@@ -19,7 +19,8 @@
 
 class UdpConnection {
 public:
-  UdpConnection(std::string DstAddress, std::uint16_t DstPort, std::atomic_bool& KeepRunning);
+  UdpConnection(std::string DstAddress, std::uint16_t DstPort,
+                std::atomic_bool &KeepRunning);
   ~UdpConnection();
   void waitTransmitDone();
 
@@ -63,8 +64,10 @@ private:
       IdlePacket_t *IdlePtr;
     };
 
-    explicit TransmitRequest(DataPacket *DataPtr) : IsData(true), DataPtr(DataPtr) {}
-    explicit TransmitRequest(IdlePacket_t *IdlePtr) : IsData(false), IdlePtr(IdlePtr) {}
+    explicit TransmitRequest(DataPacket *DataPtr)
+        : IsData(true), DataPtr(DataPtr) {}
+    explicit TransmitRequest(IdlePacket_t *IdlePtr)
+        : IsData(false), IdlePtr(IdlePtr) {}
 
     void *getTxData();
     size_t getTxSize();
@@ -90,7 +93,7 @@ private:
 
   void transmitThread();
 
-  void queueTransmitRequest(TransmitRequest TR);
+  void queueTransmitRequest(TransmitRequest Request);
   void queueTransmitAndResetDataPacketBuilder();
 
   IdlePacket_t *allocIdlePacket();
@@ -105,8 +108,8 @@ private:
   std::thread TransmitThread;
 
   static const int TransmitQueueSize = 10;
-  std::mutex TransmitRequestsAccess;
-  std::deque<TransmitRequest> TransmitRequests;
+  std::mutex TransmitQueueAccess;
+  std::deque<TransmitRequest> TransmitQueue;
 
   IdlePacket_t IdlePacketStore[3]; // there could potentially be false sharing
                                    // here by it would happen very rarely.
