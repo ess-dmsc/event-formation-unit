@@ -7,6 +7,10 @@
 
 #include "SamplingTimer.h"
 
+#ifndef CONTINOUS_SAMPLE_GENERATOR_HIGH_OVERHEAD_TEST
+#define CONTINOUS_SAMPLE_GENERATOR_HIGH_OVERHEAD_TEST 0
+#endif
+
 TimeDurationNano PoissonDelay::calcDelaTime() {
   double DelayTime = Data.RandomDistribution(Data.RandomGenerator);
   TimeDurationNano NextEventDelay(static_cast<size_t>(DelayTime * 1e9));
@@ -126,7 +130,7 @@ ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
 
   int NrOfSamples = 4468;
   int OversamplingFactor = 4;
-  if (0) { // high overhead test
+  if (CONTINOUS_SAMPLE_GENERATOR_HIGH_OVERHEAD_TEST) {
     NrOfSamples = 100;
     OversamplingFactor = 1;
   }
