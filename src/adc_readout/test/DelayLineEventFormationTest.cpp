@@ -78,13 +78,6 @@ TEST_F(FormationOfEventsInit, AxisInitTest3) {
             nullptr);
 }
 
-class DelayLineTestClass : public DelayLinePositionInterface {
-public:
-  DelayLineTestClass() = default;
-  using DelayLinePositionInterface::Origin;
-  using DelayLinePositionInterface::Slope;
-};
-
 TEST_F(FormationOfEventsInit, CalibrationTest) {
   using AxisType = AdcSettings::PositionSensingType;
   DefaultSettings.XAxis = AxisType::CONST;

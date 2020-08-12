@@ -12,7 +12,7 @@
 #include <vector>
 
 int ConstDelayLinePosition::getPosition() {
-  return std::lround(DelayLinePositionInterface::Origin);
+  return std::lround(DelayLinePositionInterface::Calib.Origin);
 }
 
 DelayLinePosCalcInterface::DelayLinePosCalcInterface(std::uint64_t Timeout)

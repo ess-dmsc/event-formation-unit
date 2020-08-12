@@ -24,20 +24,22 @@ struct AxisEvent {
 
 class DelayLinePositionInterface {
 public:
-  DelayLinePositionInterface() = default;
-  virtual ~DelayLinePositionInterface() = default;
-  virtual bool isValid() { return true; }
-  virtual void setCalibrationValues(double NewOrigin, double NewSlope) {
-    Origin = NewOrigin;
-    Slope = NewSlope;
-  };
-
+  
   struct CalibData {
     double Origin;
     double Slope;
   };
+
+  DelayLinePositionInterface() = default;
+  virtual ~DelayLinePositionInterface() = default;
+  virtual bool isValid() { return true; }
+  virtual void setCalibrationValues(double NewOrigin, double NewSlope) {
+    Calib.Origin = NewOrigin;
+    Calib.Slope = NewSlope;
+  };
+
   virtual CalibData getCalibrationValues() {
-    return {Origin, Slope};
+    return Calib;
   };
 
   /// \brief Calculate event information based on available pulse data.
@@ -58,10 +60,10 @@ protected:
   virtual void reset(){};
 
   int applyCalibration(double RawPosition) {
-    return std::lround(RawPosition * Slope + Origin);
+    return std::lround(RawPosition * Calib.Slope + Calib.Origin);
   };
-  double Origin{0};
-  double Slope{1.0};
+
+  CalibData Calib {0, 1.0};
 };
 
 class ConstDelayLinePosition : public DelayLinePositionInterface {
