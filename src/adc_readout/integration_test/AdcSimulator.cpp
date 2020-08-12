@@ -14,6 +14,10 @@
 #include <iostream>
 #include <atomic>
 
+#ifndef ADCSIM_ONLY_CREATE_FIRST_GENERATOR
+#define ADCSIM_ONLY_CREATE_FIRST_GENERATOR 0
+#endif
+
 static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
@@ -82,7 +86,7 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
 
 bool ShouldCreateGenerator(SamplerType Type, UdpConnection *TargetAdcBox,
                            UdpConnection *AdcBox2, SimSettings UsedSettings) {
-  if (0) { // only create first generator
+  if (ADCSIM_ONLY_CREATE_FIRST_GENERATOR) {
     static uint32_t callcount = 0;
     if (callcount++ != 0) {
       return false;
