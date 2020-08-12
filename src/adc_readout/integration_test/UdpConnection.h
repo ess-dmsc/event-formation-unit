@@ -63,8 +63,8 @@ private:
       IdlePacket_t *IdlePtr;
     };
 
-    TransmitRequest(DataPacket *DataPtr) : IsData(true), DataPtr(DataPtr) {}
-    TransmitRequest(IdlePacket_t *IdlePtr) : IsData(false), IdlePtr(IdlePtr) {}
+    explicit TransmitRequest(DataPacket *DataPtr) : IsData(true), DataPtr(DataPtr) {}
+    explicit TransmitRequest(IdlePacket_t *IdlePtr) : IsData(false), IdlePtr(IdlePtr) {}
 
     void *getTxData();
     size_t getTxSize();

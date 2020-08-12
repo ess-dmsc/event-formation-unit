@@ -134,7 +134,7 @@ void UdpConnection::transmitThread() {
 
   while (RunLoop) {
     bool empty = false;
-    TransmitRequest TR = (IdlePacket_t *)nullptr; // default
+    TransmitRequest TR ((IdlePacket_t *)nullptr); // default
 
     TransmitRequestsAccess.lock();
     empty = (TransmitRequests.size() == 0);
