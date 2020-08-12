@@ -8,7 +8,13 @@
 #include "UdpConnection.h"
 
 #include <common/Timer.h>
+#include <common/Trace.h>
+
 #include <unistd.h>
+
+#ifndef UDPCONNECTION_FLUSH_IDLE_DATA_PACKET_DEBUG
+#define UDPCONNECTION_FLUSH_IDLE_DATA_PACKET_DEBUG 0
+#endif
 
 UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
                              std::atomic_bool &KeepRunning)
@@ -70,7 +76,7 @@ bool UdpConnection::shouldFlushIdleDataPacket(TimePointNano TimeNow) {
   bool IdleFlushTimeoutExceeded =
       (TimeNow >= LastSampleDataAddTime + DataIdleFlushInterval);
   bool HasUnflushedData = (LastDataIdleFlushTime < LastSampleDataAddTime);
-  if (0) {
+  if (UDPCONNECTION_FLUSH_IDLE_DATA_PACKET_DEBUG) {
     // clang-format off
     printf("IdleFlushTimeoutExceeded %i = (TimeNow %" PRIu64" >= LastSampleDataAddTime %" PRIu64" + DataIdleFlushInterval %zu)\n"
            "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
@@ -87,9 +93,7 @@ bool UdpConnection::shouldFlushIdleDataPacket(TimePointNano TimeNow) {
 }
 
 void UdpConnection::flushIdleDataPacket(TimePointNano TimeNow) {
-  if (0) {
-    printf("flushIdleDataPacket\n");
-  }
+  XTRACE(DATA, DEB, "flushIdleDataPacket\n");
   LastDataIdleFlushTime = TimeNow;
   queueTransmitAndResetDataPacketBuilder();
 }
@@ -133,7 +137,7 @@ void UdpConnection::transmitThread() {
 
   while (KeepRunning) {
     bool empty = false;
-    TransmitRequest TR ((IdlePacket_t *)nullptr); // default
+    TransmitRequest TR((IdlePacket_t *)nullptr); // default
 
     TransmitRequestsAccess.lock();
     empty = (TransmitRequests.size() == 0);
