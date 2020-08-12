@@ -27,7 +27,7 @@
 /// by getifaddrs() of type AF_INET, which are both UP and RUNNING. There is also
 /// support for ignoring certain interface name patterns to remove MTU check for
 /// irrelevant interfaces such as ppp0 and docker0
-bool HwCheck::checkMTU(std::vector<std::string> ignore) {
+bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
   struct ifaddrs *ifaddr, *ifa;
   int n;
 
@@ -61,8 +61,8 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
         freeifaddrs(ifaddr);
         return false;
       } else {
-        if (0) { // for debugging failing tests on virtual build machines.
-          LOG(INIT, Sev::Warning, "[debug] MTU check succeded for interface {}",
+        if (PrintOnSuccess) {
+          LOG(INIT, Sev::Warning, "MTU check succeded for interface {}",
               ifa->ifa_name);
         }
       }

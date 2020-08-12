@@ -24,7 +24,7 @@ public:
   HwCheck() {};
 
   /// \brief Select interfaces to check
-  bool checkMTU(std::vector<std::string> ignore);
+  bool checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess = false);
 
   /// setter for MTU size check, mostly used for reverting
   /// to a lower MTU size, when running on ad hoc servers

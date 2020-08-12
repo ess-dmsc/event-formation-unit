@@ -19,7 +19,7 @@ protected:
 TEST_F(HwCheckTest, HwCheckPass) {
   std::vector<std::string> IgnoredInterfaces {"0", "00", "br-"};
   HwCheck check;
-  bool pass = check.checkMTU(IgnoredInterfaces);
+  bool pass = check.checkMTU(IgnoredInterfaces, true);
   ASSERT_TRUE(pass);
 }
 
