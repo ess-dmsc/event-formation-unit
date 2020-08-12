@@ -12,8 +12,9 @@
 
 #include <csignal>
 #include <iostream>
+#include <atomic>
 
-bool RunLoop = true;
+static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
@@ -124,8 +125,8 @@ int main(const int argc, char *argv[]) {
 
   std::signal(SIGINT, signalHandler);
 
-  UdpConnection AdcBox1(UsedSettings.EFUAddress, UsedSettings.Port1);
-  UdpConnection AdcBox2(UsedSettings.EFUAddress, UsedSettings.Port2);
+  UdpConnection AdcBox1(UsedSettings.EFUAddress, UsedSettings.Port1, RunLoop);
+  UdpConnection AdcBox2(UsedSettings.EFUAddress, UsedSettings.Port2, RunLoop);
 
   std::vector<UdpConnection *> UdpConnections = {&AdcBox1};
   if (UsedSettings.SecondFPGA) {

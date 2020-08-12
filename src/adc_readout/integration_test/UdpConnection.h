@@ -19,7 +19,7 @@
 
 class UdpConnection {
 public:
-  UdpConnection(std::string DstAddress, std::uint16_t DstPort);
+  UdpConnection(std::string DstAddress, std::uint16_t DstPort, std::atomic_bool& KeepRunning);
   ~UdpConnection();
   void waitTransmitDone();
 
@@ -72,6 +72,8 @@ private:
   };
 
 private:
+  std::atomic_bool &KeepRunning;
+
   const std::uint64_t RefTimeDeltaNS{1'000'000'000ull / 14ull};
   std::uint64_t CurrentRefTimeNS{0};
   int SamplingRuns{0};

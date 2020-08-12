@@ -16,8 +16,9 @@
 #include <h5cpp/hdf5.hpp>
 #include <string>
 #include <vector>
+#include <atomic>
 
-bool RunLoop = true;
+static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
@@ -143,7 +144,7 @@ int main(const int argc, char *argv[]) {
     return 0;
   }
 
-  UdpConnection UdpCon(UsedSettings.EFUAddress, UsedSettings.Port);
+  UdpConnection UdpCon(UsedSettings.EFUAddress, UsedSettings.Port, RunLoop);
   TimePointNano TriggerTime_UdpHeartBeat;
 
   PoissionFileGenerator PoissionFile =

@@ -9,11 +9,10 @@
 
 #include <common/Timer.h>
 #include <unistd.h>
- 
-extern bool RunLoop;
- 
-UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
-    : Address(std::move(DstAddress)), Port(DstPort),
+
+UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
+                             std::atomic_bool &KeepRunning)
+    : KeepRunning(KeepRunning), Address(std::move(DstAddress)), Port(DstPort),
       RemoteEndpoint(Address, Port),
       DataSource(Socket::Endpoint("0.0.0.0", 0), RemoteEndpoint),
       DataPacketBuilder(nullptr) {
@@ -74,7 +73,7 @@ bool UdpConnection::shouldFlushIdleDataPacket(TimePointNano TimeNow) {
   if (0) {
     // clang-format off
     printf("IdleFlushTimeoutExceeded %i = (TimeNow %" PRIu64" >= LastSampleDataAddTime %" PRIu64" + DataIdleFlushInterval %zu)\n"
-         "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
+           "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
          , IdleFlushTimeoutExceeded ?1:0
          , TimeNow.time_since_epoch().count()
          , LastSampleDataAddTime.time_since_epoch().count()
@@ -132,7 +131,7 @@ void UdpConnection::transmitThread() {
   Timer FirstDataTimer;
   uint64_t SendCount = 0;
 
-  while (RunLoop) {
+  while (KeepRunning) {
     bool empty = false;
     TransmitRequest TR ((IdlePacket_t *)nullptr); // default
 
