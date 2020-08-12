@@ -36,17 +36,17 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
     IdlePacket.Idle.TimeStamp = {0, 0};
     IdlePacket.fixEndian();
     FreeIdlePackets.push_back(&IdlePacket);
-    TransmitRequests.push_back(TransmitRequest((IdlePacket_t *)nullptr));
+    TransmitQueue.push_back(TransmitRequest((IdlePacket_t *)nullptr));
   }
 
   for (int i = 0; i < TransmitQueueSize; i++) {
     FreeDataPackets.push_back(new DataPacket(MaxPacketSize));
-    TransmitRequests.push_back(TransmitRequest((DataPacket *)nullptr));
+    TransmitQueue.push_back(TransmitRequest((DataPacket *)nullptr));
   }
   DataPacketBuilder = FreeDataPackets.back();
   FreeDataPackets.pop_back();
 
-  TransmitRequests.clear();
+  TransmitQueue.clear();
 
   TransmitThread = std::thread([this]() { this->transmitThread(); });
 }
@@ -98,10 +98,10 @@ void UdpConnection::flushIdleDataPacket(TimePointNano TimeNow) {
   queueTransmitAndResetDataPacketBuilder();
 }
 
-void UdpConnection::queueTransmitRequest(TransmitRequest TR) {
-  TransmitRequestsAccess.lock();
-  TransmitRequests.push_back(TR);
-  TransmitRequestsAccess.unlock();
+void UdpConnection::queueTransmitRequest(TransmitRequest Request) {
+  TransmitQueueAccess.lock();
+  TransmitQueue.push_back(Request);
+  TransmitQueueAccess.unlock();
 }
 
 void *UdpConnection::TransmitRequest::getTxData() {
@@ -137,15 +137,15 @@ void UdpConnection::transmitThread() {
 
   while (KeepRunning) {
     bool empty = false;
-    TransmitRequest TR((IdlePacket_t *)nullptr); // default
+    TransmitRequest Request((IdlePacket_t *)nullptr); // default
 
-    TransmitRequestsAccess.lock();
-    empty = (TransmitRequests.size() == 0);
+    TransmitQueueAccess.lock();
+    empty = (TransmitQueue.size() == 0);
     if (!empty) {
-      TR = TransmitRequests.front();
-      TransmitRequests.pop_front();
+      Request = TransmitQueue.front();
+      TransmitQueue.pop_front();
     }
-    TransmitRequestsAccess.unlock();
+    TransmitQueueAccess.unlock();
 
     if (empty) {
       usleep(FirstData ? 1 : 10000);
@@ -157,8 +157,8 @@ void UdpConnection::transmitThread() {
       }
     }
 
-    void *DataBuf = TR.getTxData();
-    std::size_t DataSize = TR.getTxSize();
+    void *DataBuf = Request.getTxData();
+    std::size_t DataSize = Request.getTxSize();
 
     // ContinuousSpeedTest
     if (ContinuousSpeedTest) {
@@ -206,9 +206,9 @@ void UdpConnection::transmitThread() {
     this->incNumSentPackets();
 
     if (RepeatPacketSpeedTest) {
-      queueTransmitRequest(TR);
+      queueTransmitRequest(Request);
     } else {
-      TR.freePacket(this);
+      Request.freePacket(this);
     }
   }
 }
