@@ -220,11 +220,6 @@ void UdpConnection::addSamplingRun(void const *const DataPtr, size_t Bytes,
     CurrentRefTimeNS = Timestamp.getTimeStampNS();
   }
 
-  // JonasNilsson:
-  // I believe the code is trying to simulate the reference pulse timestamps of
-  // the ESS accelerator. Those occur at fixed time intervals. Hence, when the
-  // code determines that we are past the point in time at which we should have
-  // a new reference pulse timestamp, it updates that timestamp.
   while (Timestamp.getTimeStampNS() > CurrentRefTimeNS + RefTimeDeltaNS) {
     CurrentRefTimeNS += RefTimeDeltaNS;
   }
