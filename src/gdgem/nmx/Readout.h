@@ -39,8 +39,7 @@
 namespace Gem {
 
 struct __attribute__ ((packed)) Readout {
-  /// \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "srs_hits"; }
+  static const char *DatasetName() { return "srs_hits"; }
   static uint16_t FormatVersion() { return 1; }
 
   /// \todo consider reordering these to optimize

@@ -23,8 +23,7 @@ struct OldReadout
   uint16_t adc;
   bool over_threshold;
 
-  // \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "srs_hits"; }
+  static const char *DatasetName() { return "srs_hits"; }
   static std::string FormatVersion() { return "1.0.0"; }
 };
 

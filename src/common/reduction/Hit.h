@@ -38,8 +38,7 @@
 #include <limits>
 
 struct __attribute__ ((packed)) Hit {
-  // \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "efu_hits"; }
+  static const char *DatasetName() { return "efu_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!

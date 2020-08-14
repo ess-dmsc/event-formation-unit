@@ -7,9 +7,8 @@
 #include <limits>
 
 struct __attribute__ ((packed)) Hit3 {
-  // \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "efu_hits3"; }
-  static uint16_t FormatVersion() { return 3; }
+  static const char *DatasetName() { return "hit_dataset"; }
+  static uint16_t FormatVersion() { return 0; }
 
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint64_t time{0};
@@ -28,30 +27,6 @@ struct __attribute__ ((packed)) Hit3 {
 };
 
 
-
-//{"time"    , offsetof(Type, time), MapPrimToH5PrimSubset<decltype(Type::time)>::Value},
-//{"coordinate", offsetof(Type, coordinate), MapPrimToH5PrimSubset<decltype(Type::coordinate)>::Value},
-//{"weight", offsetof(Type, weight), MapPrimToH5PrimSubset<decltype(Type::weight)>::Value},
-//{"plane", offsetof(Type, plane), MapPrimToH5PrimSubset<decltype(Type::plane)>::Value},
-
-// clang-format off
-#define H5_PRIM_COMPOUND_BEGIN(type)                                           \
-  template <> struct H5PrimCompoundDefData<type> {                             \
-    using Type = type;                                                         \
-    static const H5PrimCompoundDef &GetCompoundDef() {                         \
-      static const H5PrimDef Members[] = {
-
-#define H5_PRIM_COMPOUND_MEMBER(member)                                        \
-        { STRINGIFY(member), offsetof(Type, member), MapPrimToH5PrimSubset<decltype(Type::member)>::Value },
-
-#define H5_PRIM_COMPOUND_END() \
-        }; \
-      static const H5PrimCompoundDef Def{sizeof(Type), Members, countof(Members)}; \
-      return Def; \
-    } \
-  };
-// clang-format on
-
 H5_PRIM_COMPOUND_BEGIN(Hit3)
 H5_PRIM_COMPOUND_MEMBER(time)
 H5_PRIM_COMPOUND_MEMBER(coordinate)
@@ -59,39 +34,47 @@ H5_PRIM_COMPOUND_MEMBER(weight)
 H5_PRIM_COMPOUND_MEMBER(plane)
 H5_PRIM_COMPOUND_END()
 
-
-//template<> struct H5PrimCompoundDefData<Hit3>{
-//  using Type = Hit3;
-//  static const H5PrimCompoundDef& GetCompoundDef() {
-//    static const H5PrimDef Members[] = {
-//        
-//        H5_PRIM_COMPOUND_MEMBER(time)
-//        H5_PRIM_COMPOUND_MEMBER(coordinate)
-//        H5_PRIM_COMPOUND_MEMBER(weight)
-//        H5_PRIM_COMPOUND_MEMBER(plane)
-//    };
-//    static const H5PrimCompoundDef Struct{sizeof(Type), Members, countof(Members)};
-//    return Struct;
-//  }
-//};
-
-
+using Hit3PrimFile = PrimpDumpFile<Hit3>;
 
 class DumpPrimFileTest : public TestBase {
-  void SetUp() override {}
+  void SetUp() override {
+    hdf5::error::Singleton::instance().auto_print(false);
+    if (boost::filesystem::exists("dumpfile_test_00000.h5")) {
+      boost::filesystem::remove("dumpfile_test_00000.h5");
+    }
+
+    if (boost::filesystem::exists("dumpfile_test_00001.h5")) {
+      boost::filesystem::remove("dumpfile_test_00001.h5");
+    }
+  }
   void TearDown() override {}
 };
 
 TEST_F(DumpPrimFileTest, CreateFile) {
-  PrimpDumpFile<Hit3> TEST_TEST ("I DONT EXIST", 0);
+  Hit3PrimFile::create("dumpfile_test");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 struct __attribute__ ((packed)) Hit {
   size_t a{0};
   int8_t b{0};
   uint32_t c{0};
 
-  static std::string DatasetName() { return "hit_dataset"; }
+  static const char *DatasetName() { return "hit_dataset"; }
   static uint16_t FormatVersion() { return 0; }
 };
 
@@ -118,7 +101,7 @@ struct __attribute__ ((packed)) Hit2 {
   int8_t b{0};
   uint32_t c{0};
 
-  static std::string DatasetName() { return "hit_dataset"; }
+  static const char *DatasetName() { return "hit_dataset"; }
   static uint16_t FormatVersion() { return 1; }
 };
 

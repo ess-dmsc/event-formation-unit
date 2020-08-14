@@ -39,8 +39,7 @@
 namespace Loki {
 
 struct __attribute__ ((packed)) Readout {
-  /// \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "loki_readouts"; }
+  static const char *DatasetName() { return "loki_readouts"; }
   static uint16_t FormatVersion() { return 0; }
 
   /// \todo consider reordering these to optimize
