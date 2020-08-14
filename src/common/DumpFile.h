@@ -25,6 +25,144 @@
 #define H5_COMPOUND_INSERT_MEMBER(member) type.insert(STRINGIFY(member), offsetof(Type, member), datatype::create<decltype(Type::member)>())
 #define H5_COMPOUND_RETURN return type
 
+// Returns number of elements in c-style array[]
+// from https://www.g-truc.net/post-0708.html
+template <typename T, std::size_t N>
+constexpr std::size_t countof(T const (&)[N]) noexcept {
+  return N;
+}
+
+enum class H5PrimSubset {
+  Bool,
+  Float,
+  UInt64,
+  UInt32,
+  UInt16,
+  UInt8,
+  SInt8,
+  Count
+};
+
+template <typename T> struct MapPrimToH5PrimSubset;
+template <> struct MapPrimToH5PrimSubset<bool> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::Bool;
+};
+template <> struct MapPrimToH5PrimSubset<float> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::Float;
+};
+template <> struct MapPrimToH5PrimSubset<uint64_t> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::UInt64;
+};
+template <> struct MapPrimToH5PrimSubset<uint32_t> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::UInt32;
+};
+template <> struct MapPrimToH5PrimSubset<uint16_t> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::UInt16;
+};
+template <> struct MapPrimToH5PrimSubset<uint8_t> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::UInt8;
+};
+template <> struct MapPrimToH5PrimSubset<int8_t> {
+  static constexpr H5PrimSubset Value = H5PrimSubset::SInt8;
+};
+
+hid_t MapPrimToH5tNative(H5PrimSubset Prim) {
+  static hid_t PrimToH5tNative[static_cast<int>(H5PrimSubset::Count)] = {};
+  static bool Init = true;
+  if (Init) {
+    Init = false;
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::Bool)] = H5T_NATIVE_HBOOL;
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::Float)] = H5T_NATIVE_FLOAT;
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt64)] = H5T_NATIVE_ULLONG;
+    static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
+                  "H5 types: Potential 32/64 bit issue.");
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt32)] = H5T_NATIVE_UINT;
+    static_assert(sizeof(uint32_t) == sizeof(unsigned int),
+                  "H5 types: Potential 32/64 bit issue.");
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt16)] = H5T_NATIVE_USHORT;
+    static_assert(sizeof(uint16_t) == sizeof(unsigned short),
+                  "Potential 32/64 bit definition issue.");
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt8)] = H5T_NATIVE_UCHAR;
+    static_assert(sizeof(uint8_t) == sizeof(unsigned char),
+                  "H5 types: Potential 32/64 bit issue.");
+
+    PrimToH5tNative[static_cast<int>(H5PrimSubset::SInt8)] = H5T_NATIVE_SCHAR;
+    static_assert(sizeof(int8_t) == sizeof(signed char),
+                  "H5 types: Potential 32/64 bit issue.");
+
+    // verify all slots have been written
+    for (int i = 0; i < static_cast<int>(H5PrimSubset::Count); i++) {
+      if (PrimToH5tNative[i] == 0) {
+        throw std::runtime_error(
+            fmt::format("Missing H5PrimSubset to H5T_NATIVE_* mapping at "
+                        "H5PrimSubset enum item {}",
+                        i));
+      }
+    }
+  }
+  return PrimToH5tNative[static_cast<int>(Prim)];
+}
+
+struct H5PrimDef {
+  const char *Name;
+  size_t Offset;
+  H5PrimSubset PrimType;
+};
+
+struct H5PrimCompoundDef{
+  size_t StructSize;
+  const H5PrimDef* Members;
+  size_t MembersCount;
+};
+
+// traits-like class containing H5PrimCompoundDef.
+template<typename T> struct H5PrimCompoundDefData;
+
+
+class PrimDumpFileBase{
+public:
+
+  boost::filesystem::path PathBase{};
+  size_t MaxSize{0};
+  
+  PrimDumpFileBase(const H5PrimCompoundDef& PrimStruct, const boost::filesystem::path &file_path, size_t max_Mb) {
+
+    hdf5::datatype::Compound type =
+        hdf5::datatype::Compound::create(PrimStruct.StructSize);
+
+    for (size_t i = 0; i < PrimStruct.MembersCount; i++) {
+      const H5PrimDef &Def = PrimStruct.Members[i];
+      hid_t H5fNativeType = MapPrimToH5tNative(Def.PrimType);
+      type.insert(
+          Def.Name, Def.Offset,
+          hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
+    }
+
+    MaxSize = max_Mb * 1000000 / PrimStruct.StructSize;
+    PathBase = file_path;
+  }
+};
+
+
+template<typename T>
+struct PrimpDumpFile : public PrimDumpFileBase {
+  PrimpDumpFile(const boost::filesystem::path &file_path, size_t max_Mb)
+      : PrimDumpFileBase(H5PrimCompoundDefData<T>::GetCompoundDef(), file_path, max_Mb) {}
+};
+
+
+
+
+
+
+
+
 // \todo improve reading for multiple files
 template<typename T>
 class DumpFile {

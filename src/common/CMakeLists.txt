@@ -8,6 +8,7 @@ add_subdirectory(reduction)
 set(efu_common_SRC
   DataSave.cpp
   DetectorModuleRegister.cpp
+  DumpFile.cpp
   EFUArgs.cpp
   EV42Serializer.cpp
   Statistics.cpp
