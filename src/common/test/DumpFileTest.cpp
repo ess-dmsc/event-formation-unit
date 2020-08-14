@@ -55,6 +55,12 @@ TEST_F(DumpPrimFileTest, CreateFile) {
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 }
 
+TEST_F(DumpPrimFileTest, OpenEmptyFile) {
+  Hit3PrimFile::create("dumpfile_test");
+  auto file = Hit3PrimFile::open("dumpfile_test_00000");
+  EXPECT_EQ(file->count(), 0);
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

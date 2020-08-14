@@ -43,39 +43,54 @@ static hid_t MapPrimToH5tNative(H5PrimSubset Prim) {
   return PrimToH5tNative[static_cast<int>(Prim)];
 }
 
-PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
+PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
                                    const boost::filesystem::path &file_path,
                                    size_t max_Mb)
-    : CompoundDef(PrimStruct),
+    : CompoundDef(CompoundDef),
       ChunkSize(
           9000 /
-          PrimStruct.StructSize) // \todo 9000 is MTU? Correct size is <= 8972
-                                 // else packet fragmentation will occur.
+          CompoundDef.StructSize) // \todo 9000 is MTU? Correct size is <= 8972
+                                  // else packet fragmentation will occur.
       ,
       Slab({0}, {ChunkSize}) {
 
-  Compound = hdf5::datatype::Compound::create(PrimStruct.StructSize);
+  Compound = hdf5::datatype::Compound::create(CompoundDef.StructSize);
 
-  for (size_t i = 0; i < PrimStruct.MembersCount; i++) {
-    const H5PrimDef &Def = PrimStruct.Members[i];
+  for (size_t i = 0; i < CompoundDef.MembersCount; i++) {
+    const H5PrimDef &Def = CompoundDef.Members[i];
     hid_t H5fNativeType = MapPrimToH5tNative(Def.PrimType);
     Compound.insert(
         Def.Name, Def.Offset,
         hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
   }
 
-  MaxSize = max_Mb * 1000000 / PrimStruct.StructSize;
+  MaxSize = max_Mb * 1000000 / CompoundDef.StructSize;
   PathBase = file_path;
 }
 
 std::unique_ptr<PrimDumpFileBase>
-PrimDumpFileBase::create(const H5PrimCompoundDef &PrimStruct,
+PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
                          const boost::filesystem::path &FilePath,
                          size_t MaxMB) {
   auto Ret = std::unique_ptr<PrimDumpFileBase>(
-      new PrimDumpFileBase(PrimStruct, FilePath, MaxMB));
+      new PrimDumpFileBase(CompoundDef, FilePath, MaxMB));
   Ret->openRW();
   return Ret;
+}
+
+std::unique_ptr<PrimDumpFileBase>
+PrimDumpFileBase::open(const H5PrimCompoundDef &CompoundDef,
+                       const boost::filesystem::path &FilePath) {
+  auto Ret = std::unique_ptr<PrimDumpFileBase>(
+      new PrimDumpFileBase(CompoundDef, FilePath, 0));
+  Ret->openR();
+  return Ret;
+}
+
+size_t PrimDumpFileBase::count() const {
+  return hdf5::dataspace::Simple(DataSet.dataspace())
+      .current_dimensions()
+      .at(0);
 }
 
 void PrimDumpFileBase::openRW() {
@@ -93,4 +108,22 @@ void PrimDumpFileBase::openRW() {
   DataSet.attributes.create_from("format_version", CompoundDef.FormatVersion);
   DataSet.attributes.create_from("EFU_version", efu_version());
   DataSet.attributes.create_from("EFU_build_string", efu_buildstr());
+}
+
+void PrimDumpFileBase::openR() {
+  using namespace hdf5;
+
+  auto Path = PathBase;
+  Path += ".h5";
+
+  File = file::open(Path, file::AccessFlags::READONLY);
+  DataSet = File.root().get_dataset(CompoundDef.DatasetName);
+  // if not initial version, expect it to be well formed
+  if (CompoundDef.FormatVersion > 0) {
+    uint16_t ver{0};
+    DataSet.attributes["format_version"].read(ver);
+    if (ver != CompoundDef.FormatVersion) {
+      throw std::runtime_error("DumpFile version mismatch");
+    }
+  }
 }

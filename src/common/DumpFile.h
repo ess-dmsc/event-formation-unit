@@ -121,13 +121,14 @@ public:
   size_t SequenceNumber{0};
 
 
-  PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
-                   const boost::filesystem::path &file_path, size_t max_Mb);
-
   // \TODO WHICH RETURN TYPE?
   static std::unique_ptr<PrimDumpFileBase>
   create(const H5PrimCompoundDef &PrimStruct,
          const boost::filesystem::path &FilePath, size_t MaxMB = 0);
+
+  static std::unique_ptr<PrimDumpFileBase>
+  open(const H5PrimCompoundDef &PrimStruct,
+       const boost::filesystem::path &FilePath);
 
   boost::filesystem::path get_full_path() const {
     auto Ret = PathBase;
@@ -135,7 +136,13 @@ public:
     return Ret;
   }
 
+  size_t count() const;
+
+protected:
+  PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
+                   const boost::filesystem::path &file_path, size_t max_Mb);
   void openRW();
+  void openR();
 };
 
 //-----------------------------------------------------------------------------
@@ -143,15 +150,15 @@ public:
 template <typename T> 
 struct PrimpDumpFile : public PrimDumpFileBase {
   
-  ///// \todo 9000 is MTU? Correct size is <= 8972 else packet
-  ///// fragmentation will occur.
-  //static constexpr size_t ChunkSize{9000 / sizeof(T)};
-
-  PrimpDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
-
   // \TODO WHICH RETURN TYPE?
   static std::unique_ptr<PrimDumpFileBase>
   create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
+
+  static std::unique_ptr<PrimDumpFileBase>
+  open(const boost::filesystem::path &FilePath);
+
+private:
+  PrimpDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
 };
 
 //-----------------------------------------------------------------------------
@@ -168,6 +175,13 @@ PrimpDumpFile<T>::create(const boost::filesystem::path &FilePath,
                          size_t MaxMB) {
   return PrimDumpFileBase::create(H5PrimCompoundDefData<T>::GetCompoundDef(),
                                   FilePath, MaxMB);
+}
+
+template <typename T>
+std::unique_ptr<PrimDumpFileBase>
+PrimpDumpFile<T>::open(const boost::filesystem::path &FilePath) {
+  return PrimDumpFileBase::open(H5PrimCompoundDefData<T>::GetCompoundDef(),
+                                FilePath);
 }
 
 //-----------------------------------------------------------------------------
