@@ -132,6 +132,20 @@ TEST_F(DumpPrimFileTest, PushFileRotation) {
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00001.h5"));
 }
 
+TEST_F(DumpPrimFileTest, Read) {
+  auto file_out = PrimHitFile::create("dumpfile_test");
+  file_out->push(std::vector<PrimHit>(900, PrimHit()));
+  file_out.reset();
+
+  auto file = PrimHitFile::open("dumpfile_test_00000");
+  EXPECT_EQ(file->Data.size(), 0);
+  file->readAt(0, 3);
+  EXPECT_EQ(file->Data.size(), 3);
+  file->readAt(0, 9);
+  EXPECT_EQ(file->Data.size(), 9);
+
+  EXPECT_THROW(file->readAt(0, 1000), std::runtime_error);
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

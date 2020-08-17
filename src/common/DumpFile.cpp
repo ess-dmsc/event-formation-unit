@@ -120,10 +120,12 @@ void PrimDumpFileBase::rotate() {
   openRW();
 }
 
-void write_contiguous_data(const void *DataBuffer, const hdf5::node::Dataset &dataset,
-                           const hdf5::datatype::Datatype &mem_type,
-                           const hdf5::dataspace::Dataspace &mem_space,
-                           const hdf5::dataspace::Dataspace &file_space) {
+static void
+h5prim_write_contiguous_data(const void *DataBuffer,
+                             const hdf5::node::Dataset &dataset,
+                             const hdf5::datatype::Datatype &mem_type,
+                             const hdf5::dataspace::Dataspace &mem_space,
+                             const hdf5::dataspace::Dataspace &file_space) {
   hdf5::property::DatasetTransferList dtpl;
   if (H5Dwrite(static_cast<hid_t>(dataset), static_cast<hid_t>(mem_type),
                static_cast<hid_t>(mem_space), static_cast<hid_t>(file_space),
@@ -135,11 +137,11 @@ void write_contiguous_data(const void *DataBuffer, const hdf5::node::Dataset &da
   }
 }
 
-// from Dataset::write()
-void Dataset_write(const void *DataBuffer, const size_t DataElmCount,
-                   const hdf5::datatype::Compound &memory_type,
-                   const hdf5::node::Dataset &dataset,
-                   const hdf5::dataspace::Hyperslab &hyperSelection) {
+static void
+h5prim_dataset_write(const void *DataBuffer, const size_t DataElmCount,
+                     const hdf5::datatype::Compound &memory_type,
+                     const hdf5::node::Dataset &dataset,
+                     const hdf5::dataspace::Hyperslab &hyperSelection) {
 
   auto dims = hyperSelection.block();
   auto count = hyperSelection.count();
@@ -150,7 +152,8 @@ void Dataset_write(const void *DataBuffer, const size_t DataElmCount,
 
   hdf5::dataspace::Simple memory_space(hdf5::Dimensions{DataElmCount},
                                        hdf5::Dimensions{DataElmCount});
-  const hdf5::dataspace::Simple &mem_space = hdf5::dataspace::Simple(memory_space);
+  const hdf5::dataspace::Simple &mem_space =
+      hdf5::dataspace::Simple(memory_space);
 
   hid_t DataspaceId = H5Dget_space(static_cast<hid_t>(dataset));
   hdf5::dataspace::Dataspace file_space{hdf5::ObjectHandle(DataspaceId)};
@@ -165,14 +168,67 @@ void Dataset_write(const void *DataBuffer, const size_t DataElmCount,
 
   if (selected_space.rank() > 1 && mem_space.rank() == 1 &&
       selected_space.size() == memory_space.size())
-    write_contiguous_data(DataBuffer, dataset, memory_type, selected_space, file_space);
+    h5prim_write_contiguous_data(DataBuffer, dataset, memory_type,
+                                 selected_space, file_space);
   else
-    write_contiguous_data(DataBuffer, dataset, memory_type, memory_space, file_space);
+    h5prim_write_contiguous_data(DataBuffer, dataset, memory_type, memory_space,
+                                 file_space);
 }
 
 void PrimDumpFileBase::write(const void *DataBuffer, size_t DataElmCount) {
   Slab.offset(0, count());
   Slab.block(0, DataElmCount);
   DataSet.extent({count() + DataElmCount});
-  Dataset_write(DataBuffer, DataElmCount, Compound, DataSet, Slab);
+  h5prim_dataset_write(DataBuffer, DataElmCount, Compound, DataSet, Slab);
+}
+
+static void
+h5prim_read_contiguous_data(void *DataBuffer,
+                            const hdf5::node::Dataset &dataset,
+                            const hdf5::datatype::Datatype &mem_type,
+                            const hdf5::dataspace::Dataspace &mem_space,
+                            const hdf5::dataspace::Dataspace &file_space) {
+  hdf5::property::DatasetTransferList dtpl;
+  if (H5Dread(static_cast<hid_t>(dataset), static_cast<hid_t>(mem_type),
+              static_cast<hid_t>(mem_space), static_cast<hid_t>(file_space),
+              static_cast<hid_t>(dtpl), DataBuffer) < 0) {
+    std::stringstream ss;
+    ss << "Failure to read contiguous data from dataset ["
+       << dataset.link().path() << "]!";
+    hdf5::error::Singleton::instance().throw_with_stack(ss.str());
+  }
+}
+
+static void
+h5prim_dataset_read(void *DataBuffer, const size_t DataElmCount,
+                    const hdf5::datatype::Compound &memory_type,
+                    const hdf5::node::Dataset &dataset,
+                    const hdf5::dataspace::Hyperslab &hyperSelection) {
+  hdf5::dataspace::Simple memory_space(hdf5::Dimensions{DataElmCount},
+                                       hdf5::Dimensions{DataElmCount});
+
+  hid_t DataspaceId = H5Dget_space(static_cast<hid_t>(dataset));
+  hdf5::dataspace::Dataspace file_space{hdf5::ObjectHandle(DataspaceId)};
+  file_space.selection(hdf5::dataspace::SelectionOperation::SET,
+                       hyperSelection);
+
+  auto dims = hyperSelection.block();
+  auto count = hyperSelection.count();
+  for (hdf5::Dimensions::size_type i = 0; i != dims.size(); i++)
+    dims[i] *= count[i];
+
+  hdf5::dataspace::Simple selected_space(dims);
+  if (selected_space.size() == memory_space.size())
+    h5prim_read_contiguous_data(DataBuffer, dataset, memory_type, selected_space,
+                                file_space);
+  else
+    h5prim_read_contiguous_data(DataBuffer, dataset, memory_type, memory_space,
+                                file_space);
+}
+
+void PrimDumpFileBase::readAt(void *DataBuffer, const size_t DataElmCount,
+                              size_t Index, size_t Count) {
+  Slab.offset(0, Index);
+  Slab.block(0, Count);
+  h5prim_dataset_read(DataBuffer, DataElmCount, Compound, DataSet, Slab);
 }

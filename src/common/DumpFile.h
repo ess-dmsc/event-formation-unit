@@ -133,6 +133,9 @@ public:
 
   void write(const void *DataBuffer, size_t DataElmCount);
 
+  void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
+              size_t Count);
+
 protected:
   PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
                    const boost::filesystem::path &file_path, size_t max_Mb);
@@ -154,6 +157,8 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
 
   void push(const T &Hit);
   template <typename Container> void push(const Container &Hits);
+
+  void readAt(size_t Index, size_t Count);
 
   void flush();
 
@@ -216,6 +221,11 @@ void PrimDumpFile<T>::push(const Container &Hits) {
       rotate();
     }
   }
+}
+
+template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
+  Data.resize(Count);
+  PrimDumpFileBase::readAt(Data.data(), Data.size(), Index, Count);
 }
 
 template <typename T> void PrimDumpFile<T>::flush() {
