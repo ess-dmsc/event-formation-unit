@@ -43,6 +43,13 @@ static hid_t PrimToH5tNative(H5PrimSubset Prim) {
   return Map[static_cast<int>(Prim)];
 }
 
+std::unique_ptr<PrimDumpFileBase>
+PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
+                         const boost::filesystem::path &file_path) {
+  return std::unique_ptr<PrimDumpFileBase>(
+      new PrimDumpFileBase(CompoundDef, file_path));
+}
+
 PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
                                    const boost::filesystem::path &file_path)
     : ChunkSize(
@@ -219,7 +226,10 @@ h5prim_dataset_read(void *DataBuffer, const size_t DataElmCount,
                                 file_space);
 }
 
-void PrimDumpFileBase::IncSequenceNumber() { SequenceNumber++; }
+void PrimDumpFileBase::rotate() {
+  SequenceNumber++;
+  openRW();
+}
 
 void PrimDumpFileBase::readAt(void *DataBuffer, const size_t DataElmCount,
                               size_t Index, size_t Count) {

@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <common/Assert.h>
 #include <common/Version.h>
 #include <fmt/format.h>
 #include <memory>
@@ -30,6 +29,9 @@
   type.insert(STRINGIFY(member), offsetof(Type, member),                       \
               datatype::create<decltype(Type::member)>())
 #define H5_COMPOUND_RETURN return type
+
+
+#include <common/Assert.h>
 
 // Returns number of elements in c-style array[]
 // from https://www.g-truc.net/post-0708.html
@@ -113,8 +115,12 @@ template <typename T> struct H5PrimCompoundDefData;
 class PrimDumpFileBase {
 
 protected:
-  PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
-                   const boost::filesystem::path &file_path);
+  template <typename T> friend class PrimDumpFile;
+
+  static std::unique_ptr<PrimDumpFileBase>
+  create(const H5PrimCompoundDef &CompoundDef,
+         const boost::filesystem::path &file_path);
+ 
   void openRW();
   void openR();
 
@@ -126,7 +132,7 @@ protected:
   void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
               size_t Count);
 
-  void IncSequenceNumber();
+  void rotate();
 
   const size_t ChunkSize;
 
@@ -142,13 +148,21 @@ private:
 
   boost::filesystem::path PathBase{};
 
+  PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
+                   const boost::filesystem::path &file_path);
+
   boost::filesystem::path get_full_path() const;
 };
 
 //-----------------------------------------------------------------------------
 
-template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
+class PrimDumpFileBase;
 
+template <typename T> class PrimDumpFile {
+  PrimDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
+  std::unique_ptr<PrimDumpFileBase> Base;
+
+public:
   std::vector<T> Data;
 
   const size_t ChunkSize;
@@ -174,12 +188,7 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
 
   void write();
 
-  void rotate();
-
   ~PrimDumpFile();
-
-private:
-  PrimDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
 };
 
 //-----------------------------------------------------------------------------
@@ -187,8 +196,9 @@ private:
 template <typename T>
 PrimDumpFile<T>::PrimDumpFile(const boost::filesystem::path &file_path,
                               size_t max_Mb)
-    : PrimDumpFileBase(H5PrimCompoundDefData<T>::GetCompoundDef(), file_path),
-      ChunkSize(PrimDumpFileBase::ChunkSize),
+    : Base(PrimDumpFileBase::create(H5PrimCompoundDefData<T>::GetCompoundDef(),
+                                    file_path)),
+      ChunkSize(Base->ChunkSize),
       MaxSize(max_Mb * 1000000 /
               H5PrimCompoundDefData<T>::GetCompoundDef().StructSize) {}
 
@@ -196,7 +206,7 @@ template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
 PrimDumpFile<T>::create(const boost::filesystem::path &FilePath, size_t MaxMB) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, MaxMB));
-  Ret->openRW();
+  Ret->Base->openRW();
   return Ret;
 }
 
@@ -204,14 +214,8 @@ template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
 PrimDumpFile<T>::open(const boost::filesystem::path &FilePath) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, 0));
-  Ret->openR();
+  Ret->Base->openR();
   return Ret;
-}
-
-template <typename T> void PrimDumpFile<T>::rotate() {
-  // SequenceNumber++;
-  PrimDumpFileBase::IncSequenceNumber();
-  openRW();
 }
 
 template <typename T> void PrimDumpFile<T>::push(const T &Hit) {
@@ -220,7 +224,7 @@ template <typename T> void PrimDumpFile<T>::push(const T &Hit) {
     flush();
 
     if (MaxSize && (count() >= MaxSize)) {
-      rotate();
+      Base->rotate();
     }
   }
 }
@@ -233,18 +237,18 @@ void PrimDumpFile<T>::push(const Container &Hits) {
     flush();
 
     if (MaxSize && (count() >= MaxSize)) {
-      rotate();
+      Base->rotate();
     }
   }
 }
 
 template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
   Data.resize(Count);
-  PrimDumpFileBase::readAt(Data.data(), Data.size(), Index, Count);
+  Base->readAt(Data.data(), Data.size(), Index, Count);
 }
 
 template <typename T> size_t PrimDumpFile<T>::count() const {
-  return PrimDumpFileBase::count();
+  return Base->count();
 }
 
 template <typename T> void PrimDumpFile<T>::flush() {
@@ -261,11 +265,11 @@ void PrimDumpFile<T>::read(const boost::filesystem::path &FilePath,
 }
 
 template <typename T> void PrimDumpFile<T>::write() {
-  PrimDumpFileBase::write(Data.data(), Data.size());
+  Base->write(Data.data(), Data.size());
 }
 
 template <typename T> PrimDumpFile<T>::~PrimDumpFile() {
-  if (Data.size() && PrimDumpFileBase::isFileValidNonReadonly()) {
+  if (Data.size() && Base->isFileValidNonReadonly()) {
     flush();
   }
 }
