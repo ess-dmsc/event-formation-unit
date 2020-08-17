@@ -30,9 +30,6 @@
               datatype::create<decltype(Type::member)>())
 #define H5_COMPOUND_RETURN return type
 
-
-#include <common/Assert.h>
-
 // Returns number of elements in c-style array[]
 // from https://www.g-truc.net/post-0708.html
 template <typename T, std::size_t N>
@@ -113,14 +110,15 @@ template <typename T> struct H5PrimCompoundDefData;
 //-----------------------------------------------------------------------------
 
 class PrimDumpFileBase {
-
 protected:
-  template <typename T> friend class PrimDumpFile;
+  const size_t ChunkSize;
+
+  PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef);
 
   static std::unique_ptr<PrimDumpFileBase>
   create(const H5PrimCompoundDef &CompoundDef,
          const boost::filesystem::path &file_path);
- 
+
   void openRW();
   void openR();
 
@@ -134,24 +132,7 @@ protected:
 
   void rotate();
 
-  const size_t ChunkSize;
-
-private:
-  const H5PrimCompoundDef &CompoundDef;
-
-  size_t SequenceNumber{0};
-
-  hdf5::file::File File;
-  hdf5::datatype::Compound Compound;
-  hdf5::node::Dataset DataSet;
-  hdf5::dataspace::Hyperslab Slab;
-
-  boost::filesystem::path PathBase{};
-
-  PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
-                   const boost::filesystem::path &file_path);
-
-  boost::filesystem::path get_full_path() const;
+  template <typename T> friend class PrimDumpFile;
 };
 
 //-----------------------------------------------------------------------------

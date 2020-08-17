@@ -1,5 +1,56 @@
 #include <common/DumpFile.h>
+#include <common/Assert.h>
 
+class PrimDumpFileBase_Impl : public PrimDumpFileBase {
+public:
+  friend class PrimDumpFileBase;
+
+  void openRW();
+  void openR();
+
+  size_t count() const;
+  bool isFileValidNonReadonly();
+
+  void write(const void *DataBuffer, size_t DataElmCount);
+
+  void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
+              size_t Count);
+
+  void rotate();
+
+private:
+  const H5PrimCompoundDef &CompoundDef;
+
+  size_t SequenceNumber{0};
+
+  hdf5::file::File File;
+  hdf5::datatype::Compound Compound;
+  hdf5::node::Dataset DataSet;
+  hdf5::dataspace::Hyperslab Slab;
+
+  boost::filesystem::path PathBase{};
+
+  PrimDumpFileBase_Impl(const H5PrimCompoundDef &CompoundDef,
+                        const boost::filesystem::path &file_path);
+
+  boost::filesystem::path get_full_path() const;
+};
+
+//-----------------------------------------------------------------------------
+
+std::unique_ptr<PrimDumpFileBase>
+PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
+                         const boost::filesystem::path &file_path) {
+  return std::unique_ptr<PrimDumpFileBase>(
+      new PrimDumpFileBase_Impl(CompoundDef, file_path));
+}
+
+PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef)
+    // \todo 9000 is MTU? Correct size is <= 8972 packet fragmentation will
+    // occur.
+    : ChunkSize(9000 / CompoundDef.StructSize) {}
+
+// \todo this cannot be initialized atomically yet
 static hid_t PrimToH5tNative(H5PrimSubset Prim) {
   static hid_t Map[static_cast<int>(H5PrimSubset::Count)] = {};
   static bool Init = true;
@@ -43,21 +94,11 @@ static hid_t PrimToH5tNative(H5PrimSubset Prim) {
   return Map[static_cast<int>(Prim)];
 }
 
-std::unique_ptr<PrimDumpFileBase>
-PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
-                         const boost::filesystem::path &file_path) {
-  return std::unique_ptr<PrimDumpFileBase>(
-      new PrimDumpFileBase(CompoundDef, file_path));
-}
-
-PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
-                                   const boost::filesystem::path &file_path)
-    : ChunkSize(
-          9000 /
-          CompoundDef.StructSize) // \todo 9000 is MTU? Correct size is <= 8972
-                                  // else packet fragmentation will occur.
-      ,
-      CompoundDef(CompoundDef), Slab({0}, {ChunkSize}) {
+PrimDumpFileBase_Impl::PrimDumpFileBase_Impl(
+    const H5PrimCompoundDef &CompoundDef,
+    const boost::filesystem::path &file_path)
+    : PrimDumpFileBase(CompoundDef), CompoundDef(CompoundDef),
+      Slab({0}, {ChunkSize}) {
 
   Compound = hdf5::datatype::Compound::create(CompoundDef.StructSize);
 
@@ -69,17 +110,13 @@ PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
         hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
   }
 
-  // MaxSize = max_Mb * 1000000 / CompoundDef.StructSize;
   PathBase = file_path;
 }
 
-boost::filesystem::path PrimDumpFileBase::get_full_path() const {
-  auto Ret = PathBase;
-  Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
-  return Ret;
-}
-
 void PrimDumpFileBase::openRW() {
+  static_cast<PrimDumpFileBase_Impl *>(this)->openRW();
+}
+void PrimDumpFileBase_Impl::openRW() {
   using namespace hdf5;
 
   File = file::create(get_full_path(), file::AccessFlags::TRUNCATE);
@@ -97,6 +134,9 @@ void PrimDumpFileBase::openRW() {
 }
 
 void PrimDumpFileBase::openR() {
+  static_cast<PrimDumpFileBase_Impl *>(this)->openR();
+}
+void PrimDumpFileBase_Impl::openR() {
   using namespace hdf5;
 
   auto Path = PathBase;
@@ -115,9 +155,20 @@ void PrimDumpFileBase::openR() {
 }
 
 size_t PrimDumpFileBase::count() const {
+  return static_cast<const PrimDumpFileBase_Impl *>(this)->count();
+}
+size_t PrimDumpFileBase_Impl::count() const {
   return hdf5::dataspace::Simple(DataSet.dataspace())
       .current_dimensions()
       .at(0);
+}
+
+bool PrimDumpFileBase::isFileValidNonReadonly() {
+  return static_cast<PrimDumpFileBase_Impl *>(this)->isFileValidNonReadonly();
+}
+bool PrimDumpFileBase_Impl::isFileValidNonReadonly() {
+  return File.is_valid() &&
+         (File.intent() != hdf5::file::AccessFlags::READONLY);
 }
 
 static void
@@ -176,6 +227,9 @@ h5prim_dataset_write(const void *DataBuffer, const size_t DataElmCount,
 }
 
 void PrimDumpFileBase::write(const void *DataBuffer, size_t DataElmCount) {
+  static_cast<PrimDumpFileBase_Impl *>(this)->write(DataBuffer, DataElmCount);
+}
+void PrimDumpFileBase_Impl::write(const void *DataBuffer, size_t DataElmCount) {
   Slab.offset(0, count());
   Slab.block(0, DataElmCount);
   DataSet.extent({count() + DataElmCount});
@@ -226,19 +280,28 @@ h5prim_dataset_read(void *DataBuffer, const size_t DataElmCount,
                                 file_space);
 }
 
-void PrimDumpFileBase::rotate() {
-  SequenceNumber++;
-  openRW();
-}
-
 void PrimDumpFileBase::readAt(void *DataBuffer, const size_t DataElmCount,
                               size_t Index, size_t Count) {
+  static_cast<PrimDumpFileBase_Impl *>(this)->readAt(DataBuffer, DataElmCount,
+                                                     Index, Count);
+}
+void PrimDumpFileBase_Impl::readAt(void *DataBuffer, const size_t DataElmCount,
+                                   size_t Index, size_t Count) {
   Slab.offset(0, Index);
   Slab.block(0, Count);
   h5prim_dataset_read(DataBuffer, DataElmCount, Compound, DataSet, Slab);
 }
 
-bool PrimDumpFileBase::isFileValidNonReadonly() {
-  return File.is_valid() &&
-         (File.intent() != hdf5::file::AccessFlags::READONLY);
+void PrimDumpFileBase::rotate() {
+  static_cast<PrimDumpFileBase_Impl *>(this)->rotate();
+}
+void PrimDumpFileBase_Impl::rotate() {
+  SequenceNumber++;
+  openRW();
+}
+
+boost::filesystem::path PrimDumpFileBase_Impl::get_full_path() const {
+  auto Ret = PathBase;
+  Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
+  return Ret;
 }
