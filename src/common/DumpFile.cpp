@@ -232,3 +232,8 @@ void PrimDumpFileBase::readAt(void *DataBuffer, const size_t DataElmCount,
   Slab.block(0, Count);
   h5prim_dataset_read(DataBuffer, DataElmCount, Compound, DataSet, Slab);
 }
+
+bool PrimDumpFileBase::isFileValidNonReadonly() {
+  return File.is_valid() &&
+         (File.intent() != hdf5::file::AccessFlags::READONLY);
+}

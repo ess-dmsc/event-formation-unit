@@ -136,6 +136,8 @@ public:
   void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
               size_t Count);
 
+  bool isFileValidNonReadonly();
+
 protected:
   PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
                    const boost::filesystem::path &file_path, size_t max_Mb);
@@ -168,6 +170,8 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
   void write();
 
   void rotate();
+
+  ~PrimDumpFile();
 
 private:
   PrimDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
@@ -248,6 +252,11 @@ template <typename T> void PrimDumpFile<T>::write() {
   PrimDumpFileBase::write(Data.data(), Data.size());
 }
 
+template <typename T> PrimDumpFile<T>::~PrimDumpFile() {
+  if (Data.size() && PrimDumpFileBase::isFileValidNonReadonly()) {
+    flush();
+  }
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
