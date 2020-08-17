@@ -40,7 +40,7 @@ private:
 
 std::unique_ptr<PrimDumpFileBase>
 PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
-                         const boost::filesystem::path &file_path) {
+                         const std::string &file_path) {
   return std::unique_ptr<PrimDumpFileBase>(
       new PrimDumpFileBase_Impl(CompoundDef, file_path));
 }

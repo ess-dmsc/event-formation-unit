@@ -10,6 +10,8 @@
 #include <common/Version.h>
 #include <fmt/format.h>
 #include <memory>
+
+#include <string>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -116,8 +118,7 @@ protected:
   PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef);
 
   static std::unique_ptr<PrimDumpFileBase>
-  create(const H5PrimCompoundDef &CompoundDef,
-         const boost::filesystem::path &file_path);
+  create(const H5PrimCompoundDef &CompoundDef, const std::string &file_path);
 
   void openRW();
   void openR();
@@ -140,7 +141,7 @@ protected:
 class PrimDumpFileBase;
 
 template <typename T> class PrimDumpFile {
-  PrimDumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
+  PrimDumpFile(const std::string &file_path, size_t max_Mb);
   std::unique_ptr<PrimDumpFileBase> Base;
 
 public:
@@ -149,19 +150,17 @@ public:
   const size_t ChunkSize;
   const size_t MaxSize;
 
-  static std::unique_ptr<PrimDumpFile>
-  create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
+  static std::unique_ptr<PrimDumpFile> create(const std::string &FilePath,
+                                              size_t MaxMB = 0);
 
-  static std::unique_ptr<PrimDumpFile>
-  open(const boost::filesystem::path &FilePath);
+  static std::unique_ptr<PrimDumpFile> open(const std::string &FilePath);
 
   void push(const T &Hit);
   template <typename Container> void push(const Container &Hits);
 
   void readAt(size_t Index, size_t Count);
 
-  static void read(const boost::filesystem::path &FilePath,
-                   std::vector<T> &ExternalData);
+  static void read(const std::string &FilePath, std::vector<T> &ExternalData);
 
   size_t count() const;
 
@@ -175,17 +174,16 @@ public:
 //-----------------------------------------------------------------------------
 
 template <typename T>
-PrimDumpFile<T>::PrimDumpFile(const boost::filesystem::path &file_path,
-                              size_t max_Mb)
+PrimDumpFile<T>::PrimDumpFile(const std::string &file_path, size_t max_Mb)
     : Base(PrimDumpFileBase::create(H5PrimCompoundDefData<T>::GetCompoundDef(),
                                     file_path)),
       ChunkSize(Base->ChunkSize),
-      MaxSize(max_Mb * 1000000 /
+      MaxSize(max_Mb * 1000000 / // \todo should this this be a megabyte?
               H5PrimCompoundDefData<T>::GetCompoundDef().StructSize) {}
 
 template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
-PrimDumpFile<T>::create(const boost::filesystem::path &FilePath, size_t MaxMB) {
+PrimDumpFile<T>::create(const std::string &FilePath, size_t MaxMB) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, MaxMB));
   Ret->Base->openRW();
   return Ret;
@@ -193,7 +191,7 @@ PrimDumpFile<T>::create(const boost::filesystem::path &FilePath, size_t MaxMB) {
 
 template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
-PrimDumpFile<T>::open(const boost::filesystem::path &FilePath) {
+PrimDumpFile<T>::open(const std::string &FilePath) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, 0));
   Ret->Base->openR();
   return Ret;
@@ -238,7 +236,7 @@ template <typename T> void PrimDumpFile<T>::flush() {
 }
 
 template <typename T>
-void PrimDumpFile<T>::read(const boost::filesystem::path &FilePath,
+void PrimDumpFile<T>::read(const std::string &FilePath,
                            std::vector<T> &ExternalData) {
   auto TempFile = PrimDumpFile::open(FilePath);
   TempFile->readAt(0, TempFile->count());
