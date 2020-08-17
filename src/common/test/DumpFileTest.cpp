@@ -6,7 +6,7 @@
 
 #include <limits>
 
-struct __attribute__ ((packed)) Hit3 {
+struct __attribute__ ((packed)) PrimHit {
   static const char *DatasetName() { return "hit_dataset"; }
   static uint16_t FormatVersion() { return 0; }
 
@@ -26,7 +26,7 @@ struct __attribute__ ((packed)) Hit3 {
   static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
 };
 
-struct __attribute__ ((packed)) Hit4 {
+struct __attribute__ ((packed)) PrimHit2 {
   static const char *DatasetName() { return "hit_dataset"; }
   static uint16_t FormatVersion() { return 1; }
 
@@ -46,22 +46,22 @@ struct __attribute__ ((packed)) Hit4 {
   static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
 };
 
-H5_PRIM_COMPOUND_BEGIN(Hit3)
+H5_PRIM_COMPOUND_BEGIN(PrimHit)
 H5_PRIM_COMPOUND_MEMBER(time)
 H5_PRIM_COMPOUND_MEMBER(coordinate)
 H5_PRIM_COMPOUND_MEMBER(weight)
 H5_PRIM_COMPOUND_MEMBER(plane)
 H5_PRIM_COMPOUND_END()
 
-H5_PRIM_COMPOUND_BEGIN(Hit4)
+H5_PRIM_COMPOUND_BEGIN(PrimHit2)
 H5_PRIM_COMPOUND_MEMBER(time)
 H5_PRIM_COMPOUND_MEMBER(coordinate)
 H5_PRIM_COMPOUND_MEMBER(weight)
 H5_PRIM_COMPOUND_MEMBER(plane)
 H5_PRIM_COMPOUND_END()
 
-using Hit3PrimFile = PrimDumpFile<Hit3>;
-using Hit4PrimFile = PrimDumpFile<Hit4>;
+using PrimHitFile = PrimDumpFile<PrimHit>;
+using PrimHitFile2 = PrimDumpFile<PrimHit2>;
 
 class DumpPrimFileTest : public TestBase {
   void SetUp() override {
@@ -78,43 +78,60 @@ class DumpPrimFileTest : public TestBase {
 };
 
 TEST_F(DumpPrimFileTest, CreateFile) {
-  Hit3PrimFile::create("dumpfile_test");
+  PrimHitFile::create("dumpfile_test");
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 }
 
 TEST_F(DumpPrimFileTest, OpenEmptyFile) {
-  Hit3PrimFile::create("dumpfile_test");
-  auto file = Hit3PrimFile::open("dumpfile_test_00000");
+  PrimHitFile::create("dumpfile_test");
+  auto file = PrimHitFile::open("dumpfile_test_00000");
   EXPECT_EQ(file->count(), 0);
 }
 
 TEST_F(DumpPrimFileTest, PushOne) {
-  auto file = Hit3PrimFile::create("dumpfile_test");
-  file->push(Hit3());
+  auto file = PrimHitFile::create("dumpfile_test");
+  file->push(PrimHit());
   EXPECT_EQ(file->count(), 0);
   for (size_t i = 0; i < 1000; ++i)
-    file->push(Hit3());
-  EXPECT_EQ(file->count(), 9000 / sizeof(Hit3));
+    file->push(PrimHit());
+  EXPECT_EQ(file->count(), 9000 / sizeof(PrimHit));
 }
 
 TEST_F(DumpPrimFileTest, Push) {
-  auto file = Hit3PrimFile::create("dumpfile_test");
-  file->push(std::vector<Hit3>(100, Hit3()));
+  auto file = PrimHitFile::create("dumpfile_test");
+  file->push(std::vector<PrimHit>(100, PrimHit()));
   EXPECT_EQ(file->count(), 0);
-  file->push(std::vector<Hit3>(900, Hit3()));
+  file->push(std::vector<PrimHit>(900, PrimHit()));
   EXPECT_EQ(file->count(), 1000);
-  file->push(std::vector<Hit3>(3000, Hit3()));
+  file->push(std::vector<PrimHit>(3000, PrimHit()));
   EXPECT_EQ(file->count(), 4000);
 }
 
 TEST_F(DumpPrimFileTest, WrongVersion) {
-  auto file = Hit3PrimFile::create("dumpfile_test");
-  file->push(std::vector<Hit3>(1000, Hit3()));
+  auto file = PrimHitFile::create("dumpfile_test");
+  file->push(std::vector<PrimHit>(1000, PrimHit()));
   EXPECT_EQ(file->count(), 1000);
   file.reset();
 
-  EXPECT_ANY_THROW(Hit4PrimFile::open("dumpfile_test_00000"));
+  EXPECT_ANY_THROW(PrimHitFile2::open("dumpfile_test_00000"));
 }
+
+TEST_F(DumpPrimFileTest, PushFileRotation) {
+  auto file = PrimHitFile::create("dumpfile_test", 1);
+  file->push(std::vector<PrimHit>(100, PrimHit()));
+  EXPECT_EQ(file->count(), 0);
+  file->push(std::vector<PrimHit>(900, PrimHit()));
+  EXPECT_EQ(file->count(), 1000);
+  file->push(std::vector<PrimHit>(3000, PrimHit()));
+  EXPECT_EQ(file->count(), 4000);
+
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
+
+  EXPECT_FALSE(boost::filesystem::exists("dumpfile_test_00001.h5"));
+  file->push(std::vector<PrimHit>(300000, PrimHit()));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00001.h5"));
+}
+
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
