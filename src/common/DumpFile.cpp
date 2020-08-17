@@ -1,38 +1,38 @@
 #include <common/DumpFile.h>
 
-static hid_t MapPrimToH5tNative(H5PrimSubset Prim) {
-  static hid_t PrimToH5tNative[static_cast<int>(H5PrimSubset::Count)] = {};
+static hid_t PrimToH5tNative(H5PrimSubset Prim) {
+  static hid_t Map[static_cast<int>(H5PrimSubset::Count)] = {};
   static bool Init = true;
   if (Init) {
     Init = false;
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::Bool)] = H5T_NATIVE_HBOOL;
+    Map[static_cast<int>(H5PrimSubset::Bool)] = H5T_NATIVE_HBOOL;
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::Float)] = H5T_NATIVE_FLOAT;
+    Map[static_cast<int>(H5PrimSubset::Float)] = H5T_NATIVE_FLOAT;
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt64)] = H5T_NATIVE_ULLONG;
+    Map[static_cast<int>(H5PrimSubset::UInt64)] = H5T_NATIVE_ULLONG;
     static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
                   "H5 types: Potential 32/64 bit issue.");
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt32)] = H5T_NATIVE_UINT;
+    Map[static_cast<int>(H5PrimSubset::UInt32)] = H5T_NATIVE_UINT;
     static_assert(sizeof(uint32_t) == sizeof(unsigned int),
                   "H5 types: Potential 32/64 bit issue.");
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt16)] = H5T_NATIVE_USHORT;
+    Map[static_cast<int>(H5PrimSubset::UInt16)] = H5T_NATIVE_USHORT;
     static_assert(sizeof(uint16_t) == sizeof(unsigned short),
                   "Potential 32/64 bit definition issue.");
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::UInt8)] = H5T_NATIVE_UCHAR;
+    Map[static_cast<int>(H5PrimSubset::UInt8)] = H5T_NATIVE_UCHAR;
     static_assert(sizeof(uint8_t) == sizeof(unsigned char),
                   "H5 types: Potential 32/64 bit issue.");
 
-    PrimToH5tNative[static_cast<int>(H5PrimSubset::SInt8)] = H5T_NATIVE_SCHAR;
+    Map[static_cast<int>(H5PrimSubset::SInt8)] = H5T_NATIVE_SCHAR;
     static_assert(sizeof(int8_t) == sizeof(signed char),
                   "H5 types: Potential 32/64 bit issue.");
 
     // verify all slots have been written
     for (int i = 0; i < static_cast<int>(H5PrimSubset::Count); i++) {
-      if (PrimToH5tNative[i] == 0) {
+      if (Map[i] == 0) {
         throw std::runtime_error(
             fmt::format("Missing H5PrimSubset to H5T_NATIVE_* mapping at "
                         "H5PrimSubset enum item {}",
@@ -40,7 +40,7 @@ static hid_t MapPrimToH5tNative(H5PrimSubset Prim) {
       }
     }
   }
-  return PrimToH5tNative[static_cast<int>(Prim)];
+  return Map[static_cast<int>(Prim)];
 }
 
 PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
@@ -58,7 +58,7 @@ PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
 
   for (size_t i = 0; i < CompoundDef.MembersCount; i++) {
     const H5PrimDef &Def = CompoundDef.Members[i];
-    hid_t H5fNativeType = MapPrimToH5tNative(Def.PrimType);
+    hid_t H5fNativeType = PrimToH5tNative(Def.PrimType);
     Compound.insert(
         Def.Name, Def.Offset,
         hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
@@ -68,29 +68,10 @@ PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
   PathBase = file_path;
 }
 
-std::unique_ptr<PrimDumpFileBase>
-PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
-                         const boost::filesystem::path &FilePath,
-                         size_t MaxMB) {
-  auto Ret = std::unique_ptr<PrimDumpFileBase>(
-      new PrimDumpFileBase(CompoundDef, FilePath, MaxMB));
-  Ret->openRW();
+boost::filesystem::path PrimDumpFileBase::get_full_path() const {
+  auto Ret = PathBase;
+  Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
   return Ret;
-}
-
-std::unique_ptr<PrimDumpFileBase>
-PrimDumpFileBase::open(const H5PrimCompoundDef &CompoundDef,
-                       const boost::filesystem::path &FilePath) {
-  auto Ret = std::unique_ptr<PrimDumpFileBase>(
-      new PrimDumpFileBase(CompoundDef, FilePath, 0));
-  Ret->openR();
-  return Ret;
-}
-
-size_t PrimDumpFileBase::count() const {
-  return hdf5::dataspace::Simple(DataSet.dataspace())
-      .current_dimensions()
-      .at(0);
 }
 
 void PrimDumpFileBase::openRW() {
@@ -126,4 +107,72 @@ void PrimDumpFileBase::openR() {
       throw std::runtime_error("DumpFile version mismatch");
     }
   }
+}
+
+size_t PrimDumpFileBase::count() const {
+  return hdf5::dataspace::Simple(DataSet.dataspace())
+      .current_dimensions()
+      .at(0);
+}
+
+void PrimDumpFileBase::rotate() {
+  SequenceNumber++;
+  openRW();
+}
+
+void write_contiguous_data(const void *DataBuffer, const hdf5::node::Dataset &dataset,
+                           const hdf5::datatype::Datatype &mem_type,
+                           const hdf5::dataspace::Dataspace &mem_space,
+                           const hdf5::dataspace::Dataspace &file_space) {
+  hdf5::property::DatasetTransferList dtpl;
+  if (H5Dwrite(static_cast<hid_t>(dataset), static_cast<hid_t>(mem_type),
+               static_cast<hid_t>(mem_space), static_cast<hid_t>(file_space),
+               static_cast<hid_t>(dtpl), DataBuffer) < 0) {
+    std::stringstream ss;
+    ss << "Failure to write contiguous data to dataset ["
+       << dataset.link().path() << "]!";
+    hdf5::error::Singleton::instance().throw_with_stack(ss.str());
+  }
+}
+
+// from Dataset::write()
+void Dataset_write(const void *DataBuffer, const size_t DataElmCount,
+                   const hdf5::datatype::Compound &memory_type,
+                   const hdf5::node::Dataset &dataset,
+                   const hdf5::dataspace::Hyperslab &hyperSelection) {
+
+  auto dims = hyperSelection.block();
+  auto count = hyperSelection.count();
+  for (hdf5::Dimensions::size_type i = 0; i != dims.size(); i++) {
+    dims[i] *= count[i];
+  }
+  hdf5::dataspace::Simple selected_space(dims);
+
+  hdf5::dataspace::Simple memory_space(hdf5::Dimensions{DataElmCount},
+                                       hdf5::Dimensions{DataElmCount});
+  const hdf5::dataspace::Simple &mem_space = hdf5::dataspace::Simple(memory_space);
+
+  hid_t DataspaceId = H5Dget_space(static_cast<hid_t>(dataset));
+  hdf5::dataspace::Dataspace file_space{hdf5::ObjectHandle(DataspaceId)};
+  file_space.selection(hdf5::dataspace::SelectionOperation::SET,
+                       hyperSelection);
+
+  RelAssertMsg(
+      selected_space.rank() == 1 && mem_space.rank() == 1 &&
+          selected_space.size() == memory_space.size(),
+      "test assumption: we always select the entire memspace and rank is "
+      "always 1 for the vector");
+
+  if (selected_space.rank() > 1 && mem_space.rank() == 1 &&
+      selected_space.size() == memory_space.size())
+    write_contiguous_data(DataBuffer, dataset, memory_type, selected_space, file_space);
+  else
+    write_contiguous_data(DataBuffer, dataset, memory_type, memory_space, file_space);
+}
+
+void PrimDumpFileBase::write(const void *DataBuffer, size_t DataElmCount) {
+  Slab.offset(0, count());
+  Slab.block(0, DataElmCount);
+  DataSet.extent({count() + DataElmCount});
+  Dataset_write(DataBuffer, DataElmCount, Compound, DataSet, Slab);
 }

@@ -34,7 +34,7 @@ H5_PRIM_COMPOUND_MEMBER(weight)
 H5_PRIM_COMPOUND_MEMBER(plane)
 H5_PRIM_COMPOUND_END()
 
-using Hit3PrimFile = PrimpDumpFile<Hit3>;
+using Hit3PrimFile = PrimDumpFile<Hit3>;
 
 class DumpPrimFileTest : public TestBase {
   void SetUp() override {
@@ -59,6 +59,15 @@ TEST_F(DumpPrimFileTest, OpenEmptyFile) {
   Hit3PrimFile::create("dumpfile_test");
   auto file = Hit3PrimFile::open("dumpfile_test_00000");
   EXPECT_EQ(file->count(), 0);
+}
+
+TEST_F(DumpPrimFileTest, PushOne) {
+  auto file = Hit3PrimFile::create("dumpfile_test");
+  file->push(Hit3());
+  EXPECT_EQ(file->count(), 0);
+  for (size_t i = 0; i < 1000; ++i)
+    file->push(Hit3());
+  EXPECT_EQ(file->count(), 9000 / sizeof(Hit3));
 }
 
 //-----------------------------------------------------------------------------
