@@ -132,6 +132,16 @@ TEST_F(DumpPrimFileTest, PushFileRotation) {
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00001.h5"));
 }
 
+// clang-format off
+// This gives a validation error when hdf5::error::Singleton::instance().auto_print(false) is disabled:
+//   HDF5-DIAG: Error detected in HDF5 (1.10.5) thread 0:
+//     #000: ../source_subfolder/src/H5Dio.c line 185 in H5Dread(): could not get a validated dataspace from file_space_id
+//       major: Invalid arguments to routine
+//       minor: Bad value
+//     #001: ../source_subfolder/src/H5S.c line 254 in H5S_get_validated_dataspace(): selection + offset not within extent
+//       major: Dataspace
+//       minor: Out of range
+// clang-format on
 TEST_F(DumpPrimFileTest, Read) {
   auto file_out = PrimHitFile::create("dumpfile_test");
   file_out->push(std::vector<PrimHit>(900, PrimHit()));
@@ -273,6 +283,16 @@ TEST_F(DumpFileTest, PushOne) {
   EXPECT_EQ(file->count(), 9000 / sizeof(Hit));
 }
 
+// clang-format off
+// This gives a validation error when hdf5::error::Singleton::instance().auto_print(false) is disabled:
+//   HDF5-DIAG: Error detected in HDF5 (1.10.5) thread 0:
+//     #000: ../source_subfolder/src/H5Dio.c line 185 in H5Dread(): could not get a validated dataspace from file_space_id
+//       major: Invalid arguments to routine
+//       minor: Bad value
+//     #001: ../source_subfolder/src/H5S.c line 254 in H5S_get_validated_dataspace(): selection + offset not within extent
+//       major: Dataspace
+//       minor: Out of range
+// clang-format on
 TEST_F(DumpFileTest, Push) {
   auto file = HitFile::create("dumpfile_test");
   file->push(std::vector<Hit>(100, Hit()));

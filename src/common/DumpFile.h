@@ -112,12 +112,9 @@ template <typename T> struct H5PrimCompoundDefData;
 
 class PrimDumpFileBase {
 
-private:
-  const H5PrimCompoundDef &CompoundDef;
-
 protected:
   PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
-                   const boost::filesystem::path &file_path, size_t max_Mb);
+                   const boost::filesystem::path &file_path);
   void openRW();
   void openR();
 
@@ -129,14 +126,14 @@ protected:
   void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
               size_t Count);
 
+  void IncSequenceNumber();
 
   const size_t ChunkSize;
-  size_t MaxSize{0};
-
-  size_t SequenceNumber{0};
 
 private:
+  const H5PrimCompoundDef &CompoundDef;
 
+  size_t SequenceNumber{0};
 
   hdf5::file::File File;
   hdf5::datatype::Compound Compound;
@@ -153,6 +150,9 @@ private:
 template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
 
   std::vector<T> Data;
+
+  const size_t ChunkSize;
+  const size_t MaxSize;
 
   static std::unique_ptr<PrimDumpFile>
   create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
@@ -187,8 +187,10 @@ private:
 template <typename T>
 PrimDumpFile<T>::PrimDumpFile(const boost::filesystem::path &file_path,
                               size_t max_Mb)
-    : PrimDumpFileBase(H5PrimCompoundDefData<T>::GetCompoundDef(), file_path,
-                       max_Mb) {}
+    : PrimDumpFileBase(H5PrimCompoundDefData<T>::GetCompoundDef(), file_path),
+      ChunkSize(PrimDumpFileBase::ChunkSize),
+      MaxSize(max_Mb * 1000000 /
+              H5PrimCompoundDefData<T>::GetCompoundDef().StructSize) {}
 
 template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
@@ -207,7 +209,8 @@ PrimDumpFile<T>::open(const boost::filesystem::path &FilePath) {
 }
 
 template <typename T> void PrimDumpFile<T>::rotate() {
-  SequenceNumber++;
+  // SequenceNumber++;
+  PrimDumpFileBase::IncSequenceNumber();
   openRW();
 }
 

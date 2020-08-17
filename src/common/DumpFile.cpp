@@ -44,15 +44,13 @@ static hid_t PrimToH5tNative(H5PrimSubset Prim) {
 }
 
 PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
-                                   const boost::filesystem::path &file_path,
-                                   size_t max_Mb)
-    : CompoundDef(CompoundDef),
-      ChunkSize(
+                                   const boost::filesystem::path &file_path)
+    : ChunkSize(
           9000 /
           CompoundDef.StructSize) // \todo 9000 is MTU? Correct size is <= 8972
                                   // else packet fragmentation will occur.
       ,
-      Slab({0}, {ChunkSize}) {
+      CompoundDef(CompoundDef), Slab({0}, {ChunkSize}) {
 
   Compound = hdf5::datatype::Compound::create(CompoundDef.StructSize);
 
@@ -64,7 +62,7 @@ PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef,
         hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
   }
 
-  MaxSize = max_Mb * 1000000 / CompoundDef.StructSize;
+  // MaxSize = max_Mb * 1000000 / CompoundDef.StructSize;
   PathBase = file_path;
 }
 
@@ -214,12 +212,14 @@ h5prim_dataset_read(void *DataBuffer, const size_t DataElmCount,
 
   hdf5::dataspace::Simple selected_space(dims);
   if (selected_space.size() == memory_space.size())
-    h5prim_read_contiguous_data(DataBuffer, dataset, memory_type, selected_space,
-                                file_space);
+    h5prim_read_contiguous_data(DataBuffer, dataset, memory_type,
+                                selected_space, file_space);
   else
     h5prim_read_contiguous_data(DataBuffer, dataset, memory_type, memory_space,
                                 file_space);
 }
+
+void PrimDumpFileBase::IncSequenceNumber() { SequenceNumber++; }
 
 void PrimDumpFileBase::readAt(void *DataBuffer, const size_t DataElmCount,
                               size_t Index, size_t Count) {
