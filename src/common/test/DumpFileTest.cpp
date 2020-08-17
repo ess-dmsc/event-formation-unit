@@ -26,6 +26,25 @@ struct __attribute__ ((packed)) Hit3 {
   static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
 };
 
+struct __attribute__ ((packed)) Hit4 {
+  static const char *DatasetName() { return "hit_dataset"; }
+  static uint16_t FormatVersion() { return 1; }
+
+  /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
+  uint64_t time{0};
+  uint16_t coordinate{0};
+  uint16_t weight{0};
+  // \todo uint8 might not be enough, if detectors have more independent modules/segments
+  uint8_t plane{0};
+  /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
+
+  /// \brief prints values for debug purposes
+  std::string to_string() const;
+
+  static constexpr uint16_t InvalidCoord {std::numeric_limits<uint16_t>::max()};
+  static constexpr uint8_t InvalidPlane {std::numeric_limits<uint8_t>::max()};
+  static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
+};
 
 H5_PRIM_COMPOUND_BEGIN(Hit3)
 H5_PRIM_COMPOUND_MEMBER(time)
@@ -34,7 +53,15 @@ H5_PRIM_COMPOUND_MEMBER(weight)
 H5_PRIM_COMPOUND_MEMBER(plane)
 H5_PRIM_COMPOUND_END()
 
+H5_PRIM_COMPOUND_BEGIN(Hit4)
+H5_PRIM_COMPOUND_MEMBER(time)
+H5_PRIM_COMPOUND_MEMBER(coordinate)
+H5_PRIM_COMPOUND_MEMBER(weight)
+H5_PRIM_COMPOUND_MEMBER(plane)
+H5_PRIM_COMPOUND_END()
+
 using Hit3PrimFile = PrimDumpFile<Hit3>;
+using Hit4PrimFile = PrimDumpFile<Hit4>;
 
 class DumpPrimFileTest : public TestBase {
   void SetUp() override {
@@ -78,6 +105,15 @@ TEST_F(DumpPrimFileTest, Push) {
   EXPECT_EQ(file->count(), 1000);
   file->push(std::vector<Hit3>(3000, Hit3()));
   EXPECT_EQ(file->count(), 4000);
+}
+
+TEST_F(DumpPrimFileTest, WrongVersion) {
+  auto file = Hit3PrimFile::create("dumpfile_test");
+  file->push(std::vector<Hit3>(1000, Hit3()));
+  EXPECT_EQ(file->count(), 1000);
+  file.reset();
+
+  EXPECT_ANY_THROW(Hit4PrimFile::open("dumpfile_test_00000"));
 }
 
 //-----------------------------------------------------------------------------
