@@ -147,6 +147,16 @@ TEST_F(DumpPrimFileTest, Read) {
   EXPECT_THROW(file->readAt(0, 1000), std::runtime_error);
 }
 
+TEST_F(DumpPrimFileTest, ReadAll) {
+  auto file_out = PrimHitFile::create("dumpfile_test");
+  file_out->push(std::vector<PrimHit>(900, PrimHit()));
+  file_out.reset();
+
+  std::vector<PrimHit> data;
+  PrimHitFile::read("dumpfile_test_00000", data);
+  EXPECT_EQ(data.size(), 900);
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

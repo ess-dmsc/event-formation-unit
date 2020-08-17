@@ -160,6 +160,9 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
 
   void readAt(size_t Index, size_t Count);
 
+  static void read(const boost::filesystem::path &FilePath,
+                   std::vector<T> &ExternalData);
+
   void flush();
 
   void write();
@@ -231,6 +234,14 @@ template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
 template <typename T> void PrimDumpFile<T>::flush() {
   write();
   Data.clear();
+}
+
+template <typename T>
+void PrimDumpFile<T>::read(const boost::filesystem::path &FilePath,
+                           std::vector<T> &ExternalData) {
+  auto TempFile = PrimDumpFile::open(FilePath);
+  TempFile->readAt(0, TempFile->count());
+  ExternalData = std::move(TempFile->Data);
 }
 
 template <typename T> void PrimDumpFile<T>::write() {
