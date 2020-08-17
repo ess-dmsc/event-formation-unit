@@ -153,6 +153,7 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
   open(const boost::filesystem::path &FilePath);
 
   void push(const T &Hit);
+  template <typename Container> void push(const Container &Hits);
 
   void flush();
 
@@ -195,6 +196,19 @@ template <typename T> void PrimDumpFile<T>::rotate() {
 
 template <typename T> void PrimDumpFile<T>::push(const T &Hit) {
   Data.push_back(Hit);
+  if (Data.size() >= ChunkSize) {
+    flush();
+
+    if (MaxSize && (count() >= MaxSize)) {
+      rotate();
+    }
+  }
+}
+
+template <typename T>
+template <typename Container>
+void PrimDumpFile<T>::push(const Container &Hits) {
+  Data.insert(Data.end(), Hits.begin(), Hits.end());
   if (Data.size() >= ChunkSize) {
     flush();
 

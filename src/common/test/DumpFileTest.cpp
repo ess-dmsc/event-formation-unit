@@ -70,6 +70,16 @@ TEST_F(DumpPrimFileTest, PushOne) {
   EXPECT_EQ(file->count(), 9000 / sizeof(Hit3));
 }
 
+TEST_F(DumpPrimFileTest, Push) {
+  auto file = Hit3PrimFile::create("dumpfile_test");
+  file->push(std::vector<Hit3>(100, Hit3()));
+  EXPECT_EQ(file->count(), 0);
+  file->push(std::vector<Hit3>(900, Hit3()));
+  EXPECT_EQ(file->count(), 1000);
+  file->push(std::vector<Hit3>(3000, Hit3()));
+  EXPECT_EQ(file->count(), 4000);
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
