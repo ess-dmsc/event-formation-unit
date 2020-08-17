@@ -51,25 +51,25 @@ enum class H5PrimSubset {
 
 template <typename T> struct MapPrimToH5PrimSubset;
 template <> struct MapPrimToH5PrimSubset<bool> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::Bool;
+  static const H5PrimSubset Value = H5PrimSubset::Bool;
 };
 template <> struct MapPrimToH5PrimSubset<float> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::Float;
+  static const H5PrimSubset Value = H5PrimSubset::Float;
 };
 template <> struct MapPrimToH5PrimSubset<uint64_t> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::UInt64;
+  static const H5PrimSubset Value = H5PrimSubset::UInt64;
 };
 template <> struct MapPrimToH5PrimSubset<uint32_t> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::UInt32;
+  static const H5PrimSubset Value = H5PrimSubset::UInt32;
 };
 template <> struct MapPrimToH5PrimSubset<uint16_t> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::UInt16;
+  static const H5PrimSubset Value = H5PrimSubset::UInt16;
 };
 template <> struct MapPrimToH5PrimSubset<uint8_t> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::UInt8;
+  static const H5PrimSubset Value = H5PrimSubset::UInt8;
 };
 template <> struct MapPrimToH5PrimSubset<int8_t> {
-  static constexpr H5PrimSubset Value = H5PrimSubset::SInt8;
+  static const H5PrimSubset Value = H5PrimSubset::SInt8;
 };
 
 struct H5PrimDef {
@@ -111,10 +111,32 @@ template <typename T> struct H5PrimCompoundDefData;
 //-----------------------------------------------------------------------------
 
 class PrimDumpFileBase {
-public:
+
+private:
   const H5PrimCompoundDef &CompoundDef;
 
-  size_t ChunkSize;
+protected:
+  PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
+                   const boost::filesystem::path &file_path, size_t max_Mb);
+  void openRW();
+  void openR();
+
+  size_t count() const;
+  bool isFileValidNonReadonly();
+
+  void write(const void *DataBuffer, size_t DataElmCount);
+
+  void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
+              size_t Count);
+
+
+  const size_t ChunkSize;
+  size_t MaxSize{0};
+
+  size_t SequenceNumber{0};
+
+private:
+
 
   hdf5::file::File File;
   hdf5::datatype::Compound Compound;
@@ -122,27 +144,8 @@ public:
   hdf5::dataspace::Hyperslab Slab;
 
   boost::filesystem::path PathBase{};
-  size_t MaxSize{0};
-  size_t SequenceNumber{0};
 
   boost::filesystem::path get_full_path() const;
-
-  size_t count() const;
-
-  void rotate();
-
-  void write(const void *DataBuffer, size_t DataElmCount);
-
-  void readAt(void *DataBuffer, const size_t DataElmCount, size_t Index,
-              size_t Count);
-
-  bool isFileValidNonReadonly();
-
-protected:
-  PrimDumpFileBase(const H5PrimCompoundDef &PrimStruct,
-                   const boost::filesystem::path &file_path, size_t max_Mb);
-  void openRW();
-  void openR();
 };
 
 //-----------------------------------------------------------------------------
@@ -164,6 +167,8 @@ template <typename T> struct PrimDumpFile : public PrimDumpFileBase {
 
   static void read(const boost::filesystem::path &FilePath,
                    std::vector<T> &ExternalData);
+
+  size_t count() const;
 
   void flush();
 
@@ -233,6 +238,10 @@ void PrimDumpFile<T>::push(const Container &Hits) {
 template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
   Data.resize(Count);
   PrimDumpFileBase::readAt(Data.data(), Data.size(), Index, Count);
+}
+
+template <typename T> size_t PrimDumpFile<T>::count() const {
+  return PrimDumpFileBase::count();
 }
 
 template <typename T> void PrimDumpFile<T>::flush() {

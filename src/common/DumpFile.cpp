@@ -115,11 +115,6 @@ size_t PrimDumpFileBase::count() const {
       .at(0);
 }
 
-void PrimDumpFileBase::rotate() {
-  SequenceNumber++;
-  openRW();
-}
-
 static void
 h5prim_write_contiguous_data(const void *DataBuffer,
                              const hdf5::node::Dataset &dataset,
