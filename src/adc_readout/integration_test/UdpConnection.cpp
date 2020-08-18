@@ -112,7 +112,7 @@ void *UdpConnection::TransmitRequest::getTxData() {
   }
 }
 
-size_t UdpConnection::TransmitRequest::getTxSize() {
+size_t UdpConnection::TransmitRequest::getTxSize() const {
   if (IsData) {
     return DataPtr->Size;
   } else {

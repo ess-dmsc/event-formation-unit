@@ -70,7 +70,7 @@ private:
         : IsData(false), IdlePtr(IdlePtr) {}
 
     void *getTxData();
-    size_t getTxSize();
+    size_t getTxSize() const;
     void freePacket(UdpConnection *UdpCon);
   };
 

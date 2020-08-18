@@ -114,8 +114,9 @@ struct PoissionFileGenerator {
   }
 };
 
-PoissionFileGenerator CreatePoissionFileGenerator(UdpConnection *UdpCon,
-                                                  StreamSettings &Settings) {
+PoissionFileGenerator
+CreatePoissionFileGenerator(UdpConnection *UdpCon,
+                            const StreamSettings &Settings) {
   double Rate = Settings.EventRate;
 
   SampleRunGenerator Dummy(0, 0, 0, 0, 0, 0, 0);
