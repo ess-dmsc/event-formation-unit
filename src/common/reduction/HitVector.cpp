@@ -8,6 +8,7 @@
 
 #include <common/reduction/HitVector.h>
 #include <algorithm>
+#include <sstream>
 
 #define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"

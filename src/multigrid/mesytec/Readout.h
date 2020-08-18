@@ -34,7 +34,9 @@
 
 #pragma once
 
+#define H5_USE_NEW_COMPOUND_IMPL 0
 #include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 
 namespace Multigrid {
 

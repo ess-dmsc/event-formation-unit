@@ -4,6 +4,8 @@
 
 #include <common/reduction/analysis/UtpcAnalyzer.h>
 
+#include <cmath>
+
 class UtpcAnalyzerTest : public TestBase {
 protected:
   Hit hit;

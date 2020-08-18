@@ -10,6 +10,7 @@
 #include <common/Trace.h>
 #include <fmt/format.h>
 #include <cmath>
+#include <sstream>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

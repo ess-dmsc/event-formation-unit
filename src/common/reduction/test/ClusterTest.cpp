@@ -3,6 +3,8 @@
 #include <common/reduction/Cluster.h>
 #include <test/TestBase.h>
 
+#include <cmath>
+
 class ClusterTest : public TestBase {
 protected:
   Cluster cluster;

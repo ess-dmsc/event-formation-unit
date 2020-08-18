@@ -9,7 +9,9 @@
 
 #include <cinttypes>
 #include <string>
+#define H5_USE_NEW_COMPOUND_IMPL 0
 #include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 
 struct OldReadout
 {

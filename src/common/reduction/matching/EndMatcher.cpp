@@ -8,7 +8,8 @@
 #include <common/reduction/matching/EndMatcher.h>
 
 #include <cmath>
-#include <algorithm>
+#include <fmt/format.h>
+#include <sstream>
 
 void EndMatcher::set_max_delta_time(uint64_t max_delta_time) {
   max_delta_time_ = max_delta_time;

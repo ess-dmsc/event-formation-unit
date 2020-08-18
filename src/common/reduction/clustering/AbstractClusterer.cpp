@@ -8,6 +8,7 @@
 
 #include <common/reduction/clustering/AbstractClusterer.h>
 #include <fmt/format.h>
+#include <sstream>
 
 #include <common/Trace.h>
 

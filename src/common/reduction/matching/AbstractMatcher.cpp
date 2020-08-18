@@ -8,6 +8,8 @@
 
 #include <common/reduction/matching/AbstractMatcher.h>
 #include <common/Trace.h>
+#include <sstream>
+#include <fmt/format.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB

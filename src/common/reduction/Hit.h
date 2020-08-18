@@ -34,7 +34,9 @@
 
 #pragma once
 
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 #include <limits>
 
 struct __attribute__ ((packed)) Hit {
@@ -57,24 +59,34 @@ struct __attribute__ ((packed)) Hit {
   static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
 };
 
-namespace hdf5 {
+#define H5_USE_NEW_COMPOUND_IMPL 1
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0 /////// TODO put our data in same namespace and class?
+namespace hdf5 {
 namespace datatype {
 template<>
 class TypeTrait<Hit> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Hit) {
-    H5_COMPOUND_INIT;
+#endif
+  H5_COMPOUND_DEFINE_TYPE(Hit) //{
+    H5_COMPOUND_INIT
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(time);
-    H5_COMPOUND_INSERT_MEMBER(coordinate);
-    H5_COMPOUND_INSERT_MEMBER(weight);
-    H5_COMPOUND_INSERT_MEMBER(plane);
-    H5_COMPOUND_RETURN;
+    H5_COMPOUND_INSERT_MEMBER(time)
+    H5_COMPOUND_INSERT_MEMBER(coordinate)
+    H5_COMPOUND_INSERT_MEMBER(weight)
+    H5_COMPOUND_INSERT_MEMBER(plane)
+    H5_COMPOUND_RETURN
+#if H5_USE_NEW_COMPOUND_IMPL == 0
   }
 };
 }
-
 }
+#endif
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0
 using HitFile = DumpFile<Hit>;
+#else
+using HitFile = PrimDumpFile<Hit>;
+#endif
+
+#undef H5_USE_NEW_COMPOUND_IMPL

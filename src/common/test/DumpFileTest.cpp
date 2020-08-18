@@ -1,8 +1,17 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 #include <test/TestBase.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
 
 #include <limits>
 
@@ -191,6 +200,10 @@ TEST_F(DumpPrimFileTest, FlushOnClose) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+
+#define H5_USE_NEW_COMPOUND_IMPL 0
+#include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 
 struct __attribute__ ((packed)) Hit {
   size_t a{0};

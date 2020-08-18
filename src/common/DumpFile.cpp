@@ -1,5 +1,20 @@
+
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
+#undef H5_USE_NEW_COMPOUND_IMPL
 #include <common/Assert.h>
+#include <common/Version.h>
+#include <fmt/format.h>
+#include <memory>
+#include <vector>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
 
 class PrimDumpFileBase_Impl : public PrimDumpFileBase {
 public:
@@ -46,9 +61,7 @@ PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
 }
 
 PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef)
-    // \todo 9000 is MTU? Correct size is <= 8972 packet fragmentation will
-    // occur.
-    : ChunkSize(9000 / CompoundDef.StructSize) {}
+    : ChunkSize(GetChunkSize(CompoundDef.StructSize)) {}
 
 // \todo this cannot be initialized atomically yet
 static hid_t PrimToH5tNative(H5PrimSubset Prim) {
@@ -60,6 +73,8 @@ static hid_t PrimToH5tNative(H5PrimSubset Prim) {
     Map[static_cast<int>(H5PrimSubset::Bool)] = H5T_NATIVE_HBOOL;
 
     Map[static_cast<int>(H5PrimSubset::Float)] = H5T_NATIVE_FLOAT;
+
+    Map[static_cast<int>(H5PrimSubset::ULong)] = H5T_NATIVE_ULONG;
 
     Map[static_cast<int>(H5PrimSubset::UInt64)] = H5T_NATIVE_ULLONG;
     static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
@@ -94,14 +109,10 @@ static hid_t PrimToH5tNative(H5PrimSubset Prim) {
   return Map[static_cast<int>(Prim)];
 }
 
-PrimDumpFileBase_Impl::PrimDumpFileBase_Impl(
-    const H5PrimCompoundDef &CompoundDef,
-    const boost::filesystem::path &file_path)
-    : PrimDumpFileBase(CompoundDef), CompoundDef(CompoundDef),
-      Slab({0}, {ChunkSize}) {
-
-  Compound = hdf5::datatype::Compound::create(CompoundDef.StructSize);
-
+hdf5::datatype::Compound
+createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef &CompoundDef) {
+  hdf5::datatype::Compound Compound =
+      hdf5::datatype::Compound::create(CompoundDef.StructSize);
   for (size_t i = 0; i < CompoundDef.MembersCount; i++) {
     const H5PrimDef &Def = CompoundDef.Members[i];
     hid_t H5fNativeType = PrimToH5tNative(Def.PrimType);
@@ -109,7 +120,15 @@ PrimDumpFileBase_Impl::PrimDumpFileBase_Impl(
         Def.Name, Def.Offset,
         hdf5::datatype::Datatype(hdf5::ObjectHandle(H5Tcopy(H5fNativeType))));
   }
+  return Compound;
+}
 
+PrimDumpFileBase_Impl::PrimDumpFileBase_Impl(
+    const H5PrimCompoundDef &CompoundDef,
+    const boost::filesystem::path &file_path)
+    : PrimDumpFileBase(CompoundDef), CompoundDef(CompoundDef),
+      Slab({0}, {ChunkSize}) {
+  Compound = createCompoundFromH5PrimCompoundDef(CompoundDef);
   PathBase = file_path;
 }
 

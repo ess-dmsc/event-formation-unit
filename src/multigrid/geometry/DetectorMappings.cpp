@@ -17,6 +17,9 @@
 #include <multigrid/geometry/PlaneMappings.h>
 
 #include <common/Trace.h>
+#include <fmt/format.h>
+#include <sstream>
+
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 

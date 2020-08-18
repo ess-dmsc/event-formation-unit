@@ -5,32 +5,19 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#pragma once
+#ifndef H5_USE_NEW_COMPOUND_IMPL
+#error H5_USE_NEW_COMPOUND_IMPL must be 0 or 1 to pick a DumpFile implementation.
+#endif
 
-#include <common/Version.h>
-#include <fmt/format.h>
-#include <memory>
+#if H5_USE_NEW_COMPOUND_IMPL == 1
+
+#ifndef GUARD_DUMPFILE_H_NEW_IMPL
+#define GUARD_DUMPFILE_H_NEW_IMPL
 
 #include <string>
 #include <vector>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <h5cpp/hdf5.hpp>
-#pragma GCC diagnostic pop
-
-#define H5_COMPOUND_DEFINE_TYPE(x)                                             \
-  using Type = x;                                                              \
-  using TypeClass = Compound;                                                  \
-  static TypeClass create(const Type & = Type())
-#define H5_COMPOUND_INIT auto type = datatype::Compound::create(sizeof(Type))
-#define H5_COMPOUND_INSERT_MEMBER(member)                                      \
-  type.insert(STRINGIFY(member), offsetof(Type, member),                       \
-              datatype::create<decltype(Type::member)>())
-#define H5_COMPOUND_RETURN return type
+#define STRINGIFY2(x) #x
 
 // Returns number of elements in c-style array[]
 // from https://www.g-truc.net/post-0708.html
@@ -42,6 +29,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept {
 enum class H5PrimSubset {
   Bool,
   Float,
+  ULong,
   UInt64,
   UInt32,
   UInt16,
@@ -56,6 +44,9 @@ template <> struct MapPrimToH5PrimSubset<bool> {
 };
 template <> struct MapPrimToH5PrimSubset<float> {
   static const H5PrimSubset Value = H5PrimSubset::Float;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned long> {
+  static const H5PrimSubset Value = H5PrimSubset::ULong;
 };
 template <> struct MapPrimToH5PrimSubset<uint64_t> {
   static const H5PrimSubset Value = H5PrimSubset::UInt64;
@@ -87,6 +78,14 @@ struct H5PrimCompoundDef {
   uint16_t FormatVersion;
 };
 
+namespace hdf5 {
+namespace datatype {
+class Compound;
+} // namespace datatype
+} // namespace hdf5
+
+hdf5::datatype::Compound createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef& CompoundDef);
+
 // traits-like class containing H5PrimCompoundDef.
 template <typename T> struct H5PrimCompoundDefData;
 
@@ -98,7 +97,7 @@ template <typename T> struct H5PrimCompoundDefData;
       static const H5PrimDef Members[] = {
 
 #define H5_PRIM_COMPOUND_MEMBER(member)                                        \
-        { STRINGIFY(member), offsetof(Type, member), MapPrimToH5PrimSubset<decltype(Type::member)>::Value },
+        { STRINGIFY2(member), offsetof(Type, member), MapPrimToH5PrimSubset<decltype(Type::member)>::Value },
 
 #define H5_PRIM_COMPOUND_END() \
       }; \
@@ -109,9 +108,47 @@ template <typename T> struct H5PrimCompoundDefData;
   };
 // clang-format on
 
+#ifdef H5_COMPOUND_INSTANCIATE_TYPE
+#undef H5_COMPOUND_INSTANCIATE_TYPE
+#endif
+#define H5_COMPOUND_INSTANCIATE_TYPE(type)                                     \
+  createCompoundFromH5PrimCompoundDef(                                         \
+      H5PrimCompoundDefData<type>::GetCompoundDef())
+
+///// compatability, old setup -> new
+#ifdef H5_COMPOUND_DEFINE_TYPE
+#undef H5_COMPOUND_DEFINE_TYPE
+#endif
+#define H5_COMPOUND_DEFINE_TYPE(x) H5_PRIM_COMPOUND_BEGIN(x)
+
+#ifdef H5_COMPOUND_INIT
+#undef H5_COMPOUND_INIT
+#endif
+#define H5_COMPOUND_INIT /* nothing */
+
+#ifdef H5_COMPOUND_INSERT_MEMBER
+#undef H5_COMPOUND_INSERT_MEMBER
+#endif
+#define H5_COMPOUND_INSERT_MEMBER(member) H5_PRIM_COMPOUND_MEMBER(member)
+
+#ifdef H5_COMPOUND_RETURN
+#undef H5_COMPOUND_RETURN
+#endif
+#define H5_COMPOUND_RETURN H5_PRIM_COMPOUND_END()
+
+#define H5_PRIM_COMPOUND_NAMESPACE() 
+
 //-----------------------------------------------------------------------------
 
+constexpr size_t GetChunkSize(size_t StructSize){
+  return 9000 / StructSize; // \todo 9000 is MTU? Correct size is <=
+                            // 8972 packet fragmentation will occur.
+}
+
 class PrimDumpFileBase {
+public:
+  virtual ~PrimDumpFileBase(){}
+
 protected:
   const size_t ChunkSize;
 
@@ -147,7 +184,7 @@ template <typename T> class PrimDumpFile {
 public:
   std::vector<T> Data;
 
-  const size_t ChunkSize;
+  static constexpr size_t ChunkSize = GetChunkSize(sizeof(T));
   const size_t MaxSize;
 
   static std::unique_ptr<PrimDumpFile> create(const std::string &FilePath,
@@ -171,13 +208,14 @@ public:
   ~PrimDumpFile();
 };
 
+//template<class T> using DumpFile = PrimDumpFile<T>;
+
 //-----------------------------------------------------------------------------
 
 template <typename T>
 PrimDumpFile<T>::PrimDumpFile(const std::string &file_path, size_t max_Mb)
     : Base(PrimDumpFileBase::create(H5PrimCompoundDefData<T>::GetCompoundDef(),
                                     file_path)),
-      ChunkSize(Base->ChunkSize),
       MaxSize(max_Mb * 1000000 / // \todo should this this be a megabyte?
               H5PrimCompoundDefData<T>::GetCompoundDef().StructSize) {}
 
@@ -253,6 +291,8 @@ template <typename T> PrimDumpFile<T>::~PrimDumpFile() {
   }
 }
 
+#endif // GUARD_DUMPFILE_H_NEW_IMPL
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -269,6 +309,54 @@ template <typename T> PrimDumpFile<T>::~PrimDumpFile() {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+
+#else // #if H5_USE_NEW_COMPOUND_IMPL == 1
+
+#ifndef GUARD_DUMPFILE_H_OLD_IMPL
+#define GUARD_DUMPFILE_H_OLD_IMPL
+
+#include <common/Version.h>
+#include <fmt/format.h>
+#include <memory>
+#include <vector>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
+
+#ifdef H5_COMPOUND_DEFINE_TYPE
+#undef H5_COMPOUND_DEFINE_TYPE
+#endif
+#define H5_COMPOUND_DEFINE_TYPE(x)                                             \
+  using Type = x;                                                              \
+  using TypeClass = Compound;                                                  \
+  static TypeClass create(const Type & = Type())
+
+#ifdef H5_COMPOUND_INIT
+#undef H5_COMPOUND_INIT
+#endif
+#define H5_COMPOUND_INIT auto type = datatype::Compound::create(sizeof(Type))
+
+#ifdef H5_COMPOUND_INSERT_MEMBER
+#undef H5_COMPOUND_INSERT_MEMBER
+#endif
+#define H5_COMPOUND_INSERT_MEMBER(member)                                      \
+  type.insert(STRINGIFY(member), offsetof(Type, member),                       \
+              datatype::create<decltype(Type::member)>())
+
+#ifdef H5_COMPOUND_RETURN
+#undef H5_COMPOUND_RETURN
+#endif
+#define H5_COMPOUND_RETURN return type
+
+#ifdef H5_COMPOUND_INSTANCIATE_TYPE
+#undef H5_COMPOUND_INSTANCIATE_TYPE
+#endif
+#define H5_COMPOUND_INSTANCIATE_TYPE(type) hdf5::datatype::create<type>()
 
 // \todo improve reading for multiple files
 template <typename T> class DumpFile {
@@ -454,3 +542,7 @@ void DumpFile<T>::push(const Container &Hits) {
     }
   }
 }
+
+#endif // GUARD_DUMPFILE_H_OLD_IMPL
+
+#endif // #if H5_USE_NEW_COMPOUND_IMPL == 1
