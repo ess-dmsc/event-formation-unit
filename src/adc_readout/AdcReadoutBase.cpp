@@ -135,10 +135,10 @@ void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
   static uint64_t DumpExceptionsCount = 0;
   if (ReadoutSettings.DumpParserExceptionsCount &&
       (++DumpExceptionsCount & ((1 << 14) - 1)) == 0) {
-    printf("\n");
+    LOG(INIT, Sev::Info, "");
     for (int i = 0; i < static_cast<int>(ParserException::Type::Count); i++) {
-      printf("%s = %" PRIu64 "\n", ParserException::TypeNames[i],
-             ParserException::ErrorTypeCount[i]);
+      LOG(INIT, Sev::Info, "{} = {}", ParserException::TypeNames[i],
+          ParserException::ErrorTypeCount[i]);
     }
   }
 }
