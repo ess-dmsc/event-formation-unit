@@ -14,6 +14,7 @@
 #ifndef GUARD_DUMPFILE_H_NEW_IMPL
 #define GUARD_DUMPFILE_H_NEW_IMPL
 
+#include <memory> // \todo consider removing unique_ptr
 #include <string>
 #include <vector>
 
