@@ -32,10 +32,16 @@ public:
   bool addEvent(std::unique_ptr<EventData> const &Event);
   void addReferenceTimestamp(std::uint64_t NewReferenceTime);
   void setTimespan(std::uint64_t NewTimespan) { MaxOffsetTime = NewTimespan; }
-  std::pair<EventList, std::uint64_t> getFrameEvents();
+
+  struct EventsTimeData {
+    EventList Events;
+    std::uint64_t RefTime;
+  };
+
+  EventsTimeData getFrameEvents();
 
   /// \brief Get all events from the buffer.
-  std::pair<EventList, std::uint64_t> getAllEvents() const;
+  EventsTimeData getAllEvents() const;
   /// \brief Remove events from the buffer.
   /// \param[in] NrOfEvents The nr of events from the start of the buffer to
   /// remove.

@@ -6,26 +6,28 @@
  * production.
  */
 
-#include "AmpEventDelay.h"
-#include "ContinousSamplingTimer.h"
-#include "FPGASim.h"
-#include "PoissonDelay.h"
-#include "SampleRunGenerator.h"
+#include "SamplingTimer.h"
+#include "UdpConnection.h"
 #include <CLI/CLI.hpp>
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <csignal>
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <thread>
 
-bool RunLoop = true;
+#include <csignal>
+#include <iostream>
+#include <atomic>
+
+#ifndef ADCSIM_ONLY_CREATE_FIRST_GENERATOR
+#define ADCSIM_ONLY_CREATE_FIRST_GENERATOR 0
+#endif
+
+static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
   RunLoop = false;
+  static int SigIntCount = 0;
+  if (signal == SIGINT && SigIntCount++ == 3) {
+    std::cout << "many repeats of SIGINT, aborting." << std::endl;
+    abort();
+  }
 }
 
 enum class RunMode { SIMPLE, DELAY_LINE_TIME, DELAY_LINE_AMP, CONTINOUS };
@@ -82,87 +84,36 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
       ->default_str("0.5");
 }
 
-using namespace std::chrono_literals;
-
-auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
-                         int ChNr, std::map<std::string, double> Settings) {
-  auto SampleGen = std::make_shared<SampleRunGenerator>(
-      100, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
-    auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-  };
-  return std::make_shared<PoissonDelay>(Glue, Service, Settings.at("rate"));
-}
-
-auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
-                        int ChNr, std::map<std::string, double> Settings) {
-  const int NrOfSamples = 4468;
-  const int OversamplingFactor = 4;
-  auto SampleGen = std::make_shared<SampleRunGenerator>(
-      NrOfSamples, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
-    auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-  };
-  return std::make_shared<ContinousSamplingTimer>(Glue, Service, NrOfSamples,
-                                                  OversamplingFactor);
-}
-
-std::random_device RD;
-std::default_random_engine Generator(RD());
-std::uniform_real_distribution<double> Distribution(0, 3.141592653);
-
-auto generateCircleAmplitudes() {
-  const double Amplitude{2000};
-  const double Center{3000};
-  auto Angle = Distribution(Generator);
-  return std::make_pair(Center + Amplitude * std::cos(Angle),
-                        Center + Amplitude * std::sin(Angle));
-}
-
-auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
-                          int BoxNr, double EventRate) {
-  const int NrOfSamples{100};
-  auto AnodeGen = std::make_shared<SampleRunGenerator>(NrOfSamples, 50, 20, 1.0,
-                                                       500, BoxNr, 0);
-  auto XPosGen = std::make_shared<SampleRunGenerator>(NrOfSamples, 50, 20, 1.0,
-                                                      500, BoxNr, 1);
-  auto YPosGen = std::make_shared<SampleRunGenerator>(NrOfSamples, 50, 20, 1.0,
-                                                      500, BoxNr, 2);
-  auto Glue = [AnodeGen, XPosGen, YPosGen, FPGAPtr](TimeStamp const &Time) {
-    auto SampleRunAnode = AnodeGen->generate(2000.0, Time);
-    auto Amplitudes = generateCircleAmplitudes();
-    auto SampleRunX = XPosGen->generate(Amplitudes.first, Time);
-    auto SampleRunY = YPosGen->generate(Amplitudes.second, Time);
-    FPGAPtr->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second, Time);
-    FPGAPtr->addSamplingRun(SampleRunX.first, SampleRunX.second, Time);
-    FPGAPtr->addSamplingRun(SampleRunY.first, SampleRunY.second, Time);
-  };
-  return std::make_shared<AmpEventDelay>(Glue, Service, EventRate);
-}
-
-class StatsTimer {
-public:
-  StatsTimer(std::function<void()> OnTimer, asio::io_service &Service)
-      : TimerFunc(std::move(OnTimer)), Timer(Service){};
-  void start() {
-    Timer.expires_after(5s);
-    auto Handler = [this](auto &Error) { this->handleEventTimer(Error); };
-    Timer.async_wait(Handler);
-  }
-  void stop() { Timer.cancel(); }
-
-private:
-  void handleEventTimer(const asio::error_code &Error) {
-    if (not Error) {
-      TimerFunc();
-      start();
+bool ShouldCreateGenerator(SamplerType Type, UdpConnection *TargetAdcBox,
+                           UdpConnection *AdcBox2, SimSettings UsedSettings) {
+  if (ADCSIM_ONLY_CREATE_FIRST_GENERATOR) {
+    static uint32_t callcount = 0;
+    if (callcount++ != 0) {
+      return false;
     }
-  };
-  std::function<void()> TimerFunc;
-  asio::system_timer Timer;
-};
+  }
+
+  if (!UsedSettings.SecondFPGA && TargetAdcBox == AdcBox2)
+    return false;
+
+  if (UsedSettings.Mode == RunMode::SIMPLE or
+      UsedSettings.Mode == RunMode::DELAY_LINE_AMP or
+      UsedSettings.Mode == RunMode::DELAY_LINE_TIME) {
+    if (Type == SamplerType::PoissonDelay) {
+      return true;
+    }
+  }
+  if (UsedSettings.Mode == RunMode::DELAY_LINE_AMP and
+      Type == SamplerType::AmpEventDelay) {
+    return true;
+  }
+  if (UsedSettings.Mode == RunMode::CONTINOUS) {
+    if (Type == SamplerType::Continous) {
+      return true;
+    }
+  }
+  return false;
+}
 
 int main(const int argc, char *argv[]) {
   SimSettings UsedSettings;
@@ -178,135 +129,225 @@ int main(const int argc, char *argv[]) {
 
   std::signal(SIGINT, signalHandler);
 
-  asio::io_service Service;
-  asio::io_service::work Worker(Service);
+  UdpConnection AdcBox1(UsedSettings.EFUAddress, UsedSettings.Port1, RunLoop);
+  UdpConnection AdcBox2(UsedSettings.EFUAddress, UsedSettings.Port2, RunLoop);
 
-  auto AdcBox1 = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                           UsedSettings.Port1, Service);
-  auto AdcBox2 = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                           UsedSettings.Port2, Service);
-
-  std::vector<std::shared_ptr<SamplingTimer>> Box1Timers;
-
-  {
-    auto Temp1 = SetUpNoiseGenerator(Service, AdcBox1.get(), 0, 0,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 1.0},
-                                      {"amplitude", 2000.0}});
-    Box1Timers.emplace_back(Temp1);
-
-    auto Temp2 = SetUpNoiseGenerator(Service, AdcBox1.get(), 0, 1,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 10.0},
-                                      {"amplitude", 3000.0}});
-    Box1Timers.emplace_back(Temp2);
-
-    auto Temp3 = SetUpNoiseGenerator(Service, AdcBox1.get(), 0, 2,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 100.0},
-                                      {"amplitude", 4000.0}});
-    Box1Timers.emplace_back(Temp3);
-
-    auto Temp4 = SetUpNoiseGenerator(Service, AdcBox1.get(), 0, 3,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 1000.0},
-                                      {"amplitude", 5000.0}});
-    Box1Timers.emplace_back(Temp4);
-
-    auto Temp5 =
-        SetUpContGenerator(Service, AdcBox1.get(), 0, 0,
-                           {{"offset", 1000.0}, {"amplitude", 1000.0}});
-    Box1Timers.emplace_back(Temp5);
-
-    auto Temp6 =
-        SetUpAmpPosGenerator(Service, AdcBox1.get(), 0, UsedSettings.EventRate);
-    Box1Timers.emplace_back(Temp6);
-  }
-
-  std::vector<std::shared_ptr<SamplingTimer>> Box2Timers;
-
-  {
-    auto Temp1 = SetUpNoiseGenerator(Service, AdcBox2.get(), 1, 0,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 1.0},
-                                      {"amplitude", 2000.0}});
-    Box2Timers.emplace_back(Temp1);
-
-    auto Temp2 = SetUpNoiseGenerator(Service, AdcBox2.get(), 1, 1,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 10.0},
-                                      {"amplitude", 3000.0}});
-    Box2Timers.emplace_back(Temp2);
-
-    auto Temp3 = SetUpNoiseGenerator(Service, AdcBox2.get(), 1, 2,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 100.0},
-                                      {"amplitude", 4000.0}});
-    Box2Timers.emplace_back(Temp3);
-
-    auto Temp4 = SetUpNoiseGenerator(Service, AdcBox2.get(), 1, 3,
-                                     {{"rate", UsedSettings.NoiseRate},
-                                      {"offset", 1000.0},
-                                      {"amplitude", 5000.0}});
-    Box2Timers.emplace_back(Temp4);
-
-    auto Temp5 = SetUpContGenerator(Service, AdcBox2.get(), 1, 0,
-                                    {{"offset", 1000.0}, {"amplitude", 500.0}});
-    Box2Timers.emplace_back(Temp5);
-  }
-  auto UsedRunMode = UsedSettings.Mode;
-  auto ActivateTimers = [UsedRunMode](auto &TimerList) {
-    for (auto &Timer : TimerList) {
-      bool StartTimer = false;
-      if (UsedRunMode == RunMode::SIMPLE or
-          UsedRunMode == RunMode::DELAY_LINE_AMP or
-          UsedRunMode == RunMode::DELAY_LINE_TIME) {
-        if (dynamic_cast<PoissonDelay *>(Timer.get()) != nullptr and
-            dynamic_cast<AmpEventDelay *>(Timer.get()) == nullptr) {
-          StartTimer = true;
-        }
-      }
-      if (UsedRunMode == RunMode::DELAY_LINE_AMP and
-          dynamic_cast<AmpEventDelay *>(Timer.get()) != nullptr) {
-        StartTimer = true;
-      }
-      if (UsedRunMode == RunMode::CONTINOUS) {
-        if (dynamic_cast<ContinousSamplingTimer *>(Timer.get()) != nullptr) {
-          StartTimer = true;
-        }
-      }
-
-      if (StartTimer) {
-        Timer->start();
-      }
-    }
-  };
-
-  ActivateTimers(Box1Timers);
-
+  std::vector<UdpConnection *> UdpConnections = {&AdcBox1};
   if (UsedSettings.SecondFPGA) {
-    ActivateTimers(Box2Timers);
+    UdpConnections.push_back(&AdcBox2);
   }
+  std::vector<TimePointNano> TriggerTime_UdpHeartBeat;
+  TriggerTime_UdpHeartBeat.resize(UdpConnections.size());
+
+  std::vector<PoissonDelay> PoissionGenerators;
+  std::vector<TimePointNano> TriggerTime_Poisson;
+
+  std::vector<AmpEventDelay> AmpDelayGenerators;
+  std::vector<TimePointNano> TriggerTime_AmpDelay;
+
+  std::vector<ContinousSamplingTimer> ContinousGenerators;
+  std::vector<TimePointNano> TriggerTime_Continous;
+
+  // Box 1 timers
+  {
+    UdpConnection *CurAdc = &AdcBox1;
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 0,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1.0},
+                                {"amplitude", 2000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 1,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 10.0},
+                                {"amplitude", 3000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 2,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 100.0},
+                                {"amplitude", 4000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 3,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1000.0},
+                                {"amplitude", 5000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      ContinousGenerators.emplace_back(ContinousSamplingTimer::Create(
+          CurAdc, 0, 0, {{"offset", 1000.0}, {"amplitude", 1000.0}}));
+      TriggerTime_Continous.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      AmpDelayGenerators.emplace_back(
+          AmpEventDelay::Create(CurAdc, 0, UsedSettings.EventRate));
+      TriggerTime_AmpDelay.emplace_back();
+    }
+  }
+
+  // Box 2 timers
+  {
+    UdpConnection *CurAdc = &AdcBox2;
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 0,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1.0},
+                                {"amplitude", 2000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 1,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 10.0},
+                                {"amplitude", 3000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 2,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 100.0},
+                                {"amplitude", 4000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 3,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1000.0},
+                                {"amplitude", 5000.0}}));
+      TriggerTime_Poisson.emplace_back();
+    }
+
+    if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      ContinousGenerators.emplace_back(ContinousSamplingTimer::Create(
+          CurAdc, 1, 0, {{"offset", 1000.0}, {"amplitude", 500.0}}));
+      TriggerTime_Continous.emplace_back();
+    }
+  }
+
+  // Stats printer
   auto PrintStats = [&AdcBox1, &AdcBox2]() {
     std::cout << "Sampling runs generated by FPGA simulator 1: "
-              << AdcBox1->getNrOfRuns();
+              << AdcBox1.getNrOfRuns();
     std::cout << "\nSampling runs generated by FPGA simulator 2: "
-              << AdcBox2->getNrOfRuns() << "\n";
+              << AdcBox2.getNrOfRuns() << "\n";
   };
+  TimeDurationNano PrintStatsInterval(5'000'000'000ull);
+  TimePointNano TriggerTime_PrintStats;
 
-  StatsTimer Stats(PrintStats, Service);
-  Stats.start();
-
-  std::thread AsioThread([&Service]() { Service.run(); });
-
+  bool runTriggers = false;
   while (RunLoop) {
-    std::this_thread::sleep_for(500ms);
+
+    auto TimeNow = std::chrono::high_resolution_clock::now();
+    TimeStamp TimeTS = MakeExternalTimeStampFromClock(TimeNow);
+
+    // Poission
+    for (int32_t i = 0, count = PoissionGenerators.size(); i < count; i++) {
+      auto &Self = PoissionGenerators[i];
+      auto &TriggerTime = TriggerTime_Poisson[i];
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.calcDelaTime();
+        if (runTriggers) {
+          Self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // AmpDelay
+    for (int32_t i = 0, count = AmpDelayGenerators.size(); i < count; i++) {
+      auto &Self = AmpDelayGenerators[i];
+      auto &TriggerTime = TriggerTime_AmpDelay[i];
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.calcDelaTime();
+        if (runTriggers) {
+          Self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // Continous
+    for (int32_t i = 0, count = ContinousGenerators.size(); i < count; i++) {
+      auto &Self = ContinousGenerators[i];
+      auto &TriggerTime = TriggerTime_Continous[i];
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.calcDelaTime();
+        if (runTriggers) {
+          Self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // PrintStats
+    {
+      auto &TriggerTime = TriggerTime_PrintStats;
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + PrintStatsInterval;
+        if (runTriggers) {
+          PrintStats();
+        }
+      }
+    }
+
+    // UdpConnection HeatBeat
+    for (int32_t i = 0, count = UdpConnections.size(); i < count; i++) {
+      auto &Self = *UdpConnections[i];
+      auto &TriggerTime = TriggerTime_UdpHeartBeat[i];
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.HeartbeatInterval;
+        if (runTriggers) {
+          Self.transmitHeartbeat();
+        }
+      }
+    }
+
+    // UdpConnection FlushIdleData
+    for (int32_t i = 0, count = UdpConnections.size(); i < count; i++) {
+      auto &Self = *UdpConnections[i];
+      if (Self.shouldFlushIdleDataPacket(TimeNow)) {
+        if (runTriggers) {
+          Self.flushIdleDataPacket(TimeNow);
+        }
+      }
+    }
+
+    runTriggers = true;
   }
 
-  std::cout << "Waiting for transmit thread to exit!" << std::endl;
-  Service.stop();
-  if (AsioThread.joinable()) {
-    AsioThread.join();
-  }
+  std::cout << "Waiting for transmit thread(s) to exit" << std::endl;
+
   return 0;
 }

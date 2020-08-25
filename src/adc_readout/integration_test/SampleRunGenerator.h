@@ -22,9 +22,16 @@ public:
                                           TimeStamp const Time);
 
 private:
-  std::unique_ptr<std::uint8_t[]> Buffer;
-  DataHeader *HeaderPtr;
-  std::uint16_t *SamplePtr;
+  DataHeader *GetHeaderPtr() {
+    return reinterpret_cast<DataHeader *>(Buffer.data());
+  }
+
+  std::uint16_t *GetSamplePtr() {
+    return reinterpret_cast<std::uint16_t *>(Buffer.data() +
+                                             sizeof(DataHeader));
+  }
+
+  std::vector<std::uint8_t> Buffer;
   std::size_t NrOFSamples{50};
   double PeakLocation{25};
   double PeakWidth{10};

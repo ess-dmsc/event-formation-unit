@@ -8,15 +8,17 @@
 //===----------------------------------------------------------------------===//
 
 #include "DataModulariser.h"
-#include "FPGASim.h"
-#include "PoissonDelay.h"
+#include "SamplingTimer.h"
+#include "UdpConnection.h"
 #include "WaveformData.h"
+
 #include <CLI/CLI.hpp>
 #include <h5cpp/hdf5.hpp>
 #include <string>
 #include <vector>
+#include <atomic>
 
-bool RunLoop = true;
+static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
@@ -94,40 +96,43 @@ private:
   DataModulariser Modulariser;
 };
 
-auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
-                        StreamSettings &Settings) {
-  auto SampleGen =
-      std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &TS) {
-    auto SampleRun = SampleGen->generate();
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, TS);
-  };
-  return std::make_shared<PoissonDelay>(Glue, Service, Settings.EventRate);
-}
+struct PoissionFileGenerator {
+  PoissonDelayData PoissonData;
+  FileSampler FS;
 
-using namespace std::chrono_literals;
-
-class StatsTimer {
-public:
-  StatsTimer(std::function<void()> OnTimer, asio::io_service &Service)
-      : TimerFunc(std::move(OnTimer)), Timer(Service){};
-  void start() {
-    Timer.expires_after(5s);
-    auto Handler = [this](auto &Error) { this->handleEventTimer(Error); };
-    Timer.async_wait(Handler);
+  TimeDurationNano calcDelaTime() {
+    double DelayTime =
+        PoissonData.RandomDistribution(PoissonData.RandomGenerator);
+    TimeDurationNano NextEventDelay(static_cast<size_t>(DelayTime * 1e9));
+    return NextEventDelay;
   }
-  void stop() { Timer.cancel(); }
 
-private:
-  void handleEventTimer(const asio::error_code &Error) {
-    if (not Error) {
-      TimerFunc();
-      start();
-    }
-  };
-  std::function<void()> TimerFunc;
-  asio::system_timer Timer;
+  void genSamplesAndQueueSend(const TimeStamp &Time) {
+    std::pair<void const *const, std::size_t> SampleRun = FS.generate();
+    PoissonData.TimerData.UdpCon->addSamplingRun(SampleRun.first,
+                                                 SampleRun.second, Time);
+  }
 };
+
+PoissionFileGenerator
+CreatePoissionFileGenerator(UdpConnection *UdpCon,
+                            const StreamSettings &Settings) {
+  double Rate = Settings.EventRate;
+
+  SampleRunGenerator Dummy(0, 0, 0, 0, 0, 0, 0);
+
+  SamplingTimerData TimerData{
+      SamplerType::PoissonDelay, UdpCon, Dummy, 0, 0, Rate};
+
+  std::random_device RandomDevice;
+  PoissonDelayData data = {TimerData,
+                           std::default_random_engine(RandomDevice()),
+                           std::exponential_distribution<double>(Rate)};
+
+  FileSampler FS(Settings.NeXuSFile, Settings.WaveformPath);
+
+  return PoissionFileGenerator{data, std::move(FS)};
+}
 
 int main(const int argc, char *argv[]) {
   StreamSettings UsedSettings;
@@ -140,40 +145,82 @@ int main(const int argc, char *argv[]) {
     return 0;
   }
 
-  asio::io_service Service;
-  asio::io_service::work Worker(Service);
+  UdpConnection UdpCon(UsedSettings.EFUAddress, UsedSettings.Port, RunLoop);
+  TimePointNano TriggerTime_UdpHeartBeat;
 
-  auto AdcBox = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                          UsedSettings.Port, Service);
+  PoissionFileGenerator PoissionFile =
+      CreatePoissionFileGenerator(&UdpCon, UsedSettings);
+  TimePointNano TriggerTime_PoissonFile;
 
-  std::shared_ptr<SamplingTimer> DataTimer =
-      SetUpContGenerator(Service, AdcBox.get(), UsedSettings);
-  DataTimer->start();
-
-  auto PrintStats = [&AdcBox]() {
+  auto PrintStats = [&UdpCon]() {
     std::cout << "--------------------------\n";
-    std::cout << "Sampling runs:   " << AdcBox->getNrOfRuns() << "\n";
-    std::cout << "Created packets: " << AdcBox->getNrOfPackets() << "\n";
-    std::cout << "Sent packets:    " << AdcBox->getNrOfSentPackets() << "\n";
+    std::cout << "Sampling runs:   " << UdpCon.getNrOfRuns() << "\n";
+    std::cout << "Created packets: " << UdpCon.getNrOfPackets() << "\n";
+    std::cout << "Sent packets:    " << UdpCon.getNrOfSentPackets() << "\n";
   };
+  TimeDurationNano PrintStatsInterval(5'000'000'000ull);
+  TimePointNano TriggerTime_PrintStats;
 
-  StatsTimer Stats(PrintStats, Service);
-  Stats.start();
-
-  std::thread AsioThread([&Service]() { Service.run(); });
-
+  bool runTriggers = false;
   while (RunLoop) {
-    std::this_thread::sleep_for(500ms);
+
+    auto TimeNow = std::chrono::high_resolution_clock::now();
+    TimeStamp TimeTS = MakeExternalTimeStampFromClock(TimeNow);
+
+    // PoissionFile
+    {
+      auto &Self = PoissionFile;
+      auto &TriggerTime = TriggerTime_PoissonFile;
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.calcDelaTime();
+        if (runTriggers) {
+          Self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // PrintStats
+    {
+      auto &TriggerTime = TriggerTime_PrintStats;
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + PrintStatsInterval;
+        if (runTriggers) {
+          PrintStats();
+        }
+      }
+    }
+
+    // UdpConnection HeatBeat
+    {
+      auto &Self = UdpCon;
+      auto &TriggerTime = TriggerTime_UdpHeartBeat;
+      if (TriggerTime <= TimeNow) {
+        TriggerTime = TimeNow + Self.HeartbeatInterval;
+        if (runTriggers) {
+          Self.transmitHeartbeat();
+        }
+      }
+    }
+
+    // UdpConnection FlushIdleData
+    {
+      auto &Self = UdpCon;
+      if (Self.shouldFlushIdleDataPacket(TimeNow)) {
+        if (runTriggers) {
+          Self.flushIdleDataPacket(TimeNow);
+        }
+      }
+    }
+
+    runTriggers = true;
   }
 
   std::cout << "\nWaiting for transmit thread to exit!" << std::endl;
-  Service.stop();
-  if (AsioThread.joinable()) {
-    AsioThread.join();
-  }
+  UdpCon.waitTransmitDone();
+
   std::cout << "\nFinal tally:\n";
-  std::cout << "Sampling runs:   " << AdcBox->getNrOfRuns() << "\n";
-  std::cout << "Created packets: " << AdcBox->getNrOfPackets() << "\n";
-  std::cout << "Sent packets:    " << AdcBox->getNrOfSentPackets() << "\n";
+  std::cout << "Sampling runs:   " << UdpCon.getNrOfRuns() << "\n";
+  std::cout << "Created packets: " << UdpCon.getNrOfPackets() << "\n";
+  std::cout << "Sent packets:    " << UdpCon.getNrOfSentPackets() << "\n";
   return 0;
 }

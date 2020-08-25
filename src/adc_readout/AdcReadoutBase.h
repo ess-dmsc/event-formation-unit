@@ -50,13 +50,14 @@ protected:
   virtual void inputThread();
 
   /// \brief Process a data packet.
-  void packetFunction(InData const &Packet, PacketParser &Parser);
+  void parsePacketWithStats(InData const &Packet, PacketParser &Parser);
 
   /// \brief The function that executes the code for parsing and processing the
   /// sample data.
   /// This function will return when Detector::runThreads is set to false.
   virtual void processingThread(Queue &DataModuleQueue,
-                                std::shared_ptr<std::int64_t> EventCounter);
+                                std::shared_ptr<std::int64_t> EventCounter,
+                                size_t QueueId, ChannelID Identifier);
 
   /// \brief Does on demand instantiation of Kafka producer.
   /// Used in order to simplify unit testing.
@@ -65,8 +66,8 @@ protected:
   virtual std::shared_ptr<DelayLineProducer>
   getDelayLineProducer(OffsetTime UsedOffset);
 
-  SamplingRun *GetDataModule(ChannelID const Identifier);
-  bool QueueUpDataModule(SamplingRun *Data);
+  SamplingRun *getDataModuleFromQueue(ChannelID const Identifier);
+  bool queueUpDataModule(SamplingRun *Data);
 
   std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues{};
 

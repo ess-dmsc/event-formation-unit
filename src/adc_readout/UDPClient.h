@@ -24,7 +24,6 @@ public:
 
 protected:
   InData InputBuffer;
-  void receiveHandler(const asio::error_code &Error, std::size_t BytesReceived);
 
   std::function<void(InData const &Packet)> PacketHandler;
   asio::ip::udp::socket Socket;

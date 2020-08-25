@@ -21,7 +21,7 @@ EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
     : Name(std::move(SourceName)), Timeout(TransmitTimeout),
       EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode),
       RefTimeOffset(UseOffset) {
-  SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
+  SerializeThread = std::thread(&EventSerializer::serialiseThreadFunc, this);
 }
 
 EventSerializer::~EventSerializer() {
@@ -66,7 +66,7 @@ struct FBVector {
 
 using namespace std::chrono_literals;
 
-void EventSerializer::serialiseFunction() {
+void EventSerializer::serialiseThreadFunc() {
   flatbuffers::FlatBufferBuilder Builder(
       sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
   // We do not want the buffer to be too small or the vector offset addresses
@@ -93,6 +93,7 @@ void EventSerializer::serialiseFunction() {
   std::uint64_t MessageId{0};
   std::chrono::system_clock::time_point FirstEventTime;
   EventBuffer Events(EventBufferSize);
+
   auto ProduceFB = [&](auto const &SendEvents, auto const ReferenceTime) {
     if (SendEvents.empty()) {
       return;
@@ -123,6 +124,7 @@ void EventSerializer::serialiseFunction() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
+  
   std::uint64_t LastAddedRefTimestamp{0};
   auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
     auto NumberOfIterations{0};
@@ -140,6 +142,7 @@ void EventSerializer::serialiseFunction() {
     }
   };
   getReferenceTimestamps();
+
   do {
     while (EventQueue.try_dequeue(NewEvent)) {
       if (Events.size() == 0) {
@@ -148,9 +151,9 @@ void EventSerializer::serialiseFunction() {
       Events.addEvent(NewEvent);
       getReferenceTimestamps();
       auto EventList = Events.getFrameEvents();
-      if (not EventList.first.empty()) {
-        ProduceFB(EventList.first, EventList.second);
-        Events.cullEvents(EventList.first.size());
+      if (not EventList.Events.empty()) {
+        ProduceFB(EventList.Events, EventList.RefTime);
+        Events.cullEvents(EventList.Events.size());
         if (Events.size() > 0) {
           FirstEventTime = getCurrentTime();
         }
@@ -161,17 +164,18 @@ void EventSerializer::serialiseFunction() {
     getReferenceTimestamps();
     if (Events.size() > 0 and getCurrentTime() > FirstEventTime + Timeout) {
       auto EventList = Events.getAllEvents();
-      ProduceFB(EventList.first, EventList.second);
+      ProduceFB(EventList.Events, EventList.RefTime);
       Events.clearAllEvents();
     }
   } while (RunThread);
+
   if (Events.size() > 0) {
     // Reference time is calculated by Events.getEvents() so we must call that
     // function first.
     auto EventList = Events.getFrameEvents();
-    if (EventList.first.empty()) {
+    if (EventList.Events.empty()) {
       EventList = Events.getAllEvents();
     }
-    ProduceFB(EventList.first, EventList.second);
+    ProduceFB(EventList.Events, EventList.RefTime);
   }
 }

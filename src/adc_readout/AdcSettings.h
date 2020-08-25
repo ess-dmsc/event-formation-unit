@@ -19,6 +19,7 @@ struct AdcSettings {
   bool PeakDetection{false};
   bool DelayLineDetector{false};
   bool SampleTimeStamp{false};
+  bool DumpParserExceptionsCount{false};
   int TakeMeanOfNrOfSamples{1};
   OffsetTime::Offset TimeOffsetSetting{OffsetTime::Offset::NONE};
   std::chrono::system_clock::time_point ReferenceTime;
@@ -43,6 +44,7 @@ struct AdcSettings {
   PositionSensingType XAxis{PositionSensingType::CONST};
   PositionSensingType YAxis{PositionSensingType::CONST};
 
+  // Only for DelayLine system
   enum class ChannelRole {
     REFERENCE_TIME,
     AMPLITUDE_X_AXIS_1,

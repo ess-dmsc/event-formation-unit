@@ -19,13 +19,12 @@ public:
   std::pair<size_t, size_t> getBufferSizes() {
     return std::make_pair(Size, MaxSize);
   };
-  std::pair<void *, size_t> getBuffer(std::uint16_t ReadoutCount);
+  std::pair<void *, size_t> formatPacketForSend(std::uint16_t ReadoutCount);
   void resetPacket();
 
-private:
   std::unique_ptr<std::uint8_t[]> Buffer;
   PacketHeader *HeaderPtr;
   std::size_t Size{0};
   std::size_t MaxSize;
-  std::uint64_t TempReferenceTime{0};
+  std::uint64_t FirstRefTimeInPacket{0};
 };

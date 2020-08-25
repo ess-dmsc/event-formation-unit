@@ -18,27 +18,33 @@ double gaussian(int i, double PeakPos, double Width) {
          std::sqrt(2 * Pi * Width * Width);
 }
 
+#ifdef BUILD_SUPPORT_ISPC
+static const bool IspcEnabled = true;
+#else
+static const bool IspcEnabled = false;
+#endif
+
+extern "C" void SampleGenIspc(uint16_t output[], int count, float PeakBuffer[],
+                              float Amplitude, float BkgSlope, float BkgOffset);
+
 SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
                                        double PeakSigma, double Slope,
                                        double Offset, int ADCBox,
                                        int ADCChannel)
-    : Buffer(new std::uint8_t[Samples * sizeof(std::uint16_t) +
-                              sizeof(DataHeader) + 4]),
-      HeaderPtr(reinterpret_cast<DataHeader *>(Buffer.get())),
-      SamplePtr(
-          reinterpret_cast<std::uint16_t *>(Buffer.get() + sizeof(DataHeader))),
+    : Buffer(Samples * sizeof(std::uint16_t) + sizeof(DataHeader) + 4, 0xED),
       NrOFSamples(Samples), PeakLocation(PeakPos), PeakWidth(PeakSigma),
       BkgSlope(Slope), BkgOffset(Offset), ADCBoxNr(ADCBox),
       ADCChannelNr(ADCChannel), PeakBuffer(Samples) {
 
   // Set-up sample run header and trailer
-  HeaderPtr->Channel = ADCChannelNr;
-  HeaderPtr->MagicValue = 0xABCD;
-  HeaderPtr->Oversampling = 1;
-  HeaderPtr->Length = Samples * sizeof(std::uint16_t) + sizeof(DataHeader) + 4;
-  HeaderPtr->fixEndian();
+  GetHeaderPtr()->Channel = ADCChannelNr;
+  GetHeaderPtr()->MagicValue = 0xABCD;
+  GetHeaderPtr()->Oversampling = 1;
+  GetHeaderPtr()->Length =
+      Samples * sizeof(std::uint16_t) + sizeof(DataHeader) + 4;
+  GetHeaderPtr()->fixEndian();
   auto TrailerPtr = reinterpret_cast<std::uint32_t *>(
-      Buffer.get() + Samples * sizeof(std::uint16_t) + sizeof(DataHeader));
+      Buffer.data() + Samples * sizeof(std::uint16_t) + sizeof(DataHeader));
   *TrailerPtr = htonl(0xBEEFCAFEu);
 
   for (auto Y = 0u; Y < PeakBuffer.size(); ++Y) {
@@ -86,12 +92,20 @@ SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
 
 std::pair<void *, std::size_t>
 SampleRunGenerator::generate(double Amplitude, TimeStamp const Time) {
-  HeaderPtr->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
-  HeaderPtr->TimeStamp.fixEndian();
-  for (auto i = 0u; i < NrOFSamples; ++i) {
-    SamplePtr[i] = htons(
-        std::lround(PeakBuffer[i] * Amplitude + BkgSlope * i + BkgOffset));
+  GetHeaderPtr()->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
+  GetHeaderPtr()->TimeStamp.fixEndian();
+
+  std::uint16_t *SamplePtr = GetSamplePtr();
+
+  if (IspcEnabled) {
+    SampleGenIspc(SamplePtr, (int)NrOFSamples, PeakBuffer.data(),
+                  (float)Amplitude, (float)BkgSlope, (float)BkgOffset);
+  } else {
+    for (auto i = 0u; i < NrOFSamples; ++i) {
+      SamplePtr[i] = htons(
+          std::lround(PeakBuffer[i] * Amplitude + BkgSlope * i + BkgOffset));
+    }
   }
-  return std::make_pair(Buffer.get(), NrOFSamples * sizeof(std::uint16_t) +
-                                          sizeof(DataHeader) + 4);
+  return std::make_pair(Buffer.data(), NrOFSamples * sizeof(std::uint16_t) +
+                                           sizeof(DataHeader) + 4);
 }

@@ -27,7 +27,7 @@ void EventBuffer::cullEvents(size_t NrOfEvents) {
   Size = Size - NrOfEvents;
 }
 
-std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
+EventBuffer::EventsTimeData EventBuffer::getFrameEvents() {
   if (Size == 0) {
     return {};
   }
@@ -78,7 +78,7 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
              // return any events
 }
 
-std::pair<EventList, std::uint64_t> EventBuffer::getAllEvents() const {
+EventBuffer::EventsTimeData EventBuffer::getAllEvents() const {
   if (Size == 0) {
     return {};
   }
