@@ -2,6 +2,9 @@
 # Classes for hit clustering
 #=============================================================================
 
+include_directories(.)
+include_directories(${ESS_MODULE_DIR})
+
 set(clustering_obj_SRC
   AbstractClusterer.cpp
   GapClusterer.cpp
@@ -26,4 +29,3 @@ enable_coverage_flags(ClusteringObj)
 #=============================================================================
 
 add_subdirectory(test)
-

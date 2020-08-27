@@ -2,6 +2,12 @@ include_directories(.)
 include_directories(${VERSION_INCLUDE_DIR})
 
 #=============================================================================
+# Setup helpful paths
+#=============================================================================
+set(ESS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/ess)
+
+#=============================================================================
 # Required external libraries
 #=============================================================================
 
@@ -32,20 +38,13 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 # Dependencies common to EFU and plugins
 #=============================================================================
 add_subdirectory(common)
-add_subdirectory(readout)
-add_subdirectory(generators)
+#add_subdirectory(readout)
+#add_subdirectory(generators)
 
 #=============================================================================
 # Plugins
 #=============================================================================
-add_subdirectory(gdgem)
-add_subdirectory(multiblade)
-add_subdirectory(multigrid)
-add_subdirectory(sonde)
-add_subdirectory(jalousie)
-add_subdirectory(loki)
-add_subdirectory(adc_readout)
-add_subdirectory(perfgen)
+add_subdirectory(modules)
 add_subdirectory(tools)
 
 ##=============================================================================

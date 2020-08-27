@@ -1,6 +1,9 @@
 #=============================================================================
-# Classis for clustered event analysis
+# Classes for clustered event analysis
 #=============================================================================
+
+include_directories(.)
+include_directories(${ESS_MODULE_DIR})
 
 set(analysis_obj_SRC
   AbstractAnalyzer.cpp
@@ -28,4 +31,3 @@ enable_coverage_flags(AnalysisObj)
 #=============================================================================
 
 add_subdirectory(test)
-

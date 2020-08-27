@@ -14,9 +14,9 @@
 find_program(ISPC_CMD ispc)
 mark_as_advanced(ISPC_CMD)
 if(EXISTS ${ISPC_CMD})
-  message(STATUS "ISPC compiler found: ${ISPC_CMD}")
-else()  
-  message(STATUS "ISPC compiler not found. Fallback back to (slow) c++.")  
+  message(STATUS "ECDC: ISPC compiler found: ${ISPC_CMD}")
+else()
+  message(STATUS "ECDC: ISPC compiler not found. Fallback back to (slow) c++.")
 endif()
 
 function(add_ispc_support target_name)
