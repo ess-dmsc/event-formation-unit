@@ -12,7 +12,7 @@
 #include <adc_readout/AdcParse.h>
 #include <cstdint>
 #include <memory>
-#include <span.hpp>
+#include <common/span.hpp>
 #include <utility>
 
 class DataModulariser {

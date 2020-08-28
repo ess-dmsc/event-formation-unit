@@ -20,7 +20,7 @@ ispc_compile_single_file(AdcSimulator_ISPC_OBJ SampleGen.ispc avx2)
 
 find_package(Threads REQUIRED)
 
-add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_INC} ${AdcSimulator_ISPC_OBJ})
+add_executable(AdcSimulator ${AdcSimulator_SRC} ${AdcSimulator_INC} ${AdcSimulator_ISPC_OBJ})
 set_target_properties(AdcSimulator PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
@@ -55,7 +55,7 @@ set(AdcFileStreamer_INC
         SampleRunGenerator.h
         SamplingTimer.h)
 
-add_executable(AdcFileStreamer EXCLUDE_FROM_ALL ${AdcFileStreamer_SRC} ${AdcFileStreamer_INC})
+add_executable(AdcFileStreamer ${AdcFileStreamer_SRC} ${AdcFileStreamer_INC})
 set_target_properties(AdcFileStreamer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 

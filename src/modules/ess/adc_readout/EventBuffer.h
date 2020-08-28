@@ -8,7 +8,7 @@
 #pragma once
 
 #include "EventData.h"
-#include "common/span.hpp"
+#include <common/span.hpp>
 #include <deque>
 #include <limits>
 #include <memory>

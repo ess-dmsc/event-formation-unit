@@ -6,7 +6,7 @@
 # set(myTarget_ISPC_OBJ "")
 # find_package(Ispc)
 # ispc_compile_single_file(myTarget_ISPC_OBJ SampleGen.ispc avx2) # avx2 instruction set support
-# add_executable(myTarget EXCLUDE_FROM_ALL ${myTarget_SRC} ${myTarget_INC} ${myTarget_ISPC_OBJ})
+# add_executable(myTarget ${myTarget_SRC} ${myTarget_INC} ${myTarget_ISPC_OBJ})
 # add_ispc_support(myTarget)
 
 #unset(ISPC_CMD CACHE) # test add/remove
