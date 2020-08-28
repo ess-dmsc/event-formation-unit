@@ -3,6 +3,7 @@ import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
+module_src=${project}/src/modules/ess
 coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
@@ -94,7 +95,7 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -i${module_src}/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
@@ -177,9 +178,9 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${project}/src/multiblade/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/gdgem/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multiblade/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
                                 cd archive
@@ -322,5 +323,5 @@ timestamps {
             // Delete workspace when build is done
             cleanWs()
         }
-    } 
+    }
 }
