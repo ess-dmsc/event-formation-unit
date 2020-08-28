@@ -3,7 +3,7 @@ import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
-module_src=${project}/src/modules/ess
+module_src="${project}/src/modules/ess"
 coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
