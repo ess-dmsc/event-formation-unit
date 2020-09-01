@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <tools/ReaderPcap.h>
+#include <udpgenpcap/ReaderPcap.h>
 #include <common/Socket.h>
 #include <string.h>
 #include <string>

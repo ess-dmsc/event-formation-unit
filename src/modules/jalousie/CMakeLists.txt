@@ -110,13 +110,13 @@ create_module(jalousie)
 set(JalousieBaseTest_INC
   ${jalousie_common_inc}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ../adc_readout/test/TestUDPServer.h)
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h)
 set(JalousieBaseTest_SRC
   JalousieBase.cpp
   JalousieBaseTest.cpp
   ${jalousie_common_src}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
-  ../adc_readout/test/TestUDPServer.cpp)
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp)
 create_test_executable(JalousieBaseTest)
 target_compile_definitions(JalousieBaseTest
   PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")

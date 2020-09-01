@@ -34,11 +34,12 @@ create_module(sonde)
 
 set(SoNDeBaseTest_INC
   ${sonde_common_inc}
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
 )
 set(SoNDeBaseTest_SRC
   SoNDeBaseTest.cpp
   ${sonde_common_src}
-  ../adc_readout/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(SoNDeBaseTest)
 

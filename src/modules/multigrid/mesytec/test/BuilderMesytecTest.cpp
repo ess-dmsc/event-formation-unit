@@ -5,7 +5,7 @@
 #include <multigrid/mesytec/BuilderMesytec.h>
 #include <multigrid/mesytec/test/TestData.h>
 #include <common/JsonFile.h>
-#include <tools/ReaderPcap.h>
+#include <udpgenpcap/ReaderPcap.h>
 
 using namespace Multigrid;
 

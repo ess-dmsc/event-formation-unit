@@ -64,11 +64,13 @@ target_compile_definitions(NMXConfigTest
 
 set(GdGemBaseTest_INC
   ${pipeline_common_inc}
-  ../adc_readout/test/TestUDPServer.h)
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  )
 set(GdGemBaseTest_SRC
   GdGemBaseTest.cpp
   ${pipeline_common_source}
-  ../adc_readout/test/TestUDPServer.cpp)
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  )
 create_test_executable(GdGemBaseTest)
 target_compile_definitions(GdGemBaseTest
   PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")

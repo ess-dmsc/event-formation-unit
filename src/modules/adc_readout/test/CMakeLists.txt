@@ -6,7 +6,6 @@ set(AdcReadoutTest_SRC
     CircularBufferTest.cpp
     AdcReadoutTest.cpp
     AdcParseTest.cpp
-    TestUDPServer.cpp
     AdcDataProcessorTest.cpp
     SampleProcessingTest.cpp
     CLIArgumentsTest.cpp
@@ -20,11 +19,10 @@ set(AdcReadoutTest_SRC
     EventSerializerTest.cpp
     EventBufferTest.cpp
     OffsetTimeTest.cpp
+    ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
     )
 
-set(AdcReadoutTest_INC
-    TestUDPServer.h
-    )
+set(AdcReadoutTest_INC ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp)
 
 list(APPEND AdcReadoutTest_SRC $<TARGET_OBJECTS:AdcReadout>)
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)

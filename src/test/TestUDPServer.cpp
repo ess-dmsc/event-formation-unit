@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+/** Copyright (C) 2018 - 2020 European Spallation Source ERIC */
 
 /** @file
  *
@@ -6,7 +6,7 @@
  */
 // GCOVR_EXCL_START
 
-#include "TestUDPServer.h"
+#include <test/TestUDPServer.h>
 #include <ciso646>
 #include <cstring>
 #include <functional>

@@ -31,13 +31,13 @@ create_module(mbcaen)
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ../adc_readout/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
 )
 set(MBCAENBaseTest_SRC
   MBCaenBaseTest.cpp
   ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
   ${caen_common_src}
-  ../adc_readout/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)
 

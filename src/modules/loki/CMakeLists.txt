@@ -35,13 +35,13 @@ create_module(loki)
 set(LokiBaseTest_INC
   ${loki_common_inc}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ../adc_readout/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
 )
 set(LokiBaseTest_SRC
   test/LokiBaseTest.cpp
   ${loki_common_src}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
-  ../adc_readout/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
 
