@@ -1,32 +1,16 @@
-#=============================================================================
-# Detector Pipeline Plugins
-#=============================================================================
 
 add_subdirectory(geometry)
 add_subdirectory(mesytec)
 add_subdirectory(generators)
 add_subdirectory(reduction)
 
-# Two-thread implementation of Multi Grid demonstrator detector
-# for Mesytec Readout
-set(mgmesytec_SRC
-  Multigrid.cpp
-  MultigridBase.cpp
-  Config.cpp
-  )
+#=============================================================================
+# multigrid detector module and base test
+#=============================================================================
 
-set(mgmesytec_INC
-  MultigridBase.h
-  AbstractBuilder.h
-  Config.h
-  )
-
-set(mgmesytec_LIB
-  MgGeometry
-  MgMesytec
-  MgReduction
-  )
-
+set(mgmesytec_SRC Multigrid.cpp MultigridBase.cpp Config.cpp)
+set(mgmesytec_INC MultigridBase.h AbstractBuilder.h Config.h)
+set(mgmesytec_LIB  MgGeometry MgMesytec MgReduction)
 create_module(mgmesytec)
 
 #=============================================================================

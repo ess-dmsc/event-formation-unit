@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <caen/DataParser.h>
+#include <multiblade/caen/DataParser.h>
 #include <memory>
 
 //#undef TRC_LEVEL

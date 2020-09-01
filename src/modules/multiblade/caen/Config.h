@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <caen/DigitizerMapping.h>
+#include <multiblade/caen/DigitizerMapping.h>
 #include <memory>
 #include <string>
 #include <vector>

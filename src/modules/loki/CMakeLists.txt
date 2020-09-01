@@ -1,7 +1,11 @@
+
+add_subdirectory(generators)
+add_subdirectory(test)
+
 include_directories(.)
 
 #=============================================================================
-# Detector Pipeline Plugins
+# loki detector module and base test
 #=============================================================================
 set(loki_common_inc
   LokiBase.h
@@ -19,19 +23,11 @@ set(loki_common_src
   readout/DataParser.cpp
   ../readout/ReadoutParser.cpp
   )
-
-set(loki_INC
-  ${loki_common_inc}
-)
-set(loki_SRC
-  Loki.cpp
-  ${loki_common_src}
-)
+set(loki_INC ${loki_common_inc})
+set(loki_SRC Loki.cpp ${loki_common_src})
 create_module(loki)
 
-##
-## Pipeline test
-##
+#
 set(LokiBaseTest_INC
   ${loki_common_inc}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
@@ -44,6 +40,3 @@ set(LokiBaseTest_SRC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
-
-add_subdirectory(generators)
-add_subdirectory(test)

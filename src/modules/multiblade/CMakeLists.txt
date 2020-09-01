@@ -1,7 +1,11 @@
+
+add_subdirectory(caen)
+add_subdirectory(generators)
+
 include_directories(.)
 
 #=============================================================================
-# Detector Pipeline Plugins
+# multiblade detector module and base test
 #=============================================================================
 set(caen_common_inc
   MBCaenBase.h
@@ -18,16 +22,11 @@ set(caen_common_src
   caen/Config.cpp
   )
 
-set(mbcaen_INC
-  ${caen_common_inc}
-)
-set(mbcaen_SRC
-  MBCaen.cpp
-  ${caen_common_src}
-)
+set(mbcaen_INC ${caen_common_inc})
+set(mbcaen_SRC MBCaen.cpp ${caen_common_src})
 create_module(mbcaen)
 
-# Pipeline test
+#
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
@@ -40,6 +39,3 @@ set(MBCAENBaseTest_SRC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)
-
-add_subdirectory(caen)
-add_subdirectory(generators)

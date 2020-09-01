@@ -1,20 +1,12 @@
-#=============================================================================
-# Detector Pipeline Plugins
-#=============================================================================
 
-set(pipeline_common_source
-  GdGemBase.cpp
-  NMXConfig.cpp
-  nmx/TrackSerializer.cpp
-  srs/SRSMappings.cpp
-  srs/SRSTime.cpp
-  srs/ParserVMM3.cpp
-  srs/BuilderVMM3.cpp
-  srs/CalibrationFile.cpp  # Also works for VMM2
-  ../multigrid/reduction/ModuleGeometry.cpp
-  generators/BuilderReadouts.cpp
-  generators/BuilderHits.cpp
-  )
+add_subdirectory(nmx)
+add_subdirectory(srs)
+add_subdirectory(tests)
+add_subdirectory(generators)
+
+#=============================================================================
+# gdgem detector module and base test
+#=============================================================================
 
 set(pipeline_common_inc
   GdGemBase.h
@@ -32,14 +24,40 @@ set(pipeline_common_inc
   generators/BuilderReadouts.h
   generators/BuilderHits.h
   )
-
-set(gdgem_SRC GdGem.cpp ${GdGemBase_SRC} ${pipeline_common_source})
+set(pipeline_common_src
+  GdGemBase.cpp
+  NMXConfig.cpp
+  nmx/TrackSerializer.cpp
+  srs/SRSMappings.cpp
+  srs/SRSTime.cpp
+  srs/ParserVMM3.cpp
+  srs/BuilderVMM3.cpp
+  srs/CalibrationFile.cpp  # Also works for VMM2
+  ../multigrid/reduction/ModuleGeometry.cpp
+  generators/BuilderReadouts.cpp
+  generators/BuilderHits.cpp
+  )
+set(gdgem_SRC GdGem.cpp ${GdGemBase_SRC} ${pipeline_common_src})
 set(gdgem_INC ${pipeline_common_inc})
 create_module(gdgem)
 
 #
-# Unit Tests
-#
+set(GdGemBaseTest_INC
+  ${pipeline_common_inc}
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  )
+set(GdGemBaseTest_SRC
+  GdGemBaseTest.cpp
+  ${pipeline_common_src}
+  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  )
+create_test_executable(GdGemBaseTest)
+target_compile_definitions(GdGemBaseTest
+  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
+
+#=============================================================================
+# unit tests
+#=============================================================================
 
 get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
 
@@ -61,25 +79,3 @@ set(NMXConfigTest_SRC
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest
   PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
-
-set(GdGemBaseTest_INC
-  ${pipeline_common_inc}
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
-  )
-set(GdGemBaseTest_SRC
-  GdGemBaseTest.cpp
-  ${pipeline_common_source}
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
-  )
-create_test_executable(GdGemBaseTest)
-target_compile_definitions(GdGemBaseTest
-  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
-
-#=============================================================================
-# Component tests
-#=============================================================================
-
-add_subdirectory(nmx)
-add_subdirectory(srs)
-add_subdirectory(tests)
-add_subdirectory(generators)

@@ -1,37 +1,16 @@
+
 #=============================================================================
-# Detector Pipeline Plugins
+# sonde detector module and base test
 #=============================================================================
-set(sonde_common_inc
-  SoNDeBase.h
-  ideas/Data.h
-)
-set(sonde_common_src
-  SoNDeBase.cpp
-  ideas/Data.cpp
-)
 
+set(sonde_common_inc SoNDeBase.h ideas/Data.h)
+set(sonde_common_src SoNDeBase.cpp ideas/Data.cpp)
 
-
-# IDEA based readout for SoNDe detector
-set(sonde_INC
-  ${sonde_common_inc}
-)
-set(sonde_SRC
-  SoNDe.cpp
-  ${sonde_common_src}
-)
+set(sonde_INC ${sonde_common_inc})
+set(sonde_SRC SoNDe.cpp ${sonde_common_src})
 create_module(sonde)
 
-
-#=============================================================================
-# Tools and Data generators
-#=============================================================================
-
-
-#=============================================================================
-# Tests
-#=============================================================================
-
+#
 set(SoNDeBaseTest_INC
   ${sonde_common_inc}
   ${ESS_SOURCE_DIR}/test/TestUDPServer.h
@@ -43,6 +22,9 @@ set(SoNDeBaseTest_SRC
 )
 create_test_executable(SoNDeBaseTest)
 
+#=============================================================================
+# unit tests
+#=============================================================================
 
 set(IDEASDataTest_SRC
   ideas/DataTest.cpp
@@ -54,9 +36,7 @@ set(IDEASDataTest_INC
   )
 create_test_executable(IDEASDataTest)
 
-
-set(IDEASGeometryTest_SRC
-  ideas/GeometryTest.cpp)
-set(IDEASGeometryTest_INC
-  Geometry.h)
+#
+set(IDEASGeometryTest_SRC ideas/GeometryTest.cpp)
+set(IDEASGeometryTest_INC Geometry.h)
 create_test_executable(IDEASGeometryTest)

@@ -24,4 +24,3 @@ add_library(MgGeometry STATIC
   )
 
 enable_coverage_flags(MgGeometry)
-

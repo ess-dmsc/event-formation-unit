@@ -1,25 +1,12 @@
 find_package(asio REQUIRED)
 find_package(Trompeloeil REQUIRED)
 
-set(AdcReadout_SRC
-    AdcReadout.cpp
-    AdcReadoutBase.cpp
-    AdcParse.cpp
-    PeakFinder.cpp
-    AdcDataProcessor.cpp
-    SampleProcessing.cpp
-    AdcSettings.cpp
-    UDPClient.cpp
-    DelayLineProducer.cpp
-    DelayLineEventFormation.cpp
-    DelayLineProcessing.cpp
-    DelayLinePositionCalc.cpp
-    PulseParameters.cpp
-    PulseBuffer.cpp
-    EventSerializer.cpp
-    EventBuffer.cpp
-    OffsetTime.cpp
-    )
+add_subdirectory("integration_test")
+add_subdirectory("test")
+
+#=============================================================================
+# adc_readout detector module and base test
+#=============================================================================
 
 set(AdcReadout_INC
     AdcReadoutConstants.h
@@ -46,8 +33,23 @@ set(AdcReadout_INC
     EventBuffer.h
     OffsetTime.h
     )
-
+set(AdcReadout_SRC
+    AdcReadout.cpp
+    AdcReadoutBase.cpp
+    AdcParse.cpp
+    PeakFinder.cpp
+    AdcDataProcessor.cpp
+    SampleProcessing.cpp
+    AdcSettings.cpp
+    UDPClient.cpp
+    DelayLineProducer.cpp
+    DelayLineEventFormation.cpp
+    DelayLineProcessing.cpp
+    DelayLinePositionCalc.cpp
+    PulseParameters.cpp
+    PulseBuffer.cpp
+    EventSerializer.cpp
+    EventBuffer.cpp
+    OffsetTime.cpp
+    )
 create_object_module(AdcReadout)
-
-add_subdirectory("integration_test")
-add_subdirectory("test")

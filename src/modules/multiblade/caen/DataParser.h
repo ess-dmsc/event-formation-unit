@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <caen/Readout.h>
+#include <multiblade/caen/Readout.h>
 #include <vector>
 
 namespace Multiblade {
