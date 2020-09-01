@@ -8,7 +8,7 @@
 #include <string>
 
 #include <loki/LokiBase.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 #include <readout/ReadoutParser.h>

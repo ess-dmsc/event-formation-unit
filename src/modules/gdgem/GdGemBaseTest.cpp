@@ -6,7 +6,7 @@
  */
 
 #include <gdgem/GdGemBase.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 #include <gdgem/GdGemBaseTestData.h>
 #include <test/TestBase.h>
 

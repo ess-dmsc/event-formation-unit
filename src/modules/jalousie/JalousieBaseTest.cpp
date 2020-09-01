@@ -8,7 +8,7 @@
 #include <string>
 
 #include <jalousie/JalousieBase.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 #include <jalousie/JalousieBaseTestData.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>

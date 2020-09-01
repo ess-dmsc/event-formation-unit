@@ -7,7 +7,7 @@
 
 #include <sonde/SoNDeBase.h>
 #include <sonde/SoNDeBaseTestData.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 #include <test/TestBase.h>
 
 class SONDEIDEABaseStandIn : public SONDEIDEABase {

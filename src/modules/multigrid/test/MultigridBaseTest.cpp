@@ -8,7 +8,7 @@
 #include <test/TestBase.h>
 
 #include <multigrid/MultigridBase.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 
 // \todo use reference data instead
 #include <multigrid/mesytec/test/TestData.h>

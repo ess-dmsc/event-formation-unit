@@ -33,7 +33,7 @@
 
 #include <test/SaveBuffer.h>
 #include <multiblade/MBCaenBase.h>
-#include <adc_readout/test/TestUDPServer.h>
+#include <test/TestUDPServer.h>
 #include <test/TestBase.h>
 
 class CAENBaseStandIn : public Multiblade::CAENBase {

@@ -51,7 +51,7 @@ endif()
 set(TEST_DATA_PATH2 "${REFDATA}/multigrid/2018_08_30")
 if(EXISTS ${TEST_DATA_PATH2})
   set(MGBuilderMesytecTest_SRC
-    ${ESS_SOURCE_DIR}/udpgenbpcap/ReaderPcap.cpp
+    ${ESS_SOURCE_DIR}/udpgenpcap/ReaderPcap.cpp
     BuilderMesytecTest.cpp
     )
   set(MGBuilderMesytecTest_INC
