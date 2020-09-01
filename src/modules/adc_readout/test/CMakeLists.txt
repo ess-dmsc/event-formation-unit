@@ -1,6 +1,8 @@
 find_package(asio REQUIRED)
 find_package(Trompeloeil REQUIRED)
 
+
+
 set(AdcReadoutTest_SRC
     UnitTests.cpp
     CircularBufferTest.cpp
@@ -33,4 +35,4 @@ target_compile_definitions(AdcReadoutTest
     PRIVATE TEST_PACKET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
 message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
 
-target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR} ${ESS_SOURCE_DIR})
+target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
