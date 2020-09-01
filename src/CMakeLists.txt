@@ -5,7 +5,7 @@ include_directories(${VERSION_INCLUDE_DIR})
 # Setup helpful paths to avoid relative includes in source files
 #=============================================================================
 set(ESS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
-set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/ess)
+set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/)
 
 #=============================================================================
 # Required external libraries

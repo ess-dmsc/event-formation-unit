@@ -1,6 +1,15 @@
 
 #=============================================================================
-# Traverse the source tree, so far only ESS code
+# Add ess detector modules
 #=============================================================================
 
-add_subdirectory(ess)
+include_directories(.)
+
+add_subdirectory(gdgem)
+add_subdirectory(multiblade)
+add_subdirectory(multigrid)
+add_subdirectory(sonde)
+add_subdirectory(jalousie)
+add_subdirectory(loki)
+add_subdirectory(adc_readout)
+add_subdirectory(perfgen)

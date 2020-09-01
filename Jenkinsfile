@@ -3,7 +3,7 @@ import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
-module_src="${project}/src/modules/ess"
+module_src="${project}/src/modules/"
 coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
@@ -95,7 +95,7 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules/ess/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules//adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
