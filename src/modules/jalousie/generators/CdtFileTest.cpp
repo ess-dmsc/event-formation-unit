@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <jalousie/CdtFile.h>
+#include <jalousie/generators/CdtFile.h>
 #include <test/TestBase.h>
 
 using namespace Jalousie;

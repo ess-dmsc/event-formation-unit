@@ -8,7 +8,7 @@
 
 #include <multigrid/generators/ReaderReadouts.h>
 #include <gdgem/generators/ReaderReadouts.h>
-#include <jalousie/CdtFile.h>
+#include <jalousie/generators/CdtFile.h>
 
 #include <common/Socket.h>
 // GCOVR_EXCL_START

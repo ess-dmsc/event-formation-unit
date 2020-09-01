@@ -5,7 +5,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <jalousie/CdtFile.h>
+#include <jalousie/generators/CdtFile.h>
 #include <fmt/format.h>
 
 namespace Jalousie {

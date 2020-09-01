@@ -3,8 +3,8 @@
 // OBSERVATIONS
 //
 
-#include <jalousie/CdtFile.h>
-#include <jalousie/BuilderReadouts.h>
+#include <generators/CdtFile.h>
+#include <BuilderReadouts.h>
 #include <test/TestBase.h>
 #include <common/monitor/DynamicHist.h>
 #include <set>
