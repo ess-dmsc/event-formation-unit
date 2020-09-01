@@ -4,6 +4,8 @@ add_subdirectory(srs)
 add_subdirectory(tests)
 add_subdirectory(generators)
 
+get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
+
 #=============================================================================
 # gdgem detector module and base test
 #=============================================================================
@@ -58,8 +60,6 @@ target_compile_definitions(GdGemBaseTest
 #=============================================================================
 # unit tests
 #=============================================================================
-
-get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
 
 set(NMXConfigTest_INC
   NMXConfig.h
