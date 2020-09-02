@@ -31,7 +31,6 @@ create_test_executable(ParserVMM3Test)
 set(VMM3CalibrationFileTest_SRC
   CalibrationFile.cpp
   CalibrationFileTest.cpp
-  ${SD}/
   ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
   )
 set(VMM3CalibrationFileTest_INC

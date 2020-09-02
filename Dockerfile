@@ -20,7 +20,7 @@ COPY cmake efu_src/cmake
 COPY utils/udp efu_src/utils/udp
 COPY utils/udpredirect efu_src/utils/udpredirect
 COPY src efu_src/src
-COPY CMakeLists.txt LICENSE README.md Utilities.cmake efu_src/
+COPY CMakeLists.txt LICENSE README.md efu_src/
 
 RUN cd efu && \
     cmake -DCONAN="MANUAL" ../efu_src && \
