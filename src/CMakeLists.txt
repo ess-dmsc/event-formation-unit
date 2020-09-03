@@ -2,6 +2,12 @@ include_directories(.)
 include_directories(${VERSION_INCLUDE_DIR})
 
 #=============================================================================
+# Setup helpful paths to avoid relative includes in source files
+#=============================================================================
+set(ESS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/)
+
+#=============================================================================
 # Required external libraries
 #=============================================================================
 
@@ -29,47 +35,30 @@ set(EFU_COMMON_LIBS
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 
 #=============================================================================
-# Dependencies common to EFU and plugins
+# Include subdirs, do not change order
 #=============================================================================
 add_subdirectory(common)
-add_subdirectory(readout)
-add_subdirectory(generators)
-
-#=============================================================================
-# Plugins
-#=============================================================================
-add_subdirectory(gdgem)
-add_subdirectory(multiblade)
-add_subdirectory(multigrid)
-add_subdirectory(sonde)
-add_subdirectory(jalousie)
-add_subdirectory(loki)
-add_subdirectory(adc_readout)
-add_subdirectory(perfgen)
-add_subdirectory(tools)
-
-##=============================================================================
-## Event Formation Unit
-##=============================================================================
-# Add it last.
+add_subdirectory(modules)
 add_subdirectory(efu)
+add_subdirectory(udpgenpcap)
 
-get_filename_component(MB_CFG_FILE "multiblade/configs/MB18Estia.json" ABSOLUTE)
-get_filename_component(MG_CFG_FILE "multigrid/configs/ILL_mappings.json" ABSOLUTE)
-get_filename_component(GDGEM_CFG_FILE "gdgem/configs/vmm3.json" ABSOLUTE)
-get_filename_component(JALOUSIE_CFG_FILE "jalousie/configs/v20_mappings.json" ABSOLUTE)
-get_filename_component(JALOUSIE_CSV_FILE "jalousie/configs/sumo_voxel_map_20190711.csv" ABSOLUTE)
-get_filename_component(LOKI_CFG_FILE "loki/configs/STFCTest.json" ABSOLUTE)
+get_filename_component(MB_CFG_FILE "${ESS_MODULE_DIR}/multiblade/configs/MB18Estia.json" ABSOLUTE)
+get_filename_component(MG_CFG_FILE "${ESS_MODULE_DIR}/multigrid/configs/ILL_mappings.json" ABSOLUTE)
+get_filename_component(GDGEM_CFG_FILE "${ESS_MODULE_DIR}/gdgem/configs/vmm3.json" ABSOLUTE)
+get_filename_component(JALOUSIE_CFG_FILE "${ESS_MODULE_DIR}/jalousie/configs/v20_mappings.json" ABSOLUTE)
+get_filename_component(JALOUSIE_CSV_FILE "${ESS_MODULE_DIR}/jalousie/configs/sumo_voxel_map_20190711.csv" ABSOLUTE)
+get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTest.json" ABSOLUTE)
+
 add_custom_target(copycfgs
-COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
-COMMAND ${CMAKE_COMMAND} -E copy ${MG_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMAND ${CMAKE_COMMAND} -E copy ${MB_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMENT "Copying ${MB_CFG_FILE} to ${PROJECT_BINARY_DIR}/configs"
-COMMAND ${CMAKE_COMMAND} -E copy ${GDGEM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CSV_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMAND ${CMAKE_COMMAND} -E copy ${LOKI_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
+    COMMAND ${CMAKE_COMMAND} -E copy ${MG_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${MB_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMENT "Copying ${MB_CFG_FILE} to ${PROJECT_BINARY_DIR}/configs"
+    COMMAND ${CMAKE_COMMAND} -E copy ${GDGEM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CSV_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${LOKI_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
 add_custom_target(runefu

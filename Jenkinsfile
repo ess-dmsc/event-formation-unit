@@ -3,6 +3,7 @@ import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
+module_src="${project}/src/modules/"
 coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
@@ -80,7 +81,6 @@ builders = pipeline_builder.createBuilders { container ->
                 cd ${project}/build
                 make --version
                 make -j${pipeline_builder.numCpus} all unit_tests benchmark
-                make -j${pipeline_builder.numCpus} AdcSimulator AdcFileStreamer
                 cd ../utils/udpredirect
                 make
             """
@@ -94,7 +94,7 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
@@ -177,9 +177,9 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${project}/src/multiblade/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/gdgem/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multiblade/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
                                 cd archive
@@ -222,7 +222,6 @@ def get_macos_pipeline()
                         sh "conan install --build=outdated .."
                         sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                         sh "make -j${pipeline_builder.numCpus}"
-                        sh "make -j${pipeline_builder.numCpus} AdcSimulator AdcFileStreamer"
                         sh "make -j${pipeline_builder.numCpus} unit_tests"
                         sh "make runtest"
                         sh "make runefu"
@@ -322,5 +321,5 @@ timestamps {
             // Delete workspace when build is done
             cleanWs()
         }
-    } 
+    }
 }

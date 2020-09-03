@@ -40,12 +40,12 @@ function(create_benchmark_executable exec_name)
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
       -lbenchmark -lpthread efu_common)
-      
+
     set(benchmark_targets
       ${exec_name}
       ${benchmark_targets}
       CACHE INTERNAL "All targets")
   else()
-    message(STATUS "*** Skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
+    message(STATUS "ECDC: Skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
   endif()
 endfunction(create_benchmark_executable)

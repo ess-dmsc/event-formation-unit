@@ -61,6 +61,7 @@ include(${EXTRA_MODULES_DIR}/BuildString.cmake)
 # Testing-related stuff
 #=============================================================================
 enable_testing()
+include(${EXTRA_MODULES_DIR}/BuildFunctions.cmake)
 include(${EXTRA_MODULES_DIR}/AddTargetFlags.cmake)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
@@ -74,9 +75,7 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 #=============================================================================
 # The code
 #=============================================================================
-include_directories(.)
 
-include(Utilities.cmake)
 add_subdirectory(src)
 add_subdirectory(utils/udp)
 
@@ -84,25 +83,19 @@ add_subdirectory(utils/udp)
 # Finalize tests
 #=============================================================================
 
-# Should unit_test_targets depend on default targets ???
-
-add_custom_target(unit_tests
-    DEPENDS ${unit_test_targets})
-add_custom_target(runtest
-    COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
+add_custom_target(unit_tests DEPENDS ${unit_test_targets})
+add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS unit_tests)
-add_custom_target(valgrind
-    DEPENDS ${valgrind_targets})
-add_custom_target(benchmark
-    DEPENDS ${benchmark_targets})
-add_custom_target(doxygen
-    COMMAND doxygen ../src/doxyfile)
+add_custom_target(valgrind DEPENDS ${valgrind_targets})
+add_custom_target(benchmark DEPENDS ${benchmark_targets})
+add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 
 #=============================================================================
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
 "--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'")
+
 create_coverage_targets(
   coverage
   runtest
@@ -130,17 +123,7 @@ add_custom_target(hints
   COMMAND echo "--------------------------------------------------------------------------------"
   COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
   COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
-  COMMAND echo "Enable profiling with google perftools  cmake -DGPERF=ON"
-  COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"
-  COMMAND echo "    NOTE: Release mode requires a build string"
-  COMMAND echo ""
-  COMMAND echo "CMake hints advanced/not generally used"
-  COMMAND echo "--------------------------------------------------------------------------------"
-  COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp"
-  COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp"
-  COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp"
-  COMMAND echo "List cmake variables:                   cmake -LH"
   COMMAND echo ""
   )
