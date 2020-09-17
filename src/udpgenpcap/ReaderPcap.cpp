@@ -1,4 +1,12 @@
-/** Copyright (C) 2016-2020 European Spallation Source ERIC */
+// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Reads UDP data from Wireshark capture (pcap) files
+///
+/// Using the Wireshark API https://www.tcpdump.org/manpages/pcap.3pcap.html
+//===----------------------------------------------------------------------===//
 
 #include <algorithm>
 #include <arpa/inet.h>

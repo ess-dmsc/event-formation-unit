@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Reads pcap files (using ReaderPcap), sends UDP data (to EFU)
+///
+//===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
 #include <arpa/inet.h>
