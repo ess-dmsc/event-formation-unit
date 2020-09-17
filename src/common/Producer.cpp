@@ -1,4 +1,11 @@
-/** Copyright (C) 2016 - 2018 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Kafka producer - werapper for librdkafka
+///
+/// See https://github.com/edenhill/librdkafka
+//===----------------------------------------------------------------------===//
 
 #include <cassert>
 #include <common/Log.h>

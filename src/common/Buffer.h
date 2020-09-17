@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -87,4 +87,3 @@ struct Buffer {
   T *address{nullptr};
   size_t size{0};
 };
-

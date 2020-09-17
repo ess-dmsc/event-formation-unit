@@ -1,4 +1,11 @@
-/** Copyright (C) 2016 - 2018 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Implementation of named stat counters
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/Log.h>
 #include <common/Statistics.h>
