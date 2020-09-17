@@ -1,9 +1,9 @@
-/** Copyright (C) 2019 European Spallation Source */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of the detector pipeline plugin for Loki
-/// detectors.
+/// \brief Implementation of the detector pipeline plugin for Loki
+/// detectors
 //===----------------------------------------------------------------------===//
 
 #include "LokiBase.h"

@@ -1,8 +1,8 @@
-/** Copyright (C) 2017-2018 European Spallation Source */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of the detector pipeline plugin for Jalousie
+/// \brief Implementation of the detector pipeline plugin for Jalousie
 /// detectors.
 //===----------------------------------------------------------------------===//
 

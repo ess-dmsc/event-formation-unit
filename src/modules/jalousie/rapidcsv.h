@@ -1,15 +1,16 @@
-/*
- * rapidcsv.h
- *
- * URL:      https://github.com/d99kris/rapidcsv
- * Version:  4.0
- *
- * Copyright (C) 2017-2019 Kristofer Berggren
- * All rights reserved.
- *
- * rapidcsv is distributed under the BSD 3-Clause license, see LICENSE for details.
- *
- */
+// Copyright (C) 2017-2019 Kristofer Berggren
+// All rights reserved.
+//
+// rapidcsv is distributed under the BSD 3-Clause license, see LICENSE for details.
+// URL:      https://github.com/d99kris/rapidcsv
+// Version:  4.0
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Utility for reading CSV files (SUMO mappings)
+///
+//===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 #pragma once
 

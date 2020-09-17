@@ -1,9 +1,9 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Wrapper class for reading VMM data from HDF5 files
+/// \brief Wrapper class for reading VMM data ('Hits') from HDF5 files
 ///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START

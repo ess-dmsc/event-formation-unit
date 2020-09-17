@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Digital geometry for SUMO (Sub-Modules) - implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <jalousie/SumoMappings.h>
 #include <fmt/format.h>

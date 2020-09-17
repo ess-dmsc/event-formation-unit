@@ -1,4 +1,11 @@
-/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Digital geometry for SUMO (Sub-Modules)
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
