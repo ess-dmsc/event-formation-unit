@@ -1,8 +1,8 @@
-/** Copyright (C) 2018 European Spallation Source */
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Class used to perform OS and Hardware related checks prior to
+/// \brief Class used to perform OS and Hardware related checks prior to
 /// application start
 ///
 //===----------------------------------------------------------------------===//
