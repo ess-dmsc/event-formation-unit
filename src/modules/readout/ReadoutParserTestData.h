@@ -1,9 +1,10 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Dataset for running unit tests - do not edit if unsure of what they do!
+/// \brief Dataset for running unit tests - do not edit if unsure of what
+/// they do!
 ///
 //===----------------------------------------------------------------------===//
 

@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  \brief Unit tests.
- */
+// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests for MBCaenBase
+///
+//===----------------------------------------------------------------------===//
 
 #include <string>
 #include <multiblade/caen/DataParserTestData.h>

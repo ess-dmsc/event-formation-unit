@@ -1,9 +1,11 @@
-/** Copyright (C) 2017-2018 European Spallation Source */
+// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of the detector pipeline plugin for MUlti-Blade
-/// detectors.
+///
+/// \brief A pixel generator for performance testing (delete?)
+/// \todo delete?
+///
 //===----------------------------------------------------------------------===//
 
 #include "PerfGenBase.h"
@@ -31,7 +33,7 @@
 
 namespace PerfGen {
 
-const char *classname = "Multiblade detector with CAEN readout";
+const char *classname = "PerfGen Pixel Generator";
 
 PerfGenBase::PerfGenBase(BaseSettings const &settings, struct PerfGenSettings &LocalPerfGenSettings)
     : Detector("PerfGen", settings), PerfGenSettings(LocalPerfGenSettings) {

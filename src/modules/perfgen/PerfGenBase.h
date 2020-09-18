@@ -1,12 +1,13 @@
-
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief MBCAEN detector base plugin interface definition
+/// \brief pixel generator (delete?)
+/// \todo delete?
 ///
 //===----------------------------------------------------------------------===//
+
 #pragma once
 
 #include <common/Detector.h>
