@@ -4,7 +4,7 @@
 /// \file
 ///
 /// \brief Dataset for running unit tests - do not edit if unsure of what
-/// they do!
+/// they do
 ///
 //===----------------------------------------------------------------------===//
 
