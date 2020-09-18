@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Unit tests for ReadoutPOarser
+/// \brief Unit tests for ReadoutParser
 ///
 //===----------------------------------------------------------------------===//
 

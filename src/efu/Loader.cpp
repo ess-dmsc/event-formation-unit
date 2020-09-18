@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Implementation of Loader
+/// \brief Implementation of EFU detector module Loader
 ///
 //===----------------------------------------------------------------------===//
 

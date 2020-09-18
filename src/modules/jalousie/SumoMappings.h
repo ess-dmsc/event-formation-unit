@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Digital geometry for SUMO (Sub-Modules)
+/// \brief Digital geometry for SUMO (SUper-MOdule)
 ///
 //===----------------------------------------------------------------------===//
 
