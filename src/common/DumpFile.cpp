@@ -64,45 +64,44 @@ PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef)
     : ChunkSize(GetChunkSize(CompoundDef.StructSize)) {}
 
 // \todo this cannot be initialized atomically yet
-static hid_t PrimToH5tNative(H5PrimSubset Prim) {
-  static hid_t Map[static_cast<int>(H5PrimSubset::Count)] = {};
+static hid_t PrimToH5tNative(H5Prim Prim) {
+  static hid_t Map[static_cast<int>(H5Prim::Count)] = {};
   static bool Init = true;
   if (Init) {
     Init = false;
 
-    Map[static_cast<int>(H5PrimSubset::Bool)] = H5T_NATIVE_HBOOL;
+    Map[static_cast<int>(H5Prim::Bool)] = H5T_NATIVE_HBOOL;
 
-    Map[static_cast<int>(H5PrimSubset::Float)] = H5T_NATIVE_FLOAT;
+    Map[static_cast<int>(H5Prim::Float)] = H5T_NATIVE_FLOAT;
 
-    Map[static_cast<int>(H5PrimSubset::ULong)] = H5T_NATIVE_ULONG;
+    Map[static_cast<int>(H5Prim::ULong)] = H5T_NATIVE_ULONG;
 
-    Map[static_cast<int>(H5PrimSubset::UInt64)] = H5T_NATIVE_ULLONG;
+    Map[static_cast<int>(H5Prim::UInt64)] = H5T_NATIVE_ULLONG;
     static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
                   "H5 types: Potential 32/64 bit issue.");
 
-    Map[static_cast<int>(H5PrimSubset::UInt32)] = H5T_NATIVE_UINT;
+    Map[static_cast<int>(H5Prim::UInt32)] = H5T_NATIVE_UINT;
     static_assert(sizeof(uint32_t) == sizeof(unsigned int),
                   "H5 types: Potential 32/64 bit issue.");
 
-    Map[static_cast<int>(H5PrimSubset::UInt16)] = H5T_NATIVE_USHORT;
+    Map[static_cast<int>(H5Prim::UInt16)] = H5T_NATIVE_USHORT;
     static_assert(sizeof(uint16_t) == sizeof(unsigned short),
                   "Potential 32/64 bit definition issue.");
 
-    Map[static_cast<int>(H5PrimSubset::UInt8)] = H5T_NATIVE_UCHAR;
+    Map[static_cast<int>(H5Prim::UInt8)] = H5T_NATIVE_UCHAR;
     static_assert(sizeof(uint8_t) == sizeof(unsigned char),
                   "H5 types: Potential 32/64 bit issue.");
 
-    Map[static_cast<int>(H5PrimSubset::SInt8)] = H5T_NATIVE_SCHAR;
+    Map[static_cast<int>(H5Prim::SInt8)] = H5T_NATIVE_SCHAR;
     static_assert(sizeof(int8_t) == sizeof(signed char),
                   "H5 types: Potential 32/64 bit issue.");
 
     // verify all slots have been written
-    for (int i = 0; i < static_cast<int>(H5PrimSubset::Count); i++) {
+    for (int i = 0; i < static_cast<int>(H5Prim::Count); i++) {
       if (Map[i] == 0) {
-        throw std::runtime_error(
-            fmt::format("Missing H5PrimSubset to H5T_NATIVE_* mapping at "
-                        "H5PrimSubset enum item {}",
-                        i));
+        throw std::runtime_error(fmt::format(
+            "Missing H5Prim to H5T_NATIVE_* mapping at H5Prim enum item {}",
+            i));
       }
     }
   }

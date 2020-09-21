@@ -27,7 +27,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept {
   return N;
 }
 
-enum class H5PrimSubset {
+enum class H5Prim {
   Bool,
   Float,
   ULong,
@@ -41,34 +41,34 @@ enum class H5PrimSubset {
 
 template <typename T> struct MapPrimToH5PrimSubset;
 template <> struct MapPrimToH5PrimSubset<bool> {
-  static const H5PrimSubset Value = H5PrimSubset::Bool;
+  static const H5Prim Value = H5Prim::Bool;
 };
 template <> struct MapPrimToH5PrimSubset<float> {
-  static const H5PrimSubset Value = H5PrimSubset::Float;
+  static const H5Prim Value = H5Prim::Float;
 };
 template <> struct MapPrimToH5PrimSubset<unsigned long> {
-  static const H5PrimSubset Value = H5PrimSubset::ULong;
+  static const H5Prim Value = H5Prim::ULong;
 };
 template <> struct MapPrimToH5PrimSubset<uint64_t> {
-  static const H5PrimSubset Value = H5PrimSubset::UInt64;
+  static const H5Prim Value = H5Prim::UInt64;
 };
 template <> struct MapPrimToH5PrimSubset<uint32_t> {
-  static const H5PrimSubset Value = H5PrimSubset::UInt32;
+  static const H5Prim Value = H5Prim::UInt32;
 };
 template <> struct MapPrimToH5PrimSubset<uint16_t> {
-  static const H5PrimSubset Value = H5PrimSubset::UInt16;
+  static const H5Prim Value = H5Prim::UInt16;
 };
 template <> struct MapPrimToH5PrimSubset<uint8_t> {
-  static const H5PrimSubset Value = H5PrimSubset::UInt8;
+  static const H5Prim Value = H5Prim::UInt8;
 };
 template <> struct MapPrimToH5PrimSubset<int8_t> {
-  static const H5PrimSubset Value = H5PrimSubset::SInt8;
+  static const H5Prim Value = H5Prim::SInt8;
 };
 
 struct H5PrimDef {
   const char *Name;
   size_t Offset;
-  H5PrimSubset PrimType;
+  H5Prim PrimType;
 };
 
 struct H5PrimCompoundDef {
@@ -85,7 +85,8 @@ class Compound;
 } // namespace datatype
 } // namespace hdf5
 
-hdf5::datatype::Compound createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef& CompoundDef);
+hdf5::datatype::Compound
+createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef &CompoundDef);
 
 // traits-like class containing H5PrimCompoundDef.
 template <typename T> struct H5PrimCompoundDefData;
@@ -137,18 +138,18 @@ template <typename T> struct H5PrimCompoundDefData;
 #endif
 #define H5_COMPOUND_RETURN H5_PRIM_COMPOUND_END()
 
-#define H5_PRIM_COMPOUND_NAMESPACE() 
+#define H5_PRIM_COMPOUND_NAMESPACE()
 
 //-----------------------------------------------------------------------------
 
-constexpr size_t GetChunkSize(size_t StructSize){
+constexpr size_t GetChunkSize(size_t StructSize) {
   return 9000 / StructSize; // \todo 9000 is MTU? Correct size is <=
                             // 8972 packet fragmentation will occur.
 }
 
 class PrimDumpFileBase {
 public:
-  virtual ~PrimDumpFileBase(){}
+  virtual ~PrimDumpFileBase() {}
 
 protected:
   const size_t ChunkSize;
@@ -180,7 +181,7 @@ class PrimDumpFileBase;
 
 template <typename T> class PrimDumpFile {
   PrimDumpFile(const std::string &file_path, size_t max_Mb);
-  std::unique_ptr<PrimDumpFileBase> Base;
+  std::unique_ptr<PrimDumpFileBase> BaseFile;
 
 public:
   std::vector<T> Data;
@@ -209,14 +210,14 @@ public:
   ~PrimDumpFile();
 };
 
-//template<class T> using DumpFile = PrimDumpFile<T>;
+// template<class T> using DumpFile = PrimDumpFile<T>;
 
 //-----------------------------------------------------------------------------
 
 template <typename T>
 PrimDumpFile<T>::PrimDumpFile(const std::string &file_path, size_t max_Mb)
-    : Base(PrimDumpFileBase::create(H5PrimCompoundDefData<T>::GetCompoundDef(),
-                                    file_path)),
+    : BaseFile(PrimDumpFileBase::create(
+          H5PrimCompoundDefData<T>::GetCompoundDef(), file_path)),
       MaxSize(max_Mb * 1000000 / // \todo should this this be a megabyte?
               H5PrimCompoundDefData<T>::GetCompoundDef().StructSize) {}
 
@@ -224,7 +225,7 @@ template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
 PrimDumpFile<T>::create(const std::string &FilePath, size_t MaxMB) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, MaxMB));
-  Ret->Base->openRW();
+  Ret->BaseFile->openRW();
   return Ret;
 }
 
@@ -232,7 +233,7 @@ template <typename T>
 std::unique_ptr<PrimDumpFile<T>>
 PrimDumpFile<T>::open(const std::string &FilePath) {
   auto Ret = std::unique_ptr<PrimDumpFile>(new PrimDumpFile(FilePath, 0));
-  Ret->Base->openR();
+  Ret->BaseFile->openR();
   return Ret;
 }
 
@@ -242,7 +243,7 @@ template <typename T> void PrimDumpFile<T>::push(const T &Hit) {
     flush();
 
     if (MaxSize && (count() >= MaxSize)) {
-      Base->rotate();
+      BaseFile->rotate();
     }
   }
 }
@@ -255,18 +256,18 @@ void PrimDumpFile<T>::push(const Container &Hits) {
     flush();
 
     if (MaxSize && (count() >= MaxSize)) {
-      Base->rotate();
+      BaseFile->rotate();
     }
   }
 }
 
 template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
   Data.resize(Count);
-  Base->readAt(Data.data(), Data.size(), Index, Count);
+  BaseFile->readAt(Data.data(), Data.size(), Index, Count);
 }
 
 template <typename T> size_t PrimDumpFile<T>::count() const {
-  return Base->count();
+  return BaseFile->count();
 }
 
 template <typename T> void PrimDumpFile<T>::flush() {
@@ -283,11 +284,11 @@ void PrimDumpFile<T>::read(const std::string &FilePath,
 }
 
 template <typename T> void PrimDumpFile<T>::write() {
-  Base->write(Data.data(), Data.size());
+  BaseFile->write(Data.data(), Data.size());
 }
 
 template <typename T> PrimDumpFile<T>::~PrimDumpFile() {
-  if (Data.size() && Base->isFileValidNonReadonly()) {
+  if (Data.size() && BaseFile->isFileValidNonReadonly()) {
     flush();
   }
 }
