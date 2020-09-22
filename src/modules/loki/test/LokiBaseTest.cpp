@@ -15,11 +15,13 @@
 
  std::string lokijson = R"(
 {
-  "Detector": "LoKI4x8",
+  "Detector" : "LoKIBaseTest",
+
+  "StrawResolution" : 512,
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 },
-    { "Ring" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "Offset" : 114688 }
+    { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :   0 },
+    { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 124 }
   ]
 }
 )";
@@ -65,7 +67,7 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x01, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00, // Seq number 1
 
-    0x05, 0x00, 0x40, 0x00, // Data Header, ring 0, fen 0
+    0x00, 0x01, 0x40, 0x00, // Data Header, ring 0, fen 1
 
     0x11, 0x00, 0x00, 0x00, // Readout 1, time 17s,
     0x01, 0x01, 0x00, 0x00, // (257 clocks)
@@ -85,7 +87,7 @@ std::vector<uint8_t> TestPacket2{
     0x01, 0x03, 0x02, 0x03,
     0x03, 0x03, 0x04, 0x03,
 
-    0x01, 0x01, 0x40, 0x00, // Data Header 2, ring 1, fen 1
+    0x05, 0x01, 0x40, 0x00, // Data Header 2, ring 5, fen 1
 
     0x11, 0x00, 0x00, 0x00, // Readout 4, time 1
     0x01, 0x02, 0x00, 0x00,
@@ -137,7 +139,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Headers, 2);
-  EXPECT_EQ(Readout.Counters.GeometryErrors, 1);
+  EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
   EXPECT_EQ(Readout.Counters.MappingErrors, 1);
   EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
