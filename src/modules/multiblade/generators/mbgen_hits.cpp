@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  hdf5::error::Singleton::instance().auto_print(false);
+  Hdf5ErrorSetAutoPrint(false);
 
   char RxBuffer[9000];
   TxBuffer txbuffer;

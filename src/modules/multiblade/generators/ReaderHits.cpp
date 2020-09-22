@@ -29,7 +29,7 @@ size_t ReaderHits::read(char *buf) {
       std::cout << "<ReaderHits> failed to read slab ("
                 << current_ << ", " << (current_ + size) << ")"
                 << " max=" << total_ << "\n"
-                << hdf5::error::print_nested(e, 1) << std::endl;
+                << Hdf5ErrorPrintNested(e, 1) << std::endl;
     }
   }
 

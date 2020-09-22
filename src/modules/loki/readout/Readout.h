@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define H5_USE_NEW_COMPOUND_IMPL 0
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
 #undef H5_USE_NEW_COMPOUND_IMPL
 
@@ -66,37 +66,47 @@ struct __attribute__ ((packed)) Readout {
 
 }
 
+#define H5_USE_NEW_COMPOUND_IMPL 1
+#if H5_USE_NEW_COMPOUND_IMPL == 0 /////// TODO put our data in same namespace and class?
+
 namespace hdf5 {
 
 namespace datatype {
 template<>
 class TypeTrait<Loki::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Loki::Readout) {
-    H5_COMPOUND_INIT;
+#endif
+  H5_COMPOUND_DEFINE_TYPE(Loki::Readout) //{
+    H5_COMPOUND_INIT
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(AmpA);
-    H5_COMPOUND_INSERT_MEMBER(AmpB);
-    H5_COMPOUND_INSERT_MEMBER(AmpC);
-    H5_COMPOUND_INSERT_MEMBER(AmpD);
-    H5_COMPOUND_INSERT_MEMBER(RingId);
-    H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(FPGAId);
-    H5_COMPOUND_INSERT_MEMBER(TubeId);
-
-    H5_COMPOUND_RETURN;
+    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh)
+    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow)
+    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh)
+    H5_COMPOUND_INSERT_MEMBER(EventTimeLow)
+    H5_COMPOUND_INSERT_MEMBER(AmpA)
+    H5_COMPOUND_INSERT_MEMBER(AmpB)
+    H5_COMPOUND_INSERT_MEMBER(AmpC)
+    H5_COMPOUND_INSERT_MEMBER(AmpD)
+    H5_COMPOUND_INSERT_MEMBER(RingId)
+    H5_COMPOUND_INSERT_MEMBER(FENId)
+    H5_COMPOUND_INSERT_MEMBER(FPGAId)
+    H5_COMPOUND_INSERT_MEMBER(TubeId)
+    H5_COMPOUND_RETURN
+#if H5_USE_NEW_COMPOUND_IMPL == 0
   }
 };
 }
-
 }
+#endif
 
 namespace Loki {
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0
 using ReadoutFile = DumpFile<Readout>;
+#else
+using ReadoutFile = PrimDumpFile<Readout>;
+#endif
 
 }
+
+#undef H5_USE_NEW_COMPOUND_IMPL

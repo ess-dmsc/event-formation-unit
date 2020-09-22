@@ -233,6 +233,8 @@ public:
 
   static void read(const std::string &FilePath, std::vector<T> &ExternalData);
 
+  void rotate();
+
   size_t count() const;
 
   void flush();
@@ -297,6 +299,8 @@ template <typename T> void PrimDumpFile<T>::readAt(size_t Index, size_t Count) {
   Data.resize(Count);
   BaseFile->readAt(Data.data(), Data.size(), Index, Count);
 }
+
+template <typename T> void PrimDumpFile<T>::rotate() { BaseFile->rotate(); }
 
 template <typename T> size_t PrimDumpFile<T>::count() const {
   return BaseFile->count();
