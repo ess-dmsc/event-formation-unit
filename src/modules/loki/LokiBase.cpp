@@ -26,8 +26,8 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
@@ -175,6 +175,8 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
 void LokiBase::processingThread() {
   LokiConfiguration = Config(LokiModuleSettings.ConfigFile);
 
+  Amp2Pos.setResolution(LokiConfiguration.Resolution);
+
   if (LokiModuleSettings.CalibFile.empty()) {
     uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
     LokiCalibration.nullCalibration(MaxPixels);
@@ -260,39 +262,54 @@ void LokiBase::processingThread() {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
         if (Section.RingId >= LokiConfiguration.Panels.size()) {
+          XTRACE(DATA, WAR, "RINGId incompatible with configuration");
+          Counters.MappingErrors++;
+          continue;
+        }
+
+        auto Panel = LokiConfiguration.Panels[Section.RingId];
+
+        if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
+          XTRACE(DATA, WAR, "Invalid FENId, range is 1 - %d", Panel.getMaxGroup());
           Counters.MappingErrors++;
           continue;
         }
 
         for (auto & Data : Section.Data) {
-          uint8_t FPGAId = Data.FPGAId;
-          uint8_t LocalTube = Data.TubeId;
+          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
 
-          XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
-            Data.TimeHigh, Data.TimeLow, FPGAId, LocalTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
-          Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-          auto Straw = Amp2Pos.StrawId;
-          auto YPos = Amp2Pos.PosId;
+          XTRACE(DATA, DEB, "  Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
+            Data.TimeHigh, Data.TimeLow, Data.FPGAId, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
           // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
           // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
           // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
 
-          auto Panel = LokiConfiguration.Panels[Section.RingId];
-          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
-          auto PixelId =  LokiModuleSettings.DetectorImage2D
-              ? Panel.getPixel2D(Section.FENId, FPGAId, LocalTube, Straw, YPos)
-              : Panel.getPixel3D(Section.FENId, FPGAId, LocalTube, Straw, YPos);
+          // <<<< Start calculating pixel values here >>>>
+          uint8_t TubeGroup = Section.FENId - 1;
+          /// \todo validate this assumption from LoKI readout data
+          /// FPGAId: 2 bits
+          /// TUBE: 1 bit
+          /// LocalTube: 0 - 7
+          uint8_t LocalTube = ((Data.FPGAId & 0x3) << 1) + (Data.TubeId & 0x1);
 
+          Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+          auto Straw = Amp2Pos.StrawId;
+          auto XPos = Amp2Pos.PosId;
+
+          auto YPos =  Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
+
+          auto PixelId = LokiConfiguration.geometry->pixel2D(XPos,YPos);
           if (PixelId > MaxPixel) {
             Counters.CalibrationErrors++;
             continue;
           }
+          // <<<< End calculating pixel values here >>>>
 
+          // <<<< Apply calibration data here >>>>
           uint32_t MappedPixelId = LokiCalibration.Mapping[PixelId];
-          XTRACE(EVENT, DEB, "time: %" PRIu64 ", straw %u, ypos %u, pixel: %u(mapped %u)",
-                 TimeOfFlight, Straw, YPos, PixelId, MappedPixelId);
+          XTRACE(EVENT, DEB, "time: %" PRIu64 ", xpos %u, ypos %u, pixel: %u(mapped %u)",
+                 TimeOfFlight, XPos, YPos, PixelId, MappedPixelId);
 
           if (DumpFile) {
             Readout CurrentReadout;

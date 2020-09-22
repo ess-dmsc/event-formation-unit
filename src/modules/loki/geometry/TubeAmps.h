@@ -1,9 +1,9 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Loki Helium tube functions
+/// \brief Loki Boron Coated Straw Tubesfunctions
 ///
 /// Ref: Loki TG3.1 Detectors technology "Boron Coated Straw Tubes for LoKI"
 /// Davide Raspino 04/09/2019
@@ -14,6 +14,7 @@
 #include <cinttypes>
 
 namespace Loki {
+
 class TubeAmps {
 public:
   /// \brief The four amplitudes measured at certain points in the
@@ -39,18 +40,23 @@ public:
     PosId = ((NPos - 1) * PosFrac1) / Denominator;
   }
 
+  void setResolution(uint16_t Resolution) {
+    NPos = Resolution;
+  }
+
   struct Stats {
     uint64_t AmplitudeZero{0};
   } Stats;
 
 private:
-  const std::uint8_t NStraws{7}; ///< number of straws supported
-  const std::uint16_t NPos{512}; ///< resolution of position
+  const std::uint8_t NStraws{7}; ///< number of straws per tube
+  std::uint16_t NPos{512}; ///< resolution of position
 
 public:
   /// holds latest calculated values for straw and position
-  /// they will hold out -of-range values if calculation fails
-  std::uint8_t StrawId{NStraws};
-  std::uint16_t PosId{NPos};
+  /// they will hold out-of-range values if calculation fails
+  std::uint8_t StrawId{7};
+  std::uint16_t PosId{512};
 };
+
 } // nmaespace Loki
