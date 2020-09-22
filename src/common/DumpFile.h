@@ -26,19 +26,108 @@ template <typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept {
   return N;
 }
+/*
+bool
+H5T_NATIVE_HBOOL
+char
+H5T_NATIVE_CHAR
+unsigned char
+H5T_NATIVE_UCHAR
+signed char
+H5T_NATIVE_SCHAR
+short
+H5T_NATIVE_SHORT
+unsigned short
+H5T_NATIVE_USHORT
+int
+H5T_NATIVE_INT
+unsigned int
+H5T_NATIVE_UINT
+long
+H5T_NATIVE_LONG
+unsigned long
+H5T_NATIVE_ULONG
+long long
+H5T_NATIVE_LLONG
+unsigned long long
+H5T_NATIVE_ULLONG
+float
+H5T_NATIVE_FLOAT
+double
+H5T_NATIVE_DOUBLE
+*/
 
 enum class H5Prim {
-  Bool,
+  /*Bool,
   Float,
   ULong,
   UInt64,
   UInt32,
   UInt16,
   UInt8,
-  SInt8,
+  SInt8,*/
+  _bool,
+  _char,
+  _unsigned_char,
+  _signed_char,
+  _short,
+  _unsigned_short,
+  _int,
+  _unsigned_int,
+  _long,
+  _unsigned_long,
+  _long_long,
+  _unsigned_long_long,
+  _float,
+  _double,
   Count
 };
 
+template <typename T> struct MapPrimToH5PrimSubset;
+template <> struct MapPrimToH5PrimSubset<bool> {
+  static const H5Prim Value = H5Prim::_bool;
+};
+template <> struct MapPrimToH5PrimSubset<char> {
+  static const H5Prim Value = H5Prim::_char;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned char> {
+  static const H5Prim Value = H5Prim::_unsigned_char;
+};
+template <> struct MapPrimToH5PrimSubset<signed char> {
+  static const H5Prim Value = H5Prim::_signed_char;
+};
+template <> struct MapPrimToH5PrimSubset<short> {
+  static const H5Prim Value = H5Prim::_short;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned short> {
+  static const H5Prim Value = H5Prim::_unsigned_short;
+};
+template <> struct MapPrimToH5PrimSubset<int> {
+  static const H5Prim Value = H5Prim::_int;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned int> {
+  static const H5Prim Value = H5Prim::_unsigned_int;
+};
+template <> struct MapPrimToH5PrimSubset<long> {
+  static const H5Prim Value = H5Prim::_long;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned long> {
+  static const H5Prim Value = H5Prim::_unsigned_long;
+};
+template <> struct MapPrimToH5PrimSubset<long long> {
+  static const H5Prim Value = H5Prim::_long_long;
+};
+template <> struct MapPrimToH5PrimSubset<unsigned long long> {
+  static const H5Prim Value = H5Prim::_unsigned_long_long;
+};
+template <> struct MapPrimToH5PrimSubset<float> {
+  static const H5Prim Value = H5Prim::_float;
+};
+template <> struct MapPrimToH5PrimSubset<double> {
+  static const H5Prim Value = H5Prim::_double;
+};
+
+/*
 template <typename T> struct MapPrimToH5PrimSubset;
 template <> struct MapPrimToH5PrimSubset<bool> {
   static const H5Prim Value = H5Prim::Bool;
@@ -64,6 +153,7 @@ template <> struct MapPrimToH5PrimSubset<uint8_t> {
 template <> struct MapPrimToH5PrimSubset<int8_t> {
   static const H5Prim Value = H5Prim::SInt8;
 };
+*/
 
 struct H5PrimDef {
   const char *Name;
