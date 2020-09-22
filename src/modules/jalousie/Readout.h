@@ -38,6 +38,8 @@
 #include <common/DumpFile.h>
 #undef H5_USE_NEW_COMPOUND_IMPL
 
+#include <limits>
+
 namespace Jalousie {
 
 struct __attribute__ ((packed)) Readout {

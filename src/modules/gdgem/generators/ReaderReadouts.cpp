@@ -4,6 +4,8 @@
 #include <gdgem/generators/ReaderReadouts.h>
 #include <iostream>
 
+#include <string.h>
+
 namespace Gem {
 
 ReaderReadouts::ReaderReadouts(std::string filename) {
