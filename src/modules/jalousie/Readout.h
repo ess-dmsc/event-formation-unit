@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define H5_USE_NEW_COMPOUND_IMPL 0
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
 #undef H5_USE_NEW_COMPOUND_IMPL
 
@@ -60,6 +60,8 @@ struct __attribute__ ((packed)) Readout {
 };
 
 }
+#define H5_USE_NEW_COMPOUND_IMPL 1
+#if H5_USE_NEW_COMPOUND_IMPL == 0 /////// TODO put our data in same namespace and class?
 
 namespace hdf5 {
 
@@ -67,23 +69,32 @@ namespace datatype {
 template<>
 class TypeTrait<Jalousie::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Jalousie::Readout) {
-    H5_COMPOUND_INIT;
+#endif
+  H5_COMPOUND_DEFINE_TYPE(Jalousie::Readout) //{
+    H5_COMPOUND_INIT
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(board);
-    H5_COMPOUND_INSERT_MEMBER(sub_id);
-    H5_COMPOUND_INSERT_MEMBER(time);
-    H5_COMPOUND_INSERT_MEMBER(anode);
-    H5_COMPOUND_INSERT_MEMBER(cathode);
-    H5_COMPOUND_RETURN;
+    H5_COMPOUND_INSERT_MEMBER(board)
+    H5_COMPOUND_INSERT_MEMBER(sub_id)
+    H5_COMPOUND_INSERT_MEMBER(time)
+    H5_COMPOUND_INSERT_MEMBER(anode)
+    H5_COMPOUND_INSERT_MEMBER(cathode)
+    H5_COMPOUND_RETURN
+#if H5_USE_NEW_COMPOUND_IMPL == 0
   }
 };
 }
-
 }
+#endif
 
 namespace Jalousie {
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0
 using ReadoutFile = DumpFile<Readout>;
+#else
+using ReadoutFile = PrimDumpFile<Readout>;
+#endif
 
 }
+
+#undef H5_USE_NEW_COMPOUND_IMPL
+

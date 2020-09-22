@@ -3,6 +3,16 @@
 #include <gdgem/nmx/Readout.h>
 #include <test/TestBase.h>
 
+#include <boost/filesystem.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
+
 using namespace Gem;
 
 class NMXReadoutTest : public TestBase {
@@ -21,7 +31,7 @@ TEST_F(NMXReadoutTest, CompoundMapping) {
   // you have broken dumpfile compatibility, and you should
   // bump FormatVersion for the struct
 
-  auto t = hdf5::datatype::create<Readout>();
+  auto t = H5_COMPOUND_INSTANCIATE_TYPE(Readout);
 
   EXPECT_EQ(t.number_of_fields(), 9ul);
   EXPECT_EQ(t.get_class(), hdf5::datatype::Class::COMPOUND);

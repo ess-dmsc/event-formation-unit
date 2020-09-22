@@ -12,6 +12,7 @@
 #include <gdgem/nmx/Readout.h>
 #include <common/reduction/Hit.h>
 #include <vector>
+#include <list>
 
 namespace Gem {
 

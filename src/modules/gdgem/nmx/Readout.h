@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define H5_USE_NEW_COMPOUND_IMPL 0
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
 #undef H5_USE_NEW_COMPOUND_IMPL
 
@@ -73,33 +73,44 @@ struct __attribute__ ((packed)) Readout {
 
 }
 
+#define H5_USE_NEW_COMPOUND_IMPL 1
+#if H5_USE_NEW_COMPOUND_IMPL == 0 /////// TODO put our data in same namespace and class?
+
 namespace hdf5 {
 
 namespace datatype {
 template<>
 class TypeTrait<Gem::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Gem::Readout) {
-    H5_COMPOUND_INIT;
+#endif
+  H5_COMPOUND_DEFINE_TYPE(Gem::Readout) //{
+    H5_COMPOUND_INIT
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(fec);
-    H5_COMPOUND_INSERT_MEMBER(chip_id);
-    H5_COMPOUND_INSERT_MEMBER(srs_timestamp);
-    H5_COMPOUND_INSERT_MEMBER(channel);
-    H5_COMPOUND_INSERT_MEMBER(bcid);
-    H5_COMPOUND_INSERT_MEMBER(tdc);
-    H5_COMPOUND_INSERT_MEMBER(adc);
-    H5_COMPOUND_INSERT_MEMBER(over_threshold);
-    H5_COMPOUND_INSERT_MEMBER(chiptime);
-    H5_COMPOUND_RETURN;
+    H5_COMPOUND_INSERT_MEMBER(fec)
+    H5_COMPOUND_INSERT_MEMBER(chip_id)
+    H5_COMPOUND_INSERT_MEMBER(srs_timestamp)
+    H5_COMPOUND_INSERT_MEMBER(channel)
+    H5_COMPOUND_INSERT_MEMBER(bcid)
+    H5_COMPOUND_INSERT_MEMBER(tdc)
+    H5_COMPOUND_INSERT_MEMBER(adc)
+    H5_COMPOUND_INSERT_MEMBER(over_threshold)
+    H5_COMPOUND_INSERT_MEMBER(chiptime)
+    H5_COMPOUND_RETURN
+#if H5_USE_NEW_COMPOUND_IMPL == 0
   }
 };
 }
-
 }
+#endif
 
 namespace Gem {
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0
 using ReadoutFile = DumpFile<Readout>;
+#else
+using ReadoutFile = PrimDumpFile<Readout>;
+#endif
 
 }
+
+#undef H5_USE_NEW_COMPOUND_IMPL

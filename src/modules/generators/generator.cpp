@@ -11,6 +11,10 @@
 #include <jalousie/generators/CdtFile.h>
 
 #include <common/Socket.h>
+
+#include <fmt/format.h>
+#include <unistd.h>
+
 // GCOVR_EXCL_START
 
 // Non critical but somewhat arbitrary CPU clock speed guess
@@ -62,7 +66,7 @@ int main(int argc, char *argv[]) {
     return (EXIT_FAILURE);
   }
 
-  hdf5::error::Singleton::instance().auto_print(false);
+  Hdf5ErrorSetAutoPrint (false);
 
   char buffer[RxBufferSize];
 

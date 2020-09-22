@@ -9,6 +9,8 @@
 #include <common/Log.h>
 #include <common/Trace.h>
 
+#include <boost/filesystem/path.hpp>
+
 namespace Jalousie {
 
 static constexpr size_t invalid_board_mapping {std::numeric_limits<size_t>::max()};

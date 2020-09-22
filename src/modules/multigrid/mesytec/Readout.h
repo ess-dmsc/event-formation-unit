@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define H5_USE_NEW_COMPOUND_IMPL 0
+#define H5_USE_NEW_COMPOUND_IMPL 1
 #include <common/DumpFile.h>
 #undef H5_USE_NEW_COMPOUND_IMPL
 
@@ -64,34 +64,43 @@ struct __attribute__ ((packed)) Readout {
 
 }
 
+#define H5_USE_NEW_COMPOUND_IMPL 1
+#if H5_USE_NEW_COMPOUND_IMPL == 0 /////// TODO put our data in same namespace and class?
+
 namespace hdf5 {
 
 namespace datatype {
 template<>
 class TypeTrait<Multigrid::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Multigrid::Readout) {
-    H5_COMPOUND_INIT;
+#endif
+  H5_COMPOUND_DEFINE_TYPE(Multigrid::Readout) //{
+    H5_COMPOUND_INIT
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(trigger_count);
-    H5_COMPOUND_INSERT_MEMBER(external_trigger);
-    H5_COMPOUND_INSERT_MEMBER(module);
-    H5_COMPOUND_INSERT_MEMBER(high_time);
-    H5_COMPOUND_INSERT_MEMBER(low_time);
-    H5_COMPOUND_INSERT_MEMBER(total_time);
-    H5_COMPOUND_INSERT_MEMBER(bus);
-    H5_COMPOUND_INSERT_MEMBER(channel);
-    H5_COMPOUND_INSERT_MEMBER(adc);
-    H5_COMPOUND_INSERT_MEMBER(time_diff);
-    H5_COMPOUND_RETURN;
+    H5_COMPOUND_INSERT_MEMBER(trigger_count)
+    H5_COMPOUND_INSERT_MEMBER(external_trigger)
+    H5_COMPOUND_INSERT_MEMBER(module)
+    H5_COMPOUND_INSERT_MEMBER(high_time)
+    H5_COMPOUND_INSERT_MEMBER(low_time)
+    H5_COMPOUND_INSERT_MEMBER(total_time)
+    H5_COMPOUND_INSERT_MEMBER(bus)
+    H5_COMPOUND_INSERT_MEMBER(channel)
+    H5_COMPOUND_INSERT_MEMBER(adc)
+    H5_COMPOUND_INSERT_MEMBER(time_diff)
+    H5_COMPOUND_RETURN
+#if H5_USE_NEW_COMPOUND_IMPL == 0
   }
 };
 }
-
 }
+#endif
 
 namespace Multigrid {
 
+#if H5_USE_NEW_COMPOUND_IMPL == 0
 using ReadoutFile = DumpFile<Readout>;
+#else
+using ReadoutFile = PrimDumpFile<Readout>;
+#endif
 
 }

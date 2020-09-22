@@ -112,6 +112,14 @@ class Compound;
 hdf5::datatype::Compound
 createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef &CompoundDef);
 
+void Hdf5ErrorSetAutoPrint(bool enable);
+
+namespace std {
+class exception;
+} // namespace std
+
+std::string Hdf5ErrorPrintNested(const std::exception& exception, int level);
+
 // traits-like class containing H5PrimCompoundDef.
 template <typename T> struct H5PrimCompoundDefData;
 

@@ -14,7 +14,7 @@ namespace Jalousie {
 
 class CdtFile {
 public:
-  CdtFile(const boost::filesystem::path &FilePath);
+  CdtFile(const std::string &FilePath);
 
   size_t total() const;
   size_t read();

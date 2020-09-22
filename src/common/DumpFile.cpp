@@ -111,6 +111,14 @@ createCompoundFromH5PrimCompoundDef(const H5PrimCompoundDef &CompoundDef) {
   return Compound;
 }
 
+void Hdf5ErrorSetAutoPrint(bool enable) {
+  hdf5::error::Singleton::instance().auto_print(enable);
+}
+
+std::string Hdf5ErrorPrintNested(const std::exception &exception, int level) {
+  return hdf5::error::print_nested(exception, level);
+}
+
 PrimDumpFileBase_Impl::PrimDumpFileBase_Impl(
     const H5PrimCompoundDef &CompoundDef,
     const boost::filesystem::path &file_path)

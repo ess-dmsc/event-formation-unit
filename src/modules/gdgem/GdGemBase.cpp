@@ -28,6 +28,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
+#include <unistd.h>
 
 // This is depending on the CPU, but we do not rely on this to be accurate
 static constexpr int TscMHz {2900};

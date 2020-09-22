@@ -38,13 +38,13 @@ const uint64_t kMetaDataSubIndex1{uint64_t(0x1) << 54};
 // const uint64_t kMetaDataSubIndex9{uint64_t(0x9) << 54};
 // const uint64_t kMetaDataSubIndex10{uint64_t(0xA) << 54};
 
-CdtFile::CdtFile(const boost::filesystem::path &FilePath) {
+CdtFile::CdtFile(const std::string &FilePath) {
   Data.reserve(ChunkSize);
 
-  file_.open(FilePath.string(), std::ios::binary);
+  file_.open(FilePath, std::ios::binary);
   if (!file_.is_open()) {
     throw std::runtime_error(
-        fmt::format("<CdtFile> {} could not be opened!\n", FilePath.string()));
+        fmt::format("<CdtFile> {} could not be opened!\n", FilePath));
   }
 
   int header[8];
@@ -55,7 +55,7 @@ CdtFile::CdtFile(const boost::filesystem::path &FilePath) {
     read_one();
   }
   file_.close();
-  file_.open(FilePath.string(), std::ios::binary);
+  file_.open(FilePath, std::ios::binary);
   file_.read((char *)header, 8*sizeof(int));
   have_board = false;
   readouts_expected = survey_results.chopper_pulses + survey_results.events_found;

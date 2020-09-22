@@ -28,7 +28,7 @@ size_t ReaderReadouts::read(char *buf) {
       std::cout << "<ReaderReadouts> failed to read slab ("
                 << current_ << ", " << (current_ + size) << ")"
                 << " max=" << total_ << "\n"
-                << hdf5::error::print_nested(e, 1) << std::endl;
+                << Hdf5ErrorPrintNested(e, 1) << std::endl;
     }
   }
 

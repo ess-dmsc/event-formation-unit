@@ -25,6 +25,8 @@
 
 #include <common/Log.h>
 #include "JalousieBase.h"
+
+#include <unistd.h>
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
