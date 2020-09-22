@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <common/Trace.h>
 
 // #undef TRC_LEVEL
