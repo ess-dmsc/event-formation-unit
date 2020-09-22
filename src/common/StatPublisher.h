@@ -1,8 +1,8 @@
-/** Copyright (C) 2016-2018 European Spallation Source */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// This file contains the declaration of the StatPublisher class for
+/// \brief This file contains the declaration of the StatPublisher class for
 /// transmitting time series metrics to a Graphite/Carbon server over TCP
 ///
 //===----------------------------------------------------------------------===//

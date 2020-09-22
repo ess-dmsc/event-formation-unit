@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests for ReadoutParser
+///
+//===----------------------------------------------------------------------===//
 
 #include <readout/ReadoutParser.h>
 #include <readout/ReadoutParserTestData.h>

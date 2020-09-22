@@ -1,4 +1,10 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Get current time as a string
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/TimeString.h>
 
@@ -12,5 +18,3 @@ std::string timeString() {
   std::string startTime = cStartTime;
   return startTime;
 }
-
-

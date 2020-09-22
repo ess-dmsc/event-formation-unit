@@ -1,4 +1,11 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C)2019-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Jalousie Readouts builder (just a data copy)
+///
+//===----------------------------------------------------------------------===//
 
 #include <jalousie/BuilderReadouts.h>
 #include <common/TimeString.h>

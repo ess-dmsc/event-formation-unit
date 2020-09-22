@@ -1,9 +1,8 @@
-/* Copyright notice see below */
+// Copyright notice see below - author Kjell Hedström, hedstrom@kjellkod.cc
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-///
-/// /brief single producer single consumer lockless fifo
+/// \brief single producer single consumer lockless fifo
 ///
 //===----------------------------------------------------------------------===//
 /*

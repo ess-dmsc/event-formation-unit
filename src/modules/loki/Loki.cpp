@@ -1,9 +1,9 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Loki detector
+/// \brief LoKI detector base class - LoKI specific settings
 ///
 //===----------------------------------------------------------------------===//
 

@@ -1,4 +1,12 @@
-/** Copyright (C) 2016 - 2019 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Application for reading Hits and Readout for various detectors from
+/// HDF5 files and transmitting them as UDP (to the EFU)
+///
+//===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
 #include <common/TSCTimer.h>

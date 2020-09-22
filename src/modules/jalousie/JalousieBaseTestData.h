@@ -1,3 +1,11 @@
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Test data for JalousieBaseTest
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

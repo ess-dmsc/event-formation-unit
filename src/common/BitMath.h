@@ -1,10 +1,9 @@
-/** Copyright (C) 2016-2018 European Spallation Source */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// This file contains the declaration of the Socket abstration for BSD sockets
-/// it is used in detector pipeline plugins for receive and in udptx for transmit
-///
+/// \brief Small functions for bit- and byte- manipulations, graycode, reverse
+/// bits
 //===----------------------------------------------------------------------===//
 
 #pragma once

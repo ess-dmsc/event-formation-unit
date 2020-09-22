@@ -1,9 +1,10 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Specifying the geometry of a SoNDe Detector, provides a calculation of global detector pixel id
+/// \brief Specifying the geometry of a SoNDe Detector prototype, provides a
+/// calculation of global detector pixel id
 ///
 //===----------------------------------------------------------------------===//
 

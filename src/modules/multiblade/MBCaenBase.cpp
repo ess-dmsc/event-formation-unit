@@ -1,9 +1,10 @@
-/** Copyright (C) 2017-2018 European Spallation Source */
+// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of the detector pipeline plugin for MUlti-Blade
-/// detectors.
+///
+/// \brief Multi-Blade prototype detector base plugin interface definition
+///
 //===----------------------------------------------------------------------===//
 
 #include "MBCaenBase.h"
@@ -87,7 +88,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("kafka.ev_others", Counters.kafka_ev_others);
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
-  
+
   Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);

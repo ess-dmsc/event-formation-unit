@@ -1,8 +1,8 @@
-/** Copyright (C) 2016-2018 European Spallation Source */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of StatPublisher
+/// \brief Implementation of StatPublisher
 ///
 //===----------------------------------------------------------------------===//
 //

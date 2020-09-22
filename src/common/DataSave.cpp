@@ -1,4 +1,10 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Implementation of file saving functionality
+///
+//===----------------------------------------------------------------------===//
 
 #include <cassert>
 #include <common/DataSave.h>

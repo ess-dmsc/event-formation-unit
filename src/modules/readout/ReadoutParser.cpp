@@ -1,6 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief ESS readout data parser implementation
+///
+//===----------------------------------------------------------------------===//
 
-//#include <common/gccintel.h> // UNUSED macros
 #include <cstring>
 #include <common/Trace.h>
 #include <readout/ReadoutParser.h>

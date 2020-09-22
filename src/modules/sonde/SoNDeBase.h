@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,6 +6,7 @@
 /// \brief SoNDe detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
+
 #pragma once
 
 #include <cinttypes>

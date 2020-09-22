@@ -1,7 +1,9 @@
-/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2017-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
+///
+/// \brief NMX/GdGEM configuration parameter class
 ///
 //===----------------------------------------------------------------------===//
 
@@ -59,13 +61,13 @@ struct NMXConfig {
   double matcher_max_delta_time{200};
   //Matcher algorithm, either center-of-mass, charge2, utpc, or utpc_weighted
   std::string time_algorithm{"center-of-mass"};
-  
+
   // Name of the event analyzer
   std::string analyzer_name{"EventAnalyzer"};
-  
+
   // Name of the matcher
   std::string matcher_name{"CenterMatcher"};
-  
+
   // Name of the clusterer
   std::string clusterer_name{"GapClusterer"};
 

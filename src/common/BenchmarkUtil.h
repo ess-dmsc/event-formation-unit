@@ -1,11 +1,17 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief This utility supports various profiler/timer instrumentation in
+///        Google Benchmark
+///
+/// It dies this by adding the BenchmarkLoop() and
+/// BenchmarkLoopPaused() functions.
+/// Both functions allow the user to execute their code in a lambda,
+/// while turning instrumentation on/off at the correct times.
+//===----------------------------------------------------------------------===//
 #pragma once
 
-/// \brief This utility supports various profiler/timer instrumentation in
-///        Google Benchmark by adding the BenchmarkLoop() and
-///        BenchmarkLoopPaused() functions.
-///        Both functions allow the user to execute their code in a lambda,
-///        while turning instrumentation on/off at the correct times.
 
 #include <benchmark/benchmark.h>
 

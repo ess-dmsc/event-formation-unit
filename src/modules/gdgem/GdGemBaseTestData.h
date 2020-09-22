@@ -1,4 +1,13 @@
-
+// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Data for testing the GdGemBase code
+///
+/// Configuration file (json) and a single UDP packet snippet from VMM3/SRS
+/// readout
+//===----------------------------------------------------------------------===//
 #pragma once
 
 #include <string>
