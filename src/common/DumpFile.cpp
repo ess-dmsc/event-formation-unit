@@ -63,53 +63,24 @@ PrimDumpFileBase::create(const H5PrimCompoundDef &CompoundDef,
 PrimDumpFileBase::PrimDumpFileBase(const H5PrimCompoundDef &CompoundDef)
     : ChunkSize(GetChunkSize(CompoundDef.StructSize)) {}
 
-// \todo this cannot be initialized atomically yet
-static hid_t PrimToH5tNative(H5Prim Prim) {
-  static hid_t Map[static_cast<int>(H5Prim::Count)] = {};
-  static bool Init = true;
-  if (Init) {
-    Init = false;
-    Map[static_cast<int>(H5Prim::_bool)] = H5T_NATIVE_HBOOL;
-    Map[static_cast<int>(H5Prim::_char)] = H5T_NATIVE_CHAR;
-    Map[static_cast<int>(H5Prim::_unsigned_char)] = H5T_NATIVE_UCHAR;
-    Map[static_cast<int>(H5Prim::_signed_char)] = H5T_NATIVE_SCHAR;
-    Map[static_cast<int>(H5Prim::_short)] = H5T_NATIVE_SHORT;
-    Map[static_cast<int>(H5Prim::_unsigned_short)] = H5T_NATIVE_USHORT;
-    Map[static_cast<int>(H5Prim::_int)] = H5T_NATIVE_INT;
-    Map[static_cast<int>(H5Prim::_unsigned_int)] = H5T_NATIVE_UINT;
-    Map[static_cast<int>(H5Prim::_long)] = H5T_NATIVE_LONG;
-    Map[static_cast<int>(H5Prim::_unsigned_long)] = H5T_NATIVE_ULONG;
-    Map[static_cast<int>(H5Prim::_long_long)] = H5T_NATIVE_LLONG;
-    Map[static_cast<int>(H5Prim::_unsigned_long_long)] = H5T_NATIVE_ULLONG;
-    Map[static_cast<int>(H5Prim::_float)] = H5T_NATIVE_FLOAT;
-    Map[static_cast<int>(H5Prim::_double)] = H5T_NATIVE_DOUBLE;
-    /*
-        Map[static_cast<int>(H5Prim::Bool)] = H5T_NATIVE_HBOOL;
+struct PrimToH5tNativeMap {
+  hid_t Map[static_cast<int>(H5Prim::Count)] = {};
+  PrimToH5tNativeMap() {
+    Map[static_cast<int>(H5Prim::Bool)] = H5T_NATIVE_HBOOL;
+    Map[static_cast<int>(H5Prim::Char)] = H5T_NATIVE_CHAR;
+    Map[static_cast<int>(H5Prim::UnsignedChar)] = H5T_NATIVE_UCHAR;
+    Map[static_cast<int>(H5Prim::SignedChar)] = H5T_NATIVE_SCHAR;
+    Map[static_cast<int>(H5Prim::Short)] = H5T_NATIVE_SHORT;
+    Map[static_cast<int>(H5Prim::UnsignedShort)] = H5T_NATIVE_USHORT;
+    Map[static_cast<int>(H5Prim::Int)] = H5T_NATIVE_INT;
+    Map[static_cast<int>(H5Prim::UnsignedInt)] = H5T_NATIVE_UINT;
+    Map[static_cast<int>(H5Prim::Long)] = H5T_NATIVE_LONG;
+    Map[static_cast<int>(H5Prim::UnsignedLong)] = H5T_NATIVE_ULONG;
+    Map[static_cast<int>(H5Prim::LongLong)] = H5T_NATIVE_LLONG;
+    Map[static_cast<int>(H5Prim::UnsignedLongLong)] = H5T_NATIVE_ULLONG;
+    Map[static_cast<int>(H5Prim::Float)] = H5T_NATIVE_FLOAT;
+    Map[static_cast<int>(H5Prim::Double)] = H5T_NATIVE_DOUBLE;
 
-        Map[static_cast<int>(H5Prim::Float)] = H5T_NATIVE_FLOAT;
-
-        Map[static_cast<int>(H5Prim::ULong)] = H5T_NATIVE_ULONG;
-
-        Map[static_cast<int>(H5Prim::UInt64)] = H5T_NATIVE_ULLONG;
-        static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
-                      "H5 types: Potential 32/64 bit issue.");
-
-        Map[static_cast<int>(H5Prim::UInt32)] = H5T_NATIVE_UINT;
-        static_assert(sizeof(uint32_t) == sizeof(unsigned int),
-                      "H5 types: Potential 32/64 bit issue.");
-
-        Map[static_cast<int>(H5Prim::UInt16)] = H5T_NATIVE_USHORT;
-        static_assert(sizeof(uint16_t) == sizeof(unsigned short),
-                      "Potential 32/64 bit definition issue.");
-
-        Map[static_cast<int>(H5Prim::UInt8)] = H5T_NATIVE_UCHAR;
-        static_assert(sizeof(uint8_t) == sizeof(unsigned char),
-                      "H5 types: Potential 32/64 bit issue.");
-
-        Map[static_cast<int>(H5Prim::SInt8)] = H5T_NATIVE_SCHAR;
-        static_assert(sizeof(int8_t) == sizeof(signed char),
-                      "H5 types: Potential 32/64 bit issue.");
-    */
     // verify all slots have been written
     for (int i = 0; i < static_cast<int>(H5Prim::Count); i++) {
       if (Map[i] == 0) {
@@ -119,7 +90,11 @@ static hid_t PrimToH5tNative(H5Prim Prim) {
       }
     }
   }
-  return Map[static_cast<int>(Prim)];
+};
+
+static hid_t PrimToH5tNative(H5Prim Prim) {
+  static PrimToH5tNativeMap Map;
+  return Map.Map[static_cast<int>(Prim)];
 }
 
 hdf5::datatype::Compound
