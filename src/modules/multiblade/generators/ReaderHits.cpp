@@ -3,6 +3,7 @@
 
 #include <multiblade/generators/ReaderHits.h>
 #include <iostream>
+#include <string.h>
 
 namespace Multiblade {
 
