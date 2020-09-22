@@ -14,7 +14,7 @@
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
-#include "span.hpp"
+#include <common/span.hpp>
 #include <common/Buffer.h>
 #include <functional>
 #include <memory>

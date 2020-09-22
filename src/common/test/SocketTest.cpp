@@ -1,6 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source */
 
-#include <src/test/TestBase.h>
+#include <test/TestBase.h>
 #include <common/Socket.h>
 
 std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1", "224.1.2.3", "255.255.255.255"};

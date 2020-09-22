@@ -3,6 +3,7 @@ import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
+module_src="${project}/src/modules/"
 coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
@@ -93,7 +94,7 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
@@ -176,9 +177,9 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${project}/src/multiblade/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/src/gdgem/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multiblade/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
+                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
                                 cd archive
@@ -202,27 +203,29 @@ def get_macos_pipeline()
 {
     return {
         stage("macOS") {
-            node ("macos") {
-            // Delete workspace when build is done
-                cleanWs()
+           timestamps {
+               node ("macos") {
+                    // Delete workspace when build is done
+                    cleanWs()
 
-                // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
-                sh "conan remove -f FlatBuffers/*"
-                sh "conan remove -f cli11/*"
+                    // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
+                    sh "conan remove -f FlatBuffers/*"
+                    sh "conan remove -f cli11/*"
 
-                abs_dir = pwd()
+                    abs_dir = pwd()
 
-                dir("${project}") {
-                    checkout scm
-                }
+                    dir("${project}") {
+                        checkout scm
+                    }
 
-                dir("${project}/build") {
-                    sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j${pipeline_builder.numCpus}"
-                    sh "make -j${pipeline_builder.numCpus} unit_tests"
-                    sh "make runtest"
-                    sh "make runefu"
+                    dir("${project}/build") {
+                        sh "conan install --build=outdated .."
+                        sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                        sh "make -j${pipeline_builder.numCpus}"
+                        sh "make -j${pipeline_builder.numCpus} unit_tests"
+                        sh "make runtest"
+                        sh "make runefu"
+                    }
                 }
             }
         }
@@ -231,88 +234,92 @@ def get_macos_pipeline()
 
 def get_system_tests_pipeline() {
     return {
-        node('system-test') {
-            cleanWs()
-            dir("${project}") {
-                try{
-                    stage("System tests: Checkout") {
-                        checkout scm
-                    }  // stage
-                    stage("System tests: Install requirements") {
-                        sh """python3.6 -m pip install --user --upgrade pip
-                        python3.6 -m pip install --user -r system-tests/requirements.txt
-                        """
-                    }  // stage
-                    stage("System tests: Run") {
-                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
-                                                """
-			timeout(time: 30, activity: true){
-                            sh """cd system-tests/
-                            python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+        timestamps {
+            node('system-test') {
+                cleanWs()
+                dir("${project}") {
+                    try {
+                        stage("System tests: Checkout") {
+                            checkout scm
+                        }  // stage
+                        stage("System tests: Install requirements") {
+                            sh """python3.6 -m pip install --user --upgrade pip
+                            python3.6 -m pip install --user -r system-tests/requirements.txt
                             """
-			}
-                    }  // stage
-                }finally {
-		    stage("System tests: Cleanup") {
-                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
-                        """
-                    }  // stage
-                    stage("System tests: Archive") {
-                        junit "system-tests/SystemTestsOutput.xml"
+                        }  // stage
+                        stage("System tests: Run") {
+                            sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                                                    """
+                            timeout(time: 30, activity: true) {
+                                sh """cd system-tests/
+                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                                """
+                            }
+                        }  // stage
+                    } finally {
+                        stage("System tests: Cleanup") {
+                            sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                            """
+                        }  // stage
+                        stage("System tests: Archive") {
+                            junit "system-tests/SystemTestsOutput.xml"
+                        }
                     }
-                }
-            } // dir
-        }  // node
+                } // dir
+            } // node
+        } // timestamps
     }  // return
 }  // def
 
 // Script actions start here
-node('docker') {
-    dir("${project}_code") {
+timestamps {
+    node('docker') {
+        dir("${project}_code") {
 
-        stage('Checkout') {
-            try {
-                scm_vars = checkout scm
-            } catch (e) {
-                failure_function(e, 'Checkout failed')
+            stage('Checkout') {
+                try {
+                    scm_vars = checkout scm
+                } catch (e) {
+                    failure_function(e, 'Checkout failed')
+                }
+            }
+
+            // skip build process if message contains '[ci skip]'
+            pipeline_builder.abortBuildOnMagicCommitMessage()
+
+            stage("Static analysis") {
+                try {
+                    sh "find . -name '*TestData.h' > exclude_cloc"
+                    sh "find . -name 'span.hpp' >> exclude_cloc"
+                    sh "find . -name 'gcovr' >> exclude_cloc"
+                    sh "cloc --exclude-list-file=exclude_cloc --by-file --xml --out=cloc.xml ."
+                    sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
+                    sloccountPublish encoding: '', pattern: ''
+                } catch (e) {
+                    failure_function(e, 'Static analysis failed')
+                }
             }
         }
 
-        // skip build process if message contains '[ci skip]'
-        pipeline_builder.abortBuildOnMagicCommitMessage()
+        // Add macOS pipeline to builders
+        builders['macOS'] = get_macos_pipeline()
 
-        stage("Static analysis") {
-            try {
-                sh "find . -name '*TestData.h' > exclude_cloc"
-                sh "find . -name 'span.hpp' >> exclude_cloc"
-                sh "find . -name 'gcovr' >> exclude_cloc"
-                sh "cloc --exclude-list-file=exclude_cloc --by-file --xml --out=cloc.xml ."
-                sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
-                sloccountPublish encoding: '', pattern: ''
-            } catch (e) {
-                failure_function(e, 'Static analysis failed')
+        // Only add system test pipeline if this is a Pull Request
+        if ( env.CHANGE_ID ) {
+            builders['system tests'] = get_system_tests_pipeline()
+        }
+
+        try {
+            timeout(time: 2, unit: 'HOURS') {
+                // run all builders in parallel
+                parallel builders
             }
+        } catch (e) {
+            failure_function(e, 'Job failed')
+            throw e
+        } finally {
+            // Delete workspace when build is done
+            cleanWs()
         }
-    }
-
-    // Add macOS pipeline to builders
-    builders['macOS'] = get_macos_pipeline()
-
-    // Only add system test pipeline if this is a Pull Request
-    if ( env.CHANGE_ID ) {
-        builders['system tests'] = get_system_tests_pipeline()
-    }
-
-    try {
-        timeout(time: 2, unit: 'HOURS') {
-            // run all builders in parallel
-            parallel builders
-        }
-    } catch (e) {
-        failure_function(e, 'Job failed')
-        throw e
-    } finally {
-        // Delete workspace when build is done
-        cleanWs()
     }
 }
