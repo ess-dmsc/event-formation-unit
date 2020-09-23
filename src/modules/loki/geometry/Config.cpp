@@ -25,10 +25,8 @@ Config::Config(std::string ConfigFile) {
       Resolution = root["StrawResolution"].get<unsigned int>();
 
       auto PanelConfig = root["PanelConfig"];
-      uint8_t Index{0};
       for (auto &Mapping : PanelConfig) {
         auto Ring = Mapping["Bank"].get<unsigned int>();
-        assert(Ring == Index);
         bool Vertical = Mapping["Vertical"].get<bool>();
         auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
         auto TubesN = Mapping["TubesN"].get<unsigned int>();
@@ -41,7 +39,6 @@ Config::Config(std::string ConfigFile) {
 
         PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
         Panels.push_back(Temp);
-        Index++;
       }
 
       Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
