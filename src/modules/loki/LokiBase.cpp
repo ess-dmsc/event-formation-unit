@@ -171,6 +171,32 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
   return;
 }
 
+/// \brief helper function to calculate pixels from knowledge about
+/// loki panel, FENId and a single readout dataset
+uint32_t LokiBase::calcPixel(
+    PanelGeometry & Panel, uint8_t FEN,
+    DataParser::LokiReadout & Data,
+    ESSGeometry * Geometry) {
+
+  uint8_t TubeGroup = FEN - 1;
+  /// \todo validate this assumption from LoKI readout data
+  /// FPGAId: 2 bits
+  /// TUBE: 1 bit
+  /// LocalTube: 0 - 7
+  uint8_t LocalTube = ((Data.FPGAId & 0x3) << 1) + (Data.TubeId & 0x1);
+
+  Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+  auto Straw = Amp2Pos.StrawId;
+  auto XPos = Amp2Pos.PosId;
+
+  auto YPos =  Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
+
+  uint32_t PixelId = Geometry->pixel2D(XPos,YPos);
+  XTRACE(EVENT, DEB, "xpos %u, ypos %u, pixel: %u", XPos, YPos, PixelId);
+
+  return PixelId;
+}
+
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
   LokiConfiguration = Config(LokiModuleSettings.ConfigFile);
@@ -262,20 +288,22 @@ void LokiBase::processingThread() {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
         if (Section.RingId >= LokiConfiguration.Panels.size()) {
-          XTRACE(DATA, WAR, "RINGId incompatible with configuration");
+          XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
           Counters.MappingErrors++;
           continue;
         }
 
-        auto Panel = LokiConfiguration.Panels[Section.RingId];
+        PanelGeometry & Panel = LokiConfiguration.Panels[Section.RingId];
 
         if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
-          XTRACE(DATA, WAR, "Invalid FENId, range is 1 - %d", Panel.getMaxGroup());
+          XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
           Counters.MappingErrors++;
           continue;
         }
 
         for (auto & Data : Section.Data) {
+
+
           auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
 
           XTRACE(DATA, DEB, "  Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
@@ -285,21 +313,7 @@ void LokiBase::processingThread() {
           // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
           // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
 
-          // <<<< Start calculating pixel values here >>>>
-          uint8_t TubeGroup = Section.FENId - 1;
-          /// \todo validate this assumption from LoKI readout data
-          /// FPGAId: 2 bits
-          /// TUBE: 1 bit
-          /// LocalTube: 0 - 7
-          uint8_t LocalTube = ((Data.FPGAId & 0x3) << 1) + (Data.TubeId & 0x1);
-
-          Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-          auto Straw = Amp2Pos.StrawId;
-          auto XPos = Amp2Pos.PosId;
-
-          auto YPos =  Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
-
-          auto PixelId = LokiConfiguration.geometry->pixel2D(XPos,YPos);
+          auto PixelId = calcPixel(Panel, Section.FENId, Data, LokiConfiguration.Geometry);
           if (PixelId > MaxPixel) {
             Counters.CalibrationErrors++;
             continue;
@@ -308,8 +322,8 @@ void LokiBase::processingThread() {
 
           // <<<< Apply calibration data here >>>>
           uint32_t MappedPixelId = LokiCalibration.Mapping[PixelId];
-          XTRACE(EVENT, DEB, "time: %" PRIu64 ", xpos %u, ypos %u, pixel: %u(mapped %u)",
-                 TimeOfFlight, XPos, YPos, PixelId, MappedPixelId);
+          XTRACE(EVENT, DEB, "time: %" PRIu64 ", pixel: %u(mapped %u)",
+                 TimeOfFlight, PixelId, MappedPixelId);
 
           if (DumpFile) {
             Readout CurrentReadout;

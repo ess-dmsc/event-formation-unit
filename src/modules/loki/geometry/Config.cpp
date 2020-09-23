@@ -45,7 +45,7 @@ Config::Config(std::string ConfigFile) {
       }
 
       Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
-      geometry = new ESSGeometry(Resolution, NTubesTotal * 7, 1, 1);
+      Geometry = new ESSGeometry(Resolution, NTubesTotal * 7, 1, 1);
 
     }
     catch (...) {

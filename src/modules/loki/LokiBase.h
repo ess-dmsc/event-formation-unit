@@ -40,6 +40,11 @@ public:
   void processingThread();
   void testImageUdder(EV42Serializer& FlatBuffer);
 
+  /// \brief calculate pixel id
+  uint32_t calcPixel(PanelGeometry & Panel, uint8_t FEN,
+                     DataParser::LokiReadout & Data,
+                     ESSGeometry * Geometry);
+
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries {2000};
   static const int EthernetBufferSize {9000}; /// bytes
