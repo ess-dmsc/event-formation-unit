@@ -10,6 +10,7 @@
 
 #include <common/Detector.h>
 #include <common/EV42Serializer.h>
+#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
 #include <loki/Counters.h>
@@ -36,14 +37,19 @@ class LokiBase : public Detector {
 public:
   LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings);
   ~LokiBase() = default;
+
   void inputThread();
   void processingThread();
-  void testImageUdder(EV42Serializer& FlatBuffer);
+
+  /// \brief generate a Udder test image
+  void testImageUdder();
+
+  /// \brief separate initial config from main processing
+  void setupProcessingThread();
 
   /// \brief calculate pixel id
   uint32_t calcPixel(PanelGeometry & Panel, uint8_t FEN,
-                     DataParser::LokiReadout & Data,
-                     ESSGeometry * Geometry);
+                     DataParser::LokiReadout & Data);
 
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries {2000};
@@ -62,19 +68,16 @@ protected:
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
-  // From Counters.h
   struct Counters Counters;
-
   LokiSettings LokiModuleSettings;
-
-  /// \brief Used in Processing thread
-  // From geometry/Config.h
   Config LokiConfiguration;
   Calibration LokiCalibration;
   ReadoutParser ESSReadoutParser;
   DataParser LokiParser{Counters};
   TubeAmps Amp2Pos;
   ESSTime Time;
+  EV42Serializer * Serializer;
+  std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 }
