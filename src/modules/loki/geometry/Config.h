@@ -33,7 +33,7 @@ public:
   uint8_t NPanels{0}; // Loki panels, not logical geometry panels
   uint8_t NTubesTotal{0}; // total number of tubes in instrument
   uint16_t Resolution{0}; /// Resolution along straws
-  ESSGeometry * geometry;
+  ESSGeometry * Geometry;
 
 private:
   uint32_t Pixels{0};

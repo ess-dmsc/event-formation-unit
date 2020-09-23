@@ -13,7 +13,11 @@
 #include <test/TestBase.h>
 #include <readout/ReadoutParser.h>
 
- std::string lokijson = R"(
+/// Test configuration - two rings used (0 and 1)
+/// TubesN = 8 and TubesZ = 4 implies four tube groups and
+/// four FENs per ring. FENs are enumerated 1 - 4 and
+/// Tube groups 0 - 4
+std::string lokijson = R"(
 {
   "Detector" : "LoKIBaseTest",
 
@@ -60,7 +64,7 @@ std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
 std::vector<uint8_t> TestPacket2{
     EXTRA_PADDING
     0x45, 0x53, 0x53, 0x00, //  'E' 'S' 'S' 0x00
-    0x30, 0x00, 0x9c + PAD_SIZE, 0x00, // 0x009c = 156
+    0x30, 0x00, 0xb4 + PAD_SIZE, 0x00, // 0x00b4 = 180 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
     0x10, 0x00, 0x00, 0x00,
@@ -87,7 +91,7 @@ std::vector<uint8_t> TestPacket2{
     0x01, 0x03, 0x02, 0x03,
     0x03, 0x03, 0x04, 0x03,
 
-    0x05, 0x01, 0x40, 0x00, // Data Header 2, ring 5, fen 1
+    0x05, 0x01, 0x40, 0x00, // Data Header 2, ring 5, fen 1 -> MappingError
 
     0x11, 0x00, 0x00, 0x00, // Readout 4, time 1
     0x01, 0x02, 0x00, 0x00,
@@ -106,6 +110,14 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, // all amplitudes are 0 -> GeometryError++
+
+    0x01, 0x05, 0x18, 0x00, // Data Header 3, ring 1, fen 1 -> MappingError
+
+    0x11, 0x00, 0x00, 0x00, // Readout 7 FEN our if range -> MappingError++
+    0x02, 0x02, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x01, 0x02, 0x02, 0x02,
+    0x03, 0x02, 0x04, 0x02,
 };
 
 TEST_F(LokiBaseTest, DataReceive) {
@@ -137,10 +149,10 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 6);
-  EXPECT_EQ(Readout.Counters.Headers, 2);
+  EXPECT_EQ(Readout.Counters.Readouts, 7);
+  EXPECT_EQ(Readout.Counters.Headers, 3);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
-  EXPECT_EQ(Readout.Counters.MappingErrors, 1);
+  EXPECT_EQ(Readout.Counters.MappingErrors, 2);
   EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
