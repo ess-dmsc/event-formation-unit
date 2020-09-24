@@ -39,12 +39,12 @@ public:
 
 public:
   /// \brief Stuff that 'ties' LoKI together
-  struct Counters & __attribute__((unused)) Counters;
-  LokiSettings & __attribute__((unused)) ModuleSettings;
+  struct Counters & counters;
+  LokiSettings & ModuleSettings;
   Config LokiConfiguration;
   Calibration LokiCalibration;
   ReadoutParser ESSReadoutParser;
-  DataParser LokiParser{Counters};
+  DataParser LokiParser{counters};
   TubeAmps Amp2Pos;
   // ESSTime Time;
   std::shared_ptr<ReadoutFile> DumpFile;
