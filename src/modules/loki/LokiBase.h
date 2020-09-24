@@ -48,8 +48,8 @@ public:
   void setupProcessingThread();
 
   /// \brief calculate pixel id
-  uint32_t calcPixel(PanelGeometry & Panel, uint8_t FEN,
-                     DataParser::LokiReadout & Data);
+  // uint32_t calcPixel(PanelGeometry & Panel, uint8_t FEN,
+  //                    DataParser::LokiReadout & Data);
 
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries {2000};
@@ -70,14 +70,14 @@ protected:
 
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
-  Config LokiConfiguration;
-  Calibration LokiCalibration;
-  ReadoutParser ESSReadoutParser;
-  DataParser LokiParser{Counters};
-  TubeAmps Amp2Pos;
+  //Config LokiConfiguration;
+  //Calibration LokiCalibration;
+  //ReadoutParser ESSReadoutParser;
+  //DataParser LokiParser{Counters};
+  //TubeAmps Amp2Pos;
   ESSTime Time;
   EV42Serializer * Serializer;
-  std::shared_ptr<ReadoutFile> DumpFile;
+  //std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 }
