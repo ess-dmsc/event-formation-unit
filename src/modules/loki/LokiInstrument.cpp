@@ -15,7 +15,7 @@ namespace Loki {
 
 LokiInstrument::LokiInstrument(struct Counters & counters,
     LokiSettings &moduleSettings)
-      : Counters(counters)
+      : counters(counters)
       , ModuleSettings(moduleSettings) {
 
     LokiConfiguration = Config(ModuleSettings.ConfigFile);
