@@ -267,15 +267,14 @@ void LokiBase::processingThread() {
             Counters.Events++;
           }
 
-        if (Loki.DumpFile) {
-          Loki.dumpReadoutToFile(Section, Data);
-        }
+          if (Loki.DumpFile) {
+            Loki.dumpReadoutToFile(Section, Data);
+          }
 
         }
       } // for()
 
-    } else {
-      // There is NO data in the FIFO - do stop checks and sleep a little
+    } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.RxIdle++;
       usleep(10);
     }

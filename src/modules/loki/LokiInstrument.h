@@ -39,7 +39,7 @@ public:
 
 public:
   /// \brief Stuff that 'ties' LoKI together
-  Counters & __attribute__((unused)) Counters;
+  struct Counters & __attribute__((unused)) Counters;
   LokiSettings & __attribute__((unused)) ModuleSettings;
   Config LokiConfiguration;
   Calibration LokiCalibration;
