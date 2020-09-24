@@ -8,8 +8,9 @@ include_directories(.)
 # loki detector module and base test
 #=============================================================================
 set(loki_common_inc
-  LokiBase.h
   Counters.h
+  LokiBase.h
+  LokiInstrument.h
   geometry/PanelGeometry.h
   geometry/Config.h
   geometry/Calibration.h
@@ -18,6 +19,7 @@ set(loki_common_inc
   )
 set(loki_common_src
   LokiBase.cpp
+  LokiInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
   readout/DataParser.cpp
