@@ -76,21 +76,14 @@ protected:
   LokiSettings ModuleSettings;
 
   void SetUp() override {
-    ModuleSettings.CalibFile = CalibFile;
     ModuleSettings.ConfigFile = ConfigFile;
   }
-
-  // delete temporary files
-  void TearDown() override {
-    deleteFile(ConfigFile);
-    deleteFile(CalibFile);
-    deleteFile(CalibInvalidPixelFile);
-    deleteFile(CalibInvalidMappingFile);
-  }
+  void TearDown() override {}
 };
 
 /** Test cases below */
 TEST_F(LokiInstrumentTest, Constructor) {
+  ModuleSettings.CalibFile = CalibFile;
   LokiInstrument Loki(counters, ModuleSettings);
   ASSERT_EQ(Loki.LokiConfiguration.getMaxPixel(), 28);
 }
@@ -98,11 +91,13 @@ TEST_F(LokiInstrumentTest, Constructor) {
 TEST_F(LokiInstrumentTest, InvalidMapping) {
   ModuleSettings.CalibFile = CalibInvalidMappingFile;
   ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
+  deleteFile(CalibInvalidMappingFile);
 }
 
 TEST_F(LokiInstrumentTest, InvalidNumberOfPixels) {
   ModuleSettings.CalibFile = CalibInvalidPixelFile;
   ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
+  deleteFile(CalibInvalidPixelFile);
 }
 
 int main(int argc, char **argv) {
@@ -111,5 +106,7 @@ int main(int argc, char **argv) {
   saveBuffer(CalibInvalidMappingFile, (void *)CalibInvalidMappingStr.c_str(), CalibInvalidMappingStr.size());
   saveBuffer(CalibInvalidPixelFile, (void *)CalibInvalidPixelStr.c_str(), CalibInvalidPixelStr.size());
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto RetVal = RUN_ALL_TESTS();
+  deleteFile(ConfigFile);
+  return RetVal;
 }
