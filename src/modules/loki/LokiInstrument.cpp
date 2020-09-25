@@ -8,31 +8,47 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/Log.h>
+#include <common/Trace.h>
 #include <common/TimeString.h>
 #include <loki/LokiInstrument.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 namespace Loki {
 
+/// \brief load configuration and calibration files, throw exceptions
+/// if these have errors or are inconsistent
+///
+/// throws if number of pixels do not match, and if the (invalid) pixel
+/// value 0 is mapped to a nonzero value
 LokiInstrument::LokiInstrument(struct Counters & counters,
     LokiSettings &moduleSettings)
       : counters(counters)
       , ModuleSettings(moduleSettings) {
 
+    XTRACE(INIT, ALW, "Loading configuration file %s",
+      ModuleSettings.ConfigFile.c_str());
     LokiConfiguration = Config(ModuleSettings.ConfigFile);
 
     Amp2Pos.setResolution(LokiConfiguration.Resolution);
 
     if (ModuleSettings.CalibFile.empty()) {
+      XTRACE(INIT, ALW, "Using the identity 'calibration'");
       uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
       LokiCalibration.nullCalibration(MaxPixels);
     } else {
+      XTRACE(INIT, ALW, "Loading calibration file %s",
+        ModuleSettings.CalibFile.c_str());
       LokiCalibration = Calibration(ModuleSettings.CalibFile);
     }
 
     if (LokiCalibration.getMaxPixel() != LokiConfiguration.getMaxPixel()) {
-        LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
+      XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
+        LokiConfiguration.getMaxPixel(), LokiCalibration.getMaxPixel());
+      LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
           LokiConfiguration.getMaxPixel(), LokiCalibration.getMaxPixel());
-        throw std::runtime_error("Pixel mismatch");
+      throw std::runtime_error("Pixel mismatch");
     }
 
     if (!ModuleSettings.FilePrefix.empty()) {

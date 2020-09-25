@@ -24,3 +24,7 @@ void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
     throw std::runtime_error(fmt::format("DataSave: write({}) failed", filename));
   }
 }
+
+void deleteFile(std::string filename) {
+  remove(filename.c_str());
+}
