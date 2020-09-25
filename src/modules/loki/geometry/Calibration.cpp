@@ -32,6 +32,12 @@ Calibration::Calibration(std::string CalibrationFile) {
       throw std::runtime_error("Invalid Mapping array size");
     }
     MaxPixelId = Mapping.size() - 1;
+
+    // Do not allow mapping invalid pixel valuse 0 to a valid one
+    if (Mapping[0] != 0) {
+      LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Calibration of pixel 0 : {}", CalibrationFile);
+      throw std::runtime_error("Invalid mapping of pixel value 0");
+    }
 }
 
 

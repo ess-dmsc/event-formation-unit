@@ -1,8 +1,13 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+//===----------------------------------------------------------------------===//
 
 #include <loki/geometry/Config.h>
-#include <test/TestBase.h>
 #include <test/SaveBuffer.h>
+#include <test/TestBase.h>
+
 
 std::string NotJsonName{"deleteme_loki_notjson.json"};
 std::string NotJsonStr = R"(

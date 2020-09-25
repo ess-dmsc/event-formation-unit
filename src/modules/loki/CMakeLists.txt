@@ -42,3 +42,17 @@ set(LokiBaseTest_SRC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
+
+##
+## LokiInstrumentTest Module integration test
+##
+set(LokiInstrumentTest_INC
+  ${loki_common_inc}
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  )
+set(LokiInstrumentTest_SRC
+  ${loki_common_src}
+  test/LokiInstrumentTest.cpp
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+)
+create_test_executable(LokiInstrumentTest)

@@ -2,6 +2,9 @@
 # Tests
 #=============================================================================
 
+include_directories(.)
+include_directories(..)
+
 ##
 ## Pure unit tests
 ##
