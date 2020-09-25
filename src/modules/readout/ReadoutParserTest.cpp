@@ -18,6 +18,7 @@ TEST_F(ReadoutTest, Constructor) {
   ASSERT_EQ(RdOut.Stats.ErrorVersion, 0);
   ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 0);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
 }
 
 // nullptr as buffer
@@ -58,6 +59,12 @@ TEST_F(ReadoutTest, ErrorVersion) {
   ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
 }
 
+TEST_F(ReadoutTest, ErrMaxOutputQueue) {
+  auto Res = RdOut.validate((char *)&ErrMaxOutputQueue[0], ErrMaxOutputQueue.size(), DataType);
+  ASSERT_EQ(Res, -ReadoutParser::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 1);
+}
+
 TEST_F(ReadoutTest, OkVersion) {
   unsigned int Errors{0};
   unsigned int MinSize{4 + PAD_SIZE};
@@ -72,6 +79,7 @@ TEST_F(ReadoutTest, OkVersion) {
   ASSERT_EQ(Res, ReadoutParser::OK);
   ASSERT_EQ(RdOut.Packet.DataPtr, (char *)(&OkVersion[0] + sizeof(ReadoutParser::PacketHeaderV0)));
   ASSERT_EQ(RdOut.Packet.DataLength, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
 }
 
 
