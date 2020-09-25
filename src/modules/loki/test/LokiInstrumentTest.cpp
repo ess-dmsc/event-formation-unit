@@ -8,11 +8,11 @@
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 
-
 using namespace Loki;
 
-// config and calib has four tubes of one tube and seven straws with
-// resolution 1 - total pixels 28
+// Contrieved but valid configuration file
+// The config one panel with 4 x 1 tubes with 7 straws each having a
+// resolution of 1 - this gives a total of 28 pixels
 std::string ConfigFile{"deleteme_loki_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -27,7 +27,7 @@ std::string ConfigStr = R"(
   }
 )";
 
-// Valid calibration
+// Valid calibration corresponding to TubesZ * TubesN * StrawResolution * 7 = 28
 std::string CalibFile{"deleteme_loki_instr_calib.json"};
 std::string CalibStr = R"(
   {
