@@ -22,20 +22,20 @@ Calibration::Calibration(std::string CalibrationFile) {
     Mapping = LokiCalibration["Mapping"].get<std::vector<uint32_t>>();
     }
     catch (...) {
-      LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Json file: {}", CalibrationFile);
+      LOG(INIT, Sev::Error, "Loki calibration - error: Invalid Json file: {}", CalibrationFile);
       throw std::runtime_error("Invalid Json file");
       return;
     }
 
     if (Mapping.size() <= 1) {
-      LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Calibration file: {}", CalibrationFile);
+      LOG(INIT, Sev::Error, "Loki calibration - error: Invalid Mapping size: {}", CalibrationFile);
       throw std::runtime_error("Invalid Mapping array size");
     }
     MaxPixelId = Mapping.size() - 1;
 
     // Do not allow mapping invalid pixel valuse 0 to a valid one
     if (Mapping[0] != 0) {
-      LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Calibration of pixel 0 : {}", CalibrationFile);
+      LOG(INIT, Sev::Error, "Loki calibration - error: Invalid Calibration of pixel 0 : {}", CalibrationFile);
       throw std::runtime_error("Invalid mapping of pixel value 0");
     }
 }
