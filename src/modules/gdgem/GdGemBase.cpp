@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016 - 2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,6 +24,7 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 #include <common/Trace.h>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -119,14 +120,14 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
   Stats.create("events.good_hits", stats_.EventsGoodHits);
 
   Stats.create("transmit.bytes", stats_.TxBytes);
-  
+
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", stats_.KafkaProduceFails);
   Stats.create("kafka.ev_errors", stats_.KafkaEvErrors);
   Stats.create("kafka.ev_others", stats_.KafkaEvOthers);
   Stats.create("kafka.dr_errors", stats_.KafkaDrErrors);
   Stats.create("kafka.dr_others", stats_.KafkaDrNoErrors);
-  
+
   Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);

@@ -7,9 +7,8 @@
 #include <common/Trace.h>
 #include <gdgem/srs/ParserVMM3.h>
 
-
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Gem {
 

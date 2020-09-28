@@ -1,11 +1,17 @@
-/** Copyright (C) 2016-2018 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief
+//===----------------------------------------------------------------------===//
 
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/NMXStats.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/TimeString.h>
-
 #include <common/Trace.h>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 

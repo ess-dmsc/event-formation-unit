@@ -16,6 +16,7 @@
 #include <gdgem/nmx/Readout.h>
 #include <common/Trace.h>
 #include <algorithm>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
