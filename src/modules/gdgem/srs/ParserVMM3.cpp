@@ -49,6 +49,8 @@ int ParserVMM3::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vd) {
       markers[idx].hasDataMarker = true;
       vd->hasDataMarker = true;
     }
+    XTRACE(PROCESS, DEB, "SRS Data: vmm: %d, channel: %d. adc: %d",
+      vd->vmmid, vd->chno, vd->adc);
     return 1;
   } else {
     /// Marker
@@ -150,6 +152,7 @@ int ParserVMM3::receive(const char *buffer, int size) {
     stats.ParserErrorBytes += size;
     return 0;
   }
+  XTRACE(PROCESS, DEB, "fecId: %u", pd.fecId);
   hdr.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
   //This header component will vanish soon
   //and be replaced by a timestamp for each vmm

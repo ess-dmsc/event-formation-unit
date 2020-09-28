@@ -1,7 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/srs/SRSMappings.h>
+#include <common/Trace.h>
 #include <sstream>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Gem {
 
@@ -64,14 +68,21 @@ uint8_t SRSMappings::get_plane(const Readout &readout) const {
 }
 
 uint16_t SRSMappings::get_strip(const Readout &readout) const {
-  if (readout.fec >= mappings_.size())
+  if (readout.fec >= mappings_.size()) {
+    XTRACE(DATA, DEB, "fec %d >= mappings size %d",
+      readout.fec, mappings_.size());
     return Hit::InvalidCoord;
+  }
   const auto &fec = mappings_[readout.fec];
-  if (readout.chip_id >= fec.size())
+  if (readout.chip_id >= fec.size()) {
+    XTRACE(DATA, DEB, "chip_id %d >= fec size %d",
+      readout.chip_id, fec.size());
     return Hit::InvalidCoord;
+  }
   const auto &vmm = fec[readout.chip_id];
-  if (readout.channel >= vmm.size())
+  if (readout.channel >= vmm.size()) {
     return Hit::InvalidCoord;
+  }
   return vmm[readout.channel].coordinate;
 }
 
