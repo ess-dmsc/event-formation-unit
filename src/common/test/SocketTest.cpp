@@ -58,6 +58,12 @@ TEST_F(SocketTest, PortInUse) {
 }
 
 
+TEST_F(SocketTest, IsMulticast) {
+  ASSERT_TRUE(Socket::isMulticast("224.1.2.3"));
+  ASSERT_FALSE(Socket::isMulticast("240.1.2.3"));
+}
+
+
 TEST_F(SocketTest, InvalidGetSockOpt) {
   Socket tcpsocket(Socket::SocketType::TCP);
   // force file descriptor (fd) to be set to -1 by failes send()
@@ -82,6 +88,14 @@ TEST_F(SocketTest, TCPTransmitter) {
   ASSERT_EQ(res, sizeof(DummyData));
 }
 
+TEST_F(SocketTest, UDPTransmitter) {
+  Socket::Endpoint local("127.0.0.1", 13241);
+  Socket::Endpoint remote("127.0.0.1", 13241);
+  UDPTransmitter UDPXmitter(local, remote);
+
+  ASSERT_EQ(UDPXmitter.isValidSocket(), true);
+}
+
 TEST_F(SocketTest, GetHostByName) {
   std::string name {"localhost"};
   auto res = Socket::getHostByName(name);
@@ -95,6 +109,12 @@ TEST_F(SocketTest, GetHostByName) {
   std::string weirdIp {"8.8.8"};
   res = Socket::getHostByName(weirdIp);
   ASSERT_TRUE(res == "8.8.0.8");
+}
+
+TEST_F(SocketTest, GetHostByNameInvalid) {
+  Socket tcpsocket(Socket::SocketType::TCP);
+  std::string InvalidHostName("#$%@^");
+  ASSERT_THROW(tcpsocket.getHostByName(InvalidHostName), std::runtime_error);
 }
 
 int main(int argc, char **argv) {
