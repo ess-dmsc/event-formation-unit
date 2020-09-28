@@ -10,14 +10,11 @@
 #include <gdgem/NMXStats.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/TimeString.h>
+#include <common/Log.h>
 #include <common/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
-#include <common/Log.h>
-// #undef TRC_MASK
-// #define TRC_MASK TRC_M_NONE
 
 namespace Gem {
 
@@ -135,6 +132,10 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
             XTRACE(PROCESS, DEB, "Adding hit to hit_buffer_x");
             hit_buffer_x.emplace_back(hit);
           } else {
+            XTRACE(PROCESS, DEB, "Hit coordinate %d outside region (%d, %d)",
+              hit.coordinate,
+              std::max(0, (int)(PMin - PWidth)),
+              std::min(1279, (int)(PMax + PWidth)));
             stats_.HitsOutsideRegion++;
           }
         }

@@ -15,6 +15,7 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <test/TestBase.h>
+#include <test/SaveBuffer.h>
 
 //
 std::vector<uint8_t> marker_3_data_3_plane_0_and_1 {
@@ -82,14 +83,13 @@ TEST_F(BuilderVMM3Test, ProcessDataBadMapping) {
 TEST_F(BuilderVMM3Test, ProcessDataGoodMapping) {
     srsMappings.set_mapping(fec1, vmm2, plane0, 0); // FEC 1, VMM 2, plane 0, offset 0
     BuilderVMM3 * builderGood = new BuilderVMM3(srsTime, srsMappings,
-    AdcThreshold291, DumpDir, 0, 1279, 1280, calibration, stats, true);
+    AdcThreshold291, "deleteme_", 0, 1279, 1280, calibration, stats, true);
 
     builderGood->process_buffer((char * )marker_3_data_3.data(), marker_3_data_3.size());
     ASSERT_EQ(stats.HitsBadPlane, 0);
     ASSERT_EQ(stats.HitsBadAdc, 2); // see threshold value above
     ASSERT_EQ(stats.HitsOutsideRegion, 0);
-    //ASSERT_EQ(builder->hit_buffer_x.size(), 1);
-    //ASSERT_EQ(builder->hit_buffer_y.size(), 0);
+    deleteFile(builderGood->getFilename());
 }
 
 TEST_F(BuilderVMM3Test, ProcessDataBothPlanes) {
@@ -103,6 +103,19 @@ TEST_F(BuilderVMM3Test, ProcessDataBothPlanes) {
     ASSERT_EQ(stats.HitsBadPlane, 0);
     ASSERT_EQ(stats.HitsBadAdc, 0); // see threshold value above
 
+}
+
+TEST_F(BuilderVMM3Test, ProcessHitOutsideRegion) {
+    srsMappings.set_mapping(fec1, vmm2, plane0, 0); // FEC 1, VMM 2, plane 0, offset 0
+    srsMappings.set_mapping(fec1, vmm3, plane1, 0); // FEC 1, VMM 2, plane 0, offset 0
+    BuilderVMM3 * builderGood = new BuilderVMM3(srsTime, srsMappings,
+    AdcThreshold0, DumpDir, 800, 1000, 100, calibration, stats, true);
+
+    builderGood->process_buffer((char * )marker_3_data_3_plane_0_and_1.data(),
+      marker_3_data_3_plane_0_and_1.size());
+    ASSERT_EQ(stats.HitsBadPlane, 0);
+    ASSERT_EQ(stats.HitsBadAdc, 0); // see threshold value above
+    ASSERT_EQ(stats.HitsOutsideRegion, 2);
 }
 
 // Seems like the bad geometry is practically unreachable due
