@@ -125,12 +125,14 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
         }
 
         if (hit.plane == 1) {
+          XTRACE(PROCESS, DEB, "Adding hit to hit_buffer_y");
           hit_buffer_y.emplace_back(hit);
         }
 
         if (hit.plane == 0) {
           auto c = hit.coordinate;
           if ( c >= std::max(0, (int)(PMin - PWidth)) and (c <= std::min(1279, (int)(PMax + PWidth)))) {
+            XTRACE(PROCESS, DEB, "Adding hit to hit_buffer_x");
             hit_buffer_x.emplace_back(hit);
           } else {
             stats_.HitsOutsideRegion++;
