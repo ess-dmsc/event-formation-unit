@@ -38,6 +38,9 @@ public:
   /// \todo Martin document
   void process_buffer(char *buf, size_t size) override;
 
+  /// \brief return the current filename
+  std::string getFilename() { return readout_file_->get_full_path().string(); }
+
  private:
   std::shared_ptr<CalibrationFile> calfile_;
 

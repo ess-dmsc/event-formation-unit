@@ -22,6 +22,7 @@ set(BuilderVMM3Test_INC
   ParserVMM3.h
   SRSTime.h
   SRSMappings.h
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
   )
 set(BuilderVMM3Test_SRC
   BuilderVMM3Test.cpp
@@ -30,6 +31,7 @@ set(BuilderVMM3Test_SRC
   ParserVMM3.cpp
   SRSTime.cpp
   SRSMappings.cpp
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
   )
 create_test_executable(BuilderVMM3Test)
 
