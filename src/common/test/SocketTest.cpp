@@ -117,6 +117,19 @@ TEST_F(SocketTest, GetHostByNameInvalid) {
   ASSERT_THROW(tcpsocket.getHostByName(InvalidHostName), std::runtime_error);
 }
 
+
+TEST_F(SocketTest, MultiCastSetTTL) {
+  Socket udpsocket(Socket::SocketType::UDP);
+  ASSERT_TRUE(udpsocket.isValidSocket());
+  udpsocket.setMulticastTTL();
+}
+
+TEST_F(SocketTest, MultiCastSetReceive) {
+  Socket udpsocket(Socket::SocketType::UDP);
+  ASSERT_TRUE(udpsocket.isValidSocket());
+  ASSERT_NO_THROW(udpsocket.setLocalSocket("224.1.2.1", 9729));
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
