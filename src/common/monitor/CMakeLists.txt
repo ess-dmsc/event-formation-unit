@@ -18,12 +18,12 @@ set(monitor_obj_INC
   Monitor.h
 )
 
-add_library(MonitorObj OBJECT
+add_library(MonitorLib OBJECT
   ${monitor_obj_SRC}
   ${monitor_obj_INC}
   )
 
-enable_coverage_flags(MonitorObj)
+enable_coverage_flags(MonitorLib)
 
 #=============================================================================
 # Tests

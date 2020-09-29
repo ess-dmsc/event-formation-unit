@@ -18,12 +18,12 @@ set(matching_obj_INC
   CenterMatcher.h
 )
 
-add_library(MatchingObj OBJECT
+add_library(MatchingLib OBJECT
   ${matching_obj_SRC}
   ${matching_obj_INC}
   )
 
-enable_coverage_flags(MatchingObj)
+enable_coverage_flags(MatchingLib)
 
 #=============================================================================
 # Tests
