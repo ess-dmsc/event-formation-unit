@@ -14,7 +14,7 @@ protected:
   NMXStats stats;
   std::unique_ptr<ParserVMM3> parser;
   SRSTime srsTime;
-  void SetUp() override { 
+  void SetUp() override {
     srsTime.bc_clock_MHz(40);
     srsTime.tac_slope_ns(60);
     srsTime.trigger_resolution_ns(1);
@@ -29,7 +29,7 @@ protected:
     parser->stats.ParserFrameSeqErrors = 0;
     parser->stats.ParserFramecounterOverflows = 0;
     parser->stats.ParserTimestampLostErrors = 0;
-    parser->stats.ParserTimestampSeqErrors = 0; 
+    parser->stats.ParserTimestampSeqErrors = 0;
     parser->stats.ParserTimestampOverflows = 0;
     parser->stats.ParserBadFrames = 0;
     parser->stats.ParserGoodFrames = 0;
@@ -55,7 +55,7 @@ TEST_F(ParserVMM3Test, Constructor) {
 TEST_F(ParserVMM3Test, UndersizeData) {
   for (int dataLength = 0; dataLength <= 16; dataLength++) {
     memSet();
-    int res = parser->receive((char *)&data_3_ch0[0], dataLength);
+    int res = parser->receive((char *)data_3_ch0.data(), dataLength);
     EXPECT_EQ(res, 0);
     assertfields(0, 0, dataLength);
     for (int i = 0; i < MaxVMMs*MaxFECs; i++) {
@@ -66,7 +66,7 @@ TEST_F(ParserVMM3Test, UndersizeData) {
 
 TEST_F(ParserVMM3Test, DataOnly) {
   memSet();
-  int res = parser->receive((char *)&data_3_ch0[0], data_3_ch0.size());
+  int res = parser->receive((char *)data_3_ch0.data(), data_3_ch0.size());
   EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 0, 0);
   for (int i = 0; i < MaxVMMs*MaxFECs; i++) {
@@ -76,7 +76,7 @@ TEST_F(ParserVMM3Test, DataOnly) {
 
 TEST_F(ParserVMM3Test, MarkerOnly) {
   memSet();
-  int res = parser->receive((char *)&marker_3_vmm1_3[0], marker_3_vmm1_3.size());
+  int res = parser->receive((char *)marker_3_vmm1_3.data(), marker_3_vmm1_3.size());
   EXPECT_EQ(res, 0);
   assertfields(0, 3, 0);
   for (int i = 0; i < 3; i++) {
@@ -87,7 +87,7 @@ TEST_F(ParserVMM3Test, MarkerOnly) {
 
 TEST_F(ParserVMM3Test, TimestampError) {
   memSet();
-  int res = parser->receive((char *)&timestamp_error[0], timestamp_error.size());
+  int res = parser->receive((char *)timestamp_error.data(), timestamp_error.size());
   EXPECT_EQ(res, 0);
   EXPECT_EQ(0, parser->stats.ParserData);
   EXPECT_EQ(2, parser->stats.ParserMarkers);
@@ -96,7 +96,7 @@ TEST_F(ParserVMM3Test, TimestampError) {
 
 TEST_F(ParserVMM3Test, TimestampOverflow) {
   memSet();
-  int res = parser->receive((char *)&timestamp_overflow[0], timestamp_overflow.size());
+  int res = parser->receive((char *)timestamp_overflow.data(), timestamp_overflow.size());
   EXPECT_EQ(res, 0);
   EXPECT_EQ(0, parser->stats.ParserData);
   EXPECT_EQ(2, parser->stats.ParserMarkers);
@@ -105,7 +105,7 @@ TEST_F(ParserVMM3Test, TimestampOverflow) {
 
 TEST_F(ParserVMM3Test, TimestampLost) {
   memSet();
-  int res = parser->receive((char *)&timestamp_lost[0], timestamp_lost.size());
+  int res = parser->receive((char *)timestamp_lost.data(), timestamp_lost.size());
   EXPECT_EQ(res, 2);
   EXPECT_EQ(2, parser->stats.ParserData);
   EXPECT_EQ(1, parser->stats.ParserMarkers);
@@ -114,7 +114,7 @@ TEST_F(ParserVMM3Test, TimestampLost) {
 
 TEST_F(ParserVMM3Test, TimestampNotLost) {
   memSet();
-  int res = parser->receive((char *)&timestamp_not_lost[0], timestamp_not_lost.size());
+  int res = parser->receive((char *)timestamp_not_lost.data(), timestamp_not_lost.size());
   EXPECT_EQ(res, 2);
   EXPECT_EQ(2, parser->stats.ParserData);
   EXPECT_EQ(2, parser->stats.ParserMarkers);
@@ -123,27 +123,27 @@ TEST_F(ParserVMM3Test, TimestampNotLost) {
 
 TEST_F(ParserVMM3Test, FrameMissingError) {
   memSet();
-  int res = parser->receive((char *)&framecounter_error1[0], framecounter_error1.size());
+  int res = parser->receive((char *)framecounter_error1.data(), framecounter_error1.size());
   EXPECT_EQ(res, 1);
-  res = parser->receive((char *)&framecounter_error2[0], framecounter_error2.size());
+  res = parser->receive((char *)framecounter_error2.data(), framecounter_error2.size());
   EXPECT_EQ(res, 1);
   EXPECT_EQ(2, parser->stats.ParserFrameMissingErrors);
 }
 
 TEST_F(ParserVMM3Test, FrameOrderError) {
   memSet();
-  int res = parser->receive((char *)&framecounter_error2[0], framecounter_error2.size());
+  int res = parser->receive((char *)framecounter_error2.data(), framecounter_error2.size());
   EXPECT_EQ(res, 1);
-  res = parser->receive((char *)&framecounter_error1[0], framecounter_error1.size());
+  res = parser->receive((char *)framecounter_error1.data(), framecounter_error1.size());
   EXPECT_EQ(res, 1);
   EXPECT_EQ(1, parser->stats.ParserFrameSeqErrors);
 }
 
 TEST_F(ParserVMM3Test, FramecounterOverflow) {
   memSet();
-  int res = parser->receive((char *)&framecounter_overflow1[0], framecounter_overflow1.size());
+  int res = parser->receive((char *)framecounter_overflow1.data(), framecounter_overflow1.size());
   EXPECT_EQ(res, 1);
-  res = parser->receive((char *)&framecounter_overflow2[0], framecounter_overflow2.size());
+  res = parser->receive((char *)framecounter_overflow2.data(), framecounter_overflow2.size());
   EXPECT_EQ(res, 1);
   EXPECT_EQ(1, parser->stats.ParserFramecounterOverflows);
 }
@@ -151,7 +151,7 @@ TEST_F(ParserVMM3Test, FramecounterOverflow) {
 
 TEST_F(ParserVMM3Test, MarkerAndData) {
   memSet();
-  int res = parser->receive((char *)&marker_3_data_3[0], marker_3_data_3.size());
+  int res = parser->receive((char *)marker_3_data_3.data(), marker_3_data_3.size());
   EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
@@ -162,7 +162,7 @@ TEST_F(ParserVMM3Test, MarkerAndData) {
 
 TEST_F(ParserVMM3Test, MarkerAndDataMixed) {
   memSet();
-  int res = parser->receive((char *)&marker_data_mixed_3[0], marker_data_mixed_3.size());
+  int res = parser->receive((char *)marker_data_mixed_3.data(), marker_data_mixed_3.size());
   EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
@@ -173,23 +173,30 @@ TEST_F(ParserVMM3Test, MarkerAndDataMixed) {
 
 TEST_F(ParserVMM3Test, NoData) {
   memSet();
-  int res = parser->receive((char *)&no_data[0], no_data.size());
+  int res = parser->receive((char *)no_data.data(), no_data.size());
   EXPECT_EQ(res, 0);
   assertfields(0, 0, no_data.size());
 }
 
 TEST_F(ParserVMM3Test, InvalidDataId) {
   memSet();
-  int res = parser->receive((char *)&invalid_dataid[0], invalid_dataid.size());
+  int res = parser->receive((char *)invalid_dataid.data(), invalid_dataid.size());
   EXPECT_EQ(res, 0);
   assertfields(0, 0, invalid_dataid.size());
 }
 
 TEST_F(ParserVMM3Test, InconsistentDataLength) {
   memSet();
-  int res = parser->receive((char *)&inconsistent_datalen[0], inconsistent_datalen.size());
+  int res = parser->receive((char *)inconsistent_datalen.data(), inconsistent_datalen.size());
   EXPECT_EQ(res, 0);
   assertfields(0, 0, inconsistent_datalen.size());
+}
+
+TEST_F(ParserVMM3Test, InvalidFEC0) {
+  memSet();
+  int hits = parser->receive((char *)invalid_fec_id.data(), invalid_fec_id.size());
+  EXPECT_EQ(hits, 0);
+  EXPECT_EQ(parser->stats.ParserBadFrames, 1);
 }
 
 TEST_F(ParserVMM3Test, DataLengthOverflow) {
@@ -199,7 +206,7 @@ TEST_F(ParserVMM3Test, DataLengthOverflow) {
   srsTime.tac_slope_ns(60);
   srsTime.trigger_resolution_ns(1);
   ParserVMM3 shortvmmbuffer(2,stats, srsTime);
-  int res = shortvmmbuffer.receive((char *)& data_3_ch0[0],  data_3_ch0.size());
+  int res = shortvmmbuffer.receive((char *)data_3_ch0.data(),  data_3_ch0.size());
   EXPECT_EQ(res, 2);
   EXPECT_EQ(2, shortvmmbuffer.stats.ParserData);
   EXPECT_EQ(0, shortvmmbuffer.stats.ParserMarkers);
