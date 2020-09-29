@@ -1,6 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <multigrid/reduction/ModulePipeline.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
+#include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/geometry/PlaneMappings.h>
 #include <common/Trace.h>
 
