@@ -19,12 +19,12 @@ set(analysis_obj_INC
   EventAnalyzer.h
 )
 
-add_library(AnalysisObj OBJECT
+add_library(AnalysisLib OBJECT
   ${analysis_obj_SRC}
   ${analysis_obj_INC}
   )
 
-enable_coverage_flags(AnalysisObj)
+enable_coverage_flags(AnalysisLib)
 
 #=============================================================================
 # Tests

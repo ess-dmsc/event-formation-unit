@@ -10,7 +10,7 @@ add_subdirectory(reduction)
 
 set(mgmesytec_SRC Multigrid.cpp MultigridBase.cpp Config.cpp)
 set(mgmesytec_INC MultigridBase.h AbstractBuilder.h Config.h)
-set(mgmesytec_LIB  MgGeometry MgMesytec MgReduction)
+set(mgmesytec_LIB  MgGeometryLib MgMesytecLib MgReductionLib)
 create_module(mgmesytec)
 
 #=============================================================================

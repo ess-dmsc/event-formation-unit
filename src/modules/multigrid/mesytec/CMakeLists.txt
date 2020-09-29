@@ -18,9 +18,9 @@ set(mg_mesytec_obj_INC
   BuilderMesytec.h
   )
 
-add_library(MgMesytec STATIC
+add_library(MgMesytecLib STATIC
   ${mg_mesytec_obj_SRC}
   ${mg_mesytec_obj_INC}
   )
 
-enable_coverage_flags(MgMesytec)
+enable_coverage_flags(MgMesytecLib)

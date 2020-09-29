@@ -36,7 +36,7 @@ set(efu_common_INC
   Log.h
   Statistics.h
   PoolAllocator.h
-  Producer.h  
+  Producer.h
   RingBuffer.h
   Socket.h
   StatPublisher.h
@@ -56,11 +56,11 @@ add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
 
-  $<TARGET_OBJECTS:ReductionObj>
-  $<TARGET_OBJECTS:ClusteringObj>
-  $<TARGET_OBJECTS:MatchingObj>
-  $<TARGET_OBJECTS:AnalysisObj>
-  $<TARGET_OBJECTS:MonitorObj>
+  $<TARGET_OBJECTS:ReductionLib>
+  $<TARGET_OBJECTS:ClusteringLib>
+  $<TARGET_OBJECTS:MatchingLib>
+  $<TARGET_OBJECTS:AnalysisLib>
+  $<TARGET_OBJECTS:MonitorLib>
   )
 
 target_include_directories(efu_common
