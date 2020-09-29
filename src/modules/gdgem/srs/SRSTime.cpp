@@ -43,14 +43,6 @@ uint16_t SRSTime::acquisition_window() const {
   return acquisition_window_;
 }
 
-double SRSTime::max_chip_time_in_window_ns() const {
-  return max_chip_time_in_window_ns_;
-}
-
-double SRSTime::trigger_timestamp_ns(uint64_t trigger_timestamp) const {
-  return trigger_timestamp * trigger_resolution_ns_;
-}
-
 uint64_t SRSTime::trigger_period_ns() const {
   return trigger_period_ns_;
 }
