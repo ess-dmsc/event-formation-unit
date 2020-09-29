@@ -2,10 +2,10 @@
 
 #include <multigrid/reduction/ModulePipeline.h>
 #include <multigrid/geometry/PlaneMappings.h>
-
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Multigrid {
 
@@ -27,7 +27,7 @@ void ModulePipeline::ingest(const Hit &hit) {
   } else if (plane == grid_plane) {
     grid_clusterer.insert(hit);
   } else {
-    stats.invalid_planes++;
+    stats.invalid_planes++; ///< \todo can this ever happen?
   }
 }
 
@@ -45,7 +45,6 @@ void ModulePipeline::process_events(bool flush) {
   matcher.match(flush);
 
   for (auto &event : matcher.matched_events) {
-
     stats.events_total++;
 
     if ((MGAnalyzer::WireCluster(event).hit_count() > max_wire_hits) ||
@@ -81,6 +80,8 @@ void ModulePipeline::process_events(bool flush) {
   matcher.matched_events.clear();
 }
 
+// GCOVR_EXCL_START
+// debug strings excluded from coverage and unit tests
 std::string ModulePipeline::config(const std::string& prepend) const {
   std::stringstream ss;
   ss << prepend << "Wire clusterer:\n" + wire_clusterer.config(prepend + "  ");
@@ -110,5 +111,6 @@ std::string ModulePipeline::status(const std::string& prepend, bool verbose) con
   ss << prepend << "Grid clusterer:\n" + grid_clusterer.status(prepend + "  ", verbose);
   return ss.str();
 }
+// GCOVR_EXCL_STOP
 
 }
