@@ -146,7 +146,7 @@ int ParserVMM3::receive(const char *buffer, int size) {
   }
 
   pd.fecId = (hdr.dataId >> 4) & 0x0f;
-  if (pd.fecId < 1 || pd.fecId > 16) {
+  if (pd.fecId == 0) {
     XTRACE(PROCESS, WAR, "Invalid fecId: %u", pd.fecId);
     stats.ParserBadFrames++;
     stats.ParserErrorBytes += size;

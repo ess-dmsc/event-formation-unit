@@ -66,6 +66,17 @@ std::vector<uint8_t> no_data {
   0x00, 0x00, 0x00, 0x00, 0x0c, 0x03 // marker 3: vmm3, timeStamp 3
 };
 
+std::vector<uint8_t> invalid_fec_id {
+  0x00, 0x33, 0x71, 0x37,             // Frame Counter
+//                    *
+  0x56, 0x4d, 0x33, 0x00,             // Data ID 564d33 and fecId 0
+  0x4c, 0x39, 0x2f, 0x60,             // UDP timestamp
+  0x00, 0x00, 0x00, 0x00,             // Offset overflow last frame
+  0xe0, 0x92, 0x24, 0x02, 0x80, 0x00, // hit 1
+  0xe0, 0x92, 0x34, 0x01, 0x80, 0x00, // hit 2
+  0xe0, 0x92, 0x20, 0x22, 0x80, 0x00  // hit 3
+};
+
 std::vector<uint8_t> invalid_dataid {
   0x00, 0x33, 0x71, 0x37,
 //  **    **    **    **
@@ -110,7 +121,7 @@ std::vector<uint8_t> timestamp_overflow {
 
 
 //Data format hit (MSB left, LSB right)
-//data 1 
+//data 1
 //5 bit triggerOffset = (data1 >> 27) & 0x1F
 //5 bit vmmid = (data1 >> 22) & 0x1F
 //10 bit adc = (data1 >> 12) & 0x3FF
@@ -120,11 +131,11 @@ std::vector<uint8_t> timestamp_overflow {
 //1 bit overThreshold = (data2 >> 14) & 0x01
 //6 bit chno = (data2 >> 8) & 0x3f
 //8 bit tdc = data2 & 0xff;
- 
+
 //Data format marker (MSB left, LSB right)
-//data 1 
+//data 1
 //32 bit timestamp_upper_32bit = data1
-//data 2 
+//data 2
 //1 bit 0 = marker
 //5 bit vmmid = (data2 >> 10) & 0x1F;
 //10 bit timestamp_lower_10bit = data2 & 0x03FF
@@ -137,7 +148,7 @@ std::vector<uint8_t> timestamp_lost {
   0x00, 0x00, 0x00, 0x00, 0x04, 0x01, // marker 1: vmm1, timeStamp 1
   0xf8, 0x50, 0x00, 0x00, 0x80, 0x00, // hit vmm1, offset 31
   0x00, 0x50, 0x00, 0x00, 0x80, 0x00  // hit vmm1, offset 0
-  
+
 };
 
 std::vector<uint8_t> timestamp_not_lost {
