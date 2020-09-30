@@ -19,7 +19,7 @@ set(analysis_obj_INC
   EventAnalyzer.h
 )
 
-add_library(AnalysisLib STATIC
+add_library(AnalysisLib OBJECT
   ${analysis_obj_SRC}
   ${analysis_obj_INC}
   )
