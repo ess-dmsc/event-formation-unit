@@ -4,44 +4,104 @@
 #include <test/TestBase.h>
 #include <test/SaveBuffer.h>
 
-std::string CalibFile{"deleteme_calib.json"};
-std::string CalibrationStr = R"(
-{
-  "LokiCalibration":
-    {
-      "Mapping":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    }
-}
+std::string NotJsonFile{"deleteme_lokicalib_notjson.json"};
+std::string NotJsonStr = R"(
+  Failure is not an option.
 )";
 
-std::string InvalidCalibFile{"deleteme_invalid_calib.json"};
-std::string InvalidCalibrationStr = R"(
-{
-  "LokiCalibration":
-    {
-      "NoMapping":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    }
-}
+std::string BadStrawOrderFile{"deleteme_lokicalib_badstraworder.json"};
+std::string BadStrawOrderStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 3,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
+            {"straw" :    3, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
+      }
+  }
 )";
 
-std::string ShortMappingFile{"deleteme_invalid_shortmapping.json"};
-std::string ShortMappingStr = R"(
-{
-  "LokiCalibration":
-    {
-      "Mapping":[7]
-    }
-}
+std::string StrawMismatchFile{"deleteme_lokicalib_strawmismatch.json"};
+std::string StrawMismatchStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 4,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
+      }
+  }
 )";
 
-std::string InvalidPixel0MappingFile{"deleteme_invalid_badmapping.json"};
-std::string InvalidPixel0MappingStr = R"(
-{
-  "LokiCalibration":
-    {
-      "Mapping":[7], [2]
-    }
-}
+std::string InvalidCoeffFile{"deleteme_lokicalib_invalidcoeff.json"};
+std::string InvalidCoeffStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 4,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 0.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
+      }
+  }
+)";
+
+std::string StrawMappingNullFile{"deleteme_lokicalib_strawmapping_null.json"};
+std::string StrawMappingNullStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 3,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 1.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 1.0, 0.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 1.0, 0.0]}
+          ]
+      }
+  }
+)";
+
+std::string StrawMappingConstFile{"deleteme_lokicalib_strawmapping_strawid.json"};
+std::string StrawMappingConstStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 3,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
+      }
+  }
 )";
 
 using namespace Loki;
@@ -55,54 +115,95 @@ protected:
 
 TEST_F(CalibrationTest, Constructor) {
   Calibration calib;
-  ASSERT_EQ(calib.Mapping.size(), 0);
+  ASSERT_EQ(calib.StrawMapping.size(), 0);
   ASSERT_EQ(calib.getMaxPixel(), 0);
 }
 
-TEST_F(CalibrationTest, NullCalibrationWrongSize) {
+TEST_F(CalibrationTest, NullCalibrationWrongSizeStraw) {
   Calibration calib;
-  uint32_t Pixels{1};
-  ASSERT_ANY_THROW(calib.nullCalibration(Pixels));
+  uint32_t BadStraws{6};
+  uint16_t Resolution{256};
+  ASSERT_ANY_THROW(calib.nullCalibration(BadStraws, Resolution));
 }
 
-TEST_F(CalibrationTest, NullCalibration) {
+TEST_F(CalibrationTest, NullCalibrationWrongSizeResolution) {
   Calibration calib;
-  uint32_t Pixels{11234};
-  calib.nullCalibration(Pixels);
-  ASSERT_EQ(calib.Mapping.size(), Pixels + 1);
-  ASSERT_EQ(calib.getMaxPixel(), Pixels);
-  for (uint32_t i = 0; i <= Pixels; i++) {
-    ASSERT_EQ(calib.Mapping[i], i);
+  uint32_t Straws{7};
+  uint16_t BadResolution{255};
+  ASSERT_ANY_THROW(calib.nullCalibration(Straws, BadResolution));
+
+  BadResolution = 1025;
+  ASSERT_ANY_THROW(calib.nullCalibration(Straws, BadResolution));
+}
+
+TEST_F(CalibrationTest, NullCalibrationGood) {
+  Calibration calib;
+  uint32_t Straws{6160};
+  uint16_t Resolution{256};
+  calib.nullCalibration(Straws, Resolution);
+  for (uint32_t Straw = 0; Straw < Straws; Straw++) {
+    for (uint32_t Pos = 0; Pos < Resolution; Pos++) {
+      ASSERT_EQ(calib.strawCorrection(Straw, Pos), Pos);
+    }
   }
 }
 
 TEST_F(CalibrationTest, LoadCalib) {
-  Calibration calib = Calibration(CalibFile);
-  ASSERT_EQ(calib.Mapping.size(), 11);
-  ASSERT_EQ(calib.getMaxPixel(), 10);
-  deleteFile(CalibFile);
+  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
+  Calibration calib = Calibration(StrawMappingNullFile);
+  ASSERT_EQ(calib.StrawMapping.size(), 3);
+  ASSERT_EQ(calib.getMaxPixel(), 3*256);
+  deleteFile(StrawMappingNullFile);
 }
 
-TEST_F(CalibrationTest, LoadCalibShortMapping) {
-  ASSERT_ANY_THROW(Calibration calib = Calibration(ShortMappingFile));
-  deleteFile(ShortMappingFile);
+TEST_F(CalibrationTest, LoadCalibConst) {
+  saveBuffer(StrawMappingConstFile, (void *)StrawMappingConstStr.c_str(), StrawMappingConstStr.size());
+
+  uint32_t Straws{3};
+  uint16_t Resolution{256};
+
+  Calibration calib = Calibration(StrawMappingConstFile);
+  ASSERT_EQ(calib.StrawMapping.size(), Straws);
+  ASSERT_EQ(calib.getMaxPixel(), Straws * Resolution);
+
+  for (uint32_t Straw = 0; Straw < Straws; Straw++) {
+    for (uint32_t Pos = 0; Pos < Resolution; Pos++) {
+
+      ASSERT_EQ(calib.strawCorrection(Straw, Pos), Straw);
+    }
+  }
+  deleteFile(StrawMappingConstFile);
 }
 
-TEST_F(CalibrationTest, InvalidPixel0Mapping) {
-  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidPixel0MappingFile));
-  deleteFile(InvalidPixel0MappingFile);
+
+TEST_F(CalibrationTest, NOTJson) {
+  saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
+  ASSERT_ANY_THROW(Calibration calib = Calibration(NotJsonFile));
+  deleteFile(NotJsonFile);
 }
 
-TEST_F(CalibrationTest, LoadInvalidCalib) {
-  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCalibFile));
-  deleteFile(InvalidCalibFile);
+TEST_F(CalibrationTest, BadStrawOrder) {
+  saveBuffer(BadStrawOrderFile, (void *)BadStrawOrderStr.c_str(), BadStrawOrderStr.size());
+  ASSERT_ANY_THROW(Calibration calib = Calibration(BadStrawOrderFile));
+  deleteFile(BadStrawOrderFile);
 }
+
+TEST_F(CalibrationTest, StrawMismatch) {
+  saveBuffer(StrawMismatchFile, (void *)StrawMismatchStr.c_str(), StrawMismatchStr.size());
+  ASSERT_ANY_THROW(Calibration calib = Calibration(StrawMismatchFile));
+  deleteFile(StrawMismatchFile);
+}
+
+TEST_F(CalibrationTest, InvalidCoeff) {
+  saveBuffer(InvalidCoeffFile, (void *)InvalidCoeffStr.c_str(), InvalidCoeffStr.size());
+  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCoeffFile));
+  deleteFile(InvalidCoeffFile);
+}
+
+
+
 
 int main(int argc, char **argv) {
-  saveBuffer(CalibFile, (void *)CalibrationStr.c_str(), CalibrationStr.size());
-  saveBuffer(InvalidCalibFile, (void *)InvalidCalibrationStr.c_str(), InvalidCalibrationStr.size());
-  saveBuffer(ShortMappingFile, (void *)ShortMappingStr.c_str(), ShortMappingStr.size());
-  saveBuffer(InvalidPixel0MappingFile, (void *)InvalidPixel0MappingStr.c_str(), InvalidPixel0MappingStr.size());
   testing::InitGoogleTest(&argc, argv);
   auto retval = RUN_ALL_TESTS();
   return retval;
