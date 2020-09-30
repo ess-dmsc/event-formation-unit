@@ -24,7 +24,7 @@ public:
   /// is stored in the two member variables (StrawId, PosId) if an
   /// invalid input is given the output will be outside the valid
   /// ranges.
-  void calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
+  bool calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
                     std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
     std::uint32_t StrawFrac1 = AmplitudeA + AmplitudeB;
     std::uint32_t StrawFrac2 = AmplitudeC + AmplitudeD;
@@ -34,10 +34,11 @@ public:
       Stats.AmplitudeZero++;
       StrawId = NStraws;
       PosId = NPos;
-      return;
+      return false;
     }
     StrawId = ((NStraws - 1) * StrawFrac1) / Denominator;
     PosId = ((NPos - 1) * PosFrac1) / Denominator;
+    return true;
   }
 
   void setResolution(uint16_t Resolution) {

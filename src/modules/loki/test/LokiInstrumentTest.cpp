@@ -18,10 +18,10 @@ std::string ConfigStr = R"(
   {
     "Detector": "LoKI",
 
-    "StrawResolution" : 1,
+    "StrawResolution" : 256,
 
     "PanelConfig" : [
-      { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 1, "StrawOffset" : 0    }
+      { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 1, "TubesN" : 1, "StrawOffset" : 0    }
     ]
 
   }
@@ -33,42 +33,24 @@ std::string CalibStr = R"(
   {
     "LokiCalibration":
       {
-        "Mapping":[ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-                   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                   20, 21, 22, 23, 24, 25, 26, 27, 28
-                  ]
+        "straws" : 7,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]},
+            {"straw" :    3, "poly" : [0.0, 0.0, 0.0, 0.0]},
+            {"straw" :    4, "poly" : [0.0, 0.0, 0.0, 1.0]},
+            {"straw" :    5, "poly" : [0.0, 0.0, 0.0, 2.0]},
+            {"straw" :    6, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
       }
   }
 )";
 
-// Illegal mapping of 0 to nonzero pixel value
-std::string CalibInvalidMappingFile{"deleteme_loki_instr_calib_bad_map.json"};
-std::string CalibInvalidMappingStr = R"(
-  {
-    "LokiCalibration":
-      {
-        "Mapping":[ 99,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                    20, 21, 22, 23, 24, 25, 26, 27, 28
-                  ]
-      }
-  }
-)";
-
-
-// Too few pixels to match Config
-std::string CalibInvalidPixelFile{"deleteme_loki_instr_calib_bad_pixel.json"};
-std::string CalibInvalidPixelStr = R"(
-  {
-    "LokiCalibration":
-      {
-        "Mapping":[ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-                   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                   20, 21, 22, 23, 24, 25, 26, 27
-                  ]
-      }
-  }
-)";
 
 class LokiInstrumentTest : public TestBase {
 protected:
@@ -85,28 +67,13 @@ protected:
 TEST_F(LokiInstrumentTest, Constructor) {
   ModuleSettings.CalibFile = CalibFile;
   LokiInstrument Loki(counters, ModuleSettings);
-  ASSERT_EQ(Loki.LokiConfiguration.getMaxPixel(), 28);
-}
-
-TEST_F(LokiInstrumentTest, InvalidMapping) {
-  ModuleSettings.CalibFile = CalibInvalidMappingFile;
-  ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
-  deleteFile(CalibInvalidMappingFile);
-}
-
-TEST_F(LokiInstrumentTest, InvalidNumberOfPixels) {
-  ModuleSettings.CalibFile = CalibInvalidPixelFile;
-  ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
-  deleteFile(CalibInvalidPixelFile);
+  ASSERT_EQ(Loki.LokiConfiguration.getMaxPixel(), 7 * 256);
 }
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(CalibFile, (void *)CalibStr.c_str(), CalibStr.size());
-  saveBuffer(CalibInvalidMappingFile, (void *)CalibInvalidMappingStr.c_str(), CalibInvalidMappingStr.size());
-  saveBuffer(CalibInvalidPixelFile, (void *)CalibInvalidPixelStr.c_str(), CalibInvalidPixelStr.size());
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
-  deleteFile(ConfigFile);
   return RetVal;
 }

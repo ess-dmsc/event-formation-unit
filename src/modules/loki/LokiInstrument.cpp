@@ -66,20 +66,21 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
     DataParser::LokiReadout & Data) {
 
   uint8_t TubeGroup = FEN - 1;
-  /// \todo validate this assumption from LoKI readout data
-  /// FPGAId: 2 bits
-  /// TUBE: 1 bit
-  /// LocalTube: 0 - 7
-  uint8_t LocalTube = ((Data.FPGAId & 0x3) << 1) + (Data.TubeId & 0x1);
+  uint8_t LocalTube = Data.TubeId;
 
-  Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+  bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+  if (not valid) {
+    return 0;
+  }
+
   auto Straw = Amp2Pos.StrawId;
+  /// Position (and CalibratedPos) are per definition == X
+  uint16_t Position = Amp2Pos.PosId; // position along the straw
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
 
-  /// Position (and CalibratedPos) are per definition == X
-  uint16_t Position = Amp2Pos.PosId; // position along the straw
   uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);
 
   uint32_t PixelId = LokiConfiguration.Geometry->pixel2D(CalibratedPos,
