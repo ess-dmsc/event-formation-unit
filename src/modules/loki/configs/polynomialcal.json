@@ -1,0 +1,16 @@
+
+{
+  "LokiCalibration":
+    {
+      "straws" : 3,
+
+      "resolution" : 256,
+
+      "polynomials" :
+        [
+          {"straw" :    0, "poly" : [0.0, 0.0, 1.0, 0.0]},
+          {"straw" :    1, "poly" : [0.0, 0.0, 1.0, 0.0]},
+          {"straw" :    2, "poly" : [0.0, 0.0, 1.0, 0.0]}
+        ]
+    }
+}

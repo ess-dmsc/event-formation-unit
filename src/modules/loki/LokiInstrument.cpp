@@ -36,7 +36,8 @@ LokiInstrument::LokiInstrument(struct Counters & counters,
     if (ModuleSettings.CalibFile.empty()) {
       XTRACE(INIT, ALW, "Using the identity 'calibration'");
       uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
-      LokiCalibration.nullCalibration(MaxPixels);
+      uint32_t Straws = MaxPixels/LokiConfiguration.Resolution;
+      LokiCalibration.nullCalibration(Straws, LokiConfiguration.Resolution);
     } else {
       XTRACE(INIT, ALW, "Loading calibration file %s",
         ModuleSettings.CalibFile.c_str());
@@ -74,16 +75,20 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
   Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   auto Straw = Amp2Pos.StrawId;
 
-  auto XPos = Amp2Pos.PosId;
-  auto YPos = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
+  /// Globalstraw is per its definition == Y
+  uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
 
-  uint32_t PixelId = LokiConfiguration.Geometry->pixel2D(XPos,YPos);
-  uint32_t MappedPixelId = LokiCalibration.Mapping[PixelId];
+  /// Position (and CalibratedPos) are per definition == X
+  uint16_t Position = Amp2Pos.PosId; // position along the straw
+  uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);
 
-  XTRACE(EVENT, DEB, "xpos %u, ypos %u, pixel: %u (calibrated: %u)",
-    XPos, YPos, PixelId, MappedPixelId);
+  uint32_t PixelId = LokiConfiguration.Geometry->pixel2D(CalibratedPos,
+    GlobalStraw);
 
-  return MappedPixelId;
+  XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u",
+         Position, CalibratedPos, GlobalStraw, PixelId);
+
+  return PixelId;
 }
 
 
