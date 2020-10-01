@@ -27,6 +27,22 @@ std::string ConfigStr = R"(
   }
 )";
 
+
+/// \brief when used with CalibFile there is a picel count mismatch
+std::string Config512File{"deleteme_loki_instr_config_res_512.json"};
+std::string Config512Str = R"(
+  {
+    "Detector": "LoKI",
+
+    "StrawResolution" : 512,
+
+    "PanelConfig" : [
+      { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 1, "TubesN" : 1, "StrawOffset" : 0    }
+    ]
+
+  }
+)";
+
 // Valid calibration corresponding to TubesZ * TubesN * StrawResolution * 7 = 28
 std::string CalibFile{"deleteme_loki_instr_calib.json"};
 std::string CalibStr = R"(
@@ -70,10 +86,22 @@ TEST_F(LokiInstrumentTest, Constructor) {
   ASSERT_EQ(Loki.LokiConfiguration.getMaxPixel(), 7 * 256);
 }
 
+TEST_F(LokiInstrumentTest, PixelMismatch) {
+  ModuleSettings.ConfigFile = Config512File;
+  ModuleSettings.CalibFile = CalibFile;
+  ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
+}
+
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+  saveBuffer(Config512File, (void *)Config512Str.c_str(), Config512Str.size());
   saveBuffer(CalibFile, (void *)CalibStr.c_str(), CalibStr.size());
+
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
+
+  deleteFile(ConfigFile);
+  deleteFile(Config512File);
+  deleteFile(CalibFile);
   return RetVal;
 }
