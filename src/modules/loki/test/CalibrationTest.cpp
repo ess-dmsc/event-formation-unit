@@ -9,6 +9,7 @@ std::string NotJsonStr = R"(
   Failure is not an option.
 )";
 
+/// \brief straws should go 0, 1, 2, 3, ...
 std::string BadStrawOrderFile{"deleteme_lokicalib_badstraworder.json"};
 std::string BadStrawOrderStr = R"(
   {
@@ -28,6 +29,7 @@ std::string BadStrawOrderStr = R"(
   }
 )";
 
+/// \brief three calibration entries and four straws promised
 std::string StrawMismatchFile{"deleteme_lokicalib_strawmismatch.json"};
 std::string StrawMismatchStr = R"(
   {
@@ -47,12 +49,13 @@ std::string StrawMismatchStr = R"(
   }
 )";
 
+/// \brief one entry has too few coefficients
 std::string InvalidCoeffFile{"deleteme_lokicalib_invalidcoeff.json"};
 std::string InvalidCoeffStr = R"(
   {
     "LokiCalibration":
       {
-        "straws" : 4,
+        "straws" : 3,
 
         "resolution" : 256,
 
@@ -61,6 +64,26 @@ std::string InvalidCoeffStr = R"(
             {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
             {"straw" :    1, "poly" : [0.0, 0.0, 0.0]},
             {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
+          ]
+      }
+  }
+)";
+
+/// \brief calibration expands pixels outside resolution
+std::string InvalidCalibFile{"deleteme_lokicalib_invalidcalib.json"};
+std::string InvalidCalibStr = R"(
+  {
+    "LokiCalibration":
+      {
+        "straws" : 3,
+
+        "resolution" : 256,
+
+        "polynomials" :
+          [
+            {"straw" :    0, "poly" : [0.0, 0.0, 1.0, 0.0]},
+            {"straw" :    1, "poly" : [0.0, 0.0, 1.0, 1.0]},
+            {"straw" :    2, "poly" : [0.0, 0.0, 1.0, 2.0]}
           ]
       }
   }
@@ -200,6 +223,11 @@ TEST_F(CalibrationTest, InvalidCoeff) {
   deleteFile(InvalidCoeffFile);
 }
 
+TEST_F(CalibrationTest, InvalidCalib) {
+  saveBuffer(InvalidCalibFile, (void *)InvalidCalibStr.c_str(), InvalidCalibStr.size());
+  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCalibFile));
+  deleteFile(InvalidCalibFile);
+}
 
 
 
