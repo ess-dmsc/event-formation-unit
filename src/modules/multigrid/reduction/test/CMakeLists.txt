@@ -14,9 +14,11 @@ create_test_executable(EventProcessingStatsTest)
 #### Test
 set(MGModulePipelineTest_SRC
   ModulePipelineTest.cpp
+  ../ModuleGeometry.cpp
   ${analysis_obj_SRC})
 set(MGModulePipelineTest_INC
   ../ModulePipeline.h
+  ../ModuleGeometry.h
   ${analysis_obj_INC})
 set(MGModulePipelineTest_LIB
   MgGeometryLib
