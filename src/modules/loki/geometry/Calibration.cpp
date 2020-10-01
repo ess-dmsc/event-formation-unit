@@ -32,8 +32,9 @@ void Calibration::addCalibrationEntry(uint32_t Straw, std::vector<float> Polynom
 
   for (uint16_t x = 0; x < StrawResolution; x++) {
     uint16_t newx = a * x * x * x + b * x * x + c * x + d;
-    assert(newx >= 0);
-    assert(newx < StrawResolution);
+    if (newx >= StrawResolution) {
+      throw std::runtime_error("Invalid calibration polynomial (exceeds StrawResolution)");
+    }
     Calib.push_back(newx);
   }
   StrawMapping.push_back(Calib);
