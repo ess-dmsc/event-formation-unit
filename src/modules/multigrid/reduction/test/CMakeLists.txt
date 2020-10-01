@@ -12,10 +12,13 @@ create_test_executable(EventProcessingStatsTest)
 
 
 #### Test
-set(MGModulePipelineTest_SRC ModulePipelineTest.cpp)
-set(MGModulePipelineTest_INC ../ModulePipeline.h)
+set(MGModulePipelineTest_SRC
+  ModulePipelineTest.cpp
+  ${analysis_obj_SRC})
+set(MGModulePipelineTest_INC
+  ../ModulePipeline.h
+  ${analysis_obj_INC})
 set(MGModulePipelineTest_LIB
-  AnalysisLib
   MgGeometryLib
   MgMesytecLib
   MgReductionLib
