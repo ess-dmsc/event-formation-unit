@@ -29,12 +29,11 @@
 //      we should not bother mitigating this. Simply reject those events.
 
 #include <test/TestBase.h>
-
+#include <common/monitor/DynamicHist.h>
 #include <multigrid/reduction/Reduction.h>
 #include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/Config.h>
-#include <common/monitor/DynamicHist.h>
 
 using namespace Multigrid;
 

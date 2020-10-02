@@ -74,7 +74,7 @@ void Socket::setMulticastReceive() {
   MulticastRequest.imr_multiaddr.s_addr = localSockAddr.sin_addr.s_addr;
   MulticastRequest.imr_interface.s_addr = htonl(INADDR_ANY);
   if ((setsockopt(SocketFileDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&MulticastRequest, sizeof(MulticastRequest))) < 0) {
-    perror(" setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
+    perror("setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
     LOG(IPC, Sev::Error, "setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
     throw std::runtime_error("system error - setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
   }
