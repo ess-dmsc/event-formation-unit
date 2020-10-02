@@ -49,6 +49,9 @@ public:
   }
 
  private:
+  const int gdgem_min_strip{0}; // GdGEM detector has 1280 strips
+  const int gdgem_max_strip{1279};
+
   std::shared_ptr<CalibrationFile> calfile_;
 
   SRSTime time_intepreter_;
