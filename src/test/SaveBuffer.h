@@ -13,5 +13,5 @@
 /// \brief functionality moved away from DataSave class and into test
 void saveBuffer(std::string filename, void *buffer, uint64_t datasize);
 
-/// \brief helter function to remove temporary files after test
+/// \brief helper function to remove temporary files after test
 void deleteFile(std::string filename);

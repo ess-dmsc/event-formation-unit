@@ -59,10 +59,12 @@ TEST_F(PanelGeometryTest, CanonicalCornersWithOffset) {
 
 TEST_F(PanelGeometryTest, InvalidGeometry) {
   PanelGeometry PG(TZ4, TubesXY8, StrawOffset0);
-  ASSERT_EQ(PG.getGlobalStrawId(4, 0, 0), 0xffffffff); // Top left
-  //ASSERT_EQ(PG.getGlobalStrawId(0, 3, 0), 3 * StrawsPerCol); // Top right
-  //ASSERT_EQ(PG.getGlobalStrawId(3, 4, 6), StrawsPerCol - 1); // Bottom left
-  //ASSERT_EQ(PG.getGlobalStrawId(3, 7, 6), 4 * StrawsPerCol - 1); // Bottom right
+  ASSERT_NE(PG.getGlobalStrawId(3, 0, 0), 0xffffffff); // valid geometry
+  ASSERT_EQ(PG.getGlobalStrawId(4, 0, 0), 0xffffffff); // Tube group too large
+  ASSERT_NE(PG.getGlobalStrawId(2, 7, 0), 0xffffffff); // valid geometry
+  ASSERT_EQ(PG.getGlobalStrawId(2, 8, 0), 0xffffffff); // Local tube too large
+  ASSERT_NE(PG.getGlobalStrawId(1, 0, 6), 0xffffffff); // valid geometry
+  ASSERT_EQ(PG.getGlobalStrawId(1, 0, 7), 0xffffffff); // Straw too large
 }
 
 

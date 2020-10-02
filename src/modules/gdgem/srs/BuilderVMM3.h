@@ -39,7 +39,14 @@ public:
   void process_buffer(char *buf, size_t size) override;
 
   /// \brief return the current filename
-  std::string getFilename() { return readout_file_->get_full_path().string(); }
+  /// it is an programming error to use this if readout_file_ is NULL which
+  /// is only is when NOT dumping to file
+  std::string getFilename() {
+    if (readout_file_ == nullptr) {
+      throw std::runtime_error("invalild use of getFilename: readot_file_ is nullptr");
+    }
+    return readout_file_->get_full_path().string();
+  }
 
  private:
   std::shared_ptr<CalibrationFile> calfile_;

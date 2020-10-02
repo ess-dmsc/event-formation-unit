@@ -2,9 +2,6 @@
 
 #include <multigrid/reduction/ModulePipeline.h>
 #include <multigrid/geometry/PlaneMappings.h>
-//#include <multigrid/mesytec/BuilderReadouts.h>
-//#include <multigrid/generators/ReaderReadouts.h>
-//#include <common/monitor/DynamicHist.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
@@ -36,7 +33,7 @@ TEST_F(ModulePipelineTest, Ingest) {
   ASSERT_EQ(pipeline.stats.wire_clusters, 1);
   ASSERT_EQ(pipeline.stats.grid_clusters, 1);
 
-  ASSERT_EQ(pipeline.stats.events_total, 0); // why?
+  ASSERT_EQ(pipeline.stats.events_total, 0); ///< \todo why?
 
   ASSERT_EQ(pipeline.stats.time_seq_errors, 0);
   ASSERT_EQ(pipeline.stats.invalid_planes, 0);
