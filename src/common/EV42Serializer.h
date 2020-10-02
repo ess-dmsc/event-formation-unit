@@ -1,10 +1,11 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief flatbuffer serialization
+/// \brief flatbuffer serialization into ev42 schema
 ///
+/// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
 #pragma once

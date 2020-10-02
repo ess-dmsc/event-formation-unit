@@ -1,7 +1,9 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
+///
+/// \brief test-helper class for saving a buffer to file
 ///
 //===----------------------------------------------------------------------===//
 

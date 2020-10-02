@@ -1,12 +1,12 @@
-/** Copyright (C) 2016-2018 European Spallation Source */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Simple RingBuffer class to keep track of a number of buffers
-/// for receiving socket data. User writes to buffers directly, so it is
-/// possible to write beyond buffers. However overwrites can be checked
-/// using verifyBufferCookies() if paranoid.
+/// \brief Simple RingBuffer class to keep track of a number of buffers
+/// for receiving socket data.
 ///
+/// User writes to buffers directly, so it is possible to write beyond buffers.
+/// However overwrites can be checked using verifyBufferCookies() if paranoid.
 //===----------------------------------------------------------------------===//
 
 #pragma once

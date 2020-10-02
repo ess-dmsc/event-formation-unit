@@ -1,9 +1,11 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// Implements a command server. The server supports multiple
+/// \brief Class for a command server
+///
+/// The server supports multiple
 /// clients, and is of type request-response. A client request is
 /// handled synchronously to completion before servring next request.
 ///

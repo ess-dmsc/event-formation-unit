@@ -1,7 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2017-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests
+///
+//===----------------------------------------------------------------------===//
 
-// OBSERVATIONS
-//
 
 #include <generators/CdtFile.h>
 #include <BuilderReadouts.h>

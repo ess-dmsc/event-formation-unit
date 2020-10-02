@@ -1,4 +1,12 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Reads json configuration files into NMXConfig class
+///
+//===----------------------------------------------------------------------===//
+
 
 #include <gdgem/NMXConfig.h>
 #include <common/reduction/analysis/EventAnalyzer.h>

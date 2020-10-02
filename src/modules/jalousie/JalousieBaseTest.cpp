@@ -1,9 +1,11 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
-
-/** @file
- *
- *  \brief Unit tests.
- */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for JalousieBase
+///
+//===----------------------------------------------------------------------===//
 
 #include <string>
 

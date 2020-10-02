@@ -1,5 +1,9 @@
-/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Jalousie Readout format - heed the warnings below
 ///
 ///                              WARNING
 ///

@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for ESSTime
+///
+//===----------------------------------------------------------------------===//
 
 #include <readout/ESSTime.h>
 #include <test/TestBase.h>

@@ -1,4 +1,10 @@
-/** Copyright (C) 2016 European Spallation Source */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Implementation of BSD socket system call wrappers
+///
+//===----------------------------------------------------------------------===//
 
 #include <cstdlib>
 #include <cstring>

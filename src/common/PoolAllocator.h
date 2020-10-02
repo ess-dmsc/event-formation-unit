@@ -1,4 +1,10 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Memory pool allocator (speed optimisation)
+//===----------------------------------------------------------------------===//
+
 #pragma once
 
 #include <common/Assert.h>

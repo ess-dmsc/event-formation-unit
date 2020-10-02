@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Implementation of exit handler and back trace
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/Trace.h>
 #include <efu/ExitHandler.h>

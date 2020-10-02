@@ -1,4 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief VMM/HDF5 'Hits' reader
+///
+//===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <generators/ReaderHits.h>

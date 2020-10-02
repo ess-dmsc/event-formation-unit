@@ -1,7 +1,8 @@
-/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
+/// \brief SoNDe detector pipeline
 ///
 //===----------------------------------------------------------------------===//
 

@@ -1,4 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Implementation of ev42 schema serialiser
+///
+/// See https://github.com/ess-dmsc/streaming-data-types
+//===----------------------------------------------------------------------===//
 
 #include <common/EV42Serializer.h>
 #include "ev42_events_generated.h"

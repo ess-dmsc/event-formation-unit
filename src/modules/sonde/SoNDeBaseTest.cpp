@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  \brief Unit tests.
- */
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests for SoNDeBase
+///
+//===----------------------------------------------------------------------===//
 
 #include <sonde/SoNDeBase.h>
 #include <sonde/SoNDeBaseTestData.h>

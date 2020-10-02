@@ -1,3 +1,12 @@
+// Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief reads and writes JSON files to/from nlohmann types
+///
+/// See https://nlohmann.github.io/json/doxygen/index.html
+//===----------------------------------------------------------------------===//
+
 #pragma once
 
 #pragma GCC diagnostic push
