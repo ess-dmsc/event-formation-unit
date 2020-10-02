@@ -134,8 +134,8 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
           } else {
             XTRACE(PROCESS, DEB, "Hit coordinate %d outside region (%d, %d)",
               hit.coordinate,
-              std::max(0, (int)(PMin - PWidth)),
-              std::min(1279, (int)(PMax + PWidth)));
+              std::max(gdgem_min_strip, (int)(PMin - PWidth)),
+              std::min(gdgem_max_strip, (int)(PMax + PWidth)));
             stats_.HitsOutsideRegion++;
           }
         }
