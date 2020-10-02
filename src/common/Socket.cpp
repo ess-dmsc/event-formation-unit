@@ -151,7 +151,7 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
-    auto Msg = fmt::format("setLocalSocket(): bind failed {ret}, is port {} already in use?", ret, port);
+    auto Msg = fmt::format("setLocalSocket(): bind failed {}, is port {} already in use?", ret, port);
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
   }
