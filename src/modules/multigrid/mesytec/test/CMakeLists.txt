@@ -2,7 +2,7 @@ set(MGReadoutTest_SRC
   ReadoutTest.cpp
   )
 set(MGReadoutTest_LIB
-  MgMesytec
+  MgMesytecLib
   )
 create_test_executable(MGReadoutTest SKIP_MEMGRIND)
 
@@ -13,7 +13,7 @@ set(MGSis3153ParserTest_INC
   TestData.h
   )
 set(MGSis3153ParserTest_LIB
-  MgMesytec
+  MgMesytecLib
   )
 create_test_executable(MGSis3153ParserTest)
 
@@ -24,7 +24,7 @@ set(MGVmmr16ParserTest_INC
   TestData.h
   )
 set(MGVmmr16ParserTest_LIB
-  MgMesytec
+  MgMesytecLib
   )
 create_test_executable(MGVmmr16ParserTest)
 
@@ -38,8 +38,8 @@ if(EXISTS ${TEST_DATA_PATH})
     ../../generators/ReaderReadouts.h
     )
   set(MGBuilderReadoutsTest_LIB
-    MgGeometry
-    MgMesytec
+    MgGeometryLib
+    MgMesytecLib
     )
     create_test_executable(MGBuilderReadoutsTest)
   target_compile_definitions(MGBuilderReadoutsTest
@@ -60,8 +60,8 @@ if(EXISTS ${TEST_DATA_PATH2})
     )
   set(MGBuilderMesytecTest_LIB
     ${PCAP_LIBRARY}
-    MgGeometry
-    MgMesytec
+    MgGeometryLib
+    MgMesytecLib
     )
   create_test_executable(MGBuilderMesytecTest)
   target_compile_definitions(MGBuilderMesytecTest

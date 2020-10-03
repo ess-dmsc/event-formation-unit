@@ -27,12 +27,12 @@ set(reduction_obj_INC
   ChronoMerger.h
 )
 
-add_library(ReductionObj OBJECT
+add_library(ReductionLib OBJECT
   ${reduction_obj_SRC}
   ${reduction_obj_INC}
   )
 
-enable_coverage_flags(ReductionObj)
+enable_coverage_flags(ReductionLib)
 
 #=============================================================================
 # Tests

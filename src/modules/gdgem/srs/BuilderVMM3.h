@@ -16,6 +16,7 @@
 #include <gdgem/nmx/Readout.h>
 #include <common/Trace.h>
 #include <algorithm>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -37,7 +38,20 @@ public:
   /// \todo Martin document
   void process_buffer(char *buf, size_t size) override;
 
+  /// \brief return the current filename
+  /// it is an programming error to use this if readout_file_ is NULL which
+  /// is only is when NOT dumping to file
+  std::string getFilename() {
+    if (readout_file_ == nullptr) {
+      throw std::runtime_error("invalild use of getFilename: readot_file_ is nullptr");
+    }
+    return readout_file_->get_full_path().string();
+  }
+
  private:
+  const int gdgem_min_strip{0}; // GdGEM detector has 1280 strips
+  const int gdgem_max_strip{1279};
+
   std::shared_ptr<CalibrationFile> calfile_;
 
   SRSTime time_intepreter_;

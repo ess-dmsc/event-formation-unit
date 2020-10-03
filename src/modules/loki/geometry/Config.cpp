@@ -21,25 +21,28 @@ Config::Config(std::string ConfigFile) {
     try {
       auto Name = root["Detector"].get<std::string>();
 
+      // Assumed the same for all straws in all banks
+      Resolution = root["StrawResolution"].get<unsigned int>();
+
       auto PanelConfig = root["PanelConfig"];
-      uint8_t Index{0};
       for (auto &Mapping : PanelConfig) {
-        auto Ring = Mapping["Ring"].get<unsigned int>();
-        assert(Ring == Index);
+        auto Ring = Mapping["Bank"].get<unsigned int>();
         bool Vertical = Mapping["Vertical"].get<bool>();
         auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
         auto TubesN = Mapping["TubesN"].get<unsigned int>();
-        auto Offset = Mapping["Offset"].get<unsigned int>();
+        auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
 
-        Pixels += TubesZ * TubesN * 7 * 512; ///< \todo not hardcode - should parametrise
+        NTubesTotal += TubesZ * TubesN;
 
-        LOG(INIT, Sev::Info, "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN {}, Offset {}",
-          Name, Ring, Vertical, TubesZ, TubesN, Offset);
+        LOG(INIT, Sev::Info, "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN {}, StrawOffset {}",
+          Name, Ring, Vertical, TubesZ, TubesN, StrawOffset);
 
-        PanelGeometry Temp(Vertical, TubesZ, TubesN, Offset);
+        PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
         Panels.push_back(Temp);
-        Index++;
       }
+
+      Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
+      Geometry = new ESSGeometry(Resolution, NTubesTotal * 7, 1, 1);
 
     }
     catch (...) {

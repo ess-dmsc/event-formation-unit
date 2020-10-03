@@ -7,9 +7,8 @@
 #include <common/Trace.h>
 #include <gdgem/srs/ParserVMM3.h>
 
-
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Gem {
 
@@ -50,6 +49,8 @@ int ParserVMM3::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vd) {
       markers[idx].hasDataMarker = true;
       vd->hasDataMarker = true;
     }
+    XTRACE(PROCESS, DEB, "SRS Data: vmm: %d, channel: %d. adc: %d",
+      vd->vmmid, vd->chno, vd->adc);
     return 1;
   } else {
     /// Marker
@@ -145,12 +146,13 @@ int ParserVMM3::receive(const char *buffer, int size) {
   }
 
   pd.fecId = (hdr.dataId >> 4) & 0x0f;
-  if (pd.fecId < 1 || pd.fecId > 16) {
+  if (pd.fecId == 0) {
     XTRACE(PROCESS, WAR, "Invalid fecId: %u", pd.fecId);
     stats.ParserBadFrames++;
     stats.ParserErrorBytes += size;
     return 0;
   }
+  XTRACE(PROCESS, DEB, "fecId: %u", pd.fecId);
   hdr.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
   //This header component will vanish soon
   //and be replaced by a timestamp for each vmm

@@ -35,12 +35,7 @@ public:
   uint64_t bc_clock_MHz() const;
   uint64_t tac_slope_ns() const;
   double trigger_resolution_ns() const;
-  double trigger_timestamp_ns(uint64_t trigger_timestamp) const;
   uint16_t acquisition_window() const;
-
-  // \todo is this still needed?
-  double max_chip_time_in_window_ns() const;
-
   uint64_t trigger_period_ns() const;
 
   /// \brief now using VMM calibration data

@@ -13,13 +13,13 @@ struct CoordMass2TestData {
   uint16_t weight;    uint16_t coord;    double coordMass2;
 };
 
-static const CoordMass2TestData CoordMass2TestCases [6] = { 
+static const CoordMass2TestData CoordMass2TestCases [6] = {
   { 0    , 0                  , static_cast<double>(0ULL*0ULL * 0ULL)                            },
   { 1    , 2                  , static_cast<double>(1ULL*1ULL * 2ULL)                           },
   { 11   , 22                 , static_cast<double>(11ULL*11ULL * 22ULL)                         },
   { 1111 , 2222               , static_cast<double>(1111ULL*1111ULL * 2222ULL)                   },
   { 11111, 22222              , static_cast<double>(11111ULL*11111ULL * 22222ULL)                },
-  { 65535, Hit::InvalidCoord-1, static_cast<double>(65535ULL*65535ULL * (uint64_t)(Hit::InvalidCoord-1))}          
+  { 65535, Hit::InvalidCoord-1, static_cast<double>(65535ULL*65535ULL * (uint64_t)(Hit::InvalidCoord-1))}
 };
 
 TEST_F(ClusterTest, DefaultConstructed) {
@@ -29,9 +29,19 @@ TEST_F(ClusterTest, DefaultConstructed) {
   EXPECT_EQ(cluster.hit_count(), 0);
   EXPECT_EQ(cluster.coord_span(), 0);
   EXPECT_EQ(cluster.time_span(), 0);
+  EXPECT_EQ(cluster.time_gap(cluster), std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(cluster.time_mass(), 0.0);
+  EXPECT_EQ(cluster.time_mass2(), 0.0);
   EXPECT_EQ(cluster.coord_mass(), 0.0);
   EXPECT_EQ(cluster.weight_sum(), 0.0);
+}
+
+TEST_F(ClusterTest, TimeGapNonEmpty) {
+  cluster.insert({0, 0, 0, 1});
+  EXPECT_EQ(cluster.time_gap(cluster), 0);
+  Cluster cluster2;
+  cluster2.insert({1, 0, 0, 2});
+  EXPECT_EQ(cluster.time_gap(cluster2), 1);
 }
 
 TEST_F(ClusterTest, PlaneIdentity) {
@@ -77,7 +87,9 @@ TEST_F(ClusterTest, Clear) {
   EXPECT_EQ(cluster.hit_count(), 0);
   EXPECT_EQ(cluster.coord_span(), 0);
   EXPECT_EQ(cluster.time_span(), 0);
+  EXPECT_EQ(cluster.time_gap(cluster), std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(cluster.time_mass(), 0.0);
+  EXPECT_EQ(cluster.time_mass2(), 0.0);
   EXPECT_EQ(cluster.coord_mass(), 0.0);
   EXPECT_EQ(cluster.weight_sum(), 0.0);
 }
@@ -152,7 +164,7 @@ TEST_F(ClusterTest, CoordMass2_Multi) {
     cluster2.insert(Hit{0, c.coord, c.weight, 0});
     EXPECT_TRUE(cluster2.valid());
     EXPECT_EQ(cluster2.coord_mass2(), c.coordMass2);
-  }  
+  }
 }
 
 TEST_F(ClusterTest, CoordMass2_Sum) {
@@ -162,7 +174,7 @@ TEST_F(ClusterTest, CoordMass2_Sum) {
     sumCoordMass2 += c.coordMass2;
     EXPECT_TRUE(cluster.valid());
     EXPECT_EQ(cluster.coord_mass2(), sumCoordMass2);
-  }  
+  }
 }
 
 TEST_F(ClusterTest, CoordMass2) {

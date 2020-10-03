@@ -1,37 +1,36 @@
-set(MGModuleGeometryTest_SRC
-  ModuleGeometryTest.cpp
-  )
-set(MGModuleGeometryTest_LIB
-  MgReduction
-  )
+
+#### Test
+set(MGModuleGeometryTest_SRC ModuleGeometryTest.cpp)
+set(MGModuleGeometryTest_LIB MgReductionLib)
 create_test_executable(MGModuleGeometryTest)
 
-set(EventProcessingStatsTest_SRC
-  EventProcessingStatsTest.cpp
-  )
-set(EventProcessingStatsTest_LIB
-  MgReduction
-  )
+
+#### Test
+set(EventProcessingStatsTest_SRC EventProcessingStatsTest.cpp)
+set(EventProcessingStatsTest_LIB MgReductionLib)
 create_test_executable(EventProcessingStatsTest)
+
+
+#### Test
+set(MGModulePipelineTest_SRC
+  ModulePipelineTest.cpp
+  ../ModuleGeometry.cpp
+  ${analysis_obj_SRC})
+set(MGModulePipelineTest_INC
+  ../ModulePipeline.h
+  ../ModuleGeometry.h
+  ${analysis_obj_INC})
+set(MGModulePipelineTest_LIB
+  MgGeometryLib
+  MgMesytecLib
+  MgReductionLib
+  )
+create_test_executable(MGModulePipelineTest)
 
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
-  set(MGModulePipelineTest_SRC
-    ModulePipelineTest.cpp
-    ../../generators/ReaderReadouts.cpp
-    )
-  set(MGModulePipelineTest_INC
-    ../../generators/ReaderReadouts.h
-    )
-  set(MGModulePipelineTest_LIB
-    MgGeometry
-    MgMesytec
-    MgReduction
-    )
-  create_test_executable(MGModulePipelineTest)
-  target_compile_definitions(MGModulePipelineTest
-    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 
+#### Test
   set(MGReductionTest_SRC
     ReductionTest.cpp
     ../../generators/ReaderReadouts.cpp
@@ -42,14 +41,13 @@ if(EXISTS ${TEST_DATA_PATH})
     ../../Config.h
     )
   set(MGReductionTest_LIB
-    MgGeometry
-    MgMesytec
-    MgReduction
+    MgGeometryLib
+    MgMesytecLib
+    MgReductionLib
     )
   create_test_executable(MGReductionTest)
   target_compile_definitions(MGReductionTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 else()
-  message(WARNING "ECDC: No multigrid reference data found. Skipping MGModulePipelineTest.")
   message(WARNING "ECDC: No multigrid reference data found. Skipping MGReductionTests.")
 endif()

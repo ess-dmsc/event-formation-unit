@@ -8,8 +8,9 @@ include_directories(.)
 # loki detector module and base test
 #=============================================================================
 set(loki_common_inc
-  LokiBase.h
   Counters.h
+  LokiBase.h
+  LokiInstrument.h
   geometry/PanelGeometry.h
   geometry/Config.h
   geometry/Calibration.h
@@ -18,6 +19,7 @@ set(loki_common_inc
   )
 set(loki_common_src
   LokiBase.cpp
+  LokiInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
   readout/DataParser.cpp
@@ -40,3 +42,17 @@ set(LokiBaseTest_SRC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
+
+##
+## LokiInstrumentTest Module integration test
+##
+set(LokiInstrumentTest_INC
+  ${loki_common_inc}
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  )
+set(LokiInstrumentTest_SRC
+  ${loki_common_src}
+  test/LokiInstrumentTest.cpp
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+)
+create_test_executable(LokiInstrumentTest)

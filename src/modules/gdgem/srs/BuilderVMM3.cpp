@@ -1,17 +1,20 @@
-/** Copyright (C) 2016-2018 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2020 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief
+//===----------------------------------------------------------------------===//
 
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/NMXStats.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/TimeString.h>
-
+#include <common/Log.h>
 #include <common/Trace.h>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
-#include <common/Log.h>
-// #undef TRC_MASK
-// #define TRC_MASK TRC_M_NONE
 
 namespace Gem {
 
@@ -119,14 +122,20 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
         }
 
         if (hit.plane == 1) {
+          XTRACE(PROCESS, DEB, "Adding hit to hit_buffer_y");
           hit_buffer_y.emplace_back(hit);
         }
 
         if (hit.plane == 0) {
           auto c = hit.coordinate;
           if ( c >= std::max(0, (int)(PMin - PWidth)) and (c <= std::min(1279, (int)(PMax + PWidth)))) {
+            XTRACE(PROCESS, DEB, "Adding hit to hit_buffer_x");
             hit_buffer_x.emplace_back(hit);
           } else {
+            XTRACE(PROCESS, DEB, "Hit coordinate %d outside region (%d, %d)",
+              hit.coordinate,
+              std::max(gdgem_min_strip, (int)(PMin - PWidth)),
+              std::min(gdgem_max_strip, (int)(PMax + PWidth)));
             stats_.HitsOutsideRegion++;
           }
         }
