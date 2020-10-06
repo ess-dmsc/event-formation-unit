@@ -33,7 +33,8 @@ enum SliceMapConstants {
 
 /// \brief this maps pixelid to the SectorStripSlice. SliceRowIdx and
 /// SliceColIdx are coordinates inside the slice.
-/// \todo can this be changed to "masking" by doing PixelIdFromSliceInfo() in "reverse"?
+/// \todo can this be changed to "masking" by doing PixelIdFromSliceInfo() in
+/// "reverse"?
 SliceInfo PixelIdToSliceInfo(int PixelId) {
   SliceInfo Info;
   int PixelIdx = PixelId - 1;
@@ -82,8 +83,8 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_Sector3Pixel1) {
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer2Pixel1) {
   SliceInfo Wanted = {};
-  Wanted.SectorZ = 0;
-  Wanted.StripZ = 1;
+  Wanted.SectorIdx = 0;
+  Wanted.StripIdx = 1;
   int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
   ASSERT_EQ(Info.SectorIdx, 0);
@@ -94,10 +95,10 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer2Pixel1) {
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_TopLeft) {
   SliceInfo Wanted = {};
-  Wanted.SectorZ = 1;
-  Wanted.StripZ = 2;
-  Wanted.SliceColZ = 0;
-  Wanted.SliceRowZ = 0;
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 0;
+  Wanted.SliceRowIdx = 0;
   int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
   ASSERT_EQ(Info.SectorIdx, 1);
@@ -145,6 +146,20 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_BottomLeft) {
   ASSERT_EQ(Info.SectorIdx, 1);
   ASSERT_EQ(Info.StripIdx, 2);
   ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 15);
+}
+
+TEST_F(DreamIcdTest, PixelIdToSliceInfo_BottomMost) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 22;
+  Wanted.StripIdx = 15;
+  Wanted.SliceColIdx = 15;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  SliceInfo Info = PixelIdToSliceInfo(PixelId);
+  ASSERT_EQ(Info.SectorIdx, 22);
+  ASSERT_EQ(Info.StripIdx, 15);
+  ASSERT_EQ(Info.SliceColIdx, 15);
   ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
