@@ -56,19 +56,23 @@ int PixelIdFromSliceInfo(SliceInfo Info) {
   return PixelId;
 }
 
-int SumoStartColOffsetFromSliceCol(int SliceColIdx){
+struct SumoStartColWidth{
+  uint8_t StartCol;
+  uint8_t Width;
+};
+
+SumoStartColWidth SumoStartColWidthFromSliceCol(int SliceColIdx){
   // clang-format off
-  static const int SumoStartColOffset[14] = {
-     0,  0,  0,  0,  0, // 0-4
-    20, 20, 20, 20,     // 5-8
-    36, 36, 36,         // 9-11
-    48, 48,             // 12-13
-  }; 
+  static const SumoStartColWidth StartColWidth[14] = {
+    { 0, 20}, { 0, 20}, { 0, 20}, { 0, 20}, { 0, 20}, //  0- 4, SliceColIdx  0-19: Sumo 6, Cols 1-20
+    {20, 16}, {20, 16}, {20, 16}, {20, 16},           //  5- 8, SliceColIdx 20-35: Sumo 5, Cols 1-16
+    {36, 12}, {36, 12}, {36, 12},                     //  9-11, SliceColIdx 36-47: Sumo 4, Cols 1-12
+    {48,  8}, {48,  8},                               // 12-13, SliceColIdx 48-55: Sumo 3, Cols 1-8
+  };
   // clang-format on
   int SliceColDiv4 = SliceColIdx / 4;
   RelAssertMsg(SliceColDiv4 < 14, "Bad SliceColIdx");
-  int SumoStartCol = SumoStartColOffset[SliceColDiv4];
-  return SumoStartCol;
+  return StartColWidth[SliceColDiv4];
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Pixel1) {
@@ -180,26 +184,50 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_BottomMost) {
   ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
-TEST_F(DreamIcdTest, SumoStartColOffsetFromSliceCol_) {
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+0), 0);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+1), 0);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+18), 0);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+19), 0);
-  
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+0), 20);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+1), 20);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+14), 20);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+15), 20);
-  
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+0), 36);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+1), 36);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+10), 36);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+11), 36);
+TEST_F(DreamIcdTest, SumoStartColWidthFromSliceCol_TwoFirstAndLast) {
+  // Sumo 6
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+00).StartCol, 0);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+01).StartCol, 0);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+18).StartCol, 0);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+19).StartCol, 0);
 
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+0), 48);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+1), 48);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+6), 48);
-  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+7), 48);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+00).Width, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+01).Width, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+18).Width, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(0+19).Width, 20);
+  
+  // Sumo 5
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+00).StartCol, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+01).StartCol, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+14).StartCol, 20);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+15).StartCol, 20);
+
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+00).Width, 16);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+01).Width, 16);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+14).Width, 16);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(20+15).Width, 16);
+  
+  // Sumo 4
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+00).StartCol, 36);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+01).StartCol, 36);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+10).StartCol, 36);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+11).StartCol, 36);
+
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+00).Width, 12);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+01).Width, 12);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+10).Width, 12);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(36+11).Width, 12);
+  
+  // Sumo 3
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+0).StartCol, 48);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+1).StartCol, 48);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+6).StartCol, 48);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+7).StartCol, 48);
+
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+0).Width, 8);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+1).Width, 8);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+6).Width, 8);
+  ASSERT_EQ(SumoStartColWidthFromSliceCol(48+7).Width, 8);
 }
 
 class JalConfigTest : public TestBase {
