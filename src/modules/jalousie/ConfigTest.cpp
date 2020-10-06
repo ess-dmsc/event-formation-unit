@@ -58,26 +58,27 @@ int PixelIdFromSliceInfo(SliceInfo Info) {
 
 // todo refactor to model row as well?, to get pixel-in-sumo representation
 struct SumoColWidth {
-  uint8_t SumoColIdx;
+  uint8_t ColIdx;
   uint8_t Width;
+  uint8_t Sumo;
 };
 
 // The layout of the Sumo types along a SliceRow, indexd by SliceColIdx
 // 66666666666666666666555555555555555544444444444433333333
 SumoColWidth SumoColWidthFromSliceCol(int SliceColIdx) {
   // clang-format off
-  static const uint8_t SliceSumoStartColOffsetAndWidth[14][2] = {
-    { 0, 20}, { 0, 20}, { 0, 20}, { 0, 20}, { 0, 20}, //  0- 4, SliceColIdx  0-19: Sumo 6, Cols 1-20
-    {20, 16}, {20, 16}, {20, 16}, {20, 16},           //  5- 8, SliceColIdx 20-35: Sumo 5, Cols 1-16
-    {36, 12}, {36, 12}, {36, 12},                     //  9-11, SliceColIdx 36-47: Sumo 4, Cols 1-12
-    {48,  8}, {48,  8},                               // 12-13, SliceColIdx 48-55: Sumo 3, Cols 1-8
+  static const SumoColWidth SliceSumoStartColOffset_Width_Sumo[14] = {
+    {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, { 0, 20, 6}, //  0- 4, SliceColIdx  0-19: Sumo 6, Cols 1-20
+    { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 },              //  5- 8, SliceColIdx 20-35: Sumo 5, Cols 1-16
+    { 36, 12, 4 }, { 36, 12, 4 }, { 36, 12, 4 },                             //  9-11, SliceColIdx 36-47: Sumo 4, Cols 1-12
+    { 48,  8, 3 }, { 48,  8, 3 },                                            // 12-13, SliceColIdx 48-55: Sumo 3, Cols 1-8
   };
   // clang-format on
   int SliceColDiv4 = SliceColIdx / 4;
-  SumoColWidth ColWidth{
-      uint8_t(SliceColIdx - SliceSumoStartColOffsetAndWidth[SliceColDiv4][0]),
-      SliceSumoStartColOffsetAndWidth[SliceColDiv4][1]};
-  return ColWidth;
+  SumoColWidth SumoColWidth = SliceSumoStartColOffset_Width_Sumo[SliceColDiv4];
+  SumoColWidth.ColIdx = uint8_t(
+      SliceColIdx - SumoColWidth.ColIdx); // map StartColOffset to SumoCol
+  return SumoColWidth;
 }
 
 struct StripPlaneCoord {
@@ -96,6 +97,37 @@ StripPlaneCoord StripPlaneCoordFromSumoLocalCoord(int SumoColIdx,
   Coord.WireIdx = SliceHeight - SumoRowIdx - 1;
   return Coord;
 }
+
+struct PhysicalCoords {
+  int Sector;
+  int Sumo;
+  int Strip;
+  int Wire;
+  int Cassette;
+  int Counter;
+};
+
+PhysicalCoords PhysicalCoordsFromPixelId(int PixelId) {
+  SliceInfo SliceCoords = PixelIdToSliceInfo(PixelId);
+  /// \todo make this SumoCoords or the like
+  SumoColWidth SumoCoords = SumoColWidthFromSliceCol(SliceCoords.SliceColIdx);
+  StripPlaneCoord StripCoords = StripPlaneCoordFromSumoLocalCoord(
+      SumoCoords.ColIdx, SliceCoords.SliceRowIdx, SumoCoords.Width);
+
+  PhysicalCoords Phys;
+  Phys.Sector = SliceCoords.SectorIdx + 1;
+  Phys.Sumo = SumoCoords.Sumo;
+  Phys.Strip = SliceCoords.StripIdx + 1;
+  Phys.Wire = StripCoords.WireIdx + 1;
+  Phys.Cassette = StripCoords.CassetteIdx + 1;
+  Phys.Counter = StripCoords.CounterIdx + 1;
+
+  return Phys;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Pixel1) {
   int PixelId = 1;
@@ -206,50 +238,75 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_BottomMost) {
   ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
-TEST_F(DreamIcdTest, SumoStartColWidthFromSliceCol_TwoFirstAndLast) {
+TEST_F(DreamIcdTest, SumoColWidthFromSliceCol_TwoFirstAndLast) {
   // Sumo 6
-  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 00).SumoColIdx, 00);
-  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 01).SumoColIdx, 01);
-  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 18).SumoColIdx, 18);
-  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 19).SumoColIdx, 19);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 00).ColIdx, 00);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 01).ColIdx, 01);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 18).ColIdx, 18);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 19).ColIdx, 19);
 
   ASSERT_EQ(SumoColWidthFromSliceCol(0 + 00).Width, 20);
   ASSERT_EQ(SumoColWidthFromSliceCol(0 + 01).Width, 20);
   ASSERT_EQ(SumoColWidthFromSliceCol(0 + 18).Width, 20);
   ASSERT_EQ(SumoColWidthFromSliceCol(0 + 19).Width, 20);
 
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 00).ColIdx, 00);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 01).ColIdx, 01);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 18).ColIdx, 18);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 19).ColIdx, 19);
+
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 00).Sumo, 6);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 01).Sumo, 6);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 18).Sumo, 6);
+  ASSERT_EQ(SumoColWidthFromSliceCol(0 + 19).Sumo, 6);
+
   // Sumo 5
-  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 00).SumoColIdx, 00);
-  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 01).SumoColIdx, 01);
-  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 14).SumoColIdx, 14);
-  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 15).SumoColIdx, 15);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 00).ColIdx, 00);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 01).ColIdx, 01);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 14).ColIdx, 14);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 15).ColIdx, 15);
 
   ASSERT_EQ(SumoColWidthFromSliceCol(20 + 00).Width, 16);
   ASSERT_EQ(SumoColWidthFromSliceCol(20 + 01).Width, 16);
   ASSERT_EQ(SumoColWidthFromSliceCol(20 + 14).Width, 16);
   ASSERT_EQ(SumoColWidthFromSliceCol(20 + 15).Width, 16);
 
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 00).Sumo, 5);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 01).Sumo, 5);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 14).Sumo, 5);
+  ASSERT_EQ(SumoColWidthFromSliceCol(20 + 15).Sumo, 5);
+
   // Sumo 4
-  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 00).SumoColIdx, 00);
-  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 01).SumoColIdx, 01);
-  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 10).SumoColIdx, 10);
-  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 11).SumoColIdx, 11);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 00).ColIdx, 00);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 01).ColIdx, 01);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 10).ColIdx, 10);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 11).ColIdx, 11);
 
   ASSERT_EQ(SumoColWidthFromSliceCol(36 + 00).Width, 12);
   ASSERT_EQ(SumoColWidthFromSliceCol(36 + 01).Width, 12);
   ASSERT_EQ(SumoColWidthFromSliceCol(36 + 10).Width, 12);
   ASSERT_EQ(SumoColWidthFromSliceCol(36 + 11).Width, 12);
 
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 00).Sumo, 4);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 01).Sumo, 4);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 10).Sumo, 4);
+  ASSERT_EQ(SumoColWidthFromSliceCol(36 + 11).Sumo, 4);
+
   // Sumo 3
-  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 0).SumoColIdx, 0);
-  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 1).SumoColIdx, 1);
-  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 6).SumoColIdx, 6);
-  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 7).SumoColIdx, 7);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 0).ColIdx, 0);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 1).ColIdx, 1);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 6).ColIdx, 6);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 7).ColIdx, 7);
 
   ASSERT_EQ(SumoColWidthFromSliceCol(48 + 0).Width, 8);
   ASSERT_EQ(SumoColWidthFromSliceCol(48 + 1).Width, 8);
   ASSERT_EQ(SumoColWidthFromSliceCol(48 + 6).Width, 8);
   ASSERT_EQ(SumoColWidthFromSliceCol(48 + 7).Width, 8);
+
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 0).Sumo, 3);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 1).Sumo, 3);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 6).Sumo, 3);
+  ASSERT_EQ(SumoColWidthFromSliceCol(48 + 7).Sumo, 3);
 }
 
 //
@@ -439,8 +496,6 @@ TEST_F(DreamIcdTest, StripPlaneCoordFromSumoLocalCoord_Sumo3_BottomLeft) {
   ASSERT_EQ(Coord.CounterIdx, 1);
   ASSERT_EQ(Coord.WireIdx, 0);
 }
-
-
 
 class JalConfigTest : public TestBase {
 protected:
