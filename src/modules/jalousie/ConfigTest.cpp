@@ -10,136 +10,142 @@ protected:
 };
 
 /// \todo Handle pixel min/max value test?
+/// \todo Benchmark signed/unsigned int. Unsigned looks much shorter on godbolt.
 
 // test global pixel to sumo slice mapping
 
 struct SliceInfo {
-  int SectorZ;
-  int StripZ;
-  int SliceColZ;
-  int SliceRowZ;
+  int SectorIdx;
+  int StripIdx;
+  int SliceColIdx;
+  int SliceRowIdx;
 };
 
 enum SliceMapConstants {
-  SliceHeight = 16,
-  SliceWidth = 56,
-  SectorCount = 23,
+  SliceWidth =
+      56, /// Width of the Sector Sumo slice in logical coordinates, in pixels.
+  SliceHeight =
+      16, /// Width of the Sector Sumo slice in logical coordinates, in pixels.
+  SectorCount =
+      23, /// Number of Sectors, left to right, in the logical coordinates.
   TotalWidth = SliceWidth * SectorCount
 };
 
-/// \brief this maps pixelid to the SectorStripSlice. SliceRowZ and SliceColZ
-/// are coordinates inside the slice.
+/// \brief this maps pixelid to the SectorStripSlice. SliceRowIdx and
+/// SliceColIdx are coordinates inside the slice.
+/// \todo can this be changed to "masking" by doing PixelIdFromSliceInfo() in "reverse"?
 SliceInfo PixelIdToSliceInfo(int PixelId) {
   SliceInfo Info;
-  int PixelIdZ = PixelId - 1;
-  Info.SectorZ = (PixelIdZ / SliceWidth) % SectorCount;
-  Info.StripZ = (PixelIdZ / TotalWidth) / SliceHeight;
-  Info.SliceColZ = PixelIdZ % SliceWidth;
-  Info.SliceRowZ = (PixelIdZ / TotalWidth) % SliceHeight;
+  int PixelIdx = PixelId - 1;
+  int SectorIdx = PixelIdx / SliceWidth;
+  int GlobalRowIdx = PixelIdx / TotalWidth;
+  Info.SectorIdx = SectorIdx % SectorCount;
+  Info.StripIdx = GlobalRowIdx / SliceHeight;
+  Info.SliceColIdx = PixelIdx % SliceWidth;
+  Info.SliceRowIdx = GlobalRowIdx % SliceHeight;
   return Info;
+}
+
+int PixelIdFromSliceInfo(SliceInfo Info) {
+  int PixelId = 1 + Info.SliceColIdx + Info.SectorIdx * (SliceWidth) +
+                Info.SliceRowIdx * (SliceWidth * SectorCount) +
+                Info.StripIdx * (SliceWidth * SectorCount * SliceHeight);
+  return PixelId;
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Pixel1) {
   int PixelId = 1;
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 0);
-  ASSERT_EQ(Info.StripZ, 0);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 0);
+  ASSERT_EQ(Info.StripIdx, 0);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Sector2Pixel1) {
   int PixelId = 1 + SliceWidth;
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 1);
-  ASSERT_EQ(Info.StripZ, 0);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 1);
+  ASSERT_EQ(Info.StripIdx, 0);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Sector3Pixel1) {
   int PixelId = 1 + 2 * SliceWidth;
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 2);
-  ASSERT_EQ(Info.StripZ, 0);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 2);
+  ASSERT_EQ(Info.StripIdx, 0);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer2Pixel1) {
-  int WantedSectorZ = 0;
-  int WantedStripZ = 1;
-  int PixelId = 1 + WantedSectorZ * SliceWidth +
-                WantedStripZ * (SliceWidth * SectorCount * SliceHeight);
+  SliceInfo Wanted = {};
+  Wanted.SectorZ = 0;
+  Wanted.StripZ = 1;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 0);
-  ASSERT_EQ(Info.StripZ, 1);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 0);
+  ASSERT_EQ(Info.StripIdx, 1);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_TopLeft) {
-  int WantedSectorZ = 1;
-  int WantedStripZ = 2;
-  int WantedSliceColZ = 0;
-  int WantedSliceRowZ = 0;
-  int PixelId = 1 + WantedSliceColZ +
-                WantedSectorZ * (SliceWidth) +
-                WantedSliceRowZ * (SliceWidth * SectorCount) +
-                WantedStripZ * (SliceWidth * SectorCount * SliceHeight);
+  SliceInfo Wanted = {};
+  Wanted.SectorZ = 1;
+  Wanted.StripZ = 2;
+  Wanted.SliceColZ = 0;
+  Wanted.SliceRowZ = 0;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 1);
-  ASSERT_EQ(Info.StripZ, 2);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 1);
+  ASSERT_EQ(Info.StripIdx, 2);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_TopRight) {
-  int WantedSectorZ = 1;
-  int WantedStripZ = 2;
-  int WantedSliceColZ = 15;
-  int WantedSliceRowZ = 0;
-  int PixelId = 1 + WantedSliceColZ +
-                WantedSectorZ * (SliceWidth) +
-                WantedSliceRowZ * (SliceWidth * SectorCount) +
-                WantedStripZ * (SliceWidth * SectorCount * SliceHeight);
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 15;
+  Wanted.SliceRowIdx = 0;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 1);
-  ASSERT_EQ(Info.StripZ, 2);
-  ASSERT_EQ(Info.SliceColZ, 15);
-  ASSERT_EQ(Info.SliceRowZ, 0);
+  ASSERT_EQ(Info.SectorIdx, 1);
+  ASSERT_EQ(Info.StripIdx, 2);
+  ASSERT_EQ(Info.SliceColIdx, 15);
+  ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_BottomRight) {
-  int WantedSectorZ = 1;
-  int WantedStripZ = 2;
-  int WantedSliceColZ = 15;
-  int WantedSliceRowZ = 15;
-  int PixelId = 1 + WantedSliceColZ +
-                WantedSectorZ * (SliceWidth) +
-                WantedSliceRowZ * (SliceWidth * SectorCount) +
-                WantedStripZ * (SliceWidth * SectorCount * SliceHeight);
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 15;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 1);
-  ASSERT_EQ(Info.StripZ, 2);
-  ASSERT_EQ(Info.SliceColZ, 15);
-  ASSERT_EQ(Info.SliceRowZ, 15);
+  ASSERT_EQ(Info.SectorIdx, 1);
+  ASSERT_EQ(Info.StripIdx, 2);
+  ASSERT_EQ(Info.SliceColIdx, 15);
+  ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_BottomLeft) {
-  int WantedSectorZ = 1;
-  int WantedStripZ = 2;
-  int WantedSliceColZ = 0;
-  int WantedSliceRowZ = 15;
-  int PixelId = 1 + WantedSliceColZ +
-                WantedSectorZ * (SliceWidth) +
-                WantedSliceRowZ * (SliceWidth * SectorCount) +
-                WantedStripZ * (SliceWidth * SectorCount * SliceHeight);
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 0;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
-  ASSERT_EQ(Info.SectorZ, 1);
-  ASSERT_EQ(Info.StripZ, 2);
-  ASSERT_EQ(Info.SliceColZ, 0);
-  ASSERT_EQ(Info.SliceRowZ, 15);
+  ASSERT_EQ(Info.SectorIdx, 1);
+  ASSERT_EQ(Info.StripIdx, 2);
+  ASSERT_EQ(Info.SliceColIdx, 0);
+  ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
 class JalConfigTest : public TestBase {
