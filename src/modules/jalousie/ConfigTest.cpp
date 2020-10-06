@@ -3,6 +3,8 @@
 #include <jalousie/Config.h>
 #include <test/TestBase.h>
 
+#include <common/Assert.h>
+
 class DreamIcdTest : public TestBase {
 protected:
   void SetUp() override {}
@@ -52,6 +54,21 @@ int PixelIdFromSliceInfo(SliceInfo Info) {
                 Info.SliceRowIdx * (SliceWidth * SectorCount) +
                 Info.StripIdx * (SliceWidth * SectorCount * SliceHeight);
   return PixelId;
+}
+
+int SumoStartColOffsetFromSliceCol(int SliceColIdx){
+  // clang-format off
+  static const int SumoStartColOffset[14] = {
+     0,  0,  0,  0,  0, // 0-4
+    20, 20, 20, 20,     // 5-8
+    36, 36, 36,         // 9-11
+    48, 48,             // 12-13
+  }; 
+  // clang-format on
+  int SliceColDiv4 = SliceColIdx / 4;
+  RelAssertMsg(SliceColDiv4 < 14, "Bad SliceColIdx");
+  int SumoStartCol = SumoStartColOffset[SliceColDiv4];
+  return SumoStartCol;
 }
 
 TEST_F(DreamIcdTest, PixelIdToSliceInfo_Pixel1) {
@@ -161,6 +178,28 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_BottomMost) {
   ASSERT_EQ(Info.StripIdx, 15);
   ASSERT_EQ(Info.SliceColIdx, 15);
   ASSERT_EQ(Info.SliceRowIdx, 15);
+}
+
+TEST_F(DreamIcdTest, SumoStartColOffsetFromSliceCol_) {
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+0), 0);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+1), 0);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+18), 0);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(0+19), 0);
+  
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+0), 20);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+1), 20);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+14), 20);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(20+15), 20);
+  
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+0), 36);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+1), 36);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+10), 36);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(36+11), 36);
+
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+0), 48);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+1), 48);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+6), 48);
+  ASSERT_EQ(SumoStartColOffsetFromSliceCol(48+7), 48);
 }
 
 class JalConfigTest : public TestBase {
