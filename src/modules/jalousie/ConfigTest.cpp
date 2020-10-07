@@ -121,7 +121,7 @@ PhysicalCoords PhysicalCoordsFromPixelId(int PixelId) {
   Phys.Wire = StripCoords.WireIdx + 1;
   Phys.Cassette = StripCoords.CassetteIdx + 1;
   Phys.Counter = StripCoords.CounterIdx + 1;
-
+  
   return Phys;
 }
 
