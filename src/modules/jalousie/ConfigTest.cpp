@@ -186,13 +186,13 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_TopRight) {
   SliceInfo Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.SliceColIdx = 15;
+  Wanted.SliceColIdx = SliceWidth - 1;
   Wanted.SliceRowIdx = 0;
   int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
   ASSERT_EQ(Info.SectorIdx, 1);
   ASSERT_EQ(Info.StripIdx, 2);
-  ASSERT_EQ(Info.SliceColIdx, 15);
+  ASSERT_EQ(Info.SliceColIdx, SliceWidth - 1);
   ASSERT_EQ(Info.SliceRowIdx, 0);
 }
 
@@ -200,13 +200,13 @@ TEST_F(DreamIcdTest, PixelIdToSliceInfo_StripLayer3Sector2_BottomRight) {
   SliceInfo Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.SliceColIdx = 15;
+  Wanted.SliceColIdx = SliceWidth - 1;
   Wanted.SliceRowIdx = 15;
   int PixelId = PixelIdFromSliceInfo(Wanted);
   SliceInfo Info = PixelIdToSliceInfo(PixelId);
   ASSERT_EQ(Info.SectorIdx, 1);
   ASSERT_EQ(Info.StripIdx, 2);
-  ASSERT_EQ(Info.SliceColIdx, 15);
+  ASSERT_EQ(Info.SliceColIdx, SliceWidth - 1);
   ASSERT_EQ(Info.SliceRowIdx, 15);
 }
 
@@ -496,6 +496,108 @@ TEST_F(DreamIcdTest, StripPlaneCoordFromSumoLocalCoord_Sumo3_BottomLeft) {
   ASSERT_EQ(Coord.CounterIdx, 1);
   ASSERT_EQ(Coord.WireIdx, 0);
 }
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Pixel1) {
+  int PixelId = 1;
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 1);
+  ASSERT_EQ(Phys.Sumo, 6);
+  ASSERT_EQ(Phys.Strip, 1);
+  ASSERT_EQ(Phys.Wire, 16);
+  ASSERT_EQ(Phys.Cassette, 10);
+  ASSERT_EQ(Phys.Counter, 2); 
+}
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Sector3_BottomLeft) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 2;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 3);
+  ASSERT_EQ(Phys.Sumo, 6);
+  ASSERT_EQ(Phys.Strip, 1);
+  ASSERT_EQ(Phys.Wire, 1);
+  ASSERT_EQ(Phys.Cassette, 10);
+  ASSERT_EQ(Phys.Counter, 2); 
+}
+
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 0;
+  Wanted.SliceRowIdx = 0;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 2);
+  ASSERT_EQ(Phys.Sumo, 6);
+  ASSERT_EQ(Phys.Strip, 3);
+  ASSERT_EQ(Phys.Wire, 16);
+  ASSERT_EQ(Phys.Cassette, 10);
+  ASSERT_EQ(Phys.Counter, 2); 
+}
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopRight) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = SliceWidth - 1;
+  Wanted.SliceRowIdx = 0;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 2);
+  ASSERT_EQ(Phys.Sumo, 3);
+  ASSERT_EQ(Phys.Strip, 3);
+  ASSERT_EQ(Phys.Wire, 16);
+  ASSERT_EQ(Phys.Cassette, 1);
+  ASSERT_EQ(Phys.Counter, 1); 
+}
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = SliceWidth - 1;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 2);
+  ASSERT_EQ(Phys.Sumo, 3);
+  ASSERT_EQ(Phys.Strip, 3);
+  ASSERT_EQ(Phys.Wire, 1);
+  ASSERT_EQ(Phys.Cassette, 1);
+  ASSERT_EQ(Phys.Counter, 1); 
+}
+
+TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_BottomLeft) {
+  SliceInfo Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.SliceColIdx = 0;
+  Wanted.SliceRowIdx = 15;
+  int PixelId = PixelIdFromSliceInfo(Wanted);
+  PhysicalCoords Phys = PhysicalCoordsFromPixelId(PixelId);
+  ASSERT_EQ(Phys.Sector, 2);
+  ASSERT_EQ(Phys.Sumo, 6);
+  ASSERT_EQ(Phys.Strip, 3);
+  ASSERT_EQ(Phys.Wire, 1);
+  ASSERT_EQ(Phys.Cassette, 10);
+  ASSERT_EQ(Phys.Counter, 2); 
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
 
 class JalConfigTest : public TestBase {
 protected:
