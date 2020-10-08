@@ -60,10 +60,10 @@ enum SliceMapConstants {
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
 /// "reverse"?
 SlicePixel SlicePixelFromPixelId(int PixelId) {
-  SlicePixel Slice;
   int PixelIdx = PixelId - 1;
   int SectorIdx = PixelIdx / SliceWidth;
   int GlobalY = PixelIdx / TotalWidth;
+  SlicePixel Slice;
   Slice.SectorIdx = SectorIdx % SectorCount;
   Slice.StripIdx = GlobalY / SliceHeight;
   Slice.X = PixelIdx % SliceWidth;
@@ -114,7 +114,7 @@ StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   return StripPlane;
 }
 
-EndCapParams EndCapCoordsFromPixelId(int PixelId) {
+EndCapParams EndCapParamsFromPixelId(int PixelId) {
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   SumoPixel Sumo = SumoPixelFromSlicePixel(Slice);
   StripPlanePixel StripPlane = StripPlanePixelFromSumoPixel(Sumo);
@@ -504,9 +504,9 @@ TEST_F(DreamIcdTest, StripPlanePixelFromSumoPixel_Sumo3_BottomLeft) {
   ASSERT_EQ(StripPlane.WireIdx, 0);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Pixel1) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_Pixel1) {
   int PixelId = 1;
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 1);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 1);
@@ -515,12 +515,12 @@ TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Pixel1) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Sector3_BottomLeft) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_Sector3_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 2;
   Wanted.Y = 15;
   int PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 3);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 1);
@@ -529,14 +529,14 @@ TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Sector3_BottomLeft) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 0;
   int PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -545,14 +545,14 @@ TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopRight) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 0;
   int PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -561,14 +561,14 @@ TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopRight) {
   ASSERT_EQ(EndCap.Counter, 1);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_BottomRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 15;
   int PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -577,14 +577,14 @@ TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
   ASSERT_EQ(EndCap.Counter, 1);
 }
 
-TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_BottomLeft) {
+TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 15;
   int PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 3);
