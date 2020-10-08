@@ -504,7 +504,7 @@ TEST_F(DreamIcdTest, StripPlanePixelFromSumoPixel_Sumo3_BottomLeft) {
   ASSERT_EQ(StripPlane.WireIdx, 0);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Pixel1) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Pixel1) {
   int PixelId = 1;
   EndCapParams EndCap = EndCapCoordsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 1);
@@ -515,7 +515,7 @@ TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Pixel1) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Sector3_BottomLeft) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_Sector3_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 2;
   Wanted.Y = 15;
@@ -529,7 +529,7 @@ TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_Sector3_BottomLeft) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
@@ -545,7 +545,7 @@ TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopLeft) {
   ASSERT_EQ(EndCap.Counter, 2);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopRight) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_TopRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
@@ -561,7 +561,7 @@ TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_TopRight) {
   ASSERT_EQ(EndCap.Counter, 1);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
@@ -577,7 +577,7 @@ TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_BottomRight) {
   ASSERT_EQ(EndCap.Counter, 1);
 }
 
-TEST_F(DreamIcdTest, PhysicalCoordsFromPixelId_StripLayer3Sector2_BottomLeft) {
+TEST_F(DreamIcdTest, EndCapCoordsFromPixelId_StripLayer3Sector2_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
