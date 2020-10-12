@@ -10,17 +10,16 @@ protected:
 };
 
 /// \todo Handle pixel min/max value test?
-/// \todo Benchmark signed/unsigned int. Unsigned looks much shorter on godbolt.
 
 // test global pixel to sumo slice mapping
 
 /// A Slice refers to a Sector Sumo Slice, which is a slice of a Sector along
 /// the Strip axis.
 struct SlicePixel {
-  int SectorIdx;
-  int StripIdx;
-  int X;
-  int Y;
+  uint32_t SectorIdx;
+  uint32_t StripIdx;
+  uint32_t X;
+  uint32_t Y;
 };
 
 struct SumoPixel {
@@ -31,21 +30,21 @@ struct SumoPixel {
 };
 
 struct StripPlanePixel {
-  int WireIdx;
-  int CassetteIdx;
-  int CounterIdx;
+  uint32_t WireIdx;
+  uint32_t CassetteIdx;
+  uint32_t CounterIdx;
 };
 
 struct EndCapParams {
-  int Sector;
-  int Sumo;
-  int Strip;
-  int Wire;
-  int Cassette;
-  int Counter;
+  uint32_t Sector;
+  uint32_t Sumo;
+  uint32_t Strip;
+  uint32_t Wire;
+  uint32_t Cassette;
+  uint32_t Counter;
 };
 
-enum SliceMapConstants {
+enum SliceMapConstants : uint32_t {
   SliceWidth =
       56, /// Width of the Sector Sumo Slice in logical coordinates, in pixels.
   SliceHeight =
@@ -55,14 +54,13 @@ enum SliceMapConstants {
   TotalWidth = SliceWidth * SectorCount
 };
 
-/// \brief this maps pixelid to the SectorStripSlice. SliceRowIdx and
-/// SliceColIdx are coordinates inside the slice.
+/// \brief this maps pixelid to the SectorStripSlice.
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
 /// "reverse"?
-SlicePixel SlicePixelFromPixelId(int PixelId) {
-  int PixelIdx = PixelId - 1;
-  int SectorIdx = PixelIdx / SliceWidth;
-  int GlobalY = PixelIdx / TotalWidth;
+SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
+  uint32_t PixelIdx = PixelId - 1;
+  uint32_t SectorIdx = PixelIdx / SliceWidth;
+  uint32_t GlobalY = PixelIdx / TotalWidth;
   SlicePixel Slice;
   Slice.SectorIdx = SectorIdx % SectorCount;
   Slice.StripIdx = GlobalY / SliceHeight;
@@ -71,10 +69,10 @@ SlicePixel SlicePixelFromPixelId(int PixelId) {
   return Slice;
 }
 
-int PixelIdFromSlicePixel(SlicePixel Slice) {
-  int PixelId = 1 + Slice.X + Slice.SectorIdx * (SliceWidth) +
-                Slice.Y * (SliceWidth * SectorCount) +
-                Slice.StripIdx * (SliceWidth * SectorCount * SliceHeight);
+uint32_t PixelIdFromSlicePixel(SlicePixel Slice) {
+  uint32_t PixelId = 1 + Slice.X + Slice.SectorIdx * (SliceWidth) +
+                     Slice.Y * (SliceWidth * SectorCount) +
+                     Slice.StripIdx * (SliceWidth * SectorCount * SliceHeight);
   return PixelId;
 }
 
@@ -94,7 +92,8 @@ SumoPixel SumoPixelFromSlicePixel(SlicePixel Slice) {
     { 48,  8, 3 }, { 48,  8, 3 },                                            // 12-13, SlicePixel.X 48-55: Sumo 3, Cols 1-8
   };
   // clang-format on
-  int XCompact = Slice.X / 4; // Range reduced from 56 to 14 -> fewer constants
+  uint32_t XCompact =
+      Slice.X / 4; // Range reduced from 56 to 14 -> fewer constants
   SliceToSumoProperty SliceToSumo = SliceToSumoMap[XCompact];
 
   SumoPixel Sumo;
@@ -107,14 +106,14 @@ SumoPixel SumoPixelFromSlicePixel(SlicePixel Slice) {
 
 StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   StripPlanePixel StripPlane;
-  int CassetteCounterIdx = Sumo.Width - Sumo.X - 1;
+  uint32_t CassetteCounterIdx = Sumo.Width - Sumo.X - 1;
   StripPlane.CassetteIdx = CassetteCounterIdx / 2;
   StripPlane.CounterIdx = CassetteCounterIdx % 2;
   StripPlane.WireIdx = SliceHeight - Sumo.Y - 1;
   return StripPlane;
 }
 
-EndCapParams EndCapParamsFromPixelId(int PixelId) {
+EndCapParams EndCapParamsFromPixelId(uint32_t PixelId) {
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   SumoPixel Sumo = SumoPixelFromSlicePixel(Slice);
   StripPlanePixel StripPlane = StripPlanePixelFromSumoPixel(Sumo);
@@ -135,7 +134,7 @@ EndCapParams EndCapParamsFromPixelId(int PixelId) {
 //////////////////////////////////////////////////////////////////////////////
 
 TEST_F(DreamIcdTest, SlicePixelFromPixelId_Pixel1) {
-  int PixelId = 1;
+  uint32_t PixelId = 1;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
@@ -144,7 +143,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_Pixel1) {
 }
 
 TEST_F(DreamIcdTest, SlicePixelFromPixelId_Sector2Pixel1) {
-  int PixelId = 1 + SliceWidth;
+  uint32_t PixelId = 1 + SliceWidth;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 0);
@@ -153,7 +152,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_Sector2Pixel1) {
 }
 
 TEST_F(DreamIcdTest, SlicePixelFromPixelId_Sector3Pixel1) {
-  int PixelId = 1 + 2 * SliceWidth;
+  uint32_t PixelId = 1 + 2 * SliceWidth;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 2);
   ASSERT_EQ(Slice.StripIdx, 0);
@@ -165,7 +164,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_StripLayer2Pixel1) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 0;
   Wanted.StripIdx = 1;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 1);
@@ -179,7 +178,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_StripLayer3Sector2_TopLeft) {
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 0;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
@@ -193,7 +192,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_StripLayer3Sector2_TopRight) {
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 0;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
@@ -207,7 +206,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_StripLayer3Sector2_BottomRight) {
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
@@ -221,7 +220,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_StripLayer3Sector2_BottomLeft) {
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
@@ -235,7 +234,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_BottomMost) {
   Wanted.StripIdx = 15;
   Wanted.X = 15;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 22);
   ASSERT_EQ(Slice.StripIdx, 15);
@@ -244,7 +243,7 @@ TEST_F(DreamIcdTest, SlicePixelFromPixelId_BottomMost) {
 }
 
 TEST_F(DreamIcdTest, SumoPixelFromSlicePixel_TwoFirstAndLast) {
-  auto MakeSlicePixel = [](int X) { return SlicePixel{0, 0, X, 0}; };
+  auto MakeSlicePixel = [](uint32_t X) { return SlicePixel{0, 0, X, 0}; };
 
   // Sumo 6
   ASSERT_EQ(SumoPixelFromSlicePixel(MakeSlicePixel(0 + 00)).X, 00);
@@ -505,7 +504,7 @@ TEST_F(DreamIcdTest, StripPlanePixelFromSumoPixel_Sumo3_BottomLeft) {
 }
 
 TEST_F(DreamIcdTest, EndCapParamsFromPixelId_Pixel1) {
-  int PixelId = 1;
+  uint32_t PixelId = 1;
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 1);
   ASSERT_EQ(EndCap.Sumo, 6);
@@ -519,7 +518,7 @@ TEST_F(DreamIcdTest, EndCapParamsFromPixelId_Sector3_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 2;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 3);
   ASSERT_EQ(EndCap.Sumo, 6);
@@ -535,7 +534,7 @@ TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopLeft) {
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 0;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 6);
@@ -551,7 +550,7 @@ TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopRight) {
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 0;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
@@ -567,7 +566,7 @@ TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_BottomRight) {
   Wanted.StripIdx = 2;
   Wanted.X = SliceWidth - 1;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
@@ -583,7 +582,7 @@ TEST_F(DreamIcdTest, EndCapParamsFromPixelId_StripLayer3Sector2_BottomLeft) {
   Wanted.StripIdx = 2;
   Wanted.X = 0;
   Wanted.Y = 15;
-  int PixelId = PixelIdFromSlicePixel(Wanted);
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 6);
