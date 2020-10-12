@@ -10,21 +10,18 @@
 
 #include <cinttypes>
 #include <common/EFUArgs.h>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
 #include <common/Log.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
-
-#include <unistd.h>
-
 #include <common/SPSCFifo.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
+#include <loki/LokiInstrument.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -92,6 +89,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
+
 void LokiBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
@@ -131,10 +129,9 @@ void LokiBase::inputThread() {
   return;
 }
 
-/// \brief Generate an Udder test image in '3D' one image
-/// at z = 0 and one at z = 3
-/// \todo will not work for the full detector
-void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
+/// \brief Generate an Udder test image
+/// \todo is probably not working after latest changes
+void LokiBase::testImageUdder() {
   ESSGeometry LoKIGeometry(56, 512, 4, 1);
   XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
   Udder udderImage;
@@ -144,14 +141,14 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
     static int EventCount = 0;
     if (EventCount == 0) {
       uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      FlatBuffer.pulseTime(EfuTime);
+      Serializer->pulseTime(EfuTime);
     }
 
     auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-    Counters.TxBytes += FlatBuffer.addEvent(TimeOfFlight, pixelId);
+    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
     Counters.EventsUdder++;
     pixelId += LoKIGeometry.ny()*LoKIGeometry.nx()*(LoKIGeometry.nz() - 1);
-    Counters.TxBytes += FlatBuffer.addEvent(TimeOfFlight, pixelId);
+    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
     Counters.EventsUdder++;
 
     if (EFUSettings.TestImageUSleep != 0) {
@@ -171,29 +168,11 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
   return;
 }
 
+///
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
-  LokiConfiguration = Config(LokiModuleSettings.ConfigFile);
 
-  if (LokiModuleSettings.CalibFile.empty()) {
-    uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
-    LokiCalibration.nullCalibration(MaxPixels);
-  } else {
-    LokiCalibration = Calibration(LokiModuleSettings.CalibFile);
-  }
-
-  if (LokiCalibration.getMaxPixel() != LokiConfiguration.getMaxPixel()) {
-      LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        LokiConfiguration.getMaxPixel(), LokiCalibration.getMaxPixel());
-      throw std::runtime_error("Pixel mismatch");
-  }
-
-  uint32_t MaxPixel = LokiCalibration.getMaxPixel();
-
-  std::shared_ptr<ReadoutFile> DumpFile;
-  if (!LokiModuleSettings.FilePrefix.empty()) {
-    DumpFile = ReadoutFile::create(LokiModuleSettings.FilePrefix + "loki_" + timeString());
-  }
+  LokiInstrument Loki(Counters, LokiModuleSettings);
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
@@ -201,10 +180,10 @@ void LokiBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer FlatBuffer(KafkaBufferSize, "loki", Produce);
+  Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
 
   if (EFUSettings.TestImage) {
-    return testImageUdder(FlatBuffer);
+    return testImageUdder();
   }
 
   unsigned int DataIndex;
@@ -220,109 +199,82 @@ void LokiBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-      auto Res = ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
-      Counters.ErrorBuffer = ESSReadoutParser.Stats.ErrorBuffer;
-      Counters.ErrorSize = ESSReadoutParser.Stats.ErrorSize;
-      Counters.ErrorVersion = ESSReadoutParser.Stats.ErrorVersion;
-      Counters.ErrorTypeSubType = ESSReadoutParser.Stats.ErrorTypeSubType;
-      Counters.ErrorOutputQueue = ESSReadoutParser.Stats.ErrorOutputQueue;
-      Counters.ErrorSeqNum = ESSReadoutParser.Stats.ErrorSeqNum;
+
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
+      Counters.ErrorBuffer = Loki.ESSReadoutParser.Stats.ErrorBuffer;
+      Counters.ErrorSize = Loki.ESSReadoutParser.Stats.ErrorSize;
+      Counters.ErrorVersion = Loki.ESSReadoutParser.Stats.ErrorVersion;
+      Counters.ErrorTypeSubType = Loki.ESSReadoutParser.Stats.ErrorTypeSubType;
+      Counters.ErrorOutputQueue = Loki.ESSReadoutParser.Stats.ErrorOutputQueue;
+      Counters.ErrorSeqNum = Loki.ESSReadoutParser.Stats.ErrorSeqNum;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-        ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-        ESSReadoutParser.Packet.HeaderPtr->PulseLow);
+        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
-      Res = LokiParser.parse(ESSReadoutParser.Packet.DataPtr, ESSReadoutParser.Packet.DataLength);
+      Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr, Loki.ESSReadoutParser.Packet.DataLength);
 
-      //Fake pulse time
-      uint64_t PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      FlatBuffer.pulseTime(PulseTime);
+      // Dont fake pulse time, but could do something like
+      // PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      uint64_t PulseTime;
 
-      bool RealPulseTime = true;
-      if (RealPulseTime) {
-        auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-        PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
-        XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
-         PacketHeader->PulseLow, PulseTime);
-        FlatBuffer.pulseTime(PulseTime);
-      }
+      auto PacketHeader = Loki.ESSReadoutParser.Packet.HeaderPtr;
+      PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
+      XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
+        PacketHeader->PulseLow, PulseTime);
+      Serializer->pulseTime(PulseTime);
 
-
-      /// Traverse readouts
-      /// \todo include FENId in global tube calculation, eventually
-      /// \todo New format will split FPGA and Tube
-      for (auto & Section : LokiParser.Result) {
+      /// Traverse readouts, calculate pixels
+      for (auto & Section : Loki.LokiParser.Result) {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
-        if (Section.RingId >= LokiConfiguration.Panels.size()) {
+        if (Section.RingId >= Loki.LokiConfiguration.Panels.size()) {
+          XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
+          Counters.MappingErrors++;
+          continue;
+        }
+
+        PanelGeometry & Panel = Loki.LokiConfiguration.Panels[Section.RingId];
+
+        if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
+          XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
           Counters.MappingErrors++;
           continue;
         }
 
         for (auto & Data : Section.Data) {
-          uint8_t FPGAId = Data.FPGAId;
-          uint8_t LocalTube = Data.TubeId;
+          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
 
-          XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
-            Data.TimeHigh, Data.TimeLow, FPGAId, LocalTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
-          Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-          auto Straw = Amp2Pos.StrawId;
-          auto YPos = Amp2Pos.PosId;
+          XTRACE(DATA, DEB, "  Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
+            Data.TimeHigh, Data.TimeLow, Data.FPGAId, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
           // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
           // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
           // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
 
-          auto Panel = LokiConfiguration.Panels[Section.RingId];
-          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
-          auto PixelId =  LokiModuleSettings.DetectorImage2D
-              ? Panel.getPixel2D(Section.FENId, FPGAId, LocalTube, Straw, YPos)
-              : Panel.getPixel3D(Section.FENId, FPGAId, LocalTube, Straw, YPos);
-
-          if (PixelId > MaxPixel) {
-            Counters.CalibrationErrors++;
-            continue;
-          }
-
-          uint32_t MappedPixelId = LokiCalibration.Mapping[PixelId];
-          XTRACE(EVENT, DEB, "time: %" PRIu64 ", straw %u, ypos %u, pixel: %u(mapped %u)",
-                 TimeOfFlight, Straw, YPos, PixelId, MappedPixelId);
-
-          if (DumpFile) {
-            Readout CurrentReadout;
-            CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-            CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
-            CurrentReadout.EventTimeHigh = Data.TimeHigh;
-            CurrentReadout.EventTimeLow = Data.TimeLow;
-            CurrentReadout.AmpA = Data.AmpA;
-            CurrentReadout.AmpB = Data.AmpB;
-            CurrentReadout.AmpC = Data.AmpC;
-            CurrentReadout.AmpD = Data.AmpD;
-            CurrentReadout.RingId = Section.RingId;
-            CurrentReadout.FENId = Section.FENId;
-            CurrentReadout.FPGAId = Data.FPGAId;
-            CurrentReadout.TubeId = Data.TubeId;
-            DumpFile->push(CurrentReadout);
-          }
+          // Calculate pixelid and apply calibration
+          uint32_t PixelId = Loki.calcPixel(Panel, Section.FENId, Data);
 
           if (PixelId == 0) {
             Counters.GeometryErrors++;
           } else {
-            Counters.TxBytes += FlatBuffer.addEvent(PulseTime, MappedPixelId);
+            Counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
             Counters.Events++;
+          }
+
+          if (Loki.DumpFile) {
+            Loki.dumpReadoutToFile(Section, Data);
           }
 
         }
       } // for()
 
-    } else {
-      // There is NO data in the FIFO - do stop checks and sleep a little
+    } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.RxIdle++;
       usleep(10);
     }
@@ -330,7 +282,7 @@ void LokiBase::processingThread() {
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      Counters.TxBytes += FlatBuffer.produce();
+      Counters.TxBytes += Serializer->produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count

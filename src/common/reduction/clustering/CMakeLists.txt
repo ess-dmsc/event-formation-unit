@@ -17,12 +17,12 @@ set(clustering_obj_INC
   GapClusterer2D.h
 )
 
-add_library(ClusteringObj OBJECT
+add_library(ClusteringLib OBJECT
   ${clustering_obj_SRC}
   ${clustering_obj_INC}
   )
 
-enable_coverage_flags(ClusteringObj)
+enable_coverage_flags(ClusteringLib)
 
 #=============================================================================
 # Tests

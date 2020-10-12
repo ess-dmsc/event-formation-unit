@@ -16,9 +16,9 @@ set(mg_reduction_obj_INC
   Reduction.h
   )
 
-add_library(MgReduction STATIC
+add_library(MgReductionLib STATIC
   ${mg_reduction_obj_SRC}
   ${mg_reduction_obj_INC}
   )
 
-enable_coverage_flags(MgReduction)
+enable_coverage_flags(MgReductionLib)

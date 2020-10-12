@@ -11,7 +11,7 @@
 
 #include <cinttypes>
 
-const uint8_t MaxOutputQueues{64};
+const uint8_t MaxOutputQueues{24};
 
 #define READOUT_EXTRA_PADDING
 #ifdef READOUT_EXTRA_PADDING

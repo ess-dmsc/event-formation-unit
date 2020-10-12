@@ -2,6 +2,9 @@
 # Tests
 #=============================================================================
 
+include_directories(.)
+include_directories(..)
+
 ##
 ## Pure unit tests
 ##
@@ -9,7 +12,6 @@
 ##
 ## geometry/
 ##
-
 set(TubeAmpsTest_INC ../geometry/TubeAmps.h)
 set(TubeAmpsTest_SRC TubeAmpsTest.cpp)
 create_test_executable(TubeAmpsTest)

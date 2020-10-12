@@ -1382,5 +1382,5 @@ using span_lite::byte_span;
 #if ! span_USES_STD_SPAN
 span_RESTORE_WARNINGS()
 #endif  // span_USES_STD_SPAN
-
 #endif  // NONSTD_SPAN_HPP_INCLUDED
+// GCOVR_EXCL_STOP

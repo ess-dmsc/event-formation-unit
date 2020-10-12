@@ -18,9 +18,9 @@ set(mg_geometry_obj_INC
   DetectorMappings.h
   )
 
-add_library(MgGeometry STATIC
+add_library(MgGeometryLib STATIC
   ${mg_geometry_obj_SRC}
   ${mg_geometry_obj_INC}
   )
 
-enable_coverage_flags(MgGeometry)
+enable_coverage_flags(MgGeometryLib)

@@ -142,6 +142,7 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
 
   int ret = inet_aton(ipaddr.c_str(), &localSockAddr.sin_addr);
   if (ret == 0) {
+    XTRACE(IPC, DEB, "invalid ip address %s", ipaddr.c_str());
     auto Msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
@@ -156,7 +157,7 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
-    auto Msg = fmt::format("setLocalSocket(): bind failed, is port {} already in use?", port);
+    auto Msg = fmt::format("setLocalSocket(): bind failed {}, is port {} already in use?", ret, port);
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
   }
@@ -172,7 +173,7 @@ void Socket::setRemoteSocket(const std::string ipaddr, int port) {
 
   int ret = inet_aton(ipaddr.c_str(), &remoteSockAddr.sin_addr);
   if (ret == 0) {
-    auto Msg = fmt::format("etRemoteSocket(): invalid ip address {}", ipaddr);
+    auto Msg = fmt::format("setRemoteSocket(): invalid ip address {}", ipaddr);
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
   }
