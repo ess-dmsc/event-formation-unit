@@ -11,7 +11,7 @@
 
 #include <jalousie/JalousieBase.h>
 #include <test/TestUDPServer.h>
-#include <jalousie/JalousieBaseTestData.h>
+#include <JalousieBaseTestData.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 

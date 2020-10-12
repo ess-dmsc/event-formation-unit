@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 
-#include <generators/CdtFile.h>
-#include <BuilderReadouts.h>
+#include <../generators/CdtFile.h>
+#include <../BuilderReadouts.h>
 #include <test/TestBase.h>
 #include <set>
 
