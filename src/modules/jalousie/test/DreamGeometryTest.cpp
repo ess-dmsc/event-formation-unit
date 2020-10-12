@@ -1,6 +1,6 @@
 #include <test/TestBase.h>
 
-#include <geometry/DreamGeometry.h>
+#include <jalousie/geometry/DreamGeometry.h>
 
 class DreamGeometryTest : public TestBase {
 protected:
