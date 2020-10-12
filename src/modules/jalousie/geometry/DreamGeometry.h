@@ -42,7 +42,9 @@ enum SliceMapConstants : uint32_t {
   SliceWidth = 56,  /// Width of the Slice (SSS) in pixels.
   SliceHeight = 16, /// Height of the Slice (SSS) in pixels.
   SectorCount = 23, /// Sectors, left to right, in the logical coordinates.
-  TotalWidth = SliceWidth * SectorCount
+  TotalWidth = SliceWidth * SectorCount,
+  TotalHeight = SliceHeight * 16, /// 16 Strips
+  TotalPixels = TotalWidth * TotalHeight
 };
 
 /// \brief this maps pixelid to the SectorStripSlice.
