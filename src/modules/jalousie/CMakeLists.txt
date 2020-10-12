@@ -42,6 +42,10 @@ set(JalReadoutTest_SRC ReadoutTest.cpp Readout.cpp)
 set(JalReadoutTest_INC Readout.h)
 create_test_executable(JalReadoutTest SKIP_MEMGRIND)
 
+set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
+set(DreamGeometryTest_INC geometry/DreamGeometry.h)
+create_test_executable(DreamGeometryTest)
+
 #=============================================================================
 # tests depending on availability of reference data
 #=============================================================================
