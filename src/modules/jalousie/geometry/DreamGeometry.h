@@ -7,8 +7,8 @@ struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
 
 // test global pixel to sumo slice mapping
 
-/// A Slice refers to a Sector Sumo Slice (SSS), which is a slice of a Sector along
-/// the Strip axis.
+/// A Slice refers to a Sector Sumo Slice (SSS), which is a slice of a Sector
+/// along the Strip axis.
 struct SlicePixel {
   uint32_t SectorIdx;
   uint32_t StripIdx;
@@ -38,7 +38,8 @@ struct EndCapParams {
   uint32_t Counter;
 };
 
-enum SliceMapConstants : uint32_t {
+namespace DreamGeometry {
+enum Enum : uint32_t {
   SliceWidth = 56,  /// Width of the Slice (SSS) in pixels.
   SliceHeight = 16, /// Height of the Slice (SSS) in pixels.
   SectorCount = 23, /// Sectors, left to right, in the logical coordinates.
@@ -46,11 +47,13 @@ enum SliceMapConstants : uint32_t {
   TotalHeight = SliceHeight * 16, /// 16 Strips
   TotalPixels = TotalWidth * TotalHeight
 };
+};
 
 /// \brief this maps pixelid to the SectorStripSlice.
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
 /// "reverse"?
 SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
+  using namespace DreamGeometry;
   uint32_t PixelIdx = PixelId - 1;
   uint32_t SectorIdx = PixelIdx / SliceWidth;
   uint32_t GlobalY = PixelIdx / TotalWidth;
@@ -63,6 +66,7 @@ SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
 }
 
 uint32_t PixelIdFromSlicePixel(SlicePixel Slice) {
+  using namespace DreamGeometry;
   uint32_t PixelId = 1 + Slice.X + Slice.SectorIdx * (SliceWidth) +
                      Slice.Y * (SliceWidth * SectorCount) +
                      Slice.StripIdx * (SliceWidth * SectorCount * SliceHeight);
@@ -102,7 +106,7 @@ StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   uint32_t CassetteCounterIdx = Sumo.Width - Sumo.X - 1;
   StripPlane.CassetteIdx = CassetteCounterIdx / 2;
   StripPlane.CounterIdx = CassetteCounterIdx % 2;
-  StripPlane.WireIdx = SliceHeight - Sumo.Y - 1;
+  StripPlane.WireIdx = DreamGeometry::SliceHeight - Sumo.Y - 1;
   return StripPlane;
 }
 

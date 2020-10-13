@@ -3,7 +3,7 @@
 
 #include <common/BenchmarkUtil.h>
 
-const uint32_t Count = TotalPixels / 10;
+const uint32_t Count = DreamGeometry::TotalPixels / 10;
 
 static void DreamDecode(benchmark::State &state) {
   uint32_t Total = 0;

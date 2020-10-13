@@ -18,7 +18,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromPixelId_Pixel1) {
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromPixelId_Sector2Pixel1) {
-  uint32_t PixelId = 1 + SliceWidth;
+  uint32_t PixelId = 1 + DreamGeometry::SliceWidth;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 0);
@@ -27,7 +27,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromPixelId_Sector2Pixel1) {
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromPixelId_Sector3Pixel1) {
-  uint32_t PixelId = 1 + 2 * SliceWidth;
+  uint32_t PixelId = 1 + 2 * DreamGeometry::SliceWidth;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 2);
   ASSERT_EQ(Slice.StripIdx, 0);
@@ -65,13 +65,13 @@ TEST_F(DreamGeometryTest, SlicePixelFromPixelId_StripLayer3Sector2_TopRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.X = SliceWidth - 1;
+  Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 0;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
-  ASSERT_EQ(Slice.X, SliceWidth - 1);
+  ASSERT_EQ(Slice.X, DreamGeometry::SliceWidth - 1);
   ASSERT_EQ(Slice.Y, 0);
 }
 
@@ -80,13 +80,13 @@ TEST_F(DreamGeometryTest,
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.X = SliceWidth - 1;
+  Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 15;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   ASSERT_EQ(Slice.SectorIdx, 1);
   ASSERT_EQ(Slice.StripIdx, 2);
-  ASSERT_EQ(Slice.X, SliceWidth - 1);
+  ASSERT_EQ(Slice.X, DreamGeometry::SliceWidth - 1);
   ASSERT_EQ(Slice.Y, 15);
 }
 
@@ -424,7 +424,7 @@ TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopRight) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.X = SliceWidth - 1;
+  Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 0;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
@@ -441,7 +441,7 @@ TEST_F(DreamGeometryTest,
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
   Wanted.StripIdx = 2;
-  Wanted.X = SliceWidth - 1;
+  Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 15;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
