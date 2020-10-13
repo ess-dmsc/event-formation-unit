@@ -454,6 +454,128 @@ TEST_F(DreamGeometryTest,
 }
 
 TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo6_TopLeft) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 15;
+  StripPlane.CassetteIdx = 9;
+  StripPlane.CounterIdx = 1;
+  uint32_t SumoId = 6;
+  uint32_t SumoWidth = 20;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 0);
+  ASSERT_EQ(Sumo.Y, 0);
+  ASSERT_EQ(Sumo.Sumo, 6);
+  ASSERT_EQ(Sumo.Width, 20);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo6_TopRight) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 15;
+  StripPlane.CassetteIdx = 0;
+  StripPlane.CounterIdx = 0;
+  uint32_t SumoId = 6;
+  uint32_t SumoWidth = 20;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 19);
+  ASSERT_EQ(Sumo.Y, 0);
+  ASSERT_EQ(Sumo.Sumo, 6);
+  ASSERT_EQ(Sumo.Width, 20);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo6_BottomRight) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 0;
+  StripPlane.CassetteIdx = 0;
+  StripPlane.CounterIdx = 0;
+  uint32_t SumoId = 6;
+  uint32_t SumoWidth = 20;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 19);
+  ASSERT_EQ(Sumo.Y, 15);
+  ASSERT_EQ(Sumo.Sumo, 6);
+  ASSERT_EQ(Sumo.Width, 20);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo6_BottomLeft) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 0;
+  StripPlane.CassetteIdx = 9;
+  StripPlane.CounterIdx = 1;
+  uint32_t SumoId = 6;
+  uint32_t SumoWidth = 20;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 0);
+  ASSERT_EQ(Sumo.Y, 15);
+  ASSERT_EQ(Sumo.Sumo, 6);
+  ASSERT_EQ(Sumo.Width, 20);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo3_TopLeft) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 15;
+  StripPlane.CassetteIdx = 3;
+  StripPlane.CounterIdx = 1;
+  uint32_t SumoId = 3;
+  uint32_t SumoWidth = 8;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 0);
+  ASSERT_EQ(Sumo.Y, 0);
+  ASSERT_EQ(Sumo.Sumo, 3);
+  ASSERT_EQ(Sumo.Width, 8);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo3_TopRight) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 15;
+  StripPlane.CassetteIdx = 0;
+  StripPlane.CounterIdx = 0;
+  uint32_t SumoId = 3;
+  uint32_t SumoWidth = 8;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 7);
+  ASSERT_EQ(Sumo.Y, 0);
+  ASSERT_EQ(Sumo.Sumo, 3);
+  ASSERT_EQ(Sumo.Width, 8);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo3_BottomRight) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 0;
+  StripPlane.CassetteIdx = 0;
+  StripPlane.CounterIdx = 0;
+  uint32_t SumoId = 3;
+  uint32_t SumoWidth = 8;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 7);
+  ASSERT_EQ(Sumo.Y, 15);
+  ASSERT_EQ(Sumo.Sumo, 3);
+  ASSERT_EQ(Sumo.Width, 8);
+}
+
+TEST_F(DreamGeometryTest,
+       SumoPixelFromStripPlanePixel_Sumo3_BottomLeft) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = 0;
+  StripPlane.CassetteIdx = 3;
+  StripPlane.CounterIdx = 1;
+  uint32_t SumoId = 3;
+  uint32_t SumoWidth = 8;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  ASSERT_EQ(Sumo.X, 0);
+  ASSERT_EQ(Sumo.Y, 15);
+  ASSERT_EQ(Sumo.Sumo, 3);
+  ASSERT_EQ(Sumo.Width, 8);
+}
+
+#if 0
+
+TEST_F(DreamGeometryTest,
        EndCapParamsFromPixelId_StripLayer3Sector2_BottomLeft) {
   SlicePixel Wanted = {};
   Wanted.SectorIdx = 1;
@@ -469,3 +591,62 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(EndCap.Cassette, 10);
   ASSERT_EQ(EndCap.Counter, 2);
 }
+
+TEST_F(DreamGeometryTest, BigLoop) {
+  uint32_t TestCount = 0;
+  for (uint32_t Sector = 1; Sector <= DreamGeometry::SectorCount; Sector++) {
+    for (uint32_t Strip = 1; Strip <= 16; Strip++) {
+      for (uint32_t Sumo = 3; Sumo <= 6; Sumo++) {
+        uint32_t CassettesPerSumo[6] = {-1, -1, -1, 4, 6, 8, 10};
+        uint32_t AccumulatedSumoOffsetInSlice[6] = {-1, -1, -1, 0, 20, 36, 48};
+        for (uint32_t Cassette = 3; Cassette <= CassettesPerSumo[Sumo];
+             Cassette++) {
+          for (uint32_t Counter = 1; Counter <= 2; Counter++) {
+            for (uint32_t Wire = 1; Wire <= 16; Wire++) {
+
+              struct EndCapParams {
+                uint32_t Sector;
+                uint32_t Strip;
+                uint32_t Sumo;
+                uint32_t Cassette;
+                uint32_t Counter;
+                uint32_t Wire;
+              };
+              EndCapParams EndCap;
+
+              struct SlicePixel {
+                uint32_t SectorIdx;
+                uint32_t StripIdx;
+                uint32_t X;
+                uint32_t Y;
+              };
+              SlicePixel Slice;
+              Slice.SectorIdx = Sector - 1;
+              Slice.StripIdx = Strip - 1;
+              uint32_t SumoIdx = Sumo - 3;
+              uint32_t SumoOffset = AccumulatedSumoOffsetInSlice[Sumo];
+              Slice.X = SumoOffset + 
+
+              uint32_t PixelId = ;
+            }
+          }
+        }
+      }
+    }
+  }
+  SlicePixel Wanted = {};
+  Wanted.SectorIdx = 1;
+  Wanted.StripIdx = 2;
+  Wanted.X = 0;
+  Wanted.Y = 15;
+  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
+  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  ASSERT_EQ(EndCap.Sector, 2);
+  ASSERT_EQ(EndCap.Sumo, 6);
+  ASSERT_EQ(EndCap.Strip, 3);
+  ASSERT_EQ(EndCap.Wire, 1);
+  ASSERT_EQ(EndCap.Cassette, 10);
+  ASSERT_EQ(EndCap.Counter, 2);
+}
+
+#endif

@@ -110,6 +110,17 @@ StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   return StripPlane;
 }
 
+SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane, uint32_t SumoId, uint32_t SumoWidth) {
+  uint32_t CassetteCounterIdx =
+      StripPlane.CassetteIdx * 2 + StripPlane.CounterIdx;
+  SumoPixel Sumo;
+  Sumo.X = SumoWidth - CassetteCounterIdx - 1;
+  Sumo.Y = DreamGeometry::SliceHeight - StripPlane.WireIdx - 1;
+  Sumo.Width = SumoWidth;
+  Sumo.Sumo = SumoId;
+  return Sumo;
+}
+
 EndCapParams EndCapParamsFromPixelId(uint32_t PixelId) {
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   SumoPixel Sumo = SumoPixelFromSlicePixel(Slice);
