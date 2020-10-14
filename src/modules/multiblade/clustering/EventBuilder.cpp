@@ -20,11 +20,23 @@ EventBuilder::EventBuilder() {
   matcher.set_minimum_time_gap(timegap);
 }
 
+EventBuilder::EventBuilder(uint32_t BoxSize) : TimeBoxSize(BoxSize) {
+  matcher.set_minimum_time_gap(timegap);
+}
+
 void EventBuilder::insert(Hit hit) {
-  if (hit.plane == 0) {
+  if ((hit.time - TimeBoxT0) > TimeBoxSize) {
+    flush();
+    TimeBoxT0 = hit.time;
+    XTRACE(CLUSTER, DEB, "NEW TIME BOX ===================================");
+  }
+
+  XTRACE(CLUSTER, DEB, "hit: {%llu %u %u}", hit.time, hit.coordinate, hit.weight);
+
+  if (hit.plane == WirePlane) {
     p0.push_back(hit);
   }
-  else if (hit.plane == 1) {
+  else if (hit.plane == StripPlane) {
     p1.push_back(hit);
   }
   else {
@@ -43,9 +55,12 @@ void EventBuilder::flush() {
   c1.cluster(p1);
   c1.flush();
 
-  matcher.insert(0, c0.clusters);
-  matcher.insert(1, c1.clusters);
+  matcher.insert(WirePlane, c0.clusters);
+  matcher.insert(StripPlane, c1.clusters);
   matcher.match(true);
+
+  auto & e = matcher.matched_events;
+  Events.insert(Events.end(), e.begin(), e.end());
 
   clear();
 }

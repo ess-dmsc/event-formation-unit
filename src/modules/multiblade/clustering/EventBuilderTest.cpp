@@ -3,15 +3,17 @@
 #include <test/TestBase.h>
 #include <multiblade/clustering/EventBuilder.h>
 
+using namespace Multiblade;
+
 class EventBuilderTest : public TestBase {
 protected:
   uint8_t plane_x{0};
   uint8_t plane_y{1};
   uint16_t hit_adc{4000};
 
-  Multiblade::EventBuilder builder;
+  EventBuilder builder;
 
-  #include "EventBuilderCommon.cpp"
+  #include "../caen/EventBuilderCommon.cpp"
 };
 
 

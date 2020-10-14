@@ -1,6 +1,7 @@
 
 add_subdirectory(caen)
 add_subdirectory(generators)
+add_subdirectory(clustering)
 
 include_directories(.)
 

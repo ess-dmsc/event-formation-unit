@@ -2,21 +2,25 @@
 
 #pragma once
 
-#include <multiblade/caen/Readout.h>
-
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/GapMatcher.h>
 
-// \todo put these into namespace scope
-static constexpr uint64_t latency{125}; // 2us @ 16ns/tick (2000/16)
-static constexpr uint64_t coordgap{1};  // allow no gaps between channels
-static constexpr uint64_t timegap{70};  // expect readouts in a plane to be at least this close
-
 namespace Multiblade {
+
+/// \todo these tme values should be in ns. At the moment they are
+/// given in 'ticks'
+static constexpr uint64_t latency{2000}; // 2us @ 16ns/tick (2000/16)
+static constexpr uint64_t timegap{2000};  // expect readouts in a plane to be at least this close
+static constexpr uint64_t coordgap{1};  // allow no gaps between channels
+
+const uint8_t WirePlane{0};
+const uint8_t StripPlane{1};
 
 class EventBuilder {
 public:
   EventBuilder();
+
+  explicit EventBuilder(uint32_t BoxSize);
 
   // \todo pass by rvalue?
   void insert(Hit hit);
@@ -31,7 +35,14 @@ public:
   GapClusterer c0{timegap, coordgap}, c1{timegap, coordgap};
 
   // \todo parametrize
-  GapMatcher matcher{latency, 0, 1};
+  GapMatcher matcher{latency, WirePlane, StripPlane};
+
+  // final vector of reconstructed events
+  std::vector<Event> Events;
+
+  // Support for new timebox based clustering (Oct 2020)
+  uint64_t TimeBoxT0{0};
+  uint32_t TimeBoxSize{10000000};
 };
 
 }
