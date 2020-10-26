@@ -25,13 +25,13 @@ EventBuilder::EventBuilder(uint32_t BoxSize) : TimeBoxSize(BoxSize) {
 }
 
 void EventBuilder::insert(Hit hit) {
-  if ((hit.time - TimeBoxT0) > TimeBoxSize) {
+  if ((hit.time - TimeBoxT0) >= TimeBoxSize) {
     flush();
     TimeBoxT0 = hit.time;
     XTRACE(CLUSTER, DEB, "NEW TIME BOX ===================================");
   }
 
-  XTRACE(CLUSTER, DEB, "hit: {%llu %u %u}", hit.time, hit.coordinate, hit.weight);
+  XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time, hit.coordinate, hit.weight);
 
   if (hit.plane == WirePlane) {
     p0.push_back(hit);

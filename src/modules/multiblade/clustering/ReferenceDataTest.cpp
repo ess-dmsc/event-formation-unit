@@ -10,59 +10,158 @@
 
 #include <test/TestBase.h>
 #include <multiblade/clustering/EventBuilder.h>
+#include <algorithm>
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
 
 using namespace Multiblade;
 
-struct MBHits {
-  float Time;
-  float Channel;
-  float AdcValue;
-};
+// this will conditinally include the large datasets
+// and create 'unit tests' for this.
+//#define INCLUDE_LARGE_DATA
+#define INCLUDE_DS1
+#define INCLUDE_DS2
+#define INCLUDE_UNSORTED
+#include <ReferenceDataTestData.h>
 
-// Small reference dataset from Francesco Oct 2020
-// 33 readouts, 10 events, 3 unmatched clusters
-std::vector<struct MBHits> FPRefData {
-  // Time (s)        Channel           ADC
-  {9.1252640000e-03, 2.7000000000e+01, 2.1375000000e+04},
-  {9.1254240000e-03, 2.8000000000e+01, 1.0315000000e+04},
-  {9.1256320000e-03, 5.0000000000e+01, 5.8390000000e+03},
-  {9.1258400000e-03, 4.9000000000e+01, 3.2740000000e+03},
-  {9.1260960000e-03, 5.1000000000e+01, 1.9790000000e+03},
-  {9.1588000000e-03, 1.0000000000e+01, 3.3407000000e+04},
-  {9.1591200000e-03, 5.2000000000e+01, 8.6440000000e+03},
-  {9.1593760000e-03, 5.1000000000e+01, 4.4420000000e+03},
-  {9.1596320000e-03, 5.3000000000e+01, 2.4130000000e+03},
-  {9.2895680000e-03, 1.8000000000e+01, 2.5456000000e+04},
-  {9.2901120000e-03, 6.2000000000e+01, 4.1300000000e+03},
-  {9.2902560000e-03, 6.1000000000e+01, 3.1590000000e+03},
-  {9.4956480000e-03, 1.0000000000e+01, 2.4285000000e+04},
-  {9.4960000000e-03, 6.0000000000e+01, 6.7930000000e+03},
-  {9.4963840000e-03, 5.9000000000e+01, 2.9680000000e+03},
-  {9.6056640000e-03, 1.0000000000e+00, 6.0840000000e+03},
-  {9.7041760000e-03, 0.0000000000e+00, 1.1635000000e+04},
-  {9.9865280000e-03, 4.2000000000e+01, 1.7840000000e+03},
-  {1.0124720000e-02, 2.4000000000e+01, 1.9147000000e+04},
-  {1.0125296000e-02, 4.6000000000e+01, 3.1150000000e+03},
-  {1.0217376000e-02, 2.4000000000e+01, 2.1500000000e+04},
-  {1.0218272000e-02, 6.3000000000e+01, 2.1770000000e+03},
-  {1.0253808000e-02, 2.5000000000e+01, 1.4624000000e+04},
-  {1.0254560000e-02, 6.1000000000e+01, 2.0910000000e+03},
-  {1.0285024000e-02, 1.3000000000e+01, 2.7029000000e+04},
-  {1.0285440000e-02, 4.2000000000e+01, 5.6720000000e+03},
-  {1.0285872000e-02, 4.1000000000e+01, 2.4110000000e+03},
-  {1.0286032000e-02, 4.3000000000e+01, 1.6460000000e+03},
-  {1.0379984000e-02, 1.4000000000e+01, 3.2236000000e+04},
-  {1.0380480000e-02, 3.3000000000e+01, 4.7520000000e+03},
-  {1.0380640000e-02, 3.4000000000e+01, 3.1970000000e+03},
-  {1.0454736000e-02, 7.0000000000e+00, 1.1311000000e+04},
-  {1.0455744000e-02, 3.2000000000e+01, 1.5170000000e+03}
-};
+// Specific to MB16 and MB18 prototypes
+const uint16_t NumberOfStrips{32};
 
 class ReferenceDataTest : public TestBase {
+public:
+  struct {
+    uint32_t Readouts{0}; // total number of readouts
+    uint32_t NoCoincidence{0}; // clusters with only strips or wires
+    uint32_t MatchedClusters{0}; // clusters with both strips and wires
+    uint32_t MatchedEvents{0}; // EFU - FP common events
+    uint32_t InvalidEvents{0}; // coord gaps or multiple strips (wires?)
+  } Stats;
+
+  void clearStats() { std::fill_n((char*)&Stats, sizeof(Stats), 0); }
+
+  // Create a list of unmatched but 'good' events
+  std::vector<Event> EventsExtra;
+
+  // Do the clustering and event calulations
+  void LoadAndProcessReadouts(std::vector<struct MBHits> & vec);
+
+  // Compare previously calculated events with reference interpretation
+  // print out some stats
+  void CountMatches(std::vector<struct MBEvents> & evts);
+
 protected:
-  EventBuilder builder{2000};
+  // builder uses a 2us time boxing
+  EventBuilder builder{2010};
 };
 
+bool isStrip(uint16_t channel) {
+  return channel < NumberOfStrips;
+}
+
+// wires and strips share channel space, but we need each coordinate
+// to start at 0
+uint16_t GetWireCoord(uint32_t Channel) {
+  assert(Channel >= NumberOfStrips);
+  return Channel - NumberOfStrips;
+}
+
+bool isEqual(float t, uint16_t x, uint16_t y, struct MBEvents & res) {
+  return (fabsf(t - res.time) < 0.0000005)
+          and ((uint16_t)(std::round(res.x)) == x)
+          and ((uint16_t)(std::round(res.y)) == y);
+}
+
+
+//
+void ReferenceDataTest::LoadAndProcessReadouts(std::vector<struct MBHits> & vec) {
+  clearStats();
+
+  for (auto & MBHit : vec) {
+    uint64_t Time = (uint64_t)(MBHit.Time*1000000000ULL);
+    uint16_t Channel = (uint16_t)MBHit.Channel;
+    uint16_t AdcValue = (uint16_t)MBHit.AdcValue;
+
+    if (isStrip(Channel)) {
+      builder.insert({Time, Channel, AdcValue, StripPlane});
+    } else {
+      builder.insert({Time, GetWireCoord(Channel), AdcValue, WirePlane});
+    }
+    Stats.Readouts++;
+  }
+  builder.flush();
+
+  for (const auto &e : builder.Events) {
+    if (!e.both_planes()) {
+      Stats.NoCoincidence++;
+      continue;
+    } else {
+      Stats.MatchedClusters++;
+    }
+  }
+}
+
+
+
+
+// Compare the calculated (t, x, y) with the reference data
+void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts) {
+  for (const auto &e : builder.Events) {
+    if (e.both_planes()) {
+      float t = e.time_start()/1000000000.0;
+      auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+      auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+      uint64_t i;
+      for (i = 0; i < evts.size(); i++) {
+        if (isEqual(t, x, y, evts[i])) {
+          Stats.MatchedEvents++;
+          evts[i].x = 0;
+          evts[i].y = 0;
+          evts[i].time = 0.0;
+          break;
+        }
+      }
+      if (i == evts.size()) {
+        if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
+          Stats.InvalidEvents++;
+          continue;
+        }
+        if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
+          Stats.InvalidEvents++;
+          continue;
+        }
+        EventsExtra.push_back(e);
+      }
+    }
+  }
+
+  uint32_t EFUEvts = builder.Events.size() - Stats.NoCoincidence - Stats.InvalidEvents;
+  uint32_t FPEvts = evts.size();
+  printf("Readouts: %u, Clusters: %u, No coincidence: %u, Invalid: %u, EFU Events: %u\n",
+          Stats.Readouts, (uint32_t)builder.Events.size(),
+          Stats.NoCoincidence, Stats.InvalidEvents, EFUEvts);
+  printf("Events (efu/fp) %u/%u (%5.2f%%) - matched %u (%5.2f%%)\n",
+           EFUEvts, FPEvts, EFUEvts*100.0/FPEvts,
+           Stats.MatchedEvents, Stats.MatchedEvents*100.0/FPEvts);
+
+  // printf("\nFirst unmatched events (EFU missed):\n");
+  // int PrintMissed{2};
+  // for (auto & evt : evts) {
+  //   if (evt.time != 0.0) {
+  //     printf("%f %u %u\n", evt.time, (uint16_t)(std::round(evt.x)), (uint16_t)(std::round(evt.y)));
+  //     PrintMissed--;
+  //     if (PrintMissed == 0)
+  //       break;
+  //   }
+  // }
+
+  // if (EventsExtra.size() != 0) {
+  //   printf("\nFirst extra event:\n");
+  //   printf("%s\n", EventsExtra[0].to_string({}, true).c_str());
+  // }
+}
+
+/// ---------------------------------------------------------------------
 
 TEST_F(ReferenceDataTest, Constructor) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
@@ -71,43 +170,69 @@ TEST_F(ReferenceDataTest, Constructor) {
 }
 
 
-TEST_F(ReferenceDataTest, LoadMBHits) {
-  //EventBuilder builder2(2000U);
-  uint32_t Readouts{0};
-  uint32_t NoCoincidence{0};
-  uint32_t GoodEvent{0};
-
-  for (auto & MBHit : FPRefData) {
-    uint64_t Time = (uint64_t)(MBHit.Time*1000000000ULL);
-    uint16_t Channel = (uint16_t)MBHit.Channel;
-    uint16_t AdcValue = (uint16_t)MBHit.AdcValue;
-
-    if (MBHit.Channel < 32) {
-      builder.insert({Time, Channel, AdcValue, StripPlane});
-    } else {
-      builder.insert({Time, (uint16_t)(Channel - 32), AdcValue, WirePlane});
-    }
-    Readouts++;
-  }
-  builder.flush();
-
-  for (const auto &e : builder.Events) {
-    //printf("%s\n", e.to_string({}, true).c_str());
-    if (!e.both_planes()) {
-      NoCoincidence++;
-      continue;
-    } else {
-      auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-      auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
-      printf("x: %d, y: %d\n", x, y);
-      GoodEvent++;
-    }
-  }
-
-  ASSERT_EQ(Readouts, 33);
-  ASSERT_EQ(NoCoincidence, 3);
-  ASSERT_EQ(GoodEvent, 10);
+TEST_F(ReferenceDataTest, LoadSmall1_Sorted_NotFiltered) {
+  LoadAndProcessReadouts(FPRefData);
+  ASSERT_EQ(Stats.Readouts, 33);
+  ASSERT_EQ(Stats.NoCoincidence, 3);
+  ASSERT_EQ(Stats.MatchedClusters, 10);
 }
+
+TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  LoadAndProcessReadouts(DS2S_ST_FF);
+  CountMatches(DS2S_ST_FF_Res);
+
+  ASSERT_EQ(Stats.Readouts, 29);
+  ASSERT_EQ(Stats.NoCoincidence, 3);
+  ASSERT_EQ(Stats.MatchedClusters, 10);
+}
+
+#ifdef HAS_REFDATA
+
+#ifdef INCLUDE_LARGE_DATA
+#ifdef INCLUDE_DS1
+TEST_F(ReferenceDataTest, LoadLarge_Sorted_NotFiltered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  LoadAndProcessReadouts(DS1L_ST_FF);
+  CountMatches(DS1L_ST_FF_Res);
+
+  ASSERT_EQ(Stats.Readouts, 334028);
+}
+
+
+#ifdef INCLUDE_UNSORTED
+TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  LoadAndProcessReadouts(DS1L_SF_FF);
+  CountMatches(DS1L_SF_FF_Res);
+  ASSERT_EQ(Stats.Readouts, 334028);
+}
+#endif // unsorted
+#endif // ds1
+
+
+#ifdef INCLUDE_DS2
+TEST_F(ReferenceDataTest, LoadLarge2_Sorted_NotFiltered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  LoadAndProcessReadouts(DS2L_ST_FF);
+  CountMatches(DS2L_ST_FF_Res);
+
+  ASSERT_EQ(Stats.Readouts, 260716);
+}
+
+#ifdef INCLUDE_UNSORTED
+TEST_F(ReferenceDataTest, LoadLarge2_NotSorted_NotFiltered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  LoadAndProcessReadouts(DS2L_SF_FF);
+  CountMatches(DS2L_SF_FF_Res);
+
+  ASSERT_EQ(Stats.Readouts, 260716);
+}
+#endif // unsorted
+#endif // DS2
+
+#endif // large
+#endif // HAS_REFDATA
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
