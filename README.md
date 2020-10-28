@@ -12,7 +12,7 @@ For more details on the file structure, architecture, primitives see [documentat
 
 The [essdaq repository](https://github.com/ess-dmsc/essdaq) has scripts for automatically
 downloading and compiling this project. Instructions for manually compiling the event
-formation unit software follows.
+formation unit software follow.
 
 ### Prerequisites
 
@@ -90,7 +90,7 @@ make valgrind
 
 ## Running the event formation application
 
-En example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
+An example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
 
 ```
 make efu mbcaen
