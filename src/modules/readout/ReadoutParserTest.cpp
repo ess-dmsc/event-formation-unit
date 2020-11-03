@@ -19,6 +19,7 @@ protected:
   void TearDown() override {}
 };
 
+
 TEST_F(ReadoutTest, Constructor) {
   ASSERT_EQ(RdOut.Stats.ErrorBuffer, 0);
   ASSERT_EQ(RdOut.Stats.ErrorSize, 0);
@@ -57,7 +58,7 @@ TEST_F(ReadoutTest, HeaderGTMax) {
 TEST_F(ReadoutTest, ErrorCookie) {
   auto Res = RdOut.validate((char *)&ErrCookie[0], ErrCookie.size(), DataType);
   ASSERT_EQ(Res, -ReadoutParser::EHEADER);
-  ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
+  ASSERT_EQ(RdOut.Stats.ErrorCookie, 1);
 }
 
 TEST_F(ReadoutTest, ErrorVersion) {
@@ -74,7 +75,7 @@ TEST_F(ReadoutTest, ErrMaxOutputQueue) {
 
 TEST_F(ReadoutTest, OkVersion) {
   unsigned int Errors{0};
-  unsigned int MinSize{4 + PAD_SIZE};
+  unsigned int MinSize{7};
   for (unsigned int Size = MinSize; Size < OkVersion.size(); Size++) {
     Errors++;
     auto Res = RdOut.validate((char *)&OkVersion[0], Size, DataType);

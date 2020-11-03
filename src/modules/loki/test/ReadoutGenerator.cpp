@@ -23,11 +23,11 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_
   auto DP = (uint8_t *)Buffer;
   //printf("Buffer pointer %p\n", (void *)Buffer);
   auto Header = (ReadoutParser::PacketHeaderV0 *)DP;
-  #ifdef READOUT_EXTRA_PADDING
-  Header->Padding = 0;
-  #endif
-  Header->CookieVersion = 0x00535345;
-  Header->TypeSubType = 0x30;
+    Header->CookieAndType = 0x30535345;
+  Header->Padding0 = 0;
+  Header->Padding1 = 0;
+  Header->Padding2 = 0;
+  Header->Version = 0;
   //Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
