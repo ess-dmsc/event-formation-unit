@@ -120,8 +120,7 @@ std::vector<struct MBEvents> DS2S_ST_FF_Res {
 
 #ifdef HAS_REFDATA
 
-#ifdef INCLUDE_LARGE_DATA
-#ifdef INCLUDE_DS1
+#ifdef INCLUDE_DS1_SORTED
 // Large dataset1 sorted but unfiltered
 // Sorted, not filtered
 std::vector<struct MBHits> DS1L_ST_FF {
@@ -130,8 +129,9 @@ std::vector<struct MBHits> DS1L_ST_FF {
 std::vector<struct MBEvents> DS1L_ST_FF_Res {
 #include <dataset1_large_ST_FF_Clustered.txt>
 };
+#endif // DS1_SORTED
 
-#ifdef INCLUDE_UNSORTED
+#ifdef INCLUDE_DS1_UNSORTED
 // Not sorted, not filtered
 std::vector<struct MBHits> DS1L_SF_FF {
 #include <dataset1_large_SF_FF_Input.txt>
@@ -139,11 +139,10 @@ std::vector<struct MBHits> DS1L_SF_FF {
 std::vector<struct MBEvents> DS1L_SF_FF_Res {
 #include <dataset1_large_SF_FF_Clustered.txt>
 };
-#endif
-#endif // DS1
+#endif // DS1_UNSORTED
 
 
-#ifdef INCLUDE_DS2
+#ifdef INCLUDE_DS2_SORTED
 // Large dataset 2
 // Not sorted, not filtered
 std::vector<struct MBHits> DS2L_ST_FF {
@@ -152,16 +151,15 @@ std::vector<struct MBHits> DS2L_ST_FF {
 std::vector<struct MBEvents> DS2L_ST_FF_Res {
 #include <dataset2_large_ST_FF_Clustered.txt>
 };
+#endif // DS2_SORTED
 
-#ifdef INCLUDE_UNSORTED
+#ifdef INCLUDE_DS2_UNSORTED
 std::vector<struct MBHits> DS2L_SF_FF {
 #include <dataset2_large_SF_FF_Input.txt>
 };
 std::vector<struct MBEvents> DS2L_SF_FF_Res {
 #include <dataset2_large_SF_FF_Clustered.txt>
 };
-#endif // unsorted
+#endif // DS2_UNSORTED
 
-#endif // DS2
-#endif // large
 #endif // HAS_REFDATA
