@@ -19,9 +19,9 @@ using namespace Multiblade;
 
 // this will conditinally include the large datasets
 // and create 'unit tests' for this.
-//#define INCLUDE_LARGE_DATA
+#define INCLUDE_LARGE_DATA
 #define INCLUDE_DS1
-#define INCLUDE_DS2
+//#define INCLUDE_DS2
 #define INCLUDE_UNSORTED
 #include <ReferenceDataTestData.h>
 
@@ -59,6 +59,10 @@ bool isStrip(uint16_t channel) {
   return channel < NumberOfStrips;
 }
 
+bool compareByTime(const struct MBHits & a, const struct MBHits & b) {
+  return a.Time < b.Time;
+}
+
 // wires and strips share channel space, but we need each coordinate
 // to start at 0
 uint16_t GetWireCoord(uint32_t Channel) {
@@ -77,7 +81,10 @@ bool isEqual(float t, uint16_t x, uint16_t y, struct MBEvents & res) {
 void ReferenceDataTest::LoadAndProcessReadouts(std::vector<struct MBHits> & vec) {
   clearStats();
 
+  std::sort(vec.begin(), vec.end(), compareByTime);
+
   for (auto & MBHit : vec) {
+    MBHit.print();
     uint64_t Time = (uint64_t)(MBHit.Time*1000000000ULL);
     uint16_t Channel = (uint16_t)MBHit.Channel;
     uint16_t AdcValue = (uint16_t)MBHit.AdcValue;

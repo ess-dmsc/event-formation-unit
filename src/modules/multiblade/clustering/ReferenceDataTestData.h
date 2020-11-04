@@ -1,9 +1,25 @@
-
+// Copyright (C) 2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Multi-Blade reference data from DG AMOR@PSI measurements
+///
+/// If the reference data directory is detected HAS_REFDATA will be defined.
+/// Then if INCLUDE_LARGE_DATA is defined the external source files will be
+/// included.
+/// This increases compile time significantly so default is not to include them.
+///
+//===----------------------------------------------------------------------===//
 
 struct MBHits {
   float Time;
   float Channel;
   float AdcValue;
+
+  void print() {
+    printf("t: %10.7f, c: %u, a: %u\n", Time, (uint16_t)Channel, (uint16_t)AdcValue);
+  }
 };
 
 struct MBEvents {

@@ -1,4 +1,11 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
+// Copyright (C) 2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for EventBuilder
+///
+//===----------------------------------------------------------------------===//
 
 #include <test/TestBase.h>
 #include <multiblade/clustering/EventBuilder.h>

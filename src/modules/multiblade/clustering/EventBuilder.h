@@ -1,4 +1,11 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Time-boxed event builder for Multi-Blade
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
