@@ -46,7 +46,7 @@ public:
   std::vector<Event> EventsExtra;
 
   // Detect large jumps in readout time
-  void FixJumpsAndSort(std::vector<struct MBHits> & vec);
+  void FixJumpsAndSort(std::vector<struct MBHits> & vec, bool sort);
 
   // Do the clustering and event calulations
   void LoadAndProcessReadouts(std::vector<struct MBHits> & vec);
@@ -82,7 +82,7 @@ bool isEqual(float t, uint16_t x, uint16_t y, struct MBEvents & res) {
 }
 
 
-void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec) {
+void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec, bool sort) {
   int64_t Gap{43'000'000};
   int64_t PrevTime{0xffffffffff};
   std::vector<struct MBHits> temp;
@@ -97,8 +97,9 @@ void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec) {
       XTRACE(CLUSTER, DEB, "Wrap: %4d, Time: %lld, PrevTime: %lld, diff %lld\n",
              Stats.TimerWraps, Time, PrevTime, (PrevTime - Time));
       Stats.TimerWraps++;
-
-      std::sort(temp.begin(), temp.end(), compareByTime);
+      if (sort) {
+        std::sort(temp.begin(), temp.end(), compareByTime);
+      }
       LoadAndProcessReadouts(temp);
 
       temp.clear();
@@ -179,20 +180,22 @@ void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts) {
            EFUEvts, FPEvts, EFUEvts*100.0/FPEvts,
            Stats.MatchedEvents, Stats.MatchedEvents*100.0/FPEvts);
 
-  printf("\nFirst unmatched events (EFU missed):\n");
-  int PrintMissed{2};
-  for (auto & evt : evts) {
-    if (evt.time != 0.0) {
-      printf("%f %u %u\n", evt.time, (uint16_t)(std::round(evt.x)), (uint16_t)(std::round(evt.y)));
-      PrintMissed--;
-      if (PrintMissed == 0)
-        break;
+  if (0) {
+    printf("\nFirst unmatched events (EFU missed):\n");
+    int PrintMissed{2};
+    for (auto & evt : evts) {
+      if (evt.time != 0.0) {
+        printf("%f %u %u\n", evt.time, (uint16_t)(std::round(evt.x)), (uint16_t)(std::round(evt.y)));
+        PrintMissed--;
+        if (PrintMissed == 0)
+          break;
+      }
     }
-  }
 
-  if (EventsExtra.size() != 0) {
-    printf("\nFirst extra event:\n");
-    printf("%s\n", EventsExtra[0].to_string({}, true).c_str());
+    if (EventsExtra.size() != 0) {
+      printf("\nFirst extra event:\n");
+      printf("%s\n", EventsExtra[0].to_string({}, true).c_str());
+    }
   }
 }
 
@@ -206,7 +209,7 @@ TEST_F(ReferenceDataTest, Constructor) {
 
 
 TEST_F(ReferenceDataTest, LoadSmall1_Sorted_NotFiltered) {
-  FixJumpsAndSort(FPRefData);
+  FixJumpsAndSort(FPRefData, true);
   ASSERT_EQ(Stats.Readouts, 33);
   ASSERT_EQ(Stats.NoCoincidence, 3);
   ASSERT_EQ(Stats.MatchedClusters, 10);
@@ -214,7 +217,7 @@ TEST_F(ReferenceDataTest, LoadSmall1_Sorted_NotFiltered) {
 
 TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS2S_ST_FF);
+  FixJumpsAndSort(DS2S_ST_FF, true);
   CountMatches(DS2S_ST_FF_Res);
 
   ASSERT_EQ(Stats.Readouts, 29);
@@ -224,22 +227,22 @@ TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
 
 #ifdef HAS_REFDATA
 
-#ifdef INCLUDE_DS1_SORTED
-TEST_F(ReferenceDataTest, LoadLarge_Sorted_NotFiltered) {
-  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS1L_ST_FF);
-  CountMatches(DS1L_ST_FF_Res);
-
-  ASSERT_EQ(Stats.Readouts, 334028);
-  printf("\n");
-}
-#endif // DS1_SORTED
+// #ifdef INCLUDE_DS1_SORTED
+// TEST_F(ReferenceDataTest, LoadLarge_Sorted_NotFiltered) {
+//   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+//   FixJumpsAndSort(DS1L_ST_FF, true);
+//   CountMatches(DS1L_ST_FF_Res); // can't reuse, array is overwritten
+//
+//   ASSERT_EQ(Stats.Readouts, 334028);
+//   printf("\n");
+// }
+// #endif // DS1_SORTED
 
 #ifdef INCLUDE_DS1_UNSORTED
 TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS1L_SF_FF);
-  CountMatches(DS1L_SF_FF_Res);
+  FixJumpsAndSort(DS1L_SF_FF, true);
+  CountMatches(DS1L_ST_FF_Res); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 334028);
   printf("\n");
@@ -247,22 +250,22 @@ TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
 #endif // DS1_UNSORTED
 
 
-#ifdef INCLUDE_DS2_SORTED
-TEST_F(ReferenceDataTest, LoadLarge2_Sorted_NotFiltered) {
-  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS2L_ST_FF);
-  CountMatches(DS2L_ST_FF_Res);
-
-  ASSERT_EQ(Stats.Readouts, 260716);
-  printf("\n");
-}
-#endif // DS2_SORTED
+// #ifdef INCLUDE_DS2_SORTED
+// TEST_F(ReferenceDataTest, LoadLarge2_Sorted_NotFiltered) {
+//   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+//   FixJumpsAndSort(DS2L_ST_FF, true);
+//   CountMatches(DS2L_ST_FF_Res); // can't reuse, array is overwritten
+//
+//   ASSERT_EQ(Stats.Readouts, 260716);
+//   printf("\n");
+// }
+// #endif // DS2_SORTED
 
 #ifdef INCLUDE_DS2_UNSORTED
 TEST_F(ReferenceDataTest, LoadLarge2_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS2L_SF_FF);
-  CountMatches(DS2L_SF_FF_Res);
+  FixJumpsAndSort(DS2L_SF_FF, true);
+  CountMatches(DS2L_ST_FF_Res); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 260716);
   printf("\n");
