@@ -71,7 +71,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  if ( (Packet.HeaderPtr->CookieAndType >> 24) != Type) {
+  if ((Packet.HeaderPtr->CookieAndType >> 24) != Type) {
     XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
     Stats.ErrorTypeSubType++;
     return -ReadoutParser::EHEADER;
