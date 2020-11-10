@@ -20,23 +20,24 @@
 
 using namespace Multiblade;
 
-const bool NoFiltering{false};
-const bool DoFiltering{true};
-const bool DoSorting{true};
 
 // Specific to MB16 and MB18 prototypes
 const uint16_t NumberOfWires{32};
 
 // this will conditinally include the large datasets
 // and create 'unit tests' for this.
-#define INCLUDE_DS1
-#define INCLUDE_DS1_FILTERED
-#define INCLUDE_DS2
+// #define INCLUDE_DS1
+// #define INCLUDE_DS1_FILTERED
+// #define INCLUDE_DS2
 
 #include <ReferenceDataTestData.h>
 
 class ReferenceDataTest : public TestBase {
 public:
+  const bool NoFiltering{false};
+  const bool DoFiltering{true};
+  const bool DoSorting{true};
+
   struct {
     uint32_t Readouts{0}; // total number of readouts
     uint32_t NoCoincidence{0}; // clusters with only strips or wires
@@ -298,6 +299,7 @@ TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
   ASSERT_EQ(Stats.NoCoincidence, 3);
   ASSERT_EQ(Stats.MatchedClusters, 10);
 }
+
 
 
 #ifdef HAS_REFDATA
