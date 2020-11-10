@@ -15,19 +15,23 @@
 #include <math.h>
 #include <stdlib.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 using namespace Multiblade;
 
 // this will conditinally include the large datasets
 // and create 'unit tests' for this.
-// #define INCLUDE_DS1_SORTED
-// #define INCLUDE_DS1_UNSORTED
-// #define INCLUDE_DS2_SORTED
-// #define INCLUDE_DS2_UNSORTED
+#define INCLUDE_DS1_SORTED
+#define INCLUDE_DS1_UNSORTED
+#define INCLUDE_DS1_FILTERED
+#define INCLUDE_DS2_SORTED
+#define INCLUDE_DS2_UNSORTED
 
 #include <ReferenceDataTestData.h>
 
 // Specific to MB16 and MB18 prototypes
-const uint16_t NumberOfStrips{32};
+const uint16_t NumberOfWires{32};
 
 class ReferenceDataTest : public TestBase {
 public:
@@ -36,8 +40,10 @@ public:
     uint32_t NoCoincidence{0}; // clusters with only strips or wires
     uint32_t MatchedClusters{0}; // clusters with both strips and wires
     uint32_t MatchedEvents{0}; // EFU - FP common events
-    uint32_t InvalidEvents{0}; // coord gaps or multiple strips (wires?)
     uint32_t TimerWraps{0}; // Count when CAEN timer resets
+    uint32_t EventsInvalidWireGap{0};
+    uint32_t EventsInvalidStripGap{0};
+    uint32_t EventsInvalidThresh{0};
   } Stats;
 
   void clearStats() { std::fill_n((char*)&Stats, sizeof(Stats), 0); }
@@ -53,26 +59,17 @@ public:
 
   // Compare previously calculated events with reference interpretation
   // print out some stats
-  void CountMatches(std::vector<struct MBEvents> & evts);
+  void CountMatches(std::vector<struct MBEvents> & evts, bool DiscardThresh);
+
+  bool thresholdCheck(uint8_t DigIndex, uint16_t GlobalChannel, uint16_t AdcValue);
 
 protected:
   // builder uses a 2us time boxing
   EventBuilder builder{2010};
 };
 
-bool isStrip(uint16_t channel) {
-  return channel < NumberOfStrips;
-}
-
 bool compareByTime(const struct MBHits & a, const struct MBHits & b) {
   return a.Time < b.Time;
-}
-
-// wires and strips share channel space, but we need each coordinate
-// to start at 0
-uint16_t GetWireCoord(uint32_t Channel) {
-  assert(Channel >= NumberOfStrips);
-  return Channel - NumberOfStrips;
 }
 
 bool isEqual(float t, uint16_t x, uint16_t y, struct MBEvents & res) {
@@ -81,6 +78,45 @@ bool isEqual(float t, uint16_t x, uint16_t y, struct MBEvents & res) {
           and ((uint16_t)(std::round(res.y)) == y);
 }
 
+
+// MB18 specific
+bool isWire(uint16_t channel) {
+  return channel < NumberOfWires;
+}
+
+// MB18 specific - wires and strips share channel space, but we need each
+// coordinate to start at 0
+uint16_t GetWireCoord(uint32_t GlobalChannel) {
+  assert(isWire(GlobalChannel));
+  return GlobalChannel;
+}
+
+uint16_t GetStripCoord(uint32_t GlobalChannel) {
+  assert(GlobalChannel >= NumberOfWires);
+  return GlobalChannel - NumberOfWires;
+}
+
+bool ReferenceDataTest::thresholdCheck(uint8_t DigIndex, uint16_t GlobalChannel, uint16_t AdcValue) {
+  if (not isWire(GlobalChannel)) {
+    uint16_t StripCh = GlobalChannel;
+    if (AdcValue < 1) {
+      XTRACE(CLUSTER, DEB, "Strip threshold of 0 not met for ch %u ", StripCh);
+      return false;
+    } else {
+      return true;
+    }
+  } else { // wires
+    uint16_t WireCh = GetWireCoord(GlobalChannel);
+    uint16_t Thresh = builder.Thresholds[DigIndex][WireCh + 1];
+    if (AdcValue < Thresh) {
+      XTRACE(CLUSTER, DEB, "Wire threshold %u not met for ch %u (%u)",
+        Thresh, WireCh, AdcValue);
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
 
 void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec, bool sort) {
   int64_t Gap{43'000'000};
@@ -94,8 +130,8 @@ void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec, bool s
     if ((PrevTime - Time ) < Gap) {
       temp.push_back(MBHit);
     } else {
-      XTRACE(CLUSTER, DEB, "Wrap: %4d, Time: %lld, PrevTime: %lld, diff %lld\n",
-             Stats.TimerWraps, Time, PrevTime, (PrevTime - Time));
+      //XTRACE(CLUSTER, DEB, "Wrap: %4d, Time: %lld, PrevTime: %lld, diff %lld",
+      //       Stats.TimerWraps, Time, PrevTime, (PrevTime - Time));
       Stats.TimerWraps++;
       if (sort) {
         std::sort(temp.begin(), temp.end(), compareByTime);
@@ -119,6 +155,10 @@ void ReferenceDataTest::FixJumpsAndSort(std::vector<struct MBHits> & vec, bool s
   }
 }
 
+
+
+
+
 //
 void ReferenceDataTest::LoadAndProcessReadouts(std::vector<struct MBHits> & vec) {
   for (auto & MBHit : vec) {
@@ -127,10 +167,10 @@ void ReferenceDataTest::LoadAndProcessReadouts(std::vector<struct MBHits> & vec)
     uint16_t Channel = (uint16_t)MBHit.Channel;
     uint16_t AdcValue = (uint16_t)MBHit.AdcValue;
 
-    if (isStrip(Channel)) {
-      builder.insert({Time, Channel, AdcValue, StripPlane});
-    } else {
+    if (isWire(Channel)) {
       builder.insert({Time, GetWireCoord(Channel), AdcValue, WirePlane});
+    } else {
+      builder.insert({Time, GetStripCoord(Channel), AdcValue, StripPlane});
     }
     Stats.Readouts++;
   }
@@ -140,12 +180,43 @@ void ReferenceDataTest::LoadAndProcessReadouts(std::vector<struct MBHits> & vec)
 
 // Compare the calculated (t, x, y) with the reference data
 // Very slow implementation, but this is only reference data
-void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts) {
+void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts, bool DiscardThresh) {
   for (const auto &e : builder.Events) {
     if (e.both_planes()) {
       float t = e.time_start()/1000000000.0;
-      auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-      auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+      auto x = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+      auto y = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+
+      bool DiscardGap{true};
+      // Discard if there are gaps in the strip channels
+      if (DiscardGap) {
+        if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
+          Stats.EventsInvalidStripGap++;
+          continue;
+        }
+      }
+
+      // Discard if there are gaps in the wire channels
+      if (DiscardGap) {
+        if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
+          Stats.EventsInvalidWireGap++;
+          continue;
+        }
+      }
+
+      // Discard if wire threshold is not met
+      if (DiscardThresh) {
+        uint16_t Thresh = builder.Thresholds[0][x + 1];
+        uint16_t Weight = e.ClusterA.weight_sum();
+        if ( Weight < Thresh) {
+          XTRACE(CLUSTER, DEB, "Failed threshold %u for channel %u (%u)",
+            Thresh, x, Weight);
+          //printf("%s\n", e.to_string({}, true).c_str());
+          Stats.EventsInvalidThresh++;
+          continue;
+        }
+      }
+
       uint64_t i;
       for (i = 0; i < evts.size(); i++) {
         if (isEqual(t, x, y, evts[i])) {
@@ -157,25 +228,27 @@ void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts) {
         }
       }
       if (i == evts.size()) {
-        if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-          Stats.InvalidEvents++;
-          continue;
-        }
-        if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-          Stats.InvalidEvents++;
-          continue;
-        }
         EventsExtra.push_back(e);
       }
     }
   }
 
-  uint32_t EFUEvts = builder.Events.size() - Stats.NoCoincidence - Stats.InvalidEvents;
+  uint32_t EventsInvalid = Stats.EventsInvalidThresh +
+                           Stats.EventsInvalidWireGap +
+                           Stats.EventsInvalidStripGap;
+  uint32_t EFUEvts = builder.Events.size() - Stats.NoCoincidence - EventsInvalid;
   uint32_t FPEvts = evts.size();
-  printf("Readouts: %u, Clusters: %u, No coincidence: %u, Invalid: %u, EFU Events: %u\n",
+
+  printf("Readouts: %u, Clusters: %u, No coincidence: %u, EFU Events: %u\n",
           Stats.Readouts, (uint32_t)builder.Events.size(),
-          Stats.NoCoincidence, Stats.InvalidEvents, EFUEvts);
+          Stats.NoCoincidence, EFUEvts);
+
+  printf("Invalid: %u, (WGap: %u, SGap: %u, Thresh: %u)\n", EventsInvalid,
+         Stats.EventsInvalidWireGap, Stats.EventsInvalidStripGap,
+         Stats.EventsInvalidThresh);
+
   printf("Detected %u timer resets\n", Stats.TimerWraps);
+
   printf("Events (efu/fp) %u/%u (%5.2f%%) - matched %u (%5.2f%%)\n",
            EFUEvts, FPEvts, EFUEvts*100.0/FPEvts,
            Stats.MatchedEvents, Stats.MatchedEvents*100.0/FPEvts);
@@ -218,7 +291,7 @@ TEST_F(ReferenceDataTest, LoadSmall1_Sorted_NotFiltered) {
 TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
   FixJumpsAndSort(DS2S_ST_FF, true);
-  CountMatches(DS2S_ST_FF_Res);
+  CountMatches(DS2S_ST_FF_Res, false);
 
   ASSERT_EQ(Stats.Readouts, 29);
   ASSERT_EQ(Stats.NoCoincidence, 3);
@@ -231,7 +304,7 @@ TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
 // TEST_F(ReferenceDataTest, LoadLarge_Sorted_NotFiltered) {
 //   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
 //   FixJumpsAndSort(DS1L_ST_FF, true);
-//   CountMatches(DS1L_ST_FF_Res); // can't reuse, array is overwritten
+//   CountMatches(DS1L_ST_FF_Res, false); // can't reuse, array is overwritten
 //
 //   ASSERT_EQ(Stats.Readouts, 334028);
 //   printf("\n");
@@ -242,7 +315,7 @@ TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
 TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
   FixJumpsAndSort(DS1L_SF_FF, true);
-  CountMatches(DS1L_ST_FF_Res); // can't reuse, array is overwritten
+  CountMatches(DS1L_ST_FF_Res, false); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 334028);
   printf("\n");
@@ -254,7 +327,7 @@ TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
 // TEST_F(ReferenceDataTest, LoadLarge2_Sorted_NotFiltered) {
 //   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
 //   FixJumpsAndSort(DS2L_ST_FF, true);
-//   CountMatches(DS2L_ST_FF_Res); // can't reuse, array is overwritten
+//   CountMatches(DS2L_ST_FF_Res, false); // can't reuse, array is overwritten
 //
 //   ASSERT_EQ(Stats.Readouts, 260716);
 //   printf("\n");
@@ -265,12 +338,25 @@ TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
 TEST_F(ReferenceDataTest, LoadLarge2_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
   FixJumpsAndSort(DS2L_SF_FF, true);
-  CountMatches(DS2L_ST_FF_Res); // can't reuse, array is overwritten
+  CountMatches(DS2L_ST_FF_Res, false); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 260716);
   printf("\n");
 }
 #endif // DS2_UNSORTED
+
+#ifdef INCLUDE_DS1_FILTERED
+TEST_F(ReferenceDataTest, LoadLarge1_NotSorted_Filtered) {
+  ASSERT_EQ(builder.matcher.matched_events.size(), 0);
+  FixJumpsAndSort(DS1L_SF_FT, true);
+  CountMatches(DS1L_ST_FT_Res, true); // can't reuse, array is overwritten
+
+  ASSERT_EQ(Stats.Readouts, 259329);
+  printf("\n");
+}
+#endif // DS1 _FILTERED
+
+
 #endif // HAS_REFDATA
 
 int main(int argc, char **argv) {

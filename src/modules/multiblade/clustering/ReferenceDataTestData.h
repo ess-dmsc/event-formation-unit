@@ -23,8 +23,8 @@ struct MBHits {
 };
 
 struct MBEvents {
-  float y;
-  float x;
+  float y; // Wire channels (for MB18Freia)
+  float x; // Strip channels
   float time;
   float unused2;
   float unused3;
@@ -35,7 +35,7 @@ struct MBEvents {
 // Small reference dataset from Francesco Oct 2020
 // 33 readouts, 10 events, 3 unmatched clusters
 std::vector<struct MBHits> FPRefData {
-  // Time (s)        Channel           ADC
+  // Time (s)     Channel  ADC
   {9.1252640e-03, 2.7e+01, 2.1375e+04},
   {9.1254240e-03, 2.8e+01, 1.0315e+04},
   {9.1256320e-03, 5.0e+01, 5.8390e+03},
@@ -105,6 +105,7 @@ std::vector<struct MBHits> DS2S_ST_FF {
 };
 
 std::vector<struct MBEvents> DS2S_ST_FF_Res {
+  // wire   Strip      Time          Phw         Phs         Mult w   Mult s
   {1.1e+01, 1.027e+01, 2.107800e-02, 2.1548e+04, 1.1326e+04, 1.0e+00, 3.0e+00},
   {5.0e+00, 1.237e+01, 2.249900e-02, 2.8075e+04, 8.3760e+03, 1.0e+00, 2.0e+00},
   {2.9e+01, 1.300e+01, 2.276600e-02, 1.7059e+04, 2.9930e+03, 1.0e+00, 1.0e+00},
@@ -140,6 +141,15 @@ std::vector<struct MBHits> DS1L_SF_FF {
 // #include <dataset1_large_SF_FF_Clustered.txt>
 // };
 #endif // DS1_UNSORTED
+
+#ifdef INCLUDE_DS1_FILTERED
+std::vector<struct MBHits> DS1L_SF_FT {
+#include <dataset1_large_SF_FT_Input.txt>
+};
+std::vector<struct MBEvents> DS1L_ST_FT_Res {
+#include <dataset1_large_ST_FT_Clustered.txt>
+};
+#endif
 
 
 #ifdef INCLUDE_DS2_SORTED

@@ -22,6 +22,7 @@ EventBuilder::EventBuilder() {
   matcher.set_minimum_time_gap(timegap);
 }
 
+
 EventBuilder::EventBuilder(uint32_t BoxSize) : TimeBoxSize(BoxSize) {
   matcher.set_minimum_time_gap(timegap);
 }

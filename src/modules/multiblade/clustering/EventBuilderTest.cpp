@@ -24,6 +24,16 @@ protected:
 };
 
 
+TEST_F(EventBuilderTest, ThresholdData) {
+  ASSERT_EQ(builder.Thresholds[0][0], 34);
+  ASSERT_EQ(builder.Thresholds[1][0], 33);
+  ASSERT_EQ(builder.Thresholds[2][0], 137);
+  ASSERT_EQ(builder.Thresholds[3][0], 142);
+  ASSERT_EQ(builder.Thresholds[4][0], 143);
+  ASSERT_EQ(builder.Thresholds[5][0], 31);
+  ASSERT_EQ(builder.Thresholds[0][24], 8034);
+}
+
 // Preparations for Google Benchmark tests
 TEST_F(EventBuilderTest, FirstTest) {
   uint32_t clusters = 10;
