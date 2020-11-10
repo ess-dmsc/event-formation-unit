@@ -322,7 +322,7 @@ TEST_F(ReferenceDataTest, LoadLarge2_NotSorted_NotFiltered) {
   CountMatches(DS2L_ST_FF_Res, NoFiltering); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 260716);
-  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FF_Res.size() > 98.5 );
+  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS2L_ST_FF_Res.size() > 98.5 );
   printf("\n");
 }
 #endif // INCLUDE_DS2
@@ -335,7 +335,7 @@ TEST_F(ReferenceDataTest, LoadLarge1_NotSorted_Filtered) {
   CountMatches(DS1L_ST_FT_Res, DoFiltering); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 259329);
-  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FF_Res.size() > 94.0 );
+  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FT_Res.size() > 94.0 );
   printf("\n");
 }
 #endif // INCLUDE_DS1_FILTERED
