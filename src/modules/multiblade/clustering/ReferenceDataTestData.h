@@ -22,14 +22,15 @@ struct MBHits {
   }
 };
 
+// As we get the data from FP (from mail correspondence)
 struct MBEvents {
-  float y; // Wire channels (for MB18Freia)
-  float x; // Strip channels
-  float time;
-  float unused2;
-  float unused3;
-  float unused4;
-  float unused5;
+  float y; // Wire coordinate (== channel) (for MB18Freia)
+  float x; // Strip coordinate (== channels - 32)
+  float time; // Time (s)
+  float unused2; // Sum of wire adc
+  float unused3; // Sum of strip adc
+  float unused4; // Wire multiplicity
+  float unused5; // Strip multiplicity
 };
 
 // Small reference dataset from Francesco Oct 2020
@@ -121,55 +122,39 @@ std::vector<struct MBEvents> DS2S_ST_FF_Res {
 
 #ifdef HAS_REFDATA
 
-#ifdef INCLUDE_DS1_SORTED
-// Large dataset1 sorted but unfiltered
-// Sorted, not filtered
-// std::vector<struct MBHits> DS1L_ST_FF {
-// #include <dataset1_large_ST_FF_Input.txt>
-// };
-std::vector<struct MBEvents> DS1L_ST_FF_Res {
-#include <dataset1_large_ST_FF_Clustered.txt>
-};
-#endif // DS1_SORTED
-
-#ifdef INCLUDE_DS1_UNSORTED
-// Not sorted, not filtered
+#ifdef INCLUDE_DS1
+// Hits, Not sorted (for EFU event processing)
 std::vector<struct MBHits> DS1L_SF_FF {
 #include <dataset1_large_SF_FF_Input.txt>
 };
-// std::vector<struct MBEvents> DS1L_SF_FF_Res {
-// #include <dataset1_large_SF_FF_Clustered.txt>
-// };
-#endif // DS1_UNSORTED
+// Events, sorted, calculated by FP
+std::vector<struct MBEvents> DS1L_ST_FF_Res {
+#include <dataset1_large_ST_FF_Clustered.txt>
+};
+#endif // INCLUDE_DS1
+
 
 #ifdef INCLUDE_DS1_FILTERED
+// Hits, not sorted, EFU should apply adc threshold filtering
 std::vector<struct MBHits> DS1L_SF_FT {
 #include <dataset1_large_SF_FT_Input.txt>
 };
+// Events, sorted, filtered, calculated by FP
 std::vector<struct MBEvents> DS1L_ST_FT_Res {
 #include <dataset1_large_ST_FT_Clustered.txt>
 };
-#endif
+#endif // INCLUDE_DS1_FILTERED
 
 
-#ifdef INCLUDE_DS2_SORTED
-// Large dataset 2
-// Not sorted, not filtered
-// std::vector<struct MBHits> DS2L_ST_FF {
-// #include <dataset2_large_ST_FF_Input.txt>
-// };
-std::vector<struct MBEvents> DS2L_ST_FF_Res {
-#include <dataset2_large_ST_FF_Clustered.txt>
-};
-#endif // DS2_SORTED
-
-#ifdef INCLUDE_DS2_UNSORTED
+#ifdef INCLUDE_DS2
+// Hits, not sorted, not filtered (for EFU processing)
 std::vector<struct MBHits> DS2L_SF_FF {
 #include <dataset2_large_SF_FF_Input.txt>
 };
-// std::vector<struct MBEvents> DS2L_SF_FF_Res {
-// #include <dataset2_large_SF_FF_Clustered.txt>
-// };
-#endif // DS2_UNSORTED
+// Events, sorted, not filtered, calculated by FP
+std::vector<struct MBEvents> DS2L_ST_FF_Res {
+#include <dataset2_large_ST_FF_Clustered.txt>
+};
+#endif // INCLUDE_DS2
 
 #endif // HAS_REFDATA

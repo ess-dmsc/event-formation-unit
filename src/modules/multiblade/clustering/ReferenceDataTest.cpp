@@ -20,18 +20,20 @@
 
 using namespace Multiblade;
 
-// this will conditinally include the large datasets
-// and create 'unit tests' for this.
-#define INCLUDE_DS1_SORTED
-#define INCLUDE_DS1_UNSORTED
-#define INCLUDE_DS1_FILTERED
-#define INCLUDE_DS2_SORTED
-#define INCLUDE_DS2_UNSORTED
-
-#include <ReferenceDataTestData.h>
+const bool NoFiltering{false};
+const bool DoFiltering{true};
+const bool DoSorting{true};
 
 // Specific to MB16 and MB18 prototypes
 const uint16_t NumberOfWires{32};
+
+// this will conditinally include the large datasets
+// and create 'unit tests' for this.
+#define INCLUDE_DS1
+#define INCLUDE_DS1_FILTERED
+#define INCLUDE_DS2
+
+#include <ReferenceDataTestData.h>
 
 class ReferenceDataTest : public TestBase {
 public:
@@ -41,15 +43,16 @@ public:
     uint32_t MatchedClusters{0}; // clusters with both strips and wires
     uint32_t MatchedEvents{0}; // EFU - FP common events
     uint32_t TimerWraps{0}; // Count when CAEN timer resets
-    uint32_t EventsInvalidWireGap{0};
-    uint32_t EventsInvalidStripGap{0};
-    uint32_t EventsInvalidThresh{0};
+    uint32_t EventsInvalidWireGap{0}; // Events with wire gaps
+    uint32_t EventsInvalidStripGap{0}; // Events with strip gaps
+    uint32_t EventsInvalidThresh{0}; // Events with failed (wire) threshold
   } Stats;
 
+  // Zero out stat counters
   void clearStats() { std::fill_n((char*)&Stats, sizeof(Stats), 0); }
 
   // Create a list of unmatched but 'good' events
-  std::vector<Event> EventsExtra;
+  // std::vector<Event> EventsExtra;
 
   // Detect large jumps in readout time
   void FixJumpsAndSort(std::vector<struct MBHits> & vec, bool sort);
@@ -227,9 +230,9 @@ void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts, bool D
           break;
         }
       }
-      if (i == evts.size()) {
-        EventsExtra.push_back(e);
-      }
+      // if (i == evts.size()) {
+      //   EventsExtra.push_back(e);
+      // }
     }
   }
 
@@ -253,23 +256,21 @@ void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts, bool D
            EFUEvts, FPEvts, EFUEvts*100.0/FPEvts,
            Stats.MatchedEvents, Stats.MatchedEvents*100.0/FPEvts);
 
-  if (0) {
-    printf("\nFirst unmatched events (EFU missed):\n");
-    int PrintMissed{2};
-    for (auto & evt : evts) {
-      if (evt.time != 0.0) {
-        printf("%f %u %u\n", evt.time, (uint16_t)(std::round(evt.x)), (uint16_t)(std::round(evt.y)));
-        PrintMissed--;
-        if (PrintMissed == 0)
-          break;
-      }
-    }
-
-    if (EventsExtra.size() != 0) {
-      printf("\nFirst extra event:\n");
-      printf("%s\n", EventsExtra[0].to_string({}, true).c_str());
-    }
-  }
+  // printf("\nFirst unmatched events (EFU missed):\n");
+  // int PrintMissed{2};
+  // for (auto & evt : evts) {
+  //   if (evt.time != 0.0) {
+  //     printf("%f %u %u\n", evt.time, (uint16_t)(std::round(evt.x)), (uint16_t)(std::round(evt.y)));
+  //     PrintMissed--;
+  //     if (PrintMissed == 0)
+  //       break;
+  //   }
+  // }
+  //
+  // if (EventsExtra.size() != 0) {
+  //   printf("\nFirst extra event:\n");
+  //   printf("%s\n", EventsExtra[0].to_string({}, true).c_str());
+  // }
 }
 
 /// ---------------------------------------------------------------------
@@ -290,73 +291,54 @@ TEST_F(ReferenceDataTest, LoadSmall1_Sorted_NotFiltered) {
 
 TEST_F(ReferenceDataTest, LoadSmall2_Sorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS2S_ST_FF, true);
-  CountMatches(DS2S_ST_FF_Res, false);
+  FixJumpsAndSort(DS2S_ST_FF, DoSorting);
+  CountMatches(DS2S_ST_FF_Res, NoFiltering);
 
   ASSERT_EQ(Stats.Readouts, 29);
   ASSERT_EQ(Stats.NoCoincidence, 3);
   ASSERT_EQ(Stats.MatchedClusters, 10);
 }
 
+
 #ifdef HAS_REFDATA
 
-// #ifdef INCLUDE_DS1_SORTED
-// TEST_F(ReferenceDataTest, LoadLarge_Sorted_NotFiltered) {
-//   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-//   FixJumpsAndSort(DS1L_ST_FF, true);
-//   CountMatches(DS1L_ST_FF_Res, false); // can't reuse, array is overwritten
-//
-//   ASSERT_EQ(Stats.Readouts, 334028);
-//   printf("\n");
-// }
-// #endif // DS1_SORTED
-
-#ifdef INCLUDE_DS1_UNSORTED
+#ifdef INCLUDE_DS1
 TEST_F(ReferenceDataTest, LoadLarge_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS1L_SF_FF, true);
-  CountMatches(DS1L_ST_FF_Res, false); // can't reuse, array is overwritten
+  FixJumpsAndSort(DS1L_SF_FF, DoSorting);
+  CountMatches(DS1L_ST_FF_Res, NoFiltering); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 334028);
+  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FF_Res.size() > 98.5 );
   printf("\n");
 }
-#endif // DS1_UNSORTED
+#endif // INCLUDE_DS1
 
 
-// #ifdef INCLUDE_DS2_SORTED
-// TEST_F(ReferenceDataTest, LoadLarge2_Sorted_NotFiltered) {
-//   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-//   FixJumpsAndSort(DS2L_ST_FF, true);
-//   CountMatches(DS2L_ST_FF_Res, false); // can't reuse, array is overwritten
-//
-//   ASSERT_EQ(Stats.Readouts, 260716);
-//   printf("\n");
-// }
-// #endif // DS2_SORTED
-
-#ifdef INCLUDE_DS2_UNSORTED
+#ifdef INCLUDE_DS2
 TEST_F(ReferenceDataTest, LoadLarge2_NotSorted_NotFiltered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS2L_SF_FF, true);
-  CountMatches(DS2L_ST_FF_Res, false); // can't reuse, array is overwritten
+  FixJumpsAndSort(DS2L_SF_FF, DoSorting);
+  CountMatches(DS2L_ST_FF_Res, NoFiltering); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 260716);
+  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FF_Res.size() > 98.5 );
   printf("\n");
 }
-#endif // DS2_UNSORTED
+#endif // INCLUDE_DS2
+
 
 #ifdef INCLUDE_DS1_FILTERED
 TEST_F(ReferenceDataTest, LoadLarge1_NotSorted_Filtered) {
   ASSERT_EQ(builder.matcher.matched_events.size(), 0);
-  FixJumpsAndSort(DS1L_SF_FT, true);
-  CountMatches(DS1L_ST_FT_Res, true); // can't reuse, array is overwritten
+  FixJumpsAndSort(DS1L_SF_FT, DoSorting);
+  CountMatches(DS1L_ST_FT_Res, DoFiltering); // can't reuse, array is overwritten
 
   ASSERT_EQ(Stats.Readouts, 259329);
+  ASSERT_TRUE(Stats.MatchedEvents*100.0/DS1L_ST_FF_Res.size() > 94.0 );
   printf("\n");
 }
-#endif // DS1 _FILTERED
-
-
+#endif // INCLUDE_DS1_FILTERED
 #endif // HAS_REFDATA
 
 int main(int argc, char **argv) {
