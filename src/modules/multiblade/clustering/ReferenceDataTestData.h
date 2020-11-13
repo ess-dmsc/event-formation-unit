@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include <cstdio>
 #include <cinttypes>
+#include <cstdio>
 #include <vector>
 
 // #define INCLUDE_DS1
@@ -28,21 +28,21 @@ struct MBHits {
   float AdcValue;
 
   void print() {
-    printf("t: %10.7f, c: %u, a: %u\n", Time, (uint16_t)Channel, (uint16_t)AdcValue);
+    printf("t: %10.7f, c: %u, a: %u\n", Time, (uint16_t)Channel,
+           (uint16_t)AdcValue);
   }
 };
 
 // As we get the data from FP (from mail correspondence)
 struct MBEvents {
-  float y; // Wire coordinate (== channel) (for MB18Freia)
-  float x; // Strip coordinate (== channels - 32)
-  float time; // Time (s)
+  float y;       // Wire coordinate (== channel) (for MB18Freia)
+  float x;       // Strip coordinate (== channels - 32)
+  float time;    // Time (s)
   float unused2; // Sum of wire adc
   float unused3; // Sum of strip adc
   float unused4; // Wire multiplicity
   float unused5; // Strip multiplicity
 };
-
 
 extern std::vector<struct MBHits> FPRefData;
 
