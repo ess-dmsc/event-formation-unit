@@ -1,6 +1,14 @@
+set(TEST_DATA_PATH "${REFDATA}/multiblade/2020")
+if(EXISTS ${TEST_DATA_PATH})
+  add_definitions("-DHAS_REFDATA")
+  message(STATUS "ECDC: HAS multiblade reference data, using large datasets")
+else()
+  message(STATUS "ECDC: No multiblade reference data, skipping large datasets")
+endif()
 
 add_subdirectory(caen)
 add_subdirectory(generators)
+add_subdirectory(clustering)
 
 include_directories(.)
 

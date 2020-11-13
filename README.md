@@ -1,14 +1,18 @@
 # Event Formation Unit
 [![License (2-Clause BSD)](https://img.shields.io/badge/license-BSD%202--Clause-blue.svg)](https://github.com/ess-dmsc/event-formation-unit/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668) [![Build Status](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/badge/icon)](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/)
 
-This project implements processing of neutron detector event data into neturon events. Pipelines for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors have been implemented. Mostly implemented in C/C++.
+This project implements processing of neutron detector event data into neutron events. Pipelines
+for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors
+have been implemented. Mostly implemented in C/C++.
 
 ## Documentation
 For more details on the file structure, architecture, primitives see [documentation/README.md](documentation/README.md)
 
 ## Getting started
 
-The [essdaq repository](https://github.com/ess-dmsc/essdaq) has scripts for automatically downloading and compiling this project. Instructions for manually compiling the event formation unit software follows.
+The [essdaq repository](https://github.com/ess-dmsc/essdaq) has scripts for automatically
+downloading and compiling this project. Instructions for manually compiling the event
+formation unit software follow.
 
 ### Prerequisites
 
@@ -19,7 +23,8 @@ To build and run this software the following dependencies are required.
 * [**bash**](https://www.gnu.org/software/bash/) For properly setting paths to the conan provided dependencies.
 * A recent C/C++ compiler with support for C++14.
 
-Conan is used to download dependencies. For conan to know where the dependencies can be downloaded from, package repositories must be added by running the following commands:
+Conan is used to download dependencies. For conan to know where the dependencies can
+be downloaded from, package repositories must be added by running the following commands:
 
 * `conan remote add conancommunity https://api.bintray.com/conan/conan-community/conan`
 * `conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan`
@@ -51,7 +56,8 @@ make
 ```
 
 #### Building under Ubuntu 16
-Wen using conan to provide the dependencies, an extra option has to be provided: `--settings compiler.libcxx=libstdc++11`. Thus the call to conan turns into:
+Wen using conan to provide the dependencies, an extra option has to be provided:
+`--settings compiler.libcxx=libstdc++11`. Thus the call to conan turns into:
 
 ```bash
 conan install --build=outdated .. --settings compiler.libcxx=libstdc++11
@@ -84,12 +90,12 @@ make valgrind
 
 ## Running the event formation application
 
-En example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
+An example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
 
 ```
 make efu mbcaen
 cd bin
-./efu -d ../modules/sonde --nohwcheck
+./efu -d ../modules/mbcaen --nohwcheck
 ```
 
 Note you will need to provide a config file in the case of the *mbcaen* module as well.
@@ -101,7 +107,8 @@ To get the available command line arguments, use `-h` or `--help`. This works wh
 
 ## Contributing
 
-Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our code of conduct and the process for submitting pull requests to us.
+Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our code of
+conduct and the process for submitting pull requests to us.
 
 ## Authors
 

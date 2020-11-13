@@ -340,7 +340,7 @@ void CAENBase::processing_thread() {
       }
 
       builders[cassette].flush();
-      for (const auto &e : builders[cassette].matcher.matched_events) {
+      for (const auto &e : builders[cassette].Events) {
 
         if (!e.both_planes()) {
           XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
