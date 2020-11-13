@@ -26,9 +26,6 @@ const uint16_t NumberOfWires{32};
 
 // this will conditinally include the large datasets
 // and create 'unit tests' for this.
-// #define INCLUDE_DS1
-// #define INCLUDE_DS1_FILTERED
-// #define INCLUDE_DS2
 
 #include <ReferenceDataTestData.h>
 
@@ -242,11 +239,13 @@ void ReferenceDataTest::CountMatches(std::vector<struct MBEvents> & evts, bool D
   uint32_t EFUEvts = builder.Events.size() - Stats.NoCoincidence - EventsInvalid;
   uint32_t FPEvts = evts.size();
 
-  printf("Readouts: %u, Clusters: %u, No coincidence: %u, EFU Events: %u\n",
-          Stats.Readouts, (uint32_t)builder.Events.size(),
-          Stats.NoCoincidence, EFUEvts);
+  printf("Readouts: %u, Clusters: %u\n",
+          Stats.Readouts, (uint32_t)builder.Events.size());
 
-  printf("Invalid: %u, (WGap: %u, SGap: %u, Thresh: %u)\n", EventsInvalid,
+  printf("No coincidence: %u, Invalid: %u, EFU Events: %u\n",
+          Stats.NoCoincidence, EventsInvalid, EFUEvts);
+
+  printf("Invalid (WGap: %u, SGap: %u, Thresh: %u)\n",
          Stats.EventsInvalidWireGap, Stats.EventsInvalidStripGap,
          Stats.EventsInvalidThresh);
 
