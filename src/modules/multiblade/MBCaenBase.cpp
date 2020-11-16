@@ -394,7 +394,7 @@ void CAENBase::processing_thread() {
           Counters.Events++;
         }
       }
-
+      builders[cassette].Events.clear(); // else events will accumulate
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
