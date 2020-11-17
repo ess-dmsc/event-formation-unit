@@ -33,7 +33,7 @@ private:
   void reconnectHelper();
 
   /// Connection variable
-  TCPTransmitter * StatDb;
+  std::unique_ptr<TCPTransmitter>(StatDb);
 
   /// \brief ip address of the stat database server (dotted quad: x.y.z.a)
   std::string IpAddress{""};
@@ -53,5 +53,5 @@ private:
   const uint64_t MaxReconnectAttempts{240};
 
   /// \brief delay in us between reconnection attempts
-  const uint64_t ReconnectDelayUS{30 * 1000 * 1000};
+  const uint64_t ReconnectDelayUS{30'000'000};
 };
