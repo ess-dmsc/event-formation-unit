@@ -16,6 +16,7 @@
 #include <cinttypes>
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <unistd.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {
@@ -42,6 +43,13 @@ public:
 
   /// Create a socker abstraction of type UDP or TCP
   Socket(Socket::SocketType Type);
+
+  /// Close the file descriptor
+  ~Socket() {
+    if (SocketFileDescriptor >= 0) {
+      close(SocketFileDescriptor);
+    }
+  }
 
   /// Set TTL to 1 for IP multicast (for transmitters)
   void setMulticastTTL();
@@ -93,6 +101,7 @@ public:
 
 private:
   int SocketFileDescriptor{-1};
+  bool SocketIsGood{true};
   int SockOptFlagOn{1};
   struct ip_mreq  MulticastRequest;
   std::string RemoteIp;

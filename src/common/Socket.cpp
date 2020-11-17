@@ -194,8 +194,11 @@ int Socket::connectToRemote() {
   ret = connect(SocketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
     LOG(IPC, Sev::Error, "connect() to {}:{} failed", RemoteIp, RemotePort);
-    SocketFileDescriptor = -1;
+    SocketIsGood = false;
+  } else {
+    SocketIsGood = true;
   }
+
   return ret;
 }
 
@@ -204,7 +207,7 @@ int Socket::send(void const *buffer, int len) {
   int ret =
       sendto(SocketFileDescriptor, buffer, len, SEND_FLAGS, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    SocketFileDescriptor = -1;
+    SocketIsGood = false;
     XTRACE(IPC, DEB, "sendto() failed with code %d", ret);
   }
 
@@ -244,7 +247,7 @@ int Socket::setSockOpt(int option, void *value, int size) {
 }
 
 bool Socket::isValidSocket() {
-  return (SocketFileDescriptor >= 0);
+  return SocketIsGood;
 }
 
 ///
