@@ -33,7 +33,7 @@ private:
   void reconnectHelper();
 
   /// Connection variable
-  std::unique_ptr<TCPTransmitter>(StatDb);
+  std::unique_ptr<TCPTransmitter> StatDb;
 
   /// \brief ip address of the stat database server (dotted quad: x.y.z.a)
   std::string IpAddress{""};
