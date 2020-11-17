@@ -27,11 +27,7 @@
 #include <common/Timer.h>
 
 #include <caen/DataParser.h>
-
-#include <clustering/EventBuilder.h>
-
-#include <logical_geometry/ESSGeometry.h>
-#include <caen/MBGeometry.h>
+#include <multiblade/MBCaenInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -116,9 +112,6 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   /// \todo the number 11 is a workaround
   EthernetRingbuffer = new RingBuffer<EthernetBufferSize>(EthernetBufferMaxEntries + 11);
   assert(EthernetRingbuffer != 0);
-
-  MultibladeConfig = Config(MBCAENSettings.ConfigFile);
-  assert(MultibladeConfig.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {
@@ -164,61 +157,32 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  const uint16_t ncass = MultibladeConfig.getCassettes();
-  const uint16_t nwires = MultibladeConfig.getWires();
-  const uint16_t nstrips = MultibladeConfig.getStrips();
-  std::string topic{""};
-  std::string monitor{""};
 
-  MBGeometry mbgeom(ncass, nwires, nstrips);
-  ESSGeometry essgeom;
-  if (MultibladeConfig.getInstrument() == Config::InstrumentGeometry::Estia) {
-    XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
-    mbgeom.setConfigurationEstia();
-    essgeom = ESSGeometry(ncass * nwires, nstrips, 1, 1);
-    topic = "ESTIA_detector";
-    monitor = "ESTIA_monitor";
-  } else {
-    mbgeom.setConfigurationFreia();
-    XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
-    essgeom = ESSGeometry(nstrips, ncass * nwires, 1, 1);
-    topic = "FREIA_detector";
-    monitor = "FREIA_monitor";
-  }
-
-  if (MultibladeConfig.getDetectorType() == Config::DetectorType::MB18) {
-    XTRACE(PROCESS, ALW, "Setting detector to MB18");
-    mbgeom.setDetectorMB18();
-  } else {
-    XTRACE(PROCESS, ALW, "Setting detector to MB16");
-    mbgeom.setDetectorMB16();
-  }
+  MBCaenInstrument MBCaen(Counters, MBCAENSettings);
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
     dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
-  Producer eventprod(EFUSettings.KafkaBroker, topic);
+  Producer eventprod(EFUSettings.KafkaBroker, MBCaen.topic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
   EV42Serializer flatbuffer(KafkaBufferSize, "multiblade", Produce);
 
-  Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
-  Producer monitorprod(EFUSettings.KafkaBroker, monitor);
+  Producer monitorprod(EFUSettings.KafkaBroker, MBCaen.monitor);
 
   auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
     monitorprod.produce(DataBuffer, Timestamp);
   };
-  HistogramSerializer histfb(histograms.needed_buffer_size(), "multiblade");
+  HistogramSerializer histfb(MBCaen.histograms.needed_buffer_size(), "multiblade");
   histfb.set_callback(ProduceHist);
 
-  std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;
-  auto digitisers = MultibladeConfig.getDigitisers();
+  auto digitisers = MBCaen.MultibladeConfig.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
 
@@ -239,7 +203,7 @@ void CAENBase::processing_thread() {
         flatbuffer.pulseTime(efu_time);
       }
 
-      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
+      auto pixel_id = udder.getPixel(MBCaen.essgeom.nx(), MBCaen.essgeom.ny(), &MBCaen.essgeom);
 
       Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
       Counters.EventsUdder++;
@@ -291,7 +255,7 @@ void CAENBase::processing_thread() {
         dumpfile->push(parser.readouts);
       }
 
-      /// \todo why can't I use MultibladeConfig.detector->cassette()
+
       auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
       if (cassette < 0) {
         XTRACE(DATA, WAR, "Invalid digitizerId: %d",
@@ -300,47 +264,11 @@ void CAENBase::processing_thread() {
       }
 
       for (const auto &dp : parser.readouts) {
-
-        if (not mbgeom.isValidCh(dp.channel)) {
-          Counters.ReadoutsInvalidChannel++;
-          continue;
-        }
-
-        if (dp.adc > MultibladeConfig.max_valid_adc) {
-          Counters.ReadoutsInvalidAdc++;
-          continue;
-        }
-
-        uint8_t plane = mbgeom.getPlane(dp.channel);
-        uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
-        uint16_t coord;
-        if (plane == 0) {
-          if (global_ch == 30) {
-            Counters.ReadoutsMonitor++;
-            continue;
-          }
-          coord = mbgeom.getx(cassette, dp.channel);
-          histograms.bin_x(global_ch, dp.adc);
-        } else  if (plane == 1) {
-          coord = mbgeom.gety(cassette, dp.channel);
-          histograms.bin_y(global_ch, dp.adc);
-        } else {
-          Counters.ReadoutsInvalidPlane++;
-          continue;
-        }
-
-        Counters.ReadoutsGood++;
-
-        XTRACE(DATA, DEB, "time %lu, channel %u, adc %u", dp.local_time, dp.channel, dp.adc);
-
-        builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
-
-        XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
-               dp.debug().c_str(), cassette, plane, coord);
+        MBCaen.ingestOneReadout(cassette, dp);
       }
 
-      builders[cassette].flush();
-      for (const auto &e : builders[cassette].Events) {
+      MBCaen.builders[cassette].flush();
+      for (const auto &e : MBCaen.builders[cassette].Events) {
 
         if (!e.both_planes()) {
           XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
@@ -349,7 +277,7 @@ void CAENBase::processing_thread() {
         }
 
         // \todo parametrize maximum time span - in opts?
-        if (MultibladeConfig.filter_time_span && (e.time_span() > MultibladeConfig.filter_time_span_value)) {
+        if (MBCaen.MultibladeConfig.filter_time_span && (e.time_span() > MBCaen.MultibladeConfig.filter_time_span_value)) {
           XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
           Counters.FiltersMaxTimeSpan++;
           continue;
@@ -383,8 +311,8 @@ void CAENBase::processing_thread() {
 //        auto y = (e.cluster2.coord_start() + e.cluster2.coord_end()) / 2;
 
         // \todo improve this
-        auto time = e.time_start() * MultibladeConfig.TimeTickNS; // TOF in ns
-        auto pixel_id = essgeom.pixel2D(x, y);
+        auto time = e.time_start() * MBCaen.MultibladeConfig.TimeTickNS; // TOF in ns
+        auto pixel_id = MBCaen.essgeom.pixel2D(x, y);
         XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 
         if (pixel_id == 0) {
@@ -394,7 +322,7 @@ void CAENBase::processing_thread() {
           Counters.Events++;
         }
       }
-
+      MBCaen.builders[cassette].Events.clear();
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
@@ -417,11 +345,11 @@ void CAENBase::processing_thread() {
 
       Counters.TxBytes += flatbuffer.produce();
 
-      if (!histograms.isEmpty()) {
+      if (!MBCaen.histograms.isEmpty()) {
 //        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
 //               histograms.hit_count());
-        histfb.produce(histograms);
-        histograms.clear();
+        histfb.produce(MBCaen.histograms);
+        MBCaen.histograms.clear();
       }
 
       /// Kafka stats update - common to all detectors
