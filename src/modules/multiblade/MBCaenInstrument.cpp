@@ -27,7 +27,6 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 
     // Setup Instrument according to configuration file
     MultibladeConfig = Config(ModuleSettings.ConfigFile);
-    assert(MultibladeConfig.getDigitizers() != nullptr);
 
     if (!moduleSettings.FilePrefix.empty()) {
       dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
