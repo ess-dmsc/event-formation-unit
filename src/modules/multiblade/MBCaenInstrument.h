@@ -33,7 +33,7 @@ public:
   MBCaenInstrument(Counters & counters, BaseSettings & EFUSettings, CAENSettings & moduleSettings);
 
   ///
-  void parsePacket(char * data, int length);
+bool parsePacket(char * data, int length, EV42Serializer & ev42ser);
 
   ///
   void ingestOneReadout(int cassette, const Readout & dp);
@@ -62,6 +62,7 @@ public:
   DataParser parser;
   ESSGeometry essgeom;
   Config MultibladeConfig;
+  std::shared_ptr<ReadoutFile> dumpfile;
 };
 
 } // namespace

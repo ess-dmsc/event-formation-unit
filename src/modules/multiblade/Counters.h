@@ -24,6 +24,7 @@ struct Counters {
     int64_t ReadoutsErrorVersion;
     int64_t ReadoutsSeqErrors;
     int64_t ReadoutsErrorBytes;
+    int64_t PacketBadDigitizer;
     int64_t ReadoutsCount;
     int64_t ReadoutsGood;
     int64_t ReadoutsMonitor; /// \todo so far hardcoded

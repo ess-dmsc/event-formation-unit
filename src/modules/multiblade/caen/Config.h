@@ -34,14 +34,12 @@ public:
   /// \brief getter fcn for private member variable
   std::string getConfigFile() const { return ConfigFile; }
 
-  // /// \brief getter fcn for private member variable
-  std::shared_ptr<DigitizerMapping> getDigitizers() const { return Detector; }
-
   /// \brief getter fcn for private member variable
   uint32_t getTimeTickNS() const { return TimeTickNS; }
 
   /// \brief getter fcn for private member variable
-  auto getDigitisers() const { return Digitisers; }
+  std::vector<struct DigitizerMapping::Digitiser> getDigitisers() const { return Digitisers; }
+
 
   InstrumentGeometry getInstrument() const { return Instrument; }
 
@@ -54,16 +52,13 @@ public:
   bool filter_time_span{true};
   uint32_t filter_time_span_value{125};
 
-  bool filter_multiplicity_x{false};
-  uint32_t filter_multiplicity_x_value{10};
-
-  bool filter_multiplicity_y{false};
-  uint32_t filter_multiplicity_y_value{4};
-
   int max_valid_adc{65534};
 
   /// local readout timestamp resolution
   uint32_t TimeTickNS{16};
+
+  /// Specify the digital geometry
+  std::shared_ptr<DigitizerMapping> Mappings;
 
 private:
   /// \brief helper function to load and parse json file
@@ -74,9 +69,6 @@ private:
 
   /// Name of the json configuration file to load
   std::string ConfigFile{""};
-
-  /// Specify the digital geometry
-  std::shared_ptr<DigitizerMapping> Detector;
 
   /// Specify the instrument geometry
   InstrumentGeometry Instrument{InstrumentGeometry::Estia};

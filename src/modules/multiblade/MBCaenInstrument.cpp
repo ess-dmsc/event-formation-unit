@@ -29,6 +29,11 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
     MultibladeConfig = Config(ModuleSettings.ConfigFile);
     assert(MultibladeConfig.getDigitizers() != nullptr);
 
+    if (!moduleSettings.FilePrefix.empty()) {
+      dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
+    }
+
+
     ncass = MultibladeConfig.getCassettes();
     nwires = MultibladeConfig.getWires();
     nstrips = MultibladeConfig.getStrips();
@@ -72,12 +77,12 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 }
 
 
-
-void MBCaenInstrument::parsePacket(char * data, int length) {
+// Moved from MBCaenBase to better support unit testing
+bool MBCaenInstrument::parsePacket(char * data, int length,  EV42Serializer & ev42ser) {
   if (parser.parse(data, length) < 0) {
     counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
     counters.ReadoutsErrorVersion += parser.Stats.error_version;
-    return;
+    return false;
   }
   counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
 
@@ -85,6 +90,28 @@ void MBCaenInstrument::parsePacket(char * data, int length) {
          parser.MBHeader->numElements, parser.MBHeader->digitizerID);
 
   counters.ReadoutsCount += parser.MBHeader->numElements;
+
+  uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+  ev42ser.pulseTime(efu_time);
+
+  if (dumpfile) {
+    dumpfile->push(parser.readouts);
+  }
+
+  auto cassette = MultibladeConfig.Mappings->cassette(parser.MBHeader->digitizerID);
+  if (cassette < 0) {
+    XTRACE(DATA, WAR, "Invalid digitizerId: %d",
+           parser.MBHeader->digitizerID);
+    counters.PacketBadDigitizer++;
+    return false;
+  }
+
+  for (const auto &dp : parser.readouts) {
+    ingestOneReadout(cassette, dp);
+  }
+  builders[cassette].flush();
+
+  return true;
 }
 
 

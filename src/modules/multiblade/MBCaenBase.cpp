@@ -7,11 +7,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "MBCaenBase.h"
+#include <multiblade/MBCaenBase.h>
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/RingBuffer.h>
-#include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
 #include <unistd.h>
@@ -46,6 +45,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
+  Stats.create("receive.packet_bad_header", Counters.PacketBadDigitizer);
   Stats.create("readouts.count", Counters.ReadoutsCount);
   Stats.create("readouts.count_valid", Counters.ReadoutsGood);
   Stats.create("readouts.invalid_ch", Counters.ReadoutsInvalidChannel);
@@ -152,11 +152,6 @@ void CAENBase::processing_thread() {
 
   MBCaenInstrument MBCaen(Counters, EFUSettings, MBCAENSettings);
 
-  std::shared_ptr<ReadoutFile> dumpfile;
-  if (!MBCAENSettings.FilePrefix.empty()) {
-    dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
-  }
-
   // Event producer
 
   Producer eventprod(EFUSettings.KafkaBroker, MBCaen.topic);
@@ -164,10 +159,6 @@ void CAENBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
   EV42Serializer flatbuffer{KafkaBufferSize, "multiblade", Produce};
-
-
-  auto digitisers = MBCaen.MultibladeConfig.getDigitisers();
-  DigitizerMapping mb1618(digitisers);
 
 
   if (EFUSettings.TestImage) {
@@ -221,29 +212,12 @@ void CAENBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto dataptr = EthernetRingbuffer->getDataBuffer(data_index);
 
-      MBCaen.parsePacket(dataptr, datalen);
-
-      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      flatbuffer.pulseTime(efu_time);
-
-      if (dumpfile) {
-        dumpfile->push(MBCaen.parser.readouts);
-      }
-
-      auto cassette = mb1618.cassette(MBCaen.parser.MBHeader->digitizerID);
-      if (cassette < 0) {
-        XTRACE(DATA, WAR, "Invalid digitizerId: %d",
-               MBCaen.parser.MBHeader->digitizerID);
+      if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
         continue;
       }
 
-      for (const auto &dp : MBCaen.parser.readouts) {
-        MBCaen.ingestOneReadout(cassette, dp);
-      }
-      MBCaen.builders[cassette].flush();
-
+      auto cassette = MBCaen.MultibladeConfig.Mappings->cassette(MBCaen.parser.MBHeader->digitizerID);
       for (const auto &e : MBCaen.builders[cassette].Events) {
-
         if (MBCaen.filterEvent(e)) {
           continue;
         }
@@ -273,12 +247,12 @@ void CAENBase::processing_thread() {
     }
 
     // if filedumping and requesting time splitting, check for rotation.
-    if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
+    if (MBCAENSettings.H5SplitTime != 0 and (MBCaen.dumpfile)) {
       if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
 
         /// \todo user should not need to call flush() - implicit in rotate() ?
-        dumpfile->flush();
-        dumpfile->rotate();
+        MBCaen.dumpfile->flush();
+        MBCaen.dumpfile->rotate();
         h5flushtimer.now();
       }
     }

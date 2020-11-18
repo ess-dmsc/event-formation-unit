@@ -27,13 +27,13 @@ Config::Config(std::string jsonfile) : ConfigFile(jsonfile) {
   }
 
   if (Instrument == InstrumentGeometry::Estia) {
-    Detector = std::make_shared<DigitizerMapping>(Digitisers);
+    Mappings = std::make_shared<DigitizerMapping>(Digitisers);
 
   } else if (Instrument == InstrumentGeometry::Freia) {
-    Detector = std::make_shared<DigitizerMapping>(Digitisers); /// \todo add parameters for Freia
+    Mappings = std::make_shared<DigitizerMapping>(Digitisers); /// \todo add parameters for Freia
   }
 
-  assert(Detector != nullptr);
+  assert(Mappings != nullptr);
 }
 
 ///
