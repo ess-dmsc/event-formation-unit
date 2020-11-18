@@ -35,7 +35,7 @@ public:
   /** @todo figure out the right size  of the .._max_entries  */
   static const int EthernetBufferMaxEntries = 500;
   static const int EthernetBufferSize = 9000; /// bytes
-  static const int KafkaBufferSize = 124000; /// entries ~ 1MB
+  static const int KafkaBufferSize{124000}; /// entries ~ 1MB
 
 protected:
   /** Shared between input_thread and processing_thread*/

@@ -8,25 +8,17 @@
 //===----------------------------------------------------------------------===//
 
 #include "MBCaenBase.h"
-
 #include <cinttypes>
 #include <common/EFUArgs.h>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
-
 #include <unistd.h>
-
 #include <common/SPSCFifo.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-
-#include <caen/DataParser.h>
 #include <multiblade/MBCaenInstrument.h>
 
 // #undef TRC_LEVEL
@@ -158,30 +150,22 @@ void CAENBase::input_thread() {
 
 void CAENBase::processing_thread() {
 
-  MBCaenInstrument MBCaen(Counters, MBCAENSettings);
+  MBCaenInstrument MBCaen(Counters, EFUSettings, MBCAENSettings);
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
     dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
+  // Event producer
+
   Producer eventprod(EFUSettings.KafkaBroker, MBCaen.topic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
-
-  EV42Serializer flatbuffer(KafkaBufferSize, "multiblade", Produce);
-
-  Producer monitorprod(EFUSettings.KafkaBroker, MBCaen.monitor);
-
-  auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
-    monitorprod.produce(DataBuffer, Timestamp);
-  };
-  HistogramSerializer histfb(MBCaen.histograms.needed_buffer_size(), "multiblade");
-  histfb.set_callback(ProduceHist);
+  EV42Serializer flatbuffer{KafkaBufferSize, "multiblade", Produce};
 
 
-  DataParser parser;
   auto digitisers = MBCaen.MultibladeConfig.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
@@ -236,79 +220,38 @@ void CAENBase::processing_thread() {
 
       /// \todo use the Buffer<T> class here and in parser
       auto dataptr = EthernetRingbuffer->getDataBuffer(data_index);
-      if (parser.parse(dataptr, datalen) < 0) {
-        Counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
-        Counters.ReadoutsErrorVersion += parser.Stats.error_version;
-        continue;
-      }
-      Counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
 
-      XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-             parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+      MBCaen.parsePacket(dataptr, datalen);
 
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       flatbuffer.pulseTime(efu_time);
 
-      Counters.ReadoutsCount += parser.MBHeader->numElements;
-
       if (dumpfile) {
-        dumpfile->push(parser.readouts);
+        dumpfile->push(MBCaen.parser.readouts);
       }
 
-
-      auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
+      auto cassette = mb1618.cassette(MBCaen.parser.MBHeader->digitizerID);
       if (cassette < 0) {
         XTRACE(DATA, WAR, "Invalid digitizerId: %d",
-               parser.MBHeader->digitizerID);
+               MBCaen.parser.MBHeader->digitizerID);
         continue;
       }
 
-      for (const auto &dp : parser.readouts) {
+      for (const auto &dp : MBCaen.parser.readouts) {
         MBCaen.ingestOneReadout(cassette, dp);
       }
-
       MBCaen.builders[cassette].flush();
+
       for (const auto &e : MBCaen.builders[cassette].Events) {
 
-        if (!e.both_planes()) {
-          XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
-          Counters.EventsNoCoincidence++;
+        if (MBCaen.filterEvent(e)) {
           continue;
         }
-
-        // \todo parametrize maximum time span - in opts?
-        if (MBCaen.MultibladeConfig.filter_time_span && (e.time_span() > MBCaen.MultibladeConfig.filter_time_span_value)) {
-          XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
-          Counters.FiltersMaxTimeSpan++;
-          continue;
-        }
-
-        if ((e.ClusterA.coord_span() > e.ClusterA.hit_count()) && (e.ClusterB.coord_span() > e.ClusterB.hit_count())) {
-          XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.to_string({}, true).c_str());
-          Counters.EventsNotAdjacent++;
-          continue;
-        }
-
-        // // \todo are these always wires && strips respectively?
-        // if (filter_multiplicity &&
-        //     ((e.cluster1.hit_count() > 5) || (e.cluster2.hit_count() > 10))) {
-        //   Counters.FiltersMaxMulti1++;
-        //   continue;
-        // }
-        // if (filter_multiplicity2 &&
-        //     ((e.cluster1.hit_count() > 3) || (e.cluster2.hit_count() > 4))) {
-        //   Counters.FiltersMaxMulti2++;
-        //   continue;
-        // }
 
         XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
         // calculate local x and y using center of mass
         auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
         auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
-
-        // calculate local x and y using center of span
-//        auto x = (e.cluster1.coord_start() + e.cluster1.coord_end()) / 2;
-//        auto y = (e.cluster2.coord_start() + e.cluster2.coord_end()) / 2;
 
         // \todo improve this
         auto time = e.time_start() * MBCaen.MultibladeConfig.TimeTickNS; // TOF in ns
@@ -348,7 +291,7 @@ void CAENBase::processing_thread() {
       if (!MBCaen.histograms.isEmpty()) {
 //        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
 //               histograms.hit_count());
-        histfb.produce(MBCaen.histograms);
+        MBCaen.histfb.produce(MBCaen.histograms);
         MBCaen.histograms.clear();
       }
 

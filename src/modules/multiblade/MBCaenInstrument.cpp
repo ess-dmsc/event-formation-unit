@@ -19,22 +19,21 @@ namespace Multiblade {
 
 /// \brief load configuration and calibration files
 MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
+    BaseSettings & EFUSettings,
     CAENSettings &moduleSettings)
       : counters(counters)
       , ModuleSettings(moduleSettings) {
 
+
+    // Setup Instrument according to configuration file
     MultibladeConfig = Config(ModuleSettings.ConfigFile);
     assert(MultibladeConfig.getDigitizers() != nullptr);
 
     ncass = MultibladeConfig.getCassettes();
     nwires = MultibladeConfig.getWires();
     nstrips = MultibladeConfig.getStrips();
-
-    histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
-
-    builders = std::vector<EventBuilder>(ncass);
-
     mbgeom = MBGeometry(ncass, nwires, nstrips);
+
     if (MultibladeConfig.getInstrument() == Config::InstrumentGeometry::Estia) {
       XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
       mbgeom.setConfigurationEstia();
@@ -56,8 +55,37 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
       XTRACE(PROCESS, ALW, "Setting detector to MB16");
       mbgeom.setDetectorMB16();
     }
+
+    builders = std::vector<EventBuilder>(ncass);
+
+    // Kafka producers and flatbuffer serialisers
+    // Monitor producer
+    Producer monitorprod(EFUSettings.KafkaBroker, monitor);
+    auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
+      monitorprod.produce(DataBuffer, Timestamp);
+    };
+    histfb.set_callback(ProduceHist);
+    histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
+    histfb = HistogramSerializer(histograms.needed_buffer_size(), "multiblade");
+    //
+
 }
 
+
+
+void MBCaenInstrument::parsePacket(char * data, int length) {
+  if (parser.parse(data, length) < 0) {
+    counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
+    counters.ReadoutsErrorVersion += parser.Stats.error_version;
+    return;
+  }
+  counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
+
+  XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
+         parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+
+  counters.ReadoutsCount += parser.MBHeader->numElements;
+}
 
 
 void MBCaenInstrument::ingestOneReadout(int cassette, const Readout & dp) {
@@ -98,6 +126,29 @@ void MBCaenInstrument::ingestOneReadout(int cassette, const Readout & dp) {
 
   XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
          dp.debug().c_str(), cassette, plane, coord);
+  }
+
+
+bool MBCaenInstrument::filterEvent(const Event & e) {
+    if (!e.both_planes()) {
+      XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
+      counters.EventsNoCoincidence++;
+      return true;
+    }
+
+    // \todo parametrize maximum time span - in opts?
+    if (MultibladeConfig.filter_time_span && (e.time_span() > MultibladeConfig.filter_time_span_value)) {
+      XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
+      counters.FiltersMaxTimeSpan++;
+      return true;
+    }
+
+    if ((e.ClusterA.coord_span() > e.ClusterA.hit_count()) && (e.ClusterB.coord_span() > e.ClusterB.hit_count())) {
+      XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.to_string({}, true).c_str());
+      counters.EventsNotAdjacent++;
+      return true;
+    }
+    return false;
   }
 
 } // namespace
