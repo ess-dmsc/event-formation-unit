@@ -10,6 +10,7 @@
 
 #include <common/Trace.h>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 // #undef TRC_LEVEL
