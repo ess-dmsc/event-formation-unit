@@ -41,6 +41,14 @@ set(StatisticsTest_SRC
   )
 create_test_executable(StatisticsTest)
 
+set(RuntimeStatTest_INC
+    ../RuntimeStat.h
+  )
+set(RuntimeStatTest_SRC
+    RuntimeStatTest.cpp
+  )
+create_test_executable(RuntimeStatTest)
+
 set(RingBufferTest_SRC
   RingBufferTest.cpp
   )

@@ -69,6 +69,9 @@ public:
 
   virtual const char *detectorname() { return DetectorName.c_str(); }
 
+
+  virtual uint32_t runtimestat() { return RuntimeStat; }
+
   virtual ThreadList &GetThreadInfo() { return Threads; };
 
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
@@ -103,6 +106,7 @@ protected:
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
   Statistics Stats;
+  uint32_t RuntimeStat{0};
 
 private:
   std::string DetectorName;
