@@ -9,7 +9,11 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/Trace.h>
+#include <cstdint>
 #include <vector>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 class RuntimeStat {
 public:
