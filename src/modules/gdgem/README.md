@@ -20,3 +20,8 @@ care use -c -5.
 To start gdgem
 
 `> ./efu -d gdgem -f nmx_config.json -p 6006 -c -5`
+
+
+#include <common/RuntimeStat.h>
+class RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+RuntimeStat = RtStat.getRuntimeStatus({Counters.RxPackets, Counters.Events, Counters.TxBytes});
