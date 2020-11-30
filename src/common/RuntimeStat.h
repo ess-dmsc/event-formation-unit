@@ -5,7 +5,13 @@
 ///
 /// \brief Maintain and update runtime status
 ///
-/// Should be run periodically (every N seconds)
+/// A runtime stat is a set of (maximum 32) status flags that can be set
+/// or clear. Each flag indicates a good/bad status of a 'feature'
+///
+/// The runtime status query should be run periodically (every N seconds)
+/// it can be used in the EFUs to report if a pipeline stage is running
+/// At the moment acticity is determined by observing a change in counts
+/// between each poll.
 //===----------------------------------------------------------------------===//
 
 #include <common/Trace.h>
@@ -22,7 +28,7 @@ public:
   RuntimeStat(std::vector<int64_t> Counters) :
      OldStats(Counters) {
        if (Counters.size() == 0) {
-         throw std::runtime_error("RuntimeStat array must be nonzero");
+         throw std::runtime_error("RuntimeStat array must have nonzero size");
        }
   }
 

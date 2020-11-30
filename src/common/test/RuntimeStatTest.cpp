@@ -18,7 +18,7 @@ TEST_F(RuntimeStatTest, CounterMismatch) {
   EXPECT_EQ(res, 0);
   res = stats.getRuntimeStatus({CtrA});
   EXPECT_EQ(res, 0);
-  res = stats.getRuntimeStatus({CtrA, CtrB});
+  res = stats.getRuntimeStatus({CtrA, CtrB, CtrC});
   EXPECT_EQ(res, 0);
   res = stats.getRuntimeStatus({CtrA, CtrB, CtrC, CtrA});
   EXPECT_EQ(res, 0);

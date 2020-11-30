@@ -215,7 +215,7 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &k
               });
 
 
-  registercmd("RUNTIMESTATS", [detector, mainStats](std::vector<std::string> cmd,
+  registercmd("RUNTIMESTATS", [detector](std::vector<std::string> cmd,
                                            char *resp, unsigned int *nrChars) {
     return runtime_stats(cmd, resp, nrChars, detector);
   });
