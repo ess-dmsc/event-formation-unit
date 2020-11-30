@@ -157,6 +157,22 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
   return Parser::OK;
 }
 
+//=============================================================================
+static int runtime_stats(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
+  auto nargs = cmdargs.size();
+  LOG(CMD, Sev::Debug, "RUNTIMESTATS");
+  if (nargs != 1) {
+    LOG(CMD, Sev::Warning, "RUNTIMESTATS: wrong number of arguments");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "RUNTIMESTATS %u",
+                     detector->runtimestat());
+
+  return Parser::OK;
+}
+
 /******************************************************************************/
 /******************************************************************************/
 Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &keep_running) {
@@ -197,6 +213,12 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &k
                          unsigned int *nrChars) {
                 return detector_info_get(cmd, resp, nrChars, detector);
               });
+
+
+  registercmd("RUNTIMESTATS", [detector](std::vector<std::string> cmd,
+                                           char *resp, unsigned int *nrChars) {
+    return runtime_stats(cmd, resp, nrChars, detector);
+  });
 
   auto DetCmdFuncsMap = detector->GetDetectorCommandFunctions();
   for (auto &FuncObj : DetCmdFuncsMap) {

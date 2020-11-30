@@ -13,6 +13,7 @@
 #include <common/Log.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/RingBuffer.h>
+#include <common/RuntimeStat.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
@@ -188,6 +189,9 @@ void LokiBase::processingThread() {
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
+
+  class RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
@@ -281,6 +285,8 @@ void LokiBase::processingThread() {
 
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+
+      RuntimeStat = RtStat.getRuntimeStatus({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 
