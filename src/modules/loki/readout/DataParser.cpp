@@ -4,8 +4,8 @@
 #include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
@@ -47,7 +47,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u\n", DataHdrPtr->RingId,
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
       DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.Headers++;
 
@@ -67,10 +67,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
       auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize +
                                   i * LokiReadoutSize);
-      XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) FPGAId %3u TubeId %3u , A 0x%04x B "
+      XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A 0x%04x B "
                         "0x%04x C 0x%04x D 0x%04x",
              i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-             Data->TimeHigh, Data->TimeLow, Data->FPGAId, Data->TubeId, Data->AmpA,
+             Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
              Data->AmpB, Data->AmpC, Data->AmpD);
 
       CurrentDataSection.Data.push_back(*Data);

@@ -46,7 +46,6 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_
     for (auto Element = 0; Element < DataElements; Element++) {
       auto DataBlock = (DataParser::LokiReadout *)DP;
       DataBlock->TimeLow = 100;
-      DataBlock->FPGAId = 0;
       DataBlock->TubeId = Element % 8;
       DataBlock->AmpA = DataElements - Element;
       DataBlock->AmpB = Element + 1;

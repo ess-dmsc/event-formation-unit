@@ -100,13 +100,13 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData & Section,
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
+  CurrentReadout.DataSeqNum = Data.DataSeqNum;
   CurrentReadout.AmpA = Data.AmpA;
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
   CurrentReadout.AmpD = Data.AmpD;
   CurrentReadout.RingId = Section.RingId;
   CurrentReadout.FENId = Section.FENId;
-  CurrentReadout.FPGAId = Data.FPGAId;
   CurrentReadout.TubeId = Data.TubeId;
   DumpFile->push(CurrentReadout);
 }

@@ -49,13 +49,13 @@ struct __attribute__ ((packed)) Readout {
   uint32_t PulseTimeLow {0};
   uint32_t EventTimeHigh {0};
   uint32_t EventTimeLow {0};
+  uint16_t DataSeqNum {0}; // Pulse Height in debug mode
   uint16_t AmpA{0};
   uint16_t AmpB{0};
   uint16_t AmpC{0};
   uint16_t AmpD{0};
   uint8_t RingId;
   uint8_t FENId;
-  uint8_t FPGAId {0};
   uint8_t TubeId {0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
@@ -78,13 +78,13 @@ public:
     H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
     H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
     H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
+    H5_COMPOUND_INSERT_MEMBER(DataSeqNum);
     H5_COMPOUND_INSERT_MEMBER(AmpA);
     H5_COMPOUND_INSERT_MEMBER(AmpB);
     H5_COMPOUND_INSERT_MEMBER(AmpC);
     H5_COMPOUND_INSERT_MEMBER(AmpD);
     H5_COMPOUND_INSERT_MEMBER(RingId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(FPGAId);
     H5_COMPOUND_INSERT_MEMBER(TubeId);
 
     H5_COMPOUND_RETURN;

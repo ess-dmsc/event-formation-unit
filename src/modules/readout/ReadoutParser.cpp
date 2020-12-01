@@ -11,8 +11,8 @@
 #include <common/Trace.h>
 #include <readout/ReadoutParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 const unsigned int MaxUdpDataSize{8972};
 const unsigned int MinDataSize{4 + PAD_SIZE}; // just cookie and version
@@ -63,7 +63,8 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
   }
 
   if (Packet.HeaderPtr->TypeSubType != Type) {
-    XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
+    XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)", 
+           Packet.HeaderPtr->TypeSubType, Type);
     Stats.ErrorTypeSubType++;
     return -ReadoutParser::EHEADER;
   }

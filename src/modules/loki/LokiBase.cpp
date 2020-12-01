@@ -23,8 +23,8 @@
 #include <loki/LokiInstrument.h>
 #include <unistd.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
@@ -200,7 +200,7 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, 0);
       Counters.ErrorBuffer = Loki.ESSReadoutParser.Stats.ErrorBuffer;
       Counters.ErrorSize = Loki.ESSReadoutParser.Stats.ErrorSize;
       Counters.ErrorVersion = Loki.ESSReadoutParser.Stats.ErrorVersion;
@@ -250,8 +250,8 @@ void LokiBase::processingThread() {
         for (auto & Data : Section.Data) {
           auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
 
-          XTRACE(DATA, DEB, "  Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
-            Data.TimeHigh, Data.TimeLow, Data.FPGAId, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+          XTRACE(DATA, DEB, "  Data: time (%u, %u), SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
+            Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
           // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
           // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
