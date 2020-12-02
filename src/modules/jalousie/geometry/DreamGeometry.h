@@ -101,6 +101,18 @@ SumoPixel SumoPixelFromSlicePixel(SlicePixel Slice) {
   return Sumo;
 }
 
+SlicePixel SlicePixelFromSumoPixel(SumoPixel Sumo, uint32_t SectorIdx,
+                                   uint32_t StripIdx) {
+  static const uint8_t SumoStartOffsetX[4] = {0, 20, 36, 48};
+  uint32_t SumoIdx = 6 - Sumo.Sumo; // Sumo6=0, Sumo3=3
+  SlicePixel Slice;
+  Slice.X = Sumo.X + SumoStartOffsetX[SumoIdx];
+  Slice.Y = Sumo.Y;
+  Slice.SectorIdx = SectorIdx;
+  Slice.StripIdx = StripIdx;
+  return Slice;
+}
+
 StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   StripPlanePixel StripPlane;
   uint32_t CassetteCounterIdx = Sumo.Width - Sumo.X - 1;
