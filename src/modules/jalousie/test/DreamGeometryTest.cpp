@@ -660,8 +660,8 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopLeft) {
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopRight) {
   SumoPixel Sumo;
-  Sumo.X = 0;
-  Sumo.Y = 15;
+  Sumo.X = 15;
+  Sumo.Y = 0;
   Sumo.Width = 16;
   Sumo.Sumo = 5;
   uint32_t SectorIdx = 0;
