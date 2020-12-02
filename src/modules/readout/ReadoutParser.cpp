@@ -10,6 +10,7 @@
 #include <cstring>
 #include <common/Trace.h>
 #include <readout/ReadoutParser.h>
+#include <arpa/inet.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
