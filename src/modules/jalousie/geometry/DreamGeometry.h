@@ -123,7 +123,8 @@ StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   return StripPlane;
 }
 
-SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane, uint32_t SumoId, uint32_t SumoWidth) {
+SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane,
+                                       uint32_t SumoId, uint32_t SumoWidth) {
   uint32_t CassetteCounterIdx =
       StripPlane.CassetteIdx * 2 + StripPlane.CounterIdx;
   SumoPixel Sumo;

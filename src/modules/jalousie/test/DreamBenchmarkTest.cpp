@@ -16,12 +16,12 @@ static void DreamDecode(benchmark::State &state) {
     Total += Count;
   });
   state.SetItemsProcessed(Total);
-  state.SetBytesProcessed(Total * (sizeof(EndCapParams) + sizeof(SlicePixel) + sizeof(StripPlanePixel)));
+  state.SetBytesProcessed(Total * (sizeof(EndCapParams) + sizeof(SlicePixel) +
+                                   sizeof(StripPlanePixel)));
 }
 BENCHMARK(DreamDecode);
 
-__attribute__((noinline)) 
-void EndCapParamsFromPixelId_Bulk(uint32_t TheCount) {
+__attribute__((noinline)) void EndCapParamsFromPixelId_Bulk(uint32_t TheCount) {
   for (uint32_t PixelId = 1; PixelId < TheCount; PixelId++) {
     EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
     ::benchmark::ClobberMemory();
@@ -36,7 +36,8 @@ static void DreamDecode_Bulk(benchmark::State &state) {
     Total += Count;
   });
   state.SetItemsProcessed(Total);
-  state.SetBytesProcessed(Total * (sizeof(EndCapParams) + sizeof(SlicePixel) + sizeof(StripPlanePixel)));
+  state.SetBytesProcessed(Total * (sizeof(EndCapParams) + sizeof(SlicePixel) +
+                                   sizeof(StripPlanePixel)));
 }
 BENCHMARK(DreamDecode_Bulk);
 

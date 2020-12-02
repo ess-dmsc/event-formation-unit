@@ -457,8 +457,7 @@ TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_Sector3_BottomLeft) {
 
 //-----------------------------------------------------------------------------
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo6_TopLeft) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo6_TopLeft) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 15;
   StripPlane.CassetteIdx = 9;
@@ -472,8 +471,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 20);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo6_TopRight) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo6_TopRight) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 15;
   StripPlane.CassetteIdx = 0;
@@ -487,8 +485,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 20);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo6_BottomRight) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo6_BottomRight) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 0;
   StripPlane.CassetteIdx = 0;
@@ -502,8 +499,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 20);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo6_BottomLeft) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo6_BottomLeft) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 0;
   StripPlane.CassetteIdx = 9;
@@ -519,8 +515,7 @@ TEST_F(DreamGeometryTest,
 
 //-----------------------------------------------------------------------------
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo3_TopLeft) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo3_TopLeft) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 15;
   StripPlane.CassetteIdx = 3;
@@ -534,8 +529,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 8);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo3_TopRight) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo3_TopRight) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 15;
   StripPlane.CassetteIdx = 0;
@@ -549,8 +543,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 8);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo3_BottomRight) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo3_BottomRight) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 0;
   StripPlane.CassetteIdx = 0;
@@ -564,8 +557,7 @@ TEST_F(DreamGeometryTest,
   ASSERT_EQ(Sumo.Width, 8);
 }
 
-TEST_F(DreamGeometryTest,
-       SumoPixelFromStripPlanePixel_Sumo3_BottomLeft) {
+TEST_F(DreamGeometryTest, SumoPixelFromStripPlanePixel_Sumo3_BottomLeft) {
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = 0;
   StripPlane.CassetteIdx = 3;
@@ -593,7 +585,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_TopLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 0);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_TopRight) {
@@ -608,7 +600,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_TopRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 19);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_BottomRight) {
@@ -623,7 +615,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_BottomRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 19);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_BottomLeft) {
@@ -638,7 +630,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo6_BottomLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 0);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
 
 //-----------------------------------------------------------------------------
@@ -655,7 +647,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 0);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopRight) {
@@ -670,7 +662,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 15);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomRight) {
@@ -685,9 +677,8 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 15);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
-
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomLeft) {
   SumoPixel Sumo;
@@ -701,7 +692,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
 
 //-----------------------------------------------------------------------------
@@ -718,7 +709,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_TopLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 0);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_TopRight) {
@@ -733,7 +724,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_TopRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 11);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_BottomRight) {
@@ -780,7 +771,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_TopLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 12 + 0);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_TopRight) {
@@ -795,7 +786,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_TopRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 12 + 7);
-  ASSERT_EQ(Slice.Y, 0);  
+  ASSERT_EQ(Slice.Y, 0);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomRight) {
@@ -810,7 +801,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomRight) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 12 + 7);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
 
 TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomLeft) {
@@ -825,7 +816,7 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomLeft) {
   ASSERT_EQ(Slice.SectorIdx, 0);
   ASSERT_EQ(Slice.StripIdx, 0);
   ASSERT_EQ(Slice.X, 20 + 16 + 12 + 0);
-  ASSERT_EQ(Slice.Y, 15);  
+  ASSERT_EQ(Slice.Y, 15);
 }
 
 //-----------------------------------------------------------------------------
