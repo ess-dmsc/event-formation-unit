@@ -47,7 +47,7 @@ enum Enum : uint32_t {
   TotalHeight = SliceHeight * 16, /// 16 Strips
   TotalPixels = TotalWidth * TotalHeight
 };
-};
+}
 
 /// \brief this maps pixelid to the SectorStripSlice.
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
