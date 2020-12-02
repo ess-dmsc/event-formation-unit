@@ -673,9 +673,164 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_TopRight) {
   ASSERT_EQ(Slice.Y, 0);  
 }
 
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomRight) {
+  SumoPixel Sumo;
+  Sumo.X = 15;
+  Sumo.Y = 15;
+  Sumo.Width = 16;
+  Sumo.Sumo = 5;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 15);
+  ASSERT_EQ(Slice.Y, 15);  
+}
+
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo5_BottomLeft) {
+  SumoPixel Sumo;
+  Sumo.X = 0;
+  Sumo.Y = 15;
+  Sumo.Width = 16;
+  Sumo.Sumo = 5;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20);
+  ASSERT_EQ(Slice.Y, 15);  
+}
+
 //-----------------------------------------------------------------------------
 
-#if 0
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_TopLeft) {
+  SumoPixel Sumo;
+  Sumo.X = 0;
+  Sumo.Y = 0;
+  Sumo.Width = 12;
+  Sumo.Sumo = 4;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 0);
+  ASSERT_EQ(Slice.Y, 0);  
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_TopRight) {
+  SumoPixel Sumo;
+  Sumo.X = 11;
+  Sumo.Y = 0;
+  Sumo.Width = 12;
+  Sumo.Sumo = 4;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 11);
+  ASSERT_EQ(Slice.Y, 0);  
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_BottomRight) {
+  SumoPixel Sumo;
+  Sumo.X = 11;
+  Sumo.Y = 15;
+  Sumo.Width = 12;
+  Sumo.Sumo = 4;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 11);
+  ASSERT_EQ(Slice.Y, 15);
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo4_BottomLeft) {
+  SumoPixel Sumo;
+  Sumo.X = 0;
+  Sumo.Y = 15;
+  Sumo.Width = 12;
+  Sumo.Sumo = 4;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 0);
+  ASSERT_EQ(Slice.Y, 15);
+}
+
+//-----------------------------------------------------------------------------
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_TopLeft) {
+  SumoPixel Sumo;
+  Sumo.X = 0;
+  Sumo.Y = 0;
+  Sumo.Width = 8;
+  Sumo.Sumo = 3;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 12 + 0);
+  ASSERT_EQ(Slice.Y, 0);  
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_TopRight) {
+  SumoPixel Sumo;
+  Sumo.X = 7;
+  Sumo.Y = 0;
+  Sumo.Width = 8;
+  Sumo.Sumo = 3;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 12 + 7);
+  ASSERT_EQ(Slice.Y, 0);  
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomRight) {
+  SumoPixel Sumo;
+  Sumo.X = 7;
+  Sumo.Y = 15;
+  Sumo.Width = 8;
+  Sumo.Sumo = 3;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 12 + 7);
+  ASSERT_EQ(Slice.Y, 15);  
+}
+
+TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomLeft) {
+  SumoPixel Sumo;
+  Sumo.X = 0;
+  Sumo.Y = 15;
+  Sumo.Width = 8;
+  Sumo.Sumo = 3;
+  uint32_t SectorIdx = 0;
+  uint32_t StripIdx = 0;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+  ASSERT_EQ(Slice.SectorIdx, 0);
+  ASSERT_EQ(Slice.StripIdx, 0);
+  ASSERT_EQ(Slice.X, 20 + 16 + 12 + 0);
+  ASSERT_EQ(Slice.Y, 15);  
+}
+
+//-----------------------------------------------------------------------------
+
+#if 0 // this is disabled due to the lack of primitives needed to build the test
 TEST_F(DreamGeometryTest,
        EndCapParamsFromPixelId_StripLayer3Sector2_BottomLeft) {
   SlicePixel Wanted = {};

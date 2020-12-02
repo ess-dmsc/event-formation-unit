@@ -16,6 +16,7 @@ struct SlicePixel {
   uint32_t Y;
 };
 
+// Origin top-left, X goes right, Y goes down.
 struct SumoPixel {
   uint8_t X;
   uint8_t Y;
