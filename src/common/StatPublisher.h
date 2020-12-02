@@ -53,5 +53,5 @@ private:
   const uint64_t MaxReconnectAttempts{240};
 
   /// \brief delay in us between reconnection attempts
-  const uint64_t ReconnectDelayUS{30 * 1000 * 1000};
+  const uint64_t ReconnectDelayUS{30'000'000};
 };

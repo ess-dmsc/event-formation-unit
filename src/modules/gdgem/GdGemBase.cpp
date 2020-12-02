@@ -21,6 +21,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
 #include <efu/Server.h>
+#include <common/RuntimeStat.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
@@ -429,6 +430,8 @@ void GdGemBase::processingThread() {
   TSCTimer ReportTimer;
   unsigned int DataIndex;
 
+  class RuntimeStat RtStat({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
+
   while (true) {
     if (!InputFifo.pop(DataIndex)) {
       stats_.ProcessingIdle++;
@@ -478,6 +481,8 @@ void GdGemBase::processingThread() {
     // Flush on interval or exit
     if ((not runThreads) || (ReportTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
+
+      RuntimeStat = RtStat.getRuntimeStatus({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
 
       if (not runThreads && NMXOpts.perform_clustering) {
         // flush everything first

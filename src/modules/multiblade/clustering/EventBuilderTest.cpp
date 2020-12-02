@@ -1,7 +1,16 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
+// Copyright (C) 2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for EventBuilder
+///
+//===----------------------------------------------------------------------===//
 
 #include <test/TestBase.h>
 #include <multiblade/clustering/EventBuilder.h>
+
+using namespace Multiblade;
 
 class EventBuilderTest : public TestBase {
 protected:
@@ -9,11 +18,21 @@ protected:
   uint8_t plane_y{1};
   uint16_t hit_adc{4000};
 
-  Multiblade::EventBuilder builder;
+  EventBuilder builder;
 
-  #include "EventBuilderCommon.cpp"
+  #include "../caen/EventBuilderCommon.cpp"
 };
 
+
+TEST_F(EventBuilderTest, ThresholdData) {
+  ASSERT_EQ(builder.Thresholds[0][0], 34);
+  ASSERT_EQ(builder.Thresholds[1][0], 33);
+  ASSERT_EQ(builder.Thresholds[2][0], 137);
+  ASSERT_EQ(builder.Thresholds[3][0], 142);
+  ASSERT_EQ(builder.Thresholds[4][0], 143);
+  ASSERT_EQ(builder.Thresholds[5][0], 31);
+  ASSERT_EQ(builder.Thresholds[0][24], 8034);
+}
 
 // Preparations for Google Benchmark tests
 TEST_F(EventBuilderTest, FirstTest) {
