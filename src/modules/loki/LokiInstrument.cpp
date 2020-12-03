@@ -111,4 +111,62 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData & Section,
   DumpFile->push(CurrentReadout);
 }
 
+
+void LokiInstrument::processReadouts() {
+  // Dont fake pulse time, but could do something like
+  // PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+  uint64_t PulseTime;
+
+  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
+  PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
+  XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
+    PacketHeader->PulseLow, PulseTime);
+  Serializer->pulseTime(PulseTime);
+
+  /// Traverse readouts, calculate pixels
+  for (auto & Section : LokiParser.Result) {
+    XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
+
+    if (Section.RingId >= LokiConfiguration.Panels.size()) {
+      XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
+      counters.MappingErrors++;
+      continue;
+    }
+
+    PanelGeometry & Panel = LokiConfiguration.Panels[Section.RingId];
+
+    if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
+      XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
+      counters.MappingErrors++;
+      continue;
+    }
+
+    for (auto & Data : Section.Data) {
+      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
+
+      XTRACE(DATA, DEB, "  Data: time (%u, %u), SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
+        Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+      // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
+      // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
+      // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
+
+      // Calculate pixelid and apply calibration
+      uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
+
+      if (PixelId == 0) {
+        counters.GeometryErrors++;
+      } else {
+        counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+        counters.Events++;
+      }
+
+      if (DumpFile) {
+        dumpReadoutToFile(Section, Data);
+      }
+
+    }
+  } // for()
+}
+
 } // namespace

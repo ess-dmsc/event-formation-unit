@@ -12,12 +12,10 @@
 #include <common/EFUArgs.h>
 #include <common/Log.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/RingBuffer.h>
 #include <common/RuntimeStat.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
-#include <common/SPSCFifo.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
@@ -182,6 +180,7 @@ void LokiBase::processingThread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
+  Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
   if (EFUSettings.TestImage) {
     return testImageUdder();
@@ -214,6 +213,7 @@ void LokiBase::processingThread() {
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
+        Counters.ErrorHeaders++;
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
@@ -223,60 +223,8 @@ void LokiBase::processingThread() {
       // We have good header information, now parse readout data
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr, Loki.ESSReadoutParser.Packet.DataLength);
 
-      // Dont fake pulse time, but could do something like
-      // PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      uint64_t PulseTime;
-
-      auto PacketHeader = Loki.ESSReadoutParser.Packet.HeaderPtr;
-      PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
-      XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
-        PacketHeader->PulseLow, PulseTime);
-      Serializer->pulseTime(PulseTime);
-
-      /// Traverse readouts, calculate pixels
-      for (auto & Section : Loki.LokiParser.Result) {
-        XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
-
-        if (Section.RingId >= Loki.LokiConfiguration.Panels.size()) {
-          XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
-          Counters.MappingErrors++;
-          continue;
-        }
-
-        PanelGeometry & Panel = Loki.LokiConfiguration.Panels[Section.RingId];
-
-        if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
-          XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
-          Counters.MappingErrors++;
-          continue;
-        }
-
-        for (auto & Data : Section.Data) {
-          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
-
-          XTRACE(DATA, DEB, "  Data: time (%u, %u), SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
-            Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
-          // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
-          // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
-          // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
-
-          // Calculate pixelid and apply calibration
-          uint32_t PixelId = Loki.calcPixel(Panel, Section.FENId, Data);
-
-          if (PixelId == 0) {
-            Counters.GeometryErrors++;
-          } else {
-            Counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
-            Counters.Events++;
-          }
-
-          if (Loki.DumpFile) {
-            Loki.dumpReadoutToFile(Section, Data);
-          }
-
-        }
-      } // for()
+      // Process readouts, generate (end produce) events
+      Loki.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.RxIdle++;
