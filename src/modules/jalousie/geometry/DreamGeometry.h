@@ -7,6 +7,66 @@ struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
 
 // test global pixel to sumo slice mapping
 
+/* clang-format off
+
+DREAM logical pixel layout
+--------------------------
+
+The logical pixel layout of DREAM is parameterized by Sector columns and Strip rows.
+
+            Sector 1  Sector 2  Sector ...
+           +---------+---------+-----
+Strip      |         |         |
+Layer 1    |         |         |
+           |         |         |
+           +---------+---------+-----
+Strip      |         |         |
+Layer 2    |         |         |
+           |         |         |
+           +---------+---------+-----
+Strip      |         |         |
+Layer ...  |         |         |
+           |         |         |
+
+The pair of Sector and Strip is a Sector Slice. It is a rectangle, which contain
+the pixels of four SUMOs.
+
+            Sector Slice
+            width 56
+            struct SlicePixel
+           O===>-------------------------------------------------------------+
+           ║   X                                                             |
+           v Y                                                               |
+           |                                                                 |
+height     |                                                                 |
+16         |                                                                 |
+           |                                                                 |
+           +-----------------------------------------------------------------+
+
+With the SUMOs partitioned as:
+
+            SUMO 6                      SUMO 5             SUMO 4     SUMO 3
+            width 20                    width 16           width 12   width 8
+            struct SumoPixel            struct SumoPixel   struct..   struct..
+           O===>-----------------------O===>--------------O===>------O===>---+
+           ║   X                       ║   X              ║   X      ║   X   |
+           v Y                         v Y                v Y        v Y     |
+           |                           |                  |          |       |
+height     |                           |                  |          |       |
+16         |                         W ^                W ^        W ^     W ^
+           |                           ║                  ║          ║       ║
+           +-----------------------<===X--------------<===X------<===X---<===X
+                                   CC                 CC         CC      CC
+Legend: 
+  Coordinate system O:
+    X: Zero 
+
+  W : WireId
+  CC: Cassette + Counter (WireLayer)
+ 
+ 
+ clang-format on */
+
 /// A Slice refers to a Sector Sumo Slice (SSS), which is a slice of a Sector
 /// along the Strip axis.
 struct SlicePixel {
@@ -83,15 +143,14 @@ SumoPixel SumoPixelFromSlicePixel(SlicePixel Slice) {
     uint8_t SumoId;
   };
   // clang-format off
-  static const SliceToSumoProperty SliceToSumoMap[14] = {
+  static const SliceToSumoProperty SliceToSumoMap[56 / 4] = {
     {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, { 0, 20, 6}, //  0- 4, SlicePixel.X  0-19: Sumo 6, Cols 1-20
     { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 },              //  5- 8, SlicePixel.X 20-35: Sumo 5, Cols 1-16
     { 36, 12, 4 }, { 36, 12, 4 }, { 36, 12, 4 },                             //  9-11, SlicePixel.X 36-47: Sumo 4, Cols 1-12
     { 48,  8, 3 }, { 48,  8, 3 },                                            // 12-13, SlicePixel.X 48-55: Sumo 3, Cols 1-8
   };
   // clang-format on
-  uint32_t XCompact =
-      Slice.X / 4; // Range reduced from 56 to 14 -> fewer constants
+  uint32_t XCompact = Slice.X / 4; // Range reduced -> fewer constants
   SliceToSumoProperty SliceToSumo = SliceToSumoMap[XCompact];
 
   SumoPixel Sumo;
