@@ -55,20 +55,26 @@ With the SUMOs partitioned as:
 height     |                           |                  |          |       |
 16         |                         W ^                W ^        W ^     W ^
            |                           ║                  ║          ║       ║
-           +-----------------------<===X--------------<===X------<===X---<===X
+           +-----------------------<===P--------------<===P------<===P---<===P
                                    CC                 CC         CC      CC
-Legend: 
-  Coordinate system O:
-    X: Zero 
 
-  W : WireId
-  CC: Cassette + Counter (WireLayer)
- 
- 
+Where the two coordinate systems (O, P) are present on each SUMO:
+
+            O: Top-left origin                P: Bottom-Right
+            X, Y follows the                  W (wire), CC (Cassette Counter / WireLayer)
+            Sector Slice space.               Representats the strip plane of a SUMO voxel grid.
+            struct SumoPixel                  struct StripPlanePixel
+           O===>--------------+              +------------------+
+           ║   X              |              |                  |
+           v Y                |              |                  |
+           |                  |              |                  |
+           |                  |              |                  |
+           |                  |              |                W ^
+           |                  |              |                  ║
+           +------------------+              +--------------<===P
+                                                            CC
  clang-format on */
 
-/// A Slice refers to a Sector Sumo Slice (SSS), which is a slice of a Sector
-/// along the Strip axis.
 struct SlicePixel {
   uint32_t SectorIdx;
   uint32_t StripIdx;
@@ -76,7 +82,6 @@ struct SlicePixel {
   uint32_t Y;
 };
 
-// Origin top-left, X goes right, Y goes down.
 struct SumoPixel {
   uint8_t X;
   uint8_t Y;
