@@ -190,7 +190,7 @@ void LokiBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
 
-  class RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -286,7 +286,7 @@ void LokiBase::processingThread() {
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStat = RtStat.getRuntimeStatus({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 

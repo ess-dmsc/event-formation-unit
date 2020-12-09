@@ -134,7 +134,7 @@ void SONDEIDEABase::processing_thread() {
   histfb.set_callback(ProduceHist);
   unsigned int data_index;
 
-  class RuntimeStat RtStat({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
+  RuntimeStat RtStat({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
 
   TSCTimer produce_timer;
   while (1) {
@@ -154,7 +154,7 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
         produce_timer.now();
 
-        RuntimeStat = RtStat.getRuntimeStatus({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
+        RuntimeStatusMask =  RtStat.getRuntimeStatusMask({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
 
         if (!histograms.isEmpty()) {
           XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts",

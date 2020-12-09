@@ -210,7 +210,7 @@ void JalousieBase::processingThread() {
 
   EV42Serializer ev42Serializer(kafka_buffer_size, "jalo", Produce);
 
-  class RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -253,7 +253,7 @@ void JalousieBase::processingThread() {
       force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       produce_timer.now();
 
-      RuntimeStat = RtStat.getRuntimeStatus({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
     }
 
     if (not runThreads) {
