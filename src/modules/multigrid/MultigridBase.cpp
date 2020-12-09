@@ -165,7 +165,7 @@ void MultigridBase::mainThread() {
 
   TSCTimer report_timer;
 
-  class RuntimeStat RtStat({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
+  RuntimeStat RtStat({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
 
   while (true) {
     ssize_t ReadSize{0};
@@ -216,7 +216,7 @@ void MultigridBase::mainThread() {
       Counters.tx_bytes += ev42serializer.produce();
       monitor.produce_now();
 
-      RuntimeStat = RtStat.getRuntimeStatus({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count

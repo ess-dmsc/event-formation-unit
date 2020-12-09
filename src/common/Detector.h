@@ -69,8 +69,8 @@ public:
 
   virtual const char *detectorname() { return DetectorName.c_str(); }
 
-
-  virtual uint32_t runtimestat() { return RuntimeStat; }
+  /// \brief return the current status mask (should be set in pipeline)
+  virtual uint32_t runtimestat() { return RuntimeStatusMask; }
 
   virtual ThreadList &GetThreadInfo() { return Threads; };
 
@@ -106,7 +106,7 @@ protected:
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
   Statistics Stats;
-  uint32_t RuntimeStat{0};
+  uint32_t RuntimeStatusMask{0};
 
 private:
   std::string DetectorName;

@@ -430,7 +430,7 @@ void GdGemBase::processingThread() {
   TSCTimer ReportTimer;
   unsigned int DataIndex;
 
-  class RuntimeStat RtStat({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
+  RuntimeStat RtStat({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
 
   while (true) {
     if (!InputFifo.pop(DataIndex)) {
@@ -482,7 +482,7 @@ void GdGemBase::processingThread() {
     if ((not runThreads) || (ReportTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
 
-      RuntimeStat = RtStat.getRuntimeStatus({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
 
       if (not runThreads && NMXOpts.perform_clustering) {
         // flush everything first

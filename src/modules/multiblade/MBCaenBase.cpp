@@ -264,7 +264,7 @@ void CAENBase::processing_thread() {
   TSCTimer produce_timer;
   Timer h5flushtimer;
   // Monitor these counters
-  class RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (true) {
     if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
@@ -419,7 +419,7 @@ void CAENBase::processing_thread() {
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStat = RtStat.getRuntimeStatus({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += flatbuffer.produce();
 
