@@ -10,6 +10,7 @@
 #include <common/EV42Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
+#include <common/RuntimeStat.h>
 #include <common/Trace.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
@@ -133,6 +134,8 @@ void SONDEIDEABase::processing_thread() {
   histfb.set_callback(ProduceHist);
   unsigned int data_index;
 
+  class RuntimeStat RtStat({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
+
   TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -150,6 +153,8 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_dr_errors = eventprod.stats.dr_errors;
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
         produce_timer.now();
+
+        RuntimeStat = RtStat.getRuntimeStatus({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
 
         if (!histograms.isEmpty()) {
           XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts",
