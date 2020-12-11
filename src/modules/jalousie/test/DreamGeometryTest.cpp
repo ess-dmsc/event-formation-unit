@@ -1,6 +1,11 @@
 #include <test/TestBase.h>
 
+#include <bitset>
+#include <common/Trace.h>
 #include <jalousie/geometry/DreamGeometry.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 class DreamGeometryTest : public TestBase {
 protected:
@@ -821,79 +826,67 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomLeft) {
 
 //-----------------------------------------------------------------------------
 
-#if 0 // this is disabled due to the lack of primitives needed to build the test
-TEST_F(DreamGeometryTest,
-       EndCapParamsFromPixelId_StripLayer3Sector2_BottomLeft) {
-  SlicePixel Wanted = {};
-  Wanted.SectorIdx = 1;
-  Wanted.StripIdx = 2;
-  Wanted.X = 0;
-  Wanted.Y = 15;
-  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
-  ASSERT_EQ(EndCap.Sector, 2);
-  ASSERT_EQ(EndCap.Sumo, 6);
-  ASSERT_EQ(EndCap.Strip, 3);
-  ASSERT_EQ(EndCap.Wire, 1);
-  ASSERT_EQ(EndCap.Cassette, 10);
-  ASSERT_EQ(EndCap.Counter, 2);
-}
+TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
 
-TEST_F(DreamGeometryTest, BigLoop) {
-  uint32_t TestCount = 0;
-  for (uint32_t Sector = 1; Sector <= DreamGeometry::SectorCount; Sector++) {
-    for (uint32_t Strip = 1; Strip <= 16; Strip++) {
-      for (uint32_t Sumo = 3; Sumo <= 6; Sumo++) {
-        uint32_t CassettesPerSumo[6] = {-1, -1, -1, 4, 6, 8, 10};
-        uint32_t AccumulatedSumoOffsetInSlice[6] = {-1, -1, -1, 0, 20, 36, 48};
-        for (uint32_t Cassette = 3; Cassette <= CassettesPerSumo[Sumo];
-             Cassette++) {
-          for (uint32_t Counter = 1; Counter <= 2; Counter++) {
-            for (uint32_t Wire = 1; Wire <= 16; Wire++) {
+  std::bitset<DreamGeometry::TotalPixels + 1>
+      VisitedPixels; // +1 since we start at 1.
 
-              struct EndCapParams {
-                uint32_t Sector;
-                uint32_t Strip;
-                uint32_t Sumo;
-                uint32_t Cassette;
-                uint32_t Counter;
-                uint32_t Wire;
-              };
-              EndCapParams EndCap;
+  uint32_t StripStart = 1;
+  uint32_t StripLast = 16;
+  for (uint32_t Strip = StripStart; Strip <= StripLast; Strip++) {
 
-              struct SlicePixel {
-                uint32_t SectorIdx;
-                uint32_t StripIdx;
-                uint32_t X;
-                uint32_t Y;
-              };
-              SlicePixel Slice;
-              Slice.SectorIdx = Sector - 1;
-              Slice.StripIdx = Strip - 1;
-              uint32_t SumoIdx = Sumo - 3;
-              uint32_t SumoOffset = AccumulatedSumoOffsetInSlice[Sumo];
-              Slice.X = SumoOffset + 
+    uint32_t SectorStart = 1;
+    uint32_t SectorLast = DreamGeometry::SectorCount;
+    for (uint32_t Sector = SectorStart; Sector <= SectorLast; Sector++) {
 
-              uint32_t PixelId = ;
+      uint32_t SumoStart = 3;
+      uint32_t SumoLast = 6;
+      for (uint32_t Sumo = SumoStart; Sumo <= SumoLast; Sumo++) {
+
+        uint32_t WireStart = 1;
+        uint32_t WireLast = 16;
+        for (uint32_t Wire = WireStart; Wire <= WireLast; Wire++) {
+
+          static const uint32_t CassettesPerSumo[7] = {0, 0, 0, 4, 6, 8, 10};
+          uint32_t CassetteStart = 1;
+          uint32_t CassetteLast = CassettesPerSumo[Sumo];
+          for (uint32_t Cassette = CassetteStart; Cassette <= CassetteLast;
+               Cassette++) {
+
+            uint32_t CounterStart = 1;
+            uint32_t CounterLast = 2;
+            for (uint32_t Counter = CounterStart; Counter <= CounterLast;
+                 Counter++) {
+
+              EndCapParams SyntheticEndCap;
+              SyntheticEndCap.Sector = Sector;
+              SyntheticEndCap.Sumo = Sumo;
+              SyntheticEndCap.Strip = Strip;
+              SyntheticEndCap.Wire = Wire;
+              SyntheticEndCap.Cassette = Cassette;
+              SyntheticEndCap.Counter = Counter;
+
+              uint32_t PixelId = PixelIdFromEndCapParams(SyntheticEndCap);
+              EndCapParams DecodedEndCap = EndCapParamsFromPixelId(PixelId);
+
+              // test synthetic endcap and decoded are the same
+              ASSERT_EQ(SyntheticEndCap.Sector, DecodedEndCap.Sector);
+              ASSERT_EQ(SyntheticEndCap.Sumo, DecodedEndCap.Sumo);
+              ASSERT_EQ(SyntheticEndCap.Strip, DecodedEndCap.Strip);
+              ASSERT_EQ(SyntheticEndCap.Wire, DecodedEndCap.Wire);
+              ASSERT_EQ(SyntheticEndCap.Cassette, DecodedEndCap.Cassette);
+              ASSERT_EQ(SyntheticEndCap.Counter, DecodedEndCap.Counter);
+
+              // test we only visit every pixel once
+              ASSERT_EQ(VisitedPixels[PixelId], false);
+              VisitedPixels[PixelId] = true;
             }
           }
         }
       }
     }
   }
-  SlicePixel Wanted = {};
-  Wanted.SectorIdx = 1;
-  Wanted.StripIdx = 2;
-  Wanted.X = 0;
-  Wanted.Y = 15;
-  uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
-  ASSERT_EQ(EndCap.Sector, 2);
-  ASSERT_EQ(EndCap.Sumo, 6);
-  ASSERT_EQ(EndCap.Strip, 3);
-  ASSERT_EQ(EndCap.Wire, 1);
-  ASSERT_EQ(EndCap.Cassette, 10);
-  ASSERT_EQ(EndCap.Counter, 2);
-}
 
-#endif
+  // test we visit all pixels
+  ASSERT_EQ(VisitedPixels.count(), DreamGeometry::TotalPixels);
+}

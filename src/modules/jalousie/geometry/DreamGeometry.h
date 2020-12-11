@@ -1,11 +1,12 @@
 #include <stdint.h>
 
-// This is the main PixelId decoder function
+// This is the main PixelId encoder/decoder functions
+uint32_t PixelIdFromEndCapParams(struct EndCapParams EndCap);
 struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
 
 /// \todo Handle pixel min/max value test?
-
-// test global pixel to sumo slice mapping
+/// \todo Collect all SUMO properties, width, num cassettes, etc, in a few
+/// arrays.
 
 /* clang-format off
 
@@ -75,6 +76,17 @@ Where the two coordinate systems (O, P) are present on each SUMO:
                                                             CC
  clang-format on */
 
+namespace DreamGeometry {
+enum Enum : uint32_t {
+  SliceWidth = 56,  /// Width of the Slice in pixels.
+  SliceHeight = 16, /// Height of the Slice in pixels.
+  SectorCount = 23, /// Sectors, left to right, in the logical coordinates.
+  TotalWidth = SliceWidth * SectorCount,
+  TotalHeight = SliceHeight * 16, /// 16 Strips
+  TotalPixels = TotalWidth * TotalHeight
+};
+}
+
 struct SlicePixel {
   uint32_t SectorIdx;
   uint32_t StripIdx;
@@ -103,17 +115,6 @@ struct EndCapParams {
   uint32_t Cassette;
   uint32_t Counter;
 };
-
-namespace DreamGeometry {
-enum Enum : uint32_t {
-  SliceWidth = 56,  /// Width of the Slice (SSS) in pixels.
-  SliceHeight = 16, /// Height of the Slice (SSS) in pixels.
-  SectorCount = 23, /// Sectors, left to right, in the logical coordinates.
-  TotalWidth = SliceWidth * SectorCount,
-  TotalHeight = SliceHeight * 16, /// 16 Strips
-  TotalPixels = TotalWidth * TotalHeight
-};
-}
 
 /// \brief this maps pixelid to the SectorStripSlice.
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
@@ -213,4 +214,24 @@ EndCapParams EndCapParamsFromPixelId(uint32_t PixelId) {
   EndCap.Counter = StripPlane.CounterIdx + 1;
 
   return EndCap;
+}
+
+uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
+  StripPlanePixel StripPlane;
+  StripPlane.WireIdx = EndCap.Wire - 1;
+  StripPlane.CassetteIdx = EndCap.Cassette - 1;
+  StripPlane.CounterIdx = EndCap.Counter - 1;
+
+  uint32_t SumoId = EndCap.Sumo;
+
+  static const int32_t SumoWidths[7] = {-1, -1, -1, 8, 12, 16, 20};
+  uint32_t SumoWidth = SumoWidths[SumoId];
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+
+  uint32_t SectorIdx = EndCap.Sector - 1;
+  uint32_t StripIdx = EndCap.Strip - 1;
+  SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
+
+  uint32_t PixelId = PixelIdFromSlicePixel(Slice);
+  return PixelId;
 }
