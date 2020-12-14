@@ -87,13 +87,20 @@ enum Enum : uint32_t {
   TotalHeight = SliceHeight * 16, /// 16 Strips
   TotalPixels = TotalWidth * TotalHeight
 };
-}
+
+static const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
+} // namespace DreamGeometry
 
 struct SlicePixel {
   uint32_t SectorIdx;
   uint32_t StripIdx;
   uint32_t X;
   uint32_t Y;
+
+  bool IsValid() const {
+    return SectorIdx < 23 && StripIdx < 16 && X < DreamGeometry::SliceWidth &&
+           Y < DreamGeometry::SliceHeight;
+  }
 };
 
 struct SumoPixel {
@@ -101,6 +108,22 @@ struct SumoPixel {
   uint8_t Y;
   uint8_t Width;
   uint8_t Sumo;
+
+  bool IsValid() const {
+    if (Sumo < 3 || Sumo > 6) {
+      return false;
+    }
+    if (Width != DreamGeometry::SumoWidths[Sumo]) {
+      return false;
+    }
+    if (X >= DreamGeometry::SumoWidths[Sumo]) {
+      return false;
+    }
+    if (Y >= DreamGeometry::SliceHeight) {
+      return false;
+    }
+    return true;
+  }
 };
 
 struct StripPlanePixel {
@@ -227,8 +250,7 @@ uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
 
   uint32_t SumoId = EndCap.Sumo;
 
-  static const int32_t SumoWidths[7] = {-1, -1, -1, 8, 12, 16, 20};
-  uint32_t SumoWidth = SumoWidths[SumoId];
+  uint32_t SumoWidth = DreamGeometry::SumoWidths[SumoId];
   SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
 
   uint32_t SectorIdx = EndCap.Sector - 1;

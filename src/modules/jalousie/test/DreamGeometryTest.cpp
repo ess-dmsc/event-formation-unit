@@ -13,6 +13,33 @@ protected:
   void TearDown() override {}
 };
 
+TEST_F(DreamGeometryTest, SlicePixel_IsValid) {
+  {
+    SlicePixel Slice = {};
+    ASSERT_EQ(Slice.IsValid(), true);
+  }
+  {
+    SlicePixel Slice = {};
+    Slice.SectorIdx = 23;
+    ASSERT_EQ(Slice.IsValid(), false);
+  }
+  {
+    SlicePixel Slice = {};
+    Slice.StripIdx = 16;
+    ASSERT_EQ(Slice.IsValid(), false);
+  }
+  {
+    SlicePixel Slice = {};
+    Slice.X = DreamGeometry::SliceWidth;
+    ASSERT_EQ(Slice.IsValid(), false);
+  }
+  {
+    SlicePixel Slice = {};
+    Slice.Y = DreamGeometry::SliceHeight;
+    ASSERT_EQ(Slice.IsValid(), false);
+  }
+}
+
 TEST_F(DreamGeometryTest, SlicePixelFromPixelId_Pixel1) {
   uint32_t PixelId = 1;
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
@@ -121,6 +148,49 @@ TEST_F(DreamGeometryTest, SlicePixelFromPixelId_BottomMost) {
   ASSERT_EQ(Slice.StripIdx, 15);
   ASSERT_EQ(Slice.X, 15);
   ASSERT_EQ(Slice.Y, 15);
+}
+
+//-----------------------------------------------------------------------------
+
+TEST_F(DreamGeometryTest, SumoPixel_IsValid) {
+  auto MakeSumoPixel = [](uint32_t SumoId) -> SumoPixel {
+    SumoPixel Sumo;
+    Sumo.Sumo = SumoId;
+    Sumo.Width = DreamGeometry::SumoWidths[SumoId];
+    Sumo.X = Sumo.Width - 1;
+    Sumo.Y = 15;
+    return Sumo;
+  };
+  // Sumo 3
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    ASSERT_EQ(Sumo.IsValid(), true);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Sumo = 2;
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Sumo = 7;
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Width = 2;
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Width = 55;
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Width = 55;
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
 }
 
 TEST_F(DreamGeometryTest, SumoPixelFromSlicePixel_TwoFirstAndLast) {
