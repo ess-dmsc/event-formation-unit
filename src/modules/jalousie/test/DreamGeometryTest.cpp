@@ -266,6 +266,48 @@ TEST_F(DreamGeometryTest, SumoPixelFromSlicePixel_TwoFirstAndLast) {
   ASSERT_EQ(SumoPixelFromSlicePixel(MakeSlicePixel(48 + 7)).Sumo, 3);
 }
 
+TEST_F(DreamGeometryTest, StripPlanePixel_IsValid) {
+  auto MakeStripPlanePixel = [](uint32_t SumoId) -> StripPlanePixel {
+    StripPlanePixel StripPlanel;
+    StripPlanel.WireIdx = 15;
+    StripPlanel.CassetteIdx = DreamGeometry::SumoCassetteCount[SumoId] - 1;
+    StripPlanel.CounterIdx = 1;
+    StripPlanel.Sumo = SumoId;
+    return StripPlanel;
+  };
+
+  // Sumo 3
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    ASSERT_EQ(StripPlane.IsValid(), true);
+  }
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    StripPlane.WireIdx = DreamGeometry::SliceHeight;
+    ASSERT_EQ(StripPlane.IsValid(), false);
+  }
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    StripPlane.Sumo = 2;
+    ASSERT_EQ(StripPlane.IsValid(), false);
+  }
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    StripPlane.Sumo = 7;
+    ASSERT_EQ(StripPlane.IsValid(), false);
+  }
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    StripPlane.CounterIdx = 2;
+    ASSERT_EQ(StripPlane.IsValid(), false);
+  }
+  {
+    StripPlanePixel StripPlane = MakeStripPlanePixel(3);
+    StripPlane.CassetteIdx = DreamGeometry::SumoCassetteCount[StripPlane.Sumo];
+    ASSERT_EQ(StripPlane.IsValid(), false);
+  }
+}
+
 //
 // Sumo 6
 //
@@ -941,9 +983,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
         uint32_t WireLast = 16;
         for (uint32_t Wire = WireStart; Wire <= WireLast; Wire++) {
 
-          static const uint32_t CassettesPerSumo[7] = {0, 0, 0, 4, 6, 8, 10};
           uint32_t CassetteStart = 1;
-          uint32_t CassetteLast = CassettesPerSumo[Sumo];
+          uint32_t CassetteLast = DreamGeometry::SumoCassetteCount[Sumo];
           for (uint32_t Cassette = CassetteStart; Cassette <= CassetteLast;
                Cassette++) {
 

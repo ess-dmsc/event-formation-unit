@@ -88,7 +88,9 @@ enum Enum : uint32_t {
   TotalPixels = TotalWidth * TotalHeight
 };
 
+// these map Sumo Id (3..6) to various SUMO properties. 
 static const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
+static const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
 } // namespace DreamGeometry
 
 struct SlicePixel {
@@ -132,7 +134,21 @@ struct StripPlanePixel {
   uint8_t CounterIdx;
   uint8_t Sumo;
 
-  bool IsValid() const { return true; }
+  bool IsValid() const {
+    if (WireIdx >= DreamGeometry::SliceHeight) {
+      return false;
+    }
+    if (Sumo < 3 || Sumo > 6) {
+      return false;
+    }
+    if (CounterIdx > 1) {
+      return false;
+    }
+    if (CassetteIdx >= DreamGeometry::SumoCassetteCount[Sumo]) {
+      return false;
+    }
+    return true;
+  }
 };
 
 struct EndCapParams {
