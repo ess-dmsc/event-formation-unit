@@ -127,9 +127,12 @@ struct SumoPixel {
 };
 
 struct StripPlanePixel {
-  uint32_t WireIdx;
-  uint32_t CassetteIdx;
-  uint32_t CounterIdx;
+  uint8_t WireIdx;
+  uint8_t CassetteIdx;
+  uint8_t CounterIdx;
+  uint8_t Sumo;
+
+  bool IsValid() const { return true; }
 };
 
 struct EndCapParams {
@@ -211,18 +214,18 @@ StripPlanePixel StripPlanePixelFromSumoPixel(SumoPixel Sumo) {
   StripPlane.CassetteIdx = CassetteCounterIdx / 2;
   StripPlane.CounterIdx = CassetteCounterIdx % 2;
   StripPlane.WireIdx = DreamGeometry::SliceHeight - Sumo.Y - 1;
+  StripPlane.Sumo = Sumo.Sumo;
   return StripPlane;
 }
 
-SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane,
-                                       uint32_t SumoId, uint32_t SumoWidth) {
+SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane) {
   uint32_t CassetteCounterIdx =
       StripPlane.CassetteIdx * 2 + StripPlane.CounterIdx;
   SumoPixel Sumo;
-  Sumo.X = SumoWidth - CassetteCounterIdx - 1;
+  Sumo.Sumo = StripPlane.Sumo;
+  Sumo.Width = DreamGeometry::SumoWidths[Sumo.Sumo];
+  Sumo.X = Sumo.Width - CassetteCounterIdx - 1;
   Sumo.Y = DreamGeometry::SliceHeight - StripPlane.WireIdx - 1;
-  Sumo.Width = SumoWidth;
-  Sumo.Sumo = SumoId;
   return Sumo;
 }
 
@@ -247,11 +250,8 @@ uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
   StripPlane.WireIdx = EndCap.Wire - 1;
   StripPlane.CassetteIdx = EndCap.Cassette - 1;
   StripPlane.CounterIdx = EndCap.Counter - 1;
-
-  uint32_t SumoId = EndCap.Sumo;
-
-  uint32_t SumoWidth = DreamGeometry::SumoWidths[SumoId];
-  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane, SumoId, SumoWidth);
+  StripPlane.Sumo = EndCap.Sumo;
+  SumoPixel Sumo = SumoPixelFromStripPlanePixel(StripPlane);
 
   uint32_t SectorIdx = EndCap.Sector - 1;
   uint32_t StripIdx = EndCap.Strip - 1;
