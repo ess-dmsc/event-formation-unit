@@ -890,3 +890,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
   // test we visit all pixels
   ASSERT_EQ(VisitedPixels.count(), DreamGeometry::TotalPixels);
 }
+
+// this tests that test-only asserts assert
+TEST_F(DreamGeometryTest, SlicePixelFromPixelId_TestEnvInput) {
+  ASSERT_DEATH({ SlicePixelFromPixelId(0); }, "Bad PixelId");
+}

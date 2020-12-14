@@ -9,6 +9,11 @@
 /// It's made to ensure correct failure modes in Google Test (compiled in
 /// Debug) and when running large datasets, while cannot run well in
 /// Debug builds.
+///
+/// \brief macro TestEnvAssertMsg() provides an assert when running in unit test
+/// environment or in DEBUG builds. It should only be used to guarantee the
+/// normal error handling for sufficiently during testing.
+///
 //===----------------------------------------------------------------------===//
 #pragma once
 
@@ -27,3 +32,9 @@
 // TODO make the asserts primarity for DEBUG and google test.
 #define RelAssertMsg(exp, msg)                                                 \
   (UNLIKELY(!(exp)) ? HandleAssertFail(#exp, __FILE__, __LINE__, msg) : (void)0)
+
+#if defined(BUILD_IS_TEST_ENVIRONMENT) || !defined(NDEBUG)
+#define TestEnvAssertMsg(exp, msg) RelAssertMsg(exp, msg)
+#else
+#define TestEnvAssertMsg(exp, msg) /**/
+#endif

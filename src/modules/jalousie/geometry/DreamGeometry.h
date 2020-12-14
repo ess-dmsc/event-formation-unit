@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include <common/Assert.h>
+
 // This is the main PixelId encoder/decoder functions
 uint32_t PixelIdFromEndCapParams(struct EndCapParams EndCap);
 struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
@@ -121,6 +123,7 @@ struct EndCapParams {
 /// "reverse"?
 SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
   using namespace DreamGeometry;
+  TestEnvAssertMsg (PixelId > 0 && PixelId < TotalPixels + 1, "Bad PixelId");
   uint32_t PixelIdx = PixelId - 1;
   uint32_t SectorIdx = PixelIdx / SliceWidth;
   uint32_t GlobalY = PixelIdx / TotalWidth;
