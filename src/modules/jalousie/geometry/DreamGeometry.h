@@ -100,8 +100,19 @@ struct SlicePixel {
   uint32_t Y;
 
   bool IsValid() const {
-    return SectorIdx < 23 && StripIdx < 16 && X < DreamGeometry::SliceWidth &&
-           Y < DreamGeometry::SliceHeight;
+    if (SectorIdx >= 23) {
+      return false;
+    }
+    if (StripIdx >= 16) {
+      return false;
+    }
+    if (X >= DreamGeometry::SliceWidth) {
+      return false;
+    }
+    if (Y >= DreamGeometry::SliceHeight) {
+      return false;
+    }
+    return true;
   }
 };
 
@@ -158,6 +169,28 @@ struct EndCapParams {
   uint32_t Wire;
   uint32_t Cassette;
   uint32_t Counter;
+
+  bool IsValid() const {
+    if (Sector < 1 || Sector > 23) {
+      return false;
+    }
+    if (Sumo < 3 || Sumo > 6) {
+      return false;
+    }
+    if (Strip < 1 || Strip > 16) {
+      return false;
+    }
+    if (Wire < 1 || Wire > 16) {
+      return false;
+    }
+    if (Cassette < 1 || Cassette > DreamGeometry::SumoCassetteCount[Sumo]) {
+      return false;
+    }
+    if (Counter < 1 || Counter > 2) {
+      return false;
+    }
+    return true;
+  }
 };
 
 /// \brief this maps pixelid to the SectorStripSlice.

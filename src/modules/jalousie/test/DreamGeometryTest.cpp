@@ -528,6 +528,86 @@ TEST_F(DreamGeometryTest, StripPlanePixelFromSumoPixel_Sumo3_BottomLeft) {
   ASSERT_EQ(StripPlane.Sumo, 3);
 }
 
+//-----------------------------------------------------------------------------
+
+TEST_F(DreamGeometryTest, EndCapParams_IsValid) {
+  auto MakeEndCapParams = [](uint32_t SumoId) -> EndCapParams {
+    EndCapParams EndCap;
+    EndCap.Sector = 23;
+    EndCap.Sumo = SumoId;
+    EndCap.Strip = 16;
+    EndCap.Wire = 16;
+    EndCap.Cassette = DreamGeometry::SumoCassetteCount[SumoId];
+    EndCap.Counter = 1;
+    return EndCap;
+  };
+
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    ASSERT_EQ(EndCap.IsValid(), true);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Sector = 24;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Sector = 0;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Sumo = 2;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Sumo = 7;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Strip = 0;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Strip = 17;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Wire = 0;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Wire = 17;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Cassette = 0;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Cassette = DreamGeometry::SumoCassetteCount[EndCap.Sumo] + 1;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Counter = 0;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+  {
+    EndCapParams EndCap = MakeEndCapParams(3);
+    EndCap.Counter = 3;
+    ASSERT_EQ(EndCap.IsValid(), false);
+  }
+}
+
 TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_Pixel1) {
   uint32_t PixelId = 1;
   EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
