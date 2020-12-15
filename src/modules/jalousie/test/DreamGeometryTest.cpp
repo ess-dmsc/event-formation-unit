@@ -7,6 +7,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+using namespace DreamGeometry;
+
 class DreamGeometryTest : public TestBase {
 protected:
   void SetUp() override {}
@@ -610,7 +612,8 @@ TEST_F(DreamGeometryTest, EndCapParams_IsValid) {
 
 TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_Pixel1) {
   uint32_t PixelId = 1;
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  EndCapParams EndCap;
+  ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, EndCap));
   ASSERT_EQ(EndCap.Sector, 1);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 1);
@@ -628,7 +631,8 @@ TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopLeft) {
   Wanted.X = 0;
   Wanted.Y = 0;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  EndCapParams EndCap;
+  ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, EndCap));
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -644,7 +648,8 @@ TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_StripLayer3Sector2_TopRight) {
   Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 0;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  EndCapParams EndCap;
+  ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, EndCap));
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -661,7 +666,8 @@ TEST_F(DreamGeometryTest,
   Wanted.X = DreamGeometry::SliceWidth - 1;
   Wanted.Y = 15;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  EndCapParams EndCap;
+  ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, EndCap));
   ASSERT_EQ(EndCap.Sector, 2);
   ASSERT_EQ(EndCap.Sumo, 3);
   ASSERT_EQ(EndCap.Strip, 3);
@@ -675,7 +681,8 @@ TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_Sector3_BottomLeft) {
   Wanted.SectorIdx = 2;
   Wanted.Y = 15;
   uint32_t PixelId = PixelIdFromSlicePixel(Wanted);
-  EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+  EndCapParams EndCap;
+  ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, EndCap));
   ASSERT_EQ(EndCap.Sector, 3);
   ASSERT_EQ(EndCap.Sumo, 6);
   ASSERT_EQ(EndCap.Strip, 1);
@@ -1082,7 +1089,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
               SyntheticEndCap.Counter = Counter;
 
               uint32_t PixelId = PixelIdFromEndCapParams(SyntheticEndCap);
-              EndCapParams DecodedEndCap = EndCapParamsFromPixelId(PixelId);
+              EndCapParams DecodedEndCap;
+              ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, DecodedEndCap));
 
               // test synthetic endcap and decoded are the same
               ASSERT_EQ(SyntheticEndCap.Sector, DecodedEndCap.Sector);

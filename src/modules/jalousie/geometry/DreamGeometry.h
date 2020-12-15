@@ -2,6 +2,8 @@
 
 #include <common/Assert.h>
 
+namespace DreamGeometry {
+
 // This is the main PixelId encoder/decoder functions
 uint32_t PixelIdFromEndCapParams(struct EndCapParams EndCap);
 struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
@@ -78,7 +80,6 @@ Where the two coordinate systems (O, P) are present on each SUMO:
                                                             CC
  clang-format on */
 
-namespace DreamGeometry {
 enum Enum : uint32_t {
   SliceWidth = 56,  /// Width of the Slice in pixels.
   SliceHeight = 16, /// Height of the Slice in pixels.
@@ -91,7 +92,6 @@ enum Enum : uint32_t {
 // these map Sumo Id (3..6) to various SUMO properties.
 static const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
 static const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
-} // namespace DreamGeometry
 
 struct SlicePixel {
   uint32_t SectorIdx;
@@ -126,6 +126,16 @@ struct EndCapParams {
   uint32_t Counter;
   bool IsValid() const;
 };
+
+inline bool IsPixelIdValid(uint32_t PixelId) {
+  if (PixelId < 1) {
+    return false;
+  }
+  if (PixelId > TotalPixels) {
+    return false;
+  }
+  return true;
+}
 
 inline bool SlicePixel::IsValid() const {
   if (SectorIdx >= 23) {
@@ -201,7 +211,6 @@ inline bool EndCapParams::IsValid() const {
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
 /// "reverse"?
 SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
-  using namespace DreamGeometry;
   TestEnvAssertMsg(PixelId > 0 && PixelId < TotalPixels + 1, "Bad PixelId");
   uint32_t PixelIdx = PixelId - 1;
   uint32_t SectorIdx = PixelIdx / SliceWidth;
@@ -215,7 +224,6 @@ SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
 }
 
 uint32_t PixelIdFromSlicePixel(SlicePixel Slice) {
-  using namespace DreamGeometry;
   TestEnvAssertMsg(Slice.IsValid(), "Bad SlicePixel");
   uint32_t PixelId = 1 + Slice.X + Slice.SectorIdx * (SliceWidth) +
                      Slice.Y * (SliceWidth * SectorCount) +
@@ -291,20 +299,22 @@ SumoPixel SumoPixelFromStripPlanePixel(StripPlanePixel StripPlane) {
   return Sumo;
 }
 
-EndCapParams EndCapParamsFromPixelId(uint32_t PixelId) {
+bool EndCapParamsFromPixelId(uint32_t PixelId, EndCapParams &OutEndCap) {
+  if (!IsPixelIdValid(PixelId)) {
+    return false;
+  }
   SlicePixel Slice = SlicePixelFromPixelId(PixelId);
   SumoPixel Sumo = SumoPixelFromSlicePixel(Slice);
   StripPlanePixel StripPlane = StripPlanePixelFromSumoPixel(Sumo);
 
-  EndCapParams EndCap;
-  EndCap.Sector = Slice.SectorIdx + 1;
-  EndCap.Sumo = Sumo.Sumo;
-  EndCap.Strip = Slice.StripIdx + 1;
-  EndCap.Wire = StripPlane.WireIdx + 1;
-  EndCap.Cassette = StripPlane.CassetteIdx + 1;
-  EndCap.Counter = StripPlane.CounterIdx + 1;
-  TestEnvAssertMsg(EndCap.IsValid(), "Bad EndCapParams");
-  return EndCap;
+  OutEndCap.Sector = Slice.SectorIdx + 1;
+  OutEndCap.Sumo = Sumo.Sumo;
+  OutEndCap.Strip = Slice.StripIdx + 1;
+  OutEndCap.Wire = StripPlane.WireIdx + 1;
+  OutEndCap.Cassette = StripPlane.CassetteIdx + 1;
+  OutEndCap.Counter = StripPlane.CounterIdx + 1;
+  TestEnvAssertMsg(OutEndCap.IsValid(), "Bad EndCapParams");
+  return true;
 }
 
 uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
@@ -322,3 +332,5 @@ uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
   uint32_t PixelId = PixelIdFromSlicePixel(Slice);
   return PixelId;
 }
+
+} // namespace DreamGeometry

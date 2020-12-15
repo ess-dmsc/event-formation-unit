@@ -9,7 +9,8 @@ static void DreamDecode(benchmark::State &state) {
   uint32_t Total = 0;
   BenchmarkLoop(state, [&] {
     for (uint32_t PixelId = 1; PixelId < Count; PixelId++) {
-      EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+      EndCapParams EndCap;
+      EndCapParamsFromPixelId(PixelId, EndCap);
       ::benchmark::ClobberMemory();
       ::benchmark::DoNotOptimize(EndCap);
     }
@@ -23,7 +24,8 @@ BENCHMARK(DreamDecode);
 
 __attribute__((noinline)) void EndCapParamsFromPixelId_Bulk(uint32_t TheCount) {
   for (uint32_t PixelId = 1; PixelId < TheCount; PixelId++) {
-    EndCapParams EndCap = EndCapParamsFromPixelId(PixelId);
+    EndCapParams EndCap;
+    EndCapParamsFromPixelId(PixelId, EndCap);
     ::benchmark::ClobberMemory();
     ::benchmark::DoNotOptimize(EndCap);
   }
