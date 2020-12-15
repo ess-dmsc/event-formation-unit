@@ -88,7 +88,7 @@ enum Enum : uint32_t {
   TotalPixels = TotalWidth * TotalHeight
 };
 
-// these map Sumo Id (3..6) to various SUMO properties. 
+// these map Sumo Id (3..6) to various SUMO properties.
 static const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
 static const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
 } // namespace DreamGeometry
@@ -98,22 +98,7 @@ struct SlicePixel {
   uint32_t StripIdx;
   uint32_t X;
   uint32_t Y;
-
-  bool IsValid() const {
-    if (SectorIdx >= 23) {
-      return false;
-    }
-    if (StripIdx >= 16) {
-      return false;
-    }
-    if (X >= DreamGeometry::SliceWidth) {
-      return false;
-    }
-    if (Y >= DreamGeometry::SliceHeight) {
-      return false;
-    }
-    return true;
-  }
+  bool IsValid() const;
 };
 
 struct SumoPixel {
@@ -121,22 +106,7 @@ struct SumoPixel {
   uint8_t Y;
   uint8_t Width;
   uint8_t Sumo;
-
-  bool IsValid() const {
-    if (Sumo < 3 || Sumo > 6) {
-      return false;
-    }
-    if (Width != DreamGeometry::SumoWidths[Sumo]) {
-      return false;
-    }
-    if (X >= DreamGeometry::SumoWidths[Sumo]) {
-      return false;
-    }
-    if (Y >= DreamGeometry::SliceHeight) {
-      return false;
-    }
-    return true;
-  }
+  bool IsValid() const;
 };
 
 struct StripPlanePixel {
@@ -144,22 +114,7 @@ struct StripPlanePixel {
   uint8_t CassetteIdx;
   uint8_t CounterIdx;
   uint8_t Sumo;
-
-  bool IsValid() const {
-    if (WireIdx >= DreamGeometry::SliceHeight) {
-      return false;
-    }
-    if (Sumo < 3 || Sumo > 6) {
-      return false;
-    }
-    if (CounterIdx > 1) {
-      return false;
-    }
-    if (CassetteIdx >= DreamGeometry::SumoCassetteCount[Sumo]) {
-      return false;
-    }
-    return true;
-  }
+  bool IsValid() const;
 };
 
 struct EndCapParams {
@@ -169,36 +124,85 @@ struct EndCapParams {
   uint32_t Wire;
   uint32_t Cassette;
   uint32_t Counter;
-
-  bool IsValid() const {
-    if (Sector < 1 || Sector > 23) {
-      return false;
-    }
-    if (Sumo < 3 || Sumo > 6) {
-      return false;
-    }
-    if (Strip < 1 || Strip > 16) {
-      return false;
-    }
-    if (Wire < 1 || Wire > 16) {
-      return false;
-    }
-    if (Cassette < 1 || Cassette > DreamGeometry::SumoCassetteCount[Sumo]) {
-      return false;
-    }
-    if (Counter < 1 || Counter > 2) {
-      return false;
-    }
-    return true;
-  }
+  bool IsValid() const;
 };
+
+inline bool SlicePixel::IsValid() const {
+  if (SectorIdx >= 23) {
+    return false;
+  }
+  if (StripIdx >= 16) {
+    return false;
+  }
+  if (X >= DreamGeometry::SliceWidth) {
+    return false;
+  }
+  if (Y >= DreamGeometry::SliceHeight) {
+    return false;
+  }
+  return true;
+}
+
+inline bool SumoPixel::IsValid() const {
+  if (Sumo < 3 || Sumo > 6) {
+    return false;
+  }
+  if (Width != DreamGeometry::SumoWidths[Sumo]) {
+    return false;
+  }
+  if (X >= DreamGeometry::SumoWidths[Sumo]) {
+    return false;
+  }
+  if (Y >= DreamGeometry::SliceHeight) {
+    return false;
+  }
+  return true;
+}
+
+inline bool StripPlanePixel::IsValid() const {
+  if (WireIdx >= DreamGeometry::SliceHeight) {
+    return false;
+  }
+  if (Sumo < 3 || Sumo > 6) {
+    return false;
+  }
+  if (CounterIdx > 1) {
+    return false;
+  }
+  if (CassetteIdx >= DreamGeometry::SumoCassetteCount[Sumo]) {
+    return false;
+  }
+  return true;
+}
+
+inline bool EndCapParams::IsValid() const {
+  if (Sector < 1 || Sector > 23) {
+    return false;
+  }
+  if (Sumo < 3 || Sumo > 6) {
+    return false;
+  }
+  if (Strip < 1 || Strip > 16) {
+    return false;
+  }
+  if (Wire < 1 || Wire > 16) {
+    return false;
+  }
+  if (Cassette < 1 || Cassette > DreamGeometry::SumoCassetteCount[Sumo]) {
+    return false;
+  }
+  if (Counter < 1 || Counter > 2) {
+    return false;
+  }
+  return true;
+}
 
 /// \brief this maps pixelid to the SectorStripSlice.
 /// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
 /// "reverse"?
 SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
   using namespace DreamGeometry;
-  TestEnvAssertMsg (PixelId > 0 && PixelId < TotalPixels + 1, "Bad PixelId");
+  TestEnvAssertMsg(PixelId > 0 && PixelId < TotalPixels + 1, "Bad PixelId");
   uint32_t PixelIdx = PixelId - 1;
   uint32_t SectorIdx = PixelIdx / SliceWidth;
   uint32_t GlobalY = PixelIdx / TotalWidth;
