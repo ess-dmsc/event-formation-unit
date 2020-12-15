@@ -10,8 +10,8 @@
 ///        The input is checked for validity and true is returned on success.
 ///
 /// \brief EndCapParamsFromPixelId() decodes the EndCap parameters from the
-/// PixelId.
-///        The input is checked for validity and true is returned on success.
+///        PixelId. The input is checked for validity and true is returned on
+///        success.
 ///
 //===----------------------------------------------------------------------===//
 
