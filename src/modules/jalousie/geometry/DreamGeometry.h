@@ -1,18 +1,25 @@
+// Copyright (C) 2020 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Encoder/decoder from PixelId to the physics EndCap parameters for
+///        the DREAM detector.
+///
+/// \brief PixelIdFromEndCapParams() encodes the PixelId from EndCap parameters
+///        The input is checked for validity and true is returned on success.
+///
+/// \brief EndCapParamsFromPixelId() decodes the EndCap parameters from the
+/// PixelId.
+///        The input is checked for validity and true is returned on success.
+///
+//===----------------------------------------------------------------------===//
+
 #include <stdint.h>
 
 #include <common/Assert.h>
 
 namespace DreamGeometry {
-
-/// \todo fancy file header
-
-// This is the main PixelId encoder/decoder functions
-bool EndCapParamsFromPixelId(uint32_t PixelId, struct EndCapParams &OutEndCap);
-bool PixelIdFromEndCapParams(struct EndCapParams EndCap, uint32_t &OutPixelId);
-
-/// \todo Handle pixel min/max value test?
-/// \todo Collect all SUMO properties, width, num cassettes, etc, in a few
-/// arrays.
 
 /* clang-format off
 
