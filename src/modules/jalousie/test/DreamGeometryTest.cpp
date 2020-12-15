@@ -610,6 +610,12 @@ TEST_F(DreamGeometryTest, EndCapParams_IsValid) {
   }
 }
 
+TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_BadPixel) {
+  uint32_t PixelId = 0;
+  EndCapParams EndCap;
+  ASSERT_FALSE(EndCapParamsFromPixelId(PixelId, EndCap));
+}
+
 TEST_F(DreamGeometryTest, EndCapParamsFromPixelId_Pixel1) {
   uint32_t PixelId = 1;
   EndCapParams EndCap;
@@ -1047,6 +1053,13 @@ TEST_F(DreamGeometryTest, SlicePixelFromSumoPixel_Sumo3_BottomLeft) {
   ASSERT_EQ(Slice.Y, 15);
 }
 
+TEST_F(DreamGeometryTest, PixelIdFromEndCapParams_BadEndCap) {
+  EndCapParams EndCap = {};
+  ASSERT_EQ(EndCap.IsValid(), false);
+  uint32_t PixelId;
+  ASSERT_EQ(PixelIdFromEndCapParams(EndCap, PixelId), false);
+}
+
 //-----------------------------------------------------------------------------
 
 TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
@@ -1088,7 +1101,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
               SyntheticEndCap.Cassette = Cassette;
               SyntheticEndCap.Counter = Counter;
 
-              uint32_t PixelId = PixelIdFromEndCapParams(SyntheticEndCap);
+              uint32_t PixelId;
+              ASSERT_TRUE(PixelIdFromEndCapParams(SyntheticEndCap, PixelId));
               EndCapParams DecodedEndCap;
               ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, DecodedEndCap));
 

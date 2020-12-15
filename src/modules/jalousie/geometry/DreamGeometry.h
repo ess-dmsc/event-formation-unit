@@ -4,9 +4,11 @@
 
 namespace DreamGeometry {
 
+/// \todo fancy file header
+
 // This is the main PixelId encoder/decoder functions
-uint32_t PixelIdFromEndCapParams(struct EndCapParams EndCap);
-struct EndCapParams EndCapParamsFromPixelId(uint32_t PixelId);
+bool EndCapParamsFromPixelId(uint32_t PixelId, struct EndCapParams &OutEndCap);
+bool PixelIdFromEndCapParams(struct EndCapParams EndCap, uint32_t &OutPixelId);
 
 /// \todo Handle pixel min/max value test?
 /// \todo Collect all SUMO properties, width, num cassettes, etc, in a few
@@ -317,7 +319,10 @@ bool EndCapParamsFromPixelId(uint32_t PixelId, EndCapParams &OutEndCap) {
   return true;
 }
 
-uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
+bool PixelIdFromEndCapParams(EndCapParams EndCap, uint32_t &OutPixelId) {
+  if (!EndCap.IsValid()) {
+    return false;
+  }
   StripPlanePixel StripPlane;
   StripPlane.WireIdx = EndCap.Wire - 1;
   StripPlane.CassetteIdx = EndCap.Cassette - 1;
@@ -329,8 +334,8 @@ uint32_t PixelIdFromEndCapParams(EndCapParams EndCap) {
   uint32_t StripIdx = EndCap.Strip - 1;
   SlicePixel Slice = SlicePixelFromSumoPixel(Sumo, SectorIdx, StripIdx);
 
-  uint32_t PixelId = PixelIdFromSlicePixel(Slice);
-  return PixelId;
+  OutPixelId = PixelIdFromSlicePixel(Slice);
+  return true;
 }
 
 } // namespace DreamGeometry
