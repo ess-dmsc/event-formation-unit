@@ -16,7 +16,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <stdint.h>
-
 #include <common/Assert.h>
 
 namespace DreamGeometry {
