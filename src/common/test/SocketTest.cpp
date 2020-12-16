@@ -64,18 +64,6 @@ TEST_F(SocketTest, IsMulticast) {
 }
 
 
-TEST_F(SocketTest, InvalidGetSockOpt) {
-  Socket tcpsocket(Socket::SocketType::TCP);
-  // force file descriptor (fd) to be set to -1 by failes send()
-  auto res = tcpsocket.send(nullptr, 0);
-  ASSERT_TRUE(res < 0);
-  // Then ask for buffer sizes for invalid fd
-  int TxBuffer, RxBuffer;
-  tcpsocket.getBufferSizes(TxBuffer, RxBuffer);
-  ASSERT_EQ(TxBuffer, -1);
-  ASSERT_EQ(RxBuffer, -1);
-}
-
 // Create tcp transmitter and send 0 and !=0 number of bytes
 // to localhost port 22 (ssh) which should always be active
 TEST_F(SocketTest, TCPTransmitter) {

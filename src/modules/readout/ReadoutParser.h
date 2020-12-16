@@ -13,15 +13,6 @@
 
 const uint8_t MaxOutputQueues{24};
 
-#define READOUT_EXTRA_PADDING
-#ifdef READOUT_EXTRA_PADDING
-  #define PAD_SIZE 2
-  #define EXTRA_PADDING 0x00, 0x00,
-#else
-  #define PAD_SIZE 0
-  #define EXTRA_PADDING
-#endif
-
 class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
@@ -30,20 +21,27 @@ public:
   uint64_t NextSeqNum[MaxOutputQueues];
 
   // Header common to all ESS readout data
+  // Reviewed ICD (version 2) packet header version 0
+  // ownCloud: https://project.esss.dk/owncloud/index.php/s/DWNer23727TiI1x
   struct PacketHeaderV0 {
-  #ifdef READOUT_EXTRA_PADDING
-    uint16_t Padding;
-  #endif
-    uint32_t CookieVersion;
-    uint8_t TypeSubType;
-    uint8_t OutputQueue;
+    uint8_t Padding0;
+    uint8_t Padding1;
+    uint8_t Padding2;
+    uint8_t Version;
+    uint32_t CookieAndType;
     uint16_t TotalLength;
+    uint8_t OutputQueue;
+    uint8_t TimeSource;
     uint32_t PulseHigh;
     uint32_t PulseLow;
     uint32_t PrevPulseHigh;
     uint32_t PrevPulseLow;
     uint32_t SeqNum;
   } __attribute__((packed));
+
+  static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (32),
+                "Wrong header size (update assert or check packing)");
+
 
   // Holds data relevant for processing of the current packet
   struct {
@@ -53,7 +51,6 @@ public:
   } Packet;
 
   // Header for each data block
-  /// \todo change order to uint16, uint8, uint8
   struct DataHeader {
     uint8_t RingId;
     uint8_t FENId;
@@ -75,11 +72,9 @@ public:
     int64_t ErrorBuffer{0};
     int64_t ErrorSize{0};
     int64_t ErrorVersion{0};
+    int64_t ErrorCookie{0};
     int64_t ErrorTypeSubType{0};
     int64_t ErrorOutputQueue{0};
     int64_t ErrorSeqNum{0};
   } Stats;
 };
-
-static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (28 + PAD_SIZE),
-              "Wrong header size (update assert or check packing)");

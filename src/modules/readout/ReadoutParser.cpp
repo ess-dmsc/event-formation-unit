@@ -14,8 +14,10 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+#define VERSION_OFFSET 3
+
 const unsigned int MaxUdpDataSize{8972};
-const unsigned int MinDataSize{4 + PAD_SIZE}; // just cookie and version
+const unsigned int MinDataSize{7}; // just pad, cookie and version
 
 ReadoutParser::ReadoutParser() {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
@@ -36,15 +38,22 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  uint32_t CookieVer = *(uint32_t *)(Buffer + PAD_SIZE);
-  // 'E', 'S', 'S', 0x00 - cookie + version 0
-  if (CookieVer != 0x00535345) { // 'ESS0' little endian
+  uint32_t Version = *(uint32_t *)(Buffer);
+  if (Version != 0x00) { // '
     Stats.ErrorVersion++;
     return -ReadoutParser::EHEADER;
   }
 
-  // Packet is ESS readout version 0,
-  // now we can add more header size checks
+  // Check cookie
+  uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 4)) & 0xffffff;
+  XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
+  if (SwappedCookie != 0x535345) {
+    XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
+    Stats.ErrorCookie++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  // Packet is ESS readout version 0, now we can add more header size checks
   if (Size < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
     Stats.ErrorSize++;
@@ -62,7 +71,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  if (Packet.HeaderPtr->TypeSubType != Type) {
+  if ((Packet.HeaderPtr->CookieAndType >> 24) != Type) {
     XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
     Stats.ErrorTypeSubType++;
     return -ReadoutParser::EHEADER;

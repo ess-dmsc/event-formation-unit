@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 
+#include <common/RuntimeStat.h>
 #include <common/SPSCFifo.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
@@ -262,6 +263,9 @@ void CAENBase::processing_thread() {
   unsigned int data_index;
   TSCTimer produce_timer;
   Timer h5flushtimer;
+  // Monitor these counters
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+
   while (true) {
     if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = EthernetRingbuffer->getDataLength(data_index);
@@ -340,7 +344,7 @@ void CAENBase::processing_thread() {
       }
 
       builders[cassette].flush();
-      for (const auto &e : builders[cassette].matcher.matched_events) {
+      for (const auto &e : builders[cassette].Events) {
 
         if (!e.both_planes()) {
           XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
@@ -394,7 +398,7 @@ void CAENBase::processing_thread() {
           Counters.Events++;
         }
       }
-
+      builders[cassette].Events.clear(); // else events will accumulate
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
@@ -414,6 +418,8 @@ void CAENBase::processing_thread() {
 
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += flatbuffer.produce();
 

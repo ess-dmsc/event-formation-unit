@@ -15,8 +15,11 @@ print("EFU Stats:")
 print("Connection info. ip address: %s, tcp port: %s" % (args.i, args.p))
 metrics = Metrics(args.i, args.p)
 
+print(metrics._get_efu_command("RUNTIMESTATS"))
+
 print(metrics._get_efu_command("VERSION_GET"))
 print(metrics._get_efu_command("DETECTOR_INFO_GET"))
+
 
 res = metrics._get_efu_command("CMD_GET_COUNT")
 numcmds = int(res.split()[1])

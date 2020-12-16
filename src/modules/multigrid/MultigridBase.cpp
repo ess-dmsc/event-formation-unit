@@ -15,6 +15,7 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
+#include <common/RuntimeStat.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
@@ -163,6 +164,9 @@ void MultigridBase::mainThread() {
   uint8_t buffer[eth_buffer_size];
 
   TSCTimer report_timer;
+
+  RuntimeStat RtStat({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
+
   while (true) {
     ssize_t ReadSize{0};
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
@@ -211,6 +215,8 @@ void MultigridBase::mainThread() {
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       Counters.tx_bytes += ev42serializer.produce();
       monitor.produce_now();
+
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count

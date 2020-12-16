@@ -54,6 +54,6 @@ void createHits(uint32_t numberClusters, uint8_t hitsPerPlane) {
     }
     t -= interCoordTimeGap; // no gap after the last in each plane
 
-    t+= timegap + 1;
+    t+= Multiblade::timegap + 1;
   }
 }

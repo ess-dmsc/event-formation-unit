@@ -53,16 +53,6 @@ create_test_executable(MBConfigTest)
 # Tests relating to event building and benchmarks
 #
 
-# EventBuilderTest.cpp
-set(MBEventBuilderTest_INC
-  ../clustering/EventBuilder.h
-  )
-set(MBEventBuilderTest_SRC
-  ../clustering/EventBuilder.cpp
-  EventBuilderTest.cpp)
-create_test_executable(MBEventBuilderTest)
-
-
 # EventBuilderBenchmarkTest.cpp
 set(MBEventBuilderBenchmarkTest_INC
   ../clustering/EventBuilder.h
