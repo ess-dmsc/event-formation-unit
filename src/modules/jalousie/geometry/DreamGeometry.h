@@ -216,11 +216,8 @@ inline bool EndCapParams::IsValid() const {
   return true;
 }
 
-/// \brief this maps pixelid to the SectorStripSlice.
-/// \todo can this be changed to "masking" by doing PixelIdFromSlicePixel() in
-/// "reverse"?
 SlicePixel SlicePixelFromPixelId(uint32_t PixelId) {
-  TestEnvAssertMsg(PixelId > 0 && PixelId < TotalPixels + 1, "Bad PixelId");
+  TestEnvAssertMsg(IsPixelIdValid(PixelId), "Bad PixelId");
   uint32_t PixelIdx = PixelId - 1;
   uint32_t SectorIdx = PixelIdx / SliceWidth;
   uint32_t GlobalY = PixelIdx / TotalWidth;
