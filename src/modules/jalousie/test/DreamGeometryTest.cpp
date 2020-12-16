@@ -15,6 +15,13 @@ protected:
   void TearDown() override {}
 };
 
+TEST_F(DreamGeometryTest, IsPixelIdValid) {
+  ASSERT_EQ(IsPixelIdValid(1), true);
+  ASSERT_EQ(IsPixelIdValid(DreamGeometry::TotalPixels), true);
+  ASSERT_EQ(IsPixelIdValid(0), false);
+  ASSERT_EQ(IsPixelIdValid(DreamGeometry::TotalPixels + 1), false);
+}
+
 TEST_F(DreamGeometryTest, SlicePixel_IsValid) {
   {
     SlicePixel Slice = {};
@@ -190,7 +197,12 @@ TEST_F(DreamGeometryTest, SumoPixel_IsValid) {
   }
   {
     SumoPixel Sumo = MakeSumoPixel(3);
-    Sumo.Width = 55;
+    Sumo.X = DreamGeometry::SumoWidths[Sumo.Sumo];
+    ASSERT_EQ(Sumo.IsValid(), false);
+  }
+  {
+    SumoPixel Sumo = MakeSumoPixel(3);
+    Sumo.Y = DreamGeometry::SliceHeight;
     ASSERT_EQ(Sumo.IsValid(), false);
   }
 }
