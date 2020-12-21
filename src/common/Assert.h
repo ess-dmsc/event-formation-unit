@@ -11,8 +11,8 @@
 /// Debug builds.
 ///
 /// \brief macro TestEnvAssertMsg() provides an assert when running in unit test
-/// environment or in DEBUG builds. It should only be used to guarantee the
-/// normal error handling for sufficiently during testing.
+/// environment or in DEBUG builds. It should only be used to find invariant
+/// breaking errors during testing, NOT as an error mechanism during production.
 ///
 //===----------------------------------------------------------------------===//
 #pragma once
@@ -20,8 +20,6 @@
 #include <common/Expect.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-
 
 #define HandleAssertFail(exp, file, line, msg)                                 \
   ((void)fprintf(stderr, "%s:%u: failed assertion `%s': \"%s\"\n", file, line, \
