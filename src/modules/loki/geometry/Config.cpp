@@ -33,6 +33,7 @@ Config::Config(std::string ConfigFile) {
         auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
 
         NTubesTotal += TubesZ * TubesN;
+        LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
 
         LOG(INIT, Sev::Info, "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN {}, StrawOffset {}",
           Name, Ring, Vertical, TubesZ, TubesN, StrawOffset);
@@ -43,6 +44,7 @@ Config::Config(std::string ConfigFile) {
 
       Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
       Geometry = new ESSGeometry(Resolution, NTubesTotal * 7, 1, 1);
+      LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
 
     }
     catch (...) {

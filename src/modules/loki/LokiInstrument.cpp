@@ -37,6 +37,7 @@ LokiInstrument::LokiInstrument(struct Counters & counters,
       XTRACE(INIT, ALW, "Using the identity 'calibration'");
       uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
       uint32_t Straws = MaxPixels/LokiConfiguration.Resolution;
+      XTRACE(INIT, ALW, "Inst: Straws: %u, REsolution: %u", Straws, LokiConfiguration.Resolution);
       LokiCalibration.nullCalibration(Straws, LokiConfiguration.Resolution);
     } else {
       XTRACE(INIT, ALW, "Loading calibration file %s",
@@ -80,8 +81,10 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
+  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
 
   uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);
+  XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
 
   uint32_t PixelId = LokiConfiguration.Geometry->pixel2D(CalibratedPos,
     GlobalStraw);
@@ -153,6 +156,7 @@ void LokiInstrument::processReadouts() {
 
       // Calculate pixelid and apply calibration
       uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
+
 
       if (PixelId == 0) {
         counters.GeometryErrors++;
