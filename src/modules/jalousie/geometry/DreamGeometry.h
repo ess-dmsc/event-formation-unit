@@ -15,8 +15,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <stdint.h>
 #include <common/Assert.h>
+#include <stdint.h>
 
 namespace DreamGeometry {
 
@@ -246,14 +246,15 @@ SumoPixel SumoPixelFromSlicePixel(SlicePixel Slice) {
     uint8_t SumoId;
   };
   // clang-format off
-  static const SliceToSumoProperty SliceToSumoMap[56 / 4] = {
+  enum : uint32_t { DuplicationFactor = 4 }; // every 4 data points are the same
+  static const SliceToSumoProperty SliceToSumoMap[SliceWidth / DuplicationFactor] = {
     {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, {  0, 20, 6 }, { 0, 20, 6}, //  0- 4, SlicePixel.X  0-19: Sumo 6, Cols 1-20
     { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 }, { 20, 16, 5 },              //  5- 8, SlicePixel.X 20-35: Sumo 5, Cols 1-16
     { 36, 12, 4 }, { 36, 12, 4 }, { 36, 12, 4 },                             //  9-11, SlicePixel.X 36-47: Sumo 4, Cols 1-12
     { 48,  8, 3 }, { 48,  8, 3 },                                            // 12-13, SlicePixel.X 48-55: Sumo 3, Cols 1-8
   };
   // clang-format on
-  uint32_t XCompact = Slice.X / 4; // Range reduced -> fewer constants
+  uint32_t XCompact = Slice.X / DuplicationFactor;
   SliceToSumoProperty SliceToSumo = SliceToSumoMap[XCompact];
 
   SumoPixel Sumo;

@@ -101,7 +101,7 @@ function(create_test_executable)
   set_property(TARGET ${exec_name} 
     APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT")
   
-    target_link_libraries(${exec_name}
+  target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
     ${CONAN_LIBS_GTEST} efu_common)
