@@ -55,6 +55,12 @@ TEST_F(ReadoutTest, HeaderGTMax) {
   ASSERT_EQ(RdOut.Stats.ErrorSize, 1);
 }
 
+TEST_F(ReadoutTest, ErrorPad) {
+  auto Res = RdOut.validate((char *)&ErrPad[0], ErrPad.size(), DataType);
+  ASSERT_EQ(Res, -ReadoutParser::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorPad, 1);
+}
+
 TEST_F(ReadoutTest, ErrorCookie) {
   auto Res = RdOut.validate((char *)&ErrCookie[0], ErrCookie.size(), DataType);
   ASSERT_EQ(Res, -ReadoutParser::EHEADER);

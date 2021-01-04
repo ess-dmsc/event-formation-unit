@@ -35,6 +35,7 @@ public:
 
 
   uint16_t strawCorrection(uint16_t Straw, uint16_t Pos) {
+    XTRACE(EVENT, DEB, "Straw: %u, Pos: %u", Straw, Pos);
     return StrawMapping[Straw][Pos];
   }
 

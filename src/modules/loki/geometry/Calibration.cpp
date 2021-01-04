@@ -90,12 +90,14 @@ void Calibration::nullCalibration(uint32_t Straws, uint16_t Resolution) {
 
   NumberOfStraws = Straws;
   StrawResolution = Resolution;
+  XTRACE(INIT, INF, "Straws: %d, Resolution: %u", Straws, Resolution);
 
   std::vector<uint16_t> StrawCalib(Resolution);
   for (uint16_t Pos = 0; Pos < Resolution; Pos++) {
     StrawCalib[Pos] = Pos;
   }
   for (uint32_t Straw = 0; Straw < Straws; Straw++) {
+    //XTRACE(INIT, DEB, "Pushing nullcalibration for straw %u", Straw);
     StrawMapping.push_back(StrawCalib);
   }
 

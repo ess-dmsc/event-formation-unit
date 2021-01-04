@@ -10,20 +10,21 @@
 #include <cstring>
 #include <common/Trace.h>
 #include <readout/ReadoutParser.h>
+#include <arpa/inet.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#define VERSION_OFFSET 3
+#define VERSION_OFFSET 1
 
 const unsigned int MaxUdpDataSize{8972};
-const unsigned int MinDataSize{7}; // just pad, cookie and version
+const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 ReadoutParser::ReadoutParser() {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
 }
 
-int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
+int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   std::memset(&Packet, 0, sizeof(Packet));
 
   if (Buffer == nullptr or Size == 0) {
@@ -38,14 +39,21 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  uint32_t Version = *(uint32_t *)(Buffer);
-  if (Version != 0x00) { // '
+  uint32_t Version = htons(*(uint16_t *)(Buffer));
+  if ((Version >> 8) != 0) {
+    XTRACE(PROCESS, WAR, "Padding is wrong (should be 0)");
+    Stats.ErrorPad++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if ((Version & 0xff) != 0x00) { //
+    XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d", Version & 0xff);
     Stats.ErrorVersion++;
     return -ReadoutParser::EHEADER;
   }
 
   // Check cookie
-  uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 4)) & 0xffffff;
+  uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 2)) & 0xffffff;
   XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
@@ -60,7 +68,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  // It is safe to cast packet header v0 strut to data
+  // It is safe to cast packet header v0 struct to data
   Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
   if (Size < Packet.HeaderPtr->TotalLength or
@@ -71,8 +79,10 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  if ((Packet.HeaderPtr->CookieAndType >> 24) != Type) {
-    XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
+  uint8_t Type = Packet.HeaderPtr->CookieAndType >> 24;
+  if ( Type!= ExpectedType) {
+    XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
+           Type, ExpectedType);
     Stats.ErrorTypeSubType++;
     return -ReadoutParser::EHEADER;
   }

@@ -10,17 +10,9 @@
 
 #include <common/Detector.h>
 #include <common/EV42Serializer.h>
-#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
 #include <loki/Counters.h>
-#include <loki/geometry/Config.h>
-#include <loki/geometry/Calibration.h>
-#include <loki/readout/DataParser.h>
-#include <loki/readout/Readout.h>
-#include <readout/ReadoutParser.h>
-#include <readout/ESSTime.h>
-#include <loki/geometry/TubeAmps.h>
 
 namespace Loki {
 
@@ -70,14 +62,7 @@ protected:
 
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
-  //Config LokiConfiguration;
-  //Calibration LokiCalibration;
-  //ReadoutParser ESSReadoutParser;
-  //DataParser LokiParser{Counters};
-  //TubeAmps Amp2Pos;
-  ESSTime Time;
   EV42Serializer * Serializer;
-  //std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 }
