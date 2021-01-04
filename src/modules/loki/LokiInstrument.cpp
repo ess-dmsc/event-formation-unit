@@ -37,7 +37,7 @@ LokiInstrument::LokiInstrument(struct Counters & counters,
       XTRACE(INIT, ALW, "Using the identity 'calibration'");
       uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
       uint32_t Straws = MaxPixels/LokiConfiguration.Resolution;
-      XTRACE(INIT, ALW, "Inst: Straws: %u, REsolution: %u", Straws, LokiConfiguration.Resolution);
+      XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws, LokiConfiguration.Resolution);
       LokiCalibration.nullCalibration(Straws, LokiConfiguration.Resolution);
     } else {
       XTRACE(INIT, ALW, "Loading calibration file %s",
