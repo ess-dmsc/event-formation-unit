@@ -13,6 +13,7 @@
 
 #include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
+#include <string.h>
 
 class LokiPacketGen {
 public:
