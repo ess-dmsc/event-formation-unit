@@ -21,7 +21,6 @@ public:
   // From Davide's readout system
   struct raw_data_t {
     uint32_t cookie;
-    uint32_t header;
     uint32_t tof1;
     uint32_t tof2;
     uint16_t dump;
@@ -32,7 +31,7 @@ public:
     uint16_t c;
     uint16_t d;
   } __attribute__((__packed__));
-  static_assert(sizeof(struct raw_data_t) == 28, "wrong packing");
+  static_assert(sizeof(struct raw_data_t) == 24, "wrong packing");
 
   //
   LokiReader(std::string file);

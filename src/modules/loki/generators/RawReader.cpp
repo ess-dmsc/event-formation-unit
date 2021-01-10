@@ -45,12 +45,14 @@ int LokiReader::readReadout(struct Loki::DataParser::LokiReadout & Readout) {
   raw_data_t rawdata;
 
   int res = read(fd, &rawdata, sizeof(struct raw_data_t));
-  assert(rawdata.cookie == 0xDA71DEAD);
+  assert(rawdata.cookie == 0xDA71DEDA);
 
   if (res != -1) {
     Readout.TimeHigh = rawdata.tof1;
     Readout.TimeHigh = rawdata.tof2;
     Readout.TubeId = rawdata.tube;
+    Readout.unused = 0x00; // Operating Mode eventually
+    Readout.DataSeqNum = 0x0000;
     Readout.AmpA = rawdata.a;
     Readout.AmpB = rawdata.b;
     Readout.AmpC = rawdata.c;

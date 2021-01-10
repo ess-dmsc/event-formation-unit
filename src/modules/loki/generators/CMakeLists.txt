@@ -17,6 +17,7 @@ create_executable(udpgen_loki)
 
 set(udpgen_lokiraw_INC
   RawReader.h
+  LokiPacketGen.h
   ../readout/DataParser.h
   )
 set(udpgen_lokiraw_SRC

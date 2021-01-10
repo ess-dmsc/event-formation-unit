@@ -9,70 +9,50 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/Socket.h>
 #include <CLI/CLI.hpp>
 #include <loki/generators/RawReader.h>
-#include <loki/readout/DataParser.h>
-#include <readout/ReadoutParser.h>
-#include <string.h>
+#include <loki/generators/LokiPacketGen.h>
 
-class LokiPacketGen {
-public:
 
-  LokiPacketGen() {
-    newPacket();
-  }
-
-  void newPacket() {
-    memset(buffer, 0, MaxBytes);
-
-    php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
-    php->CookieAndType = ReadoutParser::Loki4Amp << 24;
-    php->CookieAndType += 0x535345;
-    php->SeqNum = SeqNum++;
-    Readouts = 0;
-  }
-
-  void setLength(uint16_t Length) {php->TotalLength = Length; }
-
-  uint16_t addReadout(struct Loki::DataParser::LokiReadout & rdout)  {
-    uint16_t HeaderSize = sizeof(struct ReadoutParser::PacketHeaderV0);
-    uint16_t DataSize = (uint16_t)sizeof(struct Loki::DataParser::LokiReadout);
-
-    char * dptr = buffer + HeaderSize + Readouts * DataSize;
-    memcpy(dptr, &rdout, DataSize);
-    Readouts++;
-    return HeaderSize + DataSize * Readouts;
-  }
-
-  uint32_t getSeqNum() { return SeqNum; }
-
-private:
-  static const int MaxBytes{9000};
-  char buffer[MaxBytes];
-  struct ReadoutParser::PacketHeaderV0 * php;
-  uint32_t SeqNum{0};
-  uint16_t Readouts{0};
-};
+struct {
+  std::string FileName;
+  std::string IpAddress{"127.0.0.1"};
+  uint16_t UDPPort{9000};
+  uint32_t TxPackets{0xFFFFFFFF};
+  uint32_t KernelTxBufferSize{1000000};
+} Config;
 
 
 CLI::App app{"Raw LoKI .dat file to UDP data generator"};
 
-int main(int argc, char * argv[]) {
-  std::string FileName;
 
-  app.add_option("-f, --file", FileName, "File");
+int main(int argc, char * argv[]) {
+
+  app.add_option("-a, --packets", Config.TxPackets, "Packets to send");
+  app.add_option("-f, --file", Config.FileName, "Raw LokI (.dat) file");
   CLI11_PARSE(app, argc, argv);
 
-  struct Loki::DataParser::LokiReadout Readout;
-  LokiReader reader(FileName);
+
+  LokiReader reader(Config.FileName);
   LokiPacketGen gen;
+  Socket::Endpoint local("0.0.0.0", 0);
+  Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
 
-  reader.skip(4); // Ignore first 4 bytes
+  UDPTransmitter DataSource(local, remote);
+  DataSource.setBufferSizes(Config.KernelTxBufferSize, 0);
+  DataSource.printBufferSizes();
 
+  struct Loki::DataParser::LokiReadout Readout;
+  uint64_t SentPackets = 0;
   int res;
-  while ((res = reader.readReadout(Readout)) > 0) {
-    int size = gen.addReadout(Readout);
+  //reader.skip(4); // Ignore first 4 bytes
+  while (((res = reader.readReadout(Readout)) > 0) and (SentPackets < Config.TxPackets)) {
+    int size = gen.addReadout(Readout, 0, 1); // Ring 0, FEN 1
     if (size > 8800) {
+      gen.setLength(size);
+      DataSource.send(gen.getBuffer(), size);
+      SentPackets++;
       gen.newPacket();
     }
   }
