@@ -227,7 +227,7 @@ void LokiBase::processingThread() {
       Loki.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
-      Counters.RxIdle++;
+      Counters.ProcessingIdle++;
       usleep(10);
     }
 

@@ -12,8 +12,8 @@
 #include <common/TimeString.h>
 #include <loki/LokiInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 

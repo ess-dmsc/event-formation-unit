@@ -21,6 +21,7 @@
 namespace Loki {
 class Calibration {
 public:
+
   Calibration();
 
   /// \brief Create pixelmappings from calibration file
@@ -34,16 +35,26 @@ public:
   uint32_t getMaxPixel() { return MaxPixelId; }
 
 
-  uint16_t strawCorrection(uint16_t Straw, uint16_t Pos) {
-    XTRACE(EVENT, DEB, "Straw: %u, Pos: %u", Straw, Pos);
-    return StrawMapping[Straw][Pos];
+  uint32_t strawCorrection(uint32_t strawId, uint16_t Pos) {
+    double pos = (double)Pos;
+    double a = StrawCalibration[strawId][0];
+    double b = StrawCalibration[strawId][1];
+    double c = StrawCalibration[strawId][2];
+    double d = StrawCalibration[strawId][3];
+    //printf("pos: %g, correction %g\n", pos, -(a + b * pos + c * pos*pos + d * pos*pos*pos));
+    double res = pos - (a + b * pos + c * pos*pos + d * pos*pos*pos);
+    if (res < 0)
+      res = 0;
+    if (res > StrawResolution)
+      res = StrawResolution;
+    return (uint32_t)res;
   }
 
-  /// \brief the new scheme to be implemented
-  std::vector<std::vector<uint16_t>> StrawMapping;
+
+  /// \brief vector of (vector of) four
+  std::vector<std::vector<double>> StrawCalibration;
 
 private:
-  void addCalibrationEntry(uint32_t Straw, std::vector<float> Polynomial);
 
   uint32_t NumberOfStraws{0}; ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
