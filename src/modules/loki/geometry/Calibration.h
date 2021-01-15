@@ -35,18 +35,23 @@ public:
   uint32_t getMaxPixel() { return MaxPixelId; }
 
 
-  uint32_t strawCorrection(uint32_t strawId, uint16_t Pos) {
-    double pos = (double)Pos;
+  uint32_t strawCorrection(uint32_t strawId, double pos) {
     double a = StrawCalibration[strawId][0];
     double b = StrawCalibration[strawId][1];
     double c = StrawCalibration[strawId][2];
     double d = StrawCalibration[strawId][3];
-    //printf("pos: %g, correction %g\n", pos, -(a + b * pos + c * pos*pos + d * pos*pos*pos));
+    XTRACE(EVENT, DEB, "pos: %g, correction %g"
+           , pos
+           , -(a + b * pos + c * pos*pos + d * pos*pos*pos));
     double res = pos - (a + b * pos + c * pos*pos + d * pos*pos*pos);
-    if (res < 0)
+    if (res < 0) {
+      ClampLow++;
       res = 0;
-    if (res > StrawResolution)
+    }
+    if (res > StrawResolution) {
+      ClampHigh++;
       res = StrawResolution;
+    }
     return (uint32_t)res;
   }
 
@@ -55,9 +60,10 @@ public:
   std::vector<std::vector<double>> StrawCalibration;
 
 private:
-
   uint32_t NumberOfStraws{0}; ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0}; ///< The maximum pixelid in the map
+  uint64_t ClampLow{0};
+  uint64_t ClampHigh{0};
 };
 } // namespace

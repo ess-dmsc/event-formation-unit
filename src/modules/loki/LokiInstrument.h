@@ -35,6 +35,8 @@ public:
   LokiInstrument(Counters & counters, LokiSettings & moduleSettings);
 
 
+  ~LokiInstrument();
+
   //
   void processReadouts();
 
@@ -62,6 +64,7 @@ public:
   ESSTime Time;
   EV42Serializer * Serializer;
   std::shared_ptr<ReadoutFile> DumpFile;
+  // uint32_t StrawHist[200]; ///< \todo debug - remove eventually
 };
 
 } // namespace

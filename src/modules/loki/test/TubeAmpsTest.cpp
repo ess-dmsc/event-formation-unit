@@ -18,7 +18,7 @@ TEST_F(TubeAmpsTest, Constructor) {
   TubeAmps tube;
   tube.setResolution(512);
   ASSERT_EQ(tube.StrawId, 7); // valid: 0 - 6
-  ASSERT_EQ(tube.PosId, 512); // valid: 0 - 511
+  ASSERT_EQ(tube.PosVal, 512); // valid: 0 - 511
 }
 
 TEST_F(TubeAmpsTest, AllZeroes) {
@@ -26,7 +26,7 @@ TEST_F(TubeAmpsTest, AllZeroes) {
   tube.setResolution(512);
   tube.calcPositions(0,0,0,0);
   ASSERT_EQ(tube.StrawId, 7); // valid: 0 - 6
-  ASSERT_EQ(tube.PosId, 512); // valid: 0 - 511
+  ASSERT_EQ(tube.PosVal, 512); // valid: 0 - 511
   ASSERT_EQ(tube.Stats.AmplitudeZero, 1);
 }
 
@@ -76,14 +76,14 @@ TEST_F(TubeAmpsTest, MinMaxPos) {
   tube.setResolution(512);
   for (unsigned int i = 1; i < 4095; i++) {
     tube.calcPositions(0,0,i,0);
-    ASSERT_EQ(tube.PosId, 0);
+    ASSERT_EQ(tube.PosVal, 0);
     tube.calcPositions(0,0,0,i);
-    ASSERT_EQ(tube.PosId, 0);
+    ASSERT_EQ(tube.PosVal, 0);
     tube.calcPositions(0,0,i,i);
-    ASSERT_EQ(tube.PosId, 0);
+    ASSERT_EQ(tube.PosVal, 0);
 
     tube.calcPositions(i,i,0,0);
-    ASSERT_EQ(tube.PosId, 511);
+    ASSERT_EQ(tube.PosVal, 511);
   }
 }
 

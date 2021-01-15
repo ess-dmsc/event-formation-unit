@@ -39,12 +39,12 @@ public:
     if (Denominator == 0) {
       Stats.AmplitudeZero++;
       StrawId = NStraws;
-      PosId = NPos;
+      PosVal = NPos;
       return false;
     }
     double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
     StrawId = strawCalc(dStrawId);
-    PosId = ((NPos - 1) * PosNum) / Denominator;
+    PosVal = ((NPos - 1) * PosNum * 1.0) / Denominator;
     XTRACE(INIT, DEB, "dStraw %f, StrawId %u, PosId: %u", dStrawId, StrawId);
     return true;
   }
@@ -84,7 +84,7 @@ public:
   /// holds latest calculated values for straw and position
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
-  std::uint16_t PosId{512};
+  double PosVal{512.0};
 };
 
 } // nmaespace Loki
