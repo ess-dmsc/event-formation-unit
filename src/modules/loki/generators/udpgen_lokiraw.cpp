@@ -69,6 +69,6 @@ int main(int argc, char * argv[]) {
   gen.setLength(size);
   DataSource.send(gen.getBuffer(), size);
   SentPackets++;
-  printf("Sent %llu packets with %llu readouts\n", SentPackets, SentReadouts);
+  printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
 }
