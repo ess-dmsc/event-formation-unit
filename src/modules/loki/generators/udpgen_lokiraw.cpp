@@ -49,7 +49,8 @@ int main(int argc, char * argv[]) {
   struct Loki::DataParser::LokiReadout Readout;
   uint64_t SentPackets = 0;
   uint64_t SentReadouts = 0;
-  int res, size;
+  int res;
+  int size{0};
   //reader.skip(4); // Ignore first 4 bytes
   while (((res = reader.readReadout(Readout)) > 0) and
          (SentPackets < Config.TxPackets) and
