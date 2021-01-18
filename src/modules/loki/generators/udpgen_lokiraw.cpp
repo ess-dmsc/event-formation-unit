@@ -14,6 +14,7 @@
 #include <loki/generators/RawReader.h>
 #include <loki/generators/LokiPacketGen.h>
 
+// GCOVR_EXCL_START
 
 struct {
   std::string FileName;
@@ -78,3 +79,5 @@ int main(int argc, char * argv[]) {
   printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
 }
+
+// GCOVR_EXCL_STOP

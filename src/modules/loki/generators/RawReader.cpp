@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <unistd.h>
 
+// GCOVR_EXCL_START
 
 LokiReader::LokiReader(std::string file) : filename(file) {
   fd = open(filename.c_str(), 'r');
@@ -60,3 +61,5 @@ int LokiReader::readReadout(struct Loki::DataParser::LokiReadout & Readout) {
   }
   return res;
 }
+
+// GCOVR_EXCL_STOP

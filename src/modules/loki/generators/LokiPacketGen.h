@@ -15,6 +15,8 @@
 #include <readout/ReadoutParser.h>
 #include <string.h>
 
+// GCOVR_EXCL_START
+
 class LokiPacketGen {
 public:
 
@@ -65,3 +67,5 @@ private:
   uint16_t HeaderSize = sizeof(struct ReadoutParser::PacketHeaderV0);
   uint16_t DataSize = (uint16_t)sizeof(struct Loki::DataParser::LokiReadout);
 };
+
+// GCOVR_EXCL_STOP
