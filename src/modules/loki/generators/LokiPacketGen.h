@@ -22,6 +22,13 @@ public:
     newPacket();
   }
 
+  // Keep data (for retransmissions - speed)
+  void nextSeqNo() {
+    php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
+    php->SeqNum = SeqNum++;
+  }
+
+  //
   void newPacket() {
     memset(buffer, 0, MaxBytes);
 

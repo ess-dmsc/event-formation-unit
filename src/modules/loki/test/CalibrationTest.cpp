@@ -141,6 +141,25 @@ TEST_F(CalibrationTest, NullCalibrationGood) {
   }
 }
 
+
+// Test clamping to 0 and max by manipulating polynomial coefficients
+TEST_F(CalibrationTest, ClampLowAndHigh) {
+  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
+  Calibration calib = Calibration(StrawMappingNullFile);
+
+  calib.StrawCalibration[0][0] = 100.0; // a = 100
+  uint32_t res = calib.strawCorrection(0, 5.0);
+  ASSERT_EQ(calib.Stats.ClampLow, 1);
+  ASSERT_EQ(res, 0);
+
+  calib.StrawCalibration[0][0] = -2000;
+  res = calib.strawCorrection(0, 5.0);
+  ASSERT_EQ(calib.Stats.ClampHigh, 1);
+  ASSERT_EQ(res, 255);
+
+  deleteFile(StrawMappingNullFile);
+}
+
 TEST_F(CalibrationTest, LoadCalib) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);

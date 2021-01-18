@@ -5,6 +5,8 @@
 ///
 /// \brief Get tube calibrations from json file
 ///
+/// Calibration method is described in the LoKI ICD which can be found here
+/// https://confluence.esss.lu.se/display/ECDC/Instrument+Status+Overview
 //===----------------------------------------------------------------------===//
 
 
@@ -24,46 +26,53 @@ public:
 
   Calibration();
 
-  /// \brief Create pixelmappings from calibration file
-  /// reads a vector of uint32_t and updated the number of pixels
+  /// \brief populate the strawcalibration vector with the provided
+  /// polynomial coefficients
   Calibration(std::string CalibrationFile);
 
-  /// /brief Create a null 'Calibration' no pixel mapping is done
+  /// \brief Create a null 'Calibration' no pixel mapping is done
   void nullCalibration(uint32_t Straws, uint16_t Resolution);
 
   /// \brief return the maximum pixel id
   uint32_t getMaxPixel() { return MaxPixelId; }
 
 
-  uint32_t strawCorrection(uint32_t strawId, double pos) {
-    double a = StrawCalibration[strawId][0];
-    double b = StrawCalibration[strawId][1];
-    double c = StrawCalibration[strawId][2];
-    double d = StrawCalibration[strawId][3];
-    XTRACE(EVENT, DEB, "pos: %g, correction %g"
-           , pos
-           , -(a + b * pos + c * pos*pos + d * pos*pos*pos));
-    double res = pos - (a + b * pos + c * pos*pos + d * pos*pos*pos);
-    if (res < 0) {
-      ClampLow++;
-      res = 0;
+  /// \brief apply the position correction
+  uint32_t strawCorrection(uint32_t StrawId, double Pos) {
+    double a = StrawCalibration[StrawId][0];
+    double b = StrawCalibration[StrawId][1];
+    double c = StrawCalibration[StrawId][2];
+    double d = StrawCalibration[StrawId][3];
+
+    double Delta = a + Pos * (b + Pos *(c + d * Pos));
+
+    XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g" , StrawId, Pos , Delta);
+    double CorrectedPos = Pos - Delta;
+
+    if (CorrectedPos < 0) {
+      Stats.ClampLow++;
+      CorrectedPos = 0;
     }
-    if (res > StrawResolution) {
-      ClampHigh++;
-      res = StrawResolution;
+    if (CorrectedPos > StrawResolution) {
+      Stats.ClampHigh++;
+      CorrectedPos = StrawResolution - 1;
     }
-    return (uint32_t)res;
+    return (uint32_t)CorrectedPos;
   }
 
 
-  /// \brief vector of (vector of) four
+  /// \brief vector of (vector of) polynomial coefficients
   std::vector<std::vector<double>> StrawCalibration;
+
+  struct {
+    uint64_t ClampLow{0};
+    uint64_t ClampHigh{0};
+  } Stats;
 
 private:
   uint32_t NumberOfStraws{0}; ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0}; ///< The maximum pixelid in the map
-  uint64_t ClampLow{0};
-  uint64_t ClampHigh{0};
+
 };
 } // namespace

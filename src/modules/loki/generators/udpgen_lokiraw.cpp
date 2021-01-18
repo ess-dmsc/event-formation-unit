@@ -20,6 +20,7 @@ struct {
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint32_t TxUSleep{1000};
+  uint32_t TxMultiplicity{1};
   uint32_t TxPackets{0xFFFFFFFF};
   uint32_t TxReadouts{0xFFFFFFFF};
   uint32_t KernelTxBufferSize{1000000};
@@ -31,8 +32,9 @@ CLI::App app{"Raw LoKI .dat file to UDP data generator"};
 
 int main(int argc, char * argv[]) {
   app.add_option("-a, --packets", Config.TxPackets, "Packets to send");
-  app.add_option("-r, --readouts", Config.TxReadouts, "Readouts to send");
+  app.add_option("-m, --multiplicity", Config.TxMultiplicity, "Repeat packet m times");
   app.add_option("-f, --file", Config.FileName, "Raw LokI (.dat) file");
+  app.add_option("-r, --readouts", Config.TxReadouts, "Readouts to send");
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
   CLI11_PARSE(app, argc, argv);
 
@@ -59,11 +61,14 @@ int main(int argc, char * argv[]) {
     SentReadouts++;
     if (size > 8800) {
       gen.setLength(size);
-      DataSource.send(gen.getBuffer(), size);
+      for (unsigned int i = 0; i < Config.TxMultiplicity; i++) {
+        DataSource.send(gen.getBuffer(), size);
+        SentPackets++;
+        gen.nextSeqNo();
+      }
       if (Config.TxUSleep != 0) {
         usleep(Config.TxUSleep);
       }
-      SentPackets++;
       gen.newPacket();
     }
   }
