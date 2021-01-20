@@ -45,21 +45,21 @@ Calibration::Calibration(std::string CalibrationFile) {
     uint32_t ExpectedStraw{0}; // to check that straws are in ascending order
 
     for (auto & e : Pols) {
-      if (e["c"].size() != 5) {
-        throw std::runtime_error("Invalid polynomial coefficients");
+      if (e.size() != 5) {
+        throw std::runtime_error("Wrong number of coefficients");
       }
 
-      uint16_t Straw = e["c"][0].get<uint16_t>();
+      uint16_t Straw = e[0].get<uint16_t>();
       XTRACE(INIT, DEB, "Straw: %u", Straw);
 
       if (Straw != ExpectedStraw) {
         throw std::runtime_error("Unexpected straw id");
       }
 
-      double a = e["c"][1].get<double>();
-      double b = e["c"][2].get<double>();
-      double c = e["c"][3].get<double>();
-      double d = e["c"][4].get<double>();
+      double a = e[1].get<double>();
+      double b = e[2].get<double>();
+      double c = e[3].get<double>();
+      double d = e[4].get<double>();
       std::vector<double> cal{a, b, c, d};
       XTRACE(INIT, DEB, "Calibration entry - Straw %d: %g %g %g %g",
         Straw, a, b, c, d);
@@ -88,7 +88,6 @@ void Calibration::nullCalibration(uint32_t Straws, uint16_t Resolution) {
   std::vector<double> StrawCalib{0, 0, 0, 0};
 
   for (uint32_t Straw = 0; Straw < Straws; Straw++) {
-    //XTRACE(INIT, DEB, "Pushing nullcalibration for straw %u", Straw);
     StrawCalibration.push_back(StrawCalib);
   }
 
