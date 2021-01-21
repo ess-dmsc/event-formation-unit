@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <unistd.h>
+#include <string>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {

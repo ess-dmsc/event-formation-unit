@@ -20,28 +20,6 @@ namespace Loki {
 Calibration::Calibration() {}
 
 
-// For each polynomial provided (straws in ascending order) generate a
-// calibration vector and push it to the StrawMapping vector
-void Calibration::addCalibrationEntry(uint32_t Straw, std::vector<float> Polynomial) {
-  float a = Polynomial[0];
-  float b = Polynomial[1];
-  float c = Polynomial[2];
-  float d = Polynomial[3];
-  std::vector<uint16_t> Calib;
-  Calib.reserve(StrawResolution);
-
-  for (uint16_t x = 0; x < StrawResolution; x++) {
-    uint16_t newx = a * x * x * x + b * x * x + c * x + d;
-    if (newx >= StrawResolution) {
-      throw std::runtime_error("Invalid calibration polynomial (exceeds StrawResolution)");
-    }
-    Calib.push_back(newx);
-  }
-  StrawMapping.push_back(Calib);
-  XTRACE(INIT, DEB, "Straw %d - pos 0 -> %d, %d -> %d\n",
-          Straw, Calib[0], StrawResolution - 1, Calib[StrawResolution - 1]);
-}
-
 /// loads calibration from file
 Calibration::Calibration(std::string CalibrationFile) {
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
@@ -49,28 +27,43 @@ Calibration::Calibration(std::string CalibrationFile) {
   nlohmann::json root = from_json_file(CalibrationFile);
   try {
     auto LokiCalibration = root["LokiCalibration"];
-    NumberOfStraws = LokiCalibration["straws"].get<uint32_t>();
+
+    uint32_t NTubes = LokiCalibration["ntubes"].get<uint32_t>();
+    uint32_t NStraws = LokiCalibration["nstraws"].get<uint32_t>();
+
+    NumberOfStraws = NTubes * NStraws;
     StrawResolution = LokiCalibration["resolution"].get<uint16_t>();
 
-    auto Cals = LokiCalibration["polynomials"];
-    if (Cals.size() != NumberOfStraws) {
+    auto Pols = LokiCalibration["polynomials"];
+    if (Pols.size() != NumberOfStraws) {
       throw std::runtime_error("Straw number mismatch in calibration file");
     }
 
+    XTRACE(INIT, DEB, "ntubes %u, nstraws %u, tot straws %u",
+        NTubes, NStraws, NumberOfStraws);
+
     uint32_t ExpectedStraw{0}; // to check that straws are in ascending order
-    for (auto & cal : Cals) {
-      auto Straw = cal["straw"].get<uint32_t>();
+
+    for (auto & e : Pols) {
+      if (e.size() != 5) {
+        throw std::runtime_error("Wrong number of coefficients");
+      }
+
+      uint16_t Straw = e[0].get<uint16_t>();
+      XTRACE(INIT, DEB, "Straw: %u", Straw);
+
       if (Straw != ExpectedStraw) {
         throw std::runtime_error("Unexpected straw id");
       }
-      auto Poly = cal["poly"].get<std::vector<float>>();
-      if (Poly.size() != 4) {
-        throw std::runtime_error("Invalid number of polynomial coefficients");
-      }
 
-      XTRACE(INIT, DEB, "Calibration entry - Straw %d: %f %f %f %f",
-             Straw, Poly[0], Poly[1], Poly[2], Poly[3]);
-      addCalibrationEntry(Straw, Poly);
+      double a = e[1].get<double>();
+      double b = e[2].get<double>();
+      double c = e[3].get<double>();
+      double d = e[4].get<double>();
+      std::vector<double> cal{a, b, c, d};
+      XTRACE(INIT, DEB, "Calibration entry - Straw %d: %g %g %g %g",
+        Straw, a, b, c, d);
+      StrawCalibration.push_back(cal);
       ExpectedStraw++;
     }
     MaxPixelId = NumberOfStraws * StrawResolution;
@@ -92,15 +85,34 @@ void Calibration::nullCalibration(uint32_t Straws, uint16_t Resolution) {
   StrawResolution = Resolution;
   XTRACE(INIT, INF, "Straws: %d, Resolution: %u", Straws, Resolution);
 
-  std::vector<uint16_t> StrawCalib(Resolution);
-  for (uint16_t Pos = 0; Pos < Resolution; Pos++) {
-    StrawCalib[Pos] = Pos;
-  }
+  std::vector<double> StrawCalib{0, 0, 0, 0};
+
   for (uint32_t Straw = 0; Straw < Straws; Straw++) {
-    //XTRACE(INIT, DEB, "Pushing nullcalibration for straw %u", Straw);
-    StrawMapping.push_back(StrawCalib);
+    StrawCalibration.push_back(StrawCalib);
   }
 
   MaxPixelId = Straws * Resolution;
+}
+
+uint32_t Calibration::strawCorrection(uint32_t StrawId, double Pos) {
+  double a = StrawCalibration[StrawId][0];
+  double b = StrawCalibration[StrawId][1];
+  double c = StrawCalibration[StrawId][2];
+  double d = StrawCalibration[StrawId][3];
+
+  double Delta = a + Pos * (b + Pos * (c + Pos * d));
+
+  XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g" , StrawId, Pos , Delta);
+  double CorrectedPos = Pos - Delta;
+
+  if (CorrectedPos < 0) {
+    Stats.ClampLow++;
+    CorrectedPos = 0;
+  }
+  if (CorrectedPos > StrawResolution) {
+    Stats.ClampHigh++;
+    CorrectedPos = StrawResolution - 1;
+  }
+  return (uint32_t)CorrectedPos;
 }
 } // namespace Loki

@@ -1,4 +1,10 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Parser for ESS readout of LoKI
+//===----------------------------------------------------------------------===//
 
 #include <common/Trace.h>
 #include <loki/readout/DataParser.h>

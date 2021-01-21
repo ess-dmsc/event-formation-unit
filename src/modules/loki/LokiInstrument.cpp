@@ -37,6 +37,7 @@ LokiInstrument::LokiInstrument(struct Counters & counters,
       XTRACE(INIT, ALW, "Using the identity 'calibration'");
       uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
       uint32_t Straws = MaxPixels/LokiConfiguration.Resolution;
+
       XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws, LokiConfiguration.Resolution);
       LokiCalibration.nullCalibration(Straws, LokiConfiguration.Resolution);
     } else {
@@ -58,6 +59,12 @@ LokiInstrument::LokiInstrument(struct Counters & counters,
     }
 }
 
+/// \todo debug - remove sometime
+LokiInstrument::~LokiInstrument() {
+  // for (int i = 0; i < 56; i++) {
+  //   printf("Straw %d, count %u\n", i, StrawHist[i]);
+  // }
+}
 
 /// \brief helper function to calculate pixels from knowledge about
 /// loki panel, FENId and a single readout dataset
@@ -69,7 +76,13 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
   uint8_t TubeGroup = FEN - 1;
   uint8_t LocalTube = Data.TubeId;
 
+  /// \todo debug REMOVE!
+  // if ((LocalTube == 0) or (LocalTube == 1) or (LocalTube == 5))
+  //   return 0;
+
   bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+  counters.ReadoutsBadAmpl = Amp2Pos.Stats.AmplitudeZero;
 
   if (not valid) {
     return 0;
@@ -77,11 +90,14 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   auto Straw = Amp2Pos.StrawId;
   /// Position (and CalibratedPos) are per definition == X
-  uint16_t Position = Amp2Pos.PosId; // position along the straw
+  double Position = Amp2Pos.PosVal; // position along the straw
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
+
+  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
+  // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
 
   uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);
   XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);

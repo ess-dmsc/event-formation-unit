@@ -43,27 +43,25 @@ std::string Config512Str = R"(
   }
 )";
 
-// Valid calibration corresponding to TubesZ * TubesN * StrawResolution * 7 = 28
+// Valid calibration for 7 straws
 std::string CalibFile{"deleteme_loki_instr_calib.json"};
 std::string CalibStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 7,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 7,
+      "resolution" : 256,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]},
-            {"straw" :    3, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    4, "poly" : [0.0, 0.0, 0.0, 1.0]},
-            {"straw" :    5, "poly" : [0.0, 0.0, 0.0, 2.0]},
-            {"straw" :    6, "poly" : [0.0, 0.0, 0.0, 2.0]}
-          ]
-      }
+      "polynomials" : [
+        [0, 0.0, 0.0, 0.0, 0.0],
+        [1, 1.0, 0.0, 0.0, 0.0],
+        [2, 2.0, 0.0, 0.0, 0.0],
+        [3, 0.0, 0.0, 0.0, 0.0],
+        [4, 1.0, 0.0, 0.0, 0.0],
+        [5, 2.0, 0.0, 0.0, 0.0],
+        [6, 2.0, 0.0, 0.0, 0.0]
+      ]
+    }
   }
 )";
 
