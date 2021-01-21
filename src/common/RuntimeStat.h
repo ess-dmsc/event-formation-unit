@@ -35,7 +35,7 @@ public:
   /// \brief Get  vector of current counters and compare with old values
   /// if the values change the 'stage' is deemed 'up' and the corresponding
   /// bit is set.
-  uint32_t getRuntimeStatus(std::vector<int64_t> Stats) {
+  uint32_t getRuntimeStatusMask(std::vector<int64_t> Stats) {
     uint32_t Status{0};
     if ((Stats.size() > 32) or (Stats.size() != OldStats.size())) {
       XTRACE(PROCESS, ERR, "Runtime stat size mismatch (%zu)", Stats.size());

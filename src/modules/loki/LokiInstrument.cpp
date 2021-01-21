@@ -94,6 +94,7 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
+  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
 
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
   // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
