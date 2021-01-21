@@ -16,7 +16,7 @@
 #include <vector>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_ERR
 
 namespace Loki {
 
@@ -37,6 +37,8 @@ public:
     XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u",
            StrawNum, PosNum, Denominator);
     if (Denominator == 0) {
+      XTRACE(INIT, WAR, "StrawNum: %u, PosNum: %u, Denominator: %u",
+             StrawNum, PosNum, Denominator);
       Stats.AmplitudeZero++;
       StrawId = NStraws;
       PosVal = NPos;

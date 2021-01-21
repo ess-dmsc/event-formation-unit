@@ -93,4 +93,26 @@ void Calibration::nullCalibration(uint32_t Straws, uint16_t Resolution) {
 
   MaxPixelId = Straws * Resolution;
 }
+
+uint32_t Calibration::strawCorrection(uint32_t StrawId, double Pos) {
+  double a = StrawCalibration[StrawId][0];
+  double b = StrawCalibration[StrawId][1];
+  double c = StrawCalibration[StrawId][2];
+  double d = StrawCalibration[StrawId][3];
+
+  double Delta = a + Pos * (b + Pos * (c + Pos * d));
+
+  XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g" , StrawId, Pos , Delta);
+  double CorrectedPos = Pos - Delta;
+
+  if (CorrectedPos < 0) {
+    Stats.ClampLow++;
+    CorrectedPos = 0;
+  }
+  if (CorrectedPos > StrawResolution) {
+    Stats.ClampHigh++;
+    CorrectedPos = StrawResolution - 1;
+  }
+  return (uint32_t)CorrectedPos;
+}
 } // namespace Loki

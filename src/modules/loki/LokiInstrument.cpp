@@ -82,6 +82,8 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
+  counters.ReadoutsBadAmpl = Amp2Pos.Stats.AmplitudeZero;
+
   if (not valid) {
     return 0;
   }

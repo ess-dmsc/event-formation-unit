@@ -39,23 +39,26 @@ public:
     php->CookieAndType += 0x535345;
     php->SeqNum = SeqNum++;
     Readouts = 0;
+    BufferSize = 0;
+    setLength(BufferSize);
   }
 
-  void setLength(uint16_t Length) {php->TotalLength = Length; }
-
   /// Add a data segment with one readout (Data Header + Data)
-  uint16_t addReadout(struct Loki::DataParser::LokiReadout & rdout, uint8_t Ring, uint8_t FEN)  {
+  void addReadout(struct Loki::DataParser::LokiReadout & rdout, uint8_t Ring, uint8_t FEN)  {
     int offset = HeaderSize + Readouts * (DataSize + DataHeaderSize);
     uint32_t datahdr = 0x00180000 + (FEN << 8) + Ring;
     memcpy(buffer + offset, &datahdr, DataHeaderSize);
     memcpy(buffer + offset + DataHeaderSize, &rdout, DataSize);
     Readouts++;
-    return HeaderSize + (DataSize + 4) * Readouts;
+    BufferSize = HeaderSize + (DataSize + DataHeaderSize) * Readouts;
+    setLength(BufferSize);
   }
 
   uint32_t getSeqNum() { return SeqNum; }
 
   char * getBuffer() { return buffer; }
+
+  uint16_t getSize() { return BufferSize; }
 
 private:
   static const int MaxBytes{9000};
@@ -66,6 +69,9 @@ private:
   uint8_t DataHeaderSize = 4;
   uint16_t HeaderSize = sizeof(struct ReadoutParser::PacketHeaderV0);
   uint16_t DataSize = (uint16_t)sizeof(struct Loki::DataParser::LokiReadout);
+  uint16_t BufferSize{0};
+
+  void setLength(uint16_t Length) {php->TotalLength = Length; }
 };
 
 // GCOVR_EXCL_STOP

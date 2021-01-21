@@ -36,30 +36,8 @@ public:
   /// \brief return the maximum pixel id
   uint32_t getMaxPixel() { return MaxPixelId; }
 
-
   /// \brief apply the position correction
-  uint32_t strawCorrection(uint32_t StrawId, double Pos) {
-    double a = StrawCalibration[StrawId][0];
-    double b = StrawCalibration[StrawId][1];
-    double c = StrawCalibration[StrawId][2];
-    double d = StrawCalibration[StrawId][3];
-
-    double Delta = a + Pos * (b + Pos *(c + d * Pos));
-
-    XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g" , StrawId, Pos , Delta);
-    double CorrectedPos = Pos - Delta;
-
-    if (CorrectedPos < 0) {
-      Stats.ClampLow++;
-      CorrectedPos = 0;
-    }
-    if (CorrectedPos > StrawResolution) {
-      Stats.ClampHigh++;
-      CorrectedPos = StrawResolution - 1;
-    }
-    return (uint32_t)CorrectedPos;
-  }
-
+  uint32_t strawCorrection(uint32_t StrawId, double Pos);
 
   /// \brief vector of (vector of) polynomial coefficients
   std::vector<std::vector<double>> StrawCalibration;

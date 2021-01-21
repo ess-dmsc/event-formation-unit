@@ -49,6 +49,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_version", Counters.ErrorVersion);
   Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
   Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
+  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
   // LoKI Readout Data
   Stats.create("readouts.count", Counters.Readouts);

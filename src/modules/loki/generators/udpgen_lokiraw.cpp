@@ -16,6 +16,8 @@
 
 // GCOVR_EXCL_START
 
+const uint16_t UdpMaxSizeBytes{8800};
+
 struct {
   std::string FileName;
   std::string IpAddress{"127.0.0.1"};
@@ -53,17 +55,15 @@ int main(int argc, char * argv[]) {
   uint64_t SentPackets = 0;
   uint64_t SentReadouts = 0;
   int res;
-  int size{0};
-  //reader.skip(4); // Ignore first 4 bytes
+
   while (((res = reader.readReadout(Readout)) > 0) and
          (SentPackets < Config.TxPackets) and
          (SentReadouts < Config.TxReadouts)) {
-    size = gen.addReadout(Readout, 0, 1); // Ring 0, FEN 1
+    gen.addReadout(Readout, 0, 1); // Ring 0, FEN 1
     SentReadouts++;
-    if (size > 8800) {
-      gen.setLength(size);
+    if (gen.getSize() > UdpMaxSizeBytes) {
       for (unsigned int i = 0; i < Config.TxMultiplicity; i++) {
-        DataSource.send(gen.getBuffer(), size);
+        DataSource.send(gen.getBuffer(), gen.getSize());
         SentPackets++;
         gen.nextSeqNo();
       }
@@ -73,8 +73,7 @@ int main(int argc, char * argv[]) {
       gen.newPacket();
     }
   }
-  gen.setLength(size);
-  DataSource.send(gen.getBuffer(), size);
+  DataSource.send(gen.getBuffer(), gen.getSize());
   SentPackets++;
   printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
