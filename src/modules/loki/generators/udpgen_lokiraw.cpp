@@ -34,6 +34,8 @@ CLI::App app{"Raw LoKI .dat file to UDP data generator"};
 
 
 int main(int argc, char * argv[]) {
+  app.add_option("-i, --ip", Config.IpAddress, "Destination IP address");
+  app.add_option("-p, --port", Config.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Config.TxPackets, "Packets to send");
   app.add_option("-m, --multiplicity", Config.TxMultiplicity, "Repeat packet m times");
   app.add_option("-f, --file", Config.FileName, "Raw LokI (.dat) file");
