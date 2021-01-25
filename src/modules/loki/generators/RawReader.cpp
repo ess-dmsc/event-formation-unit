@@ -19,8 +19,10 @@
 // GCOVR_EXCL_START
 
 LokiReader::LokiReader(std::string file) : filename(file) {
-  fd = open(filename.c_str(), 'r');
-  assert(fd != -1);
+  fd = open(filename.c_str(), O_RDONLY);
+  if (fd == -1) {
+    throw std::runtime_error("open() failed - check file and permissions");
+  }
 }
 
 int LokiReader::read32(uint32_t & val) {
@@ -46,7 +48,10 @@ int LokiReader::readReadout(struct Loki::DataParser::LokiReadout & Readout) {
   raw_data_t rawdata;
 
   int res = read(fd, &rawdata, sizeof(struct raw_data_t));
-  assert(rawdata.cookie == 0xDA71DEDA);
+  if (rawdata.cookie != 0xDA71DEDA) {
+    printf("No cookie in data return -1 (and exit)\n");
+    return -1;
+  }
 
   if (res != -1) {
     Readout.TimeHigh = rawdata.tof1;
