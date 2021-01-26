@@ -75,8 +75,11 @@ int main(int argc, char * argv[]) {
       gen.newPacket();
     }
   }
-  DataSource.send(gen.getBuffer(), gen.getSize());
-  SentPackets++;
+
+  if (gen.getSize()) {
+    DataSource.send(gen.getBuffer(), gen.getSize());
+    SentPackets++;
+  }
   printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
 }
