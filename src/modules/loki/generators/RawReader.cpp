@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <cstdio>
 #include <unistd.h>
+#include <stdexcept>
 
 // GCOVR_EXCL_START
 
