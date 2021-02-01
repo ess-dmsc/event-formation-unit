@@ -33,6 +33,8 @@ struct Counters {
   // LoKI DataParser
   int64_t Readouts;
   int64_t ReadoutsBadAmpl;
+  int64_t ReadoutsClampLow;
+  int64_t ReadoutsClampHigh;
   int64_t Headers;
   int64_t ErrorHeaders;
   int64_t ErrorBytes;
