@@ -56,6 +56,8 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.headers", Counters.Headers);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
   Stats.create("readouts.error_header", Counters.ErrorHeaders);
+  Stats.create("readouts.pos_low", Counters.ReadoutsClampLow);
+  Stats.create("readouts.pos_high", Counters.ReadoutsClampHigh);
 
   //
   Stats.create("thread.input_idle", Counters.RxIdle);
@@ -132,7 +134,7 @@ void LokiBase::inputThread() {
 /// \brief Generate an Udder test image
 /// \todo is probably not working after latest changes
 void LokiBase::testImageUdder() {
-  ESSGeometry LoKIGeometry(56, 512, 4, 1);
+  ESSGeometry LoKIGeometry(512, 224, 1, 1);
   XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
   Udder udderImage;
   udderImage.cachePixels(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
@@ -145,9 +147,6 @@ void LokiBase::testImageUdder() {
     }
 
     auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
-    Counters.EventsUdder++;
-    pixelId += LoKIGeometry.ny()*LoKIGeometry.nx()*(LoKIGeometry.nz() - 1);
     Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
     Counters.EventsUdder++;
 

@@ -187,6 +187,8 @@ void LokiInstrument::processReadouts() {
 
     }
   } // for()
+  counters.ReadoutsClampLow = LokiCalibration.Stats.ClampLow;
+  counters.ReadoutsClampHigh = LokiCalibration.Stats.ClampHigh;
 }
 
 } // namespace
