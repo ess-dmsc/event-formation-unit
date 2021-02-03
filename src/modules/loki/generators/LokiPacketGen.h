@@ -37,7 +37,7 @@ public:
     php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
     php->CookieAndType = ReadoutParser::Loki4Amp << 24;
     php->CookieAndType += 0x535345;
-    php->SeqNum = SeqNum++;
+    php->SeqNum = SeqNum;
     Readouts = 0;
     BufferSize = 0;
     setLength(BufferSize);
