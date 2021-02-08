@@ -5,6 +5,8 @@
 include_directories(.)
 include_directories(..)
 
+get_filename_component(LOKI_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
+
 ##
 ## Pure unit tests
 ##
@@ -34,6 +36,7 @@ set(LokiCalibrationTest_SRC
   CalibrationTest.cpp)
 create_test_executable(LokiCalibrationTest)
 
+
 set(LokiConfigTest_INC
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
   ../geometry/Config.h)
@@ -42,6 +45,7 @@ set(LokiConfigTest_SRC
   ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(LokiConfigTest)
+target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
 
 ##
 ## readout/
