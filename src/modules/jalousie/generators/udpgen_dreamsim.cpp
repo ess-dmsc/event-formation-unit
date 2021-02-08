@@ -3,20 +3,22 @@
 ///
 /// \file
 ///
-/// \brief UDP generator from raw detector data
+/// \brief UDP generator from simulated DREAM detector data
 ///
-/// Raw data format gotten from Davide Raspino at STFC
+/// Simulation data from Irina Stefanescu
 ///
 //===----------------------------------------------------------------------===//
 
 #include <common/Socket.h>
 #include <CLI/CLI.hpp>
-#include <loki/generators/RawReader.h>
+#include <jalousie/generators/SimReader.h>
 #include <generators/PacketGenerator.h>
 
 // GCOVR_EXCL_START
 
 const uint16_t UdpMaxSizeBytes{8800};
+
+uint8_t buffer[UdpMaxSizeBytes];
 
 struct {
   std::string FileName;
@@ -30,7 +32,7 @@ struct {
 } Config;
 
 
-CLI::App app{"Raw LoKI .dat file to UDP data generator"};
+CLI::App app{"Raw DREAM .txt file to UDP data generator"};
 
 
 int main(int argc, char * argv[]) {
@@ -38,14 +40,13 @@ int main(int argc, char * argv[]) {
   app.add_option("-p, --port", Config.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Config.TxPackets, "Packets to send");
   app.add_option("-m, --multiplicity", Config.TxMultiplicity, "Repeat packet m times");
-  app.add_option("-f, --file", Config.FileName, "Raw LokI (.dat) file");
+  app.add_option("-f, --file", Config.FileName, "Raw DREAM (.txt) file");
   app.add_option("-r, --readouts", Config.TxReadouts, "Readouts to send");
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
   CLI11_PARSE(app, argc, argv);
 
-
-  LokiReader reader(Config.FileName);
-  PacketGenerator gen(ReadoutParser::Loki4Amp, sizeof(Loki::DataParser::LokiReadout));
+  PacketGenerator gen(ReadoutParser::Debug, sizeof(struct DreamSimReader::sim_data_t));
+  DreamSimReader reader(Config.FileName);
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
 
@@ -53,7 +54,7 @@ int main(int argc, char * argv[]) {
   DataSource.setBufferSizes(Config.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
 
-  struct Loki::DataParser::LokiReadout Readout;
+  struct DreamSimReader::sim_data_t Readout;
   uint64_t SentPackets = 0;
   uint64_t SentReadouts = 0;
   int res;
@@ -61,6 +62,11 @@ int main(int argc, char * argv[]) {
   while (((res = reader.readReadout(Readout)) > 0) and
          (SentPackets < Config.TxPackets) and
          (SentReadouts < Config.TxReadouts)) {
+
+    if (res == 0) {
+      continue;
+    }
+
     gen.addReadout(&Readout, 0, 1); // Ring 0, FEN 1
     SentReadouts++;
     if (gen.getSize() > UdpMaxSizeBytes) {
@@ -80,6 +86,7 @@ int main(int argc, char * argv[]) {
     DataSource.send(gen.getBuffer(), gen.getSize());
     SentPackets++;
   }
+
   printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
 }

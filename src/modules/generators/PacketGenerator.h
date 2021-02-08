@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief packet generator for loki detector data
+/// \brief packet generator for dream simulated detector data
 ///
 /// Creates a buffer ready for transmission.
 ///
@@ -11,16 +11,16 @@
 
 #pragma once
 
-#include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
 #include <string.h>
 
 // GCOVR_EXCL_START
 
-class LokiPacketGen {
+class PacketGenerator {
 public:
 
-  LokiPacketGen() {
+  PacketGenerator(uint8_t type, uint16_t readout_size) :
+    DataSize(readout_size), ReadoutType(type) {
     newPacket();
   }
 
@@ -35,7 +35,7 @@ public:
     memset(buffer, 0, MaxBytes);
 
     php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
-    php->CookieAndType = ReadoutParser::Loki4Amp << 24;
+    php->CookieAndType = ReadoutType << 24;
     php->CookieAndType += 0x535345;
     php->SeqNum = SeqNum;
     Readouts = 0;
@@ -44,11 +44,11 @@ public:
   }
 
   /// Add a data segment with one readout (Data Header + Data)
-  void addReadout(struct Loki::DataParser::LokiReadout & rdout, uint8_t Ring, uint8_t FEN)  {
+  void addReadout(void * readout, uint8_t Ring, uint8_t FEN)  {
     int offset = HeaderSize + Readouts * (DataSize + DataHeaderSize);
     uint32_t datahdr = 0x00180000 + (FEN << 8) + Ring;
     memcpy(buffer + offset, &datahdr, DataHeaderSize);
-    memcpy(buffer + offset + DataHeaderSize, &rdout, DataSize);
+    memcpy(buffer + offset + DataHeaderSize, readout, DataSize);
     Readouts++;
     BufferSize = HeaderSize + (DataSize + DataHeaderSize) * Readouts;
     setLength(BufferSize);
@@ -68,7 +68,8 @@ private:
   uint16_t Readouts{0};
   uint8_t DataHeaderSize = 4;
   uint16_t HeaderSize = sizeof(struct ReadoutParser::PacketHeaderV0);
-  uint16_t DataSize = (uint16_t)sizeof(struct Loki::DataParser::LokiReadout);
+  uint16_t DataSize{0}; // set in constructor
+  uint8_t ReadoutType{0}; // set in constructor
   uint16_t BufferSize{0};
 
   void setLength(uint16_t Length) {php->TotalLength = Length; }
