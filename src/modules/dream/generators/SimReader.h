@@ -20,6 +20,7 @@ public:
   // From Irina's .txt file
   struct sim_data_t {
     uint32_t tof;
+    uint16_t unused;
     uint8_t module;
     uint8_t sumo;
     uint8_t strip;
@@ -27,7 +28,7 @@ public:
     uint8_t segment;
     uint8_t counter;
   } __attribute__((__packed__));
-  static_assert(sizeof(struct sim_data_t) == 10, "wrong packing");
+  static_assert(sizeof(struct sim_data_t) == 12, "wrong packing");
 
   //
   DreamSimReader(std::string file);

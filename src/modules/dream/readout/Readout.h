@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Jalousie Readout format - heed the warnings below
+/// \brief DREAM Readout format - heed the warnings below
 ///
 ///                              WARNING
 ///
@@ -42,7 +42,7 @@
 
 namespace Jalousie {
 
-struct __attribute__ ((packed)) ReadoutV2 {
+struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "jalousie_readouts"; }
   static uint16_t FormatVersion() { return 0; }
@@ -75,9 +75,9 @@ namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Jalousie::ReadoutV2> {
+class TypeTrait<Jalousie::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Jalousie::ReadoutV2) {
+  H5_COMPOUND_DEFINE_TYPE(Jalousie::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
@@ -101,6 +101,6 @@ public:
 
 namespace Jalousie {
 
-using ReadoutFile = DumpFile<ReadoutV2>;
+using ReadoutFile = DumpFile<Readout>;
 
 }

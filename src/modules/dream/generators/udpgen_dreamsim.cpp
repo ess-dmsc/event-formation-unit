@@ -13,7 +13,7 @@
 
 #include <common/Socket.h>
 #include <CLI/CLI.hpp>
-#include <jalousie/generators/SimReader.h>
+#include <dream/generators/SimReader.h>
 #include <generators/PacketGenerator.h>
 
 // GCOVR_EXCL_START
@@ -57,7 +57,7 @@ int main(int argc, char * argv[]) {
   uint64_t SentReadouts = 0;
   int res;
 
-  while (((res = reader.readReadout(Readout)) > 0) and
+  while (((res = reader.readReadout(Readout)) >= 0) and
          (SentPackets < Config.TxPackets) and
          (SentReadouts < Config.TxReadouts)) {
 

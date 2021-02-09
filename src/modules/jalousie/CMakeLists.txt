@@ -5,7 +5,7 @@ add_subdirectory(test)
 include_directories(.)
 
 #=============================================================================
-# jalousie detector module 
+# jalousie detector module
 #=============================================================================
 
 set(jalousie_common_inc Config.h Readout.h SumoMappings.h rapidcsv.h)
