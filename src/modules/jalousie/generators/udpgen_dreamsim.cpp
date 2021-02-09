@@ -6,7 +6,9 @@
 /// \brief UDP generator from simulated DREAM detector data
 ///
 /// Simulation data from Irina Stefanescu
-///
+/// Uses the SimReader class for reading the *.txt files
+/// and common PacketGenerator class for creating ESS readout data
+/// which can be sent using the UDPTransmitter class.
 //===----------------------------------------------------------------------===//
 
 #include <common/Socket.h>
@@ -17,8 +19,6 @@
 // GCOVR_EXCL_START
 
 const uint16_t UdpMaxSizeBytes{8800};
-
-uint8_t buffer[UdpMaxSizeBytes];
 
 struct {
   std::string FileName;
@@ -31,9 +31,7 @@ struct {
   uint32_t KernelTxBufferSize{1000000};
 } Config;
 
-
 CLI::App app{"Raw DREAM .txt file to UDP data generator"};
-
 
 int main(int argc, char * argv[]) {
   app.add_option("-i, --ip", Config.IpAddress, "Destination IP address");
@@ -45,11 +43,11 @@ int main(int argc, char * argv[]) {
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
   CLI11_PARSE(app, argc, argv);
 
-  PacketGenerator gen(ReadoutParser::Debug, sizeof(struct DreamSimReader::sim_data_t));
+  PacketGenerator gen(ReadoutParser::DREAM, sizeof(struct DreamSimReader::sim_data_t));
   DreamSimReader reader(Config.FileName);
+
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
-
   UDPTransmitter DataSource(local, remote);
   DataSource.setBufferSizes(Config.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
@@ -67,18 +65,20 @@ int main(int argc, char * argv[]) {
       continue;
     }
 
+    /// \todo change RING+FEN to match digital geometry
+    /// for now all goes on ring 0, fen 1
     gen.addReadout(&Readout, 0, 1); // Ring 0, FEN 1
     SentReadouts++;
     if (gen.getSize() > UdpMaxSizeBytes) {
       for (unsigned int i = 0; i < Config.TxMultiplicity; i++) {
         DataSource.send(gen.getBuffer(), gen.getSize());
         SentPackets++;
-        gen.nextSeqNo();
+        gen.newPacket(PacketGenerator::IncSeqNum);
       }
       if (Config.TxUSleep != 0) {
         usleep(Config.TxUSleep);
       }
-      gen.newPacket();
+      gen.newPacket(PacketGenerator::ClearPacket);
     }
   }
 

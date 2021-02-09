@@ -6,7 +6,7 @@
 /// \brief UDP generator from raw detector data
 ///
 /// Raw data format gotten from Davide Raspino at STFC
-///
+/// \todo udpgen_lokiraw and udpgen_dreamsim shares 90% code - should refactor
 //===----------------------------------------------------------------------===//
 
 #include <common/Socket.h>
@@ -67,12 +67,12 @@ int main(int argc, char * argv[]) {
       for (unsigned int i = 0; i < Config.TxMultiplicity; i++) {
         DataSource.send(gen.getBuffer(), gen.getSize());
         SentPackets++;
-        gen.nextSeqNo();
+        gen.newPacket(PacketGenerator::IncSeqNum);
       }
       if (Config.TxUSleep != 0) {
         usleep(Config.TxUSleep);
       }
-      gen.newPacket();
+      gen.newPacket(PacketGenerator::ClearPacket);
     }
   }
 

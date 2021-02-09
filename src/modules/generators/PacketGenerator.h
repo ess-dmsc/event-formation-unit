@@ -5,8 +5,9 @@
 ///
 /// \brief packet generator for dream simulated detector data
 ///
-/// Creates a buffer ready for transmission.
-///
+/// Created packets based on the ESS readout data format.
+/// The common header is initialised with the data type specified in the
+/// ICD for  ESS readouts.
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -19,38 +20,47 @@
 class PacketGenerator {
 public:
 
-  PacketGenerator(uint8_t type, uint16_t readout_size) :
-    DataSize(readout_size), ReadoutType(type) {
-    newPacket();
-  }
+  enum PktInit {ClearPacket, IncSeqNum};
 
-  // Keep data (for retransmissions - speed)
-  void nextSeqNo() {
-    php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
-    php->SeqNum = SeqNum++;
+  /// \brief prepare to generate ESS
+  PacketGenerator(uint8_t Type, uint16_t ReadoutSize) :
+    DataSize(ReadoutSize), ReadoutType(Type) {
+    newPacket(ClearPacket);
   }
 
   //
-  void newPacket() {
-    memset(buffer, 0, MaxBytes);
-
+  void newPacket(PktInit method) {
     php = (struct ReadoutParser::PacketHeaderV0 *)buffer;
-    php->CookieAndType = ReadoutType << 24;
-    php->CookieAndType += 0x535345;
-    php->SeqNum = SeqNum;
-    Readouts = 0;
-    BufferSize = 0;
-    setLength(BufferSize);
+
+    // Either clear the buffer and reinitialze or just increment SeqNum
+    if (method == IncSeqNum) {
+      php->SeqNum = SeqNum++;
+    } else {
+      memset(buffer, 0, MaxBytes);
+      php->CookieAndType = ReadoutType << 24;
+      php->CookieAndType += 0x535345;
+      php->SeqNum = SeqNum;
+      Readouts = 0;
+      BufferSize = 0;
+      setLength(BufferSize);
+    }
   }
 
   /// Add a data segment with one readout (Data Header + Data)
   void addReadout(void * readout, uint8_t Ring, uint8_t FEN)  {
-    int offset = HeaderSize + Readouts * (DataSize + DataHeaderSize);
-    uint32_t datahdr = 0x00180000 + (FEN << 8) + Ring;
+    // size of 'blue' and 'white' field (readout ICD)
+    uint16_t DataBlockSize = DataHeaderSize + DataSize;
+    int offset = HeaderSize + Readouts * (DataBlockSize);
+
+    struct ReadoutParser::DataHeader datahdr;
+    datahdr.RingId = Ring;
+    datahdr.FENId = FEN;
+    datahdr.DataLength = DataBlockSize;
+
     memcpy(buffer + offset, &datahdr, DataHeaderSize);
     memcpy(buffer + offset + DataHeaderSize, readout, DataSize);
     Readouts++;
-    BufferSize = HeaderSize + (DataSize + DataHeaderSize) * Readouts;
+    BufferSize = HeaderSize + (DataBlockSize) * Readouts;
     setLength(BufferSize);
   }
 
