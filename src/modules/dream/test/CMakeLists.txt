@@ -25,6 +25,16 @@ ${DREAM_BASE_DIR}/readout/DataParser.cpp
 create_test_executable(DreamInstrumentTest)
 
 
+
+set(DreamDataParserTest_INC
+  ../readout/DataParser.h
+  ../../readout/ReadoutParser.h)
+set(DreamDataParserTest_SRC
+  ../readout/DataParser.cpp
+  DataParserTest.cpp)
+create_test_executable(DreamDataParserTest)
+
+
 #=============================================================================
 # independent dream benchmark tests
 #=============================================================================
