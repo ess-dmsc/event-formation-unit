@@ -18,10 +18,16 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+/// Test cases below
 TEST_F(DreamInstrumentTest, Constructor) {
   DreamInstrument Dream(counters, ModuleSettings);
-  /// \todo Need one or two better inputs here 
+  ASSERT_EQ(Dream.counters.RxPackets, 0);
+  ASSERT_EQ(Dream.counters.Readouts, 0);
+}
+
+TEST_F(DreamInstrumentTest, CalcPixel) {
+  DreamInstrument Dream(counters, ModuleSettings);
+  /// \todo Need one or two better inputs here
   ASSERT_EQ(Dream.calcPixel(0, 0, 0, 0, 0, 0), 0);
 }
 

@@ -2,10 +2,10 @@ include_directories(.)
 
 set(DREAM_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
+
 #=============================================================================
 # independent dream unit tests
 #=============================================================================
-
 
 set(DreamGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.h)
