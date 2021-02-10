@@ -6,6 +6,7 @@
 
 #include <dream/DreamInstrument.h>
 #include <test/TestBase.h>
+#include <string.h>
 
 using namespace Jalousie;
 
@@ -14,7 +15,9 @@ protected:
   struct Counters counters;
   DreamSettings ModuleSettings;
 
-  void SetUp() override {}
+  void SetUp() override {
+    memset(&counters, 0, sizeof(counters));
+  }
   void TearDown() override {}
 };
 
