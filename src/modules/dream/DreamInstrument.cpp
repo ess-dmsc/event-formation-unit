@@ -11,6 +11,7 @@
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <dream/DreamInstrument.h>
+#include <dream/geometry/DreamGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -23,8 +24,14 @@ namespace Jalousie {
         , ModuleSettings(moduleSettings) { }
 
 
-  uint32_t DreamInstrument::calcPixel() {
-      return 42;
+  uint32_t DreamInstrument::calcPixel(
+      uint8_t Sector, uint8_t Sumo, uint8_t Strip,
+      uint8_t Wire, uint8_t Cassette, uint8_t Counter) {
+    DreamGeometry::EndCapParams endcap = {Sector, Sumo, Strip, Wire, Cassette, Counter};
+
+    uint32_t Pixel{0};
+    DreamGeometry::PixelIdFromEndCapParams(endcap, Pixel);
+    return Pixel;
   }
 
   void DreamInstrument::processReadouts() {
@@ -62,7 +69,7 @@ namespace Jalousie {
           Data.Tof, Data.Module, Data.Sumo, Data.Strip, Data.Wire, Data.Segment, Data.Counter);
 
         // Calculate pixelid and apply calibration
-        uint32_t PixelId = calcPixel();
+        uint32_t PixelId = calcPixel(Data.Module, Data.Sumo, Data.Strip, Data.Wire, Data.Segment, Data.Counter);
 
 
         if (PixelId == 0) {

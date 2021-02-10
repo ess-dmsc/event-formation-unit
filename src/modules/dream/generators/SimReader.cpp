@@ -33,7 +33,6 @@ int DreamSimReader::readReadout(struct sim_data_t & Readout) {
   }
 
   if (std::getline(*infile, line)) {
-      printf("%s\n", line.c_str());
       std::istringstream iss(line);
       std::string stof, smodule, ssumo, sstrip, swire, ssegment, scounter;
 
@@ -46,9 +45,9 @@ int DreamSimReader::readReadout(struct sim_data_t & Readout) {
       Readout.segment = stoi(ssegment);
       Readout.counter = stoi(scounter);
 
-      printf("%u: %u, %u, %u, %u, %u, %u\n",
-       Readout.tof, Readout.module, Readout.sumo, Readout.strip,
-       Readout.wire, Readout.segment, Readout.counter);
+      // printf("%u: %u, %u, %u, %u, %u, %u\n",
+      //  Readout.tof, Readout.module, Readout.sumo, Readout.strip,
+      //  Readout.wire, Readout.segment, Readout.counter);
       lines++;
       return 1;
   } else {

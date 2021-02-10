@@ -13,9 +13,9 @@
 
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/readout/DataParser.h>
 #include <modules/readout/ReadoutParser.h>
-#include <readout/DataParser.h>
-#include <readout/ESSTime.h>
+#include <modules/readout/ESSTime.h>
 
 
 namespace Jalousie {
@@ -40,7 +40,8 @@ public:
   void setSerializer(EV42Serializer * serializer) { Serializer = serializer; }
 
   //
-  uint32_t calcPixel();
+  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip,
+                     uint8_t Wire, uint8_t Cassette, uint8_t Counter);
 
 public:
   /// \brief Stuff that 'ties' DREAM together
