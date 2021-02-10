@@ -80,7 +80,3 @@ else()
   message(WARNING "ECDC: No Jalousie reference data found. Skipping JalBuilderReadoutsTest.")
   message(WARNING "ECDC: No Jalousie reference data found. Skipping JalSumoMappingsTest.")
 endif()
-
-set(DreamBenchmarkTest_SRC DreamBenchmarkTest.cpp)
-set(DreamBenchmarkTest_INC ${JAL_BASE_DIR}/geometry/DreamGeometry.h)
-create_benchmark_executable(DreamBenchmarkTest)
