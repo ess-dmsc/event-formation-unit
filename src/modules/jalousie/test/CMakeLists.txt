@@ -42,10 +42,6 @@ set(JalReadoutTest_SRC ReadoutTest.cpp ${JAL_BASE_DIR}/Readout.cpp)
 set(JalReadoutTest_INC ${JAL_BASE_DIR}/Readout.h)
 create_test_executable(JalReadoutTest SKIP_MEMGRIND)
 
-set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
-set(DreamGeometryTest_INC ${JAL_BASE_DIR}/geometry/DreamGeometry.h)
-create_test_executable(DreamGeometryTest)
-
 #=============================================================================
 # tests depending on availability of reference data
 #=============================================================================

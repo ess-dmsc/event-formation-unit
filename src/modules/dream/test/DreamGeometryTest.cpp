@@ -2,7 +2,7 @@
 
 #include <bitset>
 #include <common/Trace.h>
-#include <jalousie/geometry/DreamGeometry.h>
+#include <dream/geometry/DreamGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
