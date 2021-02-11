@@ -1116,6 +1116,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
 
               uint32_t PixelId;
               ASSERT_TRUE(PixelIdFromEndCapParams(SyntheticEndCap, PixelId));
+              // printf("sect %u, sumo %u, strip %u, wire %u, cassette %u, counter %u -- pixel %u\n",
+              //   Sector, SumoId, Strip, Wire, Cassette, Counter, PixelId);
               EndCapParams DecodedEndCap;
               ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, DecodedEndCap));
 

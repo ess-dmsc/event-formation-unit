@@ -30,8 +30,8 @@ TEST_F(DreamInstrumentTest, Constructor) {
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, ModuleSettings);
-  /// \todo Need one or two better inputs here
-  ASSERT_EQ(Dream.calcPixel(0, 0, 0, 0, 0, 0), 0);
+  /// \todo this is not in agreement with Irina
+  ASSERT_EQ(Dream.calcPixel(1, 6, 1, 16, 10, 2), 1);
 }
 
 
