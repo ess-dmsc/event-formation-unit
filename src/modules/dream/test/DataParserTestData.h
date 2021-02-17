@@ -48,7 +48,7 @@ std::vector<uint8_t> ErrSizeMismatch
 std::vector<uint8_t> OkThreeDreamReadouts
 {
   // Data Header 1
-  0x00, 0x00, 0x28, 0x00, // ring 0, fen 1, data size 40 bytes
+  0x00, 0x01, 0x28, 0x00, // ring 0, fen 1, data size 40 bytes
 
   // Readout 1
   0x22, 0x00, 0x00, 0x00, // tof 34 (0x22)
