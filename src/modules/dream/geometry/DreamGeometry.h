@@ -15,6 +15,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
 #include <common/Assert.h>
 #include <stdint.h>
 
@@ -98,8 +100,8 @@ enum Enum : uint32_t {
 };
 
 // these map Sumo Id (3..6) to various SUMO properties.
-static const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
-static const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
+const uint8_t SumoWidths[7] = {0, 0, 0, 8, 12, 16, 20};
+const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
 
 struct SlicePixel {
   uint32_t SectorIdx;

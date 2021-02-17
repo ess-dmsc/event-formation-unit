@@ -1,9 +1,9 @@
-// Copyright (C) 2019 - 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief LoKI detector base plugin interface definition
+/// \brief DREAM detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 #pragma once
@@ -12,29 +12,29 @@
 #include <common/EV42Serializer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
-#include <loki/Counters.h>
+#include <dream/Counters.h>
 
-namespace Loki {
+namespace Jalousie {
 
-struct LokiSettings {
-  std::string ConfigFile{""}; ///< panel mappings
-  std::string CalibFile{""}; ///< calibration file
-  std::string FilePrefix{""}; ///< HDF5 file dumping
-  bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
+struct DreamSettings {
+  //std::string ConfigFile;
+  //
+  //
+  //
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
-class LokiBase : public Detector {
+class DreamBase : public Detector {
 public:
-  LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings);
-  ~LokiBase() = default;
+  explicit DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDreamSettings);
+  ~DreamBase() = default;
 
   void inputThread();
   void processingThread();
 
-  /// \brief generate a Udder test image
-  void testImageUdder();
+
+
 
 
 
@@ -56,7 +56,7 @@ protected:
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
   struct Counters Counters;
-  LokiSettings LokiModuleSettings;
+  DreamSettings DreamModuleSettings;
   EV42Serializer * Serializer;
 };
 
