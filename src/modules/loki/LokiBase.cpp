@@ -21,9 +21,11 @@
 #include <common/Timer.h>
 #include <loki/LokiInstrument.h>
 #include <unistd.h>
+#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+#define ECDC_DEBUG_READOUT
 
 namespace Loki {
 
@@ -187,7 +189,7 @@ void LokiBase::processingThread() {
   }
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer;
+  TSCTimer ProduceTimer, DebugTimer;
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -229,6 +231,23 @@ void LokiBase::processingThread() {
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
       usleep(10);
+
+      #ifdef ECDC_DEBUG_READOUT
+      if (DebugTimer.timetsc() >=
+          5ULL * 1000000 * TSC_MHZ) {
+        printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
+        printf("-----------------------------------------------------------------------------------\n");
+        for (int ring = 0; ring < 8; ring++) {
+          printf("ring %2d  | ", ring);
+          for (int fen = 0; fen < 8; fen++) {
+            printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
+          }
+          printf("\n");
+        }
+        fflush(NULL);
+        DebugTimer.now();
+      }
+      #endif
     }
 
     if (ProduceTimer.timetsc() >=
