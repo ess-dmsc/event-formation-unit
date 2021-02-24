@@ -75,5 +75,8 @@ public:
     int64_t ErrorTypeSubType{0};
     int64_t ErrorOutputQueue{0};
     int64_t ErrorSeqNum{0};
+    int64_t ErrorTimeFrac{0};
+    int64_t HeartBeats{0};
   } Stats;
+
 };

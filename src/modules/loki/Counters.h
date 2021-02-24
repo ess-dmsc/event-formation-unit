@@ -23,13 +23,14 @@ struct Counters {
   int64_t FifoSeqErrors;
 
   // ESSReadout parser
-  // \todo checkout Doro's method for stats instead of copying.
   int64_t ErrorBuffer;
   int64_t ErrorSize;
   int64_t ErrorVersion;
   int64_t ErrorOutputQueue;
   int64_t ErrorTypeSubType;
   int64_t ErrorSeqNum;
+  int64_t ErrorTimeFrac;
+  int64_t HeartBeats;
   // LoKI DataParser
   int64_t Readouts;
   int64_t ReadoutsBadAmpl;

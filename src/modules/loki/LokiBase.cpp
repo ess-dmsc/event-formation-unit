@@ -53,6 +53,8 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
   Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
+  Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
+  Stats.create("readouts.heartbeats", Counters.HeartBeats);
   // LoKI Readout Data
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.Headers);
@@ -212,6 +214,8 @@ void LokiBase::processingThread() {
       Counters.ErrorTypeSubType = Loki.ESSReadoutParser.Stats.ErrorTypeSubType;
       Counters.ErrorOutputQueue = Loki.ESSReadoutParser.Stats.ErrorOutputQueue;
       Counters.ErrorSeqNum = Loki.ESSReadoutParser.Stats.ErrorSeqNum;
+      Counters.ErrorTimeFrac = Loki.ESSReadoutParser.Stats.ErrorTimeFrac;
+      Counters.HeartBeats = Loki.ESSReadoutParser.Stats.HeartBeats;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");

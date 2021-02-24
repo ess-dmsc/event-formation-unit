@@ -96,7 +96,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
 
   if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
     XTRACE(PROCESS, WAR, "Bad sequence number (expected %u, got %u)",
-           NextSeqNum, Packet.HeaderPtr->SeqNum);
+           NextSeqNum[Packet.HeaderPtr->OutputQueue], Packet.HeaderPtr->SeqNum);
     Stats.ErrorSeqNum++;
     NextSeqNum[Packet.HeaderPtr->OutputQueue] = Packet.HeaderPtr->SeqNum;
   }
@@ -104,6 +104,17 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   NextSeqNum[Packet.HeaderPtr->OutputQueue]++;
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
+
+  // Check time values \todo so far only PulseTime and not
+  // PrevPulseTime
+  if (Packet.HeaderPtr->PulseLow >= 88025200) {
+    Stats.ErrorTimeFrac++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if (Packet.DataLength == sizeof(ReadoutParser::PacketHeaderV0)) {
+    Stats.HeartBeats++;
+  }
 
   return ReadoutParser::OK;
 }
