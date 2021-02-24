@@ -96,7 +96,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
 
   if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
     XTRACE(PROCESS, WAR, "Bad sequence number (expected %u, got %u)",
-           NextSeqNum, Packet.HeaderPtr->SeqNum);
+           NextSeqNum[Packet.HeaderPtr->OutputQueue], Packet.HeaderPtr->SeqNum);
     Stats.ErrorSeqNum++;
     NextSeqNum[Packet.HeaderPtr->OutputQueue] = Packet.HeaderPtr->SeqNum;
   }

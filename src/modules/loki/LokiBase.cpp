@@ -25,7 +25,7 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-#define ECDC_DEBUG_READOUT
+// #define ECDC_DEBUG_READOUT
 
 namespace Loki {
 
@@ -232,6 +232,9 @@ void LokiBase::processingThread() {
       Counters.ProcessingIdle++;
       usleep(10);
 
+    }
+
+
       #ifdef ECDC_DEBUG_READOUT
       if (DebugTimer.timetsc() >=
           5ULL * 1000000 * TSC_MHZ) {
@@ -248,7 +251,6 @@ void LokiBase::processingThread() {
         DebugTimer.now();
       }
       #endif
-    }
 
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
