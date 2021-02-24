@@ -54,7 +54,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
 
   // Check cookie
   uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 2)) & 0xffffff;
-  XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
+  //XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
     Stats.ErrorCookie++;
@@ -114,7 +114,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     return -ReadoutParser::EHEADER;
   }
 
-  if (Packet.DataLength == sizeof(ReadoutParser::PacketHeaderV0)) {
+  if (Packet.HeaderPtr->TotalLength == sizeof(ReadoutParser::PacketHeaderV0)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
     Stats.HeartBeats++;
   }
