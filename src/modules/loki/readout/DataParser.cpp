@@ -45,7 +45,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    HeaderCounters[DataHdrPtr->RingId][DataHdrPtr->FENId]++;
+    HeaderCounters[DataHdrPtr->RingId & 0xf][DataHdrPtr->FENId & 0xf]++;
 
     if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
       XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
