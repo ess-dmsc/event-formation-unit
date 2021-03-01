@@ -10,8 +10,8 @@
 #include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Loki {
 
@@ -29,7 +29,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   while (BytesLeft) {
     // Parse Data Header
     if (BytesLeft < sizeof(ReadoutParser::DataHeader)) {
-      XTRACE(DATA, DEB, "Not enough data left for header: %u", BytesLeft);
+      XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -38,13 +38,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     auto DataHdrPtr = (ReadoutParser::DataHeader *)DataPtr;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
-      XTRACE(DATA, DEB, "Data size mismatch, header says %u got %d",
+      XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              DataHdrPtr->DataLength, BytesLeft);
       Stats.ErrorHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
+    ///\todo remove ad hoc conters sometime
     HeaderCounters[DataHdrPtr->RingId & 0xf][DataHdrPtr->FENId & 0xf]++;
 
     if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
