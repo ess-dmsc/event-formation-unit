@@ -35,7 +35,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
+pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/mnt/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
 builders = pipeline_builder.createBuilders { container ->
