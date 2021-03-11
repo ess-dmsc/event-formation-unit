@@ -32,10 +32,10 @@ public:
   ~DumpFile();
 
   static std::unique_ptr<DumpFile>
-  create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
+  create(const fs::path &FilePath, size_t MaxMB = 0);
 
   static std::unique_ptr<DumpFile>
-  open(const boost::filesystem::path &FilePath);
+  open(const fs::path &FilePath);
 
   size_t count() const;
 
@@ -43,14 +43,14 @@ public:
   template<typename Container> void push(const Container& Hits);
 
   void readAt(size_t Index, size_t Count);
-  static void read(const boost::filesystem::path &FilePath,
+  static void read(const fs::path &FilePath,
       std::vector<T> &ExternalData);
 
   /// \todo 9000 is MTU? Correct size is <= 8972 else packet
   /// fragmentation will occur.
   static constexpr size_t ChunkSize{9000 / sizeof(T)};
 
-  boost::filesystem::path get_full_path() const;
+  fs::path get_full_path() const;
 
   void flush();
   void rotate();
@@ -58,14 +58,14 @@ public:
   std::vector<T> Data;
 
 private:
-  DumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
+  DumpFile(const fs::path &file_path, size_t max_Mb);
 
   hdf5::file::File File;
   hdf5::datatype::Datatype DataType;
   hdf5::node::Dataset DataSet;
   hdf5::dataspace::Hyperslab Slab{{0}, {ChunkSize}};
 
-  boost::filesystem::path PathBase{};
+  fs::path PathBase{};
   size_t MaxSize{0};
   size_t SequenceNumber{0};
 
@@ -84,28 +84,28 @@ DumpFile<T>::~DumpFile() {
 }
 
 template<typename T>
-DumpFile<T>::DumpFile(const boost::filesystem::path& file_path, size_t max_Mb) {
+DumpFile<T>::DumpFile(const fs::path& file_path, size_t max_Mb) {
   DataType = hdf5::datatype::create<T>();
   MaxSize = max_Mb * 1000000 / sizeof(T);
   PathBase = file_path;
 }
 
 template<typename T>
-std::unique_ptr<DumpFile<T>> DumpFile<T>::create(const boost::filesystem::path& FilePath, size_t MaxMB) {
+std::unique_ptr<DumpFile<T>> DumpFile<T>::create(const fs::path& FilePath, size_t MaxMB) {
   auto Ret = std::unique_ptr<DumpFile>(new DumpFile(FilePath, MaxMB));
   Ret->openRW();
   return Ret;
 }
 
 template<typename T>
-std::unique_ptr<DumpFile<T>> DumpFile<T>::open(const boost::filesystem::path& FilePath) {
+std::unique_ptr<DumpFile<T>> DumpFile<T>::open(const fs::path& FilePath) {
   auto Ret = std::unique_ptr<DumpFile>(new DumpFile(FilePath, 0));
   Ret->openR();
   return Ret;
 }
 
 template<typename T>
-boost::filesystem::path DumpFile<T>::get_full_path() const {
+fs::path DumpFile<T>::get_full_path() const {
   auto Ret = PathBase;
   Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
   return Ret;
@@ -181,7 +181,7 @@ void DumpFile<T>::readAt(size_t Index, size_t Count) {
 }
 
 template<typename T>
-void DumpFile<T>::read(const boost::filesystem::path &FilePath, std::vector<T> &ExternalData) {
+void DumpFile<T>::read(const fs::path &FilePath, std::vector<T> &ExternalData) {
   auto TempFile = DumpFile::open(FilePath);
   TempFile->readAt(0, TempFile->count());
   ExternalData = std::move(TempFile->Data);

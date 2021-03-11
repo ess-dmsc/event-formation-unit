@@ -38,7 +38,7 @@ const uint64_t kMetaDataSubIndex1{uint64_t(0x1) << 54};
 // const uint64_t kMetaDataSubIndex9{uint64_t(0x9) << 54};
 // const uint64_t kMetaDataSubIndex10{uint64_t(0xA) << 54};
 
-CdtFile::CdtFile(const boost::filesystem::path &FilePath) {
+CdtFile::CdtFile(const fs::path &FilePath) {
   Data.reserve(ChunkSize);
 
   file_.open(FilePath.string(), std::ios::binary);

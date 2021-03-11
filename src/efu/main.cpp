@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <boost/filesystem.hpp>
+#include <common/Filesystem.h>
 #include <cstdlib>
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 
     /// Automatically create the Graphite metric prefix from detector plugin name
     /// remove leading path and trailing extension
-    auto p = boost::filesystem::path(efu_args.getDetectorName()).filename().stem().string();
+    auto p = fs::path(efu_args.getDetectorName()).filename().stem().string();
     DetectorSettings.GraphitePrefix = std::string("efu.") + p;
 
     detector = loader.createDetector(DetectorSettings);

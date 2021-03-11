@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 project("event-formation-unit")
 
+set(CMAKE_CXX_STANDARD 17)
+
 #=============================================================================
 # Augment CMake with our custom scripts
 #=============================================================================

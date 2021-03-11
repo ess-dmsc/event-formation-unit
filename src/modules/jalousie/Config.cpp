@@ -39,7 +39,7 @@ Config::Config(std::string jsonfile) {
     return;
   }
 
-  auto root_dir = boost::filesystem::path(jsonfile).parent_path();
+  auto root_dir = fs::path(jsonfile).parent_path();
 
   std::string SUMO_mappings_file = root["SUMO_mappings_file"];
   nlohmann::json modules = root["modules"];

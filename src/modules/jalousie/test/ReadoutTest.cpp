@@ -9,9 +9,9 @@ class JalSumoMappingsTest : public TestBase {
 protected:
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("hit_file_test_00000.h5"))
+    if (fs::exists("hit_file_test_00000.h5"))
     {
-      boost::filesystem::remove("hit_file_test_00000.h5");
+      fs::remove("hit_file_test_00000.h5");
     }
   }
   void TearDown() override {}
