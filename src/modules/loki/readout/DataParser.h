@@ -54,5 +54,6 @@ public:
   std::vector<struct ParsedData> Result;
 
   struct Counters & Stats;
+  uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
 }
