@@ -14,6 +14,8 @@ readerwriterqueue/07e22ec@ess-dmsc/stable
 concurrentqueue/8f7e861@ess-dmsc/stable
 streaming-data-types/d356a77@ess-dmsc/stable
 trompeloeil/v38@rollbear/stable
+boost/1.75.0
+zlib/1.2.11
 
 [generators]
 cmake
@@ -22,7 +24,7 @@ cmake_find_package
 
 [options]
 librdkafka:shared=True
-h5cpp:with_boost=False
+h5cpp:with_boost=True
 
 [imports]
 lib, * -> ./lib

@@ -26,7 +26,6 @@ set(EFU_COMMON_LIBS
   ${LibRDKafka_LIBRARIES}
   ${LibRDKafka_C_LIBRARIES}
   ${HDF5_C_LIBRARIES}
-  ${Boost_LIBRARIES}
   GraylogLogger::graylog_logger_static
   fmt::fmt
   h5cpp::h5cpp
