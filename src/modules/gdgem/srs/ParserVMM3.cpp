@@ -6,6 +6,7 @@
 #include <string.h>
 #include <common/Trace.h>
 #include <gdgem/srs/ParserVMM3.h>
+#include <iostream>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -113,11 +114,12 @@ int ParserVMM3::receive(const char *buffer, int size) {
         stats.ParserFrameSeqErrors++;
         XTRACE(PROCESS, WAR, "ParserFrameSeqErrors: fc %d, next fc %d",
           hdr.frameCounter, pd.nextFrameCounter);
-
+/*
         for(int vmmid=0; vmmid < MaxVMMs; vmmid++) {
           markers[(pd.fecId - 1) * MaxVMMs + vmmid].fecTimeStamp = 0;
           markers[(pd.fecId - 1) * MaxVMMs + vmmid].calcTimeStamp = 0;
         }
+        */
       }
     }
   }
@@ -146,6 +148,7 @@ int ParserVMM3::receive(const char *buffer, int size) {
   }
 
   pd.fecId = (hdr.dataId >> 4) & 0x0f;
+  
   if (pd.fecId == 0) {
     XTRACE(PROCESS, WAR, "Invalid fecId: %u", pd.fecId);
     stats.ParserBadFrames++;
