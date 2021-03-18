@@ -252,7 +252,7 @@ def get_system_tests_pipeline() {
                                                     """
                             timeout(time: 30, activity: true) {
                                 sh """cd system-tests/
-                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark
                                 """
                             }
                         }  // stage
