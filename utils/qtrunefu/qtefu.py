@@ -176,14 +176,14 @@ class Dialog(QDialog): #WMainWindow
 #
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", metavar='config', help = "configuration",
+    parser.add_argument("-p", metavar='profile', help = "profiles: grafana_profile",
                        type = str, default = "office")
     args = parser.parse_args()
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     app = QApplication(sys.argv)
 
-    cfg = Configuration(args.c)
+    cfg = Configuration(args.p)
     dirs = Directories(cfg.options['basedir'], cfg.options['efudir'], cfg.options['datadir'])
     searcher = Searcher(dirs)
     dialog = Dialog(cfg, dirs)
