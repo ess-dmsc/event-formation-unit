@@ -46,32 +46,40 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
-  Stats.create("readouts.error_buffer", Counters.ErrorBuffer);
-  Stats.create("readouts.error_size", Counters.ErrorSize);
-  Stats.create("readouts.error_version", Counters.ErrorVersion);
-  Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
-  Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
-  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
-  Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
-  Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
-  Stats.create("readouts.heartbeats", Counters.HeartBeats);
-  // LoKI Readout Data
-  Stats.create("readouts.count", Counters.Readouts);
-  Stats.create("readouts.headers", Counters.Headers);
-  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
-  Stats.create("readouts.error_header", Counters.ErrorHeaders);
-  Stats.create("readouts.pos_low", Counters.ReadoutsClampLow);
-  Stats.create("readouts.pos_high", Counters.ReadoutsClampHigh);
+  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
+  Stats.create("essheader.error_buffer", Counters.ErrorBuffer);
+  Stats.create("essheader.error_size", Counters.ErrorSize);
+  Stats.create("essheader.error_version", Counters.ErrorVersion);
+  Stats.create("essheader.error_output_queue", Counters.ErrorOutputQueue);
+  Stats.create("essheader.error_type", Counters.ErrorTypeSubType);
+  Stats.create("essheader.error_seqno", Counters.ErrorSeqNum);
+  Stats.create("essheader.error_timefrac", Counters.ErrorTimeFrac);
+  Stats.create("essheader.heartbeats", Counters.HeartBeats);
 
-  //
+  // LoKI Readout Data
+  Stats.create("readouts.headers", Counters.DataHeaders);
+  Stats.create("readouts.count", Counters.Readouts);
+  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
+  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
+  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+
+  // Logical and Digital geometry incl. Calibration
+  Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
+  Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
+  Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
+  Stats.create("geometry.pos_low", Counters.ReadoutsClampLow);
+  Stats.create("geometry.pos_high", Counters.ReadoutsClampHigh);
+
+  // Events
+  Stats.create("events.count", Counters.Events);
+  Stats.create("events.pixel_errors", Counters.PixelErrors);
+  Stats.create("events.udder", Counters.EventsUdder);
+
+
+  // System counters
   Stats.create("thread.input_idle", Counters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
-  Stats.create("events.count", Counters.Events);
-  Stats.create("events.udder", Counters.EventsUdder);
-  Stats.create("events.calib_errors", Counters.CalibrationErrors);
-  Stats.create("events.mapping_errors", Counters.MappingErrors);
-  Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -219,7 +227,7 @@ void LokiBase::processingThread() {
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
-        Counters.ErrorHeaders++;
+        Counters.ErrorESSHeaders++;
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",

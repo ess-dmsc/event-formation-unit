@@ -147,8 +147,9 @@ void LokiInstrument::processReadouts() {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
     if (Section.RingId >= LokiConfiguration.Panels.size()) {
-      XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
-      counters.MappingErrors++;
+      XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
+        Section.RingId, LokiConfiguration.Panels.size());
+      counters.RingErrors++;
       continue;
     }
 
@@ -156,7 +157,7 @@ void LokiInstrument::processReadouts() {
 
     if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
       XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
-      counters.MappingErrors++;
+      counters.FENErrors++;
       continue;
     }
 
@@ -175,7 +176,7 @@ void LokiInstrument::processReadouts() {
 
 
       if (PixelId == 0) {
-        counters.GeometryErrors++;
+        counters.PixelErrors++;
       } else {
         counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
         counters.Events++;
