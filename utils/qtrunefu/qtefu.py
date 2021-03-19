@@ -1,30 +1,34 @@
-#!/usr/local/bin/python3.7
+#!/usr/local/bin/python3.9
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 from os.path import expanduser
 import sys, os, re, subprocess, signal, configparser
+import argparse
 
 
 # Reads configuration from file or use reasonable default values
 class Configuration:
-    def __init__(self):
+    def __init__(self, profile):
+        self.profile=profile
         self.options = {}
         self.config = configparser.RawConfigParser()
         self.config.read(os.path.join(expanduser("~"), ".efucfg"))
-        self._load('directories', 'basedir', expanduser("~"))
-        self._load('directories', 'efudir', '/essproj/event-formation-unit')
-        self._load('directories', 'datadir', '/ownCloud/DM/data/EFU_reference')
-        self._load('servers', 'grafana', '172.17.12.31')
-        self._load('servers', 'kafka', '172.17.5.38:9092')
-        self._load('efuopts', 'hwcheck', False)
+        self._load('directories', 'basedir')
+        self._load('directories', 'efudir')
+        self._load('directories', 'datadir')
+        self._load('servers', 'grafana_'+profile)
+        self._load('servers', 'kafka_'+profile)
+        self._load('efuopts', 'hwcheck')
+        self._load('efuopts', 'region')
 
     # load option or use defult value
-    def _load(self, group, opt, default):
+    def _load(self, group, opt):
         if self.config.has_option(group, opt):
             self.options[opt] = self.config.get(group, opt)
         else:
-            self.options[opt] = default
+            print("No option {}, exiting ...".format(opt))
+            sys.exit(0)
 
 
 # Maintain a set of directories for searching
@@ -123,12 +127,14 @@ class Dialog(QDialog): #WMainWindow
         self.files_group_box.setLayout(fileslayout)
         self.options_box = QGroupBox("Options")
         optslayout = QFormLayout()
-        self.grafanale = QLineEdit(cfg.options['grafana'])
+        self.grafanale = QLineEdit(cfg.options['grafana_' + self.cfg.profile])
         self.add_row(optslayout, "Grafana IP:", self.grafanale)
-        self.kafkale = QLineEdit(cfg.options['kafka'])
+        self.kafkale = QLineEdit(cfg.options['kafka_' + self.cfg.profile])
         self.add_row(optslayout, "Kafka IP:", self.kafkale)
         self.hwcheckle = QLineEdit(cfg.options['hwcheck'])
         self.add_row(optslayout, "HW check:", self.hwcheckle)
+        self.regionle = QLineEdit(cfg.options['region'])
+        self.add_row(optslayout, "Region:", self.regionle)
         self.options_box.setLayout(optslayout)
 
     def _populate_field(self, field, list):
@@ -142,7 +148,7 @@ class Dialog(QDialog): #WMainWindow
         self._populate_field(self.calcb, calib)
 
     def get_selection(self):
-        return self._efu, self._det, self._cfg, self._cal, self._grafana, self._kafka, self._hwcheck
+        return self._efu, self._det, self._cfg, self._cal, self._grafana, self._kafka, self._hwcheck, self._region
 
     # Override builtin on_accepted method for pressing OK button
     def on_accepted(self):
@@ -153,6 +159,7 @@ class Dialog(QDialog): #WMainWindow
         self._grafana = self.grafanale.text()
         self._kafka = self.kafkale.text()
         self._hwcheck = self.hwcheckle.text()
+        self._region = self.regionle.text()
         self.accept()
 
     def update(self):
@@ -168,10 +175,15 @@ class Dialog(QDialog): #WMainWindow
 #
 #
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", metavar='config', help = "configuration",
+                       type = str, default = "office")
+    args = parser.parse_args()
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     app = QApplication(sys.argv)
 
-    cfg = Configuration()
+    cfg = Configuration(args.c)
     dirs = Directories(cfg.options['basedir'], cfg.options['efudir'], cfg.options['datadir'])
     searcher = Searcher(dirs)
     dialog = Dialog(cfg, dirs)
@@ -181,7 +193,7 @@ if __name__ == '__main__':
 
     retval = dialog.exec_()
     if retval != 0:
-        efu, det, config, calib, grafana, kafka, hwcheck = dialog.get_selection()
+        efu, det, config, calib, grafana, kafka, hwcheck, region = dialog.get_selection()
         cmdlopts = [os.path.join(dirs.basedir, efu), '--det', os.path.join(dirs.basedir, det)]
         if hwcheck == "False":
             cmdlopts += ['--nohwcheck']
@@ -193,6 +205,8 @@ if __name__ == '__main__':
             cmdlopts += ['--file', os.path.join(dirs.basedir, config)]
         if calib != "":
             cmdlopts += ['--calibration', os.path.join(dirs.basedir, calib)]
+        if region != "":
+            cmdlopts += ['--region', region]
         print(' '.join(cmdlopts))
         subprocess.call(cmdlopts)
     sys.exit()

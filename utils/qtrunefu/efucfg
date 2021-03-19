@@ -4,13 +4,19 @@ efudir: /essproj/event-formation-unit/build
 datadir: /ownCloud/DM/data/EFU_reference
 
 [servers]
-efu: 127.0.0.1
-grafana: 172.17.12.31
-kafka: 172.17.5.38:9092
+grafana_local: 127.0.0.1
+kafka_local: 127.0.0.1:9092
+
+grafana_office: 172.30.242.21
+kafka_office: 172.17.5.38:9092
+
+grafana_utgaard: 172.30.242.21
+kafka_utgaard: 172.30.242.20:9092
 
 [efuopts]
 hwcheck: False
+region: 0
 
 [datagen]
-throttle:50
+throttle:10000
 bytes: 1472
