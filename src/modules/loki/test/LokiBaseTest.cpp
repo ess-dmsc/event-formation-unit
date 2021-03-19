@@ -172,9 +172,10 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 7);
-  EXPECT_EQ(Readout.Counters.Headers, 3);
-  EXPECT_EQ(Readout.Counters.GeometryErrors, 1);
-  EXPECT_EQ(Readout.Counters.MappingErrors, 2);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 3);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
+  EXPECT_EQ(Readout.Counters.RingErrors, 1);
+  EXPECT_EQ(Readout.Counters.FENErrors, 1);
   EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
