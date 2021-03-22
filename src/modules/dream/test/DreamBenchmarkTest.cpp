@@ -1,7 +1,6 @@
 #include <benchmark/benchmark.h>
-#include <jalousie/geometry/DreamGeometry.h>
-
 #include <common/BenchmarkUtil.h>
+#include <dream/geometry/DreamGeometry.h>
 
 using namespace DreamGeometry;
 

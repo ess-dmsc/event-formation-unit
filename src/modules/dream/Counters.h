@@ -1,9 +1,9 @@
-// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief LoKI application counters (for Grafana and low level debug)
+/// \brief DREAM application counters (for Grafana and low level debug)
 ///
 //===----------------------------------------------------------------------===//
 
@@ -29,13 +29,8 @@ struct Counters {
   int64_t ErrorOutputQueue;
   int64_t ErrorTypeSubType;
   int64_t ErrorSeqNum;
-  int64_t ErrorTimeFrac;
-  int64_t HeartBeats;
-  // LoKI DataParser
+  // DREAM DataParser
   int64_t Readouts;
-  int64_t ReadoutsBadAmpl;
-  int64_t ReadoutsClampLow;
-  int64_t ReadoutsClampHigh;
   int64_t Headers;
   int64_t ErrorHeaders;
   int64_t ErrorBytes;
@@ -44,7 +39,6 @@ struct Counters {
   int64_t ProcessingIdle;
   int64_t Events;
   int64_t EventsUdder;
-  int64_t CalibrationErrors;
   int64_t MappingErrors;
   int64_t GeometryErrors;
   int64_t TxBytes;

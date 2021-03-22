@@ -1,4 +1,12 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+/* Copyright (C) 2018-2021 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to receive and generate Gd-GEM detector readout
+/// from VMM3 ASICS via the SRS readout system
+///
+//===----------------------------------------------------------------------===//
 
 #include <arpa/inet.h>
 #include <cinttypes>
@@ -42,8 +50,8 @@ int ParserVMM3::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vd) {
     markers[idx].lastTriggerOffset = vd->triggerOffset;
     vd->adc = (data1 >> 12) & 0x3FF;
     vd->bcid = BitMath::gray2bin32(data1 & 0xFFF);
-    //Maybe here use the calculated timestamp instead
-    //vd->fecTimeStamp = markers[idx].calcTimeStamp;
+    /// \todo Maybe here use the calculated timestamp instead
+    /// vd->fecTimeStamp = markers[idx].calcTimeStamp;
     vd->fecTimeStamp = markers[idx].fecTimeStamp;
     if(vd->fecTimeStamp > 0) {
       markers[idx].hasDataMarker = true;
@@ -113,11 +121,8 @@ int ParserVMM3::receive(const char *buffer, int size) {
         stats.ParserFrameSeqErrors++;
         XTRACE(PROCESS, WAR, "ParserFrameSeqErrors: fc %d, next fc %d",
           hdr.frameCounter, pd.nextFrameCounter);
-
-        for(int vmmid=0; vmmid < MaxVMMs; vmmid++) {
-          markers[(pd.fecId - 1) * MaxVMMs + vmmid].fecTimeStamp = 0;
-          markers[(pd.fecId - 1) * MaxVMMs + vmmid].calcTimeStamp = 0;
-        }
+        /// \todo here we used to clear markers. If this is needed again
+        /// some day a new method is required says Dorothea P.
       }
     }
   }
@@ -146,6 +151,7 @@ int ParserVMM3::receive(const char *buffer, int size) {
   }
 
   pd.fecId = (hdr.dataId >> 4) & 0x0f;
+
   if (pd.fecId == 0) {
     XTRACE(PROCESS, WAR, "Invalid fecId: %u", pd.fecId);
     stats.ParserBadFrames++;

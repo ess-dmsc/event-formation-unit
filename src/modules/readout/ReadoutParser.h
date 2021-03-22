@@ -16,7 +16,7 @@ const uint8_t MaxOutputQueues{24};
 class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType { Loki4Amp = 0x30 };
+  enum DetectorType { Reserved = 0x00, Loki4Amp = 0x30, DREAM = 0x60};
 
   uint64_t NextSeqNum[MaxOutputQueues];
 
@@ -75,5 +75,8 @@ public:
     int64_t ErrorTypeSubType{0};
     int64_t ErrorOutputQueue{0};
     int64_t ErrorSeqNum{0};
+    int64_t ErrorTimeFrac{0};
+    int64_t HeartBeats{0};
   } Stats;
+
 };

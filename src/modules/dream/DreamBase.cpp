@@ -1,12 +1,12 @@
-// Copyright (C) 2019-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Implementation of the detector pipeline plugin for Loki
-/// detectors
+/// \brief Implementation of the detector pipeline plugin for DREAM
+/// \todo unofficial - not reviewed Readout structure
 //===----------------------------------------------------------------------===//
 
-#include "LokiBase.h"
+#include "DreamBase.h"
 
 #include <cinttypes>
 #include <common/EFUArgs.h>
@@ -19,22 +19,20 @@
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-#include <loki/LokiInstrument.h>
+#include <dream/DreamInstrument.h>
 #include <unistd.h>
-#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-// #define ECDC_DEBUG_READOUT
 
-namespace Loki {
+namespace Jalousie {
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const char *classname = "Loki detector with ESS readout";
+const char *classname = "DREAM detector with ESS readout";
 
-LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings)
-    : Detector("Loki", Settings), LokiModuleSettings(LocalLokiSettings) {
+DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDreamSettings)
+    : Detector("Dream", Settings), DreamModuleSettings(LocalDreamSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -51,17 +49,12 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_version", Counters.ErrorVersion);
   Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
   Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
-  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
-  Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
-  Stats.create("readouts.heartbeats", Counters.HeartBeats);
-  // LoKI Readout Data
+  // Dream Readout Data
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.Headers);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
   Stats.create("readouts.error_header", Counters.ErrorHeaders);
-  Stats.create("readouts.pos_low", Counters.ReadoutsClampLow);
-  Stats.create("readouts.pos_high", Counters.ReadoutsClampHigh);
 
   //
   Stats.create("thread.input_idle", Counters.RxIdle);
@@ -69,7 +62,6 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
-  Stats.create("events.calib_errors", Counters.CalibrationErrors);
   Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
@@ -83,20 +75,20 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { LokiBase::inputThread(); };
+  std::function<void()> inputFunc = [this]() { DreamBase::inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    LokiBase::processingThread();
+    DreamBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Loki Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d Dream Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
 
-void LokiBase::inputThread() {
+void DreamBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -135,63 +127,23 @@ void LokiBase::inputThread() {
   return;
 }
 
-/// \brief Generate an Udder test image
-/// \todo is probably not working after latest changes
-void LokiBase::testImageUdder() {
-  ESSGeometry LoKIGeometry(512, 224, 1, 1);
-  XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-  Udder udderImage;
-  udderImage.cachePixels(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-  uint32_t TimeOfFlight = 0;
-  while (runThreads) {
-    static int EventCount = 0;
-    if (EventCount == 0) {
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      Serializer->pulseTime(EfuTime);
-    }
-
-    auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
-    Counters.EventsUdder++;
-
-    if (EFUSettings.TestImageUSleep != 0) {
-      usleep(EFUSettings.TestImageUSleep);
-    }
-
-    TimeOfFlight++;
-
-    if (Counters.TxBytes != 0) {
-      EventCount = 0;
-    } else {
-      EventCount++;
-    }
-  }
-  // \todo flush everything here
-  XTRACE(INPUT, ALW, "Stopping processing thread.");
-  return;
-}
-
 ///
 /// \brief Normal processing thread
-void LokiBase::processingThread() {
+void DreamBase::processingThread() {
 
-  LokiInstrument Loki(Counters, LokiModuleSettings);
+  DreamInstrument Dream(Counters, DreamModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
-  Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
-
-  if (EFUSettings.TestImage) {
-    return testImageUdder();
-  }
+  Serializer = new EV42Serializer(KafkaBufferSize, "dream", Produce);
+  Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer, DebugTimer;
+  TSCTimer ProduceTimer;
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -207,15 +159,13 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
-      Counters.ErrorBuffer = Loki.ESSReadoutParser.Stats.ErrorBuffer;
-      Counters.ErrorSize = Loki.ESSReadoutParser.Stats.ErrorSize;
-      Counters.ErrorVersion = Loki.ESSReadoutParser.Stats.ErrorVersion;
-      Counters.ErrorTypeSubType = Loki.ESSReadoutParser.Stats.ErrorTypeSubType;
-      Counters.ErrorOutputQueue = Loki.ESSReadoutParser.Stats.ErrorOutputQueue;
-      Counters.ErrorSeqNum = Loki.ESSReadoutParser.Stats.ErrorSeqNum;
-      Counters.ErrorTimeFrac = Loki.ESSReadoutParser.Stats.ErrorTimeFrac;
-      Counters.HeartBeats = Loki.ESSReadoutParser.Stats.HeartBeats;
+      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::DREAM);
+      Counters.ErrorBuffer = Dream.ESSReadoutParser.Stats.ErrorBuffer;
+      Counters.ErrorSize = Dream.ESSReadoutParser.Stats.ErrorSize;
+      Counters.ErrorVersion = Dream.ESSReadoutParser.Stats.ErrorVersion;
+      Counters.ErrorTypeSubType = Dream.ESSReadoutParser.Stats.ErrorTypeSubType;
+      Counters.ErrorOutputQueue = Dream.ESSReadoutParser.Stats.ErrorOutputQueue;
+      Counters.ErrorSeqNum = Dream.ESSReadoutParser.Stats.ErrorSeqNum;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
@@ -223,38 +173,19 @@ void LokiBase::processingThread() {
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
+        Dream.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+        Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
-      Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr, Loki.ESSReadoutParser.Packet.DataLength);
+      Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr, Dream.ESSReadoutParser.Packet.DataLength);
 
       // Process readouts, generate (end produce) events
-      Loki.processReadouts();
+      Dream.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
       usleep(10);
-
     }
-
-
-      #ifdef ECDC_DEBUG_READOUT
-      if (DebugTimer.timetsc() >=
-          5ULL * 1000000 * TSC_MHZ) {
-        printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
-        printf("-----------------------------------------------------------------------------------\n");
-        for (int ring = 0; ring < 8; ring++) {
-          printf("ring %2d  | ", ring);
-          for (int fen = 0; fen < 8; fen++) {
-            printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
-          }
-          printf("\n");
-        }
-        fflush(NULL);
-        DebugTimer.now();
-      }
-      #endif
 
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
@@ -277,4 +208,4 @@ void LokiBase::processingThread() {
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }
-} // namespace Loki
+} // namespace Jalousie

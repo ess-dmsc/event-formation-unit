@@ -12,8 +12,8 @@
 #include <readout/ReadoutParser.h>
 #include <arpa/inet.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 #define VERSION_OFFSET 1
 
@@ -54,7 +54,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
 
   // Check cookie
   uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 2)) & 0xffffff;
-  XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
+  //XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
     Stats.ErrorCookie++;
@@ -95,8 +95,9 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   }
 
   if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
-    XTRACE(PROCESS, WAR, "Bad sequence number (expected %u, got %u)",
-           NextSeqNum, Packet.HeaderPtr->SeqNum);
+    XTRACE(PROCESS, WAR, "Bad sequence number for OQ %u (expected %u, got %u)",
+           Packet.HeaderPtr->OutputQueue,
+           NextSeqNum[Packet.HeaderPtr->OutputQueue], Packet.HeaderPtr->SeqNum);
     Stats.ErrorSeqNum++;
     NextSeqNum[Packet.HeaderPtr->OutputQueue] = Packet.HeaderPtr->SeqNum;
   }
@@ -104,6 +105,20 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   NextSeqNum[Packet.HeaderPtr->OutputQueue]++;
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
+
+  // Check time values \todo so far only PulseTime and not
+  // PrevPulseTime
+  if (Packet.HeaderPtr->PulseLow >= 88025200) {
+    XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (88025199)",
+      Packet.HeaderPtr->PulseLow);
+    Stats.ErrorTimeFrac++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if (Packet.HeaderPtr->TotalLength == sizeof(ReadoutParser::PacketHeaderV0)) {
+    XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
+    Stats.HeartBeats++;
+  }
 
   return ReadoutParser::OK;
 }
