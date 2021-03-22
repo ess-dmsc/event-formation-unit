@@ -24,9 +24,9 @@ public:
   {
     uint32_t TimeHigh;
     uint32_t TimeLow;
-    uint8_t FPGAId;
+    uint8_t unused;
     uint8_t TubeId;
-    uint16_t ADC; ///< \todo hmm, where did this come from? SeqNum?
+    uint16_t DataSeqNum;
     uint16_t AmpA;
     uint16_t AmpB;
     uint16_t AmpC;
@@ -54,5 +54,6 @@ public:
   std::vector<struct ParsedData> Result;
 
   struct Counters & Stats;
+  uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
 }

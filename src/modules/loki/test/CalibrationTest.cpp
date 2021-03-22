@@ -13,19 +13,17 @@ std::string NotJsonStr = R"(
 std::string BadStrawOrderFile{"deleteme_lokicalib_badstraworder.json"};
 std::string BadStrawOrderStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 3,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 3,
+      "resolution" : 512,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
-            {"straw" :    3, "poly" : [0.0, 0.0, 0.0, 2.0]}
-          ]
-      }
+      "polynomials" : [
+        [0,0.0,0.0,0.0,0.0],
+        [2,0.0,0.0,0.0,0.0],
+        [1,0.0,0.0,0.0,0.0]
+      ]
+    }
   }
 )";
 
@@ -33,19 +31,17 @@ std::string BadStrawOrderStr = R"(
 std::string StrawMismatchFile{"deleteme_lokicalib_strawmismatch.json"};
 std::string StrawMismatchStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 4,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 4,
+      "resolution" : 512,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
-          ]
-      }
+      "polynomials" : [
+        [0,0.0,0.0,0.0,0.0],
+        [1,0.0,0.0,0.0,0.0],
+        [2,0.0,0.0,0.0,0.0]
+      ]
+    }
   }
 )";
 
@@ -53,77 +49,51 @@ std::string StrawMismatchStr = R"(
 std::string InvalidCoeffFile{"deleteme_lokicalib_invalidcoeff.json"};
 std::string InvalidCoeffStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 3,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 3,
+      "resolution" : 512,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 0.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
-          ]
-      }
-  }
-)";
-
-/// \brief calibration expands pixels outside resolution
-std::string InvalidCalibFile{"deleteme_lokicalib_invalidcalib.json"};
-std::string InvalidCalibStr = R"(
-  {
-    "LokiCalibration":
-      {
-        "straws" : 3,
-
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 1.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 1.0, 1.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 1.0, 2.0]}
-          ]
-      }
+      "polynomials" : [
+        [0, 0.0, 0.0, 0.0, 0.0],
+        [1, 0.0, 0.0, 0.0],
+        [2, 0.0, 0.0, 0.0, 0.0]
+      ]
+    }
   }
 )";
 
 std::string StrawMappingNullFile{"deleteme_lokicalib_strawmapping_null.json"};
 std::string StrawMappingNullStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 3,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 3,
+      "resolution" : 256,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 1.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 1.0, 0.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 1.0, 0.0]}
-          ]
-      }
+      "polynomials" : [
+        [0, 0.0, 1.0, 0.0, 0.0],
+        [1, 0.0, 1.0, 0.0, 0.0],
+        [2, 0.0, 1.0, 0.0, 0.0]
+      ]
+    }
   }
 )";
 
 std::string StrawMappingConstFile{"deleteme_lokicalib_strawmapping_strawid.json"};
 std::string StrawMappingConstStr = R"(
   {
-    "LokiCalibration":
-      {
-        "straws" : 3,
+    "LokiCalibration" : {
+      "ntubes" : 1,
+      "nstraws" : 3,
+      "resolution" : 256,
 
-        "resolution" : 256,
-
-        "polynomials" :
-          [
-            {"straw" :    0, "poly" : [0.0, 0.0, 0.0, 0.0]},
-            {"straw" :    1, "poly" : [0.0, 0.0, 0.0, 1.0]},
-            {"straw" :    2, "poly" : [0.0, 0.0, 0.0, 2.0]}
-          ]
-      }
+      "polynomials" : [
+        [0, 0.0, 0.0, 0.0, 0.0],
+        [1, 1.0, 0.0, 0.0, 0.0],
+        [2, 2.0, 0.0, 0.0, 0.0]
+      ]
+    }
   }
 )";
 
@@ -138,7 +108,7 @@ protected:
 
 TEST_F(CalibrationTest, Constructor) {
   Calibration calib;
-  ASSERT_EQ(calib.StrawMapping.size(), 0);
+  ASSERT_EQ(calib.StrawCalibration.size(), 0);
   ASSERT_EQ(calib.getMaxPixel(), 0);
 }
 
@@ -171,10 +141,29 @@ TEST_F(CalibrationTest, NullCalibrationGood) {
   }
 }
 
+
+// Test clamping to 0 and max by manipulating polynomial coefficients
+TEST_F(CalibrationTest, ClampLowAndHigh) {
+  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
+  Calibration calib = Calibration(StrawMappingNullFile);
+
+  calib.StrawCalibration[0][0] = 100.0; // a = 100
+  uint32_t res = calib.strawCorrection(0, 5.0);
+  ASSERT_EQ(calib.Stats.ClampLow, 1);
+  ASSERT_EQ(res, 0);
+
+  calib.StrawCalibration[0][0] = -2000;
+  res = calib.strawCorrection(0, 5.0);
+  ASSERT_EQ(calib.Stats.ClampHigh, 1);
+  ASSERT_EQ(res, 255);
+
+  deleteFile(StrawMappingNullFile);
+}
+
 TEST_F(CalibrationTest, LoadCalib) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
-  ASSERT_EQ(calib.StrawMapping.size(), 3);
+  ASSERT_EQ(calib.StrawCalibration.size(), 3);
   ASSERT_EQ(calib.getMaxPixel(), 3*256);
   deleteFile(StrawMappingNullFile);
 }
@@ -186,13 +175,13 @@ TEST_F(CalibrationTest, LoadCalibConst) {
   uint16_t Resolution{256};
 
   Calibration calib = Calibration(StrawMappingConstFile);
-  ASSERT_EQ(calib.StrawMapping.size(), Straws);
+  ASSERT_EQ(calib.StrawCalibration.size(), Straws);
   ASSERT_EQ(calib.getMaxPixel(), Straws * Resolution);
 
   for (uint32_t Straw = 0; Straw < Straws; Straw++) {
-    for (uint32_t Pos = 0; Pos < Resolution; Pos++) {
+    for (uint32_t Pos = 2; Pos < Resolution; Pos++) {
 
-      ASSERT_EQ(calib.strawCorrection(Straw, Pos), Straw);
+      ASSERT_EQ(calib.strawCorrection(Straw, Pos), Pos - Straw);
     }
   }
   deleteFile(StrawMappingConstFile);
@@ -222,13 +211,6 @@ TEST_F(CalibrationTest, InvalidCoeff) {
   ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCoeffFile));
   deleteFile(InvalidCoeffFile);
 }
-
-TEST_F(CalibrationTest, InvalidCalib) {
-  saveBuffer(InvalidCalibFile, (void *)InvalidCalibStr.c_str(), InvalidCalibStr.size());
-  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCalibFile));
-  deleteFile(InvalidCalibFile);
-}
-
 
 
 int main(int argc, char **argv) {

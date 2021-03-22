@@ -11,7 +11,12 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
+#include <common/Trace.h>
 #include <cinttypes>
+#include <vector>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_ERR
 
 namespace Loki {
 
@@ -26,18 +31,23 @@ public:
   /// ranges.
   bool calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
                     std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
-    std::uint32_t StrawFrac1 = AmplitudeA + AmplitudeB;
-    std::uint32_t StrawFrac2 = AmplitudeC + AmplitudeD;
-    std::uint32_t PosFrac1 = AmplitudeA + AmplitudeD;
-    std::uint32_t Denominator = StrawFrac1 + StrawFrac2;
+    std::uint32_t StrawNum = AmplitudeA + AmplitudeC;
+    std::uint32_t PosNum = AmplitudeA + AmplitudeB;
+    std::uint32_t Denominator = AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
+    XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u",
+           StrawNum, PosNum, Denominator);
     if (Denominator == 0) {
+      XTRACE(INIT, WAR, "StrawNum: %u, PosNum: %u, Denominator: %u",
+             StrawNum, PosNum, Denominator);
       Stats.AmplitudeZero++;
       StrawId = NStraws;
-      PosId = NPos;
+      PosVal = NPos;
       return false;
     }
-    StrawId = ((NStraws - 1) * StrawFrac1) / Denominator;
-    PosId = ((NPos - 1) * PosFrac1) / Denominator;
+    double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
+    StrawId = strawCalc(dStrawId);
+    PosVal = ((NPos - 1) * PosNum * 1.0) / Denominator;
+    XTRACE(INIT, DEB, "dStraw %f, StrawId %u, PosId: %u", dStrawId, StrawId);
     return true;
   }
 
@@ -49,15 +59,34 @@ public:
     uint64_t AmplitudeZero{0};
   } Stats;
 
+  uint8_t strawCalc(double straw) {
+    std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
+    if (straw <= limits[0])
+      return 0;
+    else if (straw <= limits[1])
+      return 1;
+    else if (straw <= limits[2])
+      return 2;
+    else if (straw <= limits[3])
+      return 3;
+    else if (straw <= limits[4])
+      return 4;
+    else if (straw <= limits[5])
+      return 5;
+    else
+      return 6;
+  }
+
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::uint16_t NPos{512}; ///< resolution of position
+
 
 public:
   /// holds latest calculated values for straw and position
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
-  std::uint16_t PosId{512};
+  double PosVal{512.0};
 };
 
 } // nmaespace Loki

@@ -16,7 +16,7 @@ const uint8_t MaxOutputQueues{24};
 class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType { Loki4Amp = 0x30 };
+  enum DetectorType { Reserved = 0x00, Loki4Amp = 0x30, DREAM = 0x60};
 
   uint64_t NextSeqNum[MaxOutputQueues];
 
@@ -25,8 +25,6 @@ public:
   // ownCloud: https://project.esss.dk/owncloud/index.php/s/DWNer23727TiI1x
   struct PacketHeaderV0 {
     uint8_t Padding0;
-    uint8_t Padding1;
-    uint8_t Padding2;
     uint8_t Version;
     uint32_t CookieAndType;
     uint16_t TotalLength;
@@ -39,7 +37,7 @@ public:
     uint32_t SeqNum;
   } __attribute__((packed));
 
-  static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (32),
+  static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (30),
                 "Wrong header size (update assert or check packing)");
 
 
@@ -71,10 +69,14 @@ public:
   struct {
     int64_t ErrorBuffer{0};
     int64_t ErrorSize{0};
+    int64_t ErrorPad{0};
     int64_t ErrorVersion{0};
     int64_t ErrorCookie{0};
     int64_t ErrorTypeSubType{0};
     int64_t ErrorOutputQueue{0};
     int64_t ErrorSeqNum{0};
+    int64_t ErrorTimeFrac{0};
+    int64_t HeartBeats{0};
   } Stats;
+
 };

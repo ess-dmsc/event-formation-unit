@@ -10,17 +10,9 @@
 
 #include <common/Detector.h>
 #include <common/EV42Serializer.h>
-#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
 #include <loki/Counters.h>
-#include <loki/geometry/Config.h>
-#include <loki/geometry/Calibration.h>
-#include <loki/readout/DataParser.h>
-#include <loki/readout/Readout.h>
-#include <readout/ReadoutParser.h>
-#include <readout/ESSTime.h>
-#include <loki/geometry/TubeAmps.h>
 
 namespace Loki {
 
@@ -44,12 +36,7 @@ public:
   /// \brief generate a Udder test image
   void testImageUdder();
 
-  /// \brief separate initial config from main processing
-  void setupProcessingThread();
 
-  /// \brief calculate pixel id
-  // uint32_t calcPixel(PanelGeometry & Panel, uint8_t FEN,
-  //                    DataParser::LokiReadout & Data);
 
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries {2000};
@@ -63,21 +50,14 @@ public:
   const int TSC_MHZ = 2900;
 
 protected:
-  /** Shared between input_thread and processing_thread*/
+  /// Shared between input_thread and processing_thread
   CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
-  //Config LokiConfiguration;
-  //Calibration LokiCalibration;
-  //ReadoutParser ESSReadoutParser;
-  //DataParser LokiParser{Counters};
-  //TubeAmps Amp2Pos;
-  ESSTime Time;
   EV42Serializer * Serializer;
-  //std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 }

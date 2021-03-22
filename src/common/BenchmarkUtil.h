@@ -5,7 +5,7 @@
 /// \brief This utility supports various profiler/timer instrumentation in
 ///        Google Benchmark
 ///
-/// It dies this by adding the BenchmarkLoop() and
+/// It does this by adding the BenchmarkLoop() and
 /// BenchmarkLoopPaused() functions.
 /// Both functions allow the user to execute their code in a lambda,
 /// while turning instrumentation on/off at the correct times.

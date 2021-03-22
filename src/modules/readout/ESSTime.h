@@ -31,7 +31,7 @@ public:
 private:
   /// \brief convert ess High/Low time to NS
   uint64_t toNS(uint32_t High, uint32_t Low) {
-    assert(Low < 88052500);
+    //assert(Low < 88052500);
     return  High * OneBillion + Low * NsPerTick;
   }
   uint64_t TimeInNS{0};

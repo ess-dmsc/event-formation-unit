@@ -11,9 +11,9 @@ const uint32_t FirstSeqNum{0};
 // Two Data Sections each containing three readouts
 std::vector<uint8_t> UdpPayload
 {
-    0x00, 0x00, 0x00, 0x00, // pad, pad, pad, v0
+                0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x30, // 'E', 'S', 'S', type 0x30
-    0xA0, 0x00, 0x01, 0x00, // len 160/0xa0 OQ 1
+    0x9e, 0x00, 0x01, 0x00, // len 158/0x9e OQ 1
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
@@ -118,8 +118,8 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
   for (auto & Section : LokiParser.Result) {
     printf("Ring %u, FEN %u\n", Section.RingId, Section.FENId);
     for (auto & Data : Section.Data) {
-      printf("time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u\n",
-        Data.TimeHigh, Data.TimeLow, Data.FPGAId, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+      printf("time (%u, %u), SeqNum %u, Tube %u, A %u, B %u, C %u, D %u\n",
+        Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
     }
   }
 }

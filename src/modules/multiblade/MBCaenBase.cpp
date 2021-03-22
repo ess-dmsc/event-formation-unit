@@ -7,18 +7,20 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/MBCaenBase.h>
+
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/RingBuffer.h>
+#include <common/RuntimeStat.h>
+#include <common/Socket.h>
+#include <common/SPSCFifo.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
-#include <unistd.h>
-#include <common/SPSCFifo.h>
-#include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
+#include <multiblade/MBCaenBase.h>
 #include <multiblade/MBCaenInstrument.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -201,6 +203,9 @@ void CAENBase::processing_thread() {
   unsigned int data_index;
   TSCTimer produce_timer;
   Timer h5flushtimer;
+  // Monitor these counters
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+
   while (true) {
     if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = EthernetRingbuffer->getDataLength(data_index);
@@ -239,7 +244,7 @@ void CAENBase::processing_thread() {
           Counters.Events++;
         }
       }
-      MBCaen.builders[cassette].Events.clear();
+      MBCaen.builders[cassette].Events.clear(); // else events will accumulate
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
@@ -259,6 +264,8 @@ void CAENBase::processing_thread() {
 
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += flatbuffer.produce();
 

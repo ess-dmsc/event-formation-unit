@@ -18,8 +18,8 @@ set(JalousieBaseTest_INC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.h)
 
 set(JalousieBaseTest_SRC
-  JalousieBaseTest.cpp  
-  ${JAL_BASE_DIR}/JalousieBase.cpp  
+  JalousieBaseTest.cpp
+  ${JAL_BASE_DIR}/JalousieBase.cpp
   ${JAL_BASE_DIR}/Config.cpp
   ${JAL_BASE_DIR}/Readout.cpp
   ${JAL_BASE_DIR}/SumoMappings.cpp
@@ -42,26 +42,12 @@ set(JalReadoutTest_SRC ReadoutTest.cpp ${JAL_BASE_DIR}/Readout.cpp)
 set(JalReadoutTest_INC ${JAL_BASE_DIR}/Readout.h)
 create_test_executable(JalReadoutTest SKIP_MEMGRIND)
 
-set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
-set(DreamGeometryTest_INC ${JAL_BASE_DIR}/geometry/DreamGeometry.h)
-create_test_executable(DreamGeometryTest)
-
 #=============================================================================
 # tests depending on availability of reference data
 #=============================================================================
 
 set(TEST_DATA_PATH "${REFDATA}/jalousie/2019_07")
 if(EXISTS ${TEST_DATA_PATH})
-
-  set(JalCdtFileTest_INC ${JAL_BASE_DIR}/generators/CdtFile.h ${JAL_BASE_DIR}/Readout.h)
-  set(JalCdtFileTest_SRC
-    ${JAL_BASE_DIR}/generators/CdtFileTest.cpp
-    ${JAL_BASE_DIR}/generators/CdtFile.cpp
-    ${JAL_BASE_DIR}/Readout.cpp
-    )
-  create_test_executable(JalCdtFileTest)
-  target_compile_definitions(JalCdtFileTest
-    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 
   #
   set(JalBuilderReadoutsTest_INC ${JAL_BASE_DIR}/BuilderReadouts.h ${JAL_BASE_DIR}/Readout.h

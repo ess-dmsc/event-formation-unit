@@ -11,6 +11,7 @@
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
+#include <common/RuntimeStat.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
 
@@ -209,6 +210,8 @@ void JalousieBase::processingThread() {
 
   EV42Serializer ev42Serializer(kafka_buffer_size, "jalo", Produce);
 
+  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+
   unsigned int data_index;
   TSCTimer produce_timer;
   while (true) {
@@ -249,6 +252,8 @@ void JalousieBase::processingThread() {
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       produce_timer.now();
+
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
     }
 
     if (not runThreads) {

@@ -35,7 +35,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
+pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/mnt/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
 builders = pipeline_builder.createBuilders { container ->
@@ -252,7 +252,7 @@ def get_system_tests_pipeline() {
                                                     """
                             timeout(time: 30, activity: true) {
                                 sh """cd system-tests/
-                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark
                                 """
                             }
                         }  // stage

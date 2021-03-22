@@ -5,6 +5,8 @@
 ///
 /// \brief Get tube calibrations from json file
 ///
+/// Calibration method is described in the LoKI ICD which can be found here
+/// https://confluence.esss.lu.se/display/ECDC/Instrument+Status+Overview
 //===----------------------------------------------------------------------===//
 
 
@@ -21,31 +23,34 @@
 namespace Loki {
 class Calibration {
 public:
+
   Calibration();
 
-  /// \brief Create pixelmappings from calibration file
-  /// reads a vector of uint32_t and updated the number of pixels
+  /// \brief populate the strawcalibration vector with the provided
+  /// polynomial coefficients
   Calibration(std::string CalibrationFile);
 
-  /// /brief Create a null 'Calibration' no pixel mapping is done
+  /// \brief Create a null 'Calibration' no pixel mapping is done
   void nullCalibration(uint32_t Straws, uint16_t Resolution);
 
   /// \brief return the maximum pixel id
   uint32_t getMaxPixel() { return MaxPixelId; }
 
+  /// \brief apply the position correction
+  uint32_t strawCorrection(uint32_t StrawId, double Pos);
 
-  uint16_t strawCorrection(uint16_t Straw, uint16_t Pos) {
-    return StrawMapping[Straw][Pos];
-  }
+  /// \brief vector of (vector of) polynomial coefficients
+  std::vector<std::vector<double>> StrawCalibration;
 
-  /// \brief the new scheme to be implemented
-  std::vector<std::vector<uint16_t>> StrawMapping;
+  struct {
+    uint64_t ClampLow{0};
+    uint64_t ClampHigh{0};
+  } Stats;
 
 private:
-  void addCalibrationEntry(uint32_t Straw, std::vector<float> Polynomial);
-
   uint32_t NumberOfStraws{0}; ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0}; ///< The maximum pixelid in the map
+
 };
 } // namespace

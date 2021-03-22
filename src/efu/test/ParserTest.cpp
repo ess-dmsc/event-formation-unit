@@ -17,7 +17,7 @@ static int dummy_command(std::vector<std::string>,
 // clang-format off
 std::vector<std::string> commands {
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
-  "CMD_GET_COUNT",                  "CMD_GET_COUNT 7",
+  "CMD_GET_COUNT",                  "CMD_GET_COUNT 8",
   "STAT_GET 1",                     "STAT_GET  -1",
   "EXIT",                           "<OK>"
 };

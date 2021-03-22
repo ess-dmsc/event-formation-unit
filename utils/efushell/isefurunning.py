@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from EFUMetrics import Metrics
 import argparse, sys
@@ -14,8 +14,12 @@ try:
   metrics = Metrics(args.i, args.p)
 
   res = metrics._get_efu_command("STAT_GET 1")
+  print(res)
+
   packets = int(res.split()[2])
-  print("efu is running")
+  res = metrics._get_efu_command("RUNTIMESTATS")
+  runtime = int(res.split()[1])
+  print("efu is running ({})".format(runtime))
 except:
   print("efu is not running")
   sys.exit(1)
