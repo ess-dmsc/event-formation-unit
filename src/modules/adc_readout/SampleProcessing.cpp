@@ -128,7 +128,9 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
       std::to_string(Data.Identifier.ChannelNr) + "_waveform");
   SampleEnvironmentDataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
-  MessageBuilder.add_Values(FBSampleData);
+
+  MessageBuilder.add_Values_type(ValueUnion::UInt16Array);
+  MessageBuilder.add_Values(FBSampleData.Union());
   if (SampleTimestamps) {
     MessageBuilder.add_Timestamps(FBTimeStamps);
   }
