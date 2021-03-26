@@ -12,4 +12,4 @@ set(udpgen_hits_INC
     ReaderHits.h
     )
 create_executable(udpgen_hits)
-target_compile_definitions(udpgen_hits PUBLIC GENERATOR_UDP_HITS)
+target_compile_definitions(udpgen_hits PUBLIC ESSUDPGEN_DREAM_SIM)
