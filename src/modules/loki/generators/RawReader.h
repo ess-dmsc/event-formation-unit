@@ -54,4 +54,5 @@ public:
 private:
   std::string filename;
   int fd;
+  uint64_t readoutReads{0};
 };
