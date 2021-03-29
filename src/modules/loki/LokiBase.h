@@ -10,8 +10,6 @@
 
 #include <common/Detector.h>
 #include <common/EV42Serializer.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 #include <loki/Counters.h>
 
 namespace Loki {
@@ -23,7 +21,7 @@ struct LokiSettings {
   bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class LokiBase : public Detector {
 public:

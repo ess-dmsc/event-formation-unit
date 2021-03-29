@@ -10,7 +10,6 @@
 #include <jalousie/Readout.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
-#include <common/RingBuffer.h>
 #include <common/RuntimeStat.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
@@ -30,8 +29,6 @@
 //#define TRC_MASK 0
 
 namespace Jalousie {
-
-using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "Jalousie detector";
 

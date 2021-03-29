@@ -21,7 +21,7 @@ struct DreamSettings {
   //
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class DreamBase : public Detector {
 public:

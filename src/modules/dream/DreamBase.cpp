@@ -29,8 +29,6 @@
 
 namespace Jalousie {
 
-using namespace memory_sequential_consistent; // Lock free fifo
-
 const char *classname = "DREAM detector with ESS readout";
 
 DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDreamSettings)

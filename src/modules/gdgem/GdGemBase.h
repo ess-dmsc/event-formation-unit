@@ -9,11 +9,9 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXStats.h>
 #include <gdgem/NMXConfig.h>
-#include <common/SPSCFifo.h>
 #include <common/reduction/clustering/AbstractClusterer.h>
 #include <common/reduction/matching/AbstractMatcher.h>
 #include <common/monitor/Histogram.h>
@@ -35,7 +33,7 @@ struct NMXSettings {
   unsigned int PWidth{ZeroNMXOverlapSize};
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class GdGemBase : public Detector {
 public:
@@ -49,11 +47,6 @@ public:
   int getCalibration(std::vector<std::string> cmdargs, char *output,
                      unsigned int *obytes);
 protected:
-
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
-  RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
-
   struct NMXSettings NMXSettings;
   Gem::NMXConfig NMXOpts;
 

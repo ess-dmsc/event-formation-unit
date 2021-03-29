@@ -29,7 +29,7 @@
 
 namespace Loki {
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 const char *classname = "Loki detector with ESS readout";
 

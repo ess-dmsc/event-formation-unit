@@ -9,8 +9,6 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 #include <jalousie/Config.h>
 #include <common/EV42Serializer.h>
 
@@ -20,7 +18,7 @@ struct CLISettings {
   std::string ConfigFile;
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class JalousieBase : public Detector {
 public:

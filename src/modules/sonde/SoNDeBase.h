@@ -11,8 +11,6 @@
 
 #include <cinttypes>
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
