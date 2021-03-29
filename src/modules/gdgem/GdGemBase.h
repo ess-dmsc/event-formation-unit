@@ -50,12 +50,6 @@ public:
                      unsigned int *obytes);
 protected:
 
-  /** \todo figure out the right size  of the .._max_entries  */
-  static constexpr int EthernetBufferMaxEntries {2000};
-  static constexpr int EthernetBufferSize {9000};
-  static constexpr int KafkaBufferSize {12400};
-
-
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};

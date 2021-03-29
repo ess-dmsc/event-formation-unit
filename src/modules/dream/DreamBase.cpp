@@ -21,9 +21,11 @@
 #include <common/Timer.h>
 #include <dream/DreamInstrument.h>
 #include <unistd.h>
+#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
 
 namespace Jalousie {
 
@@ -50,11 +52,15 @@ DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDr
   Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
   Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
-  // Dream Readout Data
+  Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
+  Stats.create("readouts.heartbeats", Counters.HeartBeats);
+  // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.Headers);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
   Stats.create("readouts.error_header", Counters.ErrorHeaders);
+
+
 
   //
   Stats.create("thread.input_idle", Counters.RxIdle);
@@ -62,6 +68,7 @@ DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDr
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
+
   Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 

@@ -51,15 +51,17 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_version", Counters.ErrorVersion);
   Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
   Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
-  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
   Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
   Stats.create("readouts.heartbeats", Counters.HeartBeats);
-  // LoKI Readout Data
+  // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.Headers);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
   Stats.create("readouts.error_header", Counters.ErrorHeaders);
+
+  // Loki readout data
+  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.pos_low", Counters.ReadoutsClampLow);
   Stats.create("readouts.pos_high", Counters.ReadoutsClampHigh);
 
