@@ -13,8 +13,8 @@
 
 #include <memory>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 using namespace Gem;
 
