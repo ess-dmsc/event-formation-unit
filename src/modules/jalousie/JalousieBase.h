@@ -9,8 +9,6 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 #include <jalousie/Config.h>
 #include <common/EV42Serializer.h>
 
@@ -20,25 +18,16 @@ struct CLISettings {
   std::string ConfigFile;
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class JalousieBase : public Detector {
 public:
   explicit JalousieBase(BaseSettings const &settings, CLISettings const &LocalSettings);
-  ~JalousieBase() { delete eth_ringbuf; }
+  ~JalousieBase() = default;
   void inputThread();
   void processingThread();
 
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 500;
-  static const int eth_buffer_size = 9000; /// bytes
-
-  static const int kafka_buffer_size = 124000; /// entries
-
 protected:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   struct {
     // Input Counters

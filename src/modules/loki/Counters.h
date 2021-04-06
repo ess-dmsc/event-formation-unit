@@ -22,7 +22,7 @@ struct Counters {
   // Processing Counters - accessed in processing thread
   int64_t FifoSeqErrors;
 
-  // ESSReadout parser
+  // ESSReadout Header
   int64_t ErrorBuffer;
   int64_t ErrorSize;
   int64_t ErrorVersion;
@@ -31,14 +31,15 @@ struct Counters {
   int64_t ErrorSeqNum;
   int64_t ErrorTimeFrac;
   int64_t HeartBeats;
-  // LoKI DataParser
+  // ESSReadout Data Header
   int64_t Readouts;
-  int64_t ReadoutsBadAmpl;
-  int64_t ReadoutsClampLow;
-  int64_t ReadoutsClampHigh;
   int64_t Headers;
   int64_t ErrorHeaders;
   int64_t ErrorBytes;
+// LoKI Readout Data
+  int64_t ReadoutsBadAmpl;
+  int64_t ReadoutsClampLow;
+  int64_t ReadoutsClampHigh;
 
   //
   int64_t ProcessingIdle;

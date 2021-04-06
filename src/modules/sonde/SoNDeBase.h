@@ -11,8 +11,6 @@
 
 #include <cinttypes>
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -21,9 +19,7 @@ struct SoNDeSettings {
   std::string fileprefix{""};
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
 
-static constexpr int TscMHz{2900}; // MJC's workstation - not reliable
 
 /** ----------------------------------------------------- */
 
@@ -35,15 +31,7 @@ public:
   void input_thread();
   void processing_thread();
 
-  /** \todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 20000;
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 124000; /**< events */
-
 protected:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   struct {
     // Input Counters

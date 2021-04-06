@@ -10,7 +10,6 @@
 #include <jalousie/Readout.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
-#include <common/RingBuffer.h>
 #include <common/RuntimeStat.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
@@ -31,11 +30,7 @@
 
 namespace Jalousie {
 
-using namespace memory_sequential_consistent; // Lock free fifo
-
 const char *classname = "Jalousie detector";
-
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
 JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &LocalSettings)
@@ -78,12 +73,6 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
     JalousieBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
-
-  XTRACE(INIT, ALW, "Creating %d Jalousie Rx ringbuffers of size %d",
-         eth_buffer_max_entries, eth_buffer_size);
-  /// \todo the number 11 is a workaround
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
-  assert(eth_ringbuf != 0);
 }
 
 void JalousieBase::inputThread() {
@@ -100,22 +89,22 @@ void JalousieBase::inputThread() {
 
   while (runThreads) {
     int ReadSize;
-    unsigned int eth_index = eth_ringbuf->getDataIndex();
+    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setDataLength(eth_index, 0);
-    if ((ReadSize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                   eth_ringbuf->getMaxBufSize())) > 0) {
-      eth_ringbuf->setDataLength(eth_index, ReadSize);
+    RxRingbuffer.setDataLength(rxBufferIndex, 0);
+    if ((ReadSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                   RxRingbuffer.getMaxBufSize())) > 0) {
+      RxRingbuffer.setDataLength(rxBufferIndex, ReadSize);
      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
             ReadSize);
       Counters.RxPackets++;
       Counters.RxBytes += ReadSize;
 
-      if (input2proc_fifo.push(eth_index) == false) {
+      if (InputFifo.push(rxBufferIndex) == false) {
         Counters.FifoPushErrors++;
       } else {
-        eth_ringbuf->getNextBuffer();
+        RxRingbuffer.getNextBuffer();
       }
     } else {
       Counters.RxIdle++;
@@ -208,21 +197,21 @@ void JalousieBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer ev42Serializer(kafka_buffer_size, "jalo", Produce);
+  EV42Serializer ev42Serializer(KafkaBufferSize, "jalo", Produce);
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   unsigned int data_index;
   TSCTimer produce_timer;
   while (true) {
-    if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = eth_ringbuf->getDataLength(data_index);
+    if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
+      auto datalen = RxRingbuffer.getDataLength(data_index);
       if (datalen == 0) {
         Counters.FifoSeqErrors++;
         continue;
       }
 
-      auto dataptr = eth_ringbuf->getDataBuffer(data_index);
+      auto dataptr = RxRingbuffer.getDataBuffer(data_index);
       assert(datalen % sizeof(Jalousie::Readout) == 0);
 
       /// Parse and convert readouts to events

@@ -28,9 +28,6 @@ public:
   void mainThread();
 
   /// Some hardcoded constants
-  static constexpr int eth_buffer_size{9000};          /// used for experimentation
-  static constexpr size_t kafka_buffer_size{1000000};  /// -||-
-  static constexpr size_t readout_entries{100000};     /// number of raw readout entries
   static constexpr int one_tenth_second_usecs{100000}; ///
 
 protected:

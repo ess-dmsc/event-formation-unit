@@ -29,6 +29,8 @@ struct Counters {
   int64_t ErrorOutputQueue;
   int64_t ErrorTypeSubType;
   int64_t ErrorSeqNum;
+  int64_t ErrorTimeFrac;
+  int64_t HeartBeats;
   // DREAM DataParser
   int64_t Readouts;
   int64_t Headers;
