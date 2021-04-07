@@ -29,7 +29,6 @@ int DreamSimReader::readReadout(struct sim_data_t & Readout) {
   if (lines == 0) {
     std::getline(*infile, line);
     lines++;
-    return 0;
   }
 
   if (std::getline(*infile, line)) {
