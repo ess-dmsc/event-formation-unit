@@ -167,9 +167,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
-  //EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
-  auto SampleValues = static_cast<const flatbuffers::Vector<uint16_t> *>(SampleData->Values());
-  EXPECT_EQ(SampleValues->size(), TempModule.Data.size());
+  ASSERT_EQ(SampleData->Values_type(), ValueUnion::UInt16Array);
+  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(), TempModule.Data.size());
   EXPECT_EQ(flatbuffers::IsFieldPresent(SampleData,
                                         SampleEnvironmentData::VT_TIMESTAMPS),
             false);
@@ -216,9 +215,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
-  //EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
-  auto SampleValues = static_cast<const flatbuffers::Vector<uint16_t> *>(SampleData->Values());
-  EXPECT_EQ(SampleValues->size(), TempModule.Data.size());
+  ASSERT_EQ(SampleData->Values_type(), ValueUnion::UInt16Array);
+  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(), TempModule.Data.size());
   ASSERT_EQ(flatbuffers::IsFieldPresent(SampleData,
                                         SampleEnvironmentData::VT_TIMESTAMPS),
             true);
