@@ -114,6 +114,8 @@ void SampleProcessing::processData(const SamplingRun &Data) {
 void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   flatbuffers::FlatBufferBuilder builder;
   auto FBSampleData = builder.CreateVector(Data.Samples);
+  auto SampleDataUnion = CreateUInt16Array(builder, FBSampleData);
+
   flatbuffers::Offset<flatbuffers::Vector<std::uint64_t>> FBTimeStamps;
   if (SampleTimestamps) {
     auto SampleTimes = Data.TimeStamps;
@@ -128,7 +130,9 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
       std::to_string(Data.Identifier.ChannelNr) + "_waveform");
   SampleEnvironmentDataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
-  MessageBuilder.add_Values(FBSampleData);
+
+  MessageBuilder.add_Values(SampleDataUnion.Union());
+  MessageBuilder.add_Values_type(ValueUnion::UInt16Array);
   if (SampleTimestamps) {
     MessageBuilder.add_Timestamps(FBTimeStamps);
   }
