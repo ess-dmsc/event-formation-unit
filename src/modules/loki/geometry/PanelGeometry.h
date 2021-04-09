@@ -21,6 +21,7 @@ class PanelGeometry {
 public:
 
   static const uint8_t NStraws{7}; /// straws per tube
+  const uint32_t StrawError{0xFFFFFFFF}; // return value upon error
 
   /// MaxGroup is equivalient to number of FENs
   uint32_t getMaxGroup() { return MaxGroup; }
@@ -37,8 +38,18 @@ public:
 
   /// \brief
   uint32_t getGlobalStrawId(uint8_t TubeGroup, uint8_t LocalTube, uint16_t Straw) {
-    if ((TubeGroup >= MaxGroup) or (LocalTube >= 8) or (Straw >= NStraws)) {
-      return 0xffffffff;
+    if (TubeGroup >= MaxGroup) {
+      XTRACE(EVENT, WAR, "Invalid TubeGroup %d (max %d)", TubeGroup, MaxGroup);
+      return StrawError;
+    }
+    if (LocalTube >= 8) {
+      XTRACE(EVENT, WAR, "Invalid LocalTube %d (max %d)", LocalTube, 8);
+      return StrawError;
+    }
+
+    if (Straw >= NStraws) {
+      XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NStraws);
+      return StrawError;
     }
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)
