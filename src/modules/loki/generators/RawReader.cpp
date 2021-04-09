@@ -49,9 +49,20 @@ int LokiReader::readReadout(struct Loki::DataParser::LokiReadout & Readout) {
   raw_data_t rawdata;
 
   int res = read(fd, &rawdata, sizeof(struct raw_data_t));
+  if (res == -1) {
+    return -1;
+  }
+
+  readoutReads++;
+
   if (rawdata.cookie != 0xDA71DEDA) {
     printf("No cookie in data return -1 (and exit)\n");
     return -1;
+  }
+
+  if (rawdata.a == 0 && rawdata.b == 0 && rawdata.c == 0 && rawdata.d == 0) {
+    printf("Zero amplitude! readout %" PRIu64 ", ", readoutReads);
+    printf(" time 0x%x:0x%08x, tube %d\n", rawdata.tof1, rawdata.tof2, rawdata.tube);
   }
 
   if (res != -1) {

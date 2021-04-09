@@ -94,9 +94,12 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
-  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
 
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
+  if (GlobalStraw == Panel.StrawError) {
+    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
+    return 0;
+  }
   // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
 
   uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);

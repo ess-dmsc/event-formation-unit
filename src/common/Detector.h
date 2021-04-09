@@ -12,12 +12,15 @@
 #include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/Statistics.h>
+#include <common/SPSCFifo.h>
+#include <common/RingBuffer.h>
 #include <functional>
 #include <map>
 #include <memory>
 #include <stdio.h>
 #include <string>
 #include <thread>
+
 
 // All settings should be initialized.
 // clang-format off
@@ -94,6 +97,22 @@ public:
   };
 
 protected:
+  /// \todo figure out the right size  of EthernetBufferMaxEntries
+  static const int EthernetBufferMaxEntries {2000};
+  static const int EthernetBufferSize {9000}; /// bytes
+  static const int KafkaBufferSize {124000}; /// entries ~ 1MB
+
+  /// Shared between input_thread and processing_thread
+  memory_sequential_consistent::CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
+  /// \todo the number 11 is a workaround
+  RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
+
+  // Ideally should match the CPU speed, but as this varies across
+  // CPU versions we just select something in the 'middle'. This is
+  // used to get an approximate time for periodic housekeeping so
+  // it is not critical that this is precise.
+  const int TSC_MHZ = 2900;
+
   void AddThreadFunction(std::function<void(void)> &func,
                          std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});

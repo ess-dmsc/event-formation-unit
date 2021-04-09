@@ -62,12 +62,6 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
     SONDEIDEABase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
-
-  XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d",
-         eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /** \todo testing workaround */
-  assert(eth_ringbuf != 0);
 }
 
 void SONDEIDEABase::input_thread() {
@@ -82,21 +76,21 @@ void SONDEIDEABase::input_thread() {
   sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 
   for (;;) {
-    int rdsize;
-    unsigned int eth_index = eth_ringbuf->getDataIndex();
+    int readSize;
+    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = sondedata.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                    eth_ringbuf->getMaxBufSize())) > 0) {
+    RxRingbuffer.setDataLength(rxBufferIndex, 0);
+    if ((readSize = sondedata.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                    RxRingbuffer.getMaxBufSize())) > 0) {
       mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
-      eth_ringbuf->setDataLength(eth_index, rdsize);
+      mystats.rx_bytes += readSize;
+      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
 
-      if (input2proc_fifo.push(eth_index) == false) {
+      if (InputFifo.push(rxBufferIndex) == false) {
         mystats.fifo_push_errors++;
       } else {
-        eth_ringbuf->getNextBuffer();
+        RxRingbuffer.getNextBuffer();
       }
     } else {
       mystats.rx_idle++;
@@ -119,7 +113,7 @@ void SONDEIDEABase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE", Produce);
+  EV42Serializer flatbuffer(KafkaBufferSize, "SONDE", Produce);
 
   constexpr uint16_t maxChannels{64};
   constexpr uint16_t maxAdc{65535};
@@ -138,11 +132,11 @@ void SONDEIDEABase::processing_thread() {
 
   TSCTimer produce_timer;
   while (1) {
-    if ((input2proc_fifo.pop(data_index)) == false) {
+    if ((InputFifo.pop(data_index)) == false) {
       mystats.processing_idle++;
 
       if (produce_timer.timetsc() >=
-          EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
+          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
         mystats.tx_bytes += flatbuffer.produce();
 
         /// Kafka stats update - common to all detectors
@@ -167,12 +161,12 @@ void SONDEIDEABase::processing_thread() {
 
     } else {
 
-      auto len = eth_ringbuf->getDataLength(data_index);
+      auto len = RxRingbuffer.getDataLength(data_index);
       if (len == 0) {
         mystats.fifo_synch_errors++;
       } else {
         int events =
-            ideasdata.parse_buffer(eth_ringbuf->getDataBuffer(data_index), len);
+            ideasdata.parse_buffer(RxRingbuffer.getDataBuffer(data_index), len);
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;

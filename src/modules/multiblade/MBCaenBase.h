@@ -10,8 +10,6 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/RingBuffer.h>
-#include <common/SPSCFifo.h>
 #include <caen/Config.h>
 #include <multiblade/caen/Readout.h>
 
@@ -23,24 +21,17 @@ struct CAENSettings {
   uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
 };
 
-using namespace memory_sequential_consistent; // Lock free fifo
+
 
 class CAENBase : public Detector {
 public:
   CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings);
-  ~CAENBase() { delete EthernetRingbuffer; }
+  ~CAENBase() = default;
+
   void input_thread();
   void processing_thread();
 
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int EthernetBufferMaxEntries = 500;
-  static const int EthernetBufferSize = 9000; /// bytes
-  static const int KafkaBufferSize = 124000; /// entries ~ 1MB
-
 protected:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
-  RingBuffer<EthernetBufferSize> *EthernetRingbuffer;
 
   struct {
     // Input Counters - accessed in input thread

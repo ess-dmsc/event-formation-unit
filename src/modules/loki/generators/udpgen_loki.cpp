@@ -21,6 +21,7 @@ struct {
   uint64_t NumberOfPackets{0}; // 0 == all packets
   uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
   uint64_t PktThrottle{0}; // 0 is fastest
+  bool Randomise{false}; // Randomise header and data
   bool Loop{false}; // Keep looping the same file forever
   // Not yet CLI settings
   uint32_t KernelTxBufferSize{1000000};
@@ -34,6 +35,7 @@ int main(int argc, char *argv[]) {
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
+  app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
   app.add_option("-r, --rings", Settings.NRings, "Number of Rings used in data header");
@@ -55,7 +57,7 @@ int main(int argc, char *argv[]) {
   uint64_t TotalPackets = 0;
   do {
     uint32_t SeqNum = TotalPackets;
-    uint16_t DataSize = lokiReadoutDataGen(DataSections,DataElements,
+    uint16_t DataSize = lokiReadoutDataGen(Settings.Randomise, DataSections,DataElements,
          Settings.NRings, Buffer, BufferSize, SeqNum);
 
     DataSource.send(Buffer, DataSize);
