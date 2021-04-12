@@ -27,7 +27,7 @@ struct Counters {
   int64_t ProcessingIdle;
 
   // ESSReadout parser
-  ReadoutParser::Stat_t ReadoutStats;
+  struct ReadoutParser::Stat_t ReadoutStats;
   int64_t ErrorESSHeaders;
 
   // LoKI DataParser
