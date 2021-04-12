@@ -72,7 +72,7 @@ protected:
   ReadoutParser CommonReadout;
   DataParser LokiParser{Counters};
   void SetUp() override {
-    memset(&Counters, 0, sizeof(Counters));
+    memset(&Counters, 0, sizeof(struct Counters));
   }
   void TearDown() override {}
 };
