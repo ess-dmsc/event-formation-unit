@@ -12,7 +12,7 @@ protected:
   struct Counters Counters;
   DataParser Parser{Counters};
   void SetUp() override {
-    memset(&Counters, 0, sizeof(Counters));
+    Counters = {};
   }
   void TearDown() override {}
 };
