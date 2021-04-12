@@ -5,17 +5,12 @@
 #include <cstdio>
 #include <cstring>
 #include <loki/test/ReadoutGenerator.h>
-#include <random>
 
 using namespace Loki;
 
 /// in benchmark tests
-uint16_t lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
+uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
      uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum) {
-
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<uint32_t> dist;
 
   auto DataSize = sizeof(ReadoutParser::PacketHeaderV0) + DataSections * (4 + DataElements * 20);
   if (DataSize > MaxSize) {
@@ -32,16 +27,28 @@ uint16_t lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t Data
   Header->Padding0 = 0;
   Header->Version = 0;
   //Header->OutputQueue = 0x00;
+
   Header->TotalLength = DataSize;
+  if (Randomise) {
+    if (random32() < 400'000'000) { // 1 in 10-ish
+      Header->TotalLength = random16() & 0x2000;
+    }
+  }
+
   Header->SeqNum = SeqNum;
+  if (Randomise) {
+    if (random8() > 240) // 1 in 10-ish
+      Header->SeqNum = random32();
+  }
+
   uint8_t RingCount{0};
 
   DP += sizeof(ReadoutParser::PacketHeaderV0);
   for (auto Section = 0; Section < DataSections; Section++) {
     auto DataHeader = (ReadoutParser::DataHeader *)DP;
     if (Randomise) {
-      DataHeader->RingId = dist(gen)&0xF;
-      DataHeader->FENId = dist(gen)&0xF;
+      DataHeader->RingId = random32() & 0xF;
+      DataHeader->FENId = random32() & 0xF;
     } else {
       DataHeader->RingId = RingCount % Rings;
       DataHeader->FENId = 0x00;
@@ -55,12 +62,12 @@ uint16_t lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t Data
     for (auto Element = 0; Element < DataElements; Element++) {
       auto DataBlock = (DataParser::LokiReadout *)DP;
       if (Randomise) {
-        DataBlock->TimeLow = dist(gen);
-        DataBlock->TubeId = dist(gen) & 0xFF;
-        DataBlock->AmpA = dist(gen) & 0xFFFF;
-        DataBlock->AmpB = dist(gen) & 0xFFFF;
-        DataBlock->AmpC = dist(gen) & 0xFFFF;
-        DataBlock->AmpD = dist(gen) & 0xFFFF;
+        DataBlock->TimeLow = random32();
+        DataBlock->TubeId = random8();
+        DataBlock->AmpA = random16();
+        DataBlock->AmpB = random16();
+        DataBlock->AmpC = random16();
+        DataBlock->AmpD = random16();
       } else {
         DataBlock->TimeLow = 100;
         DataBlock->TubeId = Element % 8;

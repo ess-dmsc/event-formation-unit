@@ -47,14 +47,16 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ErrorBuffer);
-  Stats.create("essheader.error_size", Counters.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ErrorSeqNum);
-  Stats.create("essheader.error_timefrac", Counters.ErrorTimeFrac);
-  Stats.create("essheader.heartbeats", Counters.HeartBeats);
+  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
+  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
+  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
+  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
+  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
+  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
+  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
+  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
+  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   // LoKI Readout Data
   Stats.create("readouts.headers", Counters.DataHeaders);
@@ -216,14 +218,7 @@ void LokiBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
-      Counters.ErrorBuffer = Loki.ESSReadoutParser.Stats.ErrorBuffer;
-      Counters.ErrorSize = Loki.ESSReadoutParser.Stats.ErrorSize;
-      Counters.ErrorVersion = Loki.ESSReadoutParser.Stats.ErrorVersion;
-      Counters.ErrorTypeSubType = Loki.ESSReadoutParser.Stats.ErrorTypeSubType;
-      Counters.ErrorOutputQueue = Loki.ESSReadoutParser.Stats.ErrorOutputQueue;
-      Counters.ErrorSeqNum = Loki.ESSReadoutParser.Stats.ErrorSeqNum;
-      Counters.ErrorTimeFrac = Loki.ESSReadoutParser.Stats.ErrorTimeFrac;
-      Counters.HeartBeats = Loki.ESSReadoutParser.Stats.HeartBeats;
+      Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");

@@ -55,9 +55,11 @@ int main(int argc, char *argv[]) {
 
   uint64_t Packets = 0;
   uint64_t TotalPackets = 0;
+
+  ReadoutGenerator gen;
   do {
     uint32_t SeqNum = TotalPackets;
-    uint16_t DataSize = lokiReadoutDataGen(Settings.Randomise, DataSections,DataElements,
+    uint16_t DataSize = gen.lokiReadoutDataGen(Settings.Randomise, DataSections,DataElements,
          Settings.NRings, Buffer, BufferSize, SeqNum);
 
     DataSource.send(Buffer, DataSize);
