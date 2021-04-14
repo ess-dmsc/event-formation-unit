@@ -176,7 +176,6 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.RingErrors, 1);
   EXPECT_EQ(Readout.Counters.FENErrors, 1);
-  EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
 int main(int argc, char **argv) {

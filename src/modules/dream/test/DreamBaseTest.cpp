@@ -87,7 +87,6 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.Headers, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
   EXPECT_EQ(Readout.Counters.MappingErrors, 0);
-  EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
 int main(int argc, char **argv) {
