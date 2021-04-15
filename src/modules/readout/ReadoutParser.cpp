@@ -12,8 +12,8 @@
 #include <readout/ReadoutParser.h>
 #include <arpa/inet.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 #define VERSION_OFFSET 1
 

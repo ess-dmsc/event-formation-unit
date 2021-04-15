@@ -29,8 +29,6 @@
 
 namespace Loki {
 
-
-
 const char *classname = "Loki detector with ESS readout";
 
 LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings)
