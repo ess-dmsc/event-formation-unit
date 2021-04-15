@@ -115,6 +115,13 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     return -ReadoutParser::EHEADER;
   }
 
+  if (Packet.HeaderPtr->PrevPulseLow >= 88025200) {
+    XTRACE(PROCESS, WAR, "Prev pulse time low (%u) exceeds max cycle count (88025199)",
+      Packet.HeaderPtr->PrevPulseLow);
+    Stats.ErrorTimeFrac++;
+    return -ReadoutParser::EHEADER;
+  }
+
   if (Packet.HeaderPtr->TotalLength == sizeof(ReadoutParser::PacketHeaderV0)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
     Stats.HeartBeats++;

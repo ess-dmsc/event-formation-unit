@@ -165,10 +165,22 @@ void LokiInstrument::processReadouts() {
     }
 
     for (auto & Data : Section.Data) {
-      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
+      // Calculate TOF in ns
+      //auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow) + 71'450'000;
+      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow);
+      if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
+        TimeOfFlight =  Time.getPrevTOF(Data.TimeHigh, Data.TimeLow);
+      }
+      if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
+        XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      }
 
-      XTRACE(DATA, DEB, "  Data: time (%u, %u), SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
-        Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+      XTRACE(DATA, WAR, "PulseTime %" PRIu64 ", TimeStamp %" PRIu64" ",
+        PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
+
+      XTRACE(DATA, WAR, "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
+        Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
+        Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
       // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
       // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);

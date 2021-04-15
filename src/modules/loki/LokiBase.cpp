@@ -64,6 +64,10 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+  Stats.create("readouts.tof_count", Counters.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
@@ -265,6 +269,11 @@ void LokiBase::processingThread() {
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+
+      Counters.TofCount = Loki.Time.Stats.TofCount;
+      Counters.TofNegative = Loki.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
