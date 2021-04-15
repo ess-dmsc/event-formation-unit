@@ -11,7 +11,7 @@
 #include <readout/ReadoutParser.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 

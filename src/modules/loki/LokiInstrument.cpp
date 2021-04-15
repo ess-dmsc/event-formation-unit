@@ -137,10 +137,11 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData & Section,
 void LokiInstrument::processReadouts() {
   // Dont fake pulse time, but could do something like
   // PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-  uint64_t PulseTime;
+  uint64_t PulseTime, PrevPulseTime;
 
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
+  PrevPulseTime = Time.setPrevReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
   XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
     PacketHeader->PulseLow, PulseTime);
   Serializer->pulseTime(PulseTime);
