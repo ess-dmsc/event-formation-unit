@@ -137,19 +137,17 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData & Section,
 void LokiInstrument::processReadouts() {
   // Dont fake pulse time, but could do something like
   // PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-  uint64_t PulseTime, PrevPulseTime;
+  uint64_t PulseTime;
 
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  PulseTime = Time.setReference(PacketHeader->PulseHigh,
-    PacketHeader->PulseLow);
-  PrevPulseTime = Time.setPrevReference(PacketHeader->PulseHigh,
-    PacketHeader->PulseLow);
+  PulseTime = Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  Time.setPrevReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
 
   Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
     PacketHeader->PulseLow, PulseTime);
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u) %" PRIu64 "",
-    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow, PulseTime);
+    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow, Time.getPrevTOF(0, 0));
 
 
   /// Traverse readouts, calculate pixels
