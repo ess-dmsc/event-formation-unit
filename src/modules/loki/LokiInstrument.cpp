@@ -140,11 +140,17 @@ void LokiInstrument::processReadouts() {
   uint64_t PulseTime, PrevPulseTime;
 
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
-  PrevPulseTime = Time.setPrevReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
+  PulseTime = Time.setReference(PacketHeader->PulseHigh,
+    PacketHeader->PulseLow);
+  PrevPulseTime = Time.setPrevReference(PacketHeader->PulseHigh,
+    PacketHeader->PulseLow);
+
+  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
     PacketHeader->PulseLow, PulseTime);
-  Serializer->pulseTime(PulseTime);
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u) %" PRIu64 "",
+    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow, PulseTime);
+
 
   /// Traverse readouts, calculate pixels
   for (auto & Section : LokiParser.Result) {
