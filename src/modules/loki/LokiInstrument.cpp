@@ -172,7 +172,7 @@ void LokiInstrument::processReadouts() {
     for (auto & Data : Section.Data) {
       // Calculate TOF in ns
       //auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow) + 71'450'000;
-      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow);
+      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow) + LokiConfiguration.ReadoutConstDelayNS;
       if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
         TimeOfFlight =  Time.getPrevTOF(Data.TimeHigh, Data.TimeLow);
       }
