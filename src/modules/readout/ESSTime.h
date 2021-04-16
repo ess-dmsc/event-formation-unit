@@ -37,8 +37,8 @@ public:
   }
 
   /// \brief calculate TOF from saved reference and current time
-  uint64_t getTOF(uint32_t High, uint32_t Low) {
-    uint64_t timeval = toNS(High, Low);
+  uint64_t getTOF(uint32_t High, uint32_t Low, uint32_t constdelay) {
+    uint64_t timeval = toNS(High, Low) + constdelay;
     if (timeval < TimeInNS) {
       Stats.TofNegative++;
       return 0xFFFFFFFFFFFFFFFFULL;
@@ -49,8 +49,8 @@ public:
 
   /// \brief calculate TOF from saved reference and current time
   /// \todo a valid value of TOF = 0 is in
-  uint64_t getPrevTOF(uint32_t High, uint32_t Low) {
-    uint64_t timeval = toNS(High, Low);
+  uint64_t getPrevTOF(uint32_t High, uint32_t Low, uint32_t constdelay) {
+    uint64_t timeval = toNS(High, Low) + constdelay;
     if (timeval < PrevTimeInNS) {
       Stats.PrevTofNegative++;
       return 0xFFFFFFFFFFFFFFFFULL;

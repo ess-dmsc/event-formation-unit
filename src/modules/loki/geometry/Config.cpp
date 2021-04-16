@@ -26,6 +26,7 @@ Config::Config(std::string ConfigFile) {
 
       try {
         ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
+        LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
       } catch (...) {
         ReadoutConstDelayNS = 0;
       }

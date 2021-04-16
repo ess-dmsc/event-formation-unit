@@ -141,13 +141,13 @@ void LokiInstrument::processReadouts() {
 
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   PulseTime = Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  Time.setPrevReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  Time.setPrevReference(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
 
   Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
-    PacketHeader->PulseLow, PulseTime);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u) %" PRIu64 "",
-    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow, Time.getPrevTOF(0, 0));
+  XTRACE(DATA, DEB, "PulseTime     (%u,%u)",
+    PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)",
+    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
 
 
   /// Traverse readouts, calculate pixels
@@ -171,17 +171,19 @@ void LokiInstrument::processReadouts() {
 
     for (auto & Data : Section.Data) {
       // Calculate TOF in ns
-      //auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow) + 71'450'000;
-      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow) + LokiConfiguration.ReadoutConstDelayNS;
+      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow, LokiConfiguration.ReadoutConstDelayNS);
       if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
-        TimeOfFlight =  Time.getPrevTOF(Data.TimeHigh, Data.TimeLow);
+        TimeOfFlight =  Time.getPrevTOF(Data.TimeHigh, Data.TimeLow, LokiConfiguration.ReadoutConstDelayNS);
       }
       if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
         XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       }
 
-      XTRACE(DATA, WAR, "PulseTime %" PRIu64 ", TimeStamp %" PRIu64" ",
+      XTRACE(DATA, WAR, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64" ",
         PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
+      XTRACE(DATA, WAR, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64" ",
+        Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
+        Time.toNS(Data.TimeHigh, Data.TimeLow));
 
       XTRACE(DATA, WAR, "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
         Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,

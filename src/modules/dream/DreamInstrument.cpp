@@ -63,7 +63,7 @@ namespace Jalousie {
       }
 
       for (auto & Data : Section.Data) {
-        auto TimeOfFlight =  Time.getTOF(0, Data.Tof); // TOF in ns
+        auto TimeOfFlight =  Time.getTOF(0, Data.Tof, 0); // TOF in ns
 
         XTRACE(DATA, DEB, "  Data: time (0, %u), mod %u, sumo %u, strip %u, wire %u, seg %u, ctr %u",
           Data.Tof, Data.Module, Data.Sumo, Data.Strip, Data.Wire, Data.Segment, Data.Counter);
