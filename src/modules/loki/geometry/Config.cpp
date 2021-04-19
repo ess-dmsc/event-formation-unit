@@ -24,6 +24,13 @@ Config::Config(std::string ConfigFile) {
       // Assumed the same for all straws in all banks
       Resolution = root["StrawResolution"].get<unsigned int>();
 
+      try {
+        ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
+        LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
+      } catch (...) {
+        ReadoutConstDelayNS = 0;
+      }
+
       auto PanelConfig = root["PanelConfig"];
       for (auto &Mapping : PanelConfig) {
         auto Ring = Mapping["Bank"].get<unsigned int>();

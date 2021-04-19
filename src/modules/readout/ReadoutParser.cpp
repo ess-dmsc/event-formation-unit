@@ -12,8 +12,8 @@
 #include <readout/ReadoutParser.h>
 #include <arpa/inet.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 #define VERSION_OFFSET 1
 
@@ -111,6 +111,13 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   if (Packet.HeaderPtr->PulseLow >= 88025200) {
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (88025199)",
       Packet.HeaderPtr->PulseLow);
+    Stats.ErrorTimeFrac++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if (Packet.HeaderPtr->PrevPulseLow >= 88025200) {
+    XTRACE(PROCESS, WAR, "Prev pulse time low (%u) exceeds max cycle count (88025199)",
+      Packet.HeaderPtr->PrevPulseLow);
     Stats.ErrorTimeFrac++;
     return -ReadoutParser::EHEADER;
   }

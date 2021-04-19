@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <loki/Counters.h>
 #include <readout/ReadoutParser.h>
 #include <loki/readout/DataParser.h>
 #include <test/TestBase.h>
@@ -72,7 +73,8 @@ protected:
   ReadoutParser CommonReadout;
   DataParser LokiParser{Counters};
   void SetUp() override {
-    memset(&Counters, 0, sizeof(Counters));
+    Counters = {};
+    //memset(&Counters, 0, sizeof(struct Counters));
   }
   void TearDown() override {}
 };
@@ -85,7 +87,8 @@ TEST_F(CombinedParserTest, DataGenSizeTooBig) {
   uint16_t Sections{1000};
   uint16_t Elements{1000};
 
-  auto Length = lokiReadoutDataGen(Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
+  ReadoutGenerator gen;
+  auto Length = gen.lokiReadoutDataGen(false, Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
   ASSERT_EQ(Length, 0);
 }
 
@@ -97,7 +100,8 @@ TEST_F(CombinedParserTest, DataGen) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
     uint16_t Elements = ((BufferSize - sizeof(ReadoutParser::PacketHeaderV0) - Sections*4)/20/Sections);
-    auto Length = lokiReadoutDataGen(Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
+    ReadoutGenerator gen;
+    auto Length = gen.lokiReadoutDataGen(false, Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
     ASSERT_EQ(Length, sizeof(ReadoutParser::PacketHeaderV0) + Sections *(4 + Elements * 20));
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);

@@ -55,6 +55,7 @@ public:
 public:
   /// \brief Stuff that 'ties' LoKI together
   struct Counters & counters;
+
   LokiSettings & ModuleSettings;
   Config LokiConfiguration;
   Calibration LokiCalibration;

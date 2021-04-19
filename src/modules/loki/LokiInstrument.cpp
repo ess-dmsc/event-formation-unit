@@ -94,9 +94,12 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry & Panel, uint8_t FEN,
 
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
-  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
 
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
+  if (GlobalStraw == Panel.StrawError) {
+    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
+    return 0;
+  }
   // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
 
   uint16_t CalibratedPos = LokiCalibration.strawCorrection(GlobalStraw, Position);
@@ -137,18 +140,24 @@ void LokiInstrument::processReadouts() {
   uint64_t PulseTime;
 
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
-  XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
-    PacketHeader->PulseLow, PulseTime);
-  Serializer->pulseTime(PulseTime);
+  PulseTime = Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  Time.setPrevReference(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
+
+  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
+  XTRACE(DATA, DEB, "PulseTime     (%u,%u)",
+    PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)",
+    PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
+
 
   /// Traverse readouts, calculate pixels
   for (auto & Section : LokiParser.Result) {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
     if (Section.RingId >= LokiConfiguration.Panels.size()) {
-      XTRACE(DATA, WAR, "RINGId %d is incompatible with configuration", Section.RingId);
-      counters.MappingErrors++;
+      XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
+        Section.RingId, LokiConfiguration.Panels.size());
+      counters.RingErrors++;
       continue;
     }
 
@@ -156,15 +165,29 @@ void LokiInstrument::processReadouts() {
 
     if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
       XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId, Panel.getMaxGroup());
-      counters.MappingErrors++;
+      counters.FENErrors++;
       continue;
     }
 
     for (auto & Data : Section.Data) {
-      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
+      // Calculate TOF in ns
+      auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow, LokiConfiguration.ReadoutConstDelayNS);
+      if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
+        TimeOfFlight =  Time.getPrevTOF(Data.TimeHigh, Data.TimeLow, LokiConfiguration.ReadoutConstDelayNS);
+      }
+      if (TimeOfFlight == 0xFFFFFFFFFFFFFFFFULL) {
+        XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      }
 
-      XTRACE(DATA, DEB, "  Data: time (%u, %u), SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
-        Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+      XTRACE(DATA, WAR, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64" ",
+        PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
+      XTRACE(DATA, WAR, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64" ",
+        Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
+        Time.toNS(Data.TimeHigh, Data.TimeLow));
+
+      XTRACE(DATA, WAR, "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B %u, C %u, D %u",
+        Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
+        Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
       // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
       // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
@@ -175,7 +198,7 @@ void LokiInstrument::processReadouts() {
 
 
       if (PixelId == 0) {
-        counters.GeometryErrors++;
+        counters.PixelErrors++;
       } else {
         counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
         counters.Events++;
