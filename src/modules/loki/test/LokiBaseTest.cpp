@@ -106,7 +106,7 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 2
-    // Ring 5 is invalid -> MappingError
+    // Ring 5 is invalid -> RingErrors++
     0x05, 0x01, 0x40, 0x00, // ring 5, fen 1, data size 64 bytes
 
     // Readout 1
@@ -131,7 +131,7 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x01, 0x01, 0x00,
 
     // Data Header 3
-    // FEN 5 is invalid -> MappingError
+    // FEN 5 is invalid -> FENErrors++
     0x01, 0x05, 0x18, 0x00, // ring 1, fen 5, size 24 bytes
 
     // Readout 1
