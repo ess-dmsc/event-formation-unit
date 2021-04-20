@@ -24,7 +24,10 @@ struct readoutstat_t {
   int64_t HeartBeats{0};
 };
 
+const uint32_t MaxFracTimeCount{88'052'499};
 const uint8_t MaxOutputQueues{24};
+const unsigned int MaxUdpDataSize{8972};
+const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 class ReadoutParser {
 public:
