@@ -63,7 +63,15 @@ create_test_executable(LokiDataParserTest)
 ##
 ## Module integration test for both generic readout and LoKI
 ##
-set(CombinedParserTest_INC ../readout/DataParser.h ../../readout/ReadoutParser.h)
-set(CombinedParserTest_SRC ../../readout/ReadoutParser.cpp ../readout/DataParser.cpp
-CombinedParserTest.cpp ReadoutGenerator.cpp)
+set(CombinedParserTest_INC
+  ../readout/DataParser.h
+  ../../readout/ReadoutParser.h
+  ${ESS_SOURCE_DIR}/common/DataFuzzer.h
+  )
+set(CombinedParserTest_SRC
+  ../../readout/ReadoutParser.cpp
+  ${ESS_SOURCE_DIR}/common/DataFuzzer.cpp
+  ../readout/DataParser.cpp
+  CombinedParserTest.cpp
+  ReadoutGenerator.cpp)
 create_test_executable(CombinedParserTest)

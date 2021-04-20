@@ -29,30 +29,15 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSecti
   //Header->OutputQueue = 0x00;
 
   Header->TotalLength = DataSize;
-  if (Randomise) {
-    if (random32() < 400'000'000) { // 1 in 10-ish
-      Header->TotalLength = random16() & 0x2000;
-    }
-  }
-
   Header->SeqNum = SeqNum;
-  if (Randomise) {
-    if (random8() > 240) // 1 in 10-ish
-      Header->SeqNum = random32();
-  }
 
   uint8_t RingCount{0};
 
   DP += sizeof(ReadoutParser::PacketHeaderV0);
   for (auto Section = 0; Section < DataSections; Section++) {
     auto DataHeader = (ReadoutParser::DataHeader *)DP;
-    if (Randomise) {
-      DataHeader->RingId = random32() & 0xF;
-      DataHeader->FENId = random32() & 0xF;
-    } else {
-      DataHeader->RingId = RingCount % Rings;
-      DataHeader->FENId = 0x00;
-    }
+    DataHeader->RingId = RingCount % Rings;
+    DataHeader->FENId = 0x00;
     DataHeader->DataLength = sizeof(ReadoutParser::DataHeader) +
        DataElements * sizeof(DataParser::LokiReadout);
     assert(DataHeader->DataLength == 4 + 20 * DataElements);
@@ -61,32 +46,25 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSecti
     DP += sizeof(ReadoutParser::DataHeader);
     for (auto Element = 0; Element < DataElements; Element++) {
       auto DataBlock = (DataParser::LokiReadout *)DP;
-      if (Randomise) {
-        DataBlock->TimeLow = random32();
-        DataBlock->TubeId = random8();
-        DataBlock->AmpA = random16();
-        DataBlock->AmpB = random16();
-        DataBlock->AmpC = random16();
-        DataBlock->AmpD = random16();
-      } else {
-        DataBlock->TimeLow = 100;
-        DataBlock->TubeId = Element % 8;
-        DataBlock->AmpA = DataElements - Element;
-        DataBlock->AmpB = Element + 1;
-        DataBlock->AmpC = Element + 1;
-        DataBlock->AmpD = Element + 1;
-      }
+      DataBlock->TimeLow = 100;
+      DataBlock->TubeId = Element % 8;
+      DataBlock->AmpA = DataElements - Element;
+      DataBlock->AmpB = Element + 1;
+      DataBlock->AmpC = Element + 1;
+      DataBlock->AmpD = Element + 1;
       //printf("    Data Element %u @ %p (20 bytes)\n", Element, (void *)DP);
       assert(sizeof(DataParser::LokiReadout) == 20);
       DP += sizeof(DataParser::LokiReadout);
     }
   }
-  // for (uint16_t i = 0; i < DataSize; i++) {
-  //   if (i % 4 == 0) {
-  //     printf("\n");
-  //   }
-  //   printf("%02x ", Buffer[i]);
-  // }
-  // printf("\n");
+
+  if (Randomise) {
+    uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
+    // Fuzz up to one field in header
+    Fuzzy.fuzz8Bits(Buffer, HeaderSize, 1);
+    // Fuzz up to 20 fields in data
+    Fuzzy.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
+  }
+
   return DataSize;
 }
