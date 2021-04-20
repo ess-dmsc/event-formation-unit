@@ -121,6 +121,18 @@ TEST_F(ReadoutTest, DataLengthMismatch) {
   ASSERT_EQ(res, -ReadoutParser::ESIZE);
 }
 
+TEST_F(ReadoutTest, PulseTimeFracError) {
+  auto res = RdOut.validate((char *)&ErrPulseTimeFrac[0], ErrPulseTimeFrac.size(), DataType);
+  ASSERT_EQ(res, -ReadoutParser::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 1);
+}
+
+TEST_F(ReadoutTest, PrevPulseTimeFracError) {
+  auto res = RdOut.validate((char *)&ErrPrevPulseTimeFrac[0], ErrPrevPulseTimeFrac.size(), DataType);
+  ASSERT_EQ(res, -ReadoutParser::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 1);
+}
+
 
 
 int main(int argc, char **argv) {
