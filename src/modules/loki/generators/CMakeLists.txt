@@ -5,12 +5,12 @@
 set(udpgen_loki_INC
   ../readout/DataParser.h
   ../test/ReadoutGenerator.h
-  ${ESS_SOURCE_DIR}/common/DataFuzzer.h
+  ../../generators/DataFuzzer.h
   )
 set(udpgen_loki_SRC
   udpgen_loki.cpp
   ../test/ReadoutGenerator.cpp
-  ${ESS_SOURCE_DIR}/common/DataFuzzer.cpp
+  ../../generators/DataFuzzer.cpp
   )
 create_executable(udpgen_loki)
 

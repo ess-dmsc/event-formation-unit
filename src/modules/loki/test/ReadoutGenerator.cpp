@@ -61,9 +61,9 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSecti
   if (Randomise) {
     uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
     // Fuzz up to one field in header
-    Fuzzy.fuzz8Bits(Buffer, HeaderSize, 1);
+    Fuzzer.fuzz8Bits(Buffer, HeaderSize, 1);
     // Fuzz up to 20 fields in data
-    Fuzzy.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
+    Fuzzer.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
   }
 
   return DataSize;

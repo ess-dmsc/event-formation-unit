@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/DataFuzzer.h>
+#include <modules/generators/DataFuzzer.h>
 #include <loki/readout/DataParser.h>
 
 class ReadoutGenerator {
@@ -22,5 +22,5 @@ public:
        uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum);
 
 private:
-  DataFuzzer Fuzzy;
+  DataFuzzer Fuzzer;
 };
