@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019 - 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,5 +22,11 @@ public:
        uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum);
 
 private:
+  static_assert(sizeof(Loki::DataParser::LokiReadout) == 20, "Loki data format mismatch");
+
+  const uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
+  const uint16_t DataHeaderSize = sizeof(ReadoutParser::DataHeader);
+  const uint16_t LokiDataSize = sizeof(Loki::DataParser::LokiReadout);
+
   DataFuzzer Fuzzer;
 };
