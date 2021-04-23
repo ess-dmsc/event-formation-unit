@@ -26,10 +26,8 @@ To build and run this software the following dependencies are required.
 Conan is used to download dependencies. For conan to know where the dependencies can
 be downloaded from, package repositories must be added by running the following commands:
 
-* `conan remote add conancommunity https://api.bintray.com/conan/conan-community/conan`
-* `conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan`
-* `conan remote add conan-transit https://api.bintray.com/conan/conan/conan-transit`
-* `conan remote add ess-dmsc https://api.bintray.com/conan/ess-dmsc/conan`
+* `conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan`
+* `conan remote add ecdc https://artifactoryconan.esss.dk/artifactory/api/conan/ecdc`
 
 Note also that for additional functionality you might want to install the following dependencies manually:
 
