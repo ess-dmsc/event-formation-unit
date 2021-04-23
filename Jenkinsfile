@@ -1,4 +1,4 @@
-@Library('ecdc-pipeline-test')
+@Library('ecdc-pipeline')
 import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
