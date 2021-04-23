@@ -26,10 +26,17 @@ Config::Config(std::string ConfigFile) {
 
       try {
         ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
-        LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
       } catch (...) {
-        ReadoutConstDelayNS = 0;
+        // Use default value
       }
+      LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
+
+      try {
+        ReadoutConstDelayNS = root["MaxPulseTimeNS"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
+      }
+      LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
 
       auto PanelConfig = root["PanelConfig"];
       for (auto &Mapping : PanelConfig) {

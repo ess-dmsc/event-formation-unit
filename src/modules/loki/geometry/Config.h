@@ -34,6 +34,7 @@ public:
   uint16_t NTubesTotal{0}; // total number of tubes in instrument
   uint16_t Resolution{0}; /// Resolution along straws
   uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
+  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
   ESSGeometry * Geometry;
 
 private:

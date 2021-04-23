@@ -12,8 +12,8 @@
 #include <common/TimeString.h>
 #include <loki/LokiInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Loki {
 
@@ -138,8 +138,16 @@ void LokiInstrument::processReadouts() {
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   uint64_t PulseTime = Time.setReference(PacketHeader->PulseHigh,
     PacketHeader->PulseLow);
-  Time.setPrevReference(PacketHeader->PrevPulseHigh,
+  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
     PacketHeader->PrevPulseLow);
+
+  if (PulseTime - PrevPulseTime > LokiConfiguration.MaxPulseTimeNS) {
+    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
+      (PulseTime - PrevPulseTime));
+    counters.ReadoutStats.ErrorTimeHigh++;
+    counters.ErrorESSHeaders++;
+    return;
+  }
 
   Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)",
