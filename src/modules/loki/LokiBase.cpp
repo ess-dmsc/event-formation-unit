@@ -53,6 +53,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
   Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
   Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 

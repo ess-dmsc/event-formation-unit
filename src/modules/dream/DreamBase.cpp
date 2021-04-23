@@ -44,14 +44,19 @@ DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDr
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
-  Stats.create("readouts.error_buffer", Counters.ErrorBuffer);
-  Stats.create("readouts.error_size", Counters.ErrorSize);
-  Stats.create("readouts.error_version", Counters.ErrorVersion);
-  Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
-  Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
-  Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
-  Stats.create("readouts.error_timefrac", Counters.ErrorTimeFrac);
-  Stats.create("readouts.heartbeats", Counters.HeartBeats);
+  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
+  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
+  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
+  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
+  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
+  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
+  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
+  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
+  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
+  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
+  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
+
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.Headers);
@@ -165,12 +170,7 @@ void DreamBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::DREAM);
-      Counters.ErrorBuffer = Dream.ESSReadoutParser.Stats.ErrorBuffer;
-      Counters.ErrorSize = Dream.ESSReadoutParser.Stats.ErrorSize;
-      Counters.ErrorVersion = Dream.ESSReadoutParser.Stats.ErrorVersion;
-      Counters.ErrorTypeSubType = Dream.ESSReadoutParser.Stats.ErrorTypeSubType;
-      Counters.ErrorOutputQueue = Dream.ESSReadoutParser.Stats.ErrorOutputQueue;
-      Counters.ErrorSeqNum = Dream.ESSReadoutParser.Stats.ErrorSeqNum;
+      Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
