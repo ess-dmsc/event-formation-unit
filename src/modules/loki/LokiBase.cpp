@@ -235,6 +235,12 @@ void LokiBase::processingThread() {
       // We have good header information, now parse readout data
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr, Loki.ESSReadoutParser.Packet.DataLength);
 
+      Counters.TofCount = Loki.Time.Stats.TofCount;
+      Counters.TofNegative = Loki.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
+
+
       // Process readouts, generate (end produce) events
       Loki.processReadouts();
 
@@ -268,11 +274,6 @@ void LokiBase::processingThread() {
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
-
-      Counters.TofCount = Loki.Time.Stats.TofCount;
-      Counters.TofNegative = Loki.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
