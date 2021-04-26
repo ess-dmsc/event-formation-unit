@@ -7,7 +7,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
 #pragma once
 
 #include <common/Trace.h>
@@ -20,7 +19,6 @@
 namespace Dream {
 class Config {
 public:
-
   Config();
 
   Config(std::string ConfigFile);
@@ -29,4 +27,4 @@ public:
 
 private:
 };
-} // namespace
+} // namespace Dream

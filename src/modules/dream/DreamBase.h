@@ -18,11 +18,10 @@ struct DreamSettings {
   std::string ConfigFile{""}; ///< instrument mapping
 };
 
-
-
 class DreamBase : public Detector {
 public:
-  explicit DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDreamSettings);
+  explicit DreamBase(BaseSettings const &Settings,
+                     struct DreamSettings &LocalDreamSettings);
   ~DreamBase() = default;
 
   void inputThread();
@@ -31,7 +30,7 @@ public:
 protected:
   struct Counters Counters;
   DreamSettings DreamModuleSettings;
-  EV42Serializer * Serializer;
+  EV42Serializer *Serializer;
 };
 
-}
+} // namespace Dream
