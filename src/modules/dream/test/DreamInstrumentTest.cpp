@@ -5,17 +5,30 @@
 //===----------------------------------------------------------------------===//
 
 #include <dream/DreamInstrument.h>
+#include <test/SaveBuffer.h>
 #include <string.h>
 #include <test/TestBase.h>
 
 using namespace Dream;
+
+std::string ConfigFile{"deleteme_dream_instr_config.json"};
+std::string ConfigStr = R"(
+  {
+    "Detector" : "Dream",
+
+    "MaxPulseTimeNS" : 357142855
+  }
+)";
 
 class DreamInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
   DreamSettings ModuleSettings;
 
-  void SetUp() override { memset(&counters, 0, sizeof(counters)); }
+  void SetUp() override {
+    ModuleSettings.ConfigFile = ConfigFile;
+    memset(&counters, 0, sizeof(counters));
+  }
   void TearDown() override {}
 };
 
@@ -33,6 +46,11 @@ TEST_F(DreamInstrumentTest, CalcPixel) {
 }
 
 int main(int argc, char **argv) {
+  saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto RetVal = RUN_ALL_TESTS();
+
+  deleteFile(ConfigFile);
+  return RetVal;
 }

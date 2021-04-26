@@ -16,11 +16,11 @@
 #include <test/TestUDPServer.h>
 
 std::string dreamjson = R"(
-{
-  "Detector" : "Dream",
+  {
+    "Detector" : "Dream",
 
-  "MaxPulseTimeNS" : 357142855
-}
+    "MaxPulseTimeNS" : 357142855
+  }
 )";
 
 class DreamBaseStandIn : public Dream::DreamBase {

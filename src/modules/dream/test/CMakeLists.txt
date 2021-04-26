@@ -14,16 +14,20 @@ create_test_executable(DreamGeometryTest)
 
 
 set(DreamInstrumentTest_INC
+  ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${ESS_MODULE_DIR}/readout/ReadoutParser.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
-  ${DREAM_BASE_DIR}/DreamInstrument.h)
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  )
 set(DreamInstrumentTest_SRC
+  DreamInstrumentTest.cpp
+  ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${ESS_MODULE_DIR}/readout/ReadoutParser.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
-  ${DREAM_BASE_DIR}/DreamInstrument.cpp
-  DreamInstrumentTest.cpp)
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  )
 create_test_executable(DreamInstrumentTest)
 
 
