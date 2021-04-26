@@ -18,7 +18,7 @@ protected:
   // From Counters.h
   struct Counters Counters;
   DataParser Parser{Counters};
-  void SetUp() override { memset(&Counters, 0, sizeof(Counters)); }
+  void SetUp() override { Counters = {}; }
   void TearDown() override {}
 };
 
