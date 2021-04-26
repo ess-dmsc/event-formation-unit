@@ -27,7 +27,7 @@ protected:
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    memset(&counters, 0, sizeof(counters));
+    counters = {};
   }
   void TearDown() override {}
 };
