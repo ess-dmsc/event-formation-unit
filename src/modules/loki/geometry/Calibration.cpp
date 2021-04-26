@@ -6,10 +6,10 @@
 /// \brief using nlohmann json parser to read calibrations from file
 //===----------------------------------------------------------------------===//
 
+#include <common/JsonFile.h>
 #include <common/Log.h>
 #include <common/Trace.h>
 #include <loki/geometry/Calibration.h>
-#include <common/JsonFile.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -18,7 +18,6 @@ namespace Loki {
 
 ///
 Calibration::Calibration() {}
-
 
 /// loads calibration from file
 Calibration::Calibration(std::string CalibrationFile) {
@@ -39,12 +38,12 @@ Calibration::Calibration(std::string CalibrationFile) {
       throw std::runtime_error("Straw number mismatch in calibration file");
     }
 
-    XTRACE(INIT, DEB, "ntubes %u, nstraws %u, tot straws %u",
-        NTubes, NStraws, NumberOfStraws);
+    XTRACE(INIT, DEB, "ntubes %u, nstraws %u, tot straws %u", NTubes, NStraws,
+           NumberOfStraws);
 
     uint32_t ExpectedStraw{0}; // to check that straws are in ascending order
 
-    for (auto & e : Pols) {
+    for (auto &e : Pols) {
       if (e.size() != 5) {
         throw std::runtime_error("Wrong number of coefficients");
       }
@@ -61,15 +60,16 @@ Calibration::Calibration(std::string CalibrationFile) {
       double c = e[3].get<double>();
       double d = e[4].get<double>();
       std::vector<double> cal{a, b, c, d};
-      XTRACE(INIT, DEB, "Calibration entry - Straw %d: %g %g %g %g",
-        Straw, a, b, c, d);
+      XTRACE(INIT, DEB, "Calibration entry - Straw %d: %g %g %g %g", Straw, a,
+             b, c, d);
       StrawCalibration.push_back(cal);
       ExpectedStraw++;
     }
     MaxPixelId = NumberOfStraws * StrawResolution;
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "Loki calibration - error: Invalid Json file: {}", CalibrationFile);
+    LOG(INIT, Sev::Error, "Loki calibration - error: Invalid Json file: {}",
+        CalibrationFile);
     throw std::runtime_error("Invalid Json file");
     return;
   }
@@ -102,7 +102,7 @@ uint32_t Calibration::strawCorrection(uint32_t StrawId, double Pos) {
 
   double Delta = a + Pos * (b + Pos * (c + Pos * d));
 
-  XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g" , StrawId, Pos , Delta);
+  XTRACE(EVENT, DEB, "straw: %u, pos: %g, delta %g", StrawId, Pos, Delta);
   double CorrectedPos = Pos - Delta;
 
   if (CorrectedPos < 0) {

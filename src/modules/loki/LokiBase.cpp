@@ -11,17 +11,17 @@
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/Log.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/RuntimeStat.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
-#include <common/TestImageUdder.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
+#include <common/TestImageUdder.h>
+#include <common/TimeString.h>
 #include <common/Timer.h>
+#include <common/Trace.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <loki/LokiInstrument.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -31,7 +31,8 @@ namespace Loki {
 
 const char *classname = "Loki detector with ESS readout";
 
-LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings)
+LokiBase::LokiBase(BaseSettings const &Settings,
+                   struct LokiSettings &LocalLokiSettings)
     : Detector("Loki", Settings), LokiModuleSettings(LocalLokiSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -108,7 +109,6 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-
 void LokiBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
@@ -128,7 +128,7 @@ void LokiBase::inputThread() {
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
     if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                   RxRingbuffer.getMaxBufSize())) > 0) {
+                                         RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -142,7 +142,6 @@ void LokiBase::inputThread() {
     } else {
       Counters.RxIdle++;
     }
-
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
@@ -229,17 +228,17 @@ void LokiBase::processingThread() {
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-        Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
+             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
-      Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr, Loki.ESSReadoutParser.Packet.DataLength);
+      Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,
+                                  Loki.ESSReadoutParser.Packet.DataLength);
 
       Counters.TofCount = Loki.Time.Stats.TofCount;
       Counters.TofNegative = Loki.Time.Stats.TofNegative;
       Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
       Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
-
 
       // Process readouts, generate (end produce) events
       Loki.processReadouts();
@@ -247,31 +246,28 @@ void LokiBase::processingThread() {
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
       usleep(10);
-
     }
 
-
-      #ifdef ECDC_DEBUG_READOUT
-      if (DebugTimer.timetsc() >=
-          5ULL * 1000000 * TSC_MHZ) {
-        printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
-        printf("-----------------------------------------------------------------------------------\n");
-        for (int ring = 0; ring < 8; ring++) {
-          printf("ring %2d  | ", ring);
-          for (int fen = 0; fen < 8; fen++) {
-            printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
-          }
-          printf("\n");
+#ifdef ECDC_DEBUG_READOUT
+    if (DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
+      printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
+      printf("-----------------------------------------------------------------------------------\n");
+      for (int ring = 0; ring < 8; ring++) {
+        printf("ring %2d  | ", ring);
+        for (int fen = 0; fen < 8; fen++) {
+          printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
         }
-        fflush(NULL);
-        DebugTimer.now();
+        printf("\n");
       }
-      #endif
+      fflush(NULL);
+      DebugTimer.now();
+    }
+#endif
 
-    if (ProduceTimer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 

@@ -17,6 +17,7 @@
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and
 /// four FENs per ring. FENs are enumerated 1 - 4 and
 /// Tube groups 0 - 4
+// clang-format off
 std::string lokijson = R"(
 {
   "Detector" : "LoKIBaseTest",
@@ -141,6 +142,7 @@ std::vector<uint8_t> TestPacket2{
     0x01, 0x02, 0x02, 0x02,
     0x03, 0x02, 0x04, 0x02,
 };
+// clang-format on
 
 TEST_F(LokiBaseTest, DataReceive) {
   Settings.DetectorPort = 9000;

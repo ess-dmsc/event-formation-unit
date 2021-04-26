@@ -5,24 +5,24 @@
 #include <cassert>
 #include <cinttypes>
 #include <common/Socket.h>
+#include <loki/test/ReadoutGenerator.h>
 #include <string.h>
 #include <string>
 #include <unistd.h>
-#include <loki/test/ReadoutGenerator.h>
 // GCOVR_EXCL_START
 
 struct {
   /// Loki specific
   uint16_t NRings{2};
-  //uint16_t FENs{1};
+  // uint16_t FENs{1};
   ///
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
-  uint64_t PktThrottle{0}; // 0 is fastest
-  bool Randomise{false}; // Randomise header and data
-  bool Loop{false}; // Keep looping the same file forever
+  uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
+  uint64_t PktThrottle{0};     // 0 is fastest
+  bool Randomise{false};       // Randomise header and data
+  bool Loop{false};            // Keep looping the same file forever
   // Not yet CLI settings
   uint32_t KernelTxBufferSize{1000000};
 } Settings;
@@ -32,13 +32,17 @@ CLI::App app{"Wireshark file to UDP data generator"};
 int main(int argc, char *argv[]) {
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
-  app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
-  app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
-  app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
+  app.add_option("-a, --packets", Settings.NumberOfPackets,
+                 "Number of packets to send");
+  app.add_option("-t, --throttle", Settings.SpeedThrottle,
+                 "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
+                 "Extra usleep() after n packets");
   app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
-  app.add_option("-r, --rings", Settings.NRings, "Number of Rings used in data header");
+  app.add_option("-r, --rings", Settings.NRings,
+                 "Number of Rings used in data header");
   CLI11_PARSE(app, argc, argv);
 
   const int BufferSize{8972};
@@ -59,8 +63,9 @@ int main(int argc, char *argv[]) {
   ReadoutGenerator gen;
   do {
     uint32_t SeqNum = TotalPackets;
-    uint16_t DataSize = gen.lokiReadoutDataGen(Settings.Randomise, DataSections,DataElements,
-         Settings.NRings, Buffer, BufferSize, SeqNum);
+    uint16_t DataSize =
+        gen.lokiReadoutDataGen(Settings.Randomise, DataSections, DataElements,
+                               Settings.NRings, Buffer, BufferSize, SeqNum);
 
     DataSource.send(Buffer, DataSize);
 
@@ -79,7 +84,7 @@ int main(int argc, char *argv[]) {
       Packets = 0;
       break;
     }
-    //printf("Sent %" PRIu64 " packets\n", TotalPackets);
+    // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or TotalPackets < Settings.NumberOfPackets);
   // pcap.printstats();
 
