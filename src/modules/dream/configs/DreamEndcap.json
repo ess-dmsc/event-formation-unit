@@ -2,5 +2,5 @@
 {
   "Detector": "DREAM",
 
-  "MaxPulseTimeNS" : 
+  "MaxPulseTimeNS" : 5000000000
 }
