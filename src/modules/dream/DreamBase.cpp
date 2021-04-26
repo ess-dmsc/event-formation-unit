@@ -11,27 +11,27 @@
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/Log.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/RuntimeStat.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
-#include <common/TestImageUdder.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
+#include <common/TestImageUdder.h>
+#include <common/TimeString.h>
 #include <common/Timer.h>
+#include <common/Trace.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <dream/DreamInstrument.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
 
 namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDreamSettings)
+DreamBase::DreamBase(BaseSettings const &Settings,
+                     struct DreamSettings &LocalDreamSettings)
     : Detector("Dream", Settings), DreamModuleSettings(LocalDreamSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -97,7 +97,6 @@ DreamBase::DreamBase(BaseSettings const &Settings, struct DreamSettings &LocalDr
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-
 void DreamBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
@@ -117,7 +116,7 @@ void DreamBase::inputThread() {
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
     if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                   RxRingbuffer.getMaxBufSize())) > 0) {
+                                         RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -131,7 +130,6 @@ void DreamBase::inputThread() {
     } else {
       Counters.RxIdle++;
     }
-
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
@@ -178,11 +176,12 @@ void DreamBase::processingThread() {
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-        Dream.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-        Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
+             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
-      Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr, Dream.ESSReadoutParser.Packet.DataLength);
+      Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr,
+                                    Dream.ESSReadoutParser.Packet.DataLength);
 
       // Process readouts, generate (end produce) events
       Dream.processReadouts();
@@ -195,7 +194,8 @@ void DreamBase::processingThread() {
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 

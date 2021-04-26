@@ -14,8 +14,7 @@ static Dream::DreamSettings LocalDreamSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("-f, --file", LocalDreamSettings.ConfigFile,
-                    "Dream specific configuration (json) file")
-                    ->group("DREAM");
+      "Dream specific configuration (json) file")->group("DREAM");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

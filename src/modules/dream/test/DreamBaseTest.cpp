@@ -10,11 +10,10 @@
 #include <string>
 
 #include <dream/DreamBase.h>
-#include <test/TestUDPServer.h>
+#include <readout/ReadoutParser.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
-#include <readout/ReadoutParser.h>
-
+#include <test/TestUDPServer.h>
 
 std::string dreamjson = R"(
 {
@@ -26,7 +25,8 @@ std::string dreamjson = R"(
 
 class DreamBaseStandIn : public Dream::DreamBase {
 public:
-  DreamBaseStandIn(BaseSettings Settings, struct Dream::DreamSettings ReadoutSettings)
+  DreamBaseStandIn(BaseSettings Settings,
+                   struct Dream::DreamSettings ReadoutSettings)
       : Dream::DreamBase(Settings, ReadoutSettings){};
   ~DreamBaseStandIn() = default;
   using Detector::Threads;
@@ -61,15 +61,13 @@ TEST_F(DreamBaseTest, Constructor) {
 ///
 std::vector<uint8_t> TestPacket2{
     // ESS header
-                0x00, 0x00, // pad, v0
+    0x00, 0x00,             // pad, v0
     0x45, 0x53, 0x53, 0x60, //  'E' 'S' 'S' 0x60
     0x2e, 0x00, 0x00, 0x00, // 0x002e - 46 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x10, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x00, 0x00,
-    0x01, 0x00, 0x00, 0x00, // Seq number 1
-
+    0x10, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00,
+    0x00, // Seq number 1
 
     // Data Header 1
     0x00, 0x01, 0x10, 0x00, // ring 0, fen 1, data size 16 bytes
@@ -87,7 +85,8 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort, (unsigned char *)&TestPacket2[0], TestPacket2.size());
+  TestUDPServer Server(43127, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
