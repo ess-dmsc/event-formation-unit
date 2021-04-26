@@ -50,6 +50,7 @@ get_filename_component(DREAM_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/DreamEndc
 get_filename_component(JALOUSIE_CSV_FILE "${ESS_MODULE_DIR}/jalousie/configs/sumo_voxel_map_20190711.csv" ABSOLUTE)
 get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTest.json" ABSOLUTE)
 
+
 add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
     COMMAND ${CMAKE_COMMAND} -E copy ${MG_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
