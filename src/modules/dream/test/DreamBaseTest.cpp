@@ -15,13 +15,22 @@
 #include <test/TestBase.h>
 #include <readout/ReadoutParser.h>
 
-class DreamBaseStandIn : public Jalousie::DreamBase {
+
+std::string dreamjson = R"(
+{
+  "Detector" : "Dream",
+
+  "MaxPulseTimeNS" : 357142855
+}
+)";
+
+class DreamBaseStandIn : public Dream::DreamBase {
 public:
-  DreamBaseStandIn(BaseSettings Settings, struct Jalousie::DreamSettings ReadoutSettings)
-      : Jalousie::DreamBase(Settings, ReadoutSettings){};
+  DreamBaseStandIn(BaseSettings Settings, struct Dream::DreamSettings ReadoutSettings)
+      : Dream::DreamBase(Settings, ReadoutSettings){};
   ~DreamBaseStandIn() = default;
   using Detector::Threads;
-  using Jalousie::DreamBase::Counters;
+  using Dream::DreamBase::Counters;
 };
 
 class DreamBaseTest : public ::testing::Test {
@@ -29,12 +38,13 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
+    LocalSettings.ConfigFile = "deleteme_dream.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Jalousie::DreamSettings LocalSettings;
+  Dream::DreamSettings LocalSettings;
 };
 
 TEST_F(DreamBaseTest, Constructor) {
@@ -90,6 +100,9 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
 }
 
 int main(int argc, char **argv) {
+  std::string filename{"deleteme_dream.json"};
+  saveBuffer(filename, (void *)dreamjson.c_str(), dreamjson.size());
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

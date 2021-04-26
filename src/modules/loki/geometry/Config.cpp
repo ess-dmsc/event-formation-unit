@@ -32,7 +32,7 @@ Config::Config(std::string ConfigFile) {
       LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
 
       try {
-        ReadoutConstDelayNS = root["MaxPulseTimeNS"].get<unsigned int>();
+        MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }

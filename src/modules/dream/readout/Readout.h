@@ -40,7 +40,7 @@
 
 #include <common/DumpFile.h>
 
-namespace Jalousie {
+namespace Dream {
 
 struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
@@ -75,9 +75,9 @@ namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Jalousie::Readout> {
+class TypeTrait<Dream::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Jalousie::Readout) {
+  H5_COMPOUND_DEFINE_TYPE(Dream::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
@@ -99,7 +99,7 @@ public:
 
 }
 
-namespace Jalousie {
+namespace Dream {
 
 using ReadoutFile = DumpFile<Readout>;
 

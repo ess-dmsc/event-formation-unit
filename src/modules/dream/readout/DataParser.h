@@ -12,7 +12,7 @@
 #include <dream/Counters.h>
 #include <vector>
 
-namespace Jalousie {
+namespace Dream {
 
 class DataParser {
 public:

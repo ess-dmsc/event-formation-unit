@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Jalousie {
+namespace Dream {
 
 constexpr unsigned int DataHeaderSize{sizeof(ReadoutParser::DataHeader)};
 constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};

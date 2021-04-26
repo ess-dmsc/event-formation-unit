@@ -27,7 +27,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 
-namespace Jalousie {
+namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
@@ -213,4 +213,4 @@ void DreamBase::processingThread() {
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }
-} // namespace Jalousie
+} // namespace Dream

@@ -13,12 +13,13 @@
 
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 #include <modules/readout/ReadoutParser.h>
 #include <modules/readout/ESSTime.h>
 
 
-namespace Jalousie {
+namespace Dream {
 
 class DreamInstrument {
 public:
@@ -47,6 +48,7 @@ public:
   /// \brief Stuff that 'ties' DREAM together
   struct Counters & counters;
   DreamSettings & ModuleSettings;
+  Config DreamConfiguration;
   ReadoutParser ESSReadoutParser;
   DataParser DreamParser{counters};
   ESSTime Time;

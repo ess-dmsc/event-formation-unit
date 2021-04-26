@@ -8,7 +8,7 @@
 #include <test/TestBase.h>
 #include <string.h>
 
-using namespace Jalousie;
+using namespace Dream;
 
 class DreamInstrumentTest : public TestBase {
 protected:

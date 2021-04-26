@@ -10,17 +10,20 @@
 #include "DreamBase.h"
 #include <common/Detector.h>
 
-static Jalousie::DreamSettings LocalDreamSettings;
+static Dream::DreamSettings LocalDreamSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("-f, --file", LocalDreamSettings.ConfigFile,
+                    "Dream specific configuration (json) file")
+                    ->group("DREAM");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-class DREAM : public Jalousie::DreamBase {
+class DREAM : public Dream::DreamBase {
 public:
   explicit DREAM(BaseSettings Settings)
-      : Jalousie::DreamBase(std::move(Settings), LocalDreamSettings) {}
+      : Dream::DreamBase(std::move(Settings), LocalDreamSettings) {}
 };
 
 DetectorFactory<DREAM> Factory;

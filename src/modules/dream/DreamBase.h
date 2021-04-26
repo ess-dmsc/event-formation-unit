@@ -12,13 +12,10 @@
 #include <common/EV42Serializer.h>
 #include <dream/Counters.h>
 
-namespace Jalousie {
+namespace Dream {
 
 struct DreamSettings {
-  //std::string ConfigFile;
-  //
-  //
-  //
+  std::string ConfigFile{""}; ///< instrument mapping
 };
 
 
