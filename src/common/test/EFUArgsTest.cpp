@@ -170,7 +170,7 @@ TEST_F(EFUArgsTest, StoreConfigFile) {
   std::ifstream InTestFile("ConfigFile.ini", std::ios::binary);
   std::string FileContents((std::istreambuf_iterator<char>(InTestFile)),
                   std::istreambuf_iterator<char>());
-  EXPECT_NE(FileContents.find("det=some_det"), std::string::npos);
+  EXPECT_NE(FileContents.find("det=\"some_det\""), std::string::npos);
 }
 
 TEST_F(EFUArgsTest, LoadConfigFile) {
