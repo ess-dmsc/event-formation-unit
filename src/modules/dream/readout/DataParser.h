@@ -24,11 +24,11 @@ public:
   {
     uint32_t Tof;
     uint16_t unused;
-    uint8_t Module;
+    uint8_t Sector;
     uint8_t Sumo;
     uint8_t Strip;
     uint8_t Wire;
-    uint8_t Segment;
+    uint8_t Cassette;
     uint8_t Counter;
   } __attribute__((__packed__));
 
