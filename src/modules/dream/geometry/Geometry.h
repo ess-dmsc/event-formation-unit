@@ -58,7 +58,7 @@ public:
       XTRACE(EVENT, WAR, "Invalid Counter: %u", Counter);
       return -1;
     }
-    return getXoffset(Sector) + getLocalXCoord(Sumo, Cassette, Counter);
+    return getXoffset(Sector) + SumoOffset[Sumo] + 2 * Cassette + Counter;
   }
 
   uint16_t getY(uint8_t Wire, uint8_t Strip) {
@@ -78,10 +78,6 @@ private:
   // these map Sumo Id (3..6) to various SUMO properties.
   const uint8_t SumoOffset[7] = {0, 0, 0, 48, 36, 20, 0};
   const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
-
-  uint16_t getLocalXCoord(uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
-    return SumoOffset[Sumo] + 2 * Cassette + Counter;
-  }
 
   uint16_t getLocalYCoord(uint8_t Wire) {
     return Wire;
