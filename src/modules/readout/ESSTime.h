@@ -24,6 +24,7 @@ public:
   // ESS clock is 88052500 Hz
   const double NsPerTick{11.356860963629653};
   const uint64_t OneBillion{1000000000LU};
+  const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
   /// \brief save reference (pulse) time
   uint64_t setReference(uint32_t High, uint32_t Low) {
@@ -41,7 +42,7 @@ public:
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < TimeInNS) {
       Stats.TofNegative++;
-      return 0xFFFFFFFFFFFFFFFFULL;
+      return InvalidTOF;
     }
     Stats.TofCount++;
     return timeval - TimeInNS;
@@ -53,7 +54,7 @@ public:
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < PrevTimeInNS) {
       Stats.PrevTofNegative++;
-      return 0xFFFFFFFFFFFFFFFFULL;
+      return InvalidTOF;
     }
     Stats.PrevTofCount++;
     return timeval - PrevTimeInNS;

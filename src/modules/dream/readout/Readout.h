@@ -32,7 +32,7 @@
 ///
 /// \file
 ///
-/// \brief Hit struct for Jalousie event formation
+/// \brief Readout struct for Dream event formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -40,19 +40,19 @@
 
 #include <common/DumpFile.h>
 
-namespace Jalousie {
+namespace Dream {
 
-struct __attribute__ ((packed)) Readout {
+struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "jalousie_readouts"; }
   static uint16_t FormatVersion() { return 0; }
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
-  uint32_t PulseTimeHigh {0};
-  uint32_t PulseTimeLow {0};
-  uint32_t EventTimeHigh {0};
-  uint32_t EventTimeLow {0};
+  uint32_t PulseTimeHigh{0};
+  uint32_t PulseTimeLow{0};
+  uint32_t EventTimeHigh{0};
+  uint32_t EventTimeLow{0};
   uint8_t RingId;
   uint8_t FENId;
   uint8_t Module;
@@ -63,21 +63,20 @@ struct __attribute__ ((packed)) Readout {
   uint8_t Counter;
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
-  static constexpr uint32_t chopper_sub_id {std::numeric_limits<uint8_t>::max()};
+  static constexpr uint32_t chopper_sub_id{std::numeric_limits<uint8_t>::max()};
 
   // \brief prints values for debug purposes
   std::string debug() const;
 };
 
-}
+} // namespace Dream
 
 namespace hdf5 {
 
 namespace datatype {
-template<>
-class TypeTrait<Jalousie::Readout> {
+template <> class TypeTrait<Dream::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Jalousie::Readout) {
+  H5_COMPOUND_DEFINE_TYPE(Dream::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
@@ -95,11 +94,11 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-}
+} // namespace datatype
 
-}
+} // namespace hdf5
 
-namespace Jalousie {
+namespace Dream {
 
 using ReadoutFile = DumpFile<Readout>;
 

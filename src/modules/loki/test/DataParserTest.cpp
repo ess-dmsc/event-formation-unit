@@ -11,9 +11,7 @@ protected:
   // From Counters.h
   struct Counters Counters;
   DataParser Parser{Counters};
-  void SetUp() override {
-    Counters = {};
-  }
+  void SetUp() override { Counters = {}; }
   void TearDown() override {}
 };
 
@@ -64,8 +62,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, DataSizeMismatch) {
-  auto Res =
-      Parser.parse((char *)&OkThreeLokiReadouts[0], 10);
+  auto Res = Parser.parse((char *)&OkThreeLokiReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
@@ -85,8 +82,8 @@ TEST_F(DataParserTest, ParseThree) {
 }
 
 TEST_F(DataParserTest, MultipleDataSection) {
-  auto Res =
-      Parser.parse((char *)&Ok2xThreeLokiReadouts[0], Ok2xThreeLokiReadouts.size());
+  auto Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
+                          Ok2xThreeLokiReadouts.size());
   ASSERT_EQ(Res, 6);
   ASSERT_EQ(Parser.Stats.Readouts, 6);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
@@ -96,8 +93,8 @@ TEST_F(DataParserTest, MultipleDataSection) {
 }
 
 TEST_F(DataParserTest, MultipleDataPackets) {
-  auto Res =
-      Parser.parse((char *)&Ok2xThreeLokiReadouts[0], Ok2xThreeLokiReadouts.size());
+  auto Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
+                          Ok2xThreeLokiReadouts.size());
   ASSERT_EQ(Res, 6);
   ASSERT_EQ(Parser.Stats.Readouts, 6);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
@@ -105,8 +102,8 @@ TEST_F(DataParserTest, MultipleDataPackets) {
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 2);
 
-  Res =
-      Parser.parse((char *)&Ok2xThreeLokiReadouts[0], Ok2xThreeLokiReadouts.size());
+  Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
+                     Ok2xThreeLokiReadouts.size());
   ASSERT_EQ(Res, 6);
   ASSERT_EQ(Parser.Stats.Readouts, 12);
   ASSERT_EQ(Parser.Stats.DataHeaders, 4);

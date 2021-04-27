@@ -27,7 +27,6 @@ std::string ConfigStr = R"(
   }
 )";
 
-
 /// \brief when used with CalibFile there is a picel count mismatch
 std::string Config512File{"deleteme_loki_instr_config_res_512.json"};
 std::string Config512Str = R"(
@@ -65,15 +64,12 @@ std::string CalibStr = R"(
   }
 )";
 
-
 class LokiInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
   LokiSettings ModuleSettings;
 
-  void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
-  }
+  void SetUp() override { ModuleSettings.ConfigFile = ConfigFile; }
   void TearDown() override {}
 };
 

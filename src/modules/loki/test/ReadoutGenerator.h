@@ -9,20 +9,22 @@
 
 #pragma once
 
-#include <modules/generators/DataFuzzer.h>
 #include <loki/readout/DataParser.h>
+#include <modules/generators/DataFuzzer.h>
 
 class ReadoutGenerator {
 public:
-
   ReadoutGenerator() {}
 
-/// \brief Fill out specified buffer with LoKI readouts
-  uint16_t lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
-       uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum);
+  /// \brief Fill out specified buffer with LoKI readouts
+  uint16_t lokiReadoutDataGen(bool Randomise, uint16_t DataSections,
+                              uint16_t DataElements, uint8_t Rings,
+                              uint8_t *Buffer, uint16_t MaxSize,
+                              uint32_t SeqNum);
 
 private:
-  static_assert(sizeof(Loki::DataParser::LokiReadout) == 20, "Loki data format mismatch");
+  static_assert(sizeof(Loki::DataParser::LokiReadout) == 20,
+                "Loki data format mismatch");
 
   const uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
   const uint16_t DataHeaderSize = sizeof(ReadoutParser::DataHeader);

@@ -15,13 +15,11 @@
 namespace Loki {
 
 struct LokiSettings {
-  std::string ConfigFile{""}; ///< panel mappings
-  std::string CalibFile{""}; ///< calibration file
-  std::string FilePrefix{""}; ///< HDF5 file dumping
+  std::string ConfigFile{""};  ///< panel mappings
+  std::string CalibFile{""};   ///< calibration file
+  std::string FilePrefix{""};  ///< HDF5 file dumping
   bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
 };
-
-
 
 class LokiBase : public Detector {
 public:
@@ -34,11 +32,10 @@ public:
   /// \brief generate a Udder test image
   void testImageUdder();
 
-
 protected:
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
-  EV42Serializer * Serializer;
+  EV42Serializer *Serializer;
 };
 
-}
+} // namespace Loki

@@ -11,16 +11,14 @@
 #include <dream/test/DataParserTestData.h>
 #include <test/TestBase.h>
 
-using namespace Jalousie;
+using namespace Dream;
 
 class DataParserTest : public TestBase {
 protected:
   // From Counters.h
   struct Counters Counters;
   DataParser Parser{Counters};
-  void SetUp() override {
-    memset(&Counters, 0, sizeof(Counters));
-  }
+  void SetUp() override { Counters = {}; }
   void TearDown() override {}
 };
 
@@ -71,8 +69,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, DataSizeMismatch) {
-  auto Res =
-      Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
+  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
@@ -81,8 +78,8 @@ TEST_F(DataParserTest, DataSizeMismatch) {
 }
 
 TEST_F(DataParserTest, ParseThree) {
-  auto Res =
-      Parser.parse((char *)&OkThreeDreamReadouts[0], OkThreeDreamReadouts.size());
+  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0],
+                          OkThreeDreamReadouts.size());
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(Parser.Stats.Readouts, 3);
   ASSERT_EQ(Parser.Stats.Headers, 1);

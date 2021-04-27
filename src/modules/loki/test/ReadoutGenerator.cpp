@@ -15,12 +15,14 @@
 
 using namespace Loki;
 
-uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
-     uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum) {
+uint16_t ReadoutGenerator::lokiReadoutDataGen(
+    bool Randomise, uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
+    uint8_t *Buffer, uint16_t MaxSize, uint32_t SeqNum) {
 
   uint16_t DataSize = HeaderSize + DataSections * (4 + DataElements * 20);
   if (DataSize > MaxSize) {
-    printf("Too much data for buffer. DataSize: %u, MaxSize: %u\n", DataSize, MaxSize);
+    printf("Too much data for buffer. DataSize: %u, MaxSize: %u\n", DataSize,
+           MaxSize);
     return 0;
   }
 
@@ -31,7 +33,7 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSecti
   Header->CookieAndType = 0x30535345;
   Header->Padding0 = 0;
   Header->Version = 0;
-  //Header->OutputQueue = 0x00;
+  // Header->OutputQueue = 0x00;
 
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
@@ -43,8 +45,7 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(bool Randomise, uint16_t DataSecti
     auto DataHeader = (ReadoutParser::DataHeader *)DP;
     DataHeader->RingId = RingCount % Rings;
     DataHeader->FENId = 0x00;
-    DataHeader->DataLength = DataHeaderSize +
-       DataElements * LokiDataSize;
+    DataHeader->DataLength = DataHeaderSize + DataElements * LokiDataSize;
     assert(DataHeader->DataLength == 4 + 20 * DataElements);
     RingCount++;
     DP += DataHeaderSize;

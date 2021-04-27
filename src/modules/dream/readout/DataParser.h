@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <readout/ReadoutParser.h>
 #include <dream/Counters.h>
+#include <readout/ReadoutParser.h>
 #include <vector>
 
-namespace Jalousie {
+namespace Dream {
 
 class DataParser {
 public:
@@ -32,9 +32,10 @@ public:
     uint8_t Counter;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(DreamReadout) == 12, "DREAM readout header length error");
+  static_assert(sizeof(DreamReadout) == 12,
+                "DREAM readout header length error");
 
-  DataParser(struct Counters & counters) : Stats(counters){
+  DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
@@ -52,6 +53,6 @@ public:
   // To be iterated over in processing thread
   std::vector<struct ParsedData> Result;
 
-  struct Counters & Stats;
+  struct Counters &Stats;
 };
-}
+} // namespace Dream

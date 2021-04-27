@@ -12,10 +12,10 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <stdint.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
-namespace Jalousie {
+namespace Dream {
 
 class EndCapGeometry {
 public:

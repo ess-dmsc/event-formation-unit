@@ -8,18 +8,20 @@ include_directories(.)
 #=============================================================================
 set(dream_common_inc
   Counters.h
-  readout/DataParser.h
-  readout/Readout.h
   DreamBase.h
   DreamInstrument.h
+  geometry/Config.h
+  readout/DataParser.h
+  readout/Readout.h
   ../readout/ReadoutParser.h
 )
 
 set(dream_common_src
-  readout/DataParser.cpp
   Dream.cpp
   DreamInstrument.cpp
   DreamBase.cpp
+  geometry/Config.cpp
+  readout/DataParser.cpp
   readout/DataParser.cpp
   ../readout/ReadoutParser.cpp
 )
@@ -36,11 +38,13 @@ create_module(dream)
 #=============================================================================
 set(DreamBaseTest_INC
   ${dream_common_inc}
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
   ${ESS_SOURCE_DIR}/test/TestUDPServer.h
 )
 set(DreamBaseTest_SRC
   ${dream_common_src}
   test/DreamBaseTest.cpp
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(DreamBaseTest)

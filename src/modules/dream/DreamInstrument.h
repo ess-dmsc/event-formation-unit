@@ -13,46 +13,44 @@
 
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/geometry/Config.h>
 #include <dream/geometry/Geometry.h>
 #include <dream/readout/DataParser.h>
-#include <modules/readout/ReadoutParser.h>
 #include <modules/readout/ESSTime.h>
+#include <modules/readout/ReadoutParser.h>
 
-
-namespace Jalousie {
+namespace Dream {
 
 class DreamInstrument {
 public:
-
   /// \brief 'create' the DREAM instrument
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  DreamInstrument(Counters & counters, DreamSettings & moduleSettings);
-
+  DreamInstrument(Counters &counters, DreamSettings &moduleSettings);
 
   ~DreamInstrument();
 
   //
   void processReadouts();
 
+  //
+  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   //
-  void setSerializer(EV42Serializer * serializer) { Serializer = serializer; }
-
-  //
-  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip,
-                     uint8_t Wire, uint8_t Cassette, uint8_t Counter);
+  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip, uint8_t Wire,
+                     uint8_t Cassette, uint8_t Counter);
 
 public:
   /// \brief Stuff that 'ties' DREAM together
-  struct Counters & counters;
-  DreamSettings & ModuleSettings;
+  struct Counters &counters;
+  DreamSettings &ModuleSettings;
+  Config DreamConfiguration;
   ReadoutParser ESSReadoutParser;
   DataParser DreamParser{counters};
   EndCapGeometry EcGeom;
   ESSTime Time;
-  EV42Serializer * Serializer;
+  EV42Serializer *Serializer;
 };
 
-} // namespace
+} // namespace Dream
