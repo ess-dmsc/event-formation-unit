@@ -11,7 +11,6 @@
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <dream/DreamInstrument.h>
-#include <dream/geometry/DreamGeometry.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_WAR
@@ -27,11 +26,8 @@ namespace Jalousie {
   uint32_t DreamInstrument::calcPixel(
       uint8_t Sector, uint8_t Sumo, uint8_t Strip,
       uint8_t Wire, uint8_t Cassette, uint8_t Counter) {
-    DreamGeometry::EndCapParams endcap = {Sector, Sumo, Strip, Wire, Cassette, Counter};
 
-    uint32_t Pixel{0};
-    DreamGeometry::PixelIdFromEndCapParams(endcap, Pixel);
-    return Pixel;
+    return EcGeom.getPixel(Sector, Sumo, Cassette, Counter, Wire, Strip);
   }
 
   void DreamInstrument::processReadouts() {

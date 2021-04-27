@@ -15,7 +15,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace Jalousie {
 
 class EndCapGeometry {
 public:

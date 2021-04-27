@@ -13,6 +13,7 @@
 
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/geometry/Geometry.h>
 #include <dream/readout/DataParser.h>
 #include <modules/readout/ReadoutParser.h>
 #include <modules/readout/ESSTime.h>
@@ -49,6 +50,7 @@ public:
   DreamSettings & ModuleSettings;
   ReadoutParser ESSReadoutParser;
   DataParser DreamParser{counters};
+  EndCapGeometry EcGeom;
   ESSTime Time;
   EV42Serializer * Serializer;
 };
