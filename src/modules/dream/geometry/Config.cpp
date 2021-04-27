@@ -23,7 +23,7 @@ Config::Config(std::string ConfigFile) {
 
     try {
       MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-    } catch (...) { // Use default value }
+    } catch (...) { // Use default value
       LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
     }
 

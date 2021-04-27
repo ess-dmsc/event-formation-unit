@@ -15,7 +15,7 @@ create_test_executable(DreamGeometryTest)
 
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
-  ${DREAM_BASE_DIR}/geometry/Config.cpp
+  ${DREAM_BASE_DIR}/geometry/Config.h
   ${ESS_MODULE_DIR}/readout/ReadoutParser.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
   ${ESS_SOURCE_DIR}/test/SaveBuffer.h
