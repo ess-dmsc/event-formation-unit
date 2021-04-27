@@ -1,0 +1,6 @@
+
+{
+  "Detector": "DREAM",
+
+  "MaxPulseTimeNS" : 5000000000
+}

@@ -6,10 +6,12 @@
 #include <test/TestBase.h>
 #include <loki/test/ReadoutGenerator.h>
 
+
 const uint32_t FirstSeqNum{0};
 
 // Example of UDP readout
 // Two Data Sections each containing three readouts
+// clang-format off
 std::vector<uint8_t> UdpPayload
 {
                 0x00, 0x00, // pad, v0
@@ -61,6 +63,7 @@ std::vector<uint8_t> UdpPayload
     0x01, 0x03, 0x02, 0x03,
     0x03, 0x03, 0x04, 0x03,
 };
+// clang-format on
 
 using namespace Loki;
 

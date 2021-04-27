@@ -9,7 +9,6 @@
 /// https://confluence.esss.lu.se/display/ECDC/Instrument+Status+Overview
 //===----------------------------------------------------------------------===//
 
-
 #pragma once
 
 #include <common/Trace.h>
@@ -23,7 +22,6 @@
 namespace Loki {
 class Calibration {
 public:
-
   Calibration();
 
   /// \brief populate the strawcalibration vector with the provided
@@ -48,9 +46,8 @@ public:
   } Stats;
 
 private:
-  uint32_t NumberOfStraws{0}; ///< number of straws in the calibration
+  uint32_t NumberOfStraws{0};  ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
-  uint32_t MaxPixelId{0}; ///< The maximum pixelid in the map
-
+  uint32_t MaxPixelId{0};      ///< The maximum pixelid in the map
 };
-} // namespace
+} // namespace Loki

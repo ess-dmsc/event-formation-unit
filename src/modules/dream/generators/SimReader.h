@@ -16,7 +16,6 @@
 
 class DreamSimReader {
 public:
-
   // From Irina's .txt file
   struct sim_data_t {
     uint32_t tof;
@@ -33,13 +32,12 @@ public:
   //
   DreamSimReader(std::string file);
 
-
   // Read a DreamReadout struct, return bytes read, 0 if line is
   // ignored, or -1 upon error/end
-  int readReadout(struct sim_data_t & reaout);
+  int readReadout(struct sim_data_t &reaout);
 
 private:
   std::string filename;
-  std::ifstream * infile;
+  std::ifstream *infile;
   uint32_t lines{0};
 };

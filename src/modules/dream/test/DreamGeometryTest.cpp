@@ -11,10 +11,10 @@ using namespace DreamGeometry;
 
 class DreamGeometryTest : public TestBase {
 protected:
-  uint32_t calcPixel(
-      uint8_t Sector, uint8_t Sumo, uint8_t Strip,
-      uint8_t Wire, uint8_t Cassette, uint8_t Counter) {
-    DreamGeometry::EndCapParams endcap = {Sector, Sumo, Strip, Wire, Cassette, Counter};
+  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip, uint8_t Wire,
+                     uint8_t Cassette, uint8_t Counter) {
+    DreamGeometry::EndCapParams endcap = {Sector, Sumo,     Strip,
+                                          Wire,   Cassette, Counter};
 
     uint32_t Pixel{0};
     PixelIdFromEndCapParams(endcap, Pixel);
@@ -1125,7 +1125,8 @@ TEST_F(DreamGeometryTest, EncodeDecodeAllPixels) {
 
               uint32_t PixelId;
               ASSERT_TRUE(PixelIdFromEndCapParams(SyntheticEndCap, PixelId));
-              // printf("sect %u, sumo %u, strip %u, wire %u, cassette %u, counter %u -- pixel %u\n",
+              // printf("sect %u, sumo %u, strip %u, wire %u, cassette %u,
+              // counter %u -- pixel %u\n",
               //   Sector, SumoId, Strip, Wire, Cassette, Counter, PixelId);
               EndCapParams DecodedEndCap;
               ASSERT_TRUE(EndCapParamsFromPixelId(PixelId, DecodedEndCap));
@@ -1159,12 +1160,13 @@ TEST_F(DreamGeometryTest, SlicePixelFromPixelId_TestEnvInput) {
 
 TEST_F(DreamGeometryTest, TestingICDDefinitions) {
   //                  sec su  st wi  mo ctr
-  ASSERT_EQ(calcPixel( 1, 6,  1, 16, 10, 2), 1); // upper left (z = 0)
-  ASSERT_EQ(calcPixel( 1, 3,  1, 16,  1, 1), 56); // next sector 'upper left'
-  ASSERT_EQ(calcPixel(23, 3,  1, 16,  1, 1), 1288); // upper right
+  ASSERT_EQ(calcPixel(1, 6, 1, 16, 10, 2), 1);    // upper left (z = 0)
+  ASSERT_EQ(calcPixel(1, 3, 1, 16, 1, 1), 56);    // next sector 'upper left'
+  ASSERT_EQ(calcPixel(23, 3, 1, 16, 1, 1), 1288); // upper right
 
-  ASSERT_EQ(calcPixel( 1, 6,  2, 16, 10, 2), 1288*16+1); // (x,y,z) = (0, 16, 1)
+  ASSERT_EQ(calcPixel(1, 6, 2, 16, 10, 2),
+            1288 * 16 + 1); // (x,y,z) = (0, 16, 1)
 
-  ASSERT_EQ(calcPixel( 1, 6, 16,  1, 10, 2), 1288*255 + 1); // bottom left
-  ASSERT_EQ(calcPixel(23, 3, 16,  1,  1, 1), 1288*256); // bottom right
+  ASSERT_EQ(calcPixel(1, 6, 16, 1, 10, 2), 1288 * 255 + 1); // bottom left
+  ASSERT_EQ(calcPixel(23, 3, 16, 1, 1, 1), 1288 * 256);     // bottom right
 }

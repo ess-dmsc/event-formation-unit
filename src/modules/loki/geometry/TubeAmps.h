@@ -11,8 +11,8 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/Trace.h>
 #include <cinttypes>
+#include <common/Trace.h>
 #include <vector>
 
 // #undef TRC_LEVEL
@@ -30,15 +30,16 @@ public:
   /// invalid input is given the output will be outside the valid
   /// ranges.
   bool calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
-                    std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
+                     std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
     std::uint32_t StrawNum = AmplitudeA + AmplitudeC;
     std::uint32_t PosNum = AmplitudeA + AmplitudeB;
-    std::uint32_t Denominator = AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
-    XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u",
-           StrawNum, PosNum, Denominator);
+    std::uint32_t Denominator =
+        AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
+    XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u", StrawNum,
+           PosNum, Denominator);
     if (Denominator == 0) {
-      XTRACE(INIT, WAR, "StrawNum: %u, PosNum: %u, Denominator: %u",
-             StrawNum, PosNum, Denominator);
+      XTRACE(INIT, WAR, "StrawNum: %u, PosNum: %u, Denominator: %u", StrawNum,
+             PosNum, Denominator);
       Stats.AmplitudeZero++;
       StrawId = NStraws;
       PosVal = NPos;
@@ -51,9 +52,7 @@ public:
     return true;
   }
 
-  void setResolution(uint16_t Resolution) {
-    NPos = Resolution;
-  }
+  void setResolution(uint16_t Resolution) { NPos = Resolution; }
 
   struct Stats {
     uint64_t AmplitudeZero{0};
@@ -79,8 +78,7 @@ public:
 
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
-  std::uint16_t NPos{512}; ///< resolution of position
-
+  std::uint16_t NPos{512};       ///< resolution of position
 
 public:
   /// holds latest calculated values for straw and position
@@ -89,4 +87,4 @@ public:
   double PosVal{512.0};
 };
 
-} // nmaespace Loki
+} // namespace Loki

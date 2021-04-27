@@ -7,7 +7,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
 #pragma once
 
 #include <common/Trace.h>
@@ -22,7 +21,6 @@
 namespace Loki {
 class Config {
 public:
-
   Config();
 
   Config(std::string ConfigFile);
@@ -30,13 +28,14 @@ public:
   uint32_t getMaxPixel() { return Pixels; }
 
   std::vector<PanelGeometry> Panels;
-  uint8_t NPanels{0}; // Loki panels, not logical geometry panels
-  uint16_t NTubesTotal{0}; // total number of tubes in instrument
-  uint16_t Resolution{0}; /// Resolution along straws
+  uint8_t NPanels{0};              // Loki panels, not logical geometry panels
+  uint16_t NTubesTotal{0};         // total number of tubes in instrument
+  uint16_t Resolution{0};          /// Resolution along straws
   uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
-  ESSGeometry * Geometry;
+  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
+  ESSGeometry *Geometry;
 
 private:
   uint32_t Pixels{0};
 };
-} // namespace
+} // namespace Loki

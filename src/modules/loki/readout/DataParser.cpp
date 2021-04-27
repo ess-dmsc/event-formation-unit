@@ -57,7 +57,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
-      DataHdrPtr->FENId, DataHdrPtr->DataLength);
+           DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.DataHeaders++;
 
     if (DataHdrPtr->DataLength < sizeof(DataParser::LokiReadout)) {
@@ -72,14 +72,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     CurrentDataSection.FENId = DataHdrPtr->FENId;
 
     // Loop through data here
-    auto ReadoutsInDataSection = (DataHdrPtr->DataLength - DataHeaderSize) / LokiReadoutSize;
+    auto ReadoutsInDataSection =
+        (DataHdrPtr->DataLength - DataHeaderSize) / LokiReadoutSize;
     for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
       auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize +
                                   i * LokiReadoutSize);
-      XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A 0x%04x B "
-                        "0x%04x C 0x%04x D 0x%04x",
-             i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-             Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
+      XTRACE(DATA, DEB,
+             "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+             "0x%04x B "
+             "0x%04x C 0x%04x D 0x%04x",
+             i, DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
+             Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
              Data->AmpB, Data->AmpC, Data->AmpD);
 
       CurrentDataSection.Data.push_back(*Data);
@@ -93,4 +96,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-}
+} // namespace Loki

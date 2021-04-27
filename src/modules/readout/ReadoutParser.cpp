@@ -101,8 +101,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
 
-  // Check time values \todo so far only PulseTime and not
-  // PrevPulseTime
+  // Check time values
   if (Packet.HeaderPtr->PulseLow > MaxFracTimeCount) {
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
       Packet.HeaderPtr->PulseLow, MaxFracTimeCount);

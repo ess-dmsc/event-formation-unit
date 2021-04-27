@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <readout/ReadoutParser.h>
 #include <loki/Counters.h>
+#include <readout/ReadoutParser.h>
 #include <vector>
 
 namespace Loki {
@@ -35,7 +35,7 @@ public:
 
   static_assert(sizeof(LokiReadout) == 20, "LoKI readout header length error");
 
-  DataParser(struct Counters & counters) : Stats(counters){
+  DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
@@ -53,7 +53,7 @@ public:
   // To be iterated over in processing thread
   std::vector<struct ParsedData> Result;
 
-  struct Counters & Stats;
+  struct Counters &Stats;
   uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
-}
+} // namespace Loki

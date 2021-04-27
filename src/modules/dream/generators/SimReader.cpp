@@ -9,9 +9,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <assert.h>
 #include <dream/generators/SimReader.h>
 #include <dream/readout/Readout.h>
-#include <assert.h>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -22,7 +22,7 @@ DreamSimReader::DreamSimReader(std::string file) : filename(file) {
   infile = new std::ifstream(filename);
 }
 
-int DreamSimReader::readReadout(struct sim_data_t & Readout) {
+int DreamSimReader::readReadout(struct sim_data_t &Readout) {
   std::string line;
 
   // Ignore first line
@@ -32,23 +32,23 @@ int DreamSimReader::readReadout(struct sim_data_t & Readout) {
   }
 
   if (std::getline(*infile, line)) {
-      std::istringstream iss(line);
-      std::string stof, smodule, ssumo, sstrip, swire, ssegment, scounter;
+    std::istringstream iss(line);
+    std::string stof, smodule, ssumo, sstrip, swire, ssegment, scounter;
 
-      iss >> stof >> smodule >> ssumo >> sstrip >> swire >> ssegment >> scounter;
-      Readout.tof = stoi(stof);
-      Readout.module = stoi(smodule);
-      Readout.sumo = stoi(ssumo);
-      Readout.strip = stoi(sstrip);
-      Readout.wire = stoi(swire);
-      Readout.segment = stoi(ssegment);
-      Readout.counter = stoi(scounter);
+    iss >> stof >> smodule >> ssumo >> sstrip >> swire >> ssegment >> scounter;
+    Readout.tof = stoi(stof);
+    Readout.module = stoi(smodule);
+    Readout.sumo = stoi(ssumo);
+    Readout.strip = stoi(sstrip);
+    Readout.wire = stoi(swire);
+    Readout.segment = stoi(ssegment);
+    Readout.counter = stoi(scounter);
 
-      // printf("%u: %u, %u, %u, %u, %u, %u\n",
-      //  Readout.tof, Readout.module, Readout.sumo, Readout.strip,
-      //  Readout.wire, Readout.segment, Readout.counter);
-      lines++;
-      return 1;
+    // printf("%u: %u, %u, %u, %u, %u, %u\n",
+    //  Readout.tof, Readout.module, Readout.sumo, Readout.strip,
+    //  Readout.wire, Readout.segment, Readout.counter);
+    lines++;
+    return 1;
   } else {
     printf("Getline failed\n");
   }
