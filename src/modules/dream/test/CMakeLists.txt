@@ -12,6 +12,12 @@ set(DreamGeometryTest_INC
 set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
 create_test_executable(DreamGeometryTest)
 
+set(DreamGeometryIITest_INC
+  ${DREAM_BASE_DIR}/geometry/Geometry.h)
+set(DreamGeometryIITest_SRC
+  DreamGeometryIITest.cpp)
+create_test_executable(DreamGeometryIITest)
+
 
 set(DreamInstrumentTest_INC
   ${ESS_MODULE_DIR}/readout/ReadoutParser.h
