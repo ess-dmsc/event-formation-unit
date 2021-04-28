@@ -12,7 +12,7 @@ set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/)
 #=============================================================================
 
 find_package(Threads REQUIRED)
-find_package(RDKafka REQUIRED)
+find_package(RdKafka REQUIRED)
 find_package(fmt REQUIRED)
 find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
