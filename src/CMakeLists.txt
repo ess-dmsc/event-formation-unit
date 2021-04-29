@@ -12,7 +12,7 @@ set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/)
 #=============================================================================
 
 find_package(Threads REQUIRED)
-find_package(LibRDKafka REQUIRED)
+find_package(RdKafka REQUIRED)
 find_package(fmt REQUIRED)
 find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
@@ -23,8 +23,8 @@ find_package(jsonformoderncpp REQUIRED)
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
-  ${LibRDKafka_LIBRARIES}
-  ${LibRDKafka_C_LIBRARIES}
+  RdKafka::rdkafka
+  RdKafka::rdkafka++
   ${HDF5_C_LIBRARIES}
   ${Boost_LIBRARIES}
   GraylogLogger::graylog_logger_static

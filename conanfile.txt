@@ -8,7 +8,7 @@ gtest/1.8.1@bincrafters/stable
 h5cpp/0.4.0@ess-dmsc/stable
 nlohmann_json/3.9.1
 libpcap/1.8.1@bincrafters/stable
-librdkafka/1.5.0@ess-dmsc/stable
+librdkafka/1.6.0
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 concurrentqueue/8f7e861@ess-dmsc/stable
@@ -21,7 +21,7 @@ virtualrunenv
 cmake_find_package
 
 [options]
-librdkafka:shared=True
+librdkafka:shared=False
 h5cpp:with_boost=True
 
 [imports]
