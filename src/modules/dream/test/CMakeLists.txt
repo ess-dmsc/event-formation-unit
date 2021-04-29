@@ -7,17 +7,11 @@ set(DREAM_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 # independent dream unit tests
 #=============================================================================
 
-# todo remove
-#set(DreamGeometryTest_INC
-#  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h)
-#set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
-#create_test_executable(DreamGeometryTest)
-
-set(DreamGeometryIITest_INC
+set(DreamGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/Geometry.h)
-set(DreamGeometryIITest_SRC
-  DreamGeometryIITest.cpp)
-create_test_executable(DreamGeometryIITest)
+set(DreamGeometryTest_SRC
+  DreamGeometryTest.cpp)
+create_test_executable(DreamGeometryTest)
 
 
 set(DreamInstrumentTest_INC
