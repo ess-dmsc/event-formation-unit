@@ -1,30 +1,18 @@
-// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Multi-Blade prototype detector base plugin interface definition
+/// \brief A streamer of efu events (only pixel ids) from hdf5 files
 ///
 //===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
-
-#include <unistd.h>
-
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
-
 #include <h5cpp/hdf5.hpp>
-
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#include <unistd.h>
 
 struct {
   std::string FileName;
@@ -37,6 +25,8 @@ CLI::App app{"Read event_id from hdf5 files and send to Kafka"};
 
 int main(int argc, char *argv[]) {
   app.add_option("-f, --file", Config.FileName, "FileWriter HDF5");
+  app.add_option("-b, --broker", Config.KafkaBroker, "Kafka broker");
+  app.add_option("-t, --topic", Config.KafkaTopic, "Kafka topic");
   CLI11_PARSE(app, argc, argv);
 
   Producer eventprod(Config.KafkaBroker, Config.KafkaTopic);
@@ -49,30 +39,18 @@ int main(int argc, char *argv[]) {
   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
   flatbuffer.pulseTime(efu_time);
 
-  auto AnotherFile = hdf5::file::open(Config.FileName);
-  auto RootGroup = AnotherFile.root();
+  auto HDF5File = hdf5::file::open(Config.FileName);
+  auto RootGroup = HDF5File.root();
   auto Dataset = RootGroup.get_dataset("/experiment/data/event_id");
   hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
-  auto Dimensions = Dataspace.current_dimensions();
-  auto MaxDimensions = Dataspace.maximum_dimensions();
-
-  std::cout << "Dataset dimensions\n";
-  std::cout << "   Current | Max\n";
-
-  for (unsigned int i = 0; i < Dimensions.size(); i++) {
-    std::cout << "i:" << i << "      " << Dimensions[i] << " | "
-              << MaxDimensions[i] << "\n";
-  }
-
-  std::cout << "\nAll elements\n";
   std::vector<uint32_t> AllElements(Dataspace.size());
   Dataset.read(AllElements);
+
   for (uint32_t Value : AllElements) {
-    printf("%u, ", Value);
     flatbuffer.addEvent(0, Value);
   }
-  printf("\n");
-  flatbuffer.produce();
 
+  flatbuffer.produce();
+  sleep(1);
   return 0;
 }
