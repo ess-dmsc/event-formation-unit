@@ -53,7 +53,7 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_EQ(prod.stats.dr_errors, 0);
   ASSERT_EQ(prod.stats.dr_noerrors, 0);
   ASSERT_EQ(prod.stats.ev_errors, 0);
-  ASSERT_EQ(prod.stats.ev_others, 0);
+  //ASSERT_EQ(prod.stats.ev_others, 0);
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
 

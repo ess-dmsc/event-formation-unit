@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Jalousie {
+namespace Dream {
 
 constexpr unsigned int DataHeaderSize{sizeof(ReadoutParser::DataHeader)};
 constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};
@@ -54,7 +54,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
-      DataHdrPtr->FENId, DataHdrPtr->DataLength);
+           DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.Headers++;
 
     if (DataHdrPtr->DataLength < sizeof(DataParser::DreamReadout)) {
@@ -69,15 +69,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     CurrentDataSection.FENId = DataHdrPtr->FENId;
 
     // Loop through data here
-    auto ReadoutsInDataSection = (DataHdrPtr->DataLength - DataHeaderSize) / DreamReadoutSize;
+    auto ReadoutsInDataSection =
+        (DataHdrPtr->DataLength - DataHeaderSize) / DreamReadoutSize;
     for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
       auto Data = (DreamReadout *)((char *)DataHdrPtr + DataHeaderSize +
-                                  i * DreamReadoutSize);
-      // XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A 0x%04x B "
+                                   i * DreamReadoutSize);
+      // XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId
+      // %3u , A 0x%04x B "
       //                   "0x%04x C 0x%04x D 0x%04x",
       //        i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-      //        Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
-      //        Data->AmpB, Data->AmpC, Data->AmpD);
+      //        Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId,
+      //        Data->AmpA, Data->AmpB, Data->AmpC, Data->AmpD);
 
       CurrentDataSection.Data.push_back(*Data);
       ParsedReadouts++;
@@ -90,4 +92,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-}
+} // namespace Dream

@@ -78,17 +78,35 @@ TEST_F(ConfigTest, InvalidConfig) {
 
 TEST_F(ConfigTest, ValidConfig) {
   config = Config(ValidConfigFile);
-  ASSERT_EQ(config.getMaxPixel(), (32+24)*4*7*256);
-  ASSERT_EQ(config.NTubesTotal, (32+24)*4);
+  ASSERT_EQ(config.getMaxPixel(), (32 + 24) * 4 * 7 * 256);
+  ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
   deleteFile(ValidConfigFile);
 }
 
+// Validate full instrument configuration (Loki.json)
+// should match the definitions in the ICD
+TEST_F(ConfigTest, LokiIcdGeometryFull) {
+  config = Config(LOKI_FULL);
+  ASSERT_EQ(config.getMaxPixel(), 3211264);
+  ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
+  ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);
+  ASSERT_EQ(config.Panels[2].getGlobalStrawId(0, 0, 0), 1568);
+  ASSERT_EQ(config.Panels[3].getGlobalStrawId(0, 0, 0), 2016);
+  ASSERT_EQ(config.Panels[4].getGlobalStrawId(0, 0, 0), 2352);
+  ASSERT_EQ(config.Panels[5].getGlobalStrawId(0, 0, 0), 2800);
+  ASSERT_EQ(config.Panels[6].getGlobalStrawId(0, 0, 0), 3136);
+  ASSERT_EQ(config.Panels[7].getGlobalStrawId(0, 0, 0), 3920);
+  ASSERT_EQ(config.Panels[8].getGlobalStrawId(0, 0, 0), 4816);
+  ASSERT_EQ(config.Panels[9].getGlobalStrawId(0, 0, 0), 5376);
+}
 
 int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
-  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(), InvalidConfigStr.size());
-  saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(), ValidConfigStr.size());
+  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
+             InvalidConfigStr.size());
+  saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(),
+             ValidConfigStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

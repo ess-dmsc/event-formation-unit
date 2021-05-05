@@ -32,9 +32,6 @@
 
 #include <common/Log.h>
 
-// This is depending on the CPU, but we do not rely on this to be accurate
-static constexpr int TscMHz {2900};
-
 int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
                         char *Output,
                         unsigned int *OutputBytes) {
@@ -480,7 +477,7 @@ void GdGemBase::processingThread() {
 
     // Flush on interval or exit
     if ((not runThreads) || (ReportTimer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
 
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask({stats_.RxPackets, stats_.EventsGood, stats_.TxBytes});
 

@@ -10,8 +10,8 @@
 #include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
@@ -30,7 +30,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     // Parse Data Header
     if (BytesLeft < sizeof(ReadoutParser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
-      Stats.ErrorHeaders++;
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
@@ -40,7 +40,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              DataHdrPtr->DataLength, BytesLeft);
-      Stats.ErrorHeaders++;
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
@@ -51,18 +51,18 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
       XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
              DataHdrPtr->FENId);
-      Stats.ErrorHeaders++;
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
     XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
-      DataHdrPtr->FENId, DataHdrPtr->DataLength);
-    Stats.Headers++;
+           DataHdrPtr->FENId, DataHdrPtr->DataLength);
+    Stats.DataHeaders++;
 
     if (DataHdrPtr->DataLength < sizeof(DataParser::LokiReadout)) {
       XTRACE(DATA, WAR, "Invalid data length %u", DataHdrPtr->DataLength);
-      Stats.ErrorHeaders++;
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
@@ -72,14 +72,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     CurrentDataSection.FENId = DataHdrPtr->FENId;
 
     // Loop through data here
-    auto ReadoutsInDataSection = (DataHdrPtr->DataLength - DataHeaderSize) / LokiReadoutSize;
+    auto ReadoutsInDataSection =
+        (DataHdrPtr->DataLength - DataHeaderSize) / LokiReadoutSize;
     for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
       auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize +
                                   i * LokiReadoutSize);
-      XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A 0x%04x B "
-                        "0x%04x C 0x%04x D 0x%04x",
-             i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-             Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
+      XTRACE(DATA, DEB,
+             "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+             "0x%04x B "
+             "0x%04x C 0x%04x D 0x%04x",
+             i, DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
+             Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
              Data->AmpB, Data->AmpC, Data->AmpD);
 
       CurrentDataSection.Data.push_back(*Data);
@@ -93,4 +96,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-}
+} // namespace Loki

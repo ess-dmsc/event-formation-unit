@@ -21,8 +21,8 @@
 #include <common/Timer.h>
 
 #include <common/Trace.h>
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
 #include "MultigridBase.h"
@@ -99,7 +99,7 @@ bool MultigridBase::init_config() {
   LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
   if (ModuleSettings.monitor) {
     monitor = Monitor(EFUSettings.KafkaBroker, "CSPEC", "multigrid");
-    monitor.init_hits(readout_entries);
+    monitor.init_hits(KafkaBufferSize);
     monitor.init_histograms(std::numeric_limits<uint16_t>::max());
   }
   return true;
@@ -157,11 +157,11 @@ void MultigridBase::mainThread() {
     event_producer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer ev42serializer(kafka_buffer_size, "multigrid", Produce);
+  EV42Serializer ev42serializer(KafkaBufferSize, "multigrid", Produce);
 
   ev42serializer.pulseTime(0);
 
-  uint8_t buffer[eth_buffer_size];
+  uint8_t buffer[EthernetBufferSize];
 
   TSCTimer report_timer;
 
@@ -169,7 +169,7 @@ void MultigridBase::mainThread() {
 
   while (true) {
     ssize_t ReadSize{0};
-    if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
+    if ((ReadSize = cspecdata.receive(buffer, EthernetBufferSize)) > 0) {
       Counters.rx_packets++;
       Counters.rx_bytes += ReadSize;
 //      XTRACE(PROCESS, DEB, "Processed UDP packet of size: %d", ReadSize);

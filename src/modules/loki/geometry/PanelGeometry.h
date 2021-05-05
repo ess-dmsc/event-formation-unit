@@ -10,6 +10,7 @@
 #pragma once
 
 #include <assert.h>
+#include <cstdint>
 #include <common/Trace.h>
 
 // #undef TRC_LEVEL
@@ -19,8 +20,8 @@ namespace Loki {
 
 class PanelGeometry {
 public:
-
-  static const uint8_t NStraws{7}; /// straws per tube
+  static const uint8_t NStraws{7};       /// straws per tube
+  const uint32_t StrawError{0xFFFFFFFF}; // return value upon error
 
   /// MaxGroup is equivalient to number of FENs
   uint32_t getMaxGroup() { return MaxGroup; }
@@ -29,16 +30,27 @@ public:
   /// one and sometimes more than one for each panel. It is the assumption that
   /// RingId maps directly to a PanelGeometry object. Thus this implementation
   /// does not need to use RingId in its calculations.
-  PanelGeometry(uint8_t TubesZ, uint8_t TubesN, uint32_t StrawOffset) :
-    TZ(TubesZ), TN(TubesN), StrawOffset(StrawOffset) {
-      MaxStraw = TubesZ * TubesN * NStraws;
-      MaxGroup = TubesN / 2;
+  PanelGeometry(uint8_t TubesZ, uint8_t TubesN, uint32_t StrawOffset)
+      : TZ(TubesZ), TN(TubesN), StrawOffset(StrawOffset) {
+    MaxStraw = TubesZ * TubesN * NStraws;
+    MaxGroup = TubesN / 2;
   };
 
   /// \brief
-  uint32_t getGlobalStrawId(uint8_t TubeGroup, uint8_t LocalTube, uint16_t Straw) {
-    if ((TubeGroup >= MaxGroup) or (LocalTube >= 8) or (Straw >= NStraws)) {
-      return 0xffffffff;
+  uint32_t getGlobalStrawId(uint8_t TubeGroup, uint8_t LocalTube,
+                            uint16_t Straw) {
+    if (TubeGroup >= MaxGroup) {
+      XTRACE(EVENT, WAR, "Invalid TubeGroup %d (max %d)", TubeGroup, MaxGroup);
+      return StrawError;
+    }
+    if (LocalTube >= 8) {
+      XTRACE(EVENT, WAR, "Invalid LocalTube %d (max %d)", LocalTube, 8);
+      return StrawError;
+    }
+
+    if (Straw >= NStraws) {
+      XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NStraws);
+      return StrawError;
     }
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)

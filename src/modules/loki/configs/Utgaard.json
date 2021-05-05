@@ -4,6 +4,8 @@
 
   "StrawResolution" : 512,
 
+  "ReadoutConstDelayNS" : 0,
+
   "PanelConfig" : [
     { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :      0 },
     { "Bank" : 1, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :    224 },

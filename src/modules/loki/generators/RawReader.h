@@ -11,13 +11,12 @@
 
 #pragma once
 
-#include <loki/readout/DataParser.h>
 #include <cinttypes>
+#include <loki/readout/DataParser.h>
 #include <string>
 
 class LokiReader {
 public:
-
   // From Davide's readout system
   struct raw_data_t {
     uint32_t cookie;
@@ -37,21 +36,22 @@ public:
   LokiReader(std::string file);
 
   // Read 4 bytes into val, return bytes read or -1
-  int read32(uint32_t & val);
+  int read32(uint32_t &val);
 
   // Read 2 bytes into val, return bytes read or -1
-  int read16(uint16_t & val);
+  int read16(uint16_t &val);
 
   // Read 1 bytes into val, return bytes read or -1
-  int read8(uint8_t & val);
+  int read8(uint8_t &val);
 
   // Skip n bytes
   void skip(int n);
 
   // Read a LokiReadout struct, return bytes read or -1
-  int readReadout(struct Loki::DataParser::LokiReadout & Readout);
+  int readReadout(struct Loki::DataParser::LokiReadout &Readout);
 
 private:
   std::string filename;
   int fd;
+  uint64_t readoutReads{0};
 };

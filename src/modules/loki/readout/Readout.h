@@ -38,38 +38,37 @@
 
 namespace Loki {
 
-struct __attribute__ ((packed)) Readout {
+struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "loki_readouts"; }
   static uint16_t FormatVersion() { return 0; }
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
-  uint32_t PulseTimeHigh {0};
-  uint32_t PulseTimeLow {0};
-  uint32_t EventTimeHigh {0};
-  uint32_t EventTimeLow {0};
-  uint16_t DataSeqNum {0}; // Pulse Height in debug mode
+  uint32_t PulseTimeHigh{0};
+  uint32_t PulseTimeLow{0};
+  uint32_t EventTimeHigh{0};
+  uint32_t EventTimeLow{0};
+  uint16_t DataSeqNum{0}; // Pulse Height in debug mode
   uint16_t AmpA{0};
   uint16_t AmpB{0};
   uint16_t AmpC{0};
   uint16_t AmpD{0};
   uint8_t RingId;
   uint8_t FENId;
-  uint8_t TubeId {0};
+  uint8_t TubeId{0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   // \brief prints values for to_string purposes
   std::string debug() const;
 };
 
-}
+} // namespace Loki
 
 namespace hdf5 {
 
 namespace datatype {
-template<>
-class TypeTrait<Loki::Readout> {
+template <> class TypeTrait<Loki::Readout> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Loki::Readout) {
     H5_COMPOUND_INIT;
@@ -90,9 +89,9 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-}
+} // namespace datatype
 
-}
+} // namespace hdf5
 
 namespace Loki {
 

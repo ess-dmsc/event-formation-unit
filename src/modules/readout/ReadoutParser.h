@@ -11,7 +11,24 @@
 
 #include <cinttypes>
 
+struct readoutstat_t {
+  int64_t ErrorBuffer{0};
+  int64_t ErrorSize{0};
+  int64_t ErrorVersion{0};
+  int64_t ErrorCookie{0};
+  int64_t ErrorPad{0};
+  int64_t ErrorOutputQueue{0};
+  int64_t ErrorTypeSubType{0};
+  int64_t ErrorSeqNum{0};
+  int64_t ErrorTimeHigh{0};
+  int64_t ErrorTimeFrac{0};
+  int64_t HeartBeats{0};
+};
+
+const uint32_t MaxFracTimeCount{88'052'499};
 const uint8_t MaxOutputQueues{24};
+const unsigned int MaxUdpDataSize{8972};
+const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 class ReadoutParser {
 public:
@@ -66,17 +83,5 @@ public:
   int validate(const char *Buffer, uint32_t Size, uint8_t Type);
 
   // Counters(for Grafana)
-  struct {
-    int64_t ErrorBuffer{0};
-    int64_t ErrorSize{0};
-    int64_t ErrorPad{0};
-    int64_t ErrorVersion{0};
-    int64_t ErrorCookie{0};
-    int64_t ErrorTypeSubType{0};
-    int64_t ErrorOutputQueue{0};
-    int64_t ErrorSeqNum{0};
-    int64_t ErrorTimeFrac{0};
-    int64_t HeartBeats{0};
-  } Stats;
-
+  struct readoutstat_t Stats;
 };

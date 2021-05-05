@@ -17,6 +17,7 @@
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and
 /// four FENs per ring. FENs are enumerated 1 - 4 and
 /// Tube groups 0 - 4
+// clang-format off
 std::string lokijson = R"(
 {
   "Detector" : "LoKIBaseTest",
@@ -75,8 +76,8 @@ std::vector<uint8_t> TestPacket2{
     0xb6, 0x00, 0x00, 0x00, // 0x00b6 = 182 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x10, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x00, 0x00,
+    0x11, 0x00, 0x00, 0x00, // Prev PT
+    0x00, 0x00, 0x00, 0x00, //
     0x01, 0x00, 0x00, 0x00, // Seq number 1
 
 
@@ -106,7 +107,7 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 2
-    // Ring 5 is invalid -> MappingError
+    // Ring 5 is invalid -> RingErrors++
     0x05, 0x01, 0x40, 0x00, // ring 5, fen 1, data size 64 bytes
 
     // Readout 1
@@ -131,7 +132,7 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x01, 0x01, 0x00,
 
     // Data Header 3
-    // FEN 5 is invalid -> MappingError
+    // FEN 5 is invalid -> FENErrors++
     0x01, 0x05, 0x18, 0x00, // ring 1, fen 5, size 24 bytes
 
     // Readout 1
@@ -141,6 +142,7 @@ std::vector<uint8_t> TestPacket2{
     0x01, 0x02, 0x02, 0x02,
     0x03, 0x02, 0x04, 0x02,
 };
+// clang-format on
 
 TEST_F(LokiBaseTest, DataReceive) {
   Settings.DetectorPort = 9000;
@@ -172,10 +174,10 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 7);
-  EXPECT_EQ(Readout.Counters.Headers, 3);
-  EXPECT_EQ(Readout.Counters.GeometryErrors, 1);
-  EXPECT_EQ(Readout.Counters.MappingErrors, 2);
-  EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 3);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
+  EXPECT_EQ(Readout.Counters.RingErrors, 1);
+  EXPECT_EQ(Readout.Counters.FENErrors, 1);
 }
 
 int main(int argc, char **argv) {

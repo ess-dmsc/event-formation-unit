@@ -10,7 +10,15 @@
 
 #include <cinttypes>
 #include <common/EFUArgs.h>
-#include <common/RingBuffer.h>
+#include <common/EV42Serializer.h>
+#include <common/Producer.h>
+#include <common/monitor/HistogramSerializer.h>
+#include <common/Trace.h>
+#include <common/TimeString.h>
+#include <common/TestImageUdder.h>
+
+#include <unistd.h>
+
 #include <common/RuntimeStat.h>
 #include <common/Socket.h>
 #include <common/SPSCFifo.h>
@@ -27,12 +35,7 @@
 
 namespace Multiblade {
 
-using namespace memory_sequential_consistent; // Lock free fifo
-
 const char *classname = "Multiblade detector with CAEN readout";
-
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-
 
 CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
@@ -103,9 +106,9 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
-  /// \todo the number 11 is a workaround
-  EthernetRingbuffer = new RingBuffer<EthernetBufferSize>(EthernetBufferMaxEntries + 11);
-  assert(EthernetRingbuffer != 0);
+
+  // MultibladeConfig = Config(MBCAENSettings.ConfigFile);
+  // assert(MultibladeConfig.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {
@@ -121,22 +124,22 @@ void CAENBase::input_thread() {
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   for (;;) {
-    int rdsize;
-    unsigned int eth_index = EthernetRingbuffer->getDataIndex();
+    int readSize;
+    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
     /** this is the processing step */
-    EthernetRingbuffer->setDataLength(eth_index, 0);
-    if ((rdsize = receiver.receive(EthernetRingbuffer->getDataBuffer(eth_index),
-                                   EthernetRingbuffer->getMaxBufSize())) > 0) {
-      EthernetRingbuffer->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", rdsize);
+    RxRingbuffer.setDataLength(rxBufferIndex, 0);
+    if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                   RxRingbuffer.getMaxBufSize())) > 0) {
+      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
+      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
-      Counters.RxBytes += rdsize;
+      Counters.RxBytes += readSize;
 
-      if (InputFifo.push(eth_index) == false) {
+      if (InputFifo.push(rxBufferIndex) == false) {
         Counters.FifoPushErrors++;
       } else {
-        EthernetRingbuffer->getNextBuffer();
+        RxRingbuffer.getNextBuffer();
       }
     } else {
       Counters.RxIdle++;
@@ -208,14 +211,28 @@ void CAENBase::processing_thread() {
 
   while (true) {
     if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = EthernetRingbuffer->getDataLength(data_index);
+      auto datalen = RxRingbuffer.getDataLength(data_index);
       if (datalen == 0) {
         Counters.FifoSeqErrors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto dataptr = EthernetRingbuffer->getDataBuffer(data_index);
+      auto dataptr = RxRingbuffer.getDataBuffer(data_index);
+      if (MBCaen.parser.parse(dataptr, datalen) < 0) {
+        Counters.ReadoutsErrorBytes += MBCaen.parser.Stats.error_bytes;
+        Counters.ReadoutsErrorVersion += MBCaen.parser.Stats.error_version;
+        continue;
+      }
+      Counters.ReadoutsSeqErrors += MBCaen.parser.Stats.seq_errors;
+
+      XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
+             MBCaen.parser.MBHeader->numElements, MBCaen.parser.MBHeader->digitizerID);
+
+      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      flatbuffer.pulseTime(efu_time);
+
+      Counters.ReadoutsCount += MBCaen.parser.MBHeader->numElements;
 
       if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
         continue;

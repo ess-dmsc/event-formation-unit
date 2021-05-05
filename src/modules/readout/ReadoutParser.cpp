@@ -12,13 +12,8 @@
 #include <readout/ReadoutParser.h>
 #include <arpa/inet.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
-
-#define VERSION_OFFSET 1
-
-const unsigned int MaxUdpDataSize{8972};
-const unsigned int MinDataSize{5}; // just pad, cookie and version
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 ReadoutParser::ReadoutParser() {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
@@ -106,11 +101,17 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
 
-  // Check time values \todo so far only PulseTime and not
-  // PrevPulseTime
-  if (Packet.HeaderPtr->PulseLow >= 88025200) {
-    XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (88025199)",
-      Packet.HeaderPtr->PulseLow);
+  // Check time values
+  if (Packet.HeaderPtr->PulseLow > MaxFracTimeCount) {
+    XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
+      Packet.HeaderPtr->PulseLow, MaxFracTimeCount);
+    Stats.ErrorTimeFrac++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if (Packet.HeaderPtr->PrevPulseLow > MaxFracTimeCount) {
+    XTRACE(PROCESS, WAR, "Prev pulse time low (%u) exceeds max cycle count (%u)",
+      Packet.HeaderPtr->PrevPulseLow, MaxFracTimeCount);
     Stats.ErrorTimeFrac++;
     return -ReadoutParser::EHEADER;
   }
