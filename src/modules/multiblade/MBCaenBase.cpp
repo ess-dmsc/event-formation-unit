@@ -70,8 +70,6 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
   Stats.create("events.not_adjacent", Counters.EventsNotAdjacent);
   Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
-  Stats.create("filters.max_multi1", Counters.FiltersMaxMulti1);
-  Stats.create("filters.max_multi2", Counters.FiltersMaxMulti2);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -224,15 +222,9 @@ void CAENBase::processing_thread() {
         Counters.ReadoutsErrorVersion += MBCaen.parser.Stats.error_version;
         continue;
       }
-      Counters.ReadoutsSeqErrors += MBCaen.parser.Stats.seq_errors;
-
-      XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-             MBCaen.parser.MBHeader->numElements, MBCaen.parser.MBHeader->digitizerID);
 
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       flatbuffer.pulseTime(efu_time);
-
-      Counters.ReadoutsCount += MBCaen.parser.MBHeader->numElements;
 
       if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
         continue;
