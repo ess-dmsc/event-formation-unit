@@ -27,10 +27,10 @@ public:
     uint8_t unused;
     uint8_t TubeId;
     uint16_t DataSeqNum;
-    uint16_t AmpA;
-    uint16_t AmpB;
-    uint16_t AmpC;
-    uint16_t AmpD;
+    int16_t AmpA;
+    int16_t AmpB;
+    int16_t AmpC;
+    int16_t AmpD;
   } __attribute__((__packed__));
 
   static_assert(sizeof(LokiReadout) == 20, "LoKI readout header length error");

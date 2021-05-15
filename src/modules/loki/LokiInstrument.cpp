@@ -12,8 +12,8 @@
 #include <common/Trace.h>
 #include <loki/LokiInstrument.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Loki {
 
@@ -175,6 +175,11 @@ void LokiInstrument::processReadouts() {
     }
 
     for (auto &Data : Section.Data) {
+
+      if (DumpFile) {
+        dumpReadoutToFile(Section, Data);
+      }
+
       // Calculate TOF in ns
       auto TimeOfFlight = Time.getTOF(Data.TimeHigh, Data.TimeLow,
                                       LokiConfiguration.ReadoutConstDelayNS);
@@ -183,18 +188,20 @@ void LokiInstrument::processReadouts() {
         TimeOfFlight = Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
                                        LokiConfiguration.ReadoutConstDelayNS);
       }
+
+      XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+             PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
+      XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
+             Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
+             Time.toNS(Data.TimeHigh, Data.TimeLow));
+
       if (TimeOfFlight == Time.InvalidTOF) {
         XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
         continue;
       }
 
-      XTRACE(DATA, WAR, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
-      XTRACE(DATA, WAR, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
-             Time.toNS(Data.TimeHigh, Data.TimeLow));
 
-      XTRACE(DATA, WAR,
+      XTRACE(DATA, DEB,
              "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B "
              "%u, C %u, D %u",
              Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
@@ -210,9 +217,6 @@ void LokiInstrument::processReadouts() {
         counters.Events++;
       }
 
-      if (DumpFile) {
-        dumpReadoutToFile(Section, Data);
-      }
     }
   } // for()
   counters.ReadoutsClampLow = LokiCalibration.Stats.ClampLow;
