@@ -59,12 +59,7 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   }
 }
 
-/// \todo debug - remove sometime
-LokiInstrument::~LokiInstrument() {
-  // for (int i = 0; i < 56; i++) {
-  //   printf("Straw %d, count %u\n", i, StrawHist[i]);
-  // }
-}
+LokiInstrument::~LokiInstrument() {}
 
 /// \brief helper function to calculate pixels from knowledge about
 /// loki panel, FENId and a single readout dataset
@@ -75,10 +70,6 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
 
   uint8_t TubeGroup = FEN - 1;
   uint8_t LocalTube = Data.TubeId;
-
-  /// \todo debug REMOVE!
-  // if ((LocalTube == 0) or (LocalTube == 1) or (LocalTube == 5))
-  //   return 0;
 
   bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
@@ -100,7 +91,6 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
     XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
     return 0;
   }
-  // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
 
   uint16_t CalibratedPos =
       LokiCalibration.strawCorrection(GlobalStraw, Position);
@@ -120,9 +110,12 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
   Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+  CurrentReadout.PrevPulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+  CurrentReadout.PrevPulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.DataSeqNum = Data.DataSeqNum;
+  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
   CurrentReadout.AmpA = Data.AmpA;
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
