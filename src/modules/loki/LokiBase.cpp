@@ -79,6 +79,7 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   // Events
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
+  Stats.create("events.outside_region", Counters.OutsideRegion);
   Stats.create("events.udder", Counters.EventsUdder);
 
 

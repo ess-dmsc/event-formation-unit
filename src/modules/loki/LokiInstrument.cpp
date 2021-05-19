@@ -92,6 +92,11 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
     return 0;
   }
 
+  if ((GlobalStraw < ModuleSettings.MinStraw) or (GlobalStraw > ModuleSettings.MaxStraw)) {
+    counters.OutsideRegion++;
+    return 0;
+  }
+
   uint16_t CalibratedPos =
       LokiCalibration.strawCorrection(GlobalStraw, Position);
   XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
@@ -192,7 +197,6 @@ void LokiInstrument::processReadouts() {
         XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
         continue;
       }
-
 
       XTRACE(DATA, DEB,
              "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B "
