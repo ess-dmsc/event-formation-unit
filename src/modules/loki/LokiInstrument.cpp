@@ -147,6 +147,7 @@ void LokiInstrument::processReadouts() {
   }
 
   Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
+  SerializerII->pulseTime(PulseTime);
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
          PacketHeader->PulseLow);
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
@@ -212,6 +213,7 @@ void LokiInstrument::processReadouts() {
       } else {
         counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
         counters.Events++;
+        SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
       }
 
     }

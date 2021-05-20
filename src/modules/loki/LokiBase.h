@@ -37,6 +37,7 @@ protected:
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
   EV42Serializer *Serializer;
+  EV42Serializer *SerializerII;
 };
 
 } // namespace Loki
