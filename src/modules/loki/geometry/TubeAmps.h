@@ -29,11 +29,11 @@ public:
   /// is stored in the two member variables (StrawId, PosId) if an
   /// invalid input is given the output will be outside the valid
   /// ranges.
-  bool calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
-                     std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
-    std::uint32_t StrawNum = AmplitudeA + AmplitudeC;
-    std::uint32_t PosNum = AmplitudeA + AmplitudeB;
-    std::uint32_t Denominator =
+  bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
+                     std::int16_t AmplitudeC, std::int16_t AmplitudeD) {
+    std::int32_t StrawNum = AmplitudeA + AmplitudeC;
+    std::int32_t PosNum = AmplitudeA + AmplitudeB;
+    std::int32_t Denominator =
         AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
     XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u", StrawNum,
            PosNum, Denominator);

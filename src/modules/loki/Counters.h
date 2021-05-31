@@ -47,6 +47,7 @@ struct Counters {
   // Events
   int64_t Events;
   int64_t PixelErrors;
+  int64_t OutsideRegion;
   int64_t EventsUdder;
   int64_t TofCount;
   int64_t TofNegative;
