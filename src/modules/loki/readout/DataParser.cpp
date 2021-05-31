@@ -10,8 +10,8 @@
 #include <loki/readout/DataParser.h>
 #include <readout/ReadoutParser.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Loki {
 
@@ -36,7 +36,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     auto DataHdrPtr = (ReadoutParser::DataHeader *)DataPtr;
- 
+
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
     DataHdrPtr->RingId = DataHdrPtr->RingId/2;
