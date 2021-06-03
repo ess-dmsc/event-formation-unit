@@ -19,9 +19,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
                     "LoKI specific calibration (json) file")->group("LOKI");
   parser.add_option("--dumptofile", LocalLokiSettings.FilePrefix,
                     "dump to specified file")->group("LOKI");
-
-  parser.add_flag("--2D", LocalLokiSettings.DetectorImage2D,
-                  "Generate Pixels for 2D detector (else 3D)")->group("LOKI");
+  parser.add_option("--min", LocalLokiSettings.MinStraw,
+                    "low values for straws")->group("LOKI");
+  parser.add_option("--max", LocalLokiSettings.MaxStraw,
+                    "low values for straws")->group("LOKI");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

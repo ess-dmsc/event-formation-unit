@@ -1,0 +1,17 @@
+
+{
+  "Detector": "LoKI4x2",
+
+  "StrawResolution" : 512,
+
+  "ReadoutConstDelayNS" : 0,
+
+  "MaxPulseTimeNS" : 357142857,
+
+  "PanelConfig" : [
+    { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :    0 },
+    { "Bank" : 1, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :  448 },
+    { "Bank" : 2, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :  896 }
+  ]
+
+}

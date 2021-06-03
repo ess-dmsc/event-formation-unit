@@ -39,6 +39,7 @@ public:
 
   //
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializerII(EV42Serializer *serializer) { SerializerII = serializer; }
 
   /// \brief LoKI pixel calculations
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
@@ -60,8 +61,8 @@ public:
   TubeAmps Amp2Pos;
   ESSTime Time;
   EV42Serializer *Serializer;
+  EV42Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;
-  // uint32_t StrawHist[200]; ///< \todo debug - remove eventually
 };
 
 } // namespace Loki

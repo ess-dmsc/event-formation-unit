@@ -79,6 +79,7 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   // Events
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
+  Stats.create("events.outside_region", Counters.OutsideRegion);
   Stats.create("events.udder", Counters.EventsUdder);
 
 
@@ -198,6 +199,15 @@ void LokiBase::processingThread() {
   Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
   Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
+  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug");
+
+  auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
+    EventProducerII.produce(DataBuffer, Timestamp);
+  };
+
+  SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
+  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
+
   if (EFUSettings.TestImage) {
     return testImageUdder();
   }
@@ -270,6 +280,7 @@ void LokiBase::processingThread() {
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      SerializerII->produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
