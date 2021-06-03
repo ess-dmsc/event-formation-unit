@@ -54,7 +54,7 @@ public:
 
   int max_valid_adc{65534};
 
-  /// local readout timestamp resolution
+  /// local readout timestamp resolution, ns per time tick
   uint32_t TimeTickNS{16};
 
   /// Specify the digital geometry

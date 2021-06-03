@@ -57,6 +57,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("readouts.invalid_adc", Counters.ReadoutsInvalidAdc);
   Stats.create("readouts.invalid_plane", Counters.ReadoutsInvalidPlane);
   Stats.create("readouts.monitor", Counters.ReadoutsMonitor);
+  Stats.create("readouts.timer_wraps", Counters.ReadoutsTimerWraps);
 
   Stats.create("readouts.error_version", Counters.ReadoutsErrorVersion);
   Stats.create("readouts.error_bytes", Counters.ReadoutsErrorBytes);
@@ -68,7 +69,10 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("events.udder", Counters.EventsUdder);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
-  Stats.create("events.not_adjacent", Counters.EventsNotAdjacent);
+  Stats.create("events.matched_clusters", Counters.EventsMatchedClusters);
+  Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
+  Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
+
   Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
@@ -217,11 +221,6 @@ void CAENBase::processing_thread() {
 
       /// \todo use the Buffer<T> class here and in parser
       auto dataptr = RxRingbuffer.getDataBuffer(data_index);
-      if (MBCaen.parser.parse(dataptr, datalen) < 0) {
-        Counters.ReadoutsErrorBytes += MBCaen.parser.Stats.error_bytes;
-        Counters.ReadoutsErrorVersion += MBCaen.parser.Stats.error_version;
-        continue;
-      }
 
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       flatbuffer.pulseTime(efu_time);
@@ -232,9 +231,30 @@ void CAENBase::processing_thread() {
 
       auto cassette = MBCaen.MultibladeConfig.Mappings->cassette(MBCaen.parser.MBHeader->digitizerID);
       for (const auto &e : MBCaen.builders[cassette].Events) {
-        if (MBCaen.filterEvent(e)) {
+
+        if (!e.both_planes()) {
+          Counters.EventsNoCoincidence++;
           continue;
         }
+
+        bool DiscardGap{true};
+        // Discard if there are gaps in the strip channels
+        if (DiscardGap) {
+          if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
+            Counters.EventsInvalidStripGap++;
+            continue;
+          }
+        }
+
+        // Discard if there are gaps in the wire channels
+        if (DiscardGap) {
+          if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
+            Counters.EventsInvalidWireGap++;
+            continue;
+          }
+        }
+
+        Counters.EventsMatchedClusters++;
 
         XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
         // calculate local x and y using center of mass
@@ -242,7 +262,7 @@ void CAENBase::processing_thread() {
         auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
 
         // \todo improve this
-        auto time = e.time_start() * MBCaen.MultibladeConfig.TimeTickNS; // TOF in ns
+        auto time = e.time_start();
         auto pixel_id = MBCaen.essgeom.pixel2D(x, y);
         XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 

@@ -15,6 +15,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+// Old PSI data (ESS mask) uses monitor channels
+#define MB_MONITOR_CHANNEL
+
 namespace Multiblade {
 
 /// \brief load configuration and calibration files
@@ -61,6 +64,9 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
     }
 
     builders = std::vector<EventBuilder>(ncass);
+    for (EventBuilder & builder : builders) {
+      builder.setTimeBox(2010);
+    }
 
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
@@ -78,12 +84,16 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 
 // Moved from MBCaenBase to better support unit testing
 bool MBCaenInstrument::parsePacket(char * data, int length,  EV42Serializer & ev42ser) {
-  if (parser.parse(data, length) < 0) {
-    counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
-    counters.ReadoutsErrorVersion += parser.Stats.error_version;
+
+  int res = parser.parse(data, length);
+
+  counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
+  counters.ReadoutsErrorVersion += parser.Stats.error_version;
+  counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
+
+  if (res < 0) {
     return false;
   }
-  counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
 
   XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
          parser.MBHeader->numElements, parser.MBHeader->digitizerID);
@@ -99,82 +109,96 @@ bool MBCaenInstrument::parsePacket(char * data, int length,  EV42Serializer & ev
 
   auto cassette = MultibladeConfig.Mappings->cassette(parser.MBHeader->digitizerID);
   if (cassette < 0) {
-    XTRACE(DATA, WAR, "Invalid digitizerId: %d",
-           parser.MBHeader->digitizerID);
+    XTRACE(DATA, WAR, "Invalid digitizerId: %d", parser.MBHeader->digitizerID);
     counters.PacketBadDigitizer++;
     return false;
   }
 
-  for (const auto &dp : parser.readouts) {
-    ingestOneReadout(cassette, dp);
-  }
+  FixJumpsAndSort(cassette, parser.readouts);
   builders[cassette].flush();
 
   return true;
 }
 
 
-void MBCaenInstrument::ingestOneReadout(int cassette, const Readout & dp) {
+// New EF algorithm - Needed to sort readouts in time
+bool compareByTime(const Readout &a, const Readout &b) {
+  return a.local_time < b.local_time;
+}
 
-  if (not mbgeom.isValidCh(dp.channel)) {
-    counters.ReadoutsInvalidChannel++;
-    return;
+// New EF algorithm - buffers data according to time and sorts before
+// processing
+void MBCaenInstrument::FixJumpsAndSort(int cassette, std::vector<Readout> &vec) {
+  int64_t Gap{43'000'000};
+  int64_t PrevTime{0xffffffffff};
+  std::vector<Readout> temp;
+
+  for (auto &Readout : vec) {
+    int64_t Time = (uint64_t)(Readout.local_time * MultibladeConfig.TimeTickNS);
+
+    if ((PrevTime - Time) < Gap) {
+      temp.push_back(Readout);
+    } else {
+      XTRACE(CLUSTER, DEB, "Wrap: %4d, Time: %lld, PrevTime: %lld, diff %lld",
+             counters.ReadoutsTimerWraps, Time, PrevTime, (PrevTime - Time));
+      counters.ReadoutsTimerWraps++;
+      std::sort(temp.begin(), temp.end(), compareByTime);
+      LoadAndProcessReadouts(cassette, temp);
+
+      temp.clear();
+      temp.push_back(Readout);
+    }
+    PrevTime = Time;
   }
+  LoadAndProcessReadouts(cassette, temp);
+}
 
-  if (dp.adc > MultibladeConfig.max_valid_adc) {
-    counters.ReadoutsInvalidAdc++;
-    return;
-  }
+//
+void MBCaenInstrument::LoadAndProcessReadouts(int cassette, std::vector<Readout> &vec) {
+  for (auto &dp : vec) {
+    if (not mbgeom.isValidCh(dp.channel)) {
+      counters.ReadoutsInvalidChannel++;
+      continue;
+    }
 
-  uint8_t plane = mbgeom.getPlane(dp.channel);
-  uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
-  uint16_t coord;
-  if (plane == 0) {
-    if (global_ch == 30) {
+    if (dp.adc > MultibladeConfig.max_valid_adc) {
+      counters.ReadoutsInvalidAdc++;
+      continue;
+    }
+
+    uint8_t plane = mbgeom.getPlane(dp.channel);
+
+    #ifdef MB_MONITOR_CHANNEL
+    if ((dp.digitizer == 137) and (dp.channel == 62) and (plane == 0)) {
       counters.ReadoutsMonitor++;
-      return;
+      continue;
     }
-    coord = mbgeom.getx(cassette, dp.channel);
-    histograms.bin_x(global_ch, dp.adc);
-  } else  if (plane == 1) {
-    coord = mbgeom.gety(cassette, dp.channel);
-    histograms.bin_y(global_ch, dp.adc);
-  } else {
-    counters.ReadoutsInvalidPlane++;
-    return;
+    #endif
+
+    uint16_t coord;
+    if (plane == 0) {
+      coord = mbgeom.getx(cassette, dp.channel);
+    } else  if (plane == 1) {
+      coord = mbgeom.gety(cassette, dp.channel);
+    } else {
+      counters.ReadoutsInvalidPlane++;
+      continue;
+    }
+
+    counters.ReadoutsGood++;
+
+    XTRACE(DATA, DEB, "time %u, channel %u, adc %u",
+           dp.local_time, dp.channel, dp.adc);
+    XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
+           dp.debug().c_str(), cassette, plane, coord);
+
+    assert(dp.local_time * MultibladeConfig.TimeTickNS < 0xffffffff);
+    uint64_t Time = (uint64_t)(dp.local_time * MultibladeConfig.TimeTickNS);
+
+    builders[cassette].insert({Time, coord, dp.adc, plane});
   }
+  builders[cassette].flush();
+}
 
-  counters.ReadoutsGood++;
-
-  XTRACE(DATA, DEB, "time %lu, channel %u, adc %u", dp.local_time, dp.channel, dp.adc);
-
-  builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
-
-  XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
-         dp.debug().c_str(), cassette, plane, coord);
-  }
-
-
-bool MBCaenInstrument::filterEvent(const Event & e) {
-    if (!e.both_planes()) {
-      XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
-      counters.EventsNoCoincidence++;
-      return true;
-    }
-
-    // \todo parametrize maximum time span - in opts?
-    if (MultibladeConfig.filter_time_span && (e.time_span() > MultibladeConfig.filter_time_span_value)) {
-      XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
-      counters.FiltersMaxTimeSpan++;
-      return true;
-    }
-
-    if ((e.ClusterA.coord_span() > e.ClusterA.hit_count()) && (e.ClusterB.coord_span() > e.ClusterB.hit_count())) {
-      XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.to_string({}, true).c_str());
-      counters.EventsNotAdjacent++;
-      return true;
-    }
-    return false;
-  }
 
 } // namespace

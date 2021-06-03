@@ -42,6 +42,8 @@ public:
 
   void clear();
 
+  void setTimeBox(uint32_t TimeBoxValue) {TimeBoxSize = TimeBoxValue; }
+
   HitVector p0, p1;
 
   // \todo parametrize

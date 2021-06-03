@@ -58,7 +58,7 @@ public:
   struct Header *MBHeader{nullptr};
   struct ListElement422 *Data{nullptr};
 
-  uint32_t PreviousSeqNum{0};
+  uint32_t ExpectedSeqNum{0};
 };
 
 }

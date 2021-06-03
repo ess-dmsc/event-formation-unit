@@ -31,12 +31,15 @@ struct Counters {
     int64_t ReadoutsInvalidAdc;
     int64_t ReadoutsInvalidChannel;
     int64_t ReadoutsInvalidPlane;
+    int64_t ReadoutsTimerWraps;
     int64_t FiltersMaxTimeSpan;
     int64_t ProcessingIdle;
     int64_t Events;
     int64_t EventsUdder;
     int64_t EventsNoCoincidence;
-    int64_t EventsNotAdjacent;
+    int64_t EventsMatchedClusters;
+    int64_t EventsInvalidStripGap;
+    int64_t EventsInvalidWireGap;
     int64_t GeometryErrors;
     int64_t TxBytes;
     // Kafka stats below are common to all detectors

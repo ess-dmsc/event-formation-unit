@@ -41,6 +41,14 @@ bool parsePacket(char * data, int length, EV42Serializer & ev42ser);
   ///
 bool filterEvent(const Event & e);
 
+
+// Two methods below from ref data test
+
+// determine time gaps for clusters
+void FixJumpsAndSort(int builder, std::vector<Readout> &vec);
+// load and flush as appropriate
+void LoadAndProcessReadouts(int builder, std::vector<Readout> &vec);
+
 public:
   /// \brief Stuff that 'ties' Multiblade together
   struct Counters & counters;
@@ -57,8 +65,8 @@ public:
   HistogramSerializer histfb{1, "multiblade"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
   MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
+  std::vector<EventBuilder> builders; // reinit in ctor
 
-  std::vector<EventBuilder> builders;
   DataParser parser;
   ESSGeometry essgeom;
   Config MultibladeConfig;
