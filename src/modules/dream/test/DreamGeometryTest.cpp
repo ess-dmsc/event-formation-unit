@@ -8,7 +8,11 @@
 //===----------------------------------------------------------------------===//
 
 #include <test/TestBase.h>
+// fails InvalidSumo test on CentOS build - false positive
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 #include <dream/geometry/Geometry.h>
+#pragma GCC diagnostic pop
 
 using namespace Dream;
 
