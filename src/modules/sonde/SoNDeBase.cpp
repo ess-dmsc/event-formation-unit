@@ -146,7 +146,7 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_ev_others = eventprod.stats.ev_others;
         mystats.kafka_dr_errors = eventprod.stats.dr_errors;
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-        produce_timer.now();
+        produce_timer.reset();
 
         RuntimeStatusMask =  RtStat.getRuntimeStatusMask({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
 

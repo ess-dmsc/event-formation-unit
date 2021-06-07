@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
              txbuffer.TotalBytes / B1M, usecs);
       tx = 0;
       txp = 0;
-      us_clock.now();
-      report_timer.now();
+      us_clock.reset();
+      report_timer.reset();
     }
     usleep(Settings.SpeedThrottle * 100);
   }

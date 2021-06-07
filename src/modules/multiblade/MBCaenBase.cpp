@@ -108,17 +108,12 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
-
-  // MultibladeConfig = Config(MBCAENSettings.ConfigFile);
-  // assert(MultibladeConfig.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {
-  /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
-  // receiver.buflen(opts->buflen);
   receiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
                           EFUSettings.RxSocketBufferSize);
   receiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
@@ -129,7 +124,7 @@ void CAENBase::input_thread() {
     int readSize;
     unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
-    /** this is the processing step */
+    // this is the processing step
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
     if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                    RxRingbuffer.getMaxBufSize())) > 0) {
@@ -160,13 +155,11 @@ void CAENBase::processing_thread() {
   MBCaenInstrument MBCaen(Counters, EFUSettings, MBCAENSettings);
 
   // Event producer
-
   Producer eventprod(EFUSettings.KafkaBroker, MBCaen.topic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
   EV42Serializer flatbuffer{KafkaBufferSize, "multiblade", Produce};
-
 
   if (EFUSettings.TestImage) {
     XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
@@ -206,7 +199,7 @@ void CAENBase::processing_thread() {
 
 
   unsigned int data_index;
-  TSCTimer produce_timer;
+  TSCTimer produce_timer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
@@ -287,20 +280,19 @@ void CAENBase::processing_thread() {
         /// \todo user should not need to call flush() - implicit in rotate() ?
         MBCaen.dumpfile->flush();
         MBCaen.dumpfile->rotate();
-        h5flushtimer.now();
+        h5flushtimer.reset();
       }
     }
 
-    if (produce_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (produce_timer.timeout()) {
 
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += flatbuffer.produce();
 
       if (!MBCaen.histograms.isEmpty()) {
-//        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-//               histograms.hit_count());
+        // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+        //   histograms.hit_count());
         MBCaen.histfb.produce(MBCaen.histograms);
         MBCaen.histograms.clear();
       }
@@ -312,8 +304,6 @@ void CAENBase::processing_thread() {
       Counters.kafka_ev_others = eventprod.stats.ev_others;
       Counters.kafka_dr_errors = eventprod.stats.dr_errors;
       Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
-      produce_timer.now();
     }
 
     if (not runThreads) {

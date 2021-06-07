@@ -15,12 +15,23 @@
 class TSCTimer {
 
 public:
+  /// Create a TSC timer without timeout value
   TSCTimer(void);
 
-  void now(void); ///< record current time_point
+  /// Create a TSC timer with a timeout value
+  TSCTimer(uint64_t TimeOut);
 
-  uint64_t timetsc(void); ///< time since t1
+
+  // Has timeout occured? Then reset timer
+  bool timeout(void);
+
+  void reset(void); ///< record current time_point
+
+  uint64_t timetsc(void); ///< time since T0
 
 private:
-  uint64_t t1;
+  uint64_t T0; ///< reference tsc timestamp
+
+  // If timeout not set use this 'infinite' value
+  uint64_t TimeoutTicks{0xffffffffffffffff};
 };

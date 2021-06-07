@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
              TxBytesTotal / B1M, USecs);
       TxBytes = 0;
       TxPackets = 0;
-      RateTimer.now();
-      ReportTimer.now();
+      RateTimer.reset();
+      ReportTimer.reset();
     }
   }
 }

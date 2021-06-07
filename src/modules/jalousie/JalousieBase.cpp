@@ -240,7 +240,7 @@ void JalousieBase::processingThread() {
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
-      produce_timer.now();
+      produce_timer.reset();
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
     }
