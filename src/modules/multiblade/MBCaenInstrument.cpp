@@ -169,7 +169,12 @@ void MBCaenInstrument::LoadAndProcessReadouts(int cassette, std::vector<Readout>
     uint8_t plane = mbgeom.getPlane(dp.channel);
 
     #ifdef MB_MONITOR_CHANNEL
-    if ((dp.digitizer == 137) and (dp.channel == 62) and (plane == 0)) {
+    #define MONITOR_DIGITIZER 137
+    #define MONITOR_CHANNEL 62
+    #define MONITOR_PLANE 0
+    if ((dp.digitizer == MONITOR_DIGITIZER) and
+        (dp.channel == MONITOR_CHANNEL) and
+        (plane == MONITOR_PLANE)) {
       counters.ReadoutsMonitor++;
       continue;
     }
