@@ -34,7 +34,7 @@ public:
   }
 
 private:
-  std::vector<struct DigitizerMapping::Digitiser> & Digitisers;
+  std::vector<struct DigitizerMapping::Digitiser> Digitisers;
 
 
 };

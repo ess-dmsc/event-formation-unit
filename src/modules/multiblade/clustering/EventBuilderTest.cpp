@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <test/TestBase.h>
 #include <multiblade/clustering/EventBuilder.h>
+#include <test/TestBase.h>
 
 using namespace Multiblade;
 
@@ -20,9 +20,8 @@ protected:
 
   EventBuilder builder;
 
-  #include "../caen/EventBuilderCommon.cpp"
+#include "../caen/EventBuilderCommon.cpp"
 };
-
 
 TEST_F(EventBuilderTest, ThresholdData) {
   ASSERT_EQ(builder.Thresholds[0][0], 34);
@@ -43,14 +42,13 @@ TEST_F(EventBuilderTest, FirstTest) {
   builder.flush();
 
   ASSERT_EQ(builder.matcher.matched_events.size(), clusters);
-  for (auto & e : builder.matcher.matched_events) {
+  for (auto &e : builder.matcher.matched_events) {
     ASSERT_TRUE(e.both_planes());
     auto x = e.ClusterA.coord_center();
     auto y = e.ClusterB.coord_center();
     MESSAGE() << "(x,y) = (" << x << ", " << y << ")\n";
-    ASSERT_FLOAT_EQ(x + 1.0 ,y);
+    ASSERT_FLOAT_EQ(x + 1.0, y);
   }
-
 }
 
 int main(int argc, char **argv) {

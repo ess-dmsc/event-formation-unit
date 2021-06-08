@@ -17,6 +17,7 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   MBCaenBase.h
+  MBCaenInstrument.h
   caen/Readout.h
   caen/DataParser.h
   clustering/EventBuilder.h
@@ -24,6 +25,7 @@ set(caen_common_inc
   )
 set(caen_common_src
   MBCaenBase.cpp
+  MBCaenInstrument.cpp
   caen/Readout.cpp
   caen/DataParser.cpp
   clustering/EventBuilder.cpp
