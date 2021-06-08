@@ -516,7 +516,7 @@ void GdGemBase::processingThread() {
         return;
       }
 
-      ReportTimer.now();
+      ReportTimer.reset();
     }
   }
 }

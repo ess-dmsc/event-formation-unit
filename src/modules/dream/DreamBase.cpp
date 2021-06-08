@@ -207,7 +207,7 @@ void DreamBase::processingThread() {
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
 
-      ProduceTimer.now();
+      ProduceTimer.reset();
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

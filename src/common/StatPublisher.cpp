@@ -56,7 +56,7 @@ void StatPublisher::reconnectHelper() {
           MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
     }
   }
-  ReconnectTime.now();
+  ReconnectTime.reset();
   Retries++;
 }
 

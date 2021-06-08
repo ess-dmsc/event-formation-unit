@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
       statUpTime = RunTimer.timeus()/1000000;
       metrics.publish(detector, mainStats);
-      livestats.now();
+      livestats.reset();
     }
 
     cmdAPI.serverPoll();

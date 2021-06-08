@@ -9,11 +9,32 @@
 
 #include <common/TSCTimer.h>
 
-/** */
-TSCTimer::TSCTimer(void) { t1 = rdtsc(); }
+///
+TSCTimer::TSCTimer(void) {
+  T0 = rdtsc();
+}
 
-/** */
-void TSCTimer::now(void) { t1 = rdtsc(); }
+///
+TSCTimer::TSCTimer(uint64_t Timeout)
+  : TimeoutTicks(Timeout) {
+  T0 = rdtsc();
+}
 
-/** */
-uint64_t TSCTimer::timetsc(void) { return (rdtsc() - t1); }
+/// Determine if a timeout has occured and reset timer
+bool TSCTimer::timeout(void) {
+  if (timetsc() >= TimeoutTicks) {
+    reset();
+    return true;
+  }
+  return false;
+}
+
+///
+void TSCTimer::reset(void) {
+  T0 = rdtsc();
+}
+
+///
+uint64_t TSCTimer::timetsc(void) {
+  return (rdtsc() - T0);
+}

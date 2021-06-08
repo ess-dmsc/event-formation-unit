@@ -226,7 +226,7 @@ void MultigridBase::mainThread() {
       Counters.kafka_dr_errors = event_producer.stats.dr_errors;
       Counters.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
-      report_timer.now();
+      report_timer.reset();
     }
 
     /// Checking for exit

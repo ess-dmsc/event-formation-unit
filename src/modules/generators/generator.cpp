@@ -157,8 +157,8 @@ int main(int argc, char *argv[]) {
                           usecs);
       Bytes = 0;
       Packets = 0;
-      USClock.now();
-      ReportTimer.now();
+      USClock.reset();
+      ReportTimer.reset();
     }
     usleep(Settings.SpeedThrottle);
   }

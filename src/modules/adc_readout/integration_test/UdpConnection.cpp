@@ -153,7 +153,7 @@ void UdpConnection::transmitThread() {
     } else {
       if (!FirstData) {
         FirstData = true;
-        FirstDataTimer.now();
+        FirstDataTimer.reset();
       }
     }
 
