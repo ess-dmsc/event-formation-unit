@@ -68,7 +68,9 @@ TEST_F(FullGeometryTest, FirstFewLines) {
     {0, 1, 2,   1,  513},
     {0, 1, 2,   2,  514},
     {0, 1, 2, 511, 1023},
-    {0, 1, 2, 512, 1024}
+    {0, 1, 2, 512, 1024},
+    {0, 1, 3,   1, 1025},
+    {0, 1, 3,   2, 1026}
   };
 
   for (auto & NG : NGData) {
@@ -76,8 +78,8 @@ TEST_F(FullGeometryTest, FirstFewLines) {
     uint8_t LocalTube = (NG.Tube - 1) % 8;
     uint32_t GlobalStraw = Banks[NG.Bank]->getGlobalStrawId(TubeGroup, LocalTube, NG.Straw - 1);
     uint32_t Pixel = Geometry.pixel2D(NG.Pos - 1, GlobalStraw);
-    printf("Panel %u, Tube %u, Tube Group %u, LocTube %u, Straw %u, GblStraw %u\n",
-      NG.Bank, NG.Tube, TubeGroup, LocalTube, NG.Straw, GlobalStraw);
+    // printf("Panel %u, Tube %u, Tube Group %u, LocTube %u, Straw %u, GblStraw %u\n",
+    //   NG.Bank, NG.Tube, TubeGroup, LocalTube, NG.Straw, GlobalStraw);
     ASSERT_EQ(NG.Pixel, Pixel);
   }
 }
