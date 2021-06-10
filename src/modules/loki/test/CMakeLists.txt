@@ -31,6 +31,7 @@ create_test_executable(LokiPanelGeometryTest)
 ## Validate LoKI geometry between EFU and Nexus Constructor
 ##
 set(LokiFullGeometryTest_INC
+  LokiFullGeometryTestData.h
   ../geometry/TubeAmps.h
   ../geometry/PanelGeometry.h)
 set(LokiFullGeometryTest_SRC LokiFullGeometryTest.cpp)
