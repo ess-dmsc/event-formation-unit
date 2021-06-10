@@ -52,6 +52,10 @@ TEST_F(FullGeometryTest, BasicValidation) {
   }
 }
 
+// Compare pixelids used by the generated nexux files
+// https://github.com/ess-dmsc/generate-nexus-files
+// There is a slight difference in interpretation of TubeIDs, but this is not
+// essential so here we just convert one counting convention into another.
 TEST_F(FullGeometryTest, FirstFewLines) {
 
   for (auto & NG : NGData) {
@@ -67,7 +71,7 @@ TEST_F(FullGeometryTest, FirstFewLines) {
 
     // printf("tube %u, tubegroup %u, loctube %u, locstraw %u, col %u, row %u, gblstraw %u, pixel %u\n",
     //   NG.Tube, TubeGroup, LocalTube, NG.Straw % 7, Column, Row, GlobalStraw, Pixel);
-    ASSERT_EQ(NG.Pixel + 1, Pixel);
+    ASSERT_EQ(NG.Pixel, Pixel);
   }
 }
 
