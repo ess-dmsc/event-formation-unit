@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
+#include <cstdint>
 #include <LokiFullGeometryTestData.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
