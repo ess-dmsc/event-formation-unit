@@ -12,17 +12,30 @@ get_filename_component(LOKI_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ##
 
 ##
-## geometry/
+## Analog geometry - amplitude calculations
 ##
 set(TubeAmpsTest_INC ../geometry/TubeAmps.h)
 set(TubeAmpsTest_SRC TubeAmpsTest.cpp)
 create_test_executable(TubeAmpsTest)
 
+##
+## Panel geometry
+##
 set(LokiPanelGeometryTest_INC
   ../geometry/TubeAmps.h
   ../geometry/PanelGeometry.h)
 set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
 create_test_executable(LokiPanelGeometryTest)
+
+##
+## Validate LoKI geometry between EFU and Nexus Constructor
+##
+set(LokiFullGeometryTest_INC
+  LokiFullGeometryTestData.h
+  ../geometry/TubeAmps.h
+  ../geometry/PanelGeometry.h)
+set(LokiFullGeometryTest_SRC LokiFullGeometryTest.cpp)
+create_test_executable(LokiFullGeometryTest)
 
 
 set(LokiCalibrationTest_INC
