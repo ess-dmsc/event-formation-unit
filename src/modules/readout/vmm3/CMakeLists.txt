@@ -1,9 +1,7 @@
-
 #=============================================================================
-# Add ess detector modules
+# ESS VMM3 Parser Tests
 #=============================================================================
 
-include_directories(.)
-
-add_subdirectory(common)
-add_subdirectory(vmm3)
+set(VMM3ParserTest_INC VMM3Parser.h)
+set(VMM3ParserTest_SRC test/VMM3ParserTest.cpp)
+create_test_executable(VMM3ParserTest)

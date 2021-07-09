@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <readout/ReadoutParser.h>
-#include <readout/ReadoutParserTestData.h>
+#include <readout/common/ReadoutParser.h>
+#include <readout/common/ReadoutParserTestData.h>
 #include <test/TestBase.h>
 
 class ReadoutTest : public TestBase {

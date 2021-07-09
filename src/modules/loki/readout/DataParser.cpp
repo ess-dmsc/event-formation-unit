@@ -8,7 +8,7 @@
 
 #include <common/Trace.h>
 #include <loki/readout/DataParser.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR

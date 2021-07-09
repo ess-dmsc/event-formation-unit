@@ -9,7 +9,7 @@
 
 #include <cstring>
 #include <common/Trace.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <arpa/inet.h>
 
 // #undef TRC_LEVEL

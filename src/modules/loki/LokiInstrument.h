@@ -18,9 +18,9 @@
 #include <loki/geometry/PanelGeometry.h>
 #include <loki/geometry/TubeAmps.h>
 #include <loki/readout/Readout.h>
-#include <modules/readout/ReadoutParser.h>
+#include <modules/readout/common/ReadoutParser.h>
 #include <readout/DataParser.h>
-#include <readout/ESSTime.h>
+#include <readout/common/ESSTime.h>
 
 namespace Loki {
 
