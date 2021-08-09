@@ -141,7 +141,7 @@ void DreamBase::processingThread() {
 
   DreamInstrument Dream(Counters, DreamModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

@@ -190,7 +190,7 @@ void LokiBase::processingThread() {
 
   LokiInstrument Loki(Counters, LokiModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

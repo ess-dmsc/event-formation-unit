@@ -41,7 +41,7 @@ public:
   /// \brief Construct a producer object.
   /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
   /// \param topicstr Name of Kafka topic according to agreement, example
-  /// "T-REX_detectors"
+  /// "trex_detector"
   Producer(std::string Broker, std::string topicstr);
 
   /// \brief cleans up by deleting allocated structures

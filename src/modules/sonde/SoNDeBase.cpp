@@ -108,7 +108,7 @@ void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
 
-  Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "skadi_detector");
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };

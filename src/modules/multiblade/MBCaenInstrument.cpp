@@ -45,14 +45,14 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
       XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
       mbgeom.setConfigurationEstia();
       essgeom = ESSGeometry(ncass * nwires, nstrips, 1, 1);
-      topic = "ESTIA_detector";
-      monitor = "ESTIA_monitor";
+      topic = "estia_detector";
+      monitor = "estia_monitor";
     } else {
       mbgeom.setConfigurationFreia();
       XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
       essgeom = ESSGeometry(nstrips, ncass * nwires, 1, 1);
-      topic = "FREIA_detector";
-      monitor = "FREIA_monitor";
+      topic = "freia_detector";
+      monitor = "freia_monitor";
     }
 
     if (MultibladeConfig.getDetectorType() == Config::DetectorType::MB18) {

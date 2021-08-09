@@ -397,9 +397,9 @@ void GdGemBase::processingThread() {
     // \todo this only exits this thread, but EFU continues running
   }
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "NMX_detector");
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "NMX_monitor");
-  Producer HitsProducer(EFUSettings.KafkaBroker, "NMX_hits");
+  Producer EventProducer(EFUSettings.KafkaBroker, "nmx_detector");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_monitor");
+  Producer HitsProducer(EFUSettings.KafkaBroker, "nmx_hits");
 
   auto ProduceEvents = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
