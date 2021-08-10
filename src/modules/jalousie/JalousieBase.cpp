@@ -191,7 +191,7 @@ void JalousieBase::processingThread() {
   config = Config(ModuleSettings.ConfigFile);
   LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

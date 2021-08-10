@@ -17,7 +17,7 @@
 struct {
   std::string FileName;
   std::string KafkaBroker{"172.30.242.20:9092"};
-  std::string KafkaTopic{"FREIA_detector"};
+  std::string KafkaTopic{"freia_detector"};
   int KafkaBufferSize {124000}; /// entries ~ 1MB
 } Config;
 

@@ -66,7 +66,7 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings, struct PerfGenSettings &L
 void PerfGenBase::processingThread() {
 
   if (EFUSettings.KafkaTopic == "") {
-    EFUSettings.KafkaTopic = "PERFGEN_detector";
+    EFUSettings.KafkaTopic = "perfgen_detector";
   }
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
