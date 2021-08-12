@@ -250,7 +250,7 @@ void LokiBase::processingThread() {
       Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
       Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
 
-      // Process readouts, generate (end produce) events
+      // Process readouts, generate (and produce) events
       Loki.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
@@ -280,6 +280,7 @@ void LokiBase::processingThread() {
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      // \todo this is debug, should be handled smarter
       SerializerII->produce();
 
       /// Kafka stats update - common to all detectors

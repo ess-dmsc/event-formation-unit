@@ -50,18 +50,20 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
-  Stats.create("receive.packet_bad_header", Counters.PacketBadDigitizer);
-  Stats.create("readouts.count", Counters.ReadoutsCount);
-  Stats.create("readouts.count_valid", Counters.ReadoutsGood);
-  Stats.create("readouts.invalid_ch", Counters.ReadoutsInvalidChannel);
-  Stats.create("readouts.invalid_adc", Counters.ReadoutsInvalidAdc);
-  Stats.create("readouts.invalid_plane", Counters.ReadoutsInvalidPlane);
-  Stats.create("readouts.monitor", Counters.ReadoutsMonitor);
-  Stats.create("readouts.timer_wraps", Counters.ReadoutsTimerWraps);
+  // ESS Readout
+  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
+  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
+  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
+  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
+  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
+  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
+  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
+  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
+  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
+  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
+  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
-  Stats.create("readouts.error_version", Counters.ReadoutsErrorVersion);
-  Stats.create("readouts.error_bytes", Counters.ReadoutsErrorBytes);
-  Stats.create("readouts.seq_errors", Counters.ReadoutsSeqErrors);
 
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
@@ -159,143 +161,130 @@ void CAENBase::processing_thread() {
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
-  EV42Serializer flatbuffer{KafkaBufferSize, "multiblade", Produce};
+  EV42Serializer Serializer{KafkaBufferSize, "multiblade", Produce};
 
-  if (EFUSettings.TestImage) {
-    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-    Udder udder;
-    uint32_t time_of_flight = 0;
-    while (true) {
-      if (not runThreads) {
-        // \todo flush everything here
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
-        return;
-      }
-
-      static int eventCount = 0;
-      if (eventCount == 0) {
-        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-        flatbuffer.pulseTime(efu_time);
-      }
-
-      auto pixel_id = udder.getPixel(MBCaen.essgeom.nx(), MBCaen.essgeom.ny(), &MBCaen.essgeom);
-
-      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
-      Counters.EventsUdder++;
-
-      if (EFUSettings.TestImageUSleep != 0) {
-        usleep(EFUSettings.TestImageUSleep);
-      }
-
-      time_of_flight++;
-
-      if (Counters.TxBytes != 0) {
-        eventCount = 0;
-      } else {
-        eventCount++;
-      }
-    }
-  }
-
-
-  unsigned int data_index;
-  TSCTimer produce_timer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
+  unsigned int DataIndex;
+  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
-  while (true) {
-    if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = RxRingbuffer.getDataLength(data_index);
-      if (datalen == 0) {
+  while (runThreads) {
+    if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
+      auto DataLen = RxRingbuffer.getDataLength(DataIndex);
+      if (DataLen == 0) {
         Counters.FifoSeqErrors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto dataptr = RxRingbuffer.getDataBuffer(data_index);
+      auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      flatbuffer.pulseTime(efu_time);
+      auto Res = MBCaen.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
+      Counters.ReadoutStats = MBCaen.ESSReadoutParser.Stats;
 
-      if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
+      if (Res != ReadoutParser::OK) {
+        XTRACE(DATA, DEB, "Error parsing ESS readout header");
+        Counters.ErrorESSHeaders++;
         continue;
       }
+      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
+             MBCaen.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+             MBCaen.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
-      auto cassette = MBCaen.MultibladeConfig.Mappings->cassette(MBCaen.parser.MBHeader->digitizerID);
-      for (const auto &e : MBCaen.builders[cassette].Events) {
 
-        if (!e.both_planes()) {
-          Counters.EventsNoCoincidence++;
-          continue;
-        }
+      // We have good header information, now parse readout data
+      Res = MBCaen.parser.parse(MBCaen.ESSReadoutParser.Packet.DataPtr,
+                                  MBCaen.ESSReadoutParser.Packet.DataLength);
+      //
+      // Counters.TofCount = MBCaen.Time.Stats.TofCount;
+      // Counters.TofNegative = MBCaen.Time.Stats.TofNegative;
+      // Counters.PrevTofCount = MBCaen.Time.Stats.PrevTofCount;
+      // Counters.PrevTofNegative = MBCaen.Time.Stats.PrevTofNegative;
 
-        bool DiscardGap{true};
-        // Discard if there are gaps in the strip channels
-        if (DiscardGap) {
-          if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-            Counters.EventsInvalidStripGap++;
-            continue;
-          }
-        }
-
-        // Discard if there are gaps in the wire channels
-        if (DiscardGap) {
-          if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-            Counters.EventsInvalidWireGap++;
-            continue;
-          }
-        }
-
-        Counters.EventsMatchedClusters++;
-
-        XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
-        // calculate local x and y using center of mass
-        auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-        auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
-
-        // \todo improve this
-        auto time = e.time_start();
-        auto pixel_id = MBCaen.essgeom.pixel2D(x, y);
-        XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
-
-        if (pixel_id == 0) {
-          Counters.GeometryErrors++;
-        } else {
-          Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
-          Counters.Events++;
-        }
-      }
-      MBCaen.builders[cassette].Events.clear(); // else events will accumulate
-    } else {
-      // There is NO data in the FIFO - do stop checks and sleep a little
-      Counters.ProcessingIdle++;
-      usleep(10);
+    // old code below
+    //   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+    //   flatbuffer.pulseTime(efu_time);
+    //
+    //   if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
+    //     continue;
+    //   }
+    //
+    //   auto cassette = MBCaen.MultibladeConfig.Mappings->cassette(MBCaen.parser.MBHeader->digitizerID);
+    //   for (const auto &e : MBCaen.builders[cassette].Events) {
+    //
+    //     if (!e.both_planes()) {
+    //       Counters.EventsNoCoincidence++;
+    //       continue;
+    //     }
+    //
+    //     bool DiscardGap{true};
+    //     // Discard if there are gaps in the strip channels
+    //     if (DiscardGap) {
+    //       if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
+    //         Counters.EventsInvalidStripGap++;
+    //         continue;
+    //       }
+    //     }
+    //
+    //     // Discard if there are gaps in the wire channels
+    //     if (DiscardGap) {
+    //       if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
+    //         Counters.EventsInvalidWireGap++;
+    //         continue;
+    //       }
+    //     }
+    //
+    //     Counters.EventsMatchedClusters++;
+    //
+    //     XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
+    //     // calculate local x and y using center of mass
+    //     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+    //     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    //
+    //     // \todo improve this
+    //     auto time = e.time_start();
+    //     auto pixel_id = MBCaen.essgeom.pixel2D(x, y);
+    //     XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+    //
+    //     if (pixel_id == 0) {
+    //       Counters.GeometryErrors++;
+    //     } else {
+    //       Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
+    //       Counters.Events++;
+    //     }
+    //   }
+    //   MBCaen.builders[cassette].Events.clear(); // else events will accumulate
+    // } else {
+    //   // There is NO data in the FIFO - do stop checks and sleep a little
+    //   Counters.ProcessingIdle++;
+    //   usleep(10);
+    // }
+    //
+    // // if filedumping and requesting time splitting, check for rotation.
+    // if (MBCAENSettings.H5SplitTime != 0 and (MBCaen.dumpfile)) {
+    //   if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+    //
+    //     /// \todo user should not need to call flush() - implicit in rotate() ?
+    //     MBCaen.dumpfile->flush();
+    //     MBCaen.dumpfile->rotate();
+    //     h5flushtimer.reset();
+    //   }
     }
 
-    // if filedumping and requesting time splitting, check for rotation.
-    if (MBCAENSettings.H5SplitTime != 0 and (MBCaen.dumpfile)) {
-      if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+    if (ProduceTimer.timeout()) {
 
-        /// \todo user should not need to call flush() - implicit in rotate() ?
-        MBCaen.dumpfile->flush();
-        MBCaen.dumpfile->rotate();
-        h5flushtimer.reset();
-      }
-    }
+      RuntimeStatusMask =  RtStat.getRuntimeStatusMask(
+          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
-    if (produce_timer.timeout()) {
+      Counters.TxBytes += Serializer.produce();
 
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
-
-      Counters.TxBytes += flatbuffer.produce();
-
-      if (!MBCaen.histograms.isEmpty()) {
-        // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-        //   histograms.hit_count());
-        MBCaen.histfb.produce(MBCaen.histograms);
-        MBCaen.histograms.clear();
-      }
+      // if (!MBCaen.histograms.isEmpty()) {
+      //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+      //   //   histograms.hit_count());
+      //   MBCaen.histfb.produce(MBCaen.histograms);
+      //   MBCaen.histograms.clear();
+      // }
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
@@ -305,13 +294,9 @@ void CAENBase::processing_thread() {
       Counters.kafka_dr_errors = eventprod.stats.dr_errors;
       Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
     }
-
-    if (not runThreads) {
-      // \todo flush everything here
-      XTRACE(INPUT, ALW, "Stopping processing thread.");
-      return;
-    }
   }
+  XTRACE(INPUT, ALW, "Stopping processing thread.");
+  return;
 }
 
 }

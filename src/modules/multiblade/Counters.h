@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <readout/common/ReadoutParser.h>
 
 struct Counters {
     // Input Counters - accessed in input thread
@@ -21,17 +22,16 @@ struct Counters {
 
     // Processing Counters - accessed in processing thread
     int64_t FifoSeqErrors;
-    int64_t ReadoutsErrorVersion;
-    int64_t ReadoutsSeqErrors;
-    int64_t ReadoutsErrorBytes;
-    int64_t PacketBadDigitizer;
-    int64_t ReadoutsCount;
-    int64_t ReadoutsGood;
-    int64_t ReadoutsMonitor; /// \todo so far hardcoded
-    int64_t ReadoutsInvalidAdc;
-    int64_t ReadoutsInvalidChannel;
-    int64_t ReadoutsInvalidPlane;
-    int64_t ReadoutsTimerWraps;
+
+
+    // ESSReadout parser
+    struct ESSHeaderStats ReadoutStats;
+    int64_t ErrorESSHeaders;
+
+    // VMM3a Readouts
+    int64_t Readouts;
+
+    //
     int64_t FiltersMaxTimeSpan;
     int64_t ProcessingIdle;
     int64_t Events;

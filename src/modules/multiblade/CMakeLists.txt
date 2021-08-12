@@ -22,6 +22,7 @@ set(caen_common_inc
   caen/DataParser.h
   clustering/EventBuilder.h
   caen/Config.h
+  ../readout/common/ReadoutParser.h
   )
 set(caen_common_src
   MBCaenBase.cpp
@@ -30,6 +31,7 @@ set(caen_common_src
   caen/DataParser.cpp
   clustering/EventBuilder.cpp
   caen/Config.cpp
+  ../readout/common/ReadoutParser.cpp
   )
 
 set(mbcaen_INC ${caen_common_inc})

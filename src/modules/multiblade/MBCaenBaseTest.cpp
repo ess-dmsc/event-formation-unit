@@ -77,7 +77,7 @@ TEST_F(CAENBaseTest, DataReceive) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, pkt145701.size());
-  EXPECT_EQ(Readout.Counters.ReadoutsCount, 45); // number of readouts in pkt13_short
+  EXPECT_EQ(Readout.Counters.Readouts, 45); // number of readouts in pkt13_short
 }
 
 int main(int argc, char **argv) {

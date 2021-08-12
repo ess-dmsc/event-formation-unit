@@ -10,15 +10,17 @@
 #include <readout/vmm3/VMM3Parser.h>
 #include <test/TestBase.h>
 
-class VMM3ReadoutTest : public TestBase {
+class VMM3ParserTest : public TestBase {
 protected:
+  struct Counters Counters;
+  VMM3Parser Parser{Counters};
   void SetUp() override {}
   void TearDown() override {}
 };
 
 
-TEST_F(VMM3ReadoutTest, Constructor) {
-  ASSERT_EQ(0, 0);
+TEST_F(VMM3ParserTest, Constructor) {
+  ASSERT_EQ(Parser.Result.size(), 0);
 }
 
 // // nullptr as buffer

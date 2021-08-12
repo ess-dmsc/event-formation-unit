@@ -54,6 +54,7 @@ public:
   std::vector<struct ParsedData> Result;
 
   struct Counters &Stats;
+  //\todo this is debug, should be removed
   uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
 } // namespace Loki

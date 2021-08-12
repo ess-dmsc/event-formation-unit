@@ -9,20 +9,24 @@
 
 #pragma once
 
+#include <multiblade/Counters.h>
 #include <cinttypes>
+#include <vector>
 
-struct readoutstat_t {
-  int64_t ErrorSize{0};
-  int64_t ErrorRing{0};
-  int64_t ErrorFEN{0};
-  int64_t CalibReadout{0};
-  int64_t DataReadout{0};
-};
+// struct readoutdatastat_t {
+//   int64_t ErrorSize{0};
+//   int64_t ErrorRing{0};
+//   int64_t ErrorFEN{0};
+//   int64_t CalibReadout{0};
+//   int64_t DataReadout{0};
+// };
 
 
 class VMM3Parser {
 public:
-
+  const unsigned int MaxRingId{11};
+  const unsigned int MaxFENId{23};
+  const unsigned int MaxReadoutsInPacket{500};
 
   // From VMM3 ICD
   // https://project.esss.dk/owncloud/index.php/s/Nv17qiLWwOTkbzE
@@ -45,4 +49,16 @@ public:
   static_assert(sizeof(VMM3Parser::VMM3Data) == (20),
                 "Wrong header size (update assert or check packing)");
 
+  VMM3Parser(struct Counters &counters) : Stats(counters) {
+    Result.reserve(MaxReadoutsInPacket);
+  };
+  ~VMM3Parser(){};
+
+  //
+  int parse(const char *buffer, unsigned int size);
+
+  // To be iterated over in processing thread
+  std::vector<struct VMM3Data> Result;
+
+  struct Counters &Stats;
 };

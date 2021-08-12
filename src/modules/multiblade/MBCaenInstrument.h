@@ -17,8 +17,10 @@
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <modules/readout/common/ReadoutParser.h>
 #include <caen/Config.h>
 #include <caen/DataParser.h>
+
 
 #include <multiblade/Counters.h>
 #include <multiblade/MBCaenBase.h> // to get MBSettings
@@ -33,7 +35,7 @@ public:
   MBCaenInstrument(Counters & counters, BaseSettings & EFUSettings, CAENSettings & moduleSettings);
 
   ///
-bool parsePacket(char * data, int length, EV42Serializer & ev42ser);
+bool parse(char * data, int length, EV42Serializer & ev42ser);
 
   ///
   void ingestOneReadout(int cassette, const Readout & dp);
@@ -71,6 +73,9 @@ public:
   ESSGeometry essgeom;
   Config MultibladeConfig;
   std::shared_ptr<ReadoutFile> dumpfile;
+
+  // towards VMM3
+  ReadoutParser ESSReadoutParser;
 };
 
 } // namespace
