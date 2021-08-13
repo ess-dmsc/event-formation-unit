@@ -62,7 +62,7 @@ public:
 TEST_F(CAENBaseTest, Constructor) {
   CAENBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 

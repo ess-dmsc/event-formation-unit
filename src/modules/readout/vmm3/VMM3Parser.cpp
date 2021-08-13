@@ -27,9 +27,11 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     return ParsedReadouts;
   }
 
-  nonstd::span<const VMM3Data> Data((struct VMM3Data *)Buffer, Size);
+  VMM3Parser::VMM3Data * DataPtr = (struct VMM3Data *)Buffer;
 
-  for (auto & Readout : Data) {
+
+  for (unsigned int i = 0; i < Size/20; i++) {
+    VMM3Parser::VMM3Data Readout = DataPtr[i];
     if (Readout.RingId > MaxRingId) {
       Stats.ErrorRing++;
       continue;
