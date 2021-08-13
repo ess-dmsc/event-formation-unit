@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <readout/common/ReadoutParser.h>
+#include <readout/vmm3/VMM3Parser.h>
 
 struct Counters {
     // Input Counters - accessed in input thread
@@ -29,7 +30,7 @@ struct Counters {
     int64_t ErrorESSHeaders;
 
     // VMM3a Readouts
-    int64_t Readouts;
+    struct VMM3ParserStats VMMStats;
 
     //
     int64_t FiltersMaxTimeSpan;

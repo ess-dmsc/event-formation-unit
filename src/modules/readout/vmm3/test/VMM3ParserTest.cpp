@@ -12,8 +12,7 @@
 
 class VMM3ParserTest : public TestBase {
 protected:
-  struct Counters Counters;
-  VMM3Parser Parser{Counters};
+  VMM3Parser Parser;
   void SetUp() override {}
   void TearDown() override {}
 };
@@ -23,12 +22,12 @@ TEST_F(VMM3ParserTest, Constructor) {
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
-// // nullptr as buffer
-// TEST_F(ReadoutTest, ErrorBufferPtr) {
-//   auto Res = RdOut.validate(0, 100, DataType);
-//   ASSERT_EQ(Res, -ReadoutParser::EBUFFER);
-//   ASSERT_EQ(RdOut.Stats.ErrorBuffer, 1);
-// }
+// nullptr as buffer
+TEST_F(VMM3ParserTest, ErrorBufferPtr) {
+  auto Res = RdOut.validate(0, 100, DataType);
+  ASSERT_EQ(Res, -ReadoutParser::EBUFFER);
+  ASSERT_EQ(RdOut.Stats.ErrorBuffer, 1);
+}
 //
 // // size is 0
 // TEST_F(ReadoutTest, ErrorBufferSize) {

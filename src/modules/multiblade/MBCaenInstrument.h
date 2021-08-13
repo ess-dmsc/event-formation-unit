@@ -71,7 +71,7 @@ public:
 
   // towards VMM3
   ReadoutParser ESSReadoutParser;
-  VMM3Parser VMMParser{counters};
+  VMM3Parser VMMParser;
 };
 
 } // namespace

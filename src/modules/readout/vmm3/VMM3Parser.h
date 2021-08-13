@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include <multiblade/Counters.h>
 #include <cinttypes>
 #include <vector>
 
-// struct readoutdatastat_t {
-//   int64_t ErrorSize{0};
-//   int64_t ErrorRing{0};
-//   int64_t ErrorFEN{0};
-//   int64_t CalibReadout{0};
-//   int64_t DataReadout{0};
-// };
+struct VMM3ParserStats {
+  int64_t ErrorSize{0};
+  int64_t Readouts{0};
+  int64_t ErrorRing{0};
+  int64_t ErrorFEN{0};
+  int64_t CalibReadout{0};
+  int64_t DataReadout{0};
+};
 
 
 class VMM3Parser {
@@ -32,6 +32,7 @@ public:
   // https://project.esss.dk/owncloud/index.php/s/Nv17qiLWwOTkbzE
   // Since there will always be a single readout per header we combine
   // the two fields into one.
+  #define VMM3DATASIZE 20
   struct VMM3Data {
     uint8_t RingId;
     uint8_t FENId;
@@ -46,10 +47,10 @@ public:
     uint8_t Channel;
   } __attribute__((packed));
 
-  static_assert(sizeof(VMM3Parser::VMM3Data) == (20),
+  static_assert(sizeof(VMM3Parser::VMM3Data) == (VMM3DATASIZE),
                 "Wrong header size (update assert or check packing)");
 
-  VMM3Parser(struct Counters &counters) : Stats(counters) {
+  VMM3Parser() {
     Result.reserve(MaxReadoutsInPacket);
   };
   ~VMM3Parser(){};
@@ -60,5 +61,5 @@ public:
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;
 
-  struct Counters &Stats;
+  struct VMM3ParserStats Stats;
 };
