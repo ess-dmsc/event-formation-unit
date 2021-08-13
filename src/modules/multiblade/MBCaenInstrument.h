@@ -1,4 +1,4 @@
-// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,8 +18,8 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/readout/common/ReadoutParser.h>
+#include <modules/readout/vmm3/VMM3Parser.h>
 #include <caen/Config.h>
-#include <caen/DataParser.h>
 
 
 #include <multiblade/Counters.h>
@@ -35,21 +35,18 @@ public:
   MBCaenInstrument(Counters & counters, BaseSettings & EFUSettings, CAENSettings & moduleSettings);
 
   ///
-bool parse(char * data, int length, EV42Serializer & ev42ser);
+  //void ingestOneReadout(int cassette, const Readout & dp);
 
   ///
-  void ingestOneReadout(int cassette, const Readout & dp);
-
-  ///
-bool filterEvent(const Event & e);
+  //bool filterEvent(const Event & e);
 
 
-// Two methods below from ref data test
+  // Two methods below from ref data test
 
-// determine time gaps for clusters
-void FixJumpsAndSort(int builder, std::vector<Readout> &vec);
-// load and flush as appropriate
-void LoadAndProcessReadouts(int builder, std::vector<Readout> &vec);
+  // determine time gaps for clusters
+  //void FixJumpsAndSort(int builder, std::vector<Readout> &vec);
+  // load and flush as appropriate
+  //void LoadAndProcessReadouts(int builder, std::vector<Readout> &vec);
 
 public:
   /// \brief Stuff that 'ties' Multiblade together
@@ -69,13 +66,12 @@ public:
   MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
   std::vector<EventBuilder> builders; // reinit in ctor
 
-  DataParser parser;
   ESSGeometry essgeom;
   Config MultibladeConfig;
-  std::shared_ptr<ReadoutFile> dumpfile;
 
   // towards VMM3
   ReadoutParser ESSReadoutParser;
+  VMM3Parser VMMParser{counters};
 };
 
 } // namespace

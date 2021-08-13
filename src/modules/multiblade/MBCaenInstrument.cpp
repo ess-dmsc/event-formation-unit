@@ -31,9 +31,9 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
     // Setup Instrument according to configuration file
     MultibladeConfig = Config(ModuleSettings.ConfigFile);
 
-    if (!moduleSettings.FilePrefix.empty()) {
-      dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
-    }
+    // if (!moduleSettings.FilePrefix.empty()) {
+    //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
+    // }
 
 
     ncass = MultibladeConfig.getCassettes();
@@ -81,54 +81,14 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 
 }
 
-
-// Moved from MBCaenBase to better support unit testing
-bool MBCaenInstrument::parse(char * __attribute__((unused)) data, int __attribute__((unused)) length,  EV42Serializer __attribute__((unused)) & ev42ser) {
-  //
-  // int res = parser.parse(data, length);
-  //
-  // counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
-  // counters.ReadoutsErrorVersion += parser.Stats.error_version;
-  // counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
-  //
-  // if (res < 0) {
-  //   return false;
-  // }
-  //
-  // XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-  //        parser.MBHeader->numElements, parser.MBHeader->digitizerID);
-  //
-  // counters.ReadoutsCount += parser.MBHeader->numElements;
-  //
-  // uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-  // ev42ser.pulseTime(efu_time);
-  //
-  // if (dumpfile) {
-  //   dumpfile->push(parser.readouts);
-  // }
-  //
-  // auto cassette = MultibladeConfig.Mappings->cassette(parser.MBHeader->digitizerID);
-  // if (cassette < 0) {
-  //   XTRACE(DATA, WAR, "Invalid digitizerId: %d", parser.MBHeader->digitizerID);
-  //   counters.PacketBadDigitizer++;
-  //   return false;
-  // }
-  //
-  // FixJumpsAndSort(cassette, parser.readouts);
-  // builders[cassette].flush();
-  //
-  return true;
-}
-
-
 // New EF algorithm - Needed to sort readouts in time
-bool compareByTime(const Readout &a, const Readout &b) {
-  return a.local_time < b.local_time;
-}
+// bool compareByTime(const Readout &a, const Readout &b) {
+//   return a.local_time < b.local_time;
+// }
 
 // New EF algorithm - buffers data according to time and sorts before
 // processing
-void MBCaenInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
+// void MBCaenInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
   // int64_t Gap{43'000'000};
   // int64_t PrevTime{0xffffffffff};
   // std::vector<Readout> temp;
@@ -151,10 +111,10 @@ void MBCaenInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __a
   //   PrevTime = Time;
   // }
   // LoadAndProcessReadouts(cassette, temp);
-}
+// }
 
 //
-void MBCaenInstrument::LoadAndProcessReadouts(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
+// void MBCaenInstrument::LoadAndProcessReadouts(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
   // for (auto &dp : vec) {
   //   if (not mbgeom.isValidCh(dp.channel)) {
   //     counters.ReadoutsInvalidChannel++;
@@ -203,7 +163,7 @@ void MBCaenInstrument::LoadAndProcessReadouts(int __attribute__((unused)) casset
   //   builders[cassette].insert({Time, coord, dp.adc, plane});
   // }
   // builders[cassette].flush();
-}
+// }
 
 
 } // namespace

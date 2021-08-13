@@ -7,7 +7,7 @@ else()
 endif()
 
 add_subdirectory(caen)
-add_subdirectory(generators)
+#add_subdirectory(generators)
 add_subdirectory(clustering)
 
 include_directories(.)
@@ -18,20 +18,18 @@ include_directories(.)
 set(caen_common_inc
   MBCaenBase.h
   MBCaenInstrument.h
-  caen/Readout.h
-  caen/DataParser.h
   clustering/EventBuilder.h
   caen/Config.h
   ../readout/common/ReadoutParser.h
+  ../readout/vmm3/VMM3Parser.h
   )
 set(caen_common_src
   MBCaenBase.cpp
   MBCaenInstrument.cpp
-  caen/Readout.cpp
-  caen/DataParser.cpp
   clustering/EventBuilder.cpp
   caen/Config.cpp
   ../readout/common/ReadoutParser.cpp
+  ../readout/vmm3/VMM3Parser.cpp
   )
 
 set(mbcaen_INC ${caen_common_inc})

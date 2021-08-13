@@ -194,7 +194,7 @@ void CAENBase::processing_thread() {
 
 
       // We have good header information, now parse readout data
-      Res = MBCaen.parser.parse(MBCaen.ESSReadoutParser.Packet.DataPtr,
+      Res = MBCaen.VMMParser.parse(MBCaen.ESSReadoutParser.Packet.DataPtr,
                                   MBCaen.ESSReadoutParser.Packet.DataLength);
       //
       // Counters.TofCount = MBCaen.Time.Stats.TofCount;

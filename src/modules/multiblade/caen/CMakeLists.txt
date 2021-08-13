@@ -1,11 +1,3 @@
-set(MBReadoutTest_SRC
-  Readout.cpp
-  ReadoutTest.cpp
-  )
-set(MBReadoutTest_INC
-  Readout.h
-  )
-create_test_executable(MBReadoutTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
 set(MBDataParserBenchmarkTest_INC)
@@ -16,14 +8,6 @@ create_benchmark_executable(MBDataParserBenchmarkTest)
 if(GOOGLE_BENCHMARK)
   target_link_libraries(MBDataParserBenchmarkTest h5cpp)
 endif()
-
-# Create excecutable for the test of geometry
-set(MBDataParserTest_INC
-  DataParser.h)
-set(MBDataParserTest_SRC
-  DataParser.cpp
-  DataParserTest.cpp)
-create_test_executable(MBDataParserTest)
 
 # Create excecutable for the test of digitizer mapping
 set(DigitizerMappingTest_INC
