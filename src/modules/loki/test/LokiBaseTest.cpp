@@ -57,6 +57,7 @@ public:
 TEST_F(LokiBaseTest, Constructor) {
   LokiBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
 

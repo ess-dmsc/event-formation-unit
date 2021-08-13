@@ -31,7 +31,7 @@ public:
   void processing_thread();
 
 protected:
-  struct Counters Counters;
+  struct Counters Counters{};
   CAENSettings MBCAENSettings;
 };
 
