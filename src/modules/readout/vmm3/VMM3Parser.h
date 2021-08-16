@@ -24,8 +24,8 @@ struct VMM3ParserStats {
   int64_t ErrorVMM{0};
   int64_t ErrorChannel{0};
   int64_t Readouts{0};
-  int64_t CalibReadout{0};
-  int64_t DataReadout{0};
+  int64_t CalibReadouts{0};
+  int64_t DataReadouts{0};
   int64_t OverThreshold{0};
 };
 

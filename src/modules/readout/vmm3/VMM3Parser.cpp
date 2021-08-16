@@ -94,9 +94,9 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     }
 
     if ((Readout.GEO & 0x80) == 0) {
-      Stats.DataReadout++;
+      Stats.DataReadouts++;
     } else {
-      Stats.CalibReadout++;
+      Stats.CalibReadouts++;
     }
 
     GoodReadouts++;

@@ -64,6 +64,23 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
+  // From VMM3Parser
+  Stats.create("readout.error_size", Counters.VMMStats.ErrorSize);
+  Stats.create("readout.error_ring", Counters.VMMStats.ErrorRing);
+  Stats.create("readout.error_fen", Counters.VMMStats.ErrorFEN);
+  Stats.create("readout.error_datalen", Counters.VMMStats.ErrorDataLength);
+  Stats.create("readout.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
+  Stats.create("readout.error_bc", Counters.VMMStats.ErrorBC);
+  Stats.create("readout.error_adc", Counters.VMMStats.ErrorADC);
+  Stats.create("readout.error_vmm", Counters.VMMStats.ErrorVMM);
+  Stats.create("readout.error_channel", Counters.VMMStats.ErrorChannel);
+  Stats.create("readout.count", Counters.VMMStats.Readouts);
+  Stats.create("readout.bccalib", Counters.VMMStats.CalibReadouts);
+  Stats.create("readout.data", Counters.VMMStats.DataReadouts);
+  Stats.create("readout.over_threshold", Counters.VMMStats.OverThreshold);
+
+
+
 
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
@@ -196,7 +213,10 @@ void CAENBase::processing_thread() {
       // We have good header information, now parse readout data
       Res = MBCaen.VMMParser.parse(MBCaen.ESSReadoutParser.Packet.DataPtr,
                                   MBCaen.ESSReadoutParser.Packet.DataLength);
-      //
+
+      Counters.VMMStats = MBCaen.VMMParser.Stats;
+
+
       // Counters.TofCount = MBCaen.Time.Stats.TofCount;
       // Counters.TofNegative = MBCaen.Time.Stats.TofNegative;
       // Counters.PrevTofCount = MBCaen.Time.Stats.PrevTofCount;
@@ -288,6 +308,9 @@ void CAENBase::processing_thread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
+
+      /// \todo Counters.KafkaStats = eventprod.Stats;
+
       Counters.kafka_produce_fails = eventprod.stats.produce_fails;
       Counters.kafka_ev_errors = eventprod.stats.ev_errors;
       Counters.kafka_ev_others = eventprod.stats.ev_others;

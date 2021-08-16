@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -97,7 +97,6 @@ public:
     H5_COMPOUND_INSERT_MEMBER(OutputQueue);
     H5_COMPOUND_INSERT_MEMBER(RingId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
-
 
     H5_COMPOUND_RETURN;
   }

@@ -111,8 +111,8 @@ TEST_F(VMM3ParserTest, GoodData1) {
   auto Res = Parser.parse((char *)&VMMData1[0], VMMData1.size());
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
-  ASSERT_EQ(Parser.Stats.DataReadout, 2);
-  ASSERT_EQ(Parser.Stats.CalibReadout, 0);
+  ASSERT_EQ(Parser.Stats.DataReadouts, 2);
+  ASSERT_EQ(Parser.Stats.CalibReadouts, 0);
 }
 
 
