@@ -89,6 +89,22 @@ TEST_F(VMM3ParserTest, ErrorADC) {
   ASSERT_EQ(Parser.Stats.OverThreshold, 1);
 }
 
+// Testing valid and invalid VMM ranges
+TEST_F(VMM3ParserTest, ErrorVMM) {
+  auto Res = Parser.parse((char *)&VMMVMMError[0], VMMVMMError.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
+  ASSERT_EQ(Parser.Stats.ErrorVMM, 2);
+}
+
+// Testing valid and invalid VMM ranges
+TEST_F(VMM3ParserTest, ErrorChannel) {
+  auto Res = Parser.parse((char *)&VMMChannelError[0], VMMChannelError.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
+  ASSERT_EQ(Parser.Stats.ErrorChannel, 2);
+}
+
 
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodData1) {

@@ -4,6 +4,8 @@
 /// \file
 ///
 /// \brief Parser for ESS readout of VMM3a data
+///
+/// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
 #include <common/span.hpp>
@@ -24,14 +26,14 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     return GoodReadouts;
   }
 
-  if (Size % 20 != 0) {
+  if (Size % DataLength != 0) {
     Stats.ErrorSize++;
     XTRACE(DATA, WAR, "Invalid data length - %d should be multiple of 20", Size);
     return GoodReadouts;
   }
 
   VMM3Parser::VMM3Data * DataPtr = (struct VMM3Data *)Buffer;
-  for (unsigned int i = 0; i < Size/20; i++) {
+  for (unsigned int i = 0; i < Size/DataLength; i++) {
     Stats.Readouts++;
     VMM3Parser::VMM3Data Readout = DataPtr[i];
     if (Readout.RingId > MaxRingId) {
@@ -46,7 +48,7 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
       continue;
     }
 
-    if (Readout.DataLength != 20)  {
+    if (Readout.DataLength != DataLength)  {
       XTRACE(DATA, WAR, "Invalid header length - must be 20 bytes", Readout.DataLength);
       Stats.ErrorDataLength++;
       continue;
@@ -67,6 +69,20 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     if ((Readout.OTADC & ADCMask) > MaxADCValue) {
       XTRACE(DATA, WAR, "Invalid TDC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
       Stats.ErrorADC++;
+      continue;
+    }
+
+    // So far no checks for GEO and TDC
+
+    if (Readout.VMM > MaxVMMValue) {
+      XTRACE(DATA, WAR, "Invalid VMM %u (max is %u)", Readout.VMM, MaxVMMValue);
+      Stats.ErrorVMM++;
+      continue;
+    }
+
+    if (Readout.Channel > MaxChannelValue) {
+      XTRACE(DATA, WAR, "Invalid Channel %u (max is %u)", Readout.Channel, MaxChannelValue);
+      Stats.ErrorChannel++;
       continue;
     }
 

@@ -21,6 +21,8 @@ struct VMM3ParserStats {
   int64_t ErrorTimeFrac{0};
   int64_t ErrorBC{0};
   int64_t ErrorADC{0};
+  int64_t ErrorVMM{0};
+  int64_t ErrorChannel{0};
   int64_t Readouts{0};
   int64_t CalibReadout{0};
   int64_t DataReadout{0};
@@ -70,8 +72,11 @@ public:
   struct VMM3ParserStats Stats;
 
 private:
+  const uint16_t DataLength{20};
   const uint16_t MaxBCValue{4095};
   const uint16_t MaxADCValue{1023};
+  const uint16_t MaxVMMValue{15};
+  const uint16_t MaxChannelValue{63};
   const uint16_t OverThresholdMask{0x8000};
   const uint16_t ADCMask{0x7fff};
 };
