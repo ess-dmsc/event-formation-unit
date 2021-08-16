@@ -44,42 +44,56 @@ TEST_F(VMM3ParserTest, ErrorAPISize) {
 TEST_F(VMM3ParserTest, ErrorRing) {
   auto Res = Parser.parse((char *)&VMMRingError[0], VMMRingError.size());
   ASSERT_EQ(Res, 1);
-  ASSERT_EQ(Parser.Stats.ErrorSize, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.ErrorRing, 1);
-  ASSERT_EQ(Parser.Stats.ErrorFEN, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataLength, 0);
 }
 
 // Invalid FENId
 TEST_F(VMM3ParserTest, ErrorFEN) {
   auto Res = Parser.parse((char *)&VMMFENError[0], VMMFENError.size());
   ASSERT_EQ(Res, 1);
-  ASSERT_EQ(Parser.Stats.ErrorSize, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
-  ASSERT_EQ(Parser.Stats.ErrorRing, 0);
   ASSERT_EQ(Parser.Stats.ErrorFEN, 1);
-  ASSERT_EQ(Parser.Stats.ErrorDataLength, 0);
 }
 
-// Invalid data size
+// Invalid data length - so far always 20 bytes.
 TEST_F(VMM3ParserTest, ErrorDataLength) {
   auto Res = Parser.parse((char *)&VMMDataLengthError[0], VMMDataLengthError.size());
   ASSERT_EQ(Res, 1);
-  ASSERT_EQ(Parser.Stats.ErrorSize, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
-  ASSERT_EQ(Parser.Stats.ErrorRing, 0);
-  ASSERT_EQ(Parser.Stats.ErrorFEN, 0);
   ASSERT_EQ(Parser.Stats.ErrorDataLength, 1);
 }
 
+// Testing valid and invalid TimeLO ranges
+TEST_F(VMM3ParserTest, ErrorTimeLow) {
+  auto Res = Parser.parse((char *)&VMMTimeLowError[0], VMMTimeLowError.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
+  ASSERT_EQ(Parser.Stats.ErrorTimeFrac, 2);
+}
+
+// Testing valid and invalid BC ranges
+TEST_F(VMM3ParserTest, ErrorBC) {
+  auto Res = Parser.parse((char *)&VMMBCError[0], VMMBCError.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
+  ASSERT_EQ(Parser.Stats.ErrorBC, 2);
+}
+
+// Testing valid and invalid ADC ranges
+TEST_F(VMM3ParserTest, ErrorADC) {
+  auto Res = Parser.parse((char *)&VMMADCError[0], VMMADCError.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
+  ASSERT_EQ(Parser.Stats.ErrorADC, 2);
+  ASSERT_EQ(Parser.Stats.OverThreshold, 1);
+}
 
 
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodData1) {
   auto Res = Parser.parse((char *)&VMMData1[0], VMMData1.size());
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(Parser.Stats.ErrorSize, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataReadout, 2);
   ASSERT_EQ(Parser.Stats.CalibReadout, 0);

@@ -52,6 +52,31 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
       continue;
     }
 
+    if (Readout.TimeLow > MaxFracTimeCount)  {
+      XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow, MaxFracTimeCount);
+      Stats.ErrorTimeFrac++;
+      continue;
+    }
+
+    if (Readout.BC > MaxBCValue)  {
+      XTRACE(DATA, WAR, "Invalid BC %u (max is %u)", Readout.BC, MaxBCValue);
+      Stats.ErrorBC++;
+      continue;
+    }
+
+    if ((Readout.OTADC & ADCMask) > MaxADCValue) {
+      XTRACE(DATA, WAR, "Invalid TDC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
+      Stats.ErrorADC++;
+      continue;
+    }
+
+
+    // Validation done, increment stats for decoded parameters
+
+    if (Readout.OTADC & OverThresholdMask) {
+      Stats.OverThreshold++;
+    }
+
     if ((Readout.GEO & 0x80) == 0) {
       Stats.DataReadout++;
     } else {
