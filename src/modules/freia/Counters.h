@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Multiblade application counters (for Grafana and low level debug)
+/// \brief Freia application counters (for Grafana and low level debug)
 ///
 //===----------------------------------------------------------------------===//
 

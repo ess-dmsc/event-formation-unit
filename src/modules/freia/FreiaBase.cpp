@@ -24,19 +24,19 @@
 #include <common/TimeString.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-#include <multiblade/MBCaenBase.h>
-#include <multiblade/MBCaenInstrument.h>
+#include <freia/FreiaBase.h>
+#include <freia/FreiaInstrument.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Multiblade {
+namespace Freia {
 
-const char *classname = "Multiblade detector with CAEN readout";
+const char *classname = "Freia detector with ESS readout";
 
-CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
-    : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
+FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings)
+    : Detector("FREIA", settings), FreiaSettings(LocalFreiaSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -98,33 +98,33 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
 
-  Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
-  Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
-
-  Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
-  Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
+  // Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
+  // Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
+  // Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
+  // Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
+  // Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
+  //
+  // Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
+  // Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
+  // Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
+  // Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
+  // Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
 
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { FreiaBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    CAENBase::processing_thread();
+    FreiaBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d Freia Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void CAENBase::input_thread() {
+void FreiaBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
@@ -164,16 +164,16 @@ void CAENBase::input_thread() {
   }
 }
 
-void CAENBase::processing_thread() {
+void FreiaBase::processing_thread() {
 
-  MBCaenInstrument MBCaen(Counters, EFUSettings, MBCAENSettings);
+  FreiaInstrument Freia(Counters, EFUSettings, FreiaSettings);
 
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, MBCaen.topic);
+  Producer eventprod(EFUSettings.KafkaBroker, Freia.topic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
-  EV42Serializer Serializer{KafkaBufferSize, "multiblade", Produce};
+  EV42Serializer Serializer{KafkaBufferSize, "freia", Produce};
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -192,8 +192,8 @@ void CAENBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = MBCaen.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
-      Counters.ReadoutStats = MBCaen.ESSReadoutParser.Stats;
+      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
+      Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
@@ -201,32 +201,32 @@ void CAENBase::processing_thread() {
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             MBCaen.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             MBCaen.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
+             Freia.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+             Freia.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
 
       // We have good header information, now parse readout data
-      Res = MBCaen.VMMParser.parse(MBCaen.ESSReadoutParser.Packet.DataPtr,
-                                  MBCaen.ESSReadoutParser.Packet.DataLength);
+      Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet.DataPtr,
+                                  Freia.ESSReadoutParser.Packet.DataLength);
 
-      Counters.VMMStats = MBCaen.VMMParser.Stats;
+      Counters.VMMStats = Freia.VMMParser.Stats;
 
 
-      // Counters.TofCount = MBCaen.Time.Stats.TofCount;
-      // Counters.TofNegative = MBCaen.Time.Stats.TofNegative;
-      // Counters.PrevTofCount = MBCaen.Time.Stats.PrevTofCount;
-      // Counters.PrevTofNegative = MBCaen.Time.Stats.PrevTofNegative;
+      // Counters.TofCount = Freia.Time.Stats.TofCount;
+      // Counters.TofNegative = Freia.Time.Stats.TofNegative;
+      // Counters.PrevTofCount = Freia.Time.Stats.PrevTofCount;
+      // Counters.PrevTofNegative = Freia.Time.Stats.PrevTofNegative;
 
     // old code below
     //   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
     //   flatbuffer.pulseTime(efu_time);
     //
-    //   if (not MBCaen.parsePacket(dataptr, datalen, flatbuffer)) {
+    //   if (not Freia.parsePacket(dataptr, datalen, flatbuffer)) {
     //     continue;
     //   }
     //
-    //   auto cassette = MBCaen.MultibladeConfig.Mappings->cassette(MBCaen.parser.MBHeader->digitizerID);
-    //   for (const auto &e : MBCaen.builders[cassette].Events) {
+    //   auto cassette = Freia.FreiaConfig.Mappings->cassette(Freia.parser.MBHeader->digitizerID);
+    //   for (const auto &e : Freia.builders[cassette].Events) {
     //
     //     if (!e.both_planes()) {
     //       Counters.EventsNoCoincidence++;
@@ -259,7 +259,7 @@ void CAENBase::processing_thread() {
     //
     //     // \todo improve this
     //     auto time = e.time_start();
-    //     auto pixel_id = MBCaen.essgeom.pixel2D(x, y);
+    //     auto pixel_id = Freia.essgeom.pixel2D(x, y);
     //     XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
     //
     //     if (pixel_id == 0) {
@@ -269,7 +269,7 @@ void CAENBase::processing_thread() {
     //       Counters.Events++;
     //     }
     //   }
-    //   MBCaen.builders[cassette].Events.clear(); // else events will accumulate
+    //   Freia.builders[cassette].Events.clear(); // else events will accumulate
     // } else {
     //   // There is NO data in the FIFO - do stop checks and sleep a little
     //   Counters.ProcessingIdle++;
@@ -277,12 +277,12 @@ void CAENBase::processing_thread() {
     // }
     //
     // // if filedumping and requesting time splitting, check for rotation.
-    // if (MBCAENSettings.H5SplitTime != 0 and (MBCaen.dumpfile)) {
-    //   if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+    // if (FreiaSettings.H5SplitTime != 0 and (Freia.dumpfile)) {
+    //   if (h5flushtimer.timeus() >= FreiaSettings.H5SplitTime * 1000000) {
     //
     //     /// \todo user should not need to call flush() - implicit in rotate() ?
-    //     MBCaen.dumpfile->flush();
-    //     MBCaen.dumpfile->rotate();
+    //     Freia.dumpfile->flush();
+    //     Freia.dumpfile->rotate();
     //     h5flushtimer.reset();
     //   }
     }
@@ -294,11 +294,11 @@ void CAENBase::processing_thread() {
 
       Counters.TxBytes += Serializer.produce();
 
-      // if (!MBCaen.histograms.isEmpty()) {
+      // if (!Freia.histograms.isEmpty()) {
       //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
       //   //   histograms.hit_count());
-      //   MBCaen.histfb.produce(MBCaen.histograms);
-      //   MBCaen.histograms.clear();
+      //   Freia.histfb.produce(Freia.histograms);
+      //   Freia.histograms.clear();
       // }
 
       /// Kafka stats update - common to all detectors

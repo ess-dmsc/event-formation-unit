@@ -10,33 +10,33 @@
 #include <common/Log.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
-#include <multiblade/MBCaenInstrument.h>
+#include <freia/FreiaInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Multiblade {
+namespace Freia {
 
 /// \brief load configuration and calibration files
-MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
+FreiaInstrument::FreiaInstrument(struct Counters & counters,
     BaseSettings & EFUSettings,
-    CAENSettings &moduleSettings)
+    FreiaSettings &moduleSettings)
       : counters(counters)
       , ModuleSettings(moduleSettings) {
 
 
     // Setup Instrument according to configuration file
-    //MultibladeConfig = Config(ModuleSettings.ConfigFile);
+    //FreiaConfig = Config(ModuleSettings.ConfigFile);
 
     // if (!moduleSettings.FilePrefix.empty()) {
     //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
     // }
 
 
-    builders = std::vector<EventBuilder>(ncass);
-    for (EventBuilder & builder : builders) {
-      builder.setTimeBox(2010);
-    }
+    // builders = std::vector<EventBuilder>(ncass);
+    // for (EventBuilder & builder : builders) {
+    //   builder.setTimeBox(2010);
+    // }
 
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
@@ -46,7 +46,7 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
     };
     histfb.set_callback(ProduceHist);
     histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
-    histfb = HistogramSerializer(histograms.needed_buffer_size(), "multiblade");
+    histfb = HistogramSerializer(histograms.needed_buffer_size(), "freia");
     //
 
 }
@@ -58,13 +58,13 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 
 // New EF algorithm - buffers data according to time and sorts before
 // processing
-// void MBCaenInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
+// void FreiaInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
   // int64_t Gap{43'000'000};
   // int64_t PrevTime{0xffffffffff};
   // std::vector<Readout> temp;
   //
   // for (auto &Readout : vec) {
-  //   int64_t Time = (uint64_t)(Readout.local_time * MultibladeConfig.TimeTickNS);
+  //   int64_t Time = (uint64_t)(Readout.local_time * FreiaConfig.TimeTickNS);
   //
   //   if ((PrevTime - Time) < Gap) {
   //     temp.push_back(Readout);
@@ -84,14 +84,14 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
 // }
 
 //
-// void MBCaenInstrument::LoadAndProcessReadouts(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
+// void FreiaInstrument::LoadAndProcessReadouts(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
   // for (auto &dp : vec) {
   //   if (not mbgeom.isValidCh(dp.channel)) {
   //     counters.ReadoutsInvalidChannel++;
   //     continue;
   //   }
   //
-  //   if (dp.adc > MultibladeConfig.max_valid_adc) {
+  //   if (dp.adc > FreiaConfig.max_valid_adc) {
   //     counters.ReadoutsInvalidAdc++;
   //     continue;
   //   }
@@ -127,8 +127,8 @@ MBCaenInstrument::MBCaenInstrument(struct Counters & counters,
   //   XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
   //          dp.debug().c_str(), cassette, plane, coord);
   //
-  //   assert(dp.local_time * MultibladeConfig.TimeTickNS < 0xffffffff);
-  //   uint64_t Time = (uint64_t)(dp.local_time * MultibladeConfig.TimeTickNS);
+  //   assert(dp.local_time * FreiaConfig.TimeTickNS < 0xffffffff);
+  //   uint64_t Time = (uint64_t)(dp.local_time * FreiaConfig.TimeTickNS);
   //
   //   builders[cassette].insert({Time, coord, dp.adc, plane});
   // }

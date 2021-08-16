@@ -10,11 +10,11 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <multiblade/Counters.h>
+#include <freia/Counters.h>
 
-namespace Multiblade {
+namespace Freia {
 
-struct CAENSettings {
+struct FreiaSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
   uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
@@ -22,17 +22,17 @@ struct CAENSettings {
 
 
 
-class CAENBase : public Detector {
+class FreiaBase : public Detector {
 public:
-  CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings);
-  ~CAENBase() = default;
+  FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings);
+  ~FreiaBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
   struct Counters Counters{};
-  CAENSettings MBCAENSettings;
+  FreiaSettings FreiaSettings;
 };
 
 }

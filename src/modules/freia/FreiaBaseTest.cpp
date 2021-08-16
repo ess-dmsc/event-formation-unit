@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Unit tests for MBCaenBase
+/// \brief Unit tests for FreiaBase
 ///
 //===----------------------------------------------------------------------===//
 
@@ -60,20 +60,20 @@ std::vector<uint8_t> dummyreadout {
 )";
 
 #include <test/SaveBuffer.h>
-#include <multiblade/MBCaenBase.h>
+#include <freia/FreiaBase.h>
 #include <test/TestUDPServer.h>
 #include <test/TestBase.h>
 
-class CAENBaseStandIn : public Multiblade::CAENBase {
+class FreiaBaseStandIn : public Freia::FreiaBase {
 public:
-  CAENBaseStandIn(BaseSettings Settings, struct Multiblade::CAENSettings ReadoutSettings)
-      : Multiblade::CAENBase(Settings, ReadoutSettings){};
-  ~CAENBaseStandIn() = default;
+  FreiaBaseStandIn(BaseSettings Settings, struct Freia::FreiaSettings ReadoutSettings)
+      : Freia::FreiaBase(Settings, ReadoutSettings){};
+  ~FreiaBaseStandIn() = default;
   using Detector::Threads;
-  using Multiblade::CAENBase::Counters;
+  using Freia::FreiaBase::Counters;
 };
 
-class CAENBaseTest : public ::testing::Test {
+class FreiaBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
     LocalSettings.ConfigFile = "MB18Estia.json";
@@ -83,18 +83,18 @@ public:
   void TearDown() override {}
 
   BaseSettings Settings;
-  Multiblade::CAENSettings LocalSettings;
+  Freia::FreiaSettings LocalSettings;
 };
 
-TEST_F(CAENBaseTest, Constructor) {
-  CAENBaseStandIn Readout(Settings, LocalSettings);
+TEST_F(FreiaBaseTest, Constructor) {
+  FreiaBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 
-TEST_F(CAENBaseTest, DataReceive) {
-  CAENBaseStandIn Readout(Settings, LocalSettings);
+TEST_F(FreiaBaseTest, DataReceive) {
+  FreiaBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <caen/MBGeometry.h>
-#include <clustering/EventBuilder.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/monitor/Histogram.h>
@@ -20,17 +18,17 @@
 #include <modules/readout/common/ReadoutParser.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
 
-#include <multiblade/Counters.h>
-#include <multiblade/MBCaenBase.h> // to get MBSettings
+#include <freia/Counters.h>
+#include <freia/FreiaBase.h> // to get MBSettings
 
-namespace Multiblade {
+namespace Freia {
 
-class MBCaenInstrument {
+class FreiaInstrument {
 public:
 
-  /// \brief 'create' the Multiblade instrument
+  /// \brief 'create' the Freia instrument
   ///
-  MBCaenInstrument(Counters & counters, BaseSettings & EFUSettings, CAENSettings & moduleSettings);
+  FreiaInstrument(Counters & counters, BaseSettings & EFUSettings, FreiaSettings & moduleSettings);
 
   ///
   //void ingestOneReadout(int cassette, const Readout & dp);
@@ -47,9 +45,9 @@ public:
   //void LoadAndProcessReadouts(int builder, std::vector<Readout> &vec);
 
 public:
-  /// \brief Stuff that 'ties' Multiblade together
+  /// \brief Stuff that 'ties' Freia together
   struct Counters & counters;
-  CAENSettings & ModuleSettings;
+  FreiaSettings & ModuleSettings;
 
   ///
   uint16_t ncass;
@@ -59,10 +57,10 @@ public:
   std::string topic{""};
   std::string monitor{""};
 
-  HistogramSerializer histfb{1, "multiblade"}; // reinit in ctor
+  HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
-  MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
-  std::vector<EventBuilder> builders; // reinit in ctor
+  // MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
+  // std::vector<EventBuilder> builders; // reinit in ctor
 
   ESSGeometry essgeom;
 

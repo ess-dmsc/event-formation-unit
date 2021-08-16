@@ -63,7 +63,7 @@ bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y
   if (producer_callback) {
     auto buffer = serialize();
     XTRACE(PROCESS, INF, "Producing track as buffer size: %d", buffer.size_bytes());
-#pragma message("Producer::produce() in TrackSerializer should be provided with a proper timestmap.")
+#pragma message("Producer::produce() in TrackSerializer should be provided with a proper timestamp.")
     producer_callback(buffer, time(nullptr) * 1000);
     return (0 != buffer.size_bytes());
   }
