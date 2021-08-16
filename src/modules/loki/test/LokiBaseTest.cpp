@@ -11,7 +11,7 @@
 #include <test/TestUDPServer.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 
 /// Test configuration - two rings used (0 and 1)
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and

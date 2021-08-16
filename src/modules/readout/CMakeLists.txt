@@ -1,12 +1,9 @@
+
 #=============================================================================
-# ESS Readout System Tests
+# Add ess detector modules
 #=============================================================================
 
-set(ReadoutParserTest_INC ReadoutParser.h ReadoutParserTestData.h)
-set(ReadoutParserTest_SRC ReadoutParserTest.cpp ReadoutParser.cpp)
-create_test_executable(ReadoutParserTest)
+include_directories(.)
 
-#
-set(ESSTimeTest_INC ESSTime.h)
-set(ESSTimeTest_SRC ESSTimeTest.cpp)
-create_test_executable(ESSTimeTest)
+add_subdirectory(common)
+add_subdirectory(vmm3)

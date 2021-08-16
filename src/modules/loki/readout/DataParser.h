@@ -9,7 +9,7 @@
 #pragma once
 
 #include <loki/Counters.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <vector>
 
 namespace Loki {

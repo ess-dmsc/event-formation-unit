@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <readout/ESSTime.h>
+#include <readout/common/ESSTime.h>
 #include <test/TestBase.h>
 #include <cmath>
 

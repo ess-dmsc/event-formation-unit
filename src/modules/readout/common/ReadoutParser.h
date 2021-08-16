@@ -9,9 +9,16 @@
 
 #pragma once
 
+//#define OMITCHECKS 1
+#ifdef OMITCHECKS
+  #pragma message("Some checks disabled for ReadoutParser")
+  #define OMITTYPECHECK 1
+  #define OMITSIZECHECK 1
+#endif
+
 #include <cinttypes>
 
-struct readoutstat_t {
+struct ESSHeaderStats {
   int64_t ErrorBuffer{0};
   int64_t ErrorSize{0};
   int64_t ErrorVersion{0};
@@ -33,7 +40,10 @@ const unsigned int MinDataSize{5}; // just pad, cookie and version
 class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType { Reserved = 0x00, Loki4Amp = 0x30, DREAM = 0x60};
+  enum DetectorType { Reserved = 0x00,
+                      Loki4Amp = 0x30,
+                      FREIA    = 0x48,
+                      DREAM    = 0x60};
 
   uint64_t NextSeqNum[MaxOutputQueues];
 
@@ -83,5 +93,5 @@ public:
   int validate(const char *Buffer, uint32_t Size, uint8_t Type);
 
   // Counters(for Grafana)
-  struct readoutstat_t Stats;
+  struct ESSHeaderStats Stats;
 };

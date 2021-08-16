@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 
 struct Counters {
   // Input Counters - accessed in input thread
@@ -24,7 +24,7 @@ struct Counters {
   int64_t FifoSeqErrors;
 
   // ESSReadout parser
-  struct readoutstat_t ReadoutStats;
+  struct ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
 
   // DREAM DataParser

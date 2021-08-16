@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <string.h>
 
 // GCOVR_EXCL_START

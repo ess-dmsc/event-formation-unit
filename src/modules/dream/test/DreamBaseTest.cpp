@@ -10,7 +10,7 @@
 #include <string>
 
 #include <dream/DreamBase.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 #include <test/TestUDPServer.h>
