@@ -10,35 +10,45 @@
 #include <common/Trace.h>
 #include <readout/vmm3/VMM3Parser.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 // Assume we start after the Common PacketHeader
 int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
   Result.clear();
-  unsigned int ParsedReadouts = 0;
+  uint32_t GoodReadouts{0};
 
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
     XTRACE(DATA, WAR, "Invalid data pointer");
-    return ParsedReadouts;
+    return GoodReadouts;
   }
 
   if (Size % 20 != 0) {
     Stats.ErrorSize++;
     XTRACE(DATA, WAR, "Invalid data length - %d should be multiple of 20", Size);
-    return ParsedReadouts;
+    return GoodReadouts;
   }
 
   VMM3Parser::VMM3Data * DataPtr = (struct VMM3Data *)Buffer;
-
-
   for (unsigned int i = 0; i < Size/20; i++) {
+    Stats.Readouts++;
     VMM3Parser::VMM3Data Readout = DataPtr[i];
     if (Readout.RingId > MaxRingId) {
+      XTRACE(DATA, WAR, "Invalid RingId %d (Max is %d)", Readout.RingId, MaxRingId);
       Stats.ErrorRing++;
       continue;
     }
 
-    if (Readout.FENId > MaxFENId) {
+    if ((Readout.FENId > MaxFENId) or (Readout.FENId == 0))  {
+      XTRACE(DATA, WAR, "Invalid FENId %d (valid: 1 - %d)", Readout.FENId, MaxFENId);
       Stats.ErrorFEN++;
+      continue;
+    }
+
+    if (Readout.DataLength != 20)  {
+      XTRACE(DATA, WAR, "Invalid header length - must be 20 bytes", Readout.DataLength);
+      Stats.ErrorDataLength++;
       continue;
     }
 
@@ -48,9 +58,9 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
       Stats.CalibReadout++;
     }
 
+    GoodReadouts++;
     Result.push_back(Readout);
-    Stats.Readouts++;
   }
 
-  return ParsedReadouts;
+  return GoodReadouts;
 }
