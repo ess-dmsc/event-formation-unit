@@ -32,7 +32,7 @@ public:
 
 protected:
   struct Counters Counters{};
-  FreiaSettings FreiaSettings;
+  FreiaSettings FreiaModuleSettings;
 };
 
 }

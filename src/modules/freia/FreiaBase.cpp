@@ -36,7 +36,7 @@ namespace Freia {
 const char *classname = "Freia detector with ESS readout";
 
 FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings)
-    : Detector("FREIA", settings), FreiaSettings(LocalFreiaSettings) {
+    : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -166,7 +166,7 @@ void FreiaBase::input_thread() {
 
 void FreiaBase::processing_thread() {
 
-  FreiaInstrument Freia(Counters, EFUSettings, FreiaSettings);
+  FreiaInstrument Freia(Counters, EFUSettings, FreiaModuleSettings);
 
   // Event producer
   Producer eventprod(EFUSettings.KafkaBroker, Freia.topic);
