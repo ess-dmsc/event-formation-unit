@@ -134,7 +134,7 @@ void FreiaBase::input_thread() {
   receiver.printBufferSizes();
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-  for (;;) {
+  while (runThreads) {
     int readSize;
     unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
@@ -155,13 +155,9 @@ void FreiaBase::input_thread() {
     } else {
       Counters.RxIdle++;
     }
-
-    // Checking for exit
-    if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.");
-      return;
-    }
   }
+  XTRACE(INPUT, ALW, "Stopping input thread.");
+  return;
 }
 
 void FreiaBase::processing_thread() {

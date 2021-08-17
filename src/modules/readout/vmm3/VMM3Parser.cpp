@@ -28,7 +28,8 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
 
   if (Size % DataLength != 0) {
     Stats.ErrorSize++;
-    XTRACE(DATA, WAR, "Invalid data length - %d should be multiple of 20", Size);
+    XTRACE(DATA, WAR, "Invalid data length - %d should be multiple of %d",
+           Size, DataLength);
     return GoodReadouts;
   }
 
@@ -49,7 +50,8 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     }
 
     if (Readout.DataLength != DataLength)  {
-      XTRACE(DATA, WAR, "Invalid header length - must be 20 bytes", Readout.DataLength);
+      XTRACE(DATA, WAR, "Invalid header length %d - must be %d bytes",
+             Readout.DataLength, DataLength);
       Stats.ErrorDataLength++;
       continue;
     }
