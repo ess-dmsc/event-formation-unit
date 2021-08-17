@@ -9,7 +9,7 @@
 #pragma once
 
 #include <dream/Counters.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <vector>
 
 namespace Dream {

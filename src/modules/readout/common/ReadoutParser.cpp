@@ -9,7 +9,7 @@
 
 #include <cstring>
 #include <common/Trace.h>
-#include <readout/ReadoutParser.h>
+#include <readout/common/ReadoutParser.h>
 #include <arpa/inet.h>
 
 // #undef TRC_LEVEL
@@ -66,6 +66,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   // It is safe to cast packet header v0 struct to data
   Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
+  #ifndef OMITSIZECHECK
   if (Size < Packet.HeaderPtr->TotalLength or
       Packet.HeaderPtr->TotalLength < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
@@ -73,14 +74,18 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     Stats.ErrorSize++;
     return -ReadoutParser::ESIZE;
   }
+  #endif
 
   uint8_t Type = Packet.HeaderPtr->CookieAndType >> 24;
   if ( Type!= ExpectedType) {
-    XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
+    #ifndef OMITTYPECHECK
+      XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
            Type, ExpectedType);
-    Stats.ErrorTypeSubType++;
-    return -ReadoutParser::EHEADER;
+           Stats.ErrorTypeSubType++;
+      return -ReadoutParser::EHEADER;
+    #endif
   }
+
 
   if (Packet.HeaderPtr->OutputQueue >= MaxOutputQueues) {
     XTRACE(PROCESS, WAR, "Output queue %u exceeds max size %u",

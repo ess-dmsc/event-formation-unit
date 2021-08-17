@@ -13,7 +13,7 @@ set(dream_common_inc
   geometry/Config.h
   readout/DataParser.h
   readout/Readout.h
-  ../readout/ReadoutParser.h
+  ../readout/common/ReadoutParser.h
 )
 
 set(dream_common_src
@@ -23,7 +23,7 @@ set(dream_common_src
   geometry/Config.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
-  ../readout/ReadoutParser.cpp
+  ../readout/common/ReadoutParser.cpp
 )
 
 #=============================================================================
