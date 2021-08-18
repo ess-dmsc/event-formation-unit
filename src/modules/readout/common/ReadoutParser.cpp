@@ -67,7 +67,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
   #ifndef OMITSIZECHECK
-  if (Size < Packet.HeaderPtr->TotalLength or
+  if (Size != Packet.HeaderPtr->TotalLength or
       Packet.HeaderPtr->TotalLength < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
            Packet.HeaderPtr->TotalLength, Size);
