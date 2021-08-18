@@ -63,25 +63,24 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   // From VMM3Parser
-  Stats.create("readout.error_size", Counters.VMMStats.ErrorSize);
-  Stats.create("readout.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readout.error_fen", Counters.VMMStats.ErrorFEN);
-  Stats.create("readout.error_datalen", Counters.VMMStats.ErrorDataLength);
-  Stats.create("readout.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
-  Stats.create("readout.error_bc", Counters.VMMStats.ErrorBC);
-  Stats.create("readout.error_adc", Counters.VMMStats.ErrorADC);
-  Stats.create("readout.error_vmm", Counters.VMMStats.ErrorVMM);
-  Stats.create("readout.error_channel", Counters.VMMStats.ErrorChannel);
-  Stats.create("readout.count", Counters.VMMStats.Readouts);
-  Stats.create("readout.bccalib", Counters.VMMStats.CalibReadouts);
-  Stats.create("readout.data", Counters.VMMStats.DataReadouts);
-  Stats.create("readout.over_threshold", Counters.VMMStats.OverThreshold);
+  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
+  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
+  Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
+  Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
+  Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
+  Stats.create("readouts.error_bc", Counters.VMMStats.ErrorBC);
+  Stats.create("readouts.error_adc", Counters.VMMStats.ErrorADC);
+  Stats.create("readouts.error_vmm", Counters.VMMStats.ErrorVMM);
+  Stats.create("readouts.error_channel", Counters.VMMStats.ErrorChannel);
+  Stats.create("readouts.count", Counters.VMMStats.Readouts);
+  Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
+  Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
+  Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
 
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.udder", Counters.EventsUdder);
-  Stats.create("events.geometry_errors", Counters.GeometryErrors);
+  Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
   Stats.create("events.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
@@ -267,9 +266,7 @@ void FreiaBase::processing_thread() {
     //   }
     //   Freia.builders[cassette].Events.clear(); // else events will accumulate
     // } else {
-    //   // There is NO data in the FIFO - do stop checks and sleep a little
-    //   Counters.ProcessingIdle++;
-    //   usleep(10);
+
     // }
     //
     // // if filedumping and requesting time splitting, check for rotation.
@@ -281,7 +278,11 @@ void FreiaBase::processing_thread() {
     //     Freia.dumpfile->rotate();
     //     h5flushtimer.reset();
     //   }
-    }
+  } else {
+    // There is NO data in the FIFO - increment idle counter and sleep a little
+      Counters.ProcessingIdle++;
+      usleep(10);
+  }
 
     if (ProduceTimer.timeout()) {
 
