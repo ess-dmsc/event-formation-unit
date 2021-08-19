@@ -8,34 +8,30 @@
 //===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
-#include <arpa/inet.h>
-#include <cassert>
 #include <cinttypes>
 #include <common/Socket.h>
 #include <readout/vmm3/test/ReadoutGenerator.h>
-#include <string.h>
-#include <string>
-#include <unistd.h>
+#include <stdio.h>
 // GCOVR_EXCL_START
 
 struct {
-  /// Loki specific
+  /// readout specific
   uint16_t NRings{2};
-  // uint16_t FENs{1};
-  ///
+  uint8_t Type{72};            // Freia (see readout ICD for other instruments)
+  /// udp generator generic
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
   uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
   uint64_t PktThrottle{0};     // 0 is fastest
-  uint8_t Type{72};            // Freia (see readout ICD for other instruments)
-  bool Randomise{false};       // Randomise header and data
   bool Loop{false};            // Keep looping the same file forever
+
+  bool Randomise{false};       // Randomise header and data
   // Not yet CLI settings
   uint32_t KernelTxBufferSize{1000000};
 } Settings;
 
-CLI::App app{"Wireshark file to UDP data generator"};
+CLI::App app{"UDP data generator for ESS VMM3 readout"};
 
 int main(int argc, char *argv[]) {
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
@@ -48,11 +44,11 @@ int main(int argc, char *argv[]) {
                  "Extra usleep() after n packets");
   app.add_option("-y, --type", Settings.Type,
                  "Detector type id");
-  app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data");
-  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
-
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
+  app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data fields");
+  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+
   CLI11_PARSE(app, argc, argv);
 
   const int BufferSize{8972};
@@ -72,9 +68,9 @@ int main(int argc, char *argv[]) {
   ReadoutGenerator gen;
   do {
     uint32_t SeqNum = TotalPackets;
-    uint16_t DataSize =
-        gen.vmm3ReadoutDataGen(Settings.Type, Settings.Randomise, NumReadouts,
-                               Settings.NRings, Buffer, BufferSize, SeqNum);
+    uint16_t DataSize = gen.vmm3ReadoutDataGen(
+          Buffer, BufferSize, Settings.Randomise,
+          Settings.Type, SeqNum, Settings.NRings, NumReadouts);
 
     DataSource.send(Buffer, DataSize);
 

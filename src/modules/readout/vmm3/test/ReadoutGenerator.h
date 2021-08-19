@@ -9,18 +9,24 @@
 
 #pragma once
 
-#include <readout/vmm3/VMM3Parser.h>
 #include <modules/generators/DataFuzzer.h>
+#include <readout/vmm3/VMM3Parser.h>
 
 class ReadoutGenerator {
 public:
   ReadoutGenerator() {}
 
-  /// \brief Fill out specified buffer with LoKI readouts
-  uint16_t vmm3ReadoutDataGen(uint8_t Type, bool Randomise, uint16_t NumReadouts,
-                              uint8_t Rings,
-                              uint8_t *Buffer, uint16_t MaxSize,
-                              uint32_t SeqNum);
+  /// \brief Fill out specified buffer with VMM3 readouts
+  /// \param Buffer pointer to the buffer to be filled out with packet data
+  /// \param MaxSize Maximum size of generated packet
+  /// \param Randomise whether to randomize (fuzz) some of the data
+  /// \param Type Data type as specified in the ESS Readout ICD
+  /// \param SeqNum sequence number
+  /// \param Rings number if rings in use
+  /// \param NumReadouts number of VMM readouts in the UDP packet
+  uint16_t vmm3ReadoutDataGen(
+    uint8_t *Buffer, uint16_t MaxSize, bool Randomise,
+    uint8_t Type, uint32_t SeqNum, uint8_t Rings, uint16_t NumReadouts);
 
 private:
 
