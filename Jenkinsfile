@@ -182,18 +182,18 @@ builders = pipeline_builder.createBuilders { container ->
                                 cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
-                                cd archive
-                                tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
 
                                 # Create file with build information
-                                touch BUILD_INFO
-                                echo 'Repository: ${project}/${env.BRANCH_NAME}' >> BUILD_INFO
-                                echo 'Commit: ${scm_vars.GIT_COMMIT}' >> BUILD_INFO
-                                echo 'Jenkins build: ${BUILD_NUMBER}' >> BUILD_INFO
+                                touch archive/event-formation-unit/BUILD_INFO
+                                echo 'Repository: ${project}/${env.BRANCH_NAME}' >> archive/event-formation-unit/BUILD_INFO
+                                echo 'Commit: ${scm_vars.GIT_COMMIT}' >> archive/event-formation-unit/BUILD_INFO
+                                echo 'Jenkins build: ${BUILD_NUMBER}' >> archive/event-formation-unit/BUILD_INFO
+
+                                cd archive
+                                tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
                             """
             container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
-            container.copyFrom("/home/jenkins/archive/BUILD_INFO", '.')
-
+            container.copyFrom("/home/jenkins/archive/event-formation-unit/BUILD_INFO", '.')
             archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
         }
     }
