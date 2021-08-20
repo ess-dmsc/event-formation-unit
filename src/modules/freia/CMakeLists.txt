@@ -7,12 +7,14 @@ include_directories(.)
 set(freia_common_inc
   FreiaBase.h
   FreiaInstrument.h
+  geometry/Config.h
   ../readout/common/ReadoutParser.h
   ../readout/vmm3/VMM3Parser.h
   )
 set(freia_common_src
   FreiaBase.cpp
   FreiaInstrument.cpp
+  geometry/Config.cpp
   ../readout/common/ReadoutParser.cpp
   ../readout/vmm3/VMM3Parser.cpp
   )

@@ -24,9 +24,9 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
       : counters(counters)
       , ModuleSettings(moduleSettings) {
 
-
-    // Setup Instrument according to configuration file
-    //FreiaConfig = Config(ModuleSettings.ConfigFile);
+    XTRACE(INIT, ALW, "Loading configuration file %s",
+           ModuleSettings.ConfigFile.c_str());
+    FreiaConfiguration = Config(ModuleSettings.ConfigFile);
 
     // if (!moduleSettings.FilePrefix.empty()) {
     //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());

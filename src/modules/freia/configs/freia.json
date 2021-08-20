@@ -1,0 +1,21 @@
+
+{
+  "Detector": "Freia",
+
+  "WireChOffset" : 16,
+
+  "Config" : [
+    { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
+    { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
+    { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
+    { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
+    { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
+    { "Ring" :  5, "CassOffset" : 17, "FENs" : 1},
+    { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
+    { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
+    { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
+    { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
+    { "Ring" : 10, "CassOffset" : 29, "FENs" : 2}
+  ]
+
+}

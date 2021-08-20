@@ -19,6 +19,7 @@
 #include <modules/readout/vmm3/VMM3Parser.h>
 
 #include <freia/Counters.h>
+#include <freia/geometry/Config.h>
 #include <freia/FreiaBase.h> // to get MBSettings
 
 namespace Freia {
@@ -65,6 +66,7 @@ public:
   ESSGeometry essgeom;
 
   // towards VMM3
+  Config FreiaConfiguration;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
 };
