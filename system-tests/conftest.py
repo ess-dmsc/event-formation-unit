@@ -43,12 +43,6 @@ def _wait_until_kafka_ready(docker_cmd, docker_options):
         docker_cmd.down(docker_options)  # Bring down containers cleanly
         raise Exception('Kafka broker was not ready after 100 seconds, aborting tests.')
 
-log_options = {   "--no-color": False,
-                  "--follow": False,
-                  "--timestamps": False,
-                  "--tail": "all"
-                  }
-
 common_options = {"--no-deps": False,
                   "--always-recreate-deps": False,
                   "--scale": "",
@@ -98,8 +92,8 @@ def _build_and_run(options, request):
     def fin():
         # Stop the containers then remove them and their volumes (--volumes option)
         print("containers stopping", flush=True)
-        logopts = dict(log_options)
-        cmd.logs(logopts)
+        #logopts = dict(log_options) # TODO fix this - breaks PR merge builds
+        #cmd.logs(logopts)
         options["--timeout"] = 30
         cmd.down(options)
         print("containers stopped", flush=True)
