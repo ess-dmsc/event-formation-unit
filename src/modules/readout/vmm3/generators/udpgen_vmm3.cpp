@@ -63,11 +63,10 @@ int main(int argc, char *argv[]) {
   DataSource.printBufferSizes();
 
   uint64_t Packets = 0;
-  uint64_t TotalPackets = 0;
 
   ReadoutGenerator gen;
   do {
-    uint32_t SeqNum = TotalPackets;
+    uint32_t SeqNum = Packets;
     uint16_t DataSize = gen.vmm3ReadoutDataGen(
           Buffer, BufferSize, Settings.Randomise,
           Settings.Type, SeqNum, Settings.NRings, NumReadouts);
@@ -78,19 +77,17 @@ int main(int argc, char *argv[]) {
       usleep(Settings.SpeedThrottle);
     }
     Packets++;
-    TotalPackets++;
     if (Settings.PktThrottle) {
       if (Packets % Settings.PktThrottle == 0) {
         usleep(10);
       }
     }
     if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      printf("Sent %" PRIu64 " packets\n", TotalPackets);
-      Packets = 0;
+      printf("Sent %" PRIu64 " packets\n", Packets);
       break;
     }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
-  } while (Settings.Loop or TotalPackets < Settings.NumberOfPackets);
+  } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
 
   return 0;
