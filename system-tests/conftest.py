@@ -93,9 +93,9 @@ def _build_and_run(options, request):
     def fin():
         # Stop the containers then remove them and their volumes (--volumes option)
         print("containers stopping", flush=True)
-        log_options = dict(options)
-        log_options["SERVICE"] = ["efu"]
-        cmd.logs(log_options)
+        #log_options = dict(options)
+        #log_options["SERVICE"] = ["efu"]
+        cmd.logs("")
         options["--timeout"] = 30
         cmd.down(options)
         print("containers stopped", flush=True)
