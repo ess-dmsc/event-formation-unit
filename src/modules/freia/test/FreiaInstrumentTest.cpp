@@ -58,7 +58,10 @@ protected:
   struct Counters counters;
   FreiaSettings ModuleSettings;
 
-  void SetUp() override { ModuleSettings.ConfigFile = ConfigFile; }
+  void SetUp() override {
+    ModuleSettings.ConfigFile = ConfigFile;
+    counters = {};
+  }
   void TearDown() override {}
 };
 
