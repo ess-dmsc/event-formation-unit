@@ -36,27 +36,27 @@ std::vector<uint8_t> dummyreadout {
   0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
 };
 
- std::string mb18estiajson = R"(
- {
-   "Detector": "MB18",
+ std::string freiajson = R"(
+   {
+     "Detector": "Freia",
 
-   "InstrumentGeometry": "Estia",
+     "WireChOffset" : 16,
 
-   "DigitizerConfig" : [
-     { "index" : 0, "id" : 137 },
-     { "index" : 1, "id" : 143 },
-     { "index" : 2, "id" : 142 },
-     { "index" : 3, "id" :  31 },
-     { "index" : 4, "id" :  33 },
-     { "index" : 5, "id" :  34 }
-   ],
+     "Config" : [
+       { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
+       { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
+       { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
+       { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
+       { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
+       { "Ring" :  5, "CassOffset" : 17, "FENs" : 1},
+       { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
+       { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
+       { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
+       { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
+       { "Ring" : 10, "CassOffset" : 29, "FENs" : 2}
+     ]
 
-   "cassettes": 6,
-   "wires":  32,
-   "strips": 32,
-
-   "TimeTickNS": 16
- }
+   }
 )";
 
 #include <test/SaveBuffer.h>
@@ -76,7 +76,7 @@ public:
 class FreiaBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    LocalSettings.ConfigFile = "MB18Estia.json";
+    LocalSettings.ConfigFile = "Freia.json";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
@@ -109,8 +109,8 @@ TEST_F(FreiaBaseTest, DataReceive) {
 }
 
 int main(int argc, char **argv) {
-  std::string filename{"MB18Estia.json"};
-  saveBuffer(filename, (void *)mb18estiajson.c_str(), mb18estiajson.size());
+  std::string filename{"Freia.json"};
+  saveBuffer(filename, (void *)freiajson.c_str(), freiajson.size());
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
