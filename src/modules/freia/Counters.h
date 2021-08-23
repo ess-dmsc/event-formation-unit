@@ -32,6 +32,10 @@ struct Counters {
     // VMM3a Readouts
     struct VMM3ParserStats VMMStats;
 
+    // Logical and Digital geometry incl. Calibration
+    int64_t RingErrors;
+    int64_t FENErrors;
+
     //
     int64_t FiltersMaxTimeSpan;
     int64_t ProcessingIdle;

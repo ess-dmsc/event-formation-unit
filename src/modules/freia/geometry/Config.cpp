@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,7 +13,6 @@
 namespace Freia {
 
 ///
-Config::Config() {}
 
 Config::Config(std::string ConfigFile) {
   nlohmann::json root = from_json_file(ConfigFile);
@@ -22,30 +21,35 @@ Config::Config(std::string ConfigFile) {
     auto Name = root["Detector"].get<std::string>();
 
     auto PanelConfig = root["Config"];
-    unsigned int RingIndex{0};
-    unsigned int Cassettes{0};
+    unsigned int VMMOffs{0};
+    unsigned int FENOffs{0};
     for (auto &Mapping : PanelConfig) {
       auto Ring = Mapping["Ring"].get<unsigned int>();
       auto Offset = Mapping["CassOffset"].get<unsigned int>();
       auto FENs = Mapping["FENs"].get<unsigned int>();
 
-      if ((Ring != RingIndex) or (Ring > 10)) {
+      if ((Ring != NumRings) or (Ring > 10)) {
         LOG(INIT, Sev::Error, "Ring configuration error");
         throw std::runtime_error("Inconsistent Json file - ring index mismatch");
       }
 
-      MaxFen.push_back(FENs);
-      Cassettes += FENs * 2;
-      RingIndex++;
+      NumFens.push_back(FENs);
+      FENOffset.push_back(FENOffs);
+      VMMOffset.push_back(VMMOffs);
+
+      VMMOffs += FENs * VMMsPerFEN;
+      FENOffs += FENs;
+      NumCassettes += FENs * CassettesPerFEN;
+      NumRings++;
 
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Ring {}, Offset {}, FENs {}",
           Name, Ring, Offset, FENs);
     }
 
-    Pixels = Cassettes * 32 * 64; //
+    NumPixels = NumCassettes * NumWiresPerCassette * NumStripsPerCassette; //
     LOG(INIT, Sev::Info, "JSON config - Detector has {} cassettes and "
-    "{} pixels", Cassettes, Pixels);
+    "{} pixels", NumCassettes, NumPixels);
 
 
   } catch (...) {

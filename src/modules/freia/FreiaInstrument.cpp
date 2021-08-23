@@ -26,7 +26,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     XTRACE(INIT, ALW, "Loading configuration file %s",
            ModuleSettings.ConfigFile.c_str());
-    FreiaConfiguration = Config(ModuleSettings.ConfigFile);
+    Conf = Config(ModuleSettings.ConfigFile);
 
     // if (!moduleSettings.FilePrefix.empty()) {
     //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
@@ -51,6 +51,26 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
 }
 
+
+
+void FreiaInstrument::processReadouts(void) {
+  // All readouts are theoretically valid, but mapping errors
+  // and illegal time intervals can be detected here
+  for (const auto & readout : VMMParser.Result) {
+    if (readout.RingId > Conf.NumRings) {
+      XTRACE(DATA, WAR, "Invalid RingId %d (max is %d)",
+             readout.RingId, Conf.NumRings);
+      counters.RingErrors++;
+    }
+
+    if (readout.FENId > Conf.NumFens[readout.RingId]) {
+      XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
+             readout.FENId, Conf.NumFens[readout.RingId]);
+      counters.FENErrors++;
+    }
+
+  }
+}
 // New EF algorithm - Needed to sort readouts in time
 // bool compareByTime(const Readout &a, const Readout &b) {
 //   return a.local_time < b.local_time;

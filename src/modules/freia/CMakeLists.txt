@@ -1,3 +1,6 @@
+# Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+
+add_subdirectory(test)
 
 include_directories(.)
 

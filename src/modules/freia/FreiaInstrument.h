@@ -31,6 +31,9 @@ public:
   ///
   FreiaInstrument(Counters & counters, BaseSettings & EFUSettings, FreiaSettings & moduleSettings);
 
+  /// \brief process parsed vmm data into events
+  void processReadouts(void);
+
   ///
   //void ingestOneReadout(int cassette, const Readout & dp);
 
@@ -66,7 +69,7 @@ public:
   ESSGeometry essgeom;
 
   // towards VMM3
-  Config FreiaConfiguration;
+  Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
 };
