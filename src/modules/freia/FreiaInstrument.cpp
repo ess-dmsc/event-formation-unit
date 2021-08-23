@@ -52,20 +52,23 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 }
 
 
-
 void FreiaInstrument::processReadouts(void) {
-  // All readouts are theoretically valid, but mapping errors
-  // and illegal time intervals can be detected here
+  // All readouts are potentially now valid, but rings and fens
+  // could still be outside the configured range, also
+  // illegal time intervals can be detected here
   for (const auto & readout : VMMParser.Result) {
-    if (readout.RingId > Conf.NumRings) {
-      XTRACE(DATA, WAR, "Invalid RingId %d (max is %d)",
-             readout.RingId, Conf.NumRings);
+    // Convert from physical rings to logical rings
+    uint8_t Ring = readout.RingId/2;
+
+    if (Ring >= Conf.NumRings) {
+      XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
+             Ring, readout.RingId, Conf.NumRings - 1);
       counters.RingErrors++;
     }
 
-    if (readout.FENId > Conf.NumFens[readout.RingId]) {
+    if (readout.FENId > Conf.NumFens[Ring]) {
       XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
-             readout.FENId, Conf.NumFens[readout.RingId]);
+             readout.FENId, Conf.NumFens[Ring]);
       counters.FENErrors++;
     }
 

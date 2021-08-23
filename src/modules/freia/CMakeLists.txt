@@ -39,3 +39,18 @@ set(FreiaBaseTest_SRC
   ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
 )
 create_test_executable(FreiaBaseTest)
+
+
+##
+## FreiaiInstrumentTest Module integration test
+##
+set(FreiaInstrumentTest_INC
+  ${freia_common_inc}
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  )
+set(FreiaInstrumentTest_SRC
+  ${freia_common_src}
+  test/FreiaInstrumentTest.cpp
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+)
+create_test_executable(FreiaInstrumentTest)
