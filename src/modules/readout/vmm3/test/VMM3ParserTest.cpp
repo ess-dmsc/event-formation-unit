@@ -115,6 +115,14 @@ TEST_F(VMM3ParserTest, GoodData1) {
   ASSERT_EQ(Parser.Stats.CalibReadouts, 0);
 }
 
+// valid data two readouts
+TEST_F(VMM3ParserTest, GoodCalib1) {
+  auto Res = Parser.parse((char *)&VMMCalib1[0], VMMCalib1.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 2);
+  ASSERT_EQ(Parser.Stats.DataReadouts, 0);
+  ASSERT_EQ(Parser.Stats.CalibReadouts, 2);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
