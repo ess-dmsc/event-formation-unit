@@ -24,9 +24,9 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
       : counters(counters)
       , ModuleSettings(moduleSettings) {
 
-
-    // Setup Instrument according to configuration file
-    //FreiaConfig = Config(ModuleSettings.ConfigFile);
+    XTRACE(INIT, ALW, "Loading configuration file %s",
+           ModuleSettings.ConfigFile.c_str());
+    Conf = Config(ModuleSettings.ConfigFile);
 
     // if (!moduleSettings.FilePrefix.empty()) {
     //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
@@ -51,6 +51,33 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
 }
 
+
+void FreiaInstrument::processReadouts(void) {
+  // All readouts are potentially now valid, but rings and fens
+  // could still be outside the configured range, also
+  // illegal time intervals can be detected here
+  for (const auto & readout : VMMParser.Result) {
+    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d",
+           readout.RingId, readout.FENId, readout.VMM);
+    // Convert from physical rings to logical rings
+    uint8_t Ring = readout.RingId/2;
+
+    if (Ring >= Conf.NumRings) {
+      XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
+             Ring, readout.RingId, Conf.NumRings - 1);
+      counters.RingErrors++;
+      continue;
+    }
+
+    if (readout.FENId > Conf.NumFens[Ring]) {
+      XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
+             readout.FENId, Conf.NumFens[Ring]);
+      counters.FENErrors++;
+      continue;
+    }
+
+  }
+}
 // New EF algorithm - Needed to sort readouts in time
 // bool compareByTime(const Readout &a, const Readout &b) {
 //   return a.local_time < b.local_time;

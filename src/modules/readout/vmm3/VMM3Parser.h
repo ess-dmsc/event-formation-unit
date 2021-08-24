@@ -32,7 +32,7 @@ struct VMM3ParserStats {
 
 class VMM3Parser {
 public:
-  const unsigned int MaxRingId{11};
+  const unsigned int MaxRingId{23}; // Physical rings
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 

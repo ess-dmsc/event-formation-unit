@@ -206,6 +206,9 @@ void FreiaBase::processing_thread() {
 
       Counters.VMMStats = Freia.VMMParser.Stats;
 
+      //
+      Freia.processReadouts();
+
 
       // Counters.TofCount = Freia.Time.Stats.TofCount;
       // Counters.TofNegative = Freia.Time.Stats.TofNegative;
