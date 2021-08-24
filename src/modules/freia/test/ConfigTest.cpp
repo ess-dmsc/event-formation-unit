@@ -32,13 +32,11 @@ struct RingCfg {
   uint16_t VMMOffset;
 };
 
-
 // This table generated from the ICD and will be
 // compared to the calculated values
 std::vector<RingCfg> FullConfig {
   {  0, 2,  0,  0},
   {  1, 2,  2,  8},
-
   {  2, 2,  4, 16},
   {  3, 1,  6, 24},
   {  4, 1,  7, 28},
@@ -61,13 +59,10 @@ TEST_F(ConfigTest, FullInstrument) {
     ASSERT_EQ(config.FENOffset[Cfg.Ring], Cfg.FENOffset);
     ASSERT_EQ(config.VMMOffset[Cfg.Ring], Cfg.VMMOffset);
   }
-
-
 }
 
 
 int main(int argc, char **argv) {
-  // saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
