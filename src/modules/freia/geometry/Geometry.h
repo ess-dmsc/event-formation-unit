@@ -32,7 +32,7 @@ public:
     }
 
     if ((VMM & 0x1) == 0) {
-      XTRACE(DATA, WAR, "Invalid VMM %d for x-coordinates", VMM);
+      XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
       return InvalidCoord;
     } else {
       return Channel;
@@ -50,13 +50,13 @@ public:
     }
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (%d < ch < %d)",
+      XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
              Channel, MinWireChannel, MaxWireChannel);
       return InvalidCoord;
     }
 
     if (VMM & 0x01) {
-      XTRACE(DATA, WAR, "Invalid VMM %d for y-coordinates", VMM);
+      XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return InvalidCoord;
     } else {
       return (Cassette - 1) * NumWires + Channel - MinWireChannel;
