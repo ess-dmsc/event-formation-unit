@@ -16,6 +16,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/readout/common/ReadoutParser.h>
+#include <modules/readout/vmm3/Readout.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
 
 #include <freia/Counters.h>
@@ -33,6 +34,9 @@ public:
 
   /// \brief process parsed vmm data into events
   void processReadouts(void);
+
+  /// \brief dump readout data to HDF5
+  void dumpReadoutToFile(const VMM3Parser::VMM3Data & Data);
 
   ///
   //void ingestOneReadout(int cassette, const Readout & dp);
@@ -72,6 +76,7 @@ public:
   Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
+  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
 } // namespace

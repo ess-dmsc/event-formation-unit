@@ -11,6 +11,7 @@
 #include <common/Trace.h>
 #include <common/TimeString.h>
 #include <freia/FreiaInstrument.h>
+#include <readout/vmm3/Readout.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -28,9 +29,9 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
            ModuleSettings.ConfigFile.c_str());
     Conf = Config(ModuleSettings.ConfigFile);
 
-    // if (!moduleSettings.FilePrefix.empty()) {
-    //   dumpfile = ReadoutFile::create(moduleSettings.FilePrefix + "-" + timeString());
-    // }
+    if (!ModuleSettings.FilePrefix.empty()) {
+      DumpFile = VMM3::ReadoutFile::create(ModuleSettings.FilePrefix + "freia_" + timeString());
+    }
 
 
     // builders = std::vector<EventBuilder>(ncass);
@@ -48,7 +49,6 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
     histfb = HistogramSerializer(histograms.needed_buffer_size(), "freia");
     //
-
 }
 
 
@@ -57,6 +57,11 @@ void FreiaInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   for (const auto & readout : VMMParser.Result) {
+
+    if (DumpFile) {
+      dumpReadoutToFile(readout);
+    }
+
     XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d",
            readout.RingId, readout.FENId, readout.VMM);
     // Convert from physical rings to logical rings
@@ -161,6 +166,28 @@ void FreiaInstrument::processReadouts(void) {
   // }
   // builders[cassette].flush();
 // }
+
+/// \todo move into readout/vmm3 instead as this will be common
+void FreiaInstrument::dumpReadoutToFile(const VMM3Parser::VMM3Data & Data) {
+  VMM3::Readout CurrentReadout;
+  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
+  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+  CurrentReadout.PrevPulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+  CurrentReadout.PrevPulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+  CurrentReadout.EventTimeHigh = Data.TimeHigh;
+  CurrentReadout.EventTimeLow = Data.TimeLow;
+  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
+  CurrentReadout.BC = Data.BC;
+  CurrentReadout.OTADC = Data.OTADC;
+  CurrentReadout.GEO = Data.GEO;
+  CurrentReadout.TDC = Data.TDC;
+  CurrentReadout.VMM = Data.VMM;
+  CurrentReadout.Channel = Data.Channel;
+  CurrentReadout.RingId = Data.RingId;
+  CurrentReadout.FENId = Data.FENId;
+
+  DumpFile->push(CurrentReadout);
+}
 
 
 } // namespace
