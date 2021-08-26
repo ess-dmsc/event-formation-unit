@@ -30,7 +30,9 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     Conf = Config(ModuleSettings.ConfigFile);
 
     if (!ModuleSettings.FilePrefix.empty()) {
-      DumpFile = VMM3::ReadoutFile::create(ModuleSettings.FilePrefix + "freia_" + timeString());
+      std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
+      XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
+      DumpFile = VMM3::ReadoutFile::create(DumpFileName);
     }
 
 

@@ -6,7 +6,6 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/JsonFile.h>
 #include <common/Log.h>
 #include <freia/geometry/Config.h>
 
@@ -15,7 +14,12 @@ namespace Freia {
 ///
 
 Config::Config(std::string ConfigFile) {
-  nlohmann::json root = from_json_file(ConfigFile);
+  try {
+    root = from_json_file(ConfigFile);
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Error loading json file");
+    throw std::runtime_error("Error loading json file");
+  }
 
   try {
     auto Name = root["Detector"].get<std::string>();

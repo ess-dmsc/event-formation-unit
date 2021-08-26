@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/JsonFile.h>
 #include <common/Trace.h>
 #include <string>
 #include <vector>
@@ -37,6 +38,7 @@ public:
   uint32_t NumPixels{0};
   uint32_t NumCassettes{0};
 
+  nlohmann::json root;
 };
 
 } // namespace Freia
