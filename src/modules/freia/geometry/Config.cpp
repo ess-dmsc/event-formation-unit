@@ -6,16 +6,23 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/JsonFile.h>
 #include <common/Log.h>
+#include <common/Trace.h>
 #include <freia/geometry/Config.h>
 
 namespace Freia {
 
-///
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 
 Config::Config(std::string ConfigFile) {
-  nlohmann::json root = from_json_file(ConfigFile);
+  try {
+    root = from_json_file(ConfigFile);
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Error loading json file");
+    throw std::runtime_error("Error loading json file");
+  }
 
   try {
     auto Name = root["Detector"].get<std::string>();
@@ -27,6 +34,8 @@ Config::Config(std::string ConfigFile) {
       auto Ring = Mapping["Ring"].get<unsigned int>();
       auto Offset = Mapping["CassOffset"].get<unsigned int>();
       auto FENs = Mapping["FENs"].get<unsigned int>();
+
+      XTRACE(INIT, DEB, "Ring %d, Offset %d, FENs %d", Ring, Offset, FENs);
 
       if ((Ring != NumRings) or (Ring > 10)) {
         LOG(INIT, Sev::Error, "Ring configuration error");

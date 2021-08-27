@@ -161,7 +161,7 @@ void FreiaBase::input_thread() {
 
 void FreiaBase::processing_thread() {
 
-  FreiaInstrument Freia(Counters, EFUSettings, FreiaModuleSettings);
+  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings);
 
   // Event producer
   Producer eventprod(EFUSettings.KafkaBroker, Freia.topic);

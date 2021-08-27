@@ -7,6 +7,7 @@
 #include <freia/FreiaInstrument.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
+#include <stdio.h>
 
 using namespace Freia;
 
@@ -60,15 +61,23 @@ protected:
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
+    printf("Setup() ConfigFile: %s\n", ConfigFile.c_str());
     counters = {};
   }
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  BaseSettings Unused;
-  FreiaInstrument Freia(counters, Unused, ModuleSettings);
+  //BaseSettings Unused;
+  FreiaInstrument Freia(counters, /*Unused,*/ ModuleSettings);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+}
+
+TEST_F(FreiaInstrumentTest, TwoReadouts) {
+  //BaseSettings Unused;
+  FreiaInstrument Freia(counters, /*Unused,*/ ModuleSettings);
 
   auto Res = Freia.VMMParser.parse((char *)&MappingError[0], MappingError.size());
   ASSERT_EQ(Res, 2);

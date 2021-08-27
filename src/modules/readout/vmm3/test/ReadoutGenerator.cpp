@@ -12,6 +12,8 @@
 #include <cstring>
 #include <readout/vmm3/test/ReadoutGenerator.h>
 
+// GCOVR_EXCL_START
+
 uint16_t ReadoutGenerator::vmm3ReadoutDataGen(
   uint8_t *Buffer, uint16_t MaxSize, bool Randomise,
   uint8_t Type, uint32_t SeqNum, uint8_t Rings, uint16_t NumReadouts) {
@@ -58,3 +60,4 @@ uint16_t ReadoutGenerator::vmm3ReadoutDataGen(
 
   return DataSize;
 }
+// GCOVR_EXCL_STOP
