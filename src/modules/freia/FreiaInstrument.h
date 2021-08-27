@@ -30,7 +30,7 @@ public:
 
   /// \brief 'create' the Freia instrument
   ///
-  FreiaInstrument(Counters & counters, BaseSettings & EFUSettings, FreiaSettings & moduleSettings);
+  FreiaInstrument(Counters & counters, /* BaseSettings & EFUSettings, */ FreiaSettings & moduleSettings);
 
   /// \brief process parsed vmm data into events
   void processReadouts(void);

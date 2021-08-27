@@ -13,14 +13,14 @@
 #include <freia/FreiaInstrument.h>
 #include <readout/vmm3/Readout.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters & counters,
-    BaseSettings & EFUSettings,
+    //BaseSettings & EFUSettings,
     FreiaSettings &moduleSettings)
       : counters(counters)
       , ModuleSettings(moduleSettings) {
@@ -43,13 +43,13 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
-    Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-    auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
-      monitorprod.produce(DataBuffer, Timestamp);
-    };
-    histfb.set_callback(ProduceHist);
-    histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
-    histfb = HistogramSerializer(histograms.needed_buffer_size(), "freia");
+    // Producer monitorprod(EFUSettings.KafkaBroker, monitor);
+    // auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
+    //   monitorprod.produce(DataBuffer, Timestamp);
+    // };
+    // histfb.set_callback(ProduceHist);
+    // histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
+    // histfb = HistogramSerializer(histograms.needed_buffer_size(), "freia");
     //
 }
 
@@ -58,6 +58,7 @@ void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
+  XTRACE(DATA, DEB, "processReadouts()");
   for (const auto & readout : VMMParser.Result) {
 
     if (DumpFile) {
