@@ -6,9 +6,11 @@
 /// \brief Class for fuzzing a data buffer: writing random data at random
 /// locations according to specifications.
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <cassert>
 #include <modules/generators/DataFuzzer.h>
+
 
 void DataFuzzer::fuzz8Bits(void * Buffer, uint16_t BufferLength, uint16_t MaxRepeats)  {
   // randomInterval(0, N) yields values from 0, N - 1. Hence the + 1
@@ -22,3 +24,5 @@ void DataFuzzer::fuzz8Bits(void * Buffer, uint16_t BufferLength, uint16_t MaxRep
     *((uint8_t*)Buffer + Offset) = Value;
   }
 }
+
+// GCOVR_EXCL_STOP

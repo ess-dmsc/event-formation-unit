@@ -7,6 +7,7 @@
 /// HDF5 files and transmitting them as UDP (to the EFU)
 ///
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
 #include <common/TSCTimer.h>
@@ -19,7 +20,7 @@
 #include <jalousie/generators/CdtFile.h>
 
 #include <common/Socket.h>
-// GCOVR_EXCL_START
+
 
 // Non critical but somewhat arbitrary CPU clock speed guess
 static constexpr int TscMHz {2900};

@@ -9,13 +9,13 @@
 /// The common header is initialised with the data type specified in the
 /// ICD for  ESS readouts.
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #pragma once
 
 #include <readout/common/ReadoutParser.h>
 #include <string.h>
 
-// GCOVR_EXCL_START
 
 class PacketGenerator {
 public:
