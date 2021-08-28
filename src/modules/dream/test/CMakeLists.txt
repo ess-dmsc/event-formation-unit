@@ -8,9 +8,24 @@ set(DREAM_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 #=============================================================================
 
 set(DreamGeometryTest_INC
-  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h)
-set(DreamGeometryTest_SRC DreamGeometryTest.cpp)
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  )
+set(DreamGeometryTest_SRC
+  DreamGeometryTest.cpp
+  )
 create_test_executable(DreamGeometryTest)
+
+
+set(DreamConfigTest_INC
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${DREAM_BASE_DIR}/geometry/Config.h
+  )
+set(DreamConfigTest_SRC
+  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${DREAM_BASE_DIR}/geometry/Config.cpp
+  ConfigTest.cpp
+  )
+create_test_executable(DreamConfigTest)
 
 
 set(DreamInstrumentTest_INC
