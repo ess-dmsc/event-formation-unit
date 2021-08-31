@@ -12,8 +12,8 @@
 
 namespace Freia {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 
 Config::Config(std::string ConfigFile) {
