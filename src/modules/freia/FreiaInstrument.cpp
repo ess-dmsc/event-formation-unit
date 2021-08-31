@@ -12,6 +12,7 @@
 #include <common/TimeString.h>
 #include <freia/FreiaInstrument.h>
 #include <readout/vmm3/Readout.h>
+#include <assert.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,9 +22,11 @@ namespace Freia {
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters & counters,
     //BaseSettings & EFUSettings,
-    FreiaSettings &moduleSettings)
+    FreiaSettings &moduleSettings,
+    EV42Serializer * serializer)
       : counters(counters)
-      , ModuleSettings(moduleSettings) {
+      , ModuleSettings(moduleSettings)
+      , Serializer(serializer) {
 
     XTRACE(INIT, ALW, "Loading configuration file %s",
            ModuleSettings.ConfigFile.c_str());
@@ -73,6 +76,7 @@ void FreiaInstrument::processReadouts(void) {
     return;
   }
 
+  assert(Serializer != nullptr);
   Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
          PacketHeader->PulseLow);

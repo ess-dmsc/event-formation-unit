@@ -11,7 +11,6 @@
 #pragma once
 
 #include <common/EV42Serializer.h>
-#include <common/Producer.h>
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
@@ -31,7 +30,10 @@ public:
 
   /// \brief 'create' the Freia instrument
   ///
-  FreiaInstrument(Counters & counters, /* BaseSettings & EFUSettings, */ FreiaSettings & moduleSettings);
+  FreiaInstrument(Counters & counters,
+                  /* BaseSettings & EFUSettings, */
+                  FreiaSettings & moduleSettings,
+                  EV42Serializer * serializer);
 
   /// \brief process parsed vmm data into events
   void processReadouts(void);
@@ -66,9 +68,6 @@ public:
   uint16_t nwires;
   uint16_t nstrips;
 
-  std::string topic{""};
-  std::string monitor{""};
-
   HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
   // MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
@@ -82,7 +81,7 @@ public:
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
-  EV42Serializer *Serializer;
+  EV42Serializer *Serializer{nullptr};
 };
 
 } // namespace
