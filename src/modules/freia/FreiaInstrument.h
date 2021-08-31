@@ -16,6 +16,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/readout/common/ReadoutParser.h>
+#include <modules/readout/common/ESSTime.h>
 #include <modules/readout/vmm3/Readout.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
 
@@ -37,6 +38,9 @@ public:
 
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const VMM3Parser::VMM3Data & Data);
+
+  //
+  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   ///
   //void ingestOneReadout(int cassette, const Readout & dp);
@@ -73,10 +77,12 @@ public:
   ESSGeometry essgeom;
 
   // towards VMM3
+  ESSTime Time;
   Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
+  EV42Serializer *Serializer;
 };
 
 } // namespace
