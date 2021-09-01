@@ -6,6 +6,7 @@
 /// \brief Generator of artificial LoKI readouts with variable number
 /// of sections and data elements per section.
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <cassert>
 #include <cstdint>
@@ -70,3 +71,4 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(
 
   return DataSize;
 }
+// GCOVR_EXCL_STOP
