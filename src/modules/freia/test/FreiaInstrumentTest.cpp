@@ -69,7 +69,7 @@ protected:
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    printf("SetUp() ConfigFile: %s\n", ConfigFile.c_str());
+    ModuleSettings.FilePrefix = "deleteme_";
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
 
