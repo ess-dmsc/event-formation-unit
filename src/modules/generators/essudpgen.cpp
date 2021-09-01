@@ -10,6 +10,7 @@
 /// and common PacketGenerator class for creating ESS readout data
 /// which can be sent using the UDPTransmitter class.
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <common/Socket.h>
 #include <CLI/CLI.hpp>
@@ -24,7 +25,6 @@
 
 #include <generators/PacketGenerator.h>
 
-// GCOVR_EXCL_START
 
 const uint16_t UdpMaxSizeBytes{8800};
 

@@ -6,6 +6,7 @@
 /// \brief A streamer of efu events (only pixel ids) from hdf5 files
 ///
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
@@ -54,3 +55,5 @@ int main(int argc, char *argv[]) {
   sleep(1);
   return 0;
 }
+
+// GCOVR_EXCL_STOP

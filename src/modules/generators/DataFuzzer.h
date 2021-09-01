@@ -8,6 +8,7 @@
 ///
 /// Meant for use in data generators
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #pragma once
 
@@ -39,3 +40,4 @@ private:
   std::uniform_int_distribution<uint32_t> IntDist;
   std::uniform_real_distribution<double> RealDist{0.0, 1.0};
 };
+// GCOVR_EXCL_STOP
