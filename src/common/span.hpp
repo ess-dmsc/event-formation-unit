@@ -9,6 +9,7 @@
 /// (See accompanying file LICENSE.txt or copy at
 ///http://www.boost.org/LICENSE_1_0.txt)
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #ifndef NONSTD_SPAN_HPP_INCLUDED
 #define NONSTD_SPAN_HPP_INCLUDED

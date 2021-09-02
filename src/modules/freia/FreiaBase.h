@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/Detector.h>
+#include <common/EV42Serializer.h>
 #include <freia/Counters.h>
 
 namespace Freia {
@@ -33,6 +34,7 @@ public:
 protected:
   struct Counters Counters{};
   FreiaSettings FreiaModuleSettings;
+  EV42Serializer *Serializer;
 };
 
 }

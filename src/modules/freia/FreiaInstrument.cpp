@@ -12,18 +12,21 @@
 #include <common/TimeString.h>
 #include <freia/FreiaInstrument.h>
 #include <readout/vmm3/Readout.h>
+#include <assert.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters & counters,
     //BaseSettings & EFUSettings,
-    FreiaSettings &moduleSettings)
+    FreiaSettings &moduleSettings,
+    EV42Serializer * serializer)
       : counters(counters)
-      , ModuleSettings(moduleSettings) {
+      , ModuleSettings(moduleSettings)
+      , Serializer(serializer) {
 
     XTRACE(INIT, ALW, "Loading configuration file %s",
            ModuleSettings.ConfigFile.c_str());
@@ -58,6 +61,28 @@ void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
+
+  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
+  uint64_t PulseTime =
+      Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
+  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
+                                                 PacketHeader->PrevPulseLow);
+
+  if (PulseTime - PrevPulseTime > Conf.MaxPulseTimeNS) {
+    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
+           (PulseTime - PrevPulseTime));
+    ESSReadoutParser.Stats.ErrorTimeHigh++;
+    counters.ErrorESSHeaders++;
+    return;
+  }
+
+  assert(Serializer != nullptr);
+  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
+  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
+         PacketHeader->PulseLow);
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
+         PacketHeader->PrevPulseLow);
+
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto & readout : VMMParser.Result) {
 

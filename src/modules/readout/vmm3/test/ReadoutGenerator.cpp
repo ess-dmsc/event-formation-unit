@@ -5,14 +5,13 @@
 ///
 /// \brief Generator of artificial VMM3 readouts
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <readout/vmm3/test/ReadoutGenerator.h>
-
-// GCOVR_EXCL_START
 
 uint16_t ReadoutGenerator::vmm3ReadoutDataGen(
   uint8_t *Buffer, uint16_t MaxSize, bool Randomise,

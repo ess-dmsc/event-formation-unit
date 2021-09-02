@@ -6,6 +6,7 @@
 /// \brief Generator of artificial VMM3a readouts with variable number
 /// of readouts
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #pragma once
 
@@ -35,3 +36,4 @@ private:
 
   DataFuzzer Fuzzer;
 };
+// GCOVR_EXCL_STOP

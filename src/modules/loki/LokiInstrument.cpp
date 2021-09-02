@@ -141,7 +141,7 @@ void LokiInstrument::processReadouts() {
   if (PulseTime - PrevPulseTime > LokiConfiguration.MaxPulseTimeNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
            (PulseTime - PrevPulseTime));
-    counters.ReadoutStats.ErrorTimeHigh++;
+    ESSReadoutParser.Stats.ErrorTimeHigh++;
     counters.ErrorESSHeaders++;
     return;
   }

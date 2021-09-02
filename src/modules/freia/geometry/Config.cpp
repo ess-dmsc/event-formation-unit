@@ -12,11 +12,12 @@
 
 namespace Freia {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 
 Config::Config(std::string ConfigFile) {
+  std::string Name;
   try {
     root = from_json_file(ConfigFile);
   } catch (...) {
@@ -25,8 +26,26 @@ Config::Config(std::string ConfigFile) {
   }
 
   try {
-    auto Name = root["Detector"].get<std::string>();
+    Name = root["Detector"].get<std::string>();
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Missing 'Detector' field");
+    throw std::runtime_error("Missing 'Detector' field");
+  }
 
+  if (Name != "Freia") {
+    LOG(INIT, Sev::Error, "Instrument configuration is not Freia");
+    throw std::runtime_error("Inconsistent Json file - invalid name");
+  }
+
+  try {
+    MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
+  }
+
+  XTRACE(INIT, DEB, "MaxPulseTimeNS %u", MaxPulseTimeNS);
+
+  try {
     auto PanelConfig = root["Config"];
     unsigned int VMMOffs{0};
     unsigned int FENOffs{0};
@@ -62,7 +81,7 @@ Config::Config(std::string ConfigFile) {
 
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
         ConfigFile);
     throw std::runtime_error("Invalid Json file");
     return;

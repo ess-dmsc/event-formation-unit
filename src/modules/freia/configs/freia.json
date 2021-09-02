@@ -16,6 +16,8 @@
     { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
     { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
     { "Ring" : 10, "CassOffset" : 29, "FENs" : 2}
-  ]
+  ],
+
+  "MaxPulseTimeNS" : 357000000
 
 }

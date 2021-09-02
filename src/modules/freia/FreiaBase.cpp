@@ -11,7 +11,6 @@
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
-#include <common/Producer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
@@ -161,14 +160,14 @@ void FreiaBase::input_thread() {
 
 void FreiaBase::processing_thread() {
 
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings);
-
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, Freia.topic);
+  Producer eventprod(EFUSettings.KafkaBroker, "freia_detector");
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
-  EV42Serializer Serializer{KafkaBufferSize, "freia", Produce};
+
+  Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
+  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings, Serializer);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -292,7 +291,7 @@ void FreiaBase::processing_thread() {
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
-      Counters.TxBytes += Serializer.produce();
+      Counters.TxBytes += Serializer->produce();
 
       // if (!Freia.histograms.isEmpty()) {
       //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
