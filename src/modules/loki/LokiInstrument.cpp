@@ -164,21 +164,22 @@ void LokiInstrument::processReadouts() {
       }
 
       // Calculate TOF in ns
-      auto TimeOfFlight = Time.getTOF(Data.TimeHigh, Data.TimeLow,
+      auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow,
                                       LokiConfiguration.ReadoutConstDelayNS);
 
-      if (TimeOfFlight == Time.InvalidTOF) {
-        TimeOfFlight = Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
+      if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
+        TimeOfFlight = ESSReadoutParser.Packet.Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
                                        LokiConfiguration.ReadoutConstDelayNS);
       }
 
       XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             ESSReadoutParser.Packet.Time.TimeInNS, Time.toNS(Data.TimeHigh, Data.TimeLow));
+             ESSReadoutParser.Packet.Time.TimeInNS,
+             ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
       XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
              ESSReadoutParser.Packet.Time.PrevTimeInNS,
-             Time.toNS(Data.TimeHigh, Data.TimeLow));
+             ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
 
-      if (TimeOfFlight == Time.InvalidTOF) {
+      if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
         XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
         continue;
       }

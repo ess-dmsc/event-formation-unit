@@ -242,10 +242,10 @@ void LokiBase::processingThread() {
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,
                                   Loki.ESSReadoutParser.Packet.DataLength);
 
-      Counters.TofCount = Loki.Time.Stats.TofCount;
-      Counters.TofNegative = Loki.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
+      Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
+      Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
 
       // Process readouts, generate (end produce) events
       Loki.processReadouts();

@@ -76,7 +76,6 @@ public:
   ESSGeometry essgeom;
 
   // towards VMM3
-  ESSTime Time;
   Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
