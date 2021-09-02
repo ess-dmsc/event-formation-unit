@@ -20,7 +20,6 @@ ReadoutParser::ReadoutParser() {
 }
 
 int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
-  std::memset(&Packet, 0, sizeof(Packet));
 
   if (Buffer == nullptr or Size == 0) {
     XTRACE(PROCESS, WAR, "no buffer specified");

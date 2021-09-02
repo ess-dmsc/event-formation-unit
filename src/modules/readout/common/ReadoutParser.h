@@ -72,9 +72,9 @@ public:
 
   // Holds data relevant for processing of the current packet
   struct {
-    PacketHeaderV0 * HeaderPtr;
-    uint16_t DataLength;
-    char * DataPtr;
+    PacketHeaderV0 * HeaderPtr{nullptr};
+    uint16_t DataLength{0};
+    char * DataPtr{nullptr};
     ESSTime Time;
   } Packet;
 
@@ -104,5 +104,5 @@ public:
   // Counters(for Grafana)
   struct ESSHeaderStats Stats;
   // Maximum allowed separation between PulseTime and PrevPulseTime
-  uint32_t MaxPulseTimeDiff{0};
+  uint32_t MaxPulseTimeDiff{0xffffffff};
 };
