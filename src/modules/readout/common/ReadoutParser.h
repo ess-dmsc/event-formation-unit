@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <readout/common/ESSTime.h>
+
 //#define OMITCHECKS 1
 #ifdef OMITCHECKS
   #pragma message("Some checks disabled for ReadoutParser")
@@ -73,6 +75,7 @@ public:
     PacketHeaderV0 * HeaderPtr;
     uint16_t DataLength;
     char * DataPtr;
+    ESSTime Time;
   } Packet;
 
   // Header for each data block
@@ -83,7 +86,13 @@ public:
   } __attribute__((packed));
 
 
+  //
   ReadoutParser();
+
+  //
+  void setMaxPulseTimeDiff(uint32_t MaxTimeDiff) {
+    MaxPulseTimeDiff = MaxTimeDiff;
+  }
 
   /// \brief validate a readout buffer
   /// \param[in] Buffer pointer to data
@@ -94,4 +103,6 @@ public:
 
   // Counters(for Grafana)
   struct ESSHeaderStats Stats;
+  // Maximum allowed separation between PulseTime and PrevPulseTime
+  uint32_t MaxPulseTimeDiff{0};
 };

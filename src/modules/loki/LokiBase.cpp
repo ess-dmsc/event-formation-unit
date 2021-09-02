@@ -237,9 +237,6 @@ void LokiBase::processingThread() {
         Counters.ErrorESSHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,

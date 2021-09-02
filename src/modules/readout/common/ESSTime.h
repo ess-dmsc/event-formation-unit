@@ -68,7 +68,6 @@ public:
   }
 public:
   struct Stats_t Stats = {};
-private:
   uint64_t TimeInNS{0};
   uint64_t PrevTimeInNS{0};
 };
