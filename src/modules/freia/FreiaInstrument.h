@@ -18,9 +18,11 @@
 #include <modules/readout/common/ESSTime.h>
 #include <modules/readout/vmm3/Readout.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
+#include <multiblade/clustering/EventBuilder.h>
 
 #include <freia/Counters.h>
 #include <freia/geometry/Config.h>
+#include <freia/geometry/Geometry.h>
 #include <freia/FreiaBase.h> // to get MBSettings
 
 namespace Freia {
@@ -35,8 +37,11 @@ public:
                   FreiaSettings & moduleSettings,
                   EV42Serializer * serializer);
 
-  /// \brief process parsed vmm data into events
+  /// \brief process parsed vmm data into clusters
   void processReadouts(void);
+
+  /// \brief process clusters into events
+  void generateEvents(void);
 
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const VMM3Parser::VMM3Data & Data);
@@ -63,24 +68,21 @@ public:
   struct Counters & counters;
   FreiaSettings & ModuleSettings;
 
-  ///
-  uint16_t ncass;
-  uint16_t nwires;
-  uint16_t nstrips;
-
   HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
   // MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
-  // std::vector<EventBuilder> builders; // reinit in ctor
+
 
   ESSGeometry essgeom;
 
   // towards VMM3
+  Multiblade::EventBuilder builder; // single builder for entire detector
   Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
   EV42Serializer *Serializer{nullptr};
+  Geometry FreiaGeom;
 };
 
 } // namespace

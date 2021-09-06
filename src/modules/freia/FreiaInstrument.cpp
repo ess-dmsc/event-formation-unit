@@ -40,10 +40,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
 
-    // builders = std::vector<EventBuilder>(ncass);
-    // for (EventBuilder & builder : builders) {
-    //   builder.setTimeBox(2010);
-    // }
+    builder.setTimeBox(2010); // Time boxing
 
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
@@ -91,91 +88,73 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
+
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    uint16_t ADC = readout.OTADC & 0x3FF;
+    uint8_t Plane = readout.VMM & 0x1;
+    uint8_t Cassette = Conf.FENOffset[readout.RingId] * Conf.CassettesPerFEN +
+                       FreiaGeom.cassette(readout.VMM, readout.Channel); // local cassette
+
+    if (Plane == FreiaGeom.PlaneX) {
+      builder.insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
+                      ADC, Plane});
+    } else {
+      builder.insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
+                      ADC, Plane});
+    }
   }
+
+  builder.flush(); // Do matching
 }
-// New EF algorithm - Needed to sort readouts in time
-// bool compareByTime(const Readout &a, const Readout &b) {
-//   return a.local_time < b.local_time;
-// }
 
-// New EF algorithm - buffers data according to time and sorts before
-// processing
-// void FreiaInstrument::FixJumpsAndSort(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
-  // int64_t Gap{43'000'000};
-  // int64_t PrevTime{0xffffffffff};
-  // std::vector<Readout> temp;
-  //
-  // for (auto &Readout : vec) {
-  //   int64_t Time = (uint64_t)(Readout.local_time * FreiaConfig.TimeTickNS);
-  //
-  //   if ((PrevTime - Time) < Gap) {
-  //     temp.push_back(Readout);
-  //   } else {
-  //     XTRACE(CLUSTER, DEB, "Wrap: %4d, Time: %lld, PrevTime: %lld, diff %lld",
-  //            counters.ReadoutsTimerWraps, Time, PrevTime, (PrevTime - Time));
-  //     counters.ReadoutsTimerWraps++;
-  //     std::sort(temp.begin(), temp.end(), compareByTime);
-  //     LoadAndProcessReadouts(cassette, temp);
-  //
-  //     temp.clear();
-  //     temp.push_back(Readout);
-  //   }
-  //   PrevTime = Time;
-  // }
-  // LoadAndProcessReadouts(cassette, temp);
-// }
 
-//
-// void FreiaInstrument::LoadAndProcessReadouts(int __attribute__((unused)) cassette, __attribute__((unused)) std::vector<Readout> &vec) {
-  // for (auto &dp : vec) {
-  //   if (not mbgeom.isValidCh(dp.channel)) {
-  //     counters.ReadoutsInvalidChannel++;
-  //     continue;
-  //   }
-  //
-  //   if (dp.adc > FreiaConfig.max_valid_adc) {
-  //     counters.ReadoutsInvalidAdc++;
-  //     continue;
-  //   }
-  //
-  //   uint8_t plane = mbgeom.getPlane(dp.channel);
-  //
-  //   #ifdef MB_MONITOR_CHANNEL
-  //   #define MONITOR_DIGITIZER 137
-  //   #define MONITOR_CHANNEL 62
-  //   #define MONITOR_PLANE 0
-  //   if ((dp.digitizer == MONITOR_DIGITIZER) and
-  //       (dp.channel == MONITOR_CHANNEL) and
-  //       (plane == MONITOR_PLANE)) {
-  //     counters.ReadoutsMonitor++;
-  //     continue;
-  //   }
-  //   #endif
-  //
-  //   uint16_t coord;
-  //   if (plane == 0) {
-  //     coord = mbgeom.getx(cassette, dp.channel);
-  //   } else  if (plane == 1) {
-  //     coord = mbgeom.gety(cassette, dp.channel);
-  //   } else {
-  //     counters.ReadoutsInvalidPlane++;
-  //     continue;
-  //   }
-  //
-  //   counters.ReadoutsGood++;
-  //
-  //   XTRACE(DATA, DEB, "time %u, channel %u, adc %u",
-  //          dp.local_time, dp.channel, dp.adc);
-  //   XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
-  //          dp.debug().c_str(), cassette, plane, coord);
-  //
-  //   assert(dp.local_time * FreiaConfig.TimeTickNS < 0xffffffff);
-  //   uint64_t Time = (uint64_t)(dp.local_time * FreiaConfig.TimeTickNS);
-  //
-  //   builders[cassette].insert({Time, coord, dp.adc, plane});
-  // }
-  // builders[cassette].flush();
-// }
+void FreiaInstrument::generateEvents(void) {
+  for (const auto &e : builder.Events) {
+
+    if (!e.both_planes()) {
+      counters.EventsNoCoincidence++;
+      continue;
+    }
+
+    bool DiscardGap{true};
+    // Discard if there are gaps in the strip channels
+    if (DiscardGap) {
+      if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
+        counters.EventsInvalidStripGap++;
+        continue;
+      }
+    }
+
+    // Discard if there are gaps in the wire channels
+    if (DiscardGap) {
+      if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
+        counters.EventsInvalidWireGap++;
+        continue;
+      }
+    }
+
+    counters.EventsMatchedClusters++;
+
+    XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
+    // calculate local x and y using center of mass
+    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+
+    // \todo implement this
+    auto time = 0;
+    auto pixel_id = essgeom.pixel2D(x, y);
+    XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+
+    if (pixel_id == 0) {
+      counters.PixelErrors++;
+    } else {
+      counters.TxBytes += Serializer->addEvent(time, pixel_id);
+      counters.Events++;
+    }
+  }
+  builder.Events.clear(); // else events will accumulate
+}
+
 
 /// \todo move into readout/vmm3 instead as this will be common
 void FreiaInstrument::dumpReadoutToFile(const VMM3Parser::VMM3Data & Data) {

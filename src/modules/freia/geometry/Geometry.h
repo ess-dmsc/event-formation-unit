@@ -63,11 +63,18 @@ public:
     }
   }
 
+  // Return the local cassette
+  uint8_t cassette(uint8_t FEN, uint8_t VMM) {
+    return 2 * (FEN - 1) + ((VMM & 0x0f) >> 1);
+  }
+
   const uint16_t InvalidCoord{0xFFFF};
   const uint16_t NumStrips{64};
   const uint16_t NumWires{32};
   const uint16_t MinWireChannel{16};
   const uint16_t MaxWireChannel{47};
+  const uint8_t PlaneX{1};
+  const uint8_t PlaneY{0};
 };
 
 } // namespace

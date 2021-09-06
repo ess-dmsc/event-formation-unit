@@ -85,8 +85,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
-  Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
-
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
@@ -204,83 +202,13 @@ void FreiaBase::processing_thread() {
       //
       Freia.processReadouts();
 
+      Freia.generateEvents();
 
-      // Counters.TofCount = Freia.Time.Stats.TofCount;
-      // Counters.TofNegative = Freia.Time.Stats.TofNegative;
-      // Counters.PrevTofCount = Freia.Time.Stats.PrevTofCount;
-      // Counters.PrevTofNegative = Freia.Time.Stats.PrevTofNegative;
-
-    // old code below
-    //   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-    //   flatbuffer.pulseTime(efu_time);
-    //
-    //   if (not Freia.parsePacket(dataptr, datalen, flatbuffer)) {
-    //     continue;
-    //   }
-    //
-    //   auto cassette = Freia.FreiaConfig.Mappings->cassette(Freia.parser.MBHeader->digitizerID);
-    //   for (const auto &e : Freia.builders[cassette].Events) {
-    //
-    //     if (!e.both_planes()) {
-    //       Counters.EventsNoCoincidence++;
-    //       continue;
-    //     }
-    //
-    //     bool DiscardGap{true};
-    //     // Discard if there are gaps in the strip channels
-    //     if (DiscardGap) {
-    //       if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-    //         Counters.EventsInvalidStripGap++;
-    //         continue;
-    //       }
-    //     }
-    //
-    //     // Discard if there are gaps in the wire channels
-    //     if (DiscardGap) {
-    //       if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-    //         Counters.EventsInvalidWireGap++;
-    //         continue;
-    //       }
-    //     }
-    //
-    //     Counters.EventsMatchedClusters++;
-    //
-    //     XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
-    //     // calculate local x and y using center of mass
-    //     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    //     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
-    //
-    //     // \todo improve this
-    //     auto time = e.time_start();
-    //     auto pixel_id = Freia.essgeom.pixel2D(x, y);
-    //     XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
-    //
-    //     if (pixel_id == 0) {
-    //       Counters.GeometryErrors++;
-    //     } else {
-    //       Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
-    //       Counters.Events++;
-    //     }
-    //   }
-    //   Freia.builders[cassette].Events.clear(); // else events will accumulate
-    // } else {
-
-    // }
-    //
-    // // if filedumping and requesting time splitting, check for rotation.
-    // if (FreiaSettings.H5SplitTime != 0 and (Freia.dumpfile)) {
-    //   if (h5flushtimer.timeus() >= FreiaSettings.H5SplitTime * 1000000) {
-    //
-    //     /// \todo user should not need to call flush() - implicit in rotate() ?
-    //     Freia.dumpfile->flush();
-    //     Freia.dumpfile->rotate();
-    //     h5flushtimer.reset();
-    //   }
-  } else {
-    // There is NO data in the FIFO - increment idle counter and sleep a little
-      Counters.ProcessingIdle++;
-      usleep(10);
-  }
+    } else {
+      // There is NO data in the FIFO - increment idle counter and sleep a little
+        Counters.ProcessingIdle++;
+        usleep(10);
+    }
 
     if (ProduceTimer.timeout()) {
 
