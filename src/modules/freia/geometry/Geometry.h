@@ -73,8 +73,8 @@ public:
   const uint16_t NumWires{32};
   const uint16_t MinWireChannel{16};
   const uint16_t MaxWireChannel{47};
-  const uint8_t PlaneX{1};
-  const uint8_t PlaneY{0};
+  const uint8_t PlaneX{0};
+  const uint8_t PlaneY{1};
 };
 
 } // namespace

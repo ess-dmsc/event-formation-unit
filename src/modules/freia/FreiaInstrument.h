@@ -70,10 +70,7 @@ public:
 
   HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
-  // MBGeometry mbgeom{1, 1, 1}; // reinit in ctor
 
-
-  ESSGeometry essgeom;
 
   // towards VMM3
   Multiblade::EventBuilder builder; // single builder for entire detector
@@ -83,6 +80,7 @@ public:
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
   EV42Serializer *Serializer{nullptr};
   Geometry FreiaGeom;
+  ESSGeometry essgeom{64, 1024, 1, 1};
 };
 
 } // namespace

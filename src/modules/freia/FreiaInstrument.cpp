@@ -91,16 +91,16 @@ void FreiaInstrument::processReadouts(void) {
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     uint16_t ADC = readout.OTADC & 0x3FF;
-    uint8_t Plane = readout.VMM & 0x1;
-    uint8_t Cassette = Conf.FENOffset[readout.RingId] * Conf.CassettesPerFEN +
-                       FreiaGeom.cassette(readout.VMM, readout.Channel); // local cassette
+    uint8_t Plane = (readout.VMM & 0x1) ^ 0x1;
+    uint8_t Cassette = 1 + Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
+      FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
 
     if (Plane == FreiaGeom.PlaneX) {
       builder.insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
-                      ADC, Plane});
+                      ADC, FreiaGeom.PlaneX});
     } else {
       builder.insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
-                      ADC, Plane});
+                      ADC, FreiaGeom.PlaneY});
     }
   }
 
@@ -135,7 +135,7 @@ void FreiaInstrument::generateEvents(void) {
 
     counters.EventsMatchedClusters++;
 
-    XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
+    XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
@@ -143,7 +143,7 @@ void FreiaInstrument::generateEvents(void) {
     // \todo implement this
     auto time = 0;
     auto pixel_id = essgeom.pixel2D(x, y);
-    XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+    XTRACE(EVENT, INF, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 
     if (pixel_id == 0) {
       counters.PixelErrors++;
