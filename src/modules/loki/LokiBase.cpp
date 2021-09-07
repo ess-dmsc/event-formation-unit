@@ -237,18 +237,15 @@ void LokiBase::processingThread() {
         Counters.ErrorESSHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,
                                   Loki.ESSReadoutParser.Packet.DataLength);
 
-      Counters.TofCount = Loki.Time.Stats.TofCount;
-      Counters.TofNegative = Loki.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
+      Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
+      Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
 
       // Process readouts, generate (end produce) events
       Loki.processReadouts();

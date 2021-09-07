@@ -57,6 +57,8 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   if (!ModuleSettings.FilePrefix.empty()) {
     DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "loki_" + timeString());
   }
+
+  ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
 }
 
 LokiInstrument::~LokiInstrument() {}
@@ -132,26 +134,8 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
 }
 
 void LokiInstrument::processReadouts() {
-  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime =
-      Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
-                                                 PacketHeader->PrevPulseLow);
-
-  if (PulseTime - PrevPulseTime > LokiConfiguration.MaxPulseTimeNS) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
-           (PulseTime - PrevPulseTime));
-    ESSReadoutParser.Stats.ErrorTimeHigh++;
-    counters.ErrorESSHeaders++;
-    return;
-  }
-
-  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  SerializerII->pulseTime(PulseTime);
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
-         PacketHeader->PulseLow);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
-         PacketHeader->PrevPulseLow);
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  SerializerII->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : LokiParser.Result) {
@@ -180,21 +164,22 @@ void LokiInstrument::processReadouts() {
       }
 
       // Calculate TOF in ns
-      auto TimeOfFlight = Time.getTOF(Data.TimeHigh, Data.TimeLow,
+      auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow,
                                       LokiConfiguration.ReadoutConstDelayNS);
 
-      if (TimeOfFlight == Time.InvalidTOF) {
-        TimeOfFlight = Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
+      if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
+        TimeOfFlight = ESSReadoutParser.Packet.Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
                                        LokiConfiguration.ReadoutConstDelayNS);
       }
 
       XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
+             ESSReadoutParser.Packet.Time.TimeInNS,
+             ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
       XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
-             Time.toNS(Data.TimeHigh, Data.TimeLow));
+             ESSReadoutParser.Packet.Time.PrevTimeInNS,
+             ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
 
-      if (TimeOfFlight == Time.InvalidTOF) {
+      if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
         XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
         continue;
       }

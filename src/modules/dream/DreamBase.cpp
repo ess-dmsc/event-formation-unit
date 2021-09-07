@@ -175,9 +175,6 @@ void DreamBase::processingThread() {
         Counters.ErrorHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
       Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr,

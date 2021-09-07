@@ -38,6 +38,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
       DumpFile = VMM3::ReadoutFile::create(DumpFileName);
     }
 
+    ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
 
     // builders = std::vector<EventBuilder>(ncass);
     // for (EventBuilder & builder : builders) {
@@ -61,27 +62,8 @@ void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-
-  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime =
-      Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
-                                                 PacketHeader->PrevPulseLow);
-
-  if (PulseTime - PrevPulseTime > Conf.MaxPulseTimeNS) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
-           (PulseTime - PrevPulseTime));
-    ESSReadoutParser.Stats.ErrorTimeHigh++;
-    counters.ErrorESSHeaders++;
-    return;
-  }
-
   assert(Serializer != nullptr);
-  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
-         PacketHeader->PulseLow);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
-         PacketHeader->PrevPulseLow);
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto & readout : VMMParser.Result) {

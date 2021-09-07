@@ -60,7 +60,6 @@ public:
   ReadoutParser ESSReadoutParser;
   DataParser LokiParser{counters};
   TubeAmps Amp2Pos;
-  ESSTime Time;
   EV42Serializer *Serializer;
   EV42Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;

@@ -194,10 +194,6 @@ void FreiaBase::processing_thread() {
         Counters.ErrorESSHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Freia.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Freia.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
-
 
       // We have good header information, now parse readout data
       Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet.DataPtr,

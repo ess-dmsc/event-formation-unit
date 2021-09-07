@@ -20,7 +20,6 @@ ReadoutParser::ReadoutParser() {
 }
 
 int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
-  std::memset(&Packet, 0, sizeof(Packet));
 
   if (Buffer == nullptr or Size == 0) {
     XTRACE(PROCESS, WAR, "no buffer specified");
@@ -94,6 +93,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     return -ReadoutParser::EHEADER;
   }
 
+  // Check per OutputQueue packet sequence number
   if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
     XTRACE(PROCESS, WAR, "Bad sequence number for OQ %u (expected %u, got %u)",
            Packet.HeaderPtr->OutputQueue,
@@ -106,6 +106,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
 
+  //
   // Check time values
   if (Packet.HeaderPtr->PulseLow > MaxFracTimeCount) {
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
@@ -121,6 +122,25 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     return -ReadoutParser::EHEADER;
   }
 
+  Packet.Time.setReference(Packet.HeaderPtr->PulseHigh,
+                           Packet.HeaderPtr->PulseLow);
+  Packet.Time.setPrevReference(Packet.HeaderPtr->PrevPulseHigh,
+                               Packet.HeaderPtr->PrevPulseLow);
+
+  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", Packet.HeaderPtr->PulseHigh,
+        Packet.HeaderPtr->PulseLow);
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", Packet.HeaderPtr->PrevPulseHigh,
+        Packet.HeaderPtr->PrevPulseLow);
+
+  if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiff) {
+    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
+           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS));
+    Stats.ErrorTimeHigh++;
+
+    return -ReadoutParser::EHEADER;
+  }
+
+  //
   if (Packet.HeaderPtr->TotalLength == sizeof(ReadoutParser::PacketHeaderV0)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
     Stats.HeartBeats++;
