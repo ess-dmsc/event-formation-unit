@@ -35,19 +35,24 @@ uint16_t ReadoutGenerator::vmm3ReadoutDataGen(
 
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
-
-  uint8_t RingCount{0};
+  Header->PulseHigh = SeqNum;
+  Header->PulseLow = 10;
+  Header->PrevPulseHigh = SeqNum;
+  Header->PrevPulseLow = 0;
 
   DP += HeaderSize;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
     auto ReadoutData = (VMM3Parser::VMM3Data *)DP;
-    ReadoutData->RingId = RingCount % Rings;
+    ReadoutData->RingId = (Readout / 10) % Rings;
     ReadoutData->FENId = 0x01;
     ReadoutData->DataLength = sizeof(VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
-    RingCount++;
+
     ReadoutData->TimeHigh = SeqNum;
-    ReadoutData->TimeLow = 100;
+    ReadoutData->TimeLow = 100 + Readout * 100;
+    ReadoutData->VMM = Readout & 0x1;
+    ReadoutData->OTADC = 1000;
+    ReadoutData->Channel = 17 + Readout % 32;
     DP += VMM3DataSize;
   }
 

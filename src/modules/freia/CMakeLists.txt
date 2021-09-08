@@ -11,15 +11,18 @@ set(freia_common_inc
   FreiaBase.h
   FreiaInstrument.h
   geometry/Config.h
-  ../readout/common/ReadoutParser.h
-  ../readout/vmm3/VMM3Parser.h
+  ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.h
+  ${ESS_MODULE_DIR}/readout/common/ReadoutParser.h
+  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Parser.h
+
   )
 set(freia_common_src
   FreiaBase.cpp
   FreiaInstrument.cpp
   geometry/Config.cpp
-  ../readout/common/ReadoutParser.cpp
-  ../readout/vmm3/VMM3Parser.cpp
+  ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.cpp
+  ${ESS_MODULE_DIR}/readout/common/ReadoutParser.cpp
+  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Parser.cpp
   )
 
 set(freia_INC ${freia_common_inc})

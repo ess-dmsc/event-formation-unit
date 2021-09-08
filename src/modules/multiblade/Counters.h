@@ -32,7 +32,6 @@ struct Counters {
     int64_t ReadoutsInvalidChannel;
     int64_t ReadoutsInvalidPlane;
     int64_t ReadoutsTimerWraps;
-    int64_t FiltersMaxTimeSpan;
     int64_t ProcessingIdle;
     int64_t Events;
     int64_t EventsUdder;

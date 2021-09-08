@@ -33,15 +33,15 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     return -ReadoutParser::ESIZE;
   }
 
-  uint32_t Version = htons(*(uint16_t *)(Buffer));
-  if ((Version >> 8) != 0) {
+  uint32_t VersionAndPad = htons(*(uint16_t *)(Buffer));
+  if ((VersionAndPad >> 8) != 0) {
     XTRACE(PROCESS, WAR, "Padding is wrong (should be 0)");
     Stats.ErrorPad++;
     return -ReadoutParser::EHEADER;
   }
 
-  if ((Version & 0xff) != 0x00) { //
-    XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d", Version & 0xff);
+  if ((VersionAndPad & 0xff) != 0x00) { //
+    XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d", VersionAndPad & 0xff);
     Stats.ErrorVersion++;
     return -ReadoutParser::EHEADER;
   }

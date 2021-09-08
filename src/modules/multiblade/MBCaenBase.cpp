@@ -73,8 +73,6 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
-  Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
-
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
