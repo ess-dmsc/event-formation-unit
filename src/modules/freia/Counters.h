@@ -45,6 +45,8 @@ struct Counters {
     int64_t EventsInvalidStripGap;
     int64_t EventsInvalidWireGap;
     int64_t PixelErrors;
+    int64_t TimeErrors;
+    struct ESSTime::Stats_t TimeStats;
     int64_t TxBytes;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;

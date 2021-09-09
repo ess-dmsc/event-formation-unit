@@ -75,11 +75,16 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
   Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
+  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
 
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
+  Stats.create("events.time_errors", Counters.TimeErrors);
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
   Stats.create("events.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
@@ -200,9 +205,9 @@ void FreiaBase::processing_thread() {
 
       // We have good header information, now parse readout data
 
-      Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet.DataPtr,
-                                  Freia.ESSReadoutParser.Packet.DataLength);
+      Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
 
+      Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
       //

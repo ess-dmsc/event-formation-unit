@@ -46,8 +46,16 @@ private:
 
   const uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
   const uint16_t VMM3DataSize = sizeof(VMM3Parser::VMM3Data);
-  const uint32_t TimeLowOffset{20000}; // ticks
+
+  // Time offsets for readout generation
+  const uint32_t TimeLowOffset{20000};     // ticks
   const uint32_t PrevTimeLowOffset{10000}; // ticks
+  const uint32_t TimeToFirstReadout{1000}; // ticks
+  const uint32_t TimeBtwReadout{88};       // ticks ~ 1us
+  const uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
+
+  const uint8_t MinChannel{16};  // wire channels range from 16 - 47
+  const uint8_t NumChannels{32}; //
 
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};

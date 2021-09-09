@@ -59,6 +59,7 @@ void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
 
   DP += HeaderSize;
+  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
     auto ReadoutData = (VMM3Parser::VMM3Data *)DP;
     ReadoutData->RingId = (Readout / 10) % Rings;
@@ -68,11 +69,16 @@ void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = SeqNum;
-    ReadoutData->TimeLow = TimeLowOffset + Readout * 100;
+    ReadoutData->TimeLow = TimeLow;
     ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;
-    ReadoutData->Channel = 17 + Readout % 32;
+    ReadoutData->Channel = MinChannel + Readout % NumChannels;
     DP += VMM3DataSize;
+    if ((Readout % 2) == 0) {
+      TimeLow += TimeBtwReadout;
+    } else {
+      TimeLow += TimeBtwEvents;
+    }
   }
 }
 
