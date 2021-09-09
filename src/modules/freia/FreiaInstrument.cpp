@@ -113,6 +113,8 @@ void FreiaInstrument::processReadouts(void) {
 
 
 void FreiaInstrument::generateEvents(void) {
+  ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+
   for (const auto &e : builder.Events) {
 
     if (!e.both_planes()) {
@@ -138,23 +140,32 @@ void FreiaInstrument::generateEvents(void) {
     }
 
     counters.EventsMatchedClusters++;
-
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
+
+    // Calculate TOF in ns
+    uint64_t EventTime = e.time_start();
+
+    if (TimeRef.TimeInNS > EventTime) {
+      counters.TimeErrors++;
+      continue;
+    }
+
+    uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
+
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    auto PixelId = essgeom.pixel2D(x, y);
 
-    // \todo implement this
-    auto time = 0;
-    auto pixel_id = essgeom.pixel2D(x, y);
-    XTRACE(EVENT, INF, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
-
-    if (pixel_id == 0) {
+    if (PixelId == 0) {
       counters.PixelErrors++;
-    } else {
-      counters.TxBytes += Serializer->addEvent(time, pixel_id);
-      counters.Events++;
+      continue;
     }
+
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u",
+           time, TimeOfFlight, x, y, PixelId);
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+    counters.Events++;
   }
   builder.Events.clear(); // else events will accumulate
 }
