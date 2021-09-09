@@ -12,6 +12,8 @@
 #include <cstdio>
 #include <cstring>
 #include <readout/vmm3/test/ReadoutGenerator.h>
+#include <stdexcept>
+
 
 
 ReadoutGenerator::ReadoutGenerator(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
