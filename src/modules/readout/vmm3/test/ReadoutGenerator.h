@@ -15,24 +15,45 @@
 
 class ReadoutGenerator {
 public:
-  ReadoutGenerator() {}
-
-  /// \brief Fill out specified buffer with VMM3 readouts
+  /// \brief Setup buffer and sequence number
   /// \param Buffer pointer to the buffer to be filled out with packet data
-  /// \param MaxSize Maximum size of generated packet
-  /// \param Randomise whether to randomize (fuzz) some of the data
-  /// \param Type Data type as specified in the ESS Readout ICD
+  /// \param BufferSize Maximum size of generated packet
   /// \param SeqNum sequence number
-  /// \param Rings number if rings in use
+  /// \param Randomise whether to randomize (fuzz) some of the data
+  ReadoutGenerator(uint8_t *Buffer, uint16_t BufferSize,
+    uint32_t InitialSeqNum, bool Randomise);
+
+  /// \brief create a packet ready for UDP transmission, calls private methods
+  /// \param Type Data type as specified in the ESS Readout ICD
   /// \param NumReadouts number of VMM readouts in the UDP packet
-  uint16_t vmm3ReadoutDataGen(
-    uint8_t *Buffer, uint16_t MaxSize, bool Randomise,
-    uint8_t Type, uint32_t SeqNum, uint8_t Rings, uint16_t NumReadouts);
+  /// \param Rings number if rings in use
+  uint16_t makePacket(
+    uint8_t Type, uint16_t NumReadouts, uint8_t Rings);
 
 private:
+  /// \brief Generate common readout header
+  /// \param Type Data type as specified in the ESS Readout ICD
+  /// \param NumReadouts number of VMM readouts in the UDP packet
+  void generateHeader(uint8_t Type, uint16_t NumReadouts);
+
+  /// \brief Fill out specified buffer with VMM3 readouts
+  /// \param Rings number if rings in use
+  /// \param NumReadouts number of VMM readouts in the UDP packet
+  void generateData(uint8_t Rings, uint16_t NumReadouts);
+
+  /// \brief Increment sequence number and do fuzzing
+  void finishPacket();
 
   const uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
   const uint16_t VMM3DataSize = sizeof(VMM3Parser::VMM3Data);
+  const uint32_t TimeLowOffset{20000}; // ticks
+  const uint32_t PrevTimeLowOffset{10000}; // ticks
+
+  uint8_t * Buffer{nullptr};
+  uint16_t BufferSize{0};
+  uint32_t SeqNum{0};
+  uint16_t DataSize{0}; // Number of data bytes in packet
+  bool Random{false};
 
   DataFuzzer Fuzzer;
 };

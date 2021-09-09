@@ -69,12 +69,12 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d",
-           readout.RingId, readout.FENId, readout.VMM);
+    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Ring >= Conf.NumRings) {
+    if (Ring >= Conf.NumRings - 1) {
       XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
              Ring, readout.RingId, Conf.NumRings - 1);
       counters.RingErrors++;
@@ -96,9 +96,13 @@ void FreiaInstrument::processReadouts(void) {
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
 
     if (Plane == FreiaGeom.PlaneX) {
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
+         TimeNS, FreiaGeom.PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
       builder.insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneX});
     } else {
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
+         TimeNS, FreiaGeom.PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
       builder.insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneY});
     }
