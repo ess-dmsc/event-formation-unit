@@ -103,6 +103,22 @@ std::vector<uint8_t> StripGap {
   0x00, 0x00, 0x01, 0x12,  // GEO 0, TDC 0, VMM 1, CH 18
 };
 
+std::vector<uint8_t> GoodEvent {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
 
 class FreiaInstrumentTest : public TestBase {
 public:
@@ -113,17 +129,25 @@ protected:
   struct Counters counters;
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
+  FreiaInstrument * freia;
+  char Buffer[50];
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    ModuleSettings.FilePrefix = "deleteme_";
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
+
+    memset(Buffer, 0, sizeof(Buffer));
+
     PacketData.HeaderPtr = nullptr;
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
     PacketData.Time.setReference(0,0);
     PacketData.Time.setPrevReference(0,0);
+
+    freia = new FreiaInstrument(counters, ModuleSettings, serializer);
+    freia->setSerializer(serializer);
+    freia->ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
   }
   void TearDown() override {}
 
@@ -135,63 +159,57 @@ protected:
 
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  //BaseSettings Unused;
-  FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
-  freia.setSerializer(serializer);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
 }
 
+
+/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
+TEST_F(FreiaInstrumentTest, ConstructorDumpTofile) {
+  ModuleSettings.FilePrefix = "deleteme_freia_";
+  FreiaInstrument dummy(counters, ModuleSettings, serializer);
+  dummy.setSerializer(serializer);
+}
+
 TEST_F(FreiaInstrumentTest, TwoReadouts) {
-  FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
-  freia.setSerializer(serializer);
   makeHeader(MappingError);
-  auto Res = freia.VMMParser.parse(PacketData);
+  auto Res = freia->VMMParser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
 
-  ///
-  char Buffer[50];
-  memset(Buffer, 0, sizeof(Buffer));
-  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
-  /// !!!! Requires a valid header ptr to previously parsed ESS header
-  freia.processReadouts();
+  freia->processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
   ASSERT_EQ(counters.FENErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
-  FreiaInstrument freia(counters, ModuleSettings, serializer);
-  freia.setSerializer(serializer);
   makeHeader(WireGap);
-  auto Res = freia.VMMParser.parse(PacketData);
+  auto Res = freia->VMMParser.parse(PacketData);
   ASSERT_EQ(Res, 3);
 
-  ///
-  char Buffer[50];
-  memset(Buffer, 0, sizeof(Buffer));
-  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
-  /// !!!! Requires a valid header ptr to previously parsed ESS header
-  freia.processReadouts();
-  freia.generateEvents();
+  freia->processReadouts();
+  freia->generateEvents();
   ASSERT_EQ(counters.EventsInvalidWireGap, 1);
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
-  FreiaInstrument freia(counters, ModuleSettings, serializer);
-  freia.setSerializer(serializer);
   makeHeader(StripGap);
-  auto Res = freia.VMMParser.parse(PacketData);
+  auto Res = freia->VMMParser.parse(PacketData);
   ASSERT_EQ(Res, 3);
 
-  ///
-  char Buffer[50];
-  memset(Buffer, 0, sizeof(Buffer));
-  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
-  /// !!!! Requires a valid header ptr to previously parsed ESS header
-  freia.processReadouts();
-  freia.generateEvents();
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, GoodEvent) {
+  makeHeader(StripGap);
+  auto Res = freia->VMMParser.parse(PacketData);
+  ASSERT_EQ(Res, 3);
+
+  freia->processReadouts();
+  freia->generateEvents();
   ASSERT_EQ(counters.EventsInvalidStripGap, 1);
 }
 
