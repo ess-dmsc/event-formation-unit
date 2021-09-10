@@ -169,6 +169,12 @@ TEST_F(FreiaInstrumentTest, ConstructorDumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_freia_";
   FreiaInstrument dummy(counters, ModuleSettings, serializer);
   dummy.setSerializer(serializer);
+  makeHeader(GoodEvent);
+  auto Res = dummy.VMMParser.parse(PacketData);
+
+  counters.VMMStats = dummy.VMMParser.Stats;
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
 }
 
 TEST_F(FreiaInstrumentTest, TwoReadouts) {
@@ -204,13 +210,13 @@ TEST_F(FreiaInstrumentTest, StripGap) {
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
-  makeHeader(StripGap);
+  makeHeader(GoodEvent);
   auto Res = freia->VMMParser.parse(PacketData);
-  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(Res, 2);
 
   freia->processReadouts();
   freia->generateEvents();
-  ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+  ASSERT_EQ(counters.Events, 1);
 }
 
 int main(int argc, char **argv) {
@@ -219,6 +225,6 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  //deleteFile(ConfigFile);
+  deleteFile(ConfigFile);
   return RetVal;
 }
