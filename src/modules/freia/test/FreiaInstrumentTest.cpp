@@ -103,6 +103,22 @@ std::vector<uint8_t> StripGap {
   0x00, 0x00, 0x01, 0x12,  // GEO 0, TDC 0, VMM 1, CH 18
 };
 
+std::vector<uint8_t> PixelError {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x32,  // GEO 0, TDC 0, VMM 0, CH 50
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
 std::vector<uint8_t> GoodEvent {
   // First readout - plane Y - Wires
   0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
@@ -205,6 +221,31 @@ TEST_F(FreiaInstrumentTest, StripGap) {
   freia->processReadouts();
   freia->generateEvents();
   ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, PixelError) {
+  makeHeader(freia->ESSReadoutParser.Packet, PixelError);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.PixelErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, EventTOFError) {
+  auto & Packet = freia->ESSReadoutParser.Packet;
+  makeHeader(Packet, GoodEvent);
+
+  Packet.Time.setReference(200, 0);
+  auto Res = freia->VMMParser.parse(Packet);
+  counters.VMMStats = freia->VMMParser.Stats;
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+  ASSERT_EQ(counters.TimeErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {

@@ -147,7 +147,11 @@ void FreiaInstrument::generateEvents(void) {
     // Calculate TOF in ns
     uint64_t EventTime = e.time_start();
 
+    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64,
+           EventTime, TimeRef.TimeInNS);
+
     if (TimeRef.TimeInNS > EventTime) {
+      XTRACE(EVENT, WAR, "Negative TOF!");
       counters.TimeErrors++;
       continue;
     }
@@ -160,6 +164,7 @@ void FreiaInstrument::generateEvents(void) {
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {
+      XTRACE(EVENT, WAR, "Bad Pixel!");
       counters.PixelErrors++;
       continue;
     }
