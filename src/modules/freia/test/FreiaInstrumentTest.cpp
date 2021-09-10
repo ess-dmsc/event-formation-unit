@@ -48,14 +48,59 @@ std::vector<uint8_t> MappingError {
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
 
   // Second readout
   0x02, 0x03, 0x14, 0x00,  // Data Header
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+
+std::vector<uint8_t> WireGap {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x12,  // GEO 0, TDC 0, VMM 0, CH 18
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+std::vector<uint8_t> StripGap {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x12,  // GEO 0, TDC 0, VMM 1, CH 18
 };
 
 
@@ -98,9 +143,6 @@ TEST_F(FreiaInstrumentTest, Constructor) {
 }
 
 TEST_F(FreiaInstrumentTest, TwoReadouts) {
-  //BaseSettings Unused;
-
-
   FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
   freia.setSerializer(serializer);
   makeHeader(MappingError);
@@ -117,6 +159,40 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
   freia.processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
   ASSERT_EQ(counters.FENErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, WireGap) {
+  FreiaInstrument freia(counters, ModuleSettings, serializer);
+  freia.setSerializer(serializer);
+  makeHeader(WireGap);
+  auto Res = freia.VMMParser.parse(PacketData);
+  ASSERT_EQ(Res, 3);
+
+  ///
+  char Buffer[50];
+  memset(Buffer, 0, sizeof(Buffer));
+  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+  /// !!!! Requires a valid header ptr to previously parsed ESS header
+  freia.processReadouts();
+  freia.generateEvents();
+  ASSERT_EQ(counters.EventsInvalidWireGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, StripGap) {
+  FreiaInstrument freia(counters, ModuleSettings, serializer);
+  freia.setSerializer(serializer);
+  makeHeader(StripGap);
+  auto Res = freia.VMMParser.parse(PacketData);
+  ASSERT_EQ(Res, 3);
+
+  ///
+  char Buffer[50];
+  memset(Buffer, 0, sizeof(Buffer));
+  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+  /// !!!! Requires a valid header ptr to previously parsed ESS header
+  freia.processReadouts();
+  freia.generateEvents();
+  ASSERT_EQ(counters.EventsInvalidStripGap, 1);
 }
 
 int main(int argc, char **argv) {

@@ -126,7 +126,8 @@ void FreiaInstrument::generateEvents(void) {
     // Discard if there are gaps in the strip channels
     if (DiscardGap) {
       if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-        counters.EventsInvalidStripGap++;
+        XTRACE(EVENT, DEB, "Event invalid due to wire gap");
+        counters.EventsInvalidWireGap++;
         continue;
       }
     }
@@ -134,7 +135,8 @@ void FreiaInstrument::generateEvents(void) {
     // Discard if there are gaps in the wire channels
     if (DiscardGap) {
       if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-        counters.EventsInvalidWireGap++;
+        XTRACE(EVENT, DEB, "Event invalid due to strip gap");
+        counters.EventsInvalidStripGap++;
         continue;
       }
     }
