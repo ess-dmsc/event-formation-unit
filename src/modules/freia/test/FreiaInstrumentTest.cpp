@@ -125,7 +125,6 @@ public:
 
 
 protected:
-  ReadoutParser::PacketDataV0 PacketData;
   struct Counters counters;
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
@@ -139,21 +138,18 @@ protected:
 
     memset(Buffer, 0, sizeof(Buffer));
 
-    PacketData.HeaderPtr = nullptr;
-    PacketData.DataPtr = nullptr;
-    PacketData.DataLength = 0;
-    PacketData.Time.setReference(0,0);
-    PacketData.Time.setPrevReference(0,0);
-
     freia = new FreiaInstrument(counters, ModuleSettings, serializer);
     freia->setSerializer(serializer);
     freia->ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
   }
   void TearDown() override {}
 
-  void makeHeader(std::vector<uint8_t> & testdata) {
-    PacketData.DataPtr = (char *)&testdata[0];
-    PacketData.DataLength = testdata.size();
+  void makeHeader(ReadoutParser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
+    Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+    Packet.DataPtr = (char *)&testdata[0];
+    Packet.DataLength = testdata.size();
+    Packet.Time.setReference(0,0);
+    Packet.Time.setPrevReference(0,0);
   }
 };
 
@@ -165,21 +161,23 @@ TEST_F(FreiaInstrumentTest, Constructor) {
 
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(FreiaInstrumentTest, ConstructorDumpTofile) {
+TEST_F(FreiaInstrumentTest, DumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_freia_";
-  FreiaInstrument dummy(counters, ModuleSettings, serializer);
-  dummy.setSerializer(serializer);
-  makeHeader(GoodEvent);
-  auto Res = dummy.VMMParser.parse(PacketData);
+  FreiaInstrument FreiaDump(counters, ModuleSettings, serializer);
+  FreiaDump.setSerializer(serializer);
 
-  counters.VMMStats = dummy.VMMParser.Stats;
+  makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
+  auto Res = FreiaDump.VMMParser.parse(FreiaDump.ESSReadoutParser.Packet);
+  FreiaDump.processReadouts();
+
+  counters.VMMStats = FreiaDump.VMMParser.Stats;
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 }
 
 TEST_F(FreiaInstrumentTest, TwoReadouts) {
-  makeHeader(MappingError);
-  auto Res = freia->VMMParser.parse(PacketData);
+  makeHeader(freia->ESSReadoutParser.Packet, MappingError);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
@@ -190,8 +188,8 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
-  makeHeader(WireGap);
-  auto Res = freia->VMMParser.parse(PacketData);
+  makeHeader(freia->ESSReadoutParser.Packet, WireGap);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
 
   freia->processReadouts();
@@ -200,8 +198,8 @@ TEST_F(FreiaInstrumentTest, WireGap) {
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
-  makeHeader(StripGap);
-  auto Res = freia->VMMParser.parse(PacketData);
+  makeHeader(freia->ESSReadoutParser.Packet, StripGap);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
 
   freia->processReadouts();
@@ -210,8 +208,8 @@ TEST_F(FreiaInstrumentTest, StripGap) {
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
-  makeHeader(GoodEvent);
-  auto Res = freia->VMMParser.parse(PacketData);
+  makeHeader(freia->ESSReadoutParser.Packet, GoodEvent);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
 
   freia->processReadouts();
