@@ -6,6 +6,7 @@
 
 #include <common/EV42Serializer.h>
 #include <freia/FreiaInstrument.h>
+#include <readout/common/ReadoutParser.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 #include <stdio.h>
@@ -63,6 +64,7 @@ public:
 
 
 protected:
+  ReadoutParser::PacketDataV0 PacketData;
   struct Counters counters;
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
@@ -72,9 +74,18 @@ protected:
     ModuleSettings.FilePrefix = "deleteme_";
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
-
+    PacketData.HeaderPtr = nullptr;
+    PacketData.DataPtr = nullptr;
+    PacketData.DataLength = 0;
+    PacketData.Time.setReference(0,0);
+    PacketData.Time.setPrevReference(0,0);
   }
   void TearDown() override {}
+
+  void makeHeader(std::vector<uint8_t> & testdata) {
+    PacketData.DataPtr = (char *)&testdata[0];
+    PacketData.DataLength = testdata.size();
+  }
 };
 
 // Test cases below
@@ -92,8 +103,8 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
 
   FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
   freia.setSerializer(serializer);
-
-  auto Res = freia.VMMParser.parse((char *)&MappingError[0], MappingError.size());
+  makeHeader(MappingError);
+  auto Res = freia.VMMParser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
