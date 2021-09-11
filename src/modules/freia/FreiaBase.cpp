@@ -100,12 +100,12 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
-  Stats.create("kafka.ev_others", Counters.kafka_ev_others);
-  Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
-  Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
+  /// \todo below stats are common to all detectors
+  Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
+  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
+  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
+  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
 
   Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
@@ -197,7 +197,6 @@ void FreiaBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
@@ -205,10 +204,6 @@ void FreiaBase::processing_thread() {
         XTRACE(DATA, WAR, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
-      }
-
-      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
       }
 
       // We have good header information, now parse readout data
@@ -231,6 +226,7 @@ void FreiaBase::processing_thread() {
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      Counters.KafkaStats = eventprod.stats;
 
       // if (!Freia.histograms.isEmpty()) {
       //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
@@ -238,17 +234,6 @@ void FreiaBase::processing_thread() {
       //   Freia.histfb.produce(Freia.histograms);
       //   Freia.histograms.clear();
       // }
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-
-      /// \todo Counters.KafkaStats = eventprod.Stats;
-
-      Counters.kafka_produce_fails = eventprod.stats.produce_fails;
-      Counters.kafka_ev_errors = eventprod.stats.ev_errors;
-      Counters.kafka_ev_others = eventprod.stats.ev_others;
-      Counters.kafka_dr_errors = eventprod.stats.dr_errors;
-      Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

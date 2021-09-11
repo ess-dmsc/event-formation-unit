@@ -51,9 +51,6 @@ struct Counters {
     struct ESSTime::Stats_t TimeStats;
     int64_t TxBytes;
     // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
+    struct Producer::ProducerStats KafkaStats;
+
   } __attribute__((aligned(64)));

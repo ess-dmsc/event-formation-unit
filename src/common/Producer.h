@@ -56,15 +56,15 @@ public:
   /// \brief Kafka callback function for events
   void event_cb(RdKafka::Event &event) override;
 
-  struct {
-    uint64_t ev_errors;
-    uint64_t ev_others;
-    // uint64_t ev_log;
-    // uint64_t ev_stats;
-    // uint64_t ev_throttle;
-    uint64_t dr_errors;
-    uint64_t dr_noerrors;
-    uint64_t produce_fails;
+  struct ProducerStats {
+    int64_t ev_errors;
+    int64_t ev_others;
+    // int64_t ev_log;
+    // int64_t ev_stats;
+    // int64_t ev_throttle;
+    int64_t dr_errors;
+    int64_t dr_noerrors;
+    int64_t produce_fails;
   } stats = {};
 
 protected:
