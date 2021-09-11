@@ -59,50 +59,6 @@ std::vector<uint8_t> MappingError {
 };
 
 
-std::vector<uint8_t> WireGap {
-  // First readout - plane Y - Wires
-  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
-
-  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x12,  // GEO 0, TDC 0, VMM 0, CH 18
-
-  // Second readout - plane X - Strips
-  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
-};
-
-std::vector<uint8_t> StripGap {
-  // First readout - plane Y - Wires
-  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
-
-  // Second readout - plane X - Strips
-  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
-
-  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x01, 0x12,  // GEO 0, TDC 0, VMM 1, CH 18
-};
-
 std::vector<uint8_t> PixelError {
   // First readout - plane Y - Wires
   0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
@@ -139,29 +95,30 @@ std::vector<uint8_t> GoodEvent {
 class FreiaInstrumentTest : public TestBase {
 public:
 
-
 protected:
   struct Counters counters;
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
   FreiaInstrument * freia;
-  char Buffer[50];
+  ReadoutParser::PacketHeaderV0 PacketHeader;
+  Event TestEvent;           // used for testing generateEvents()
+  std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
 
-    memset(Buffer, 0, sizeof(Buffer));
+    memset(&PacketHeader, 0, sizeof(PacketHeader));
 
     freia = new FreiaInstrument(counters, ModuleSettings, serializer);
     freia->setSerializer(serializer);
-    freia->ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+    freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
 
   void makeHeader(ReadoutParser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
-    Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+    Packet.HeaderPtr = &PacketHeader;
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0,0);
@@ -178,7 +135,7 @@ TEST_F(FreiaInstrumentTest, Constructor) {
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(FreiaInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_freia_";
+  ModuleSettings.FilePrefix = "deleteme_";
   FreiaInstrument FreiaDump(counters, ModuleSettings, serializer);
   FreiaDump.setSerializer(serializer);
 
@@ -203,24 +160,41 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
   ASSERT_EQ(counters.FENErrors, 1);
 }
 
-TEST_F(FreiaInstrumentTest, WireGap) {
-  makeHeader(freia->ESSReadoutParser.Packet, WireGap);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 3);
 
-  freia->processReadouts();
-  freia->generateEvents();
+TEST_F(FreiaInstrumentTest, WireGap) {
+  TestEvent.ClusterA.insert({0, 1, 0, 100});
+  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  TestEvent.ClusterB.insert({0, 3, 1, 100});
+  Events.push_back(TestEvent);
+
+  freia->generateEvents(Events);
   ASSERT_EQ(counters.EventsInvalidWireGap, 1);
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
-  makeHeader(freia->ESSReadoutParser.Packet, StripGap);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 3);
+  TestEvent.ClusterA.insert({0, 1, 0, 100});
+  TestEvent.ClusterA.insert({0, 3, 0, 100});
+  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  Events.push_back(TestEvent);
 
-  freia->processReadouts();
-  freia->generateEvents();
+  freia->generateEvents(Events);
   ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, ClusterWireOnly) {
+  TestEvent.ClusterB.insert({0, 1, 0, 0});
+  Events.push_back(TestEvent);
+
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.EventsMatchedWireOnly, 1);
+}
+
+TEST_F(FreiaInstrumentTest, ClusterStripOnly) {
+  TestEvent.ClusterA.insert({0, 1, 0, 0});
+  Events.push_back(TestEvent);
+
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.EventsMatchedStripOnly, 1);
 }
 
 TEST_F(FreiaInstrumentTest, PixelError) {
@@ -229,7 +203,7 @@ TEST_F(FreiaInstrumentTest, PixelError) {
   ASSERT_EQ(Res, 2);
 
   freia->processReadouts();
-  freia->generateEvents();
+  freia->generateEvents(freia->builder.Events);
   ASSERT_EQ(counters.PixelErrors, 1);
 }
 
@@ -242,19 +216,17 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
   counters.VMMStats = freia->VMMParser.Stats;
 
   freia->processReadouts();
-  freia->generateEvents();
+  freia->generateEvents(freia->builder.Events);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
   ASSERT_EQ(counters.TimeErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
-  makeHeader(freia->ESSReadoutParser.Packet, GoodEvent);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 2);
-
-  freia->processReadouts();
-  freia->generateEvents();
+  TestEvent.ClusterA.insert({0, 3, 0, 100});
+  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  Events.push_back(TestEvent);
+  freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 1);
 }
 

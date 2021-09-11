@@ -221,7 +221,7 @@ void FreiaBase::processing_thread() {
       //
       Freia.processReadouts();
 
-      Freia.generateEvents();
+      Freia.generateEvents(Freia.builder.Events);
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little

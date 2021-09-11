@@ -112,10 +112,10 @@ void FreiaInstrument::processReadouts(void) {
 }
 
 
-void FreiaInstrument::generateEvents(void) {
+void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
   ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
 
-  for (const auto &e : builder.Events) {
+  for (const auto &e : Events) {
 
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
