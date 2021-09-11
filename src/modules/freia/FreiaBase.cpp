@@ -201,26 +201,22 @@ void FreiaBase::processing_thread() {
       auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
-      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
-      }
-
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, WAR, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
       }
 
+      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
+        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
+      }
+
       // We have good header information, now parse readout data
-
       Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
-
       Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
-      //
       Freia.processReadouts();
-
       Freia.generateEvents(Freia.builder.Events);
 
     } else {
