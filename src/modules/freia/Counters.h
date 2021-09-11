@@ -42,6 +42,8 @@ struct Counters {
     int64_t EventsUdder;
     int64_t EventsNoCoincidence;
     int64_t EventsMatchedClusters;
+    int64_t EventsMatchedWireOnly;
+    int64_t EventsMatchedStripOnly;
     int64_t EventsInvalidStripGap;
     int64_t EventsInvalidWireGap;
     int64_t PixelErrors;
