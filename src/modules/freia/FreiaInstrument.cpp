@@ -69,12 +69,12 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d",
-           readout.RingId, readout.FENId, readout.VMM);
+    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Ring >= Conf.NumRings) {
+    if (Ring >= Conf.NumRings - 1) {
       XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
              Ring, readout.RingId, Conf.NumRings - 1);
       counters.RingErrors++;
@@ -96,9 +96,13 @@ void FreiaInstrument::processReadouts(void) {
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
 
     if (Plane == FreiaGeom.PlaneX) {
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
+         TimeNS, FreiaGeom.PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
       builder.insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneX});
     } else {
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
+         TimeNS, FreiaGeom.PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
       builder.insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneY});
     }
@@ -109,6 +113,8 @@ void FreiaInstrument::processReadouts(void) {
 
 
 void FreiaInstrument::generateEvents(void) {
+  ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+
   for (const auto &e : builder.Events) {
 
     if (!e.both_planes()) {
@@ -120,7 +126,8 @@ void FreiaInstrument::generateEvents(void) {
     // Discard if there are gaps in the strip channels
     if (DiscardGap) {
       if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-        counters.EventsInvalidStripGap++;
+        XTRACE(EVENT, DEB, "Event invalid due to wire gap");
+        counters.EventsInvalidWireGap++;
         continue;
       }
     }
@@ -128,29 +135,44 @@ void FreiaInstrument::generateEvents(void) {
     // Discard if there are gaps in the wire channels
     if (DiscardGap) {
       if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-        counters.EventsInvalidWireGap++;
+        XTRACE(EVENT, DEB, "Event invalid due to strip gap");
+        counters.EventsInvalidStripGap++;
         continue;
       }
     }
 
     counters.EventsMatchedClusters++;
-
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
+
+    // Calculate TOF in ns
+    uint64_t EventTime = e.time_start();
+
+    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64,
+           EventTime, TimeRef.TimeInNS);
+
+    if (TimeRef.TimeInNS > EventTime) {
+      XTRACE(EVENT, WAR, "Negative TOF!");
+      counters.TimeErrors++;
+      continue;
+    }
+
+    uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
+
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    auto PixelId = essgeom.pixel2D(x, y);
 
-    // \todo implement this
-    auto time = 0;
-    auto pixel_id = essgeom.pixel2D(x, y);
-    XTRACE(EVENT, INF, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
-
-    if (pixel_id == 0) {
+    if (PixelId == 0) {
+      XTRACE(EVENT, WAR, "Bad Pixel!");
       counters.PixelErrors++;
-    } else {
-      counters.TxBytes += Serializer->addEvent(time, pixel_id);
-      counters.Events++;
+      continue;
     }
+
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u",
+           time, TimeOfFlight, x, y, PixelId);
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+    counters.Events++;
   }
   builder.Events.clear(); // else events will accumulate
 }

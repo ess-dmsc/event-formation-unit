@@ -71,7 +71,7 @@ public:
 
 
   // Holds data relevant for processing of the current packet
-  struct {
+  struct PacketDataV0 {
     PacketHeaderV0 * HeaderPtr{nullptr};
     uint16_t DataLength{0};
     char * DataPtr{nullptr};

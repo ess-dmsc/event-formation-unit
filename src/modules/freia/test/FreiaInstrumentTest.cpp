@@ -6,6 +6,7 @@
 
 #include <common/EV42Serializer.h>
 #include <freia/FreiaInstrument.h>
+#include <readout/common/ReadoutParser.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 #include <stdio.h>
@@ -47,14 +48,91 @@ std::vector<uint8_t> MappingError {
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
 
   // Second readout
   0x02, 0x03, 0x14, 0x00,  // Data Header
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+
+std::vector<uint8_t> WireGap {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x12,  // GEO 0, TDC 0, VMM 0, CH 18
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+std::vector<uint8_t> StripGap {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x12,  // GEO 0, TDC 0, VMM 1, CH 18
+};
+
+std::vector<uint8_t> PixelError {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x32,  // GEO 0, TDC 0, VMM 0, CH 50
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+std::vector<uint8_t> GoodEvent {
+  // First readout - plane Y - Wires
+  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+
+  // Second readout - plane X - Strips
+  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
 };
 
 
@@ -66,46 +144,118 @@ protected:
   struct Counters counters;
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
+  FreiaInstrument * freia;
+  char Buffer[50];
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    ModuleSettings.FilePrefix = "deleteme_";
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
 
+    memset(Buffer, 0, sizeof(Buffer));
+
+    freia = new FreiaInstrument(counters, ModuleSettings, serializer);
+    freia->setSerializer(serializer);
+    freia->ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
   }
   void TearDown() override {}
+
+  void makeHeader(ReadoutParser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
+    Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
+    Packet.DataPtr = (char *)&testdata[0];
+    Packet.DataLength = testdata.size();
+    Packet.Time.setReference(0,0);
+    Packet.Time.setPrevReference(0,0);
+  }
 };
 
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  //BaseSettings Unused;
-  FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
-  freia.setSerializer(serializer);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
 }
 
+
+/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
+TEST_F(FreiaInstrumentTest, DumpTofile) {
+  ModuleSettings.FilePrefix = "deleteme_freia_";
+  FreiaInstrument FreiaDump(counters, ModuleSettings, serializer);
+  FreiaDump.setSerializer(serializer);
+
+  makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
+  auto Res = FreiaDump.VMMParser.parse(FreiaDump.ESSReadoutParser.Packet);
+  FreiaDump.processReadouts();
+
+  counters.VMMStats = FreiaDump.VMMParser.Stats;
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+}
+
 TEST_F(FreiaInstrumentTest, TwoReadouts) {
-  //BaseSettings Unused;
-
-
-  FreiaInstrument freia(counters, /*Unused,*/ ModuleSettings, serializer);
-  freia.setSerializer(serializer);
-
-  auto Res = freia.VMMParser.parse((char *)&MappingError[0], MappingError.size());
+  makeHeader(freia->ESSReadoutParser.Packet, MappingError);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
 
-  ///
-  char Buffer[50];
-  memset(Buffer, 0, sizeof(Buffer));
-  freia.ESSReadoutParser.Packet.HeaderPtr = (ReadoutParser::PacketHeaderV0 *)&Buffer[0];
-  /// !!!! Requires a valid header ptr to previously parsed ESS header
-  freia.processReadouts();
+  freia->processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
   ASSERT_EQ(counters.FENErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, WireGap) {
+  makeHeader(freia->ESSReadoutParser.Packet, WireGap);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 3);
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.EventsInvalidWireGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, StripGap) {
+  makeHeader(freia->ESSReadoutParser.Packet, StripGap);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 3);
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+}
+
+TEST_F(FreiaInstrumentTest, PixelError) {
+  makeHeader(freia->ESSReadoutParser.Packet, PixelError);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.PixelErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, EventTOFError) {
+  auto & Packet = freia->ESSReadoutParser.Packet;
+  makeHeader(Packet, GoodEvent);
+
+  Packet.Time.setReference(200, 0);
+  auto Res = freia->VMMParser.parse(Packet);
+  counters.VMMStats = freia->VMMParser.Stats;
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+  ASSERT_EQ(counters.TimeErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, GoodEvent) {
+  makeHeader(freia->ESSReadoutParser.Packet, GoodEvent);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+
+  freia->processReadouts();
+  freia->generateEvents();
+  ASSERT_EQ(counters.Events, 1);
 }
 
 int main(int argc, char **argv) {
@@ -114,6 +264,6 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  //deleteFile(ConfigFile);
+  deleteFile(ConfigFile);
   return RetVal;
 }

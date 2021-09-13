@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <readout/common/ReadoutParser.h>
 #include <readout/vmm3/VMM3Parser.h>
 #include <readout/vmm3/test/VMM3ParserTestData.h>
 #include <test/TestBase.h>
@@ -14,9 +15,21 @@
 
 class VMM3ParserTest : public TestBase {
 protected:
+  ReadoutParser::PacketDataV0 PacketData;
   VMM3Parser Parser;
-  void SetUp() override {}
+  void SetUp() override {
+    PacketData.HeaderPtr = nullptr;
+    PacketData.DataPtr = nullptr;
+    PacketData.DataLength = 0;
+    PacketData.Time.setReference(0,0);
+    PacketData.Time.setPrevReference(0,0);
+  }
   void TearDown() override {}
+
+  void makeHeader(std::vector<uint8_t> & testdata) {
+    PacketData.DataPtr = (char *)&testdata[0];
+    PacketData.DataLength = testdata.size();
+  }
 };
 
 
@@ -26,7 +39,9 @@ TEST_F(VMM3ParserTest, Constructor) {
 
 // nullptr as buffer
 TEST_F(VMM3ParserTest, ErrorBufferPtr) {
-  auto Res = Parser.parse(0, 100);
+  PacketData.DataPtr = 0;
+  PacketData.DataLength = 100;
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.ErrorSize, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
@@ -34,7 +49,10 @@ TEST_F(VMM3ParserTest, ErrorBufferPtr) {
 
 // invalid data size
 TEST_F(VMM3ParserTest, ErrorAPISize) {
-  auto Res = Parser.parse((char *)&VMMData1[0], 19);
+  makeHeader(VMMData1);
+  PacketData.DataLength = 19;
+
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.ErrorSize, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
@@ -42,7 +60,8 @@ TEST_F(VMM3ParserTest, ErrorAPISize) {
 
 // Invalid RingID
 TEST_F(VMM3ParserTest, ErrorRing) {
-  auto Res = Parser.parse((char *)&VMMRingError[0], VMMRingError.size());
+  makeHeader(VMMRingError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.ErrorRing, 1);
@@ -50,7 +69,8 @@ TEST_F(VMM3ParserTest, ErrorRing) {
 
 // Invalid FENId
 TEST_F(VMM3ParserTest, ErrorFEN) {
-  auto Res = Parser.parse((char *)&VMMFENError[0], VMMFENError.size());
+  makeHeader(VMMFENError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.ErrorFEN, 1);
@@ -58,7 +78,8 @@ TEST_F(VMM3ParserTest, ErrorFEN) {
 
 // Invalid data length - so far always 20 bytes.
 TEST_F(VMM3ParserTest, ErrorDataLength) {
-  auto Res = Parser.parse((char *)&VMMDataLengthError[0], VMMDataLengthError.size());
+  makeHeader(VMMDataLengthError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.ErrorDataLength, 1);
@@ -66,7 +87,8 @@ TEST_F(VMM3ParserTest, ErrorDataLength) {
 
 // Testing valid and invalid TimeLO ranges
 TEST_F(VMM3ParserTest, ErrorTimeLow) {
-  auto Res = Parser.parse((char *)&VMMTimeLowError[0], VMMTimeLowError.size());
+  makeHeader(VMMTimeLowError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.ErrorTimeFrac, 2);
@@ -74,7 +96,8 @@ TEST_F(VMM3ParserTest, ErrorTimeLow) {
 
 // Testing valid and invalid BC ranges
 TEST_F(VMM3ParserTest, ErrorBC) {
-  auto Res = Parser.parse((char *)&VMMBCError[0], VMMBCError.size());
+  makeHeader(VMMBCError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.ErrorBC, 2);
@@ -82,7 +105,8 @@ TEST_F(VMM3ParserTest, ErrorBC) {
 
 // Testing valid and invalid ADC ranges
 TEST_F(VMM3ParserTest, ErrorADC) {
-  auto Res = Parser.parse((char *)&VMMADCError[0], VMMADCError.size());
+  makeHeader(VMMADCError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.ErrorADC, 2);
@@ -91,7 +115,8 @@ TEST_F(VMM3ParserTest, ErrorADC) {
 
 // Testing valid and invalid VMM ranges
 TEST_F(VMM3ParserTest, ErrorVMM) {
-  auto Res = Parser.parse((char *)&VMMVMMError[0], VMMVMMError.size());
+  makeHeader(VMMVMMError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.ErrorVMM, 2);
@@ -99,7 +124,8 @@ TEST_F(VMM3ParserTest, ErrorVMM) {
 
 // Testing valid and invalid VMM ranges
 TEST_F(VMM3ParserTest, ErrorChannel) {
-  auto Res = Parser.parse((char *)&VMMChannelError[0], VMMChannelError.size());
+  makeHeader(VMMChannelError);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.ErrorChannel, 2);
@@ -108,7 +134,8 @@ TEST_F(VMM3ParserTest, ErrorChannel) {
 
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodData1) {
-  auto Res = Parser.parse((char *)&VMMData1[0], VMMData1.size());
+  makeHeader(VMMData1);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataReadouts, 2);
@@ -117,7 +144,8 @@ TEST_F(VMM3ParserTest, GoodData1) {
 
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodCalib1) {
-  auto Res = Parser.parse((char *)&VMMCalib1[0], VMMCalib1.size());
+  makeHeader(VMMCalib1);
+  auto Res = Parser.parse(PacketData);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataReadouts, 0);

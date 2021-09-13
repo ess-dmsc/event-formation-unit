@@ -16,9 +16,13 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
-int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
+int VMM3Parser::parse(ReadoutParser::PacketDataV0 & PacketData) {
   Result.clear();
   uint32_t GoodReadouts{0};
+
+  char * Buffer = (char *)PacketData.DataPtr;
+  unsigned int Size = PacketData.DataLength;
+  ESSTime & TimeRef = PacketData.Time;
 
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
@@ -59,6 +63,25 @@ int VMM3Parser::parse(const char *Buffer, unsigned int Size) {
     if (Readout.TimeLow > MaxFracTimeCount)  {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow, MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
+      continue;
+    }
+
+    // Check for negative TOFs
+    auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
+
+    if (TimeOfFlight == TimeRef.InvalidTOF) {
+      TimeOfFlight = TimeRef.getPrevTOF(Readout.TimeHigh, Readout.TimeLow);
+    }
+
+    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+           TimeRef.TimeInNS,
+           TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow));
+    XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
+           TimeRef.PrevTimeInNS,
+           TimeRef.getPrevTOF(Readout.TimeHigh, Readout.TimeLow));
+
+    if (TimeOfFlight == TimeRef.InvalidTOF) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
 

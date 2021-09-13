@@ -22,6 +22,7 @@ struct {
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
+  uint64_t NumReadouts{400};   // # readouts in packet
   uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
   uint64_t PktThrottle{0};     // 0 is fastest
   bool Loop{false};            // Keep looping the same file forever
@@ -46,6 +47,8 @@ int main(int argc, char *argv[]) {
                  "Detector type id");
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
+  app.add_option("-o, --readouts", Settings.NumReadouts,
+                "Number of readouts per packet");
   app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
@@ -53,7 +56,6 @@ int main(int argc, char *argv[]) {
 
   const int BufferSize{8972};
   uint8_t Buffer[BufferSize];
-  const uint16_t NumReadouts{400};
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
@@ -62,14 +64,12 @@ int main(int argc, char *argv[]) {
   DataSource.setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
 
-  uint64_t Packets = 0;
-
-  ReadoutGenerator gen;
+  uint64_t Packets{0};
+  uint32_t SeqNum{0};
+  ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
   do {
-    uint32_t SeqNum = Packets;
-    uint16_t DataSize = gen.vmm3ReadoutDataGen(
-          Buffer, BufferSize, Settings.Randomise,
-          Settings.Type, SeqNum, Settings.NRings, NumReadouts);
+    uint16_t DataSize = gen.makePacket(Settings.Type, Settings.NumReadouts,
+      Settings.NRings);
 
     DataSource.send(Buffer, DataSize);
 

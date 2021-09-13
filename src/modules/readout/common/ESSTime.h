@@ -12,15 +12,17 @@
 #include <cinttypes>
 #include <cassert>
 
-struct Stats_t {
-  uint64_t TofCount;
-  uint64_t TofNegative;
-  uint64_t PrevTofCount;
-  uint64_t PrevTofNegative;
-};
+
 
 class ESSTime {
 public:
+  struct Stats_t {
+    int64_t TofCount;
+    int64_t TofNegative;
+    int64_t PrevTofCount;
+    int64_t PrevTofNegative;
+  };
+
   // ESS clock is 88052500 Hz
   const double NsPerTick{11.356860963629653};
   const uint64_t OneBillion{1000000000LU};
@@ -59,7 +61,6 @@ public:
     Stats.PrevTofCount++;
     return timeval - PrevTimeInNS;
   }
-
 
   /// \brief convert ess High/Low time to NS
   uint64_t toNS(uint32_t High, uint32_t Low) {
