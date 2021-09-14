@@ -38,6 +38,11 @@ public:
   uint32_t NumPixels{0};
   uint32_t NumCassettes{0};
 
+  bool StripGapCheck{true};
+  bool WireGapCheck{true};
+  uint16_t MaxGapWire{0};
+  uint16_t MaxGapStrip{0};
+
   uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
 
   nlohmann::json root;

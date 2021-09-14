@@ -26,7 +26,7 @@ public:
   ///       must be able to sort hits in their preferred way without copying the contents
   HitVector hits;
 
-public:  
+public:
   /// \brief adds hit to cluster, accumulates mass and recalculates bounds
   ///        no validation is enforced, duplicates possible
   ///        no particular time or spatial ordering is expected
@@ -51,6 +51,11 @@ public:
 
   /// \returns true if cluster contains hits and all are on the same plane
   bool valid() const;
+
+  /// \brief check if cluster span exceeds the maximum allowed gap
+  /// \param MaxAllowedGap the maximum gap allowed
+  /// \returns true if a gap is detected
+  bool hasGap(uint8_t MaxAllowedGap) const;
 
   /// \returns returns plane of all hits in cluster, can be Hit::InvalidPlane if
   ///         not all hits belong to the same plane
@@ -80,7 +85,7 @@ public:
 
  /// \returns pre-calculated sum of each hit's weight squared
   double weight2_sum() const;
-  
+
   /// \returns pre-calculated sum of each hit's weight*coord
   double coord_mass() const;
   /// \returns center of mass in the coordinate dimension
@@ -107,7 +112,7 @@ public:
 
  /// \returns utpc coordinate, optionally weighted with charge
   double coord_utpc(bool weighted) const;
-    
+
   /// \brief calculates the overlapping time span of two clusters
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
@@ -144,7 +149,7 @@ private:
   double weight2_sum_{0.0};
   double coord_mass2_{0.0}; ///< sum of coord*weight*weight
   double time_mass2_{0.0};  ///< sum of time*weight*weight
-  
+
   int utpc_idx_min_{0};
   int utpc_idx_max_{0};
 };

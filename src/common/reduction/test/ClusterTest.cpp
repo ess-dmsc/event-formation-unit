@@ -309,6 +309,19 @@ TEST_F(ClusterTest, PrintDebug) {
   MESSAGE() << "VISUALIZE:\n" << cluster.visualize("  ");
 }
 
+
+
+TEST_F(ClusterTest, HasGap) {
+  ASSERT_EQ(cluster.hasGap(0), false);
+
+  cluster.insert({0, 0, 0, 0});
+  cluster.insert({0, 1, 0, 0});
+  cluster.insert({0, 3, 0, 0});
+
+  ASSERT_EQ(cluster.hasGap(0), true);
+  ASSERT_EQ(cluster.hasGap(1), false);
+}
+
 // \todo have functions for generation of randomized clusters
 
 int main(int argc, char **argv) {

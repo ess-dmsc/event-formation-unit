@@ -41,13 +41,15 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
+
+  // Rx and Tx stats
   Stats.create("receive.packets", Counters.RxPackets);
   Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.idle", Counters.RxIdle);
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
+  Stats.create("transmit.bytes", Counters.TxBytes);
 
-  // ESS Readout
+  // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
   Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
   Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
@@ -61,9 +63,10 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
-  // From VMM3Parser
+  // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
+  Stats.create("readouts.ring_mismatch", Counters.RingErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -80,36 +83,42 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
 
-  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
+  // Clustering stats
+  Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
+  Stats.create("cluster.no_coincidence", Counters.EventsNoCoincidence);
+  Stats.create("cluster.wire_only", Counters.EventsMatchedWireOnly);
+  Stats.create("cluster.strip_only", Counters.EventsMatchedStripOnly);
 
+  // Event stats
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
-  Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
-  Stats.create("events.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
-  Stats.create("transmit.bytes", Counters.TxBytes);
-
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
-  Stats.create("kafka.ev_others", Counters.kafka_ev_others);
-  Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
-  Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
-
-  // Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
-  // Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
-  // Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
-  // Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
-  // Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
   //
-  // Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
-  // Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
-  // Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
-  // Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
-  // Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
+  Stats.create("thread.receive_idle", Counters.RxIdle);
+  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
+
+
+  /// \todo below stats are common to all detectors
+  Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
+  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
+  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
+  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
+
+  Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
+  Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
+  Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
+  //
+  Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
+  Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
+  Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
 
   // clang-format on
 
@@ -204,16 +213,12 @@ void FreiaBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-
       Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
-
       Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
-      //
       Freia.processReadouts();
-
-      Freia.generateEvents();
+      Freia.generateEvents(Freia.builder.Events);
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
@@ -227,6 +232,7 @@ void FreiaBase::processing_thread() {
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      Counters.KafkaStats = eventprod.stats;
 
       // if (!Freia.histograms.isEmpty()) {
       //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
@@ -234,17 +240,6 @@ void FreiaBase::processing_thread() {
       //   Freia.histfb.produce(Freia.histograms);
       //   Freia.histograms.clear();
       // }
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-
-      /// \todo Counters.KafkaStats = eventprod.Stats;
-
-      Counters.kafka_produce_fails = eventprod.stats.produce_fails;
-      Counters.kafka_ev_errors = eventprod.stats.ev_errors;
-      Counters.kafka_ev_others = eventprod.stats.ev_others;
-      Counters.kafka_dr_errors = eventprod.stats.dr_errors;
-      Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

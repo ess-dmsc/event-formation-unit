@@ -112,30 +112,36 @@ void FreiaInstrument::processReadouts(void) {
 }
 
 
-void FreiaInstrument::generateEvents(void) {
+void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
   ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
 
-  for (const auto &e : builder.Events) {
-
+  for (const auto &e : Events) {
     if (!e.both_planes()) {
+      XTRACE(EVENT, DEB, "Event has no coincidence");
       counters.EventsNoCoincidence++;
+
+      if (not e.ClusterB.empty()) {
+        counters.EventsMatchedWireOnly++;
+      }
+
+      if (not e.ClusterA.empty()) {
+        counters.EventsMatchedStripOnly++;
+      }
       continue;
     }
 
-    bool DiscardGap{true};
-    // Discard if there are gaps in the strip channels
-    if (DiscardGap) {
-      if (e.ClusterB.hits.size() < e.ClusterB.coord_span()) {
-        XTRACE(EVENT, DEB, "Event invalid due to wire gap");
+    // Discard if there are gaps in the strip or wire channels
+    if (Conf.WireGapCheck) {
+      if (e.ClusterB.hasGap(Conf.MaxGapWire)) {
+        XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
       }
     }
 
-    // Discard if there are gaps in the wire channels
-    if (DiscardGap) {
-      if (e.ClusterA.hits.size() < e.ClusterA.coord_span()) {
-        XTRACE(EVENT, DEB, "Event invalid due to strip gap");
+    if (Conf.StripGapCheck) {
+        if (e.ClusterA.hasGap(Conf.MaxGapStrip)) {
+        XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
       }

@@ -41,7 +41,7 @@ public:
   void processReadouts(void);
 
   /// \brief process clusters into events
-  void generateEvents(void);
+  void generateEvents(std::vector<Event> & Events);
 
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const VMM3Parser::VMM3Data & Data);

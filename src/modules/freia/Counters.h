@@ -42,6 +42,8 @@ struct Counters {
     int64_t EventsUdder;
     int64_t EventsNoCoincidence;
     int64_t EventsMatchedClusters;
+    int64_t EventsMatchedWireOnly;
+    int64_t EventsMatchedStripOnly;
     int64_t EventsInvalidStripGap;
     int64_t EventsInvalidWireGap;
     int64_t PixelErrors;
@@ -49,9 +51,6 @@ struct Counters {
     struct ESSTime::Stats_t TimeStats;
     int64_t TxBytes;
     // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
+    struct Producer::ProducerStats KafkaStats;
+
   } __attribute__((aligned(64)));

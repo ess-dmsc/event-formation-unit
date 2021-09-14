@@ -81,7 +81,7 @@ void Cluster::insert(const Hit &e) {
   DebugSplitOptimizer();
 
   time_start_ = std::min(time_start_, e.time);
-  
+
   DebugSplitOptimizer();
 
   //more than one hit with identical largest time in cluster
@@ -95,7 +95,7 @@ void Cluster::insert(const Hit &e) {
   }
 
   DebugSplitOptimizer();
-   
+
   coord_start_ = std::min(coord_start_, e.coordinate);
   coord_end_ = std::max(coord_end_, e.coordinate);
 }
@@ -152,6 +152,11 @@ bool Cluster::empty() const {
 
 bool Cluster::valid() const {
   return !hits.empty() && (plane_ != Hit::InvalidPlane);
+}
+
+
+bool Cluster::hasGap(uint8_t MaxAllowedGap) const {
+  return hits.size() + MaxAllowedGap < coord_span();
 }
 
 uint8_t Cluster::plane() const {
@@ -246,16 +251,16 @@ double Cluster::coord_utpc(bool weighted) const {
         utpc_idx = utpc_idx_min_;
       } else {
         utpc_idx = utpc_idx_max_;
-      }    
+      }
     }
   }
- 
+
   if (!weighted) {
     return hits[utpc_idx].coordinate;
   }
-  //utpc with center-of-mass: channels c and weights w 
+  //utpc with center-of-mass: channels c and weights w
   double c1 = 0, c2 = 0, c3 = 0, w1 = 0, w2 = 0, w3 = 0;
-  
+
   //coordinate and weight of hit with largest time
   c2 = hits[utpc_idx].coordinate;
   w2 = hits[utpc_idx].weight;
@@ -264,10 +269,10 @@ double Cluster::coord_utpc(bool weighted) const {
     c1 = hits[utpc_idx-1].coordinate;
     w1 = hits[utpc_idx - 1].weight;
   }
-  //right neighbour of coordinate with largest time 
+  //right neighbour of coordinate with largest time
   if(utpc_idx < static_cast<int>(hits.size() - 1)) {
     c3 = hits[utpc_idx+1].coordinate;
-    w3 = hits[utpc_idx+1].weight;  
+    w3 = hits[utpc_idx+1].weight;
   }
   double pos_utpc = (c1*w1*w1 + c2*w2*w2 + c3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
   return pos_utpc;
@@ -347,4 +352,3 @@ std::string Cluster::visualize(const std::string &prepend,
   }
   return ss.str();
 }
-
