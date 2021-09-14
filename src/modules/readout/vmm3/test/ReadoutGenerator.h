@@ -54,9 +54,6 @@ private:
   const uint32_t TimeBtwReadout{88};       // ticks ~ 1us
   const uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
 
-  const uint8_t MinChannel{16};  // wire channels range from 16 - 47
-  const uint8_t NumChannels{32}; //
-
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};
   uint32_t SeqNum{0};
