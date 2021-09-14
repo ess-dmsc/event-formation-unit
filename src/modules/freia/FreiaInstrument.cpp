@@ -74,7 +74,7 @@ void FreiaInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Ring >= Conf.NumRings) {
+    if (Ring >= Conf.NumRings - 1) {
       XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
              Ring, readout.RingId, Conf.NumRings - 1);
       counters.RingErrors++;
@@ -116,7 +116,6 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
   ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
-
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
       counters.EventsNoCoincidence++;

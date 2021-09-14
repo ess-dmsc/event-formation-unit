@@ -198,8 +198,13 @@ void FreiaBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
+      int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::FREIA);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
+
+      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
+        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
+      }
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, WAR, "Error parsing ESS readout header");

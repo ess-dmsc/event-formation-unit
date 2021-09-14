@@ -58,7 +58,6 @@ std::vector<uint8_t> MappingError {
   0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
 };
 
-
 std::vector<uint8_t> PixelError {
   // First readout - plane Y - Wires
   0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
@@ -159,7 +158,6 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
   ASSERT_EQ(counters.RingErrors, 1);
   ASSERT_EQ(counters.FENErrors, 1);
 }
-
 
 TEST_F(FreiaInstrumentTest, WireGap) {
   TestEvent.ClusterA.insert({0, 1, 0, 100});
