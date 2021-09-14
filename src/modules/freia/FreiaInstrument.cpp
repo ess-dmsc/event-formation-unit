@@ -74,7 +74,7 @@ void FreiaInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Ring >= Conf.NumRings - 1) {
+    if (Ring >= Conf.NumRings) {
       XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
              Ring, readout.RingId, Conf.NumRings - 1);
       counters.RingErrors++;
