@@ -80,7 +80,7 @@ void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
 
     if ((Readout % 2) == 0) {
       Angle = Fuzzer.random8() * 360.0/ 255;
-      XChannel = 32.0 + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
+      XChannel = 44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
       YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
     }
 
