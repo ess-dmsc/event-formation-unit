@@ -71,9 +71,9 @@ public:
   HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
 
-
-  // towards VMM3
-  Multiblade::EventBuilder builder; // single builder for entire detector
+  /// \brief One builder per cassesse, rezise in constructor when we have
+  /// parsed the configuration file.
+  std::vector<Multiblade::EventBuilder> builders; // reinit in ctor
   Config Conf;
   ReadoutParser ESSReadoutParser;
   VMM3Parser VMMParser;
@@ -81,6 +81,8 @@ public:
   EV42Serializer *Serializer{nullptr};
   Geometry FreiaGeom;
   ESSGeometry essgeom{64, 1024, 1, 1};
+
+  const uint16_t TimeBoxNs{2010}; ///\todo add to config
 };
 
 } // namespace

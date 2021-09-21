@@ -25,7 +25,7 @@
 #include <common/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
-#include <unistd.h>
+#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -170,6 +170,38 @@ void FreiaBase::input_thread() {
   return;
 }
 
+
+#if 0
+void hexDump(const void* data, size_t size) {
+	char ascii[17];
+	size_t i, j;
+	ascii[16] = '\0';
+	for (i = 0; i < size; ++i) {
+		printf("%02X ", ((unsigned char*)data)[i]);
+		if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
+			ascii[i % 16] = ((unsigned char*)data)[i];
+		} else {
+			ascii[i % 16] = '.';
+		}
+		if ((i+1) % 8 == 0 || i+1 == size) {
+			printf(" ");
+			if ((i+1) % 16 == 0) {
+				printf("|  %s \n", ascii);
+			} else if (i+1 == size) {
+				ascii[(i+1) % 16] = '\0';
+				if ((i+1) % 16 <= 8) {
+					printf(" ");
+				}
+				for (j = (i+1) % 16; j < 16; ++j) {
+					printf("   ");
+				}
+				printf("|  %s \n", ascii);
+			}
+		}
+	}
+}
+#endif
+
 void FreiaBase::processing_thread() {
 
   // Event producer
@@ -207,7 +239,8 @@ void FreiaBase::processing_thread() {
       }
 
       if (Res != ReadoutParser::OK) {
-        XTRACE(DATA, WAR, "Error parsing ESS readout header");
+        XTRACE(DATA, WAR, "Error parsing ESS readout header (RxPackets %" PRIu64 ")", Counters.RxPackets);
+        //hexDump(DataPtr, DataLen);
         Counters.ErrorESSHeaders++;
         continue;
       }
@@ -218,7 +251,10 @@ void FreiaBase::processing_thread() {
       Counters.VMMStats = Freia.VMMParser.Stats;
 
       Freia.processReadouts();
-      Freia.generateEvents(Freia.builder.Events);
+
+      for (auto & builder : Freia.builders) {
+        Freia.generateEvents(builder.Events);
+      }
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
