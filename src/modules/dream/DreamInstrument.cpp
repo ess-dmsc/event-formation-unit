@@ -25,6 +25,9 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   DreamConfiguration = Config(ModuleSettings.ConfigFile);
+
+
+  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
 uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip,
