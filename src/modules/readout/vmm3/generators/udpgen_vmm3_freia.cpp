@@ -23,6 +23,8 @@ struct {
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
   uint64_t NumReadouts{400};   // # readouts in packet
+  uint32_t TicksBtwReadouts{88}; // 88 ticks ~ 1us
+  uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
   uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
   uint64_t PktThrottle{0};     // 0 is fastest
   bool Loop{false};            // Keep looping the same file forever
@@ -47,6 +49,10 @@ int main(int argc, char *argv[]) {
                  "Detector type id");
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
+  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
+                 "Delay (ticks) between events");
+  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
+                 "Delay (ticks) between coincident readouts");
   app.add_option("-o, --readouts", Settings.NumReadouts,
                 "Number of readouts per packet");
   app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data fields");
@@ -69,7 +75,7 @@ int main(int argc, char *argv[]) {
   ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
   do {
     uint16_t DataSize = gen.makePacket(Settings.Type, Settings.NumReadouts,
-      Settings.NRings);
+      Settings.NRings, Settings.TicksBtwReadouts, Settings.TicksBtwEvents);
 
     DataSource.send(Buffer, DataSize);
 

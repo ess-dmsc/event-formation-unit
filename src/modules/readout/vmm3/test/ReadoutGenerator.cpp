@@ -25,7 +25,11 @@ ReadoutGenerator::ReadoutGenerator(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
   , Random(Randomise) { }
 
 
-uint16_t ReadoutGenerator::makePacket(uint8_t Type, uint16_t NumReadouts, uint8_t Rings) {
+uint16_t ReadoutGenerator::makePacket(
+  uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
+  uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents) {
+  TimeBtwReadout = TicksBtwReadouts;
+  TimeBtwEvents = TicksBtwEvents;
   generateHeader(Type, NumReadouts);
   generateData(Rings, NumReadouts);
   finishPacket();

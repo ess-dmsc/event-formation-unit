@@ -91,7 +91,7 @@ public:
 
   //
   void setMaxPulseTimeDiff(uint32_t MaxTimeDiff) {
-    MaxPulseTimeDiff = MaxTimeDiff;
+    MaxPulseTimeDiffNS = MaxTimeDiff;
   }
 
   /// \brief validate a readout buffer
@@ -104,5 +104,8 @@ public:
   // Counters(for Grafana)
   struct ESSHeaderStats Stats;
   // Maximum allowed separation between PulseTime and PrevPulseTime
-  uint32_t MaxPulseTimeDiff{0xffffffff};
+  ///\todo 6289464 is (maybe) 14Hz in ticks of ESS clock, or?
+  ///71428571 in ns, but for now we set max pt to 0 and require
+  /// setting this in the config file.
+  uint32_t MaxPulseTimeDiffNS{0};
 };
