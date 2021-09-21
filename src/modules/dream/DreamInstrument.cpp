@@ -13,8 +13,8 @@
 #include <dream/DreamInstrument.h>
 #include <dream/geometry/DreamGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
