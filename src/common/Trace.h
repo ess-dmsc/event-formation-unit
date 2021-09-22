@@ -16,6 +16,11 @@
 #include <libgen.h>
 #include <stdarg.h>
 
+#include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
+#include <math.h>
+
 
 const unsigned int TRC_L_ALW  = 1; //Should not be used
 const unsigned int TRC_L_CRI  = 2;
@@ -44,6 +49,26 @@ const unsigned int USED_TRC_LEVEL = TRC_LEVEL;
 #define TRC_ADD_FUNCTIONS_AND_INDENT_NEWLINES 0
 #endif
 
+static void printTime() {
+  char buffer[26];
+  int millisec;
+  struct tm* tm_info;
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+
+  millisec = lrint(tv.tv_usec/1000.0); // Round to nearest millisec
+  if (millisec>=1000) { // Allow for rounding up to nearest second
+    millisec -=1000;
+    tv.tv_sec++;
+  }
+
+  tm_info = localtime(&tv.tv_sec);
+
+  strftime(buffer, 26, "%H:%M:%S", tm_info);
+  printf("%s.%03d ", buffer, millisec);
+}
+
 inline int Trace(int const LineNumber, char const *File, __attribute__((unused)) const char* Function, const char* GroupName,  const char* SeverityName, const char *Format, ...) {
   char *MessageBuffer = nullptr;
 
@@ -52,6 +77,7 @@ inline int Trace(int const LineNumber, char const *File, __attribute__((unused))
   __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
   va_end (args);
 
+  printTime();
   if (TRC_ADD_FUNCTIONS_AND_INDENT_NEWLINES) {
     char FunctionPretty[1024];
     snprintf (FunctionPretty, 1024, "%s()", Function);
@@ -71,7 +97,7 @@ inline int Trace(int const LineNumber, char const *File, __attribute__((unused))
     }
   }
   else {
-    printf("%-4s %-20s %5d %-7s - %s\n", SeverityName, basename((char *)File), LineNumber, GroupName, MessageBuffer);  
+    printf("%-4s %-20s %5d %-7s - %s\n", SeverityName, basename((char *)File), LineNumber, GroupName, MessageBuffer);
   }
 
   free(MessageBuffer);
@@ -94,8 +120,3 @@ inline int DebugTrace(char const *Format, ...) {
 ? Trace(__LINE__, __FILE__, __func__, #Group, #Level, Format,\
 ##__VA_ARGS__) \
 : 0)
-
-
-/// \brief Raw trace
-#define DTRACE(Level, Format, ...)                                                \
-(void)((TRC_L_##Level <= TRC_LEVEL) ? DebugTrace(Format, ##__VA_ARGS__) : 0)
