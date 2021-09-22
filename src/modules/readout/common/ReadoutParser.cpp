@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_WAR
 
 ReadoutParser::ReadoutParser() {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));

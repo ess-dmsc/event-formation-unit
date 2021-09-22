@@ -10,6 +10,7 @@ set(efu_common_SRC
   DetectorModuleRegister.cpp
   EFUArgs.cpp
   EV42Serializer.cpp
+  Hexdump.cpp
   Statistics.cpp
   Producer.cpp
   Socket.cpp
@@ -31,6 +32,7 @@ set(efu_common_INC
   EV42Serializer.h
   Expect.h
   FixedSizePool.h
+  Hexdump.h
   JsonFile.h
   gccintel.h
   Log.h
