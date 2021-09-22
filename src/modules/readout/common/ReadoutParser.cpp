@@ -134,9 +134,15 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", Packet.HeaderPtr->PrevPulseHigh,
         Packet.HeaderPtr->PrevPulseLow);
 
-  if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiff) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
-           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS));
+  if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiffNS) {
+    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 ". Max allowed %u",
+           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS), MaxPulseTimeDiffNS);
+    XTRACE(DATA, WAR, "PulseTimeHi      0x%08x", Packet.HeaderPtr->PulseHigh);
+    XTRACE(DATA, WAR, "PulseTimeLow     0x%08x", Packet.HeaderPtr->PulseLow);
+    XTRACE(DATA, WAR, "PulseTime (ns)   %" PRIu64 "", Packet.Time.TimeInNS);
+    XTRACE(DATA, WAR, "PrevPulseTimeHi  0x%08x", Packet.HeaderPtr->PrevPulseHigh);
+    XTRACE(DATA, WAR, "PrevPulseTimeLow 0x%08x", Packet.HeaderPtr->PrevPulseLow);
+    XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "", Packet.Time.PrevTimeInNS);
     Stats.ErrorTimeHigh++;
 
     return -ReadoutParser::EHEADER;

@@ -28,7 +28,8 @@ public:
   /// \param NumReadouts number of VMM readouts in the UDP packet
   /// \param Rings number if rings in use
   uint16_t makePacket(
-    uint8_t Type, uint16_t NumReadouts, uint8_t Rings);
+    uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
+    uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents);
 
 private:
   /// \brief Generate common readout header
@@ -51,11 +52,8 @@ private:
   const uint32_t TimeLowOffset{20000};     // ticks
   const uint32_t PrevTimeLowOffset{10000}; // ticks
   const uint32_t TimeToFirstReadout{1000}; // ticks
-  const uint32_t TimeBtwReadout{88};       // ticks ~ 1us
-  const uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
-
-  const uint8_t MinChannel{16};  // wire channels range from 16 - 47
-  const uint8_t NumChannels{32}; //
+  uint32_t TimeBtwReadout{88};       // ticks ~ 1us
+  uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
 
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};

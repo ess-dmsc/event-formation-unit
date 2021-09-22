@@ -18,6 +18,6 @@
     { "Ring" : 10, "CassOffset" : 29, "FENs" : 2}
   ],
 
-  "MaxPulseTimeNS" : 357000000
+  "MaxPulseimeNS" : 71428568
 
 }

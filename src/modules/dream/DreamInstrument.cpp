@@ -13,8 +13,8 @@
 #include <dream/DreamInstrument.h>
 #include <dream/geometry/DreamGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
@@ -25,6 +25,9 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   DreamConfiguration = Config(ModuleSettings.ConfigFile);
+
+
+  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
 uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip,

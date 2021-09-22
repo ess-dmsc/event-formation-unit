@@ -9,10 +9,12 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <cassert>
+#include <cinttypes>
+#include <common/Trace.h>
 
-
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 class ESSTime {
 public:
@@ -55,6 +57,9 @@ public:
   uint64_t getPrevTOF(uint32_t High, uint32_t Low, uint32_t DelayNS = 0) {
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < PrevTimeInNS) {
+      XTRACE(EVENT, WAR,
+              "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              High, Low, timeval, PrevTimeInNS);
       Stats.PrevTofNegative++;
       return InvalidTOF;
     }
