@@ -232,6 +232,13 @@ TEST_F(FreiaInstrumentTest, GoodEvent) {
   ASSERT_EQ(counters.Events, 1);
 }
 
+
+TEST_F(FreiaInstrumentTest, NoEvents) {
+  Events.push_back(TestEvent);
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+}
+
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
 
