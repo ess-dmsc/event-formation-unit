@@ -42,6 +42,21 @@ Config::Config(std::string ConfigFile) {
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
   }
+  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", MaxPulseTimeNS);
+
+  try {
+    MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxGapWire");
+  }
+  LOG(INIT, Sev::Info, "MaxGapWire {}", MaxGapWire);
+
+  try {
+    MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxGapStrip");
+  }
+  LOG(INIT, Sev::Info, "MaxGapStrip {}", MaxGapStrip);
 
   XTRACE(INIT, DEB, "MaxPulseTimeNS %u", MaxPulseTimeNS);
 
