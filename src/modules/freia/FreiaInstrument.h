@@ -17,6 +17,7 @@
 #include <modules/readout/common/ReadoutParser.h>
 #include <modules/readout/common/ESSTime.h>
 #include <modules/readout/vmm3/Readout.h>
+#include <modules/readout/vmm3/VMM3Calibration.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
 #include <multiblade/clustering/EventBuilder.h>
 
@@ -83,6 +84,10 @@ public:
   ESSGeometry essgeom{64, 1024, 1, 1};
 
   const uint16_t TimeBoxNs{2010}; ///\todo add to config
+
+  // For now just a single, common, VMM3 calibration
+  ///\todo add Cassette or other abstraction
+  VMM3Calibration VMMCal;
 };
 
 } // namespace

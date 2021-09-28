@@ -67,6 +67,7 @@ int VMM3Parser::parse(ReadoutParser::PacketDataV0 & PacketData) {
     }
 
     // Check for negative TOFs
+    ///\todo Missing TDC correction
     auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {

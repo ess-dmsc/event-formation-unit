@@ -13,44 +13,57 @@
 
 class VMM3CalibrationTest : public TestBase {
 protected:
-
+  VMM3Calibration cal;
 };
 
 ///\brief \todo using ASSERT_EQ for doubles and float might
-
-TEST_F(VMM3CalibrationTest, Dummy) {
-  ASSERT_EQ(1, 1);
-}
+/// not be accurate
 
 TEST_F(VMM3CalibrationTest, Constructor) {
-  VMM3Calibration cal;
-  ASSERT_EQ(cal.ADCCorr(    0),    0);
-  ASSERT_EQ(cal.ADCCorr(   42),   42);
-  ASSERT_EQ(cal.ADCCorr( 1023), 1023);
-  ASSERT_EQ(cal.ADCCorr( 1024), 1023);
-  ASSERT_EQ(cal.ADCCorr(65535), 1023);
+  for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
+    ASSERT_EQ(cal.ADCCorr(ch,     0),    0);
+    ASSERT_EQ(cal.ADCCorr(ch,    42),   42);
+    ASSERT_EQ(cal.ADCCorr(ch,  1023), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch,  1024), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 65535), 1023);
 
-  ASSERT_EQ(cal.TDCCorr(  0), 1.5*22.72);
-  ASSERT_EQ(cal.TDCCorr(255), 1.5*22.72 - 60);
+    ASSERT_EQ(cal.TDCCorr(ch,   0), 1.5 * 22.72     );
+    ASSERT_EQ(cal.TDCCorr(ch, 255), 1.5 * 22.72 - 60);
+  }
 }
 
 TEST_F(VMM3CalibrationTest, ZeroCal) {
-  VMM3Calibration cal(0.0, 0.0, 0.0, 0.0);
-  ASSERT_EQ(cal.ADCCorr(   0), 0);
-  ASSERT_EQ(cal.ADCCorr(  42), 0);
-  ASSERT_EQ(cal.ADCCorr(1023), 0);
+  for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
+    cal.setCalibration(ch, 0.0, 0.0, 0.0, 0.0);
+    ASSERT_EQ(cal.ADCCorr(ch,    0), 0);
+    ASSERT_EQ(cal.ADCCorr(ch,   42), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 1023), 0);
 
-  ASSERT_EQ(cal.TDCCorr(  0), 0);
-  ASSERT_EQ(cal.TDCCorr(255), 0);
+    ASSERT_EQ(cal.TDCCorr(ch,   0), 0);
+    ASSERT_EQ(cal.TDCCorr(ch, 255), 0);
+  }
 }
 
 TEST_F(VMM3CalibrationTest, ADCClampNegative) {
-  VMM3Calibration cal(0.0, -1.0, 0.0, -1.0);
-  ASSERT_EQ(cal.ADCCorr(    0), 0);
-  ASSERT_EQ(cal.ADCCorr(   42), 0);
-  ASSERT_EQ(cal.ADCCorr( 1023), 0);
-  ASSERT_EQ(cal.ADCCorr( 1024), 0);
-  ASSERT_EQ(cal.ADCCorr(65535), 0);
+  for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
+    cal.setCalibration(ch, 0.0, -1.0, 0.0, -1.0);
+    ASSERT_EQ(cal.ADCCorr(ch,     0), 0);
+    ASSERT_EQ(cal.ADCCorr(ch,    42), 0);
+    ASSERT_EQ(cal.ADCCorr(ch,  1023), 0);
+    ASSERT_EQ(cal.ADCCorr(ch,  1024), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 65535), 0);
+ }
+}
+
+TEST_F(VMM3CalibrationTest, ADCClampPositive) {
+  for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
+    cal.setCalibration(ch, 0.0, -1.0, -1.0, 2000.0);
+    ASSERT_EQ(cal.ADCCorr(ch,     0), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch,    42), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch,  1023), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch,  1024), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 65535), 1023);
+  }
 }
 
 

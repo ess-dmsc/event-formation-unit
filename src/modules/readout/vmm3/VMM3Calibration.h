@@ -14,27 +14,56 @@
 
 class VMM3Calibration {
 public:
+  static constexpr int CHANNELS{64};
 
-  VMM3Calibration() {};
+  struct Calib {
+    double TDCOffset;
+    double TDCSlope;
+    double ADCOffset;
+    double ADCSlope;
+  };
 
-  VMM3Calibration(double TOffset, double TSlope, double AOffset, double ASlope) :
-    TDCOffset(TOffset), TDCSlope(TSlope),
-    ADCOffset(AOffset), ADCSlope(ASlope) {}
+  VMM3Calibration() {
+    InitCal();
+  };
 
-    double TDCCorr(uint8_t TDC) {
-      double TDCns = 1.5 * 22.72 - 60.0*TDC/255;
-      double TDCCorr = (TDCns - TDCOffset) * TDCSlope;
-      return TDCCorr;
+  void setCalibration(int Channel,
+                 double TDCOffset, double TDCSlope,
+                 double ADCOffset, double ADCSlope) {
+    if (Channel >= CHANNELS) {
+      // XTRACE()
+      return;
     }
 
-    double ADCCorr(uint16_t ADC) {
-      double ADCCorr = (ADC - ADCOffset) * ADCSlope;
-      return std::max(std::min(1023.0, ADCCorr), 0.0);
-    }
+    Calibration[Channel].TDCOffset = TDCOffset;
+    Calibration[Channel].TDCSlope = TDCSlope;
+    Calibration[Channel].ADCOffset = ADCOffset;
+    Calibration[Channel].ADCSlope = ADCSlope;
+  }
+
+  double TDCCorr(int Channel, uint8_t TDC) {
+    double TDCns = 1.5 * 22.72 - 60.0*TDC/255;
+    double TDCCorr = (TDCns - Calibration[Channel].TDCOffset)
+                   * Calibration[Channel].TDCSlope;
+    return TDCCorr;
+  }
+
+  double ADCCorr(int Channel, uint16_t ADC) {
+    double ADCCorr = (ADC - Calibration[Channel].ADCOffset)
+                   * Calibration[Channel].ADCSlope;
+    return std::max(std::min(1023.0, ADCCorr), 0.0);
+  }
 
 private:
-  double TDCOffset{0.0};
-  double TDCSlope{1.0};
-  double ADCOffset{0.0};
-  double ADCSlope{1.0};
+
+  void InitCal() {
+    for (auto & Cal : Calibration) {
+      Cal.TDCOffset = 0.0;
+      Cal.TDCSlope = 1.0;
+      Cal.ADCOffset = 0.0;
+      Cal.ADCSlope = 1.0;
+    }
+  }
+
+  struct Calib Calibration[CHANNELS];
 };

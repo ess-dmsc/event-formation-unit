@@ -94,9 +94,14 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
-    uint16_t ADC = readout.OTADC & 0x3FF;
+    int64_t TDCCorr = VMMCal.TDCCorr(readout.Channel, readout.TDC);
+    XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS, TDCCorr);
+    TimeNS += TDCCorr;
+    XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
+
+    uint16_t ADC = VMMCal.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+
     uint8_t Plane = (readout.VMM & 0x1) ^ 0x1;
     uint8_t Cassette = 1 + Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
