@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
+#include <common/Hexdump.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
@@ -25,10 +26,10 @@
 #include <common/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
-#include <unistd.h>
+#include <stdio.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Freia {
 
@@ -170,6 +171,7 @@ void FreiaBase::input_thread() {
   return;
 }
 
+
 void FreiaBase::processing_thread() {
 
   // Event producer
@@ -207,7 +209,8 @@ void FreiaBase::processing_thread() {
       }
 
       if (Res != ReadoutParser::OK) {
-        XTRACE(DATA, WAR, "Error parsing ESS readout header");
+        XTRACE(DATA, WAR, "Error parsing ESS readout header (RxPackets %" PRIu64 ")", Counters.RxPackets);
+        //hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }
@@ -218,7 +221,10 @@ void FreiaBase::processing_thread() {
       Counters.VMMStats = Freia.VMMParser.Stats;
 
       Freia.processReadouts();
-      Freia.generateEvents(Freia.builder.Events);
+
+      for (auto & builder : Freia.builders) {
+        Freia.generateEvents(builder.Events);
+      }
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little

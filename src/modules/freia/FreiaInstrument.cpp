@@ -40,8 +40,14 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
 
-    builder.setTimeBox(2010); // Time boxing
+    XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette)",
+           Conf.NumCassettes);
+    builders = std::vector<Multiblade::EventBuilder>(Conf.NumCassettes);
 
+    XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
+    for (auto & builder : builders) {
+      builder.setTimeBox(TimeBoxNs); // Time boxing
+    }
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
     // Producer monitorprod(EFUSettings.KafkaBroker, monitor);
@@ -98,17 +104,19 @@ void FreiaInstrument::processReadouts(void) {
     if (Plane == FreiaGeom.PlaneX) {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
          TimeNS, FreiaGeom.PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
-      builder.insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
+      builders[Cassette].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneX});
     } else {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
          TimeNS, FreiaGeom.PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
-      builder.insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
+      builders[Cassette].insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, FreiaGeom.PlaneY});
     }
   }
 
-  builder.flush(); // Do matching
+  for (auto & builder : builders) {
+    builder.flush(); // Do matching
+  }
 }
 
 
@@ -116,6 +124,10 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
   ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
+    if (e.empty()) {
+      continue;
+    }
+
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
       counters.EventsNoCoincidence++;
@@ -181,7 +193,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
-  builder.Events.clear(); // else events will accumulate
+  Events.clear(); // else events will accumulate
 }
 
 

@@ -201,7 +201,9 @@ TEST_F(FreiaInstrumentTest, PixelError) {
   ASSERT_EQ(Res, 2);
 
   freia->processReadouts();
-  freia->generateEvents(freia->builder.Events);
+  for (auto & builder : freia->builders) {
+    freia->generateEvents(builder.Events);
+  }
   ASSERT_EQ(counters.PixelErrors, 1);
 }
 
@@ -214,7 +216,9 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
   counters.VMMStats = freia->VMMParser.Stats;
 
   freia->processReadouts();
-  freia->generateEvents(freia->builder.Events);
+  for (auto & builder : freia->builders) {
+    freia->generateEvents(builder.Events);
+  }
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
   ASSERT_EQ(counters.TimeErrors, 1);
@@ -226,6 +230,13 @@ TEST_F(FreiaInstrumentTest, GoodEvent) {
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 1);
+}
+
+
+TEST_F(FreiaInstrumentTest, NoEvents) {
+  Events.push_back(TestEvent);
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
 }
 
 int main(int argc, char **argv) {
