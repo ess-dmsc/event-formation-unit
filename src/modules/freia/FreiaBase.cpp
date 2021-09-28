@@ -175,7 +175,10 @@ void FreiaBase::input_thread() {
 void FreiaBase::processing_thread() {
 
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, "freia_detector");
+  if (EFUSettings.KafkaTopic == "") {
+    EFUSettings.KafkaTopic = "freia_detector";
+  }
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };

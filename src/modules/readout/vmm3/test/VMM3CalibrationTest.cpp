@@ -67,6 +67,12 @@ TEST_F(VMM3CalibrationTest, ADCClampPositive) {
 }
 
 
+TEST_F(VMM3CalibrationTest, InvalidChannel) {
+  ASSERT_EQ(cal.setCalibration(63, 0.0, -1.0, -1.0, 2000.0), true);
+  ASSERT_EQ(cal.setCalibration(64, 0.0, -1.0, -1.0, 2000.0), false);
+}
+
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
