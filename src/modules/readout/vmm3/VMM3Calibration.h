@@ -10,7 +10,7 @@
 #pragma once
 
 #include <algorithm>
-#include <cstdlib>
+#include <cinttypes>
 
 class VMM3Calibration {
 public:
