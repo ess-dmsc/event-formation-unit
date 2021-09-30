@@ -52,6 +52,10 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     // for freia #Hybrids == #Cassettes
     Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumCassettes);
 
+    XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
+    for (auto & builder : builders) {
+      builder.setTimeBox(TimeBoxNs); // Time boxing
+    }
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
     // Producer monitorprod(EFUSettings.KafkaBroker, monitor);
