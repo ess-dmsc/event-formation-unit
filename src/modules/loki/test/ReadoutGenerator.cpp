@@ -29,7 +29,7 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(
 
   memset(Buffer, 0, MaxSize);
   auto DP = (uint8_t *)Buffer;
-  auto Header = (ReadoutParser::PacketHeaderV0 *)DP;
+  auto Header = (ESSReadout::ReadoutParser::PacketHeaderV0 *)DP;
 
   Header->CookieAndType = 0x30535345;
   Header->Padding0 = 0;
@@ -43,7 +43,7 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(
 
   DP += HeaderSize;
   for (auto Section = 0; Section < DataSections; Section++) {
-    auto DataHeader = (ReadoutParser::DataHeader *)DP;
+    auto DataHeader = (ESSReadout::ReadoutParser::DataHeader *)DP;
     DataHeader->RingId = RingCount % Rings;
     DataHeader->FENId = 0x00;
     DataHeader->DataLength = DataHeaderSize + DataElements * LokiDataSize;

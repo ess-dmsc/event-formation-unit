@@ -45,8 +45,8 @@ private:
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();
 
-  const uint16_t HeaderSize = sizeof(ReadoutParser::PacketHeaderV0);
-  const uint16_t VMM3DataSize = sizeof(VMM3Parser::VMM3Data);
+  const uint16_t HeaderSize = sizeof(ESSReadout::ReadoutParser::PacketHeaderV0);
+  const uint16_t VMM3DataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
 
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks

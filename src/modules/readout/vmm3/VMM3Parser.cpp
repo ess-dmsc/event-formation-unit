@@ -12,6 +12,8 @@
 #include <common/Trace.h>
 #include <readout/vmm3/VMM3Parser.h>
 
+namespace ESSReadout {
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -131,3 +133,4 @@ int VMM3Parser::parse(ReadoutParser::PacketDataV0 & PacketData) {
 
   return GoodReadouts;
 }
+} // namespace ESSReadout

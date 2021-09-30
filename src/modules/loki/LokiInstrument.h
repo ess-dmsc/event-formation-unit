@@ -57,7 +57,7 @@ public:
   LokiSettings &ModuleSettings;
   Config LokiConfiguration;
   Calibration LokiCalibration;
-  ReadoutParser ESSReadoutParser;
+  ESSReadout::ReadoutParser ESSReadoutParser;
   DataParser LokiParser{counters};
   TubeAmps Amp2Pos;
   EV42Serializer *Serializer;

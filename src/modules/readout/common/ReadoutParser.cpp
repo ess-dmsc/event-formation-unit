@@ -12,6 +12,8 @@
 #include <readout/common/ReadoutParser.h>
 #include <arpa/inet.h>
 
+namespace ESSReadout {
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
@@ -65,7 +67,6 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   // It is safe to cast packet header v0 struct to data
   Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
-  #ifndef OMITSIZECHECK
   if (Size != Packet.HeaderPtr->TotalLength or
       Packet.HeaderPtr->TotalLength < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
@@ -73,16 +74,13 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     Stats.ErrorSize++;
     return -ReadoutParser::ESIZE;
   }
-  #endif
 
   uint8_t Type = Packet.HeaderPtr->CookieAndType >> 24;
   if ( Type!= ExpectedType) {
-    #ifndef OMITTYPECHECK
       XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
            Type, ExpectedType);
            Stats.ErrorTypeSubType++;
       return -ReadoutParser::EHEADER;
-    #endif
   }
 
 
@@ -156,3 +154,4 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
 
   return ReadoutParser::OK;
 }
+} // namespace ESSReadout

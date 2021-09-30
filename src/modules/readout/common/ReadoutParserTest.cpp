@@ -11,6 +11,8 @@
 #include <readout/common/ReadoutParserTestData.h>
 #include <test/TestBase.h>
 
+namespace ESSReadout {
+
 class ReadoutTest : public TestBase {
 protected:
   ReadoutParser RdOut;
@@ -139,3 +141,4 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+} // namespace ESSReadout

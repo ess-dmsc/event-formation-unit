@@ -10,15 +10,9 @@
 #pragma once
 
 #include <readout/common/ESSTime.h>
-
-//#define OMITCHECKS 1
-#ifdef OMITCHECKS
-  #pragma message("Some checks disabled for ReadoutParser")
-  #define OMITTYPECHECK 1
-  #define OMITSIZECHECK 1
-#endif
-
 #include <cinttypes>
+
+namespace ESSReadout {
 
 struct ESSHeaderStats {
   int64_t ErrorBuffer{0};
@@ -109,3 +103,4 @@ public:
   /// setting this in the config file.
   uint32_t MaxPulseTimeDiffNS{0};
 };
+} // namespace ESSReadout

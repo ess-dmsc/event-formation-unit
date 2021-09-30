@@ -167,10 +167,10 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::DREAM);
+      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::ReadoutParser::DREAM);
       Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
 
-      if (Res != ReadoutParser::OK) {
+      if (Res != ESSReadout::ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorHeaders++;
         continue;
