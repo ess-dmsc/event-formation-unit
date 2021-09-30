@@ -21,6 +21,5 @@ set(VMM3CalibrationTest_INC
 )
 set(VMM3CalibrationTest_SRC
   test/VMM3CalibrationTest.cpp
-  VMM3Calibration.cpp
 )
 create_test_executable(VMM3CalibrationTest)
