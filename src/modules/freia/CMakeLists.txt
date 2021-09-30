@@ -14,6 +14,8 @@ set(freia_common_inc
   ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.h
   ${ESS_MODULE_DIR}/readout/common/ReadoutParser.h
   ${ESS_MODULE_DIR}/readout/vmm3/VMM3Parser.h
+  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Calibration.h
+  ${ESS_MODULE_DIR}/readout/vmm3/Hybrid.h
 
   )
 set(freia_common_src

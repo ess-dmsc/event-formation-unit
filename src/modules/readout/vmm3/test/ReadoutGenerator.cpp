@@ -44,7 +44,7 @@ void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
   }
 
   memset(Buffer, 0, BufferSize);
-  auto Header = (ReadoutParser::PacketHeaderV0 *)Buffer;
+  auto Header = (ESSReadout::ReadoutParser::PacketHeaderV0 *)Buffer;
 
   Header->CookieAndType = (Type << 24) + 0x535345;
   Header->Padding0 = 0;
@@ -70,11 +70,11 @@ void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
-    auto ReadoutData = (VMM3Parser::VMM3Data *)DP;
+    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->RingId = (Readout / 10) % Rings;
     //printf("RingId: %u\n", ReadoutData->RingId);
     ReadoutData->FENId = 0x01;
-    ReadoutData->DataLength = sizeof(VMM3Parser::VMM3Data);
+    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = SeqNum;

@@ -16,6 +16,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace ESSReadout {
+
 class ESSTime {
 public:
   struct Stats_t {
@@ -77,3 +79,4 @@ public:
   uint64_t TimeInNS{0};
   uint64_t PrevTimeInNS{0};
 };
+} // namespace ESSReadout

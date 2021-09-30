@@ -56,12 +56,12 @@ int main(int argc, char * argv[]) {
   #ifdef ESSUDPGEN_DREAM_SIM
   DreamSimReader reader(Config.FileName);
   struct DreamSimReader::sim_data_t Readout;
-  PacketGenerator gen(ReadoutParser::DREAM, sizeof(struct DreamSimReader::sim_data_t));
+  PacketGenerator gen(ESSReadout::ReadoutParser::DREAM, sizeof(struct DreamSimReader::sim_data_t));
   #endif
 
   #ifdef ESSUDPGEN_LOKI_RAW
   LokiReader reader(Config.FileName);
-  PacketGenerator gen(ReadoutParser::Loki4Amp, sizeof(Loki::DataParser::LokiReadout));
+  PacketGenerator gen(ESSReadout::ReadoutParser::Loki4Amp, sizeof(Loki::DataParser::LokiReadout));
   struct Loki::DataParser::LokiReadout Readout;
   #endif
 

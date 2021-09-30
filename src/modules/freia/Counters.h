@@ -26,11 +26,11 @@ struct Counters {
 
 
     // ESSReadout parser
-    struct ESSHeaderStats ReadoutStats;
+    struct ESSReadout::ESSHeaderStats ReadoutStats;
     int64_t ErrorESSHeaders;
 
     // VMM3a Readouts
-    struct VMM3ParserStats VMMStats;
+    struct ESSReadout::VMM3ParserStats VMMStats;
 
     // Logical and Digital geometry incl. Calibration
     int64_t RingErrors;
@@ -48,7 +48,7 @@ struct Counters {
     int64_t EventsInvalidWireGap;
     int64_t PixelErrors;
     int64_t TimeErrors;
-    struct ESSTime::Stats_t TimeStats;
+    struct ESSReadout::ESSTime::Stats_t TimeStats;
     int64_t TxBytes;
     // Kafka stats below are common to all detectors
     struct Producer::ProducerStats KafkaStats;

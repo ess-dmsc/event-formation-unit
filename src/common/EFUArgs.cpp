@@ -37,7 +37,7 @@ EFUArgs::EFUArgs() {
       ->group("EFU Options")->default_str("localhost");
 
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")
-      ->group("EFU Options")->default_str("Detector_data");
+      ->group("EFU Options")->default_str("");
 
   CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
                     return parseAffinityStrings(Input);

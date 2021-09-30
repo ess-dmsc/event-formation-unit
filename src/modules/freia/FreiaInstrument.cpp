@@ -48,6 +48,14 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     for (auto & builder : builders) {
       builder.setTimeBox(TimeBoxNs); // Time boxing
     }
+
+    // for freia #Hybrids == #Cassettes
+    Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumCassettes);
+
+    XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
+    for (auto & builder : builders) {
+      builder.setTimeBox(TimeBoxNs); // Time boxing
+    }
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
     // Producer monitorprod(EFUSettings.KafkaBroker, monitor);
@@ -94,12 +102,21 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-
-    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
-    uint16_t ADC = readout.OTADC & 0x3FF;
-    uint8_t Plane = (readout.VMM & 0x1) ^ 0x1;
+    uint8_t Asic = readout.VMM & 0x1;
+    uint8_t Plane = (Asic) ^ 0x1;
     uint8_t Cassette = 1 + Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
+
+    VMM3Calibration & Calib = Hybrids[Cassette].VMMs[Asic];
+
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
+    XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS, TDCCorr);
+    TimeNS += TDCCorr;
+    XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
+
+    uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+
 
     if (Plane == FreiaGeom.PlaneX) {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
@@ -121,7 +138,7 @@ void FreiaInstrument::processReadouts(void) {
 
 
 void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
-  ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -198,7 +215,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
 
 
 /// \todo move into readout/vmm3 instead as this will be common
-void FreiaInstrument::dumpReadoutToFile(const VMM3Parser::VMM3Data & Data) {
+void FreiaInstrument::dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data) {
   VMM3::Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;

@@ -12,6 +12,7 @@
 #include <readout/vmm3/test/VMM3ParserTestData.h>
 #include <test/TestBase.h>
 
+namespace ESSReadout {
 
 class VMM3ParserTest : public TestBase {
 protected:
@@ -156,3 +157,4 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+} // namespace ESSReadout

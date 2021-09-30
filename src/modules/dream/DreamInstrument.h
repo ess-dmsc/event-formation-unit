@@ -45,9 +45,9 @@ public:
   struct Counters &counters;
   DreamSettings &ModuleSettings;
   Config DreamConfiguration;
-  ReadoutParser ESSReadoutParser;
+  ESSReadout::ReadoutParser ESSReadoutParser;
   DataParser DreamParser{counters};
-  ESSTime Time;
+  ESSReadout::ESSTime Time;
   EV42Serializer *Serializer;
 };
 

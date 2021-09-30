@@ -14,3 +14,12 @@ set(VMM3ParserTest_SRC
   VMM3Parser.cpp
 )
 create_test_executable(VMM3ParserTest)
+
+
+set(VMM3CalibrationTest_INC
+  VMM3Calibration.h
+)
+set(VMM3CalibrationTest_SRC
+  test/VMM3CalibrationTest.cpp
+)
+create_test_executable(VMM3CalibrationTest)

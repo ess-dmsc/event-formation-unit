@@ -13,6 +13,8 @@
 #include <cinttypes>
 #include <vector>
 
+namespace ESSReadout {
+
 struct VMM3ParserStats {
   int64_t ErrorSize{0};
   int64_t ErrorRing{0};
@@ -80,3 +82,4 @@ private:
   const uint16_t OverThresholdMask{0x8000};
   const uint16_t ADCMask{0x7fff};
 };
+} // namespace ESSReadout

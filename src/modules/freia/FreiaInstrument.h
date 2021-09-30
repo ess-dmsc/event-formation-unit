@@ -18,6 +18,7 @@
 #include <modules/readout/common/ESSTime.h>
 #include <modules/readout/vmm3/Readout.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
+#include <modules/readout/vmm3/Hybrid.h>
 #include <multiblade/clustering/EventBuilder.h>
 
 #include <freia/Counters.h>
@@ -44,7 +45,7 @@ public:
   void generateEvents(std::vector<Event> & Events);
 
   /// \brief dump readout data to HDF5
-  void dumpReadoutToFile(const VMM3Parser::VMM3Data & Data);
+  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data);
 
   //
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
@@ -75,14 +76,17 @@ public:
   /// parsed the configuration file.
   std::vector<Multiblade::EventBuilder> builders; // reinit in ctor
   Config Conf;
-  ReadoutParser ESSReadoutParser;
-  VMM3Parser VMMParser;
+  ESSReadout::ReadoutParser ESSReadoutParser;
+  ESSReadout::VMM3Parser VMMParser;
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
   EV42Serializer *Serializer{nullptr};
   Geometry FreiaGeom;
   ESSGeometry essgeom{64, 1024, 1, 1};
 
   const uint16_t TimeBoxNs{2010}; ///\todo add to config
+
+  // Each cassette holds 2 VMMCalibrations
+  std::vector<ESSReadout::Hybrid> Hybrids;
 };
 
 } // namespace

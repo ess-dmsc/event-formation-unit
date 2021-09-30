@@ -229,10 +229,10 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::ReadoutParser::Loki4Amp);
       Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
-      if (Res != ReadoutParser::OK) {
+      if (Res != ESSReadout::ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
