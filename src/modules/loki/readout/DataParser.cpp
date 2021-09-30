@@ -8,14 +8,14 @@
 
 #include <common/Trace.h>
 #include <loki/readout/DataParser.h>
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
 namespace Loki {
 
-constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::ReadoutParser::DataHeader)};
+constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::Parser::DataHeader)};
 constexpr unsigned int LokiReadoutSize{sizeof(DataParser::LokiReadout)};
 
 // Assume we start after the PacketHeader
@@ -28,14 +28,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(ESSReadout::ReadoutParser::DataHeader)) {
+    if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (ESSReadout::ReadoutParser::DataHeader *)DataPtr;
+    auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two

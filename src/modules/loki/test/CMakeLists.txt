@@ -63,7 +63,7 @@ target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
 ##
 ## readout/
 ##
-set(LokiDataParserTest_INC ../readout/DataParser.h ../../readout/common/ReadoutParser.h)
+set(LokiDataParserTest_INC ../readout/DataParser.h ../../readout/common/Parser.h)
 set(LokiDataParserTest_SRC ../readout/DataParser.cpp DataParserTest.cpp)
 create_test_executable(LokiDataParserTest)
 
@@ -78,11 +78,11 @@ create_test_executable(LokiDataParserTest)
 ##
 set(CombinedParserTest_INC
   ../readout/DataParser.h
-  ../../readout/common/ReadoutParser.h
+  ../../readout/common/Parser.h
   ../../generators/DataFuzzer.h
   )
 set(CombinedParserTest_SRC
-  ../../readout/common/ReadoutParser.cpp
+  ../../readout/common/Parser.cpp
  ../../generators/DataFuzzer.cpp
   ../readout/DataParser.cpp
   CombinedParserTest.cpp

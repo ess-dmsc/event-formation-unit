@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 #include <cinttypes>
 #include <vector>
 
@@ -66,7 +66,7 @@ public:
   ~VMM3Parser(){};
 
   //
-  int parse(ReadoutParser::PacketDataV0 & PacketData);
+  int parse(Parser::PacketDataV0 & PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;

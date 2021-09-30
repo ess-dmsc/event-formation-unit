@@ -6,7 +6,7 @@
 
 #include <common/EV42Serializer.h>
 #include <freia/FreiaInstrument.h>
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 #include <stdio.h>
@@ -99,7 +99,7 @@ protected:
   FreiaSettings ModuleSettings;
   EV42Serializer * serializer;
   FreiaInstrument * freia;
-  ESSReadout::ReadoutParser::PacketHeaderV0 PacketHeader;
+  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
@@ -116,7 +116,7 @@ protected:
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::ReadoutParser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
+  void makeHeader(ESSReadout::Parser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
     Packet.HeaderPtr = &PacketHeader;
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();

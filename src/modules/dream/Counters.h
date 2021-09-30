@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 
 struct Counters {
   // Input Counters - accessed in input thread

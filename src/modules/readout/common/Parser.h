@@ -33,7 +33,7 @@ const uint8_t MaxOutputQueues{24};
 const unsigned int MaxUdpDataSize{8972};
 const unsigned int MinDataSize{5}; // just pad, cookie and version
 
-class ReadoutParser {
+class Parser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType { Reserved = 0x00,
@@ -60,7 +60,7 @@ public:
     uint32_t SeqNum;
   } __attribute__((packed));
 
-  static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (30),
+  static_assert(sizeof(Parser::PacketHeaderV0) == (30),
                 "Wrong header size (update assert or check packing)");
 
 
@@ -81,7 +81,7 @@ public:
 
 
   //
-  ReadoutParser();
+  Parser();
 
   //
   void setMaxPulseTimeDiff(uint32_t MaxTimeDiff) {

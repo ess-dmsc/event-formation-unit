@@ -44,7 +44,7 @@ void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
   }
 
   memset(Buffer, 0, BufferSize);
-  auto Header = (ESSReadout::ReadoutParser::PacketHeaderV0 *)Buffer;
+  auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
 
   Header->CookieAndType = (Type << 24) + 0x535345;
   Header->Padding0 = 0;

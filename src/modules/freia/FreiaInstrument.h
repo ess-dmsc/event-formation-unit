@@ -14,7 +14,7 @@
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <modules/readout/common/ReadoutParser.h>
+#include <modules/readout/common/Parser.h>
 #include <modules/readout/common/ESSTime.h>
 #include <modules/readout/vmm3/Readout.h>
 #include <modules/readout/vmm3/VMM3Parser.h>
@@ -76,7 +76,7 @@ public:
   /// parsed the configuration file.
   std::vector<Multiblade::EventBuilder> builders; // reinit in ctor
   Config Conf;
-  ESSReadout::ReadoutParser ESSReadoutParser;
+  ESSReadout::Parser ESSReadoutParser;
   ESSReadout::VMM3Parser VMMParser;
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
   EV42Serializer *Serializer{nullptr};
