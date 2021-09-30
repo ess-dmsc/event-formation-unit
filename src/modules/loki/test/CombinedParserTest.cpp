@@ -102,7 +102,6 @@ TEST_F(CombinedParserTest, DataGen) {
   uint8_t Buffer[BufferSize];
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
-<<<<<<< HEAD
     uint16_t Elements = ((BufferSize - sizeof(ESSReadout::Parser::PacketHeaderV0) - Sections*4)/20/Sections);
     ReadoutGenerator gen;
     auto Length = gen.lokiReadoutDataGen(false, Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
@@ -110,15 +109,6 @@ TEST_F(CombinedParserTest, DataGen) {
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
-=======
-    uint16_t Elements = ((BufferSize - sizeof(ESSReadout::ReadoutParser::PacketHeaderV0) - Sections*4)/20/Sections);
-    ReadoutGenerator gen;
-    auto Length = gen.lokiReadoutDataGen(false, Sections, Elements, 1, Buffer, BufferSize, FirstSeqNum);
-    ASSERT_EQ(Length, sizeof(ESSReadout::ReadoutParser::PacketHeaderV0) + Sections *(4 + Elements * 20));
-
-    auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
-    ASSERT_EQ(Res, ESSReadout::ReadoutParser::OK);
->>>>>>> master
     Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
     ASSERT_EQ(Res, Sections*Elements);
   }
@@ -127,11 +117,7 @@ TEST_F(CombinedParserTest, DataGen) {
 
 TEST_F(CombinedParserTest, ParseUDPPacket) {
   auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(), DataType);
-<<<<<<< HEAD
   ASSERT_EQ(Res, ESSReadout::Parser::OK);
-=======
-  ASSERT_EQ(Res, ESSReadout::ReadoutParser::OK);
->>>>>>> master
   Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
   ASSERT_EQ(Res, 6);
 

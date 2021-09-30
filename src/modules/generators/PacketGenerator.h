@@ -52,11 +52,8 @@ public:
     uint16_t DataBlockSize = DataHeaderSize + DataSize;
     int offset = HeaderSize + Readouts * (DataBlockSize);
 
-<<<<<<< HEAD
     struct ESSReadout::Parser::DataHeader datahdr;
-=======
-    struct ESSReadout::ReadoutParser::DataHeader datahdr;
->>>>>>> master
+
     datahdr.RingId = Ring;
     datahdr.FENId = FEN;
     datahdr.DataLength = DataBlockSize;
@@ -77,19 +74,12 @@ public:
 private:
   static const int MaxBytes{9000};
   char buffer[MaxBytes];
-<<<<<<< HEAD
   struct ESSReadout::Parser::PacketHeaderV0 * php;
   uint32_t SeqNum{0};
   uint16_t Readouts{0};
   uint8_t DataHeaderSize = 4;
   uint16_t HeaderSize = sizeof(struct ESSReadout::Parser::PacketHeaderV0);
-=======
-  struct ESSReadout::ReadoutParser::PacketHeaderV0 * php;
-  uint32_t SeqNum{0};
-  uint16_t Readouts{0};
-  uint8_t DataHeaderSize = 4;
-  uint16_t HeaderSize = sizeof(struct ESSReadout::ReadoutParser::PacketHeaderV0);
->>>>>>> master
+
   uint16_t DataSize{0}; // set in constructor
   uint8_t ReadoutType{0}; // set in constructor
   uint16_t BufferSize{0};
