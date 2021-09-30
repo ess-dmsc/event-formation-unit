@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 #include <readout/vmm3/VMM3Parser.h>
 
 struct Counters {

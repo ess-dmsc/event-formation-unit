@@ -204,14 +204,14 @@ void FreiaBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::ReadoutParser::FREIA);
+      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::FREIA);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
       }
 
-      if (Res != ESSReadout::ReadoutParser::OK) {
+      if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR, "Error parsing ESS readout header (RxPackets %" PRIu64 ")", Counters.RxPackets);
         //hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;

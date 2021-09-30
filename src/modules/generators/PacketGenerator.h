@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 #include <string.h>
 
 
@@ -30,7 +30,7 @@ public:
 
   //
   void newPacket(PktInit method) {
-    php = (struct ESSReadout::ReadoutParser::PacketHeaderV0 *)buffer;
+    php = (struct ESSReadout::Parser::PacketHeaderV0 *)buffer;
 
     // Either clear the buffer and reinitialze or just increment SeqNum
     if (method == IncSeqNum) {
@@ -52,7 +52,8 @@ public:
     uint16_t DataBlockSize = DataHeaderSize + DataSize;
     int offset = HeaderSize + Readouts * (DataBlockSize);
 
-    struct ESSReadout::ReadoutParser::DataHeader datahdr;
+    struct ESSReadout::Parser::DataHeader datahdr;
+
     datahdr.RingId = Ring;
     datahdr.FENId = FEN;
     datahdr.DataLength = DataBlockSize;
@@ -73,11 +74,12 @@ public:
 private:
   static const int MaxBytes{9000};
   char buffer[MaxBytes];
-  struct ESSReadout::ReadoutParser::PacketHeaderV0 * php;
+  struct ESSReadout::Parser::PacketHeaderV0 * php;
   uint32_t SeqNum{0};
   uint16_t Readouts{0};
   uint8_t DataHeaderSize = 4;
-  uint16_t HeaderSize = sizeof(struct ESSReadout::ReadoutParser::PacketHeaderV0);
+  uint16_t HeaderSize = sizeof(struct ESSReadout::Parser::PacketHeaderV0);
+
   uint16_t DataSize{0}; // set in constructor
   uint8_t ReadoutType{0}; // set in constructor
   uint16_t BufferSize{0};

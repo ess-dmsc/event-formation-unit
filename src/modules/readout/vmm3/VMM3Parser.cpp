@@ -18,7 +18,7 @@ namespace ESSReadout {
 // #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
-int VMM3Parser::parse(ReadoutParser::PacketDataV0 & PacketData) {
+int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
   Result.clear();
   uint32_t GoodReadouts{0};
 

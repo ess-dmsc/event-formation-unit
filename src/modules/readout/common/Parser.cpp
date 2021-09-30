@@ -9,7 +9,7 @@
 
 #include <cstring>
 #include <common/Trace.h>
-#include <readout/common/ReadoutParser.h>
+#include <readout/common/Parser.h>
 #include <arpa/inet.h>
 
 namespace ESSReadout {
@@ -17,35 +17,35 @@ namespace ESSReadout {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-ReadoutParser::ReadoutParser() {
+Parser::Parser() {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
 }
 
-int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
+int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
   if (Buffer == nullptr or Size == 0) {
     XTRACE(PROCESS, WAR, "no buffer specified");
     Stats.ErrorBuffer++;
-    return -ReadoutParser::EBUFFER;
+    return -Parser::EBUFFER;
   }
 
   if ((Size < MinDataSize) || (Size > MaxUdpDataSize)) {
     XTRACE(PROCESS, WAR, "Invalid data size (%u)", Size);
     Stats.ErrorSize++;
-    return -ReadoutParser::ESIZE;
+    return -Parser::ESIZE;
   }
 
   uint32_t VersionAndPad = htons(*(uint16_t *)(Buffer));
   if ((VersionAndPad >> 8) != 0) {
     XTRACE(PROCESS, WAR, "Padding is wrong (should be 0)");
     Stats.ErrorPad++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   if ((VersionAndPad & 0xff) != 0x00) { //
     XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d", VersionAndPad & 0xff);
     Stats.ErrorVersion++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   // Check cookie
@@ -54,14 +54,14 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
     Stats.ErrorCookie++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   // Packet is ESS readout version 0, now we can add more header size checks
   if (Size < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
     Stats.ErrorSize++;
-    return -ReadoutParser::ESIZE;
+    return -Parser::ESIZE;
   }
 
   // It is safe to cast packet header v0 struct to data
@@ -72,7 +72,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
            Packet.HeaderPtr->TotalLength, Size);
     Stats.ErrorSize++;
-    return -ReadoutParser::ESIZE;
+    return -Parser::ESIZE;
   }
 
   uint8_t Type = Packet.HeaderPtr->CookieAndType >> 24;
@@ -80,7 +80,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
       XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
            Type, ExpectedType);
            Stats.ErrorTypeSubType++;
-      return -ReadoutParser::EHEADER;
+      return -Parser::EHEADER;
   }
 
 
@@ -88,7 +88,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     XTRACE(PROCESS, WAR, "Output queue %u exceeds max size %u",
            Packet.HeaderPtr->OutputQueue, MaxOutputQueues);
     Stats.ErrorOutputQueue++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   // Check per OutputQueue packet sequence number
@@ -112,14 +112,14 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
       Packet.HeaderPtr->PulseLow, MaxFracTimeCount);
     Stats.ErrorTimeFrac++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   if (Packet.HeaderPtr->PrevPulseLow > MaxFracTimeCount) {
     XTRACE(PROCESS, WAR, "Prev pulse time low (%u) exceeds max cycle count (%u)",
       Packet.HeaderPtr->PrevPulseLow, MaxFracTimeCount);
     Stats.ErrorTimeFrac++;
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   Packet.Time.setReference(Packet.HeaderPtr->PulseHigh,
@@ -143,15 +143,15 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedT
     XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "", Packet.Time.PrevTimeInNS);
     Stats.ErrorTimeHigh++;
 
-    return -ReadoutParser::EHEADER;
+    return -Parser::EHEADER;
   }
 
   //
-  if (Packet.HeaderPtr->TotalLength == sizeof(ReadoutParser::PacketHeaderV0)) {
+  if (Packet.HeaderPtr->TotalLength == sizeof(Parser::PacketHeaderV0)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
     Stats.HeartBeats++;
   }
 
-  return ReadoutParser::OK;
+  return Parser::OK;
 }
 } // namespace ESSReadout
