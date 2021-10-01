@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 const unsigned int NB_ENTRIES = 256;
 const unsigned int BASE_OVERHEAD = 128;

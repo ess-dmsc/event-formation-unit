@@ -3,7 +3,7 @@
 #include <common/reduction/ReducedEvent.h>
 #include <common/reduction/NeutronEvent.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class ReducedEventTest : public TestBase {
 protected:

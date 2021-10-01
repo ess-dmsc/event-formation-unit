@@ -7,11 +7,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 #include <freia/FreiaInstrument.h>
-#include <readout/vmm3/Readout.h>
+#include <common/readout/vmm3/Readout.h>
 #include <assert.h>
 
 // #undef TRC_LEVEL

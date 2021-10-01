@@ -3,7 +3,7 @@
 
 #include <gdgem/srs/ParserVMM3.h>
 #include <gdgem/srs/ParserVMM3TestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <vector>
 
 using namespace Gem;

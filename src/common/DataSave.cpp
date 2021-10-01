@@ -8,8 +8,8 @@
 
 #include <cassert>
 #include <common/DataSave.h>
-#include <common/TimeString.h>
-#include <common/Log.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Log.h>
 #include <fmt/format.h>
 
 //#undef TRC_LEVEL

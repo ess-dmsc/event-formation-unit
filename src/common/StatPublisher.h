@@ -12,7 +12,7 @@
 #include <common/Detector.h>
 #include <common/Socket.h>
 #include <common/Statistics.h>
-#include <common/Timer.h>
+#include <common/time/Timer.h>
 #include <string>
 
 class StatPublisher {

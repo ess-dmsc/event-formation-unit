@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <jalousie/BuilderReadouts.h>
-#include <common/TimeString.h>
+#include <common/time/TimeString.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 

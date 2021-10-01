@@ -2,7 +2,7 @@
 
 #include <benchmark/benchmark.h>
 #include <gdgem/NMXConfig.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <gdgem/nmx/Readout.h>
 #include <common/reduction/clustering/GapClusterer.h>

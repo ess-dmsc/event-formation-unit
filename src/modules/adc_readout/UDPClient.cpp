@@ -6,7 +6,7 @@
  */
 
 #include "UDPClient.h"
-#include <common/Log.h>
+#include <common/debug/Log.h>
 
 using udp = asio::ip::udp;
 

@@ -40,7 +40,7 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 add_subdirectory(common)
 add_subdirectory(modules)
 add_subdirectory(efu)
-add_subdirectory(udpgenpcap)
+add_subdirectory(generators)
 
 get_filename_component(MB_CFG_FILE "${ESS_MODULE_DIR}/multiblade/configs/MB18Estia.json" ABSOLUTE)
 get_filename_component(MG_CFG_FILE "${ESS_MODULE_DIR}/multigrid/configs/ILL_mappings.json" ABSOLUTE)

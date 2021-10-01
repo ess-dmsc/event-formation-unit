@@ -5,7 +5,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <trompeloeil.hpp>
 

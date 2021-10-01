@@ -6,7 +6,7 @@ include_directories(..)
 
 # TODO REMOVE?
 set(udpgen_jalousie_SRC
-  ${ESS_MODULE_DIR}/generators/generator.cpp
+  ${ESS_SOURCE_DIR}/generators/udpgen_hits/generator.cpp
   CdtFile.cpp
   ../Readout.cpp
   )

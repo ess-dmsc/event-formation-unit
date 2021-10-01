@@ -28,7 +28,7 @@
 //      plane mappings), which will not be needed in the final VMM-based setup, so
 //      we should not bother mitigating this. Simply reject those events.
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <common/monitor/DynamicHist.h>
 #include <multigrid/reduction/Reduction.h>
 #include <multigrid/mesytec/BuilderReadouts.h>

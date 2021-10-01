@@ -2,7 +2,7 @@
 
 #include <common/reduction/analysis/AbstractAnalyzer.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class AbstractAnalyzerTest : public TestBase {
 protected:

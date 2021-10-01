@@ -14,11 +14,11 @@
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <modules/readout/common/Parser.h>
-#include <modules/readout/common/ESSTime.h>
-#include <modules/readout/vmm3/Readout.h>
-#include <modules/readout/vmm3/VMM3Parser.h>
-#include <modules/readout/vmm3/Hybrid.h>
+#include <common/readout/ess/Parser.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/vmm3/Readout.h>
+#include <common/readout/vmm3/VMM3Parser.h>
+#include <common/readout/vmm3/Hybrid.h>
 #include <multiblade/clustering/EventBuilder.h>
 
 #include <freia/Counters.h>

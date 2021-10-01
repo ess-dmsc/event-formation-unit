@@ -7,7 +7,7 @@
 
 #include <common/monitor/Monitor.h>
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 //#undef TRC_MASK
 //#define TRC_MASK 0
 

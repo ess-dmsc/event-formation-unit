@@ -1,13 +1,13 @@
 // Copyright (C) 2016, 2017 European Spallation Source ERIC
-#include <common/TimeString.h>
+#include <common/time/TimeString.h>
 #include <cstring>
 #include <gdgem/generators/BuilderHits.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #undef TRC_MASK
 #define TRC_MASK 0
 

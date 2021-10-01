@@ -9,7 +9,7 @@
 
 #include <dream/readout/DataParser.h>
 #include <dream/test/DataParserTestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Dream;
 

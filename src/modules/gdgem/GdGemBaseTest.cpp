@@ -6,9 +6,9 @@
  */
 
 #include <gdgem/GdGemBase.h>
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 #include <gdgem/GdGemBaseTestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class GdGemBaseStandIn : public GdGemBase {
 public:

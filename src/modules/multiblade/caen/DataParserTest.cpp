@@ -7,7 +7,7 @@
 
 #include <multiblade/caen/DataParser.h>
 #include <multiblade/caen/DataParserTestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class MultibladeDataTest : public TestBase {
 protected:

@@ -2,7 +2,7 @@
 
 #include <loki/readout/DataParser.h>
 #include <loki/test/DataParserTestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Loki;
 

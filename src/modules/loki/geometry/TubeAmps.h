@@ -12,7 +12,7 @@
 
 #pragma once
 #include <cinttypes>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <vector>
 
 // #undef TRC_LEVEL

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <string>

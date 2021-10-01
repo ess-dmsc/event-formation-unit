@@ -14,8 +14,8 @@
 #include <gdgem/srs/ParserVMM3TestData.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <test/TestBase.h>
-#include <test/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
 
 //
 std::vector<uint8_t> marker_3_data_3_plane_0_and_1 {

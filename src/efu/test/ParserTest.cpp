@@ -5,7 +5,7 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #define UNUSED __attribute__((unused))
 

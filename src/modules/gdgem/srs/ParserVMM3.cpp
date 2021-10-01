@@ -12,7 +12,7 @@
 #include <cinttypes>
 #include <cstdio>
 #include <string.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <gdgem/srs/ParserVMM3.h>
 
 // #undef TRC_LEVEL

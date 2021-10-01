@@ -6,8 +6,8 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 #include <freia/geometry/Config.h>
 
 namespace Freia {

@@ -33,10 +33,10 @@
  }
 )";
 
-#include <test/SaveBuffer.h>
+#include <common/testutils/SaveBuffer.h>
 #include <multiblade/MBCaenBase.h>
-#include <test/TestUDPServer.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
+#include <common/testutils/TestBase.h>
 
 class CAENBaseStandIn : public Multiblade::CAENBase {
 public:

@@ -13,7 +13,7 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <memory>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <vector>
 
 using namespace Loki;

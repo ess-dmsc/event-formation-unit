@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/JsonFile.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <dream/geometry/Config.h>
 
 namespace Dream {

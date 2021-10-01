@@ -14,7 +14,7 @@
 #include <fmt/format.h>
 
 #include <common/BenchmarkUtil.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 #include <memory>
 

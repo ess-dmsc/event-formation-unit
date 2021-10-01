@@ -3,7 +3,7 @@
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <cstring>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include "ev42_events_generated.h"
 
 //#define ARRAYLENGTH 125000

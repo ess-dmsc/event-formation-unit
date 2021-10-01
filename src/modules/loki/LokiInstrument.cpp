@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/TimeString.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Trace.h>
 #include <loki/LokiInstrument.h>
 
 // #undef TRC_LEVEL

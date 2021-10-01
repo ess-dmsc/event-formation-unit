@@ -3,7 +3,7 @@
 #include <common/Detector.h>
 #include <common/DetectorModuleRegister.h>
 #include <memory>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #define UNUSED __attribute__((unused))
 

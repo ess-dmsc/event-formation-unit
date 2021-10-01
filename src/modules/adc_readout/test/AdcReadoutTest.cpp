@@ -6,7 +6,7 @@
  */
 
 #include <adc_readout/AdcReadoutBase.h>
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 #include <array>
 #include <gtest/gtest.h>
 #include <trompeloeil.hpp>

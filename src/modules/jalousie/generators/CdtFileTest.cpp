@@ -2,7 +2,7 @@
 /// TODO REMOVE?
 
 #include <jalousie/generators/CdtFile.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Jalousie;
 

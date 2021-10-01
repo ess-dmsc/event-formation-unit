@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/srs/SRSMappings.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <sstream>
 
 // #undef TRC_LEVEL

@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/JsonFile.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <loki/geometry/Config.h>
 
 namespace Loki {

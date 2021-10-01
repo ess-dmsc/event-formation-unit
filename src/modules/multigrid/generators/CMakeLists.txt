@@ -3,7 +3,7 @@
 #=============================================================================
 
 set(mggen_readouts_SRC
-  ../../generators/generator.cpp
+  ${ESS_SOURCE_DIR}/generators/udpgen_hits/generator.cpp
   ../mesytec/Readout.cpp
   ReaderReadouts.cpp
   )

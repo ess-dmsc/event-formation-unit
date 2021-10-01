@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/reduction/matching/GapMatcher.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 // #include <cmath>
 // #include <algorithm>
 

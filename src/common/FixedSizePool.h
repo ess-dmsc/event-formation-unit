@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <common/Assert.h>
+#include <common/debug/Assert.h>
 #include <common/BitMath.h>
-#include <common/Expect.h>
-#include <common/Trace.h>
+#include <common/debug/Expect.h>
+#include <common/debug/Trace.h>
 
 #include <algorithm>
 #include <bitset>

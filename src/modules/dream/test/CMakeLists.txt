@@ -17,11 +17,11 @@ create_test_executable(DreamGeometryTest)
 
 
 set(DreamConfigTest_INC
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ${DREAM_BASE_DIR}/geometry/Config.h
   )
 set(DreamConfigTest_SRC
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ConfigTest.cpp
   )
@@ -31,17 +31,17 @@ create_test_executable(DreamConfigTest)
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
-  ${ESS_MODULE_DIR}/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(DreamInstrumentTest_SRC
   DreamInstrumentTest.cpp
   ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
-  ${ESS_MODULE_DIR}/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )
 create_test_executable(DreamInstrumentTest)
 
@@ -49,7 +49,7 @@ create_test_executable(DreamInstrumentTest)
 
 set(DreamDataParserTest_INC
   ../readout/DataParser.h
-  ../../readout/common/Parser.h)
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
 set(DreamDataParserTest_SRC
   ../readout/DataParser.cpp
   DataParserTest.cpp)

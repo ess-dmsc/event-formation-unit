@@ -15,7 +15,7 @@
 #endif
 
 #include <common/EFUArgs.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class EFUArgsTest : public TestBase {};
 

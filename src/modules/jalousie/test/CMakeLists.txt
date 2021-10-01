@@ -14,8 +14,8 @@ set(JalousieBaseTest_INC
   ${JAL_BASE_DIR}/Readout.h
   ${JAL_BASE_DIR}/SumoMappings.h
   ${JAL_BASE_DIR}/rapidcsv.h
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h)
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h)
 
 set(JalousieBaseTest_SRC
   JalousieBaseTest.cpp
@@ -23,8 +23,8 @@ set(JalousieBaseTest_SRC
   ${JAL_BASE_DIR}/Config.cpp
   ${JAL_BASE_DIR}/Readout.cpp
   ${JAL_BASE_DIR}/SumoMappings.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp)
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp)
 
 create_test_executable(JalousieBaseTest)
 

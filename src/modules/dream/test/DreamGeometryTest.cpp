@@ -1,7 +1,7 @@
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <bitset>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <dream/geometry/DreamGeometry.h>
 
 //#undef TRC_LEVEL

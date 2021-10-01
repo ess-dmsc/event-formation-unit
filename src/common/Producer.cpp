@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/Producer.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <common/gccintel.h>
 
 // #undef TRC_LEVEL

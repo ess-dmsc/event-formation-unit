@@ -14,7 +14,7 @@
 #include <gdgem/srs/ParserVMM3.h>
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/nmx/Readout.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <algorithm>
 
 // #undef TRC_LEVEL

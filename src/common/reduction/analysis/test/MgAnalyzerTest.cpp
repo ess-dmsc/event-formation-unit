@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <common/reduction/analysis/MgAnalyzer.h>
 

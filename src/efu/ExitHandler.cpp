@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <efu/ExitHandler.h>
 #include <execinfo.h>
 #include <signal.h>

@@ -10,10 +10,10 @@
 #include <string>
 
 #include <dream/DreamBase.h>
-#include <readout/common/Parser.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
-#include <test/TestUDPServer.h>
+#include <common/readout/ess/Parser.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
 
 std::string dreamjson = R"(
   {

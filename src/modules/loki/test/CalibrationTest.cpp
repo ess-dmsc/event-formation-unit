@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <loki/geometry/Calibration.h>
-#include <test/TestBase.h>
-#include <test/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
 
 std::string NotJsonFile{"deleteme_lokicalib_notjson.json"};
 std::string NotJsonStr = R"(

@@ -4,38 +4,41 @@
 
 add_subdirectory(monitor)
 add_subdirectory(reduction)
+add_subdirectory(readout)
 
 set(efu_common_SRC
   DataSave.cpp
   DetectorModuleRegister.cpp
   EFUArgs.cpp
   EV42Serializer.cpp
-  Hexdump.cpp
+  debug/Hexdump.cpp
   Statistics.cpp
   Producer.cpp
   Socket.cpp
   StatPublisher.cpp
-  Timer.cpp
-  TimeString.cpp
-  TSCTimer.cpp
+  time/Timer.cpp
+  time/TimeString.cpp
+  time/TSCTimer.cpp
   )
 
 set(efu_common_INC
-  Assert.h
   BitMath.h
   Buffer.h
   DataSave.h
   Detector.h
   DetectorModuleRegister.h
   DumpFile.h
+  debug/Assert.h
+  debug/Log.h
+  debug/Hexdump.h
+  debug/Expect.h
+  debug/Trace.h
+  debug/TraceGroups.h
   EFUArgs.h
   EV42Serializer.h
-  Expect.h
   FixedSizePool.h
-  Hexdump.h
   JsonFile.h
   gccintel.h
-  Log.h
   Statistics.h
   PoolAllocator.h
   Producer.h
@@ -43,11 +46,9 @@ set(efu_common_INC
   Socket.h
   StatPublisher.h
   TestImageUdder.h
-  Timer.h
-  TimeString.h
-  Trace.h
-  TraceGroups.h
-  TSCTimer.h
+  time/Timer.h
+  time/TimeString.h
+  time/TSCTimer.h
   ${VERSION_INCLUDE_DIR}/common/version_num.h
   ${VERSION_INCLUDE_DIR}/common/Version.h
   )

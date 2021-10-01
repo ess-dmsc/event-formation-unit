@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/DetectorModuleRegister.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>

@@ -3,8 +3,8 @@
 
 #include <multiblade/caen/Config.h>
 #include <multiblade/caen/ConfigTestData.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 class ConfigTest : public TestBase {};
 

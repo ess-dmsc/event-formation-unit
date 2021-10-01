@@ -4,7 +4,7 @@
 #include <chrono>
 #include <efu/Server.h>
 #include <sys/socket.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <thread>
 
 uint16_t ServerPort = 8889;

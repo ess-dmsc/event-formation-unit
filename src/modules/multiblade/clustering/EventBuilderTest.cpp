@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <multiblade/clustering/EventBuilder.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multiblade;
 

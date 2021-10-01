@@ -39,23 +39,23 @@ create_test_executable(LokiFullGeometryTest)
 
 
 set(LokiCalibrationTest_INC
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ../geometry/Config.h
   ../geometry/Calibration.h)
 set(LokiCalibrationTest_SRC
   ../geometry/Config.cpp
   ../geometry/Calibration.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   CalibrationTest.cpp)
 create_test_executable(LokiCalibrationTest)
 
 
 set(LokiConfigTest_INC
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ../geometry/Config.h)
 set(LokiConfigTest_SRC
   ../geometry/Config.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(LokiConfigTest)
 target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
@@ -63,8 +63,12 @@ target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
 ##
 ## readout/
 ##
-set(LokiDataParserTest_INC ../readout/DataParser.h ../../readout/common/Parser.h)
-set(LokiDataParserTest_SRC ../readout/DataParser.cpp DataParserTest.cpp)
+set(LokiDataParserTest_INC
+  ../readout/DataParser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
+set(LokiDataParserTest_SRC
+  ../readout/DataParser.cpp
+  DataParserTest.cpp)
 create_test_executable(LokiDataParserTest)
 
 
@@ -78,12 +82,12 @@ create_test_executable(LokiDataParserTest)
 ##
 set(CombinedParserTest_INC
   ../readout/DataParser.h
-  ../../readout/common/Parser.h
-  ../../generators/DataFuzzer.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
+  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   )
 set(CombinedParserTest_SRC
-  ../../readout/common/Parser.cpp
- ../../generators/DataFuzzer.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
   ../readout/DataParser.cpp
   CombinedParserTest.cpp
   ReadoutGenerator.cpp)

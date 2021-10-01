@@ -11,7 +11,7 @@
 
 #include <assert.h>
 #include <cstdint>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

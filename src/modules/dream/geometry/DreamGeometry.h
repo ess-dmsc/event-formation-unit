@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <common/Assert.h>
+#include <common/debug/Assert.h>
 #include <stdint.h>
 
 namespace DreamGeometry {

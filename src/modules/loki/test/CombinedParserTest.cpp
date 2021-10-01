@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <loki/Counters.h>
-#include <readout/common/Parser.h>
+#include <common/readout/ess/Parser.h>
 #include <loki/readout/DataParser.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <loki/test/ReadoutGenerator.h>
 
 
