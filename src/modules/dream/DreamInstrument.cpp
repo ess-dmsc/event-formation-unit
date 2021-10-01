@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/TimeString.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Trace.h>
 #include <dream/DreamInstrument.h>
 #include <dream/geometry/DreamGeometry.h>
 

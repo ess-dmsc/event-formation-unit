@@ -5,5 +5,5 @@
 
 include_directories(.)
 
-add_subdirectory(common)
+add_subdirectory(ess)
 add_subdirectory(vmm3)

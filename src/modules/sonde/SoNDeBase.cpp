@@ -11,9 +11,9 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
 #include <common/RuntimeStat.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <common/Socket.h>
-#include <common/TSCTimer.h>
+#include <common/time/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
 // #undef TRC_LEVEL

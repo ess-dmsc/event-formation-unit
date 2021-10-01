@@ -65,7 +65,7 @@ target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
 ##
 set(LokiDataParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h)
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
 set(LokiDataParserTest_SRC
   ../readout/DataParser.cpp
   DataParserTest.cpp)
@@ -82,11 +82,11 @@ create_test_executable(LokiDataParserTest)
 ##
 set(CombinedParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   )
 set(CombinedParserTest_SRC
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
   ../readout/DataParser.cpp
   CombinedParserTest.cpp

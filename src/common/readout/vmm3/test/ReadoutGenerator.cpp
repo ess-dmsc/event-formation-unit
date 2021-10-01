@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include <math.h>
-#include <readout/vmm3/test/ReadoutGenerator.h>
+#include <common/readout/vmm3/test/ReadoutGenerator.h>
 #include <stdexcept>
 
 

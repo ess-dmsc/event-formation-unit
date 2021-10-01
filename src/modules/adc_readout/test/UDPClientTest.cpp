@@ -6,7 +6,7 @@
  */
 
 #include <adc_readout/UDPClient.h>
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 #include <chrono>
 #include <gtest/gtest.h>
 

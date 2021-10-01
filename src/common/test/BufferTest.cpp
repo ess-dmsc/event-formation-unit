@@ -2,7 +2,7 @@
 
 #include <common/Buffer.h>
 #include <memory>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class BufferTest : public TestBase {
 };

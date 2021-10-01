@@ -2,7 +2,7 @@
 
 #include <gdgem/srs/SRSTime.h>
 #include <string>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <unistd.h>
 
 using namespace Gem;

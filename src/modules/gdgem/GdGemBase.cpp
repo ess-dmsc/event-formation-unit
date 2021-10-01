@@ -23,14 +23,14 @@
 #include <efu/Server.h>
 #include <common/RuntimeStat.h>
 #include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
-#include <common/Trace.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 
 int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
                         char *Output,

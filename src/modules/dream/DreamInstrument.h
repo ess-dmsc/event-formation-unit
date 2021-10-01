@@ -15,8 +15,8 @@
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
-#include <modules/readout/common/ESSTime.h>
-#include <modules/readout/common/Parser.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
 
 namespace Dream {
 

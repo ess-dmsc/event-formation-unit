@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/GapMatcher.h>

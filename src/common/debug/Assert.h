@@ -17,7 +17,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <common/Expect.h>
+#include <common/debug/Expect.h>
 #include <stdio.h>
 #include <stdlib.h>
 

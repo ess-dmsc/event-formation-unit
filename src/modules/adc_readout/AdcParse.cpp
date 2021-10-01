@@ -6,7 +6,7 @@
  */
 
 #include "AdcParse.h"
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 #include <arpa/inet.h>
 #include <bitset>

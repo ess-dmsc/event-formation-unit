@@ -6,7 +6,7 @@
 /// \brief Implementation - just calls chrono functions
 //===----------------------------------------------------------------------===//
 
-#include <common/Timer.h>
+#include <common/time/Timer.h>
 
 /** */
 Timer::Timer(void) { T0 = HRClock::now(); }

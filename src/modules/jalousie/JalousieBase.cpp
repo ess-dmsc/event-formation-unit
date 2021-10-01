@@ -11,19 +11,19 @@
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
 #include <common/RuntimeStat.h>
-#include <common/TimeString.h>
+#include <common/time/TimeString.h>
 #include <common/TestImageUdder.h>
 
 #include <common/SPSCFifo.h>
 #include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include "JalousieBase.h"
 //#undef TRC_MASK
 //#define TRC_MASK 0

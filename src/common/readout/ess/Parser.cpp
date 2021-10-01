@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <cstring>
-#include <common/Trace.h>
-#include <readout/common/Parser.h>
+#include <common/debug/Trace.h>
+#include <common/readout/ess/Parser.h>
 #include <arpa/inet.h>
 
 namespace ESSReadout {

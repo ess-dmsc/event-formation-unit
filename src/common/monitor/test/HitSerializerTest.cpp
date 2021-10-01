@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <common/monitor/HitSerializer.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class HitSerializerTest : public TestBase {
   void SetUp() override {  }

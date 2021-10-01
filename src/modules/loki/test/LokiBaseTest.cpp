@@ -8,10 +8,10 @@
 #include <string>
 
 #include <loki/LokiBase.h>
-#include <test/TestUDPServer.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
-#include <readout/common/Parser.h>
+#include <common/testutils/TestUDPServer.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/readout/ess/Parser.h>
 
 /// Test configuration - two rings used (0 and 1)
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and

@@ -12,8 +12,8 @@
 #include <sstream>
 #include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/mesytec/BuilderMesytec.h>
-#include <common/Log.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 
 namespace Multigrid {
 

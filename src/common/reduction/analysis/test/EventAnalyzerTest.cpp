@@ -3,7 +3,7 @@
 #include <common/reduction/analysis/EventAnalyzer.h>
 #include <cmath>
 #include <string>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <unistd.h>
 
 

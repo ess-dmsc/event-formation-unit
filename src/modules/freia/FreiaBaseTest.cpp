@@ -59,10 +59,10 @@ std::vector<uint8_t> dummyreadout {
    }
 )";
 
-#include <test/SaveBuffer.h>
+#include <common/testutils/SaveBuffer.h>
 #include <freia/FreiaBase.h>
-#include <test/TestUDPServer.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
+#include <common/testutils/TestBase.h>
 
 class FreiaBaseStandIn : public Freia::FreiaBase {
 public:

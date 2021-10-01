@@ -2,7 +2,7 @@
 
 #include <common/monitor/HistogramSerializer.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #define MAX_STRIP_VAL_TEST 5000
 

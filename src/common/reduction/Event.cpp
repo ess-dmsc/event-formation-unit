@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/reduction/Event.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <fmt/format.h>
 #include <cmath>
 

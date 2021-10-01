@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <loki/geometry/PanelGeometry.h>
 #include <memory>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Loki;
 

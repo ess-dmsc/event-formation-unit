@@ -3,7 +3,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/gccintel.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");

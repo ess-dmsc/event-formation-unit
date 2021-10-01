@@ -6,9 +6,9 @@
 /// \brief Parser for ESS readout of DREAM
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <dream/readout/DataParser.h>
-#include <readout/common/Parser.h>
+#include <common/readout/ess/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

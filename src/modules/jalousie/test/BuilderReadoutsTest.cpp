@@ -10,7 +10,7 @@
 
 #include <../generators/CdtFile.h>
 #include <../BuilderReadouts.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <set>
 
 using namespace Jalousie;

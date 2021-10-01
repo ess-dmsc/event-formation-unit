@@ -13,7 +13,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstring>
-#include <udpgenpcap/ReaderPcap.h>
+#include <generators/udpgenpcap/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 #include <fmt/format.h>

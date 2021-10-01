@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/reduction/Cluster.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class ClusterTest : public TestBase {
 protected:

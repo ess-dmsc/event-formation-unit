@@ -12,7 +12,7 @@ set(freia_common_inc
   FreiaInstrument.h
   geometry/Config.h
   ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.h
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
@@ -23,7 +23,7 @@ set(freia_common_src
   FreiaInstrument.cpp
   geometry/Config.cpp
   ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.cpp
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
   )
 

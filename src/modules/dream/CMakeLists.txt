@@ -13,7 +13,7 @@ set(dream_common_inc
   geometry/Config.h
   readout/DataParser.h
   readout/Readout.h
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
 )
 
 set(dream_common_src
@@ -23,7 +23,7 @@ set(dream_common_src
   geometry/Config.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
 )
 
 #=============================================================================

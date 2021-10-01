@@ -11,19 +11,19 @@
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
-#include <common/Hexdump.h>
+#include <common/debug/Hexdump.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
+#include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 
 #include <unistd.h>
 
 #include <common/RuntimeStat.h>
 #include <common/Socket.h>
 #include <common/SPSCFifo.h>
-#include <common/TimeString.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/time/TimeString.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
 #include <stdio.h>

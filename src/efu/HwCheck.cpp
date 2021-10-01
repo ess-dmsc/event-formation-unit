@@ -8,7 +8,7 @@
 
 #include <efu/HwCheck.h>
 #include <arpa/inet.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <cinttypes>
 #include <cstring>
 #include <ifaddrs.h>

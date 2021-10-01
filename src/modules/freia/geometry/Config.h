@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/JsonFile.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <string>
 #include <vector>
 

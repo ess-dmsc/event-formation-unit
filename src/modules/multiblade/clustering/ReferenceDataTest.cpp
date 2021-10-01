@@ -13,7 +13,7 @@
 #include <math.h>
 #include <multiblade/clustering/EventBuilder.h>
 #include <stdlib.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

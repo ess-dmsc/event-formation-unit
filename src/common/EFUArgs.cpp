@@ -9,7 +9,7 @@
 #include <common/DetectorModuleRegister.h>
 #include <common/EFUArgs.h>
 #include <common/Version.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <cstdio>
 #include <fstream>
 #include <regex>

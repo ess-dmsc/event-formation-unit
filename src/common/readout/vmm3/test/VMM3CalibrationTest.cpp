@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <readout/vmm3/VMM3Calibration.h>
-#include <test/TestBase.h>
+#include <common/readout/vmm3/VMM3Calibration.h>
+#include <common/testutils/TestBase.h>
 
 
 class VMM3CalibrationTest : public TestBase {

@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cassert>
 #include <common/EFUArgs.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/Version.h>
 #include <cstring>
 #include <efu/Parser.h>

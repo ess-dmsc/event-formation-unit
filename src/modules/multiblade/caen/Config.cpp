@@ -6,14 +6,14 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <fstream>
 #include <multiblade/caen/Config.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
 #pragma GCC diagnostic pop
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 namespace Multiblade {
 

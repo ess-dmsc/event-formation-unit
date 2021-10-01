@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <multigrid/mesytec/BuilderMesytec.h>
 #include <multigrid/mesytec/test/TestData.h>
 #include <common/JsonFile.h>
-#include <udpgenpcap/ReaderPcap.h>
+#include <generators/udpgenpcap/ReaderPcap.h>
 
 using namespace Multigrid;
 

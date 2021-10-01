@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <generators/ReaderHits.h>
+#include <generators/udpgen_hits/ReaderHits.h>
 
 namespace Gem {
 

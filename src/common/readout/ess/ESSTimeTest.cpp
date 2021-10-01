@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <readout/common/ESSTime.h>
-#include <test/TestBase.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/testutils/TestBase.h>
 #include <cmath>
 
 namespace ESSReadout {

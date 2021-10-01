@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <common/Assert.h>
+#include <common/debug/Assert.h>
 #include <common/FixedSizePool.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 #include <cstdint>
 

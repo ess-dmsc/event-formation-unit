@@ -15,7 +15,7 @@ set(loki_common_inc
   geometry/Config.h
   geometry/Calibration.h
   readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   )
 set(loki_common_src
   LokiBase.cpp
@@ -23,7 +23,7 @@ set(loki_common_src
   geometry/Config.cpp
   geometry/Calibration.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   )
 set(loki_INC ${loki_common_inc})
 set(loki_SRC Loki.cpp ${loki_common_src})

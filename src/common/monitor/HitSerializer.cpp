@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/monitor/HitSerializer.h>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <common/gccintel.h>
 
 //#undef TRC_LEVEL

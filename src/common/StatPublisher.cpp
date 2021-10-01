@@ -6,7 +6,7 @@
 ///
 //===----------------------------------------------------------------------===//
 //
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <fmt/format.h>
 

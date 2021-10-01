@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/DumpFile.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 struct __attribute__ ((packed)) Hit {
   size_t a{0};

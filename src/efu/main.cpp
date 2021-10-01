@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/Version.h>
 #include <efu/ExitHandler.h>
 #include <efu/HwCheck.h>
@@ -20,7 +20,7 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
-#include <common/Timer.h>
+#include <common/time/Timer.h>
 #include <common/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>

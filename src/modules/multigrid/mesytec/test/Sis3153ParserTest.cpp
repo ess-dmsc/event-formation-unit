@@ -2,7 +2,7 @@
 
 #include <multigrid/mesytec/Sis3153Parser.h>
 #include <multigrid/mesytec/test/TestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 

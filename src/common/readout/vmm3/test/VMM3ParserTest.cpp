@@ -7,10 +7,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <readout/common/Parser.h>
-#include <readout/vmm3/VMM3Parser.h>
-#include <readout/vmm3/test/VMM3ParserTestData.h>
-#include <test/TestBase.h>
+#include <common/readout/ess/Parser.h>
+#include <common/readout/vmm3/VMM3Parser.h>
+#include <common/readout/vmm3/test/VMM3ParserTestData.h>
+#include <common/testutils/TestBase.h>
 
 namespace ESSReadout {
 

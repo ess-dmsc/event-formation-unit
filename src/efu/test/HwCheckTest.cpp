@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/HwCheck.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <vector>
 
 class HwCheckTest : public TestBase {

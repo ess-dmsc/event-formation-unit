@@ -10,8 +10,8 @@
 #include <cstring>
 #include <iostream>
 #include <common/Socket.h>
-#include <common/Log.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 #include <netdb.h>
 
 // #undef TRC_LEVEL

@@ -6,7 +6,7 @@
  */
 // GCOVR_EXCL_START
 
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 #include <ciso646>
 #include <cstring>
 #include <functional>

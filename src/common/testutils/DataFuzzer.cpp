@@ -9,7 +9,7 @@
 // GCOVR_EXCL_START
 
 #include <cassert>
-#include <modules/generators/DataFuzzer.h>
+#include <common/testutils/DataFuzzer.h>
 
 
 void DataFuzzer::fuzz8Bits(void * Buffer, uint16_t BufferLength, uint16_t MaxRepeats)  {

@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <modules/generators/DataFuzzer.h>
-#include <readout/vmm3/VMM3Parser.h>
+#include <common/testutils/DataFuzzer.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 
 class ReadoutGenerator {
 public:

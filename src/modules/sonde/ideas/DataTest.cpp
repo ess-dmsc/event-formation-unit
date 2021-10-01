@@ -5,7 +5,7 @@
 #include <sonde/Geometry.h>
 #include <sonde/ideas/Data.h>
 #include <sonde/ideas/TestData.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Sonde;
 

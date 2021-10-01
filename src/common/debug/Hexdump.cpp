@@ -8,7 +8,7 @@
 /// From https://gist.github.com/ccbrown
 //===----------------------------------------------------------------------===//
 
-#include <common/Hexdump.h>
+#include <common/debug/Hexdump.h>
 
 void hexDump(const void* DataPtr, size_t DataLen) {
 	char ascii[17];

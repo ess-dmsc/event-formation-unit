@@ -6,9 +6,9 @@
 
 #include <common/EV42Serializer.h>
 #include <freia/FreiaInstrument.h>
-#include <readout/common/Parser.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/readout/ess/Parser.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 #include <stdio.h>
 #include <string.h>
 

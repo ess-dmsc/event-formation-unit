@@ -1,6 +1,6 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <common/reduction/HitVector.h>
 #include <common/reduction/analysis/EventAnalyzer.h>
@@ -9,7 +9,7 @@
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/tests/HitGenerator.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 #include <memory>
 

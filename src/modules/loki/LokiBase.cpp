@@ -10,14 +10,14 @@
 
 #include <cinttypes>
 #include <common/EFUArgs.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
 #include <common/Socket.h>
-#include <common/TSCTimer.h>
+#include <common/time/TSCTimer.h>
 #include <common/TestImageUdder.h>
-#include <common/TimeString.h>
-#include <common/Timer.h>
-#include <common/Trace.h>
+#include <common/time/TimeString.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <loki/LokiInstrument.h>
 #include <stdio.h>

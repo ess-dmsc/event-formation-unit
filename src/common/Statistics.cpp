@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/Statistics.h>
 
 int Statistics::create(std::string StatName, int64_t &Value) {

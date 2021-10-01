@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <readout/common/ESSTime.h>
+#include <common/readout/ess/ESSTime.h>
 #include <cinttypes>
 
 namespace ESSReadout {

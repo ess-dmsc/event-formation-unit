@@ -5,7 +5,7 @@
 /// \brief Save a buffer to file - only to be used in unit tests!
 //===----------------------------------------------------------------------===//
 
-#include <test/SaveBuffer.h>
+#include <common/testutils/SaveBuffer.h>
 #include <fcntl.h>
 #include <fmt/format.h>
 #include <sys/types.h>

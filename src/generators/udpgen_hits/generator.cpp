@@ -10,14 +10,14 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 
-#include <generators/ReaderHits.h>
+#include <generators/udpgen_hits/ReaderHits.h>
 
-#include <multigrid/generators/ReaderReadouts.h>
-#include <gdgem/generators/ReaderReadouts.h>
-#include <jalousie/generators/CdtFile.h>
+#include <modules/multigrid/generators/ReaderReadouts.h>
+#include <modules/gdgem/generators/ReaderReadouts.h>
+#include <modules/jalousie/generators/CdtFile.h>
 
 #include <common/Socket.h>
 

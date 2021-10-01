@@ -10,7 +10,7 @@
 #pragma once
 
 #include <loki/readout/DataParser.h>
-#include <modules/generators/DataFuzzer.h>
+#include <common/testutils/DataFuzzer.h>
 
 class ReadoutGenerator {
 public:

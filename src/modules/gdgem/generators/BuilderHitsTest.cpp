@@ -2,7 +2,7 @@
 
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/srs/SRSMappings.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 // From common/reduction/Hit.h
 std::vector<uint8_t> TwoHitsXY {

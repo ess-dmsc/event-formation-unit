@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <modules/readout/vmm3/VMM3Calibration.h>
+#include <common/readout/vmm3/VMM3Calibration.h>
 #include <vector>
 
 namespace ESSReadout {

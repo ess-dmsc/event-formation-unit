@@ -5,7 +5,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <freia/geometry/Geometry.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Freia;
 

@@ -6,11 +6,11 @@
 #include <set>
 #include <sstream>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #undef TRC_MASK
 #define TRC_MASK 0
 

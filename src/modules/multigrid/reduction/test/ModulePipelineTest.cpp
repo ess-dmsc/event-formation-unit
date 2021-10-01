@@ -9,7 +9,7 @@
 
 #include <multigrid/reduction/ModulePipeline.h>
 #include <multigrid/geometry/PlaneMappings.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 

@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <udpgenpcap/ReaderPcap.h>
+#include <generators/udpgenpcap/ReaderPcap.h>
 #include <common/Socket.h>
 #include <string.h>
 #include <string>

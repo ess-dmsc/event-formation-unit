@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <common/reduction/matching/OverlapMatcher.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class OverlapMatcherTest : public TestBase {
 protected:

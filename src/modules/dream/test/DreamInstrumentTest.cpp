@@ -5,9 +5,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <dream/DreamInstrument.h>
-#include <test/SaveBuffer.h>
+#include <common/testutils/SaveBuffer.h>
 #include <string.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Dream;
 

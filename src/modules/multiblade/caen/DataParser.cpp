@@ -8,7 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

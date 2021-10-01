@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/Readout.h>
+#include <modules/gdgem/nmx/Readout.h>
 
 namespace Gem {
 

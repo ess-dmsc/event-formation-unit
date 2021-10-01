@@ -2,7 +2,7 @@
 
 #include <arpa/inet.h>
 #include <cassert>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <cstring>
 #include <sonde/ideas/Data.h>
 

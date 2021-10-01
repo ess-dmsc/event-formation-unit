@@ -2,8 +2,8 @@
 
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/srs/CalibrationFileTestData.h>
-#include <test/TestBase.h>
-#include <test/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
 #include <vector>
 
 using namespace Gem;

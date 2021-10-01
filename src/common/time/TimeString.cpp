@@ -6,7 +6,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/TimeString.h>
+#include <common/time/TimeString.h>
 
 std::string timeString() {
   char cStartTime[50];
