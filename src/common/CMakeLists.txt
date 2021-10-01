@@ -4,6 +4,7 @@
 
 add_subdirectory(monitor)
 add_subdirectory(reduction)
+add_subdirectory(readout)
 
 set(efu_common_SRC
   DataSave.cpp
@@ -15,9 +16,9 @@ set(efu_common_SRC
   Producer.cpp
   Socket.cpp
   StatPublisher.cpp
-  Timer.cpp
-  TimeString.cpp
-  TSCTimer.cpp
+  time/Timer.cpp
+  time/TimeString.cpp
+  time/TSCTimer.cpp
   )
 
 set(efu_common_INC
@@ -43,11 +44,11 @@ set(efu_common_INC
   Socket.h
   StatPublisher.h
   TestImageUdder.h
-  Timer.h
-  TimeString.h
+  time/Timer.h
+  time/TimeString.h
   Trace.h
   TraceGroups.h
-  TSCTimer.h
+  time/TSCTimer.h
   ${VERSION_INCLUDE_DIR}/common/version_num.h
   ${VERSION_INCLUDE_DIR}/common/Version.h
   )

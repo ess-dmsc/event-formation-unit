@@ -12,13 +12,13 @@ target_compile_definitions(MGConfigTest
 set(MultigridBaseTest_INC
   ../Config.h
   ../MultigridBase.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
   )
 set(MultigridBaseTest_SRC
   MultigridBaseTest.cpp
   ../Config.cpp
   ../MultigridBase.cpp
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
   )
 set(MultigridBaseTest_LIB MgGeometryLib MgMesytecLib MgReductionLib)
 create_test_executable(MultigridBaseTest)

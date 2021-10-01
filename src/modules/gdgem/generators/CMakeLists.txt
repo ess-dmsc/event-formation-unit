@@ -3,7 +3,7 @@
 #=============================================================================
 
 set(nmxgen_readouts_SRC
-  ../../generators/generator.cpp
+  ${ESS_SOURCE_DIR}/generators/udpgen_hits/generator.cpp
   ReaderReadouts.cpp
   )
 set(nmxgen_readouts_INC

@@ -12,10 +12,10 @@ set(freia_common_inc
   FreiaInstrument.h
   geometry/Config.h
   ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.h
-  ${ESS_MODULE_DIR}/readout/common/Parser.h
-  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Parser.h
-  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Calibration.h
-  ${ESS_MODULE_DIR}/readout/vmm3/Hybrid.h
+  ${ESS_SOURCE_DIR}/common/readout/common/Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
 
   )
 set(freia_common_src
@@ -23,8 +23,8 @@ set(freia_common_src
   FreiaInstrument.cpp
   geometry/Config.cpp
   ${ESS_MODULE_DIR}/multiblade/clustering/EventBuilder.cpp
-  ${ESS_MODULE_DIR}/readout/common/Parser.cpp
-  ${ESS_MODULE_DIR}/readout/vmm3/VMM3Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/common/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
   )
 
 set(freia_INC ${freia_common_inc})
@@ -34,14 +34,14 @@ create_module(freia)
 #
 set(FreiaBaseTest_INC
   ${freia_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(FreiaBaseTest_SRC
   FreiaBaseTest.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${freia_common_src}
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(FreiaBaseTest)
 
@@ -51,11 +51,11 @@ create_test_executable(FreiaBaseTest)
 ##
 set(FreiaInstrumentTest_INC
   ${freia_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(FreiaInstrumentTest_SRC
   ${freia_common_src}
   test/FreiaInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(FreiaInstrumentTest)
