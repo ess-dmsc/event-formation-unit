@@ -58,7 +58,13 @@ Config::Config(std::string ConfigFile) {
   }
   LOG(INIT, Sev::Info, "MaxGapStrip {}", MaxGapStrip);
 
-  XTRACE(INIT, DEB, "MaxPulseTimeNS %u", MaxPulseTimeNS);
+  try {
+    TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
+  }
+  LOG(INIT, Sev::Info, "TimeBoxNs {}", TimeBoxNs);
+
 
   try {
     auto PanelConfig = root["Config"];

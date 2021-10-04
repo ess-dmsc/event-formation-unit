@@ -54,7 +54,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
     for (auto & builder : builders) {
-      builder.setTimeBox(TimeBoxNs); // Time boxing
+      builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
     }
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
