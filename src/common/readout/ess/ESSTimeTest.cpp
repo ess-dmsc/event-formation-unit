@@ -64,6 +64,18 @@ TEST_F(ESSTimeTest, AddConstantDelay) {
   ASSERT_EQ(Time.getTOF(0, 88052499, 11), 999999999);
 }
 
+TEST_F(ESSTimeTest, ExactPulseDelay) {
+  Time.setReference(0, 6289464);
+  ASSERT_EQ(Time.TimeInNS, 71428568);
+
+  Time.setReference(    0, 0x034a3c11);
+  Time.setPrevReference(0, 0x02ea43d9);
+  ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428568);
+
+  Time.setReference(    0x615c414f, 0x034a3c11);
+  Time.setPrevReference(0x615c414f, 0x02ea43d9);
+  ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428568);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

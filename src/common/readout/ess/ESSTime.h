@@ -71,8 +71,7 @@ public:
 
   /// \brief convert ess High/Low time to NS
   uint64_t toNS(uint32_t High, uint32_t Low) {
-    //assert(Low < 88052500);
-    return  High * OneBillion + Low * NsPerTick;
+    return  High * OneBillion + (uint64_t)(Low * NsPerTick);
   }
 public:
   struct Stats_t Stats = {};
