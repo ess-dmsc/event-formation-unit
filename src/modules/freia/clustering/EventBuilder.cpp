@@ -41,14 +41,19 @@ void EventBuilder::insert(Hit hit) {
 void EventBuilder::insertDone() {
   XTRACE(CLUSTER, DEB, "HitsX %u, HitsY %u", HitsX.size(), HitsY.size());
   uint32_t TotReadouts = HitsX.size() + HitsY.size();
-  if ((TotReadouts < 500) and (TotReadouts > 0)) {
+  bool OneIsEmpty = HitsX.size() and HitsX.size();
+
+  if ((TotReadouts < 500) and (TotReadouts != 0)) {
     XTRACE(CLUSTER, INF, "Too few readouts (%u) keep buffering", TotReadouts);
     return; // More Hits are needed
   }
-  if (TotReadouts != 0) {
-    XTRACE(CLUSTER, INF, "HitsX %u, HitsY %u", HitsX.size(), HitsY.size());
-    flush();
+  if (OneIsEmpty) {
+    XTRACE(CLUSTER, INF, "Either X or Y has no readouts");
+    return; // More Hits are needed
   }
+
+  XTRACE(CLUSTER, INF, "HitsX %u, HitsY %u", HitsX.size(), HitsY.size());
+  flush();
 }
 
 void EventBuilder::flush() {
