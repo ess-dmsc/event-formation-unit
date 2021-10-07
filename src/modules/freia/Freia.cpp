@@ -17,11 +17,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
                     "dump to specified file")->group("Freia");
 
   parser.add_option("-f, --file", LocalFreiaSettings.ConfigFile,
-                    "Multi-Blade specific calibration (json) file")
+                    "Freia specific configuration (json) file")
                     ->group("Freia");
-
-  parser.add_option("--h5filesplit", LocalFreiaSettings.H5SplitTime,
-                    "Specify interval to split HDF5 files")
+  parser.add_option("--calibration", LocalFreiaSettings.CalibFile,
+                    "Freia specific calibration (json) file")
                     ->group("Freia");
 }
 

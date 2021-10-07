@@ -11,6 +11,7 @@
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <freia/FreiaInstrument.h>
+#include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <assert.h>
 
@@ -56,6 +57,13 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     for (auto & builder : builders) {
       builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
     }
+
+    // Load and apply calibration file
+    if (ModuleSettings.CalibFile != "") {
+      ESSReadout::CalibFile Calibration("Freia", Hybrids);
+      Calibration.load(ModuleSettings.CalibFile);
+    }
+
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
     // Producer monitorprod(EFUSettings.KafkaBroker, monitor);

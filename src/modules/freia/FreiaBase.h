@@ -18,7 +18,7 @@ namespace Freia {
 struct FreiaSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
-  uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
+  std::string CalibFile{""};
 };
 
 
