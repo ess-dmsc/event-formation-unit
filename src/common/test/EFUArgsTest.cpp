@@ -14,7 +14,7 @@
 #pragma message("Unit tests testing regular expressions are enabled.")
 #endif
 
-#include <common/EFUArgs.h>
+#include <common/detector/EFUArgs.h>
 #include <common/testutils/TestBase.h>
 
 class EFUArgsTest : public TestBase {};

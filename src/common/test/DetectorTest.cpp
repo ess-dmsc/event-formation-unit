@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Detector.h>
-#include <common/DetectorModuleRegister.h>
+#include <common/detector/Detector.h>
+#include <common/detector/DetectorModuleRegister.h>
 #include <memory>
 #include <common/testutils/TestBase.h>
 

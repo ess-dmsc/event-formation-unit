@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Buffer.h>
+#include <common/memory/Buffer.h>
 #include <memory>
 #include <common/testutils/TestBase.h>
 

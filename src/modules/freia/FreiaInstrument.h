@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>

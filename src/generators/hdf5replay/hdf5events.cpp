@@ -10,8 +10,8 @@
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
+#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/Producer.h>
 #include <h5cpp/hdf5.hpp>
 #include <unistd.h>
 

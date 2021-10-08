@@ -12,7 +12,7 @@
 #include "mo01_nmx_generated.h"
 
 #include <common/monitor/Histogram.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 
 class HistogramSerializer {
 public:

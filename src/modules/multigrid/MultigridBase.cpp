@@ -10,13 +10,13 @@
 #include <multigrid/MultigridBase.h>
 #include <multigrid/geometry/PlaneMappings.h>
 
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <common/time/TimeString.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 

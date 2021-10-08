@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <common/Detector.h>
-#include <common/Socket.h>
+#include <common/detector/Detector.h>
+#include <common/system/Socket.h>
 #include <common/Statistics.h>
 #include <common/time/Timer.h>
 #include <string>

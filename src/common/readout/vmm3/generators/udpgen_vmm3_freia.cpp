@@ -9,7 +9,7 @@
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/readout/vmm3/test/ReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START

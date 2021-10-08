@@ -6,8 +6,8 @@
 /// plugin for a minimalistic detector doing basically nothing
 //===----------------------------------------------------------------------===//
 
-#include <common/Detector.h>
-#include <common/Socket.h>
+#include <common/detector/Detector.h>
+#include <common/system/Socket.h>
 
 const char *classname = "Demo Detector";
 

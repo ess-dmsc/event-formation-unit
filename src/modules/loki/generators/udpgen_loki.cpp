@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <loki/test/ReadoutGenerator.h>
 #include <string.h>
 #include <string>

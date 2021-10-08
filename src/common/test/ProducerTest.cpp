@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include "KafkaMocks.h"
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <cstring>
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>

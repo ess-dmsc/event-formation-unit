@@ -8,14 +8,14 @@
 
 #include <jalousie/JalousieBase.h>
 #include <jalousie/Readout.h>
-#include <common/EFUArgs.h>
-#include <common/Producer.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/Producer.h>
 #include <common/RuntimeStat.h>
 #include <common/time/TimeString.h>
 #include <common/TestImageUdder.h>
 
-#include <common/SPSCFifo.h>
-#include <common/Socket.h>
+#include <common/memory/SPSCFifo.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 

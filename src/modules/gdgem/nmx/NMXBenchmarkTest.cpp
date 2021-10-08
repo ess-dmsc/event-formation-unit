@@ -3,7 +3,7 @@
 #include <benchmark/benchmark.h>
 #include <unistd.h>
 
-#include <common/PoolAllocator.h>
+#include <common/memory/PoolAllocator.h>
 #include <common/reduction/analysis/EventAnalyzer.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/CenterMatcher.h>

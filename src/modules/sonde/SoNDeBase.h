@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB

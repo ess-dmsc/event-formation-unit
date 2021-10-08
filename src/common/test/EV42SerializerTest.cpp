@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
+#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/Producer.h>
 #include <cstring>
 #include <common/testutils/TestBase.h>
 #include "ev42_events_generated.h"

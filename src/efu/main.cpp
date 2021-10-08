@@ -9,7 +9,7 @@
 
 #include <boost/filesystem.hpp>
 #include <cstdlib>
-#include <common/EFUArgs.h>
+#include <common/detector/EFUArgs.h>
 #include <common/StatPublisher.h>
 #include <common/debug/Log.h>
 #include <common/Version.h>
@@ -21,7 +21,7 @@
 #include <efu/Server.h>
 #include <iostream>
 #include <common/time/Timer.h>
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
 

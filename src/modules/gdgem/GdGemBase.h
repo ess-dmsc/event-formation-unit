@@ -8,14 +8,14 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXStats.h>
 #include <gdgem/NMXConfig.h>
 #include <common/reduction/clustering/AbstractClusterer.h>
 #include <common/reduction/matching/AbstractMatcher.h>
 #include <common/monitor/Histogram.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 
 const unsigned int MinNMXChannel{0};

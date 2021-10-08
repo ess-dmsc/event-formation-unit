@@ -9,7 +9,7 @@
 
 #pragma once
 #include <CLI/CLI.hpp>
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 #include <functional>
 #include <memory>
 #include <string>

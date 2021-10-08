@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <common/EFUArgs.h>
+#include <common/detector/EFUArgs.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>

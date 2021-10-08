@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <netdb.h>

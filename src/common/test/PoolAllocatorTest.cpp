@@ -1,6 +1,6 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 
-#include <common/PoolAllocator.h>
+#include <common/memory/PoolAllocator.h>
 #include <common/testutils/TestBase.h>
 
 class PoolAllocatorTest : public TestBase {

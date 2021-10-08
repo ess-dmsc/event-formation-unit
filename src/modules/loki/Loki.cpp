@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "LokiBase.h"
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 static Loki::LokiSettings LocalLokiSettings;
 

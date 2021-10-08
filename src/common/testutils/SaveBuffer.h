@@ -12,7 +12,7 @@
 #include <string>
 #include <cinttypes>
 
-/// \brief functionality moved away from DataSave class and into test
+/// \brief save buffer to file
 void saveBuffer(std::string filename, void *buffer, uint64_t datasize);
 
 /// \brief helper function to remove temporary files after test

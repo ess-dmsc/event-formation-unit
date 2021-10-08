@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <common/PoolAllocator.h>
+#include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit.h>
 
 #define ENABLE_GREEDY_HIT_ALLOCATOR 0

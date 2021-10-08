@@ -7,12 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <sonde/SoNDeBase.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 

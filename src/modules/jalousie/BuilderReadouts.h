@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/Buffer.h>
+#include <common/memory/Buffer.h>
 #include <jalousie/Readout.h>
 #include <vector>
 

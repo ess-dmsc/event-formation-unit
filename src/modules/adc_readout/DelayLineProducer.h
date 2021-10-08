@@ -15,7 +15,7 @@
 #include "EventSerializer.h"
 #include "PulseParameters.h"
 #include <atomic>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <mutex>
 #include <queue>

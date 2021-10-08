@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <CLI/CLI.hpp>
 
 #ifdef ESSUDPGEN_DREAM_SIM

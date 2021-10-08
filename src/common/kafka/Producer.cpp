@@ -9,9 +9,9 @@
 
 #include <cassert>
 #include <common/debug/Log.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <common/debug/Trace.h>
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
