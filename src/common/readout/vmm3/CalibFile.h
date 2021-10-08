@@ -26,7 +26,10 @@ public:
   CalibFile(std::string DetectorName, std::vector<Hybrid> & Hybrids)
      : Detector(DetectorName), Hybrids(Hybrids) {};
 
+
   void load(std::string FileName);
+
+  void apply();
 
   void applyCalibration(unsigned HybridIndex, nlohmann::json Calibration);
   void applyVMM3Calibration(Hybrid & Hybrid, unsigned vmmid,

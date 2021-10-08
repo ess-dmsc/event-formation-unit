@@ -28,7 +28,10 @@ namespace ESSReadout {
       LOG(INIT, Sev::Error, "Error loading json calibration file");
       throw std::runtime_error("Error loading json calibration file");
     }
+    apply();
+  }
 
+void CalibFile::apply() {
     std::string Name = root["Detector"];
     unsigned Version = root["Version"].get<unsigned int>();
     unsigned NumHybrids = root["Hybrids"].get<unsigned int>();
