@@ -11,11 +11,6 @@ set(BufferTest_SRC
   )
 create_test_executable(BufferTest)
 
-set(DataSaveTest_SRC
-  DataSaveTest.cpp
-  )
-create_test_executable(DataSaveTest)
-
 set(DumpFileTest_SRC
   DumpFileTest.cpp
   )

@@ -104,10 +104,6 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
     int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asch);
     if (pixelid >= 1) {
       addEvent(time, pixelid, NoAdcProvided);
-      // if (dumptofile) {
-      //   datafile->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
-      //                     hdr_sysno, asch >> 6, asch & 0x3f);
-      // }
     } else {
       XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)", i, asch);
       errors++;
@@ -147,11 +143,6 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
     if (pixelid > 0) {
       addEvent(hdr_hdrtime, pixelid, sample);
     }
-
-    // if (dumptofile) {
-    //   datafile->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, dp->TriggerType,
-    //                    dp->HoldDelay, dp->SourceId, dp->ChannelId, sample);
-    // }
   }
 
   return events;
@@ -189,10 +180,6 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
       if (pixelid >= 1) {
         addEvent(evtime, pixelid, ADCValue);
       }
-      // if (dumptofile) {
-      //   datafile->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
-      //                    dp->TriggerType, dp->ASIC, dp->Channel, ADCValue);
-      // }
     }
   }
 

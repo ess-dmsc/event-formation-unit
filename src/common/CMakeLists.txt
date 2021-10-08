@@ -16,7 +16,6 @@ set(efu_common_SRC
   time/Timer.cpp
   time/TimeString.cpp
   time/TSCTimer.cpp
-  #DataSave.cpp
   Statistics.cpp
   StatPublisher.cpp
   )
@@ -45,7 +44,6 @@ set(efu_common_INC
   time/TimeString.h
   time/TSCTimer.h
   BitMath.h
-  #DataSave.h
   DumpFile.h
   JsonFile.h
   Statistics.h
