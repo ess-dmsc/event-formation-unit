@@ -1,23 +1,18 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 
 #include <benchmark/benchmark.h>
-#include <unistd.h>
-
+#include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/analysis/EventAnalyzer.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/CenterMatcher.h>
-
+#include <common/testutils/BenchmarkUtil.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/tests/HitGenerator.h>
-
 #include <fmt/format.h>
 
-#include <common/BenchmarkUtil.h>
-#include <common/debug/Trace.h>
-
+#include <unistd.h>
 #include <memory>
-
 #include <thread>
 
 //#undef TRC_LEVEL
