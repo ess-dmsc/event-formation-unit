@@ -68,12 +68,55 @@ TEST_F(CalibFileTest, EmptyJson) {
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
-TEST_F(CalibFileTest, OneHybrid) {
+TEST_F(CalibFileTest, OneHybridAllGood) {
   ASSERT_EQ(hybrids[0].HybridId.size(), 0);
   ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
   MyCalibFile.root = j2;
   MyCalibFile.apply();
   ASSERT_EQ(hybrids[0].HybridId.size(), 32);
+}
+
+TEST_F(CalibFileTest, ErrorDetector) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+  MyCalibFile.root["Detector"] = "Udder";
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorVersion) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+  MyCalibFile.root["Version"] = 0;
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorNumHybrids) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+  MyCalibFile.root["Hybrids"] = 42;
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorHybridIndex) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+  MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridIndex"] = 42;
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorHybridIdSize) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+    MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] = "42";
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorDuplicateHybridId) {
+  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
+  MyCalibFile.root = j2;
+    MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] =
+       MyCalibFile.root["Calibrations"][1]["VMMHybridCalibration"]["HybridId"];
+  EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 
