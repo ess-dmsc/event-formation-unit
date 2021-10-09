@@ -76,7 +76,7 @@ void CalibFile::apply() {
     if (TotalLength != 4 * VMM3Calibration::CHANNELS) {
       throw std::runtime_error("Wrong number of channels in calibration");
     }
-    for (unsigned Channel = 0; Channel < 64; Channel++) {
+    for (unsigned Channel = 0; Channel < VMM3Calibration::CHANNELS; Channel++) {
       Hybrid.VMMs[vmmid].setCalibration(Channel,
         tdc_offset[Channel], tdc_slope[Channel],
         adc_offset[Channel], adc_slope[Channel]);

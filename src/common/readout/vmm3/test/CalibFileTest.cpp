@@ -11,7 +11,6 @@
 #include <common/readout/vmm3/Hybrid.h>
 #include <common/testutils/TestBase.h>
 
-
 auto j2 = R"(
   {
     "Detector" : "Freia",
@@ -47,18 +46,17 @@ auto j2 = R"(
 
 class CalibFileTest : public TestBase {
 protected:
+  ESSReadout::CalibFile MyCalibFile{"Freia", hybrids};
   std::vector<ESSReadout::Hybrid> hybrids{1};
   nlohmann::json j;
+
+  void SetUp() override {
+    MyCalibFile.root = j2;
+  }
 };
 
 
-TEST_F(CalibFileTest, Constructor) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-}
-
-
 TEST_F(CalibFileTest, NoFile) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
   EXPECT_ANY_THROW(MyCalibFile.load("nosuchfile"));
 }
 
@@ -70,52 +68,44 @@ TEST_F(CalibFileTest, EmptyJson) {
 
 TEST_F(CalibFileTest, OneHybridAllGood) {
   ASSERT_EQ(hybrids[0].HybridId.size(), 0);
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
   MyCalibFile.apply();
   ASSERT_EQ(hybrids[0].HybridId.size(), 32);
 }
 
 TEST_F(CalibFileTest, ErrorDetector) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
   MyCalibFile.root["Detector"] = "Udder";
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 TEST_F(CalibFileTest, ErrorVersion) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
   MyCalibFile.root["Version"] = 0;
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 TEST_F(CalibFileTest, ErrorNumHybrids) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
   MyCalibFile.root["Hybrids"] = 42;
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 TEST_F(CalibFileTest, ErrorHybridIndex) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
   MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridIndex"] = 42;
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 TEST_F(CalibFileTest, ErrorHybridIdSize) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
-    MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] = "42";
+  MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] = "42";
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
 TEST_F(CalibFileTest, ErrorDuplicateHybridId) {
-  ESSReadout::CalibFile MyCalibFile("Freia", hybrids);
-  MyCalibFile.root = j2;
-    MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] =
-       MyCalibFile.root["Calibrations"][1]["VMMHybridCalibration"]["HybridId"];
+  MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["HybridId"] =
+    MyCalibFile.root["Calibrations"][1]["VMMHybridCalibration"]["HybridId"];
+  EXPECT_ANY_THROW(MyCalibFile.apply());
+}
+
+TEST_F(CalibFileTest, ErrorCalibSize) {
+  auto & ADCOffsets = MyCalibFile.root["Calibrations"][0]["VMMHybridCalibration"]["vmm0"]["adc_offset"];
+  ADCOffsets.erase(ADCOffsets.begin() + 4);
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
