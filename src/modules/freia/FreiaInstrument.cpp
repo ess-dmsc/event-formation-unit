@@ -22,58 +22,51 @@ namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters & counters,
-    //BaseSettings & EFUSettings,
-    FreiaSettings &moduleSettings,
-    EV42Serializer * serializer)
-      : counters(counters)
-      , ModuleSettings(moduleSettings)
-      , Serializer(serializer) {
+  //BaseSettings & EFUSettings,
+  FreiaSettings &moduleSettings,
+  EV42Serializer * serializer)
+    : counters(counters)
+    , ModuleSettings(moduleSettings)
+    , Serializer(serializer) {
 
-    XTRACE(INIT, ALW, "Loading configuration file %s",
-           ModuleSettings.ConfigFile.c_str());
-    Conf = Config(ModuleSettings.ConfigFile);
 
-    if (!ModuleSettings.FilePrefix.empty()) {
-      std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
-      XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
-      DumpFile = VMM3::ReadoutFile::create(DumpFileName);
-    }
+  if (!ModuleSettings.FilePrefix.empty()) {
+    std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
+    XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
+    DumpFile = VMM3::ReadoutFile::create(DumpFileName);
+  }
 
-    ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+  Conf = Config("Freia", ModuleSettings.ConfigFile);
+  loadConfigAndCalib();
 
-    XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette)",
-           Conf.NumCassettes);
-    builders = std::vector<EventBuilder>(Conf.NumCassettes);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.TimeBoxNs);
+  for (auto & builder : builders) {
+    builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
+  }
 
-    XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
-    for (auto & builder : builders) {
-      builder.setTimeBox(TimeBoxNs); // Time boxing
-    }
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+}
 
-    // for freia #Hybrids == #Cassettes
-    Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumCassettes);
 
-    XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
-    for (auto & builder : builders) {
-      builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
-    }
+void FreiaInstrument::loadConfigAndCalib() {
+  XTRACE(INIT, ALW, "Loading configuration file %s",
+         ModuleSettings.ConfigFile.c_str());
+  Conf = Config("Freia", ModuleSettings.ConfigFile);
+  Conf.loadAndApply();
 
-    // Load and apply calibration file
-    if (ModuleSettings.CalibFile != "") {
-      ESSReadout::CalibFile Calibration("Freia", Hybrids);
-      Calibration.load(ModuleSettings.CalibFile);
-    }
+  XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette)",
+         Conf.NumCassettes);
+  builders = std::vector<EventBuilder>(Conf.NumCassettes);
 
-    // Kafka producers and flatbuffer serialisers
-    // Monitor producer
-    // Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-    // auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
-    //   monitorprod.produce(DataBuffer, Timestamp);
-    // };
-    // histfb.set_callback(ProduceHist);
-    // histograms = Hists(std::max(ncass * nwires, ncass * nstrips), 65535);
-    // histfb = HistogramSerializer(histograms.needed_buffer_size(), "freia");
-    //
+  XTRACE(INIT, ALW, "Creating vector of %d Hybrids (one per cassette)",
+         Conf.NumCassettes);
+  Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumCassettes);
+
+  if (ModuleSettings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file");
+    ESSReadout::CalibFile Calibration("Freia", Hybrids);
+    Calibration.load(ModuleSettings.CalibFile);
+  }
 }
 
 
