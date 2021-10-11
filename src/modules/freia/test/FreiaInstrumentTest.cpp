@@ -202,6 +202,7 @@ TEST_F(FreiaInstrumentTest, PixelError) {
 
   freia->processReadouts();
   for (auto & builder : freia->builders) {
+    builder.flush();
     freia->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.PixelErrors, 1);
@@ -217,6 +218,7 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
 
   freia->processReadouts();
   for (auto & builder : freia->builders) {
+    builder.flush();
     freia->generateEvents(builder.Events);
   }
   ASSERT_EQ(Res, 2);

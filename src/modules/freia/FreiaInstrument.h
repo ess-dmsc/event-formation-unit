@@ -19,8 +19,7 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
-#include <multiblade/clustering/EventBuilder.h>
-
+#include <freia/clustering/EventBuilder.h>
 #include <freia/Counters.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
@@ -69,24 +68,40 @@ public:
   struct Counters & counters;
   FreiaSettings & ModuleSettings;
 
+  /// \brief serialiser (and producer) for events
+  EV42Serializer *Serializer{nullptr};
+
   HistogramSerializer histfb{1, "freia"}; // reinit in ctor
   Hists histograms{1, 1}; // reinit in ctor
 
-  /// \brief One builder per cassesse, rezise in constructor when we have
-  /// parsed the configuration file.
-  std::vector<Multiblade::EventBuilder> builders; // reinit in ctor
-  Config Conf;
-  ESSReadout::Parser ESSReadoutParser;
-  ESSReadout::VMM3Parser VMMParser;
-  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
-  EV42Serializer *Serializer{nullptr};
-  Geometry FreiaGeom;
-  ESSGeometry essgeom{64, 1024, 1, 1};
+  /// \brief One builder per cassette, rezise in constructor when we have
+  /// parsed the configuration file and know the number of cassettes
+  std::vector<EventBuilder> builders; // reinit in ctor
 
-  const uint16_t TimeBoxNs{2010}; ///\todo add to config
+  /// \brief Instrument configuration (rings, cassettes, FENs)
+  Config Conf;
+
+  /// \brief digital geometry
+  /// get x- and y- coordinates from cassettes and channels
+  Geometry FreiaGeom;
+
+  /// \brief logical geometry
+  /// get pixel IDs from x- and y- coordinates
+  ESSGeometry essgeom{64, 1024, 1, 1};
 
   // Each cassette holds 2 VMMCalibrations
   std::vector<ESSReadout::Hybrid> Hybrids;
+
+  /// \brief parser for the ESS Readout header
+  ESSReadout::Parser ESSReadoutParser;
+
+  /// \brief parser for VMM3 readout data
+  ESSReadout::VMM3Parser VMMParser;
+
+  /// \brief for dumping raw VMM3 readouts to HDF5 files
+  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
+
+  const uint16_t TimeBoxNs{2010}; ///\todo add to config
 };
 
 } // namespace

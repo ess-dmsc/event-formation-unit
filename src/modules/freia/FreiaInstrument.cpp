@@ -42,7 +42,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette)",
            Conf.NumCassettes);
-    builders = std::vector<Multiblade::EventBuilder>(Conf.NumCassettes);
+    builders = std::vector<EventBuilder>(Conf.NumCassettes);
 
     XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
     for (auto & builder : builders) {
@@ -54,7 +54,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
 
     XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", TimeBoxNs);
     for (auto & builder : builders) {
-      builder.setTimeBox(TimeBoxNs); // Time boxing
+      builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
     }
     // Kafka producers and flatbuffer serialisers
     // Monitor producer
@@ -118,16 +118,16 @@ void FreiaInstrument::processReadouts(void) {
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
 
 
-    if (Plane == FreiaGeom.PlaneX) {
+    if (Plane == PlaneX) {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
-         TimeNS, FreiaGeom.PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
+         TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
       builders[Cassette].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
-                      ADC, FreiaGeom.PlaneX});
+                      ADC, PlaneX});
     } else {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
-         TimeNS, FreiaGeom.PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
+         TimeNS, PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
       builders[Cassette].insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
-                      ADC, FreiaGeom.PlaneY});
+                      ADC, PlaneY});
     }
   }
 
