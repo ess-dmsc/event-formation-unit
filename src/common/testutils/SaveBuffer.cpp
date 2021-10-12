@@ -17,11 +17,11 @@ void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
   const int mode = S_IRUSR | S_IWUSR;
 
   if ((fd = open(filename.c_str(), flags, mode)) < 0) {
-    throw std::runtime_error(fmt::format("DataSave: open({}) failed", filename));
+    throw std::runtime_error(fmt::format("saveBuffer: open({}) failed", filename));
   }
 
   if (::write(fd, buffer, datasize) < 0) {
-    throw std::runtime_error(fmt::format("DataSave: write({}) failed", filename));
+    throw std::runtime_error(fmt::format("saveBuffer: write({}) failed", filename));
   }
 }
 

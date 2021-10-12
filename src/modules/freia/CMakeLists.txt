@@ -14,6 +14,7 @@ set(freia_common_inc
   clustering/EventBuilder.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
 
@@ -24,6 +25,7 @@ set(freia_common_src
   geometry/Config.cpp
   clustering/EventBuilder.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
   )
 

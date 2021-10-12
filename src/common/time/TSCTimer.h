@@ -10,7 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <cstdint>
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 
 class TSCTimer {
 

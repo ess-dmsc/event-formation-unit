@@ -15,16 +15,13 @@ namespace Freia {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+void Config::loadAndApply() {
+  root = from_json_file(FileName);
+  apply();
+}
 
-Config::Config(std::string ConfigFile) {
+void Config::apply() {
   std::string Name;
-  try {
-    root = from_json_file(ConfigFile);
-  } catch (...) {
-    LOG(INIT, Sev::Error, "Error loading json file");
-    throw std::runtime_error("Error loading json file");
-  }
-
   try {
     Name = root["Detector"].get<std::string>();
   } catch (...) {
@@ -103,7 +100,7 @@ Config::Config(std::string ConfigFile) {
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        ConfigFile);
+        FileName);
     throw std::runtime_error("Invalid Json file");
     return;
   }

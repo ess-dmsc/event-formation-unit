@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <freia/FreiaInstrument.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>

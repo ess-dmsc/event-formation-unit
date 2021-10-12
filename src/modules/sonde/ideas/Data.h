@@ -13,7 +13,6 @@
 #pragma once
 
 #include <cinttypes>
-#include <common/DataSave.h>
 #include <sonde/Geometry.h>
 #include <memory>
 #include <cassert>
@@ -75,15 +74,6 @@ public:
   IDEASData(Geometry *geom, std::string fileprefix = "")
       : sondegeometry(geom) {
     dumptofile = !fileprefix.empty();
-    if (dumptofile) {
-      datafile = std::make_shared<DataSave>(fileprefix, 100000000);
-
-      datafile->tofile(
-          "#mpeh: hdr_count, evtime, trigger_type, asic, channel, sample\n");
-      datafile->tofile("#seph: hdr_hdrtime, trigger_type, hold_delay, triggering_asic, "
-                       "triggering_channel, sample\n");
-      datafile->tofile("#tt: hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
-    }
   }
 
   ~IDEASData() {}
@@ -133,7 +123,6 @@ private:
   int hdr_length{0};
 
   bool dumptofile{false};
-  std::shared_ptr<DataSave> datafile;
 };
 
 }

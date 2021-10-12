@@ -8,7 +8,7 @@
 #include <cstring>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <multiblade/generators/ReaderHits.h>
 #include <multiblade/caen/DataParser.h>
 #include <unistd.h>

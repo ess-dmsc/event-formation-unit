@@ -12,7 +12,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <generators/udpgenpcap/ReaderPcap.h>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <string.h>
 #include <string>
 #include <unistd.h>

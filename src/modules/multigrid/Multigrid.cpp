@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <multigrid/MultigridBase.h>
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 static struct MultigridSettings LocalMultigridSettings;
 

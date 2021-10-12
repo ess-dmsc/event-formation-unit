@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/RingBuffer.h>
+#include <common/memory/RingBuffer.h>
 #include <common/testutils/TestBase.h>
 
 class RingBufferTest : public TestBase {

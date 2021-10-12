@@ -12,7 +12,7 @@
 #include <jalousie/SumoMappings.h>
 #include <jalousie/Readout.h>
 #include <common/reduction/ChronoMerger.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <logical_geometry/ESSGeometry.h>
 
 namespace Jalousie {

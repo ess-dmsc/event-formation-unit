@@ -7,8 +7,8 @@
 
 #include "AdcReadoutBase.h"
 #include "AdcSettings.h"
-#include <common/Detector.h>
-#include <common/DetectorModuleRegister.h>
+#include <common/detector/Detector.h>
+#include <common/detector/DetectorModuleRegister.h>
 
 namespace AdcReadout {
 static AdcSettings LocalAdcSettings;

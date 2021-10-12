@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <common/Detector.h>
-#include <common/EV42Serializer.h>
+#include <common/detector/Detector.h>
+#include <common/kafka/EV42Serializer.h>
 #include <freia/Counters.h>
 
 namespace Freia {
@@ -18,7 +18,7 @@ namespace Freia {
 struct FreiaSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
-  uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
+  std::string CalibFile{""};
 };
 
 

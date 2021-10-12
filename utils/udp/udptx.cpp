@@ -4,7 +4,7 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <iostream>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 #include <fmt/format.h>

@@ -1,5 +1,5 @@
 #include <benchmark/benchmark.h>
-#include <common/BenchmarkUtil.h>
+#include <common/testutils/BenchmarkUtil.h>
 #include <dream/geometry/DreamGeometry.h>
 
 using namespace DreamGeometry;

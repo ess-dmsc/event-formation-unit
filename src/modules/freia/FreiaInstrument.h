@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
@@ -36,6 +36,10 @@ public:
                   /* BaseSettings & EFUSettings, */
                   FreiaSettings & moduleSettings,
                   EV42Serializer * serializer);
+
+  /// \brief handle loading and application of configuration and calibration
+  /// files. This step will throw an exception upon errors.
+  void loadConfigAndCalib();
 
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);
@@ -100,8 +104,6 @@ public:
 
   /// \brief for dumping raw VMM3 readouts to HDF5 files
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
-
-  const uint16_t TimeBoxNs{2010}; ///\todo add to config
 };
 
 } // namespace

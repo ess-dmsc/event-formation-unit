@@ -9,10 +9,10 @@
 #include "LokiBase.h"
 
 #include <cinttypes>
-#include <common/EFUArgs.h>
+#include <common/detector/EFUArgs.h>
 #include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/TestImageUdder.h>
 #include <common/time/TimeString.h>

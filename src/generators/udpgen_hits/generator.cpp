@@ -19,7 +19,7 @@
 #include <modules/gdgem/generators/ReaderReadouts.h>
 #include <modules/jalousie/generators/CdtFile.h>
 
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 
 
 // Non critical but somewhat arbitrary CPU clock speed guess

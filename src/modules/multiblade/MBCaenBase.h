@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 #include <multiblade/Counters.h>
 
 namespace Multiblade {

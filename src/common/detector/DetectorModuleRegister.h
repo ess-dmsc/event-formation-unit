@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 #include <string>
 
 /// \brief Stores a factory function and CLI set-up function for a detector module.

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/monitor/HistogramSerializer.h>
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 
 #include <common/debug/Trace.h>
 

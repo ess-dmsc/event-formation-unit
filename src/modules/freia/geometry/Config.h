@@ -28,7 +28,15 @@ public:
 
   Config() {};
 
-  Config(std::string ConfigFile);
+  // Load and apply the json config
+  Config(std::string Instrument, std::string ConfigFile)
+    : InstrumentName(Instrument), FileName(ConfigFile) {}
+
+  // load file into json object and apply
+  void loadAndApply();
+
+  // Apply the loaded json file
+  void apply();
 
   std::vector<uint16_t> NumFens;   // # FENs per ring
   std::vector<uint16_t> FENOffset; // Global FEN offset per ring
@@ -47,6 +55,8 @@ public:
 
   uint32_t TimeBoxNs{0xffffffff};
 
+  std::string InstrumentName{""};
+  std::string FileName{""};
   nlohmann::json root;
 };
 

@@ -12,8 +12,8 @@
 #include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/Statistics.h>
-#include <common/SPSCFifo.h>
-#include <common/RingBuffer.h>
+#include <common/memory/SPSCFifo.h>
+#include <common/memory/RingBuffer.h>
 #include <functional>
 #include <map>
 #include <memory>

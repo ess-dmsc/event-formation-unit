@@ -8,7 +8,7 @@
 /// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
-#include <common/span.hpp>
+#include <common/memory/span.hpp>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 

@@ -11,7 +11,7 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <functional>
 
 class HitSerializer {

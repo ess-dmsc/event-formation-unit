@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/Detector.h>
-#include <common/EFUArgs.h>
+#include <common/detector/Detector.h>
+#include <common/detector/EFUArgs.h>
 #include <vector>
 
 class Launcher {

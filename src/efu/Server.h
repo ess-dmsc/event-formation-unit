@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <common/EFUArgs.h>
+#include <common/detector/EFUArgs.h>
 #include <efu/Parser.h>
 #include <sys/select.h>
 #include <sys/types.h>

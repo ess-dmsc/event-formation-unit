@@ -11,9 +11,9 @@
 #include "PerfGenBase.h"
 
 #include <cinttypes>
-#include <common/EFUArgs.h>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/Producer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
@@ -21,8 +21,8 @@
 
 #include <unistd.h>
 
-#include <common/SPSCFifo.h>
-#include <common/Socket.h>
+#include <common/memory/SPSCFifo.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 

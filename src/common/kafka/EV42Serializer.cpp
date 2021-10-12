@@ -8,9 +8,9 @@
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include "ev42_events_generated.h"
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 
 #include <common/debug/Trace.h>
 //#undef TRC_LEVEL

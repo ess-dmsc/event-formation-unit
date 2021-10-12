@@ -6,8 +6,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/DetectorModuleRegister.h>
-#include <common/EFUArgs.h>
+#include <common/detector/DetectorModuleRegister.h>
+#include <common/detector/EFUArgs.h>
 #include <common/Version.h>
 #include <common/debug/Log.h>
 #include <cstdio>

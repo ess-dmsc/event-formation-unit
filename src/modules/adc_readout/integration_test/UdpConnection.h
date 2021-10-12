@@ -9,7 +9,7 @@
 
 #include <adc_readout/AdcParse.h>
 #include "DataPacket.h"
-#include <common/Socket.h>
+#include <common/system/Socket.h>
 #include <common/time/TimeNano.h>
 
 #include <atomic>

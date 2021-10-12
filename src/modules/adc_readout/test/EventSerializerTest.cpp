@@ -11,7 +11,7 @@
 #include <adc_readout/EventData.h>
 #include "ev42_events_generated.h"
 #include <chrono>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <gtest/gtest.h>
 #include <limits>
 #include <trompeloeil.hpp>

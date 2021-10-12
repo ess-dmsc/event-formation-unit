@@ -12,8 +12,8 @@
 
 #include <caen/MBGeometry.h>
 #include <clustering/EventBuilder.h>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
+#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/Producer.h>
 #include <common/monitor/Histogram.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
