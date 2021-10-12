@@ -1,4 +1,4 @@
-FROM screamingudder/ubuntu18.04-build-node:4.0.1
+FROM screamingudder/ubuntu20.04-build-node:2.1.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 

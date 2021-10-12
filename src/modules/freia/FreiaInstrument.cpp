@@ -133,8 +133,7 @@ void FreiaInstrument::processReadouts(void) {
   }
 
   for (auto & builder : builders) {
-    //builder.flush(); // Do matching
-    builder.insertDone();
+    builder.flush(); // Do matching
   }
 }
 

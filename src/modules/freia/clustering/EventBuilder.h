@@ -31,14 +31,11 @@ public:
   // \todo pass by rvalue?
   void insert(Hit hit);
 
-  // indicate that a full packet has been processed
-  void insertDone();
-
   void flush();
 
   void clear();
 
-  void setTimeBox(uint32_t TimeBoxValue) {TimeBoxSize = TimeBoxValue; }
+  void setTimeBox(uint32_t TimeBoxValue) { TimeBoxSize = TimeBoxValue; }
 
   HitVector HitsX, HitsY;
 
