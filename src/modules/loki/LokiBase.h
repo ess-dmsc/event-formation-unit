@@ -30,9 +30,6 @@ public:
   void inputThread();
   void processingThread();
 
-  /// \brief generate a Udder test image
-  void testImageUdder();
-
 protected:
   struct Counters Counters;
   LokiSettings LokiModuleSettings;

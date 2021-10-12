@@ -7,6 +7,7 @@
 ///
 /// From https://gist.github.com/ccbrown
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #include <common/debug/Hexdump.h>
 
@@ -38,3 +39,4 @@ void hexDump(const void* DataPtr, size_t DataLen) {
 		}
 	}
 }
+// GCOVR_EXCL_STOP

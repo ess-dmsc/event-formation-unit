@@ -48,7 +48,6 @@ set(efu_common_INC
   JsonFile.h
   Statistics.h
   StatPublisher.h
-  TestImageUdder.h
   )
 
 find_package(CLI11 REQUIRED)

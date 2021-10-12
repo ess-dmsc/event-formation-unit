@@ -70,7 +70,6 @@ DreamBase::DreamBase(BaseSettings const &Settings,
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.udder", Counters.EventsUdder);
 
   Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
