@@ -71,17 +71,16 @@ int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
     // Check for negative TOFs
     ///\todo Missing TDC correction
     auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
+    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+           TimeRef.TimeInNS,
+           TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {
       TimeOfFlight = TimeRef.getPrevTOF(Readout.TimeHigh, Readout.TimeLow);
+      XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
+             TimeRef.PrevTimeInNS,
+             TimeOfFlight);
     }
-
-    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           TimeRef.TimeInNS,
-           TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow));
-    XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           TimeRef.PrevTimeInNS,
-           TimeRef.getPrevTOF(Readout.TimeHigh, Readout.TimeLow));
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");

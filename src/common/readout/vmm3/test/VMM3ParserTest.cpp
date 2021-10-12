@@ -133,6 +133,22 @@ TEST_F(VMM3ParserTest, ErrorChannel) {
 }
 
 
+// Testing invalid TOF
+TEST_F(VMM3ParserTest, ErrorTOF) {
+  makeHeader(TOFError);
+  PacketData.Time.setReference(1,0);
+  PacketData.Time.setPrevReference(1,0);
+  ASSERT_EQ(VMMParser.Stats.Readouts, 0);
+  ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 0);
+
+  auto Res = VMMParser.parse(PacketData);
+
+  ASSERT_EQ(Res, 0);
+  ASSERT_EQ(VMMParser.Stats.Readouts, 2);
+  ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 2);
+}
+
+
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodData1) {
   makeHeader(VMMData1);
