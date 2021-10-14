@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file

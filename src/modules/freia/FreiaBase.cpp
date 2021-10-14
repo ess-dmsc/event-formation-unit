@@ -1,18 +1,17 @@
-// Copyright (C) 2018-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Multi-Blade prototype detector base plugin interface definition
+/// \brief Freia instrument base plugin
 ///
 //===----------------------------------------------------------------------===//
-
 
 #include <cinttypes>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
-#include <common/debug/Hexdump.h>
 #include <common/monitor/HistogramSerializer.h>
+#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 
@@ -183,8 +182,17 @@ void FreiaBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_monitor");
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
+  };
+
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
   FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings, Serializer);
+
+
+  HistogramSerializer HistSerializer(Freia.Histograms.needed_buffer_size(), "Freia");
+  HistSerializer.set_callback(ProduceMonitor);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -243,12 +251,12 @@ void FreiaBase::processing_thread() {
       Counters.TxBytes += Serializer->produce();
       Counters.KafkaStats = eventprod.stats;
 
-      // if (!Freia.histograms.isEmpty()) {
-      //   // XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-      //   //   histograms.hit_count());
-      //   Freia.histfb.produce(Freia.histograms);
-      //   Freia.histograms.clear();
-      // }
+      if (!Freia.Histograms.isEmpty()) {
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts",
+           Freia.Histograms.hit_count());
+        HistSerializer.produce(Freia.Histograms);
+        Freia.Histograms.clear();
+      }
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

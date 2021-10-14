@@ -1,9 +1,10 @@
-// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Separating Multigrid processing from pipeline main loop
+/// \brief FreiaInstrument is responsible for readout validation and event
+/// formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -45,6 +46,11 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+
+  // Reinit histogram size (was set to 1 in class definition)
+  // ADC is 10 bit 2^10 = 1024
+  // Each plane (x,y) has a maximum of NumCassettes * 64 channels
+  Histograms = Hists(Conf.NumCassettes * 64, 1024);
 }
 
 
@@ -105,10 +111,12 @@ void FreiaInstrument::processReadouts(void) {
 
     uint8_t Asic = readout.VMM & 0x1;
     uint8_t Plane = (Asic) ^ 0x1;
-    uint8_t Cassette = 1 + Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
+    /// \tofo Cassette enumerated from 1, Hybrids from 0 ?
+    uint8_t Hybrid = Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
+    uint8_t Cassette = 1 + Hybrid;
 
-    VMM3Calibration & Calib = Hybrids[Cassette].VMMs[Asic];
+    VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
@@ -124,11 +132,13 @@ void FreiaInstrument::processReadouts(void) {
          TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
       builders[Cassette].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
+      Histograms.bin_x(Hybrid * 64 + readout.Channel, ADC);
     } else {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
          TimeNS, PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
       builders[Cassette].insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, PlaneY});
+      Histograms.bin_y(Hybrid * 64 + readout.Channel, ADC);
     }
   }
 
