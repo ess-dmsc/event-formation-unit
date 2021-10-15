@@ -111,7 +111,6 @@ void FreiaInstrument::processReadouts(void) {
 
     uint8_t Asic = readout.VMM & 0x1;
     uint8_t Plane = (Asic) ^ 0x1;
-    /// \tofo Cassette enumerated from 1, Hybrids from 0 ?
     uint8_t Hybrid = Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
       FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
     uint8_t Cassette = 1 + Hybrid;
