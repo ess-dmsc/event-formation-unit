@@ -23,7 +23,6 @@
 #include <common/system/Socket.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/time/TimeString.h>
-#include <common/TestImageUdder.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 #include <multiblade/MBCaenBase.h>
@@ -66,7 +65,6 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.udder", Counters.EventsUdder);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
   Stats.create("events.matched_clusters", Counters.EventsMatchedClusters);
@@ -158,43 +156,6 @@ void CAENBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
   EV42Serializer flatbuffer{KafkaBufferSize, "multiblade", Produce};
-
-  if (EFUSettings.TestImage) {
-    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-    Udder udder;
-    uint32_t time_of_flight = 0;
-    while (true) {
-      if (not runThreads) {
-        // \todo flush everything here
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
-        return;
-      }
-
-      static int eventCount = 0;
-      if (eventCount == 0) {
-        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-        flatbuffer.pulseTime(efu_time);
-      }
-
-      auto pixel_id = udder.getPixel(MBCaen.essgeom.nx(), MBCaen.essgeom.ny(), &MBCaen.essgeom);
-
-      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
-      Counters.EventsUdder++;
-
-      if (EFUSettings.TestImageUSleep != 0) {
-        usleep(EFUSettings.TestImageUSleep);
-      }
-
-      time_of_flight++;
-
-      if (Counters.TxBytes != 0) {
-        eventCount = 0;
-      } else {
-        eventCount++;
-      }
-    }
-  }
-
 
   unsigned int data_index;
   TSCTimer produce_timer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);

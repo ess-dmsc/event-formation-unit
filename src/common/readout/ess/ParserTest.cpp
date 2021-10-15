@@ -135,6 +135,12 @@ TEST_F(ReadoutTest, PrevPulseTimeFracError) {
   ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 1);
 }
 
+TEST_F(ReadoutTest, MaxPulseTimeError) {
+  auto res = RdOut.validate((char *)&ErrMaxPulseTime[0], ErrMaxPulseTime.size(), DataType);
+  ASSERT_EQ(res, -Parser::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorTimeHigh, 1);
+}
+
 
 
 int main(int argc, char **argv) {

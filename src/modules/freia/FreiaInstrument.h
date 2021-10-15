@@ -1,18 +1,17 @@
-// Copyright (C) 2020 - 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Separating MB processing from pipeline main loop
+/// \brief FreiaInstrument is responsible for readout validation and event
+/// formation
 ///
-/// Holds efu stats, ...
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
@@ -75,8 +74,8 @@ public:
   /// \brief serialiser (and producer) for events
   EV42Serializer *Serializer{nullptr};
 
-  HistogramSerializer histfb{1, "freia"}; // reinit in ctor
-  Hists histograms{1, 1}; // reinit in ctor
+  /// ADC value histograms for all channels
+  Hists Histograms{1, 1}; // reinit in ctor
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes

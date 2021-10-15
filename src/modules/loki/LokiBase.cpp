@@ -14,7 +14,6 @@
 #include <common/RuntimeStat.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
-#include <common/TestImageUdder.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <common/debug/Trace.h>
@@ -80,7 +79,6 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.outside_region", Counters.OutsideRegion);
-  Stats.create("events.udder", Counters.EventsUdder);
 
 
   // System counters
@@ -148,41 +146,6 @@ void LokiBase::inputThread() {
   return;
 }
 
-/// \brief Generate an Udder test image
-/// \todo is probably not working after latest changes
-void LokiBase::testImageUdder() {
-  ESSGeometry LoKIGeometry(512, 224, 1, 1);
-  XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-  Udder udderImage;
-  udderImage.cachePixels(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-  uint32_t TimeOfFlight = 0;
-  while (runThreads) {
-    static int EventCount = 0;
-    if (EventCount == 0) {
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      Serializer->pulseTime(EfuTime);
-    }
-
-    auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
-    Counters.EventsUdder++;
-
-    if (EFUSettings.TestImageUSleep != 0) {
-      usleep(EFUSettings.TestImageUSleep);
-    }
-
-    TimeOfFlight++;
-
-    if (Counters.TxBytes != 0) {
-      EventCount = 0;
-    } else {
-      EventCount++;
-    }
-  }
-  // \todo flush everything here
-  XTRACE(INPUT, ALW, "Stopping processing thread.");
-  return;
-}
 
 ///
 /// \brief Normal processing thread
@@ -207,10 +170,6 @@ void LokiBase::processingThread() {
 
   SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
   Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
-
-  if (EFUSettings.TestImage) {
-    return testImageUdder();
-  }
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer, DebugTimer;
