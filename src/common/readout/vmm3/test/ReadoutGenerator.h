@@ -58,6 +58,7 @@ private:
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};
   uint32_t SeqNum{0};
+  uint32_t TimeHigh{0};
   uint16_t DataSize{0}; // Number of data bytes in packet
   bool Random{false};
 

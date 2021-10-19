@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include <math.h>
+#include <time.h>
 #include <common/readout/vmm3/test/ReadoutGenerator.h>
 #include <stdexcept>
 
@@ -43,6 +44,8 @@ void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
+  TimeHigh = time(NULL);
+
   memset(Buffer, 0, BufferSize);
   auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
 
@@ -53,9 +56,9 @@ void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
 
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
-  Header->PulseHigh = SeqNum; /// \todo fixme - better idea?
+  Header->PulseHigh = TimeHigh;
   Header->PulseLow = TimeLowOffset;
-  Header->PrevPulseHigh = SeqNum; /// \todo fixme - better idea?
+  Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
 }
 
@@ -77,7 +80,7 @@ void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = SeqNum;
+    ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;
