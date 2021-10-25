@@ -37,20 +37,21 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
-  Conf = Config("Freia", ModuleSettings.ConfigFile);
   loadConfigAndCalib();
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
   for (auto & builder : builders) {
-    builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
+    builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
   // Each plane (x,y) has a maximum of NumCassettes * 64 channels
-  Histograms = Hists(Conf.NumCassettes * 64, 1024);
+  // Hists will automatically allocate space for both x and y planes
+  ADCHist = Hists(Conf.NumHybrids * 64, 1024); // 10 bit ADC
+  TDCHist = Hists(Conf.NumHybrids * 64, 4096); // 12 bit TDC
 }
 
 
@@ -60,18 +61,36 @@ void FreiaInstrument::loadConfigAndCalib() {
   Conf = Config("Freia", ModuleSettings.ConfigFile);
   Conf.loadAndApply();
 
-  XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette)",
-         Conf.NumCassettes);
-  builders = std::vector<EventBuilder>(Conf.NumCassettes);
+  XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette/hybrid)",
+         Conf.NumHybrids);
+  builders = std::vector<EventBuilder>(Conf.NumHybrids);
 
-  XTRACE(INIT, ALW, "Creating vector of %d Hybrids (one per cassette)",
-         Conf.NumCassettes);
-  Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumCassettes);
+  XTRACE(INIT, ALW, "Creating vector of %d Hybrids (one per cassette/hybrid)",
+         Conf.NumHybrids);
+  Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumHybrids);
+  XTRACE(INIT, ALW, "Set individual HybridIDs");
+  setHybridIds(Conf.HybridStr);
+
 
   if (ModuleSettings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
     ESSReadout::CalibFile Calibration("Freia", Hybrids);
     Calibration.load(ModuleSettings.CalibFile);
+  }
+}
+
+
+void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
+  if (Ids.size() != Conf.NumHybrids) {
+    throw std::runtime_error("Hybrid Id size mismatch");
+  }
+  for (uint8_t i = 0; i < Ids.size(); i++) {
+    if (not ESSReadout::Hybrid::isAvailable(Ids[i], Hybrids)) {
+      XTRACE(INIT, ERR, "Duplicate Hybrid ID: %s", Ids[i].c_str());
+      throw std::runtime_error("Duplicate Hybrid ID");
+    }
+    Hybrids[i].HybridId = Ids[i];
+    XTRACE(INIT, ALW, "Config: Hybrid %u has ID: %s", i, Ids[i].c_str());
   }
 }
 
@@ -90,30 +109,31 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+    XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
+
+    //counters.RingRx[readout.RingId]++;
+
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Ring >= Conf.NumRings) {
-      XTRACE(DATA, WAR, "Invalid RingId %d (physical %d) - max is %d logical",
-             Ring, readout.RingId, Conf.NumRings - 1);
+    if (Conf.NumFENs[Ring] == 0) {
+      XTRACE(DATA, WAR, "No FENs on RingId %d (physical %d)",
+             Ring, readout.RingId);
       counters.RingErrors++;
       continue;
     }
 
-    if (readout.FENId > Conf.NumFens[Ring]) {
+    if (readout.FENId > Conf.NumFENs[Ring]) {
       XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
-             readout.FENId, Conf.NumFens[Ring]);
+             readout.FENId, Conf.NumFENs[Ring]);
       counters.FENErrors++;
       continue;
     }
 
     uint8_t Asic = readout.VMM & 0x1;
     uint8_t Plane = (Asic) ^ 0x1;
-    uint8_t Hybrid = Conf.FENOffset[Ring] * Conf.CassettesPerFEN +
-      FreiaGeom.cassette(readout.FENId, readout.VMM); // local cassette
-    uint8_t Cassette = 1 + Hybrid;
+    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
 
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
@@ -125,19 +145,20 @@ void FreiaInstrument::processReadouts(void) {
 
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
 
-
     if (Plane == PlaneX) {
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
-         TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel);
-      builders[Cassette].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
-      Histograms.bin_x(Hybrid * 64 + readout.Channel, ADC);
+      ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
+      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     } else {
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u",
-         TimeNS, PlaneY, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel);
-      builders[Cassette].insert({TimeNS, FreiaGeom.yCoord(Cassette, readout.VMM, readout.Channel),
+      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneY, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel),
                       ADC, PlaneY});
-      Histograms.bin_y(Hybrid * 64 + readout.Channel, ADC);
+      ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
+      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     }
   }
 
@@ -170,16 +191,16 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     }
 
     // Discard if there are gaps in the strip or wire channels
-    if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.MaxGapWire)) {
+    if (Conf.Parms.WireGapCheck) {
+      if (e.ClusterB.hasGap(Conf.Parms.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
       }
     }
 
-    if (Conf.StripGapCheck) {
-        if (e.ClusterA.hasGap(Conf.MaxGapStrip)) {
+    if (Conf.Parms.StripGapCheck) {
+        if (e.ClusterA.hasGap(Conf.Parms.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;

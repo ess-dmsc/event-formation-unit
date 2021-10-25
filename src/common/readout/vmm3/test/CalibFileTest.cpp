@@ -73,6 +73,8 @@ protected:
 
   void SetUp() override {
     MyCalibFile.root = j2;
+    hybrids[0].HybridId = "ff7245e2d61cfcce2feafd7e687cdb0e";
+    hybrids[1].HybridId = "aa7245e2d61cfcce2feafd7e687cdb0e";
   }
 };
 
@@ -88,9 +90,7 @@ TEST_F(CalibFileTest, EmptyJson) {
 }
 
 TEST_F(CalibFileTest, TwoHybridsAllGood) {
-  ASSERT_EQ(hybrids[0].HybridId.size(), 0);
   MyCalibFile.apply();
-  ASSERT_EQ(hybrids[0].HybridId.size(), 32);
 }
 
 TEST_F(CalibFileTest, ErrorDetector) {

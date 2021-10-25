@@ -28,6 +28,7 @@ struct Counters {
     // ESSReadout parser
     struct ESSReadout::ESSHeaderStats ReadoutStats;
     int64_t ErrorESSHeaders;
+    //int64_t RingRx[24];
 
     // VMM3a Readouts
     struct ESSReadout::VMM3ParserStats VMMStats;
