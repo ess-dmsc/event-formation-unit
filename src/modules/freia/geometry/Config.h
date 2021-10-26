@@ -23,7 +23,7 @@ class Config {
 public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
-  static constexpr uint8_t MaxRing{12};
+  static constexpr uint8_t MaxRing{11};
   static constexpr uint8_t MaxFEN{1};
   static constexpr uint8_t MaxHybrid{1}; // Hybrids are VMM >> 1
 
@@ -44,13 +44,14 @@ public:
   void apply();
 
 
+  /// \todo this is messy - too many implicit assumptions
+  /// hybridIndex can return 0 - 63 and can wrap around to valid
+  /// values
+  /// HybridId has size 64 with some fields uninitialized (-1)
   uint8_t getHybridId(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
     int Id = HybridId[hybridIndex(Ring, FEN, VMM)];
     if (Id < 0) {
       throw std::runtime_error("Unallocated HybridId SNAFU");
-    }
-    if (Id > 31) {
-      throw std::runtime_error("HybridId SNAFU");
     }
     return (uint8_t)Id;
   }
