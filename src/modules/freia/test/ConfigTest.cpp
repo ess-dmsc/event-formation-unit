@@ -42,9 +42,7 @@ auto InvalidRing = R"(
     { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
     { "Ring" : 12, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
     { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
-  ],
-
-  "MaxPulseTimeNS" : 357000000
+  ]
 }
 )"_json;
 
@@ -66,6 +64,22 @@ std::string InvalidConfig = R"(
   "MaxPulseTimeNS" : 357000000
 }
 )";
+
+
+auto DuplicateEntry = R"(
+{
+  "Detector": "Freia",
+
+  "WireChOffset" : 16,
+
+  "Config" : [
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
+  ]
+}
+)"_json;
 
 using namespace Freia;
 
@@ -107,6 +121,10 @@ TEST_F(ConfigTest, InvalidConfig) {
   ASSERT_ANY_THROW(config.apply());
 }
 
+TEST_F(ConfigTest, Duplicate) {
+  config.root = DuplicateEntry;
+  ASSERT_ANY_THROW(config.apply());
+}
 
 // Compare calculated maxpixels and number of fens against
 // ICD

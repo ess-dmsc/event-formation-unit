@@ -23,8 +23,8 @@ class Config {
 public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
-  static constexpr uint8_t MaxRing{11};
-  static constexpr uint8_t MaxFEN{1};
+  static constexpr uint8_t MaxRing{11}; // 12 (logical) rings from 0 to 11
+  static constexpr uint8_t MaxFEN{1}; // This is topology specific
   static constexpr uint8_t MaxHybrid{1}; // Hybrids are VMM >> 1
 
   Config() {};
