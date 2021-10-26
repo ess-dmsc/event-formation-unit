@@ -26,8 +26,6 @@ class EventBuilder {
 public:
   EventBuilder();
 
-  explicit EventBuilder(uint32_t BoxSize);
-
   // \todo pass by rvalue?
   void insert(Hit hit);
 
