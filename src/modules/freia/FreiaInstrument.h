@@ -5,7 +5,7 @@
 ///
 /// \brief FreiaInstrument is responsible for readout validation and event
 /// formation
-///
+/// Its functions are called from the main prcessing loop in FreiaBase
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -22,7 +22,7 @@
 #include <freia/Counters.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
-#include <freia/FreiaBase.h> // to get MBSettings
+#include <freia/FreiaBase.h>
 
 namespace Freia {
 
@@ -30,15 +30,21 @@ class FreiaInstrument {
 public:
 
   /// \brief 'create' the Freia instrument
-  ///
+  /// based on settings the constructor loads both configuration
+  /// and calibration data. It then initialises event builders and
+  /// histograms
   FreiaInstrument(Counters & counters,
-                  /* BaseSettings & EFUSettings, */
                   FreiaSettings & moduleSettings,
                   EV42Serializer * serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
   void loadConfigAndCalib();
+
+  /// \brief after loading the config file, Config.Parms.HybridIdStr contains
+  /// a vector of HybridIds. These are then loaded into the Hybrids so that
+  /// we can later do consistency checks when applying the calibration data
+  void setHybridIds(std::vector<std::string> Ids);
 
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);
@@ -49,22 +55,9 @@ public:
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data);
 
-  //
+  // \brief initialise the serializer. This is used both in FreiaInstrument
+  // and FreiaBase. Called from FreiaBase
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
-
-  ///
-  //void ingestOneReadout(int cassette, const Readout & dp);
-
-  ///
-  //bool filterEvent(const Event & e);
-
-
-  // Two methods below from ref data test
-
-  // determine time gaps for clusters
-  //void FixJumpsAndSort(int builder, std::vector<Readout> &vec);
-  // load and flush as appropriate
-  //void LoadAndProcessReadouts(int builder, std::vector<Readout> &vec);
 
 public:
   /// \brief Stuff that 'ties' Freia together
@@ -75,7 +68,8 @@ public:
   EV42Serializer *Serializer{nullptr};
 
   /// ADC value histograms for all channels
-  Hists Histograms{1, 1}; // reinit in ctor
+  Hists ADCHist{1, 1}; // reinit in ctor
+  Hists TDCHist{1, 1}; // reinit in ctor
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes

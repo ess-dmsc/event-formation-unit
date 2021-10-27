@@ -16,24 +16,7 @@ auto j2 = R"(
 
 auto NoDetector = R"(
 {
-  "WireChOffset" : 16,
-
-  "Config" : [
-    { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
-    { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
-    { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
-    { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
-    { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
-    { "Ring" :  5, "CassOffset" : 17, "FENs" : 1},
-    { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
-    { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
-    { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
-    { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
-    { "Ring" : 10, "CassOffset" : 29, "FENs" : 2}
-  ],
-
-  "MaxPulseTimeNS" : 357000000
-
+  "WireChOffset" : 16
 }
 )"_json;
 
@@ -41,25 +24,7 @@ auto NoDetector = R"(
 auto InvalidDetector = R"(
 {
   "Detector": "Freias",
-
-  "WireChOffset" : 16,
-
-  "Config" : [
-    { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
-    { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
-    { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
-    { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
-    { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
-    { "Ring" :  5, "CassOffset" : 17, "FENs" : 1},
-    { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
-    { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
-    { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
-    { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
-    { "Ring" : 11, "CassOffset" : 29, "FENs" : 2}
-  ],
-
-  "MaxPulseTimeNS" : 357000000
-
+  "WireChOffset" : 16
 }
 )"_json;
 
@@ -71,47 +36,50 @@ auto InvalidRing = R"(
   "WireChOffset" : 16,
 
   "Config" : [
-    { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
-    { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
-    { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
-    { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
-    { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
-    { "Ring" :  5, "CassOffset" : 17, "FENs" : 1},
-    { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
-    { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
-    { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
-    { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
-    { "Ring" : 11, "CassOffset" : 29, "FENs" : 2}
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
+    { "Ring" : 12, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+    { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
+  ]
+}
+)"_json;
+
+std::string InvalidConfig = R"(
+{
+  "Detector": "Freia",
+
+  "WireChOffset" : 16,
+
+  "Config" : [
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
+    { "Rinx" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+    { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
   ],
 
   "MaxPulseTimeNS" : 357000000
 }
-)"_json;
+)";
 
-// std::string InvalidConfigFile{"deleteme_freia_invalid_config.json"};
-// std::string InvalidConfigStr = R"(
-// {
-//   "Detector": "Freia",
-//
-//   "WireChOffset" : 16,
-//
-//   "Config" : [
-//     { "Ring" :  0, "CassOffset" :  1, "FENs" : 2},
-//     { "Ring" :  1, "CassOffset" :  5, "FENs" : 2},
-//     { "Ring" :  2, "CassOffset" :  9, "FENs" : 2},
-//     { "Ring" :  3, "CassOffset" : 13, "FENs" : 1},
-//     { "Ring" :  4, "CassOffset" : 15, "FENs" : 1},
-//     { "Rinx" :  5, "CassOffset" : 17, "FENs" : 1},
-//     { "Ring" :  6, "CassOffset" : 19, "FENs" : 1},
-//     { "Ring" :  7, "CassOffset" : 21, "FENs" : 1},
-//     { "Ring" :  8, "CassOffset" : 23, "FENs" : 1},
-//     { "Ring" :  9, "CassOffset" : 25, "FENs" : 2},
-//     { "Ring" : 11, "CassOffset" : 29, "FENs" : 2}
-//   ],
-//
-//   "MaxPulseTimeNS" : 357000000
-// }
-// )";
+
+auto DuplicateEntry = R"(
+{
+  "Detector": "Freia",
+
+  "WireChOffset" : 16,
+
+  "Config" : [
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
+  ]
+}
+)"_json;
 
 using namespace Freia;
 
@@ -126,19 +94,12 @@ protected:
 
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
-  ASSERT_EQ(config.NumCassettes, 0);
+  ASSERT_EQ(config.NumHybrids, 0);
 }
 
-// Compare calculated maxpixels and number of fens against
-// ICD
-struct RingCfg {
-  uint8_t Ring;
-  uint16_t FENs;
-  uint16_t FENOffset;
-  uint16_t VMMOffset;
-};
-
-
+TEST_F(ConfigTest, UninitialisedHybrids) {
+  ASSERT_ANY_THROW(config.getHybridId(0, 0, 0));
+}
 
 TEST_F(ConfigTest, NoDetector) {
   config.root = NoDetector;
@@ -155,37 +116,39 @@ TEST_F(ConfigTest, InvalidRing) {
   ASSERT_ANY_THROW(config.apply());
 }
 
-// TEST_F(ConfigTest, InvalidConfig) {
-//   ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
-// }
-//
+TEST_F(ConfigTest, InvalidConfig) {
+  config.root = InvalidConfig;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, Duplicate) {
+  config.root = DuplicateEntry;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+// Compare calculated maxpixels and number of fens against
+// ICD
+struct RingCfg {
+  uint8_t Ring;
+  uint16_t FENs;
+};
+
 // This table generated from the ICD and will be
 // compared to the calculated values
-std::vector<RingCfg> FullConfig {
-  {  0, 2,  0,  0},
-  {  1, 2,  2,  8},
-  {  2, 2,  4, 16},
-  {  3, 1,  6, 24},
-  {  4, 1,  7, 28},
-  {  5, 1,  8, 32},
-  {  6, 1,  9, 36},
-  {  7, 1, 10, 40},
-  {  8, 1, 11, 44},
-  {  9, 2, 12, 48},
-  { 10, 2, 14, 56}
+std::vector<RingCfg> ReferenceConfig {
+  {  0, 2},  {  1, 2},  {  2, 2},
+  {  3, 1},  {  4, 1},  {  5, 1},  {  6, 1},  {  7, 1},  {  8, 1},
+  {  9, 2},  { 10, 2}
 };
 
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("Freia", FREIA_FULL);
   config.loadAndApply();
-  ASSERT_EQ(config.NumRings, 11);
   ASSERT_EQ(config.NumPixels, 65536);
-  ASSERT_EQ(config.NumCassettes, 32);
+  ASSERT_EQ(config.NumHybrids, 32);
 
-  for (const auto & Cfg : FullConfig) {
-    ASSERT_EQ(config.NumFens[Cfg.Ring], Cfg.FENs);
-    ASSERT_EQ(config.FENOffset[Cfg.Ring], Cfg.FENOffset);
-    ASSERT_EQ(config.VMMOffset[Cfg.Ring], Cfg.VMMOffset);
+  for (const auto & Ref : ReferenceConfig) {
+    ASSERT_EQ(config.NumFENs[Ref.Ring], Ref.FENs);
   }
 }
 

@@ -92,8 +92,8 @@ void CalibFile::apply() {
       throw std::runtime_error("HybridId string has wrong length");
     }
 
-    if (not Hybrid::isAvailable(NewId, Hybrids)) {
-      throw std::runtime_error("Duplicate HybridId in calibration");
+    if (NewId != Hybrids[HybridIndex].HybridId) {
+      throw std::runtime_error("Hybrid ID does not match configuration");
     }
 
     std::string Date = Calibration["VMMHybridCalibration"]["CalibrationDate"];

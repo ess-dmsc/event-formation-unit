@@ -73,6 +73,8 @@ protected:
 
   void SetUp() override {
     MyCalibFile.root = j2;
+    hybrids[0].HybridId = "ff7245e2d61cfcce2feafd7e687cdb0e";
+    hybrids[1].HybridId = "aa7245e2d61cfcce2feafd7e687cdb0e";
   }
 };
 
@@ -87,10 +89,16 @@ TEST_F(CalibFileTest, EmptyJson) {
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
+// Just verify that calibration parameters have actually changed
+// the values used for channels and ADC/TDC have no special significance
 TEST_F(CalibFileTest, TwoHybridsAllGood) {
-  ASSERT_EQ(hybrids[0].HybridId.size(), 0);
+  ASSERT_EQ(hybrids[0].VMMs[0].ADCCorr(1, 456), 456);
+  auto TDCCorr = hybrids[0].VMMs[0].TDCCorr(1, 75);
+
   MyCalibFile.apply();
-  ASSERT_EQ(hybrids[0].HybridId.size(), 32);
+
+  ASSERT_NE(hybrids[0].VMMs[0].ADCCorr(1, 456), 456);
+  ASSERT_NE(hybrids[0].VMMs[0].TDCCorr(1, 75), TDCCorr);
 }
 
 TEST_F(CalibFileTest, ErrorDetector) {

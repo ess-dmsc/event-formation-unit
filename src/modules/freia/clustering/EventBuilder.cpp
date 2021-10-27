@@ -20,10 +20,6 @@ namespace Freia {
 
 EventBuilder::EventBuilder() { matcher.set_minimum_time_gap(timegap); }
 
-EventBuilder::EventBuilder(uint32_t BoxSize) : TimeBoxSize(BoxSize) {
-  matcher.set_minimum_time_gap(timegap);
-}
-
 void EventBuilder::insert(Hit hit) {
   XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time,
          hit.coordinate, hit.weight);

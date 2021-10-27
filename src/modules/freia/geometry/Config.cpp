@@ -29,73 +29,93 @@ void Config::apply() {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (Name != "Freia") {
-    LOG(INIT, Sev::Error, "Instrument configuration is not Freia");
+  if (Name != InstrumentName) {
+    LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }
 
   try {
-    MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
+    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
   }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", MaxPulseTimeNS);
+  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", Parms.MaxPulseTimeNS);
 
   try {
-    MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
+    Parms.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxGapWire");
   }
-  LOG(INIT, Sev::Info, "MaxGapWire {}", MaxGapWire);
+  LOG(INIT, Sev::Info, "MaxGapWire {}", Parms.MaxGapWire);
 
   try {
-    MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
+    Parms.MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxGapStrip");
   }
-  LOG(INIT, Sev::Info, "MaxGapStrip {}", MaxGapStrip);
+  LOG(INIT, Sev::Info, "MaxGapStrip {}", Parms.MaxGapStrip);
 
   try {
-    TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
+    Parms.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
   }
-  LOG(INIT, Sev::Info, "TimeBoxNs {}", TimeBoxNs);
-
+  LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
   try {
+    uint8_t OldRing{255};
+    uint8_t OldFEN{255};
     auto PanelConfig = root["Config"];
-    unsigned int VMMOffs{0};
-    unsigned int FENOffs{0};
     for (auto &Mapping : PanelConfig) {
-      auto Ring = Mapping["Ring"].get<unsigned int>();
-      auto Offset = Mapping["CassOffset"].get<unsigned int>();
-      auto FENs = Mapping["FENs"].get<unsigned int>();
+      uint8_t Ring = Mapping["Ring"].get<uint8_t>();
+      uint8_t FEN = Mapping["FEN"].get<uint8_t>();
+      uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
+      std::string IDString =  Mapping["HybridId"];
 
-      XTRACE(INIT, DEB, "Ring %d, Offset %d, FENs %d", Ring, Offset, FENs);
-
-      if ((Ring != NumRings) or (Ring > 10)) {
-        LOG(INIT, Sev::Error, "Ring configuration error");
-        throw std::runtime_error("Inconsistent Json file - ring index mismatch");
+      if (Ring != OldRing) { // New ring
+        OldRing = Ring;
+        OldFEN = 255;
+      } else { // Same ring
+        if (FEN != OldFEN) {
+          OldFEN = FEN;
+          NumFENs[Ring]++;
+        }
       }
 
-      NumFens.push_back(FENs);
-      FENOffset.push_back(FENOffs);
-      VMMOffset.push_back(VMMOffs);
+      XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
-      VMMOffs += FENs * VMMsPerFEN;
-      FENOffs += FENs;
-      NumCassettes += FENs * CassettesPerFEN;
-      NumRings++;
+      if ((Ring > MaxRing) or (FEN - 1 > MaxFEN) or (LocalHybrid > MaxHybrid)) {
+        XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
+        throw std::runtime_error("Illegal Ring/FEN/VMM values");
+      }
+
+      uint8_t HybridIndex = hybridIndex(Ring, FEN - 1, LocalHybrid);
+
+      if (HybridId[HybridIndex] != -1) {
+        XTRACE(INIT, ERR, "Duplicate {Ring, FEN, VMM} entry for Hybrid Index %u",
+          HybridIndex);
+        throw std::runtime_error("Duplicate {Ring, FEN, VMM} entry");
+      }
 
       LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Ring {}, Offset {}, FENs {}",
-          Name, Ring, Offset, FENs);
+          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid {}",
+          Name, NumHybrids, Ring, FEN, LocalHybrid);
+
+      HybridId[HybridIndex] = NumHybrids;
+      HybridStr[NumHybrids] = IDString;
+      NumHybrids++;
     }
 
-    NumPixels = NumCassettes * NumWiresPerCassette * NumStripsPerCassette; //
-    LOG(INIT, Sev::Info, "JSON config - Detector has {} cassettes and "
-    "{} pixels", NumCassettes, NumPixels);
+    HybridStr.resize(NumHybrids);
+
+    NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette; //
+    LOG(INIT, Sev::Info, "JSON config - Detector has {} cassettes/hybrids and "
+    "{} pixels", NumHybrids, NumPixels);
+
+    for (uint8_t Ring = 0; Ring < 12; Ring++) {
+      LOG(INIT, Sev::Info,
+          "Ring {} - # FENs {}", Ring, NumFENs[Ring]);
+    }
 
 
   } catch (...) {
