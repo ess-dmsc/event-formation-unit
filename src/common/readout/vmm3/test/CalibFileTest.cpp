@@ -89,8 +89,16 @@ TEST_F(CalibFileTest, EmptyJson) {
   EXPECT_ANY_THROW(MyCalibFile.apply());
 }
 
+// Just verify that calibration parameters have actually changed
+// the values used for channels and ADC/TDC have no special significance
 TEST_F(CalibFileTest, TwoHybridsAllGood) {
+  ASSERT_EQ(hybrids[0].VMMs[0].ADCCorr(1, 456), 456);
+  auto TDCCorr = hybrids[0].VMMs[0].TDCCorr(1, 75);
+
   MyCalibFile.apply();
+
+  ASSERT_NE(hybrids[0].VMMs[0].ADCCorr(1, 456), 456);
+  ASSERT_NE(hybrids[0].VMMs[0].TDCCorr(1, 75), TDCCorr);
 }
 
 TEST_F(CalibFileTest, ErrorDetector) {
