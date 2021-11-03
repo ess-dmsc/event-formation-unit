@@ -11,6 +11,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <freia/geometry/GeometryBase.h>
 #include <string>
 #include <vector>
 
@@ -19,30 +20,30 @@
 
 namespace Freia {
 
-class Geometry {
+class AMORGeometry : public GeometryBase {
 public:
   ///\brief return global x-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// strip = channel + 1
-  /// x = strip - 1
-  uint16_t xCoord(uint16_t VMM, uint8_t Channel) {
+  /// Formulae taken from the Freia ICD, AMOR section
+  /// strip = 64 - channel
+  /// x = strip - 1       ( == 63 - channel )
+  uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
       return InvalidCoord;
     }
 
-    if ((VMM & 0x1) == 0) {
+    if (not isXCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
       return InvalidCoord;
     } else {
-      return Channel;
+      return 63 - Channel;
     }
   }
 
   ///\brief return global y-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// wire = 32 - (channel - 16)
-  /// y = (cass - 1) * 32 + 32 - wire
+  /// Formulae taken from the Freia ICD, AMOR section
+  /// wire = channel + 1 - 16
+  /// y = (cass - 1) * 32 + 47 - channel
   uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
     if (Cassette == 0) {
       XTRACE(DATA, WAR, "Cassette 0 is not valid");
@@ -55,24 +56,29 @@ public:
       return InvalidCoord;
     }
 
-    if (VMM & 0x01) {
+    if (not isYCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return InvalidCoord;
     } else {
-      return (Cassette - 1) * NumWires + Channel - MinWireChannel;
+      return (Cassette - 1) * NumWires + MaxWireChannel - Channel;
     }
+  }
+
+
+  // x-coordinates are strips, which are on VMM 0
+  bool isXCoord(uint8_t VMM) {
+    return not isYCoord(VMM);
+  }
+
+  // y-coordinates are wires, which are on VMM 1
+  bool isYCoord(uint8_t VMM) {
+    return (VMM & 0x1);
   }
 
   // Return the local cassette
   uint8_t cassette(uint8_t FEN, uint8_t VMM) {
     return 2 * (FEN - 1) + ((VMM & 0x0f) >> 1);
   }
-
-  const uint16_t InvalidCoord{0xFFFF};
-  const uint16_t NumStrips{64};
-  const uint16_t NumWires{32};
-  const uint16_t MinWireChannel{16};
-  const uint16_t MaxWireChannel{47};
 };
 
 } // namespace

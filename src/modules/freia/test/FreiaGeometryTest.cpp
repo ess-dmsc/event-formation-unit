@@ -4,14 +4,14 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/Geometry.h>
+#include <freia/geometry/FreiaGeometry.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Freia;
 
 class GeometryTest : public TestBase {
 protected:
-  Geometry Geom;
+  FreiaGeometry Geom;
   uint16_t Cassette1{1};
   uint16_t VMMX{1};
   uint16_t VMMY{0};

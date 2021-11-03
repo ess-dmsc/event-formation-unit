@@ -24,7 +24,14 @@ target_compile_definitions(FreiaConfigTest PRIVATE FREIA_FULL="${FREIA_FULL}")
 
 
 set(FreiaGeometryTest_INC
-  ../geometry/Geometry.h)
+  ../geometry/FreiaGeometry.h)
 set(FreiaGeometryTest_SRC
-  ../test/GeometryTest.cpp)
+  ../test/FreiaGeometryTest.cpp)
 create_test_executable(FreiaGeometryTest)
+
+
+set(AMORGeometryTest_INC
+  ../geometry/AMORGeometry.h)
+set(AMORGeometryTest_SRC
+  ../test/AMORGeometryTest.cpp)
+create_test_executable(AMORGeometryTest)

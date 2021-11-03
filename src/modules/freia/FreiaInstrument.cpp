@@ -30,6 +30,8 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     , ModuleSettings(moduleSettings)
     , Serializer(serializer) {
 
+  //Geometry = &AMORGeom;
+  Geometry = &FreiaGeom;
 
   if (!ModuleSettings.FilePrefix.empty()) {
     std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
@@ -132,7 +134,6 @@ void FreiaInstrument::processReadouts(void) {
     }
 
     uint8_t Asic = readout.VMM & 0x1;
-    uint8_t Plane = (Asic) ^ 0x1;
     uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
 
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
@@ -145,17 +146,17 @@ void FreiaInstrument::processReadouts(void) {
 
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
 
-    if (Plane == PlaneX) {
+    if (Geometry->isXCoord(readout.VMM)) {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
+         TimeNS, PlaneX, Geometry->xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geometry->xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
       ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
       TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     } else {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel),
+         TimeNS, PlaneY, Geometry->yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geometry->yCoord(Hybrid, readout.VMM, readout.Channel),
                       ADC, PlaneY});
       ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
       TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
