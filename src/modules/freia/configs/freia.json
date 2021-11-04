@@ -1,6 +1,8 @@
 
 {
-  "Detector": "Freia",
+  "Detector" : "Freia",
+
+  "InstrumentGeometry" : "Freia",
 
   "WireChOffset" : 16,
 

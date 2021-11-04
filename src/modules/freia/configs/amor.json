@@ -1,0 +1,30 @@
+
+{
+  "Detector" : "Freia",
+
+  "InstrumentGeometry" : "AMOR",
+
+  "WireChOffset" : 16,
+
+  "Config" : [
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
+    { "Ring" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+    { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"},
+    { "Ring" :  2, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000006"},
+    { "Ring" :  2, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
+    { "Ring" :  3, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000008"},
+    { "Ring" :  3, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000009"},
+    { "Ring" :  4, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000010"},
+    { "Ring" :  4, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000011"},
+    { "Ring" :  5, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000012"},
+    { "Ring" :  5, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000013"}
+  ],
+
+  "MaxPulseTimeNS" : 71428570,
+  "MaxGapWire"  : 0,
+  "MaxGapStrip" : 0,
+  "TimeBoxNs" : 2010
+}

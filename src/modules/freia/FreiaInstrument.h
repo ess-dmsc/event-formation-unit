@@ -21,8 +21,7 @@
 #include <freia/clustering/EventBuilder.h>
 #include <freia/Counters.h>
 #include <freia/geometry/Config.h>
-#include <freia/geometry/AMORGeometry.h>
-#include <freia/geometry/FreiaGeometry.h>
+#include <freia/geometry/Geometry.h>
 #include <freia/FreiaBase.h>
 
 namespace Freia {
@@ -81,9 +80,7 @@ public:
 
   /// \brief digital geometry
   /// get x- and y- coordinates from cassettes and channels
-  FreiaGeometry FreiaGeom; // used indirectly through Geometry
-  AMORGeometry AMORGeom; // used indirtectly through Geometry
-  GeometryBase * Geometry{nullptr};
+  Geometry Geom;
 
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates

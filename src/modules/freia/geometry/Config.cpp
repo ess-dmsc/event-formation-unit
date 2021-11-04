@@ -23,16 +23,23 @@ void Config::loadAndApply() {
 void Config::apply() {
   std::string Name;
   try {
-    Name = root["Detector"].get<std::string>();
+    Parms.InstrumentName = root["Detector"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (Name != InstrumentName) {
+  if (Parms.InstrumentName != InstrumentName) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }
+
+  try {
+    Parms.InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
+  }
+  LOG(INIT, Sev::Info, "InstrumentGeometry {}", Parms.InstrumentGeometry);
 
   try {
     Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
