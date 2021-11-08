@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/FreiaGeometry.h>
+#include <freia/geometry/FreiaChannelMapping.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Freia;
