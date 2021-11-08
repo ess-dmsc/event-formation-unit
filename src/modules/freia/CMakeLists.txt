@@ -11,8 +11,8 @@ set(freia_common_inc
   FreiaBase.h
   FreiaInstrument.h
   geometry/Config.h
-  geometry/FreiaGeometry.h
-  geometry/AMORGeometry.h
+  geometry/FreiaChannelMapping.h
+  geometry/AMORChannelMapping.h
   clustering/EventBuilder.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h

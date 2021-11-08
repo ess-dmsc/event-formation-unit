@@ -28,7 +28,8 @@ public:
   };
 
   // ESS clock is 88052500 Hz
-  const double NsPerTick{11.356860963629653};
+  //const double NsPerTick{11.356860963629653};
+  const double NsPerTick{11.3568609};
   const uint64_t OneBillion{1000000000LU};
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 

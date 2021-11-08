@@ -10,8 +10,8 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <freia/geometry/AMORGeometry.h>
-#include <freia/geometry/FreiaGeometry.h>
+#include <freia/geometry/AMORChannelMapping.h>
+#include <freia/geometry/FreiaChannelMapping.h>
 #include <string>
 
 // #undef TRC_LEVEL
@@ -28,15 +28,13 @@ public:
   bool setGeometry(std::string NewGeometry) {
     if (NewGeometry == "AMOR") {
       GeometryInst = &AMORGeom;
-      printf("xxxxx AMOR xxxxx\n");
       return true;
     }
     if (NewGeometry == "Freia") {
       GeometryInst = &FreiaGeom;
-      printf("xxxxx Freia xxxxx\n");
       return true;
     }
-    printf("xxxxx XXXXXXXXXXXXX xxxxx\n");
+    XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
     return false;
   }
 

@@ -24,14 +24,21 @@ target_compile_definitions(FreiaConfigTest PRIVATE FREIA_FULL="${FREIA_FULL}")
 
 
 set(FreiaGeometryTest_INC
-  ../geometry/FreiaGeometry.h)
+  ../geometry/Geometry.h)
 set(FreiaGeometryTest_SRC
-  ../test/FreiaGeometryTest.cpp)
+  ../test/GeometryTest.cpp)
 create_test_executable(FreiaGeometryTest)
 
 
-set(AMORGeometryTest_INC
-  ../geometry/AMORGeometry.h)
-set(AMORGeometryTest_SRC
-  ../test/AMORGeometryTest.cpp)
-create_test_executable(AMORGeometryTest)
+set(FreiaChannelMappingTest_INC
+  ../geometry/FreiaChannelMapping.h)
+set(FreiaChannelMappingTest_SRC
+  ../test/FreiaChannelMappingTest.cpp)
+create_test_executable(FreiaChannelMappingTest)
+
+
+set(AMORChannelMappingTest_INC
+  ../geometry/AMORChannelMapping.h)
+set(AMORChannelMappingTest_SRC
+  ../test/AMORChannelMappingTest.cpp)
+create_test_executable(AMORChannelMappingTest)
