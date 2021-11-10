@@ -231,6 +231,12 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
+    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
+        XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      counters.TOFErrors++;
+      continue;
+    }
+
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
@@ -249,6 +255,87 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     counters.Events++;
   }
   Events.clear(); // else events will accumulate
+}
+
+
+void FreiaInstrument::processMonitorReadouts(void) {
+  ESSReadout::ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+  // All readouts are potentially now valid, but rings and fens
+  // could still be outside the configured range, also
+  // illegal time intervals can be detected here
+  assert(Serializer != nullptr);
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+
+  XTRACE(DATA, DEB, "processMonitorReadouts()");
+  for (const auto & readout : VMMParser.Result) {
+
+    if (DumpFile) {
+      dumpReadoutToFile(readout);
+    }
+
+    XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
+
+    if (readout.RingId/2 != 11) {
+      XTRACE(DATA, WAR, "Invalid ring %u for monitor readout",
+             readout.RingId);
+      counters.RingErrors++;
+      continue;
+    }
+
+    if (readout.FENId != 1) {
+      XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout",
+             readout.FENId);
+      counters.FENErrors++;
+      continue;
+    }
+
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "", TimeRef.PrevTimeInNS);
+    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "", TimeRef.TimeInNS);
+    XTRACE(DATA, DEB, "Time of readout  %" PRIi64 "", TimeNS);
+
+    uint64_t TimeOfFlight = 0;
+    if (TimeRef.TimeInNS > TimeNS) {
+      if (TimeRef.PrevTimeInNS > TimeNS) {
+        XTRACE(DATA, WAR, "TOF from PrevTime is negative!");
+        counters.MonitorErrors++;
+        continue;
+      } else {
+        TimeOfFlight = TimeNS - TimeRef.PrevTimeInNS;
+      }
+    } else {
+      TimeOfFlight = TimeNS - TimeRef.TimeInNS;
+    }
+
+    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      counters.TOFErrors++;
+      continue;
+    }
+
+    if (readout.OTADC != 0) {
+       XTRACE(DATA, WAR, "OTADC (%u) must be zero", readout.OTADC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.VMM != 0) {
+       XTRACE(DATA, WAR, "VMM (%u) must be zero", readout.VMM);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.Channel != 0) {
+       XTRACE(DATA, WAR, "Channel (%u) must be zero", readout.Channel);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    XTRACE(DATA, ALW, "TOF %" PRIu64 "", TimeOfFlight);
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, 1);
+    counters.MonitorCounts++;
+  }
 }
 
 

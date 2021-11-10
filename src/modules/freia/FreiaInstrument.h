@@ -49,6 +49,9 @@ public:
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);
 
+  /// \brief process vmm-formatted monitor readouts
+  void processMonitorReadouts(void);
+
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> & Events);
 

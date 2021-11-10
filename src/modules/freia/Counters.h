@@ -36,6 +36,9 @@ struct Counters {
     // Logical and Digital geometry incl. Calibration
     int64_t RingErrors;
     int64_t FENErrors;
+    int64_t TOFErrors;
+    int64_t MonitorErrors;
+    int64_t MonitorCounts;
 
     //
     int64_t ProcessingIdle;
