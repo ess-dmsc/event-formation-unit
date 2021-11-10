@@ -17,7 +17,6 @@
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <common/debug/Trace.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>

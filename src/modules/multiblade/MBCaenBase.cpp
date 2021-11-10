@@ -12,7 +12,6 @@
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
 #include <common/kafka/Producer.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <common/TestImageUdder.h>

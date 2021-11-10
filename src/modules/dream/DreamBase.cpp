@@ -18,7 +18,6 @@
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <common/debug/Trace.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <dream/DreamInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
