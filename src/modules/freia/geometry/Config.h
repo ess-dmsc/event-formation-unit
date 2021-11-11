@@ -34,7 +34,7 @@ public:
     : NumFENs(12),
       HybridId(64, -1),
       HybridStr(64),
-      InstrumentName(Instrument),
+      ExpectedName(Instrument),
       FileName(ConfigFile) {}
 
   // load file into json object and apply
@@ -91,7 +91,7 @@ public:
   uint32_t NumPixels{0};
 
   // Other parameters
-  std::string InstrumentName{""};
+  std::string ExpectedName{""};
   std::string FileName{""};
   // JSON object
   nlohmann::json root;

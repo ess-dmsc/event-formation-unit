@@ -29,7 +29,7 @@ void Config::apply() {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (Parms.InstrumentName != InstrumentName) {
+  if (Parms.InstrumentName != ExpectedName) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }

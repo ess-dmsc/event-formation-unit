@@ -77,16 +77,6 @@ TEST_F(ESSTimeTest, ExactPulseDelay) {
   ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428568);
 }
 
-// Test specific error condition
-TEST_F(ESSTimeTest, Issue2021_11_08) {
-  Time.setReference(0x6188e7a9, 0x00070ff6);
-  ASSERT_EQ(Time.TimeInNS, 1636362153005256386);
-
-  Time.setPrevReference(0x6188e7a8, 0x04e6aad1);
-  ASSERT_EQ(Time.PrevTimeInNS, 1636362152933827807);
-  ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428579);
-}
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
