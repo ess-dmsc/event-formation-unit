@@ -80,7 +80,7 @@ public:
 
   /// \brief digital geometry
   /// get x- and y- coordinates from cassettes and channels
-  Geometry FreiaGeom;
+  Geometry Geom;
 
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates

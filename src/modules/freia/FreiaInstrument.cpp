@@ -30,7 +30,6 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
     , ModuleSettings(moduleSettings)
     , Serializer(serializer) {
 
-
   if (!ModuleSettings.FilePrefix.empty()) {
     std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
@@ -38,6 +37,10 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   }
 
   loadConfigAndCalib();
+
+  // We can now use the settings in Conf.Parms
+
+  Geom.setGeometry(Conf.Parms.InstrumentGeometry);
 
   XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
   for (auto & builder : builders) {
@@ -132,31 +135,35 @@ void FreiaInstrument::processReadouts(void) {
     }
 
     uint8_t Asic = readout.VMM & 0x1;
-    uint8_t Plane = (Asic) ^ 0x1;
     uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
-
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS, TDCCorr);
+
     TimeNS += TDCCorr;
     XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
 
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+    XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
 
-    if (Plane == PlaneX) {
+    // Now we add readouts with the calibrated time and adc to the x,y builders
+    if (Geom.isXCoord(readout.VMM)) {
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneX, FreiaGeom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, FreiaGeom.xCoord(readout.VMM, readout.Channel),
+         TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
+
       ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
       TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
-    } else {
+
+    } else { // implicit isYCoord
       XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, FreiaGeom.yCoord(Hybrid, readout.VMM, readout.Channel),
+         TimeNS, PlaneY, Geom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geom.yCoord(Hybrid, readout.VMM, readout.Channel),
                       ADC, PlaneY});
+
       ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
       TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     }

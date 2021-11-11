@@ -12,45 +12,45 @@ using namespace Freia;
 class GeometryTest : public TestBase {
 protected:
   Geometry Geom;
-  uint16_t Cassette1{1};
-  uint16_t VMMX{1};
-  uint16_t VMMY{0};
+  uint16_t VMM0{0};
+  uint16_t VMM1{1};
+
   void SetUp() override {}
   void TearDown() override {}
 };
 
 
-TEST_F(GeometryTest, Coordinates) {
-  for (unsigned int i = 0; i < 64; i++) {
-    ASSERT_EQ(Geom.xCoord(VMMX, i), i);
-  }
-  for (unsigned int i = 16; i < 47; i++) {
-    ASSERT_EQ(Geom.yCoord(Cassette1, VMMY, i), i - 16);
-  }
+// Should match the ICD
+TEST_F(GeometryTest, DefaultFreia) {
+  ASSERT_TRUE(Geom.isXCoord(VMM1));
+  ASSERT_TRUE(Geom.isYCoord(VMM0));
 }
 
-TEST_F(GeometryTest, XCoordErrors) {
-  ASSERT_EQ(Geom.xCoord(VMMY, 0),  Geom.InvalidCoord); // bad VMM
-  ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
+// Freia is already default so we need to first swap to AMOR
+TEST_F(GeometryTest, SelectFreia) {
+  ASSERT_TRUE(Geom.setGeometry("AMOR"));
+  ASSERT_TRUE(Geom.setGeometry("Freia"));
+  ASSERT_TRUE(Geom.isXCoord(VMM1));
+  ASSERT_TRUE(Geom.isYCoord(VMM0));
 }
 
-TEST_F(GeometryTest, YCoordErrors) {
-  ASSERT_EQ(Geom.yCoord(0, VMMY,  0), Geom.InvalidCoord); // bad cassette
-  ASSERT_EQ(Geom.yCoord(1, VMMX, 32), Geom.InvalidCoord); // bad VMM
-  ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
-  ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel
+// x- and y- vmms are swapped compared with Freia
+TEST_F(GeometryTest, SelectAMOR) {
+  ASSERT_TRUE(Geom.setGeometry("AMOR"));
+  ASSERT_TRUE(Geom.isXCoord(VMM0));
+  ASSERT_TRUE(Geom.isYCoord(VMM1));
 }
 
-TEST_F(GeometryTest, Cassettes) {
-  ASSERT_EQ(Geom.cassette(1, 0), 0); // FEN 1, VMM 0, hybrid 0
-  ASSERT_EQ(Geom.cassette(1, 1), 0); // FEN 1, VMM 1
-  ASSERT_EQ(Geom.cassette(1, 2), 1); // FEN 1, VMM 2, hybrid 1
-  ASSERT_EQ(Geom.cassette(1, 3), 1); // FEN 1, VMM 3
-  ASSERT_EQ(Geom.cassette(2, 0), 2); // FEN 2, VMM 0, hybrid 2
-  ASSERT_EQ(Geom.cassette(2, 1), 2); // FEN 2, VMM 1
-  ASSERT_EQ(Geom.cassette(2, 2), 3); // FEN 2, VMM 2, hybrid 3
-  ASSERT_EQ(Geom.cassette(2, 3), 3); // FEN 2, VMM 3
+TEST_F(GeometryTest, SelectInvalid) {
+  ASSERT_FALSE(Geom.setGeometry(""));
+  ASSERT_TRUE(Geom.isXCoord(VMM1));
+  ASSERT_TRUE(Geom.isYCoord(VMM0));
+
+  ASSERT_FALSE(Geom.setGeometry("InvalidInstrument"));
+  ASSERT_TRUE(Geom.isXCoord(VMM1));
+  ASSERT_TRUE(Geom.isYCoord(VMM0));
 }
+
 
 
 int main(int argc, char **argv) {

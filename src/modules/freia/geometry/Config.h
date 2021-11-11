@@ -68,8 +68,11 @@ private:
 
 public:
 
-  // Configurable parameters
+  // Parameters obtained from JSON config file
   struct {
+    std::string InstrumentName{""};
+    std::string InstrumentGeometry{"Freia"};
+
     bool StripGapCheck{true};
     bool WireGapCheck{true};
     uint16_t MaxGapWire{0};
@@ -85,9 +88,10 @@ public:
   std::vector<std::string> HybridStr; // reinit in constructor
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
+
+  // Other parameters
   std::string InstrumentName{""};
   std::string FileName{""};
-
   // JSON object
   nlohmann::json root;
 };

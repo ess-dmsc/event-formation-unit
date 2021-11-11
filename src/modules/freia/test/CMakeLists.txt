@@ -28,3 +28,17 @@ set(FreiaGeometryTest_INC
 set(FreiaGeometryTest_SRC
   ../test/GeometryTest.cpp)
 create_test_executable(FreiaGeometryTest)
+
+
+set(FreiaChannelMappingTest_INC
+  ../geometry/FreiaChannelMapping.h)
+set(FreiaChannelMappingTest_SRC
+  ../test/FreiaChannelMappingTest.cpp)
+create_test_executable(FreiaChannelMappingTest)
+
+
+set(AMORChannelMappingTest_INC
+  ../geometry/AMORChannelMapping.h)
+set(AMORChannelMappingTest_SRC
+  ../test/AMORChannelMappingTest.cpp)
+create_test_executable(AMORChannelMappingTest)

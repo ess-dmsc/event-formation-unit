@@ -3,16 +3,16 @@
 ///
 /// \file
 ///
-/// \brief Freia geometry class
+/// \brief Multiblade geometry selector class
 ///
-/// Mapping from digital identifiers to x- and y- coordinates
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <freia/geometry/AMORChannelMapping.h>
+#include <freia/geometry/FreiaChannelMapping.h>
 #include <string>
-#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,58 +21,42 @@ namespace Freia {
 
 class Geometry {
 public:
-  ///\brief return global x-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// strip = channel + 1
-  /// x = strip - 1
-  uint16_t xCoord(uint16_t VMM, uint8_t Channel) {
-    if (Channel >= NumStrips) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
-      return InvalidCoord;
-    }
-
-    if ((VMM & 0x1) == 0) {
-      XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
-      return InvalidCoord;
-    } else {
-      return Channel;
-    }
+  Geometry() {
+    GeometryInst = &FreiaGeom;
   }
 
-  ///\brief return global y-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// wire = 32 - (channel - 16)
-  /// y = (cass - 1) * 32 + 32 - wire
+  bool setGeometry(std::string NewGeometry) {
+    if (NewGeometry == "AMOR") {
+      GeometryInst = &AMORGeom;
+      return true;
+    }
+    if (NewGeometry == "Freia") {
+      GeometryInst = &FreiaGeom;
+      return true;
+    }
+    XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
+    return false;
+  }
+
+  // wrapper function for specific instrument geometry instance
+  uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
+    return GeometryInst->xCoord(VMM, Channel);
+  }
+
+  // wrapper function for specific instrument geometry instance
   uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
-    if (Cassette == 0) {
-      XTRACE(DATA, WAR, "Cassette 0 is not valid");
-      return InvalidCoord;
-    }
-
-    if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
-             Channel, MinWireChannel, MaxWireChannel);
-      return InvalidCoord;
-    }
-
-    if (VMM & 0x01) {
-      XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
-      return InvalidCoord;
-    } else {
-      return (Cassette - 1) * NumWires + Channel - MinWireChannel;
-    }
+    return GeometryInst->yCoord(Cassette, VMM, Channel);
   }
 
-  // Return the local cassette
-  uint8_t cassette(uint8_t FEN, uint8_t VMM) {
-    return 2 * (FEN - 1) + ((VMM & 0x0f) >> 1);
-  }
+  // wrapper function for specific instrument geometry instance
+  bool isXCoord(uint8_t VMM) { return GeometryInst->isXCoord(VMM); }
 
-  const uint16_t InvalidCoord{0xFFFF};
-  const uint16_t NumStrips{64};
-  const uint16_t NumWires{32};
-  const uint16_t MinWireChannel{16};
-  const uint16_t MaxWireChannel{47};
+  // wrapper function for specific instrument geometry instance
+  bool isYCoord(uint8_t VMM) { return GeometryInst->isYCoord(VMM); }
+
+private:
+  AMORGeometry AMORGeom;
+  FreiaGeometry FreiaGeom;
+  GeometryBase * GeometryInst{nullptr};
 };
-
-} // namespace
+}
