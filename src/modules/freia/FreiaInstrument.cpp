@@ -332,7 +332,7 @@ void FreiaInstrument::processMonitorReadouts(void) {
        continue;
     }
 
-    XTRACE(DATA, ALW, "TOF %" PRIu64 "", TimeOfFlight);
+    XTRACE(DATA, DEB, "TOF %" PRIu64 "", TimeOfFlight);
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, 1);
     counters.MonitorCounts++;
   }
