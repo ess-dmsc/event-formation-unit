@@ -163,6 +163,44 @@ std::vector<uint8_t> MonitorReadout {
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x01, 0x00, 0x00, 0x00,  // BC 1 invalid
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Eighth monitor readout - invalid Ring
+  0x15, 0x01, 0x14, 0x00,  // Data Header - Ring 21 invalid, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Ninth monitor readout - invalid FEN
+  0x16, 0x02, 0x14, 0x00,  // Data Header - Ring 22, FEN 2 invalid
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Tenth monitor readout - TOF too large
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+};
+
+
+std::vector<uint8_t> MonitorReadoutTOF {
+  // First monitor readout - Negative PrevTOF - possibly unreachable!
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Second monitor readout - Negative TOF, positive PrevTOF
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
 };
 
 
@@ -319,12 +357,28 @@ TEST_F(FreiaInstrumentTest, NoEvents) {
 TEST_F(FreiaInstrumentTest, BeamMonitor) {
   ModuleSettings.IsMonitor = true;
   makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 7);
+  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Readouts, 10);
 
   freia->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorCounts, 1);
   ASSERT_EQ(counters.MonitorErrors, 6);
+  ASSERT_EQ(counters.RingErrors, 1);
+  ASSERT_EQ(counters.FENErrors, 1);
+  ASSERT_EQ(counters.TOFErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, BeamMonitorTOF) {
+  ModuleSettings.IsMonitor = true;
+  makeHeader(freia->ESSReadoutParser.Packet, MonitorReadoutTOF);
+  freia->ESSReadoutParser.Packet.Time.setReference(1,100000);
+  freia->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
+
+  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Readouts, 1);
+
+  freia->processMonitorReadouts();
+  ASSERT_EQ(counters.MonitorErrors, 0);
 }
 
 int main(int argc, char **argv) {
