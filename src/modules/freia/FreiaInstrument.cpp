@@ -16,8 +16,8 @@
 #include <common/readout/vmm3/Readout.h>
 #include <assert.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
@@ -260,7 +260,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
 
 void FreiaInstrument::processMonitorReadouts(void) {
   ESSReadout::ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
-  // All readouts are potentially now valid, but rings and fens
+  // All readouts are potentially now valid, negative TOF is not
+  // possible, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
@@ -297,13 +298,7 @@ void FreiaInstrument::processMonitorReadouts(void) {
 
     uint64_t TimeOfFlight = 0;
     if (TimeRef.TimeInNS > TimeNS) {
-      if (TimeRef.PrevTimeInNS > TimeNS) {
-        XTRACE(DATA, WAR, "TOF from PrevTime is negative!");
-        counters.MonitorErrors++;
-        continue;
-      } else {
-        TimeOfFlight = TimeNS - TimeRef.PrevTimeInNS;
-      }
+      TimeOfFlight = TimeNS - TimeRef.PrevTimeInNS;
     } else {
       TimeOfFlight = TimeNS - TimeRef.TimeInNS;
     }

@@ -273,9 +273,9 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
-  TestEvent.ClusterA.insert({0, 1, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
-  TestEvent.ClusterB.insert({0, 3, 1, 100});
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
+  TestEvent.ClusterB.insert({0, 3, 100, 1});
   Events.push_back(TestEvent);
 
   freia->generateEvents(Events);
@@ -283,9 +283,9 @@ TEST_F(FreiaInstrumentTest, WireGap) {
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
-  TestEvent.ClusterA.insert({0, 1, 0, 100});
-  TestEvent.ClusterA.insert({0, 3, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterA.insert({0, 3, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
 
   freia->generateEvents(Events);
@@ -340,11 +340,21 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
-  TestEvent.ClusterA.insert({0, 3, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  //                         t  c  w    p
+  TestEvent.ClusterA.insert({0, 3, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 1);
+}
+
+TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
+  TestEvent.ClusterA.insert({3000000000, 3, 100, 0});
+  TestEvent.ClusterB.insert({3000000000, 1, 100, 1});
+  Events.push_back(TestEvent);
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TOFErrors, 1);
 }
 
 
