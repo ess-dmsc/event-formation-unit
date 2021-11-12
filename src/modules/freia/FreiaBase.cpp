@@ -209,7 +209,7 @@ void FreiaBase::processing_thread() {
   if (EFUSettings.KafkaTopic == "") {
     if (FreiaModuleSettings.IsMonitor) {
       XTRACE(INIT, ALW, "EFU is Monitor, setting Kafka topic");
-      EFUSettings.KafkaTopic = "freia_monitor";
+      EFUSettings.KafkaTopic = "freia_beam_monitor";
     } else {
       XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
       EFUSettings.KafkaTopic = "freia_detector";
