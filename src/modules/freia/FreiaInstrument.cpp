@@ -314,8 +314,26 @@ void FreiaInstrument::processMonitorReadouts(void) {
       continue;
     }
 
+    if (readout.BC != 0) {
+       XTRACE(DATA, WAR, "BC (%u) must be zero", readout.BC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
     if (readout.OTADC != 0) {
        XTRACE(DATA, WAR, "OTADC (%u) must be zero", readout.OTADC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.GEO != 0) {
+       XTRACE(DATA, WAR, "GEO (%u) must be zero", readout.GEO);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.TDC != 0) {
+       XTRACE(DATA, WAR, "TDC (%u) must be zero", readout.TDC);
        counters.MonitorErrors++;
        continue;
     }
