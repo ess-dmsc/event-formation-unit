@@ -112,7 +112,7 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+    XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
     //counters.RingRx[readout.RingId]++;
@@ -136,6 +136,7 @@ void FreiaInstrument::processReadouts(void) {
 
     uint8_t Asic = readout.VMM & 0x1;
     uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
+    uint8_t Cassette = Hybrid + 1;
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -150,22 +151,22 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+      XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
          TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
       builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
 
       ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
-      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
 
     } else { // implicit isYCoord
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, Geom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, Geom.yCoord(Hybrid, readout.VMM, readout.Channel),
+      XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneY, Geom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, PlaneY});
 
       ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
-      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     }
   }
 
