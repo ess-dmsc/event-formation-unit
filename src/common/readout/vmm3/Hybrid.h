@@ -12,6 +12,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Calibration.h>
+#include <string>
 #include <vector>
 
 namespace ESSReadout {
