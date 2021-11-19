@@ -53,8 +53,10 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   // ADC is 10 bit 2^10 = 1024
   // Each plane (x,y) has a maximum of NumCassettes * 64 channels
   // Hists will automatically allocate space for both x and y planes
-  ADCHist = Hists(Conf.NumHybrids * 64, 1024); // 10 bit ADC
-  TDCHist = Hists(Conf.NumHybrids * 64, 4096); // 12 bit TDC
+  uint32_t MaxADC = 1024;
+  uint32_t MaxChannels =
+    Conf.NumHybrids * std::max(GeometryBase::NumWires, GeometryBase::NumStrips);
+  ADCHist = Hists(MaxChannels, MaxADC);
 }
 
 
@@ -147,7 +149,14 @@ void FreiaInstrument::processReadouts(void) {
     XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
 
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+
     XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
+
+    if (ADC >= 1023) {
+      counters.MaxADC++;
+      printf("Max ADC reached\n");
+
+    }
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
@@ -156,8 +165,8 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
 
-      ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
-      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
+      ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
@@ -165,8 +174,8 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, PlaneY});
 
-      ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
-      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
+      ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }
 

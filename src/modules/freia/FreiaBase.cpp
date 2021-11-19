@@ -63,38 +63,12 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
-
-  #if 0
-  // Experiment/Debugging - could be initialised in a loop
-  Stats.create("receive.phys_ring0", Counters.RingRx[0]);
-  Stats.create("receive.phys_ring1", Counters.RingRx[1]);
-  Stats.create("receive.phys_ring2", Counters.RingRx[2]);
-  Stats.create("receive.phys_ring3", Counters.RingRx[3]);
-  Stats.create("receive.phys_ring4", Counters.RingRx[4]);
-  Stats.create("receive.phys_ring5", Counters.RingRx[5]);
-  Stats.create("receive.phys_ring6", Counters.RingRx[6]);
-  Stats.create("receive.phys_ring7", Counters.RingRx[7]);
-  Stats.create("receive.phys_ring8", Counters.RingRx[8]);
-  Stats.create("receive.phys_ring9", Counters.RingRx[9]);
-  Stats.create("receive.phys_ring10", Counters.RingRx[10]);
-  Stats.create("receive.phys_ring11", Counters.RingRx[11]);
-  Stats.create("receive.phys_ring12", Counters.RingRx[12]);
-  Stats.create("receive.phys_ring13", Counters.RingRx[13]);
-  Stats.create("receive.phys_ring14", Counters.RingRx[14]);
-  Stats.create("receive.phys_ring15", Counters.RingRx[15]);
-  Stats.create("receive.phys_ring16", Counters.RingRx[16]);
-  Stats.create("receive.phys_ring17", Counters.RingRx[17]);
-  Stats.create("receive.phys_ring18", Counters.RingRx[18]);
-  Stats.create("receive.phys_ring19", Counters.RingRx[19]);
-  Stats.create("receive.phys_ring20", Counters.RingRx[20]);
-  Stats.create("receive.phys_ring21", Counters.RingRx[21]);
-  Stats.create("receive.phys_ring22", Counters.RingRx[22]);
-  Stats.create("receive.phys_ring23", Counters.RingRx[23]);
-  #endif
-
-  // VMM3Parser stats
+  //
   Stats.create("monitors.error", Counters.MonitorErrors);
   Stats.create("monitors.count", Counters.MonitorCounts);
+  Stats.create("readouts.adc_max", Counters.MaxADC);
+  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
+  // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
   Stats.create("readouts.ring_mismatch", Counters.RingErrors);
@@ -109,11 +83,12 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
   Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
+  // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
+
 
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
@@ -231,9 +206,6 @@ void FreiaBase::processing_thread() {
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(), "Freia");
   ADCHistSerializer.set_callback(ProduceMonitor);
-
-  HistogramSerializer TDCHistSerializer(Freia.TDCHist.needed_buffer_size(), "Freia");
-  TDCHistSerializer.set_callback(ProduceMonitor);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);

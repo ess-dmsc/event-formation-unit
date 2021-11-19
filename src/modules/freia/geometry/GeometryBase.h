@@ -29,8 +29,8 @@ public:
   virtual uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) = 0;
 
   const uint16_t InvalidCoord{0xFFFF};
-  const uint16_t NumStrips{64};
-  const uint16_t NumWires{32};
+  static const uint16_t NumStrips{64};
+  static const uint16_t NumWires{32};
   const uint16_t MinWireChannel{16};
   const uint16_t MaxWireChannel{47};
 };
