@@ -28,10 +28,10 @@ public:
 
   virtual uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) = 0;
 
-  const uint16_t InvalidCoord{0xFFFF};
-  static const uint16_t NumStrips{64};
-  static const uint16_t NumWires{32};
-  const uint16_t MinWireChannel{16};
-  const uint16_t MaxWireChannel{47};
+  constexpr static uint16_t InvalidCoord{0xFFFF};
+  constexpr static uint16_t NumStrips{64};
+  constexpr static uint16_t NumWires{32};
+  constexpr static uint16_t MinWireChannel{16};
+  constexpr static uint16_t MaxWireChannel{47};
 };
 }

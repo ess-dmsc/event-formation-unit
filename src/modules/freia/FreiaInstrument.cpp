@@ -154,8 +154,6 @@ void FreiaInstrument::processReadouts(void) {
 
     if (ADC >= 1023) {
       counters.MaxADC++;
-      printf("Max ADC reached\n");
-
     }
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
