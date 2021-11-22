@@ -54,10 +54,6 @@ public:
   // wrapper function for specific instrument geometry instance
   bool isYCoord(uint8_t VMM) { return GeometryInst->isYCoord(VMM); }
 
-  /// \todo hack because of lack of header only static consts
-  uint16_t getNumWires() { return GeometryInst->NumWires; }
-  uint16_t getNumStrips() { return GeometryInst->NumStrips; }
-
 private:
   AMORGeometry AMORGeom;
   FreiaGeometry FreiaGeom;

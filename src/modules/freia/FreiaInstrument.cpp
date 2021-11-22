@@ -55,7 +55,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   // Hists will automatically allocate space for both x and y planes
   uint32_t MaxADC = 1024;
   uint32_t MaxChannels =
-    Conf.NumHybrids * std::max(Geom.getNumWires(), Geom.getNumStrips());
+    Conf.NumHybrids * std::max(GeometryBase::NumWires, GeometryBase::NumStrips);
   ADCHist = Hists(MaxChannels, MaxADC);
 }
 
@@ -163,7 +163,7 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
 
-      uint32_t GlobalXChannel = Hybrid * Geom.getNumStrips() + readout.Channel;
+      uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
       ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
@@ -172,7 +172,7 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, PlaneY});
 
-      uint32_t GlobalYChannel = Hybrid * Geom.getNumWires() + readout.Channel;
+      uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
       ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }
