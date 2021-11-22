@@ -28,10 +28,11 @@ public:
 
   virtual uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) = 0;
 
-  constexpr static uint16_t InvalidCoord{0xFFFF};
-  constexpr static uint16_t NumStrips{64};
-  constexpr static uint16_t NumWires{32};
-  constexpr static uint16_t MinWireChannel{16};
-  constexpr static uint16_t MaxWireChannel{47};
+  /// \todo These really ought to be const, but this leads to linking errors
+  uint16_t InvalidCoord{0xFFFF};
+  uint16_t NumStrips{64};
+  uint16_t NumWires{32};
+  uint16_t MinWireChannel{16};
+  uint16_t MaxWireChannel{47};
 };
 }

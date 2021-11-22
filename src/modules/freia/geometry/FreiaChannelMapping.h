@@ -29,12 +29,12 @@ public:
   uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
-      return InvalidCoord;
+      return GeometryBase::InvalidCoord;
     }
 
     if (not isXCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
-      return InvalidCoord;
+      return GeometryBase::InvalidCoord;
     } else {
       return Channel;
     }
@@ -47,18 +47,18 @@ public:
   uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
     if (Cassette == 0) {
       XTRACE(DATA, WAR, "Cassette 0 is not valid");
-      return InvalidCoord;
+      return GeometryBase::InvalidCoord;
     }
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
              Channel, MinWireChannel, MaxWireChannel);
-      return InvalidCoord;
+      return GeometryBase::InvalidCoord;
     }
 
     if (not isYCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
-      return InvalidCoord;
+      return GeometryBase::InvalidCoord;
     } else {
       return (Cassette - 1) * NumWires + Channel - MinWireChannel;
     }
