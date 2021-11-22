@@ -22,6 +22,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("--calibration", LocalFreiaSettings.CalibFile,
                     "Freia specific calibration (json) file")
                     ->group("Freia");
+
+  parser.add_flag("--monitor", LocalFreiaSettings.IsMonitor,
+                    "Only process monitor readouts")
+                    ->group("Freia");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

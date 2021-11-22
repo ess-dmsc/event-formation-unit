@@ -19,6 +19,8 @@ struct FreiaSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
   std::string CalibFile{""};
+  //
+  bool IsMonitor{false}; ///\todo temporary
 };
 
 

@@ -93,6 +93,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   #endif
 
   // VMM3Parser stats
+  Stats.create("monitors.error", Counters.MonitorErrors);
+  Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
   Stats.create("readouts.ring_mismatch", Counters.RingErrors);
@@ -111,6 +113,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
+  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
@@ -204,14 +207,20 @@ void FreiaBase::processing_thread() {
 
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
-    EFUSettings.KafkaTopic = "freia_detector";
+    if (FreiaModuleSettings.IsMonitor) {
+      XTRACE(INIT, ALW, "EFU is Monitor, setting Kafka topic");
+      EFUSettings.KafkaTopic = "freia_beam_monitor";
+    } else {
+      XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
+      EFUSettings.KafkaTopic = "freia_detector";
+    }
   }
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_monitor");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug");
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
@@ -263,12 +272,16 @@ void FreiaBase::processing_thread() {
       Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
-      Freia.processReadouts();
 
-      for (auto & builder : Freia.builders) {
-        Freia.generateEvents(builder.Events);
+      if (FreiaModuleSettings.IsMonitor) {
+        Freia.processMonitorReadouts();
+      } else { // process regular events
+        Freia.processReadouts();
+
+        for (auto & builder : Freia.builders) {
+          Freia.generateEvents(builder.Events);
+        }
       }
-
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
         Counters.ProcessingIdle++;

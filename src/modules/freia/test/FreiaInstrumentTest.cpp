@@ -114,6 +114,96 @@ std::vector<uint8_t> GoodEvent {
 };
 
 
+std::vector<uint8_t> MonitorReadout {
+  // First monitor readout - Valid
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Second monitor readout - invalid channel
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x01,  // CH 1 is invalid
+
+  // Third monitor readout - invalid VMM
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x01, 0x00,  // VMM 1 invalid
+
+  // Fourth monitor readout - invalid TDC
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x01, 0x00, 0x00,  // TDC 1 invalid
+
+  // Fifth monitor readout - invalid GEO
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x01, 0x00, 0x00, 0x00,  // GEO 1 invalid
+
+  // Sixth monitor readout - invalid OTADC
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x01, 0x00,  // OTADC 1 invalid
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Seventh monitor readout - invalid BC
+  0x17, 0x01, 0x14, 0x00,  // Data Header, Ring 23, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x01, 0x00, 0x00, 0x00,  // BC 1 invalid
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Eighth monitor readout - invalid Ring
+  0x15, 0x01, 0x14, 0x00,  // Data Header - Ring 21 invalid, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Ninth monitor readout - invalid FEN
+  0x16, 0x02, 0x14, 0x00,  // Data Header - Ring 22, FEN 2 invalid
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Tenth monitor readout - TOF too large
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+};
+
+
+std::vector<uint8_t> MonitorReadoutTOF {
+  // First monitor readout - Negative PrevTOF - possibly unreachable!
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Second monitor readout - Negative TOF, positive PrevTOF
+  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+};
+
+
 class FreiaInstrumentTest : public TestBase {
 public:
 
@@ -183,9 +273,9 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
-  TestEvent.ClusterA.insert({0, 1, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
-  TestEvent.ClusterB.insert({0, 3, 1, 100});
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
+  TestEvent.ClusterB.insert({0, 3, 100, 1});
   Events.push_back(TestEvent);
 
   freia->generateEvents(Events);
@@ -193,9 +283,9 @@ TEST_F(FreiaInstrumentTest, WireGap) {
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
-  TestEvent.ClusterA.insert({0, 1, 0, 100});
-  TestEvent.ClusterA.insert({0, 3, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterA.insert({0, 3, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
 
   freia->generateEvents(Events);
@@ -250,11 +340,21 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
-  TestEvent.ClusterA.insert({0, 3, 0, 100});
-  TestEvent.ClusterB.insert({0, 1, 1, 100});
+  //                         t  c  w    p
+  TestEvent.ClusterA.insert({0, 3, 100, 0});
+  TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 1);
+}
+
+TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
+  TestEvent.ClusterA.insert({3000000000, 3, 100, 0});
+  TestEvent.ClusterB.insert({3000000000, 1, 100, 1});
+  Events.push_back(TestEvent);
+  freia->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TOFErrors, 1);
 }
 
 
@@ -262,6 +362,33 @@ TEST_F(FreiaInstrumentTest, NoEvents) {
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
+}
+
+TEST_F(FreiaInstrumentTest, BeamMonitor) {
+  ModuleSettings.IsMonitor = true;
+  makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
+  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Readouts, 10);
+
+  freia->processMonitorReadouts();
+  ASSERT_EQ(counters.MonitorCounts, 1);
+  ASSERT_EQ(counters.MonitorErrors, 6);
+  ASSERT_EQ(counters.RingErrors, 1);
+  ASSERT_EQ(counters.FENErrors, 1);
+  ASSERT_EQ(counters.TOFErrors, 1);
+}
+
+TEST_F(FreiaInstrumentTest, BeamMonitorTOF) {
+  ModuleSettings.IsMonitor = true;
+  makeHeader(freia->ESSReadoutParser.Packet, MonitorReadoutTOF);
+  freia->ESSReadoutParser.Packet.Time.setReference(1,100000);
+  freia->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
+
+  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Readouts, 1);
+
+  freia->processMonitorReadouts();
+  ASSERT_EQ(counters.MonitorErrors, 0);
 }
 
 int main(int argc, char **argv) {

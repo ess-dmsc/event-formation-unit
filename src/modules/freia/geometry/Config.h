@@ -34,7 +34,7 @@ public:
     : NumFENs(12),
       HybridId(64, -1),
       HybridStr(64),
-      InstrumentName(Instrument),
+      ExpectedName(Instrument),
       FileName(ConfigFile) {}
 
   // load file into json object and apply
@@ -78,6 +78,7 @@ public:
     uint16_t MaxGapWire{0};
     uint16_t MaxGapStrip{0};
 
+    uint32_t MaxTOFNS{1'000'000'000};
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
     uint32_t TimeBoxNs{0xffffffff};
   } Parms;
@@ -90,7 +91,7 @@ public:
   uint32_t NumPixels{0};
 
   // Other parameters
-  std::string InstrumentName{""};
+  std::string ExpectedName{""};
   std::string FileName{""};
   // JSON object
   nlohmann::json root;

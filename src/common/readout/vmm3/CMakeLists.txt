@@ -33,3 +33,12 @@ set(CalibFileTest_SRC
   CalibFile.cpp
 )
 create_test_executable(CalibFileTest)
+
+
+set(HybridTest_INC
+  Hybrid.h
+)
+set(HybridTest_SRC
+  test/HybridTest.cpp
+)
+create_test_executable(HybridTest)

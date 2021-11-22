@@ -112,7 +112,7 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+    XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
     //counters.RingRx[readout.RingId]++;
@@ -136,6 +136,7 @@ void FreiaInstrument::processReadouts(void) {
 
     uint8_t Asic = readout.VMM & 0x1;
     uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
+    uint8_t Cassette = Hybrid + 1;
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -150,22 +151,22 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+      XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
          TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
       builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
 
       ADCHist.bin_x(Hybrid * 64 + readout.Channel, ADC);
-      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
 
     } else { // implicit isYCoord
-      XTRACE(DATA, DEB, "TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, Geom.yCoord(Hybrid, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, Geom.yCoord(Hybrid, readout.VMM, readout.Channel),
+      XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneY, Geom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
                       ADC, PlaneY});
 
       ADCHist.bin_y(Hybrid * 64 + readout.Channel, ADC);
-      TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
+      //TDCHist.bin_x(Hybrid * 64 + readout.Channel, TDCCorr);
     }
   }
 
@@ -231,6 +232,12 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
+    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
+        XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      counters.TOFErrors++;
+      continue;
+    }
+
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
@@ -249,6 +256,100 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     counters.Events++;
   }
   Events.clear(); // else events will accumulate
+}
+
+
+void FreiaInstrument::processMonitorReadouts(void) {
+  ESSReadout::ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+  // All readouts are potentially now valid, negative TOF is not
+  // possible, but rings and fens
+  // could still be outside the configured range, also
+  // illegal time intervals can be detected here
+  assert(Serializer != nullptr);
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+
+  XTRACE(DATA, DEB, "processMonitorReadouts()");
+  for (const auto & readout : VMMParser.Result) {
+
+    if (DumpFile) {
+      dumpReadoutToFile(readout);
+    }
+
+    XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
+
+    if (readout.RingId/2 != 11) {
+      XTRACE(DATA, WAR, "Invalid ring %u for monitor readout",
+             readout.RingId);
+      counters.RingErrors++;
+      continue;
+    }
+
+    if (readout.FENId != 1) {
+      XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout",
+             readout.FENId);
+      counters.FENErrors++;
+      continue;
+    }
+
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "", TimeRef.PrevTimeInNS);
+    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "", TimeRef.TimeInNS);
+    XTRACE(DATA, DEB, "Time of readout  %" PRIi64 "", TimeNS);
+
+    uint64_t TimeOfFlight = 0;
+    if (TimeRef.TimeInNS > TimeNS) {
+      TimeOfFlight = TimeNS - TimeRef.PrevTimeInNS;
+    } else {
+      TimeOfFlight = TimeNS - TimeRef.TimeInNS;
+    }
+
+    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      counters.TOFErrors++;
+      continue;
+    }
+
+    if (readout.BC != 0) {
+       XTRACE(DATA, WAR, "BC (%u) must be zero", readout.BC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.OTADC != 0) {
+       XTRACE(DATA, WAR, "OTADC (%u) must be zero", readout.OTADC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.GEO != 0) {
+       XTRACE(DATA, WAR, "GEO (%u) must be zero", readout.GEO);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.TDC != 0) {
+       XTRACE(DATA, WAR, "TDC (%u) must be zero", readout.TDC);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.VMM != 0) {
+       XTRACE(DATA, WAR, "VMM (%u) must be zero", readout.VMM);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    if (readout.Channel != 0) {
+       XTRACE(DATA, WAR, "Channel (%u) must be zero", readout.Channel);
+       counters.MonitorErrors++;
+       continue;
+    }
+
+    XTRACE(DATA, DEB, "TOF %" PRIu64 "", TimeOfFlight);
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, 1);
+    counters.MonitorCounts++;
+  }
 }
 
 
