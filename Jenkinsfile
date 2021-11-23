@@ -29,8 +29,7 @@ container_build_nodes = [
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    String emailsAsString =  "[\"${toEmails.join('", "')}\"]"
-    emailext body: '${DEFAULT_CONTENT}\n\"' + emailsAsString + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+    emailext body: '${DEFAULT_CONTENT}\n\"' + toEmails.inspect() + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
