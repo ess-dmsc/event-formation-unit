@@ -29,7 +29,7 @@ container_build_nodes = [
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n${DEFAULT_RECIPIENTS}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+    emailext body: '${DEFAULT_CONTENT}\n\"' + toEmails.getDisplayName() + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
