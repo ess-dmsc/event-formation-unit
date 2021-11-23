@@ -29,7 +29,7 @@ container_build_nodes = [
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + culprits() + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
@@ -279,7 +279,6 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
-                    error 'MJC'
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
