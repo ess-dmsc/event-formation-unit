@@ -292,8 +292,6 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
-                    sh "git log -n 1 --pretty=format:'%ae'"
-                    error 'MJC testing'
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
