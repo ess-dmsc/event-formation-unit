@@ -28,8 +28,12 @@ container_build_nodes = [
 ]
 
 def failure_function(exception_obj, failureMessage) {
+    COMMITEMAIL = sh (
+        script: 'git --no-pager show -s --format=\'%ae\'',
+        returnStdout: true
+    ).trim()
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+    emailext body: '${DEFAULT_CONTENT}\n${COMMITEMAIL}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
