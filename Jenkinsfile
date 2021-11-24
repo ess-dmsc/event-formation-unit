@@ -37,7 +37,9 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + COMMITNAME + COMMITEMAIL + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
+                    + '\"\n\nCheck console output at $BUILD_URL to view the results.'
+                    + COMMITNAME + '\n' + COMMITEMAIL \,
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
