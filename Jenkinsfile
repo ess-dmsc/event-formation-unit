@@ -32,14 +32,17 @@ def failure_function(exception_obj, failureMessage) {
         script: 'git --no-pager show -s --format=\'%ae\'',
         returnStdout: true
     ).trim()
+
     COMMITNAME = sh (
         script: 'git --no-pager show -s --format=\'%an\'',
         returnStdout: true
     ).trim()
+
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
+
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
-                    + '\"\n\nCheck console output at $BUILD_URL to view the results.' \
-                    + COMMITNAME + '\n' + COMMITEMAIL,
+                    + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
+                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL,
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
