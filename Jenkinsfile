@@ -8,10 +8,6 @@ coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
 
-
-def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
-                 "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
-
 // Set number of old builds to keep.
  properties([[
      $class: 'BuildDiscarderProperty',
@@ -32,6 +28,9 @@ container_build_nodes = [
 ]
 
 def failure_function(exception_obj, failureMessage) {
+    def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
+                     "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
+
     COMMITEMAIL = sh (
         script: 'git --no-pager show -s --format=\'%ae\'',
         returnStdout: true
