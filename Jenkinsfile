@@ -41,15 +41,11 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
-
-    //println(emailmap.containsKey(COMMITEMAIL))
-    //println(emailmap.get(COMMITEMAIL, ""))
-
     EXTRATEXT="not found in mail map"
-    TOMAIL=""
+    TOMAIL='morten.christensen@ess.eu'
     if (emailmap.containsKey(COMMITEMAIL)) {
        EXTRATEXT="found in mail map"
-       TOMAIL=emailmap.get(COMMITEMAIL)
+       TOMAIL= TOMAIL + ', ' + emailmap.get(COMMITEMAIL)
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
@@ -58,7 +54,7 @@ def failure_function(exception_obj, failureMessage) {
                     + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
                     + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL \
                     + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
-            to: 'morten.christensen@ess.eu',
+            to: TOMAIL,
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
 }
