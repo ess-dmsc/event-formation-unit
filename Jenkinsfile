@@ -43,15 +43,15 @@ def failure_function(exception_obj, failureMessage) {
 
     println("DEBUG BEGIN")
     println(COMMITEMAIL)
-    println(COMMITEMAIL == "mortenjc@jcaps.com")
+    //println(COMMITEMAIL == "mortenjc@jcaps.com")
     println("DEBUG END")
 
     EXTRATEXT="not found in mail map"
     TOMAIL=""
-    if (COMMITEMAIL == "mortenjc@jcaps.com") {
-       EXTRATEXT="found in mail map"
-       TOMAIL="a@b.dk"
-    }
+    //if (COMMITEMAIL == "mortenjc@jcaps.com") {
+    //   EXTRATEXT="found in mail map"
+    //   TOMAIL="a@b.dk"
+    //}
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
 
@@ -307,8 +307,8 @@ timestamps {
 
             stage('Checkout') {
                 try {
-                    error 'MJC testing again'
                     scm_vars = checkout scm
+                    error 'MJC testing again'
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
