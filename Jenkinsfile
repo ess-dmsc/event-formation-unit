@@ -44,6 +44,7 @@ def failure_function(exception_obj, failureMessage) {
     println("DEBUG BEGIN")
     println(COMMITEMAIL)
     println(COMMITEMAIL == "mortenjc@jcaps.com")
+    println(emailmap.containsKey(COMMITEMAIL))
     println("DEBUG END")
 
     EXTRATEXT="not found in mail map"
