@@ -41,17 +41,15 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
-    println("DEBUG BEGIN")
-    println(COMMITEMAIL)
-    println(COMMITEMAIL == "mortenjc@jcaps.com")
-    println(emailmap.containsKey(COMMITEMAIL))
-    println("DEBUG END")
+
+    //println(emailmap.containsKey(COMMITEMAIL))
+    //println(emailmap.get(COMMITEMAIL, ""))
 
     EXTRATEXT="not found in mail map"
     TOMAIL=""
-    if (COMMITEMAIL == "mortenjc@jcaps.com") {
+    if (emailmap.containsKey(COMMITEMAIL)) {
        EXTRATEXT="found in mail map"
-       TOMAIL="a@b.dk"
+       TOMAIL=emailmap.get(COMMITEMAIL)
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
