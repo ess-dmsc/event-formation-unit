@@ -303,7 +303,6 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
-                    error 'MJC testing again'
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
