@@ -43,15 +43,15 @@ def failure_function(exception_obj, failureMessage) {
 
     println("DEBUG BEGIN")
     println(COMMITEMAIL)
-    //println(COMMITEMAIL == "mortenjc@jcaps.com")
+    println(COMMITEMAIL == "mortenjc@jcaps.com")
     println("DEBUG END")
 
     EXTRATEXT="not found in mail map"
     TOMAIL=""
-    //if (COMMITEMAIL == "mortenjc@jcaps.com") {
-    //   EXTRATEXT="found in mail map"
-    //   TOMAIL="a@b.dk"
-    //}
+    if (COMMITEMAIL == "mortenjc@jcaps.com") {
+       EXTRATEXT="found in mail map"
+       TOMAIL="a@b.dk"
+    }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
 
