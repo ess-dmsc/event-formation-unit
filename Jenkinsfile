@@ -43,9 +43,9 @@ def failure_function(exception_obj, failureMessage) {
 
     EXTRATEXT="not found in mail map"
     TOMAIL=""
-    if (emailmap.containsKey(COMMITEMAIL)) {
+    if (COMMITEMAIL == "mortenjc@jcaps.com") {
        EXTRATEXT="found in mail map"
-       //TOMAIL=emailmap.get(COMMITEMAIL)
+       TOMAIL="a@b.dk"
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
