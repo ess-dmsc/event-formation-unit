@@ -57,7 +57,7 @@ def failure_function(exception_obj, failureMessage) {
 
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
                     + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
-                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL, \
+                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL \
                     + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
