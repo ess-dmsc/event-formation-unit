@@ -41,6 +41,11 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
+    println("DEBUG BEGIN")
+    println(COMMITEMAIL)
+    println(COMMITEMAIL == "mortenjc@jcaps.com")
+    println("DEBUG END")
+
     EXTRATEXT="not found in mail map"
     TOMAIL=""
     if (COMMITEMAIL == "mortenjc@jcaps.com") {
@@ -302,8 +307,8 @@ timestamps {
 
             stage('Checkout') {
                 try {
-                    scm_vars = checkout scm
                     error 'MJC testing again'
+                    scm_vars = checkout scm
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
