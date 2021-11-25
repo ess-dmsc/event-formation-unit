@@ -8,6 +8,10 @@ coverage_on = "centos7"
 clangformat_os = "debian10"
 archive_what = "centos7-release"
 
+
+def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
+                 "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
+
 // Set number of old builds to keep.
  properties([[
      $class: 'BuildDiscarderProperty',
@@ -38,11 +42,19 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
+    EXTRATEXT="not found in mail map"
+    TOMAIL=""
+    if emailmap.containsKey(COMMITEMAIL) {
+       EXTRATEXT="found in mail map"
+       TOMAIL=emailmap.get(COMMITEMAIL)
+    }
+
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
 
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
                     + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
-                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL,
+                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL, \
+                    + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
             to: 'morten.christensen@ess.eu',
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
@@ -292,6 +304,7 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
+                    error 'MJC testing again'
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
