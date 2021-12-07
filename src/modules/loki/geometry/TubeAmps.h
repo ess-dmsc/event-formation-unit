@@ -35,11 +35,12 @@ public:
     std::int32_t PosNum = AmplitudeA + AmplitudeB;
     std::int32_t Denominator =
         AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
-    XTRACE(INIT, DEB, "StrawNum: %u, PosNum: %u, Denominator: %u", StrawNum,
+    XTRACE(INIT, DEB, "StrawNum: %d, PosNum: %d, Denominator: %d", StrawNum,
            PosNum, Denominator);
     if (Denominator == 0) {
-      XTRACE(INIT, WAR, "StrawNum: %u, PosNum: %u, Denominator: %u", StrawNum,
-             PosNum, Denominator);
+      XTRACE(INIT, WAR, "Denominator is 0, StrawNum: %d, PosNum: %d, "
+        " Denominator: %d,  A %d, B %d, C %d, D %d", StrawNum, PosNum,
+        Denominator, AmplitudeA, AmplitudeB, AmplitudeC, AmplitudeD);
       Stats.AmplitudeZero++;
       StrawId = NStraws;
       PosVal = NPos;
@@ -48,7 +49,8 @@ public:
     double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
     StrawId = strawCalc(dStrawId);
     PosVal = ((NPos - 1) * PosNum * 1.0) / Denominator;
-    XTRACE(INIT, DEB, "dStraw %f, StrawId %u, PosId: %u", dStrawId, StrawId);
+    XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f",
+      dStrawId, StrawId, PosNum, PosVal);
     return true;
   }
 

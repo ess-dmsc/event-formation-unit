@@ -185,8 +185,8 @@ void LokiInstrument::processReadouts() {
       }
 
       XTRACE(DATA, DEB,
-             "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B "
-             "%u, C %u, D %u",
+             "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
+             "%d, C %d, D %d",
              Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
              Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
