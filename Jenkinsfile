@@ -28,9 +28,33 @@ container_build_nodes = [
 ]
 
 def failure_function(exception_obj, failureMessage) {
+    def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
+                     "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
+
+    COMMITEMAIL = sh (
+        script: 'git --no-pager show -s --format=\'%ae\'',
+        returnStdout: true
+    ).trim()
+
+    COMMITNAME = sh (
+        script: 'git --no-pager show -s --format=\'%an\'',
+        returnStdout: true
+    ).trim()
+
+    EXTRATEXT="not found in mail map"
+    TOMAIL='morten.christensen@ess.eu'
+    if (emailmap.containsKey(COMMITEMAIL)) {
+       EXTRATEXT="found in mail map"
+       TOMAIL= TOMAIL + ', ' + emailmap.get(COMMITEMAIL)
+    }
+
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
-            recipientProviders: toEmails,
+
+    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
+                    + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
+                    + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL \
+                    + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
+            to: TOMAIL,
             subject: '${DEFAULT_SUBJECT}'
     throw exception_obj
 }
