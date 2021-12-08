@@ -32,8 +32,8 @@ class Configuration:
 
     #  updates the [qtefu_latest] section of the ~/.efucfg file
     def update_latest(self, selection):
-        for option in selection.keys():
-            self.config.set("qtefu_latest", option, selection[option])
+        for name, value in selection.items():
+            self.config.set("qtefu_latest", name, value)
         self.write_config()
 
     #  updates the [directories] section of the ~/.efucfg file
@@ -207,16 +207,22 @@ class Dialog(QDialog):  # WMainWindow
         self.populate(efu, detector, config, calib)
 
     def set_defaults(self, cfg):
-        efu_index = self.efucb.findText(dict(self.cfg.config.items("qtefu_latest"))["efu"])
+        efu_index = self.efucb.findText(
+            dict(self.cfg.config.items("qtefu_latest"))["efu"]
+        )
         self.efucb.setCurrentIndex(efu_index)
-        det_index = self.detcb.findText(dict(self.cfg.config.items("qtefu_latest"))["det"])
+        det_index = self.detcb.findText(
+            dict(self.cfg.config.items("qtefu_latest"))["det"]
+        )
         self.detcb.setCurrentIndex(det_index)
-        cfg_index = self.cfgcb.findText(dict(self.cfg.config.items("qtefu_latest"))["config"])
+        cfg_index = self.cfgcb.findText(
+            dict(self.cfg.config.items("qtefu_latest"))["config"]
+        )
         self.cfgcb.setCurrentIndex(cfg_index)
-        cal_index = self.calcb.findText(dict(self.cfg.config.items("qtefu_latest"))["calib"])
+        cal_index = self.calcb.findText(
+            dict(self.cfg.config.items("qtefu_latest"))["calib"]
+        )
         self.calcb.setCurrentIndex(cal_index)
-
-
 
 
 # runs efu command with given directories and configuration selection
@@ -267,7 +273,6 @@ if __name__ == "__main__":
     dirs = Directories(
         cfg.options["basedir"], cfg.options["efudir"], cfg.options["datadir"]
     )
-
 
     # if resume argument used, uses saved parameters in ~/.efucfg
     if args.resume:
