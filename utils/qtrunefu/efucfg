@@ -20,5 +20,11 @@ throttle = 10000
 bytes = 1472
 
 [qtefu_latest]
-efu = Documents/essproj/event-formation-unit/build/bin/efu
-
+efu = 
+det = 
+config = 
+calib = 
+grafana = 
+kafka = 
+hwcheck = 
+region = 
