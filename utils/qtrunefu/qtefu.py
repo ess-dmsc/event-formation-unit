@@ -30,17 +30,20 @@ class Configuration:
             print("No option {}, exiting ...".format(opt))
             sys.exit(0)
 
+    #  updates the [qtefu_latest] section of the ~/.efucfg file
     def update_latest(self, selection):
         for option in selection.keys():
             self.config.set("qtefu_latest", option, selection[option])
         self.write_config()
 
+    #  updates the [directories] section of the ~/.efucfg file
     def update_dirs(self, dirs):
         self.config.set("directories", "basedir", dirs.basedir)
         self.config.set("directories", "datadir", dirs.datadir)
         self.config.set("directories", "efudir", dirs.efudir)
         self.write_config()
 
+    # writes current config settings to ~/.efucfg file
     def write_config(self):
         with open(os.path.join(expanduser("~"), ".efucfg"), "w") as configfile:
             self.config.write(configfile)
@@ -166,6 +169,7 @@ class Dialog(QDialog):  # WMainWindow
         self._populate_field(self.cfgcb, config)
         self._populate_field(self.calcb, calib)
 
+    # returns currently selected options as a dictionary
     def get_selection(self):
         return {
             "efu": self._efu,
@@ -202,7 +206,20 @@ class Dialog(QDialog):  # WMainWindow
         efu, detector, config, calib = search.get_values()
         self.populate(efu, detector, config, calib)
 
+    def set_defaults(self, cfg):
+        efu_index = self.efucb.findText(dict(self.cfg.config.items("qtefu_latest"))["efu"])
+        self.efucb.setCurrentIndex(efu_index)
+        det_index = self.detcb.findText(dict(self.cfg.config.items("qtefu_latest"))["det"])
+        self.detcb.setCurrentIndex(det_index)
+        cfg_index = self.cfgcb.findText(dict(self.cfg.config.items("qtefu_latest"))["config"])
+        self.cfgcb.setCurrentIndex(cfg_index)
+        cal_index = self.calcb.findText(dict(self.cfg.config.items("qtefu_latest"))["calib"])
+        self.calcb.setCurrentIndex(cal_index)
 
+
+
+
+# runs efu command with given directories and configuration selection
 def run_cmdlopts(dirs, selection):
     cmdlopts = [
         os.path.join(dirs.basedir, selection["efu"]),
@@ -251,9 +268,12 @@ if __name__ == "__main__":
         cfg.options["basedir"], cfg.options["efudir"], cfg.options["datadir"]
     )
 
+
+    # if resume argument used, uses saved parameters in ~/.efucfg
     if args.resume:
         selection = dict(cfg.config.items("qtefu_latest"))
         run_cmdlopts(dirs, selection)
+    # else loads GUI for parameter selection
     else:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         app = QApplication(sys.argv)
@@ -263,6 +283,8 @@ if __name__ == "__main__":
 
         efu, detector, config, calib = searcher.get_values()
         dialog.populate(efu, detector, config, calib)
+
+        dialog.set_defaults(cfg)
 
         retval = dialog.exec_()
         if retval != 0:
