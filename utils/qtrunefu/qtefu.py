@@ -42,7 +42,7 @@ class Configuration:
         self.write_config()
 
     def write_config(self):
-         with open(os.path.join(expanduser("~"), ".efucfg"), "w") as configfile:
+        with open(os.path.join(expanduser("~"), ".efucfg"), "w") as configfile:
             self.config.write(configfile)
 
 
@@ -203,6 +203,31 @@ class Dialog(QDialog):  # WMainWindow
         self.populate(efu, detector, config, calib)
 
 
+def run_cmdlopts(dirs, selection):
+    cmdlopts = [
+        os.path.join(dirs.basedir, selection["efu"]),
+        "--det",
+        os.path.join(dirs.basedir, selection["det"]),
+    ]
+    if selection["hwcheck"] == "False":
+        cmdlopts += ["--nohwcheck"]
+    if selection["grafana"] != "":
+        cmdlopts += ["--graphite", selection["grafana"]]
+    if selection["kafka"] != "":
+        cmdlopts += ["--broker_addr", selection["kafka"]]
+    if selection["config"] != "":
+        cmdlopts += ["--file", os.path.join(dirs.basedir, selection["config"])]
+    if selection["calib"] != "":
+        cmdlopts += [
+            "--calibration",
+            os.path.join(dirs.basedir, selection["calib"]),
+        ]
+    if selection["region"] != "":
+        cmdlopts += ["--region", selection["region"]]
+    print(" ".join(cmdlopts))
+    subprocess.call(cmdlopts)
+
+
 #
 #
 if __name__ == "__main__":
@@ -214,43 +239,35 @@ if __name__ == "__main__":
         type=str,
         default="office",
     )
+    parser.add_argument(
+        "-r",
+        "--resume",
+        help="resume efu with previously used parameters",
+        action="store_true",
+    )
     args = parser.parse_args()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    app = QApplication(sys.argv)
-
     cfg = Configuration(args.p)
     dirs = Directories(
         cfg.options["basedir"], cfg.options["efudir"], cfg.options["datadir"]
     )
-    searcher = Searcher(dirs)
-    dialog = Dialog(cfg, dirs)
 
-    efu, detector, config, calib = searcher.get_values()
-    dialog.populate(efu, detector, config, calib)
+    if args.resume:
+        selection = dict(cfg.config.items("qtefu_latest"))
+        run_cmdlopts(dirs, selection)
+    else:
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        app = QApplication(sys.argv)
 
-    retval = dialog.exec_()
-    if retval != 0:
-        selection = dialog.get_selection()
-        cfg.update_latest(selection)
-        cfg.update_dirs(dirs)
-        cmdlopts = [
-            os.path.join(dirs.basedir, selection["efu"]),
-            "--det",
-            os.path.join(dirs.basedir, selection["det"]),
-        ]
-        if selection["hwcheck"] == "False":
-            cmdlopts += ["--nohwcheck"]
-        if selection["grafana"] != "":
-            cmdlopts += ["--graphite", selection["grafana"]]
-        if selection["kafka"] != "":
-            cmdlopts += ["--broker_addr", selection["kafka"]]
-        if selection["config"] != "":
-            cmdlopts += ["--file", os.path.join(dirs.basedir, selection["config"])]
-        if selection["calib"] != "":
-            cmdlopts += ["--calibration", os.path.join(dirs.basedir, selection["calib"])]
-        if selection["region"] != "":
-            cmdlopts += ["--region", selection["region"]]
-        print(" ".join(cmdlopts))
-        subprocess.call(cmdlopts)
+        searcher = Searcher(dirs)
+        dialog = Dialog(cfg, dirs)
+
+        efu, detector, config, calib = searcher.get_values()
+        dialog.populate(efu, detector, config, calib)
+
+        retval = dialog.exec_()
+        if retval != 0:
+            selection = dialog.get_selection()
+            cfg.update_latest(selection)
+            cfg.update_dirs(dirs)
+            run_cmdlopts(dirs, selection)
     sys.exit()
