@@ -40,7 +40,7 @@ Config::Config(std::string ConfigFile) {
 
     auto PanelConfig = root["PanelConfig"];
     for (auto &Mapping : PanelConfig) {
-      auto Ring = Mapping["Bank"].get<unsigned int>();
+      auto Bank = Mapping["Bank"].get<unsigned int>();
       bool Vertical = Mapping["Vertical"].get<bool>();
       auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
       auto TubesN = Mapping["TubesN"].get<unsigned int>();
@@ -50,16 +50,17 @@ Config::Config(std::string ConfigFile) {
       LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
 
       LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN "
+          "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, TubesN "
           "{}, StrawOffset {}",
-          Name, Ring, Vertical, TubesZ, TubesN, StrawOffset);
+          Name, Bank, Vertical, TubesZ, TubesN, StrawOffset);
 
       PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
       Panels.push_back(Temp);
     }
 
     Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
-    Geometry = new ESSGeometry(Resolution, NTubesTotal * 7, 1, 1);
+    // This detector is made of individual 2D banks, so final 2 dimensions are 1
+    Geometry = new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1); 
     LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
 
   } catch (...) {
