@@ -47,7 +47,7 @@ public:
   struct ParsedData {
     uint8_t RingId;
     uint8_t FENId;
-    std::vector<LokiReadout> Data;
+    LokiReadout Data;
   };
 
   // To be iterated over in processing thread

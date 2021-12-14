@@ -85,7 +85,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
            Data->AmpB, Data->AmpC, Data->AmpD);
 
-    CurrentDataSection.Data.push_back(*Data);
+    CurrentDataSection.Data = *Data;
     ParsedReadouts++;
     Stats.Readouts++;
   
