@@ -64,8 +64,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.DataHeaders++;
 
-    if (DataHdrPtr->DataLength < sizeof(DataParser::LokiReadout)) {
-      XTRACE(DATA, WAR, "Invalid data length %u", DataHdrPtr->DataLength);
+    if (DataHdrPtr->DataLength != DataHeaderSize + LokiReadoutSize) {
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", 
+            DataHdrPtr->DataLength, DataHeaderSize + LokiReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -75,24 +76,19 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     CurrentDataSection.RingId = DataHdrPtr->RingId;
     CurrentDataSection.FENId = DataHdrPtr->FENId;
 
-    // Loop through data here
-    auto ReadoutsInDataSection =
-        (DataHdrPtr->DataLength - DataHeaderSize) / LokiReadoutSize;
-    for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
-      auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize +
-                                  i * LokiReadoutSize);
-      XTRACE(DATA, DEB,
-             "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
-             "0x%04x B "
-             "0x%04x C 0x%04x D 0x%04x",
-             i, DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
-             Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
-             Data->AmpB, Data->AmpC, Data->AmpD);
+    auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize);
+    XTRACE(DATA, DEB,
+           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+           "0x%04x B "
+           "0x%04x C 0x%04x D 0x%04x",
+           DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
+           Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
+           Data->AmpB, Data->AmpC, Data->AmpD);
 
-      CurrentDataSection.Data.push_back(*Data);
-      ParsedReadouts++;
-      Stats.Readouts++;
-    }
+    CurrentDataSection.Data.push_back(*Data);
+    ParsedReadouts++;
+    Stats.Readouts++;
+  
     Result.push_back(CurrentDataSection);
     BytesLeft -= DataHdrPtr->DataLength;
     DataPtr += DataHdrPtr->DataLength;

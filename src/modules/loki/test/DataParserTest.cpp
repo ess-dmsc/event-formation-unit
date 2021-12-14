@@ -113,6 +113,19 @@ TEST_F(DataParserTest, MultipleDataPackets) {
   ASSERT_EQ(Parser.Result.size(), 2);
 }
 
+
+// TODO, confirm this response when passed too many readouts
+TEST_F(DataParserTest, BadThreeReadouts) {
+  auto Res = Parser.parse((char *)&ErrThreeLokiReadouts[0],
+                          ErrThreeLokiReadouts.size());
+  ASSERT_EQ(Res, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorBytes, 64);
+  ASSERT_EQ(Parser.Result.size(), 0);
+} 
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
