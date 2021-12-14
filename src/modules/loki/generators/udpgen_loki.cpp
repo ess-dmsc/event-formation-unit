@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
   const int BufferSize{8972};
   uint8_t Buffer[BufferSize];
   const uint16_t DataSections{100};
-  const uint16_t DataElements{4};
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
@@ -64,7 +63,7 @@ int main(int argc, char *argv[]) {
   do {
     uint32_t SeqNum = TotalPackets;
     uint16_t DataSize =
-        gen.lokiReadoutDataGen(Settings.Randomise, DataSections, DataElements,
+        gen.lokiReadoutDataGen(Settings.Randomise, DataSections,
                                Settings.NRings, Buffer, BufferSize, SeqNum);
 
     DataSource.send(Buffer, DataSize);
