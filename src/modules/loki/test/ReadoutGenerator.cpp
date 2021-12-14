@@ -48,7 +48,7 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(
     DataHeader->RingId = RingCount % Rings;
     DataHeader->FENId = 0x00;
     DataHeader->DataLength = DataHeaderSize + LokiDataSize;
-    assert(DataHeader->DataLength == 4 + 20 * DataElements);
+    assert(DataHeader->DataLength == 4 + 20);
     RingCount++;
     DP += DataHeaderSize;
 
