@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
   const int BufferSize{8972};
   uint8_t Buffer[BufferSize];
-  const uint16_t DataSections{100};
+  const uint16_t DataSections{400};
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
