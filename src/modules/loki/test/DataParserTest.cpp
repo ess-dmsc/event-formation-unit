@@ -15,6 +15,7 @@ protected:
   void TearDown() override {}
 };
 
+
 TEST_F(DataParserTest, Constructor) {
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.DataHeaders, 0);
@@ -62,7 +63,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, DataSizeMismatch) {
-  auto Res = Parser.parse((char *)&OkThreeLokiReadouts[0], 10);
+  auto Res = Parser.parse((char *)&OkLokiReadout[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
@@ -70,11 +71,11 @@ TEST_F(DataParserTest, DataSizeMismatch) {
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
-TEST_F(DataParserTest, ParseThree) {
+TEST_F(DataParserTest, ParseOne) {
   auto Res =
-      Parser.parse((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size());
-  ASSERT_EQ(Res, 3);
-  ASSERT_EQ(Parser.Stats.Readouts, 3);
+      Parser.parse((char *)&OkLokiReadout[0], OkLokiReadout.size());
+  ASSERT_EQ(Res, 1);
+  ASSERT_EQ(Parser.Stats.Readouts, 1);
   ASSERT_EQ(Parser.Stats.DataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
@@ -82,10 +83,10 @@ TEST_F(DataParserTest, ParseThree) {
 }
 
 TEST_F(DataParserTest, MultipleDataSection) {
-  auto Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
-                          Ok2xThreeLokiReadouts.size());
-  ASSERT_EQ(Res, 6);
-  ASSERT_EQ(Parser.Stats.Readouts, 6);
+  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0],
+                          Ok2xLokiReadout.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
@@ -93,24 +94,37 @@ TEST_F(DataParserTest, MultipleDataSection) {
 }
 
 TEST_F(DataParserTest, MultipleDataPackets) {
-  auto Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
-                          Ok2xThreeLokiReadouts.size());
-  ASSERT_EQ(Res, 6);
-  ASSERT_EQ(Parser.Stats.Readouts, 6);
+  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0],
+                          Ok2xLokiReadout.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 2);
 
-  Res = Parser.parse((char *)&Ok2xThreeLokiReadouts[0],
-                     Ok2xThreeLokiReadouts.size());
-  ASSERT_EQ(Res, 6);
-  ASSERT_EQ(Parser.Stats.Readouts, 12);
+  Res = Parser.parse((char *)&Ok2xLokiReadout[0],
+                     Ok2xLokiReadout.size());
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.DataHeaders, 4);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 2);
 }
+
+
+// TODO, confirm this response when passed too many readouts
+TEST_F(DataParserTest, BadThreeReadouts) {
+  auto Res = Parser.parse((char *)&ErrThreeLokiReadouts[0],
+                          ErrThreeLokiReadouts.size());
+  ASSERT_EQ(Res, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorBytes, 64);
+  ASSERT_EQ(Parser.Result.size(), 0);
+} 
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
