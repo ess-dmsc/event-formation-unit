@@ -64,7 +64,7 @@ TEST_F(CombinedParserTest, DataGenSizeTooBig) {
   const uint16_t BufferSize{8972};
   uint8_t Buffer[BufferSize];
 
-  uint16_t Sections{100000};
+  uint16_t Sections{1000};
 
   ReadoutGenerator gen;
   auto Length = gen.lokiReadoutDataGen(false, Sections, 1, Buffer, BufferSize, FirstSeqNum);
