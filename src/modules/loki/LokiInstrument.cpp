@@ -157,7 +157,7 @@ void LokiInstrument::processReadouts() {
       continue;
     }
 
-    auto Data = Section.Data;
+    auto &Data = Section.Data;
 
     if (DumpFile) {
       dumpReadoutToFile(Section, Data);
