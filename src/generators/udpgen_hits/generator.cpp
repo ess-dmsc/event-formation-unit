@@ -16,8 +16,6 @@
 #include <generators/udpgen_hits/ReaderHits.h>
 
 #include <modules/multigrid/generators/ReaderReadouts.h>
-#include <modules/gdgem/generators/ReaderReadouts.h>
-#include <modules/jalousie/generators/CdtFile.h>
 
 #include <common/system/Socket.h>
 
@@ -91,18 +89,6 @@ int main(int argc, char *argv[]) {
 
   #ifdef GENERATOR_MULTIGRID_READOUTS
   Multigrid::ReaderReadouts file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_GDGEM_READOUTS
-  Gem::ReaderReadouts file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_GDGEM_HITS
-  Gem::ReaderHits file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_JALOUSIE_CDT
-  Jalousie::CdtFile file(Settings.FileName);
   #endif
 
   size_t ReadoutSize = file.getReadoutSize();
