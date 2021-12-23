@@ -94,7 +94,7 @@ int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
     }
 
     if ((Readout.OTADC & ADCMask) > MaxADCValue) {
-      XTRACE(DATA, WAR, "Invalid TDC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
+      XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
       Stats.ErrorADC++;
       continue;
     }

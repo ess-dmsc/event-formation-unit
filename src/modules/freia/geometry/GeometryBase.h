@@ -28,10 +28,15 @@ public:
 
   virtual uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) = 0;
 
-  const uint16_t InvalidCoord{0xFFFF};
-  const uint16_t NumStrips{64};
-  const uint16_t NumWires{32};
-  const uint16_t MinWireChannel{16};
-  const uint16_t MaxWireChannel{47};
+  static const uint16_t InvalidCoord;
+  static const uint16_t NumStrips;
+  static const uint16_t NumWires;
+  static const uint16_t MinWireChannel;
+  static const uint16_t MaxWireChannel;
 };
+inline uint16_t const GeometryBase::InvalidCoord = 0xFFFF;
+inline uint16_t const GeometryBase::NumStrips = 64;
+inline uint16_t const GeometryBase::NumWires = 32;
+inline uint16_t const GeometryBase::MinWireChannel = 16;
+inline uint16_t const GeometryBase::MaxWireChannel = 47;
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -39,6 +39,7 @@ struct Counters {
     int64_t TOFErrors;
     int64_t MonitorErrors;
     int64_t MonitorCounts;
+    int64_t MaxADC;
 
     //
     int64_t ProcessingIdle;

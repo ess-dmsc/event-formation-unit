@@ -72,7 +72,6 @@ public:
 
   /// ADC value histograms for all channels
   Hists ADCHist{1, 1}; // reinit in ctor
-  Hists TDCHist{1, 1}; // reinit in ctor
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes
