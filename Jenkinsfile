@@ -67,7 +67,6 @@ builders = pipeline_builder.createBuilders { container ->
     pipeline_builder.stage("${container.key}: checkout") {
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
-            error "testing"
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
@@ -241,7 +240,6 @@ def get_macos_pipeline()
 
                     dir("${project}") {
                         checkout scm
-                        error "testing macos"
                     }
 
                     dir("${project}/build") {
@@ -305,7 +303,6 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
-                    error "another test"
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
