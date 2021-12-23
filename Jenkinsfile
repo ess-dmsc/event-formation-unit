@@ -241,6 +241,7 @@ def get_macos_pipeline()
 
                     dir("${project}") {
                         checkout scm
+                        error "testing macos"
                     }
 
                     dir("${project}/build") {
@@ -304,6 +305,7 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
+                    error "another test"
                 } catch (e) {
                     failure_function(e, 'Checkout failed')
                 }
