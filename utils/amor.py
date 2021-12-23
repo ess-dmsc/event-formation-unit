@@ -1,5 +1,8 @@
 
 # Utility to visualise the digital geometry for AMOR
+#
+# This script is nonessential and considered a 'helper' function
+# it should reflect the AMOR geometry but not be used as a ground truth
 
 from graphics import *
 import sys, argparse

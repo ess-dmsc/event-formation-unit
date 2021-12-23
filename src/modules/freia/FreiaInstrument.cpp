@@ -52,6 +52,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
   // Each plane (x,y) has a maximum of NumCassettes * 64 channels
+  // eventhough there are only 32 wires so some bins will be empty
   // Hists will automatically allocate space for both x and y planes
   uint32_t MaxADC = 1024;
   uint32_t MaxChannels =
@@ -148,10 +149,13 @@ void FreiaInstrument::processReadouts(void) {
     TimeNS += TDCCorr;
     XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
 
+    // Only 10 bits of the 16-bit OTADC field is used hence the 0x3ff mask below
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
 
     XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
 
+    // If the corrected ADC reaches maximum value we count the occurance but
+    // use the new value anyway
     if (ADC >= 1023) {
       counters.MaxADC++;
     }
