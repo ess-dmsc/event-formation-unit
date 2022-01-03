@@ -12,7 +12,7 @@
 #include "mo01_nmx_generated.h"
 
 #include <common/reduction/Event.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 
 namespace Gem {
 

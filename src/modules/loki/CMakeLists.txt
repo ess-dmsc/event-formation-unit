@@ -15,7 +15,7 @@ set(loki_common_inc
   geometry/Config.h
   geometry/Calibration.h
   readout/DataParser.h
-  ../readout/ReadoutParser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   )
 set(loki_common_src
   LokiBase.cpp
@@ -23,7 +23,7 @@ set(loki_common_src
   geometry/Config.cpp
   geometry/Calibration.cpp
   readout/DataParser.cpp
-  ../readout/ReadoutParser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   )
 set(loki_INC ${loki_common_inc})
 set(loki_SRC Loki.cpp ${loki_common_src})
@@ -32,14 +32,14 @@ create_module(loki)
 #
 set(LokiBaseTest_INC
   ${loki_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(LokiBaseTest_SRC
   test/LokiBaseTest.cpp
   ${loki_common_src}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
 
@@ -48,11 +48,11 @@ create_test_executable(LokiBaseTest)
 ##
 set(LokiInstrumentTest_INC
   ${loki_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(LokiInstrumentTest_SRC
   ${loki_common_src}
   test/LokiInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(LokiInstrumentTest)

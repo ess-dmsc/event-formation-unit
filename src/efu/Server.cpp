@@ -10,7 +10,7 @@
 //#include <algorithm>
 #include <arpa/inet.h>
 #include <cinttypes>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <cstdio>
 #include <cstring>
 #include <efu/Parser.h>
@@ -78,7 +78,7 @@ void Server::serverOpen() {
 }
 
 void Server::serverClose(int socket) {
-  LOG(IPC, Sev::Info, "Closing socket fd {}", socket);
+  LOG(IPC, Sev::Debug, "Closing socket fd {}", socket);
 
   auto client = std::find(ClientFd.begin(), ClientFd.end(), socket);
   if (client == ClientFd.end()) {
@@ -128,15 +128,15 @@ void Server::serverPoll() {
       LOG(IPC, Sev::Warning, "Max clients connected, can't accept()");
       close(newsock);
     } else {
-      LOG(IPC, Sev::Info, "Accept new connection, socket {}", newsock);
+      LOG(IPC, Sev::Debug, "Accept new connection, socket {}", newsock);
       *freefd = newsock;
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         LOG(IPC, Sev::Error, "serverPoll() - internal error");
         throw std::runtime_error("serverPoll() - internal error");
       }
-      LOG(IPC, Sev::Info, "New cilent socket: {}", *freefd);
+      LOG(IPC, Sev::Debug, "New cilent socket: {}", *freefd);
       #ifdef SYSTEM_NAME_DARWIN
-        LOG(IPC, Sev::Info, "setsockopt() - MacOS specific");
+        LOG(IPC, Sev::Debug, "setsockopt() - MacOS specific");
         int on = 1;
         int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
         if (ret != 0) {

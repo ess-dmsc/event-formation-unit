@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/reduction/Event.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class EventTest : public TestBase {
 protected:
@@ -25,6 +25,15 @@ TEST_F(EventTest, Empty) {
   EXPECT_TRUE(event.empty());
   event.insert({0, 0, 0, 0});
   EXPECT_FALSE(event.empty());
+}
+
+TEST_F(EventTest, EmptyTimeGap) {
+  Cluster EmptyCluster;
+  EXPECT_TRUE(event.empty());
+  EXPECT_EQ(event.time_gap(EmptyCluster), std::numeric_limits<uint64_t>::max());
+  event.insert({0, 0, 0, 0});
+  EXPECT_FALSE(event.empty());
+  EXPECT_EQ(event.time_gap(EmptyCluster), std::numeric_limits<uint64_t>::max());
 }
 
 TEST_F(EventTest, Clear) {

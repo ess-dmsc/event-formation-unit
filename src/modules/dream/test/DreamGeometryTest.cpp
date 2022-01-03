@@ -1,3 +1,4 @@
+
 // Copyright (C) 2021 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
@@ -6,8 +7,8 @@
 /// \brief Unit test for Dream geometry
 ///
 //===----------------------------------------------------------------------===//
+#include <common/testutils/TestBase.h>
 
-#include <test/TestBase.h>
 // fails InvalidSumo test on CentOS build - false positive
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"

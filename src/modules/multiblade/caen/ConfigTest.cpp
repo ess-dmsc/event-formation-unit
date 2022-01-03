@@ -3,8 +3,8 @@
 
 #include <multiblade/caen/Config.h>
 #include <multiblade/caen/ConfigTestData.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 class ConfigTest : public TestBase {};
 
@@ -13,10 +13,8 @@ TEST_F(ConfigTest, Constructor) {
   Multiblade::Config mbconf;
   ASSERT_FALSE(mbconf.isConfigLoaded());
   ASSERT_EQ(mbconf.getTimeTickNS(), 16);
-  ASSERT_EQ(mbconf.getDigitizers(), nullptr);
   ASSERT_EQ(mbconf.getInstrument(), Multiblade::Config::InstrumentGeometry::Estia);
   ASSERT_TRUE(mbconf.getConfigFile().empty());
-  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 TEST_F(ConfigTest, NoFile) {
@@ -83,9 +81,7 @@ TEST_F(ConfigTest, ValidConfigFile) {
   mbconf = Multiblade::Config(filename);
   ASSERT_TRUE(mbconf.isConfigLoaded());
   ASSERT_EQ(mbconf.getTimeTickNS(), 17);
-  ASSERT_NE(mbconf.getDigitizers(), nullptr);
   ASSERT_EQ(mbconf.getConfigFile(), filename);
-  ASSERT_EQ(mbconf.getDigitisers().size(), 6);
 }
 
 int main(int argc, char **argv) {

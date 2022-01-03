@@ -11,20 +11,19 @@
 #include "PerfGenBase.h"
 
 #include <cinttypes>
-#include <common/EFUArgs.h>
-#include <common/EV42Serializer.h>
-#include <common/Producer.h>
-#include <common/monitor/HistogramSerializer.h>
-#include <common/Trace.h>
-#include <common/TimeString.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/Producer.h>
+#include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 #include <common/TestImageUdder.h>
 
 #include <unistd.h>
 
-#include <common/SPSCFifo.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/memory/SPSCFifo.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 
 #include <logical_geometry/ESSGeometry.h>
 
@@ -66,7 +65,7 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings, struct PerfGenSettings &L
 void PerfGenBase::processingThread() {
 
   if (EFUSettings.KafkaTopic == "") {
-    EFUSettings.KafkaTopic = "PERFGEN_detector";
+    EFUSettings.KafkaTopic = "perfgen_detector";
   }
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);

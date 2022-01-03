@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MBCaenBase.h"
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 static struct Multiblade::CAENSettings LocalMBCAENSettings;
 

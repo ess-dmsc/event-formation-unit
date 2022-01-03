@@ -14,7 +14,7 @@
 /// between each poll.
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>

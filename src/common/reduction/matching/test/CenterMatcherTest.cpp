@@ -2,7 +2,7 @@
 
 #include <common/reduction/matching/CenterMatcher.h>
 #include <common/reduction/matching/EndMatcher.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class CenterMatcherTest : public TestBase {
 protected:

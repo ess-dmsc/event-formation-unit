@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <jalousie/Readout.h>
+#include <modules/jalousie/Readout.h>
 #include <fstream>
 
 namespace Jalousie {

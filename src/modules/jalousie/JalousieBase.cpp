@@ -8,22 +8,22 @@
 
 #include <jalousie/JalousieBase.h>
 #include <jalousie/Readout.h>
-#include <common/EFUArgs.h>
-#include <common/Producer.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/Producer.h>
 #include <common/RuntimeStat.h>
-#include <common/TimeString.h>
+#include <common/time/TimeString.h>
 #include <common/TestImageUdder.h>
 
-#include <common/SPSCFifo.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/memory/SPSCFifo.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include "JalousieBase.h"
 //#undef TRC_MASK
 //#define TRC_MASK 0
@@ -191,7 +191,7 @@ void JalousieBase::processingThread() {
   config = Config(ModuleSettings.ConfigFile);
   LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -240,7 +240,7 @@ void JalousieBase::processingThread() {
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
-      produce_timer.now();
+      produce_timer.reset();
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask({Counters.RxPackets, Counters.Events, Counters.TxBytes});
     }

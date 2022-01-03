@@ -1,6 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source */
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 #include <common/BitMath.h>
 
 struct pair16 {

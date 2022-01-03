@@ -10,11 +10,11 @@
 #include <cmath>
 #include <set>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #undef TRC_MASK
 #define TRC_MASK 0
 
@@ -92,6 +92,7 @@ bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
+// GCOVR_EXCL_START
 std::string utpcAnalyzer::debug(const std::string& prepend) const {
   std::stringstream ss;
   ss << "uTPC analysis\n";
@@ -100,3 +101,4 @@ std::string utpcAnalyzer::debug(const std::string& prepend) const {
   ss << prepend << fmt::format("  max_timedif = {}\n", max_timedif_);
   return ss.str();
 }
+// GCOVR_EXCL_STOP

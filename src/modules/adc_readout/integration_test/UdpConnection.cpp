@@ -7,8 +7,8 @@
 
 #include "UdpConnection.h"
 
-#include <common/Timer.h>
-#include <common/Trace.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 
 #include <unistd.h>
 
@@ -153,7 +153,7 @@ void UdpConnection::transmitThread() {
     } else {
       if (!FirstData) {
         FirstData = true;
-        FirstDataTimer.now();
+        FirstDataTimer.reset();
       }
     }
 

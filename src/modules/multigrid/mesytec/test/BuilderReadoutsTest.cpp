@@ -16,7 +16,7 @@
 //    Timing errors: check for these and flush cluseters when this happens
 //    Geometry errors: do nothing, such readouts are alrady discarded in builder
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/mesytec/BuilderReadouts.h>

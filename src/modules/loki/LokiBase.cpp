@@ -9,16 +9,14 @@
 #include "LokiBase.h"
 
 #include <cinttypes>
-#include <common/EFUArgs.h>
-#include <common/Log.h>
+#include <common/detector/EFUArgs.h>
+#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/TestImageUdder.h>
-#include <common/TimeString.h>
-#include <common/Timer.h>
-#include <common/Trace.h>
-#include <common/monitor/HistogramSerializer.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/TimeString.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -79,7 +77,7 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   // Events
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
-  Stats.create("events.udder", Counters.EventsUdder);
+  Stats.create("events.outside_region", Counters.OutsideRegion);
 
 
   // System counters
@@ -147,41 +145,6 @@ void LokiBase::inputThread() {
   return;
 }
 
-/// \brief Generate an Udder test image
-/// \todo is probably not working after latest changes
-void LokiBase::testImageUdder() {
-  ESSGeometry LoKIGeometry(512, 224, 1, 1);
-  XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-  Udder udderImage;
-  udderImage.cachePixels(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-  uint32_t TimeOfFlight = 0;
-  while (runThreads) {
-    static int EventCount = 0;
-    if (EventCount == 0) {
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      Serializer->pulseTime(EfuTime);
-    }
-
-    auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
-    Counters.TxBytes += Serializer->addEvent(TimeOfFlight, pixelId);
-    Counters.EventsUdder++;
-
-    if (EFUSettings.TestImageUSleep != 0) {
-      usleep(EFUSettings.TestImageUSleep);
-    }
-
-    TimeOfFlight++;
-
-    if (Counters.TxBytes != 0) {
-      EventCount = 0;
-    } else {
-      EventCount++;
-    }
-  }
-  // \todo flush everything here
-  XTRACE(INPUT, ALW, "Stopping processing thread.");
-  return;
-}
 
 ///
 /// \brief Normal processing thread
@@ -189,7 +152,7 @@ void LokiBase::processingThread() {
 
   LokiInstrument Loki(Counters, LokiModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -198,9 +161,14 @@ void LokiBase::processingThread() {
   Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
   Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
-  if (EFUSettings.TestImage) {
-    return testImageUdder();
-  }
+  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug");
+
+  auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
+    EventProducerII.produce(DataBuffer, Timestamp);
+  };
+
+  SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
+  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer, DebugTimer;
@@ -219,26 +187,23 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::Loki4Amp);
       Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
-      if (Res != ReadoutParser::OK) {
+      if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Loki.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,
                                   Loki.ESSReadoutParser.Packet.DataLength);
 
-      Counters.TofCount = Loki.Time.Stats.TofCount;
-      Counters.TofNegative = Loki.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Loki.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Loki.Time.Stats.PrevTofNegative;
+      Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
+      Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
 
       // Process readouts, generate (end produce) events
       Loki.processReadouts();
@@ -260,7 +225,7 @@ void LokiBase::processingThread() {
         printf("\n");
       }
       fflush(NULL);
-      DebugTimer.now();
+      DebugTimer.reset();
     }
 #endif
 
@@ -270,6 +235,7 @@ void LokiBase::processingThread() {
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      SerializerII->produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
@@ -279,7 +245,7 @@ void LokiBase::processingThread() {
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
 
-      ProduceTimer.now();
+      ProduceTimer.reset();
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

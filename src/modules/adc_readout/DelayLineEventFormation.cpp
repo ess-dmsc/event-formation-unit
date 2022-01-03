@@ -6,7 +6,7 @@
  */
 
 #include "DelayLineEventFormation.h"
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <cstdlib>
 
 using AxisType = AdcSettings::PositionSensingType;

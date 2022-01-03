@@ -2,7 +2,7 @@
 
 #include <common/reduction/clustering/GapClusterer.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class GapClustererTest : public TestBase {
 protected:

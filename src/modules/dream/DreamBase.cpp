@@ -9,16 +9,15 @@
 #include "DreamBase.h"
 
 #include <cinttypes>
-#include <common/EFUArgs.h>
-#include <common/Log.h>
+#include <common/detector/EFUArgs.h>
+#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
 #include <common/TestImageUdder.h>
-#include <common/TimeString.h>
-#include <common/Timer.h>
-#include <common/Trace.h>
-#include <common/monitor/HistogramSerializer.h>
+#include <common/time/TimeString.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 #include <dream/DreamInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -70,7 +69,6 @@ DreamBase::DreamBase(BaseSettings const &Settings,
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.udder", Counters.EventsUdder);
 
   Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
@@ -141,7 +139,7 @@ void DreamBase::processingThread() {
 
   DreamInstrument Dream(Counters, DreamModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -167,17 +165,14 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::DREAM);
+      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::DREAM);
       Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
 
-      if (Res != ReadoutParser::OK) {
+      if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorHeaders++;
         continue;
       }
-      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
-             Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
       Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr,
@@ -207,7 +202,7 @@ void DreamBase::processingThread() {
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
 
-      ProduceTimer.now();
+      ProduceTimer.reset();
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

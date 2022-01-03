@@ -4,9 +4,9 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <iostream>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 #include <fmt/format.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
              TxBytesTotal / B1M, USecs);
       TxBytes = 0;
       TxPackets = 0;
-      RateTimer.now();
-      ReportTimer.now();
+      RateTimer.reset();
+      ReportTimer.reset();
     }
   }
 }

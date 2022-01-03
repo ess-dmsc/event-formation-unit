@@ -16,8 +16,8 @@
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Geometry.h>
 #include <dream/readout/DataParser.h>
-#include <modules/readout/ESSTime.h>
-#include <modules/readout/ReadoutParser.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
 
 namespace Dream {
 
@@ -46,10 +46,10 @@ public:
   struct Counters &counters;
   DreamSettings &ModuleSettings;
   Config DreamConfiguration;
-  ReadoutParser ESSReadoutParser;
+  ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
   EndCapGeometry EcGeom;
-  ESSTime Time;
+  ESSReadout::ESSTime Time;
   EV42Serializer *Serializer;
 };
 

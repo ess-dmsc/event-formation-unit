@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <readout/ReadoutParser.h>
+#include <common/readout/ess/Parser.h>
 
 struct Counters {
   // Input Counters - accessed in input thread
@@ -27,7 +27,7 @@ struct Counters {
   int64_t ProcessingIdle;
 
   // ESSReadout parser
-  struct readoutstat_t ReadoutStats;
+  struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
 
   // LoKI DataParser
@@ -47,6 +47,7 @@ struct Counters {
   // Events
   int64_t Events;
   int64_t PixelErrors;
+  int64_t OutsideRegion;
   int64_t EventsUdder;
   int64_t TofCount;
   int64_t TofNegative;

@@ -9,8 +9,8 @@
 
 #include <sonde/SoNDeBase.h>
 #include <sonde/SoNDeBaseTestData.h>
-#include <test/TestUDPServer.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
+#include <common/testutils/TestBase.h>
 
 class SONDEIDEABaseStandIn : public SONDEIDEABase {
 public:

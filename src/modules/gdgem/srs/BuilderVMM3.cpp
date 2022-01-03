@@ -9,9 +9,9 @@
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/NMXStats.h>
 #include <common/reduction/clustering/GapClusterer.h>
-#include <common/TimeString.h>
-#include <common/Log.h>
-#include <common/Trace.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

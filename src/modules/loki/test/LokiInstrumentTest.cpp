@@ -5,8 +5,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <loki/LokiInstrument.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Loki;
 

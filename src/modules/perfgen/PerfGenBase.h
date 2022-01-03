@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 namespace PerfGen {
 

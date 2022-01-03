@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/reduction/HitVector.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <random>
 #include <chrono>

@@ -11,7 +11,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 
 //#undef TRC_LEVEL

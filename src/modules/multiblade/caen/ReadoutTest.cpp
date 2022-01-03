@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multiblade/caen/Readout.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multiblade;
 

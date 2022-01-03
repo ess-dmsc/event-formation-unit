@@ -5,10 +5,10 @@
  *  \brief Unit tests.
  */
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 #include <multigrid/MultigridBase.h>
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 
 // \todo use reference data instead
 #include <multigrid/mesytec/test/TestData.h>

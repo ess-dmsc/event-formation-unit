@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <loki/geometry/Config.h>
 #include <string>
 #include <vector>

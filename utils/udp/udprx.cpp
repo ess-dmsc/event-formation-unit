@@ -5,8 +5,8 @@
 #include <cassert>
 #include <inttypes.h>
 #include <iostream>
-#include <common/Socket.h>
-#include <common/Timer.h>
+#include <common/system/Socket.h>
+#include <common/time/Timer.h>
 #include <stdio.h>
 
 struct {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
              RxBytes * 8.0 / (USecs / 1000000.0) / B1M, RxBytes / B1M, RxBytesTotal / B1M,
              USecs, (1.0 * SeqNo - RxPackets)/SeqNo);
       RxBytes = 0;
-      UpdateTimer.now();
+      UpdateTimer.reset();
       USecs = UpdateTimer.timeus();
     }
   }

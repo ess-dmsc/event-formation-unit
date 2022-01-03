@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <multigrid/mesytec/Readout.h>
+#include <modules/multigrid/mesytec/Readout.h>
 
 namespace Multigrid {
 

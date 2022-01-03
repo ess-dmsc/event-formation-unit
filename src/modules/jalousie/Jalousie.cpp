@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <jalousie/JalousieBase.h>
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 
 static struct Jalousie::CLISettings LocalJalousieSettings;
 

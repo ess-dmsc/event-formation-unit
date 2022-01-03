@@ -16,8 +16,8 @@
 #include "DelayLineProcessing.h"
 #include "SampleProcessing.h"
 #include <asio.hpp>
-#include <common/Detector.h>
-#include <common/Producer.h>
+#include <common/detector/Detector.h>
+#include <common/kafka/Producer.h>
 #include <cstdint>
 #include <mutex>
 

@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/monitor/HistogramSerializer.h>
-#include <common/gccintel.h>
+#include <common/system/gccintel.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
@@ -55,7 +55,7 @@ size_t HistogramSerializer::produce(const Hists &hists) {
   nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
 
   if (producer_callback) {
-#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestmap.")
+#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
     producer_callback(buffer, time(nullptr) * 1000);
   }
 

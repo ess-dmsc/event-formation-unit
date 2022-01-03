@@ -2,8 +2,8 @@
 
 #include <cinttypes>
 #include <common/monitor/HitSerializer.h>
-#include <common/Trace.h>
-#include <common/gccintel.h>
+#include <common/debug/Trace.h>
+#include <common/system/gccintel.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -42,7 +42,7 @@ size_t HitSerializer::produce() {
 
   nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
   if (producer_callback) {
-#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestmap.")
+#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
     producer_callback(buffer, time(nullptr) * 1000);
   }
 

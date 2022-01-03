@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <common/Detector.h>
+#include <common/detector/Detector.h>
 #include <jalousie/Config.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 
 namespace Jalousie {
 

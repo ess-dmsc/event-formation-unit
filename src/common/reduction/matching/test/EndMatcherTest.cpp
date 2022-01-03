@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <common/reduction/matching/EndMatcher.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class EndMatcherTest : public TestBase {
 protected:

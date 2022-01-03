@@ -6,16 +6,16 @@
 /// \brief Parser for ESS readout of DREAM
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <dream/readout/DataParser.h>
-#include <readout/ReadoutParser.h>
+#include <common/readout/ess/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
-constexpr unsigned int DataHeaderSize{sizeof(ReadoutParser::DataHeader)};
+constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::Parser::DataHeader)};
 constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};
 
 // Assume we start after the PacketHeader
@@ -28,14 +28,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(ReadoutParser::DataHeader)) {
+    if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, DEB, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (ReadoutParser::DataHeader *)DataPtr;
+    auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, DEB, "Data size mismatch, header says %u got %d",

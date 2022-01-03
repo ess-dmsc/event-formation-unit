@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <multiblade/caen/MBGeometry.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 //using namespace Multiblade;
 

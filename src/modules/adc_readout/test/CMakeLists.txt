@@ -21,10 +21,10 @@ set(AdcReadoutTest_SRC
     EventSerializerTest.cpp
     EventBufferTest.cpp
     OffsetTimeTest.cpp
-    ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+    ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
     )
 
-set(AdcReadoutTest_INC ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp)
+set(AdcReadoutTest_INC ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp)
 
 list(APPEND AdcReadoutTest_SRC $<TARGET_OBJECTS:AdcReadout>)
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)

@@ -5,8 +5,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <loki/geometry/Config.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 std::string NotJsonFile{"deleteme_loki_notjson.json"};
 std::string NotJsonStr = R"(

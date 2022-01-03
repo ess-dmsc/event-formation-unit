@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
-#include <common/Detector.h>
-#include <common/EFUArgs.h>
-#include <common/Log.h>
+#include <common/detector/Detector.h>
+#include <common/detector/EFUArgs.h>
+#include <common/debug/Log.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <map>

@@ -6,9 +6,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
-#include <common/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
+#include <common/system/Socket.h>
 #include <multiblade/generators/ReaderHits.h>
 #include <multiblade/caen/DataParser.h>
 #include <unistd.h>
@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
              txbuffer.TotalBytes / B1M, usecs);
       tx = 0;
       txp = 0;
-      us_clock.now();
-      report_timer.now();
+      us_clock.reset();
+      report_timer.reset();
     }
     usleep(Settings.SpeedThrottle * 100);
   }

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/reduction/ChronoMerger.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class ChronoMergerTest : public TestBase {
 protected:

@@ -5,7 +5,7 @@
 #include <multigrid/geometry/MG24Mappings.h>
 #include <multigrid/geometry/PlaneMappings.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 

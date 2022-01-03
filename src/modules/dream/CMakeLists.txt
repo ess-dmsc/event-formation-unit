@@ -13,7 +13,7 @@ set(dream_common_inc
   geometry/Config.h
   readout/DataParser.h
   readout/Readout.h
-  ../readout/ReadoutParser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
 )
 
 set(dream_common_src
@@ -23,7 +23,7 @@ set(dream_common_src
   geometry/Config.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
-  ../readout/ReadoutParser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
 )
 
 #=============================================================================
@@ -38,13 +38,13 @@ create_module(dream)
 #=============================================================================
 set(DreamBaseTest_INC
   ${dream_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(DreamBaseTest_SRC
   ${dream_common_src}
   test/DreamBaseTest.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(DreamBaseTest)

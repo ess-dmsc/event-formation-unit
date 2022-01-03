@@ -10,21 +10,21 @@
 #include <multigrid/MultigridBase.h>
 #include <multigrid/geometry/PlaneMappings.h>
 
-#include <common/Producer.h>
-#include <common/TimeString.h>
+#include <common/kafka/Producer.h>
+#include <common/time/TimeString.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include "MultigridBase.h"
 //#undef TRC_MASK
 //#define TRC_MASK 0
@@ -152,7 +152,7 @@ void MultigridBase::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
-  Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector");
   auto Produce = [&event_producer](auto DataBuffer, auto Timestamp) {
     event_producer.produce(DataBuffer, Timestamp);
   };
@@ -226,7 +226,7 @@ void MultigridBase::mainThread() {
       Counters.kafka_dr_errors = event_producer.stats.dr_errors;
       Counters.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
-      report_timer.now();
+      report_timer.reset();
     }
 
     /// Checking for exit

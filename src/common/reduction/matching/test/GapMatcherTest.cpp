@@ -2,7 +2,7 @@
 
 #include <common/reduction/matching/GapMatcher.h>
 
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 class GapMatcherTest : public TestBase {
 protected:

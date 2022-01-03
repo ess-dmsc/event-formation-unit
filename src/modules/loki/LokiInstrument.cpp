@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/TimeString.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Trace.h>
 #include <loki/LokiInstrument.h>
 
 // #undef TRC_LEVEL
@@ -57,14 +57,11 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   if (!ModuleSettings.FilePrefix.empty()) {
     DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "loki_" + timeString());
   }
+
+  ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
 }
 
-/// \todo debug - remove sometime
-LokiInstrument::~LokiInstrument() {
-  // for (int i = 0; i < 56; i++) {
-  //   printf("Straw %d, count %u\n", i, StrawHist[i]);
-  // }
-}
+LokiInstrument::~LokiInstrument() {}
 
 /// \brief helper function to calculate pixels from knowledge about
 /// loki panel, FENId and a single readout dataset
@@ -75,10 +72,6 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
 
   uint8_t TubeGroup = FEN - 1;
   uint8_t LocalTube = Data.TubeId;
-
-  /// \todo debug REMOVE!
-  // if ((LocalTube == 0) or (LocalTube == 1) or (LocalTube == 5))
-  //   return 0;
 
   bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
@@ -100,7 +93,11 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
     XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
     return 0;
   }
-  // StrawHist[GlobalStraw]++; ///< \todo - debug delete eventually
+
+  if ((GlobalStraw < ModuleSettings.MinStraw) or (GlobalStraw > ModuleSettings.MaxStraw)) {
+    counters.OutsideRegion++;
+    return 0;
+  }
 
   uint16_t CalibratedPos =
       LokiCalibration.strawCorrection(GlobalStraw, Position);
@@ -120,9 +117,12 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
   Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+  CurrentReadout.PrevPulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+  CurrentReadout.PrevPulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.DataSeqNum = Data.DataSeqNum;
+  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
   CurrentReadout.AmpA = Data.AmpA;
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
@@ -134,25 +134,8 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
 }
 
 void LokiInstrument::processReadouts() {
-  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime =
-      Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
-                                                 PacketHeader->PrevPulseLow);
-
-  if (PulseTime - PrevPulseTime > LokiConfiguration.MaxPulseTimeNS) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
-           (PulseTime - PrevPulseTime));
-    counters.ReadoutStats.ErrorTimeHigh++;
-    counters.ErrorESSHeaders++;
-    return;
-  }
-
-  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
-         PacketHeader->PulseLow);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
-         PacketHeader->PrevPulseLow);
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  SerializerII->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : LokiParser.Result) {
@@ -174,46 +157,51 @@ void LokiInstrument::processReadouts() {
       continue;
     }
 
-    for (auto &Data : Section.Data) {
-      // Calculate TOF in ns
-      auto TimeOfFlight = Time.getTOF(Data.TimeHigh, Data.TimeLow,
-                                      LokiConfiguration.ReadoutConstDelayNS);
+    auto &Data = Section.Data;
 
-      if (TimeOfFlight == Time.InvalidTOF) {
-        TimeOfFlight = Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
-                                       LokiConfiguration.ReadoutConstDelayNS);
-      }
-      if (TimeOfFlight == Time.InvalidTOF) {
-        XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
-        continue;
-      }
-
-      XTRACE(DATA, WAR, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             PulseTime, Time.toNS(Data.TimeHigh, Data.TimeLow));
-      XTRACE(DATA, WAR, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             Time.toNS(PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow),
-             Time.toNS(Data.TimeHigh, Data.TimeLow));
-
-      XTRACE(DATA, WAR,
-             "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %u, B "
-             "%u, C %u, D %u",
-             Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
-             Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
-      // Calculate pixelid and apply calibration
-      uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
-
-      if (PixelId == 0) {
-        counters.PixelErrors++;
-      } else {
-        counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
-        counters.Events++;
-      }
-
-      if (DumpFile) {
-        dumpReadoutToFile(Section, Data);
-      }
+    if (DumpFile) {
+      dumpReadoutToFile(Section, Data);
     }
+
+    // Calculate TOF in ns
+    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow,
+                                    LokiConfiguration.ReadoutConstDelayNS);
+
+    if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
+      TimeOfFlight = ESSReadoutParser.Packet.Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
+                                     LokiConfiguration.ReadoutConstDelayNS);
+    }
+
+    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+           ESSReadoutParser.Packet.Time.TimeInNS,
+           ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
+    XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
+           ESSReadoutParser.Packet.Time.PrevTimeInNS,
+           ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
+
+    if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      continue;
+    }
+
+    XTRACE(DATA, DEB,
+           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
+           "%d, C %d, D %d",
+           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
+           Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+    // Calculate pixelid and apply calibration
+    uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
+
+    if (PixelId == 0) {
+      counters.PixelErrors++;
+    } else {
+      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      counters.Events++;
+      SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
+    }
+
+    
   } // for()
   counters.ReadoutsClampLow = LokiCalibration.Stats.ClampLow;
   counters.ReadoutsClampHigh = LokiCalibration.Stats.ClampHigh;

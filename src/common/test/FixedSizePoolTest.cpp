@@ -1,7 +1,7 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 
-#include <common/FixedSizePool.h>
-#include <test/TestBase.h>
+#include <common/memory/FixedSizePool.h>
+#include <common/testutils/TestBase.h>
 
 class FixedSizePoolTest : public TestBase {
 public:

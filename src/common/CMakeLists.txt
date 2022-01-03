@@ -4,50 +4,50 @@
 
 add_subdirectory(monitor)
 add_subdirectory(reduction)
+add_subdirectory(readout)
 
 set(efu_common_SRC
-  DataSave.cpp
-  DetectorModuleRegister.cpp
-  EFUArgs.cpp
-  EV42Serializer.cpp
+  debug/Hexdump.cpp
+  detector/DetectorModuleRegister.cpp
+  detector/EFUArgs.cpp
+  kafka/EV42Serializer.cpp
+  kafka/Producer.cpp
+  system/Socket.cpp
+  time/Timer.cpp
+  time/TimeString.cpp
+  time/TSCTimer.cpp
   Statistics.cpp
-  Producer.cpp
-  Socket.cpp
   StatPublisher.cpp
-  Timer.cpp
-  TimeString.cpp
-  TSCTimer.cpp
   )
 
 set(efu_common_INC
-  Assert.h
-  BitMath.h
-  Buffer.h
-  DataSave.h
-  Detector.h
-  DetectorModuleRegister.h
-  DumpFile.h
-  EFUArgs.h
-  EV42Serializer.h
-  Expect.h
-  FixedSizePool.h
-  JsonFile.h
-  gccintel.h
-  Log.h
-  Statistics.h
-  PoolAllocator.h
-  Producer.h
-  RingBuffer.h
-  Socket.h
-  StatPublisher.h
-  TestImageUdder.h
-  Timer.h
-  TimeString.h
-  Trace.h
-  TraceGroups.h
-  TSCTimer.h
   ${VERSION_INCLUDE_DIR}/common/version_num.h
   ${VERSION_INCLUDE_DIR}/common/Version.h
+  debug/Assert.h
+  debug/Expect.h
+  debug/Hexdump.h
+  debug/Log.h
+  debug/Trace.h
+  debug/TraceGroups.h
+  detector/Detector.h
+  detector/DetectorModuleRegister.h
+  detector/EFUArgs.h
+  kafka/EV42Serializer.h
+  kafka/Producer.h
+  memory/Buffer.h
+  memory/FixedSizePool.h
+  memory/PoolAllocator.h
+  memory/RingBuffer.h
+  system/gccintel.h
+  system/Socket.h
+  time/Timer.h
+  time/TimeString.h
+  time/TSCTimer.h
+  BitMath.h
+  DumpFile.h
+  JsonFile.h
+  Statistics.h
+  StatPublisher.h
   )
 
 find_package(CLI11 REQUIRED)

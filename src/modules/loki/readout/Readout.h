@@ -47,16 +47,20 @@ struct __attribute__((packed)) Readout {
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint32_t PulseTimeHigh{0};
   uint32_t PulseTimeLow{0};
+  uint32_t PrevPulseTimeHigh{0};
+  uint32_t PrevPulseTimeLow{0};
   uint32_t EventTimeHigh{0};
   uint32_t EventTimeLow{0};
   uint16_t DataSeqNum{0}; // Pulse Height in debug mode
-  uint16_t AmpA{0};
-  uint16_t AmpB{0};
-  uint16_t AmpC{0};
-  uint16_t AmpD{0};
+  int16_t AmpA{0};
+  int16_t AmpB{0};
+  int16_t AmpC{0};
+  int16_t AmpD{0};
+  uint8_t OutputQueue{0};
   uint8_t RingId;
   uint8_t FENId;
   uint8_t TubeId{0};
+
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   // \brief prints values for to_string purposes
@@ -75,6 +79,8 @@ public:
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
     H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
+    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeHigh);
+    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeLow);
     H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
     H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
     H5_COMPOUND_INSERT_MEMBER(DataSeqNum);
@@ -82,6 +88,7 @@ public:
     H5_COMPOUND_INSERT_MEMBER(AmpB);
     H5_COMPOUND_INSERT_MEMBER(AmpC);
     H5_COMPOUND_INSERT_MEMBER(AmpD);
+    H5_COMPOUND_INSERT_MEMBER(OutputQueue);
     H5_COMPOUND_INSERT_MEMBER(RingId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
     H5_COMPOUND_INSERT_MEMBER(TubeId);

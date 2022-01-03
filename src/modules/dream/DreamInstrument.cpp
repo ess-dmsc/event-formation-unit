@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/TimeString.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/time/TimeString.h>
+#include <common/debug/Trace.h>
 #include <dream/DreamInstrument.h>
 
 // #undef TRC_LEVEL
@@ -24,6 +24,9 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   DreamConfiguration = Config(ModuleSettings.ConfigFile);
+
+
+  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
 uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,

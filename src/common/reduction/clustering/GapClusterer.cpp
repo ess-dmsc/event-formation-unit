@@ -6,7 +6,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 #include <common/reduction/clustering/GapClusterer.h>
 
 // #undef TRC_LEVEL

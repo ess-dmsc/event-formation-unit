@@ -10,10 +10,10 @@
 #include <string>
 
 #include <dream/DreamBase.h>
-#include <readout/ReadoutParser.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
-#include <test/TestUDPServer.h>
+#include <common/readout/ess/Parser.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
 
 std::string dreamjson = R"(
   {
@@ -66,7 +66,7 @@ std::vector<uint8_t> TestPacket2{
     0x2e, 0x00, 0x00, 0x00, // 0x002e - 46 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x10, 0x00, 0x00, 0x00,
+    0x11, 0x00, 0x00, 0x00,
     0x00, 0x01, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00, // Seq number 1
 

@@ -10,10 +10,10 @@
 #include <string>
 
 #include <jalousie/JalousieBase.h>
-#include <test/TestUDPServer.h>
+#include <common/testutils/TestUDPServer.h>
 #include <JalousieBaseTestData.h>
-#include <test/SaveBuffer.h>
-#include <test/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 class JalousieBaseStandIn : public Jalousie::JalousieBase {
 public:

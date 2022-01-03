@@ -7,21 +7,18 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/clustering/EventBuilder.h>
 #include <algorithm>
 #include <fmt/format.h>
+#include <multiblade/clustering/EventBuilder.h>
 
-#include <common/Trace.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
-EventBuilder::EventBuilder() {
-  matcher.set_minimum_time_gap(timegap);
-}
-
+EventBuilder::EventBuilder() { matcher.set_minimum_time_gap(timegap); }
 
 EventBuilder::EventBuilder(uint32_t BoxSize) : TimeBoxSize(BoxSize) {
   matcher.set_minimum_time_gap(timegap);
@@ -34,15 +31,14 @@ void EventBuilder::insert(Hit hit) {
     XTRACE(CLUSTER, DEB, "NEW TIME BOX ===================================");
   }
 
-  XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time, hit.coordinate, hit.weight);
+  XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time,
+         hit.coordinate, hit.weight);
 
   if (hit.plane == WirePlane) {
     p0.push_back(hit);
-  }
-  else if (hit.plane == StripPlane) {
+  } else if (hit.plane == StripPlane) {
     p1.push_back(hit);
-  }
-  else {
+  } else {
     XTRACE(CLUSTER, WAR, "bad plane %s", hit.to_string().c_str());
   }
 }
@@ -62,7 +58,7 @@ void EventBuilder::flush() {
   matcher.insert(StripPlane, c1.clusters);
   matcher.match(true);
 
-  auto & e = matcher.matched_events;
+  auto &e = matcher.matched_events;
   Events.insert(Events.end(), e.begin(), e.end());
 
   clear();
@@ -73,5 +69,4 @@ void EventBuilder::clear() {
   p1.clear();
 }
 
-
-}
+} // namespace Multiblade

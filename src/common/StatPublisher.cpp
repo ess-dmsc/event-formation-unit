@@ -6,7 +6,7 @@
 ///
 //===----------------------------------------------------------------------===//
 //
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <fmt/format.h>
 
@@ -56,7 +56,7 @@ void StatPublisher::reconnectHelper() {
           MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
     }
   }
-  ReconnectTime.now();
+  ReconnectTime.reset();
   Retries++;
 }
 

@@ -2,7 +2,7 @@
 
 #include <gdgem/generators/BuilderReadouts.h>
 #include <gdgem/srs/SRSMappings.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 std::vector<uint8_t> OneReadout {
   0x00, // fec 0

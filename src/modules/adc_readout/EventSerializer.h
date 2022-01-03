@@ -13,7 +13,7 @@
 #include "EventBuffer.h"
 #include "OffsetTime.h"
 #include <chrono>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <concurrentqueue/concurrentqueue.h>
 #include <memory>
 #include <mutex>

@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Log.h>
-#include <common/Trace.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 #include <fstream>
 #include <gdgem/srs/CalibrationFile.h>
 #pragma GCC diagnostic push

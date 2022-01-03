@@ -10,7 +10,7 @@
 #pragma once
 
 #include "AdcParse.h"
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <memory>
 
 /// \brief Base class for the AdcReadout data processors.

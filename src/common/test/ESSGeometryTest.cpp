@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source */
 
 #include <logical_geometry/ESSGeometry.h>
-#include <test/TestBase.h>
+#include <common/testutils/TestBase.h>
 
 
 class ESSGeometryTest : public TestBase {};

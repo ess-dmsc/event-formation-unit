@@ -17,6 +17,7 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   MBCaenBase.h
+  MBCaenInstrument.h
   caen/Readout.h
   caen/DataParser.h
   clustering/EventBuilder.h
@@ -24,6 +25,7 @@ set(caen_common_inc
   )
 set(caen_common_src
   MBCaenBase.cpp
+  MBCaenInstrument.cpp
   caen/Readout.cpp
   caen/DataParser.cpp
   clustering/EventBuilder.cpp
@@ -37,13 +39,13 @@ create_module(mbcaen)
 #
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.h
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(MBCAENBaseTest_SRC
   MBCaenBaseTest.cpp
-  ${ESS_SOURCE_DIR}/test/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${caen_common_src}
-  ${ESS_SOURCE_DIR}/test/TestUDPServer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)

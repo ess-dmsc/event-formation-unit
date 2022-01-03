@@ -17,20 +17,20 @@
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/generators/BuilderReadouts.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <efu/Server.h>
 #include <common/RuntimeStat.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
-#include <common/Timer.h>
-#include <common/Trace.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/Log.h>
+#include <common/debug/Log.h>
 
 int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
                         char *Output,
@@ -397,9 +397,9 @@ void GdGemBase::processingThread() {
     // \todo this only exits this thread, but EFU continues running
   }
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "NMX_detector");
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "NMX_monitor");
-  Producer HitsProducer(EFUSettings.KafkaBroker, "NMX_hits");
+  Producer EventProducer(EFUSettings.KafkaBroker, "nmx_detector");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_monitor");
+  Producer HitsProducer(EFUSettings.KafkaBroker, "nmx_hits");
 
   auto ProduceEvents = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -516,7 +516,7 @@ void GdGemBase::processingThread() {
         return;
       }
 
-      ReportTimer.now();
+      ReportTimer.reset();
     }
   }
 }

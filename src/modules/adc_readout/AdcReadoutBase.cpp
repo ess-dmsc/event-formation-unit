@@ -12,7 +12,7 @@
 #include "PeakFinder.h"
 #include "SampleProcessing.h"
 #include "UDPClient.h"
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <iostream>
 #include <memory>
 

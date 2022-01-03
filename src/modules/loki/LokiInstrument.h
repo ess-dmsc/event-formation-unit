@@ -18,9 +18,10 @@
 #include <loki/geometry/PanelGeometry.h>
 #include <loki/geometry/TubeAmps.h>
 #include <loki/readout/Readout.h>
-#include <modules/readout/ReadoutParser.h>
+#include <common/readout/ess/Parser.h>
+#include <common/readout/ess/ESSTime.h>
 #include <readout/DataParser.h>
-#include <readout/ESSTime.h>
+
 
 namespace Loki {
 
@@ -39,6 +40,7 @@ public:
 
   //
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializerII(EV42Serializer *serializer) { SerializerII = serializer; }
 
   /// \brief LoKI pixel calculations
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
@@ -55,13 +57,12 @@ public:
   LokiSettings &ModuleSettings;
   Config LokiConfiguration;
   Calibration LokiCalibration;
-  ReadoutParser ESSReadoutParser;
+  ESSReadout::Parser ESSReadoutParser;
   DataParser LokiParser{counters};
   TubeAmps Amp2Pos;
-  ESSTime Time;
   EV42Serializer *Serializer;
+  EV42Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;
-  // uint32_t StrawHist[200]; ///< \todo debug - remove eventually
 };
 
 } // namespace Loki

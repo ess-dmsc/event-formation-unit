@@ -6,7 +6,7 @@
  */
 
 #include <adc_readout/DelayLineEventFormation.h>
-#include <common/Log.h>
+#include <common/debug/Log.h>
 #include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 

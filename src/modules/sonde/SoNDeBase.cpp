@@ -7,13 +7,13 @@
 //===----------------------------------------------------------------------===//
 
 #include <sonde/SoNDeBase.h>
-#include <common/EV42Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/Producer.h>
+#include <common/kafka/Producer.h>
 #include <common/RuntimeStat.h>
-#include <common/Trace.h>
-#include <common/Socket.h>
-#include <common/TSCTimer.h>
+#include <common/debug/Trace.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
 // #undef TRC_LEVEL
@@ -108,7 +108,7 @@ void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
 
-  Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "skadi_detector");
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
@@ -146,7 +146,7 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_ev_others = eventprod.stats.ev_others;
         mystats.kafka_dr_errors = eventprod.stats.dr_errors;
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-        produce_timer.now();
+        produce_timer.reset();
 
         RuntimeStatusMask =  RtStat.getRuntimeStatusMask({mystats.rx_packets, mystats.rx_events, mystats.tx_bytes});
 
