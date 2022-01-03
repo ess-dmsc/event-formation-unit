@@ -42,7 +42,7 @@ TEST_F(DreamInstrumentTest, Constructor) {
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, ModuleSettings);
   /// \todo this is not in agreement with Irina
-  ASSERT_EQ(Dream.calcPixel(1, 6, 1, 16, 10, 2), 1);
+  ASSERT_EQ(Dream.calcPixel(22, 3,  3,  1, 15, 15), 329'728);
 }
 
 int main(int argc, char **argv) {

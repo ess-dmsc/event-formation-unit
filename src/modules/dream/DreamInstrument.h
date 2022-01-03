@@ -14,6 +14,7 @@
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
+#include <dream/geometry/Geometry.h>
 #include <dream/readout/DataParser.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
@@ -37,8 +38,8 @@ public:
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   //
-  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip, uint8_t Wire,
-                     uint8_t Cassette, uint8_t Counter);
+  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
+                     uint8_t Counter, uint8_t Wire, uint8_t Strip);
 
 public:
   /// \brief Stuff that 'ties' DREAM together
@@ -47,6 +48,7 @@ public:
   Config DreamConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
+  EndCapGeometry EcGeom;
   ESSReadout::ESSTime Time;
   EV42Serializer *Serializer;
 };

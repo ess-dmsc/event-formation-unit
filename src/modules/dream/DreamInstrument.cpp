@@ -11,7 +11,6 @@
 #include <common/time/TimeString.h>
 #include <common/debug/Trace.h>
 #include <dream/DreamInstrument.h>
-#include <dream/geometry/DreamGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -30,14 +29,9 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
-uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Strip,
-                                    uint8_t Wire, uint8_t Cassette,
-                                    uint8_t Counter) {
-  DreamGeometry::EndCapParams endcap = {Sector, Sumo, Strip, Wire, Cassette, Counter};
-
-  uint32_t Pixel{0};
-  DreamGeometry::PixelIdFromEndCapParams(endcap, Pixel);
-  return Pixel;
+uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
+                                    uint8_t Counter, uint8_t Wire, uint8_t Strip) {
+return EcGeom.getPixel(Sector, Sumo, Cassette, Counter, Wire, Strip);
 }
 
 void DreamInstrument::processReadouts() {
@@ -78,14 +72,14 @@ void DreamInstrument::processReadouts() {
       auto TimeOfFlight = Time.getTOF(0, Data.Tof); // TOF in ns
 
       XTRACE(DATA, DEB,
-             "  Data: time (0, %u), mod %u, sumo %u, strip %u, wire %u, seg "
-             "%u, ctr %u",
-             Data.Tof, Data.Module, Data.Sumo, Data.Strip, Data.Wire,
-             Data.Segment, Data.Counter);
+             "  Data: time (0, %u), sector %u, sumo %u, cassette %u, counter %u, wire "
+             "%u, strip %u",
+             Data.Tof, Data.Sector, Data.Sumo, Data.Cassette,
+             Data.Counter, Data.Wire, Data.Strip);
 
       // Calculate pixelid and apply calibration
-      uint32_t PixelId = calcPixel(Data.Module, Data.Sumo, Data.Strip,
-                                   Data.Wire, Data.Segment, Data.Counter);
+      uint32_t PixelId = calcPixel(Data.Sector, Data.Sumo, Data.Cassette,
+                                   Data.Counter, Data.Wire, Data.Strip);
 
       if (PixelId == 0) {
         counters.GeometryErrors++;

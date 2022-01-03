@@ -32,7 +32,7 @@
 ///
 /// \file
 ///
-/// \brief Hit struct for Jalousie event formation
+/// \brief Readout struct for Dream event formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -55,11 +55,11 @@ struct __attribute__((packed)) Readout {
   uint32_t EventTimeLow{0};
   uint8_t RingId;
   uint8_t FENId;
-  uint8_t Module;
+  uint8_t Sector;
   uint8_t Sumo;
   uint8_t Strip;
   uint8_t Wire;
-  uint8_t Segment;
+  uint8_t Cassette;
   uint8_t Counter;
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
@@ -85,11 +85,11 @@ public:
     H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
     H5_COMPOUND_INSERT_MEMBER(RingId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(Module);
+    H5_COMPOUND_INSERT_MEMBER(Sector);
     H5_COMPOUND_INSERT_MEMBER(Sumo);
     H5_COMPOUND_INSERT_MEMBER(Strip);
     H5_COMPOUND_INSERT_MEMBER(Wire);
-    H5_COMPOUND_INSERT_MEMBER(Segment);
+    H5_COMPOUND_INSERT_MEMBER(Cassette);
     H5_COMPOUND_INSERT_MEMBER(Counter);
     H5_COMPOUND_RETURN;
   }

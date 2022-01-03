@@ -20,11 +20,11 @@ public:
   struct sim_data_t {
     uint32_t tof;
     uint16_t unused;
-    uint8_t module;
+    uint8_t sector;
     uint8_t sumo;
     uint8_t strip;
     uint8_t wire;
-    uint8_t segment;
+    uint8_t cassette;
     uint8_t counter;
   } __attribute__((__packed__));
   static_assert(sizeof(struct sim_data_t) == 12, "wrong packing");
