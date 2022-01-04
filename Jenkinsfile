@@ -32,12 +32,12 @@ def failure_function(exception_obj, failureMessage) {
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
     COMMITEMAIL = sh (
-        script: 'git --no-pager show -s --format=\'%ae\'',
+        script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null',
         returnStdout: true
     ).trim()
 
     COMMITNAME = sh (
-        script: 'git --no-pager show -s --format=\'%an\'',
+        script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null',
         returnStdout: true
     ).trim()
 
@@ -256,44 +256,44 @@ def get_macos_pipeline()
     }
 }
 
-def get_system_tests_pipeline() {
-    return {
-        timestamps {
-            node('system-test') {
-                cleanWs()
-                dir("${project}") {
-                    try {
-                        stage("System tests: Checkout") {
-                            checkout scm
-                        }  // stage
-                        stage("System tests: Install requirements") {
-                            sh """python3.6 -m pip install --user --upgrade pip
-                            python3.6 -m pip install --user -r system-tests/requirements.txt
-                            """
-                        }  // stage
-                        stage("System tests: Run") {
-                            sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
-                                                    """
-                            timeout(time: 30, activity: true) {
-                                sh """cd system-tests/
-                                python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark
-                                """
-                            }
-                        }  // stage
-                    } finally {
-                        stage("System tests: Cleanup") {
-                            sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
-                            """
-                        }  // stage
-                        stage("System tests: Archive") {
-                            junit "system-tests/SystemTestsOutput.xml"
-                        }
-                    }
-                } // dir
-            } // node
-        } // timestamps
-    }  // return
-}  // def
+// def get_system_tests_pipeline() {
+//     return {
+//         timestamps {
+//             node('system-test') {
+//                 cleanWs()
+//                 dir("${project}") {
+//                     try {
+//                         stage("System tests: Checkout") {
+//                             checkout scm
+//                         }  // stage
+//                         stage("System tests: Install requirements") {
+//                             sh """python3.6 -m pip install --user --upgrade pip
+//                             python3.6 -m pip install --user -r system-tests/requirements.txt
+//                             """
+//                         }  // stage
+//                         stage("System tests: Run") {
+//                             sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+//                                                     """
+//                             timeout(time: 30, activity: true) {
+//                                 sh """cd system-tests/
+//                                 python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /mnt/data/EFU_reference/multiblade/2018_11_22/wireshark
+//                                 """
+//                             }
+//                         }  // stage
+//                     } finally {
+//                         stage("System tests: Cleanup") {
+//                             sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+//                             """
+//                         }  // stage
+//                         stage("System tests: Archive") {
+//                             junit "system-tests/SystemTestsOutput.xml"
+//                         }
+//                     }
+//                 } // dir
+//             } // node
+//         } // timestamps
+//     }  // return
+// }  // def
 
 // Script actions start here
 timestamps {
@@ -329,9 +329,9 @@ timestamps {
         builders['macOS'] = get_macos_pipeline()
 
         // Only add system test pipeline if this is a Pull Request
-        if ( env.CHANGE_ID ) {
-            builders['system tests'] = get_system_tests_pipeline()
-        }
+        // if ( env.CHANGE_ID ) {
+        //     builders['system tests'] = get_system_tests_pipeline()
+        // }
 
         try {
             timeout(time: 2, unit: 'HOURS') {
