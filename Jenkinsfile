@@ -201,9 +201,7 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${module_src}/multiblade/configs/* archive/event-formation-unit/configs/
                                 cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
 
@@ -256,7 +254,9 @@ def get_macos_pipeline()
     }
 }
 
-def get_system_tests_pipeline() {
+
+//TODO, remove system tests
+/*def get_system_tests_pipeline() {
     return {
         timestamps {
             node('system-test') {
@@ -294,7 +294,7 @@ def get_system_tests_pipeline() {
         } // timestamps
     }  // return
 }  // def
-
+*/
 // Script actions start here
 timestamps {
     node('docker') {
@@ -329,9 +329,9 @@ timestamps {
         builders['macOS'] = get_macos_pipeline()
 
         // Only add system test pipeline if this is a Pull Request
-        if ( env.CHANGE_ID ) {
-            builders['system tests'] = get_system_tests_pipeline()
-        }
+        //if ( env.CHANGE_ID ) {
+        //    builders['system tests'] = get_system_tests_pipeline()
+        //}
 
         try {
             timeout(time: 2, unit: 'HOURS') {
