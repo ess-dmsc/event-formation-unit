@@ -47,7 +47,7 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
   //   builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
   // }
 
-  // ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024

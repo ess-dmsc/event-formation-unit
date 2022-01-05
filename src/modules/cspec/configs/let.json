@@ -1,0 +1,14 @@
+
+{
+  "Detector" : "CSPEC",
+
+  "InstrumentGeometry" : "LET",
+
+  "WireChOffset" : 16,
+
+
+  "MaxPulseTimeNS" : 71428570,
+  "MaxGapWire"  : 0,
+  "MaxGapStrip" : 0,
+  "TimeBoxNs" : 2010
+}
