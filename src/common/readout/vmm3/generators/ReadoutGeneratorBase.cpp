@@ -13,20 +13,63 @@
 #include <cstring>
 #include <math.h>
 #include <time.h>
-#include <common/readout/vmm3/test/ReadoutGenerator.h>
+#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
 #include <stdexcept>
 
 
 
-ReadoutGenerator::ReadoutGenerator(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
+ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
   uint32_t InitialSeqNum, bool Randomise)
   : Buffer(BufferPtr)
   , BufferSize(MaxPayloadSize)
   , SeqNum(InitialSeqNum)
   , Random(Randomise) { }
 
+// void ReadoutGeneratorBase::generateData(uint8_t Rings, uint16_t NumReadouts) {
+//   auto DP = (uint8_t *)Buffer;
+//   DP += HeaderSize;
 
-uint16_t ReadoutGenerator::makePacket(
+//   double Angle = 0;
+//   double XChannel = 32;
+//   double YChannel = 32;
+
+//   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
+//   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
+//     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
+//     ReadoutData->RingId = (Readout / 10) % Rings;
+//     //printf("RingId: %u\n", ReadoutData->RingId);
+//     ReadoutData->FENId = 0x01;
+//     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+//     assert(ReadoutData->DataLength == 20);
+
+//     ReadoutData->TimeHigh = TimeHigh;
+//     ReadoutData->TimeLow = TimeLow;
+//     ReadoutData->VMM = Readout & 0x3;
+//     ReadoutData->OTADC = 1000;
+
+//     if ((Readout % 2) == 0) {
+//       Angle = Fuzzer.random8() * 360.0/ 255;
+//       XChannel = 44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
+//       YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
+//     }
+
+//     if ((Readout % 2) == 0) {
+//       ReadoutData->Channel = YChannel;
+//     } else {
+//       ReadoutData->Channel = XChannel;
+//     }
+//     DP += VMM3DataSize;
+//     if ((Readout % 2) == 0) {
+//       TimeLow += TimeBtwReadout;
+//     } else {
+//       TimeLow += TimeBtwEvents;
+//     }
+//   }
+// }
+
+
+
+uint16_t ReadoutGeneratorBase::makePacket(
   uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
   uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents) {
   TimeBtwReadout = TicksBtwReadouts;
@@ -37,7 +80,7 @@ uint16_t ReadoutGenerator::makePacket(
   return DataSize;
 }
 
-void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
+void ReadoutGeneratorBase::generateHeader(uint8_t Type, uint16_t NumReadouts) {
 
   DataSize = HeaderSize + NumReadouts * VMM3DataSize;
   if (DataSize >= BufferSize) {
@@ -63,50 +106,7 @@ void ReadoutGenerator::generateHeader(uint8_t Type, uint16_t NumReadouts) {
 }
 
 
-void ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
-  auto DP = (uint8_t *)Buffer;
-  DP += HeaderSize;
-
-  double Angle = 0;
-  double XChannel = 32;
-  double YChannel = 32;
-
-  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (auto Readout = 0; Readout < NumReadouts; Readout++) {
-    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
-    ReadoutData->RingId = (Readout / 10) % Rings;
-    //printf("RingId: %u\n", ReadoutData->RingId);
-    ReadoutData->FENId = 0x01;
-    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
-    assert(ReadoutData->DataLength == 20);
-
-    ReadoutData->TimeHigh = TimeHigh;
-    ReadoutData->TimeLow = TimeLow;
-    ReadoutData->VMM = Readout & 0x3;
-    ReadoutData->OTADC = 1000;
-
-    if ((Readout % 2) == 0) {
-      Angle = Fuzzer.random8() * 360.0/ 255;
-      XChannel = 44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
-      YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
-    }
-
-    if ((Readout % 2) == 0) {
-      ReadoutData->Channel = YChannel;
-    } else {
-      ReadoutData->Channel = XChannel;
-    }
-    DP += VMM3DataSize;
-    if ((Readout % 2) == 0) {
-      TimeLow += TimeBtwReadout;
-    } else {
-      TimeLow += TimeBtwEvents;
-    }
-  }
-}
-
-
-void ReadoutGenerator::finishPacket() {
+void ReadoutGeneratorBase::finishPacket() {
   SeqNum++; // ready for next packet
 
   // if doing fuzzing, fuzz up to one field in header & up to 20 fields in data

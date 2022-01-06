@@ -12,10 +12,10 @@
 
 #include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <common/readout/vmm3/test/ReadoutGenerator.h>
+#include <common/readout/vmm3/test/ReadoutGeneratorBase.h>
 
 namespace Cspec{
-class ReadoutGenerator{
+class ReadoutGenerator : public ReadoutGeneratorBase{
 public:
   /// \brief Setup buffer and sequence number
   /// \param Buffer pointer to the buffer to be filled out with packet data

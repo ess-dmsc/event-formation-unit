@@ -13,15 +13,16 @@
 #include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
-class ReadoutGenerator {
+class ReadoutGeneratorBase {
 public:
   /// \brief Setup buffer and sequence number
   /// \param Buffer pointer to the buffer to be filled out with packet data
   /// \param BufferSize Maximum size of generated packet
   /// \param SeqNum sequence number
   /// \param Randomise whether to randomize (fuzz) some of the data
-  ReadoutGenerator(uint8_t *Buffer, uint16_t BufferSize,
+  ReadoutGeneratorBase(uint8_t *Buffer, uint16_t BufferSize,
     uint32_t InitialSeqNum, bool Randomise);
+  // ReadoutGeneratorBase() = default;
 
   /// \brief create a packet ready for UDP transmission, calls private methods
   /// \param Type Data type as specified in the ESS Readout ICD
@@ -40,7 +41,7 @@ private:
   /// \brief Fill out specified buffer with VMM3 readouts
   /// \param Rings number if rings in use
   /// \param NumReadouts number of VMM readouts in the UDP packet
-  void generateData(uint8_t Rings, uint16_t NumReadouts);
+  virtual void generateData(uint8_t Rings, uint16_t NumReadouts) = 0;
 
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();
@@ -51,7 +52,7 @@ private:
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks
   const uint32_t PrevTimeLowOffset{10000}; // ticks
-  const uint32_t TimeToFirstReadout{1000}; // ticks
+  // const uint32_t TimeToFirstReadout{1000}; // ticks
   uint32_t TimeBtwReadout{88};       // ticks ~ 1us
   uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
 

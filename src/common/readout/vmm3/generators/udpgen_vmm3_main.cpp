@@ -10,7 +10,7 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <common/readout/vmm3/test/ReadoutGenerator.h>
+#include <modules/freia/generators/ReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -72,7 +72,16 @@ int main(int argc, char *argv[]) {
 
   uint64_t Packets{0};
   uint32_t SeqNum{0};
-  ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+
+  // #ifdef CSPECGenerator
+  //   Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+  // #endif
+
+  #ifdef FREIA_GENERATOR
+    Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+  #endif
+
+
   do {
     uint16_t DataSize = gen.makePacket(Settings.Type, Settings.NumReadouts,
       Settings.NRings, Settings.TicksBtwReadouts, Settings.TicksBtwEvents);

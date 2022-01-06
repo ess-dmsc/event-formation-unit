@@ -67,32 +67,48 @@ void Cspec::ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) 
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
-  double XChannel = 384;
-  double YChannel = 2240;
-
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
-    ReadoutData->RingId = (Readout / 10) % Rings;
-    ReadoutData->FENId = 0x01;
+
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
-    ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;
 
-    XChannel = 50;
-    YChannel = 50;
 
+    if ((Readout % 16) == 0){
+      XGlobal = Fuzzer.random8() * 12 / 255;
+    } 
+    YGlobal = 12 * abs(XChannel-2) + 140 * Readout % 16;
+
+
+    ReadoutData->RingId = 5
+    ReadoutData->FENId = 1 + (Readout % 2);
+
+    // Wire
     if ((Readout % 2) == 0) {
-      ReadoutData->Channel = YChannel;
-    } else {
-      ReadoutData->Channel = XChannel;
+      if Global < 2 {
+        VMM = 0;
+        Channel = (XGlobal * 16) + 32 + Fuzzer.random8() * 16 / 255;
+      }
+      else{
+        VMM = 1;
+        Channel = (XGlobal - 2) * 16 + Fuzzer.random8() * 16 / 255;
+      }
+      ReadoutData->VMM = VMM
+      ReadoutData->Channel = Channel;
     }
+    // Grid
+    else {
+      
+      ReadoutData->Channel = 0;
+    }
+
     DP += VMM3DataSize;
-    if ((Readout % 2) == 0) {
+    if ((Readout % 3) == 0) {
       TimeLow += TimeBtwReadout;
     } else {
       TimeLow += TimeBtwEvents;
