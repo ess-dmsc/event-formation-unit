@@ -35,18 +35,18 @@ set(cspec_SRC CSPEC.cpp ${cspec_common_src})
 create_module(cspec)
 
 #
-set(CSPECBaseTest_INC
-  ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
-)
-set(CSPECBaseTest_SRC
-  CSPECBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${cspec_common_src}
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
-)
-create_test_executable(CSPECBaseTest)
+# set(CSPECBaseTest_INC
+#   ${cspec_common_inc}
+#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+#   ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+# )
+# set(CSPECBaseTest_SRC
+#   CSPECBaseTest.cpp
+#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+#   ${cspec_common_src}
+#   ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+# )
+# create_test_executable(CSPECBaseTest)
 
 
 ##
