@@ -34,12 +34,12 @@ def failure_function(exception_obj, failureMessage) {
     COMMITEMAIL = sh (
         script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null || echo "none"',
         returnStdout: true
-    ).text.trim()
+    ).trim()
 
     COMMITNAME = sh (
         script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null || echo "none"',
         returnStdout: true
-    ).text.trim()
+    ).trim()
 
     EXTRATEXT="not found in mail map"
     TOMAIL='morten.christensen@ess.eu'
