@@ -52,13 +52,13 @@ create_test_executable(CSPECBaseTest)
 ##
 ## CSPECiInstrumentTest Module integration test
 ##
-set(CSPECInstrumentTest_INC
-  ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  )
-set(CSPECInstrumentTest_SRC
-  ${cspec_common_src}
-  test/CSPECInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-)
-create_test_executable(CSPECInstrumentTest)
+# set(CSPECInstrumentTest_INC
+#   ${cspec_common_inc}
+#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+#   )
+# set(CSPECInstrumentTest_SRC
+#   ${cspec_common_src}
+#   test/CSPECInstrumentTest.cpp
+#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+# )
+# create_test_executable(CSPECInstrumentTest)
