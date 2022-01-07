@@ -27,6 +27,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   uint8_t VMM;
   uint16_t Channel;
 
+
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
@@ -47,7 +48,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     ReadoutData->RingId = 5;
     ReadoutData->FENId = 1 + (Readout % 2);
 
-    // Wire
+    // Wire X and Z direction
     if ((Readout % 2) == 0) {
       if (XGlobal < 2) {
         VMM = 0;
@@ -57,14 +58,29 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
         VMM = 1;
         Channel = (XGlobal - 2) * 16 + Fuzzer.random8() * 16 / 255;
       }
-      ReadoutData->VMM = VMM;
-      ReadoutData->Channel = Channel;
     }
-    // Grid
+    // Grid Y direction
     else {
-      
-      ReadoutData->Channel = 0;
+      if (YGlobal < 6){
+        VMM = 5;
+        Channel = 5 - YGlobal;
+      }
+      else if (YGlobal < 70){
+        VMM = 4;
+        Channel = 69 - YGlobal;
+      }
+      else if (YGlobal < 134){
+        VMM = 3;
+        Channel = 133 - YGlobal;
+      }
+      else{
+        VMM = 2;
+        Channel = 139 - YGlobal;
+      }
     }
+
+    ReadoutData->VMM = VMM;
+    ReadoutData->Channel = Channel;
 
     DP += VMM3DataSize;
     if ((Readout % 3) == 0) {
