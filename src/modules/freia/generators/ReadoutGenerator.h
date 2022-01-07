@@ -19,8 +19,9 @@ class ReadoutGenerator : public ReadoutGeneratorBase {
   public:
    using ReadoutGeneratorBase::ReadoutGeneratorBase;
   private:
-   virtual void generateData(uint8_t Rings, uint16_t NumReadouts) override;
+  void generateData(uint8_t Rings, uint16_t NumReadouts) override;
    const uint32_t TimeToFirstReadout{1000};
 }; 
 }
+
 // GCOVR_EXCL_STOP

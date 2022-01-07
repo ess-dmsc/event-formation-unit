@@ -32,7 +32,8 @@ public:
     uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
     uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents);
 
-private:
+
+protected:
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
   /// \param NumReadouts number of VMM readouts in the UDP packet
