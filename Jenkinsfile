@@ -32,13 +32,13 @@ def failure_function(exception_obj, failureMessage) {
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
     COMMITEMAIL = sh (
-        script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null',
+        script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null || echo "none"',
         returnStdout: true,
         returnStatus: true
     ).trim()
 
     COMMITNAME = sh (
-        script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null',
+        script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null || echo "none"',
         returnStdout: true,
         returnStatus: true
     ).trim()
