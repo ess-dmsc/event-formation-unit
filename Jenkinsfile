@@ -31,21 +31,18 @@ def failure_function(exception_obj, failureMessage) {
     def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
-    sh (echo "extracting commit email")
-
     COMMITEMAIL = sh (
         script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null',
-        returnStdout: true
+        returnStdout: true,
+        returnStatus: true
     ).trim()
-
-    sh (echo "extracting commit name")
 
     COMMITNAME = sh (
         script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null',
-        returnStdout: true
+        returnStdout: true,
+        returnStatus: true
     ).trim()
 
-    sh (echo "convert external emails to internal")
     EXTRATEXT="not found in mail map"
     TOMAIL='morten.christensen@ess.eu'
     if (emailmap.containsKey(COMMITEMAIL)) {
@@ -54,7 +51,7 @@ def failure_function(exception_obj, failureMessage) {
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    sh (echo "send emails")
+
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage \
                     + '\"\n\nCheck console output at $BUILD_URL to view the results.\n\n' \
                     + 'Committer: ' + COMMITNAME + '\n' + 'Email:' + COMMITEMAIL \
