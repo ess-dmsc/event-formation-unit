@@ -22,5 +22,5 @@ protected:
   void generateData(uint16_t NumReadouts) override;
      const uint32_t TimeToFirstReadout{1000};
 
-};}; // namespace Cspec
+};} // namespace Cspec
 // GCOVR_EXCL_STOP
