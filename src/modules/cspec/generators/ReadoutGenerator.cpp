@@ -22,10 +22,10 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
-  uint16_t XGlobal;
-  uint16_t YGlobal;
-  uint8_t VMM;
-  uint16_t Channel;
+  uint16_t XGlobal = 0;
+  uint16_t YGlobal = 0;
+  uint8_t VMM = 0;
+  uint16_t Channel = 0;
 
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
