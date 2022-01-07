@@ -24,7 +24,7 @@
 //   , SeqNum(InitialSeqNum)
 //   , Random(Randomise) { }
 
-void Freia::ReadoutGenerator::generateData(uint8_t Rings, uint16_t NumReadouts) {
+void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 

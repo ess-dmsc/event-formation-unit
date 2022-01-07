@@ -29,7 +29,7 @@ public:
   /// \param NumReadouts number of VMM readouts in the UDP packet
   /// \param Rings number if rings in use
   uint16_t makePacket(
-    uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
+    uint8_t Type, uint16_t NumReadouts,
     uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents);
 
 
@@ -42,7 +42,7 @@ protected:
   /// \brief Fill out specified buffer with VMM3 readouts
   /// \param Rings number if rings in use
   /// \param NumReadouts number of VMM readouts in the UDP packet
-  virtual void generateData(uint8_t Rings, uint16_t NumReadouts) = 0;
+  virtual void generateData(uint16_t NumReadouts) = 0;
 
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();
@@ -56,6 +56,7 @@ protected:
   // const uint32_t TimeToFirstReadout{1000}; // ticks
   uint32_t TimeBtwReadout{88};       // ticks ~ 1us
   uint32_t TimeBtwEvents{88 * 3};    // ticks ~ 3us
+  uint8_t Rings{4};
 
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};

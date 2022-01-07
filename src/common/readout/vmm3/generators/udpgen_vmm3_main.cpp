@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <common/system/Socket.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/ReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -82,9 +83,13 @@ int main(int argc, char *argv[]) {
   #endif
 
 
+  #ifdef CSPEC_GENERATOR
+    Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+  #endif
+
   do {
     uint16_t DataSize = gen.makePacket(Settings.Type, Settings.NumReadouts,
-      Settings.NRings, Settings.TicksBtwReadouts, Settings.TicksBtwEvents);
+       Settings.TicksBtwReadouts, Settings.TicksBtwEvents);
 
     DataSource.send(Buffer, DataSize);
 

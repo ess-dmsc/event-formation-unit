@@ -70,12 +70,12 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPaylo
 
 
 uint16_t ReadoutGeneratorBase::makePacket(
-  uint8_t Type, uint16_t NumReadouts, uint8_t Rings,
+  uint8_t Type, uint16_t NumReadouts,
   uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents) {
   TimeBtwReadout = TicksBtwReadouts;
   TimeBtwEvents = TicksBtwEvents;
   generateHeader(Type, NumReadouts);
-  generateData(Rings, NumReadouts);
+  generateData(NumReadouts);
   finishPacket();
   return DataSize;
 }
