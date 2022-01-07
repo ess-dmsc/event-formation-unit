@@ -145,7 +145,7 @@ builders = pipeline_builder.createBuilders { container ->
             } catch(e) {
                 container.copyFrom("${project}/build/test_results", '.')
                 junit 'test_results/*.xml'
-                failure_function(e, 'Run tests (${container.key}) failed')
+                failure_function(e, "Run tests (${container.key}) failed")
             }
 
             dir("${project}/build") {
