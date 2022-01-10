@@ -6,6 +6,15 @@
 
   "WireChOffset" : 16,
 
+  "Config" : [
+    { "Ring" :  5, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 2, "Hybrid" :  2, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 3, "Hybrid" :  2, "HybridId" : ""},
+  ],
+
 
   "MaxPulseTimeNS" : 71428570,
   "MaxGapWire"  : 0,
