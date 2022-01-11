@@ -2,9 +2,7 @@
 {
   "Detector" : "CSPEC",
 
-  "InstrumentGeometry" : "",
-
-  "WireChOffset" : 16,
+  "InstrumentGeometry" : "CSPEC",
 
   "Vessel_Config" : [
     {"ID":  0, "NumGrids": 140, "Rotation": false, "XOffset":   0},
@@ -70,6 +68,7 @@
     { "Ring" :  1, "VesselId": 7, "FEN": 7, "Hybrid" :  1, "HybridId" : ""},
     { "Ring" :  1, "VesselId": 7, "FEN": 7, "Hybrid" :  2, "HybridId" : ""},
 
+    { "Ring" :  2, "VesselId": 11, "FEN": 6, "Hybrid" :  1, "HybridId" : ""},
 
     { "Ring" :  2, "VesselId": 8, "FEN": 0, "Hybrid" :  0, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 8, "FEN": 0, "Hybrid" :  1, "HybridId" : ""},
@@ -90,7 +89,6 @@
     { "Ring" :  2, "VesselId": 10, "FEN": 5, "Hybrid" :  1, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 10, "FEN": 5, "Hybrid" :  2, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 11, "FEN": 6, "Hybrid" :  0, "HybridId" : ""},
-    { "Ring" :  2, "VesselId": 11, "FEN": 6, "Hybrid" :  1, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 11, "FEN": 6, "Hybrid" :  2, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 11, "FEN": 7, "Hybrid" :  0, "HybridId" : ""},
     { "Ring" :  2, "VesselId": 11, "FEN": 7, "Hybrid" :  1, "HybridId" : ""},
@@ -123,6 +121,7 @@
     { "Ring" :  3, "VesselId": 15, "FEN": 7, "Hybrid" :  2, "HybridId" : ""},
 
 
+
     { "Ring" :  5, "VesselId": 24, "FEN": 0, "Hybrid" :  0, "HybridId" : ""},
     { "Ring" :  5, "VesselId": 24, "FEN": 0, "Hybrid" :  1, "HybridId" : ""},
     { "Ring" :  5, "VesselId": 24, "FEN": 0, "Hybrid" :  2, "HybridId" : ""},
@@ -146,7 +145,5 @@
 
 
   "MaxPulseTimeNS" : 71428570,
-  "MaxGapWire"  : 0,
-  "MaxGapStrip" : 0,
   "TimeBoxNs" : 2010
 }

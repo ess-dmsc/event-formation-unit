@@ -94,7 +94,7 @@ protected:
 
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
-  ASSERT_EQ(config.NumHybrids, 0);
+  //TODO run through Hybrids and check initialised
 }
 
 // TEST_F(ConfigTest, UninitialisedHybrids) {
@@ -126,19 +126,6 @@ TEST_F(ConfigTest, Duplicate) {
   ASSERT_ANY_THROW(config.apply());
 }
 
-// Compare calculated maxpixels and number of fens against
-// ICD
-struct RingCfg {
-  uint8_t Ring;
-  uint16_t FENs;
-};
-
-// This table generated from the ICD and will be
-// compared to the calculated values
-std::vector<RingCfg> ReferenceConfig {
-  {  0, 8},  {  1, 8},  {  2, 8},
-  {  3, 8},  {  4, 8},  {  5, 13},  {  6, 8},  {  7, 8}
-};
 
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
@@ -146,9 +133,7 @@ TEST_F(ConfigTest, FullInstrument) {
   // ASSERT_EQ(config.NumPixels, 65536);
   // ASSERT_EQ(config.NumHybrids, 32);
 
-  for (const auto & Ref : ReferenceConfig) {
-    ASSERT_EQ(config.NumFENs[Ref.Ring], Ref.FENs);
-  }
+  //TODO, check correct Hybrids initialised
 }
 
 
