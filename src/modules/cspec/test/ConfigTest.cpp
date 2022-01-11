@@ -7,6 +7,11 @@
 #include <cspec/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <common/debug/Trace.h>
+
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 auto j2 = R"(
 {
@@ -33,8 +38,6 @@ auto InvalidRing = R"(
 {
   "Detector": "CSPEC",
 
-  "WireChOffset" : 16,
-
   "Config" : [
     { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
     { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
@@ -49,8 +52,6 @@ auto InvalidRing = R"(
 std::string InvalidConfig = R"(
 {
   "Detector": "CSPEC",
-
-  "WireChOffset" : 16,
 
   "Config" : [
     { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
@@ -69,8 +70,6 @@ std::string InvalidConfig = R"(
 auto DuplicateEntry = R"(
 {
   "Detector": "CSPEC",
-
-  "WireChOffset" : 16,
 
   "Config" : [
     { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
@@ -94,12 +93,12 @@ protected:
 
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
-  //TODO run through Hybrids and check initialised
+  ASSERT_EQ(config.getNumHybrids(), 0);
 }
 
-// TEST_F(ConfigTest, UninitialisedHybrids) {
-//   ASSERT_ANY_THROW(config.getHybridId(0, 0, 0));
-// }
+TEST_F(ConfigTest, UninitialisedHybrids) {
+  ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
+}
 
 TEST_F(ConfigTest, NoDetector) {
   config.root = NoDetector;
@@ -130,8 +129,8 @@ TEST_F(ConfigTest, Duplicate) {
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
   config.loadAndApply();
-  // ASSERT_EQ(config.NumPixels, 65536);
-  // ASSERT_EQ(config.NumHybrids, 32);
+  ASSERT_EQ(config.NumPixels, 838272);
+  ASSERT_EQ(config.getNumHybrids(), 198);
 
   //TODO, check correct Hybrids initialised
 }

@@ -39,10 +39,14 @@ public:
   // Apply the loaded json file
   void apply();
 
-
+  // Get Hybrid from the Ring, FEN, and VMM numbers
+  // Currently Hybrids are stored as a 3D array, but may be updated in future
   ESSReadout::Hybrid& getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
     return Hybrids[Ring][FEN][VMM];
   }
+
+  uint8_t getNumHybrids();
+
 
 public:
 

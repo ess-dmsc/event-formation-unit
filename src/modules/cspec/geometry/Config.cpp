@@ -82,10 +82,22 @@ void Config::apply() {
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}",
           Name, Ring, FEN, LocalHybrid);
+
+
     }
 
-    //TODO calculate NumPixels
-    // NumPixels+= Grids * 6 * 16;
+    //Calculates number of pixels config covers via Vessel_Config and 
+    //assumed 6 * 16 wires per column and 2 columns per vessel
+    try{
+      uint8_t NumGrids = 0;
+      for (auto &Vessel : root["Vessel_Config"]){
+        NumGrids = Vessel["NumGrids"];
+        NumPixels+= NumGrids * 6 * 16 * 2;
+      }
+    } catch(...){
+      LOG(INIT, Sev::Error, "Invalid Vessel_Config");
+    }
+    
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
@@ -94,5 +106,22 @@ void Config::apply() {
     return;
   }
 }
+
+uint8_t Config::getNumHybrids() {
+    uint8_t NumHybrids = 0;
+    for (int RingIndex = 0; RingIndex <= MaxRing; RingIndex++){
+      for (int FENIndex = 0; FENIndex <= MaxFEN; FENIndex++){
+        for (int HybridIndex = 0; HybridIndex <= MaxHybrid; HybridIndex++){
+          ESSReadout::Hybrid Hybrid = getHybrid(RingIndex, FENIndex, HybridIndex);
+          if (Hybrid.Initialised) {
+            NumHybrids++;
+          }
+        }
+      } 
+    }
+    return NumHybrids;
+  }
+
+
 
 } // namespace Cspec
