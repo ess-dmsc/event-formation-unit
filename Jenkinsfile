@@ -32,12 +32,12 @@ def failure_function(exception_obj, failureMessage) {
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
     COMMITEMAIL = sh (
-        script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null',
+        script: 'git --no-pager show -s --format=\'%ae\' 2> /dev/null || echo "none"',
         returnStdout: true
     ).trim()
 
     COMMITNAME = sh (
-        script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null',
+        script: 'git --no-pager show -s --format=\'%an\' 2> /dev/null || echo "none"',
         returnStdout: true
     ).trim()
 
@@ -145,7 +145,7 @@ builders = pipeline_builder.createBuilders { container ->
             } catch(e) {
                 container.copyFrom("${project}/build/test_results", '.')
                 junit 'test_results/*.xml'
-                failure_function(e, 'Run tests (${container.key}) failed')
+                failure_function(e, "Run tests (${container.key}) failed")
             }
 
             dir("${project}/build") {
