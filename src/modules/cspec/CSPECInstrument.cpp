@@ -15,6 +15,7 @@
 #include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <assert.h>
+#include <math.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -40,7 +41,7 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
 
   // We can now use the settings in Conf.Parms
 
-  // Geom.setGeometry(Conf.Parms.InstrumentGeometry);
+  Geom.setGeometry(Conf.Parms.InstrumentGeometry);
 
   // XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
   // for (auto & builder : builders) {
@@ -79,27 +80,21 @@ void CSPECInstrument::processReadouts(void) {
     XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
-    //counters.RingRx[readout.RingId]++;
+    // counters.RingRx[readout.RingId]++;
 
     // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
+    uint8_t Ring = readout.RingId/2;
+    uint8_t AsicId = readout.VMM & 0x1;
+    uint8_t HybridId = floor(readout.VMM/2);
 
-  //   if (Conf.NumFENs[Ring] == 0) {
-  //     XTRACE(DATA, WAR, "No FENs on RingId %d (physical %d)",
-  //            Ring, readout.RingId);
-  //     counters.RingErrors++;
-  //     continue;
-  //   }
+    if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
+      XTRACE(DATA, WAR, "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
+              readout.RingId, readout.FENId, readout.VMM);
+      counters.HybridErrors++;
+      continue;
+    }
 
-  //   if (readout.FENId > Conf.NumFENs[Ring]) {
-  //     XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
-  //            readout.FENId, Conf.NumFENs[Ring]);
-  //     counters.FENErrors++;
-  //     continue;
-  //   }
 
-  //   uint8_t Asic = readout.VMM & 0x1;
-  //   uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
   //   uint8_t Cassette = Hybrid + 1;
   //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
@@ -122,24 +117,26 @@ void CSPECInstrument::processReadouts(void) {
   //   }
 
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
-  //   if (Geom.isXCoord(readout.VMM)) {
-  //     XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-  //        TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
-  //     builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
-  //                     ADC, PlaneX});
+    if (Geom.isWire(HybridId)) {
+      std::pair<uint8_t, uint8_t> xAndzCoord = Geom.xandzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
+      XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneX, xAndzCoord, readout.Channel, ADC) ;
+      // builders[HybridId].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
+      //                 ADC, PlaneX});
 
   //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
   //     ADCHist.bin_x(GlobalXChannel, ADC);
 
-  //   } else { // implicit isYCoord
-  //     XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-  //        TimeNS, PlaneY, Geom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel, ADC);
-  //     builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
-  //                     ADC, PlaneY});
+    } else { // implicit isYCoord
+      uint8_t yCoord = Geom.yCoord(HybridId, AsicId, Channel);
+      XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+         TimeNS, PlaneY, yCoord, readout.Channel, ADC);
+      // builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
+      //                 ADC, PlaneY});
 
-  //     uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
-  //     ADCHist.bin_y(GlobalYChannel, ADC);
-  //   }
+      // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
+      // ADCHist.bin_y(GlobalYChannel, ADC);
+    }
   // }
 
   // for (auto & builder : builders) {
