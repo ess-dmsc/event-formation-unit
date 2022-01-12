@@ -74,7 +74,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     else {
       if (YLocal < 6){
         VMM = 5;
-        Channel = 5 - YGlobal;
+        Channel = 5 - YLocal;
       }
       else if (YLocal < 70){
         VMM = 4;
