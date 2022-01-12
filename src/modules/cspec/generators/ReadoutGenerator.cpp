@@ -24,7 +24,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   DP += HeaderSize;
 
   uint16_t XGlobal = 0;
-  uint16_t YGlobal = 0;
+  uint16_t YLocal = 0;
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
