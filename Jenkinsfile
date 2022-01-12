@@ -42,7 +42,7 @@ def failure_function(exception_obj, failureMessage) {
     ).trim()
 
     EXTRATEXT="not found in mail map"
-    TOMAIL='morten.christensen@ess.eu'
+    TOMAIL='morten.christensen@ess.eu, jennifer.walker@ess.eu'
     if (emailmap.containsKey(COMMITEMAIL)) {
        EXTRATEXT="found in mail map"
        TOMAIL= TOMAIL + ', ' + emailmap.get(COMMITEMAIL)
