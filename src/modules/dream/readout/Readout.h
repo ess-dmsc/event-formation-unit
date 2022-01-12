@@ -44,7 +44,7 @@ namespace Dream {
 
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
-  static std::string DatasetName() { return "jalousie_readouts"; }
+  static std::string DatasetName() { return "dream_readouts"; }
   static uint16_t FormatVersion() { return 0; }
 
   /// \todo consider reordering these to optimize
