@@ -1,0 +1,19 @@
+
+{
+  "Detector" : "CSPEC",
+
+  "InstrumentGeometry" : "LET",
+
+  "Config" : [
+    { "Ring" :  5, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  5, "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
+  ],
+
+
+  "MaxPulseTimeNS" : 71428570,
+  "MaxGapWire"  : 0,
+  "MaxGapStrip" : 0,
+  "TimeBoxNs" : 2010
+}

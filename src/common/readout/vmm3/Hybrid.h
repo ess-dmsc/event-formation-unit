@@ -31,7 +31,7 @@ public:
     }
     return true;
   }
-
+  bool Initialised{false};
   std::string HybridId{""};
   std::vector<VMM3Calibration> VMMs{NumVMMs};
 }; // class Hybrid

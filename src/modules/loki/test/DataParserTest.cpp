@@ -114,7 +114,7 @@ TEST_F(DataParserTest, MultipleDataPackets) {
 }
 
 
-// TODO, confirm this response when passed too many readouts
+/// \todo confirm this response when passed too many readouts
 TEST_F(DataParserTest, BadThreeReadouts) {
   auto Res = Parser.parse((char *)&ErrThreeLokiReadouts[0],
                           ErrThreeLokiReadouts.size());

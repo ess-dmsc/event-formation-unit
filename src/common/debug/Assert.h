@@ -27,7 +27,7 @@
    abort())
 
 // for now the asserts are always on!
-// TODO make the asserts primarity for DEBUG and google test.
+/// \todo make the asserts primarity for DEBUG and google test.
 #define RelAssertMsg(exp, msg)                                                 \
   (UNLIKELY(!(exp)) ? HandleAssertFail(#exp, __FILE__, __LINE__, msg) : (void)0)
 
