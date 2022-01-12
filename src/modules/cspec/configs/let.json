@@ -4,8 +4,6 @@
 
   "InstrumentGeometry" : "LET",
 
-  "WireChOffset" : 16,
-
   "Config" : [
     { "Ring" :  5, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
     { "Ring" :  5, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},

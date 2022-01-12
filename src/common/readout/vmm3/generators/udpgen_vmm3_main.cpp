@@ -74,14 +74,9 @@ int main(int argc, char *argv[]) {
   uint64_t Packets{0};
   uint32_t SeqNum{0};
 
-  // #ifdef CSPECGenerator
-  //   Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
-  // #endif
-
   #ifdef FREIA_GENERATOR
     Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
   #endif
-
 
   #ifdef CSPEC_GENERATOR
     Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);

@@ -1,6 +1,7 @@
 # Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
+add_subdirectory(generators)
 include_directories(.)
 
 #=============================================================================
@@ -9,9 +10,8 @@ include_directories(.)
 set(cspec_common_inc
   CSPECBase.h
   CSPECInstrument.h
-  #geometry/Config.h
+  geometry/Config.h
   #geometry/CSPECChannelMapping.h
-  #geometry/AMORChannelMapping.h
   #clustering/EventBuilder.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h

@@ -113,7 +113,7 @@ public:
 
   void pop_back() { Vec.pop_back(); }
 
-  // TODO why are we using insert()?
+  /// \todo why are we using insert()?
   template <class InputIterator>
   iterator insert(const_iterator position, InputIterator first,
                   InputIterator last) {

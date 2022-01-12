@@ -132,7 +132,7 @@ TEST_F(ConfigTest, FullInstrument) {
   ASSERT_EQ(config.NumPixels, 838272);
   ASSERT_EQ(config.getNumHybrids(), 198);
 
-  //TODO, check correct Hybrids initialised
+  /// \todo, check correct Hybrids initialised
 }
 
 

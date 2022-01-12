@@ -4,6 +4,7 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
+// based on CSPEC ICD document https://project.esss.dk/owncloud/index.php/f/14482406
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
@@ -33,49 +34,59 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+    //CSPEC VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
 
+    //CSPEC is 16 wires deep in Z direction
+    //X is selected as a number between 0 and 11 as there are
+    //2 columns of 6 wires in the LET setup
     if ((Readout % 16) == 0){
       XGlobal = Fuzzer.random8() * 12 / 255;
     } 
-    YGlobal = 12 * abs(XGlobal-2) + 140 * Readout % 16;
+    //Forms a tick shape, and stretches it into a taller rectangle
+    //as for LET MaxX = 11 and MaxY = 50
+    YLocal = 4 * abs(XGlobal-2);
 
-
+    //Readout generated for LET test, with Ring 5 and FENId 0 or 1
     ReadoutData->RingId = 5;
-    ReadoutData->FENId = 1 + (Readout % 2);
+    ReadoutData->FENId = 0 + (Readout % 2);
 
     // Wire X and Z direction
+    /// \todo check maths for calculating Channel is correct
+    // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
       if (XGlobal < 2) {
         VMM = 0;
-        Channel = (XGlobal * 16) + 32 + Fuzzer.random8() * 16 / 255;
+        Channel = (XGlobal * 16) + 32 + Readout % 16;
       }
       else{
         VMM = 1;
-        Channel = (XGlobal - 2) * 16 + Fuzzer.random8() * 16 / 255;
+        Channel = (XGlobal - 2) * 16 + Readout % 16;
       }
     }
     // Grid Y direction
+    // Mappings of Y coordinates to channels and VMMs is complicated
+    // Details are in ICD, with useful figure
     else {
-      if (YGlobal < 6){
+      if (YLocal < 6){
         VMM = 5;
         Channel = 5 - YGlobal;
       }
-      else if (YGlobal < 70){
+      else if (YLocal < 70){
         VMM = 4;
-        Channel = 69 - YGlobal;
+        Channel = 69 - YLocal;
       }
-      else if (YGlobal < 134){
+      else if (YLocal < 134){
         VMM = 3;
-        Channel = 133 - YGlobal;
+        Channel = 133 - YLocal;
       }
       else{
         VMM = 2;
-        Channel = 139 - YGlobal;
+        Channel = 139 - YLocal;
       }
     }
 
@@ -83,6 +94,8 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     ReadoutData->Channel = Channel;
 
     DP += VMM3DataSize;
+
+    /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
     if ((Readout % 3) == 0) {
       TimeLow += TimeBtwReadout;
     } else {

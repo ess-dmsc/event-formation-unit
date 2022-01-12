@@ -55,7 +55,7 @@ void Cluster::insert(const Hit &e) {
 
   DebugSplitOptimizer();
 
-  // TODO can we avoid converting to doubles and stay in uint64?
+  /// \todo can we avoid converting to doubles and stay in uint64?
   double weight64 = static_cast<double>(e.weight);
   double coordinate64 = static_cast<double>(e.coordinate);
   double time64 = static_cast<double>(e.time);

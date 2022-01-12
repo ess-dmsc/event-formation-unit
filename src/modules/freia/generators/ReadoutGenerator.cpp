@@ -4,6 +4,7 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
+// based on Freia ICD document https://project.esss.dk/owncloud/index.php/f/14683667
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
