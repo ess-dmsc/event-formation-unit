@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -138,8 +138,8 @@ void FreiaInstrument::processReadouts(void) {
     }
 
     uint8_t Asic = readout.VMM & 0x1;
-    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId - 1, readout.VMM >> 1);
-    uint8_t Cassette = Hybrid + 1;
+    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId, readout.VMM >> 1);
+    uint8_t Cassette = Hybrid;
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -296,7 +296,7 @@ void FreiaInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    if (readout.FENId != 1) {
+    if (readout.FENId != 0) {
       XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout",
              readout.FENId);
       counters.FENErrors++;

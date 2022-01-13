@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,7 @@ using namespace Freia;
 class GeometryTest : public TestBase {
 protected:
   FreiaGeometry Geom;
-  uint16_t Cassette1{1};
+  uint16_t Cassette0{0};
   uint16_t VMMX{1};
   uint16_t VMMY{0};
   void SetUp() override {}
@@ -25,7 +25,7 @@ TEST_F(GeometryTest, Coordinates) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), i);
   }
   for (unsigned int i = 16; i < 47; i++) {
-    ASSERT_EQ(Geom.yCoord(Cassette1, VMMY, i), i - 16);
+    ASSERT_EQ(Geom.yCoord(Cassette0, VMMY, i), i - 16);
   }
 }
 
@@ -42,14 +42,14 @@ TEST_F(GeometryTest, YCoordErrors) {
 }
 
 TEST_F(GeometryTest, Cassettes) {
-  ASSERT_EQ(Geom.cassette(1, 0), 0); // FEN 1, VMM 0, hybrid 0
-  ASSERT_EQ(Geom.cassette(1, 1), 0); // FEN 1, VMM 1
-  ASSERT_EQ(Geom.cassette(1, 2), 1); // FEN 1, VMM 2, hybrid 1
-  ASSERT_EQ(Geom.cassette(1, 3), 1); // FEN 1, VMM 3
-  ASSERT_EQ(Geom.cassette(2, 0), 2); // FEN 2, VMM 0, hybrid 2
-  ASSERT_EQ(Geom.cassette(2, 1), 2); // FEN 2, VMM 1
-  ASSERT_EQ(Geom.cassette(2, 2), 3); // FEN 2, VMM 2, hybrid 3
-  ASSERT_EQ(Geom.cassette(2, 3), 3); // FEN 2, VMM 3
+  ASSERT_EQ(Geom.cassette(0, 0), 0); // FEN 1, VMM 0, hybrid 0
+  ASSERT_EQ(Geom.cassette(0, 1), 0); // FEN 1, VMM 1
+  ASSERT_EQ(Geom.cassette(0, 2), 1); // FEN 1, VMM 2, hybrid 1
+  ASSERT_EQ(Geom.cassette(0, 3), 1); // FEN 1, VMM 3
+  ASSERT_EQ(Geom.cassette(1, 0), 2); // FEN 2, VMM 0, hybrid 2
+  ASSERT_EQ(Geom.cassette(1, 1), 2); // FEN 2, VMM 1
+  ASSERT_EQ(Geom.cassette(1, 2), 3); // FEN 2, VMM 2, hybrid 3
+  ASSERT_EQ(Geom.cassette(1, 3), 3); // FEN 2, VMM 3
 }
 
 

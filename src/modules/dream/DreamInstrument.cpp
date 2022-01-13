@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -61,12 +61,6 @@ void DreamInstrument::processReadouts() {
   /// Traverse readouts, calculate pixels
   for (auto &Section : DreamParser.Result) {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
-
-    if (Section.FENId == 0) {
-      XTRACE(DATA, WAR, "FENId == 0");
-      counters.MappingErrors++;
-      continue;
-    }
 
     for (auto &Data : Section.Data) {
       auto TimeOfFlight = Time.getTOF(0, Data.Tof); // TOF in ns

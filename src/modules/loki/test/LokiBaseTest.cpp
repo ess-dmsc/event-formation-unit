@@ -1,9 +1,11 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
-
-/** @file
- *
- *  \brief Unit tests.
- */
+// Copyright (C) 2019 - 2022 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests for LokiBase
+///
+//===----------------------------------------------------------------------===//
 
 #include <string>
 
@@ -15,7 +17,7 @@
 
 /// Test configuration - two rings used (0 and 1)
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and
-/// four FENs per ring. FENs are enumerated 1 - 4 and
+/// four FENs per ring. FENs are enumerated 0 - 3 and
 /// Tube groups 0 - 4
 // clang-format off
 std::string lokijson = R"(
@@ -82,7 +84,7 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 1
-    0x00, 0x01, 0x18, 0x00, // ring 0, fen 1, data size 64 bytes
+    0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00, // time high (17s)
     0x01, 0x01, 0x00, 0x00, // time low (257 clocks)
@@ -93,7 +95,7 @@ std::vector<uint8_t> TestPacket2{
 
     // Data Header 2
     // Ring 5 is invalid -> RingErrors++
-    0x05, 0x01, 0x18, 0x00, // ring 5, fen 1, data size 64 bytes
+    0x05, 0x00, 0x18, 0x00, // ring 5, fen 0, data size 64 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00, //time high 17s
     0x01, 0x02, 0x00, 0x00, // time low (257 clocks)
@@ -103,8 +105,8 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 3
-    // FEN 5 is invalid -> FENErrors++
-    0x01, 0x05, 0x18, 0x00, // ring 1, fen 5, size 24 bytes
+    // FEN 4 is invalid -> FENErrors++
+    0x01, 0x04, 0x18, 0x00, // ring 1, fen 4, size 24 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00,
     0x02, 0x02, 0x00, 0x00,
@@ -114,7 +116,7 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 4 
-    0x00, 0x01, 0x18, 0x00, // ring 0, fen 1, data size 64 bytes
+    0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00, // time high (17s)
     0x03, 0x01, 0x00, 0x00, // time low (259 clocks)

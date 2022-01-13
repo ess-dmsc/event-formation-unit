@@ -1,4 +1,4 @@
-// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -70,7 +70,7 @@ LokiInstrument::~LokiInstrument() {}
 uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
                                    DataParser::LokiReadout &Data) {
 
-  uint8_t TubeGroup = FEN - 1;
+  uint8_t TubeGroup = FEN;
   uint8_t LocalTube = Data.TubeId;
 
   bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
@@ -150,9 +150,9 @@ void LokiInstrument::processReadouts() {
 
     PanelGeometry &Panel = LokiConfiguration.Panels[Section.RingId];
 
-    if ((Section.FENId == 0) or (Section.FENId > Panel.getMaxGroup())) {
-      XTRACE(DATA, WAR, "FENId %d outside valid range 1 - %d", Section.FENId,
-             Panel.getMaxGroup());
+    if (Section.FENId >= Panel.getMaxGroup()) {
+      XTRACE(DATA, WAR, "FENId %d outside valid range 0 - %d", Section.FENId,
+             Panel.getMaxGroup() - 1);
       counters.FENErrors++;
       continue;
     }
@@ -201,7 +201,7 @@ void LokiInstrument::processReadouts() {
       SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
     }
 
-    
+
   } // for()
   counters.ReadoutsClampLow = LokiCalibration.Stats.ClampLow;
   counters.ReadoutsClampHigh = LokiCalibration.Stats.ClampHigh;
