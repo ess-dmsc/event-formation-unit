@@ -26,8 +26,6 @@ set(cspec_common_src
   CSPECInstrument.cpp
   geometry/Config.cpp
   geometry/CSPECGeometry.cpp
-  geometry/Geometry.h
-
   #clustering/EventBuilder.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp
