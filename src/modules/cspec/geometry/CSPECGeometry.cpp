@@ -9,14 +9,14 @@
 /// Mapping from digital identifiers to x-, z- and y- coordinates
 //===----------------------------------------------------------------------===//
 
-#include<CSPECGeometry.h>
+#include <cspec/geometry/CSPECGeometry.h>
 #include <utility>
 #include <cmath>
 
 std::pair<uint8_t, uint8_t> Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
 	if (isGrid(HybridID)){
 		XTRACE(DATA, WAR, "Invalid Hybrid ID for calculating X and Z coordinates");
-    	return InvalidCoord;
+    	return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
   	}
 	uint8_t LocalXCoord = 0;
 	uint8_t ZCoord = 0;
@@ -37,7 +37,7 @@ std::pair<uint8_t, uint8_t> Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uin
 		}
 		else{
 			XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-			return InvalidCoord;
+			return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
 		}
 	}
 	else if (VMMID == 1){
@@ -49,7 +49,6 @@ std::pair<uint8_t, uint8_t> Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uin
 }
 
 uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
-	uint8_t YCoord;
 	//Channel mappings for Y coordinates/grids are detailed in ICD document
 	if (HybridID == 1){
 		if (VMMID == 0){

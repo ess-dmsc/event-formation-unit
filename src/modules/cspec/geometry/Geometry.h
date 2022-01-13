@@ -25,8 +25,8 @@ public:
   virtual bool isWire(uint8_t LocalHybridID) = 0;
   virtual bool isGrid(uint8_t LocalHybridID) = 0;
   virtual std::pair<uint8_t, uint8_t> xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel) = 0;
-  virtual uint16_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel) = 0;
-  static const uint16_t InvalidCoord;
+  virtual uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel) = 0;
+  static const uint8_t InvalidCoord;
 };
-inline uint16_t const GeometryBase::InvalidCoord = 0xFFFF;
+inline uint8_t const InvalidCoord = 255;
 }

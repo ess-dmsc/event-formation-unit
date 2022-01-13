@@ -10,14 +10,14 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <Geometry.h>
+#include <cspec/geometry/Geometry.h>
 
 
-namespace CSPEC {
+namespace Cspec {
 
-class CSPECGeometry : public Geometry{
+class CSPECGeometry : public Cspec::Geometry{
 public:
-	bool isWire(uint8_t LocalHybridID){
+	bool isWire(uint8_t LocalHybridID) override{
 		if (LocalHybridID == 0){
 			return true;
 		}
@@ -26,9 +26,14 @@ public:
 		}
 	}
 
-	bool isGrid(uint8_t LocalHybridID){
+	bool isGrid(uint8_t LocalHybridID) override{
 		return !isWire(LocalHybridID);
 	}
-}
+
+	std::pair<uint8_t, uint8_t> xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel) override;
+  	uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel) override;
+    static const uint8_t InvalidCoord;
+
+};
 
 } // namespace CSPEC

@@ -11,7 +11,8 @@ set(cspec_common_inc
   CSPECBase.h
   CSPECInstrument.h
   geometry/Config.h
-  #geometry/CSPECChannelMapping.h
+  geometry/CSPECGeometry.h
+  geometry/Geometry.h
   #clustering/EventBuilder.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
@@ -23,7 +24,10 @@ set(cspec_common_inc
 set(cspec_common_src
   CSPECBase.cpp
   CSPECInstrument.cpp
-  #geometry/Config.cpp
+  geometry/Config.cpp
+  geometry/CSPECGeometry.cpp
+  geometry/Geometry.h
+
   #clustering/EventBuilder.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp

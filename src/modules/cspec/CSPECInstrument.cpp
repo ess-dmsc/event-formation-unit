@@ -12,6 +12,7 @@
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>
+#include <cspec/geometry/CSPECGeometry.h>
 #include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <assert.h>
@@ -40,8 +41,14 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
   loadConfigAndCalib();
 
   // We can now use the settings in Conf.Parms
-
-  Geom.setGeometry(Conf.Parms.InstrumentGeometry);
+  Geometry* geometry;
+  if (Conf.Parms.InstrumentGeometry == "CSPEC"){
+    Cspec::CSPECGeometry cspecgeometry = Cspec::CSPECGeometry();
+    geometry = &cspecgeometry;
+  }
+  else {
+    throw std::runtime_error("Invalid InstrumentGeometry in config file");
+  }
 
   // XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
   // for (auto & builder : builders) {
@@ -83,7 +90,7 @@ void CSPECInstrument::processReadouts(void) {
     // counters.RingRx[readout.RingId]++;
 
     // Convert from physical rings to logical rings
-    uint8_t Ring = readout.RingId/2;
+    // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
     uint8_t HybridId = floor(readout.VMM/2);
 
@@ -117,10 +124,10 @@ void CSPECInstrument::processReadouts(void) {
   //   }
 
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
-    if (Geom.isWire(HybridId)) {
-      std::pair<uint8_t, uint8_t> xAndzCoord = Geom.xandzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
-      XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneX, xAndzCoord, readout.Channel, ADC) ;
+    if (geometry->isWire(HybridId)) {
+      std::pair<uint8_t, uint8_t> xAndzCoord = geometry->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
+      XTRACE(DATA, DEB, "X: Coord %u, Channel %u",
+         xAndzCoord, readout.Channel) ;
       // builders[HybridId].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
       //                 ADC, PlaneX});
 
@@ -128,9 +135,9 @@ void CSPECInstrument::processReadouts(void) {
   //     ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
-      uint8_t yCoord = Geom.yCoord(HybridId, AsicId, Channel);
-      XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, yCoord, readout.Channel, ADC);
+      uint8_t yCoord = geometry->yCoord(HybridId, AsicId, readout.Channel);
+      XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
+         yCoord, readout.Channel) ;
       // builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
       //                 ADC, PlaneY});
 

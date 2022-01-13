@@ -13,6 +13,7 @@
 #include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <cspec/geometry/Geometry.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/vmm3/Readout.h>
@@ -78,6 +79,8 @@ public:
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates
   ESSGeometry essgeom{384, 2240, 1, 1};
+
+  Cspec::Geometry* geometry{nullptr};
 
   // Each cassette holds 2 VMMCalibrations
   std::vector<ESSReadout::Hybrid> Hybrids;
