@@ -16,7 +16,8 @@
 std::pair<uint8_t, uint8_t> Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
 	if (isGrid(HybridID)){
 		XTRACE(DATA, WAR, "Invalid Hybrid ID for calculating X and Z coordinates");
-    	return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
+    	// return std::pair<uint8_t, uint8_t>(Cspec::CSPECGeometry::InvalidCoord, Cspec::CSPECGeometry::InvalidCoord);
+    	return std::pair<uint8_t, uint8_t>(255, 255);
   	}
 	uint8_t LocalXCoord = 0;
 	uint8_t ZCoord = 0;
@@ -37,8 +38,9 @@ std::pair<uint8_t, uint8_t> Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uin
 		}
 		else{
 			XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-			return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
-		}
+			// return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
+    		return std::pair<uint8_t, uint8_t>(255, 255);
+    	}
 	}
 	else if (VMMID == 1){
 		LocalXCoord = floor(Channel/16) + 2;
@@ -67,6 +69,7 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 		}
 	}
 	XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-	return InvalidCoord;
+	//return InvalidCoord;
+	return 255;
 }
 
