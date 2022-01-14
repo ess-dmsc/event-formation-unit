@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   #ifdef CSPEC_GENERATOR
     Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
-    Settings.Type = 64;
+    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
   #endif
 
   do {
