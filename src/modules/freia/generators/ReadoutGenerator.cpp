@@ -38,7 +38,7 @@ void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->RingId = (Readout / 10) % Rings;
     //printf("RingId: %u\n", ReadoutData->RingId);
-    ReadoutData->FENId = 0x01;
+    ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
