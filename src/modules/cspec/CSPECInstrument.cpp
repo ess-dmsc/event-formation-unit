@@ -41,7 +41,6 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
   loadConfigAndCalib();
 
   // We can now use the settings in Conf.Parms
-  Geometry* geometry;
   if (Conf.Parms.InstrumentGeometry == "CSPEC"){
     Cspec::CSPECGeometry cspecgeometry = Cspec::CSPECGeometry();
     geometry = &cspecgeometry;
