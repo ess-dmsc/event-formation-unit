@@ -49,7 +49,7 @@ int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
       continue;
     }
 
-    if ((Readout.FENId > MaxFENId) or (Readout.FENId == 0))  {
+    if (Readout.FENId > MaxFENId)  {
       XTRACE(DATA, WAR, "Invalid FENId %d (valid: 1 - %d)", Readout.FENId, MaxFENId);
       Stats.ErrorFEN++;
       continue;

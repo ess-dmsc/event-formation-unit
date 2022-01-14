@@ -49,10 +49,10 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  // XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
-  // for (auto & builder : builders) {
-  //   builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
-  // }
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
+  for (auto & builder : builders) {
+    builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
+  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
 
@@ -143,10 +143,10 @@ void CSPECInstrument::processReadouts(void) {
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
       // ADCHist.bin_y(GlobalYChannel, ADC);
     }
-  // }
+  }
 
-  // for (auto & builder : builders) {
-  //   builder.flush(); // Do matching
+  for (auto & builder : builders) {
+    builder.flush(); // Do matching
   }
 }
 

@@ -235,15 +235,12 @@ void CSPECBase::processing_thread() {
       Counters.VMMStats = CSPEC.VMMParser.Stats;
 
 
-      // if (CSPECModuleSettings.IsMonitor) {
-      //   CSPEC.processMonitorReadouts();
-      // } else { // process regular events
-      //   CSPEC.processReadouts();
+      CSPEC.processReadouts();
 
-      //   for (auto & builder : CSPEC.builders) {
-      //     CSPEC.generateEvents(builder.Events);
-      //   }
-      // }
+      for (auto & builder : CSPEC.builders) {
+        CSPEC.generateEvents(builder.Events);
+      }
+    
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
         Counters.ProcessingIdle++;

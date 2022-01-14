@@ -13,7 +13,7 @@
 #include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <cspec/geometry/Geometry.h>
+
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/vmm3/Readout.h>
@@ -23,6 +23,8 @@
 #include <cspec/Counters.h>
 #include <cspec/CSPECBase.h>
 #include <cspec/geometry/Config.h>
+#include <cspec/geometry/Geometry.h>
+#include <cspec/clustering/EventBuilder.h>
 
 namespace Cspec {
 
@@ -67,22 +69,21 @@ public:
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes
-  // std::vector<EventBuilder> builders; // reinit in ctor
+  std::vector<EventBuilder> builders; // reinit in ctor
 
   /// \brief Instrument configuration (rings, cassettes, FENs)
   Config Conf;
-
-  /// \brief digital geometry
-  /// get x- and y- coordinates from cassettes and channels
-  // Geometry Geom;
 
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates
   ESSGeometry essgeom{384, 2240, 1, 1};
 
+  /// \brief digital geometry
+  /// Defines which digital geometry to use
+  /// for calculating pixel ids
   Cspec::Geometry* geometry{nullptr};
 
-  // Each cassette holds 2 VMMCalibrations
+  // 
   std::vector<ESSReadout::Hybrid> Hybrids;
 
   /// \brief parser for the ESS Readout header
