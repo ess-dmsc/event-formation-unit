@@ -30,11 +30,11 @@ TEST_F(CSPECGeometryTest, DefaultCSPEC) {
 
 TEST_F(CSPECGeometryTest, CoordinateCalculations){
   //xAndzCoord = ((4 * 12 * RindID) + (6 * FENId) + VMM & Channel specific value) * 16 + (Channel % 16)
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 0, 32), 0);
-  ASSERT_EQ(Geom.xAndzCoord(3, 5, 0, 1, 43), 2859);
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 32, 0, false), 0);
+  ASSERT_EQ(Geom.xAndzCoord(1, 1, 43, 174 ,false), 2859);
   //yCoord = VMM & Channel specific value
-  ASSERT_EQ(Geom.yCoord(2, 1, 5), 0);
-  ASSERT_EQ(Geom.yCoord(1, 0, 60), 137);
+  ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false), 0);
+  ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false), 137);
 }
 
 
