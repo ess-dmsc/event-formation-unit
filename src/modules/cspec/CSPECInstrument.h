@@ -76,7 +76,7 @@ public:
 
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates
-  ESSGeometry essgeom{4500, 140, 1, 1};
+  ESSGeometry essgeom{432, 140, 16, 1};
 
   /// \brief digital geometry
   /// Defines which digital geometry to use

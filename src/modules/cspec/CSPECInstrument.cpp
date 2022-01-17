@@ -137,6 +137,8 @@ void CSPECInstrument::processReadouts(void) {
     }
 
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
+    // x and z coord is a combination of the X and Z coordinates that provides a unique wire identifier
+    // Adjacency of wires isn't needed as wires are well insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
       uint16_t xAndzCoord = GeometryInstance->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
@@ -196,26 +198,28 @@ void CSPECInstrument::generateEvents(std::vector<Event> & Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
-    // if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
-    //     XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
-    //   counters.TOFErrors++;
-    //   continue;
-    // }
+    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
+        XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      counters.TOFErrors++;
+      continue;
+    }
 
     // calculate local x and y using center of mass
-    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
-    auto PixelId = essgeom.pixel2D(x, y);
+    uint16_t xandz = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    uint16_t x = floor(xandz/16);
+    uint16_t z = xandz % 16;
+    auto PixelId = essgeom.pixel3D(x, y, z);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x & z %u, y %u, pixel %u",
-             time, TimeOfFlight, x, y, PixelId);
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, z %u, pixel %u",
+             time, TimeOfFlight, x, y, z, PixelId);
       counters.PixelErrors++;
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, x & z %u, y %u, pixel %u",
-           time, TimeOfFlight, x, y, PixelId);
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, z %u, pixel %u",
+           time, TimeOfFlight, x, y, z, PixelId);
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
