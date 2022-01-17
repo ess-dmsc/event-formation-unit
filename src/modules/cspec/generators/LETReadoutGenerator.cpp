@@ -14,12 +14,12 @@
 #include <cstring>
 #include <math.h>
 #include <time.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <stdexcept>
 
 
 
-void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -53,7 +53,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     YLocal = 4 * abs(XGlobal-2);
 
     //Readout generated for LET test, with Ring 5 and FENId 0 or 1
-    ReadoutData->RingId = 5;
+    ReadoutData->RingId = 0;
     ReadoutData->FENId = 0 + (Readout % 2);
 
     // Each column is 6 wires wide

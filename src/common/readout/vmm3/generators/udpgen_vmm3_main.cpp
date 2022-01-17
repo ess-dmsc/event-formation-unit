@@ -12,6 +12,7 @@
 #include <common/system/Socket.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -80,6 +81,11 @@ int main(int argc, char *argv[]) {
 
   #ifdef CSPEC_GENERATOR
     Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
+  #endif
+
+   #ifdef LET_GENERATOR
+    Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
     Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
   #endif
 

@@ -18,8 +18,8 @@
 #include <assert.h>
 #include <math.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Cspec {
 
@@ -74,7 +74,7 @@ void CSPECInstrument::loadConfigAndCalib() {
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
-  builders = std::vector<EventBuilder>(5);
+  builders = std::vector<EventBuilder>((Conf.MaxRing+1) * (Conf.MaxFEN+1));
 
 
   // if (ModuleSettings.CalibFile != "") {
@@ -114,35 +114,35 @@ void CSPECInstrument::processReadouts(void) {
     }
 
 
-  //   uint8_t Cassette = Hybrid + 1;
   //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
-  //   uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
   //   int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
   //   XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS, TDCCorr);
 
   //   TimeNS += TDCCorr;
   //   XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
 
-  //   // Only 10 bits of the 16-bit OTADC field is used hence the 0x3ff mask below
-  //   uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+    // Only 10 bits of the 16-bit OTADC field is used hence the 0x3ff mask below
+    // uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+    // no calibration yet, so using raw ADC value
+    uint16_t ADC = readout.OTADC & 0x3FF;
 
   //   XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
 
-  //   // If the corrected ADC reaches maximum value we count the occurance but
-  //   // use the new value anyway
-  //   if (ADC >= 1023) {
-  //     counters.MaxADC++;
-  //   }
+    // If the corrected ADC reaches maximum value we count the occurance but
+    // use the new value anyway
+    if (ADC >= 1023) {
+      counters.MaxADC++;
+    }
 
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      std::pair<uint8_t, uint8_t> xAndzCoord = GeometryInstance->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
+      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
       XTRACE(DATA, DEB, "X: Coord %u, Channel %u",
          xAndzCoord, readout.Channel) ;
-      // builders[HybridId].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
-      //                 ADC, PlaneX});
+      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, xAndzCoord, ADC, 0});
 
   //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
   //     ADCHist.bin_x(GlobalXChannel, ADC);
@@ -152,8 +152,7 @@ void CSPECInstrument::processReadouts(void) {
       uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel);
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
          yCoord, readout.Channel) ;
-      // builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
-      //                 ADC, PlaneY});
+      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, yCoord, ADC, 1});
 
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
       // ADCHist.bin_y(GlobalYChannel, ADC);
@@ -209,13 +208,13 @@ void CSPECInstrument::generateEvents(std::vector<Event> & Events) {
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u",
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x & z %u, y %u, pixel %u",
              time, TimeOfFlight, x, y, PixelId);
       counters.PixelErrors++;
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u",
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x & z %u, y %u, pixel %u",
            time, TimeOfFlight, x, y, PixelId);
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;

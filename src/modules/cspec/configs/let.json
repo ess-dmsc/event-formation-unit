@@ -5,10 +5,10 @@
   "InstrumentGeometry" : "LET",
 
   "Config" : [
-    { "Ring" :  5, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  0, "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  0, "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
   ],
 
 
