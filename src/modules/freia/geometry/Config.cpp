@@ -91,12 +91,12 @@ void Config::apply() {
 
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
-      if ((Ring > MaxRing) or (FEN - 1 > MaxFEN) or (LocalHybrid > MaxHybrid)) {
+      if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
         XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      uint8_t HybridIndex = hybridIndex(Ring, FEN - 1, LocalHybrid);
+      uint8_t HybridIndex = hybridIndex(Ring, FEN, LocalHybrid);
 
       if (HybridId[HybridIndex] != -1) {
         XTRACE(INIT, ERR, "Duplicate {Ring, FEN, VMM} entry for Hybrid Index %u",

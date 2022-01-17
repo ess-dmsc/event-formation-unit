@@ -73,7 +73,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.ring_mismatch", Counters.RingErrors);
+  Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
+  Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
