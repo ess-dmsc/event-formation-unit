@@ -13,7 +13,8 @@
 #include <utility>
 #include <cmath>
 
-uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
+
+uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated){
 	if (isGrid(HybridID)){
 		XTRACE(DATA, WAR, "Invalid Hybrid ID for calculating X and Z coordinates");
     	// return std::pair<uint8_t, uint8_t>(Cspec::CSPECGeometry::InvalidCoord, Cspec::CSPECGeometry::InvalidCoord);
@@ -21,12 +22,6 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t
   	}
 	uint8_t LocalXCoord = 0;
 	uint8_t ZCoord = 0;
-
-	//Offset from RingID, each Ring is 4 vessels, each vessel is 12 wires wide
-	uint8_t XOffset = 4 * 12 * RingID;
-
-	//Add offset from FENID, each FEN is 1 column, each column is 6 wires wide
-	XOffset += 6 * FENID;
 
 	//Channel mappings for each VMM are detailed in ICD document
 	if (VMMID == 0){
@@ -46,30 +41,51 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t
 		LocalXCoord = floor(Channel/16) + 2;
 	}
 	ZCoord = Channel % 16;
+
+	if (Rotated){
+		LocalXCoord = 5 - LocalXCoord;
+	}
+	//X and Z Coordinates
 	uint16_t ComboCoordinate = 16 * (LocalXCoord + XOffset) + ZCoord;
 	return ComboCoordinate;
 }
 
-uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
+uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated){
+	uint8_t YCoord;
 	//Channel mappings for Y coordinates/grids are detailed in ICD document
 	if (HybridID == 1){
 		if (VMMID == 0){
-			return 139 - (Channel - 58);
+			YCoord = 139 - (Channel - 58);
 		}
 		else if (VMMID == 1){
-			return 133 - Channel;
+			YCoord = 133 - Channel;
+		}
+		else{
+			XTRACE(DATA, WAR, "Invalid VMM ID %u for HybridID 1", VMMID);
+			return 255;
 		}
 	}
 	else if (HybridID == 2){
 		if (VMMID == 0){
-			return 69 - Channel;
+			YCoord = 69 - Channel;
 		}
-		if (VMMID == 1){
-			return 5 - Channel;
+		else if (VMMID == 1){
+			YCoord = 5 - Channel;
+		}
+		else{
+			XTRACE(DATA, WAR, "Invalid VMM ID %u for HybridID 2", VMMID);
+			return 255;
 		}
 	}
-	XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-	//return InvalidCoord;
-	return 255;
+	else{
+		XTRACE(DATA, WAR, "Invalid HybridID %u", HybridID);
+		return 255;
+	}
+
+	if (Rotated){
+		YCoord = - YCoord;
+	}
+	YCoord += YOffset;
+	return YCoord;
 }
 

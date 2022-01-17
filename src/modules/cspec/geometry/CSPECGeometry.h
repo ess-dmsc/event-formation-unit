@@ -32,8 +32,8 @@ public:
 		return !isWire(LocalHybridID);
 	}
 
-	uint16_t xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel) override;
-  	uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel) override;
+	uint16_t xAndzCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated) override;
+  	uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated) override;
     static const uint8_t InvalidCoord;
 
 };

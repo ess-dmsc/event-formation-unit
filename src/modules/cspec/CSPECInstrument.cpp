@@ -105,6 +105,9 @@ void CSPECInstrument::processReadouts(void) {
     // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
     uint8_t HybridId = floor(readout.VMM/2);
+    uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][readout.VMM];
+    uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][readout.VMM];
+    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][readout.VMM];
 
     if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR, "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
@@ -141,7 +144,7 @@ void CSPECInstrument::processReadouts(void) {
     // Adjacency of wires isn't needed as wires are well insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
+      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(HybridId, AsicId, readout.Channel, XOffset, Rotated);
       XTRACE(DATA, DEB, "X: Coord %u, Channel %u",
          xAndzCoord, readout.Channel) ;
       builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, xAndzCoord, ADC, 0});
@@ -151,7 +154,7 @@ void CSPECInstrument::processReadouts(void) {
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
-      uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel);
+      uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel, YOffset, Rotated);
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
          yCoord, readout.Channel) ;
       builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, yCoord, ADC, 1});

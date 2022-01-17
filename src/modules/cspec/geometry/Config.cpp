@@ -66,7 +66,7 @@ void Config::apply() {
 
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
-      if ((Ring > MaxRing) or (FEN - 1 > MaxFEN) or (LocalHybrid > MaxHybrid)) {
+      if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
         XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
@@ -76,8 +76,18 @@ void Config::apply() {
         throw std::runtime_error("Duplicate Hybrid in config file");
       }
 
+
       Hybrids[Ring][FEN][LocalHybrid].Initialised = true;
       Hybrids[Ring][FEN][LocalHybrid].HybridId = IDString;
+      std::string VesselID = Mapping["VesselId"];
+      Rotated[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Rotation"];
+      XOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["XOffset"];
+      if (root["Vessel_Config"][VesselID].contains("YOffset")){
+        YOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["YOffset"];
+      }
+      else {
+        YOffset[Ring][FEN][LocalHybrid] = 0;
+      }
 
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}",
