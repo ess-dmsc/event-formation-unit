@@ -9,6 +9,8 @@
 /// Mapping from digital identifiers to x-, z- and y- coordinates
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
 #include <common/debug/Trace.h>
 #include <cspec/geometry/Geometry.h>
 

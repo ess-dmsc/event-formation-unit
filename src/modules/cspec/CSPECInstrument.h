@@ -23,7 +23,7 @@
 #include <cspec/Counters.h>
 #include <cspec/CSPECBase.h>
 #include <cspec/geometry/Config.h>
-#include <cspec/geometry/Geometry.h>
+#include <cspec/geometry/CSPECGeometry.h>
 #include <cspec/clustering/EventBuilder.h>
 
 namespace Cspec {
@@ -71,7 +71,7 @@ public:
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder> builders; // reinit in ctor
 
-  /// \brief Instrument configuration (rings, cassettes, FENs)
+  /// \brief Instrument configuration (rings, FENs, Hybrids, etc)
   Config Conf;
 
   /// \brief logical geometry
@@ -81,7 +81,9 @@ public:
   /// \brief digital geometry
   /// Defines which digital geometry to use
   /// for calculating pixel ids
-  Cspec::Geometry* geometry{nullptr};
+  CSPECGeometry CSPECGeometryInstance;
+
+  Geometry *GeometryInstance;
 
   // 
   std::vector<ESSReadout::Hybrid> Hybrids;

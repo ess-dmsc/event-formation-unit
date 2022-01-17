@@ -52,4 +52,4 @@ public:
 
 }; // class
 
-} // namespace Multiblade
+} // namespace CSPEC

@@ -42,8 +42,7 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
 
   // We can now use the settings in Conf.Parms
   if (Conf.Parms.InstrumentGeometry == "CSPEC"){
-    Cspec::CSPECGeometry cspecgeometry = Cspec::CSPECGeometry();
-    geometry = &cspecgeometry;
+    GeometryInstance = &CSPECGeometryInstance;
   }
   else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
@@ -67,7 +66,23 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
   // ADCHist = Hists(MaxChannels, MaxADC);
 }
 
-void CSPECInstrument::loadConfigAndCalib() { }
+void CSPECInstrument::loadConfigAndCalib() {
+  XTRACE(INIT, ALW, "Loading configuration file %s",
+         ModuleSettings.ConfigFile.c_str());
+  Conf = Config("CSPEC", ModuleSettings.ConfigFile);
+  Conf.loadAndApply();
+
+  // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
+  //        Conf.getNumHybrids());
+  builders = std::vector<EventBuilder>(5);
+
+
+  // if (ModuleSettings.CalibFile != "") {
+  //   XTRACE(INIT, ALW, "Loading and applying calibration file");
+  //   ESSReadout::CalibFile Calibration("Freia", Hybrids);
+  //   Calibration.load(ModuleSettings.CalibFile);
+  // }
+}
 
 void CSPECInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
@@ -85,8 +100,6 @@ void CSPECInstrument::processReadouts(void) {
 
     XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
-
-    // counters.RingRx[readout.RingId]++;
 
     // Convert from physical rings to logical rings
     // uint8_t Ring = readout.RingId/2;
@@ -123,8 +136,9 @@ void CSPECInstrument::processReadouts(void) {
   //   }
 
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
-    if (geometry->isWire(HybridId)) {
-      std::pair<uint8_t, uint8_t> xAndzCoord = geometry->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
+    if (GeometryInstance->isWire(HybridId)) {
+      XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
+      std::pair<uint8_t, uint8_t> xAndzCoord = GeometryInstance->xAndzCoord(readout.RingId, readout.FENId, HybridId, AsicId, readout.Channel);
       XTRACE(DATA, DEB, "X: Coord %u, Channel %u",
          xAndzCoord, readout.Channel) ;
       // builders[HybridId].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
@@ -134,7 +148,8 @@ void CSPECInstrument::processReadouts(void) {
   //     ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
-      uint8_t yCoord = geometry->yCoord(HybridId, AsicId, readout.Channel);
+      XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
+      uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel);
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
          yCoord, readout.Channel) ;
       // builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
