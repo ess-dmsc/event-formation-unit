@@ -98,6 +98,18 @@ void CSPECInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
+    if(readout.RingId > Conf.MaxRing){
+      XTRACE(DATA, ERR, "Invalid Ring ID: %u, Max Ring ID: %u", readout.RingId, Conf.MaxRing);
+      counters.RingErrors++;
+      continue;
+    }
+
+    if(readout.FENId > Conf.MaxFEN){
+      XTRACE(DATA, ERR, "Invalid FEN ID: %u, Max FEN ID: %u", readout.FENId, Conf.MaxFEN);
+      counters.FENErrors++;
+      continue;
+    }
+
     XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
