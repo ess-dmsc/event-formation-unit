@@ -29,12 +29,24 @@ TEST_F(CSPECGeometryTest, DefaultCSPEC) {
 }
 
 TEST_F(CSPECGeometryTest, CoordinateCalculations){
-  //xAndzCoord = ((4 * 12 * RindID) + (6 * FENId) + VMM & Channel specific value) * 16 + (Channel % 16)
+  //xAndzCoord takes HybridID, VMMID, Channel, XOffset, Rotated
+  
+  //Vessel 0, very first xAndzCoord position
   ASSERT_EQ(Geom.xAndzCoord(0, 0, 32, 0, false), 0);
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 174 ,false), 2859);
+  //Vessel 14, position is mid-column
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 168 ,false), 2763);
+  //Vessel 25, rotated
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 300 , true), 4827);
+
   //yCoord = VMM & Channel specific value
-  ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false), 0);
-  ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false), 137);
+  ASSERT_EQ(Geom.yCoord(1, 0, 58, 0, false, false), 0);
+  ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false, false), 139);
+
+  //short rotated vessel
+  ASSERT_EQ(Geom.yCoord(1, 0, 40, 51, true, true), 9);
+
+  //short not rotated vessel
+  ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 100);
 }
 
 

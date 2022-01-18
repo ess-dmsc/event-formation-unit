@@ -120,6 +120,7 @@ void CSPECInstrument::processReadouts(void) {
     uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][readout.VMM];
     uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][readout.VMM];
     bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][readout.VMM];
+    bool Short = Conf.Short[readout.RingId][readout.FENId][readout.VMM];
 
     if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR, "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
@@ -166,7 +167,7 @@ void CSPECInstrument::processReadouts(void) {
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
-      uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel, YOffset, Rotated);
+      uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
          yCoord, readout.Channel) ;
       builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, yCoord, ADC, 1});

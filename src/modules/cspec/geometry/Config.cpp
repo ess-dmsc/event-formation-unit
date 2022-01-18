@@ -82,6 +82,15 @@ void Config::apply() {
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Rotation"];
       XOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["XOffset"];
+
+      if (root["Vessel_Config"][VesselID].contains("Short")){
+        Short[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Short"];
+      }
+      else{
+        Short[Ring][FEN][LocalHybrid] = false;
+      }
+      
+
       if (root["Vessel_Config"][VesselID].contains("YOffset")){
         YOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["YOffset"];
       }
