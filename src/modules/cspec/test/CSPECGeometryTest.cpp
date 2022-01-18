@@ -28,7 +28,7 @@ TEST_F(CSPECGeometryTest, DefaultCSPEC) {
   ASSERT_TRUE(Geom.isGrid(VMM2));
 }
 
-TEST_F(CSPECGeometryTest, CoordinateCalculations){
+TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations){
   //xAndzCoord takes HybridID, VMMID, Channel, XOffset, Rotated
   
   //Vessel 0, very first xAndzCoord position
@@ -38,15 +38,18 @@ TEST_F(CSPECGeometryTest, CoordinateCalculations){
   //Vessel 25, rotated
   ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 300 , true), 4827);
 
+}
+
+TEST_F(CSPECGeometryTest, YCoordinateCalculations){
   //yCoord = VMM & Channel specific value
   ASSERT_EQ(Geom.yCoord(1, 0, 58, 0, false, false), 0);
   ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false, false), 139);
 
   //short rotated vessel
-  ASSERT_EQ(Geom.yCoord(1, 0, 40, 51, true, true), 9);
+  ASSERT_EQ(Geom.yCoord(1, 0, 40, 50, true, true), 10);
 
   //short not rotated vessel
-  ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 100);
+  ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 129);
 }
 
 

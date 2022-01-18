@@ -98,6 +98,7 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 		}
 		else{
 			XTRACE(DATA, ERR, "Invalid Hybrid or VMM for rotated CSPEC vessel, HybridID %u, VMM %u", HybridID, VMMID);
+			return 255;
 		}
 	}
 
