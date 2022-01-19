@@ -20,20 +20,18 @@
 
 
 ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
-  uint32_t InitialSeqNum, bool Randomise)
+  uint32_t InitialSeqNum, GeneratorSettings Settings)
   : Buffer(BufferPtr)
   , BufferSize(MaxPayloadSize)
   , SeqNum(InitialSeqNum)
-  , Random(Randomise) { }
+  { 
+    setSettings(Settings);
+  }
 
 
-uint16_t ReadoutGeneratorBase::makePacket(
-  uint8_t Type, uint16_t NumReadouts,
-  uint32_t TicksBtwReadouts, uint32_t TicksBtwEvents) {
-  TimeBtwReadout = TicksBtwReadouts;
-  TimeBtwEvents = TicksBtwEvents;
-  generateHeader(Type, NumReadouts);
-  generateData(NumReadouts);
+uint16_t ReadoutGeneratorBase::makePacket() {
+  generateHeader(Settings.Type, Settings.NumReadouts);
+  generateData(Settings.NumReadouts);
   finishPacket();
   return DataSize;
 }
@@ -69,10 +67,14 @@ void ReadoutGeneratorBase::finishPacket() {
   SeqNum++; // ready for next packet
 
   // if doing fuzzing, fuzz up to one field in header & up to 20 fields in data
-  if (Random) {
+  if (Settings.Randomise) {
     Fuzzer.fuzz8Bits(Buffer, HeaderSize, 1);
     Fuzzer.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
   }
+}
+
+void ReadoutGeneratorBase::setSettings(GeneratorSettings NewSettings){
+  Settings = NewSettings;
 }
 
 

@@ -14,16 +14,17 @@
 #include <cstring>
 #include <math.h>
 #include <time.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <stdexcept>
 
 
 
-void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
   uint16_t XGlobal = 0;
+  uint16_t XLocal = 0;
   uint16_t YLocal = 0;
   uint8_t VMM = 0;
   uint16_t Channel = 0;
@@ -52,20 +53,32 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     YLocal = 4 * abs(XGlobal-2);
 
     //Readout generated for LET test, with Ring 5 and FENId 0 or 1
-    ReadoutData->RingId = 5;
+    ReadoutData->RingId = 0;
     ReadoutData->FENId = 0 + (Readout % 2);
+
+    // Each column is 6 wires wide
+    // Select the FEN based on whether XGlobal is in column 0 or column 1
+    // Initialise XLocal as the local X value within each column
+    if (XGlobal<6){
+      ReadoutData->FENId = 0;
+      XLocal = XGlobal;
+    }
+    else{
+      ReadoutData->FENId = 1;
+      XLocal = XGlobal - 6;
+    }
 
     // Wire X and Z direction
     /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
-      if (XGlobal < 2) {
+      if (XLocal < 2) {
         VMM = 0;
-        Channel = (XGlobal * 16) + 32 + Readout % 16;
+        Channel = (XLocal * 16) + 32 + Fuzzer.random8() * 16 / 255;
       }
       else{
         VMM = 1;
-        Channel = (XGlobal - 2) * 16 + Readout % 16;
+        Channel = (XLocal - 2) * 16 + Fuzzer.random8() * 16 / 255;
       }
     }
     // Grid Y direction
