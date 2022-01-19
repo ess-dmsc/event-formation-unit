@@ -32,11 +32,12 @@ TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations){
   //xAndzCoord takes HybridID, VMMID, Channel, XOffset, Rotated
   
   //Vessel 0, very first xAndzCoord position
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 32, 0, false), 0);
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 32, 0, false), 0);
   //Vessel 14, position is mid-column
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 168 ,false), 2763);
-  //Vessel 25, rotated
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 43, 300 , true), 4827);
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 168 ,false), 2763);
+  //Vessel 25, rotated, column 0 and column 1
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 300 , true), 4923);
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 43, 300 , true), 4827);
 
 }
 

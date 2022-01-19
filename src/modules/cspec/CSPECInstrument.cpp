@@ -157,7 +157,7 @@ void CSPECInstrument::processReadouts(void) {
     // Adjacency of wires isn't needed as wires are well insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(HybridId, AsicId, readout.Channel, XOffset, Rotated);
+      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
       if (xAndzCoord != 65535){ //65535 is invalid xandzCoordinate
         XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u",
            xAndzCoord, readout.Channel) ;

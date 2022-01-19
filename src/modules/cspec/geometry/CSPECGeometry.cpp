@@ -14,45 +14,29 @@
 #include <cmath>
 
 
-uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated){
+uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated){
 	if (isGrid(HybridID)){
 		XTRACE(DATA, WAR, "Invalid Hybrid ID for calculating X and Z coordinates");
     	// return std::pair<uint8_t, uint8_t>(Cspec::CSPECGeometry::InvalidCoord, Cspec::CSPECGeometry::InvalidCoord);
     	return 65535;
   	}
-	uint8_t LocalXCoord = 0;
-	uint8_t ZCoord = 0;
+	
+	uint8_t Wire = (HybridID * 2 + VMMID) * 64 + Channel - 32;
+	uint8_t LocalXCoord = floor(Wire/16);
+	uint8_t LocalZCoord = Wire % 16;
 
-	//Channel mappings for each VMM are detailed in ICD document
-	if (VMMID == 0){ // Wires in X=0 and 1 represented by VMM0
-		if (Channel > 31 and Channel < 48){ //Channels 32-47 are in X=0
-			LocalXCoord = 0;
-		}
-		else if (Channel > 47 and Channel < 64){ //Channels 48-63 are in X=1
-			LocalXCoord = 1;
-		}
-		else{
-			XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-    		return 65535;
-    	}
+	//odd FENs are second column in a vessel, 6 wires over
+	if (FENID % 2){
+		LocalXCoord = LocalXCoord + 6;
 	}
-	else if (VMMID == 1 and Channel < 64){ //Wires in X=2,3,4 and 5 are represented by VMM1
-		LocalXCoord = floor(Channel/16) + 2;
-	}
-	else{
-		XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-    		return 65535;
-	}
-	//Vessels are 16 wires deep, and channels count up in Z direction, with %16=0 at the front of the vessel
-	ZCoord = Channel % 16;
 
 	//When the vessel is rotated the X coordinates are reversed, Z remains the same
 	if (Rotated){
-		LocalXCoord = 5 - LocalXCoord;
+		LocalXCoord = 11 - LocalXCoord;
 	}
 	//X and Z Coordinates are combined into one unique value for clustering purposes
 	//Will later be separated back into X and Z coordinates
-	uint16_t ComboCoordinate = 16 * (LocalXCoord + XOffset) + ZCoord;
+	uint16_t ComboCoordinate = 16 * (LocalXCoord + XOffset) + LocalZCoord;
 	return ComboCoordinate;
 }
 
