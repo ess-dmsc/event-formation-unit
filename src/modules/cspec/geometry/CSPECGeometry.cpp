@@ -21,23 +21,26 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8
     	return 65535;
   	}
 	
-	uint8_t Wire = (HybridID * 2 + VMMID) * 64 + Channel - 32;
-	uint8_t LocalXCoord = floor(Wire/16);
-	uint8_t LocalZCoord = Wire % 16;
+	//Wire equation defined in CSPEC ICD Document
+	uint16_t Wire = (HybridID * 2 + VMMID) * 64 + Channel - 32;
 
-	//odd FENs are second column in a vessel, 6 wires over
+	//odd FENs are second column in a vessel, 6 * 16 wires over
 	if (FENID % 2){
-		LocalXCoord = LocalXCoord + 6;
+		Wire = Wire + 6 * 16;
 	}
 
-	//When the vessel is rotated the X coordinates are reversed, Z remains the same
+	//when rotated local X coordinate is flipped around centre, ie 11-XCoord
+	//Z coord remains the same
+	//Then turning value back into wire value/combination of X and Z
 	if (Rotated){
+		uint8_t LocalXCoord = floor(Wire/16);
+		uint8_t LocalZCoord = Wire % 16;
 		LocalXCoord = 11 - LocalXCoord;
+		Wire = 16 * LocalXCoord + LocalZCoord;
 	}
-	//X and Z Coordinates are combined into one unique value for clustering purposes
-	//Will later be separated back into X and Z coordinates
-	uint16_t ComboCoordinate = 16 * (LocalXCoord + XOffset) + LocalZCoord;
-	return ComboCoordinate;
+
+	Wire += 16 * XOffset;
+	return Wire;
 }
 
 uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated, bool Short){
