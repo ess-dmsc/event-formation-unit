@@ -253,8 +253,9 @@ TEST_F(CSPECInstrumentTest, BadChannelError){
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.CoordinateErrors, 2);
+  ASSERT_EQ(counters.MappingErrors, 2);
 }
+
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());

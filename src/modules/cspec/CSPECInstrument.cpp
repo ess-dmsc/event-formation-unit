@@ -165,7 +165,7 @@ void CSPECInstrument::processReadouts(void) {
       }
       else{
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
-        counters.CoordinateErrors++;
+        counters.MappingErrors++;
       }
   //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
   //     ADCHist.bin_x(GlobalXChannel, ADC);
@@ -180,7 +180,7 @@ void CSPECInstrument::processReadouts(void) {
       }
       else{
         XTRACE(DATA, ERR, "Invalid Y Coord");
-        counters.CoordinateErrors++;
+        counters.MappingErrors++;
       }
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
       // ADCHist.bin_y(GlobalYChannel, ADC);
