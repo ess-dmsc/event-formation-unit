@@ -102,19 +102,35 @@ std::vector<uint8_t> PixelError {
 };
 
 std::vector<uint8_t> GoodEvent {
-  // First readout - plane Y - Wires
-  0x04, 0x01, 0x14, 0x00,  // Data Header - Ring 4, FEN 1
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane X - Strips
-  0x05, 0x01, 0x14, 0x00,  // Data Header, Ring 5, FEN 1
+  // Second readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
+
+std::vector<uint8_t> BadChannelError {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x05,  // GEO 0, TDC 0, VMM 1, CH 5
+
+  // Second readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x05,  // GEO 0, TDC 0, VMM 0, CH 5
 };
 
 
@@ -180,6 +196,8 @@ TEST_F(CSPECInstrumentTest, BadHybridError) {
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
   ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 1);
 
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   cspec->processReadouts();
@@ -188,6 +206,55 @@ TEST_F(CSPECInstrumentTest, BadHybridError) {
   ASSERT_EQ(counters.HybridErrors, 1);
 }
 
+TEST_F(CSPECInstrumentTest, GoodEvent){
+  makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+
+
+  // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
+  cspec->processReadouts();
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+
+
+  for (auto & builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 1);
+}
+
+TEST_F(CSPECInstrumentTest, BadChannelError){
+  makeHeader(cspec->ESSReadoutParser.Packet, BadChannelError);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+
+
+  // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
+  cspec->processReadouts();
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+
+  for (auto & builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.CoordinateErrors, 2);
+}
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());

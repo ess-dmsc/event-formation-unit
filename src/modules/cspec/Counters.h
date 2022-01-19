@@ -37,6 +37,7 @@ struct Counters {
     int64_t HybridErrors;
     int64_t TOFErrors;
     int64_t MaxADC;
+    int64_t CoordinateErrors;
 
     //
     int64_t ProcessingIdle;

@@ -18,8 +18,8 @@
 #include <assert.h>
 #include <math.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Cspec {
 
@@ -158,20 +158,30 @@ void CSPECInstrument::processReadouts(void) {
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
       uint16_t xAndzCoord = GeometryInstance->xAndzCoord(HybridId, AsicId, readout.Channel, XOffset, Rotated);
-      XTRACE(DATA, DEB, "X: Coord %u, Channel %u",
-         xAndzCoord, readout.Channel) ;
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, xAndzCoord, ADC, 0});
-
+      if (xAndzCoord != 65535){ //65535 is invalid xandzCoordinate
+        XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u",
+           xAndzCoord, readout.Channel) ;
+        builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, xAndzCoord, ADC, 0});
+      }
+      else{
+        XTRACE(DATA, ERR, "Invalid X and Z Coord");
+        counters.CoordinateErrors++;
+      }
   //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
   //     ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
       uint8_t yCoord = GeometryInstance->yCoord(HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
-      XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
-         yCoord, readout.Channel) ;
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, yCoord, ADC, 1});
-
+      if (yCoord != 255){ //255 is invalid yCoordinate
+        XTRACE(DATA, DEB, "Y: Coord %u, Channel %u",
+           yCoord, readout.Channel) ;
+        builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert({TimeNS, yCoord, ADC, 1});
+      }
+      else{
+        XTRACE(DATA, ERR, "Invalid Y Coord");
+        counters.CoordinateErrors++;
+      }
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
       // ADCHist.bin_y(GlobalYChannel, ADC);
     }
