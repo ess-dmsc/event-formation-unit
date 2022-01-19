@@ -21,6 +21,7 @@ protected:
 };
 
 TEST_F(BitMathTest, GrayCode) {
+  ASSERT_FALSE(true);
   for (auto data : graycode) {
     auto gray_code = data.input;
     auto binary = BitMath::gray2bin32(gray_code);

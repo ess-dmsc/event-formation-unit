@@ -27,6 +27,7 @@ container_build_nodes = [
   'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804-gcc8')
 ]
 
+def error_messages = []
 def failure_function(exception_obj, failureMessage) {
     def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
@@ -56,7 +57,7 @@ def failure_function(exception_obj, failureMessage) {
                     + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
             to: TOMAIL,
             subject: '${DEFAULT_SUBJECT}'
-    throw exception_obj
+    //throw exception_obj
 }
 
 pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/mnt/data:/home/jenkins/refdata")
@@ -123,7 +124,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
             } catch (e) {
-                failure_function(e, "Cppcheck step for (${container.key}) failed")
+                //failure_function(e, "Cppcheck step for (${container.key}) failed")
+                error_messages.push("Cppcheck step for (${container.key}) failed")
+                throw e
             }
         }  // stage
         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
@@ -145,7 +148,9 @@ builders = pipeline_builder.createBuilders { container ->
             } catch(e) {
                 container.copyFrom("${project}/build/test_results", '.')
                 junit 'test_results/*.xml'
-                failure_function(e, "Run tests (${container.key}) failed")
+                //failure_function(e, "Run tests (${container.key}) failed")
+                error_messages.push("Run tests (${container.key}) failed")
+                throw e
             }
 
             dir("${project}/build") {
@@ -304,7 +309,9 @@ timestamps {
                 try {
                     scm_vars = checkout scm
                 } catch (e) {
-                    failure_function(e, 'Checkout failed')
+                    //failure_function(e, 'Checkout failed')
+                    error_messages.push('Checkout failed')
+                    throw e
                 }
             }
 
@@ -320,7 +327,9 @@ timestamps {
                     sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                     sloccountPublish encoding: '', pattern: ''
                 } catch (e) {
-                    failure_function(e, 'Static analysis failed')
+                    //failure_function(e, 'Static analysis failed')
+                    error_messages.push('Static analysis failed')
+                    throw e
                 }
             }
         }
@@ -339,7 +348,7 @@ timestamps {
                 parallel builders
             }
         } catch (e) {
-            failure_function(e, 'Job failed')
+            failure_function(e, error_messages.join("\n"))
             throw e
         } finally {
             // Delete workspace when build is done
