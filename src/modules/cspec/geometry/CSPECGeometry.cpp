@@ -33,12 +33,15 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t HybridID, uint8_t VMMID, uint8
 		}
 		else{
 			XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
-			// return std::pair<uint8_t, uint8_t>(InvalidCoord, InvalidCoord);
     		return 65535;
     	}
 	}
-	else if (VMMID == 1){ //Wires in X=2,3,4 and 5 are represented by VMM1
+	else if (VMMID == 1 and Channel < 64){ //Wires in X=2,3,4 and 5 are represented by VMM1
 		LocalXCoord = floor(Channel/16) + 2;
+	}
+	else{
+		XTRACE(DATA, WAR, "Invalid VMM ID and Channel combination for calculating X and Z coordinates");
+    		return 65535;
 	}
 	//Vessels are 16 wires deep, and channels count up in Z direction, with %16=0 at the front of the vessel
 	ZCoord = Channel % 16;
@@ -62,7 +65,7 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 				// channels 58-63 represent grids 0-5
 				YCoord = Channel - 58;
 			}
-			else if (VMMID == 1 and Channel >= 0 and Channel < 64){
+			else if (VMMID == 1 and Channel < 64){
 				// channels 0-63 represent grids 6-69
 				YCoord = 6 + Channel;
 			}
@@ -72,12 +75,12 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 			}
 		}
 		else if (HybridID == 2){
-			if (VMMID == 0 and Channel >= 0 and Channel < 64){
+			if (VMMID == 0 and Channel < 64){
 				//70 grids represented by hybrid 1
 				//channels 0-63 represent grids 70-133
 				YCoord = 70 + Channel;
 			}
-			else if (VMMID == 1 and Channel >= 0 and Channel < 6){
+			else if (VMMID == 1 and Channel < 6){
 				//70 grids represented by hybrid 1, and 64 by hybrid 2, vmm 0
 				//channels 0-5 represent grids 134-139
 				YCoord = 134 + Channel;
@@ -93,7 +96,7 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 		}
 	}
 	else{ // channel mapping for short vessel
-		if (HybridID == 1 and VMMID == 0 and Channel >= 0 and Channel < 51){
+		if (HybridID == 1 and VMMID == 0 and Channel < 51){
 			YCoord = Channel;
 		}
 		else{
