@@ -15,8 +15,8 @@
 
 
 uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated){
-	if (isGrid(HybridID)){
-		XTRACE(DATA, WAR, "Invalid Hybrid ID for calculating X and Z coordinates");
+	if (!validWireMapping(HybridID, VMMID, Channel)){
+		XTRACE(DATA, WAR, "Invalid Hybrid: %u, VMM: %u, and Channel: %u, combination for wire mapping", HybridID, VMMID, Channel);
     	// return std::pair<uint8_t, uint8_t>(Cspec::CSPECGeometry::InvalidCoord, Cspec::CSPECGeometry::InvalidCoord);
     	return 65535;
   	}
@@ -103,3 +103,18 @@ bool Cspec::CSPECGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID, uin
 
 }
 
+//The valid combinations of these parameters are defined in CSPEC ICD document
+bool Cspec::CSPECGeometry::validWireMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel){
+	if(HybridID != 0){
+		return false;
+	}
+	if(VMMID == 0){ //only channels 32-63 used on VMM0
+		return Channel >=32 and Channel <= 63;
+	}
+	else if (VMMID == 1){ //channels only go up to 63
+		return Channel <= 63;
+	}
+	else{
+		return false;
+	}
+}
