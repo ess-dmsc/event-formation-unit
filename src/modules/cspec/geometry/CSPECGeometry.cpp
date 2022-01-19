@@ -45,18 +45,17 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8
 
 uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated, bool Short){
 	uint8_t YCoord;
+	if (!validGridMapping(HybridID, VMMID, Channel, Short)){
+		XTRACE(DATA, ERR, "Invalid combination of HybridID: %u, VMMID: %u, Channel: %u, Short: %d");
+		return 255;
+	}
+
 	//Channel mappings for Y coordinates/grids are detailed in ICD document
 	if (!Short){ // channel mapping for full length vessel
 		YCoord = (HybridID * 2 + VMMID - 2) * 64 + Channel - 58;
 	}
 	else{ // channel mapping for short vessel
-		if (HybridID == 1 and VMMID == 0 and Channel < 51){
-			YCoord = Channel;
-		}
-		else{
-			XTRACE(DATA, ERR, "Invalid Hybrid, VMM, or Channel for rotated CSPEC vessel, HybridID %u, VMM %u, Channe; %u", HybridID, VMMID, Channel);
-			return 255;
-		}
+		YCoord = Channel;
 	}
 
 	//when rotated grid order is reversed, and YOffset should be used to place vessel correctly
@@ -66,5 +65,41 @@ uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Ch
 
 	YCoord += YOffset;
 	return YCoord;
+}
+
+
+//The valid combinations of these parameters are defined in CSPEC ICD document
+bool Cspec::CSPECGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, bool Short){
+	if (Short){
+		return(HybridID == 1 and VMMID == 0 and Channel <= 50);
+	}
+	else{
+		if (HybridID == 1){
+			if (VMMID == 0){
+				return(Channel >= 58 and Channel <= 63);
+			}
+			else if (VMMID == 1){
+				return Channel <= 63;
+			}
+			else{ //hybrid 1 has 2 VMMs only, VMM0 and VMM1
+				return false;
+			}
+		}
+		else if (HybridID == 2){
+			if (VMMID == 0){
+				return Channel <= 63;
+			}
+			else if (VMMID == 1){
+				return Channel <=5;
+			}
+			else{ //hybrid 2 has 2 VMMs only, VMM0 and VMM1
+				return false;
+			}
+		}
+		else{ 	//hybrid id for grids must be 1 or 2
+			return false;
+		}
+	}
+
 }
 
