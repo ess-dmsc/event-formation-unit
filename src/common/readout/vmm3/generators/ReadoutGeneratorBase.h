@@ -20,7 +20,7 @@ typedef struct GeneratorSettings{
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t NumReadouts{400};   // # readouts in packet
+  uint32_t NumReadouts{400};   // # readouts in packet
   uint32_t TicksBtwReadouts{88}; // 88 ticks ~ 1us
   uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
   uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
@@ -56,12 +56,12 @@ protected:
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
   /// \param NumReadouts number of VMM readouts in the UDP packet
-  void generateHeader(uint8_t Type, uint16_t NumReadouts);
+  void generateHeader();
 
   /// \brief Fill out specified buffer with VMM3 readouts
   /// \param Rings number if rings in use
   /// \param NumReadouts number of VMM readouts in the UDP packet
-  virtual void generateData(uint16_t NumReadouts) = 0;
+  virtual void generateData() = 0;
 
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();

@@ -25,7 +25,7 @@
 //   , SeqNum(InitialSeqNum)
 //   , Random(Randomise) { }
 
-void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+void Freia::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -34,7 +34,7 @@ void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   double YChannel = 32;
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (auto Readout = 0; Readout < NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->RingId = (Readout / 10) % Settings.NRings;
     //printf("RingId: %u\n", ReadoutData->RingId);

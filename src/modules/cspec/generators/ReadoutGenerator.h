@@ -19,7 +19,7 @@ class ReadoutGenerator : public ReadoutGeneratorBase{
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 protected:
-  void generateData(uint16_t NumReadouts) override;
+  void generateData() override;
      const uint32_t TimeToFirstReadout{1000};
 
 };} // namespace Cspec

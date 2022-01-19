@@ -19,7 +19,7 @@
 
 
 
-void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+void Cspec::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -30,7 +30,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
 
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (auto Readout = 0; Readout < NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);

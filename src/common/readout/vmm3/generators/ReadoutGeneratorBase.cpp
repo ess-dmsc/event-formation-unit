@@ -30,16 +30,16 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPaylo
 
 
 uint16_t ReadoutGeneratorBase::makePacket() {
-  generateHeader(Settings.Type, Settings.NumReadouts);
-  generateData(Settings.NumReadouts);
+  generateHeader();
+  generateData();
   finishPacket();
   return DataSize;
 }
 
 
-void ReadoutGeneratorBase::generateHeader(uint8_t Type, uint16_t NumReadouts) {
+void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + NumReadouts * VMM3DataSize;
+  DataSize = HeaderSize + Settings.NumReadouts * VMM3DataSize;
   if (DataSize >= BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
@@ -49,7 +49,7 @@ void ReadoutGeneratorBase::generateHeader(uint8_t Type, uint16_t NumReadouts) {
   memset(Buffer, 0, BufferSize);
   auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
 
-  Header->CookieAndType = (Type << 24) + 0x535345;
+  Header->CookieAndType = (Settings.Type << 24) + 0x535345;
   Header->Padding0 = 0;
   Header->Version = 0;
   // Header->OutputQueue = 0x00;
