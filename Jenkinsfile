@@ -42,11 +42,19 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
-    EXTRATEXT="not found in mail map"
-    TOMAIL='morten.christensen@ess.eu, jennifer.walker@ess.eu'
-    if (emailmap.containsKey(COMMITEMAIL)) {
-       EXTRATEXT="found in mail map"
-       TOMAIL= TOMAIL + ', ' + emailmap.get(COMMITEMAIL)
+    EXTRATEXT="uninitialized"
+    TOMAIL='no email'
+    if (!COMMITEMAIL.contains("ess.eu")) {
+      if (emailmap.containsKey(COMMITEMAIL)) {
+         EXTRATEXT="non ess.eu - found in mail map"
+         TOMAIL= emailmap.get(COMMITEMAIL)
+      } else {
+         EXTRATEXT="non ess.eu - not found in mail map"
+         TOMAIL='morten.christensen@ess.eu'
+      }
+    } else {
+      EXTRATEXT="ess.eu - no lookup"
+      TOMAIL=COMMITEMAIL
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
