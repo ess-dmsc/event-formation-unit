@@ -30,6 +30,7 @@ container_build_nodes = [
 def error_messages = []
 def failure_function(exception_obj, failureMessage) {
     def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
+                     "jenny.walker@live.co.uk":"jennifer.walker@ess.eu", \
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
     COMMITEMAIL = sh (
