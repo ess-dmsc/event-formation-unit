@@ -37,9 +37,9 @@
     "29": {"NumGrids":  51, "Rotation": true,  "XOffset": 324, "Short": true, "YOffset": 51},
     "30": {"NumGrids":  51, "Rotation": false, "XOffset": 324, "Short": true, "YOffset": 89},
     "31": {"NumGrids": 140, "Rotation": false, "XOffset": 336},
-    "32": {"NumGrids": 140, "Rotation": false, "XOffset": 336},
-    "33": {"NumGrids": 140, "Rotation": false, "XOffset": 336},
-    "34": {"NumGrids": 140, "Rotation": false, "XOffset": 336}
+    "32": {"NumGrids": 140, "Rotation": false, "XOffset": 348},
+    "33": {"NumGrids": 140, "Rotation": false, "XOffset": 360},
+    "34": {"NumGrids": 140, "Rotation": false, "XOffset": 372}
     },
 
   "Config" : [

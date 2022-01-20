@@ -148,6 +148,8 @@ void CSPECInstrument::processReadouts(void) {
 
     // If the corrected ADC reaches maximum value we count the occurance but
     // use the new value anyway
+    // Only possible if calibration takes it over the max value
+    // Original value has already been checked against max value
     if (ADC >= 1023) {
       counters.MaxADC++;
     }

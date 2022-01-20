@@ -117,7 +117,7 @@ std::vector<uint8_t> GoodEvent {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
-std::vector<uint8_t> BadChannelError {
+std::vector<uint8_t> BadMappingError {
   // First readout - plane Y - Grids
   0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
@@ -132,6 +132,39 @@ std::vector<uint8_t> BadChannelError {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x05,  // GEO 0, TDC 0, VMM 0, CH 5
 };
+
+std::vector<uint8_t> MaxADC {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+  // Second readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0xD0, 0x07,  // ADC = 2000
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
+
+std::vector<uint8_t> NoEvent {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x03, 0x37,  // GEO 0, TDC 0, VMM 1, CH 55
+};
+
 
 
 class CSPECInstrumentTest : public TestBase {
@@ -231,16 +264,14 @@ TEST_F(CSPECInstrumentTest, GoodEvent){
   ASSERT_EQ(counters.Events, 1);
 }
 
-TEST_F(CSPECInstrumentTest, BadChannelError){
-  makeHeader(cspec->ESSReadoutParser.Packet, BadChannelError);
+TEST_F(CSPECInstrumentTest, BadMappingError){
+  makeHeader(cspec->ESSReadoutParser.Packet, BadMappingError);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
   ASSERT_EQ(counters.HybridErrors, 0);
 
-
-  // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   cspec->processReadouts();
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
@@ -256,6 +287,36 @@ TEST_F(CSPECInstrumentTest, BadChannelError){
   ASSERT_EQ(counters.MappingErrors, 2);
 }
 
+TEST_F(CSPECInstrumentTest, MaxADC){
+  makeHeader(cspec->ESSReadoutParser.Packet, MaxADC);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1);
+  ASSERT_EQ(Res, 1);
+}
+
+TEST_F(CSPECInstrumentTest, NoEvent){
+  makeHeader(cspec->ESSReadoutParser.Packet, NoEvent);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+
+  cspec->processReadouts();
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+
+  for (auto & builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.EventsNoCoincidence, 1);
+}
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());

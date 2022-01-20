@@ -46,7 +46,7 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8
 uint8_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated, bool Short){
 	uint8_t YCoord;
 	if (!validGridMapping(HybridID, VMMID, Channel, Short)){
-		XTRACE(DATA, ERR, "Invalid combination of HybridID: %u, VMMID: %u, Channel: %u, Short: %d");
+		XTRACE(DATA, ERR, "Invalid combination of HybridID: %u, VMMID: %u, Channel: %u, Short: %d", HybridID, VMMID, Channel, Short);
 		return 255;
 	}
 
