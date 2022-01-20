@@ -15,7 +15,7 @@
 #include <stdio.h>
 // GCOVR_EXCL_START
 
-GeneratorSettings Settings;
+ReadoutGeneratorBase::GeneratorSettings Settings;
 
 CLI::App app{"UDP data generator for ESS VMM3 readout"};
 

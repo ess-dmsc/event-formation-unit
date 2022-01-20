@@ -20,13 +20,12 @@
 
 
 ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
-  uint32_t InitialSeqNum, GeneratorSettings Settings)
-  : Buffer(BufferPtr)
+  uint32_t InitialSeqNum, GeneratorSettings& Settings)
+  : Settings(Settings)
+  , Buffer(BufferPtr)
   , BufferSize(MaxPayloadSize)
   , SeqNum(InitialSeqNum)
-  { 
-    setSettings(Settings);
-  }
+  {}
 
 
 uint16_t ReadoutGeneratorBase::makePacket() {
@@ -73,9 +72,6 @@ void ReadoutGeneratorBase::finishPacket() {
   }
 }
 
-void ReadoutGeneratorBase::setSettings(GeneratorSettings NewSettings){
-  Settings = NewSettings;
-}
 
 
 // GCOVR_EXCL_STOP
