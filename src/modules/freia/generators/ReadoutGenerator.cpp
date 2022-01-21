@@ -26,8 +26,6 @@ void Freia::ReadoutGenerator::generateData() {
   double XChannel = 32;
   double YChannel = 32;
 
-  uint8_t UsedRings{22}; /// \todo should be configurable
-
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
