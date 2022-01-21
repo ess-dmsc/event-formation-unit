@@ -7,7 +7,6 @@ include_directories(.)
 
 add_subdirectory(gdgem)
 add_subdirectory(freia)
-add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(dream)

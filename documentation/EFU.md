@@ -23,8 +23,7 @@ The behaviour of the processing threads is completely determined by the author o
 Four examples of already implemented detector interfaces, somewhat alike but also differing are found here
 
 [Gd-GEM](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/gdgem/gdgem.cpp) <br>
-[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/multigrid/mgmesytec.cpp) <br>
-[Multi-Blade](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/multiblade/mbcaen.cpp) <br>
+[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/multigrid/mgmesytec.cpp)  <br>
 [SoNDe](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/sonde/sonde.cpp)
 
 
