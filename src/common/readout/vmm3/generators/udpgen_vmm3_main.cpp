@@ -15,25 +15,7 @@
 #include <stdio.h>
 // GCOVR_EXCL_START
 
-struct {
-  /// readout specific
-  uint16_t NRings{2};
-  uint8_t Type{72};            // Freia (see readout ICD for other instruments)
-  /// udp generator generic
-  std::string IpAddress{"127.0.0.1"};
-  uint16_t UDPPort{9000};
-  uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t NumReadouts{400};   // # readouts in packet
-  uint32_t TicksBtwReadouts{88}; // 88 ticks ~ 1us
-  uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
-  uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
-  uint64_t PktThrottle{0};     // 0 is fastest
-  bool Loop{false};            // Keep looping the same file forever
-
-  bool Randomise{false};       // Randomise header and data
-  // Not yet CLI settings
-  uint32_t KernelTxBufferSize{1000000};
-} Settings;
+ReadoutGeneratorBase::GeneratorSettings Settings;
 
 CLI::App app{"UDP data generator for ESS VMM3 readout"};
 
@@ -75,16 +57,22 @@ int main(int argc, char *argv[]) {
   uint32_t SeqNum{0};
 
   #ifdef FREIA_GENERATOR
-    Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+    Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   #endif
 
   #ifdef CSPEC_GENERATOR
-    Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings.Randomise);
+    Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
   #endif
 
+   #ifdef LET_GENERATOR
+    Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
+  #endif
+
+
   do {
-    uint16_t DataSize = gen.makePacket(Settings.Type, Settings.NumReadouts,
-       Settings.TicksBtwReadouts, Settings.TicksBtwEvents);
+    uint16_t DataSize = gen.makePacket();
 
     DataSource.send(Buffer, DataSize);
 

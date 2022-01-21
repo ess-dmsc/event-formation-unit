@@ -18,7 +18,7 @@
 #include <stdexcept>
 
 
-void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+void Freia::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -29,10 +29,9 @@ void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   uint8_t UsedRings{22}; /// \todo should be configurable
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (auto Readout = 0; Readout < NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
-    ReadoutData->RingId = (Readout / 10) % UsedRings;
-
+    ReadoutData->RingId = (Readout / 10) % Settings.NRings;
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
@@ -55,9 +54,9 @@ void Freia::ReadoutGenerator::generateData(uint16_t NumReadouts) {
     }
     DP += VMM3DataSize;
     if ((Readout % 2) == 0) {
-      TimeLow += TimeBtwReadout;
+      TimeLow += Settings.TicksBtwReadouts;
     } else {
-      TimeLow += TimeBtwEvents;
+      TimeLow += Settings.TicksBtwEvents;
     }
   }
 }
