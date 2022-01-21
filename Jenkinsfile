@@ -264,7 +264,6 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
-                    sh "/usr/bin/false"
                 } catch (e) {
                     error_messages.push('Checkout failed')
                     throw e
@@ -294,6 +293,7 @@ timestamps {
 
         try {
             timeout(time: 2, unit: 'HOURS') {
+                sh "/usr/bin/false"
                 // run all builders in parallel
                 parallel builders
             }
