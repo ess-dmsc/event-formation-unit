@@ -298,6 +298,7 @@ timestamps {
                 parallel builders
             }
         } catch (e) {
+            error_messages.push('Checkout failed')
             dir("${project}_code") {
               failure_function(e, error_messages.join("\n"))
             }
