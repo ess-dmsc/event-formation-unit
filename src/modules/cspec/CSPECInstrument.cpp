@@ -40,6 +40,9 @@ CSPECInstrument::CSPECInstrument(struct Counters & counters,
 
   loadConfigAndCalib();
 
+
+  essgeom = ESSGeometry(Conf.Parms.SizeX, Conf.Parms.SizeY, Conf.Parms.SizeZ, 1);
+
   // We can now use the settings in Conf.Parms
   if (Conf.Parms.InstrumentGeometry == "CSPEC"){
     GeometryInstance = &CSPECGeometryInstance;
