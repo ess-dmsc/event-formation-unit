@@ -57,6 +57,27 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
   try {
+    Parms.SizeX = root["SizeX"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for Size X");
+  }
+  LOG(INIT, Sev::Info, "Size X {}", Parms.SizeX);
+
+  try {
+    Parms.SizeY = root["SizeY"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for Size Y");
+  }
+  LOG(INIT, Sev::Info, "Size Y {}", Parms.SizeY);
+
+  try {
+    Parms.SizeZ = root["SizeZ"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for Size Z");
+  }
+  LOG(INIT, Sev::Info, "Size Z {}", Parms.SizeZ);
+
+  try {
     auto PanelConfig = root["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();

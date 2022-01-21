@@ -57,6 +57,10 @@ public:
     uint32_t MaxTOFNS{1'000'000'000};
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
     uint32_t TimeBoxNs{0xffffffff};
+    uint16_t SizeX = 384;
+    uint16_t SizeY = 140;
+    uint16_t SizeZ = 16;
+
   } Parms;
 
   uint32_t NumPixels{0};
@@ -73,5 +77,6 @@ public:
   bool Short[MaxRing+1][MaxFEN+1][MaxHybrid+1];
   uint16_t XOffset[MaxRing+1][MaxFEN+1][MaxHybrid+1];
   uint16_t YOffset[MaxRing+1][MaxFEN+1][MaxHybrid+1];
+
 
 };} // namespace Cspec

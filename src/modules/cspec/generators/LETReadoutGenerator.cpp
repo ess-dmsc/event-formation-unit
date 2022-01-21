@@ -16,8 +16,11 @@
 #include <time.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <stdexcept>
+#include <common/debug/Trace.h>
 
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
@@ -52,9 +55,8 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     //as for LET MaxX = 11 and MaxY = 50
     YLocal = 4 * abs(XGlobal-2);
 
-    //Readout generated for LET test, with Ring 5 and FENId 0 or 1
+    //Readout generated for LET test, with Ring 0
     ReadoutData->RingId = 0;
-    ReadoutData->FENId = 0 + (Readout % 2);
 
     // Each column is 6 wires wide
     // Select the FEN based on whether XGlobal is in column 0 or column 1
@@ -85,28 +87,15 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     // Mappings of Y coordinates to channels and VMMs is complicated
     // Details are in ICD, with useful figure
     else {
-      if (YLocal < 6){
-        VMM = 5;
-        Channel = 5 - YLocal;
-      }
-      else if (YLocal < 70){
-        VMM = 4;
-        Channel = 69 - YLocal;
-      }
-      else if (YLocal < 134){
-        VMM = 3;
-        Channel = 133 - YLocal;
-      }
-      else{
         VMM = 2;
-        Channel = 139 - YLocal;
-      }
+        Channel = 50-YLocal;
     }
 
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
 
     DP += VMM3DataSize;
+    XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal, XLocal, YLocal);
 
     /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
     if ((Readout % 2) == 0) {
