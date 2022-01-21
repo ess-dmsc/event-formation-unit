@@ -146,7 +146,7 @@ TEST_F(CSPECBaseTest, DataReceiveBadHeader) {
 }
 
 int main(int argc, char **argv) {
-  std::string filename{"Cspec.json"};
+  std::string filename{"cspec.json"};
   saveBuffer(filename, (void *)cspecjson.c_str(), cspecjson.size());
 
   testing::InitGoogleTest(&argc, argv);
