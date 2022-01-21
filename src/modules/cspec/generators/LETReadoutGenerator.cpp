@@ -19,8 +19,8 @@
 #include <common/debug/Trace.h>
 
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
   auto DP = (uint8_t *)Buffer;
