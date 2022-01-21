@@ -74,7 +74,7 @@ void PerfGenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer FlatBuffer(kafka_buffer_size, "multiblade", Produce);
+  EV42Serializer FlatBuffer(kafka_buffer_size, "perfgen", Produce);
 
   ESSGeometry ESSGeom(64, 64, 1, 1);
 

@@ -84,23 +84,21 @@ To run a memory leak test (using Valgrind), run:
 make valgrind
 ```
 
-### [Running System tests (link)](system-tests/README.md)
-
 ## Running the event formation application
 
-An example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
+An example of the commands required to run an event formation pipeline (in this case the *freia* pipeline) follows:
 
 ```
-make efu mbcaen
+make efu freia
 cd bin
-./efu -d ../modules/mbcaen --nohwcheck
+./efu -d ../modules/freia --nohwcheck
 ```
 
-Note you will need to provide a config file in the case of the *mbcaen* module as well.
+Note you will need to provide a config file in the case of the *freia* module as well.
 
 To get the available command line arguments, use `-h` or `--help`. This works when providing a detector module argument as well. For example:
 ```
-./efu -d ../modules/mbcaen -h
+./efu -d ../modules/freia -h
 ```
 
 ## Contributing
