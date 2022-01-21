@@ -264,6 +264,7 @@ timestamps {
             stage('Checkout') {
                 try {
                     scm_vars = checkout scm
+                    sh "/usr/bin/false"
                 } catch (e) {
                     error_messages.push('Checkout failed')
                     throw e
