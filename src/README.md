@@ -22,7 +22,7 @@ Contains detector pipeline plugins for a number of prototype detectors and monit
 ### Prototypes
 * dream - DREAM instrument (simulation)
 * gdgem - NMX instrument (srs)
-* multiblade - Freia and Estia instruments (caen)
+* freia - Freia, Estia and AMOR instruments
 * multigrid - CSPEC instrument (mesytec)
 * sonde - SKADI prototype (ideas)
 
