@@ -27,8 +27,10 @@ container_build_nodes = [
   'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804-gcc8')
 ]
 
+def error_messages = []
 def failure_function(exception_obj, failureMessage) {
     def emailmap = [ "mortenjc@jcaps.com":"morten.christensen@ess.eu", \
+                     "jenny.walker@live.co.uk":"jennifer.walker@ess.eu", \
                      "28659574+amues@users.noreply.github.com": "afonso.mukai@ess.eu"]
 
     COMMITEMAIL = sh (
@@ -41,11 +43,19 @@ def failure_function(exception_obj, failureMessage) {
         returnStdout: true
     ).trim()
 
-    EXTRATEXT="not found in mail map"
-    TOMAIL='morten.christensen@ess.eu, jennifer.walker@ess.eu'
-    if (emailmap.containsKey(COMMITEMAIL)) {
-       EXTRATEXT="found in mail map"
-       TOMAIL= TOMAIL + ', ' + emailmap.get(COMMITEMAIL)
+    EXTRATEXT="uninitialized"
+    TOMAIL='no email'
+    if (!COMMITEMAIL.contains("ess.eu")) {
+      if (emailmap.containsKey(COMMITEMAIL)) {
+         EXTRATEXT="non ess.eu - found in mail map"
+         TOMAIL= emailmap.get(COMMITEMAIL)
+      } else {
+         EXTRATEXT="non ess.eu - not found in mail map"
+         TOMAIL='morten.christensen@ess.eu'
+      }
+    } else {
+      EXTRATEXT="ess.eu - no lookup"
+      TOMAIL=COMMITEMAIL
     }
 
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
@@ -56,7 +66,6 @@ def failure_function(exception_obj, failureMessage) {
                     + '\n' + EXTRATEXT + '\n mapped to: ' + TOMAIL,
             to: TOMAIL,
             subject: '${DEFAULT_SUBJECT}'
-    throw exception_obj
 }
 
 pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/mnt/data:/home/jenkins/refdata")
@@ -123,7 +132,8 @@ builders = pipeline_builder.createBuilders { container ->
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
             } catch (e) {
-                failure_function(e, "Cppcheck step for (${container.key}) failed")
+                error_messages.push("Cppcheck step for (${container.key}) failed")
+                throw e
             }
         }  // stage
         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
@@ -145,7 +155,8 @@ builders = pipeline_builder.createBuilders { container ->
             } catch(e) {
                 container.copyFrom("${project}/build/test_results", '.')
                 junit 'test_results/*.xml'
-                failure_function(e, "Run tests (${container.key}) failed")
+                error_messages.push("Run tests (${container.key}) failed")
+                throw e
             }
 
             dir("${project}/build") {
@@ -164,19 +175,6 @@ builders = pipeline_builder.createBuilders { container ->
                         sourceEncoding: 'ASCII',
                         zoomCoverageChart: true
                     ])
-                    // step([$class: 'ValgrindPublisher',
-                    //      pattern: 'memcheck_res/*.valgrind',
-                    //      failBuildOnMissingReports: true,
-                    //      failBuildOnInvalidReports: true,
-                    //      publishResultsForAbortedBuilds: false,
-                    //      publishResultsForFailedBuilds: false,
-                    //      failThresholdInvalidReadWrite: '',
-                    //      unstableThresholdInvalidReadWrite: '',
-                    //      failThresholdDefinitelyLost: '',
-                    //      unstableThresholdDefinitelyLost: '',
-                    //      failThresholdTotal: '',
-                    //      unstableThresholdTotal: '99'
-                    //])
             }
         }  // stage
     } else if (container.key != clangformat_os) {
@@ -256,6 +254,7 @@ def get_macos_pipeline()
 }
 
 // Script actions start here
+//
 timestamps {
     node('docker') {
         dir("${project}_code") {
@@ -264,7 +263,8 @@ timestamps {
                 try {
                     scm_vars = checkout scm
                 } catch (e) {
-                    failure_function(e, 'Checkout failed')
+                    error_messages.push('Checkout failed')
+                    throw e
                 }
             }
 
@@ -280,7 +280,8 @@ timestamps {
                     sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                     sloccountPublish encoding: '', pattern: ''
                 } catch (e) {
-                    failure_function(e, 'Static analysis failed')
+                    error_messages.push('Static analysis failed')
+                    throw e
                 }
             }
         }
@@ -288,18 +289,15 @@ timestamps {
         // Add macOS pipeline to builders
         builders['macOS'] = get_macos_pipeline()
 
-        // Only add system test pipeline if this is a Pull Request
-        // if ( env.CHANGE_ID ) {
-        //     builders['system tests'] = get_system_tests_pipeline()
-        // }
-
         try {
             timeout(time: 2, unit: 'HOURS') {
                 // run all builders in parallel
                 parallel builders
             }
         } catch (e) {
-            failure_function(e, 'Job failed')
+            dir("${project}_code") {
+              failure_function(e, error_messages.join("\n"))
+            }
             throw e
         } finally {
             // Delete workspace when build is done
@@ -307,3 +305,4 @@ timestamps {
         }
     }
 }
+

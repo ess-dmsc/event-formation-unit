@@ -22,38 +22,38 @@ std::string ConfigStr = R"(
     "WireChOffset" : 16,
 
     "Config" : [
-      { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-      { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-      { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-      { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
-      { "Ring" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
-      { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"},
-      { "Ring" :  1, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000006"},
-      { "Ring" :  1, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
-      { "Ring" :  2, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000008"},
-      { "Ring" :  2, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000009"},
-      { "Ring" :  2, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000010"},
-      { "Ring" :  2, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000011"},
-      { "Ring" :  3, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000012"},
-      { "Ring" :  3, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000013"},
-      { "Ring" :  4, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000014"},
-      { "Ring" :  4, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000015"},
-      { "Ring" :  5, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000016"},
-      { "Ring" :  5, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000017"},
-      { "Ring" :  6, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000018"},
-      { "Ring" :  6, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000019"},
-      { "Ring" :  7, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000020"},
-      { "Ring" :  7, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000021"},
-      { "Ring" :  8, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000022"},
-      { "Ring" :  8, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000023"},
-      { "Ring" :  9, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000024"},
-      { "Ring" :  9, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000025"},
-      { "Ring" :  9, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000026"},
-      { "Ring" :  9, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000027"},
-      { "Ring" : 10, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000028"},
-      { "Ring" : 10, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000029"},
-      { "Ring" : 10, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000030"},
-      { "Ring" : 10, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000031"}
+      { "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+      { "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+      { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+      { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
+      { "Ring" :  1, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+      { "Ring" :  1, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"},
+      { "Ring" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000006"},
+      { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
+      { "Ring" :  2, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000008"},
+      { "Ring" :  2, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000009"},
+      { "Ring" :  2, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000010"},
+      { "Ring" :  2, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000011"},
+      { "Ring" :  3, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000012"},
+      { "Ring" :  3, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000013"},
+      { "Ring" :  4, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000014"},
+      { "Ring" :  4, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000015"},
+      { "Ring" :  5, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000016"},
+      { "Ring" :  5, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000017"},
+      { "Ring" :  6, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000018"},
+      { "Ring" :  6, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000019"},
+      { "Ring" :  7, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000020"},
+      { "Ring" :  7, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000021"},
+      { "Ring" :  8, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000022"},
+      { "Ring" :  8, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000023"},
+      { "Ring" :  9, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000024"},
+      { "Ring" :  9, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000025"},
+      { "Ring" :  9, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000026"},
+      { "Ring" :  9, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000027"},
+      { "Ring" : 10, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000028"},
+      { "Ring" : 10, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000029"},
+      { "Ring" : 10, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000030"},
+      { "Ring" : 10, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000031"}
     ],
 
     "MaxPulseTimeNS" : 71428570,
@@ -74,7 +74,7 @@ std::vector<uint8_t> MappingError {
   0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
 
   // Second readout
-  0x02, 0x03, 0x14, 0x00,  // Data Header
+  0x02, 0x02, 0x14, 0x00,  // Data Header - ring 2 has 2 fens (0 and 1) so 2 is an error
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
@@ -240,8 +240,8 @@ protected:
 
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.RingCfgErrors, 0);
+  ASSERT_EQ(counters.FENCfgErrors, 0);
 }
 
 
@@ -264,12 +264,12 @@ TEST_F(FreiaInstrumentTest, TwoReadouts) {
   makeHeader(freia->ESSReadoutParser.Packet, MappingError);
   auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.RingCfgErrors, 0);
+  ASSERT_EQ(counters.FENCfgErrors, 0);
 
   freia->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 1);
-  ASSERT_EQ(counters.FENErrors, 1);
+  ASSERT_EQ(counters.RingCfgErrors, 1);
+  ASSERT_EQ(counters.FENCfgErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
@@ -373,8 +373,8 @@ TEST_F(FreiaInstrumentTest, BeamMonitor) {
   freia->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorCounts, 1);
   ASSERT_EQ(counters.MonitorErrors, 6);
-  ASSERT_EQ(counters.RingErrors, 1);
-  ASSERT_EQ(counters.FENErrors, 1);
+  ASSERT_EQ(counters.RingCfgErrors, 1);
+  ASSERT_EQ(counters.FENCfgErrors, 1);
   ASSERT_EQ(counters.TOFErrors, 1);
 }
 

@@ -18,13 +18,6 @@
 #include <stdexcept>
 
 
-// Freia::ReadoutGenerator::ReadoutGenerator(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
-//   uint32_t InitialSeqNum, bool Randomise)
-//   : Buffer(BufferPtr)
-//   , BufferSize(MaxPayloadSize)
-//   , SeqNum(InitialSeqNum)
-//   , Random(Randomise) { }
-
 void Freia::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
@@ -37,7 +30,6 @@ void Freia::ReadoutGenerator::generateData() {
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->RingId = (Readout / 10) % Settings.NRings;
-    //printf("RingId: %u\n", ReadoutData->RingId);
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);

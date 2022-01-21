@@ -115,7 +115,7 @@ void FreiaInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+    XTRACE(DATA, INF, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
     //counters.RingRx[readout.RingId]++;
@@ -126,20 +126,22 @@ void FreiaInstrument::processReadouts(void) {
     if (Conf.NumFENs[Ring] == 0) {
       XTRACE(DATA, WAR, "No FENs on RingId %d (physical %d)",
              Ring, readout.RingId);
-      counters.RingErrors++;
+      counters.RingCfgErrors++;
       continue;
     }
 
-    if (readout.FENId > Conf.NumFENs[Ring]) {
+    uint8_t MaxFENIdOnRing = Conf.NumFENs[Ring] - 1;
+    if (readout.FENId > MaxFENIdOnRing) {
       XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
-             readout.FENId, Conf.NumFENs[Ring]);
-      counters.FENErrors++;
+             readout.FENId, MaxFENIdOnRing);
+      counters.FENCfgErrors++;
       continue;
     }
 
     uint8_t Asic = readout.VMM & 0x1;
-    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId, readout.VMM >> 1);
-    uint8_t Cassette = Hybrid;
+    uint8_t LocalHybrid = readout.VMM >> 1;
+    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId, LocalHybrid);
+    uint8_t Cassette = (uint8_t)Hybrid;
     VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -292,14 +294,14 @@ void FreiaInstrument::processMonitorReadouts(void) {
     if (readout.RingId/2 != 11) {
       XTRACE(DATA, WAR, "Invalid ring %u for monitor readout",
              readout.RingId);
-      counters.RingErrors++;
+      counters.RingCfgErrors++;
       continue;
     }
 
     if (readout.FENId != 0) {
       XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout",
              readout.FENId);
-      counters.FENErrors++;
+      counters.FENCfgErrors++;
       continue;
     }
 
