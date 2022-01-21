@@ -293,12 +293,10 @@ timestamps {
 
         try {
             timeout(time: 2, unit: 'HOURS') {
-                sh "/usr/bin/false"
                 // run all builders in parallel
                 parallel builders
             }
         } catch (e) {
-            error_messages.push('Checkout failed')
             dir("${project}_code") {
               failure_function(e, error_messages.join("\n"))
             }
