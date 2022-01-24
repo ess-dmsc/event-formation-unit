@@ -57,6 +57,13 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
   try {
+    Parms.DefaultMaxADC = root["DefaultMaxADC"].get<std::uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for DefaultMaxADC");
+  }
+  LOG(INIT, Sev::Info, "DefaultMaxADC {}", Parms.DefaultMaxADC);
+
+  try {
     Parms.SizeX = root["SizeX"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size X");
@@ -104,19 +111,27 @@ void Config::apply() {
       Rotated[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Rotation"];
       XOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["XOffset"];
 
-      if (root["Vessel_Config"][VesselID].contains("Short")){
+      try{
         Short[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Short"];
       }
-      else{
+      catch (...){
         Short[Ring][FEN][LocalHybrid] = false;
       }
       
 
-      if (root["Vessel_Config"][VesselID].contains("YOffset")){
+      try{
         YOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["YOffset"];
       }
-      else {
+      catch(...) {
         YOffset[Ring][FEN][LocalHybrid] = 0;
+      }
+
+      try{
+        MaxADC[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["MaxADC"];
+        XTRACE(INIT, DEB, "Vessel specific MaxADC %u assigned to vessel %s", MaxADC[Ring][FEN][LocalHybrid], VesselID.c_str());
+      }
+      catch(...){
+        MaxADC[Ring][FEN][LocalHybrid] = Parms.DefaultMaxADC;
       }
 
       LOG(INIT, Sev::Info,

@@ -254,6 +254,7 @@
   "MaxPulseTimeNS" : 71428570,
   "TimeBoxNs" : 2010,
   "MaxGridsSpan": 5,
+  "DefaultMaxADC": 500,
   "SizeX": 384,
   "SizeY": 51, 
   "SizeZ": 16
