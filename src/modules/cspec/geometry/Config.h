@@ -60,7 +60,7 @@ public:
     uint16_t SizeX = 384;
     uint16_t SizeY = 140;
     uint16_t SizeZ = 16;
-
+    uint16_t MaxGridsSpan = 3;
   } Parms;
 
   uint32_t NumPixels{0};

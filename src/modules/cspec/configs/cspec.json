@@ -253,7 +253,7 @@
 
   "MaxPulseTimeNS" : 71428570,
   "TimeBoxNs" : 2010,
-  "MaxGridsPerEvent": 5,
+  "MaxGridsSpan": 5,
   "SizeX": 384,
   "SizeY": 51, 
   "SizeZ": 16
