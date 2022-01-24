@@ -74,13 +74,14 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
+      uint8_t ZLocal = 12 - abs(XGlobal-2);
       if (XLocal < 2) {
         VMM = 0;
-        Channel = (XLocal * 16) + 32 + Fuzzer.random8() * 16 / 255;
+        Channel = (XLocal * 16) + 32 + ZLocal;
       }
       else{
         VMM = 1;
-        Channel = (XLocal - 2) * 16 + Fuzzer.random8() * 16 / 255;
+        Channel = (XLocal - 2) * 16 + ZLocal;
       }
     }
     // Grid Y direction
