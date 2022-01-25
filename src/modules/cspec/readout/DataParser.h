@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include <cspec/Counters.h>
 #include <common/readout/ess/Parser.h>
+#include <cspec/Counters.h>
+
 #include <vector>
 
 namespace Cspec {
@@ -30,7 +31,8 @@ public:
 
   } __attribute__((__packed__));
 
-  static_assert(sizeof(CSPECReadout) == 20, "CSPEC readout header length error");
+  static_assert(sizeof(CSPECReadout) == 20,
+                "CSPEC readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
