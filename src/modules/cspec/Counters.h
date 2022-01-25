@@ -36,6 +36,7 @@ struct Counters {
     // Logical and Digital geometry incl. Calibration
     int64_t HybridErrors;
     int64_t TOFErrors;
+    int64_t MinADC;
     int64_t MaxADC;
     int64_t MappingErrors;
 

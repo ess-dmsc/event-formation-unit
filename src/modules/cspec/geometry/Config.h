@@ -61,7 +61,7 @@ public:
     uint16_t SizeY = 140;
     uint16_t SizeZ = 16;
     uint16_t MaxGridsSpan = 3;
-    uint16_t DefaultMaxADC = 1023;
+    uint16_t DefaultMinADC = 50;
   } Parms;
 
   uint32_t NumPixels{0};
@@ -78,7 +78,7 @@ public:
   bool Short[MaxRing+1][MaxFEN+1][MaxHybrid+1];
   uint16_t XOffset[MaxRing+1][MaxFEN+1][MaxHybrid+1];
   uint16_t YOffset[MaxRing+1][MaxFEN+1][MaxHybrid+1];
-  uint16_t MaxADC[MaxRing+1][MaxFEN+1][MaxHybrid+1];
+  uint16_t MinADC[MaxRing+1][MaxFEN+1][MaxHybrid+1];
 
 
 

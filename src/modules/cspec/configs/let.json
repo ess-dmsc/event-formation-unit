@@ -4,7 +4,7 @@
   "InstrumentGeometry" : "CSPEC",
 
   "Vessel_Config" : {
-    "0":  {"NumGrids": 51, "Rotation": false, "XOffset":   0, "Short": true, "MaxADC": 200}
+    "0":  {"NumGrids": 51, "Rotation": false, "XOffset":   0, "Short": true, "MinADC": 200}
   },
 
     "Config" : [
@@ -18,9 +18,8 @@
 
 
   "MaxPulseTimeNS" : 71428570,
-  "MaxGapWire"  : 0,
-  "MaxGapStrip" : 0,
   "TimeBoxNs" : 2010,
+  "DefaultMinADC": 50,
   "MaxGridsPerEvent": 5,
   "SizeX": 12,
   "SizeY": 51, 

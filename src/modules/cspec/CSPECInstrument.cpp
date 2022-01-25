@@ -113,10 +113,6 @@ void CSPECInstrument::processReadouts(void) {
       continue;
     }
 
-    uint16_t MaxADC = Conf.MaxADC[readout.RingId][readout.FENId][readout.VMM];
-
-
-
     XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
@@ -128,6 +124,8 @@ void CSPECInstrument::processReadouts(void) {
     uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][readout.VMM];
     bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][readout.VMM];
     bool Short = Conf.Short[readout.RingId][readout.FENId][readout.VMM];
+    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][readout.VMM];
+
 
     if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR, "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
@@ -151,13 +149,13 @@ void CSPECInstrument::processReadouts(void) {
     // no calibration yet, so using raw ADC value
     uint16_t ADC = readout.OTADC & 0x3FF;
 
-    if(ADC > MaxADC){
-      XTRACE(DATA, ERR, "Over MaxADC value, got %u, maximum is %u", ADC, MaxADC);
-      counters.MaxADC++;
+    if(ADC < MinADC){
+      XTRACE(DATA, ERR, "Under MinADC value, got %u, minimum is %u", ADC, MinADC);
+      counters.MinADC++;
       continue;
     }
     else{
-      XTRACE(DATA, DEB, "Valid ADC %u, max is %u", ADC, MaxADC);
+      XTRACE(DATA, DEB, "Valid ADC %u, min is %u", ADC, MinADC);
     }
 
 

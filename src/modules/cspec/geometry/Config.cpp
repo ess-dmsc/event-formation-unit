@@ -57,11 +57,11 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
   try {
-    Parms.DefaultMaxADC = root["DefaultMaxADC"].get<std::uint16_t>();
+    Parms.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for DefaultMaxADC");
+    LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
   }
-  LOG(INIT, Sev::Info, "DefaultMaxADC {}", Parms.DefaultMaxADC);
+  LOG(INIT, Sev::Info, "DefaultMinADC {}", Parms.DefaultMinADC);
 
   try {
     Parms.SizeX = root["SizeX"].get<uint16_t>();
@@ -127,11 +127,11 @@ void Config::apply() {
       }
 
       try{
-        MaxADC[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["MaxADC"];
-        XTRACE(INIT, DEB, "Vessel specific MaxADC %u assigned to vessel %s", MaxADC[Ring][FEN][LocalHybrid], VesselID.c_str());
+        MinADC[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["MinADC"];
+        XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s", MinADC[Ring][FEN][LocalHybrid], VesselID.c_str());
       }
       catch(...){
-        MaxADC[Ring][FEN][LocalHybrid] = Parms.DefaultMaxADC;
+        MinADC[Ring][FEN][LocalHybrid] = Parms.DefaultMinADC;
       }
 
       LOG(INIT, Sev::Info,
