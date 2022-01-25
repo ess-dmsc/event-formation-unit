@@ -98,6 +98,9 @@ int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
       Stats.ErrorADC++;
       continue;
     }
+    else{
+      XTRACE(DATA, DEB, "Valid ADC %u", Readout.OTADC & 0x7fff);
+    }
 
     // So far no checks for GEO and TDC
 

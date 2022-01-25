@@ -113,6 +113,10 @@ void CSPECInstrument::processReadouts(void) {
       continue;
     }
 
+    uint16_t MaxADC = Conf.MaxADC[readout.RingId][readout.FENId][readout.VMM];
+
+
+
     XTRACE(DATA, DEB, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
@@ -147,16 +151,24 @@ void CSPECInstrument::processReadouts(void) {
     // no calibration yet, so using raw ADC value
     uint16_t ADC = readout.OTADC & 0x3FF;
 
+    if(ADC > MaxADC){
+      XTRACE(DATA, ERR, "Over MaxADC value, got %u, maximum is %u", ADC, MaxADC);
+      counters.MaxADC++;
+      continue;
+    }
+    else{
+      XTRACE(DATA, DEB, "Valid ADC %u, max is %u", ADC, MaxADC);
+    }
+
+
   //   XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
 
     // If the corrected ADC reaches maximum value we count the occurance but
     // use the new value anyway
     // Only possible if calibration takes it over the max value
     // Original value has already been checked against max value
-    if (ADC >= 1023) {
-      counters.MaxADC++;
-    }
-
+    /// \todo apply calibration and recheck if over max ADC, is this overall max adc or still vessel/channel specific?
+    
   //   // Now we add readouts with the calibrated time and adc to the x,y builders
     // x and z coord is a combination of the X and Z coordinates that provides a unique wire identifier
     // Adjacency of wires isn't needed as wires are well insulated and events don't span multiples of them
