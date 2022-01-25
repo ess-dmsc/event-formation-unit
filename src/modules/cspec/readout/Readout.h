@@ -51,7 +51,7 @@ struct __attribute__((packed)) Readout {
   uint32_t PrevPulseTimeLow{0};
   uint32_t EventTimeHigh{0};
   uint32_t EventTimeLow{0};
-  uint16_t DataSeqNum{0}; // Pulse Height in debug mode
+  uint16_t DataSeqNum{0};  // Pulse Height in debug mode
   uint8_t OutputQueue{0};
   uint8_t RingId;
   uint8_t FENId;
@@ -63,13 +63,14 @@ struct __attribute__((packed)) Readout {
   std::string debug() const;
 };
 
-} // namespace Cspec
+}  // namespace Cspec
 
 namespace hdf5 {
 
 namespace datatype {
-template <> class TypeTrait<Loki::Readout> {
-public:
+template <>
+class TypeTrait<Loki::Readout> {
+ public:
   H5_COMPOUND_DEFINE_TYPE(Loki::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
@@ -88,9 +89,9 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-} // namespace datatype
+}  // namespace datatype
 
-} // namespace hdf5
+}  // namespace hdf5
 
 namespace Cspec {
 

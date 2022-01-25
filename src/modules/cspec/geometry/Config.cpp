@@ -5,10 +5,11 @@
 ///
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
-#include <iostream>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <cspec/geometry/Config.h>
+
+#include <iostream>
 
 namespace Cspec {
 
@@ -47,7 +48,6 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", Parms.MaxPulseTimeNS);
-
 
   try {
     Parms.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
@@ -90,7 +90,7 @@ void Config::apply() {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
-      std::string IDString =  Mapping["HybridId"];
+      std::string IDString = Mapping["HybridId"];
 
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
@@ -99,60 +99,58 @@ void Config::apply() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      if (Hybrids[Ring][FEN][LocalHybrid].Initialised){
+      if (Hybrids[Ring][FEN][LocalHybrid].Initialised) {
         XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
         throw std::runtime_error("Duplicate Hybrid in config file");
       }
 
-
       Hybrids[Ring][FEN][LocalHybrid].Initialised = true;
       Hybrids[Ring][FEN][LocalHybrid].HybridId = IDString;
       std::string VesselID = Mapping["VesselId"];
-      Rotated[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Rotation"];
-      XOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["XOffset"];
+      Rotated[Ring][FEN][LocalHybrid] =
+          root["Vessel_Config"][VesselID]["Rotation"];
+      XOffset[Ring][FEN][LocalHybrid] =
+          root["Vessel_Config"][VesselID]["XOffset"];
 
-      try{
-        Short[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Short"];
-      }
-      catch (...){
+      try {
+        Short[Ring][FEN][LocalHybrid] =
+            root["Vessel_Config"][VesselID]["Short"];
+      } catch (...) {
         Short[Ring][FEN][LocalHybrid] = false;
       }
-      
 
-      try{
-        YOffset[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["YOffset"];
-      }
-      catch(...) {
+      try {
+        YOffset[Ring][FEN][LocalHybrid] =
+            root["Vessel_Config"][VesselID]["YOffset"];
+      } catch (...) {
         YOffset[Ring][FEN][LocalHybrid] = 0;
       }
 
-      try{
-        MinADC[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["MinADC"];
-        XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s", MinADC[Ring][FEN][LocalHybrid], VesselID.c_str());
-      }
-      catch(...){
+      try {
+        MinADC[Ring][FEN][LocalHybrid] =
+            root["Vessel_Config"][VesselID]["MinADC"];
+        XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
+               MinADC[Ring][FEN][LocalHybrid], VesselID.c_str());
+      } catch (...) {
         MinADC[Ring][FEN][LocalHybrid] = Parms.DefaultMinADC;
       }
 
       LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}",
-          Name, Ring, FEN, LocalHybrid);
-
-
+          "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}", Name,
+          Ring, FEN, LocalHybrid);
     }
 
-    //Calculates number of pixels config covers via Vessel_Config and 
-    //assumed 6 * 16 wires per column and 2 columns per vessel
-    try{
+    // Calculates number of pixels config covers via Vessel_Config and
+    // assumed 6 * 16 wires per column and 2 columns per vessel
+    try {
       uint8_t NumGrids = 0;
-      for (auto &Vessel : root["Vessel_Config"]){
+      for (auto &Vessel : root["Vessel_Config"]) {
         NumGrids = Vessel["NumGrids"];
-        NumPixels+= NumGrids * 6 * 16 * 2;
+        NumPixels += NumGrids * 6 * 16 * 2;
       }
-    } catch(...){
+    } catch (...) {
       LOG(INIT, Sev::Error, "Invalid Vessel_Config");
     }
-    
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
@@ -163,20 +161,18 @@ void Config::apply() {
 }
 
 uint8_t Config::getNumHybrids() {
-    uint8_t NumHybrids = 0;
-    for (int RingIndex = 0; RingIndex <= MaxRing; RingIndex++){
-      for (int FENIndex = 0; FENIndex <= MaxFEN; FENIndex++){
-        for (int HybridIndex = 0; HybridIndex <= MaxHybrid; HybridIndex++){
-          ESSReadout::Hybrid Hybrid = getHybrid(RingIndex, FENIndex, HybridIndex);
-          if (Hybrid.Initialised) {
-            NumHybrids++;
-          }
+  uint8_t NumHybrids = 0;
+  for (int RingIndex = 0; RingIndex <= MaxRing; RingIndex++) {
+    for (int FENIndex = 0; FENIndex <= MaxFEN; FENIndex++) {
+      for (int HybridIndex = 0; HybridIndex <= MaxHybrid; HybridIndex++) {
+        ESSReadout::Hybrid Hybrid = getHybrid(RingIndex, FENIndex, HybridIndex);
+        if (Hybrid.Initialised) {
+          NumHybrids++;
         }
-      } 
+      }
     }
-    return NumHybrids;
   }
+  return NumHybrids;
+}
 
-
-
-} // namespace Cspec
+}  // namespace Cspec

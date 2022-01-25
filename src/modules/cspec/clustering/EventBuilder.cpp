@@ -7,11 +7,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <algorithm>
-#include <fmt/format.h>
-#include <cspec/clustering/EventBuilder.h>
-
 #include <common/debug/Trace.h>
+#include <cspec/clustering/EventBuilder.h>
+#include <fmt/format.h>
+
+#include <algorithm>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
@@ -32,7 +32,6 @@ void EventBuilder::insert(Hit hit) {
     XTRACE(CLUSTER, WAR, "bad plane %s", hit.to_string().c_str());
   }
 }
-
 
 void EventBuilder::flush() {
   matcher.matched_events.clear();
@@ -60,4 +59,4 @@ void EventBuilder::clear() {
   HitsY.clear();
 }
 
-} // namespace Multiblade
+}  // namespace Cspec

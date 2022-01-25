@@ -4,13 +4,13 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <cspec/geometry/CSPECGeometry.h>
 #include <common/testutils/TestBase.h>
+#include <cspec/geometry/CSPECGeometry.h>
 
 using namespace Cspec;
 
 class CSPECGeometryTest : public TestBase {
-protected:
+ protected:
   CSPECGeometry Geom;
   uint16_t VMM0{0};
   uint16_t VMM1{1};
@@ -20,7 +20,6 @@ protected:
   void TearDown() override {}
 };
 
-
 // Should match the ICD
 TEST_F(CSPECGeometryTest, DefaultCSPEC) {
   ASSERT_TRUE(Geom.isWire(VMM0));
@@ -28,35 +27,33 @@ TEST_F(CSPECGeometryTest, DefaultCSPEC) {
   ASSERT_TRUE(Geom.isGrid(VMM2));
 }
 
-TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations){
-  //xAndzCoord takes FENID, HybridID, VMMID, Channel, XOffset, Rotated
-  
-  //Vessel 0, very first xAndzCoord position
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 32, 0, false), 0);
-  //Vessel 14, position is mid-column
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 168 ,false), 2763);
-  //Vessel 25, rotated, column 0 and column 1
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 300 , true), 4923);
-  ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 43, 300 , true), 4827);
-  //Vessel 34, final pixel
-  ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 63, 372, false), 6143);
+TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations) {
+  // xAndzCoord takes FENID, HybridID, VMMID, Channel, XOffset, Rotated
 
+  // Vessel 0, very first xAndzCoord position
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 32, 0, false), 0);
+  // Vessel 14, position is mid-column
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 168, false), 2763);
+  // Vessel 25, rotated, column 0 and column 1
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 1, 43, 300, true), 4923);
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 43, 300, true), 4827);
+  // Vessel 34, final pixel
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 63, 372, false), 6143);
 }
 
-TEST_F(CSPECGeometryTest, YCoordinateCalculations){
-  //yCoord = VMM & Channel specific value
+TEST_F(CSPECGeometryTest, YCoordinateCalculations) {
+  // yCoord = VMM & Channel specific value
 
-  //Full length vessel, grid 0 and grid 139
+  // Full length vessel, grid 0 and grid 139
   ASSERT_EQ(Geom.yCoord(1, 0, 58, 0, false, false), 0);
   ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false, false), 139);
 
-  //short rotated vessel
+  // short rotated vessel
   ASSERT_EQ(Geom.yCoord(1, 0, 40, 50, true, true), 10);
 
-  //short not rotated vessel
+  // short not rotated vessel
   ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 129);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

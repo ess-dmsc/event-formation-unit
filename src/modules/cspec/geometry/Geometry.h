@@ -11,9 +11,9 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+
 #include <string>
 #include <utility>
-
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,14 +21,19 @@
 namespace Cspec {
 
 class Geometry {
-public:
+ public:
   virtual bool isWire(uint8_t LocalHybridID) = 0;
   virtual bool isGrid(uint8_t LocalHybridID) = 0;
-  virtual uint16_t xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t XOffset, bool Rotated) = 0;
-  virtual uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, uint16_t YOffset, bool Rotated, bool Short) = 0;
-  virtual bool validGridMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel, bool Short) = 0;
-  virtual bool validWireMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel) = 0;
+  virtual uint16_t xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8_t VMMID,
+                              uint8_t Channel, uint16_t XOffset,
+                              bool Rotated) = 0;
+  virtual uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
+                         uint16_t YOffset, bool Rotated, bool Short) = 0;
+  virtual bool validGridMapping(uint8_t HybridID, uint8_t VMMID,
+                                uint8_t Channel, bool Short) = 0;
+  virtual bool validWireMapping(uint8_t HybridID, uint8_t VMMID,
+                                uint8_t Channel) = 0;
   static const uint8_t InvalidCoord;
 };
 inline uint8_t const InvalidCoord = 255;
-}
+}  // namespace Cspec

@@ -5,15 +5,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/kafka/EV42Serializer.h>
-#include <cspec/CSPECInstrument.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <cspec/CSPECInstrument.h>
 #include <stdio.h>
 #include <string.h>
 
 using namespace Cspec;
 
+// clang-format off
 std::string ConfigFile{"deleteme_cspec_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -235,19 +236,18 @@ std::vector<uint8_t> NoEvent {
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 };
 
-
+// clang-format on
 
 class CSPECInstrumentTest : public TestBase {
-public:
-
-protected:
+ public:
+ protected:
   struct Counters counters;
   CSPECSettings ModuleSettings;
-  EV42Serializer * serializer;
-  CSPECInstrument * cspec;
+  EV42Serializer *serializer;
+  CSPECInstrument *cspec;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
-  Event TestEvent;           // used for testing generateEvents()
-  std::vector<Event> Events; // used for testing generateEvents()
+  Event TestEvent;            // used for testing generateEvents()
+  std::vector<Event> Events;  // used for testing generateEvents()
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
@@ -262,12 +262,13 @@ protected:
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::Parser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
+  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+                  std::vector<uint8_t> &testdata) {
     Packet.HeaderPtr = &PacketHeader;
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0,0);
-    Packet.Time.setPrevReference(0,0);
+    Packet.Time.setReference(0, 0);
+    Packet.Time.setPrevReference(0, 0);
   }
 };
 
@@ -277,7 +278,6 @@ TEST_F(CSPECInstrumentTest, Constructor) {
   ASSERT_EQ(counters.FENErrors, 0);
   ASSERT_EQ(counters.RingErrors, 0);
 }
-
 
 TEST_F(CSPECInstrumentTest, BadRingAndFENError) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadRingAndFENError);
@@ -290,7 +290,6 @@ TEST_F(CSPECInstrumentTest, BadRingAndFENError) {
   ASSERT_EQ(counters.RingErrors, 1);
   ASSERT_EQ(counters.FENErrors, 1);
 }
-
 
 TEST_F(CSPECInstrumentTest, BadHybridError) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadHybridError);
@@ -309,14 +308,13 @@ TEST_F(CSPECInstrumentTest, BadHybridError) {
   ASSERT_EQ(counters.HybridErrors, 1);
 }
 
-TEST_F(CSPECInstrumentTest, GoodEvent){
+TEST_F(CSPECInstrumentTest, GoodEvent) {
   makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.RingErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
   ASSERT_EQ(counters.HybridErrors, 0);
-
 
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   cspec->processReadouts();
@@ -326,15 +324,14 @@ TEST_F(CSPECInstrumentTest, GoodEvent){
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
 
-
-  for (auto & builder : cspec->builders) {
+  for (auto &builder : cspec->builders) {
     builder.flush();
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 1);
 }
 
-TEST_F(CSPECInstrumentTest, BadMappingError){
+TEST_F(CSPECInstrumentTest, BadMappingError) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadMappingError);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
@@ -349,7 +346,7 @@ TEST_F(CSPECInstrumentTest, BadMappingError){
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
-  for (auto & builder : cspec->builders) {
+  for (auto &builder : cspec->builders) {
     builder.flush();
     cspec->generateEvents(builder.Events);
   }
@@ -357,28 +354,28 @@ TEST_F(CSPECInstrumentTest, BadMappingError){
   ASSERT_EQ(counters.MappingErrors, 2);
 }
 
-TEST_F(CSPECInstrumentTest, MaxADC){
+TEST_F(CSPECInstrumentTest, MaxADC) {
   makeHeader(cspec->ESSReadoutParser.Packet, MaxADC);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   counters.VMMStats = cspec->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); //ADC was above VMM threshold of 1023 once
+  ASSERT_EQ(counters.VMMStats.ErrorADC,
+            1);  // ADC was above VMM threshold of 1023 once
   ASSERT_EQ(Res, 1);
 }
 
-TEST_F(CSPECInstrumentTest, MinADC){
+TEST_F(CSPECInstrumentTest, MinADC) {
   makeHeader(cspec->ESSReadoutParser.Packet, MinADC);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
 
-
   cspec->processReadouts();
-  ASSERT_EQ(counters.MinADC, 2); // ADC was under vessel specific threshold once, under general default once
-
+  ASSERT_EQ(counters.MinADC, 2);  // ADC was under vessel specific threshold
+                                  // once, under general default once
 }
 
-TEST_F(CSPECInstrumentTest, NoEvent){
+TEST_F(CSPECInstrumentTest, NoEvent) {
   makeHeader(cspec->ESSReadoutParser.Packet, NoEvent);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
@@ -393,7 +390,7 @@ TEST_F(CSPECInstrumentTest, NoEvent){
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
-  for (auto & builder : cspec->builders) {
+  for (auto &builder : cspec->builders) {
     builder.flush();
     cspec->generateEvents(builder.Events);
   }
@@ -402,8 +399,7 @@ TEST_F(CSPECInstrumentTest, NoEvent){
   ASSERT_EQ(counters.EventsMatchedGridOnly, 1);
 }
 
-
-TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan){
+TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeGridSpan);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 5);
@@ -418,7 +414,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan){
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 5);
 
-  for (auto & builder : cspec->builders) {
+  for (auto &builder : cspec->builders) {
     builder.flush();
     cspec->generateEvents(builder.Events);
   }

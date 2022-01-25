@@ -7,36 +7,34 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
-#include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
-#include <common/monitor/HistogramSerializer.h>
+#include <common/RuntimeStat.h>
 #include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
-#include <common/time/TimeString.h>
-
-#include <unistd.h>
-
-#include <common/RuntimeStat.h>
-#include <common/system/Socket.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/EV42Serializer.h>
 #include <common/memory/SPSCFifo.h>
-#include <common/time/TimeString.h>
+#include <common/monitor/HistogramSerializer.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
+#include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <cspec/CSPECBase.h>
 #include <cspec/CSPECInstrument.h>
 #include <stdio.h>
+#include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <cinttypes>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Cspec {
 
 const char *classname = "CSPEC detector with ESS readout";
 
-CSPECBase::CSPECBase(BaseSettings const &settings, struct CSPECSettings &LocalCSPECSettings)
+CSPECBase::CSPECBase(BaseSettings const &settings,
+                     struct CSPECSettings &LocalCSPECSettings)
     : Detector("CSPEC", settings), CSPECModuleSettings(LocalCSPECSettings) {
-
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -144,7 +142,7 @@ void CSPECBase::input_thread() {
                           EFUSettings.RxSocketBufferSize);
   receiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
   receiver.printBufferSizes();
-  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+  receiver.setRecvTimeout(0, 100000);  /// secs, usecs 1/10s
 
   while (runThreads) {
     int readSize;
@@ -153,7 +151,7 @@ void CSPECBase::input_thread() {
     // this is the processing step
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
     if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                   RxRingbuffer.getMaxBufSize())) > 0) {
+                                     RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -172,14 +170,11 @@ void CSPECBase::input_thread() {
   return;
 }
 
-
 void CSPECBase::processing_thread() {
-
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
     EFUSettings.KafkaTopic = "cspec_detector";
-
   }
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
@@ -192,9 +187,11 @@ void CSPECBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "cspec", Produce);
-  CSPECInstrument CSPEC(Counters, /*EFUSettings,*/ CSPECModuleSettings, Serializer);
+  CSPECInstrument CSPEC(Counters, /*EFUSettings,*/ CSPECModuleSettings,
+                        Serializer);
 
-  HistogramSerializer ADCHistSerializer(CSPEC.ADCHist.needed_buffer_size(), "CSPEC");
+  HistogramSerializer ADCHistSerializer(CSPEC.ADCHist.needed_buffer_size(),
+                                        "CSPEC");
   ADCHistSerializer.set_callback(ProduceMonitor);
 
   unsigned int DataIndex;
@@ -204,7 +201,8 @@ void CSPECBase::processing_thread() {
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
-    if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
+    if (InputFifo.pop(
+            DataIndex)) {  // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
         Counters.FifoSeqErrors++;
@@ -215,16 +213,20 @@ void CSPECBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = CSPEC.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::CSPEC);
+      auto Res = CSPEC.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                 ESSReadout::Parser::CSPEC);
       Counters.ReadoutStats = CSPEC.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
+        XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
+               Counters.RxPackets);
       }
 
       if (Res != ESSReadout::Parser::OK) {
-        XTRACE(DATA, WAR, "Error parsing ESS readout header (RxPackets %" PRIu64 ")", Counters.RxPackets);
-        //hexDump(DataPtr, std::min(64, DataLen));
+        XTRACE(DATA, WAR,
+               "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
+               Counters.RxPackets);
+        // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }
@@ -234,22 +236,21 @@ void CSPECBase::processing_thread() {
       Counters.TimeStats = CSPEC.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = CSPEC.VMMParser.Stats;
 
-
       CSPEC.processReadouts();
 
-      for (auto & builder : CSPEC.builders) {
+      for (auto &builder : CSPEC.builders) {
         CSPEC.generateEvents(builder.Events);
       }
-    
+
     } else {
-      // There is NO data in the FIFO - increment idle counter and sleep a little
-        Counters.ProcessingIdle++;
-        usleep(10);
+      // There is NO data in the FIFO - increment idle counter and sleep a
+      // little
+      Counters.ProcessingIdle++;
+      usleep(10);
     }
 
     if (ProduceTimer.timeout()) {
-
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask(
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
@@ -257,7 +258,7 @@ void CSPECBase::processing_thread() {
 
       if (!CSPEC.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-           CSPEC.ADCHist.hit_count());
+               CSPEC.ADCHist.hit_count());
         ADCHistSerializer.produce(CSPEC.ADCHist);
         CSPEC.ADCHist.clear();
       }
@@ -273,4 +274,4 @@ void CSPECBase::processing_thread() {
   return;
 }
 
-}
+}  // namespace Cspec
