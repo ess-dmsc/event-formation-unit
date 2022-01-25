@@ -23,12 +23,14 @@ target_compile_definitions(CSPECConfigTest PRIVATE CSPEC_FULL="${CSPEC_FULL}")
 
 
 
+
 set(CSPECGeometryTest_INC
   ../geometry/CSPECGeometry.h)
 set(CSPECGeometryTest_SRC
   ../test/CSPECGeometryTest.cpp
   ../geometry/CSPECGeometry.cpp)
 create_test_executable(CSPECGeometryTest)
+
 
 
 # set(CSPECChannelMappingTest_INC

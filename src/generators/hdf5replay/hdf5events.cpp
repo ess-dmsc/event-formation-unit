@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(Config.KafkaBufferSize, "multiblade", Produce);
+  EV42Serializer flatbuffer(Config.KafkaBufferSize, "hdf5pixel", Produce);
 
   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
   flatbuffer.pulseTime(efu_time);

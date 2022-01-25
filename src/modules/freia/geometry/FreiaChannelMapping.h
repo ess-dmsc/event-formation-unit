@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -43,12 +43,8 @@ public:
   ///\brief return global y-coordinate from the digital geometry
   /// Formulae taken from the Freia ICD
   /// wire = 32 - (channel - 16)
-  /// y = (cass - 1) * 32 + 32 - wire
+  /// y = cass * 32 + 32 - wire
   uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
-    if (Cassette == 0) {
-      XTRACE(DATA, WAR, "Cassette 0 is not valid");
-      return GeometryBase::InvalidCoord;
-    }
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
@@ -60,7 +56,7 @@ public:
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return GeometryBase::InvalidCoord;
     } else {
-      return (Cassette - 1) * NumWires + Channel - MinWireChannel;
+      return Cassette * NumWires + Channel - MinWireChannel;
     }
   }
 
@@ -77,7 +73,7 @@ public:
 
   // Return the local cassette
   uint8_t cassette(uint8_t FEN, uint8_t VMM) {
-    return 2 * (FEN - 1) + ((VMM & 0x0f) >> 1);
+    return 2 * FEN + ((VMM & 0x0f) >> 1);
   }
 };
 

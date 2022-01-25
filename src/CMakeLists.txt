@@ -42,7 +42,6 @@ add_subdirectory(modules)
 add_subdirectory(efu)
 add_subdirectory(generators)
 
-get_filename_component(MB_CFG_FILE "${ESS_MODULE_DIR}/multiblade/configs/MB18Estia.json" ABSOLUTE)
 get_filename_component(MG_CFG_FILE "${ESS_MODULE_DIR}/multigrid/configs/ILL_mappings.json" ABSOLUTE)
 get_filename_component(GDGEM_CFG_FILE "${ESS_MODULE_DIR}/gdgem/configs/vmm3.json" ABSOLUTE)
 get_filename_component(DREAM_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/DreamEndcap.json" ABSOLUTE)
@@ -53,8 +52,6 @@ get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.jso
 add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
     COMMAND ${CMAKE_COMMAND} -E copy ${MG_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-    COMMAND ${CMAKE_COMMAND} -E copy ${MB_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-    COMMENT "Copying ${MB_CFG_FILE} to ${PROJECT_BINARY_DIR}/configs"
     COMMAND ${CMAKE_COMMAND} -E copy ${GDGEM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${DREAM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${LOKI_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
@@ -65,12 +62,11 @@ add_custom_target(copycfgs
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-f" "../configs/ILL_mappings.json" "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
-    COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB18Estia.json"  "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "AdcReadout" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTest.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/perfgen" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/dream" "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/freia" "-f" "../configs/freia.json" "-s" "2" "--nohwcheck"
-    DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen AdcReadout dream loki freia
+    DEPENDS copycfgs efu mgmesytec gdgem sonde AdcReadout dream loki freia
     )

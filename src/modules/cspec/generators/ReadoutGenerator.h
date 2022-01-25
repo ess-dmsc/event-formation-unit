@@ -20,8 +20,9 @@ public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
 protected:
-  void generateData(uint16_t NumReadouts) override;
-  const uint32_t TimeToFirstReadout{1000};
-};
-} // namespace Cspec
+  void generateData() override;
+     const uint32_t TimeToFirstReadout{1000};
+
+};} // namespace Cspec
+
 // GCOVR_EXCL_STOP

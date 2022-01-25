@@ -34,8 +34,8 @@ struct Counters {
     struct ESSReadout::VMM3ParserStats VMMStats;
 
     // Logical and Digital geometry incl. Calibration
-    int64_t RingErrors;
-    int64_t FENErrors;
+    int64_t RingCfgErrors;
+    int64_t FENCfgErrors;
     int64_t TOFErrors;
     int64_t MonitorErrors;
     int64_t MonitorCounts;

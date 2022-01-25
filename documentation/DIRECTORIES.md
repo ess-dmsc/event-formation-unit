@@ -7,7 +7,6 @@ cmake                 | cmake modules including third parties
 documentation         | detailed documentation
 jenkins               | Continuous Integration scripts
 src *                 | the detector event processing pipeline (and unit tests)
-system-tests          | scripts for running the event formation unit as a system test
 utils                 | misc helper scripts and programs, notable efushell.py and efustats.py
 
 

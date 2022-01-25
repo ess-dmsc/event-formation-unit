@@ -19,7 +19,8 @@
 #include <cstring>
 #include <stdexcept>
 
-void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
+
+void Cspec::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -30,7 +31,7 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
   uint16_t Channel = 0;
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (auto Readout = 0; Readout < NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
@@ -102,12 +103,11 @@ void Cspec::ReadoutGenerator::generateData(uint16_t NumReadouts) {
 
     DP += VMM3DataSize;
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to CSPEC
+    /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
     if ((Readout % 2) == 0) {
-      TimeLow += TimeBtwReadout;
+      TimeLow += Settings.TicksBtwReadouts;
     } else {
-      TimeLow += TimeBtwEvents;
+      TimeLow += Settings.TicksBtwEvents;
     }
   }
 }
