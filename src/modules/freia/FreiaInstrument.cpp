@@ -353,14 +353,9 @@ void FreiaInstrument::processMonitorReadouts(void) {
        continue;
     }
 
-    if (readout.Channel != 0) {
-       XTRACE(DATA, WAR, "Channel (%u) must be zero", readout.Channel);
-       counters.MonitorErrors++;
-       continue;
-    }
-
     XTRACE(DATA, DEB, "TOF %" PRIu64 "", TimeOfFlight);
-    counters.TxBytes += Serializer->addEvent(TimeOfFlight, 1);
+    // TTL monitor emits pixels == Channel + 1
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, readout.Channel + 1);
     counters.MonitorCounts++;
   }
 }

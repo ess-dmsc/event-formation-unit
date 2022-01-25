@@ -1,9 +1,9 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Freia instrument base plugin
+/// \brief TTLMonitor instrument base plugin
 ///
 //===----------------------------------------------------------------------===//
 
@@ -23,19 +23,19 @@
 #include <common/time/TimeString.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
-#include <freia/FreiaBase.h>
-#include <freia/FreiaInstrument.h>
+#include <ttlmonitor/TTLMonitorBase.h>
+#include <ttlmonitor/TTLMonitorInstrument.h>
 #include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-namespace Freia {
+namespace TTLMonitor {
 
-const char *classname = "Freia detector with ESS readout";
+const char *classname = "TTLMonitor detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings)
-    : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
+TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSettings &LocalTTLMonitorSettings)
+    : Detector("TTLMON", settings), TTLMonitorModuleSettings(LocalTTLMonitorSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -118,34 +118,21 @@ FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFr
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-
-  Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
-  Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
-  //
-  Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
-  Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
-
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { FreiaBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { TTLMonitorBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    FreiaBase::processing_thread();
+    TTLMonitorBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Freia Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d TTLMonitor Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void FreiaBase::input_thread() {
+void TTLMonitorBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
@@ -182,37 +169,22 @@ void FreiaBase::input_thread() {
 }
 
 
-void FreiaBase::processing_thread() {
+void TTLMonitorBase::processing_thread() {
 
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
-    if (FreiaModuleSettings.IsMonitor) {
-      XTRACE(INIT, ALW, "EFU is Monitor, setting Kafka topic");
-      EFUSettings.KafkaTopic = "freia_beam_monitor";
-    } else {
-      XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
-      EFUSettings.KafkaTopic = "freia_detector";
-    }
+    throw std::runtime_error("TTL Monitor needs a topic name");
   }
+
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug");
-  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings, Serializer);
+  TTLMonitorInstrument TTLMonitor(Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializer);
 
-  /// \todo remove wheb ttlmonitor module is implemented
-  Freia.VMMParser.setMonitor(FreiaModuleSettings.IsMonitor);
-
-
-  HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(), "Freia");
-  ADCHistSerializer.set_callback(ProduceMonitor);
+  TTLMonitor.VMMParser.setMonitor(true);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -232,8 +204,8 @@ void FreiaBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::FREIA);
-      Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
+      auto Res = TTLMonitor.ESSReadoutParser.validate(DataPtr, DataLen, TTLMonitor.ModuleSettings.TypeSubtype);
+      Counters.ReadoutStats = TTLMonitor.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
@@ -247,20 +219,12 @@ void FreiaBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
-      Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
-      Counters.VMMStats = Freia.VMMParser.Stats;
+      Res = TTLMonitor.VMMParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      Counters.TimeStats = TTLMonitor.ESSReadoutParser.Packet.Time.Stats;
+      Counters.VMMStats = TTLMonitor.VMMParser.Stats;
 
+      TTLMonitor.processMonitorReadouts();
 
-      if (FreiaModuleSettings.IsMonitor) {
-        Freia.processMonitorReadouts();
-      } else { // process regular events
-        Freia.processReadouts();
-
-        for (auto & builder : Freia.builders) {
-          Freia.generateEvents(builder.Events);
-        }
-      }
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
         Counters.ProcessingIdle++;
@@ -275,18 +239,7 @@ void FreiaBase::processing_thread() {
       Counters.TxBytes += Serializer->produce();
       Counters.KafkaStats = eventprod.stats;
 
-      if (!Freia.ADCHist.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-           Freia.ADCHist.hit_count());
-        ADCHistSerializer.produce(Freia.ADCHist);
-        Freia.ADCHist.clear();
-      }
-      // if (!Freia.TDCHist.isEmpty()) {
-      //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      Freia.TDCHist.hit_count());
-      //   TDCHistSerializer.produce(Freia.TDCHist);
-      //   Freia.TDCHist.clear();
-      // }
+
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

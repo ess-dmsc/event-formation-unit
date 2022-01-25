@@ -93,10 +93,13 @@ int VMM3Parser::parse(Parser::PacketDataV0 & PacketData) {
       continue;
     }
 
-    if ((Readout.OTADC & ADCMask) > MaxADCValue) {
-      XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
-      Stats.ErrorADC++;
-      continue;
+    // If monitor there are no invalid ADC values
+    if (not IsMonitor) {
+      if ((Readout.OTADC & ADCMask) > MaxADCValue) {
+        XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
+        Stats.ErrorADC++;
+        continue;
+      }
     }
 
     // So far no checks for GEO and TDC
