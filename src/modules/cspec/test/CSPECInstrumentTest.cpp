@@ -23,7 +23,7 @@ std::string ConfigStr = R"(
     "Vessel_Config" : {
       "0": {"NumGrids": 140, "Rotation": false, "XOffset":   0},
       "1": {"NumGrids": 140, "Rotation": false, "XOffset":  12},
-      "2": {"NumGrids": 140, "Rotation": false, "XOffset":  24},
+      "2": {"NumGrids": 140, "Rotation": false, "XOffset":  24, "MaxADC": 100},
       "3": {"NumGrids": 140, "Rotation": false, "XOffset":  36}
     },
 
@@ -185,14 +185,28 @@ std::vector<uint8_t> MaxADC {
   0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x01,  // ADC 256
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
   // Second readout - plane X & Z - Wires
   0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
-  0x00, 0x00, 0xD0, 0x07,  // ADC = 2000
+  0x00, 0x00, 0xD0, 0x07,  // ADC = 2000, above threshold
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+   // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC = 256, under threshold
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+   // Fourth readout - plane X & Z - Wires
+  0x00, 0x04, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC = 256, over threshold for this specific vessel
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
@@ -338,8 +352,12 @@ TEST_F(CSPECInstrumentTest, MaxADC){
   makeHeader(cspec->ESSReadoutParser.Packet, MaxADC);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   counters.VMMStats = cspec->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 1);
-  ASSERT_EQ(Res, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); //ADC was above VMM threshold of 1023 once
+  ASSERT_EQ(Res, 3);
+
+  cspec->processReadouts();
+  ASSERT_EQ(counters.MaxADC, 1); // ADC was within VMM limits but over vessel threshold once
+
 }
 
 TEST_F(CSPECInstrumentTest, NoEvent){
