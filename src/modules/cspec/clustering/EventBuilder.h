@@ -14,16 +14,16 @@
 
 namespace Cspec {
 
-static constexpr uint64_t latency{2010};  // ns == 2.01us
+static constexpr uint64_t latency{2010}; // ns == 2.01us
 // expect readouts in a plane to be at least this close
 static constexpr uint64_t timegap{2000};
-static constexpr uint64_t coordgap{1};  // allow no gaps between channels
+static constexpr uint64_t coordgap{1}; // allow no gaps between channels
 
 const uint8_t PlaneX{0};
 const uint8_t PlaneY{1};
 
 class EventBuilder {
- public:
+public:
   EventBuilder();
 
   // \todo pass by rvalue?
@@ -50,6 +50,6 @@ class EventBuilder {
   uint64_t TimeBoxT0{0};
   uint32_t TimeBoxSize{10000000};
 
-};  // class
+}; // class
 
-}  // namespace Cspec
+} // namespace Cspec

@@ -4,20 +4,21 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-// based on CSPEC ICD document https://project.esss.dk/owncloud/index.php/f/14482406
+// based on CSPEC ICD document
+// https://project.esss.dk/owncloud/index.php/f/14482406
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
+
+#include <common/debug/Trace.h>
+#include <math.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
+#include <time.h>
 
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <math.h>
-#include <time.h>
-#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <stdexcept>
-#include <common/debug/Trace.h>
-
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -32,40 +33,38 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (auto Readout = 0; Readout < NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
-    //CSPEC VMM readouts all have DataLength 20
+    // CSPEC VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
 
-    //CSPEC is 16 wires deep in Z direction
-    //X is selected as a number between 0 and 11 as there are
-    //2 columns of 6 wires in the LET setup
-    if ((Readout % 16) == 0){
+    // CSPEC is 16 wires deep in Z direction
+    // X is selected as a number between 0 and 11 as there are
+    // 2 columns of 6 wires in the LET setup
+    if ((Readout % 16) == 0) {
       XGlobal = Fuzzer.random8() * 12 / 255;
-    } 
-    //Forms a tick shape, and stretches it into a taller rectangle
-    //as for LET MaxX = 11 and MaxY = 50
-    YLocal = 4 * abs(XGlobal-2);
+    }
+    // Forms a tick shape, and stretches it into a taller rectangle
+    // as for LET MaxX = 11 and MaxY = 50
+    YLocal = 4 * abs(XGlobal - 2);
 
-    //Readout generated for LET test, with Ring 0
+    // Readout generated for LET test, with Ring 0
     ReadoutData->RingId = 0;
 
     // Each column is 6 wires wide
     // Select the FEN based on whether XGlobal is in column 0 or column 1
     // Initialise XLocal as the local X value within each column
-    if (XGlobal<6){
+    if (XGlobal < 6) {
       ReadoutData->FENId = 0;
       XLocal = XGlobal;
-    }
-    else{
+    } else {
       ReadoutData->FENId = 1;
       XLocal = XGlobal - 6;
     }
@@ -74,12 +73,11 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
-      uint8_t ZLocal = 12 - abs(XGlobal-2);
+      uint8_t ZLocal = 12 - abs(XGlobal - 2);
       if (XLocal < 2) {
         VMM = 0;
         Channel = (XLocal * 16) + 32 + ZLocal;
-      }
-      else{
+      } else {
         VMM = 1;
         Channel = (XLocal - 2) * 16 + ZLocal;
       }
@@ -88,17 +86,19 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     // Mappings of Y coordinates to channels and VMMs is complicated
     // Details are in ICD, with useful figure
     else {
-        VMM = 2;
-        Channel = 50-YLocal;
+      VMM = 2;
+      Channel = 50 - YLocal;
     }
 
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
 
     DP += VMM3DataSize;
-    XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal, XLocal, YLocal);
+    XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
+           XLocal, YLocal);
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
+    /// \todo work out why updating TimeLow is done this way, and if it applies
+    /// to CSPEC
     if ((Readout % 2) == 0) {
       TimeLow += TimeBtwReadout;
     } else {
@@ -106,8 +106,5 @@ void Cspec::LETReadoutGenerator::generateData(uint16_t NumReadouts) {
     }
   }
 }
-
-
-
 
 // GCOVR_EXCL_STOP

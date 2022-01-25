@@ -59,4 +59,4 @@ void EventBuilder::clear() {
   HitsY.clear();
 }
 
-}  // namespace Cspec
+} // namespace Cspec

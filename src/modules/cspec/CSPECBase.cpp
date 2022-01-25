@@ -142,7 +142,7 @@ void CSPECBase::input_thread() {
                           EFUSettings.RxSocketBufferSize);
   receiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
   receiver.printBufferSizes();
-  receiver.setRecvTimeout(0, 100000);  /// secs, usecs 1/10s
+  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   while (runThreads) {
     int readSize;
@@ -201,8 +201,7 @@ void CSPECBase::processing_thread() {
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
-    if (InputFifo.pop(
-            DataIndex)) {  // There is data in the FIFO - do processing
+    if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
         Counters.FifoSeqErrors++;
@@ -274,4 +273,4 @@ void CSPECBase::processing_thread() {
   return;
 }
 
-}  // namespace Cspec
+} // namespace Cspec

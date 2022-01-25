@@ -16,12 +16,12 @@
 namespace Cspec {
 
 class DataParser {
- public:
+public:
   const unsigned int MaxRingId{11};
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct CSPECReadout  //
+  struct CSPECReadout //
   {
     uint32_t TimeHigh;
     uint32_t TimeLow;
@@ -53,6 +53,6 @@ class DataParser {
   std::vector<struct ParsedData> Result;
 
   struct Counters &Stats;
-  uint32_t HeaderCounters[16][16];  // {ring,fen} counters
+  uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
-}  // namespace Cspec
+} // namespace Cspec

@@ -175,4 +175,4 @@ uint8_t Config::getNumHybrids() {
   return NumHybrids;
 }
 
-}  // namespace Cspec
+} // namespace Cspec

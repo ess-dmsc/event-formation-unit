@@ -10,17 +10,18 @@
 
 #pragma once
 
-#include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
+#include <common/testutils/DataFuzzer.h>
 
-namespace Cspec{
-class LETReadoutGenerator : public ReadoutGeneratorBase{
+namespace Cspec {
+class LETReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
+
 protected:
   void generateData(uint16_t NumReadouts) override;
-     const uint32_t TimeToFirstReadout{1000};
-
-};} // namespace Cspec
+  const uint32_t TimeToFirstReadout{1000};
+};
+} // namespace Cspec
 // GCOVR_EXCL_STOP

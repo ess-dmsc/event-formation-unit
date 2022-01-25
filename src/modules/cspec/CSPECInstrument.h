@@ -28,7 +28,7 @@
 namespace Cspec {
 
 class CSPECInstrument {
- public:
+public:
   /// \brief 'create' the CSPEC instrument
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
@@ -53,7 +53,7 @@ class CSPECInstrument {
   // and CSPECBase. Called from CSPECBase
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
- public:
+public:
   /// \brief Stuff that 'ties' CSPEC together
   struct Counters &counters;
   CSPECSettings &ModuleSettings;
@@ -62,11 +62,11 @@ class CSPECInstrument {
   EV42Serializer *Serializer{nullptr};
 
   /// ADC value histograms for all channels
-  Hists ADCHist{1, 1};  // reinit in ctor
+  Hists ADCHist{1, 1}; // reinit in ctor
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes
-  std::vector<EventBuilder> builders;  // reinit in ctor
+  std::vector<EventBuilder> builders; // reinit in ctor
 
   /// \brief Instrument configuration (rings, FENs, Hybrids, etc)
   Config Conf;
@@ -95,4 +95,4 @@ class CSPECInstrument {
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
-}  // namespace Cspec
+} // namespace Cspec

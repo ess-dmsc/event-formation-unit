@@ -198,21 +198,21 @@ std::vector<uint8_t> MaxADC {
 };
 
 std::vector<uint8_t> MinADC {
- // First readout - plane X & Z - Wires
+  // First readout - plane X & Z - Wires
   0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x28, 0x00,  // ADC = 40, under default threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
  
- // Third readout - plane X & Z - Wires
+  // Second readout - plane X & Z - Wires
   0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x4B, 0x00,  // ADC = 75, over threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
-   // Fourth readout - plane X & Z - Wires
+  // Third readout - plane X & Z - Wires
   0x00, 0x04, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -239,15 +239,15 @@ std::vector<uint8_t> NoEvent {
 // clang-format on
 
 class CSPECInstrumentTest : public TestBase {
- public:
- protected:
+public:
+protected:
   struct Counters counters;
   CSPECSettings ModuleSettings;
   EV42Serializer *serializer;
   CSPECInstrument *cspec;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
-  Event TestEvent;            // used for testing generateEvents()
-  std::vector<Event> Events;  // used for testing generateEvents()
+  Event TestEvent;           // used for testing generateEvents()
+  std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
@@ -359,7 +359,7 @@ TEST_F(CSPECInstrumentTest, MaxADC) {
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorADC,
-            1);  // ADC was above VMM threshold of 1023 once
+            1); // ADC was above VMM threshold of 1023 once
   ASSERT_EQ(Res, 1);
 }
 
@@ -371,8 +371,8 @@ TEST_F(CSPECInstrumentTest, MinADC) {
   ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
 
   cspec->processReadouts();
-  ASSERT_EQ(counters.MinADC, 2);  // ADC was under vessel specific threshold
-                                  // once, under general default once
+  ASSERT_EQ(counters.MinADC, 2); // ADC was under vessel specific threshold
+                                 // once, under general default once
 }
 
 TEST_F(CSPECInstrumentTest, NoEvent) {

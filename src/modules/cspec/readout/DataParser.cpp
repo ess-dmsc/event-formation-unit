@@ -96,4 +96,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-}  // namespace Cspec
+} // namespace Cspec

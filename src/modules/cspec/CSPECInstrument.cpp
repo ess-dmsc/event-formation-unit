@@ -28,8 +28,7 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
                                  // BaseSettings & EFUSettings,
                                  CSPECSettings &moduleSettings,
                                  EV42Serializer *serializer)
-    : counters(counters),
-      ModuleSettings(moduleSettings),
+    : counters(counters), ModuleSettings(moduleSettings),
       Serializer(serializer) {
   if (!ModuleSettings.FilePrefix.empty()) {
     std::string DumpFileName =
@@ -52,7 +51,7 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
 
   XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
   for (auto &builder : builders) {
-    builder.setTimeBox(Conf.Parms.TimeBoxNs);  // Time boxing
+    builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
@@ -91,9 +90,8 @@ void CSPECInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(
-      ESSReadoutParser.Packet.Time
-          .TimeInNS);  /// \todo sometimes PrevPulseTime maybe?
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time
+                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -123,17 +121,17 @@ void CSPECInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
-    uint8_t HybridId = floor(readout.VMM / 2);
-    uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][readout.VMM];
-    uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][readout.VMM];
-    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][readout.VMM];
-    bool Short = Conf.Short[readout.RingId][readout.FENId][readout.VMM];
-    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][readout.VMM];
+    uint8_t HybridId = readout.VMM >> 1;
+    uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][HybridId];
+    uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][HybridId];
+    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
+    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
+    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][HybridId];
 
     if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-             readout.RingId, readout.FENId, readout.VMM);
+             readout.RingId, readout.FENId, HybridId);
       counters.HybridErrors++;
       continue;
     }
@@ -183,7 +181,7 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t xAndzCoord = GeometryInstance->xAndzCoord(
           readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
 
-      if (xAndzCoord == 65535) {  // 65535 is invalid xandzCoordinate
+      if (xAndzCoord == 65535) { // 65535 is invalid xandzCoordinate
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
         counters.MappingErrors++;
         continue;
@@ -197,12 +195,12 @@ void CSPECInstrument::processReadouts(void) {
       //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips +
       //     readout.Channel; ADCHist.bin_x(GlobalXChannel, ADC);
 
-    } else {  // implicit isYCoord
+    } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
       uint8_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord == 255) {  // 255 is invalid yCoordinate
+      if (yCoord == 255) { // 255 is invalid yCoordinate
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;
@@ -218,7 +216,7 @@ void CSPECInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush();  // Do matching
+    builder.flush(); // Do matching
   }
 }
 
@@ -294,7 +292,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
-  Events.clear();  // else events will accumulate
+  Events.clear(); // else events will accumulate
 }
 
 /// \todo move into readout/vmm3 instead as this will be common
@@ -322,4 +320,4 @@ void CSPECInstrument::dumpReadoutToFile(
   DumpFile->push(CurrentReadout);
 }
 
-}  // namespace Cspec
+} // namespace Cspec

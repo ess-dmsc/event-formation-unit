@@ -18,7 +18,7 @@
 namespace Cspec {
 
 class CSPECGeometry : public Cspec::Geometry {
- public:
+public:
   bool isWire(uint8_t LocalHybridID) override {
     if (LocalHybridID == 0) {
       return true;
@@ -31,13 +31,12 @@ class CSPECGeometry : public Cspec::Geometry {
 
   uint16_t xAndzCoord(uint8_t FENID, uint8_t HybridID, uint8_t VMMID,
                       uint8_t Channel, uint16_t XOffset, bool Rotated) override;
-  uint8_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
-                 uint16_t YOffset, bool Rotated, bool Short) override;
+  uint16_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
+                  uint16_t YOffset, bool Rotated, bool Short) override;
   bool validGridMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
                         bool Short) override;
   bool validWireMapping(uint8_t HybridID, uint8_t VMMID,
                         uint8_t Channel) override;
-  static const uint8_t InvalidCoord;
 };
 
-}  // namespace Cspec
+} // namespace Cspec

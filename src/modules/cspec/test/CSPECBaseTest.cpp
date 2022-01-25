@@ -77,7 +77,12 @@ std::vector<uint8_t> dummyreadout {
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
+    "TimeBoxNs" : 2010,
+    "DefaultMinADC": 50,
+    "MaxGridsPerEvent": 5,
+    "SizeX": 12,
+    "SizeY": 51, 
+    "SizeZ": 16
   }
 )";
 
@@ -89,7 +94,7 @@ std::vector<uint8_t> dummyreadout {
 #include <cspec/CSPECBase.h>
 
 class CSPECBaseStandIn : public Cspec::CSPECBase {
- public:
+public:
   CSPECBaseStandIn(BaseSettings Settings,
                    struct Cspec::CSPECSettings ReadoutSettings)
       : Cspec::CSPECBase(Settings, ReadoutSettings){};
@@ -99,7 +104,7 @@ class CSPECBaseStandIn : public Cspec::CSPECBase {
 };
 
 class CSPECBaseTest : public ::testing::Test {
- public:
+public:
   void SetUp() override {
     LocalSettings.ConfigFile = "cspec.json";
     Settings.RxSocketBufferSize = 100000;
@@ -130,7 +135,7 @@ TEST_F(CSPECBaseTest, DataReceive) {
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            2);  // number of readouts dummyreadout
+            2); // number of readouts dummyreadout
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
 }
 
@@ -139,7 +144,7 @@ TEST_F(CSPECBaseTest, DataReceiveBadHeader) {
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  dummyreadout[0] = 0xff;  // pad should be 0
+  dummyreadout[0] = 0xff; // pad should be 0
   TestUDPServer Server(43126, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
@@ -149,7 +154,7 @@ TEST_F(CSPECBaseTest, DataReceiveBadHeader) {
   EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            0);  // no readouts as header is bad
+            0); // no readouts as header is bad
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
 }
 

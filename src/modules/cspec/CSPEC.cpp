@@ -28,7 +28,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 class CSPEC : public Cspec::CSPECBase {
- public:
+public:
   explicit CSPEC(BaseSettings Settings)
       : Cspec::CSPECBase(std::move(Settings), LocalCSPECSettings) {}
 };

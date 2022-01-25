@@ -23,7 +23,7 @@ struct CSPECSettings {
 };
 
 class CSPECBase : public Detector {
- public:
+public:
   CSPECBase(BaseSettings const &settings,
             struct CSPECSettings &LocalCSPECSettings);
   ~CSPECBase() = default;
@@ -31,10 +31,10 @@ class CSPECBase : public Detector {
   void input_thread();
   void processing_thread();
 
- protected:
+protected:
   struct Counters Counters {};
   CSPECSettings CSPECModuleSettings;
   EV42Serializer *Serializer;
 };
 
-}  // namespace Cspec
+} // namespace Cspec

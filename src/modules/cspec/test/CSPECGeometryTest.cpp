@@ -10,7 +10,7 @@
 using namespace Cspec;
 
 class CSPECGeometryTest : public TestBase {
- protected:
+protected:
   CSPECGeometry Geom;
   uint16_t VMM0{0};
   uint16_t VMM1{1};

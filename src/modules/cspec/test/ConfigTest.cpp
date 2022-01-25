@@ -79,7 +79,7 @@ auto DuplicateEntry = R"(
 using namespace Cspec;
 
 class ConfigTest : public TestBase {
- protected:
+protected:
   Config config{"CSPEC", "config.json"};
   void SetUp() override { config.root = j2; }
   void TearDown() override {}
