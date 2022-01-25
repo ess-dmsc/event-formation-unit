@@ -71,12 +71,6 @@ int main(int argc, char *argv[]) {
     Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
   #endif
 
-   #ifdef LET_GENERATOR
-    Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
-  #endif
-
-
   do {
     uint16_t DataSize = gen.makePacket();
 
