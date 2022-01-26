@@ -536,8 +536,8 @@ TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.EventsNoCoincidence, 1);
-  ASSERT_EQ(counters.EventsMatchedGridOnly, 1);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
+  ASSERT_EQ(counters.ClustersMatchedGridOnly, 1);
 }
 
 TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
@@ -560,8 +560,8 @@ TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.EventsNoCoincidence, 1);
-  ASSERT_EQ(counters.EventsMatchedWireOnly, 1);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
+  ASSERT_EQ(counters.ClustersMatchedWireOnly, 1);
 }
 
 
@@ -585,7 +585,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.EventsTooLargeGridSpan, 1);
+  ASSERT_EQ(counters.ClustersTooLargeGridSpan, 1);
 }
 
 TEST_F(CSPECInstrumentTest, NegativeTOF) {
@@ -641,7 +641,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
   ASSERT_EQ(Res, 4);
   ASSERT_EQ(counters.VMMStats.Readouts, 4);
   ASSERT_EQ(counters.Events, 1);
-  ASSERT_EQ(counters.EventsNoCoincidence, 1);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
 }
 
 int main(int argc, char **argv) {
