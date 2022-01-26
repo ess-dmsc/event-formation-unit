@@ -122,63 +122,49 @@ std::vector<uint8_t> MonitorReadout {
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 
-  // Second monitor readout - invalid channel
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x01,  // CH 1 is invalid
-
-  // Third monitor readout - invalid VMM
+  // Second monitor readout - invalid VMM
   0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x01, 0x00,  // VMM 1 invalid
 
-  // Fourth monitor readout - invalid TDC
+  // Third monitor readout - invalid TDC
   0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x01, 0x00, 0x00,  // TDC 1 invalid
 
-  // Fifth monitor readout - invalid GEO
+  // Fourth monitor readout - invalid GEO
   0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x01, 0x00, 0x00, 0x00,  // GEO 1 invalid
 
-  // Sixth monitor readout - invalid OTADC
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x00, 0x00, 0x01, 0x00,  // OTADC 1 invalid
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-
-  // Seventh monitor readout - invalid BC
+  // Fifth monitor readout - invalid BC
   0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x01, 0x00, 0x00, 0x00,  // BC 1 invalid
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 
-  // Eighth monitor readout - invalid Ring
+  // Sixth monitor readout - invalid Ring
   0x15, 0x00, 0x14, 0x00,  // Data Header - Ring 21 invalid, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 
-  // Ninth monitor readout - invalid FEN
+  // Seventh monitor readout - invalid FEN
   0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1 invalid
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 
-  // Tenth monitor readout - TOF too large
+  // Eights monitor readout - TOF too large
   0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
   0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
@@ -367,15 +353,18 @@ TEST_F(FreiaInstrumentTest, NoEvents) {
 TEST_F(FreiaInstrumentTest, BeamMonitor) {
   ModuleSettings.IsMonitor = true;
   makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
+
+  freia->VMMParser.setMonitor(ModuleSettings.IsMonitor);
   auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Readouts, 10);
+  ASSERT_EQ(Readouts, 8);
 
   freia->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorCounts, 1);
-  ASSERT_EQ(counters.MonitorErrors, 6);
+  ASSERT_EQ(counters.MonitorErrors, 4);
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.FENCfgErrors, 1);
   ASSERT_EQ(counters.TOFErrors, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
 }
 
 TEST_F(FreiaInstrumentTest, BeamMonitorTOF) {
@@ -384,6 +373,7 @@ TEST_F(FreiaInstrumentTest, BeamMonitorTOF) {
   freia->ESSReadoutParser.Packet.Time.setReference(1,100000);
   freia->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
 
+  freia->VMMParser.setMonitor(ModuleSettings.IsMonitor);
   auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 1);
 
