@@ -69,5 +69,5 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/dream" "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/freia" "-f" "../configs/freia.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/cspec" "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
-    DEPENDS copycfgs efu mgmesytec gdgem sonde AdcReadout dream loki freia
+    DEPENDS copycfgs efu mgmesytec gdgem sonde AdcReadout dream loki freia cspec
     )
