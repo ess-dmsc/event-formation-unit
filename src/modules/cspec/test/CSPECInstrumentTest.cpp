@@ -15,6 +15,26 @@
 using namespace Cspec;
 
 // clang-format off
+std::string BadConfigFile{"deleteme_cspec_instr_config_bad.json"};
+std::string BadConfigStr = R"(
+  {
+    "Detector": "CSPEC",
+    "InstrumentGeometry" : "Not_CSPEC",
+
+    "Vessel_Config" : {
+      "0": {"NumGrids": 140, "Rotation": false, "XOffset":   0}
+    },
+
+    "Config" : [
+      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""}
+    ],
+
+    "MaxPulseTimeNS" : 71428570,
+    "TimeBoxNs" : 2010
+  }
+)";
+
+
 std::string ConfigFile{"deleteme_cspec_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -220,7 +240,7 @@ std::vector<uint8_t> MinADC {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
-std::vector<uint8_t> NoEvent {
+std::vector<uint8_t> NoEventGridOnly {
   // First readout - plane Y - Grids
   0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
@@ -236,7 +256,58 @@ std::vector<uint8_t> NoEvent {
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 };
 
+std::vector<uint8_t> NoEventWireOnly {
+  // First readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+  // Second readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+};
+
 // clang-format on
+
+class CSPECInstrumentTestBadConfig : public TestBase {
+public:
+protected:
+  struct Counters counters;
+  CSPECSettings ModuleSettings;
+  EV42Serializer *serializer;
+  CSPECInstrument *cspec;
+  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
+  Event TestEvent;           // used for testing generateEvents()
+  std::vector<Event> Events; // used for testing generateEvents()
+
+  void SetUp() override {
+    ModuleSettings.ConfigFile = BadConfigFile;
+    serializer = new EV42Serializer(115000, "cspec");
+    counters = {};
+
+    memset(&PacketHeader, 0, sizeof(PacketHeader));
+
+    cspec = new CSPECInstrument(counters, ModuleSettings, serializer);
+    cspec->setSerializer(serializer);
+    cspec->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+  }
+  void TearDown() override {}
+
+  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+                  std::vector<uint8_t> &testdata) {
+    Packet.HeaderPtr = &PacketHeader;
+    Packet.DataPtr = (char *)&testdata[0];
+    Packet.DataLength = testdata.size();
+    Packet.Time.setReference(0, 0);
+    Packet.Time.setPrevReference(0, 0);
+  }
+};
+
 
 class CSPECInstrumentTest : public TestBase {
 public:
@@ -272,7 +343,28 @@ protected:
   }
 };
 
+
+/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
+TEST_F(CSPECInstrumentTest, DumpTofile) {
+  ModuleSettings.FilePrefix = "deleteme_";
+  CSPECInstrument CSPECDump(counters, ModuleSettings, serializer);
+  CSPECDump.setSerializer(serializer);
+
+  makeHeader(CSPECDump.ESSReadoutParser.Packet, GoodEvent);
+  auto Res = CSPECDump.VMMParser.parse(CSPECDump.ESSReadoutParser.Packet);
+  CSPECDump.processReadouts();
+
+  counters.VMMStats = CSPECDump.VMMParser.Stats;
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+}
+
 // Test cases below
+TEST_F(CSPECInstrumentTest, BadConfig) {
+  ModuleSettings.ConfigFile = BadConfigFile;
+  EXPECT_THROW(new CSPECInstrument(counters, ModuleSettings, serializer), std::runtime_error);
+}
+
 TEST_F(CSPECInstrumentTest, Constructor) {
   ASSERT_EQ(counters.HybridErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
@@ -375,8 +467,8 @@ TEST_F(CSPECInstrumentTest, MinADC) {
                                  // once, under general default once
 }
 
-TEST_F(CSPECInstrumentTest, NoEvent) {
-  makeHeader(cspec->ESSReadoutParser.Packet, NoEvent);
+TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
+  makeHeader(cspec->ESSReadoutParser.Packet, NoEventGridOnly);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
@@ -398,6 +490,31 @@ TEST_F(CSPECInstrumentTest, NoEvent) {
   ASSERT_EQ(counters.EventsNoCoincidence, 1);
   ASSERT_EQ(counters.EventsMatchedGridOnly, 1);
 }
+
+TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
+  makeHeader(cspec->ESSReadoutParser.Packet, NoEventWireOnly);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+
+  cspec->processReadouts();
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.EventsNoCoincidence, 1);
+  ASSERT_EQ(counters.EventsMatchedWireOnly, 1);
+}
+
 
 TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeGridSpan);
@@ -424,10 +541,12 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+  saveBuffer(BadConfigFile, (void *)BadConfigStr.c_str(), BadConfigStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(ConfigFile);
+  deleteFile(BadConfigFile);
   return RetVal;
 }
