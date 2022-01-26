@@ -145,6 +145,29 @@ std::vector<uint8_t> GoodEvent {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
+std::vector<uint8_t> HighTOFError {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
+
 
 std::vector<uint8_t> BadEventLargeGridSpan {
   // First readout - plane Y - Grids
@@ -273,41 +296,6 @@ std::vector<uint8_t> NoEventWireOnly {
 };
 
 // clang-format on
-
-class CSPECInstrumentTestBadConfig : public TestBase {
-public:
-protected:
-  struct Counters counters;
-  CSPECSettings ModuleSettings;
-  EV42Serializer *serializer;
-  CSPECInstrument *cspec;
-  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
-  Event TestEvent;           // used for testing generateEvents()
-  std::vector<Event> Events; // used for testing generateEvents()
-
-  void SetUp() override {
-    ModuleSettings.ConfigFile = BadConfigFile;
-    serializer = new EV42Serializer(115000, "cspec");
-    counters = {};
-
-    memset(&PacketHeader, 0, sizeof(PacketHeader));
-
-    cspec = new CSPECInstrument(counters, ModuleSettings, serializer);
-    cspec->setSerializer(serializer);
-    cspec->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
-  }
-  void TearDown() override {}
-
-  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
-                  std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = &PacketHeader;
-    Packet.DataPtr = (char *)&testdata[0];
-    Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0, 0);
-    Packet.Time.setPrevReference(0, 0);
-  }
-};
-
 
 class CSPECInstrumentTest : public TestBase {
 public:
@@ -537,6 +525,44 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   }
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.EventsTooLargeGridSpan, 1);
+}
+
+TEST_F(CSPECInstrumentTest, NegativeTOF) {
+  auto & Packet = cspec->ESSReadoutParser.Packet;
+  makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
+  Packet.Time.setReference(200, 0);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TimeErrors, 1);
+}
+
+TEST_F(CSPECInstrumentTest, HighTOFError) {
+  makeHeader(cspec->ESSReadoutParser.Packet, HighTOFError);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TOFErrors, 1);
 }
 
 int main(int argc, char **argv) {
