@@ -200,7 +200,7 @@ void CSPECInstrument::processReadouts(void) {
       uint8_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord == 255) { // 255 is invalid yCoordinate
+      if (yCoord == 65535) { // 65535 is invalid yCoordinate
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;

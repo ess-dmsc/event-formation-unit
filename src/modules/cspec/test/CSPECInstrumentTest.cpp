@@ -75,7 +75,7 @@ std::string ConfigStr = R"(
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
+    "TimeBoxNs" : 2
   }
 )";
 
@@ -143,6 +143,37 @@ std::vector<uint8_t> GoodEvent {
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+};
+
+std::vector<uint8_t> BadEventMultipleWires {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+   // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 6 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 };
 
 std::vector<uint8_t> HighTOFError {
@@ -206,6 +237,36 @@ std::vector<uint8_t> BadEventLargeGridSpan {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
+
+std::vector<uint8_t> BadEventLargeTimeSpan {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0xFF, 0x04, 0x00, 0x00,  // Time LO 500 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x14, 0x00, 0x00, 0x00,  // Time LO 20 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
 
 
 std::vector<uint8_t> BadMappingError {
@@ -563,6 +624,24 @@ TEST_F(CSPECInstrumentTest, HighTOFError) {
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.TOFErrors, 1);
+}
+
+TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
+  makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeTimeSpan);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 4);
+  ASSERT_EQ(counters.VMMStats.Readouts, 4);
+  ASSERT_EQ(counters.Events, 1);
+  ASSERT_EQ(counters.EventsNoCoincidence, 1);
 }
 
 int main(int argc, char **argv) {
