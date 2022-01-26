@@ -197,7 +197,7 @@ void CSPECInstrument::processReadouts(void) {
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
-      uint8_t yCoord = GeometryInstance->yCoord(
+      uint16_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
       if (yCoord == 65535) { // 65535 is invalid yCoordinate
