@@ -93,14 +93,14 @@ bool Cspec::CSPECGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
   if (HybridID == 1) {
     if (VMMID == 0) {
       return (Channel >= 58 and Channel <= 63);
-    } else if (VMMID != 1) { // hybrid 1 has 2 VMMs only, VMM0 and VMM1
-      return false;
+    } else if (VMMID == 1) { // hybrid 1 has 2 VMMs only, VMM0 and VMM1
+      return true;
     }
   } else if (HybridID == 2) {
     if (VMMID == 1) {
       return Channel <= 5;
-    } else if (VMMID != 0) { // hybrid 2 has 2 VMMs only, VMM0 and VMM1
-      return false;
+    } else if (VMMID == 0) { // hybrid 2 has 2 VMMs only, VMM0 and VMM1
+      return true;
     }
   } // hybrid id for grids must be 1 or 2
   return false;

@@ -362,7 +362,7 @@ TEST_F(CSPECInstrumentTest, DumpTofile) {
 // Test cases below
 TEST_F(CSPECInstrumentTest, BadConfig) {
   ModuleSettings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(new CSPECInstrument(counters, ModuleSettings, serializer), std::runtime_error);
+  EXPECT_THROW(CSPECInstrument(counters, ModuleSettings, serializer), std::runtime_error);
 }
 
 TEST_F(CSPECInstrumentTest, Constructor) {
