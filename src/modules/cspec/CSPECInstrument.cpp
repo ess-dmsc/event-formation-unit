@@ -230,13 +230,13 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
-      counters.EventsNoCoincidence++;
+      counters.ClustersNoCoincidence++;
       if (not e.ClusterB.empty()) {
-        counters.EventsMatchedGridOnly++;
+        counters.ClustersMatchedGridOnly++;
       }
 
       if (not e.ClusterA.empty()) {
-        counters.EventsMatchedWireOnly++;
+        counters.ClustersMatchedWireOnly++;
       }
       continue;
     }
@@ -244,7 +244,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
     if (Conf.Parms.MaxGridsSpan < e.ClusterB.coord_span()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
              e.ClusterA.coord_span());
-      counters.EventsTooLargeGridSpan++;
+      counters.ClustersTooLargeGridSpan++;
       continue;
     }
 

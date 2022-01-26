@@ -65,9 +65,8 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   // VMM3Parser stats
-  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
+  Stats.create("readouts.count", Counters.VMMStats.Readouts);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  // Stats.create("readouts.ring_mismatch", Counters.RingErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -75,10 +74,12 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
   Stats.create("readouts.error_adc", Counters.VMMStats.ErrorADC);
   Stats.create("readouts.error_vmm", Counters.VMMStats.ErrorVMM);
   Stats.create("readouts.error_channel", Counters.VMMStats.ErrorChannel);
-  Stats.create("readouts.count", Counters.VMMStats.Readouts);
-  Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
+  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
+  Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
+
+
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
@@ -89,7 +90,10 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
 
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
-  Stats.create("cluster.no_coincidence", Counters.EventsNoCoincidence);
+  Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
+  Stats.create("cluster.matched_wire_only", Counters.ClustersMatchedWireOnly);
+  Stats.create("cluster.matched_grid_only", Counters.ClustersMatchedGridOnly);
+  Stats.create("cluster.too_large_grid_span", Counters.ClustersTooLargeGridSpan);
 
   // Event stats
   Stats.create("events.count", Counters.Events);

@@ -43,10 +43,10 @@ struct Counters {
   //
   int64_t ProcessingIdle;
   int64_t Events;
-  int64_t EventsNoCoincidence;
-  int64_t EventsMatchedWireOnly;
-  int64_t EventsMatchedGridOnly;
-  int64_t EventsTooLargeGridSpan;
+  int64_t ClustersNoCoincidence;
+  int64_t ClustersMatchedWireOnly;
+  int64_t ClustersMatchedGridOnly;
+  int64_t ClustersTooLargeGridSpan;
   int64_t EventsMatchedClusters;
   int64_t PixelErrors;
   int64_t TimeErrors;
