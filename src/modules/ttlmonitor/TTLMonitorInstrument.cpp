@@ -28,13 +28,18 @@ TTLMonitorInstrument::TTLMonitorInstrument(struct Counters & counters,
     , ModuleSettings(moduleSettings)
     , Serializer(serializer) {
 
+  XTRACE(INIT, ALW, "Loading configuration file %s",
+         ModuleSettings.ConfigFile.c_str());
+  Conf = Config(ModuleSettings.ConfigFile);
+  Conf.loadAndApply();
+
   if (!ModuleSettings.FilePrefix.empty()) {
     std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
-  // ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
 }
 
 

@@ -24,11 +24,9 @@ struct Counters {
     // Processing Counters - accessed in processing thread
     int64_t FifoSeqErrors;
 
-
     // ESSReadout parser
     struct ESSReadout::ESSHeaderStats ReadoutStats;
     int64_t ErrorESSHeaders;
-    //int64_t RingRx[24];
 
     // VMM3a Readouts
     struct ESSReadout::VMM3ParserStats VMMStats;
@@ -43,18 +41,10 @@ struct Counters {
 
     //
     int64_t ProcessingIdle;
-    int64_t Events;
-    int64_t EventsUdder;
-    int64_t EventsNoCoincidence;
-    int64_t EventsMatchedClusters;
-    int64_t EventsMatchedWireOnly;
-    int64_t EventsMatchedStripOnly;
-    int64_t EventsInvalidStripGap;
-    int64_t EventsInvalidWireGap;
-    int64_t PixelErrors;
     int64_t TimeErrors;
     struct ESSReadout::ESSTime::Stats_t TimeStats;
     int64_t TxBytes;
+
     // Kafka stats below are common to all detectors
     struct Producer::ProducerStats KafkaStats;
 

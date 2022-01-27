@@ -36,11 +36,12 @@ const unsigned int MinDataSize{5}; // just pad, cookie and version
 class Parser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType { Reserved = 0x00,
-                      Loki4Amp = 0x30,
-                      CSPEC    = 0x40,
-                      FREIA    = 0x48,
-                      DREAM    = 0x60 };
+  enum DetectorType { Reserved   = 0x00,
+                      TTLMonitor = 0x10,
+                      Loki4Amp   = 0x30,
+                      CSPEC      = 0x40,
+                      FREIA      = 0x48,
+                      DREAM      = 0x60 };
 
   uint64_t NextSeqNum[MaxOutputQueues];
 

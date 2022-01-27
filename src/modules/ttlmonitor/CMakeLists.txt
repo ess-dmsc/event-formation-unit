@@ -9,6 +9,7 @@ include_directories(.)
 set(ttlmonitor_inc
   TTLMonitorBase.h
   TTLMonitorInstrument.h
+  geometry/Config.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   )
@@ -18,6 +19,7 @@ set(ttlmonitor_SRC
 TTLMonitor.cpp
 TTLMonitorBase.cpp
 TTLMonitorInstrument.cpp
+geometry/Config.cpp
 ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
 ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
 )

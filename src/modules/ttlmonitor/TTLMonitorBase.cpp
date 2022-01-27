@@ -93,24 +93,9 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSe
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
-
-  // Clustering stats
-  Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
-  Stats.create("cluster.no_coincidence", Counters.EventsNoCoincidence);
-  Stats.create("cluster.wire_only", Counters.EventsMatchedWireOnly);
-  Stats.create("cluster.strip_only", Counters.EventsMatchedStripOnly);
-
-  // Event stats
-  Stats.create("events.count", Counters.Events);
-  Stats.create("events.pixel_errors", Counters.PixelErrors);
-  Stats.create("events.time_errors", Counters.TimeErrors);
-  Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
-  Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
-
   //
   Stats.create("thread.receive_idle", Counters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-
 
   /// \todo below stats are common to all detectors
   Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
@@ -190,7 +175,7 @@ void TTLMonitorBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -204,7 +189,7 @@ void TTLMonitorBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = TTLMonitor.ESSReadoutParser.validate(DataPtr, DataLen, TTLMonitor.ModuleSettings.TypeSubtype);
+      auto Res = TTLMonitor.ESSReadoutParser.validate(DataPtr, DataLen, TTLMonitor.Conf.Parms.TypeSubType);
       Counters.ReadoutStats = TTLMonitor.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
@@ -234,7 +219,7 @@ void TTLMonitorBase::processing_thread() {
     if (ProduceTimer.timeout()) {
 
       RuntimeStatusMask =  RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
+          {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
       Counters.KafkaStats = eventprod.stats;

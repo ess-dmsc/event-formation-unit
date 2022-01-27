@@ -16,7 +16,7 @@
 namespace TTLMonitor {
 
 struct TTLMonitorSettings {
-  uint8_t TypeSubtype{0x10};
+  std::string ConfigFile{""};
   std::string FilePrefix{""};
 };
 
