@@ -157,10 +157,6 @@ void TTLMonitorBase::input_thread() {
 void TTLMonitorBase::processing_thread() {
 
   // Event producer
-  if (EFUSettings.KafkaTopic == "") {
-    throw std::runtime_error("TTL Monitor needs a topic name");
-  }
-
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
