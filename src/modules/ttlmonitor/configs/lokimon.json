@@ -2,9 +2,9 @@
 {
   "Detector" : "TTLMonitor",
 
-  "TypeSubtype" : 72,
+  "TypeSubType" : 72,
 
-  "KafkaTopic" : "loki_beam_monitor",
+  "TTLMonitorTopic" : "loki_beam_monitor",
 
   "MaxPulseTimeDiffNS" : 1000000000,
 

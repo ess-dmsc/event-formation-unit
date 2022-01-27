@@ -39,7 +39,7 @@ TTLMonitorInstrument::TTLMonitorInstrument(struct Counters & counters,
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
 }
 
 

@@ -4,7 +4,7 @@
 
   "TypeSubType" : 72,
 
-  "KafkaTopic" : "freia_beam_monitor",
+  "TTLMonitorTopic" : "freia_beam_monitor",
 
   "MaxPulseTimeDiffNS" : 1000000000,
 

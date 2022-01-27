@@ -49,6 +49,22 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TTLMonitorTopic {}", Parms.TTLMonitorTopic);
 
 
+  try {
+    Parms.MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeDiffNS");
+  }
+  LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS {}", Parms.MaxPulseTimeDiffNS);
+
+  try {
+    Parms.MaxTOFNS = root["MaxTOFNS"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxTOFNS");
+  }
+  LOG(INIT, Sev::Info, "MaxTOFNS {}", Parms.MaxTOFNS);
+
+
+
 
 }
 
