@@ -6,7 +6,7 @@ include_directories(.)
 #=============================================================================
 # ttlmonitor detector module and base test
 #=============================================================================
-set(ttlmonitor_inc
+set(ttlmonitor_common_inc
   TTLMonitorBase.h
   TTLMonitorInstrument.h
   geometry/Config.h
@@ -15,15 +15,19 @@ set(ttlmonitor_inc
   )
 
 
-set(ttlmonitor_SRC
-TTLMonitor.cpp
+set(ttlmonitor_common_src
 TTLMonitorBase.cpp
 TTLMonitorInstrument.cpp
 geometry/Config.cpp
 ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
 ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
 )
+
+#
+set(ttlmonitor_INC ${ttlmonitor_common_inc})
+set(freia_SRC TTLMonitor.cpp ${ttlmonitor_common_src})
 create_module(ttlmonitor)
+
 
 #
 #set(TTLMonitorBaseTest_INC
@@ -40,16 +44,16 @@ create_module(ttlmonitor)
 #create_test_executable(TTLMonitorBaseTest)
 
 
-##
-## TTLMonitoriInstrumentTest Module integration test
-##
-#set(TTLMonitorInstrumentTest_INC
-#  ${freia_common_inc}
-#  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-#  )
-#set(TTLMonitorInstrumentTest_SRC
-#  ${freia_common_src}
-#  test/TTLMonitorInstrumentTest.cpp
-#  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-#)
-#create_test_executable(TTLMonitorInstrumentTest)
+#
+# TTLMonitoriInstrumentTest Module integration test
+#
+set(TTLMonitorInstrumentTest_INC
+  ${ttlmonitor_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  )
+set(TTLMonitorInstrumentTest_SRC
+  ${ttlmonitor_common_src}
+  test/TTLMonitorInstrumentTest.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+)
+create_test_executable(TTLMonitorInstrumentTest)

@@ -42,14 +42,6 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TypeSubType {}", Parms.TypeSubType);
 
   try {
-    Parms.TTLMonitorTopic = root["TTLMonitorTopic"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Kafka Topic");
-  }
-  LOG(INIT, Sev::Info, "TTLMonitorTopic {}", Parms.TTLMonitorTopic);
-
-
-  try {
     Parms.MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeDiffNS");
@@ -62,9 +54,6 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for MaxTOFNS");
   }
   LOG(INIT, Sev::Info, "MaxTOFNS {}", Parms.MaxTOFNS);
-
-
-
 
 }
 

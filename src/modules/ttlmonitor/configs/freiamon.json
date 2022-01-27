@@ -4,8 +4,6 @@
 
   "TypeSubType" : 72,
 
-  "TTLMonitorTopic" : "freia_beam_monitor",
-
   "MaxPulseTimeDiffNS" : 1000000000,
 
   "MaxTOFNS" : 1000000000
