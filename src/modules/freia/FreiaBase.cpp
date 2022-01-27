@@ -186,13 +186,8 @@ void FreiaBase::processing_thread() {
 
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
-    if (FreiaModuleSettings.IsMonitor) {
-      XTRACE(INIT, ALW, "EFU is Monitor, setting Kafka topic");
-      EFUSettings.KafkaTopic = "freia_beam_monitor";
-    } else {
-      XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
-      EFUSettings.KafkaTopic = "freia_detector";
-    }
+    XTRACE(INIT, ALW, "Setting defailt Kafka topic to freia_detector");
+    EFUSettings.KafkaTopic = "freia_detector";
   }
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
@@ -206,10 +201,6 @@ void FreiaBase::processing_thread() {
 
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
   FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings, Serializer);
-
-  /// \todo remove wheb ttlmonitor module is implemented
-  Freia.VMMParser.setMonitor(FreiaModuleSettings.IsMonitor);
-
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(), "Freia");
   ADCHistSerializer.set_callback(ProduceMonitor);
@@ -251,16 +242,12 @@ void FreiaBase::processing_thread() {
       Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
+      Freia.processReadouts();
 
-      if (FreiaModuleSettings.IsMonitor) {
-        Freia.processMonitorReadouts();
-      } else { // process regular events
-        Freia.processReadouts();
-
-        for (auto & builder : Freia.builders) {
-          Freia.generateEvents(builder.Events);
-        }
+      for (auto & builder : Freia.builders) {
+        Freia.generateEvents(builder.Events);
       }
+      // done processing data
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a little
         Counters.ProcessingIdle++;
