@@ -2,7 +2,7 @@
 {
   "Detector" : "TTLMonitor",
 
-  "TypeSubtype" : 72,
+  "TypeSubType" : 72,
 
   "KafkaTopic" : "freia_beam_monitor",
 

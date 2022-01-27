@@ -68,13 +68,11 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSe
   Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
-  // VMM3Parser stats
-  Stats.create("monitors.error", Counters.MonitorErrors);
-  Stats.create("monitors.count", Counters.MonitorCounts);
-  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
-  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
   Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
+  // VMM3Parser stats
+  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
+  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -91,6 +89,7 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSe
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
+
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
   //
