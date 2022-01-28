@@ -27,8 +27,8 @@
 #include <ttlmonitor/TTLMonitorInstrument.h>
 #include <stdio.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 namespace TTLMonitor {
 
@@ -89,8 +89,6 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSe
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
   //
   Stats.create("thread.receive_idle", Counters.RxIdle);
