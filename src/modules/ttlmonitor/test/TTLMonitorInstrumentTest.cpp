@@ -155,6 +155,7 @@ TEST_F(TTLMonitorInstrumentTest, Constructor) {
 TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
 
+  freia->VMMParser.setMonitor(true);
   auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 9);
 
@@ -172,6 +173,7 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   freia->ESSReadoutParser.Packet.Time.setReference(1,100000);
   freia->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
 
+  freia->VMMParser.setMonitor(true);
   auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 1);
 
