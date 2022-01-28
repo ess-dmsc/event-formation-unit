@@ -94,7 +94,7 @@ add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
-"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp' --exclude-throw-branches")
+"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'") #when gcovr is updated, add --exclude_throw_branches for more sensible conditionals output
 
 create_coverage_targets(
   coverage
@@ -121,7 +121,7 @@ add_custom_target(hints
   COMMAND echo ""
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"
-  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
+  COMMAND echo "Enable code coverage:                   cmake -ƒOV=ON"
   COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"
