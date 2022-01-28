@@ -564,6 +564,21 @@ TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
   ASSERT_EQ(counters.ClustersMatchedWireOnly, 1);
 }
 
+TEST_F(CSPECInstrumentTest, NoEvents) {
+  Events.push_back(TestEvent);
+  cspec->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+}
+
+TEST_F(CSPECInstrumentTest, PixelError) {
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterB.insert({0, 60000, 100, 1});
+  Events.push_back(TestEvent);
+  cspec->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.PixelErrors, 1);
+
+}
 
 TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeGridSpan);
