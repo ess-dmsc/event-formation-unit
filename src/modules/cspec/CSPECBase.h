@@ -22,20 +22,19 @@ struct CSPECSettings {
   //
 };
 
-
-
 class CSPECBase : public Detector {
 public:
-  CSPECBase(BaseSettings const &settings, struct CSPECSettings &LocalCSPECSettings);
+  CSPECBase(BaseSettings const &settings,
+            struct CSPECSettings &LocalCSPECSettings);
   ~CSPECBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
-  struct Counters Counters{};
+  struct Counters Counters {};
   CSPECSettings CSPECModuleSettings;
   EV42Serializer *Serializer;
 };
 
-}
+} // namespace Cspec

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
+
 #include <cinttypes>
 #include <vector>
 
@@ -31,18 +32,17 @@ struct VMM3ParserStats {
   int64_t OverThreshold{0};
 };
 
-
 class VMM3Parser {
-public:
-  const unsigned int MaxRingId{23}; // Physical rings
+ public:
+  const unsigned int MaxRingId{23};  // Physical rings
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
-  // From VMM3 ICD
-  // https://project.esss.dk/owncloud/index.php/s/Nv17qiLWwOTkbzE
-  // Since there will always be a single readout per header we combine
-  // the two fields into one.
-  #define VMM3DATASIZE 20
+// From VMM3 ICD
+// https://project.esss.dk/owncloud/index.php/s/Nv17qiLWwOTkbzE
+// Since there will always be a single readout per header we combine
+// the two fields into one.
+#define VMM3DATASIZE 20
   struct VMM3Data {
     uint8_t RingId;
     uint8_t FENId;
@@ -75,14 +75,14 @@ public:
   ~VMM3Parser(){};
 
   //
-  int parse(Parser::PacketDataV0 & PacketData);
+  int parse(Parser::PacketDataV0& PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;
 
   struct VMM3ParserStats Stats;
 
-private:
+ private:
   const uint16_t DataLength{20};
   const uint16_t MaxBCValue{4095};
   const uint16_t MaxADCValue{1023};
@@ -92,4 +92,4 @@ private:
   const uint16_t ADCMask{0x7fff};
   bool IsMonitor{false};
 };
-} // namespace ESSReadout
+}  // namespace ESSReadout

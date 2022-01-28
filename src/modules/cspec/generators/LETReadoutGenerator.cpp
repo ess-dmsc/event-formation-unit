@@ -9,8 +9,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include <common/debug/Trace.h>
 #include <math.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <time.h>
 
 #include <cassert>
@@ -19,8 +20,10 @@
 #include <cstring>
 #include <stdexcept>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
-void Cspec::ReadoutGenerator::generateData() {
+void Cspec::LETReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -52,9 +55,8 @@ void Cspec::ReadoutGenerator::generateData() {
     // as for LET MaxX = 11 and MaxY = 50
     YLocal = 4 * abs(XGlobal - 2);
 
-    // Readout generated for LET test, with Ring 5 and FENId 0 or 1
-    ReadoutData->RingId = 5;
-    ReadoutData->FENId = 0 + (Readout % 2);
+    // Readout generated for LET test, with Ring 0
+    ReadoutData->RingId = 0;
 
     // Each column is 6 wires wide
     // Select the FEN based on whether XGlobal is in column 0 or column 1
@@ -71,39 +73,32 @@ void Cspec::ReadoutGenerator::generateData() {
     /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
+      uint8_t ZLocal = 12 - abs(XGlobal - 2);
       if (XLocal < 2) {
         VMM = 0;
-        Channel = (XLocal * 16) + 32 + Fuzzer.random8() * 16 / 255;
+        Channel = (XLocal * 16) + 32 + ZLocal;
       } else {
         VMM = 1;
-        Channel = (XLocal - 2) * 16 + Fuzzer.random8() * 16 / 255;
+        Channel = (XLocal - 2) * 16 + ZLocal;
       }
     }
     // Grid Y direction
     // Mappings of Y coordinates to channels and VMMs is complicated
     // Details are in ICD, with useful figure
     else {
-      if (YLocal < 6) {
-        VMM = 5;
-        Channel = 5 - YLocal;
-      } else if (YLocal < 70) {
-        VMM = 4;
-        Channel = 69 - YLocal;
-      } else if (YLocal < 134) {
-        VMM = 3;
-        Channel = 133 - YLocal;
-      } else {
-        VMM = 2;
-        Channel = 139 - YLocal;
-      }
+      VMM = 2;
+      Channel = 50 - YLocal;
     }
 
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
 
     DP += VMM3DataSize;
+    XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
+           XLocal, YLocal);
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
+    /// \todo work out why updating TimeLow is done this way, and if it applies
+    /// to CSPEC
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {

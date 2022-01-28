@@ -4,11 +4,10 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <cspec/geometry/Config.h>
+#include <common/debug/Trace.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <common/debug/Trace.h>
-
+#include <cspec/geometry/Config.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -25,14 +24,12 @@ auto NoDetector = R"(
 }
 )"_json;
 
-
 auto InvalidDetector = R"(
 {
   "Detector": "CSPECs",
   "WireChOffset" : 16
 }
 )"_json;
-
 
 auto InvalidRing = R"(
 {
@@ -66,7 +63,6 @@ std::string InvalidConfig = R"(
 }
 )";
 
-
 auto DuplicateEntry = R"(
 {
   "Detector": "CSPEC",
@@ -85,9 +81,7 @@ using namespace Cspec;
 class ConfigTest : public TestBase {
 protected:
   Config config{"CSPEC", "config.json"};
-  void SetUp() override {
-    config.root = j2;
-  }
+  void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
 
@@ -125,7 +119,6 @@ TEST_F(ConfigTest, Duplicate) {
   ASSERT_ANY_THROW(config.apply());
 }
 
-
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
   config.loadAndApply();
@@ -134,7 +127,6 @@ TEST_F(ConfigTest, FullInstrument) {
 
   /// \todo, check correct Hybrids initialised
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

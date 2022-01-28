@@ -7,18 +7,22 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "CSPECBase.h"
 #include <common/detector/Detector.h>
+
+#include "CSPECBase.h"
 
 static struct Cspec::CSPECSettings LocalCSPECSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser.add_option("--dumptofile", LocalCSPECSettings.FilePrefix,
-                    "dump to specified file")->group("CSPEC");
+  parser
+      .add_option("--dumptofile", LocalCSPECSettings.FilePrefix,
+                  "dump to specified file")
+      ->group("CSPEC");
 
-  parser.add_option("-f, --file", LocalCSPECSettings.ConfigFile,
-                    "CSPEC specific configuration (json) file")
-                    ->group("CSPEC");
+  parser
+      .add_option("-f, --file", LocalCSPECSettings.ConfigFile,
+                  "CSPEC specific configuration (json) file")
+      ->group("CSPEC");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

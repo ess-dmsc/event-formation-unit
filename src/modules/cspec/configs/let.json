@@ -1,19 +1,27 @@
-
 {
   "Detector" : "CSPEC",
 
-  "InstrumentGeometry" : "LET",
+  "InstrumentGeometry" : "CSPEC",
 
-  "Config" : [
-    { "Ring" :  5, "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
-    { "Ring" :  5, "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
+  "Vessel_Config" : {
+    "0":  {"NumGrids": 51, "Rotation": false, "XOffset":   0, "Short": true, "MinADC": 200}
+  },
+
+    "Config" : [
+    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  2, "HybridId" : ""},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : ""},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : ""},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  2, "HybridId" : ""}
   ],
 
 
   "MaxPulseTimeNS" : 71428570,
-  "MaxGapWire"  : 0,
-  "MaxGapStrip" : 0,
-  "TimeBoxNs" : 2010
+  "TimeBoxNs" : 2010,
+  "DefaultMinADC": 50,
+  "MaxGridsPerEvent": 5,
+  "SizeX": 12,
+  "SizeY": 51, 
+  "SizeZ": 16
 }
