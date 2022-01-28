@@ -94,7 +94,7 @@ add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
-"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'")
+"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp' --exclude-throw-branches")
 
 create_coverage_targets(
   coverage
