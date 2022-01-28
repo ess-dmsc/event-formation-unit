@@ -25,7 +25,7 @@ ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
 
 #
 set(ttlmonitor_INC ${ttlmonitor_common_inc})
-set(freia_SRC TTLMonitor.cpp ${ttlmonitor_common_src})
+set(ttlmonitor_SRC TTLMonitor.cpp ${ttlmonitor_common_src})
 create_module(ttlmonitor)
 
 

@@ -84,6 +84,13 @@ std::vector<uint8_t> MonitorReadout {
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
+
+  // Nineth monitor readout - OTADC nonzero
+  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0xff, 0xff,  // OTADC 0xffff
+  0x00, 0x00, 0x00, 0x00,  // 0x00000000
 };
 
 
@@ -149,11 +156,11 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
 
   auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Readouts, 8);
+  ASSERT_EQ(Readouts, 9);
 
   freia->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorCounts, 1);
-  ASSERT_EQ(counters.MonitorErrors, 4);
+  ASSERT_EQ(counters.MonitorErrors, 5);
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.FENCfgErrors, 1);
   ASSERT_EQ(counters.TOFErrors, 1);

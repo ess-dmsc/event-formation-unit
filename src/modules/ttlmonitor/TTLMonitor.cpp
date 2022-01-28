@@ -23,10 +23,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-class FREIA : public TTLMonitor::TTLMonitorBase {
+class TTLMON : public TTLMonitor::TTLMonitorBase {
 public:
-  explicit FREIA(BaseSettings Settings)
+  explicit TTLMON(BaseSettings Settings)
       : TTLMonitor::TTLMonitorBase(std::move(Settings), LocalTTLMonitorSettings) {}
 };
 
-DetectorFactory<FREIA> Factory;
+DetectorFactory<TTLMON> Factory;
