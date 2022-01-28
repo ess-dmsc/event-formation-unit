@@ -181,6 +181,21 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   ASSERT_EQ(counters.MonitorErrors, 0);
 }
 
+/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
+TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
+  ModuleSettings.FilePrefix = "deleteme_";
+  TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializer);
+  TTLMonDump.setSerializer(serializer);
+
+  makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
+  auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);
+  TTLMonDump.processMonitorReadouts();
+
+  counters.VMMStats = TTLMonDump.VMMParser.Stats;
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+}
+
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
 
