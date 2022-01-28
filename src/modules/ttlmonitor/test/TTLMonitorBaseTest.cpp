@@ -97,22 +97,22 @@ TEST_F(TTLMonitorBaseTest, DataReceive) {
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
 }
 
-// TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
-//   TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
-//   Readout.startThreads();
-//   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-//   std::this_thread::sleep_for(SleepTime);
-//   dummyreadout[0] = 0xff; // pad should be 0
-//   TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&dummyreadout[0], dummyreadout.size());
-//   Server.startPacketTransmission(1, 100);
-//   std::this_thread::sleep_for(SleepTime);
-//   Readout.stopThreads();
-//   EXPECT_EQ(Readout.Counters.RxPackets, 1);
-//   EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
-//   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-//   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts as header is bad
-//   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
-// }
+TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
+  TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
+  std::this_thread::sleep_for(SleepTime);
+  dummyreadout[0] = 0xff; // pad should be 0
+  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&dummyreadout[0], dummyreadout.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
+  EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts as header is bad
+  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
+}
 
 int main(int argc, char **argv) {
   std::string filename{"TTLMonitor.json"};
