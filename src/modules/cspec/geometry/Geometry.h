@@ -33,6 +33,6 @@ public:
                                 uint8_t Channel, bool Short) = 0;
   virtual bool validWireMapping(uint8_t HybridID, uint8_t VMMID,
                                 uint8_t Channel) = 0;
-  static const uint16_t InvalidCoord = 65535;
+  static constexpr uint16_t InvalidCoord = 65535;
 };
 } // namespace Cspec

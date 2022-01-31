@@ -6,7 +6,6 @@
 
 #include <common/testutils/TestBase.h>
 #include <cspec/geometry/CSPECGeometry.h>
-#include <cspec/geometry/Geometry.h>
 
 using namespace Cspec;
 
@@ -75,10 +74,9 @@ TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations) {
 
 TEST_F(CSPECGeometryTest, InvalidXAndZCoordinates) {
   // invalid HybridID
-  /// \todo access InvalidCoord from tests, linking not working so stuck with hard coded values 
-  // ASSERT_EQ(Geom.InvalidCoord, 65535); // Invalid Coordinate == 65535
+  ASSERT_EQ(Geometry::InvalidCoord, 65535); // Invalid Coordinate == 65535
 
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), 65535); 
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), 65535);
   ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), 65535);
   // invalid channel on vmm0
   ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 10, 0, false), 65535);
