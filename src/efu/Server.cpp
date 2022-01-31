@@ -42,7 +42,7 @@ Server::~Server() {
 
 /// \brief Setup socket parameters
 void Server::serverOpen() {
-  LOG(IPC, Sev::Info, "Server::open() called on port {}", ServerPort);
+  LOG(IPC, Sev::Info, "Server::serverOpen() called on port {}", ServerPort);
 
   struct sockaddr_in socket_address;
   int __attribute__((unused)) ret;

@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <cspec/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
+#include <cspec/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -39,7 +39,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
-    DataHdrPtr->RingId = DataHdrPtr->RingId/2;
+    DataHdrPtr->RingId = DataHdrPtr->RingId / 2;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -65,8 +65,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     Stats.DataHeaders++;
 
     if (DataHdrPtr->DataLength != DataHeaderSize + CSPECReadoutSize) {
-      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", 
-            DataHdrPtr->DataLength, DataHeaderSize + CSPECReadoutSize);
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
+             DataHdrPtr->DataLength, DataHeaderSize + CSPECReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -81,14 +81,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
-           Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
-           Data->AmpB, Data->AmpC, Data->AmpD);
+           DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           Data->AmpD);
 
     CurrentDataSection.Data = *Data;
     ParsedReadouts++;
     Stats.Readouts++;
-  
+
     Result.push_back(CurrentDataSection);
     BytesLeft -= DataHdrPtr->DataLength;
     DataPtr += DataHdrPtr->DataLength;
@@ -96,4 +96,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace CSPEC
+} // namespace Cspec

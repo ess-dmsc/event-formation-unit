@@ -15,14 +15,13 @@
 #include <common/testutils/DataFuzzer.h>
 
 namespace Cspec {
-class ReadoutGenerator : public ReadoutGeneratorBase {
+class LETReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
 protected:
   void generateData() override;
-     const uint32_t TimeToFirstReadout{1000};
-
-};} // namespace Cspec
-
+  const uint32_t TimeToFirstReadout{1000};
+};
+} // namespace Cspec
 // GCOVR_EXCL_STOP

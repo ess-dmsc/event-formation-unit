@@ -42,6 +42,14 @@ TEST_F(ESSGeometryTest, ConstructorII) {
 
   essgeom.nz(1);
   ASSERT_EQ(nx * ny, essgeom.pixel2D(nx - 1, ny - 1));
+
+}
+
+//checking the pixel values for 3D shapes are as expected, 
+//last pixel in Z = 0 is 1 less than first pixel in Z = 1
+TEST_F(ESSGeometryTest, ConstructorIII) {
+  ESSGeometry essgeom(10, 10, 10, 1);
+  ASSERT_EQ(essgeom.pixel3D(9, 9, 0) + 1, essgeom.pixel3D(0, 0, 1));
 }
 
 int main(int argc, char **argv) {
