@@ -76,7 +76,8 @@ void CSPECInstrument::loadConfigAndCalib() {
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
-  builders = std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
+  builders =
+      std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
   // if (ModuleSettings.CalibFile != "") {
   //   XTRACE(INIT, ALW, "Loading and applying calibration file");

@@ -33,7 +33,7 @@ public:
                       uint8_t Channel, uint16_t XOffset, bool Rotated) override;
   uint16_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
                   uint16_t YOffset, bool Rotated, bool Short) override;
-  
+
 protected:
   bool validGridMapping(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
                         bool Short) override;

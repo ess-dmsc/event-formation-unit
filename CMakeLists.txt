@@ -121,7 +121,7 @@ add_custom_target(hints
   COMMAND echo ""
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"
-  COMMAND echo "Enable code coverage:                   cmake -ƒOV=ON"
+  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
   COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"

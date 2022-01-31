@@ -392,7 +392,6 @@ protected:
   }
 };
 
-
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(CSPECInstrumentTest, DumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_";
@@ -411,7 +410,8 @@ TEST_F(CSPECInstrumentTest, DumpTofile) {
 // Test cases below
 TEST_F(CSPECInstrumentTest, BadConfig) {
   ModuleSettings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(CSPECInstrument(counters, ModuleSettings, serializer), std::runtime_error);
+  EXPECT_THROW(CSPECInstrument(counters, ModuleSettings, serializer),
+               std::runtime_error);
 }
 
 TEST_F(CSPECInstrumentTest, Constructor) {
@@ -577,7 +577,6 @@ TEST_F(CSPECInstrumentTest, PixelError) {
   cspec->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.PixelErrors, 1);
-
 }
 
 TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
@@ -604,7 +603,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
 }
 
 TEST_F(CSPECInstrumentTest, NegativeTOF) {
-  auto & Packet = cspec->ESSReadoutParser.Packet;
+  auto &Packet = cspec->ESSReadoutParser.Packet;
   makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
   Packet.Time.setReference(200, 0);
 

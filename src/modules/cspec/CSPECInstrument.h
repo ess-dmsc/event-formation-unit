@@ -18,9 +18,9 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
+#include <common/reduction/EventBuilder2D.h>
 #include <cspec/CSPECBase.h>
 #include <cspec/Counters.h>
-#include <common/reduction/EventBuilder2D.h>
 #include <cspec/geometry/CSPECGeometry.h>
 #include <cspec/geometry/Config.h>
 #include <logical_geometry/ESSGeometry.h>
