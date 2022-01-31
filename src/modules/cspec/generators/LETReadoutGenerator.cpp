@@ -24,6 +24,8 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData() {
+  Settings.TicksBtwReadouts = 88; // 88 ticks ~ 1us
+  Settings.TicksBtwEvents = 300 * 88;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -33,7 +35,6 @@ void Cspec::LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
@@ -97,12 +98,15 @@ void Cspec::LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to CSPEC
+    /// \todo when does TimeHigh need updating?
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {
       TimeLow += Settings.TicksBtwEvents;
+    }
+    if (TimeLow >= 88052499){
+      TimeLow -= 88052499;
+      TimeHigh += 1;
     }
   }
 }
