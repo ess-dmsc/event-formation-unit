@@ -1,0 +1,10 @@
+
+{
+  "Detector" : "TTLMonitor",
+
+  "TypeSubType" : 72,
+
+  "MaxPulseTimeDiffNS" : 1000000000,
+
+  "MaxTOFNS" : 1000000000
+}
