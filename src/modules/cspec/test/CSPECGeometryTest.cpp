@@ -75,15 +75,16 @@ TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations) {
 
 TEST_F(CSPECGeometryTest, InvalidXAndZCoordinates) {
   // invalid HybridID
-  ASSERT_EQ(Geom.InvalidCoord, 65535); // Invalid Coordinate == 65535
+  /// \todo access InvalidCoord from tests, linking not working so stuck with hard coded values 
+  // ASSERT_EQ(Geom.InvalidCoord, 65535); // Invalid Coordinate == 65535
 
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), Geom.InvalidCoord); 
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), 65535); 
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), 65535);
   // invalid channel on vmm0
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 10, 0, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 10, 0, false), 65535);
 
   // invalid VMM
-  ASSERT_EQ(Geom.xAndzCoord(0, 0, 4, 0, 0, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 4, 0, 0, false), 65535);
 }
 
 TEST_F(CSPECGeometryTest, YCoordinateCalculations) {
@@ -129,16 +130,16 @@ TEST_F(CSPECGeometryTest, YCoordinateCalculations) {
 
 TEST_F(CSPECGeometryTest, InvalidYCoordinates) {
   // invalid channel on short vessel
-  ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false, true), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false, true), 65535);
 
   // invalid channel on hybrid 1 vmm0
-  ASSERT_EQ(Geom.xAndzCoord(1, 0, 10, 0, false, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 10, 0, false, false), 65535);
 
   // invalid channel on hybrid 2 vmm 1
-  ASSERT_EQ(Geom.xAndzCoord(2, 1, 10, 0, false, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(2, 1, 10, 0, false, false), 65535);
 
   // invalid hybrid
-  ASSERT_EQ(Geom.xAndzCoord(3, 0, 0, 0, false, false), Geom.InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(3, 0, 0, 0, false, false), 65535);
 }
 
 int main(int argc, char **argv) {
