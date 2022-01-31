@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <cspec/clustering/EventBuilder.h>
+#include <common/reduction/EventBuilder2D.h>
 #include <fmt/format.h>
 
 #include <algorithm>
@@ -16,11 +16,11 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
 
-namespace Cspec {
 
-EventBuilder::EventBuilder() { matcher.set_minimum_time_gap(timegap); }
 
-void EventBuilder::insert(Hit hit) {
+EventBuilder2D::EventBuilder2D() { matcher.set_minimum_time_gap(timegap); }
+
+void EventBuilder2D::insert(Hit hit) {
   XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time,
          hit.coordinate, hit.weight);
 
@@ -33,7 +33,7 @@ void EventBuilder::insert(Hit hit) {
   }
 }
 
-void EventBuilder::flush() {
+void EventBuilder2D::flush() {
   matcher.matched_events.clear();
 
   sort_chronologically(HitsX);
@@ -54,9 +54,8 @@ void EventBuilder::flush() {
   clear();
 }
 
-void EventBuilder::clear() {
+void EventBuilder2D::clear() {
   HitsX.clear();
   HitsY.clear();
 }
 
-} // namespace Cspec

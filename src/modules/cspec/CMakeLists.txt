@@ -13,7 +13,7 @@ set(cspec_common_inc
   geometry/Config.h
   geometry/CSPECGeometry.h
   geometry/Geometry.h
-  clustering/EventBuilder.h
+  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.h
@@ -25,7 +25,7 @@ set(cspec_common_src
   CSPECInstrument.cpp
   geometry/Config.cpp
   geometry/CSPECGeometry.cpp
-  clustering/EventBuilder.cpp
+  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
