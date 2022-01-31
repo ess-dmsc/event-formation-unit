@@ -63,14 +63,14 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     XTRACE(DATA, DEB, "readout: RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
-    if (readout.RingId/2 != 11) {
+    if (readout.RingId/2 != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u for monitor readout",
              readout.RingId);
       counters.RingCfgErrors++;
       continue;
     }
 
-    if (readout.FENId != 0) {
+    if (readout.FENId != Conf.Parms.MonitorFEN) {
       XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout",
              readout.FENId);
       counters.FENCfgErrors++;

@@ -27,6 +27,14 @@ auto DefaultValuesOnly = R"(
   }
 )"_json;
 
+auto RingAndFEN = R"(
+  {
+    "Detector" : "TTLMonitor",
+    "MonitorRing" : 88,
+    "MonitorFEN" : 77
+  }
+)"_json;
+
 
 using namespace TTLMonitor;
 
@@ -42,6 +50,8 @@ TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
   ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000/14));
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000/14));
+  ASSERT_EQ(config.Parms.MonitorRing, 11);
+  ASSERT_EQ(config.Parms.MonitorFEN, 0);
 }
 
 TEST_F(ConfigTest, MissingMandatoryField) {
@@ -60,6 +70,13 @@ TEST_F(ConfigTest, DefaultValues) {
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
   ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000/14));
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000/14));
+}
+
+TEST_F(ConfigTest, RingAndFENConfig) {
+  config.root = RingAndFEN;
+  config.apply();
+  ASSERT_EQ(config.Parms.MonitorRing, 88);
+  ASSERT_EQ(config.Parms.MonitorFEN, 77);
 }
 
 

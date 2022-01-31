@@ -55,6 +55,20 @@ void Config::apply() {
   }
   LOG(INIT, Sev::Info, "MaxTOFNS {}", Parms.MaxTOFNS);
 
+  try {
+    Parms.MonitorRing = root["MonitorRing"].get<std::uint8_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MonitorRing");
+  }
+  LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
+
+  try {
+    Parms.MonitorFEN = root["MonitorFEN"].get<std::uint8_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MonitorFEN");
+  }
+  LOG(INIT, Sev::Info, "MonitorFEN {}", Parms.MonitorFEN);
+
 }
 
 } // namespace Freia

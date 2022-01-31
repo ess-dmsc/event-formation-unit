@@ -11,12 +11,12 @@ get_filename_component(TTLMON_FULL "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamo
 ## Pure unit tests
 ##
 
-set(TTLMonConfigTest_INC
+set(TTLMonitorConfigTest_INC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ../geometry/Config.h)
-set(TTLMonConfigTest_SRC
+set(TTLMonitorConfigTest_SRC
   ../geometry/Config.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ConfigTest.cpp)
-create_test_executable(TTLMonConfigTest)
-target_compile_definitions(TTLMonConfigTest PRIVATE TTLMON_FULL="${TTLMON_FULL}")
+create_test_executable(TTLMonitorConfigTest)
+target_compile_definitions(TTLMonitorConfigTest PRIVATE TTLMON_FULL="${TTLMON_FULL}")

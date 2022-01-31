@@ -37,6 +37,8 @@ public:
     uint8_t TypeSubType{ESSReadout::Parser::TTLMonitor};
     uint32_t MaxTOFNS{20 * 71'428'571}; // Twenty 14Hz pulses
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
+    uint8_t MonitorRing{11};
+    uint8_t MonitorFEN{0};
   } Parms;
 
   std::string FileName{""};

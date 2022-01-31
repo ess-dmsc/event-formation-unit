@@ -118,7 +118,7 @@ protected:
   struct Counters counters;
   TTLMonitorSettings ModuleSettings;
   EV42Serializer * serializer;
-  TTLMonitorInstrument * freia;
+  TTLMonitorInstrument * ttlmonitor;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
@@ -130,9 +130,9 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    freia = new TTLMonitorInstrument(counters, ModuleSettings, serializer);
-    freia->setSerializer(serializer);
-    freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    ttlmonitor = new TTLMonitorInstrument(counters, ModuleSettings, serializer);
+    ttlmonitor->setSerializer(serializer);
+    ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
 
@@ -153,13 +153,13 @@ TEST_F(TTLMonitorInstrumentTest, Constructor) {
 
 
 TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
-  makeHeader(freia->ESSReadoutParser.Packet, MonitorReadout);
+  makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadout);
 
-  freia->VMMParser.setMonitor(true);
-  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ttlmonitor->VMMParser.setMonitor(true);
+  auto Readouts = ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 9);
 
-  freia->processMonitorReadouts();
+  ttlmonitor->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorCounts, 1);
   ASSERT_EQ(counters.MonitorErrors, 5);
   ASSERT_EQ(counters.RingCfgErrors, 1);
@@ -169,15 +169,15 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
 }
 
 TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
-  makeHeader(freia->ESSReadoutParser.Packet, MonitorReadoutTOF);
-  freia->ESSReadoutParser.Packet.Time.setReference(1,100000);
-  freia->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
+  makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadoutTOF);
+  ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1,100000);
+  ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
 
-  freia->VMMParser.setMonitor(true);
-  auto Readouts = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ttlmonitor->VMMParser.setMonitor(true);
+  auto Readouts = ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 1);
 
-  freia->processMonitorReadouts();
+  ttlmonitor->processMonitorReadouts();
   ASSERT_EQ(counters.MonitorErrors, 0);
 }
 
