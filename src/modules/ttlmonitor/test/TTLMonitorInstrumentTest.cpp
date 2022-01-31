@@ -5,16 +5,17 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/kafka/EV42Serializer.h>
-#include <common/reduction/Event.h>
 #include <common/readout/ess/Parser.h>
+#include <common/reduction/Event.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <ttlmonitor/TTLMonitorInstrument.h>
 #include <stdio.h>
 #include <string.h>
+#include <ttlmonitor/TTLMonitorInstrument.h>
 
 using namespace TTLMonitor;
 
+// clang-format off
 std::string ConfigFile{"deleteme_ttlmonitor_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -109,16 +110,15 @@ std::vector<uint8_t> MonitorReadoutTOF {
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 };
-
+// clang-format on
 
 class TTLMonitorInstrumentTest : public TestBase {
 public:
-
 protected:
   struct Counters counters;
   TTLMonitorSettings ModuleSettings;
-  EV42Serializer * serializer;
-  TTLMonitorInstrument * ttlmonitor;
+  EV42Serializer *serializer;
+  TTLMonitorInstrument *ttlmonitor;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
@@ -136,12 +136,13 @@ protected:
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::Parser::PacketDataV0 & Packet, std::vector<uint8_t> & testdata) {
+  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+                  std::vector<uint8_t> &testdata) {
     Packet.HeaderPtr = &PacketHeader;
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0,0);
-    Packet.Time.setPrevReference(0,0);
+    Packet.Time.setReference(0, 0);
+    Packet.Time.setPrevReference(0, 0);
   }
 };
 
@@ -151,12 +152,12 @@ TEST_F(TTLMonitorInstrumentTest, Constructor) {
   ASSERT_EQ(counters.FENCfgErrors, 0);
 }
 
-
 TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadout);
 
   ttlmonitor->VMMParser.setMonitor(true);
-  auto Readouts = ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+  auto Readouts =
+      ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 9);
 
   ttlmonitor->processMonitorReadouts();
@@ -170,11 +171,12 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
 
 TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadoutTOF);
-  ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1,100000);
-  ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1,0);
+  ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1, 100000);
+  ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
 
   ttlmonitor->VMMParser.setMonitor(true);
-  auto Readouts = ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+  auto Readouts =
+      ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
   ASSERT_EQ(Readouts, 1);
 
   ttlmonitor->processMonitorReadouts();

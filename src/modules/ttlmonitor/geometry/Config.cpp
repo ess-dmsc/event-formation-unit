@@ -68,7 +68,6 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for MonitorFEN");
   }
   LOG(INIT, Sev::Info, "MonitorFEN {}", Parms.MonitorFEN);
-
 }
 
-} // namespace Freia
+} // namespace TTLMonitor

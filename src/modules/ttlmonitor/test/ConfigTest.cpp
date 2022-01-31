@@ -4,11 +4,11 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <ttlmonitor/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <ttlmonitor/geometry/Config.h>
 
-
+// clang-format off
 auto MissingDetector = R"(
   {
     "Instrument" : "Freia"
@@ -34,7 +34,7 @@ auto RingAndFEN = R"(
     "MonitorFEN" : 77
   }
 )"_json;
-
+// clang-format on
 
 using namespace TTLMonitor;
 
@@ -45,11 +45,10 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
-  ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000/14));
-  ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000/14));
+  ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
+  ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
   ASSERT_EQ(config.Parms.MonitorRing, 11);
   ASSERT_EQ(config.Parms.MonitorFEN, 0);
 }
@@ -68,8 +67,8 @@ TEST_F(ConfigTest, DefaultValues) {
   config.root = DefaultValuesOnly;
   config.apply();
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
-  ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000/14));
-  ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000/14));
+  ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
+  ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
 }
 
 TEST_F(ConfigTest, RingAndFENConfig) {
@@ -79,7 +78,6 @@ TEST_F(ConfigTest, RingAndFENConfig) {
   ASSERT_EQ(config.Parms.MonitorFEN, 77);
 }
 
-
 TEST_F(ConfigTest, FullInstrument) {
   config = Config(TTLMON_FULL);
   config.loadAndApply();
@@ -87,7 +85,6 @@ TEST_F(ConfigTest, FullInstrument) {
   ASSERT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

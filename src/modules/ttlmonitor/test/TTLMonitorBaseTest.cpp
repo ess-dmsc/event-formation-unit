@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+// clang-format off
 std::vector<uint8_t> dummyreadout {
               0x00, 0x00, // pad, v0
   0x45, 0x53, 0x53, 0x48, // 'E', 'S', 'S', type 0x48
@@ -47,6 +48,7 @@ std::string ttlmonjson = R"(
    "MaxTOFNS" : 1000000000
   }
 )";
+// clang-format on
 
 #include <common/testutils/SaveBuffer.h>
 #include <ttlmonitor/TTLMonitorBase.h>
@@ -55,7 +57,8 @@ std::string ttlmonjson = R"(
 
 class TTLMonitorBaseStandIn : public TTLMonitor::TTLMonitorBase {
 public:
-  TTLMonitorBaseStandIn(BaseSettings Settings, struct TTLMonitor::TTLMonitorSettings ReadoutSettings)
+  TTLMonitorBaseStandIn(BaseSettings Settings,
+                        struct TTLMonitor::TTLMonitorSettings ReadoutSettings)
       : TTLMonitor::TTLMonitorBase(Settings, ReadoutSettings){};
   ~TTLMonitorBaseStandIn() = default;
   using Detector::Threads;
@@ -81,19 +84,20 @@ TEST_F(TTLMonitorBaseTest, Constructor) {
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
-
 TEST_F(TTLMonitorBaseTest, DataReceive) {
   TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&dummyreadout[0], dummyreadout.size());
+  TestUDPServer Server(43126, Settings.DetectorPort,
+                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2); // number of readouts dummyreadout
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
+            2); // number of readouts dummyreadout
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
 }
 
@@ -103,14 +107,16 @@ TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
   dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&dummyreadout[0], dummyreadout.size());
+  TestUDPServer Server(43126, Settings.DetectorPort,
+                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts as header is bad
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
+            0); // no readouts as header is bad
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
 }
 
