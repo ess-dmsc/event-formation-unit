@@ -182,7 +182,7 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t xAndzCoord = GeometryInstance->xAndzCoord(
           readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
 
-      if (xAndzCoord == 65535) { // 65535 is invalid xandzCoordinate
+      if (xAndzCoord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
         counters.MappingErrors++;
         continue;
@@ -201,7 +201,7 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord == 65535) { // 65535 is invalid yCoordinate
+      if (yCoord == GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;

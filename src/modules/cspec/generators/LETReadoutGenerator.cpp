@@ -24,8 +24,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData() {
-  Settings.TicksBtwReadouts = 88; // 88 ticks ~ 1us
-  Settings.TicksBtwEvents = 300 * 88;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -71,7 +69,6 @@ void Cspec::LETReadoutGenerator::generateData() {
     }
 
     // Wire X and Z direction
-    /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
       uint8_t ZLocal = 12 - abs(XGlobal - 2);
@@ -98,7 +95,6 @@ void Cspec::LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    /// \todo when does TimeHigh need updating?
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {
