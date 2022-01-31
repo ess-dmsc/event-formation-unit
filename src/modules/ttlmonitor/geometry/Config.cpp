@@ -30,8 +30,8 @@ void Config::apply() {
   }
 
   if (DetectorName != "TTLMonitor") {
-    LOG(INIT, Sev::Error, "InstrumentName mismatch, expexted TTLMonitor");
-    throw std::runtime_error("Inconsistent Json file - invalid name, expected TTLMonitor");
+    LOG(INIT, Sev::Error, "Detector name mismatch, expected TTLMonitor");
+    throw std::runtime_error("Detector name mismatch, expected TTLMonitor");
   }
 
   try {
