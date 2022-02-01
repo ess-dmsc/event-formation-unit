@@ -70,24 +70,12 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
   try {
-    uint8_t OldRing{255};
-    uint8_t OldFEN{255};
     auto PanelConfig = root["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
       std::string IDString =  Mapping["HybridId"];
-
-      if (Ring != OldRing) { // New ring
-        OldRing = Ring;
-        OldFEN = 255;
-      } else { // Same ring
-        if (FEN != OldFEN) {
-          OldFEN = FEN;
-          NumFENs[Ring]++;
-        }
-      }
 
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
@@ -96,33 +84,37 @@ void Config::apply() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      uint8_t HybridIndex = hybridIndex(Ring, FEN, LocalHybrid);
+      ESSReadout::Hybrid Hybrid = Hybrids[Ring][FEN][LocalHybrid];
 
-      if (HybridId[HybridIndex] != -1) {
-        XTRACE(INIT, ERR, "Duplicate {Ring, FEN, VMM} entry for Hybrid Index %u",
-          HybridIndex);
-        throw std::runtime_error("Duplicate {Ring, FEN, VMM} entry");
+      if (Hybrid.Initialised) {
+        XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
+        throw std::runtime_error("Duplicate Hybrid in config file");
+      }
+
+      Hybrid.Initialised = true;
+      Hybrid.HybridId = IDString;
+
+      /// \todo implement extra rows?
+      Hybrid.XOffset = 0;
+
+      try {
+       Hybrid.YOffset =
+            (uint8_t)Mapping["CassetteNumber"] * (uint8_t)PanelConfig["WiresPerCassette"];
+      } catch (...) {
+        Hybrid.YOffset = 0;
       }
 
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid {}",
           Name, NumHybrids, Ring, FEN, LocalHybrid);
 
-      HybridId[HybridIndex] = NumHybrids;
-      HybridStr[NumHybrids] = IDString;
+      Hybrid.HybridNumber = NumHybrids;
       NumHybrids++;
     }
-
-    HybridStr.resize(NumHybrids);
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette; //
     LOG(INIT, Sev::Info, "JSON config - Detector has {} cassettes/hybrids and "
     "{} pixels", NumHybrids, NumPixels);
-
-    for (uint8_t Ring = 0; Ring < 12; Ring++) {
-      LOG(INIT, Sev::Info,
-          "Ring {} - # FENs {}", Ring, NumFENs[Ring]);
-    }
 
 
   } catch (...) {

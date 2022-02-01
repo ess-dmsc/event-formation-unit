@@ -44,7 +44,7 @@ public:
   /// Formulae taken from the Freia ICD
   /// wire = 32 - (channel - 16)
   /// y = cass * 32 + 32 - wire
-  uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
+  uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
@@ -56,7 +56,7 @@ public:
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return GeometryBase::InvalidCoord;
     } else {
-      return Cassette * NumWires + Channel - MinWireChannel;
+      return YOffset+ Channel - MinWireChannel;
     }
   }
 
@@ -71,10 +71,6 @@ public:
     return not isXCoord(VMM);
   }
 
-  // Return the local cassette
-  uint8_t cassette(uint8_t FEN, uint8_t VMM) {
-    return 2 * FEN + ((VMM & 0x0f) >> 1);
-  }
 };
 
 } // namespace

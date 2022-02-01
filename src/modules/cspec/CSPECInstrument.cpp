@@ -119,16 +119,7 @@ void CSPECInstrument::processReadouts(void) {
            readout.RingId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
-    uint8_t AsicId = readout.VMM & 0x1;
     uint8_t HybridId = readout.VMM >> 1;
-    uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][HybridId];
-    uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][HybridId];
-    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
-    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
-    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][HybridId];
-
     if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
@@ -136,6 +127,18 @@ void CSPECInstrument::processReadouts(void) {
       counters.HybridErrors++;
       continue;
     }
+
+    ESSReadout::Hybrid Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
+    // Convert from physical rings to logical rings
+    // uint8_t Ring = readout.RingId/2;
+    uint8_t AsicId = readout.VMM & 0x1;
+    uint16_t XOffset = Hybrid.XOffset;
+    uint16_t YOffset = Hybrid.YOffset;
+    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
+    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
+    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][HybridId];
+
+    
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 

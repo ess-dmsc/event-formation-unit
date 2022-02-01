@@ -11,6 +11,7 @@
 
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
+#include <common/readout/vmm3/Hybrid.h>
 #include <string>
 #include <vector>
 
@@ -23,8 +24,8 @@ class Config {
 public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
-  static constexpr uint8_t MaxRing{11}; // 12 (logical) rings from 0 to 11
-  static constexpr uint8_t MaxFEN{1}; // This is topology specific
+  static constexpr uint8_t MaxRing{10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
+  static constexpr uint8_t MaxFEN{2}; // This is topology specific
   static constexpr uint8_t MaxHybrid{1}; // Hybrids are VMM >> 1
 
   Config() {};
@@ -32,8 +33,6 @@ public:
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
     : NumFENs(12),
-      HybridId(64, -1),
-      HybridStr(64),
       ExpectedName(Instrument),
       FileName(ConfigFile) {}
 
@@ -43,6 +42,11 @@ public:
   // Apply the loaded json file
   void apply();
 
+  // Get Hybrid from the Ring, FEN, and VMM numbers
+  // Currently Hybrids are stored as a 3D array, but may be updated in future
+  ESSReadout::Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
+    return Hybrids[Ring][FEN][VMM];
+  }
 
   /// \todo this is messy - too many implicit assumptions
   /// hybridIndex can return 0 - 63 and can wrap around to valid
@@ -86,7 +90,8 @@ public:
   // Derived parameters
   std::vector<uint16_t> NumFENs;   // #FENs per logical ring
   std::vector<int> HybridId; // reinit in constructor
-  std::vector<std::string> HybridStr; // reinit in constructor
+  ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
 

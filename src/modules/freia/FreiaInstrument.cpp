@@ -71,13 +71,6 @@ void FreiaInstrument::loadConfigAndCalib() {
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
-  XTRACE(INIT, ALW, "Creating vector of %d Hybrids (one per cassette/hybrid)",
-         Conf.NumHybrids);
-  Hybrids = std::vector<ESSReadout::Hybrid>(Conf.NumHybrids);
-  XTRACE(INIT, ALW, "Set individual HybridIDs");
-  setHybridIds(Conf.HybridStr);
-
-
   if (ModuleSettings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
     ESSReadout::CalibFile Calibration("Freia", Hybrids);
@@ -123,26 +116,38 @@ void FreiaInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId/2;
 
-    if (Conf.NumFENs[Ring] == 0) {
-      XTRACE(DATA, WAR, "No FENs on RingId %d (physical %d)",
-             Ring, readout.RingId);
-      counters.RingCfgErrors++;
+    if (Ring > Conf.MaxRing) {
+      XTRACE(DATA, ERR, "Invalid Ring ID: %u, Max Ring ID: %u", Ring,
+             Conf.MaxRing);
+      counters.RingErrors++;
       continue;
     }
 
-    uint8_t MaxFENIdOnRing = Conf.NumFENs[Ring] - 1;
-    if (readout.FENId > MaxFENIdOnRing) {
-      XTRACE(DATA, WAR, "Invalid FEN %d (max is %d)",
-             readout.FENId, MaxFENIdOnRing);
-      counters.FENCfgErrors++;
+    if (readout.FENId > Conf.MaxFEN) {
+      XTRACE(DATA, ERR, "Invalid FEN ID: %u, Max FEN ID: %u", readout.FENId,
+             Conf.MaxFEN);
+      counters.FENErrors++;
       continue;
     }
+
+    XTRACE(DATA, DEB,
+           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           Ring, readout.FENId, readout.VMM, readout.Channel,
+           readout.TimeLow);
+
+    uint8_t HybridId = readout.VMM >> 1;
+    if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
+      XTRACE(DATA, WAR,
+             "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
+             Ring, readout.FENId, HybridId);
+      counters.HybridErrors++;
+      continue;
+    }
+
+    ESSReadout::Hybrid Hybrid = Conf.getHybrid(Ring, readout.FENId,  readout.VMM >> 1); 
 
     uint8_t Asic = readout.VMM & 0x1;
-    uint8_t LocalHybrid = readout.VMM >> 1;
-    uint8_t Hybrid = Conf.getHybridId(Ring, readout.FENId, LocalHybrid);
-    uint8_t Cassette = (uint8_t)Hybrid;
-    VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
+    VMM3Calibration & Calib = Hybrid.VMMs[Asic];
 
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
@@ -166,19 +171,19 @@ void FreiaInstrument::processReadouts(void) {
     if (Geom.isXCoord(readout.VMM)) {
       XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
          TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
+      builders[Hybrid.HybridNumber].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
                       ADC, PlaneX});
 
-      uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips + readout.Channel;
+      uint32_t GlobalXChannel = Hybrid.XOffset + readout.Channel;
       ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, Geom.yCoord(Cassette, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid].insert({TimeNS, Geom.yCoord(Cassette, readout.VMM, readout.Channel),
+         TimeNS, PlaneY, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel), readout.Channel, ADC);
+      builders[Hybrid.HybridNumber].insert({TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
                       ADC, PlaneY});
 
-      uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires + readout.Channel;
+      uint32_t GlobalYChannel = Hybrid.YOffset + readout.Channel;
       ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }

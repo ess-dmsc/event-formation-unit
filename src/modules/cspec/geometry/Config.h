@@ -74,8 +74,6 @@ public:
   ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Rotated[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Short[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint16_t XOffset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint16_t YOffset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   uint16_t MinADC[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
 } // namespace Cspec

@@ -25,7 +25,9 @@ TEST_F(GeometryTest, Coordinates) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
   }
   for (unsigned int i = 16; i < 47; i++) {
-    ASSERT_EQ(Geom.yCoord(Cassette1, VMMY, i), 47 - i);
+    for (unsigned int YOffset = 0; YOffset < 1024; YOffset += 32){
+      ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), 47 - i + YOffset);
+    }
   }
 }
 
@@ -35,21 +37,9 @@ TEST_F(GeometryTest, XCoordErrors) {
 }
 
 TEST_F(GeometryTest, YCoordErrors) {
-  ASSERT_EQ(Geom.yCoord(0, VMMY,  0), Geom.InvalidCoord); // bad cassette
   ASSERT_EQ(Geom.yCoord(1, VMMX, 32), Geom.InvalidCoord); // bad VMM
   ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
   ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel
-}
-
-TEST_F(GeometryTest, Cassettes) {
-  ASSERT_EQ(Geom.cassette(1, 0), 0); // FEN 1, VMM 0, hybrid 0
-  ASSERT_EQ(Geom.cassette(1, 1), 0); // FEN 1, VMM 1
-  ASSERT_EQ(Geom.cassette(1, 2), 1); // FEN 1, VMM 2, hybrid 1
-  ASSERT_EQ(Geom.cassette(1, 3), 1); // FEN 1, VMM 3
-  ASSERT_EQ(Geom.cassette(2, 0), 2); // FEN 2, VMM 0, hybrid 2
-  ASSERT_EQ(Geom.cassette(2, 1), 2); // FEN 2, VMM 1
-  ASSERT_EQ(Geom.cassette(2, 2), 3); // FEN 2, VMM 2, hybrid 3
-  ASSERT_EQ(Geom.cassette(2, 3), 3); // FEN 2, VMM 3
 }
 
 

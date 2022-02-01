@@ -33,7 +33,10 @@ public:
   }
   bool Initialised{false};
   std::string HybridId{""};
+  uint8_t HybridNumber;
   std::vector<VMM3Calibration> VMMs{NumVMMs};
+  uint16_t XOffset{0};
+  uint16_t YOffset{0};
 }; // class Hybrid
 
 } // namespace ESSReadout
