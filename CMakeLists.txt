@@ -126,5 +126,6 @@ add_custom_target(hints
   COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"
+  COMMAND echo "Specify external EFU modules            cmake -DEFU_EXTERNAL_DIR= \\\"/tmp/thisrepo\;/tmp/thatrepo\\\" .."
   COMMAND echo ""
   )

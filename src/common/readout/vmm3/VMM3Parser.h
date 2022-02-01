@@ -60,7 +60,18 @@ class VMM3Parser {
   static_assert(sizeof(VMM3Parser::VMM3Data) == (VMM3DATASIZE),
                 "Wrong header size (update assert or check packing)");
 
-  VMM3Parser() { Result.reserve(MaxReadoutsInPacket); };
+  VMM3Parser() {
+    Result.reserve(MaxReadoutsInPacket);
+  };
+
+  /// \brief VMM readout is used as monitor
+  /// this mainly affects parsing of the ADC field which
+  /// is 10 bits when used for readouts and 16 bits when
+  /// a monitor
+  void setMonitor(bool Monitor) {
+    IsMonitor = Monitor;
+  };
+
   ~VMM3Parser(){};
 
   //
@@ -79,5 +90,6 @@ class VMM3Parser {
   const uint16_t MaxChannelValue{63};
   const uint16_t OverThresholdMask{0x8000};
   const uint16_t ADCMask{0x7fff};
+  bool IsMonitor{false};
 };
 }  // namespace ESSReadout

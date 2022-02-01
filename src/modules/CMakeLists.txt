@@ -14,6 +14,7 @@ add_subdirectory(loki)
 add_subdirectory(adc_readout)
 add_subdirectory(perfgen)
 add_subdirectory(cspec)
+add_subdirectory(ttlmonitor)
 
 #=============================================================================
 # Support out-of-tree build
