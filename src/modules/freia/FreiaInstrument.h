@@ -18,7 +18,7 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
-#include <freia/clustering/EventBuilder.h>
+#include <common/reduction/EventBuilder2D.h>
 #include <freia/Counters.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
@@ -72,7 +72,7 @@ public:
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes
-  std::vector<EventBuilder> builders; // reinit in ctor
+  std::vector<EventBuilder2D> builders; // reinit in ctor
 
   /// \brief Instrument configuration (rings, cassettes, FENs)
   Config Conf;

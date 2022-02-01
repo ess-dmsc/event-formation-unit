@@ -19,7 +19,6 @@
 #include <cstring>
 #include <stdexcept>
 
-
 void Cspec::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
@@ -103,7 +102,8 @@ void Cspec::ReadoutGenerator::generateData() {
 
     DP += VMM3DataSize;
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies to CSPEC
+    /// \todo work out why updating TimeLow is done this way, and if it applies
+    /// to CSPEC
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {

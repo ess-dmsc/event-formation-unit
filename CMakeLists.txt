@@ -93,6 +93,7 @@ add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 #=============================================================================
 # Finalize coverage
 #=============================================================================
+# TODO when gcovr is updated, add --exclude_throw_branches for more sensible conditionals output
 set(gcovr_excl_opts
 "--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'")
 

@@ -39,6 +39,50 @@ TEST_F(CSPECGeometryTest, XAndZCoordinateCalculations) {
   ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 43, 300, true), 4827);
   // Vessel 34, final pixel
   ASSERT_EQ(Geom.xAndzCoord(1, 0, 1, 63, 372, false), 6143);
+
+  int FENID = 0;
+  int HybridID = 0;
+  int VMMID = 0;
+  int XOffset = 0;
+  bool Rotated = false;
+
+  for (int Channel = 32; Channel < 64; ++Channel) {
+    ASSERT_EQ(
+        Geom.xAndzCoord(FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+        Channel - 32);
+  }
+  VMMID = 1;
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(
+        Geom.xAndzCoord(FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+        Channel + 32);
+  }
+  FENID = 1;
+  VMMID = 0;
+  for (int Channel = 32; Channel < 64; ++Channel) {
+    ASSERT_EQ(
+        Geom.xAndzCoord(FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+        Channel + 64);
+  }
+  VMMID = 1;
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(
+        Geom.xAndzCoord(FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+        Channel + 128);
+  }
+}
+
+TEST_F(CSPECGeometryTest, InvalidXAndZCoordinates) {
+  // invalid HybridID
+  ASSERT_EQ(Geometry::InvalidCoord, 65535); // Invalid Coordinate == 65535
+
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), Geometry::InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 0, 0, false), Geometry::InvalidCoord);
+  // invalid channel on vmm0
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 0, 10, 0, false), Geometry::InvalidCoord);
+
+  // invalid VMM
+  ASSERT_EQ(Geom.xAndzCoord(0, 0, 4, 0, 0, false), Geometry::InvalidCoord);
 }
 
 TEST_F(CSPECGeometryTest, YCoordinateCalculations) {
@@ -53,6 +97,47 @@ TEST_F(CSPECGeometryTest, YCoordinateCalculations) {
 
   // short not rotated vessel
   ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 129);
+
+  int HybridID = 1;
+  int VMMID = 0;
+  int YOffset = 0;
+  bool Rotated = false;
+  bool Short = false;
+
+  for (int Channel = 58; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.yCoord(HybridID, VMMID, Channel, YOffset, Rotated, Short),
+              Channel - 58);
+  }
+  VMMID = 1;
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.yCoord(HybridID, VMMID, Channel, YOffset, Rotated, Short),
+              Channel + 6);
+  }
+  HybridID = 2;
+  VMMID = 0;
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.yCoord(HybridID, VMMID, Channel, YOffset, Rotated, Short),
+              Channel + 70);
+  }
+  VMMID = 1;
+  for (int Channel = 0; Channel < 6; ++Channel) {
+    ASSERT_EQ(Geom.yCoord(HybridID, VMMID, Channel, YOffset, Rotated, Short),
+              Channel + 134);
+  }
+}
+
+TEST_F(CSPECGeometryTest, InvalidYCoordinates) {
+  // invalid channel on short vessel
+  ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false, true), Geometry::InvalidCoord);
+
+  // invalid channel on hybrid 1 vmm0
+  ASSERT_EQ(Geom.xAndzCoord(1, 0, 10, 0, false, false), Geometry::InvalidCoord);
+
+  // invalid channel on hybrid 2 vmm 1
+  ASSERT_EQ(Geom.xAndzCoord(2, 1, 10, 0, false, false), Geometry::InvalidCoord);
+
+  // invalid hybrid
+  ASSERT_EQ(Geom.xAndzCoord(3, 0, 0, 0, false, false), Geometry::InvalidCoord);
 }
 
 int main(int argc, char **argv) {

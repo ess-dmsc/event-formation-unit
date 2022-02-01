@@ -39,7 +39,7 @@ TEST_F(UDPClientTest, DISABLED_SingleUDPPacket) {
   EXPECT_EQ(PacketsHandled, 1);
 }
 
-TEST_F(UDPClientTest, MultipleUDPPackets) {
+TEST_F(UDPClientTest, DISABLED_MultipleUDPPackets) {
   int BytesToTransmit = 1470;
   std::uint16_t ListenOnPort = GetPortNumber();
   auto SendToPort = ListenOnPort;

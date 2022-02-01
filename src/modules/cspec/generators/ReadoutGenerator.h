@@ -21,8 +21,8 @@ public:
 
 protected:
   void generateData() override;
-     const uint32_t TimeToFirstReadout{1000};
-
-};} // namespace Cspec
+  const uint32_t TimeToFirstReadout{1000};
+};
+} // namespace Cspec
 
 // GCOVR_EXCL_STOP

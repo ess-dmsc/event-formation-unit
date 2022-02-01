@@ -15,6 +15,26 @@
 using namespace Cspec;
 
 // clang-format off
+std::string BadConfigFile{"deleteme_cspec_instr_config_bad.json"};
+std::string BadConfigStr = R"(
+  {
+    "Detector": "CSPEC",
+    "InstrumentGeometry" : "Not_CSPEC",
+
+    "Vessel_Config" : {
+      "0": {"NumGrids": 140, "Rotation": false, "XOffset":   0}
+    },
+
+    "Config" : [
+      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""}
+    ],
+
+    "MaxPulseTimeNS" : 71428570,
+    "TimeBoxNs" : 2010
+  }
+)";
+
+
 std::string ConfigFile{"deleteme_cspec_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -55,7 +75,7 @@ std::string ConfigStr = R"(
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
+    "TimeBoxNs" : 2
   }
 )";
 
@@ -123,6 +143,60 @@ std::vector<uint8_t> GoodEvent {
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+};
+
+std::vector<uint8_t> BadEventMultipleWires {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+   // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 6 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+};
+
+std::vector<uint8_t> HighTOFError {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
 
@@ -163,6 +237,36 @@ std::vector<uint8_t> BadEventLargeGridSpan {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
+
+std::vector<uint8_t> BadEventLargeTimeSpan {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0xFF, 0x04, 0x00, 0x00,  // Time LO 500 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x14, 0x00, 0x00, 0x00,  // Time LO 20 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
 
 
 std::vector<uint8_t> BadMappingError {
@@ -220,7 +324,7 @@ std::vector<uint8_t> MinADC {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
-std::vector<uint8_t> NoEvent {
+std::vector<uint8_t> NoEventGridOnly {
   // First readout - plane Y - Grids
   0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
@@ -234,6 +338,22 @@ std::vector<uint8_t> NoEvent {
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+};
+
+std::vector<uint8_t> NoEventWireOnly {
+  // First readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+  // Second readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 };
 
 // clang-format on
@@ -272,7 +392,28 @@ protected:
   }
 };
 
+/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
+TEST_F(CSPECInstrumentTest, DumpTofile) {
+  ModuleSettings.FilePrefix = "deleteme_";
+  CSPECInstrument CSPECDump(counters, ModuleSettings, serializer);
+  CSPECDump.setSerializer(serializer);
+
+  makeHeader(CSPECDump.ESSReadoutParser.Packet, GoodEvent);
+  auto Res = CSPECDump.VMMParser.parse(CSPECDump.ESSReadoutParser.Packet);
+  CSPECDump.processReadouts();
+
+  counters.VMMStats = CSPECDump.VMMParser.Stats;
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+}
+
 // Test cases below
+TEST_F(CSPECInstrumentTest, BadConfig) {
+  ModuleSettings.ConfigFile = BadConfigFile;
+  EXPECT_THROW(CSPECInstrument(counters, ModuleSettings, serializer),
+               std::runtime_error);
+}
+
 TEST_F(CSPECInstrumentTest, Constructor) {
   ASSERT_EQ(counters.HybridErrors, 0);
   ASSERT_EQ(counters.FENErrors, 0);
@@ -375,8 +516,8 @@ TEST_F(CSPECInstrumentTest, MinADC) {
                                  // once, under general default once
 }
 
-TEST_F(CSPECInstrumentTest, NoEvent) {
-  makeHeader(cspec->ESSReadoutParser.Packet, NoEvent);
+TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
+  makeHeader(cspec->ESSReadoutParser.Packet, NoEventGridOnly);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
@@ -395,8 +536,47 @@ TEST_F(CSPECInstrumentTest, NoEvent) {
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.EventsNoCoincidence, 1);
-  ASSERT_EQ(counters.EventsMatchedGridOnly, 1);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
+  ASSERT_EQ(counters.ClustersMatchedGridOnly, 1);
+}
+
+TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
+  makeHeader(cspec->ESSReadoutParser.Packet, NoEventWireOnly);
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+
+  cspec->processReadouts();
+  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.FENErrors, 0);
+  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.Readouts, 2);
+
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
+  ASSERT_EQ(counters.ClustersMatchedWireOnly, 1);
+}
+
+TEST_F(CSPECInstrumentTest, NoEvents) {
+  Events.push_back(TestEvent);
+  cspec->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+}
+
+TEST_F(CSPECInstrumentTest, PixelError) {
+  TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterB.insert({0, 60000, 100, 1});
+  Events.push_back(TestEvent);
+  cspec->generateEvents(Events);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.PixelErrors, 1);
 }
 
 TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
@@ -419,15 +599,73 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.EventsTooLargeGridSpan, 1);
+  ASSERT_EQ(counters.ClustersTooLargeGridSpan, 1);
+}
+
+TEST_F(CSPECInstrumentTest, NegativeTOF) {
+  auto &Packet = cspec->ESSReadoutParser.Packet;
+  makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
+  Packet.Time.setReference(200, 0);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TimeErrors, 1);
+}
+
+TEST_F(CSPECInstrumentTest, HighTOFError) {
+  makeHeader(cspec->ESSReadoutParser.Packet, HighTOFError);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.TOFErrors, 1);
+}
+
+TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
+  makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeTimeSpan);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 4);
+  ASSERT_EQ(counters.VMMStats.Readouts, 4);
+  ASSERT_EQ(counters.Events, 1);
+  ASSERT_EQ(counters.ClustersNoCoincidence, 1);
 }
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+  saveBuffer(BadConfigFile, (void *)BadConfigStr.c_str(), BadConfigStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(ConfigFile);
+  deleteFile(BadConfigFile);
   return RetVal;
 }

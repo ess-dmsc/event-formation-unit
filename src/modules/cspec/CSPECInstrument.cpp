@@ -76,7 +76,8 @@ void CSPECInstrument::loadConfigAndCalib() {
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
-  builders = std::vector<EventBuilder>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
+  builders =
+      std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
   // if (ModuleSettings.CalibFile != "") {
   //   XTRACE(INIT, ALW, "Loading and applying calibration file");
@@ -181,7 +182,7 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t xAndzCoord = GeometryInstance->xAndzCoord(
           readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
 
-      if (xAndzCoord == 65535) { // 65535 is invalid xandzCoordinate
+      if (xAndzCoord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
         counters.MappingErrors++;
         continue;
@@ -197,10 +198,10 @@ void CSPECInstrument::processReadouts(void) {
 
     } else { // implicit isYCoord
       XTRACE(DATA, DEB, "Is grid, calculating y coordinate");
-      uint8_t yCoord = GeometryInstance->yCoord(
+      uint16_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord == 255) { // 255 is invalid yCoordinate
+      if (yCoord == GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;
@@ -230,13 +231,13 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
-      counters.EventsNoCoincidence++;
+      counters.ClustersNoCoincidence++;
       if (not e.ClusterB.empty()) {
-        counters.EventsMatchedGridOnly++;
+        counters.ClustersMatchedGridOnly++;
       }
 
       if (not e.ClusterA.empty()) {
-        counters.EventsMatchedWireOnly++;
+        counters.ClustersMatchedWireOnly++;
       }
       continue;
     }
@@ -244,7 +245,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
     if (Conf.Parms.MaxGridsSpan < e.ClusterB.coord_span()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
              e.ClusterA.coord_span());
-      counters.EventsTooLargeGridSpan++;
+      counters.ClustersTooLargeGridSpan++;
       continue;
     }
 

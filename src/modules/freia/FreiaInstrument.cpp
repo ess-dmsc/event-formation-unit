@@ -69,7 +69,7 @@ void FreiaInstrument::loadConfigAndCalib() {
 
   XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette/hybrid)",
          Conf.NumHybrids);
-  builders = std::vector<EventBuilder>(Conf.NumHybrids);
+  builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
   XTRACE(INIT, ALW, "Creating vector of %d Hybrids (one per cassette/hybrid)",
          Conf.NumHybrids);

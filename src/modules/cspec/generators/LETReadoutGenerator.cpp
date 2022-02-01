@@ -33,7 +33,6 @@ void Cspec::LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
@@ -70,7 +69,6 @@ void Cspec::LETReadoutGenerator::generateData() {
     }
 
     // Wire X and Z direction
-    /// \todo check maths for calculating Channel is correct
     // All channel calculations are based on ICD linked at top of file
     if ((Readout % 2) == 0) {
       uint8_t ZLocal = 12 - abs(XGlobal - 2);
@@ -97,12 +95,14 @@ void Cspec::LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to CSPEC
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {
       TimeLow += Settings.TicksBtwEvents;
+    }
+    if (TimeLow >= 88052499){
+      TimeLow -= 88052499;
+      TimeHigh += 1;
     }
   }
 }
