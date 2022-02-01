@@ -18,7 +18,7 @@ find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
 find_package(PCAP REQUIRED)
 find_package(asio REQUIRED)
-find_package(jsonformoderncpp REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}
@@ -30,6 +30,7 @@ set(EFU_COMMON_LIBS
   GraylogLogger::graylog_logger_static
   fmt::fmt
   h5cpp::h5cpp
+  nlohmann_json::nlohmann_json
   )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
