@@ -47,16 +47,6 @@ public:
     return Hybrids[Ring][FEN][VMM];
   }
 
-private:
-  /// \brief return the Hybrid index calculated from Ring, FEN, VMM
-  /// Assume - for Freia - that
-  /// \param Ring RingId (4 bits)
-  /// \param FEN FEN id (1 bit)
-  /// \param VMM  (1 bit)
-  uint8_t hybridIndex(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
-    return ((Ring << 2) + (FEN << 1) + VMM) & 0x3F;
-  }
-
 public:
   // Parameters obtained from JSON config file
   struct {
