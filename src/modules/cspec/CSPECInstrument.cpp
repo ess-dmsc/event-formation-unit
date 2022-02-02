@@ -128,7 +128,7 @@ void CSPECInstrument::processReadouts(void) {
       continue;
     }
 
-    ESSReadout::Hybrid Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
+    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
     // Convert from physical rings to logical rings
     // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;

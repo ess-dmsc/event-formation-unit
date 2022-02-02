@@ -21,20 +21,19 @@ struct FreiaSettings {
   std::string CalibFile{""};
 };
 
-
-
 class FreiaBase : public Detector {
 public:
-  FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings);
+  FreiaBase(BaseSettings const &settings,
+            struct FreiaSettings &LocalFreiaSettings);
   ~FreiaBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
-  struct Counters Counters{};
+  struct Counters Counters {};
   FreiaSettings FreiaModuleSettings;
   EV42Serializer *Serializer;
 };
 
-}
+} // namespace Freia

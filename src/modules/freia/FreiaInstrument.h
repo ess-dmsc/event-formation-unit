@@ -12,30 +12,28 @@
 
 #include <common/kafka/EV42Serializer.h>
 #include <common/monitor/Histogram.h>
-#include <logical_geometry/ESSGeometry.h>
-#include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
+#include <common/readout/vmm3/Hybrid.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <common/readout/vmm3/Hybrid.h>
 #include <common/reduction/EventBuilder2D.h>
 #include <freia/Counters.h>
+#include <freia/FreiaBase.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
-#include <freia/FreiaBase.h>
+#include <logical_geometry/ESSGeometry.h>
 
 namespace Freia {
 
 class FreiaInstrument {
 public:
-
   /// \brief 'create' the Freia instrument
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  FreiaInstrument(Counters & counters,
-                  FreiaSettings & moduleSettings,
-                  EV42Serializer * serializer);
+  FreiaInstrument(Counters &counters, FreiaSettings &moduleSettings,
+                  EV42Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -50,10 +48,10 @@ public:
   void processReadouts(void);
 
   /// \brief process clusters into events
-  void generateEvents(std::vector<Event> & Events);
+  void generateEvents(std::vector<Event> &Events);
 
   /// \brief dump readout data to HDF5
-  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data);
+  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
   // \brief initialise the serializer. This is used both in FreiaInstrument
   // and FreiaBase. Called from FreiaBase
@@ -61,8 +59,8 @@ public:
 
 public:
   /// \brief Stuff that 'ties' Freia together
-  struct Counters & counters;
-  FreiaSettings & ModuleSettings;
+  struct Counters &counters;
+  FreiaSettings &ModuleSettings;
 
   /// \brief serialiser (and producer) for events
   EV42Serializer *Serializer{nullptr};
@@ -98,4 +96,4 @@ public:
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
-} // namespace
+} // namespace Freia

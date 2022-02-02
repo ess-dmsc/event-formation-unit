@@ -47,8 +47,8 @@ public:
   uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)",
-             Channel, MinWireChannel, MaxWireChannel);
+      XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)", Channel,
+             MinWireChannel, MaxWireChannel);
       return GeometryBase::InvalidCoord;
     }
 
@@ -56,21 +56,15 @@ public:
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return GeometryBase::InvalidCoord;
     } else {
-      return YOffset+ Channel - MinWireChannel;
+      return YOffset + Channel - MinWireChannel;
     }
   }
 
-
   // x-coordinates are strips, which are on VMM 1
-  bool isXCoord(uint8_t VMM) {
-    return (VMM & 0x1);
-  }
+  bool isXCoord(uint8_t VMM) { return (VMM & 0x1); }
 
   // y-coordinates are wires, which are on VMM 0
-  bool isYCoord(uint8_t VMM) {
-    return not isXCoord(VMM);
-  }
-
+  bool isYCoord(uint8_t VMM) { return not isXCoord(VMM); }
 };
 
-} // namespace
+} // namespace Freia

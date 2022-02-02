@@ -39,4 +39,4 @@ inline uint16_t const GeometryBase::NumStrips = 64;
 inline uint16_t const GeometryBase::NumWires = 32;
 inline uint16_t const GeometryBase::MinWireChannel = 16;
 inline uint16_t const GeometryBase::MaxWireChannel = 47;
-}
+} // namespace Freia

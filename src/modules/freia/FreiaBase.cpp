@@ -8,20 +8,20 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
+#include <common/debug/Hexdump.h>
+#include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/debug/Hexdump.h>
-#include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 
 #include <unistd.h>
 
 #include <common/RuntimeStat.h>
-#include <common/system/Socket.h>
 #include <common/memory/SPSCFifo.h>
-#include <common/time/TimeString.h>
+#include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
+#include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
@@ -34,7 +34,8 @@ namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings, struct FreiaSettings &LocalFreiaSettings)
+FreiaBase::FreiaBase(BaseSettings const &settings,
+                     struct FreiaSettings &LocalFreiaSettings)
     : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -161,7 +162,7 @@ void FreiaBase::input_thread() {
     // this is the processing step
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
     if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                   RxRingbuffer.getMaxBufSize())) > 0) {
+                                     RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -179,7 +180,6 @@ void FreiaBase::input_thread() {
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
 }
-
 
 void FreiaBase::processing_thread() {
 
@@ -199,9 +199,11 @@ void FreiaBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings, Serializer);
+  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings,
+                        Serializer);
 
-  HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(), "Freia");
+  HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
+                                        "Freia");
   ADCHistSerializer.set_callback(ProduceMonitor);
 
   unsigned int DataIndex;
@@ -222,16 +224,20 @@ void FreiaBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::FREIA);
+      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                 ESSReadout::Parser::FREIA);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR,"SeqNum error at RxPackets %" PRIu64, Counters.RxPackets);
+        XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
+               Counters.RxPackets);
       }
 
       if (Res != ESSReadout::Parser::OK) {
-        XTRACE(DATA, WAR, "Error parsing ESS readout header (RxPackets %" PRIu64 ")", Counters.RxPackets);
-        //hexDump(DataPtr, std::min(64, DataLen));
+        XTRACE(DATA, WAR,
+               "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
+               Counters.RxPackets);
+        // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }
@@ -243,19 +249,20 @@ void FreiaBase::processing_thread() {
 
       Freia.processReadouts();
 
-      for (auto & builder : Freia.builders) {
+      for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
       }
       // done processing data
     } else {
-      // There is NO data in the FIFO - increment idle counter and sleep a little
-        Counters.ProcessingIdle++;
-        usleep(10);
+      // There is NO data in the FIFO - increment idle counter and sleep a
+      // little
+      Counters.ProcessingIdle++;
+      usleep(10);
     }
 
     if (ProduceTimer.timeout()) {
 
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask(
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
@@ -263,7 +270,7 @@ void FreiaBase::processing_thread() {
 
       if (!Freia.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-           Freia.ADCHist.hit_count());
+               Freia.ADCHist.hit_count());
         ADCHistSerializer.produce(Freia.ADCHist);
         Freia.ADCHist.clear();
       }
@@ -279,4 +286,4 @@ void FreiaBase::processing_thread() {
   return;
 }
 
-}
+} // namespace Freia

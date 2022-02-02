@@ -4,8 +4,8 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/Geometry.h>
 #include <common/testutils/TestBase.h>
+#include <freia/geometry/Geometry.h>
 
 using namespace Freia;
 
@@ -18,7 +18,6 @@ protected:
   void SetUp() override {}
   void TearDown() override {}
 };
-
 
 // Should match the ICD
 TEST_F(GeometryTest, DefaultFreia) {
@@ -50,8 +49,6 @@ TEST_F(GeometryTest, SelectInvalid) {
   ASSERT_TRUE(Geom.isXCoord(VMM1));
   ASSERT_TRUE(Geom.isYCoord(VMM0));
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

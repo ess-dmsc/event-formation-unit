@@ -4,7 +4,8 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-// based on Freia ICD document https://project.esss.dk/owncloud/index.php/f/14683667
+// based on Freia ICD document
+// https://project.esss.dk/owncloud/index.php/f/14683667
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
@@ -13,10 +14,9 @@
 #include <cstdio>
 #include <cstring>
 #include <math.h>
-#include <time.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
 #include <stdexcept>
-
+#include <time.h>
 
 void Freia::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -40,8 +40,9 @@ void Freia::ReadoutGenerator::generateData() {
     ReadoutData->OTADC = 1000;
 
     if ((Readout % 2) == 0) {
-      Angle = Fuzzer.random8() * 360.0/ 255;
-      XChannel = 44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
+      Angle = Fuzzer.random8() * 360.0 / 255;
+      XChannel =
+          44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
       YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
     }
 
@@ -58,8 +59,5 @@ void Freia::ReadoutGenerator::generateData() {
     }
   }
 }
-
-
-
 
 // GCOVR_EXCL_STOP

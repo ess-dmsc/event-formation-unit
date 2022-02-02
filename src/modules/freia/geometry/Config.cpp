@@ -75,7 +75,7 @@ void Config::apply() {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
-      std::string IDString =  Mapping["HybridId"];
+      std::string IDString = Mapping["HybridId"];
 
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
@@ -98,14 +98,15 @@ void Config::apply() {
       Hybrid.XOffset = 0;
 
       try {
-       Hybrid.YOffset =
-            (uint8_t)Mapping["CassetteNumber"] * (uint8_t)PanelConfig["WiresPerCassette"];
+        Hybrid.YOffset = (uint8_t)Mapping["CassetteNumber"] *
+                         (uint8_t)PanelConfig["WiresPerCassette"];
       } catch (...) {
         Hybrid.YOffset = 0;
       }
 
       LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid {}",
+          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
+          "{}",
           Name, NumHybrids, Ring, FEN, LocalHybrid);
 
       Hybrid.HybridNumber = NumHybrids;
@@ -113,9 +114,10 @@ void Config::apply() {
     }
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette; //
-    LOG(INIT, Sev::Info, "JSON config - Detector has {} cassettes/hybrids and "
-    "{} pixels", NumHybrids, NumPixels);
-
+    LOG(INIT, Sev::Info,
+        "JSON config - Detector has {} cassettes/hybrids and "
+        "{} pixels",
+        NumHybrids, NumPixels);
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",

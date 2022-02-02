@@ -8,13 +8,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/time/TimeString.h>
-#include <freia/FreiaInstrument.h>
 #include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
-#include <assert.h>
+#include <common/time/TimeString.h>
+#include <freia/FreiaInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -22,16 +22,16 @@
 namespace Freia {
 
 /// \brief load configuration and calibration files
-FreiaInstrument::FreiaInstrument(struct Counters & counters,
-  //BaseSettings & EFUSettings,
-  FreiaSettings &moduleSettings,
-  EV42Serializer * serializer)
-    : counters(counters)
-    , ModuleSettings(moduleSettings)
-    , Serializer(serializer) {
+FreiaInstrument::FreiaInstrument(struct Counters &counters,
+                                 // BaseSettings & EFUSettings,
+                                 FreiaSettings &moduleSettings,
+                                 EV42Serializer *serializer)
+    : counters(counters), ModuleSettings(moduleSettings),
+      Serializer(serializer) {
 
   if (!ModuleSettings.FilePrefix.empty()) {
-    std::string DumpFileName = ModuleSettings.FilePrefix + "freia_" + timeString();
+    std::string DumpFileName =
+        ModuleSettings.FilePrefix + "freia_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -43,7 +43,7 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   Geom.setGeometry(Conf.Parms.InstrumentGeometry);
 
   XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
-  for (auto & builder : builders) {
+  for (auto &builder : builders) {
     builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
   }
 
@@ -55,11 +55,10 @@ FreiaInstrument::FreiaInstrument(struct Counters & counters,
   // eventhough there are only 32 wires so some bins will be empty
   // Hists will automatically allocate space for both x and y planes
   uint32_t MaxADC = 1024;
-  uint32_t MaxChannels =
-    Conf.NumHybrids * std::max(GeometryBase::NumWires, GeometryBase::NumStrips);
+  uint32_t MaxChannels = Conf.NumHybrids * std::max(GeometryBase::NumWires,
+                                                    GeometryBase::NumStrips);
   ADCHist = Hists(MaxChannels, MaxADC);
 }
-
 
 void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -78,7 +77,6 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-
 void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
   if (Ids.size() != Conf.NumHybrids) {
     throw std::runtime_error("Hybrid Id size mismatch");
@@ -93,28 +91,30 @@ void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
   }
 }
 
-
 void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->pulseTime(ESSReadoutParser.Packet.Time
+                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
-  for (const auto & readout : VMMParser.Result) {
+  for (const auto &readout : VMMParser.Result) {
 
     if (DumpFile) {
       dumpReadoutToFile(readout);
     }
 
-    XTRACE(DATA, INF, "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
+    XTRACE(DATA, INF,
+           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.RingId, readout.FENId, readout.VMM, readout.Channel,
+           readout.TimeLow);
 
-    //counters.RingRx[readout.RingId]++;
+    // counters.RingRx[readout.RingId]++;
 
     // Convert from physical rings to logical rings
-    uint8_t Ring = readout.RingId/2;
+    uint8_t Ring = readout.RingId / 2;
 
     if (Ring > Conf.MaxRing) {
       XTRACE(DATA, ERR, "Invalid Ring ID: %u, Max Ring ID: %u", Ring,
@@ -132,8 +132,7 @@ void FreiaInstrument::processReadouts(void) {
 
     XTRACE(DATA, DEB,
            "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           Ring, readout.FENId, readout.VMM, readout.Channel,
-           readout.TimeLow);
+           Ring, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
 
     uint8_t HybridId = readout.VMM >> 1;
     if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
@@ -144,14 +143,17 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-    ESSReadout::Hybrid Hybrid = Conf.getHybrid(Ring, readout.FENId,  readout.VMM >> 1); 
+    ESSReadout::Hybrid Hybrid =
+        Conf.getHybrid(Ring, readout.FENId, readout.VMM >> 1);
 
     uint8_t Asic = readout.VMM & 0x1;
-    VMM3Calibration & Calib = Hybrid.VMMs[Asic];
+    VMM3Calibration &Calib = Hybrid.VMMs[Asic];
 
-    uint64_t TimeNS = ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    uint64_t TimeNS =
+        ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
-    XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS, TDCCorr);
+    XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS,
+           TDCCorr);
 
     TimeNS += TDCCorr;
     XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
@@ -159,7 +161,8 @@ void FreiaInstrument::processReadouts(void) {
     // Only 10 bits of the 16-bit OTADC field is used hence the 0x3ff mask below
     uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
 
-    XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF, ADC);
+    XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF,
+           ADC);
 
     // If the corrected ADC reaches maximum value we count the occurance but
     // use the new value anyway
@@ -169,33 +172,38 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      XTRACE(DATA, DEB, "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert({TimeNS, Geom.xCoord(readout.VMM, readout.Channel),
-                      ADC, PlaneX});
+      XTRACE(DATA, DEB,
+             "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+             TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel),
+             readout.Channel, ADC);
+      builders[Hybrid.HybridNumber].insert(
+          {TimeNS, Geom.xCoord(readout.VMM, readout.Channel), ADC, PlaneX});
 
       uint32_t GlobalXChannel = Hybrid.XOffset + readout.Channel;
       ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
-      XTRACE(DATA, DEB, "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-         TimeNS, PlaneY, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel), readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert({TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
-                      ADC, PlaneY});
+      XTRACE(DATA, DEB,
+             "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
+             TimeNS, PlaneY,
+             Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
+             readout.Channel, ADC);
+      builders[Hybrid.HybridNumber].insert(
+          {TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
+           ADC, PlaneY});
 
       uint32_t GlobalYChannel = Hybrid.YOffset + readout.Channel;
       ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }
 
-  for (auto & builder : builders) {
+  for (auto &builder : builders) {
     builder.flush(); // Do matching
   }
 }
 
-
-void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
-  ESSReadout::ESSTime & TimeRef = ESSReadoutParser.Packet.Time;
+void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
+  ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -226,7 +234,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     }
 
     if (Conf.Parms.StripGapCheck) {
-        if (e.ClusterA.hasGap(Conf.Parms.MaxGapStrip)) {
+      if (e.ClusterA.hasGap(Conf.Parms.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
@@ -239,8 +247,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     // Calculate TOF in ns
     uint64_t EventTime = e.time_start();
 
-    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64,
-           EventTime, TimeRef.TimeInNS);
+    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
+           TimeRef.TimeInNS);
 
     if (TimeRef.TimeInNS > EventTime) {
       XTRACE(EVENT, WAR, "Negative TOF!");
@@ -251,7 +259,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
     if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
-        XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }
@@ -268,22 +276,24 @@ void FreiaInstrument::generateEvents(std::vector<Event> & Events) {
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u",
-           time, TimeOfFlight, x, y, PixelId);
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", time,
+           TimeOfFlight, x, y, PixelId);
     counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate
 }
 
-
 /// \todo move into readout/vmm3 instead as this will be common
-void FreiaInstrument::dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data) {
+void FreiaInstrument::dumpReadoutToFile(
+    const ESSReadout::VMM3Parser::VMM3Data &Data) {
   VMM3::Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
-  CurrentReadout.PrevPulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
-  CurrentReadout.PrevPulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+  CurrentReadout.PrevPulseTimeHigh =
+      ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+  CurrentReadout.PrevPulseTimeLow =
+      ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
@@ -299,5 +309,4 @@ void FreiaInstrument::dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &
   DumpFile->push(CurrentReadout);
 }
 
-
-} // namespace
+} // namespace Freia

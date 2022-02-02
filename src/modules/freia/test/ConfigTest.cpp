@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <freia/geometry/Config.h>
 
 auto j2 = R"(
 {
@@ -20,14 +20,12 @@ auto NoDetector = R"(
 }
 )"_json;
 
-
 auto InvalidDetector = R"(
 {
   "Detector": "Freias",
   "WireChOffset" : 16
 }
 )"_json;
-
 
 auto InvalidRing = R"(
 {
@@ -65,7 +63,6 @@ std::string InvalidConfig = R"(
 }
 )";
 
-
 auto DuplicateEntry = R"(
 {
   "Detector": "Freia",
@@ -86,9 +83,7 @@ using namespace Freia;
 class ConfigTest : public TestBase {
 protected:
   Config config{"Freia", "config.json"};
-  void SetUp() override {
-    config.root = j2;
-  }
+  void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
 
@@ -136,39 +131,13 @@ struct RingCfg {
 
 // This table generated from the ICD and will be
 // compared to the calculated values
-std::vector<RingCfg> ReferenceConfig {
-   {0, 0, 0}, 
-   {0, 0, 1},
-   {0, 1, 0},
-   {0, 1, 1},
-   {1, 0, 0},
-   {1, 0, 1},
-   {1, 1, 0},
-   {1, 1, 1},
-   {2, 0, 0},
-   {2, 0, 1},
-   {2, 1, 0},
-   {2, 1, 1},
-   {3, 0, 0}, 
-   {3, 0, 1},
-   {4, 0, 0},
-   {4, 0, 1},
-   {5, 0, 0},
-   {5, 0, 1}, 
-   {6, 0, 0},
-   {6, 0, 1},
-   {7, 0, 0},
-   {7, 0, 1},
-   {8, 0, 0},
-   {8, 0, 1},
-   {9, 0, 0},
-   {9, 0, 1},
-   {9, 1, 0},
-   {9, 1, 1},
-   {10,0, 0},
-   {10,0, 1},
-   {10,1, 0},
-   {10,1, 1},
+std::vector<RingCfg> ReferenceConfig{
+    {0, 0, 0},  {0, 0, 1},  {0, 1, 0}, {0, 1, 1}, {1, 0, 0},  {1, 0, 1},
+    {1, 1, 0},  {1, 1, 1},  {2, 0, 0}, {2, 0, 1}, {2, 1, 0},  {2, 1, 1},
+    {3, 0, 0},  {3, 0, 1},  {4, 0, 0}, {4, 0, 1}, {5, 0, 0},  {5, 0, 1},
+    {6, 0, 0},  {6, 0, 1},  {7, 0, 0}, {7, 0, 1}, {8, 0, 0},  {8, 0, 1},
+    {9, 0, 0},  {9, 0, 1},  {9, 1, 0}, {9, 1, 1}, {10, 0, 0}, {10, 0, 1},
+    {10, 1, 0}, {10, 1, 1},
 };
 
 TEST_F(ConfigTest, FullInstrument) {
@@ -177,11 +146,11 @@ TEST_F(ConfigTest, FullInstrument) {
   ASSERT_EQ(config.NumPixels, 65536);
   ASSERT_EQ(config.NumHybrids, 32);
 
-  for (const auto & Ref : ReferenceConfig) {
-    ASSERT_EQ(config.getHybrid(Ref.Ring, Ref.FEN, Ref.Hybrid).Initialised, true);
+  for (const auto &Ref : ReferenceConfig) {
+    ASSERT_EQ(config.getHybrid(Ref.Ring, Ref.FEN, Ref.Hybrid).Initialised,
+              true);
   }
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -24,17 +24,16 @@ class Config {
 public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
-  static constexpr uint8_t MaxRing{10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
-  static constexpr uint8_t MaxFEN{2}; // This is topology specific
+  static constexpr uint8_t MaxRing{
+      10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
+  static constexpr uint8_t MaxFEN{2};    // This is topology specific
   static constexpr uint8_t MaxHybrid{1}; // Hybrids are VMM >> 1
 
-  Config() {};
+  Config(){};
 
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
-    : NumFENs(12),
-      ExpectedName(Instrument),
-      FileName(ConfigFile) {}
+      : NumFENs(12), ExpectedName(Instrument), FileName(ConfigFile) {}
 
   // load file into json object and apply
   void loadAndApply();
@@ -59,7 +58,6 @@ private:
   }
 
 public:
-
   // Parameters obtained from JSON config file
   struct {
     std::string InstrumentName{""};
@@ -76,8 +74,7 @@ public:
   } Parms;
 
   // Derived parameters
-  std::vector<uint16_t> NumFENs;   // #FENs per logical ring
-  std::vector<int> HybridId; // reinit in constructor
+  std::vector<uint16_t> NumFENs; // #FENs per logical ring
   ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 
   uint8_t NumHybrids{0};

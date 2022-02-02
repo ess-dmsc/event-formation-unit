@@ -4,8 +4,8 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/AMORChannelMapping.h>
 #include <common/testutils/TestBase.h>
+#include <freia/geometry/AMORChannelMapping.h>
 
 using namespace Freia;
 
@@ -19,20 +19,19 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(GeometryTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
   }
   for (unsigned int i = 16; i < 47; i++) {
-    for (unsigned int YOffset = 0; YOffset < 1024; YOffset += 32){
+    for (unsigned int YOffset = 0; YOffset < 1024; YOffset += 32) {
       ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), 47 - i + YOffset);
     }
   }
 }
 
 TEST_F(GeometryTest, XCoordErrors) {
-  ASSERT_EQ(Geom.xCoord(VMMY, 0),  Geom.InvalidCoord); // bad VMM
+  ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
   ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
@@ -41,7 +40,6 @@ TEST_F(GeometryTest, YCoordErrors) {
   ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
   ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

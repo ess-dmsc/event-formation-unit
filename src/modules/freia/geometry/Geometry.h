@@ -21,9 +21,7 @@ namespace Freia {
 
 class Geometry {
 public:
-  Geometry() {
-    GeometryInst = &FreiaGeom;
-  }
+  Geometry() { GeometryInst = &FreiaGeom; }
 
   bool setGeometry(std::string NewGeometry) {
     if (NewGeometry == "AMOR") {
@@ -57,6 +55,6 @@ public:
 private:
   AMORGeometry AMORGeom;
   FreiaGeometry FreiaGeom;
-  GeometryBase * GeometryInst{nullptr};
+  GeometryBase *GeometryInst{nullptr};
 };
-}
+} // namespace Freia

@@ -10,18 +10,19 @@
 
 #pragma once
 
-#include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
+#include <common/testutils/DataFuzzer.h>
 
 namespace Freia {
 class ReadoutGenerator : public ReadoutGeneratorBase {
-  public:
-   using ReadoutGeneratorBase::ReadoutGeneratorBase;
-  protected:
+public:
+  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+
+protected:
   void generateData() override;
-   const uint32_t TimeToFirstReadout{1000};
-}; 
-}
+  const uint32_t TimeToFirstReadout{1000};
+};
+} // namespace Freia
 
 // GCOVR_EXCL_STOP
