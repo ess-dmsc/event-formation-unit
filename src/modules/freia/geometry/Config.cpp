@@ -84,7 +84,7 @@ void Config::apply() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      ESSReadout::Hybrid Hybrid = Hybrids[Ring][FEN][LocalHybrid];
+      ESSReadout::Hybrid &Hybrid = Hybrids[Ring][FEN][LocalHybrid];
 
       if (Hybrid.Initialised) {
         XTRACE(INIT, ERR, "Duplicate Hybrid in config file");

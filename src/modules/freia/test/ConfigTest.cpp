@@ -73,10 +73,10 @@ auto DuplicateEntry = R"(
   "WireChOffset" : 16,
 
   "Config" : [
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
   ]
 }
 )"_json;
@@ -98,7 +98,7 @@ TEST_F(ConfigTest, Constructor) {
 }
 
 TEST_F(ConfigTest, UninitialisedHybrids) {
-  ASSERT_ANY_THROW(config.getHybridId(0, 0, 0));
+  ASSERT_EQ(config.getHybrid(1, 0, 0).Initialised, false);
 }
 
 TEST_F(ConfigTest, NoDetector) {
@@ -130,15 +130,45 @@ TEST_F(ConfigTest, Duplicate) {
 // ICD
 struct RingCfg {
   uint8_t Ring;
-  uint16_t FENs;
+  uint16_t FEN;
+  uint16_t Hybrid;
 };
 
 // This table generated from the ICD and will be
 // compared to the calculated values
 std::vector<RingCfg> ReferenceConfig {
-  {  0, 2},  {  1, 2},  {  2, 2},
-  {  3, 1},  {  4, 1},  {  5, 1},  {  6, 1},  {  7, 1},  {  8, 1},
-  {  9, 2},  { 10, 2}
+   {0, 0, 0}, 
+   {0, 0, 1},
+   {0, 1, 0},
+   {0, 1, 1},
+   {1, 0, 0},
+   {1, 0, 1},
+   {1, 1, 0},
+   {1, 1, 1},
+   {2, 0, 0},
+   {2, 0, 1},
+   {2, 1, 0},
+   {2, 1, 1},
+   {3, 0, 0}, 
+   {3, 0, 1},
+   {4, 0, 0},
+   {4, 0, 1},
+   {5, 0, 0},
+   {5, 0, 1}, 
+   {6, 0, 0},
+   {6, 0, 1},
+   {7, 0, 0},
+   {7, 0, 1},
+   {8, 0, 0},
+   {8, 0, 1},
+   {9, 0, 0},
+   {9, 0, 1},
+   {9, 1, 0},
+   {9, 1, 1},
+   {10,0, 0},
+   {10,0, 1},
+   {10,1, 0},
+   {10,1, 1},
 };
 
 TEST_F(ConfigTest, FullInstrument) {
@@ -148,7 +178,7 @@ TEST_F(ConfigTest, FullInstrument) {
   ASSERT_EQ(config.NumHybrids, 32);
 
   for (const auto & Ref : ReferenceConfig) {
-    ASSERT_EQ(config.NumFENs[Ref.Ring], Ref.FENs);
+    ASSERT_EQ(config.getHybrid(Ref.Ring, Ref.FEN, Ref.Hybrid).Initialised, true);
   }
 }
 

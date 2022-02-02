@@ -48,18 +48,6 @@ public:
     return Hybrids[Ring][FEN][VMM];
   }
 
-  /// \todo this is messy - too many implicit assumptions
-  /// hybridIndex can return 0 - 63 and can wrap around to valid
-  /// values
-  /// HybridId has size 64 with some fields uninitialized (-1)
-  uint8_t getHybridId(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
-    int Id = HybridId[hybridIndex(Ring, FEN, VMM)];
-    if (Id < 0) {
-      throw std::runtime_error("Unallocated HybridId SNAFU");
-    }
-    return (uint8_t)Id;
-  }
-
 private:
   /// \brief return the Hybrid index calculated from Ring, FEN, VMM
   /// Assume - for Freia - that
