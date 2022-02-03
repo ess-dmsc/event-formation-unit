@@ -44,22 +44,20 @@ uint16_t ReadoutGenerator::lokiReadoutDataGen(
 
   DP += HeaderSize;
   for (auto Section = 0; Section < DataSections; Section++) {
-    auto DataHeader = (ESSReadout::Parser::DataHeader *)DP;
-    DataHeader->RingId = RingCount % Rings;
-    DataHeader->FENId = 0x00;
-    DataHeader->DataLength = DataHeaderSize + LokiDataSize;
-    assert(DataHeader->DataLength == 4 + 20);
-    RingCount++;
-    DP += DataHeaderSize;
+    auto Data = (DataParser::LokiReadout *)DP;
 
-    
-    auto DataBlock = (DataParser::LokiReadout *)DP;
-    DataBlock->TimeLow = 100;
-    DataBlock->TubeId = 1;
-    DataBlock->AmpA = 1;
-    DataBlock->AmpB = 1;
-    DataBlock->AmpC = 1;
-    DataBlock->AmpD = 1;
+    Data->RingId = RingCount % Rings;
+    Data->FENId = 0x00;
+    Data->DataLength = LokiDataSize;
+    assert(Data->DataLength == 4 + 20);
+    RingCount++;
+
+    Data->TimeLow = 100;
+    Data->TubeId = 1;
+    Data->AmpA = 1;
+    Data->AmpB = 1;
+    Data->AmpC = 1;
+    Data->AmpD = 1;
     DP += LokiDataSize;
   }
 

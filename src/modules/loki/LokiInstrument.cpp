@@ -112,8 +112,7 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   return PixelId;
 }
 
-void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
-                                       DataParser::LokiReadout &Data) {
+void LokiInstrument::dumpReadoutToFile(DataParser::LokiReadout &Data) {
   Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
@@ -127,8 +126,8 @@ void LokiInstrument::dumpReadoutToFile(DataParser::ParsedData &Section,
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
   CurrentReadout.AmpD = Data.AmpD;
-  CurrentReadout.RingId = Section.RingId;
-  CurrentReadout.FENId = Section.FENId;
+  CurrentReadout.RingId = Data.RingId;
+  CurrentReadout.FENId = Data.FENId;
   CurrentReadout.TubeId = Data.TubeId;
   DumpFile->push(CurrentReadout);
 }
@@ -157,10 +156,10 @@ void LokiInstrument::processReadouts() {
       continue;
     }
 
-    auto &Data = Section.Data;
+    auto &Data = Section;
 
     if (DumpFile) {
-      dumpReadoutToFile(Section, Data);
+      dumpReadoutToFile(Data);
     }
 
     // Calculate TOF in ns

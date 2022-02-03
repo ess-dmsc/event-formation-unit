@@ -100,8 +100,8 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
   for (auto & Section : LokiParser.Result) {
     printf("Ring %u, FEN %u\n", Section.RingId, Section.FENId);
     printf("time (%u, %u), SeqNum %u, Tube %u, A %u, B %u, C %u, D %u\n",
-            Section.Data.TimeHigh, Section.Data.TimeLow, Section.Data.DataSeqNum, Section.Data.TubeId,
-            Section.Data.AmpA, Section.Data.AmpB, Section.Data.AmpC, Section.Data.AmpD);
+            Section.TimeHigh, Section.TimeLow, Section.DataSeqNum, Section.TubeId,
+            Section.AmpA, Section.AmpB, Section.AmpC, Section.AmpD);
   }
 }
 

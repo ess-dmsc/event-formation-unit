@@ -24,7 +24,6 @@ struct Counters {
     // Processing Counters - accessed in processing thread
     int64_t FifoSeqErrors;
 
-
     // ESSReadout parser
     struct ESSReadout::ESSHeaderStats ReadoutStats;
     int64_t ErrorESSHeaders;
@@ -37,14 +36,11 @@ struct Counters {
     int64_t RingCfgErrors;
     int64_t FENCfgErrors;
     int64_t TOFErrors;
-    int64_t MonitorErrors;
-    int64_t MonitorCounts;
     int64_t MaxADC;
 
     //
     int64_t ProcessingIdle;
     int64_t Events;
-    int64_t EventsUdder;
     int64_t EventsNoCoincidence;
     int64_t EventsMatchedClusters;
     int64_t EventsMatchedWireOnly;

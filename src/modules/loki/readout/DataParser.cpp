@@ -15,7 +15,6 @@
 
 namespace Loki {
 
-constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::Parser::DataHeader)};
 constexpr unsigned int LokiReadoutSize{sizeof(DataParser::LokiReadout)};
 
 // Assume we start after the PacketHeader
@@ -35,63 +34,57 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
+    auto Data = (LokiReadout *)((char *)DataPtr);
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
-    DataHdrPtr->RingId = DataHdrPtr->RingId/2;
+    Data->RingId = Data->RingId/2;
 
-    if (BytesLeft < DataHdrPtr->DataLength) {
+    if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
-             DataHdrPtr->DataLength, BytesLeft);
+             Data->DataLength, BytesLeft);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
     ///\todo remove ad hoc conters sometime
-    HeaderCounters[DataHdrPtr->RingId & 0xf][DataHdrPtr->FENId & 0xf]++;
+    HeaderCounters[Data->RingId & 0xf][Data->FENId & 0xf]++;
 
-    if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
-             DataHdrPtr->FENId);
+    if (Data->RingId > MaxRingId or Data->FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
+             Data->FENId);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
-           DataHdrPtr->FENId, DataHdrPtr->DataLength);
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId,
+           Data->FENId, Data->DataLength);
     Stats.DataHeaders++;
 
-    if (DataHdrPtr->DataLength != DataHeaderSize + LokiReadoutSize) {
-      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", 
-            DataHdrPtr->DataLength, DataHeaderSize + LokiReadoutSize);
+    if (Data->DataLength != LokiReadoutSize) {
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
+            Data->DataLength, LokiReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    ParsedData CurrentDataSection;
-    CurrentDataSection.RingId = DataHdrPtr->RingId;
-    CurrentDataSection.FENId = DataHdrPtr->FENId;
-
-    auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize);
     XTRACE(DATA, DEB,
            "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh,
+           Data->RingId, Data->FENId, Data->TimeHigh,
            Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
            Data->AmpB, Data->AmpC, Data->AmpD);
 
-    CurrentDataSection.Data = *Data;
     ParsedReadouts++;
     Stats.Readouts++;
-  
-    Result.push_back(CurrentDataSection);
-    BytesLeft -= DataHdrPtr->DataLength;
-    DataPtr += DataHdrPtr->DataLength;
+
+    Result.push_back(*Data);
+    BytesLeft -= Data->DataLength;
+    DataPtr += Data->DataLength;
   }
 
   return ParsedReadouts;

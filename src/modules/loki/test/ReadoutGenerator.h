@@ -23,11 +23,10 @@ public:
                               uint32_t SeqNum);
 
 private:
-  static_assert(sizeof(Loki::DataParser::LokiReadout) == 20,
+  static_assert(sizeof(Loki::DataParser::LokiReadout) == 24,
                 "Loki data format mismatch");
 
   const uint16_t HeaderSize = sizeof(ESSReadout::Parser::PacketHeaderV0);
-  const uint16_t DataHeaderSize = sizeof(ESSReadout::Parser::DataHeader);
   const uint16_t LokiDataSize = sizeof(Loki::DataParser::LokiReadout);
 
   DataFuzzer Fuzzer;

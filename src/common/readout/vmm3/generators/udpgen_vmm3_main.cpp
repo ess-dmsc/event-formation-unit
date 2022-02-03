@@ -10,9 +10,10 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <modules/freia/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
+#include <modules/freia/generators/ReadoutGenerator.h>
+#include <modules/loki/generators/LokiReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -69,6 +70,11 @@ int main(int argc, char *argv[]) {
    #ifdef LET_GENERATOR
     Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
     Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
+  #endif
+
+  #ifdef LOKI_GENERATOR
+   Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+   Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
   #endif
 
   do {
