@@ -11,7 +11,6 @@
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>

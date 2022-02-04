@@ -16,10 +16,9 @@ set(freia_common_inc
   ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
-
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(freia_common_src
   FreiaBase.cpp
@@ -27,8 +26,8 @@ set(freia_common_src
   geometry/Config.cpp
   ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
   )
 
 set(freia_INC ${freia_common_inc})
@@ -61,5 +60,7 @@ set(FreiaInstrumentTest_SRC
   ${freia_common_src}
   test/FreiaInstrumentTest.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
+
 )
 create_test_executable(FreiaInstrumentTest)

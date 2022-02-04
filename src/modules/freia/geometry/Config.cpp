@@ -15,10 +15,6 @@ namespace Freia {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Config::loadAndApply() {
-  root = from_json_file(FileName);
-  apply();
-}
 
 void Config::apply() {
   std::string Name;

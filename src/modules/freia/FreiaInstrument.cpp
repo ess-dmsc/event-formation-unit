@@ -11,13 +11,12 @@
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <freia/FreiaInstrument.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
@@ -72,8 +71,7 @@ void FreiaInstrument::loadConfigAndCalib() {
 
   if (ModuleSettings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
-    ESSReadout::CalibFile Calibration("Freia", Hybrids);
-    Calibration.load(ModuleSettings.CalibFile);
+    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
   }
 }
 
