@@ -9,6 +9,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Config.h>
+#include <common/readout/vmm3/VMM3Calibration.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB

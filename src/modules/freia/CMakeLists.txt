@@ -28,6 +28,7 @@ set(freia_common_src
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
 set(freia_INC ${freia_common_inc})

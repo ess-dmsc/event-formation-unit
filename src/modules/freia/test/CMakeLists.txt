@@ -17,6 +17,7 @@ set(FreiaConfigTest_INC
 set(FreiaConfigTest_SRC
   ../geometry/Config.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp  
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(FreiaConfigTest)

@@ -78,8 +78,8 @@ std::string CalibStr = R"(
         "CalibrationDate" : "20210222-124533",
 
         "vmm0" : {
-          "adc_offset" : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-          "adc_slope"  : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+          "adc_offset" : [50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "adc_slope"  : [5.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
           "tdc_offset" : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
           "tdc_slope"  : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
           "tdc_ofs_corr" : [0.0, 1.0]
@@ -100,20 +100,34 @@ std::string CalibStr = R"(
 //
 std::vector<uint8_t> MappingError{
     // First readout
-    0x16, 0x00, 0x14,
-    0x00, // Data Header - Ring 24 is greater than max ring number
+    0x16, 0x00, 0x14, 0x00, // Data Header - Ring 24 is greater than max ring number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x00, 0x10, // GEO 0, TDC 0, VMM 0, CH 16
 
     // Second readout
-    0x02, 0x0A, 0x14,
-    0x00, // Data Header - FEN 10 is greater than max FEN number
+    0x02, 0x0A, 0x14, 0x00, // Data Header - FEN 10 is greater than max FEN number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x01, 0x10, // GEO 0, TDC 0, VMM 1, CH 16
+};
+
+std::vector<uint8_t> CalibrationTest{
+    // First readout
+    0x00, 0x00, 0x14, 0x00, // Data Header - Ring 0, FEN 0
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x01, 0x00, 0x00, // GEO 0, TDC 0, VMM 0, CH 16
+
+    // Second readout
+    0x00, 0x00, 0x14, 0x00, // Data Header - FEN 10 is greater than max FEN number
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x01, 0x01, 0x10, // GEO 0, TDC 0, VMM 1, CH 16
 };
 
 std::vector<uint8_t> GoodEvent{
@@ -171,6 +185,19 @@ TEST_F(FreiaInstrumentTest, Constructor) {
   ModuleSettings.CalibFile = CalibFile;
   FreiaInstrument Freia(counters, ModuleSettings, serializer);
   ASSERT_EQ(counters.RingErrors, 0); 
+}
+
+TEST_F(FreiaInstrumentTest, CalibrationTest) {
+  ModuleSettings.CalibFile = CalibFile;
+  FreiaInstrument Freia(counters, ModuleSettings, serializer);
+  ASSERT_EQ(counters.RingErrors, 0); 
+
+  makeHeader(freia->ESSReadoutParser.Packet, CalibrationTest);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.RingErrors, 0);
+
+  freia->processReadouts();
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
