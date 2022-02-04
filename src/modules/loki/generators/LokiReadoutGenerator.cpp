@@ -26,20 +26,31 @@
 void Loki::LokiReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
+  uint8_t LokiDataSize = sizeof(DataParser::LokiReadout);
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
     auto ReadoutData = (DataParser::LokiReadout *)DP;
 
-    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
-    /// \todo LOKI readouts all have DataLength xx
-    assert(ReadoutData->DataLength == 20);
+    ReadoutData->DataLength = ReadoutDataSize;
+    assert(ReadoutData->DataLength == LokiDataSize);
 
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
 
-    /// \todo ... add code here for ring, fen,amplitudes
+    ReadoutData->RingId = (Readout/10) % Settings.NRings;
+    ReadoutData->FENId = Readout % 8;
+    ReadoutData->DataLength = LokiDataSize;
 
+    ReadoutData->TubeId = (Readout/10) % 8;
+    ReadoutData->AmpA = Readout;
+    ReadoutData->AmpB = 1;
+    ReadoutData->AmpC = 1;
+    ReadoutData->AmpD = 100;
+    // printf("Readout %d: Ring %u, FEN %u, Tube %u, A %u\n", Readout,
+    //        ReadoutData->RingId,
+    //        ReadoutData->FENId, ReadoutData->TubeId, ReadoutData->AmpA);
+    DP += LokiDataSize;
     ///
 
     // All readouts are events for loki

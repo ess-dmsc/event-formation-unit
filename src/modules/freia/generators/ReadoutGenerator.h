@@ -12,7 +12,7 @@
 
 #include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Freia {
 class ReadoutGenerator : public ReadoutGeneratorBase {

@@ -91,7 +91,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
 
-    DP += VMM3DataSize;
+    DP += ReadoutDataSize;
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 

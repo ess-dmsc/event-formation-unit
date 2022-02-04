@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <common/testutils/DataFuzzer.h>
 #include <loki/readout/DataParser.h>
 

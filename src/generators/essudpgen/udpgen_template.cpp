@@ -4,7 +4,8 @@
 /// \file
 ///
 /// \brief Generate artificial VMM3 readouts for ESS readout system
-///
+/// \todo in case of Loki we are not using vmm3, so this is no longer
+/// a vmm3 thing
 //===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
@@ -74,6 +75,7 @@ int main(int argc, char *argv[]) {
 
   #ifdef LOKI_GENERATOR
    Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+   gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
    Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
   #endif
 
