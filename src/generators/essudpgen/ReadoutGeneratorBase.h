@@ -51,6 +51,10 @@ public:
   /// \param Rings number if rings in use
   uint16_t makePacket();
 
+  /// \brief Change the readout data size (if not VMM3)
+  void setReadoutDataSize(uint8_t ReadoutSize) {
+    ReadoutDataSize = ReadoutSize;
+  }
 
 protected:
   /// \brief Generate common readout header
@@ -68,7 +72,6 @@ protected:
 
 
   const uint16_t HeaderSize = sizeof(ESSReadout::Parser::PacketHeaderV0);
-  const uint16_t VMM3DataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
 
   GeneratorSettings& Settings;
   // Time offsets for readout generation
@@ -76,6 +79,7 @@ protected:
   const uint32_t PrevTimeLowOffset{10000}; // ticks
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
+  uint8_t ReadoutDataSize{sizeof(ESSReadout::VMM3Parser::VMM3Data)};
   uint8_t * Buffer{nullptr};
   uint16_t BufferSize{0};
   uint32_t SeqNum{0};

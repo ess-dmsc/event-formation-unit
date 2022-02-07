@@ -14,7 +14,7 @@
 #include <cstring>
 #include <math.h>
 #include <time.h>
-#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <stdexcept>
 
 
@@ -38,7 +38,7 @@ uint16_t ReadoutGeneratorBase::makePacket() {
 
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + Settings.NumReadouts * VMM3DataSize;
+  DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
   if (DataSize >= BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }

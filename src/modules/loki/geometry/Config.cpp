@@ -18,9 +18,20 @@ Config::Config() {}
 Config::Config(std::string ConfigFile) {
   nlohmann::json root = from_json_file(ConfigFile);
 
+  std::string InstrumentName;
   try {
-    auto Name = root["Detector"].get<std::string>();
+    InstrumentName = root["Detector"].get<std::string>();
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Missing 'Detector' field");
+    throw std::runtime_error("Missing 'Detector' field");
+  }
 
+  if (InstrumentName != "LoKI") {
+    LOG(INIT, Sev::Error, "InstrumentName mismatch");
+    throw std::runtime_error("Inconsistent Json file - invalid name, expected LoKI");
+  }
+
+  try {
     // Assumed the same for all straws in all banks
     Resolution = root["StrawResolution"].get<unsigned int>();
 
@@ -52,7 +63,7 @@ Config::Config(std::string ConfigFile) {
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, TubesN "
           "{}, StrawOffset {}",
-          Name, Bank, Vertical, TubesZ, TubesN, StrawOffset);
+          InstrumentName, Bank, Vertical, TubesZ, TubesN, StrawOffset);
 
       PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
       Panels.push_back(Temp);
@@ -60,7 +71,7 @@ Config::Config(std::string ConfigFile) {
 
     Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
     // This detector is made of individual 2D banks, so final 2 dimensions are 1
-    Geometry = new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1); 
+    Geometry = new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
     LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
 
   } catch (...) {

@@ -1,10 +1,17 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2019 - 2022 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests
+///
+//===----------------------------------------------------------------------===//
 
 #include <loki/Counters.h>
 #include <common/readout/ess/Parser.h>
 #include <loki/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
-#include <loki/test/ReadoutGenerator.h>
+#include <loki/generators/LokiReadoutGenerator.h>
 
 
 const uint32_t FirstSeqNum{0};
@@ -52,37 +59,32 @@ protected:
   const int DataType{0x30};
   ESSReadout::Parser CommonReadout;
   DataParser LokiParser{Counters};
+
   void SetUp() override {
     Counters = {};
-    //memset(&Counters, 0, sizeof(struct Counters));
+    CommonReadout.setMaxPulseTimeDiff(4000000000);
   }
   void TearDown() override {}
 };
-
-
-TEST_F(CombinedParserTest, DataGenSizeTooBig) {
-  const uint16_t BufferSize{8972};
-  uint8_t Buffer[BufferSize];
-
-  uint16_t Sections{1000};
-
-  ReadoutGenerator gen;
-  auto Length = gen.lokiReadoutDataGen(false, Sections, 1, Buffer, BufferSize, FirstSeqNum);
-  ASSERT_EQ(Length, 0);
-}
 
 
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGen) {
   const uint16_t BufferSize{8972};
   uint8_t Buffer[BufferSize];
+  uint32_t SeqNum{FirstSeqNum};
+  ReadoutGeneratorBase::GeneratorSettings Settings;
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
-    ReadoutGenerator gen;
-    auto Length = gen.lokiReadoutDataGen(false, Sections, 1, Buffer, BufferSize, FirstSeqNum);
-    ASSERT_EQ(Length, sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections *(4 + 20));
+    Settings.NumReadouts = Sections;
+    Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+    gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
+    Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
 
-    auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
+    uint16_t DataSize = gen.makePacket();
+    ASSERT_EQ(DataSize, sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections *(4 + 20));
+
+    auto Res = CommonReadout.validate((char *)&Buffer[0], DataSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
     Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
@@ -97,11 +99,11 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
   ASSERT_EQ(Res, 2);
 
   // Just for visual inspection for now
-  for (auto & Section : LokiParser.Result) {
-    printf("Ring %u, FEN %u\n", Section.RingId, Section.FENId);
+  for (auto & Data : LokiParser.Result) {
+    printf("Ring %u, FEN %u\n", Data.RingId, Data.FENId);
     printf("time (%u, %u), SeqNum %u, Tube %u, A %u, B %u, C %u, D %u\n",
-            Section.Data.TimeHigh, Section.Data.TimeLow, Section.Data.DataSeqNum, Section.Data.TubeId,
-            Section.Data.AmpA, Section.Data.AmpB, Section.Data.AmpC, Section.Data.AmpD);
+            Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId,
+            Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   }
 }
 
