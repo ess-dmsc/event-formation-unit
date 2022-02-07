@@ -2,7 +2,7 @@
 {
   "Comment" : "March 2022 test - Ring 0 has 16 FENs, part of bank 0",
 
-  "Detector": "LoKI4x2",
+  "Detector": "LoKI",
 
   "StrawResolution" : 512,
 

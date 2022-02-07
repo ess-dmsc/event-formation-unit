@@ -27,6 +27,18 @@ std::string InvalidConfigStr = R"(
 }
 )";
 
+// Invalid config file: Detector name is not LoKI
+std::string BadDetectorFile{"deleteme_loki_baddetector.json"};
+std::string BadDetectorStr = R"(
+{
+  "Detector": "LoKI4x8",
+
+  "NotPanelConfig" : [
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+  ]
+}
+)";
+
 // Good configuration file
 std::string ValidConfigFile{"deleteme_loki_valid_conf.json"};
 std::string ValidConfigStr = R"(
@@ -71,6 +83,11 @@ TEST_F(ConfigTest, NotJson) {
   deleteFile(NotJsonFile);
 }
 
+TEST_F(ConfigTest, BadDetectorName) {
+  ASSERT_ANY_THROW(config = Config(BadDetectorFile));
+  deleteFile(BadDetectorFile);
+}
+
 TEST_F(ConfigTest, InvalidConfig) {
   ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
   deleteFile(InvalidConfigFile);
@@ -86,7 +103,7 @@ TEST_F(ConfigTest, ValidConfig) {
 
 // Validate full instrument configuration (Loki.json)
 // should match the definitions in the ICD
-TEST_F(ConfigTest, LokiIcdGeometryFull) {
+TEST_F(ConfigTest, LokiICDGeometryFull) {
   config = Config(LOKI_FULL);
   ASSERT_EQ(config.getMaxPixel(), 3211264);
   ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
@@ -105,6 +122,8 @@ int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
              InvalidConfigStr.size());
+  saveBuffer(BadDetectorFile, (void *)BadDetectorStr.c_str(),
+             BadDetectorStr.size());
   saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(),
              ValidConfigStr.size());
   testing::InitGoogleTest(&argc, argv);
