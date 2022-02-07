@@ -16,12 +16,7 @@ namespace Cspec {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Config::loadAndApply() {
-  root = from_json_file(FileName);
-  apply();
-}
-
-void Config::apply() {
+void Config::applyConfig() {
   std::string Name;
   try {
     Parms.InstrumentName = root["Detector"].get<std::string>();
@@ -134,12 +129,12 @@ void Config::apply() {
 
 
       try {
-        MinADC[Ring][FEN][LocalHybrid] =
+        Hybrids[Ring][FEN][LocalHybrid].MinADC =
             root["Vessel_Config"][VesselID]["MinADC"];
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
-               MinADC[Ring][FEN][LocalHybrid], VesselID.c_str());
+               Hybrids[Ring][FEN][LocalHybrid].MinADC, VesselID.c_str());
       } catch (...) {
-        MinADC[Ring][FEN][LocalHybrid] = Parms.DefaultMinADC;
+        Hybrids[Ring][FEN][LocalHybrid].MinADC = Parms.DefaultMinADC;
       }
 
       LOG(INIT, Sev::Info,
@@ -165,21 +160,6 @@ void Config::apply() {
     throw std::runtime_error("Invalid Json file");
     return;
   }
-}
-
-uint8_t Config::getNumHybrids() {
-  uint8_t NumHybrids = 0;
-  for (int RingIndex = 0; RingIndex <= MaxRing; RingIndex++) {
-    for (int FENIndex = 0; FENIndex <= MaxFEN; FENIndex++) {
-      for (int HybridIndex = 0; HybridIndex <= MaxHybrid; HybridIndex++) {
-        ESSReadout::Hybrid Hybrid = getHybrid(RingIndex, FENIndex, HybridIndex);
-        if (Hybrid.Initialised) {
-          NumHybrids++;
-        }
-      }
-    }
-  }
-  return NumHybrids;
 }
 
 } // namespace Cspec

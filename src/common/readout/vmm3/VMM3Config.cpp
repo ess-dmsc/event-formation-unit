@@ -14,9 +14,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void VMM3Config::loadAndApply() {
+void VMM3Config::loadAndApplyConfig() {
   root = from_json_file(FileName);
-  apply();
+  applyConfig();
 }
 
 void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {

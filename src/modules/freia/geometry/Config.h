@@ -33,7 +33,7 @@ public:
       : VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
-  void apply() override;
+  void applyConfig() override;
 
 public:
   // Parameters obtained from JSON config file

@@ -12,6 +12,7 @@
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Hybrid.h>
+#include <common/readout/vmm3/VMM3Config.h>
 
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@
 
 namespace Cspec {
 
-class Config {
+class Config : public VMM3Config {
 public:
   static constexpr uint8_t MaxRing{11};  // 12 (logical) rings from 0 to 11
   static constexpr uint8_t MaxFEN{13};   // This is topology specific
@@ -31,21 +32,11 @@ public:
 
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
-      : ExpectedName(Instrument), FileName(ConfigFile) {}
-
-  // load file into json object and apply
-  void loadAndApply();
+     : VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
-  void apply();
+  void applyConfig() override;
 
-  // Get Hybrid from the Ring, FEN, and VMM numbers
-  // Currently Hybrids are stored as a 3D array, but may be updated in future
-  ESSReadout::Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
-    return Hybrids[Ring][FEN][VMM];
-  }
-
-  uint8_t getNumHybrids();
 
 public:
   // Parameters obtained from JSON config file
@@ -62,18 +53,9 @@ public:
     uint16_t DefaultMinADC{50};
   } Parms;
 
-  uint32_t NumPixels{0};
-
-  // Other parameters
-  std::string ExpectedName{""};
-  std::string FileName{""};
-  // JSON object
-  nlohmann::json root;
 
   // Derived parameters
-  ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Rotated[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Short[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint16_t MinADC[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
 } // namespace Cspec

@@ -32,8 +32,6 @@ public:
       : ExpectedName(Instrument), FileName(ConfigFile) {}
 
   // load file into json object and apply
-  void loadAndApply();
-
   void loadAndApplyConfig();
 
   void loadAndApplyCalibration(std::string CalibFile);
@@ -42,7 +40,7 @@ public:
                             nlohmann::json VMMCalibration);
 
   // Apply the loaded json file
-  virtual void apply() = 0;
+  virtual void applyConfig() = 0;
 
   // Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future

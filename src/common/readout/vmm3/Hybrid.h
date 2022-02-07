@@ -38,6 +38,7 @@ public:
   std::vector<VMM3Calibration> VMMs{NumVMMs};
   uint16_t XOffset{0};
   uint16_t YOffset{0};
+  uint16_t MinADC{0};
 }; // class Hybrid
 
 } // namespace ESSReadout

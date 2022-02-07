@@ -63,7 +63,7 @@ void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   Conf = Config("Freia", ModuleSettings.ConfigFile);
-  Conf.loadAndApply();
+  Conf.loadAndApplyConfig();
 
   XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette/hybrid)",
          Conf.NumHybrids);

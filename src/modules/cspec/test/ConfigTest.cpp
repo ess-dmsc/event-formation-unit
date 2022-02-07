@@ -87,7 +87,7 @@ protected:
 
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
-  ASSERT_EQ(config.getNumHybrids(), 0);
+  ASSERT_EQ(config.NumHybrids, 0);
 }
 
 TEST_F(ConfigTest, UninitialisedHybrids) {
@@ -96,34 +96,34 @@ TEST_F(ConfigTest, UninitialisedHybrids) {
 
 TEST_F(ConfigTest, NoDetector) {
   config.root = NoDetector;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidRing) {
   config.root = InvalidRing;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidConfig) {
   config.root = InvalidConfig;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, Duplicate) {
   config.root = DuplicateEntry;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
-  config.loadAndApply();
+  config.loadAndApplyConfig();
   ASSERT_EQ(config.NumPixels, 838272);
-  ASSERT_EQ(config.getNumHybrids(), 198);
+  ASSERT_EQ(config.NumHybrids, 198);
 
   /// \todo, check correct Hybrids initialised
 }

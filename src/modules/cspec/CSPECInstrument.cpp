@@ -71,7 +71,7 @@ void CSPECInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   Conf = Config("CSPEC", ModuleSettings.ConfigFile);
-  Conf.loadAndApply();
+  Conf.loadAndApplyConfig();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
@@ -135,7 +135,7 @@ void CSPECInstrument::processReadouts(void) {
     uint16_t YOffset = Hybrid.YOffset;
     bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
     bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
-    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][HybridId];
+    uint16_t MinADC = Hybrid.MinADC;
 
     
 

@@ -15,7 +15,7 @@ namespace Freia {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Config::apply() {
+void Config::applyConfig() {
   std::string Name;
   try {
     Parms.InstrumentName = root["Detector"].get<std::string>();
