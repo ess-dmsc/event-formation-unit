@@ -10,7 +10,6 @@
 // GCOVR_EXCL_START
 
 #include <cassert>
-#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
