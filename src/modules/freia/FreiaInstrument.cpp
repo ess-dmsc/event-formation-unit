@@ -145,8 +145,9 @@ void FreiaInstrument::processReadouts(void) {
         Conf.getHybrid(Ring, readout.FENId, readout.VMM >> 1);
 
     uint8_t Asic = readout.VMM & 0x1;
+    XTRACE(DATA, DEB, "Asic calculated to be %u", Asic);
     VMM3Calibration &Calib = Hybrid.VMMs[Asic];
-
+    
     uint64_t TimeNS =
         ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);

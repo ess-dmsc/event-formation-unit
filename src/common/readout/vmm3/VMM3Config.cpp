@@ -63,17 +63,21 @@ void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid & Hybrid, unsigned vmmi
     throw std::runtime_error("Wrong number of channels in calibration");
   }
   for (unsigned Channel = 0; Channel < VMM3Calibration::CHANNELS; Channel++) {
-    Hybrid.VMMs[vmmid].setCalibration(Channel,
-      tdc_offset[Channel], tdc_slope[Channel],
-      adc_offset[Channel], adc_slope[Channel]);
+    Hybrid.VMMs[vmmid].setCalibration(Channel, tdc_offset[Channel],
+                                      tdc_slope[Channel], adc_offset[Channel],
+                                      adc_slope[Channel]);
+    XTRACE(INIT, DEB,
+           "Setting Calibration for Channel %u, tdc_offset %d, tdc_slope %d, "
+           "adc_offset %d, adc_slope %d",
+           Channel, (double)tdc_offset[Channel], (double)tdc_slope[Channel],
+           (double)adc_offset[Channel], (double)adc_slope[Channel]);
   }
 }
-
 
 void VMM3Config::applyCalibration(std::string HybridID,
   nlohmann::json Calibration) {
 
-  ESSReadout::Hybrid CurrentHybrid = getHybrid(HybridID);
+  ESSReadout::Hybrid & CurrentHybrid = getHybrid(HybridID);
 
   std::string Date = Calibration["VMMHybridCalibration"]["CalibrationDate"];
 

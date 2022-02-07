@@ -16,6 +16,7 @@
 bool VMM3Calibration::setCalibration(int Channel,
                  double TDCOffset, double TDCSlope,
                  double ADCOffset, double ADCSlope) {
+    XTRACE(INIT, DEB, "Setting calibration for Channel %u, tdc_offset %d, tdc_slope %d adc_offset %d, adc_slope %d", Channel, TDCOffset, TDCSlope, ADCOffset, ADCSlope);
     if (Channel >= CHANNELS) {
       return false;
     }
@@ -27,6 +28,7 @@ bool VMM3Calibration::setCalibration(int Channel,
 }
 
 double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) {
+  XTRACE(DATA, DEB, "TDC Correction, Offset %d, Slope %d", Calibration[Channel].TDCOffset, Calibration[Channel].TDCSlope);
 	double TDCns = 1.5 * 22.72 - 60.0*TDC/255;
 	double TDCCorr = (TDCns - Calibration[Channel].TDCOffset)
 	               * Calibration[Channel].TDCSlope;
@@ -34,6 +36,7 @@ double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) {
 }
 
 double VMM3Calibration::ADCCorr(int Channel, uint16_t ADC) {
+  XTRACE(DATA, DEB, "ADC Correction, Offset %d, Slope %d", Calibration[Channel].ADCOffset, Calibration[Channel].ADCSlope);
 	double ADCCorr = (ADC - Calibration[Channel].ADCOffset)
 	               * Calibration[Channel].ADCSlope;
 	return std::max(std::min(1023.0, ADCCorr), 0.0);
