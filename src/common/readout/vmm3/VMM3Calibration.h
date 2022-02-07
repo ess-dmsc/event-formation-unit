@@ -13,7 +13,6 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 
-
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -57,7 +56,7 @@ private:
   ///\brief the initial calibration is the identity calibration with
   /// offsets 0.0 and slopes 1.0
   void InitCal() {
-    for (auto & Cal : Calibration) {
+    for (auto &Cal : Calibration) {
       Cal.TDCOffset = 0.0;
       Cal.TDCSlope = 1.0;
       Cal.ADCOffset = 0.0;

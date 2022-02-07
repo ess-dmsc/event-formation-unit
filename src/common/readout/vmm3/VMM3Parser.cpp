@@ -51,9 +51,9 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-
-    if (Readout.FENId > MaxFENId)  {
-      XTRACE(DATA, WAR, "Invalid FENId %d (valid: 0 - %d)", Readout.FENId, MaxFENId);
+    if (Readout.FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "Invalid FENId %d (valid: 0 - %d)", Readout.FENId,
+             MaxFENId);
       Stats.ErrorFEN++;
       continue;
     }
@@ -98,7 +98,8 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
     // If monitor there are no invalid ADC values
     if (not IsMonitor) {
       if ((Readout.OTADC & ADCMask) > MaxADCValue) {
-        XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff, MaxADCValue);
+        XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff,
+               MaxADCValue);
         Stats.ErrorADC++;
         continue;
       }
@@ -138,4 +139,4 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
 
   return GoodReadouts;
 }
-}  // namespace ESSReadout
+} // namespace ESSReadout

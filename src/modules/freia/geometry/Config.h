@@ -50,8 +50,6 @@ public:
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
     uint32_t TimeBoxNs{0xffffffff};
   } Parms;
-
-
 };
 
 } // namespace Freia

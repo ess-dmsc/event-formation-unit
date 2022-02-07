@@ -18,10 +18,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
 class VMM3Config {
 public:
- 
   static constexpr uint8_t MaxRing{
       10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
   static constexpr uint8_t MaxFEN{2};    // This is topology specific
@@ -31,7 +29,7 @@ public:
 
   // Load and apply the json config
   VMM3Config(std::string Instrument, std::string ConfigFile)
-      :ExpectedName(Instrument), FileName(ConfigFile) {}
+      : ExpectedName(Instrument), FileName(ConfigFile) {}
 
   // load file into json object and apply
   void loadAndApply();
@@ -40,8 +38,8 @@ public:
 
   void loadAndApplyCalibration(std::string CalibFile);
 
-  void applyVMM3Calibration(ESSReadout::Hybrid & Hybrid, unsigned vmmid,
-        nlohmann::json VMMCalibration);
+  void applyVMM3Calibration(ESSReadout::Hybrid &Hybrid, unsigned vmmid,
+                            nlohmann::json VMMCalibration);
 
   // Apply the loaded json file
   virtual void apply() = 0;
@@ -52,22 +50,22 @@ public:
     return Hybrids[Ring][FEN][VMM];
   }
 
-  ESSReadout::Hybrid &getHybrid(std::string HybridID){
-    for(int RingID=0 ; RingID <= MaxRing ; RingID++){
-      for(int FENID=0 ; FENID <= MaxFEN ; FENID++){
-        for(int HybridNum=0 ; HybridNum <= MaxHybrid ; HybridNum++){
-          if (Hybrids[RingID][FENID][HybridNum].HybridId == HybridID ){
+  ESSReadout::Hybrid &getHybrid(std::string HybridID) {
+    for (int RingID = 0; RingID <= MaxRing; RingID++) {
+      for (int FENID = 0; FENID <= MaxFEN; FENID++) {
+        for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
+          if (Hybrids[RingID][FENID][HybridNum].HybridId == HybridID) {
             return Hybrids[RingID][FENID][HybridNum];
           }
         }
       }
     }
-    XTRACE(INIT, ERR, "HybridID %s requested not in configuration file", HybridID.c_str());
+    XTRACE(INIT, ERR, "HybridID %s requested not in configuration file",
+           HybridID.c_str());
     throw std::runtime_error("Invalid HybridID requested");
   }
 
-  void applyCalibration(std::string HybridID,
-  nlohmann::json Calibration);
+  void applyCalibration(std::string HybridID, nlohmann::json Calibration);
 
 public:
   // Derived parameters
@@ -82,4 +80,3 @@ public:
   // JSON object
   nlohmann::json root;
 };
-

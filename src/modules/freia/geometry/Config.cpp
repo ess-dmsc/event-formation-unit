@@ -15,7 +15,6 @@ namespace Freia {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
 void Config::apply() {
   std::string Name;
   try {
@@ -81,6 +80,7 @@ void Config::apply() {
       }
 
       ESSReadout::Hybrid &Hybrid = Hybrids[Ring][FEN][LocalHybrid];
+      XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
       if (Hybrid.Initialised) {
         XTRACE(INIT, ERR, "Duplicate Hybrid in config file");

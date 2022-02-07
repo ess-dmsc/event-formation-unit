@@ -10,8 +10,8 @@
 
 #include <common/readout/vmm3/VMM3Calibration.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 bool VMM3Calibration::setCalibration(int Channel,
                  double TDCOffset, double TDCSlope,

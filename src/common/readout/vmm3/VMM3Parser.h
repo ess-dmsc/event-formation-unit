@@ -33,8 +33,8 @@ struct VMM3ParserStats {
 };
 
 class VMM3Parser {
- public:
-  const unsigned int MaxRingId{23};  // Physical rings
+public:
+  const unsigned int MaxRingId{23}; // Physical rings
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
@@ -60,29 +60,25 @@ class VMM3Parser {
   static_assert(sizeof(VMM3Parser::VMM3Data) == (VMM3DATASIZE),
                 "Wrong header size (update assert or check packing)");
 
-  VMM3Parser() {
-    Result.reserve(MaxReadoutsInPacket);
-  };
+  VMM3Parser() { Result.reserve(MaxReadoutsInPacket); };
 
   /// \brief VMM readout is used as monitor
   /// this mainly affects parsing of the ADC field which
   /// is 10 bits when used for readouts and 16 bits when
   /// a monitor
-  void setMonitor(bool Monitor) {
-    IsMonitor = Monitor;
-  };
+  void setMonitor(bool Monitor) { IsMonitor = Monitor; };
 
   ~VMM3Parser(){};
 
   //
-  int parse(Parser::PacketDataV0& PacketData);
+  int parse(Parser::PacketDataV0 &PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;
 
   struct VMM3ParserStats Stats;
 
- private:
+private:
   const uint16_t DataLength{20};
   const uint16_t MaxBCValue{4095};
   const uint16_t MaxADCValue{1023};
@@ -92,4 +88,4 @@ class VMM3Parser {
   const uint16_t ADCMask{0x7fff};
   bool IsMonitor{false};
 };
-}  // namespace ESSReadout
+} // namespace ESSReadout

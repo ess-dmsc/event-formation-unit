@@ -19,13 +19,14 @@ namespace ESSReadout {
 
 class Hybrid {
 public:
-  static constexpr int NumVMMs{2}; // #VMMs per cassette
+  static constexpr int NumVMMs{2};          // #VMMs per cassette
   static constexpr unsigned int IdSize{32}; // chars
 
-  static bool isAvailable(std::string NewId, std::vector<Hybrid> & Hybrids) {
+  static bool isAvailable(std::string NewId, std::vector<Hybrid> &Hybrids) {
     for (unsigned i = 0; i < Hybrids.size(); i++) {
       if (Hybrids[i].HybridId == NewId) {
-        XTRACE(INIT, ALW, "Id '%s' is already used in Hybrid %d", NewId.c_str(), i);
+        XTRACE(INIT, ALW, "Id '%s' is already used in Hybrid %d", NewId.c_str(),
+               i);
         return false;
       }
     }

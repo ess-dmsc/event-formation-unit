@@ -10,9 +10,9 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <modules/freia/generators/ReadoutGenerator.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
+#include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/freia/generators/ReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -29,8 +29,7 @@ int main(int argc, char *argv[]) {
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Type,
-                 "Detector type id");
+  app.add_option("-y, --type", Settings.Type, "Detector type id");
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
@@ -38,8 +37,9 @@ int main(int argc, char *argv[]) {
   app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
                  "Delay (ticks) between coincident readouts");
   app.add_option("-o, --readouts", Settings.NumReadouts,
-                "Number of readouts per packet");
-  app.add_flag("-m, --random", Settings.Randomise, "Randomise header and data fields");
+                 "Number of readouts per packet");
+  app.add_flag("-m, --random", Settings.Randomise,
+               "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
   CLI11_PARSE(app, argc, argv);
@@ -57,19 +57,19 @@ int main(int argc, char *argv[]) {
   uint64_t Packets{0};
   uint32_t SeqNum{0};
 
-  #ifdef FREIA_GENERATOR
-    Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-  #endif
+#ifdef FREIA_GENERATOR
+  Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+#endif
 
-  #ifdef CSPEC_GENERATOR
-    Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
-  #endif
+#ifdef CSPEC_GENERATOR
+  Cspec::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
+#endif
 
-   #ifdef LET_GENERATOR
-    Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-    Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
-  #endif
+#ifdef LET_GENERATOR
+  Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
+#endif
 
   do {
     uint16_t DataSize = gen.makePacket();

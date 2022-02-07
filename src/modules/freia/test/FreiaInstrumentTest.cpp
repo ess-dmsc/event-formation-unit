@@ -184,20 +184,20 @@ protected:
 TEST_F(FreiaInstrumentTest, Constructor) {
   ModuleSettings.CalibFile = CalibFile;
   FreiaInstrument Freia(counters, ModuleSettings, serializer);
-  ASSERT_EQ(counters.RingErrors, 0); 
+  ASSERT_EQ(counters.RingErrors, 0);
 }
 
 TEST_F(FreiaInstrumentTest, CalibrationTest) {
   ModuleSettings.CalibFile = CalibFile;
-  FreiaInstrument Freia(counters, ModuleSettings, serializer);
-  ASSERT_EQ(counters.RingErrors, 0); 
+  FreiaInstrument freia(counters, ModuleSettings, serializer);
+  ASSERT_EQ(counters.RingErrors, 0);
 
-  makeHeader(freia->ESSReadoutParser.Packet, CalibrationTest);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  makeHeader(freia.ESSReadoutParser.Packet, CalibrationTest);
+  auto Res = freia.VMMParser.parse(freia.ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.RingErrors, 0);
 
-  freia->processReadouts();
+  freia.processReadouts();
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
@@ -316,7 +316,6 @@ TEST_F(FreiaInstrumentTest, NoEvents) {
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(CalibFile, (void *)CalibStr.c_str(), CalibStr.size());
-
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

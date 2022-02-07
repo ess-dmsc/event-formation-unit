@@ -4,29 +4,26 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-// based on VMM3 Readout ICD document https://project.esss.dk/owncloud/index.php/f/14670413
+// based on VMM3 Readout ICD document
+// https://project.esss.dk/owncloud/index.php/f/14670413
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <cassert>
+#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <math.h>
-#include <time.h>
-#include <common/readout/vmm3/generators/ReadoutGeneratorBase.h>
 #include <stdexcept>
+#include <time.h>
 
-
-
-ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
-  uint32_t InitialSeqNum, GeneratorSettings& Settings)
-  : Settings(Settings)
-  , Buffer(BufferPtr)
-  , BufferSize(MaxPayloadSize)
-  , SeqNum(InitialSeqNum)
-  {}
-
+ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr,
+                                           uint16_t MaxPayloadSize,
+                                           uint32_t InitialSeqNum,
+                                           GeneratorSettings &Settings)
+    : Settings(Settings), Buffer(BufferPtr), BufferSize(MaxPayloadSize),
+      SeqNum(InitialSeqNum) {}
 
 uint16_t ReadoutGeneratorBase::makePacket() {
   generateHeader();
@@ -34,7 +31,6 @@ uint16_t ReadoutGeneratorBase::makePacket() {
   finishPacket();
   return DataSize;
 }
-
 
 void ReadoutGeneratorBase::generateHeader() {
 
@@ -61,7 +57,6 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PrevPulseLow = PrevTimeLowOffset;
 }
 
-
 void ReadoutGeneratorBase::finishPacket() {
   SeqNum++; // ready for next packet
 
@@ -71,7 +66,5 @@ void ReadoutGeneratorBase::finishPacket() {
     Fuzzer.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
   }
 }
-
-
 
 // GCOVR_EXCL_STOP

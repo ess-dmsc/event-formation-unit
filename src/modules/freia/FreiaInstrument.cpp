@@ -15,8 +15,8 @@
 #include <common/time/TimeString.h>
 #include <freia/FreiaInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
@@ -141,13 +141,15 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-    ESSReadout::Hybrid Hybrid =
+    ESSReadout::Hybrid &Hybrid =
         Conf.getHybrid(Ring, readout.FENId, readout.VMM >> 1);
 
     uint8_t Asic = readout.VMM & 0x1;
     XTRACE(DATA, DEB, "Asic calculated to be %u", Asic);
     VMM3Calibration &Calib = Hybrid.VMMs[Asic];
-    
+    XTRACE(DATA, DEB, "Hybrid at: %p", &Hybrid);
+    XTRACE(DATA, DEB, "Calibration at: %p", &Hybrid.VMMs[Asic]);
+
     uint64_t TimeNS =
         ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
