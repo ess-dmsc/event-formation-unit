@@ -65,13 +65,9 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   //
-  Stats.create("monitors.error", Counters.MonitorErrors);
-  Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   // VMM3Parser stats
-  Stats.create("monitors.error", Counters.MonitorErrors);
-  Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
   Stats.create("readouts.error_hybrid", Counters.HybridErrors);

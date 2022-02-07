@@ -22,6 +22,9 @@ public:
 
   struct LokiReadout //
   {
+    uint8_t RingId;
+    uint8_t FENId;
+    uint16_t DataLength;
     uint32_t TimeHigh;
     uint32_t TimeLow;
     uint8_t unused;
@@ -33,7 +36,7 @@ public:
     int16_t AmpD;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(LokiReadout) == 20, "LoKI readout header length error");
+  static_assert(sizeof(LokiReadout) == 24, "LoKI readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
@@ -43,15 +46,8 @@ public:
   //
   int parse(const char *buffer, unsigned int size);
 
-  //
-  struct ParsedData {
-    uint8_t RingId;
-    uint8_t FENId;
-    LokiReadout Data;
-  };
-
   // To be iterated over in processing thread
-  std::vector<struct ParsedData> Result;
+  std::vector<struct LokiReadout> Result;
 
   struct Counters &Stats;
   uint32_t HeaderCounters[16][16]; // {ring,fen} counters

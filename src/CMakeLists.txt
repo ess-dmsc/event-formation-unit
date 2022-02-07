@@ -18,7 +18,7 @@ find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
 find_package(PCAP REQUIRED)
 find_package(asio REQUIRED)
-find_package(jsonformoderncpp REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}
@@ -30,6 +30,7 @@ set(EFU_COMMON_LIBS
   GraylogLogger::graylog_logger_static
   fmt::fmt
   h5cpp::h5cpp
+  nlohmann_json::nlohmann_json
   )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
@@ -45,7 +46,7 @@ add_subdirectory(generators)
 get_filename_component(MG_CFG_FILE "${ESS_MODULE_DIR}/multigrid/configs/ILL_mappings.json" ABSOLUTE)
 get_filename_component(GDGEM_CFG_FILE "${ESS_MODULE_DIR}/gdgem/configs/vmm3.json" ABSOLUTE)
 get_filename_component(DREAM_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/DreamEndcap.json" ABSOLUTE)
-get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTest.json" ABSOLUTE)
+get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTestII.json" ABSOLUTE)
 get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
 get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 get_filename_component(TTLMON_CFG_FILE "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamon.json" ABSOLUTE)
@@ -67,7 +68,7 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-f" "../configs/ILL_mappings.json" "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "AdcReadout" "-s" "1" "--nohwcheck"
-    COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTest.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
+    COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTestII.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/perfgen" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/dream" "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"

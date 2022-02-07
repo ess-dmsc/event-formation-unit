@@ -4,15 +4,17 @@
 /// \file
 ///
 /// \brief Generate artificial VMM3 readouts for ESS readout system
-///
+/// \todo in case of Loki we are not using vmm3, so this is no longer
+/// a vmm3 thing
 //===----------------------------------------------------------------------===//
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
+#include <modules/loki/generators/LokiReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -70,6 +72,12 @@ int main(int argc, char *argv[]) {
   Cspec::LETReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
 #endif
+
+  #ifdef LOKI_GENERATOR
+   Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+   gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
+   Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+  #endif
 
   do {
     uint16_t DataSize = gen.makePacket();

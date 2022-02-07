@@ -100,7 +100,7 @@ void Cspec::ReadoutGenerator::generateData() {
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
 
-    DP += VMM3DataSize;
+    DP += ReadoutDataSize;
 
     /// \todo work out why updating TimeLow is done this way, and if it applies
     /// to CSPEC

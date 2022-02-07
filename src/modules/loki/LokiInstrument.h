@@ -47,8 +47,7 @@ public:
                      DataParser::LokiReadout &Data);
 
   /// \brief writes a single readout to file
-  void dumpReadoutToFile(DataParser::ParsedData &Section,
-                         DataParser::LokiReadout &Data);
+  void dumpReadoutToFile(DataParser::LokiReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' LoKI together

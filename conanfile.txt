@@ -3,7 +3,7 @@ asio/1.16.1
 benchmark/1.5.0
 cli11/1.9.1
 fmt/6.2.0
-graylog-logger/2.0.3-dm1@ess-dmsc/stable
+graylog-logger/2.0.4-dm1@ess-dmsc/stable
 gtest/1.8.1@bincrafters/stable
 h5cpp/0.4.0@ess-dmsc/stable
 nlohmann_json/3.9.1

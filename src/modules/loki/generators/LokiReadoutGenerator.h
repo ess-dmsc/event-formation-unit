@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include <common/readout/vmm3/VMM3Parser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <common/testutils/DataFuzzer.h>
+#include <loki/readout/DataParser.h>
 
-namespace Cspec {
-class ReadoutGenerator : public ReadoutGeneratorBase {
+namespace Loki {
+class LokiReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
@@ -23,6 +23,5 @@ protected:
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
 };
-} // namespace Cspec
-
+} // namespace Loki
 // GCOVR_EXCL_STOP

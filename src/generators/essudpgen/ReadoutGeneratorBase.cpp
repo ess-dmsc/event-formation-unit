@@ -15,15 +15,21 @@
 #include <cstdio>
 #include <cstring>
 #include <math.h>
+#include <time.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <stdexcept>
 #include <time.h>
 
-ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr,
-                                           uint16_t MaxPayloadSize,
-                                           uint32_t InitialSeqNum,
-                                           GeneratorSettings &Settings)
-    : Settings(Settings), Buffer(BufferPtr), BufferSize(MaxPayloadSize),
-      SeqNum(InitialSeqNum) {}
+
+
+ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
+  uint32_t InitialSeqNum, GeneratorSettings& Settings)
+  : Settings(Settings)
+  , Buffer(BufferPtr)
+  , BufferSize(MaxPayloadSize)
+  , SeqNum(InitialSeqNum)
+  {}
+
 
 uint16_t ReadoutGeneratorBase::makePacket() {
   generateHeader();
@@ -34,7 +40,7 @@ uint16_t ReadoutGeneratorBase::makePacket() {
 
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + Settings.NumReadouts * VMM3DataSize;
+  DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
   if (DataSize >= BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }

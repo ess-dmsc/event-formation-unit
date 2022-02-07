@@ -19,10 +19,6 @@
 #include <dream/generators/SimReader.h>
 #endif
 
-#ifdef ESSUDPGEN_LOKI_RAW
-#include <loki/generators/RawReader.h>
-#endif
-
 #include <generators/PacketGenerator.h>
 
 

@@ -51,7 +51,7 @@ void Freia::ReadoutGenerator::generateData() {
     } else {
       ReadoutData->Channel = XChannel;
     }
-    DP += VMM3DataSize;
+    DP += ReadoutDataSize;
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
     } else {
