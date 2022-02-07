@@ -14,7 +14,8 @@
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
+#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -74,9 +75,14 @@ int main(int argc, char *argv[]) {
   #endif
 
   #ifdef LOKI_GENERATOR
-   Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+   Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
    gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
    Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+  #endif
+
+  #ifdef TTLMON_GENERATOR
+   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
   #endif
 
   do {
