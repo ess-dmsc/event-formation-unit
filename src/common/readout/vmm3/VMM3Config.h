@@ -22,8 +22,8 @@ class VMM3Config {
 public:
   static constexpr uint8_t MaxRing{
       10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
-  static constexpr uint8_t MaxFEN{2};    // This is topology specific
-  static constexpr uint8_t MaxHybrid{1}; // Hybrids are VMM >> 1
+  static constexpr uint8_t MaxFEN{13};    // This is topology specific
+  static constexpr uint8_t MaxHybrid{2}; // Hybrids are VMM >> 1
 
   VMM3Config(){};
 

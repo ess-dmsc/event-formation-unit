@@ -87,7 +87,7 @@ void Config::applyConfig() {
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
       std::string IDString = Mapping["HybridId"];
 
-      XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
+      XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
       if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
         XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
@@ -95,10 +95,11 @@ void Config::applyConfig() {
       }
 
       if (Hybrids[Ring][FEN][LocalHybrid].Initialised) {
-        XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
+        XTRACE(INIT, ERR, "Duplicate Hybrid in config file, Ring %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
         throw std::runtime_error("Duplicate Hybrid in config file");
       }
 
+      XTRACE(INIT, DEB, "Initialising Hybrid Ring: %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
       Hybrids[Ring][FEN][LocalHybrid].Initialised = true;
       Hybrids[Ring][FEN][LocalHybrid].HybridId = IDString;
       std::string VesselID = Mapping["VesselId"];
@@ -140,6 +141,7 @@ void Config::applyConfig() {
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}", Name,
           Ring, FEN, LocalHybrid);
+      NumHybrids++;
     }
 
     // Calculates number of pixels config covers via Vessel_Config and
