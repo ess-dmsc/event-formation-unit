@@ -125,9 +125,9 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    XTRACE(DATA, DEB, "TOF %" PRIu64 "", TimeOfFlight);
-    // TTL monitor emits pixels == Channel + 1
-    counters.TxBytes += Serializer->addEvent(TimeOfFlight, readout.Channel + 1);
+    uint32_t PixelId = readout.Channel + 1;
+    XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
+    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;
   }
 }

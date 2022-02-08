@@ -44,7 +44,7 @@ void ReadoutGenerator::generateData() {
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 0;
     ReadoutData->VMM = 0;
-    ReadoutData->Channel = Readout % 3;
+    ReadoutData->Channel = (Readout % 3) & 0x01; // 0 0 1, 0 0 1, ...
 
     DP += ReadoutDataSize;
 

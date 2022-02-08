@@ -157,6 +157,12 @@ void TTLMonitorBase::input_thread() {
 
 void TTLMonitorBase::processing_thread() {
 
+  if (EFUSettings.KafkaTopic == "") {
+    XTRACE(INPUT, ALW, "Missing topic - mandatory for ttl monitor");
+    stopThreads();
+  }
+  XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
+
   // Event producer
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
