@@ -5,7 +5,7 @@
   "InstrumentGeometry" : "CSPEC",
 
   "Vessel_Config" : {
-    "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
+    "0":  {"NumGrids": 140, "Rotation": false},
     "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12},
     "2":  {"NumGrids": 140, "Rotation": false, "XOffset":  24},
     "3":  {"NumGrids": 140, "Rotation": false, "XOffset":  36},
