@@ -20,6 +20,7 @@
 
 class VMM3Config {
 public:
+  // Provide maximum values from all VMM3 detectors
   static constexpr uint8_t MaxRing{
       10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
   static constexpr uint8_t MaxFEN{13};    // This is topology specific
@@ -48,6 +49,7 @@ public:
     return Hybrids[Ring][FEN][VMM];
   }
 
+  // Slow string comparison method, only to be used on EFU config initialisation
   ESSReadout::Hybrid &getHybrid(std::string HybridID) {
     for (int RingID = 0; RingID <= MaxRing; RingID++) {
       for (int FENID = 0; FENID <= MaxFEN; FENID++) {

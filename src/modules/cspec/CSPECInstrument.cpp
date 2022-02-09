@@ -78,11 +78,10 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
-  // if (ModuleSettings.CalibFile != "") {
-  //   XTRACE(INIT, ALW, "Loading and applying calibration file");
-  //   ESSReadout::CalibFile Calibration("Freia", Hybrids);
-  //   Calibration.load(ModuleSettings.CalibFile);
-  // }
+  if (ModuleSettings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file");
+    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+  }
 }
 
 void CSPECInstrument::processReadouts(void) {

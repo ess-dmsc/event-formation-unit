@@ -3,8 +3,11 @@
 ///
 /// \file
 ///
-/// \brief Get detector configuration from json file
+/// \brief Gets detector configuration from json file,
+///  and optionally detector calibration from json file
 ///
+/// Inherits from common/readout/VMM3Config.h
+/// Provides CSPEC specific applyConfig function
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -52,6 +55,7 @@ public:
 
 
   // Derived parameters
+  // CSPEC specific Hybrid fields not included in common Hybrid class
   bool Rotated[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Short[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };

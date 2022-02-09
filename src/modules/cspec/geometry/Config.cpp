@@ -94,14 +94,16 @@ void Config::applyConfig() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      if (Hybrids[Ring][FEN][LocalHybrid].Initialised) {
+      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+
+      if (Hybrid.Initialised) {
         XTRACE(INIT, ERR, "Duplicate Hybrid in config file, Ring %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
         throw std::runtime_error("Duplicate Hybrid in config file");
       }
 
       XTRACE(INIT, DEB, "Initialising Hybrid Ring: %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
-      Hybrids[Ring][FEN][LocalHybrid].Initialised = true;
-      Hybrids[Ring][FEN][LocalHybrid].HybridId = IDString;
+      Hybrid.Initialised = true;
+      Hybrid.HybridId = IDString;
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =
           root["Vessel_Config"][VesselID]["Rotation"];
@@ -114,28 +116,28 @@ void Config::applyConfig() {
       }
 
       try {
-       Hybrids[Ring][FEN][LocalHybrid].XOffset =
+       Hybrid.XOffset =
             root["Vessel_Config"][VesselID]["XOffset"];
       } catch (...) {
-        Hybrids[Ring][FEN][LocalHybrid].XOffset = 0;
+        Hybrid.XOffset = 0;
       }
 
       try {
-       Hybrids[Ring][FEN][LocalHybrid].YOffset =
+       Hybrid.YOffset =
             root["Vessel_Config"][VesselID]["YOffset"];
       } catch (...) {
-        Hybrids[Ring][FEN][LocalHybrid].YOffset = 0;
+        Hybrid.YOffset = 0;
       }
 
 
 
       try {
-        Hybrids[Ring][FEN][LocalHybrid].MinADC =
+        Hybrid.MinADC =
             root["Vessel_Config"][VesselID]["MinADC"];
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
-               Hybrids[Ring][FEN][LocalHybrid].MinADC, VesselID.c_str());
+               Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
-        Hybrids[Ring][FEN][LocalHybrid].MinADC = Parms.DefaultMinADC;
+        Hybrid.MinADC = Parms.DefaultMinADC;
       }
 
       LOG(INIT, Sev::Info,
