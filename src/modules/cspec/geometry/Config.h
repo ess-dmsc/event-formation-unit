@@ -24,10 +24,6 @@ namespace Cspec {
 
 class Config : public VMM3Config {
 public:
-  /// \todo work out if these can be defined in Config, not VMM3Config
-  // static constexpr uint8_t MaxRing{11};  // 12 (logical) rings from 0 to 11
-  // static constexpr uint8_t MaxFEN{13};   // This is topology specific
-  // static constexpr uint8_t MaxHybrid{2}; // Hybrids are VMM >> 1
 
   Config(){};
 
