@@ -15,7 +15,7 @@
 #include <loki/readout/DataParser.h>
 
 namespace Loki {
-class LokiReadoutGenerator : public ReadoutGeneratorBase {
+class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 

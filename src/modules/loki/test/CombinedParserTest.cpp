@@ -11,7 +11,7 @@
 #include <common/readout/ess/Parser.h>
 #include <loki/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
-#include <loki/generators/LokiReadoutGenerator.h>
+#include <loki/generators/ReadoutGenerator.h>
 
 
 const uint32_t FirstSeqNum{0};
@@ -77,7 +77,7 @@ TEST_F(CombinedParserTest, DataGen) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
     Settings.NumReadouts = Sections;
-    Loki::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+    Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
     gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
     Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
 

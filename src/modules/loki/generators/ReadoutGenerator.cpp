@@ -4,14 +4,14 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-/// based on LoKI ICD:
+/// for Loki ICD:
 ///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
 #include <math.h>
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
 #include <time.h>
 
 #include <cassert>
@@ -23,7 +23,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Loki::LokiReadoutGenerator::generateData() {
+namespace Loki {
+
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::LokiReadout);
@@ -62,5 +64,5 @@ void Loki::LokiReadoutGenerator::generateData() {
     }
   }
 }
-
+} // namespace Loki
 // GCOVR_EXCL_STOP

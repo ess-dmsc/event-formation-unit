@@ -85,11 +85,11 @@ set(CombinedParserTest_INC
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  ../generators/LokiReadoutGenerator.h
+  ../generators/ReadoutGenerator.h
   )
 set(CombinedParserTest_SRC
   CombinedParserTest.cpp
-  ../generators/LokiReadoutGenerator.cpp
+  ../generators/ReadoutGenerator.cpp
   ../readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp

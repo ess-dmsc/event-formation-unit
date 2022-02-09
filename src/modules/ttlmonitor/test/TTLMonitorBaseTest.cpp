@@ -69,6 +69,7 @@ class TTLMonitorBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
     LocalSettings.ConfigFile = "TTLMonitor.json";
+    Settings.KafkaTopic = "freia_beam_monitor";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }

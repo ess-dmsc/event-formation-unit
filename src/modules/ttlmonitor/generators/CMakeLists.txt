@@ -1,17 +1,17 @@
 #=============================================================================
-# Generate artificial LoKI readouts
+# Generate artificial TTLMonitor readouts
 #=============================================================================
 
-set(udpgen_loki_INC
+set(udpgen_ttlmon_INC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  ${ESS_MODULE_DIR}/loki/generators/ReadoutGenerator.h
+  ${ESS_MODULE_DIR}/ttlmonitor/generators/ReadoutGenerator.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   )
-set(udpgen_loki_SRC
+set(udpgen_ttlmon_SRC
   ${ESS_SOURCE_DIR}/generators/essudpgen/udpgen_template.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
-  ${ESS_MODULE_DIR}/loki/generators/ReadoutGenerator.cpp
+  ${ESS_MODULE_DIR}/ttlmonitor/generators/ReadoutGenerator.cpp
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
   )
-create_executable(udpgen_loki)
-target_compile_definitions(udpgen_loki PUBLIC LOKI_GENERATOR)
+create_executable(udpgen_ttlmon)
+target_compile_definitions(udpgen_ttlmon PUBLIC TTLMON_GENERATOR)
