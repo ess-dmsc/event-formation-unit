@@ -187,18 +187,18 @@ TEST_F(FreiaInstrumentTest, Constructor) {
   ASSERT_EQ(counters.RingErrors, 0);
 }
 
-TEST_F(FreiaInstrumentTest, CalibrationTest) {
-  ModuleSettings.CalibFile = CalibFile;
-  FreiaInstrument freia(counters, ModuleSettings, serializer);
-  ASSERT_EQ(counters.RingErrors, 0);
+// TEST_F(FreiaInstrumentTest, CalibrationTest) {
+//   ModuleSettings.CalibFile = CalibFile;
+//   FreiaInstrument freia(counters, ModuleSettings, serializer);
+//   ASSERT_EQ(counters.RingErrors, 0);
 
-  makeHeader(freia.ESSReadoutParser.Packet, CalibrationTest);
-  auto Res = freia.VMMParser.parse(freia.ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
+//   makeHeader(freia.ESSReadoutParser.Packet, CalibrationTest);
+//   auto Res = freia.VMMParser.parse(freia.ESSReadoutParser.Packet);
+//   ASSERT_EQ(Res, 2);
+//   ASSERT_EQ(counters.RingErrors, 0);
 
-  freia.processReadouts();
-}
+//   freia.processReadouts();
+// }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(FreiaInstrumentTest, DumpTofile) {
