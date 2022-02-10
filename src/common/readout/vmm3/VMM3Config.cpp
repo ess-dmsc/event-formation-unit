@@ -47,6 +47,23 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   }
 }
 
+void VMM3Config::applyCalibration(std::string HybridID,
+                                  nlohmann::json Calibration) {
+
+  ESSReadout::Hybrid &CurrentHybrid = getHybrid(HybridID);
+
+  std::string Date = Calibration["VMMHybridCalibration"]["CalibrationDate"];
+
+  // Apply calibration below
+  XTRACE(INIT, ALW, "Hybrid ID %s, Date %s", HybridID.c_str(), Date.c_str());
+
+  auto &vmm0cal = Calibration["VMMHybridCalibration"]["vmm0"];
+  applyVMM3Calibration(CurrentHybrid, 0, vmm0cal);
+  auto &vmm1cal = Calibration["VMMHybridCalibration"]["vmm1"];
+  applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
+}
+
+
 void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
                                       unsigned vmmid,
                                       nlohmann::json VMMCalibration) {
@@ -75,18 +92,3 @@ void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
   }
 }
 
-void VMM3Config::applyCalibration(std::string HybridID,
-                                  nlohmann::json Calibration) {
-
-  ESSReadout::Hybrid &CurrentHybrid = getHybrid(HybridID);
-
-  std::string Date = Calibration["VMMHybridCalibration"]["CalibrationDate"];
-
-  // Apply calibration below
-  XTRACE(INIT, ALW, "Hybrid ID %s, Date %s", HybridID.c_str(), Date.c_str());
-
-  auto &vmm0cal = Calibration["VMMHybridCalibration"]["vmm0"];
-  applyVMM3Calibration(CurrentHybrid, 0, vmm0cal);
-  auto &vmm1cal = Calibration["VMMHybridCalibration"]["vmm1"];
-  applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
-}
