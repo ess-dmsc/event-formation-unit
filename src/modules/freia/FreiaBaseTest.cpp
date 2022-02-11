@@ -10,9 +10,9 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
-
+// clang-format off
 std::vector<uint8_t> dummyreadout{
-    0x00, 0x00,             // pad, v0
+                0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x48, // 'E', 'S', 'S', type 0x48
     0x46, 0x00, 0x17, 0x00, // len(0x005e), OQ23, TSrc0
     0x00, 0x00, 0x00, 0x00, // PT HI
@@ -80,11 +80,11 @@ std::string freiajson = R"(
      "MaxPulseTimeNS" : 71428570,
      "MaxGapWire"  : 0,
      "MaxGapStrip" : 0,
-     "TimeBoxNs" : 2010,
-     "WiresPerCassette" : 16
-
+     "TimeBoxNs" : 2010
    }
 )";
+
+//clang-format on
 
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>

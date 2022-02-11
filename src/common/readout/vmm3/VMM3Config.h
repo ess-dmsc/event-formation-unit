@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -35,20 +35,24 @@ public:
   // load file into json object and apply
   void loadAndApplyConfig();
 
+  /// \brief Loads calibration file and applies to each hybrid based on string ID matching
+  /// CalibFile parameter = string path to calibration json file
   void loadAndApplyCalibration(std::string CalibFile);
 
+  /// \brief Applies calibration json object to specified VMM on Hybrid
   void applyVMM3Calibration(ESSReadout::Hybrid &Hybrid, unsigned vmmid,
                             nlohmann::json VMMCalibration);
 
-  // Apply the loaded json file
+  /// \brief Apply the loaded configuration json file
   virtual void applyConfig() = 0;
 
-  // Get Hybrid from the Ring, FEN, and VMM numbers
+  /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
   ESSReadout::Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
     return Hybrids[Ring][FEN][VMM];
   }
 
+  /// \brief Get Hybrid from the string Hybrid ID
   // Slow string comparison method, only to be used on EFU config initialisation
   ESSReadout::Hybrid &getHybrid(std::string HybridID) {
     for (int RingID = 0; RingID <= MaxRing; RingID++) {
@@ -65,6 +69,7 @@ public:
     throw std::runtime_error("Invalid HybridID requested");
   }
 
+  /// \brief Applies calibration to each VMM on Hybrid matching given Hybrid ID
   void applyCalibration(std::string HybridID, nlohmann::json Calibration);
 
 public:

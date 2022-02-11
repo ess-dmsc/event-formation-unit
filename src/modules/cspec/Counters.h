@@ -34,7 +34,7 @@ struct Counters {
   struct ESSReadout::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
-  int64_t HybridErrors;
+  int64_t HybridMappingErrors;
   int64_t TOFErrors;
   int64_t MinADC;
   int64_t MaxADC;
@@ -50,8 +50,6 @@ struct Counters {
   int64_t EventsMatchedClusters;
   int64_t PixelErrors;
   int64_t TimeErrors;
-  int64_t RingErrors;
-  int64_t FENErrors;
   struct ESSReadout::ESSTime::Stats_t TimeStats;
   int64_t TxBytes;
   // Kafka stats below are common to all detectors

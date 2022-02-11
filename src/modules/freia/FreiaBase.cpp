@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -70,7 +70,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.error_hybrid", Counters.HybridErrors);
+  Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -233,7 +233,6 @@ void FreiaBase::processing_thread() {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
                Counters.RxPackets);
-        // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }

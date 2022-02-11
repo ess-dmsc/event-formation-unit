@@ -1,9 +1,10 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read configurations from file
+/// \brief using nlohmann json parser to read configuration and calibration from file
+///         superclass for detector specific classes to inherit from
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
@@ -30,7 +31,6 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
 
   std::string Name = calib_root["Detector"];
   unsigned Version = calib_root["Version"].get<unsigned int>();
-  // unsigned NumHybrids = root["Hybrids"].get<unsigned int>();
   auto Calibrations = calib_root["Calibrations"];
 
   if (Name != ExpectedName) {
@@ -74,7 +74,7 @@ void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
   auto tdc_slope = VMMCalibration["tdc_slope"];
 
   unsigned TotalLength = adc_offset.size() + adc_slope.size() +
-                         adc_offset.size() + adc_slope.size();
+                         tdc_offset.size() + tdc_slope.size();
 
   if (TotalLength != 4 * VMM3Calibration::CHANNELS) {
     throw std::runtime_error("Wrong number of channels in calibration");

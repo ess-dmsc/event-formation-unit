@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -32,12 +32,21 @@ public:
     }
     return true;
   }
+
+  // indicates if hybrid was initialised in config file
   bool Initialised{false};
+  
   std::string HybridId{""};
   uint8_t HybridNumber;
+  
+  // holds calibration info for each VMM ASIC on hybrid
   std::vector<VMM3Calibration> VMMs{NumVMMs};
+
+  // defines offset of hybrid in logical geometry
   uint16_t XOffset{0};
   uint16_t YOffset{0};
+
+  //defines the minimum ADC value threshold, under this is discarded as noise
   uint16_t MinADC{0};
 }; // class Hybrid
 

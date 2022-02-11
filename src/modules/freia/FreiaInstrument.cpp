@@ -114,30 +114,12 @@ void FreiaInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId / 2;
 
-    if (Ring > Conf.MaxRing) {
-      XTRACE(DATA, ERR, "Invalid Ring ID: %u, Max Ring ID: %u", Ring,
-             Conf.MaxRing);
-      counters.RingErrors++;
-      continue;
-    }
-
-    if (readout.FENId > Conf.MaxFEN) {
-      XTRACE(DATA, ERR, "Invalid FEN ID: %u, Max FEN ID: %u", readout.FENId,
-             Conf.MaxFEN);
-      counters.FENErrors++;
-      continue;
-    }
-
-    XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           Ring, readout.FENId, readout.VMM, readout.Channel, readout.TimeLow);
-
     uint8_t HybridId = readout.VMM >> 1;
     if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
              Ring, readout.FENId, HybridId);
-      counters.HybridErrors++;
+      counters.HybridMappingErrors++;
       continue;
     }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -64,8 +64,16 @@ void Config::applyConfig() {
   }
   LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
 
+
+
   try {
     auto PanelConfig = root["Config"];
+    uint8_t MaxCassetteNumber = 0;
+    for (auto &Mapping : PanelConfig) {
+      if((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber){
+        MaxCassetteNumber = (uint8_t)Mapping["CassetteNumber"];
+      }
+    }  
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
@@ -79,7 +87,7 @@ void Config::applyConfig() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      ESSReadout::Hybrid &Hybrid = Hybrids[Ring][FEN][LocalHybrid];
+      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
       if (Hybrid.Initialised) {
@@ -94,8 +102,8 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset = (uint8_t)Mapping["CassetteNumber"] *
-                         (uint8_t)PanelConfig["WiresPerCassette"];
+        Hybrid.YOffset = MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"] *
+                         NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }

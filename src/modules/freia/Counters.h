@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -33,9 +33,7 @@ struct Counters {
     struct ESSReadout::VMM3ParserStats VMMStats;
 
     // Logical and Digital geometry incl. Calibration
-    int64_t RingErrors;
-    int64_t FENErrors;
-    int64_t HybridErrors;
+    int64_t HybridMappingErrors;
     int64_t TOFErrors;
     int64_t MaxADC;
 

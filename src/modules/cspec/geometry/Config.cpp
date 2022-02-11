@@ -109,22 +109,19 @@ void Config::applyConfig() {
           root["Vessel_Config"][VesselID]["Rotation"];
      
       try {
-        Short[Ring][FEN][LocalHybrid] =
-            root["Vessel_Config"][VesselID]["Short"];
+        Short[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Short"];
       } catch (...) {
         Short[Ring][FEN][LocalHybrid] = false;
       }
 
       try {
-       Hybrid.XOffset =
-            root["Vessel_Config"][VesselID]["XOffset"];
+       Hybrid.XOffset = root["Vessel_Config"][VesselID]["XOffset"];
       } catch (...) {
         Hybrid.XOffset = 0;
       }
 
       try {
-       Hybrid.YOffset =
-            root["Vessel_Config"][VesselID]["YOffset"];
+       Hybrid.YOffset = root["Vessel_Config"][VesselID]["YOffset"];
       } catch (...) {
         Hybrid.YOffset = 0;
       }
@@ -159,8 +156,7 @@ void Config::applyConfig() {
     }
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}", FileName);
     throw std::runtime_error("Invalid Json file");
     return;
   }

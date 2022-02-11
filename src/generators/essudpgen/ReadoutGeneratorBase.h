@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,6 @@
 
 #include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <common/testutils/DataFuzzer.h>
 
 class ReadoutGeneratorBase {
 public:
@@ -23,7 +22,7 @@ public:
     std::string IpAddress{"127.0.0.1"};
     uint16_t UDPPort{9000};
     uint64_t NumberOfPackets{0};     // 0 == all packets
-    uint32_t NumReadouts{400};       // # readouts in packet
+    uint32_t NumReadouts{370};       // # readouts in packet
     uint32_t TicksBtwReadouts{88};   // 88 ticks ~ 1us
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower

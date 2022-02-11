@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,9 +23,15 @@ TEST_F(GeometryTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
   }
-  for (unsigned int i = 16; i < 47; i++) {
-    for (unsigned int YOffset = 0; YOffset < 1024; YOffset += 32) {
-      ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), 47 - i + YOffset);
+
+  uint YCoordMinChannel = 16;
+  uint YCoordMaxChannel = 47;
+  uint MaxYOffset = 1024;
+  uint YOffsetJumps = 32;
+
+  for (unsigned int i = YCoordMinChannel; i < YCoordMaxChannel; i++) {
+    for (unsigned int YOffset = 0; YOffset < MaxYOffset; YOffset += YOffsetJumps) {
+      ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), YCoordMaxChannel - i + YOffset);
     }
   }
 }
