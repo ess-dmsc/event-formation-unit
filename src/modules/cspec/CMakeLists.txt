@@ -16,9 +16,9 @@ set(cspec_common_inc
   ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(cspec_common_src
   CSPECBase.cpp
@@ -27,8 +27,9 @@ set(cspec_common_src
   geometry/CSPECGeometry.cpp
   ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/CalibFile.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
 set(cspec_INC ${cspec_common_inc})

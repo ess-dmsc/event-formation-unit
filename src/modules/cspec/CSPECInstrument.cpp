@@ -11,7 +11,6 @@
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/readout/vmm3/CalibFile.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>
@@ -72,18 +71,17 @@ void CSPECInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
   Conf = Config("CSPEC", ModuleSettings.ConfigFile);
-  Conf.loadAndApply();
+  Conf.loadAndApplyConfig();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
-  // if (ModuleSettings.CalibFile != "") {
-  //   XTRACE(INIT, ALW, "Loading and applying calibration file");
-  //   ESSReadout::CalibFile Calibration("Freia", Hybrids);
-  //   Calibration.load(ModuleSettings.CalibFile);
-  // }
+  if (ModuleSettings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file");
+    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+  }
 }
 
 void CSPECInstrument::processReadouts(void) {
@@ -100,42 +98,32 @@ void CSPECInstrument::processReadouts(void) {
       dumpReadoutToFile(readout);
     }
 
-    if (readout.RingId > Conf.MaxRing) {
-      XTRACE(DATA, ERR, "Invalid Ring ID: %u, Max Ring ID: %u", readout.RingId,
-             Conf.MaxRing);
-      counters.RingErrors++;
-      continue;
-    }
-
-    if (readout.FENId > Conf.MaxFEN) {
-      XTRACE(DATA, ERR, "Invalid FEN ID: %u, Max FEN ID: %u", readout.FENId,
-             Conf.MaxFEN);
-      counters.FENErrors++;
-      continue;
-    }
-
     XTRACE(DATA, DEB,
            "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
-    uint8_t AsicId = readout.VMM & 0x1;
     uint8_t HybridId = readout.VMM >> 1;
-    uint16_t XOffset = Conf.XOffset[readout.RingId][readout.FENId][HybridId];
-    uint16_t YOffset = Conf.YOffset[readout.RingId][readout.FENId][HybridId];
-    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
-    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
-    uint16_t MinADC = Conf.MinADC[readout.RingId][readout.FENId][HybridId];
+    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
 
-    if (!Conf.getHybrid(readout.RingId, readout.FENId, HybridId).Initialised) {
+    if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
              readout.RingId, readout.FENId, HybridId);
-      counters.HybridErrors++;
+      counters.HybridMappingErrors++;
       continue;
     }
+
+    // Convert from physical rings to logical rings
+    // uint8_t Ring = readout.RingId/2;
+    uint8_t AsicId = readout.VMM & 0x1;
+    uint16_t XOffset = Hybrid.XOffset;
+    uint16_t YOffset = Hybrid.YOffset;
+    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
+    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
+    uint16_t MinADC = Hybrid.MinADC;
+
+    
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 

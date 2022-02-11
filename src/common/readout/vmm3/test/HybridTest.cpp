@@ -16,9 +16,7 @@ class HybridTest : public TestBase {
 protected:
   void SetUp() override {}
   void TearDown() override {}
-
 };
-
 
 TEST_F(HybridTest, IsAvailable) {
   std::vector<Hybrid> Hybrids;
@@ -34,8 +32,6 @@ TEST_F(HybridTest, IsAvailable) {
   res = ESSReadout::Hybrid::isAvailable("AAA", Hybrids);
   ASSERT_FALSE(res);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

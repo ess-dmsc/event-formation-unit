@@ -21,9 +21,7 @@ namespace Freia {
 
 class Geometry {
 public:
-  Geometry() {
-    GeometryInst = &FreiaGeom;
-  }
+  Geometry() { GeometryInst = &FreiaGeom; }
 
   bool setGeometry(std::string NewGeometry) {
     if (NewGeometry == "AMOR") {
@@ -44,8 +42,8 @@ public:
   }
 
   // wrapper function for specific instrument geometry instance
-  uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) {
-    return GeometryInst->yCoord(Cassette, VMM, Channel);
+  uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
+    return GeometryInst->yCoord(YOffset, VMM, Channel);
   }
 
   // wrapper function for specific instrument geometry instance
@@ -57,6 +55,6 @@ public:
 private:
   AMORGeometry AMORGeom;
   FreiaGeometry FreiaGeom;
-  GeometryBase * GeometryInst{nullptr};
+  GeometryBase *GeometryInst{nullptr};
 };
-}
+} // namespace Freia

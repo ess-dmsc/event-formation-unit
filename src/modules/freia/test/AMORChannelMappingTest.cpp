@@ -1,11 +1,11 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <freia/geometry/AMORChannelMapping.h>
 #include <common/testutils/TestBase.h>
+#include <freia/geometry/AMORChannelMapping.h>
 
 using namespace Freia;
 
@@ -19,39 +19,33 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(GeometryTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
   }
-  for (unsigned int i = 16; i < 47; i++) {
-    ASSERT_EQ(Geom.yCoord(Cassette1, VMMY, i), 47 - i);
+
+  uint YCoordMinChannel = 16;
+  uint YCoordMaxChannel = 47;
+  uint MaxYOffset = 1024;
+  uint YOffsetJumps = 32;
+
+  for (unsigned int i = YCoordMinChannel; i < YCoordMaxChannel; i++) {
+    for (unsigned int YOffset = 0; YOffset < MaxYOffset; YOffset += YOffsetJumps) {
+      ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), YCoordMaxChannel - i + YOffset);
+    }
   }
 }
 
 TEST_F(GeometryTest, XCoordErrors) {
-  ASSERT_EQ(Geom.xCoord(VMMY, 0),  Geom.InvalidCoord); // bad VMM
+  ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
   ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
 TEST_F(GeometryTest, YCoordErrors) {
-  ASSERT_EQ(Geom.yCoord(0, VMMY,  0), Geom.InvalidCoord); // bad cassette
   ASSERT_EQ(Geom.yCoord(1, VMMX, 32), Geom.InvalidCoord); // bad VMM
   ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
   ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel
 }
-
-TEST_F(GeometryTest, Cassettes) {
-  ASSERT_EQ(Geom.cassette(1, 0), 0); // FEN 1, VMM 0, hybrid 0
-  ASSERT_EQ(Geom.cassette(1, 1), 0); // FEN 1, VMM 1
-  ASSERT_EQ(Geom.cassette(1, 2), 1); // FEN 1, VMM 2, hybrid 1
-  ASSERT_EQ(Geom.cassette(1, 3), 1); // FEN 1, VMM 3
-  ASSERT_EQ(Geom.cassette(2, 0), 2); // FEN 2, VMM 0, hybrid 2
-  ASSERT_EQ(Geom.cassette(2, 1), 2); // FEN 2, VMM 1
-  ASSERT_EQ(Geom.cassette(2, 2), 3); // FEN 2, VMM 2, hybrid 3
-  ASSERT_EQ(Geom.cassette(2, 3), 3); // FEN 2, VMM 3
-}
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

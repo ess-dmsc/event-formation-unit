@@ -22,21 +22,18 @@ protected:
     PacketData.HeaderPtr = nullptr;
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
-    PacketData.Time.setReference(0,0);
-    PacketData.Time.setPrevReference(0,0);
+    PacketData.Time.setReference(0, 0);
+    PacketData.Time.setPrevReference(0, 0);
   }
   void TearDown() override {}
 
-  void makeHeader(std::vector<uint8_t> & testdata) {
+  void makeHeader(std::vector<uint8_t> &testdata) {
     PacketData.DataPtr = (char *)&testdata[0];
     PacketData.DataLength = testdata.size();
   }
 };
 
-
-TEST_F(VMM3ParserTest, Constructor) {
-  ASSERT_EQ(VMMParser.Result.size(), 0);
-}
+TEST_F(VMM3ParserTest, Constructor) { ASSERT_EQ(VMMParser.Result.size(), 0); }
 
 // nullptr as buffer
 TEST_F(VMM3ParserTest, ErrorBufferPtr) {
@@ -132,12 +129,11 @@ TEST_F(VMM3ParserTest, ErrorChannel) {
   ASSERT_EQ(VMMParser.Stats.ErrorChannel, 2);
 }
 
-
 // Testing invalid TOF
 TEST_F(VMM3ParserTest, ErrorTOF) {
   makeHeader(TOFError);
-  PacketData.Time.setReference(1,0);
-  PacketData.Time.setPrevReference(1,0);
+  PacketData.Time.setReference(1, 0);
+  PacketData.Time.setPrevReference(1, 0);
   ASSERT_EQ(VMMParser.Stats.Readouts, 0);
   ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 0);
 
@@ -147,7 +143,6 @@ TEST_F(VMM3ParserTest, ErrorTOF) {
   ASSERT_EQ(VMMParser.Stats.Readouts, 2);
   ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 2);
 }
-
 
 // valid data two readouts
 TEST_F(VMM3ParserTest, GoodData1) {

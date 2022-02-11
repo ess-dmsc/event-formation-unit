@@ -49,33 +49,38 @@ std::string ConfigStr = R"(
     },
 
     "Config" : [
-      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  2, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  0, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  1, "HybridId" : ""},
-      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  2, "HybridId" : ""}
+      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000002"},
+      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"},
+      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000004"},
+      { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000005"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000006"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 2, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000008"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000009"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000010"},
+      { "Ring" :  0, "VesselId": "1", "FEN": 3, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000011"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000012"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000013"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 4, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000014"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000015"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000016"},
+      { "Ring" :  0, "VesselId": "2", "FEN": 5, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000017"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000018"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000019"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 6, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000020"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000021"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000022"},
+      { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000023"}
     ],
-
+    
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2
+    "TimeBoxNs" : 2010,
+    "DefaultMinADC": 50,
+    "MaxGridsPerEvent": 5,
+    "SizeX": 12,
+    "SizeY": 51, 
+    "SizeZ": 16
   }
 )";
 
@@ -83,27 +88,18 @@ std::string ConfigStr = R"(
 //
 std::vector<uint8_t> BadRingAndFENError {
   // First readout
-  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22!
+  0x18, 0x01, 0x14, 0x00,  // Data Header - Ring 23!
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
 
   // Second readout
-  0x02, 0x14, 0x14, 0x00,  // Data Header - Ring 2, FEN 3
+  0x02, 0x18, 0x14, 0x00,  // Data Header - Ring 2, FEN 3
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticka
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x01, 0x10,  // GEO 0, TDC 0, VMM 1, CH 16
-};
-
-std::vector<uint8_t> BadHybridError {
-  // First readout, in test config Ring 0, FEN 0, Hybrid 0 is undefined
-  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x10,  // GEO 0, TDC 0, VMM 0, CH 16
 };
 
 std::vector<uint8_t> PixelError {
@@ -415,54 +411,33 @@ TEST_F(CSPECInstrumentTest, BadConfig) {
 }
 
 TEST_F(CSPECInstrumentTest, Constructor) {
-  ASSERT_EQ(counters.HybridErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.RingErrors, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 }
 
 TEST_F(CSPECInstrumentTest, BadRingAndFENError) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadRingAndFENError);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-
-  cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 1);
-  ASSERT_EQ(counters.FENErrors, 1);
-}
-
-TEST_F(CSPECInstrumentTest, BadHybridError) {
-  makeHeader(cspec->ESSReadoutParser.Packet, BadHybridError);
-  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 1);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  ASSERT_EQ(Res, 0);
   counters.VMMStats = cspec->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.Readouts, 1);
-
-  // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
-  cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
+
 
 TEST_F(CSPECInstrumentTest, GoodEvent) {
   makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
-  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
 
   for (auto &builder : cspec->builders) {
@@ -476,14 +451,16 @@ TEST_F(CSPECInstrumentTest, BadMappingError) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadMappingError);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
@@ -499,8 +476,9 @@ TEST_F(CSPECInstrumentTest, MaxADC) {
   makeHeader(cspec->ESSReadoutParser.Packet, MaxADC);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   counters.VMMStats = cspec->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorADC,
-            1); // ADC was above VMM threshold of 1023 once
+
+  // ADC was above VMM threshold of 1023 once
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); 
   ASSERT_EQ(Res, 1);
 }
 
@@ -520,14 +498,15 @@ TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
   makeHeader(cspec->ESSReadoutParser.Packet, NoEventGridOnly);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
   counters.VMMStats = cspec->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
@@ -544,15 +523,16 @@ TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
   makeHeader(cspec->ESSReadoutParser.Packet, NoEventWireOnly);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
-  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
@@ -583,15 +563,16 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   makeHeader(cspec->ESSReadoutParser.Packet, BadEventLargeGridSpan);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 5);
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   cspec->processReadouts();
-  ASSERT_EQ(counters.RingErrors, 0);
-  ASSERT_EQ(counters.FENErrors, 0);
-  ASSERT_EQ(counters.HybridErrors, 0);
-  counters.VMMStats = cspec->VMMParser.Stats;
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 5);
 
   for (auto &builder : cspec->builders) {

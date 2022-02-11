@@ -34,14 +34,19 @@ auto InvalidDetector = R"(
 auto InvalidRing = R"(
 {
   "Detector": "CSPEC",
+  
+  "Vessel_Config" : {
+    "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
+    "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12}
+  },
 
   "Config" : [
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
-    { "Ring" : 12, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
-    { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
+    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
+    { "Ring" : 12, "VesselId": "1", "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+    { "Ring" :  1, "VesselId": "1", "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
   ]
 }
 )"_json;
@@ -66,12 +71,15 @@ std::string InvalidConfig = R"(
 auto DuplicateEntry = R"(
 {
   "Detector": "CSPEC",
-
+  "Vessel_Config" : {
+      "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
+      "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12}
+  },
   "Config" : [
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
+    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
   ]
 }
 )"_json;
@@ -87,7 +95,7 @@ protected:
 
 TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
-  ASSERT_EQ(config.getNumHybrids(), 0);
+  ASSERT_EQ(config.NumHybrids, 0);
 }
 
 TEST_F(ConfigTest, UninitialisedHybrids) {
@@ -96,34 +104,34 @@ TEST_F(ConfigTest, UninitialisedHybrids) {
 
 TEST_F(ConfigTest, NoDetector) {
   config.root = NoDetector;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidRing) {
   config.root = InvalidRing;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, InvalidConfig) {
   config.root = InvalidConfig;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, Duplicate) {
   config.root = DuplicateEntry;
-  ASSERT_ANY_THROW(config.apply());
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(ConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
-  config.loadAndApply();
+  config.loadAndApplyConfig();
   ASSERT_EQ(config.NumPixels, 838272);
-  ASSERT_EQ(config.getNumHybrids(), 198);
+  ASSERT_EQ(config.NumHybrids, 198);
 
   /// \todo, check correct Hybrids initialised
 }

@@ -26,7 +26,7 @@ public:
 
   virtual uint16_t xCoord(uint8_t VMM, uint8_t Channel) = 0;
 
-  virtual uint16_t yCoord(uint8_t Cassette, uint8_t VMM, uint8_t Channel) = 0;
+  virtual uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) = 0;
 
   static const uint16_t InvalidCoord;
   static const uint16_t NumStrips;
@@ -39,4 +39,4 @@ inline uint16_t const GeometryBase::NumStrips = 64;
 inline uint16_t const GeometryBase::NumWires = 32;
 inline uint16_t const GeometryBase::MinWireChannel = 16;
 inline uint16_t const GeometryBase::MaxWireChannel = 47;
-}
+} // namespace Freia

@@ -4,7 +4,8 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-// based on VMM3 Readout ICD document https://project.esss.dk/owncloud/index.php/f/14670413
+// based on VMM3 Readout ICD document
+// https://project.esss.dk/owncloud/index.php/f/14670413
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
@@ -35,7 +36,6 @@ uint16_t ReadoutGeneratorBase::makePacket() {
   return DataSize;
 }
 
-
 void ReadoutGeneratorBase::generateHeader() {
 
   DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
@@ -61,7 +61,6 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PrevPulseLow = PrevTimeLowOffset;
 }
 
-
 void ReadoutGeneratorBase::finishPacket() {
   SeqNum++; // ready for next packet
 
@@ -71,7 +70,5 @@ void ReadoutGeneratorBase::finishPacket() {
     Fuzzer.fuzz8Bits(Buffer + HeaderSize, DataSize - HeaderSize, 20);
   }
 }
-
-
 
 // GCOVR_EXCL_STOP

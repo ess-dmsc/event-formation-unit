@@ -4,7 +4,7 @@
 /// \file
 ///
 /// \brief CSPEC geometry class
-/// Based on CSPEC ICD documen
+/// Based on CSPEC ICD document
 /// thttps://project.esss.dk/owncloud/index.php/f/14482406
 
 /// Mapping from digital identifiers to x-, z- and y- coordinates
@@ -15,6 +15,7 @@
 #include <cmath>
 #include <utility>
 
+// returns integer describing the X and Z position in the flattened 2D space
 uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID,
                                           uint8_t VMMID, uint8_t Channel,
                                           uint16_t XOffset, bool Rotated) {
@@ -23,8 +24,6 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID,
            "Invalid Hybrid: %u, VMM: %u, and Channel: %u, combination for wire "
            "mapping",
            HybridID, VMMID, Channel);
-    // return std::pair<uint8_t, uint8_t>(Cspec::CSPECGeometry::InvalidCoord,
-    // Cspec::CSPECGeometry::InvalidCoord);
     return InvalidCoord;
   }
 

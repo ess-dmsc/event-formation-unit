@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,19 +11,20 @@
 #include <common/detector/Detector.h>
 
 static struct Freia::FreiaSettings LocalFreiaSettings;
-
+//clang-format off
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("--dumptofile", LocalFreiaSettings.FilePrefix,
-                    "dump to specified file")->group("Freia");
+                  "dump to specified file")->group("Freia");
 
   parser.add_option("-f, --file", LocalFreiaSettings.ConfigFile,
-                    "Freia specific configuration (json) file")
-                    ->group("Freia");
-  parser.add_option("--calibration", LocalFreiaSettings.CalibFile,
-                    "Freia specific calibration (json) file")
-                    ->group("Freia");
-}
+                  "Freia specific configuration (json) file")
+                  ->group("Freia");
 
+  parser.add_option("--calibration", LocalFreiaSettings.CalibFile,
+                  "Freia specific calibration (json) file")
+                  ->group("Freia");
+}
+//clang-format on
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 class FREIA : public Freia::FreiaBase {
