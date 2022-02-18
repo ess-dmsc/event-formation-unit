@@ -95,7 +95,7 @@ void CSPECInstrument::processReadouts(void) {
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
     if (DumpFile) {
-      dumpReadoutToFile(readout);
+      VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
 
     XTRACE(DATA, DEB,
@@ -283,30 +283,4 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
   }
   Events.clear(); // else events will accumulate
 }
-
-/// \todo move into readout/vmm3 instead as this will be common
-void CSPECInstrument::dumpReadoutToFile(
-    const ESSReadout::VMM3Parser::VMM3Data &Data) {
-  VMM3::Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
-  CurrentReadout.PrevPulseTimeHigh =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
-  CurrentReadout.PrevPulseTimeLow =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
-  CurrentReadout.EventTimeHigh = Data.TimeHigh;
-  CurrentReadout.EventTimeLow = Data.TimeLow;
-  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
-  CurrentReadout.BC = Data.BC;
-  CurrentReadout.OTADC = Data.OTADC;
-  CurrentReadout.GEO = Data.GEO;
-  CurrentReadout.TDC = Data.TDC;
-  CurrentReadout.VMM = Data.VMM;
-  CurrentReadout.Channel = Data.Channel;
-  CurrentReadout.RingId = Data.RingId;
-  CurrentReadout.FENId = Data.FENId;
-
-  DumpFile->push(CurrentReadout);
-}
-
 } // namespace Cspec

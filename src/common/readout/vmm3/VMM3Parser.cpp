@@ -15,8 +15,8 @@
 
 namespace ESSReadout {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
 int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
@@ -138,5 +138,29 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
   }
 
   return GoodReadouts;
+}
+
+void VMM3Parser::dumpReadoutToFile(
+      const VMM3Data &Data, const ESSReadout::Parser ESSReadoutParser, std::shared_ptr<VMM3::ReadoutFile> DumpFile) {
+    VMM3::Readout CurrentReadout;
+    CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
+    CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+    CurrentReadout.PrevPulseTimeHigh =
+        ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+    CurrentReadout.PrevPulseTimeLow =
+        ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+    CurrentReadout.EventTimeHigh = Data.TimeHigh;
+    CurrentReadout.EventTimeLow = Data.TimeLow;
+    CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
+    CurrentReadout.BC = Data.BC;
+    CurrentReadout.OTADC = Data.OTADC;
+    CurrentReadout.GEO = Data.GEO;
+    CurrentReadout.TDC = Data.TDC;
+    CurrentReadout.VMM = Data.VMM;
+    CurrentReadout.Channel = Data.Channel;
+    CurrentReadout.RingId = Data.RingId;
+    CurrentReadout.FENId = Data.FENId;
+
+    DumpFile->push(CurrentReadout);
 }
 } // namespace ESSReadout
