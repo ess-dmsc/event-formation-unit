@@ -46,6 +46,8 @@ public:
   /// \brief Apply the loaded configuration json file
   virtual void applyConfig() = 0;
 
+  void verifyHybridId(std::string HybridID);
+
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
   ESSReadout::Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {

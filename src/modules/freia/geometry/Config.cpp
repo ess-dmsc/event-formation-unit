@@ -87,6 +87,8 @@ void Config::applyConfig() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
+      verifyHybridId(IDString);
+
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
