@@ -18,7 +18,95 @@
 
 void VMM3Config::loadAndApplyConfig() {
   root = from_json_file(FileName);
+  applyVMM3Config();
   applyConfig();
+}
+
+void VMM3Config::applyVMM3Config(){
+  std::string Name;
+  try {
+    InstrumentName = root["Detector"].get<std::string>();
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Missing 'Detector' field");
+    throw std::runtime_error("Missing 'Detector' field");
+  }
+
+  if (InstrumentName != ExpectedName) {
+    LOG(INIT, Sev::Error, "InstrumentName mismatch");
+    throw std::runtime_error("Inconsistent Json file - invalid name");
+  }
+
+  try {
+    InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
+  }
+  LOG(INIT, Sev::Info, "InstrumentGeometry {}", InstrumentGeometry);
+
+  try {
+    MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
+  }
+  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", MaxPulseTimeNS);
+
+  try {
+    TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
+  }
+  LOG(INIT, Sev::Info, "TimeBoxNs {}", TimeBoxNs);
+
+  try {
+    auto PanelConfig = root["Config"];
+    for (auto &Mapping : PanelConfig){
+      uint8_t Ring = Mapping["Ring"].get<uint8_t>();
+      uint8_t FEN = Mapping["FEN"].get<uint8_t>();
+      uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
+      std::string IDString = Mapping["HybridId"];
+
+      XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
+
+      if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
+        XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
+        throw std::runtime_error("Illegal Ring/FEN/VMM values");
+      }
+
+      if (!validHybridId(IDString)){
+        XTRACE(INIT, ERR, "Invalid HybridId in config file: %s", IDString.c_str());
+        throw std::runtime_error("Invalid HybridId in config file");
+      }
+
+      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
+
+      if (Hybrid.Initialised) {
+        XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
+        throw std::runtime_error("Duplicate Hybrid in config file");
+      }
+
+      Hybrid.Initialised = true;
+      Hybrid.HybridId = IDString;
+
+      LOG(INIT, Sev::Info,
+          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
+          "{}",
+          Name, NumHybrids, Ring, FEN, LocalHybrid);
+
+      Hybrid.HybridNumber = NumHybrids;
+      NumHybrids++;
+    }
+    
+    LOG(INIT, Sev::Info,
+        "JSON config - Detector has {} cassettes/hybrids and "
+        "{} pixels",
+        NumHybrids, NumPixels);
+  } catch (...) {
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
+        FileName);
+    throw std::runtime_error("Invalid Json file");
+    return;
+  }
 }
 
 void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {

@@ -40,19 +40,12 @@ public:
 
 public:
   // Parameters obtained from JSON config file
-  struct {
-    std::string InstrumentName{""};
-    std::string InstrumentGeometry{"CSPEC"};
-    uint32_t MaxTOFNS{1'000'000'000};
-    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
-    uint32_t TimeBoxNs{0xffffffff};
-    uint16_t SizeX{384};
-    uint16_t SizeY{140};
-    uint16_t SizeZ{16};
-    uint16_t MaxGridsSpan{3};
-    uint16_t DefaultMinADC{50};
-  } Parms;
-
+  std::string InstrumentGeometry{"CSPEC"};
+  uint16_t SizeX{384};
+  uint16_t SizeY{140};
+  uint16_t SizeZ{16};
+  uint16_t MaxGridsSpan{3};
+  uint16_t DefaultMinADC{50};
 
   // Derived parameters
   // CSPEC specific Hybrid fields not included in common Hybrid class

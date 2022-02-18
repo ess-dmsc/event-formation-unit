@@ -16,55 +16,19 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  std::string Name;
   try {
-    Parms.InstrumentName = root["Detector"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Error, "Missing 'Detector' field");
-    throw std::runtime_error("Missing 'Detector' field");
-  }
-
-  if (Parms.InstrumentName != ExpectedName) {
-    LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error("Inconsistent Json file - invalid name");
-  }
-
-  try {
-    Parms.InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
-  }
-  LOG(INIT, Sev::Info, "InstrumentGeometry {}", Parms.InstrumentGeometry);
-
-  try {
-    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
-  }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", Parms.MaxPulseTimeNS);
-
-  try {
-    Parms.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
+    MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxGapWire");
   }
-  LOG(INIT, Sev::Info, "MaxGapWire {}", Parms.MaxGapWire);
+  LOG(INIT, Sev::Info, "MaxGapWire {}", MaxGapWire);
 
   try {
-    Parms.MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
+    MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxGapStrip");
   }
-  LOG(INIT, Sev::Info, "MaxGapStrip {}", Parms.MaxGapStrip);
-
-  try {
-    Parms.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
-  }
-  LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
-
-
+  LOG(INIT, Sev::Info, "MaxGapStrip {}", MaxGapStrip);
 
   try {
     auto PanelConfig = root["Config"];
@@ -80,28 +44,7 @@ void Config::applyConfig() {
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
       std::string IDString = Mapping["HybridId"];
 
-      XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
-
-      if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
-        XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
-        throw std::runtime_error("Illegal Ring/FEN/VMM values");
-      }
-
-      if (!validHybridId(IDString)){
-        XTRACE(INIT, ERR, "Invalid HybridId in config file: %s", IDString.c_str());
-        throw std::runtime_error("Invalid HybridId in config file");
-      }
-
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
-      XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
-
-      if (Hybrid.Initialised) {
-        XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
-        throw std::runtime_error("Duplicate Hybrid in config file");
-      }
-
-      Hybrid.Initialised = true;
-      Hybrid.HybridId = IDString;
 
       /// \todo implement extra rows?
       Hybrid.XOffset = 0;
@@ -111,28 +54,15 @@ void Config::applyConfig() {
                          NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
-      }
-
-      LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
-          "{}",
-          Name, NumHybrids, Ring, FEN, LocalHybrid);
-
-      Hybrid.HybridNumber = NumHybrids;
-      NumHybrids++;
+      } 
     }
 
-    NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette; //
-    LOG(INIT, Sev::Info,
-        "JSON config - Detector has {} cassettes/hybrids and "
-        "{} pixels",
-        NumHybrids, NumPixels);
-
+    NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
   } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
-    throw std::runtime_error("Invalid Json file");
-    return;
+      LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
+          FileName);
+      throw std::runtime_error("Invalid Json file");
+      return;
   }
 }
 
