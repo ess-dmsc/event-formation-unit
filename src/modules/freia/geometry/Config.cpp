@@ -87,7 +87,7 @@ void Config::applyConfig() {
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      if (!verifyHybridId(IDString)){
+      if (!validHybridId(IDString)){
         XTRACE(INIT, ERR, "Invalid HybridId in config file: %s", IDString.c_str());
         throw std::runtime_error("Invalid HybridId in config file");
       }

@@ -46,7 +46,7 @@ public:
   /// \brief Apply the loaded configuration json file
   virtual void applyConfig() = 0;
 
-  bool verifyHybridId(std::string HybridID);
+  bool validHybridId(std::string HybridID);
 
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future

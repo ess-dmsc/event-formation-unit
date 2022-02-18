@@ -44,14 +44,14 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
 
   for (auto &Calibration : Calibrations) {
     std::string HybridId = Calibration["VMMHybridCalibration"]["HybridId"];
-    if (!verifyHybridId(HybridId)){
+    if (!validHybridId(HybridId)){
       throw std::runtime_error("Invalid HybridID in Calibration file");
     }
     applyCalibration(HybridId, Calibration);
   }
 }
 
-bool VMM3Config::verifyHybridId(std::string HybridID){
+bool VMM3Config::validHybridId(std::string HybridID){
   std::regex HybridIdRegex ("E55[0-9]{29}");
   return std::regex_match(HybridID, HybridIdRegex);
 }
