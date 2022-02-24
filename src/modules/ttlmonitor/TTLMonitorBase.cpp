@@ -169,7 +169,7 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
+  Serializer = new EV42Serializer(KafkaBufferSize, "ttlmon", Produce);
   TTLMonitorInstrument TTLMonitor(
       Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializer);
 
