@@ -69,6 +69,7 @@ TTLMonitorBase::TTLMonitorBase(
   //
   Stats.create("monitors.error", Counters.MonitorErrors);
   Stats.create("monitors.count", Counters.MonitorCounts);
+  Stats.create("monitors.reduced", Counters.MonitorIgnored);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);

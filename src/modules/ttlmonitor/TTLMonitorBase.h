@@ -18,6 +18,7 @@ namespace TTLMonitor {
 struct TTLMonitorSettings {
   std::string ConfigFile{""};
   std::string FilePrefix{""};
+  int ReduceEvents{1};
 };
 
 

@@ -37,6 +37,7 @@ struct Counters {
     int64_t TOFErrors;
     int64_t MonitorErrors;
     int64_t MonitorCounts;
+    int64_t MonitorIgnored;
     int64_t MaxADC;
 
     //
