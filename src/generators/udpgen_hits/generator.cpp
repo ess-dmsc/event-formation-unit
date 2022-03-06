@@ -17,6 +17,7 @@
 
 #include <modules/multigrid/generators/ReaderReadouts.h>
 #include <modules/gdgem/generators/ReaderReadouts.h>
+#include <modules/loki/generators/ReaderReadouts.h>
 
 #include <common/system/Socket.h>
 
@@ -98,6 +99,10 @@ int main(int argc, char *argv[]) {
 
   #ifdef GENERATOR_GDGEM_HITS
   Gem::ReaderHits file(Settings.FileName);
+  #endif
+
+  #ifdef GENERATOR_LOKI_READOUTS
+  Loki::ReaderReadouts file(Settings.FileName);
   #endif
 
   size_t ReadoutSize = file.getReadoutSize();
