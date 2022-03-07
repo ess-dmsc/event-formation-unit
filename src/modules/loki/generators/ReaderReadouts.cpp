@@ -3,15 +3,12 @@
 ///
 /// \file
 ///
-/// \brief Wrapper class for reading Loki readout data from HDF5 files
+/// \brief Wrapper class for generating UDP from Loki readout HDF5 files
 ///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/debug/Hexdump.h>
-#include <common/readout/ess/Parser.h>
 #include <loki/generators/ReaderReadouts.h>
-#include <loki/readout/DataParser.h>
 #include <loki/readout/Readout.h>
 #include <iostream>
 
@@ -22,65 +19,64 @@ ReaderReadouts::ReaderReadouts(std::string filename) {
   total_ = file->count();
   ReadoutSize = sizeof(Readout);
   ChunkSize = ReadoutFile::ChunkSize;
-  current_ = 0;
-  //printf("total %lu, RDSize %lu, ChunkSize %lu\n",
-  //        total_, ReadoutSize, ChunkSize);
 }
 
+
 size_t ReaderReadouts::read(char *buf) {
-  size_t size = ReadoutFile::ChunkSize;
-  if ((current_ + ReadoutFile::ChunkSize) > total_) {
+  size_t size = ChunkSize;
+  if ((current_ + ChunkSize) > total_) {
     size = total_ - current_;
   }
 
   size_t TotalLength{0};
-  const size_t LokiReadoutSize = sizeof(struct DataParser::LokiReadout);
-  const size_t ESSHeaderSize = sizeof(struct ESSReadout::Parser::PacketHeaderV0);
+  unsigned int CurDataItems{0};
 
   if (size > 0) {
     try {
       file->readAt(current_, size);
-      Readout * Loki = (Readout *)(file->Data.data());
-      auto * PHP = (ESSReadout::Parser::PacketHeaderV0 *)buf;
+      Readout * LokiData = (Readout *)(file->Data.data());
+      auto * PacketHdr = (ESSReadout::Parser::PacketHeaderV0 *)buf;
 
-      PHP->Padding0 = 0x00;
-      PHP->Version = 0x00;
-      PHP->CookieAndType =
+      PacketHdr->Padding0 = 0x00;
+      PacketHdr->Version = 0x00;
+      PacketHdr->CookieAndType =
             (ESSReadout::Parser::DetectorType::Loki4Amp << 24) + 0x00535345;
-      PHP->TotalLength =  ESSHeaderSize + size * (LokiReadoutSize);
-      PHP->OutputQueue = 0x00;
-      PHP->TimeSource = 0x00; /// \todo hardcoded
-      PHP->PulseHigh = Loki[0].PulseTimeHigh;
-      PHP->PulseLow = Loki[0].PulseTimeLow;
-      PHP->PrevPulseHigh = Loki[0].PrevPulseTimeHigh;
-      PHP->PrevPulseLow = Loki[0].PrevPulseTimeLow;
-      PHP->SeqNum = SeqNum++;
+      PacketHdr->TotalLength = ESSHeaderSize;
+      PacketHdr->OutputQueue = 0x00;
+      PacketHdr->TimeSource = 0x00; /// \todo hardcoded
+      PacketHdr->PulseHigh = LokiData[0].PulseTimeHigh;
+      PacketHdr->PulseLow = LokiData[0].PulseTimeLow;
+      PacketHdr->PrevPulseHigh = LokiData[0].PrevPulseTimeHigh;
+      PacketHdr->PrevPulseLow = LokiData[0].PrevPulseTimeLow;
+      PacketHdr->SeqNum = SeqNum++;
 
       auto * LRDP = (struct DataParser::LokiReadout *)(buf
                     + sizeof(struct ESSReadout::Parser::PacketHeaderV0));
 
-      if (Loki[0].PulseTimeHigh != Loki[size - 1].PulseTimeHigh) {
-        printf("TimeHigh inconsistent with packet\n");
-      }
-      if (Loki[0].PulseTimeLow != Loki[size - 1].PulseTimeLow) {
-        printf("TimeLow inconsistent with packet\n");
-      }
+      CurPulseTimeHigh = LokiData[0].PulseTimeHigh;
+      CurPulseTimeLow = LokiData[0].PulseTimeLow;
 
       for (unsigned int i = 0; i < size; i++) {
-        LRDP[i].RingId = Loki[i].RingId;
-        LRDP[i].FENId = Loki[i].FENId;
+        if ((CurPulseTimeHigh != LokiData[i].PulseTimeHigh) or
+            (CurPulseTimeLow  != LokiData[i].PulseTimeLow )   ) {
+          break;
+        }
+        LRDP[i].RingId = LokiData[i].RingId;
+        LRDP[i].FENId = LokiData[i].FENId;
         LRDP[i].DataLength = 24;
-        LRDP[i].TimeHigh = Loki[i].EventTimeHigh;
-        LRDP[i].TimeLow = Loki[i].EventTimeLow;
+        LRDP[i].TimeHigh = LokiData[i].EventTimeHigh;
+        LRDP[i].TimeLow = LokiData[i].EventTimeLow;
         LRDP[i].unused = 0x00;
-        LRDP[i].TubeId = Loki[i].TubeId;
+        LRDP[i].TubeId = LokiData[i].TubeId;
         LRDP[i].DataSeqNum = 0x0000;
-        LRDP[i].AmpA = Loki[i].AmpA;
-        LRDP[i].AmpB = Loki[i].AmpB;
-        LRDP[i].AmpC = Loki[i].AmpC;
-        LRDP[i].AmpD = Loki[i].AmpD;
+        LRDP[i].AmpA = LokiData[i].AmpA;
+        LRDP[i].AmpB = LokiData[i].AmpB;
+        LRDP[i].AmpC = LokiData[i].AmpC;
+        LRDP[i].AmpD = LokiData[i].AmpD;
+        CurDataItems++;
+        PacketHdr->TotalLength += LokiReadoutSize;
+        TotalLength = PacketHdr->TotalLength;
       }
-      TotalLength = PHP->TotalLength;
 
     } catch (std::exception &e) {
       std::cout << "<ReaderReadouts> failed to read slab ("
@@ -90,11 +86,7 @@ size_t ReaderReadouts::read(char *buf) {
     }
   }
 
-  current_ += size;
-
-  hexDump(buf, TotalLength);
-
-  printf("Packet of length %zu\n", TotalLength);
+  current_ += CurDataItems;
   return TotalLength;
 }
 
