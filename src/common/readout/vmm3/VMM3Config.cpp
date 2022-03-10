@@ -24,37 +24,37 @@ void VMM3Config::loadAndApplyConfig() {
 void VMM3Config::applyVMM3Config(){
   std::string Name;
   try {
-    InstrumentName = root["Detector"].get<std::string>();
+    FileParameters.InstrumentName = root["Detector"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (InstrumentName != ExpectedName) {
+  if (FileParameters.InstrumentName != ExpectedName) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }
 
   try {
-    InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
+    FileParameters.InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
   }
-  LOG(INIT, Sev::Info, "InstrumentGeometry {}", InstrumentGeometry);
+  LOG(INIT, Sev::Info, "InstrumentGeometry {}", FileParameters.InstrumentGeometry);
 
   try {
-    MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
+    FileParameters.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
   }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", MaxPulseTimeNS);
+  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", FileParameters.MaxPulseTimeNS);
 
   try {
-    TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
+    FileParameters.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
   }
-  LOG(INIT, Sev::Info, "TimeBoxNs {}", TimeBoxNs);
+  LOG(INIT, Sev::Info, "TimeBoxNs {}", FileParameters.TimeBoxNs);
 
   try {
     auto PanelConfig = root["Config"];

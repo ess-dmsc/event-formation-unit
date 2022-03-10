@@ -18,32 +18,32 @@ namespace Cspec {
 
 void Config::applyConfig() {
   try {
-    DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
+    CSPECFileParameters.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
   }
-  LOG(INIT, Sev::Info, "DefaultMinADC {}", DefaultMinADC);
+  LOG(INIT, Sev::Info, "DefaultMinADC {}", CSPECFileParameters.DefaultMinADC);
 
   try {
-    SizeX = root["SizeX"].get<uint16_t>();
+    CSPECFileParameters.SizeX = root["SizeX"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size X");
   }
-  LOG(INIT, Sev::Info, "Size X {}", SizeX);
+  LOG(INIT, Sev::Info, "Size X {}", CSPECFileParameters.SizeX);
 
   try {
-    SizeY = root["SizeY"].get<uint16_t>();
+    CSPECFileParameters.SizeY = root["SizeY"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size Y");
   }
-  LOG(INIT, Sev::Info, "Size Y {}", SizeY);
+  LOG(INIT, Sev::Info, "Size Y {}", CSPECFileParameters.SizeY);
 
   try {
-    SizeZ = root["SizeZ"].get<uint16_t>();
+    CSPECFileParameters.SizeZ = root["SizeZ"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size Z");
   }
-  LOG(INIT, Sev::Info, "Size Z {}", SizeZ);
+  LOG(INIT, Sev::Info, "Size Z {}", CSPECFileParameters.SizeZ);
 
   try {
     auto PanelConfig = root["Config"];
@@ -86,7 +86,7 @@ void Config::applyConfig() {
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
-        Hybrid.MinADC = DefaultMinADC;
+        Hybrid.MinADC = CSPECFileParameters.DefaultMinADC;
       }
     }
 

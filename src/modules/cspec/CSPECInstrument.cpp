@@ -39,21 +39,21 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
   loadConfigAndCalib();
 
   essgeom =
-      ESSGeometry(Conf.SizeX, Conf.SizeY, Conf.SizeZ, 1);
+      ESSGeometry(Conf.CSPECFileParameters.SizeX, Conf.CSPECFileParameters.SizeY, Conf.CSPECFileParameters.SizeZ, 1);
 
   // We can now use the settings in Conf
-  if (Conf.InstrumentGeometry == "CSPEC") {
+  if (Conf.FileParameters.InstrumentGeometry == "CSPEC") {
     GeometryInstance = &CSPECGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
-    builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
+    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -230,7 +230,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.MaxGridsSpan < e.ClusterB.coord_span()) {
+    if (Conf.CSPECFileParameters.MaxGridsSpan < e.ClusterB.coord_span()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
              e.ClusterA.coord_span());
       counters.ClustersTooLargeGridSpan++;
@@ -254,8 +254,8 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
-    if (TimeOfFlight > Conf.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }

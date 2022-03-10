@@ -39,14 +39,14 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   // We can now use the settings in Conf
 
-  Geom.setGeometry(Conf.InstrumentGeometry);
+  Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
-    builder.setTimeBox(Conf.TimeBoxNs); // Time boxing
+    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -241,8 +241,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
-    if (TimeOfFlight > Conf.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }

@@ -78,17 +78,20 @@ public:
   void applyCalibration(std::string HybridID, nlohmann::json Calibration);
 
 public:
+  struct {
+    std::string InstrumentName{""};
+    std::string InstrumentGeometry{""};
+    uint32_t MaxTOFNS{1'000'000'000};
+    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
+    uint32_t TimeBoxNs{0xffffffff};
+  } FileParameters;
+
   // Derived parameters
   ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
 
-  std::string InstrumentName{""};
-  std::string InstrumentGeometry{""};
-  uint32_t MaxTOFNS{1'000'000'000};
-  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
-  uint32_t TimeBoxNs{0xffffffff};
 
   // Other parameters
   std::string ExpectedName{""};
