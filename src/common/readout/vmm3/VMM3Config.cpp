@@ -11,7 +11,6 @@
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Calibration.h>
 #include <common/readout/vmm3/VMM3Config.h>
-#include <regex>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -140,8 +139,7 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
 }
 
 bool VMM3Config::validHybridId(std::string HybridID){
-  std::regex HybridIdRegex ("E55[0-9]{29}");
-  return std::regex_match(HybridID, HybridIdRegex);
+  return (HybridID.length() == 32);
 }
 
 void VMM3Config::applyCalibration(std::string HybridID,
