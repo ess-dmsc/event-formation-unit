@@ -37,16 +37,16 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   loadConfigAndCalib();
 
-  // We can now use the settings in Conf.Parms
+  // We can now use the settings in Conf
 
-  Geom.setGeometry(Conf.Parms.InstrumentGeometry);
+  Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.Parms.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
-    builder.setTimeBox(Conf.Parms.TimeBoxNs); // Time boxing
+    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -208,16 +208,16 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // Discard if there are gaps in the strip or wire channels
-    if (Conf.Parms.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.Parms.MaxGapWire)) {
+    if (Conf.WireGapCheck) {
+      if (e.ClusterB.hasGap(Conf.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
       }
     }
 
-    if (Conf.Parms.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.Parms.MaxGapStrip)) {
+    if (Conf.StripGapCheck) {
+      if (e.ClusterA.hasGap(Conf.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
@@ -241,8 +241,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
 
-    if (TimeOfFlight > Conf.Parms.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.Parms.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }
