@@ -17,67 +17,33 @@ namespace Cspec {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  std::string Name;
   try {
-    Parms.InstrumentName = root["Detector"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Error, "Missing 'Detector' field");
-    throw std::runtime_error("Missing 'Detector' field");
-  }
-
-  if (Parms.InstrumentName != ExpectedName) {
-    LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error("Inconsistent Json file - invalid name");
-  }
-
-  try {
-    Parms.InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
-  }
-  LOG(INIT, Sev::Info, "InstrumentGeometry {}", Parms.InstrumentGeometry);
-
-  try {
-    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
-  }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", Parms.MaxPulseTimeNS);
-
-  try {
-    Parms.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
-  }
-  LOG(INIT, Sev::Info, "TimeBoxNs {}", Parms.TimeBoxNs);
-
-  try {
-    Parms.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
+    CSPECFileParameters.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
   }
-  LOG(INIT, Sev::Info, "DefaultMinADC {}", Parms.DefaultMinADC);
+  LOG(INIT, Sev::Info, "DefaultMinADC {}", CSPECFileParameters.DefaultMinADC);
 
   try {
-    Parms.SizeX = root["SizeX"].get<uint16_t>();
+    CSPECFileParameters.SizeX = root["SizeX"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size X");
   }
-  LOG(INIT, Sev::Info, "Size X {}", Parms.SizeX);
+  LOG(INIT, Sev::Info, "Size X {}", CSPECFileParameters.SizeX);
 
   try {
-    Parms.SizeY = root["SizeY"].get<uint16_t>();
+    CSPECFileParameters.SizeY = root["SizeY"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size Y");
   }
-  LOG(INIT, Sev::Info, "Size Y {}", Parms.SizeY);
+  LOG(INIT, Sev::Info, "Size Y {}", CSPECFileParameters.SizeY);
 
   try {
-    Parms.SizeZ = root["SizeZ"].get<uint16_t>();
+    CSPECFileParameters.SizeZ = root["SizeZ"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for Size Z");
   }
-  LOG(INIT, Sev::Info, "Size Z {}", Parms.SizeZ);
+  LOG(INIT, Sev::Info, "Size Z {}", CSPECFileParameters.SizeZ);
 
   try {
     auto PanelConfig = root["Config"];
@@ -89,21 +55,9 @@ void Config::applyConfig() {
 
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
-      if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
-        XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
-        throw std::runtime_error("Illegal Ring/FEN/VMM values");
-      }
-
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
-      if (Hybrid.Initialised) {
-        XTRACE(INIT, ERR, "Duplicate Hybrid in config file, Ring %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
-        throw std::runtime_error("Duplicate Hybrid in config file");
-      }
-
-      XTRACE(INIT, DEB, "Initialising Hybrid Ring: %u, FEN %u, LocalHybrid %u", Ring, FEN, LocalHybrid);
-      Hybrid.Initialised = true;
-      Hybrid.HybridId = IDString;
+      
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =
           root["Vessel_Config"][VesselID]["Rotation"];
@@ -126,21 +80,14 @@ void Config::applyConfig() {
         Hybrid.YOffset = 0;
       }
 
-
-
       try {
         Hybrid.MinADC =
             root["Vessel_Config"][VesselID]["MinADC"];
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
-        Hybrid.MinADC = Parms.DefaultMinADC;
+        Hybrid.MinADC = CSPECFileParameters.DefaultMinADC;
       }
-
-      LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Ring {}, FEN {}, LocalHybrid {}", Name,
-          Ring, FEN, LocalHybrid);
-      NumHybrids++;
     }
 
     // Calculates number of pixels config covers via Vessel_Config and

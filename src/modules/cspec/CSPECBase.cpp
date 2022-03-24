@@ -63,7 +63,6 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
 
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   // VMM3Parser stats
   Stats.create("readouts.count", Counters.VMMStats.Readouts);

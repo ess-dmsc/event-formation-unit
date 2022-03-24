@@ -39,7 +39,7 @@ public:
   /// files. This step will throw an exception upon errors.
   void loadConfigAndCalib();
 
-  /// \brief after loading the config file, Config.Parms.HybridIdStr contains
+  /// \brief after loading the config file, Config.HybridIdStr contains
   /// a vector of HybridIds. These are then loaded into the Hybrids so that
   /// we can later do consistency checks when applying the calibration data
   void setHybridIds(std::vector<std::string> Ids);
