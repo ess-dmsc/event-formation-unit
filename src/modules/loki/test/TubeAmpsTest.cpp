@@ -60,14 +60,14 @@ TEST_F(TubeAmpsTest, MinMaxStraw) {
   unsigned int iMax = 4096;
   for (unsigned int i = 1; i < iMax; i++) {
     tube.calcPositions(0, i, 0, 0);
-    ASSERT_EQ(tube.StrawId, 0);
+    ASSERT_EQ(tube.StrawId, 6);
     tube.calcPositions(0, 0, 0, i);
-    ASSERT_EQ(tube.StrawId, 0);
+    ASSERT_EQ(tube.StrawId, 6);
     tube.calcPositions(0, i, 0, i);
-    ASSERT_EQ(tube.StrawId, 0);
+    ASSERT_EQ(tube.StrawId, 6);
 
     tube.calcPositions(i, 0, i, 0);
-    ASSERT_EQ(tube.StrawId, 6);
+    ASSERT_EQ(tube.StrawId, 0);
   }
 }
 
