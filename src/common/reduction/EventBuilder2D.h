@@ -37,7 +37,7 @@ public:
   HitVector HitsX, HitsY;
 
   // \todo parametrize
-  GapClusterer ClustersX{timegap, coordgap}, ClustersY{timegap, coordgap};
+  GapClusterer ClustererX{timegap, coordgap}, ClustererY{timegap, coordgap};
 
   // \todo parametrize
   GapMatcher matcher{latency, PlaneX, PlaneY};

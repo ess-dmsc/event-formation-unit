@@ -37,16 +37,17 @@ void EventBuilder2D::flush() {
   matcher.matched_events.clear();
 
   sort_chronologically(HitsX);
-  ClustersX.cluster(HitsX);
-  ClustersX.flush();
+  ClustererX.cluster(HitsX);
+  // Clusterer flushes when time gap between hits is large enough, no need to force it between packets
+  // ClustererX.flush();
 
   sort_chronologically(HitsY);
-  ClustersY.cluster(HitsY);
-  ClustersY.flush();
+  ClustererY.cluster(HitsY);
+  // ClustererY.flush();
 
-  matcher.insert(PlaneX, ClustersX.clusters);
-  matcher.insert(PlaneY, ClustersY.clusters);
-  matcher.match(true);
+  matcher.insert(PlaneX, ClustererX.clusters);
+  matcher.insert(PlaneY, ClustererY.clusters);
+  matcher.match(false);
 
   auto &e = matcher.matched_events;
   Events.insert(Events.end(), e.begin(), e.end());
@@ -55,7 +56,7 @@ void EventBuilder2D::flush() {
 }
 
 void EventBuilder2D::clear() {
-  HitsX.clear();
-  HitsY.clear();
+  HitsX.mostly_clear(20);
+  HitsY.mostly_clear(20);
 }
 
