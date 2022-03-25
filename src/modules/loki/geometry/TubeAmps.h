@@ -31,7 +31,7 @@ public:
   /// ranges.
   bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
                      std::int16_t AmplitudeC, std::int16_t AmplitudeD) {
-    std::int32_t StrawNum = AmplitudeA + AmplitudeC;
+    std::int32_t StrawNum = AmplitudeB + AmplitudeD;
     std::int32_t PosNum = AmplitudeA + AmplitudeB;
     std::int32_t Denominator =
         AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;

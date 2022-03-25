@@ -39,6 +39,8 @@ TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
+
+  UseEveryNEvents = ModuleSettings.ReduceEvents;
 }
 
 void TTLMonitorInstrument::processMonitorReadouts(void) {
@@ -126,8 +128,14 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 
     uint32_t PixelId = readout.Channel + 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
-    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
-    counters.MonitorCounts++;
+    if (UseEveryNEvents == 1) {
+      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      counters.MonitorCounts++;
+      UseEveryNEvents = ModuleSettings.ReduceEvents;
+    } else {
+      counters.MonitorIgnored++;
+      UseEveryNEvents--;
+    }
   }
 }
 
