@@ -98,17 +98,17 @@ TEST_F(ConfigTest, UninitialisedHybrids) {
 
 TEST_F(ConfigTest, NoDetector) {
   config.root = NoDetector;
-  ASSERT_ANY_THROW(config.applyConfig());
+  ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(ConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
-  ASSERT_ANY_THROW(config.applyConfig());
+  ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(ConfigTest, InvalidRing) {
   config.root = InvalidRing;
-  ASSERT_ANY_THROW(config.applyConfig());
+  ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(ConfigTest, InvalidConfig) {
@@ -118,7 +118,7 @@ TEST_F(ConfigTest, InvalidConfig) {
 
 TEST_F(ConfigTest, Duplicate) {
   config.root = DuplicateEntry;
-  ASSERT_ANY_THROW(config.applyConfig());
+  ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 // Compare calculated maxpixels and number of fens against

@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2019 - 2022 European Spallation Source, ERIC. See LICENSE file
 ///===--------------------------------------------------------------------===///
 ///
 /// \file HitVector.h
@@ -169,10 +169,15 @@ template <class T> struct HitVectorAllocator {
   }
 };
 
+/// \todo Does not seem to be required
 template <class T, class U>
 bool operator==(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
   return true;
 }
+
+/// \todo don't know the logic behind this but it seems to be necessary for
+/// the project to compile, yet is not used or at least does not have
+/// any test coverage
 template <class T, class U>
 bool operator!=(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
   return false;

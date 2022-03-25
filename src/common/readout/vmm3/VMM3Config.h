@@ -43,8 +43,13 @@ public:
   void applyVMM3Calibration(ESSReadout::Hybrid &Hybrid, unsigned vmmid,
                             nlohmann::json VMMCalibration);
 
-  /// \brief Apply the loaded configuration json file
+  /// \brief Apply VMM3 generic aspects of loaded configuration json file
+  void applyVMM3Config();
+
+  /// \brief Apply detector specific aspects of loaded configuration json file
   virtual void applyConfig() = 0;
+
+  bool validHybridId(std::string HybridID);
 
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
@@ -73,11 +78,20 @@ public:
   void applyCalibration(std::string HybridID, nlohmann::json Calibration);
 
 public:
+  struct {
+    std::string InstrumentName{""};
+    std::string InstrumentGeometry{""};
+    uint32_t MaxTOFNS{1'000'000'000};
+    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
+    uint32_t TimeBoxNs{0xffffffff};
+  } FileParameters;
+
   // Derived parameters
   ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
+
 
   // Other parameters
   std::string ExpectedName{""};
