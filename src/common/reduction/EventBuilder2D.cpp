@@ -56,7 +56,7 @@ void EventBuilder2D::flush() {
 }
 
 void EventBuilder2D::clear() {
-  HitsX.mostly_clear(20);
-  HitsY.mostly_clear(20);
+  HitsX.clear();
+  HitsY.clear();
 }
 
