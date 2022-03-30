@@ -30,7 +30,9 @@ public:
 
   void flush();
 
-  void clear();
+  void clearHits();
+
+  void clearClusters();
 
   void setTimeBox(uint32_t TimeBoxValue) { TimeBoxSize = TimeBoxValue; }
 

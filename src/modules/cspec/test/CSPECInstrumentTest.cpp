@@ -630,6 +630,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
     builder.flush();
+    builder.clearClusters();
     cspec->generateEvents(builder.Events);
   }
 
