@@ -1,7 +1,7 @@
 {
   "Detector" : "CSPEC",
 
-  "InstrumentGeometry" : "CSPEC",
+  "InstrumentGeometry" : "LET",
 
   "Vessel_Config" : {
     "0":  {"NumGrids": 51, "Rotation": false, "XOffset":   0, "Short": true, "MinADC": 200}
