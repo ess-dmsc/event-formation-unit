@@ -22,6 +22,7 @@
 #include <cspec/CSPECBase.h>
 #include <cspec/Counters.h>
 #include <cspec/geometry/CSPECGeometry.h>
+#include <cspec/geometry/LETGeometry.h>
 #include <cspec/geometry/Config.h>
 #include <logical_geometry/ESSGeometry.h>
 
@@ -79,6 +80,7 @@ public:
   /// Defines which digital geometry to use
   /// for calculating pixel ids
   CSPECGeometry CSPECGeometryInstance;
+  LETGeometry LETGeometryInstance;
 
   Geometry *GeometryInstance;
 

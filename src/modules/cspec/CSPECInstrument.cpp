@@ -15,6 +15,7 @@
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>
 #include <cspec/geometry/CSPECGeometry.h>
+#include <cspec/geometry/LETGeometry.h>
 #include <math.h>
 
 // #undef TRC_LEVEL
@@ -44,6 +45,9 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "CSPEC") {
     GeometryInstance = &CSPECGeometryInstance;
+  }
+  else if (Conf.FileParameters.InstrumentGeometry == "LET"){
+    GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
