@@ -4,20 +4,18 @@
   "InstrumentGeometry" : "LET",
 
   "Vessel_Config" : {
-    "0":  {"NumGrids": 51, "Rotation": false, "XOffset":   0, "Short": true, "MinADC": 200}
+    "0":  {"NumGrids": 51, "Rotation": true, "XOffset":   0, "Short": true, "MinADC": 20}
   },
 
     "Config" : [
     { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  0, "HybridId" : "00000000000000000000000000000000"},
     { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : "00000000000000000000000000000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  2, "HybridId" : "00000000000000000000000000000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "00000000000000000000000000000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "00000000000000000000000000000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  2, "HybridId" : "00000000000000000000000000000000"}
+    { "Ring" :  1, "VesselId": "0", "FEN": 0, "Hybrid" :  0, "HybridId" : "00000000000000000000000000000000"},
+    { "Ring" :  1, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : "00000000000000000000000000000000"}
   ],
 
 
-  "MaxPulseTimeNS" : 71428570,
+  "MaxPulseTimeNS" : 71438570,
   "TimeBoxNs" : 2010,
   "DefaultMinADC": 50,
   "MaxGridsPerEvent": 5,

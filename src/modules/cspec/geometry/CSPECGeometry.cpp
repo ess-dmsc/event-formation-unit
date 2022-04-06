@@ -16,7 +16,7 @@
 #include <utility>
 
 // returns integer describing the X and Z position in the flattened 2D space
-uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID,
+uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
                                           uint8_t VMMID, uint8_t Channel,
                                           uint16_t XOffset, bool Rotated) {
   if (!validWireMapping(HybridID, VMMID, Channel)) {
@@ -26,7 +26,7 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t FENID, uint8_t HybridID,
            HybridID, VMMID, Channel);
     return InvalidCoord;
   }
-
+  XTRACE(DATA, DEB, "Ring ID is %d", RingID);
   // Wire equation defined in CSPEC ICD Document
   uint16_t xAndzCoordNumber = (HybridID * 2 + VMMID) * 64 + Channel - 32;
 
