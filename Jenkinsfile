@@ -216,6 +216,10 @@ builders = pipeline_builder.createBuilders { container ->
             container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
             container.copyFrom("/home/jenkins/archive/event-formation-unit/BUILD_INFO", '.')
             archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
+            if (env.CHANGE_ID) {
+                // Stash archive for integration test
+                stash 'event-formation-unit-centos7.tar.gz'
+            }
         }
     }
 }
@@ -306,3 +310,14 @@ timestamps {
     }
 }
 
+if (env.CHANGE_ID) {
+    // This is a pull request build
+    node('inttest') {
+        stage('Integration Test') {
+            checkout scm
+            unstash 'event-formation-unit-centos7.tar.gz'
+            sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "ls event-fomation-unit"
+        }  // stage
+    }  // node
+}  // if
