@@ -66,6 +66,7 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
+  Stats.create("readouts.high_tof", Counters.HighTOF);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
