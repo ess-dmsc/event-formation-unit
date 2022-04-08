@@ -189,6 +189,7 @@ void LokiInstrument::processReadouts() {
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
            Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
       counters.HighTOF++;
+      continue;
     }
 
     XTRACE(DATA, DEB,
