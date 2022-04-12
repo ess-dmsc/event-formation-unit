@@ -183,7 +183,7 @@ void LokiInstrument::processReadouts() {
       continue;
     }
 
-    if (TimeOfFlight >= 800000000) {
+    if (TimeOfFlight >= LokiConfiguration.MaxTOFNS) {
       XTRACE(DATA, WAR, "High TOF value. Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
            "%d, C %d, D %d",
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
