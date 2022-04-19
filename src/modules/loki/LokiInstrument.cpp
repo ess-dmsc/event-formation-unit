@@ -180,6 +180,7 @@ void LokiInstrument::processReadouts() {
 
     if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      counters.InvalidTOF++;
       continue;
     }
 
