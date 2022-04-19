@@ -53,7 +53,7 @@ struct Counters {
   int64_t TofNegative;
   int64_t PrevTofCount;
   int64_t PrevTofNegative;
-  int64_t HighTOF;
+  int64_t HighTof;
   int64_t InvalidTOF;
 
   int64_t TxBytes;

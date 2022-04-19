@@ -30,7 +30,7 @@ TEST_F(ESSTimeTest, SetRef) {
   ASSERT_EQ(Time.getTOF(100, 1), 11);
   ASSERT_EQ(Time.getTOF(100, 2), 22);
   ASSERT_EQ(Time.getTOF(100, 3), 34);
-  ASSERT_EQ(Time.getTOF(200, 0), 100*1000000000LU);
+  ASSERT_EQ(Time.getTOF(200, 0), Time.InvalidTOF);
 }
 
 TEST_F(ESSTimeTest, Bounds) {
@@ -45,16 +45,18 @@ TEST_F(ESSTimeTest, PrevPulse) {
   Time.setPrevReference(100,  50000);
 
   ASSERT_EQ(Time.getTOF(100, 100000),  0);
-  ASSERT_EQ(Time.getTOF(100, 75000), Time.InvalidTOF);
+  ASSERT_EQ(Time.getTOF(100, 75000), (uint64_t)(25000 * Time.NsPerTick));
+  ASSERT_EQ(Time.getTOF(100, 49999), Time.InvalidTOF);
+
 
   ASSERT_EQ(Time.getPrevTOF(100, 75000), (uint64_t)(25000 * Time.NsPerTick));
   ASSERT_EQ(Time.getPrevTOF(100, 50000), 0);
   ASSERT_EQ(Time.getPrevTOF(100, 49999), Time.InvalidTOF);
 
   ASSERT_EQ(Time.Stats.TofCount, 1);
-  ASSERT_EQ(Time.Stats.TofNegative, 1);
-  ASSERT_EQ(Time.Stats.PrevTofCount, 2);
-  ASSERT_EQ(Time.Stats.PrevTofNegative, 1);
+  ASSERT_EQ(Time.Stats.TofNegative, 2);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 3);
+  ASSERT_EQ(Time.Stats.PrevTofNegative, 2);
 }
 
 TEST_F(ESSTimeTest, AddConstantDelay) {
