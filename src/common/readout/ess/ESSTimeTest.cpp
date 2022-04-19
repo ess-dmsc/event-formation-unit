@@ -31,6 +31,14 @@ TEST_F(ESSTimeTest, SetRef) {
   ASSERT_EQ(Time.getTOF(100, 2), 22);
   ASSERT_EQ(Time.getTOF(100, 3), 34);
   ASSERT_EQ(Time.getTOF(200, 0), Time.InvalidTOF);
+
+  ASSERT_EQ(Time.Stats.TofCount, 4);
+  ASSERT_EQ(Time.Stats.TofNegative, 0);
+  ASSERT_EQ(Time.Stats.TofHigh, 1);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 0);
+  ASSERT_EQ(Time.Stats.PrevTofNegative, 0);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+
 }
 
 TEST_F(ESSTimeTest, Bounds) {
@@ -55,8 +63,10 @@ TEST_F(ESSTimeTest, PrevPulse) {
 
   ASSERT_EQ(Time.Stats.TofCount, 1);
   ASSERT_EQ(Time.Stats.TofNegative, 2);
+  ASSERT_EQ(Time.Stats.TofHigh, 0);
   ASSERT_EQ(Time.Stats.PrevTofCount, 3);
   ASSERT_EQ(Time.Stats.PrevTofNegative, 2);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
 }
 
 TEST_F(ESSTimeTest, AddConstantDelay) {
