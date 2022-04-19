@@ -179,7 +179,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.RingErrors, 1);
   EXPECT_EQ(Readout.Counters.FENErrors, 1);
-  EXPECT_EQ(Readout.Counters.HighTof, 1);
+  EXPECT_EQ(Readout.Counters.TofHigh, 1);
   EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
 }
 

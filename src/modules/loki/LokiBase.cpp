@@ -67,7 +67,8 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  Stats.create("readouts.high_tof", Counters.HighTof);
+  Stats.create("readouts.tof_high", Counters.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
@@ -209,8 +210,8 @@ void LokiBase::processingThread() {
       Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
       Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
       Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
-      Counters.HighTof = Loki.ESSReadoutParser.Packet.Time.Stats.HighTof;
-      Counters.HighTof = Loki.ESSReadoutParser.Packet.Time.Stats.HighTof;
+      Counters.TofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.TofHigh;
+      Counters.PrevTofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
     
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little

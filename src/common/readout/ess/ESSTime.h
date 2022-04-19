@@ -25,7 +25,8 @@ public:
     int64_t TofNegative;
     int64_t PrevTofCount;
     int64_t PrevTofNegative;
-    int64_t HighTof;
+    int64_t TofHigh;
+    int64_t PrevTofHigh;
   };
 
   // ESS clock is 88052500 Hz
@@ -62,7 +63,7 @@ public:
       XTRACE(EVENT, WAR,
           "High TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
               High, Low, timeval, TimeInNS);
-      Stats.HighTof++;
+      Stats.TofHigh++;
       return InvalidTOF;
     }
     Stats.TofCount++;
@@ -82,9 +83,9 @@ public:
     }
     if ((timeval - PrevTimeInNS) > MaxTOF) {
       XTRACE(EVENT, WAR,
-          "High TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+          "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
               High, Low, timeval, PrevTimeInNS);
-      Stats.HighTof++;
+      Stats.PrevTofHigh++;
       return InvalidTOF;
     }
     Stats.PrevTofCount++;

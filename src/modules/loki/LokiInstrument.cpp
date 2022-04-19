@@ -31,7 +31,6 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   LokiConfiguration = Config(ModuleSettings.ConfigFile);
 
   Amp2Pos.setResolution(LokiConfiguration.Resolution);
-  ESSReadoutParser.Packet.Time.setMaxTOF(LokiConfiguration.MaxTOFNS);
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
@@ -60,6 +59,8 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
+  ESSReadoutParser.Packet.Time.setMaxTOF(LokiConfiguration.MaxTOFNS);
+
 }
 
 LokiInstrument::~LokiInstrument() {}
@@ -177,14 +178,6 @@ void LokiInstrument::processReadouts() {
 
     if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
-      continue;
-    }
-
-    if (TimeOfFlight >= LokiConfiguration.MaxTOFNS) {
-      XTRACE(DATA, WAR, "High TOF value. Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
-           "%d, C %d, D %d",
-           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
-           Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
       continue;
     }
 
