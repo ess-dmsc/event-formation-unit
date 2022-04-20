@@ -319,7 +319,9 @@ if (env.CHANGE_ID) {
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
             sh "pwd"
             sh "ls"
-            sh "python ./utils/efushell/integrationtest.py"
+            sh "python --version"
+            sh "python3 --version"
+            sh "python3 ./utils/efushell/integrationtest.py"
         }  // stage
     }  // node
 }  // if
