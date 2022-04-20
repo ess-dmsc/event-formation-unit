@@ -49,6 +49,13 @@ Config::Config(std::string ConfigFile) {
     }
     LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
 
+    try {
+      MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
+    } catch (...) {
+      // Use default value
+    }
+    LOG(INIT, Sev::Info, "MaxTOFNS: {}", MaxTOFNS);
+
     auto PanelConfig = root["PanelConfig"];
     for (auto &Mapping : PanelConfig) {
       auto Bank = Mapping["Bank"].get<unsigned int>();

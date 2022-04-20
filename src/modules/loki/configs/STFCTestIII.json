@@ -10,6 +10,8 @@
 
   "MaxPulseTimeNS" : 357142857,
 
+  "MaxTOF" : 800000000,
+
   "PanelConfig" : [
     { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 32, "StrawOffset" :    0 }
   ]
