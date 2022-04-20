@@ -54,7 +54,7 @@ def check_stats(test, stats_test_list):
 			print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
 def run_tests():
-	efu = "./event-formation-unit/build"
+	efu = "./build"
 	stats_test_list = [
 						['kafka.ev_errors', '==', 0],
 						['transmit.bytes', '>=', 500000]
