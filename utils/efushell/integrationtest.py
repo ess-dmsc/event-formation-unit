@@ -49,7 +49,7 @@ def check_stats(test, stats_test_list):
 			raise Exception(f"EFU stat check failed, did not find stat named {stats_test[0]}")
 		if not compare_pair(actual_stat, expected_stat, operator):
 			efu_process.kill()
-			raise Exception(f"EFU stat check failed, got {actual_stat} and expected {expected_stat}")
+			raise Exception(f"EFU stat check failed, {actual_stat} {operator} {expected_stat}")
 		else:
 			print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
