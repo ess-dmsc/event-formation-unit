@@ -60,7 +60,7 @@ def run_tests():
 						['transmit.bytes', '>=', 500000]
 	]
 
-	file = open('./event-formation-unit/utils/efushell/integrationtest.json')
+	file = open('./utils/efushell/integrationtest.json')
 	data = json.load(file)
 	file.close()
 
