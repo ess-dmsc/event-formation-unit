@@ -317,7 +317,8 @@ if (env.CHANGE_ID) {
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
-            sh "ls event-fomation-unit"
+            sh "pwd"
+            sh "ls"
             sh "python ./utils/efushell/integrationtest.py"
         }  // stage
     }  // node
