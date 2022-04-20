@@ -21,6 +21,9 @@ def run_efu(test, efu):
 	time.sleep(5)
 	poll = efu_process.poll()
 	if poll is not None:
+		out, errs = efu_process.communicate()
+		print(out)
+		print(errs)
 		raise Exception(f"Running efu with command {efu_command} failed")
 	return efu_process
 
