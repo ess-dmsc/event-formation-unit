@@ -4,7 +4,7 @@
 	[
 		{
 			"Module":"loki",
-			"Config":"/Users/jenniferwalker/Documents/essproj/event-formation-unit/src/modules/loki/configs/STFCTestII.json",
+			"Config":"./src/modules/loki/configs/STFCTestII.json",
 			"KafkaTopic":"",
 			"Generator" : "loki_udp_generated",
 			"Packets" : 50,
