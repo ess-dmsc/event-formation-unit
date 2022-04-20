@@ -54,13 +54,13 @@ def check_stats(test, stats_test_list):
 			print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
 def run_tests():
-	efu = "/Users/jenniferwalker/Documents/essproj/event-formation-unit/build"
+	efu = "./event-formation-unit/build"
 	stats_test_list = [
 						['kafka.ev_errors', '==', 0],
 						['transmit.bytes', '>=', 500000]
 	]
 
-	file = open('integrationtest.json')
+	file = open('./event-formation-unit/utils/efushell/integrationtest.json')
 	data = json.load(file)
 	file.close()
 
