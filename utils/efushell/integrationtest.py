@@ -1,6 +1,7 @@
 import json
 import subprocess
 import time
+from EFUMetrics import Metrics
 
 
 def get_stat(stats_output, stat_name):
@@ -9,12 +10,19 @@ def get_stat(stats_output, stat_name):
 			return stat.split(' ')[-1]
 	raise Exception(f"stat {stat_name} doesn't exist in stats_output")
 
+def compare_pair(x, y, operator):
+    if operator == "==":
+        return x == y
+    if operator == ">=":
+        return x >= y
+    print("invalid operator")
+    return False
 
 def run_tests():
 	efu = "/Users/jenniferwalker/Documents/essproj/event-formation-unit/build"
-	stats_test_list = [['kafka.ev_errors', '0']]
+	stats_test_list = [['kafka.ev_errors', '==', 0]]
 
-	file = open('tests.json')
+	file = open('integrationtest.json')
 	data = json.load(file)
 	file.close()
 
@@ -37,18 +45,18 @@ def run_tests():
 		time.sleep(1)
 
 		print("Getting EFU Stats")
-		stats_process = subprocess.Popen(f"exec python3 ../../utils/efushell/efustats.py", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		time.sleep(1)
-		stats_output, err = stats_process.communicate()
-		stats_output = str(stats_output).split('\\n')
+		metrics = Metrics('127.0.0.1', 8888)
+		metrics.get_all_metrics(metrics.get_number_of_stats())
+
 		for stats_test in stats_test_list:
-			actual_stat = get_stat(stats_output, stats_test[0])
-			expected_stat = stats_test[1]
-			if actual_stat != expected_stat:
+			actual_stat = metrics.return_metric(f"efu.{test['Module']}.0.{stats_test[0]}")
+			operator = stats_test[1]
+			expected_stat = stats_test[2]
+			if not compare_pair(actual_stat, expected_stat, operator):
 				efu_process.kill()
 				raise Exception(f"EFU stat check failed, got {actual_stat} and expected {expected_stat}")
 			else:
-				print(f"Stat check passed for {stats_test[0]} == {stats_test[1]}")
+				print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
 
 		efu_process.kill()
