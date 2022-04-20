@@ -17,7 +17,7 @@ def run_efu(test, efu):
 	print("Running EFU")
 	efu_command = f"{efu}/bin/efu --det {efu}/modules/{test['Module']}.so --nohwcheck --file {test['Config']} --region 0 --graphite 172.30.242.21"
 	print(efu_command)
-	efu_process = subprocess.Popen(f"exec {efu_command}", shell=True, stdout=PIPE, stderr=PIPE)
+	efu_process = subprocess.Popen(f"exec {efu_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	time.sleep(5)
 	poll = efu_process.poll()
 	if poll is not None:
