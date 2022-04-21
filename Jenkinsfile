@@ -318,6 +318,7 @@ if (env.CHANGE_ID) {
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
             sh "ls -R"
+            sh "export LD_LIBRARY_PATH = $LD_LIBRARY_PATH:./event-formation-unit/lib/"
             sh "python3 -u ./utils/efushell/integrationtest.py"
         }  // stage
     }  // node
