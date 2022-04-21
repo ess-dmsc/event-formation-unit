@@ -40,8 +40,14 @@ def run_data_generator(test, efu):
 
 def check_stats(test, stats_test_list):
 	print("Getting EFU Stats")
-	metrics = Metrics('127.0.0.1', 8888)
-	metrics.get_all_metrics(metrics.get_number_of_stats())
+	
+	for i in range(10):
+		try:
+			metrics = Metrics('127.0.0.1', 8888)
+			metrics.get_all_metrics(metrics.get_number_of_stats())
+			break
+		except:
+			print("failed to get metrics")
 
 	for stats_test in stats_test_list:
 		actual_stat = metrics.return_metric(f"efu.{test['Module']}.0.{stats_test[0]}")
