@@ -56,6 +56,10 @@ def check_stats(test, stats_test_list):
 		else:
 			print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
+
+def check_kafka():
+	subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki-detector --group-id testconsumer1 --max-messages 3")
+
 def run_tests():
 	efu = "./event-formation-unit"
 	stats_test_list = [
@@ -72,6 +76,7 @@ def run_tests():
 		efu_process = run_efu(test, efu)
 		generator_process = run_data_generator(test, efu)
 		check_stats(test, stats_test_list)
+		check_kafka()
 		efu_process.kill()
 
 if __name__ == "__main__":
