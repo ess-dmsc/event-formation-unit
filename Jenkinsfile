@@ -193,6 +193,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
+                                cp -r ${project}/build/generators archive/event-formation-unit
                                 cp -r ${project}/build/modules archive/event-formation-unit
                                 cp -r ${project}/build/lib archive/event-formation-unit
                                 cp -r ${project}/build/licenses archive/event-formation-unit
