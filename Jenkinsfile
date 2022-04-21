@@ -21,10 +21,10 @@ archive_what = "centos7-release"
  ]]);
 
 container_build_nodes = [
-  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
+  // 'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
-  'debian10': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
-  'ubuntu2004': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2004')
+  // 'debian10': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
+  // 'ubuntu2004': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2004')
 ]
 
 def error_messages = []
@@ -291,7 +291,7 @@ timestamps {
         }
 
         // Add macOS pipeline to builders
-        builders['macOS'] = get_macos_pipeline()
+        // builders['macOS'] = get_macos_pipeline()
 
         try {
             timeout(time: 2, unit: 'HOURS') {
