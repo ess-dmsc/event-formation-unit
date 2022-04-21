@@ -15,7 +15,7 @@ def compare_pair(x, y, operator):
 
 def run_efu(test, efu):
 	print("Running EFU")
-	efu_command = f"{efu}/bin/efu --det {efu}/modules/{test['Module']}.so --nohwcheck --file {test['Config']} --region 0 --graphite 172.30.242.21"
+	efu_command = f"{efu}/bin/efu --det {efu}/modules/{test['Module']}.so --nohwcheck --file {test['Config']} --region 0 --graphite 127.0.0.1"
 	print(efu_command)
 	efu_process = subprocess.Popen(f"exec {efu_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	time.sleep(5)
