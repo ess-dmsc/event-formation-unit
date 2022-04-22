@@ -64,7 +64,7 @@ def check_stats(test, stats_test_list):
 
 
 def check_kafka():
-	subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki-detector --group-id testconsumer1 --max-messages 3")
+	subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki-detector --group-id testconsumer1 --max-messages 3", shell=True)
 
 def run_tests():
 	efu = "./event-formation-unit"
