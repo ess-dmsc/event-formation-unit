@@ -5,7 +5,7 @@
 		{
 			"Module":"loki",
 			"Config":"./src/modules/loki/configs/STFCTestII.json",
-			"KafkaTopic":"",
+			"KafkaTopic":"loki_detector",
 			"Generator" : "loki_udp_generated",
 			"Packets" : 50,
 			"Throttle" : 100

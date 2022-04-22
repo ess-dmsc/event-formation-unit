@@ -65,34 +65,50 @@ def check_stats(test, stats_test_list):
 
 
 def create_kafka_topic(topic_name):
-	subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh create --topic {topic_name}").wait()
+        subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic {topic_name}", shell=True).wait()
 
-def check_kafka():
-	kafka_process = subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki_detector --group-id testconsumer1", shell=True, stdout=subprocess.PIPE)
-	time.sleep(5)
-	kafka_process.kill()
-	out, err = kafka_process.communicate()
-	print(str(out).split("\\n"))
+def check_kafka(topic_name):
+        kafka_process = subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic {topic_name} --group-id testconsumer1", shell=True, stdout=subprocess.PIPE)
+        time.sleep(5)
+        kafka_process.kill()
+        out, err = kafka_process.communicate()
+        results_dict = [json.loads(str(x)) for x in out.decode("utf-8").split("\n") if str(x) != '']
+        messages = 0
+        for result in results_dict:
+                if result['name'] == "records_consumed":
+                        messages += result['count']
+        if messages == 2:
+                print("Successfully received 2 messages in Kafka topic")
+        else:
+                raise Exception(f"Did not successfully receive 2 messages in Kafka topic, received {messages}")
 
 def run_tests():
-	efu = "./event-formation-unit"
-	stats_test_list = [
-						['kafka.ev_errors', '==', 0],
-						['transmit.bytes', '>=', 500000]
-	]
+        efu = "./event-formation-unit"
+        stats_test_list = [
+                                                ['kafka.ev_errors', '==', 0],
+                                                ['transmit.bytes', '>=', 500000]
+        ]
 
-	file = open('./utils/efushell/integrationtest.json')
-	data = json.load(file)
-	file.close()
+        file = open('./utils/efushell/integrationtest.json')
+        data = json.load(file)
+        file.close()
 
 
-	for test in data['Tests']:
-		create_kafka_topic(test["KafkaTopic"])
-		efu_process = run_efu(test, efu)
-		generator_process = run_data_generator(test, efu)
-		check_stats(test, stats_test_list)
-		check_kafka()
-		efu_process.kill()
+        for test in data['Tests']:
+                create_kafka_topic(test["KafkaTopic"])
+                efu_process = run_efu(test, efu)
+                try:
+                        run_data_generator(test, efu)
+                        time.sleep(1)
+                        run_data_generator(test, efu)
+                        check_stats(test, stats_test_list)
+                        check_kafka(test["KafkaTopic"])
+                        efu_process.kill()
+                except:
+                        efu_process.kill()
+                        raise Exception()
+
+
 
 if __name__ == "__main__":
 	run_tests()
