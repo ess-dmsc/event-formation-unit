@@ -67,8 +67,8 @@ def check_stats(test, stats_test_list):
 def create_kafka_topic(topic_name):
         subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic {topic_name}", shell=True).wait()
 
-def check_kafka(topic_name):
-        kafka_process = subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic {topic_name} --group-id testconsumer1", shell=True, stdout=subprocess.PIPE)
+def check_kafka(test):
+        kafka_process = subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic {test["KafkaTopic"]} --group-id testconsumer1", shell=True, stdout=subprocess.PIPE)
         time.sleep(5)
         kafka_process.kill()
         out, err = kafka_process.communicate()
@@ -77,10 +77,10 @@ def check_kafka(topic_name):
         for result in results_dict:
                 if result['name'] == "records_consumed":
                         messages += result['count']
-        if messages == 2:
-                print("Successfully received 2 messages in Kafka topic")
+        if messages == test["ExpectedKafkaMessages"]:
+                print(f"Successfully received {test["ExpectedKafkaMessages"]} messages in Kafka topic {test["KafkaTopic"]}")
         else:
-                raise Exception(f"Did not successfully receive 2 messages in Kafka topic, received {messages}")
+                raise Exception(f"Did not successfully receive {test["ExpectedKafkaMessages"]} messages in Kafka topic {test["KafkaTopic"]}, received {messages}")
 
 def run_tests():
         efu = "./event-formation-unit"
@@ -102,7 +102,7 @@ def run_tests():
                         time.sleep(1)
                         run_data_generator(test, efu)
                         check_stats(test, stats_test_list)
-                        check_kafka(test["KafkaTopic"])
+                        check_kafka(test)
                         efu_process.kill()
                 except:
                         efu_process.kill()

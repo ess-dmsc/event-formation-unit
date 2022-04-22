@@ -8,7 +8,8 @@
 			"KafkaTopic":"loki_detector",
 			"Generator" : "loki_udp_generated",
 			"Packets" : 50,
-			"Throttle" : 100
+			"Throttle" : 100,
+			"ExpectedKafkaMessages" : 2
 		}
 	]
 
