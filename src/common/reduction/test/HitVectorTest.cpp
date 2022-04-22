@@ -1,4 +1,10 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
+///===--------------------------------------------------------------------===///
+///
+/// \file HitVectorTest.h
+/// \brief Unit test for HitVector class
+///
+///===--------------------------------------------------------------------===///
 
 #include <common/reduction/HitVector.h>
 #include <common/testutils/TestBase.h>
@@ -44,6 +50,12 @@ TEST_F(HitVectorTest, Visualize) {
   MESSAGE() << "\n" << visualize(hits, {}, 100, 100) << "\n";
   MESSAGE() << "\n" << visualize(hits, {}, 30, 30) << "\n";
   MESSAGE() << "\n" << visualize(hits, {}, 0, 30) << "\n";
+}
+
+TEST_F(HitVectorTest, VisualizeEmpty) {
+  HitVector hits;
+  auto ret = visualize(hits, {}, 0, 30);
+  ASSERT_EQ(0, ret.size());
 }
 
 int main(int argc, char **argv) {

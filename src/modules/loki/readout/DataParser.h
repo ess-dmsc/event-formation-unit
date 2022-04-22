@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <loki/Counters.h>
+#include <modules/loki/Counters.h>
 #include <common/readout/ess/Parser.h>
 #include <vector>
 
@@ -20,8 +20,7 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct LokiReadout //
-  {
+  struct LokiReadout {
     uint8_t RingId;
     uint8_t FENId;
     uint16_t DataLength;

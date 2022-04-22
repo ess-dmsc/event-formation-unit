@@ -63,6 +63,9 @@ public:
 
   /// \brief for dumping raw VMM3 readouts to HDF5 files
   std::shared_ptr<VMM3::ReadoutFile> DumpFile;
+
+  /// \brief experimental: monitor rate reduction
+  int UseEveryNEvents{1};
 };
 
 } // namespace

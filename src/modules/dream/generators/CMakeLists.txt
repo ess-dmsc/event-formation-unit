@@ -1,22 +1,28 @@
+# Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 #=============================================================================
-# PCAP generator
+# UDP generator for DREAM
 #=============================================================================
 include_directories(.)
 include_directories(..)
 
+#=============================================================================
+# Generate DREAM readouts from (.dat) file
+#=============================================================================
 
-#=============================================================================
-# Generate real LoKI readouts from (.dat) file
-# Shares code with LoKI
-#=============================================================================
-set(udpgen_dreamsim_SRC
+set(dream_udp_from_dat_SRC
   SimReader.cpp
-  ${ESS_SOURCE_DIR}/generators/essudpgen.cpp
+  essudpgen.cpp
   )
-set(udpgen_dreamsim_INC
+set(dream_udp_from_dat_INC
   SimReader.h
   ../readout/Readout.h
-  ${ESS_SOURCE_DIR}/generators/PacketGenerator.h
+  PacketGenerator.h
   )
-create_executable(udpgen_dreamsim)
-target_compile_definitions(udpgen_dreamsim PUBLIC ESSUDPGEN_DREAM_SIM)
+create_executable(dream_udp_from_dat)
+target_compile_definitions(dream_udp_from_dat
+  PUBLIC ESSUDPGEN_DREAM_SIM
+  )
+set_target_properties(dream_udp_from_dat
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
+  )

@@ -55,12 +55,6 @@ int main(int argc, char * argv[]) {
   PacketGenerator gen(ESSReadout::Parser::DREAM, sizeof(struct DreamSimReader::sim_data_t));
   #endif
 
-  #ifdef ESSUDPGEN_LOKI_RAW
-  LokiReader reader(Config.FileName);
-  PacketGenerator gen(ESSReadout::Parser::Loki4Amp, sizeof(Loki::DataParser::LokiReadout));
-  struct Loki::DataParser::LokiReadout Readout;
-  #endif
-
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
   UDPTransmitter DataSource(local, remote);

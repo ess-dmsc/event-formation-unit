@@ -15,13 +15,25 @@ std::string NotJsonStr = R"(
 )";
 
 // Invalid config file: StrawResolution missing, invalid names:
-// NotDetector, NotPanelConfig
+// NotDetector
 std::string InvalidConfigFile{"deleteme_loki_invalidconfig.json"};
 std::string InvalidConfigStr = R"(
 {
   "NotDetector": "LoKI4x8",
 
-  "NotPanelConfig" : [
+  "PanelConfig" : [
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+  ]
+}
+)";
+
+// Invalid config file: StrawResolution missing
+std::string InvalidConfigIIFile{"deleteme_loki_invalidconfigii.json"};
+std::string InvalidConfigIIStr = R"(
+{
+  "Detector": "LoKI",
+
+  "PanelConfig" : [
     { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
   ]
 }
@@ -93,6 +105,11 @@ TEST_F(ConfigTest, InvalidConfig) {
   deleteFile(InvalidConfigFile);
 }
 
+TEST_F(ConfigTest, InvalidConfigII) {
+  ASSERT_ANY_THROW(config = Config(InvalidConfigIIFile));
+  deleteFile(InvalidConfigIIFile);
+}
+
 TEST_F(ConfigTest, ValidConfig) {
   config = Config(ValidConfigFile);
   ASSERT_EQ(config.getMaxPixel(), (32 + 24) * 4 * 7 * 256);
@@ -122,6 +139,8 @@ int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
              InvalidConfigStr.size());
+  saveBuffer(InvalidConfigIIFile, (void *)InvalidConfigIIStr.c_str(),
+            InvalidConfigIIStr.size());
   saveBuffer(BadDetectorFile, (void *)BadDetectorStr.c_str(),
              BadDetectorStr.size());
   saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(),
