@@ -63,8 +63,16 @@ def check_stats(test, stats_test_list):
 			print(f"Stat check passed for {stats_test[0]} {stats_test[1]} {stats_test[2]}")
 
 
+
+def create_kafka_topic(topic_name):
+	subprocess.Popen(f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh create --topic {topic_name}").wait()
+
 def check_kafka():
-	subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki-detector --group-id testconsumer1 --max-messages 3", shell=True)
+	kafka_process = subprocess.Popen("/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-verifiable-consumer.sh --bootstrap-server localhost:9092 --topic loki_detector --group-id testconsumer1", shell=True, stdout=subprocess.PIPE)
+	time.sleep(5)
+	kafka_process.kill()
+	out, err = kafka_process.communicate()
+	print(str(out).split("\\n"))
 
 def run_tests():
 	efu = "./event-formation-unit"
@@ -79,6 +87,7 @@ def run_tests():
 
 
 	for test in data['Tests']:
+		create_kafka_topic(test["KafkaTopic"])
 		efu_process = run_efu(test, efu)
 		generator_process = run_data_generator(test, efu)
 		check_stats(test, stats_test_list)
