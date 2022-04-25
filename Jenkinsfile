@@ -321,7 +321,7 @@ if (env.CHANGE_ID) {
             sh "ls -R"
             sh """
                 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
-                python3 -u ./utils/efushell/integrationtest.py
+                python3 -u ./integrationtest/integrationtest.py
             """
         }  // stage
     }  // node
