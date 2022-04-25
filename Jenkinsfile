@@ -193,6 +193,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
+                                cp -r ${project}/build/generators archive/event-formation-unit
                                 cp -r ${project}/build/modules archive/event-formation-unit
                                 cp -r ${project}/build/lib archive/event-formation-unit
                                 cp -r ${project}/build/licenses archive/event-formation-unit
@@ -216,6 +217,10 @@ builders = pipeline_builder.createBuilders { container ->
             container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
             container.copyFrom("/home/jenkins/archive/event-formation-unit/BUILD_INFO", '.')
             archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
+            if (env.CHANGE_ID) {
+                // Stash archive for integration test
+                stash 'event-formation-unit-centos7.tar.gz'
+            }
         }
     }
 }
@@ -306,3 +311,18 @@ timestamps {
     }
 }
 
+if (env.CHANGE_ID) {
+    // This is a pull request build
+    node('inttest') {
+        stage('Integration Test') {
+            checkout scm
+            unstash 'event-formation-unit-centos7.tar.gz'
+            sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "ls -R"
+            sh """
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                python3 -u ./integrationtest/integrationtest.py
+            """
+        }  // stage
+    }  // node
+}  // if
