@@ -1,7 +1,11 @@
 import json
 import subprocess
 import time
-from EFUMetrics import Metrics
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from utils.efushell.EFUMetrics import Metrics
 
 
 def compare_pair(x, y, operator):
@@ -113,7 +117,7 @@ def run_tests():
     efu = "./event-formation-unit"
     efu = "./build"
 
-    with open('./utils/efushell/integrationtest.json') as f:
+    with open('./integrationtest/integrationtest.json') as f:
         data = json.load(f)
 
     for test in data['Tests']:
