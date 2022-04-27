@@ -2,7 +2,7 @@
 #include <common/reduction/HitVector.h>
 
 
-static void BM_pushback_hits(benchmark::State& state){
+static void BM_pushback_hits(benchmark::State &state){
 	HitVector hits;
   	for (auto _ : state){
     	Hit hit;
@@ -12,5 +12,5 @@ static void BM_pushback_hits(benchmark::State& state){
     	hits.push_back(hit);
   	}
 }
-
 BENCHMARK(BM_pushback_hits);
+BENCHMARK_MAIN();
