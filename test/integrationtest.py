@@ -3,6 +3,7 @@ import subprocess
 import time
 import sys
 import os
+from testutils import run_efu, run_data_generator, get_metrics
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from utils.efushell.EFUMetrics import Metrics
@@ -16,49 +17,9 @@ def compare_pair(x, y, operator):
     raise Exception(f"invalid operator {operator}")
 
 
-def run_efu(test, efu):
-    print("Running EFU")
-    efu_command = f"{efu}/bin/efu --det {efu}/modules/{test['Module']}.so --nohwcheck --file {test['Config']} --region 0 --graphite 127.0.0.1"
-    print(efu_command)
-    efu_process = subprocess.Popen(
-        f"exec {efu_command}",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    # waiting for EFU start up to finish (estimated 5 seconds is enough time)
-    # checking if the EFU is still running after start up
-    time.sleep(5)
-    poll = efu_process.poll()
-    if poll is not None:
-        out, errs = efu_process.communicate()
-        print(out)
-        print(errs)
-        raise Exception(f"Running efu with command {efu_command} failed")
-    return efu_process
-
-
-def run_data_generator(test, efu):
-    print("Running Data Generator")
-    generator_process = subprocess.Popen(
-        f"{efu}/generators/{test['Generator']} -a {test['Packets']} -o 50 -t {test['Throttle']}",
-        shell=True,
-    )
-    exit_code = generator_process.wait()
-    if exit_code != 0:
-        raise Exception(f"Artififial generator {test['Generator']} failed")
-    return generator_process
-
-
 def check_stats(test):
     print("Getting EFU Stats")
-    try:
-        metrics = Metrics("127.0.0.1", 8888)
-        metrics.get_all_metrics(metrics.get_number_of_stats())
-    except:
-    	# socket errors can happen when attempting to get metrics if grafana connection is hanging
-        raise Exception("failed to get metrics") 
+    metrics = get_metrics()
 
     for stats_test in test['StatsTestList']:
         actual_stat = metrics.return_metric(f"efu.{test['Module']}.0.{stats_test[0]}")
@@ -115,17 +76,18 @@ def check_kafka(test):
 
 def run_tests():
     efu = "./event-formation-unit"
+    efu = "./build"
 
-    with open('./integrationtest/integrationtest.json') as f:
+    with open('./test/integrationtest.json') as f:
         data = json.load(f)
 
     for test in data['Tests']:
         create_kafka_topic(test['KafkaTopic'])
-        efu_process = run_efu(test, efu)
+        efu_process = run_efu(efu, test['Module'], test['Config'])
         try:
-            run_data_generator(test, efu)
+            run_data_generator(efu, test['Generator'], test['Packets'], test['Throttle'])
             time.sleep(1)
-            run_data_generator(test, efu)
+            run_data_generator(efu, test['Generator'], test['Packets'], test['Throttle'])
             check_stats(test)
             check_kafka(test)
             efu_process.kill()
