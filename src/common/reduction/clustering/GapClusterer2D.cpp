@@ -8,8 +8,8 @@
 
 #include <common/reduction/clustering/GapClusterer2D.h>
 #include <common/debug/Trace.h>
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 GapClusterer2D::GapClusterer2D(uint64_t max_time_gap, uint16_t max_coord_gap)
     : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}

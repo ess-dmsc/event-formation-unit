@@ -13,8 +13,8 @@
 
 #include <algorithm>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_INF
 
 
 
@@ -33,7 +33,7 @@ void EventBuilder2D::insert(Hit hit) {
   }
 }
 
-void EventBuilder2D::flush() {
+void EventBuilder2D::flush(bool full) {
   matcher.matched_events.clear();
 
   sort_chronologically(HitsX);
@@ -44,12 +44,15 @@ void EventBuilder2D::flush() {
 
   matcher.insert(PlaneX, ClustererX.clusters);
   matcher.insert(PlaneY, ClustererY.clusters);
-  matcher.match(false);
+  matcher.match(full);
 
   auto &e = matcher.matched_events;
   Events.insert(Events.end(), e.begin(), e.end());
 
   clearHits();
+  if(full){
+    clearClusters();
+  }
 }
 
 void EventBuilder2D::clearHits() {

@@ -28,7 +28,7 @@ public:
   // \todo pass by rvalue?
   void insert(Hit hit);
 
-  void flush();
+  void flush(bool full = false);
 
   void clearHits();
 
