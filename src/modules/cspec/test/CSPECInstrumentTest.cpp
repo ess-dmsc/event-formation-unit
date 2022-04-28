@@ -441,7 +441,7 @@ TEST_F(CSPECInstrumentTest, GoodEvent) {
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 1);
@@ -465,7 +465,7 @@ TEST_F(CSPECInstrumentTest, BadMappingError) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -511,7 +511,7 @@ TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -536,7 +536,7 @@ TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -576,7 +576,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   ASSERT_EQ(counters.VMMStats.Readouts, 5);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -593,7 +593,7 @@ TEST_F(CSPECInstrumentTest, NegativeTOF) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
@@ -611,7 +611,7 @@ TEST_F(CSPECInstrumentTest, HighTOFError) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
@@ -629,8 +629,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
-    builder.clearClusters();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 

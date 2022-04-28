@@ -28,11 +28,11 @@ public:
   // \todo pass by rvalue?
   void insert(Hit hit);
 
-  void flush(bool full = false);
+  void flush(bool full_flush = false);
 
   void clearHits();
 
-  void clearClusters();
+  void flushClusterers();
 
   void setTimeBox(uint32_t TimeBoxValue) { TimeBoxSize = TimeBoxValue; }
 

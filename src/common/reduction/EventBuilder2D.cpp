@@ -33,7 +33,7 @@ void EventBuilder2D::insert(Hit hit) {
   }
 }
 
-void EventBuilder2D::flush(bool full) {
+void EventBuilder2D::flush(bool full_flush) {
   matcher.matched_events.clear();
 
   sort_chronologically(HitsX);
@@ -42,17 +42,18 @@ void EventBuilder2D::flush(bool full) {
   sort_chronologically(HitsY);
   ClustererY.cluster(HitsY);
 
+  if(full_flush){
+    flushClusterers();
+  }
+
   matcher.insert(PlaneX, ClustererX.clusters);
   matcher.insert(PlaneY, ClustererY.clusters);
-  matcher.match(full);
+  matcher.match(full_flush);
 
   auto &e = matcher.matched_events;
   Events.insert(Events.end(), e.begin(), e.end());
 
   clearHits();
-  if(full){
-    clearClusters();
-  }
 }
 
 void EventBuilder2D::clearHits() {
@@ -60,7 +61,7 @@ void EventBuilder2D::clearHits() {
   HitsY.clear();
 }
 
-void EventBuilder2D::clearClusters() {
+void EventBuilder2D::flushClusterers() {
   ClustererX.flush();
   ClustererY.flush();
 }
