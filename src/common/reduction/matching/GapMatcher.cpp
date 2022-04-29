@@ -11,8 +11,8 @@
 // #include <cmath>
 // #include <algorithm>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;

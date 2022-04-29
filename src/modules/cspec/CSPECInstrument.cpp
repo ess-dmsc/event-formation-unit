@@ -18,7 +18,7 @@
 #include <math.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Cspec {
 
@@ -247,7 +247,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
            TimeRef.TimeInNS);
 
     if (TimeRef.TimeInNS > EventTime) {
-      XTRACE(EVENT, WAR, "Negative TOF!");
+      XTRACE(EVENT, WAR, "Negative TOF, pulse = %u, event time = %u", TimeRef.TimeInNS, EventTime);
       counters.TimeErrors++;
       continue;
     }

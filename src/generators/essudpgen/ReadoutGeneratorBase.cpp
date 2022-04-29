@@ -57,12 +57,21 @@ void ReadoutGeneratorBase::generateHeader() {
 
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
-  Header->PulseHigh = TimeHigh;
-  Header->PulseLow = TimeLow;
-  Header->PrevPulseHigh = TimeHigh;
-  Header->PrevPulseLow = TimeLow;
 
-  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh, TimeLow);
+  if ((Time.toNS(TimeHigh, TimeLow) - Time.toNS(PulseTimeHigh, PulseTimeLow)) > MaxTOF){
+    XTRACE(DATA, DEB, "New pulse");
+    PrevPulseTimeHigh = PulseTimeHigh;
+    PrevPulseTimeLow = PulseTimeLow;
+    PulseTimeHigh = TimeHigh;
+    PulseTimeLow = TimeLow;
+  }
+
+  Header->PulseHigh = PulseTimeHigh;
+  Header->PulseLow = PulseTimeLow;
+  Header->PrevPulseHigh = PrevPulseTimeHigh;
+  Header->PrevPulseLow = PrevPulseTimeLow;
+
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", PulseTimeHigh, PulseTimeLow);
 }
 
 void ReadoutGeneratorBase::finishPacket() {

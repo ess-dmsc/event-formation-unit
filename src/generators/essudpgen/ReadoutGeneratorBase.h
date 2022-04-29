@@ -82,7 +82,13 @@ protected:
   uint32_t SeqNum{0};
   uint32_t TimeHigh{0};
   uint32_t TimeLow{0};
+  uint32_t PulseTimeHigh{0};
+  uint32_t PulseTimeLow{0};
+  uint32_t PrevPulseTimeHigh{0};
+  uint32_t PrevPulseTimeLow{0};
+  uint32_t MaxTOF{500000};
   uint16_t DataSize{0}; // Number of data bytes in packet
+  ESSReadout::ESSTime Time;
 
   DataFuzzer Fuzzer;
 };
