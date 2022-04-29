@@ -687,7 +687,7 @@ TEST_F(CSPECInstrumentTest, EventCrossPackets) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
