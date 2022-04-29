@@ -127,13 +127,6 @@ public:
     reserve(MinReserveCount);
   }
 
-  void mostly_clear(unsigned long keep_n_elements){
-    if (Vec.size() > keep_n_elements){
-      std::vector<T, Alloc>(Vec.end()-keep_n_elements, Vec.end()).swap(Vec);
-      reserve(MinReserveCount);
-    }
-  }
-
   void resize(size_type sz) { Vec.resize(sz); }
   void resize(size_type sz, const value_type &c) { Vec.resize(sz, c); }
 };
