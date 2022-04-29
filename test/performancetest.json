@@ -9,7 +9,7 @@
     },
     {
       "Module": "cspec",
-      "Config": "./src/modules/cspec/configs/LET.json",
+      "Config": "./src/modules/cspec/configs/let.json",
       "Generator": "let_udp_generated",
       "InitThrottle": 1
     }
