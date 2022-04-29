@@ -34,6 +34,9 @@ void Cspec::LETReadoutGenerator::generateData() {
   uint16_t Channel = 0;
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+
+
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
@@ -79,6 +82,7 @@ void Cspec::LETReadoutGenerator::generateData() {
         VMM = 1;
         Channel = (XLocal - 2) * 16 + ZLocal;
       }
+      XTRACE(DATA, DEB, "Readout for Wires");
     }
     // Grid Y direction
     // Mappings of Y coordinates to channels and VMMs is complicated
@@ -86,6 +90,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     else {
       VMM = 2;
       Channel = 50 - YLocal;
+      XTRACE(DATA, DEB, "Readout for grids");
     }
 
     ReadoutData->VMM = VMM;
@@ -97,13 +102,16 @@ void Cspec::LETReadoutGenerator::generateData() {
 
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
+      XTRACE(DATA, DEB, "Ticking between readouts for same event, Time Low = %u", TimeLow);
     } else {
       TimeLow += Settings.TicksBtwEvents;
+      XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u", TimeLow);
     }
     if (TimeLow >= 88052499){
       TimeLow -= 88052499;
       TimeHigh += 1;
     }
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", TimeLow, TimeHigh);
   }
 }
 

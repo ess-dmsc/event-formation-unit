@@ -13,8 +13,8 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace ESSReadout {
 
@@ -54,14 +54,14 @@ public:
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < TimeInNS) {
       XTRACE(EVENT, WAR,
-              "TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              "TOF negative: High: 0x%04x, Low: 0x%04x, timens %u, PTns: %u",
               High, Low, timeval, TimeInNS);
       Stats.TofNegative++;
       return getPrevTOF(High, Low, DelayNS);
     }
     if ((timeval - TimeInNS) > MaxTOF) {
       XTRACE(EVENT, WAR,
-          "High TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+          "High TOF: High: 0x%04x, Low: 0x%04x, timens %u, PTns: %u",
               High, Low, timeval, TimeInNS);
       Stats.TofHigh++;
       return InvalidTOF;
@@ -76,14 +76,14 @@ public:
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < PrevTimeInNS) {
       XTRACE(EVENT, WAR,
-              "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %u, PrevPTns: %u",
               High, Low, timeval, PrevTimeInNS);
       Stats.PrevTofNegative++;
       return InvalidTOF;
     }
     if ((timeval - PrevTimeInNS) > MaxTOF) {
       XTRACE(EVENT, WAR,
-          "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+          "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %u, PrevPTns: %u",
               High, Low, timeval, PrevTimeInNS);
       Stats.PrevTofHigh++;
       return InvalidTOF;

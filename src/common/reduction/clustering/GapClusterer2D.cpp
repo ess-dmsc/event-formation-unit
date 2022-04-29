@@ -41,6 +41,7 @@ void GapClusterer2D::cluster(const HitVector &hits) {
 }
 
 void GapClusterer2D::flush() {
+  XTRACE(EVENT, DEB, "Flushing clusterer");
   if (current_time_cluster_.empty()) {
     return;
   }

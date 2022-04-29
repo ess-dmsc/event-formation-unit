@@ -13,10 +13,14 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <common/debug/Trace.h>
 #include <math.h>
 #include <time.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <stdexcept>
+
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 
 
@@ -43,8 +47,6 @@ void ReadoutGeneratorBase::generateHeader() {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
-  TimeHigh = time(NULL);
-
   memset(Buffer, 0, BufferSize);
   auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
 
@@ -56,9 +58,11 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
   Header->PulseHigh = TimeHigh;
-  Header->PulseLow = TimeLowOffset;
+  Header->PulseLow = TimeLow;
   Header->PrevPulseHigh = TimeHigh;
-  Header->PrevPulseLow = PrevTimeLowOffset;
+  Header->PrevPulseLow = TimeLow;
+
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh, TimeLow);
 }
 
 void ReadoutGeneratorBase::finishPacket() {

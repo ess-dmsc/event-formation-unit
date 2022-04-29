@@ -24,6 +24,11 @@ void GapClusterer::insert(const Hit &hit) {
            hit.time, current_time_cluster_.back().time);
     flush();
   }
+  else{
+    XTRACE(CLUSTER, DEB, "timegap < %lu, hit: %lu, current: %lu", max_time_gap_,
+           hit.time, current_time_cluster_.back().time);
+    XTRACE(CLUSTER, DEB, "current time cluster length: %u", current_time_cluster_.size());
+  }
 
   /// Insert hit in either case
   XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
@@ -39,7 +44,7 @@ void GapClusterer::cluster(const HitVector &hits) {
 }
 
 void GapClusterer::flush() {
-  XTRACE(CLUSTER, DEB, "flushing");
+  XTRACE(CLUSTER, DEB, "flushing clusterer");
   if (current_time_cluster_.empty()) {
     return;
   }
