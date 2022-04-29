@@ -42,6 +42,10 @@ def check_stats(test):
 
 def create_kafka_topic(topic_name):
     subprocess.Popen(
+        f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic {topic_name}",
+        shell=True,
+    ).wait()
+    subprocess.Popen(
         f"/ess/ecdc/kafka/kafka_2.13-2.8.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic {topic_name}",
         shell=True,
     ).wait()
