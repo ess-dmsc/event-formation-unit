@@ -20,8 +20,8 @@
 #include <cstring>
 #include <stdexcept>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -37,7 +37,7 @@ void Cspec::LETReadoutGenerator::generateData() {
 
 
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
-    if(Time.toNS(TimeHigh, TimeLow) - Time.toNS(PulseTimeHigh, PulseTimeLow) > MaxTOF){
+    if((Time.toNS(TimeHigh, TimeLow) - Time.toNS(PulseTimeHigh, PulseTimeLow) > MaxTOF) && !(GlobalReadout%2)){
       XTRACE(DATA, DEB, "Event tof longer than max tof, need to start new packet, expected %u readouts and generated %u", Settings.NumReadouts, Readout);
       break;
     }
@@ -54,7 +54,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     // CSPEC is 16 wires deep in Z direction
     // X is selected as a number between 0 and 11 as there are
     // 2 columns of 6 wires in the LET setup
-    if ((Readout % 16) == 0) {
+    if ((GlobalReadout % 16) == 0) {
       XGlobal = Fuzzer.random8() * 12 / 255;
     }
     // Forms a tick shape, and stretches it into a taller rectangle
@@ -77,7 +77,7 @@ void Cspec::LETReadoutGenerator::generateData() {
 
     // Wire X and Z direction
     // All channel calculations are based on ICD linked at top of file
-    if ((Readout % 2) == 0) {
+    if ((GlobalReadout % 2) == 0) {
       uint8_t ZLocal = 12 - abs(XGlobal - 2);
       if (XLocal < 2) {
         VMM = 0;
@@ -104,7 +104,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    if ((Readout % 2) == 0) {
+    if ((GlobalReadout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
       XTRACE(DATA, DEB, "Ticking between readouts for same event, Time Low = %u", TimeLow);
     } else {
@@ -115,6 +115,7 @@ void Cspec::LETReadoutGenerator::generateData() {
       TimeLow -= 88052499;
       TimeHigh += 1;
     }
+    GlobalReadout++;
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", TimeLow, TimeHigh);
   }
 }

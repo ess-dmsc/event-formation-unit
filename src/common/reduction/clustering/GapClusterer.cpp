@@ -9,8 +9,8 @@
 #include <common/debug/Trace.h>
 #include <common/reduction/clustering/GapClusterer.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
     : AbstractClusterer(), max_time_gap_(max_time_gap),
@@ -38,7 +38,6 @@ void GapClusterer::insert(const Hit &hit) {
 void GapClusterer::cluster(const HitVector &hits) {
   /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
-    XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
     insert(hit);
   }
 }

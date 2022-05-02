@@ -18,7 +18,7 @@
 #include <math.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Cspec {
 
@@ -222,10 +222,14 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
       counters.ClustersNoCoincidence++;
       if (not e.ClusterB.empty()) {
         counters.ClustersMatchedGridOnly++;
+        XTRACE(EVENT, DEB, "Event matched grids only, start time is %u", e.ClusterB.time_start());
+        throw std::runtime_error("Grids only");
       }
 
       if (not e.ClusterA.empty()) {
         counters.ClustersMatchedWireOnly++;
+        XTRACE(EVENT, DEB, "Event matched wires only, start time is %u", e.ClusterB.time_start());
+        throw std::runtime_error("Wires only");
       }
       continue;
     }
