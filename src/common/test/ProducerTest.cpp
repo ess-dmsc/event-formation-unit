@@ -98,7 +98,7 @@ TEST_F(ProducerTest, ProducerSuccess) {
       .RETURN(ReturnValue);
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
-  int NrOfBytes{200};
+  unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
   ASSERT_EQ(prod.stats.produce_fails, 0);
   int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
