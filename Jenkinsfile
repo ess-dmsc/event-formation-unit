@@ -147,9 +147,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                         cd ${project}/build
                         . ./activate_run.sh
-                        make ${pipeline_builder.numMakeJobs} runefu
+                        make -j${pipeline_builder.numMakeJobs} runefu
                         make coverage
-                        echo skipping make ${pipeline_builder.numMakeJobs} valgrind
+                        echo skipping make -j${pipeline_builder.numMakeJobs} valgrind
                     """
                 container.copyFrom("${project}", '.')
             } catch(e) {
