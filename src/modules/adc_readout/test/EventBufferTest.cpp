@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <adc_readout/EventBuffer.h>
-#include <gtest/gtest.h>
+#include <common/testutils/TestBase.h>
 
 class EventBufferTest : public ::testing::Test {
 public:
