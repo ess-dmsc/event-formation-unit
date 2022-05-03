@@ -32,7 +32,7 @@ public:
   /// histograms
   TTLMonitorInstrument(Counters & counters,
                   TTLMonitorSettings & moduleSettings,
-                  EV42Serializer * serializer);
+                  std::vector<EV42Serializer> &serializers);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
@@ -42,7 +42,7 @@ public:
 
   // \brief initialise the serializer. This is used both in TTLMonitorInstrument
   // and TTLMonitorBase. Called from TTLMonitorBase
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  // void setSerializers(std::vector<EV42Serializer>& serializers) { Serializers = &serializers; }
 
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
@@ -53,7 +53,7 @@ public:
   Config Conf;
 
   /// \brief serialiser (and producer) for events
-  EV42Serializer *Serializer{nullptr};
+  std::vector<EV42Serializer>& Serializers;
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;

@@ -19,6 +19,7 @@ struct TTLMonitorSettings {
   std::string ConfigFile{""};
   std::string FilePrefix{""};
   int ReduceEvents{1};
+  int NumberOfMonitors{1};
 };
 
 
@@ -33,7 +34,7 @@ public:
 protected:
   struct Counters Counters{};
   TTLMonitorSettings TTLMonitorModuleSettings;
-  EV42Serializer *Serializer;
+  std::vector<EV42Serializer> Serializers;
 };
 
 }
