@@ -85,7 +85,7 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
+  Stats.create("readouts.tof_toolarge", Counters.TOFErrors); //move this to events.tof_toolarge
 
 
   // Clustering stats

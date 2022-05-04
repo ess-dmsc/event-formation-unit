@@ -27,3 +27,8 @@ set(ChronoMergerTest_SRC
   ChronoMergerTest.cpp
   )
 create_test_executable(ChronoMergerTest)
+
+set(HitVectorBenchmark_SRC
+   HitVectorBenchmark.cpp
+    )
+ create_benchmark_executable(HitVectorBenchmark)

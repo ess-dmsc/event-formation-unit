@@ -318,11 +318,21 @@ if (env.CHANGE_ID) {
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
-            sh "ls -R"
             sh """
                 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
-                python3 -u ./integrationtest/integrationtest.py
+                python3 -u ./test/integrationtest.py
             """
         }  // stage
     }  // node
+    node('inttest'){
+        stage('Performance Test'){
+            checkout scm
+            unstash 'event-formation-unit-centos7.tar.gz'
+            sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh """
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                python3 -u ./test/performancetest.py
+            """
+        }
+    }
 }  // if
