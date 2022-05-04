@@ -20,16 +20,14 @@ def get_stats(stat_name_list):
         stats[stat_name] = metrics.return_metric(stat_name)
     return(stats)
 
-def efu_handles_data(efu, generator, module, throttle, packets_dropped):
+def efu_drop_packets_check(efu, generator, module, throttle):
     time_s = 30
     readouts_per_packet = 100
     run_data_generator_timed(efu, generator, throttle, readouts_per_packet, time_s)
     time.sleep(5)
     new_packets_dropped = get_stat(f"efu.{module}.0.receive.dropped")
-    if new_packets_dropped != packets_dropped:
-        return new_packets_dropped - packets_dropped
-    else:
-        return 0
+    return new_packets_dropped 
+
 
 def assess_performance(efu, generator, module, throttle):
     time_s = 30
@@ -50,8 +48,8 @@ def bisect_throttle_settings(efu, generator, module, throttle):
     min_throttle = 0
     max_throttle = 1000
     for x in range(10):
-        packets_dropped = efu_handles_data(efu, generator, module, throttle, packets_dropped)
-        if packets_dropped==0:
+        new_packets_dropped = efu_drop_packets_check(efu, generator, module, throttle)
+        if new_packets_dropped == packets_dropped:
             print(f"Passed at throttle: {throttle}")
             max_throttle = throttle
             throttle = (throttle + min_throttle) / 2
@@ -59,16 +57,19 @@ def bisect_throttle_settings(efu, generator, module, throttle):
             print(f"Failed at throttle: {throttle}")
             min_throttle = throttle
             throttle = (throttle + max_throttle) / 2
-        print(f"New throttle to test: {throttle}")
-        print(f"Min throttle: {min_throttle}, Max throttle: {max_throttle}")
+        packets_dropped = new_packets_dropped
         if((max_throttle - min_throttle) < 1):
             break
+        print(f"New throttle to test: {throttle}")
+        print(f"Min throttle: {min_throttle}, Max throttle: {max_throttle}")
+        print(f"Packets dropped: {packets_dropped}")
     print(f"Best throttle achieved: {max_throttle}")
     best_passing_throttle = max_throttle
     return best_passing_throttle
 
 def run_performance_test():
     efu = "./event-formation-unit"
+    efu = "./build"
 
     with open('./test/performancetest.json') as f:
         data = json.load(f)
