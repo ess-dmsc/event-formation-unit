@@ -4,10 +4,10 @@ benchmark/1.5.0
 cli11/1.9.1
 fmt/6.2.0
 graylog-logger/2.0.4-dm1@ess-dmsc/stable
-gtest/1.8.1@bincrafters/stable
+gtest/1.11.0
 h5cpp/0.4.0@ess-dmsc/stable
 nlohmann_json/3.9.1
-libpcap/1.8.1@bincrafters/stable
+libpcap/1.10.1
 librdkafka/1.6.0
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
