@@ -283,7 +283,7 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
 
   freia->processReadouts();
   for (auto &builder : freia->builders) {
-    builder.flush();
+    builder.flush(true);
     freia->generateEvents(builder.Events);
   }
   ASSERT_EQ(Res, 2);

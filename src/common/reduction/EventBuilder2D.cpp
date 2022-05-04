@@ -17,7 +17,6 @@
 // #define TRC_LEVEL TRC_L_INF
 
 
-
 EventBuilder2D::EventBuilder2D() { matcher.set_minimum_time_gap(timegap); }
 
 void EventBuilder2D::insert(Hit hit) {
@@ -33,29 +32,38 @@ void EventBuilder2D::insert(Hit hit) {
   }
 }
 
-void EventBuilder2D::flush() {
+void EventBuilder2D::flush(bool full_flush) {
   matcher.matched_events.clear();
 
   sort_chronologically(HitsX);
-  ClustersX.cluster(HitsX);
-  ClustersX.flush();
+  ClustererX.cluster(HitsX);
 
   sort_chronologically(HitsY);
-  ClustersY.cluster(HitsY);
-  ClustersY.flush();
+  ClustererY.cluster(HitsY);
 
-  matcher.insert(PlaneX, ClustersX.clusters);
-  matcher.insert(PlaneY, ClustersY.clusters);
-  matcher.match(true);
+  if(full_flush){
+    flushClusterers();
+  }
+
+  matcher.insert(PlaneX, ClustererX.clusters);
+  matcher.insert(PlaneY, ClustererY.clusters);
+  matcher.match(full_flush);
 
   auto &e = matcher.matched_events;
   Events.insert(Events.end(), e.begin(), e.end());
 
-  clear();
+  clearHits();
 }
 
-void EventBuilder2D::clear() {
+void EventBuilder2D::clearHits() {
   HitsX.clear();
   HitsY.clear();
 }
+
+void EventBuilder2D::flushClusterers() {
+  ClustererX.flush();
+  ClustererY.flush();
+}
+
+
 
