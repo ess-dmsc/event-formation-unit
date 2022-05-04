@@ -69,7 +69,6 @@ def bisect_throttle_settings(efu, generator, module, throttle):
 
 def run_performance_test():
     efu = "./event-formation-unit"
-    efu = "./build"
 
     with open('./test/performancetest.json') as f:
         data = json.load(f)
