@@ -65,7 +65,7 @@ class EFUShell(cmd.Cmd):
       print(output)
 
    def emptyline(self):
-      print self.prompt
+      print(self.prompt)
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()

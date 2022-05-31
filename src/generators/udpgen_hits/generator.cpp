@@ -16,7 +16,6 @@
 #include <generators/udpgen_hits/ReaderHits.h>
 
 #include <modules/multigrid/generators/ReaderReadouts.h>
-#include <modules/gdgem/generators/ReaderReadouts.h>
 #include <modules/loki/generators/ReaderReadouts.h>
 
 #include <common/system/Socket.h>
@@ -91,14 +90,6 @@ int main(int argc, char *argv[]) {
 
   #ifdef GENERATOR_MULTIGRID_READOUTS
   Multigrid::ReaderReadouts file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_GDGEM_READOUTS
-  Gem::ReaderReadouts file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_GDGEM_HITS
-  Gem::ReaderHits file(Settings.FileName);
   #endif
 
   #ifdef GENERATOR_LOKI_READOUTS
