@@ -126,6 +126,7 @@ public:
     Vec.clear();
     reserve(MinReserveCount);
   }
+
   void resize(size_type sz) { Vec.resize(sz); }
   void resize(size_type sz, const value_type &c) { Vec.resize(sz, c); }
 };

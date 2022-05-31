@@ -20,6 +20,7 @@
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
+// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -66,6 +67,8 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
+  Stats.create("readouts.tof_high", Counters.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
@@ -200,13 +203,16 @@ void LokiBase::processingThread() {
       Res = Loki.LokiParser.parse(Loki.ESSReadoutParser.Packet.DataPtr,
                                   Loki.ESSReadoutParser.Packet.DataLength);
 
+      // Process readouts, generate (end produce) events
+      Loki.processReadouts();
+
       Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
       Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
       Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
       Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
-
-      // Process readouts, generate (end produce) events
-      Loki.processReadouts();
+      Counters.TofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.TofHigh;
+      Counters.PrevTofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
+    
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
