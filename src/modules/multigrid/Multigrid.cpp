@@ -14,7 +14,7 @@ static struct MultigridSettings LocalMultigridSettings;
 
 void SetCLIArguments(CLI::App & parser) {
   parser.add_option("-f,--file", LocalMultigridSettings.ConfigFile,
-                    "NMX (gdgem) specific config file")->group("Multigrid")->
+                    "config file")->group("Multigrid")->
                     required()->configurable(true);
   parser.add_flag("--monitor", LocalMultigridSettings.monitor,
                   "stream monitor data")->group("Multigrid")->configurable(true)->default_val("true");
