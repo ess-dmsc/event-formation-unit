@@ -28,16 +28,18 @@ public:
   // \todo pass by rvalue?
   void insert(Hit hit);
 
-  void flush();
+  void flush(bool full_flush = false);
 
-  void clear();
+  void clearHits();
+
+  void flushClusterers();
 
   void setTimeBox(uint32_t TimeBoxValue) { TimeBoxSize = TimeBoxValue; }
 
   HitVector HitsX, HitsY;
 
   // \todo parametrize
-  GapClusterer ClustersX{timegap, coordgap}, ClustersY{timegap, coordgap};
+  GapClusterer ClustererX{timegap, coordgap}, ClustererY{timegap, coordgap};
 
   // \todo parametrize
   GapMatcher matcher{latency, PlaneX, PlaneY};
