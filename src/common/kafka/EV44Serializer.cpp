@@ -19,9 +19,6 @@
 static constexpr size_t TimeSize = sizeof(uint32_t);
 static constexpr size_t PixelSize = sizeof(uint32_t);
 
-// These must be non-0 because of Flatbuffers being stupid
-// If they are initially set to 0, they will not be mutable
-static constexpr uint64_t FBMutablePlaceholder = 1;
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
@@ -30,11 +27,13 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName, Pr
     : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256), ProduceFunctor(Callback) {
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
-  auto TimeOffset = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
+  auto ReferenceTimeOffset = Builder_.CreateUninitializedVector(1, TimeSize, &ReferenceTimePtr);
+  auto ReferenceTimeIndexOffset = Builder_.CreateVector<int32_t>(std::vector(1, 0));
+  auto OffsetTimeOffset = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &OffsetTimePtr);
   auto PixelOffset = Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
   auto HeaderOffset = CreateEvent44Message(Builder_, SourceNameOffset,
-      FBMutablePlaceholder, FBMutablePlaceholder, TimeOffset, PixelOffset);
+      ReferenceTimeOffset, ReferenceTimeIndexOffset, OffsetTimeOffset, PixelOffset);
   FinishEvent44MessageBuffer(Builder_, HeaderOffset);
 
   Buffer_ = nonstd::span<const uint8_t >(Builder_.GetBufferPointer(), Builder_.GetSize());
@@ -45,10 +44,7 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName, Pr
           const_cast<std::uint8_t *>(Event44Message_->time_of_flight()->Data())) - 1;
   PixelLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(Event44Message_->detector_id()->Data())) - 1;
-
-  Event44Message_->mutate_message_id(0);
-  Event44Message_->mutate_pulse_time(std::vector(0));
+          const_cast<std::uint8_t *>(Event44Message_->pixel_id()->Data())) - 1;
 }
 
 void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
@@ -60,13 +56,11 @@ nonstd::span<const uint8_t> EV44Serializer::serialize() {
     // \todo this should probably throw instead?
     return {};
   }
-  Event44Message_->mutate_message_id(MessageId);
   *TimeLengthPtr = EventCount;
   *PixelLengthPtr = EventCount;
 
   // reset counter and increment message counter
   EventCount = 0;
-  MessageId++;
 
   return Buffer_;
 }
@@ -77,33 +71,30 @@ size_t EV44Serializer::produce() {
     serialize();
     if (ProduceFunctor) {
       // pulse_time is currently ns since 1970, produce time should be ms.
-      ProduceFunctor(Buffer_, Event44Message_->pulse_time()/1000000);
+      ProduceFunctor(Buffer_, Event44Message_->reference_time()->data()[0]/1000000);
     }
     return Buffer_.size_bytes();
   }
   return 0;
 }
 
-void EV44Serializer::referenceTime(uint64_t Time) {
-  Event44Message_->mutate_reference_time(Time);
-}
-
-uint64_t EV44Serializer::referenceTime() const {
-  return Event44Message_->reference_time();
-}
-
 size_t EV44Serializer::eventCount() const {
   return EventCount;
 }
 
-uint64_t EV44Serializer::currentMessageId() const {
-  return MessageId;
+void EV44Serializer::setReferenceTime(int64_t Time){
+  XTRACE(OUTPUT, DEB, "Set reference time: %d\n", Time);
+  reinterpret_cast<int64_t*>(ReferenceTimePtr)[0] = Time;
 }
 
-size_t EV44Serializer::addEvent(uint32_t Time, uint32_t Pixel) {
+int64_t EV44Serializer::referenceTime() const{
+  return reinterpret_cast<int64_t*>(ReferenceTimePtr)[0];
+}
+
+size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", Time, Pixel);
-  reinterpret_cast<uint32_t*>(TimePtr)[EventCount] = Time;
-  reinterpret_cast<uint32_t*>(PixelPtr)[EventCount] = Pixel;
+  reinterpret_cast<int32_t*>(OffsetTimePtr)[EventCount] = Time;  
+  reinterpret_cast<int32_t*>(PixelPtr)[EventCount] = Pixel;
   EventCount++;
 
   if (EventCount >= MaxEvents) {

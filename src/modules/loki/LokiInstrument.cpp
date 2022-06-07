@@ -135,8 +135,8 @@ void LokiInstrument::dumpReadoutToFile(DataParser::LokiReadout &Data) {
 }
 
 void LokiInstrument::processReadouts() {
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
-  SerializerII->pulseTime(ESSReadoutParser.Packet.Time.TimeInNS);
+  Serializer->setReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  SerializerII->setReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : LokiParser.Result) {

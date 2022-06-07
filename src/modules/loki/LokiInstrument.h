@@ -39,8 +39,8 @@ public:
   void processReadouts();
 
   //
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
-  void setSerializerII(EV42Serializer *serializer) { SerializerII = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
+  void setSerializerII(EV44Serializer *serializer) { SerializerII = serializer; }
 
   /// \brief LoKI pixel calculations
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
@@ -59,8 +59,8 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser LokiParser{counters};
   TubeAmps Amp2Pos;
-  EV42Serializer *Serializer;
-  EV42Serializer *SerializerII;
+  EV44Serializer *Serializer;
+  EV44Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;
 };
 

@@ -11,7 +11,7 @@ struct Event44MessageBuilder;
 
 struct Event44Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef Event44MessageBuilder Builder;
-  static FLATBUFFERS_CONSTEXPR_CPP11 const char *GetFullyQualifiedName() {
+  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() {
     return "Event44Message";
   }
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -90,6 +90,7 @@ struct Event44MessageBuilder {
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  Event44MessageBuilder &operator=(const Event44MessageBuilder &);
   flatbuffers::Offset<Event44Message> Finish() {
     const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<Event44Message>(end);
@@ -149,10 +150,6 @@ inline Event44Message *GetMutableEvent44Message(void *buf) {
   return flatbuffers::GetMutableRoot<Event44Message>(buf);
 }
 
-inline Event44Message *GetMutableSizePrefixedEvent44Message(void *buf) {
-  return flatbuffers::GetMutableSizePrefixedRoot<Event44Message>(buf);
-}
-
 inline const char *Event44MessageIdentifier() {
   return "ev44";
 }
@@ -160,11 +157,6 @@ inline const char *Event44MessageIdentifier() {
 inline bool Event44MessageBufferHasIdentifier(const void *buf) {
   return flatbuffers::BufferHasIdentifier(
       buf, Event44MessageIdentifier());
-}
-
-inline bool SizePrefixedEvent44MessageBufferHasIdentifier(const void *buf) {
-  return flatbuffers::BufferHasIdentifier(
-      buf, Event44MessageIdentifier(), true);
 }
 
 inline bool VerifyEvent44MessageBuffer(
