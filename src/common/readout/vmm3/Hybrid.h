@@ -19,7 +19,7 @@ namespace ESSReadout {
 
 class Hybrid {
 public:
-  static constexpr int NumVMMs{2};          // #VMMs per cassette
+  static constexpr int NumVMMs{2};          // #VMMs per hybrid
   static constexpr unsigned int IdSize{32}; // chars
 
   static bool isAvailable(std::string NewId, std::vector<Hybrid> &Hybrids) {
