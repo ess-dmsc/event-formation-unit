@@ -40,10 +40,6 @@ public:
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data);
 
-  // \brief initialise the serializer. This is used both in TTLMonitorInstrument
-  // and TTLMonitorBase. Called from TTLMonitorBase
-   void setSerializers(std::vector<EV44Serializer>& serializers) { Serializers = &serializers; }
-
 
 public:
   /// \brief Stuff that 'ties' TTLMonitor together

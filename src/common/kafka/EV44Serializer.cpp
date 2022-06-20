@@ -82,6 +82,17 @@ size_t EV44Serializer::eventCount() const {
   return EventCount;
 }
 
+
+uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time){
+  uint32_t bytesProduced = 0;
+  if (Time != referenceTime()){
+     XTRACE(OUTPUT, DEB, "Reference time is new: %d\n", Time);
+     bytesProduced = produce();
+     setReferenceTime(Time);
+  }
+  return bytesProduced;
+}
+
 void EV44Serializer::setReferenceTime(int64_t Time){
   XTRACE(OUTPUT, DEB, "Set reference time: %d\n", Time);
   reinterpret_cast<int64_t*>(ReferenceTimePtr)[0] = Time;

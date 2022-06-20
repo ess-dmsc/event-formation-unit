@@ -54,8 +54,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   
   //TODO, have proper assertion heres
   //assert(Serializers != nullptr);
-  for Serializer in Serialzers{
-    Serializer->setReferenceTime(ESSReadoutParser.Packet.Time
+  for (EV44Serializer &Serializer : Serializers){
+    counters.TxBytes += Serializer.checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   }
 

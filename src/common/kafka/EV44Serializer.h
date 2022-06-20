@@ -26,6 +26,9 @@ public:
   /// \param cb function to be called to send buffer to Kafka
   void setProducerCallback(ProducerCallback Callback);
 
+  /// \brief checks if new reference time being used, if so message needs to be produced
+  uint32_t checkAndSetReferenceTime(int64_t Time);
+
   /// \brief changes reference time
   void setReferenceTime(int64_t Time);
 
