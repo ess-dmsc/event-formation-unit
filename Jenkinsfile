@@ -113,7 +113,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                 cd ${project}/build
                 make --version
-                make -j${pipeline_builder.numCpus} all unit_tests benchmark
+                make -j${pipeline_builder.numMakeJobs} all unit_tests benchmark
                 cd ../utils/udpredirect
                 make
             """
@@ -147,9 +147,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                         cd ${project}/build
                         . ./activate_run.sh
-                        make -j${pipeline_builder.numCpus} runefu
+                        make -j${pipeline_builder.numMakeJobs} runefu
                         make coverage
-                        echo skipping make -j${pipeline_builder.numCpus} valgrind
+                        echo skipping make -j${pipeline_builder.numMakeJobs} valgrind
                     """
                 container.copyFrom("${project}", '.')
             } catch(e) {
@@ -193,6 +193,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
+                                cp -r ${project}/build/generators archive/event-formation-unit
                                 cp -r ${project}/build/modules archive/event-formation-unit
                                 cp -r ${project}/build/lib archive/event-formation-unit
                                 cp -r ${project}/build/licenses archive/event-formation-unit
@@ -200,7 +201,6 @@ builders = pipeline_builder.createBuilders { container ->
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
                                 cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
 
@@ -216,6 +216,10 @@ builders = pipeline_builder.createBuilders { container ->
             container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
             container.copyFrom("/home/jenkins/archive/event-formation-unit/BUILD_INFO", '.')
             archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
+            if (env.CHANGE_ID) {
+                // Stash archive for integration test
+                stash 'event-formation-unit-centos7.tar.gz'
+            }
         }
     }
 }
@@ -305,4 +309,30 @@ timestamps {
         }
     }
 }
+
+if (env.CHANGE_ID) {
+    // This is a pull request build
+    node('inttest') {
+        stage('Integration Test') {
+            checkout scm
+            unstash 'event-formation-unit-centos7.tar.gz'
+            sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh """
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                python3 -u ./test/integrationtest.py
+            """
+        }  // stage
+    }  // node
+    node('inttest'){
+        stage('Performance Test'){
+            checkout scm
+            unstash 'event-formation-unit-centos7.tar.gz'
+            sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh """
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                python3 -u ./test/performancetest.py
+            """
+        }
+    }
+}  // if
 

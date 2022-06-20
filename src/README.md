@@ -7,31 +7,8 @@ Directory             | Function
 -------------         | -------------
 common                | common detector code
 efu                   | EFU main application code
+generators            | detector data generators (for test)
 modules               | detector implementations
-test                  | unit test utilities:
-udpgenpcap            | replay of network (pcap) traffic
-
-
-## modules
-Contains detector pipeline plugins for a number of prototype detectors and monitors:
-### Instrument pipelines
-* loki - LoKI instrument
-* freia - Freia instrument
-* adc_readout - monitor
-
-### Prototypes
-* dream - DREAM instrument (simulation)
-* gdgem - NMX instrument (srs)
-* freia - Freia, Estia and AMOR instruments
-* multigrid - CSPEC instrument (mesytec)
-* sonde - SKADI prototype (ideas)
-
-### Utilities
-* readout - ESS/VMM3 readout
-* generators - UDP data generators for various sources
-* perfgen - generator of events for benchmarking
-
-
 
 ## external modules
 It is possible to build modules with sources outside the efu repository. To

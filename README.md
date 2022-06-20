@@ -24,9 +24,8 @@ To build and run this software the following dependencies are required.
 * A recent C/C++ compiler with support for C++14.
 
 Conan is used to download dependencies. For conan to know where the dependencies can
-be downloaded from, package repositories must be added by running the following commands:
+be downloaded from, the ecdc package repository must be added by running the following command:
 
-* `conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan`
 * `conan remote add ecdc https://artifactoryconan.esss.dk/artifactory/api/conan/ecdc`
 
 Note also that for additional functionality you might want to install the following dependencies manually:

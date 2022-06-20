@@ -59,6 +59,8 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
+  ESSReadoutParser.Packet.Time.setMaxTOF(LokiConfiguration.MaxTOFNS);
+
 }
 
 LokiInstrument::~LokiInstrument() {}
@@ -166,10 +168,6 @@ void LokiInstrument::processReadouts() {
     auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow,
                                     LokiConfiguration.ReadoutConstDelayNS);
 
-    if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
-      TimeOfFlight = ESSReadoutParser.Packet.Time.getPrevTOF(Data.TimeHigh, Data.TimeLow,
-                                     LokiConfiguration.ReadoutConstDelayNS);
-    }
 
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
            ESSReadoutParser.Packet.Time.TimeInNS,

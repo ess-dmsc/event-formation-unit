@@ -187,9 +187,10 @@ void FreiaInstrument::processReadouts(void) {
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
-
+  XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &e : Events) {
     if (e.empty()) {
+      XTRACE(EVENT, DEB, "Empty event");
       continue;
     }
 

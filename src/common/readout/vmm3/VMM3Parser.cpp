@@ -82,12 +82,6 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
            TimeRef.TimeInNS, TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {
-      TimeOfFlight = TimeRef.getPrevTOF(Readout.TimeHigh, Readout.TimeLow);
-      XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-             TimeRef.PrevTimeInNS, TimeOfFlight);
-    }
-
-    if (TimeOfFlight == TimeRef.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }

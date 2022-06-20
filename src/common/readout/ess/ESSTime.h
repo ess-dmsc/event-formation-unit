@@ -25,6 +25,8 @@ public:
     int64_t TofNegative;
     int64_t PrevTofCount;
     int64_t PrevTofNegative;
+    int64_t TofHigh;
+    int64_t PrevTofHigh;
   };
 
   // ESS clock is 88052500 Hz
@@ -43,11 +45,25 @@ public:
     return PrevTimeInNS;
   }
 
+  void setMaxTOF(uint64_t NewMaxTOF){
+    MaxTOF = NewMaxTOF;
+  }
+
   /// \brief calculate TOF from saved reference and current time
   uint64_t getTOF(uint32_t High, uint32_t Low, uint32_t DelayNS = 0) {
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < TimeInNS) {
+      XTRACE(EVENT, WAR,
+              "TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              High, Low, timeval, TimeInNS);
       Stats.TofNegative++;
+      return getPrevTOF(High, Low, DelayNS);
+    }
+    if ((timeval - TimeInNS) > MaxTOF) {
+      XTRACE(EVENT, WAR,
+          "High TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              High, Low, timeval, TimeInNS);
+      Stats.TofHigh++;
       return InvalidTOF;
     }
     Stats.TofCount++;
@@ -65,6 +81,13 @@ public:
       Stats.PrevTofNegative++;
       return InvalidTOF;
     }
+    if ((timeval - PrevTimeInNS) > MaxTOF) {
+      XTRACE(EVENT, WAR,
+          "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64, ", PrevPTns: %" PRIu64,
+              High, Low, timeval, PrevTimeInNS);
+      Stats.PrevTofHigh++;
+      return InvalidTOF;
+    }
     Stats.PrevTofCount++;
     return timeval - PrevTimeInNS;
   }
@@ -77,5 +100,6 @@ public:
   struct Stats_t Stats = {};
   uint64_t TimeInNS{0};
   uint64_t PrevTimeInNS{0};
+  uint64_t MaxTOF{2147483647}; // max 32 bit integer, larger TOFs cause errors downstream
 };
 } // namespace ESSReadout

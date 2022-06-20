@@ -142,6 +142,34 @@ std::vector<uint8_t> GoodEvent {
 
 };
 
+
+std::vector<uint8_t> SplitEventA {
+  // First readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+};
+
+std::vector<uint8_t> SplitEventB {
+  // Second readout - plane Y - Grids
+  0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Third readout - plane X & Z - Wires
+  0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+};
+
 std::vector<uint8_t> BadEventMultipleWires {
   // First readout - plane Y - Grids
   0x00, 0x01, 0x14, 0x00,  // Data Header - Ring 0, FEN 1
@@ -441,7 +469,7 @@ TEST_F(CSPECInstrumentTest, GoodEvent) {
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 1);
@@ -465,7 +493,7 @@ TEST_F(CSPECInstrumentTest, BadMappingError) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -511,7 +539,7 @@ TEST_F(CSPECInstrumentTest, NoEventGridOnly) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -536,7 +564,7 @@ TEST_F(CSPECInstrumentTest, NoEventWireOnly) {
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -576,7 +604,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeGridSpan) {
   ASSERT_EQ(counters.VMMStats.Readouts, 5);
 
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
@@ -593,7 +621,7 @@ TEST_F(CSPECInstrumentTest, NegativeTOF) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
@@ -611,7 +639,7 @@ TEST_F(CSPECInstrumentTest, HighTOFError) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
@@ -629,7 +657,7 @@ TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
 
   cspec->processReadouts();
   for (auto &builder : cspec->builders) {
-    builder.flush();
+    builder.flush(true);
     cspec->generateEvents(builder.Events);
   }
 
@@ -637,6 +665,35 @@ TEST_F(CSPECInstrumentTest, BadEventLargeTimeSpan) {
   ASSERT_EQ(counters.VMMStats.Readouts, 4);
   ASSERT_EQ(counters.Events, 1);
   ASSERT_EQ(counters.ClustersNoCoincidence, 1);
+}
+
+TEST_F(CSPECInstrumentTest, EventCrossPackets) {
+  makeHeader(cspec->ESSReadoutParser.Packet, SplitEventA);
+
+  auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush();
+    cspec->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(Res, 1);
+
+  makeHeader(cspec->ESSReadoutParser.Packet, SplitEventB);
+
+  Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
+  counters.VMMStats = cspec->VMMParser.Stats;
+
+  cspec->processReadouts();
+  for (auto &builder : cspec->builders) {
+    builder.flush(true);
+    cspec->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(counters.Events, 1);
 }
 
 int main(int argc, char **argv) {

@@ -29,7 +29,8 @@ std::string lokijson = R"(
   "PanelConfig" : [
     { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :   0 },
     { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 224 }
-  ]
+  ],
+  "MaxTOFNS" : 800000000
 }
 )";
 
@@ -75,7 +76,7 @@ std::vector<uint8_t> TestPacket2{
     // ESS header
                 0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x30, //  'E' 'S' 'S' 0x00
-    0x7e, 0x00, 0x00, 0x00, // 0x00b6 = 126 bytes
+    0xae, 0x00, 0x00, 0x00, // 0x96 = 150 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
     0x11, 0x00, 0x00, 0x00, // Prev PT
@@ -124,6 +125,23 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
 
+    // Data Header 5
+    0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
+    // Readout
+    0x12, 0x00, 0x00, 0x00, // time high (18s)
+    0x01, 0x01, 0x00, 0x00, // time low (257 clocks)
+    0x00, 0x00, 0x00, 0x00, // fpga 0, tube 0
+    0x01, 0x01, 0x02, 0x01, // amp a, amp b
+    0x03, 0x01, 0x04, 0x01, // amp c, amp d
+
+    // Data Header 6
+    0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
+    // Readout
+    0x0a, 0x00, 0x00, 0x00, // time high (10s)
+    0x01, 0x01, 0x00, 0x00, // time low (257 clocks)
+    0x00, 0x00, 0x00, 0x00, // fpga 0, tube 0
+    0x01, 0x01, 0x02, 0x01, // amp a, amp b
+    0x03, 0x01, 0x04, 0x01, // amp c, amp d
 };
 // clang-format on
 
@@ -156,11 +174,13 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 4);
-  EXPECT_EQ(Readout.Counters.DataHeaders, 4);
+  EXPECT_EQ(Readout.Counters.Readouts, 6);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.RingErrors, 1);
   EXPECT_EQ(Readout.Counters.FENErrors, 1);
+  EXPECT_EQ(Readout.Counters.TofHigh, 1);
+  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
 }
 
 int main(int argc, char **argv) {
