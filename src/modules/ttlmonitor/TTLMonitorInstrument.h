@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
@@ -32,7 +32,7 @@ public:
   /// histograms
   TTLMonitorInstrument(Counters & counters,
                   TTLMonitorSettings & moduleSettings,
-                  EV42Serializer * serializer);
+                  EV44Serializer * serializer);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
@@ -42,7 +42,7 @@ public:
 
   // \brief initialise the serializer. This is used both in TTLMonitorInstrument
   // and TTLMonitorBase. Called from TTLMonitorBase
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
@@ -53,7 +53,7 @@ public:
   Config Conf;
 
   /// \brief serialiser (and producer) for events
-  EV42Serializer *Serializer{nullptr};
+  EV44Serializer *Serializer{nullptr};
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;

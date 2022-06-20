@@ -11,7 +11,7 @@
 #include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -170,7 +170,7 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "ttlmon", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "ttlmon", Produce);
   TTLMonitorInstrument TTLMonitor(
       Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializer);
 

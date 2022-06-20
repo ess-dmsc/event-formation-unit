@@ -22,7 +22,7 @@ namespace TTLMonitor {
 /// \brief load configuration and calibration files
 TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
                                            TTLMonitorSettings &moduleSettings,
-                                           EV42Serializer *serializer)
+                                           EV44Serializer *serializer)
     : counters(counters), ModuleSettings(moduleSettings),
       Serializer(serializer) {
 
@@ -50,7 +50,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
+  Serializer->setReferenceTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processMonitorReadouts()");
