@@ -44,6 +44,9 @@ public:
   /// \returns current message counter
   uint64_t currentMessageId() const;
 
+  /// \brief checks if new reference time being used, if so message needs to be produced
+  uint32_t checkAndSetPulseTime(uint64_t Time);
+
   /// \brief serializes and sends to producer
   /// \returns bytes transmitted
   size_t produce();
