@@ -25,8 +25,8 @@
 
 #include <cinttypes>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Cspec {
 

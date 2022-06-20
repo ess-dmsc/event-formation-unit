@@ -15,8 +15,8 @@
 
 namespace ESSReadout {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
 int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
@@ -44,9 +44,6 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
   for (unsigned int i = 0; i < Size / DataLength; i++) {
     Stats.Readouts++;
     VMM3Parser::VMM3Data Readout = DataPtr[i];
-
-    
-
     if (Readout.RingId > MaxRingId) {
       XTRACE(DATA, WAR, "Invalid RingId %d (Max is %d)", Readout.RingId,
              MaxRingId);
