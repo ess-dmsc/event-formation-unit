@@ -110,6 +110,7 @@ conduct and the process for submitting pull requests to us.
 * Morten Jagd Christensen
 * Martin Shetty
 * Jonas Nilsson
+* Jenny Walker
 
 See also the [list of contributors](https://github.com/ess-dmsc/event-formation-unit/graphs/contributors) on Github.
 
