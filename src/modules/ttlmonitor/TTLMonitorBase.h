@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <ttlmonitor/Counters.h>
 
 namespace TTLMonitor {
@@ -34,7 +34,8 @@ public:
 protected:
   struct Counters Counters{};
   TTLMonitorSettings TTLMonitorModuleSettings;
-  std::vector<EV42Serializer> Serializers;
+  std::vector<EV44Serializer> Serializers;
+
 };
 
 }

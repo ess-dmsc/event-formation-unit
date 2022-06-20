@@ -22,7 +22,8 @@ namespace TTLMonitor {
 /// \brief load configuration and calibration files
 TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
                                            TTLMonitorSettings &moduleSettings,
-                                           std::vector<EV42Serializer> &serializers)
+                                           std::vector<EV44Serializer> &serializers)
+
     : counters(counters), ModuleSettings(moduleSettings),
       Serializers(serializers) {
 
@@ -49,10 +50,15 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // possible, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
+
   
   //TODO, have proper assertion heres
   //assert(Serializers != nullptr);
-  
+  for Serializer in Serialzers{
+    Serializer->setReferenceTime(ESSReadoutParser.Packet.Time
+                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  }
+
   XTRACE(DATA, DEB, "processMonitorReadouts()");
   for (const auto &readout : VMMParser.Result) {
 
@@ -129,8 +135,6 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
     if (UseEveryNEvents == 1) {
-      Serializers[readout.Channel].pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
       counters.TxBytes += Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
       counters.MonitorCounts++;
       UseEveryNEvents = ModuleSettings.ReduceEvents;

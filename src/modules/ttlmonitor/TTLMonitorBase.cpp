@@ -11,7 +11,7 @@
 #include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -171,7 +171,7 @@ void TTLMonitorBase::processing_thread() {
   };
 
   for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
-    Serializers.push_back(EV42Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+    Serializers.push_back(EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
   TTLMonitorInstrument TTLMonitor(
