@@ -49,7 +49,9 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // possible, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-  assert(Serializers != nullptr);
+  
+  //TODO, have proper assertion heres
+  //assert(Serializers != nullptr);
   
   XTRACE(DATA, DEB, "processMonitorReadouts()");
   for (const auto &readout : VMMParser.Result) {
