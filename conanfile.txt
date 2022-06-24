@@ -12,7 +12,7 @@ librdkafka/1.6.0
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 concurrentqueue/8f7e861@ess-dmsc/stable
-streaming-data-types/416487f@ess-dmsc/stable
+streaming-data-types/e644b3c@ess-dmsc/stable
 trompeloeil/40
 
 [generators]

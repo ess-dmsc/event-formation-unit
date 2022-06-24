@@ -170,9 +170,12 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "ttlmon", Produce);
+  for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
+    Serializers.push_back(EV42Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+  }
+
   TTLMonitorInstrument TTLMonitor(
-      Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializer);
+      Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializers);
 
   TTLMonitor.VMMParser.setMonitor(true);
 
@@ -231,8 +234,9 @@ void TTLMonitorBase::processing_thread() {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-
-      Counters.TxBytes += Serializer->produce();
+      for (auto &serializer : Serializers){
+        Counters.TxBytes += serializer.produce();
+      }
       Counters.KafkaStats = eventprod.stats;
     }
   }

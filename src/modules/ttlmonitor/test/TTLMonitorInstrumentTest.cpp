@@ -25,7 +25,9 @@ std::string ConfigStr = R"(
 
     "MaxPulseTimeDiffNS" : 1000000000,
 
-    "MaxTOFNS" : 1000000000
+    "MaxTOFNS" : 1000000000,
+
+    "NumberOfMonitors" : 1
   }
 )";
 
@@ -117,7 +119,7 @@ public:
 protected:
   struct Counters counters;
   TTLMonitorSettings ModuleSettings;
-  EV42Serializer *serializer;
+  std::vector<EV42Serializer> serializers;
   TTLMonitorInstrument *ttlmonitor;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
@@ -125,13 +127,12 @@ protected:
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    serializer = new EV42Serializer(115000, "ttlmonitor");
+    serializers.push_back(EV42Serializer(115000, "ttlmonitor"));
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    ttlmonitor = new TTLMonitorInstrument(counters, ModuleSettings, serializer);
-    ttlmonitor->setSerializer(serializer);
+    ttlmonitor = new TTLMonitorInstrument(counters, ModuleSettings, serializers);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
@@ -186,8 +187,7 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_";
-  TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializer);
-  TTLMonDump.setSerializer(serializer);
+  TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializers);
 
   makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
   auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);

@@ -2,7 +2,12 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-from utils.efushell.SocketDriver import SimpleSocket
+try:
+    from utils.efushell.SocketDriver import SimpleSocket
+
+except:
+    from SocketDriver import SimpleSocket
+
 
 class Metrics:
     def __init__(self, ip, port):
