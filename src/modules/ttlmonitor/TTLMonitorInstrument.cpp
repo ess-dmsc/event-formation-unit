@@ -22,7 +22,7 @@ namespace TTLMonitor {
 /// \brief load configuration and calibration files
 TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
                                            TTLMonitorSettings &moduleSettings,
-                                           std::vector<EV44Serializer> &serializers)
+                                           std::vector<EV42Serializer> &serializers)
 
     : counters(counters), ModuleSettings(moduleSettings),
       Serializers(serializers) {
@@ -54,8 +54,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   
   //TODO, have proper assertion heres
   //assert(Serializers != nullptr);
-  for (EV44Serializer &Serializer : Serializers){
-    counters.TxBytes += Serializer.checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
+  for (EV42Serializer &Serializer : Serializers){
+    counters.TxBytes += Serializer.checkAndSetPulseTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   }
 

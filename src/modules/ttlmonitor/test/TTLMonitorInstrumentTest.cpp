@@ -119,7 +119,7 @@ public:
 protected:
   struct Counters counters;
   TTLMonitorSettings ModuleSettings;
-  std::vector<EV44Serializer> serializers;
+  std::vector<EV42Serializer> serializers;
   TTLMonitorInstrument *ttlmonitor;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
@@ -127,13 +127,12 @@ protected:
 
   void SetUp() override {
     ModuleSettings.ConfigFile = ConfigFile;
-    serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
+    serializers.push_back(EV42Serializer(115000, "ttlmonitor"));
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
     ttlmonitor = new TTLMonitorInstrument(counters, ModuleSettings, serializers);
-    // ttlmonitor->setSerializer(serializers);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
@@ -189,7 +188,6 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
 TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_";
   TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializers);
-  //TTLMonDump.setSerializer(serializer);
 
   makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
   auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);
