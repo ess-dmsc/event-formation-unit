@@ -33,12 +33,11 @@ struct Counters {
   // Bifrost DataParser
   int64_t DataHeaders;
   int64_t Readouts;
-  // int64_t ReadoutsBadAmpl;
   int64_t ErrorDataHeaders;
   int64_t ErrorBytes;
 
   // Logical and Digital geometry incl. Calibration
-  // int64_t RingErrors;
+  int64_t RingErrors;
   // int64_t FENErrors;
   // int64_t CalibrationErrors;
   // int64_t ReadoutsClampLow;

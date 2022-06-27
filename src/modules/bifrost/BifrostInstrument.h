@@ -13,6 +13,7 @@
 
 #include <bifrost/Counters.h>
 #include <bifrost/BifrostBase.h> // to get BifrostSettings
+#include <bifrost/geometry/Config.h>
 #include <bifrost/readout/Readout.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
@@ -48,7 +49,7 @@ public:
   struct Counters &counters;
 
   BifrostSettings &ModuleSettings;
-  //Config BifrostConfiguration;
+  Config BifrostConfiguration;
   //Calibration BifrostCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser BifrostParser{counters};

@@ -30,7 +30,8 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
   // }
 
   // ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeNS);
-  // ESSReadoutParser.Packet.Time.setMaxTOF(BifrostConfiguration.MaxTOFNS);
+  //ESSReadoutParser.Packet.Time.setMaxTOF(BifrostConfiguration.MaxTOFNS);
+  ESSReadoutParser.Packet.Time.setMaxTOF(0xFFFFFFFFFFFFFFFFULL);
 
 }
 
@@ -65,12 +66,11 @@ void BifrostInstrument::processReadouts() {
   for (auto &Section : BifrostParser.Result) {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
-    // if (Section.RingId >= BifrostConfiguration.Panels.size()) {
-    //   XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
-    //          Section.RingId, LokiConfiguration.Panels.size());
-    //   counters.RingErrors++;
-    //   continue;
-    // }
+    if (Section.RingId > BifrostConfiguration.MaxValidRing) {
+      XTRACE(DATA, WAR, "RING %d is incompatible with config", Section.RingId);
+      counters.RingErrors++;
+      continue;
+    }
 
     auto &Data = Section;
 

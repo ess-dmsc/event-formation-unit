@@ -11,6 +11,7 @@ set(bifrost_common_inc
   BifrostBase.h
   BifrostInstrument.h
   readout/DataParser.h
+  geometry/Config.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )

@@ -51,7 +51,7 @@ int main(int argc, char * argv[]) {
   #ifdef ESSUDPGEN_BIFROST_DAT
   R5560Reader reader(Config.FileName);
   struct R5560Reader::raw_data_t Readout;
-  PacketGenerator gen(ESSReadout::Parser::Loki4Amp, sizeof(struct R5560Reader::raw_data_t));
+  PacketGenerator gen(ESSReadout::Parser::BIFROST, sizeof(struct R5560Reader::raw_data_t));
   #endif
 
   Socket::Endpoint local("0.0.0.0", 0);

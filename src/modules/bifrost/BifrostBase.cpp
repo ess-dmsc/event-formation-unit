@@ -24,7 +24,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-// #define ECDC_DEBUG_READOUT
 
 namespace Bifrost {
 
@@ -58,29 +57,25 @@ BifrostBase::BifrostBase(BaseSettings const &Settings,
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   // Bifrost Readout Data
-  // Stats.create("readouts.headers", Counters.DataHeaders);
-  // Stats.create("readouts.count", Counters.Readouts);
-  // Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
-  // Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
-  // Stats.create("readouts.error_bytes", Counters.ErrorBytes);
-  // Stats.create("readouts.tof_count", Counters.TofCount);
-  // Stats.create("readouts.tof_neg", Counters.TofNegative);
-  // Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
-  // Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  // Stats.create("readouts.tof_high", Counters.TofHigh);
-  // Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+  Stats.create("readouts.headers", Counters.DataHeaders);
+  Stats.create("readouts.count", Counters.Readouts);
+  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
+  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+  Stats.create("readouts.tof_count", Counters.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
+  Stats.create("readouts.tof_high", Counters.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
-  // Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
+  Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
   // Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
   // Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
-  // Stats.create("geometry.pos_low", Counters.ReadoutsClampLow);
-  // Stats.create("geometry.pos_high", Counters.ReadoutsClampHigh);
 
   // Events
-  // Stats.create("events.count", Counters.Events);
-  // Stats.create("events.pixel_errors", Counters.PixelErrors);
-  // Stats.create("events.outside_region", Counters.OutsideRegion);
+  Stats.create("events.count", Counters.Events);
+  Stats.create("events.pixel_errors", Counters.PixelErrors);
 
 
   // System counters
@@ -88,7 +83,7 @@ BifrostBase::BifrostBase(BaseSettings const &Settings,
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
 
-  // Stats.create("transmit.bytes", Counters.TxBytes);
+  Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
@@ -162,7 +157,7 @@ void BifrostBase::processingThread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "bifrost", Produce);
-  // Bifrost.setSerializer(Serializer); // would rather have this in BifrostInstrument
+  Bifrost.setSerializer(Serializer); // would rather have this in BifrostInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer, DebugTimer;
