@@ -38,8 +38,13 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
 BifrostInstrument::~BifrostInstrument() {}
 
 
-uint32_t BifrostInstrument::calcPixel() {
-  return 0;
+uint32_t BifrostInstrument::calcPixel(int Ring, int Tube, int AmpA, int AmpB) {
+  int xoff = geom.xOffset(Ring, Tube);
+  int yoff = geom.yOffset(Tube);
+  int xlocal = geom.xCoord(AmpA, AmpB);
+  int ylocal = geom.yCoord(AmpA, AmpB);
+
+  return lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
 }
 
 void BifrostInstrument::dumpReadoutToFile(DataParser::BifrostReadout &Data) {
@@ -64,7 +69,8 @@ void BifrostInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : BifrostParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
+    XTRACE(DATA, ALW, "Ring %u, FEN %u, Tube %u",
+           Section.RingId, Section.FENId, Section.TubeId);
 
     if (Section.RingId > BifrostConfiguration.MaxValidRing) {
       XTRACE(DATA, WAR, "RING %d is incompatible with config", Section.RingId);
@@ -99,7 +105,7 @@ void BifrostInstrument::processReadouts() {
            Data.TubeId, Data.AmpA, Data.AmpB);
 
     // Calculate pixelid and apply calibration
-    uint32_t PixelId = calcPixel();
+    uint32_t PixelId = calcPixel(Data.RingId, Data.TubeId, Data.AmpA, Data.AmpB);
 
     if (PixelId == 0) {
       counters.PixelErrors++;

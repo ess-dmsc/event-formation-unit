@@ -14,9 +14,11 @@
 #include <bifrost/Counters.h>
 #include <bifrost/BifrostBase.h> // to get BifrostSettings
 #include <bifrost/geometry/Config.h>
+#include <bifrost/geometry/Geometry.h>
 #include <bifrost/readout/Readout.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <readout/DataParser.h>
 
 
@@ -39,7 +41,7 @@ public:
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   /// \brief Bifrost pixel calculations
-  uint32_t calcPixel();
+  uint32_t calcPixel(int Ring, int Tube, int AmpA, int AmpB);
 
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::BifrostReadout &Data);
@@ -50,6 +52,8 @@ public:
 
   BifrostSettings &ModuleSettings;
   Config BifrostConfiguration;
+  ESSGeometry lgeom{900, 15, 1, 1};
+  Geometry geom;
   //Calibration BifrostCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser BifrostParser{counters};

@@ -1,5 +1,5 @@
-
 add_subdirectory(generators)
+add_subdirectory(test)
 
 include_directories(.)
 
@@ -12,12 +12,14 @@ set(bifrost_common_inc
   BifrostInstrument.h
   readout/DataParser.h
   geometry/Config.h
+  geometry/Geometry.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 set(bifrost_common_src
   BifrostBase.cpp
   BifrostInstrument.cpp
+  geometry/Geometry.cpp
   readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
