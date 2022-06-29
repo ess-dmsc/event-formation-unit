@@ -68,8 +68,9 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTestII.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND efu "-d" "../modules/perfgen" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/dream" "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
+    COMMAND efu "-d" "../modules/bifrost" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/freia" "-f" "../configs/freia.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/cspec" "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/ttlmonitor" "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
-    DEPENDS copycfgs efu mgmesytec AdcReadout dream loki freia cspec ttlmonitor
+    DEPENDS copycfgs efu mgmesytec AdcReadout loki perfgen dream bifrost freia cspec ttlmonitor
     )
