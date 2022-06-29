@@ -22,8 +22,8 @@
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Bifrost {
 

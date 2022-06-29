@@ -12,8 +12,8 @@
 #include <common/debug/Trace.h>
 #include <bifrost/BifrostInstrument.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Bifrost {
 

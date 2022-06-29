@@ -27,3 +27,22 @@ set(bifrost_common_src
 set(bifrost_INC ${bifrost_common_inc})
 set(bifrost_SRC Bifrost.cpp ${bifrost_common_src})
 create_module(bifrost)
+
+
+
+
+#=============================================================================
+# Bifrost module test
+#=============================================================================
+set(BifrostBaseTest_INC
+  ${bifrost_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+)
+set(BifrostBaseTest_SRC
+  ${bifrost_common_src}
+  test/BifrostBaseTest.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+)
+create_test_executable(BifrostBaseTest)
