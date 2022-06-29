@@ -136,7 +136,7 @@ builders = pipeline_builder.createBuilders { container ->
                 throw e
             }
         }  // stage
-        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+        recordIssues(tools: [cppCheck(pattern: 'cppcheck.txt')])
     }
 
     if (container.key == coverage_on) {
