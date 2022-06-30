@@ -5,9 +5,8 @@ include_directories(.)
 set(BIFROST_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 #=============================================================================
-# independent bifrost unit tests
+# Unit test - geometry/Geometry.cpp
 #=============================================================================
-
 set(BifrostGeometryTest_INC
   ${BIFROST_BASE_DIR}/geometry/Geometry.h)
 
@@ -17,6 +16,18 @@ set(BifrostGeometryTest_SRC
 
 create_test_executable(BifrostGeometryTest)
 
+
+#=============================================================================
+# Unit test - readout/DataParser.cpp
+#=============================================================================
+set(BifrostDataParserTest_INC
+  ${BIFROST_BASE_DIR}/readout/DataParser.h
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
+set(BifrostDataParserTest_SRC
+  ${BIFROST_BASE_DIR}/readout/DataParser.cpp
+  DataParserTest.cpp)
+
+create_test_executable(BifrostDataParserTest)
 
 
 #=============================================================================
@@ -37,4 +48,4 @@ set(BifrostInstrumentTest_SRC
   ${BIFROST_BASE_DIR}/readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )
-#create_test_executable(DreamInstrumentTest)
+#create_test_executable(BifrostInstrumentTest)

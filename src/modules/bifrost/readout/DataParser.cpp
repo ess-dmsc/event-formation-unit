@@ -10,8 +10,8 @@
 #include <bifrost/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Bifrost {
 
@@ -56,8 +56,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId,
-           Data->FENId, Data->DataLength);
     Stats.DataHeaders++;
 
     if (Data->DataLength != BifrostReadoutSize) {
@@ -69,11 +67,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, t(%11u,%11u) flags %02x, TubeId %3u, "
-           "A 0x%04x B 0x%04x C 0x%04x D 0x%04x",
+           "Ring %u, FEN %u, t(%11u,%11u) flags %02x, TubeId %3u, "
+           "A 0x%2x B 0x%2x",
            Data->RingId, Data->FENId, Data->TimeHigh,
            Data->TimeLow, Data->Flags, Data->TubeId,
-           Data->AmpA, Data->AmpB, Data->AmpC, Data->AmpD);
+           (uint16_t)Data->AmpA, (uint16_t)Data->AmpB);
 
     ParsedReadouts++;
     Stats.Readouts++;
