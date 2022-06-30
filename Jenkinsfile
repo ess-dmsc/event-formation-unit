@@ -123,11 +123,11 @@ builders = pipeline_builder.createBuilders { container ->
     if (container.key == clangformat_os) {
         pipeline_builder.stage("${container.key}: cppcheck") {
         try {
-                def test_output = "cppcheck.txt"
+                def test_output = "cppcheck.xml"
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
@@ -136,7 +136,7 @@ builders = pipeline_builder.createBuilders { container ->
                 throw e
             }
         }  // stage
-        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+        recordIssues(tools: [cppCheck(pattern: 'cppcheck.xml')])
     }
 
     if (container.key == coverage_on) {
