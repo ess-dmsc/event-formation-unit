@@ -25,9 +25,9 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
   //        ModuleSettings.ConfigFile.c_str());
   // BifrostConfiguration = Config(ModuleSettings.ConfigFile);
 
-  // if (!ModuleSettings.FilePrefix.empty()) {
-  //   DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "bifrost_" + timeString());
-  // }
+  if (not ModuleSettings.FilePrefix.empty()) {
+    DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "bifrost_" + timeString());
+  }
 
   // ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeNS);
   //ESSReadoutParser.Packet.Time.setMaxTOF(BifrostConfiguration.MaxTOFNS);

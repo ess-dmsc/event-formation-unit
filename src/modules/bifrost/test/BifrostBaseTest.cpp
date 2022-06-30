@@ -88,6 +88,7 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(BifrostBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
+  LocalSettings.FilePrefix = "deleteme_bifrostbasetest_";
   BifrostBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
 

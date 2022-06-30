@@ -17,7 +17,7 @@ namespace Bifrost {
 struct BifrostSettings {
   std::string ConfigFile{""};  ///< panel mappings
   // std::string CalibFile{""};   ///< calibration file
-  // std::string FilePrefix{""};  ///< HDF5 file dumping
+  std::string FilePrefix{""};  ///< HDF5 file dumping
 };
 
 class BifrostBase : public Detector {
