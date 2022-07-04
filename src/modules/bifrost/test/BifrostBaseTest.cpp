@@ -103,6 +103,26 @@ TEST_F(BifrostBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.Readouts, 1);
 }
 
+TEST_F(BifrostBaseTest, HeaderError) {
+  Settings.DetectorPort = 9001;
+  Settings.UpdateIntervalSec = 0;
+  LocalSettings.FilePrefix = "deleteme_bifrostbasetest_";
+  BifrostBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+
+  std::this_thread::sleep_for(SleepTime);
+  TestPacket2[5] = 0x00; // wrong type == header error
+  TestUDPServer Server(43127, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.Counters.Readouts, 0);
+}
+
 int main(int argc, char **argv) {
   std::string filename{"deleteme_bifrost.json"};
   saveBuffer(filename, (void *)bifrostjson.c_str(), bifrostjson.size());
