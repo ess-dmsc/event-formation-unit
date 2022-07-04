@@ -19,7 +19,7 @@
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <readout/DataParser.h>
+#include <bifrost/readout/DataParser.h>
 
 
 namespace Bifrost {

@@ -34,7 +34,7 @@ protected:
 
 /// Test cases below
 TEST_F(BifrostInstrumentTest, Constructor) {
-  BifrostInstrument Dream(counters, ModuleSettings);
+  BifrostInstrument Bifrost(counters, ModuleSettings);
   ASSERT_EQ(Bifrost.counters.RxPackets, 0);
   ASSERT_EQ(Bifrost.counters.Readouts, 0);
 }
