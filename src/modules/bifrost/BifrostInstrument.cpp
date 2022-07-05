@@ -69,9 +69,7 @@ void BifrostInstrument::dumpReadoutToFile(DataParser::BifrostReadout &Data) {
 }
 
 void BifrostInstrument::processReadouts() {
-  if (Serializer != nullptr) {
     Serializer->checkAndSetPulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
-  }
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : BifrostParser.Result) {
@@ -116,14 +114,9 @@ void BifrostInstrument::processReadouts() {
     if (PixelId == 0) {
       counters.PixelErrors++;
     } else {
-      if (Serializer != nullptr) {
-        printf("Calling addEvent()\n");
-        counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
-      }
+      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
     }
-
-
   } // for()
 }
 } // namespace Loki
