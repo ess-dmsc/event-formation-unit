@@ -12,8 +12,8 @@
 #include <common/debug/Trace.h>
 #include <bifrost/BifrostInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Bifrost {
 
@@ -43,8 +43,12 @@ uint32_t BifrostInstrument::calcPixel(int Ring, int Tube, int AmpA, int AmpB) {
   int yoff = geom.yOffset(Tube);
   int xlocal = geom.xCoord(AmpA, AmpB);
   int ylocal = geom.yCoord(AmpA, AmpB);
+  uint32_t pixel = lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
 
-  return lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
+  XTRACE(DATA, ALW, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+         xoff, xlocal, yoff, ylocal, pixel);
+
+  return pixel;
 }
 
 void BifrostInstrument::dumpReadoutToFile(DataParser::BifrostReadout &Data) {
@@ -65,7 +69,9 @@ void BifrostInstrument::dumpReadoutToFile(DataParser::BifrostReadout &Data) {
 }
 
 void BifrostInstrument::processReadouts() {
-  Serializer->checkAndSetPulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  if (Serializer != nullptr) {
+    Serializer->checkAndSetPulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  }
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : BifrostParser.Result) {
@@ -110,7 +116,10 @@ void BifrostInstrument::processReadouts() {
     if (PixelId == 0) {
       counters.PixelErrors++;
     } else {
-      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      if (Serializer != nullptr) {
+        printf("Calling addEvent()\n");
+        counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      }
       counters.Events++;
     }
 

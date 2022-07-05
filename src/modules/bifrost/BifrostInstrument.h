@@ -57,7 +57,7 @@ public:
   //Calibration BifrostCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser BifrostParser{counters};
-  EV42Serializer *Serializer;
+  EV42Serializer *Serializer{nullptr};
   std::shared_ptr<ReadoutFile> DumpFile;
 };
 

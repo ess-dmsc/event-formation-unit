@@ -29,6 +29,7 @@ protected:
     //ModuleSettings.ConfigFile = ConfigFile;
     counters = {};
   }
+
   void TearDown() override {}
 };
 
@@ -39,11 +40,17 @@ TEST_F(BifrostInstrumentTest, Constructor) {
   ASSERT_EQ(Bifrost.counters.Readouts, 0);
 }
 
-// TEST_F(DreamInstrumentTest, CalcPixel) {
-//   DreamInstrument Dream(counters, ModuleSettings);
-//   /// \todo this is not in agreement with Irina
-//   ASSERT_EQ(Dream.calcPixel(22, 3,  3,  1, 15, 15), 329'728);
-// }
+TEST_F(BifrostInstrumentTest, CalcPixel) {
+  BifrostInstrument Bifrost(counters, ModuleSettings);
+  ASSERT_EQ(Bifrost.calcPixel(0, 0, 0, 1), 1);
+}
+
+TEST_F(BifrostInstrumentTest, InvalidRing) {
+  BifrostInstrument Bifrost(counters, ModuleSettings);
+  Bifrost.BifrostParser.Result.push_back({1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  Bifrost.processReadouts();
+  ASSERT_EQ(counters.RingErrors, 1);
+}
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
