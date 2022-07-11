@@ -56,32 +56,34 @@ void Config::applyConfig() {
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
-
+      XTRACE(INIT, DEB, "Got Hybrid");
       
-      std::string VesselID = Mapping["VesselId"];
-      Plane[Ring][FEN][LocalHybrid] =
-          Mapping["Plane"];
-     
       try {
-        ReversedChannels[Ring][FEN][LocalHybrid] = Mapping["ReversedChannels"];
+        Plane[Ring][FEN][LocalHybrid] = Mapping["Plane"].get<uint8_t>();
+        XTRACE(INIT, DEB, "Got Plane: %u", Plane[Ring][FEN][LocalHybrid]);
+      } catch (...) {
+        XTRACE(INIT, DEB, "Failed to get Plane, using 0");
+        Plane[Ring][FEN][LocalHybrid] = 0;
+      }
+
+      try {
+        ReversedChannels[Ring][FEN][LocalHybrid] = Mapping["ReversedChannels"].get<bool>();
+        XTRACE(INIT, DEB, "Got ReversedChannels: %u", ReversedChannels[Ring][FEN][LocalHybrid]);
       } catch (...) {
         ReversedChannels[Ring][FEN][LocalHybrid] = false;
       }
+     
 
        try {
-        Offset[Ring][FEN][LocalHybrid] = Mapping["Offset"];
+        Offset[Ring][FEN][LocalHybrid] = Mapping["Offset"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Offset: %u", Offset[Ring][FEN][LocalHybrid]);
       } catch (...) {
         Offset[Ring][FEN][LocalHybrid] = 0;
       }
+      
 
-      try {
-        Hybrid.MinADC =
-            root["Vessel_Config"][VesselID]["MinADC"];
-        XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
-               Hybrid.MinADC, VesselID.c_str());
-      } catch (...) {
-        Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
-      }
+
+      Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
     }
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}", FileName);

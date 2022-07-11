@@ -37,30 +37,30 @@ set(nmx_SRC NMX.cpp ${nmx_common_src})
 create_module(nmx)
 
 
-# set(NMXBaseTest_INC
-#   ${nmx_common_inc}
-#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-#   ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
-# )
-# set(NMXBaseTest_SRC
-#   test/NMXBaseTest.cpp
-#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-#   ${nmx_common_src}
-#   ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
-# )
-# create_test_executable(NMXBaseTest)
+set(NMXBaseTest_INC
+  ${nmx_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+)
+set(NMXBaseTest_SRC
+  test/NMXBaseTest.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${nmx_common_src}
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+)
+create_test_executable(NMXBaseTest)
 
-#
+
 # NMX InstrumentTest Module integration test
-#
-# set(NMXInstrumentTest_INC
-#   ${nmx_common_inc}
-#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-#   )
-# set(NMXInstrumentTest_SRC
-#   ${nmx_common_src}
-#   test/NMXInstrumentTest.cpp
-#   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-# )
-# create_test_executable(NMXInstrumentTest)
+
+set(NMXInstrumentTest_INC
+  ${nmx_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  )
+set(NMXInstrumentTest_SRC
+  ${nmx_common_src}
+  test/NMXInstrumentTest.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+)
+create_test_executable(NMXInstrumentTest)
 

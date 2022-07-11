@@ -56,8 +56,8 @@ public:
   // Derived parameters
   // NMX specific Hybrid fields not included in common Hybrid class
   bool ReversedChannels[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  bool Plane[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  bool Panel[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  bool Offset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  uint8_t Plane[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  uint8_t Panel[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  uint64_t Offset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
 } // namespace Nmx
