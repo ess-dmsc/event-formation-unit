@@ -44,7 +44,16 @@ void Nmx::ReadoutGenerator::generateData() {
     Panel = (Readout / 1280)%4;
     XLocal = Readout % 160;
     YLocal = abs(XLocal - 150);
-
+    
+    
+    if (Readout % 2){
+      Channel = XLocal%64;
+      VMM = XLocal/64;
+    }
+    else{
+      Channel = YLocal%64;
+      VMM = YLocal/64;
+    }
     
 
     ReadoutData->VMM = VMM;
