@@ -80,6 +80,14 @@ void Config::applyConfig() {
       } catch (...) {
         Offset[Ring][FEN][LocalHybrid] = 0;
       }
+
+      try {
+        Panel[Ring][FEN][LocalHybrid] = Mapping["Panel"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Panel: %u", Panel[Ring][FEN][LocalHybrid]);
+      } catch (...) {
+        Panel[Ring][FEN][LocalHybrid] = 0;
+      }
+
       Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
     }
   

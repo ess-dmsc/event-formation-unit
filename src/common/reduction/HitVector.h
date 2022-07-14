@@ -10,6 +10,10 @@
 
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit.h>
+#include <common/debug/Trace.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #define ENABLE_GREEDY_HIT_ALLOCATOR 0
 
@@ -103,7 +107,10 @@ public:
   value_type *data() noexcept { return Vec.data(); }
   const value_type *data() const noexcept { return Vec.data(); }
 
-  void push_back(const value_type &x) { Vec.push_back(x); }
+  void push_back(const value_type &x) { 
+    XTRACE(DATA, DEB, "pushing back constant value");
+    Vec.push_back(x);
+    }
 
   void push_back(value_type &&x) { Vec.push_back(std::move(x)); }
 
