@@ -12,12 +12,16 @@
 #include <math.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <time.h>
+#include <common/debug/Trace.h>
 
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <stdexcept>
+
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 void Nmx::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -43,13 +47,12 @@ void Nmx::ReadoutGenerator::generateData() {
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
-
-    Panel = (Number / 1280)%4;
-    XLocal = Number % 160;
-    YLocal = abs(XLocal - 150);
-    
+    ReadoutData->RingId = 0;
     
     if (Readout % 2){
+      Panel = rand() % 4;
+      XLocal = rand() % 640;
+      YLocal = abs(XLocal - 150);
       Channel = XLocal%64;
       VMM = XLocal/64;
       FEN = XPanelToFEN[Panel];
@@ -73,8 +76,7 @@ void Nmx::ReadoutGenerator::generateData() {
     } else {
       TimeLow += Settings.TicksBtwEvents;
     }
-
-    Number ++;
+    XTRACE(DATA, DEB, "Generating readout, RingId: %u, FENId:%u, VMM:%u, Channel:%u", ReadoutData->RingId, ReadoutData->FENId, ReadoutData->VMM, ReadoutData->Channel);
   }
 }
 
