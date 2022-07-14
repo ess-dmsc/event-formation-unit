@@ -1,7 +1,7 @@
 # Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
 
-# add_subdirectory(test)
-# add_subdirectory(generators)
+add_subdirectory(test)
+add_subdirectory(generators)
 include_directories(.)
 
 #=============================================================================
