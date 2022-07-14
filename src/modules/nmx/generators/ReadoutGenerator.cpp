@@ -28,6 +28,9 @@ void Nmx::ReadoutGenerator::generateData() {
   uint16_t YLocal = 0;
   uint8_t VMM = 0;
   uint16_t Channel = 0;
+  uint8_t FEN = 0;
+  std::map<uint8_t, uint8_t> XPanelToFEN { {0, 0}, {1, 1}, {2, 5}, {3, 4}};
+  std::map<uint8_t, uint8_t> YPanelToFEN { {0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
@@ -49,16 +52,18 @@ void Nmx::ReadoutGenerator::generateData() {
     if (Readout % 2){
       Channel = XLocal%64;
       VMM = XLocal/64;
+      FEN = XPanelToFEN[Panel];
     }
     else{
       Channel = YLocal%64;
       VMM = YLocal/64;
+      FEN = XPanelToFEN[Panel];
     }
     
 
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
-
+    ReadoutData->FENId = FEN;
     DP += ReadoutDataSize;
 
     /// \todo work out why updating TimeLow is done this way, and if it applies
