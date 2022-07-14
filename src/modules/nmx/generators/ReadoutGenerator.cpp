@@ -57,7 +57,7 @@ void Nmx::ReadoutGenerator::generateData() {
     else{
       Channel = YLocal%64;
       VMM = YLocal/64;
-      FEN = XPanelToFEN[Panel];
+      FEN = YPanelToFEN[Panel];
     }
     
 
