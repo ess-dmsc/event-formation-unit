@@ -80,11 +80,12 @@ void Config::applyConfig() {
       } catch (...) {
         Offset[Ring][FEN][LocalHybrid] = 0;
       }
-      
-
-
       Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
     }
+  
+  // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels, resulting in 8192 pixels per hybrid
+  NumPixels += NumHybrids * 8192;
+
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}", FileName);
     throw std::runtime_error("Invalid Json file");

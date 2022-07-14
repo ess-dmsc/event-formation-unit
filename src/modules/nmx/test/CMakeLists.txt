@@ -19,7 +19,7 @@ set(NMXConfigTest_SRC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp  
-  ConfigTest.cpp)
+  NMXConfigTest.cpp)
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest PRIVATE NMX_FULL="${NMX_FULL}")
 

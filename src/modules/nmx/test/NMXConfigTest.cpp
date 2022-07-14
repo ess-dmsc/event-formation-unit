@@ -20,33 +20,48 @@ auto j2 = R"(
 
 auto NoDetector = R"(
 {
-  "WireChOffset" : 16
+  "MaxSpanX" : 10
 }
 )"_json;
 
 auto InvalidDetector = R"(
 {
   "Detector": "NMXs",
-  "WireChOffset" : 16
+  "MaxSpanX" : 10
 }
 )"_json;
 
 auto InvalidRing = R"(
 {
-  "Detector": "NMX",
-  
-  "Vessel_Config" : {
-    "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
-    "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12}
-  },
-
+  "Detector" : "NMX",
+  "InstrumentGeometry" : "NMX",
+  "MaxSpanX" : 10,
+  "MaxSpanY" : 10,
+  "MaxGapX" : 2,
+  "MaxGapY" : 2,
+  "EventTimeWindowNS": 8000,
+  "DefaultMinADC":50,
   "Config" : [
-    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
-    { "Ring" : 12, "VesselId": "1", "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
-    { "Ring" :  1, "VesselId": "1", "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
+        {
+          "Ring" :  0, 
+          "FEN": 0, 
+          "Hybrid" :  0, 
+          "Plane" : 0,
+          "Offset" : 0,
+          "ReversedChannels" : true,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000000"
+        },
+        {
+          "Ring" :  20, 
+          "FEN": 0, 
+          "Hybrid" :  1, 
+          "Plane" : 0,
+          "Offset" : 128,
+          "ReversedChannels" : true,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000001"
+        }
   ]
 }
 )"_json;
@@ -70,68 +85,87 @@ std::string InvalidConfig = R"(
 
 auto DuplicateEntry = R"(
 {
-  "Detector": "NMX",
-  "Vessel_Config" : {
-      "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
-      "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12}
-  },
+  "Detector" : "NMX",
+  "InstrumentGeometry" : "NMX",
+  "MaxSpanX" : 10,
+  "MaxSpanY" : 10,
+  "MaxGapX" : 2,
+  "MaxGapY" : 2,
+  "EventTimeWindowNS": 8000,
+  "DefaultMinADC":50,
   "Config" : [
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "Ring" :  0, "VesselId": "0", "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"}
+        {
+          "Ring" :  0, 
+          "FEN": 0, 
+          "Hybrid" :  0, 
+          "Plane" : 0,
+          "Offset" : 0,
+          "ReversedChannels" : true,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000000"
+        },
+        {
+          "Ring" :  20, 
+          "FEN": 0, 
+          "Hybrid" :  0, 
+          "Plane" : 0,
+          "Offset" : 128,
+          "ReversedChannels" : true,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000001"
+        }
   ]
 }
 )"_json;
 
 using namespace Nmx;
 
-class ConfigTest : public TestBase {
+class NMXConfigTest : public TestBase {
 protected:
   Config config{"NMX", "config.json"};
   void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(NMXConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
   ASSERT_EQ(config.NumHybrids, 0);
 }
 
-TEST_F(ConfigTest, UninitialisedHybrids) {
+TEST_F(NMXConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
 }
 
-TEST_F(ConfigTest, NoDetector) {
+TEST_F(NMXConfigTest, NoDetector) {
   config.root = NoDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidDetector) {
+TEST_F(NMXConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidRing) {
+TEST_F(NMXConfigTest, InvalidRing) {
   config.root = InvalidRing;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidConfig) {
+TEST_F(NMXConfigTest, InvalidConfig) {
   config.root = InvalidConfig;
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
-TEST_F(ConfigTest, Duplicate) {
+TEST_F(NMXConfigTest, Duplicate) {
   config.root = DuplicateEntry;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, FullInstrument) {
+TEST_F(NMXConfigTest, FullInstrument) {
   config = Config("NMX", NMX_FULL);
   config.loadAndApplyConfig();
-  ASSERT_EQ(config.NumPixels, 838272);
-  ASSERT_EQ(config.NumHybrids, 198);
+  // ASSERT_EQ(config.NumPixels, 1638400);
+  ASSERT_EQ(config.NumHybrids, 40);
 
   /// \todo, check correct Hybrids initialised
 }
