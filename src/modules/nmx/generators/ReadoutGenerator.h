@@ -22,6 +22,7 @@ public:
 protected:
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
+  int64_t Number{0};
 };
 } // namespace Nmx
 

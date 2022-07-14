@@ -44,8 +44,8 @@ void Nmx::ReadoutGenerator::generateData() {
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
 
-    Panel = (Readout / 1280)%4;
-    XLocal = Readout % 160;
+    Panel = (Number / 1280)%4;
+    XLocal = Number % 160;
     YLocal = abs(XLocal - 150);
     
     
@@ -73,6 +73,8 @@ void Nmx::ReadoutGenerator::generateData() {
     } else {
       TimeLow += Settings.TicksBtwEvents;
     }
+
+    Number ++;
   }
 }
 
