@@ -56,11 +56,14 @@ void Nmx::ReadoutGenerator::generateData() {
       Channel = XLocal%64;
       VMM = XLocal/64;
       FEN = XPanelToFEN[Panel];
+      XTRACE(DATA, DEB, "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u", Panel, XLocal, YLocal);
+      XTRACE(DATA, DEB, "Generating readout for X, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     else{
       Channel = YLocal%64;
       VMM = YLocal/64;
       FEN = YPanelToFEN[Panel];
+      XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     
 
