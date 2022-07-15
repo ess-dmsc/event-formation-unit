@@ -52,10 +52,11 @@ void Nmx::ReadoutGenerator::generateData() {
     if ((Readout % 2) == 0) {
       Panel = rand() % 4;
       XLocal = rand() % 640;
-      YLocal = abs(XLocal - 150);
+      // YLocal = abs(XLocal - 150);
+      YLocal = XLocal;
       if (Panel <= 1){
-        Channel = 64 - XLocal%64;
-        VMM = 10 - XLocal/64;
+        Channel = 63 - XLocal%64;
+        VMM = 9 - XLocal/64;
       }
       else{
         Channel = XLocal%64;
@@ -67,8 +68,8 @@ void Nmx::ReadoutGenerator::generateData() {
     }
     else{
       if ((Panel%2) == 0){
-        Channel = 64 - YLocal%64;
-        VMM = 10 - YLocal/64;
+        Channel = 63 - YLocal%64;
+        VMM = 9 - YLocal/64;
       }
       else{
         Channel = YLocal%64;
