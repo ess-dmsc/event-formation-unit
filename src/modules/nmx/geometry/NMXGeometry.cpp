@@ -24,7 +24,7 @@ uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offse
 
   // Wire equation defined in NMX ICD Document
   if (ReversedChannels){
-    CoordNumber = Offset + 64 * AsicId + 63 - Channel;
+    CoordNumber = Offset + 64 * (1 - AsicId) + 63 - Channel;
   }
   else{
     CoordNumber = Offset + 64 * AsicId + Channel;

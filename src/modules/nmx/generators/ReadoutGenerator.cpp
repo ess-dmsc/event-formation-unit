@@ -67,7 +67,7 @@ void Nmx::ReadoutGenerator::generateData() {
       XTRACE(DATA, DEB, "Generating readout for X, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     else{
-      if ((Panel%2) == 0){
+      if ((Panel%2) != 0){
         Channel = 63 - YLocal%64;
         VMM = 9 - YLocal/64;
       }
