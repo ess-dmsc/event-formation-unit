@@ -5,6 +5,8 @@
   "MaxSpanY" : 10,
   "MaxGapX" : 2,
   "MaxGapY" : 2,
+  "SizeX" : 1280,
+  "SizeY" : 1280,
   "EventTimeWindowNS": 8000,
   "DefaultMinADC":50,
   "Config" : [

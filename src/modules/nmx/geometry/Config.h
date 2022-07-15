@@ -43,8 +43,8 @@ public:
 public:
   // Parameters obtained from JSON config file
   struct {
-    uint16_t SizeX{640};
-    uint16_t SizeY{640};
+    uint16_t SizeX{1280};
+    uint16_t SizeY{1280};
     uint16_t NumPanels{4};
     uint16_t MaxGridsSpan{3};
     uint16_t DefaultMinADC{50};
