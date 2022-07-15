@@ -49,7 +49,7 @@ void Nmx::ReadoutGenerator::generateData() {
     ReadoutData->OTADC = 1000;
     ReadoutData->RingId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
-    if (Readout % 2){
+    if ((Readout % 2) == 0) {
       Panel = rand() % 4;
       XLocal = rand() % 640;
       YLocal = abs(XLocal - 150);
