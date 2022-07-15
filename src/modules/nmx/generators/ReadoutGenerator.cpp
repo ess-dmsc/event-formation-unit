@@ -52,7 +52,7 @@ void Nmx::ReadoutGenerator::generateData() {
     if ((Readout % 2) == 0) {
       Panel = rand() % 4;
       XLocal = rand() % 640;
-      YLocal = abs(1.2*(XLocal - 128));
+      YLocal = 639-(abs(1.2*(XLocal - 128)));
       if (Panel <= 1){
         Channel = 63 - XLocal%64;
         VMM = 9 - XLocal/64;
