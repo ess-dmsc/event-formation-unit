@@ -29,7 +29,7 @@ uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offse
   else{
     CoordNumber = Offset + 64 * AsicId + Channel;
   }
-  XTRACE(DATA, DEB, "Calculating coordinate value from Channel: %u, AsicId: %u, Offset: %u, ReversedChannels: %B, got Coordinate %u", Channel, AsicId, Offset, ReversedChannels, CoordNumber);
+  XTRACE(DATA, DEB, "Calculating coordinate value from Channel: %u, AsicId: %u, Offset: %u, ReversedChannels: %u, got Coordinate %u", Channel, AsicId, Offset, ReversedChannels, CoordNumber);
 
   return CoordNumber;
 }
