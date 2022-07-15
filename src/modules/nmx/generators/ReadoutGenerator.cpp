@@ -53,15 +53,27 @@ void Nmx::ReadoutGenerator::generateData() {
       Panel = rand() % 4;
       XLocal = rand() % 640;
       YLocal = abs(XLocal - 150);
-      Channel = XLocal%64;
-      VMM = XLocal/64;
+      if (Panel <= 1){
+        Channel = 64 - XLocal%64;
+        VMM = 10 - XLocal/64;
+      }
+      else{
+        Channel = XLocal%64;
+        VMM = XLocal/64;
+      }
       FEN = XPanelToFEN[Panel];
       XTRACE(DATA, DEB, "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u", Panel, XLocal, YLocal);
       XTRACE(DATA, DEB, "Generating readout for X, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     else{
-      Channel = YLocal%64;
-      VMM = YLocal/64;
+      if ((Panel%2) == 0){
+        Channel = 64 - YLocal%64;
+        VMM = 10 - YLocal/64;
+      }
+      else{
+        Channel = YLocal%64;
+        VMM = YLocal/64;
+      }
       FEN = YPanelToFEN[Panel];
       XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
