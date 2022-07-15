@@ -76,7 +76,11 @@ void Nmx::ReadoutGenerator::generateData() {
     } else {
       TimeLow += Settings.TicksBtwEvents;
     }
-    XTRACE(DATA, DEB, "Generating readout, RingId: %u, FENId:%u, VMM:%u, Channel:%u", ReadoutData->RingId, ReadoutData->FENId, ReadoutData->VMM, ReadoutData->Channel);
+    if (TimeLow >= 88052499){
+      TimeLow -= 88052499;
+      TimeHigh += 1;
+    }
+    XTRACE(DATA, DEB, "Generating readout, RingId: %u, FENId:%u, VMM:%u, Channel:%u, TimeHigh:%u, TimeLow:%u", ReadoutData->RingId, ReadoutData->FENId, ReadoutData->VMM, ReadoutData->Channel,  ReadoutData->TimeHigh,  ReadoutData->TimeLow);
   }
 }
 
