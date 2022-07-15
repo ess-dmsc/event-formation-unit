@@ -119,7 +119,7 @@ void NMXInstrument::processReadouts(void) {
     // Convert from physical rings to logical rings
     // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
-    uint16_t Offset = Hybrid.XOffset;
+    uint16_t Offset = Conf.Offset[readout.RingId][readout.FENId][HybridId];
     uint8_t Plane = Conf.Plane[readout.RingId][readout.FENId][HybridId];
     uint8_t Panel = Conf.Panel[readout.RingId][readout.FENId][HybridId];
     bool ReversedChannels = Conf.ReversedChannels[readout.RingId][readout.FENId][HybridId];
