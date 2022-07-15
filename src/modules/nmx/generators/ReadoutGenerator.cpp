@@ -48,7 +48,7 @@ void Nmx::ReadoutGenerator::generateData() {
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
     ReadoutData->RingId = 0;
-    
+    XTRACE(DATA, DEB, "Generating Readout %u", Readout);
     if (Readout % 2){
       Panel = rand() % 4;
       XLocal = rand() % 640;
