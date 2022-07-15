@@ -15,7 +15,7 @@
           "FEN": 0, 
           "Hybrid" :  0, 
           "Plane" : 0,
-          "Offset" : 0,
+          "Offset" : 512,
           "ReversedChannels" : true,
           "Panel" : 0,
           "HybridId" : "E5533333222222221111111100000000"
@@ -25,7 +25,7 @@
           "FEN": 0, 
           "Hybrid" :  1, 
           "Plane" : 0,
-          "Offset" : 128,
+          "Offset" : 384,
           "ReversedChannels" : true,
           "Panel" : 0,
           "HybridId" : "E5533333222222221111111100000001"
@@ -45,7 +45,7 @@
           "FEN": 0, 
           "Hybrid" :  3, 
           "Plane" : 0,
-          "Offset" : 384,
+          "Offset" : 128,
           "ReversedChannels" : true,
           "Panel" : 0,
           "HybridId" : "E5533333222222221111111100000003"
@@ -55,7 +55,7 @@
           "FEN": 0, 
           "Hybrid" :  4, 
           "Plane" : 0,
-          "Offset" : 512,
+          "Offset" : 0,
           "ReversedChannels" : true,
           "Panel" : 0,
           "HybridId" : "E5533333222222221111111100000004"
@@ -65,7 +65,7 @@
           "FEN": 1, 
           "Hybrid" :  0, 
           "Plane" : 0,
-          "Offset" : 640,
+          "Offset" : 1152,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000005"
@@ -75,7 +75,7 @@
           "FEN": 1, 
           "Hybrid" :  1, 
           "Plane" : 0,
-          "Offset" : 768,
+          "Offset" : 1024,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000006"
@@ -95,7 +95,7 @@
           "FEN": 1, 
           "Hybrid" :  3, 
           "Plane" : 0,
-          "Offset" : 1024,
+          "Offset" : 768,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000008"
@@ -105,7 +105,7 @@
           "FEN": 1, 
           "Hybrid" :  4, 
           "Plane" : 0,
-          "Offset" : 1152,
+          "Offset" : 640,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000009"
@@ -115,7 +115,7 @@
           "FEN": 2, 
           "Hybrid" :  0, 
           "Plane" : 1,
-          "Offset" : 0,
+          "Offset" : 512,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000010"
@@ -125,7 +125,7 @@
           "FEN": 2, 
           "Hybrid" :  1, 
           "Plane" : 1,
-          "Offset" : 128,
+          "Offset" : 384,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000011"
@@ -145,7 +145,7 @@
           "FEN": 2, 
           "Hybrid" :  3, 
           "Plane" : 1,
-          "Offset" : 384,
+          "Offset" : 128,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000013"
@@ -155,7 +155,7 @@
           "FEN": 2, 
           "Hybrid" :  4, 
           "Plane" : 1,
-          "Offset" : 512,
+          "Offset" : 0,
           "ReversedChannels" : true,
           "Panel" : 1,
           "HybridId" : "E5533333222222221111111100000014"
@@ -165,7 +165,7 @@
           "FEN": 3, 
           "Hybrid" :  0, 
           "Plane" : 1,
-          "Offset" : 640,
+          "Offset" : 1152,
           "ReversedChannels" : true,
           "Panel" : 3,
           "HybridId" : "E5533333222222221111111100000015"
@@ -175,7 +175,7 @@
           "FEN": 3, 
           "Hybrid" :  1, 
           "Plane" : 1,
-          "Offset" : 768,
+          "Offset" : 1024,
           "ReversedChannels" : true,
           "Panel" : 3,
           "HybridId" : "E5533333222222221111111100000016"
@@ -195,7 +195,7 @@
           "FEN": 3, 
           "Hybrid" :  3, 
           "Plane" : 1,
-          "Offset" : 1024,
+          "Offset" : 768,
           "ReversedChannels" : true,
           "Panel" : 3,
           "HybridId" : "E5533333222222221111111100000018"
@@ -205,7 +205,7 @@
           "FEN": 3, 
           "Hybrid" :  4, 
           "Plane" : 1,
-          "Offset" : 1152,
+          "Offset" : 640,
           "ReversedChannels" : true,
           "Panel" : 3,
           "HybridId" : "E5533333222222221111111100000019"
