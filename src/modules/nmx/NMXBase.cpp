@@ -91,9 +91,10 @@ NMXBase::NMXBase(BaseSettings const &settings,
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
-  Stats.create("cluster.matched_wire_only", Counters.ClustersMatchedWireOnly);
-  Stats.create("cluster.matched_grid_only", Counters.ClustersMatchedGridOnly);
-  Stats.create("cluster.too_large_grid_span", Counters.ClustersTooLargeGridSpan);
+  Stats.create("cluster.matched_x_only", Counters.ClustersMatchedXOnly);
+  Stats.create("cluster.matched_y_only", Counters.ClustersMatchedYOnly);
+  Stats.create("cluster.too_large_x_span", Counters.ClustersTooLargeXSpan);
+  Stats.create("cluster.too_large_y_span", Counters.ClustersTooLargeYSpan);
 
   // Event stats
   Stats.create("events.count", Counters.Events);

@@ -39,6 +39,20 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "Size Y {}", NMXFileParameters.SizeY);
 
   try {
+    NMXFileParameters.MaxXSpan = root["MaxXSpan"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxXSpan");
+  }
+  LOG(INIT, Sev::Info, "MaxXSpan {}", NMXFileParameters.MaxXSpan);
+
+  try {
+    NMXFileParameters.MaxYSpan = root["MaxYSpan"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxYSpan");
+  }
+  LOG(INIT, Sev::Info, "MaxYSpan {}", NMXFileParameters.MaxYSpan);
+
+  try {
     NMXFileParameters.NumPanels = root["NumPanels"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for NumPanels");

@@ -253,21 +253,21 @@ std::vector<uint8_t> MaxADC {
 };
 
 std::vector<uint8_t> MinADC {
-  // First readout - plane X & Z - Wires
+  // First readout - plane X 
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x28, 0x00,  // ADC = 40, under default threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
  
-  // Second readout - plane X & Z - Wires
+  // Second readout - plane X 
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x4B, 0x00,  // ADC = 75, over threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
-  // Third readout - plane X & Z - Wires
+  // Third readout - plane X 
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -275,15 +275,15 @@ std::vector<uint8_t> MinADC {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
-std::vector<uint8_t> NoEventGridOnly {
-  // First readout - plane Y - Grids
+std::vector<uint8_t> NoEventYOnly {
+  // First readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y - Grids
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
@@ -291,15 +291,15 @@ std::vector<uint8_t> NoEventGridOnly {
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 };
 
-std::vector<uint8_t> NoEventWireOnly {
-  // First readout - plane X & Z - Wires
+std::vector<uint8_t> NoEventXOnly {
+  // First readout - plane X 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
-  // Second readout - plane X & Z - Wires
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 tick
@@ -424,8 +424,8 @@ TEST_F(NMXInstrumentTest, MinADC) {
                                  // once, under general default once
 }
 
-TEST_F(NMXInstrumentTest, NoEventGridOnly) {
-  makeHeader(nmx->ESSReadoutParser.Packet, NoEventGridOnly);
+TEST_F(NMXInstrumentTest, NoEventYOnly) {
+  makeHeader(nmx->ESSReadoutParser.Packet, NoEventYOnly);
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
@@ -446,11 +446,11 @@ TEST_F(NMXInstrumentTest, NoEventGridOnly) {
   }
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.ClustersNoCoincidence, 1);
-  ASSERT_EQ(counters.ClustersMatchedGridOnly, 1);
+  ASSERT_EQ(counters.ClustersMatchedYOnly, 1);
 }
 
-TEST_F(NMXInstrumentTest, NoEventWireOnly) {
-  makeHeader(nmx->ESSReadoutParser.Packet, NoEventWireOnly);
+TEST_F(NMXInstrumentTest, NoEventXOnly) {
+  makeHeader(nmx->ESSReadoutParser.Packet, NoEventXOnly);
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
@@ -471,7 +471,7 @@ TEST_F(NMXInstrumentTest, NoEventWireOnly) {
   }
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.ClustersNoCoincidence, 1);
-  ASSERT_EQ(counters.ClustersMatchedWireOnly, 1);
+  ASSERT_EQ(counters.ClustersMatchedXOnly, 1);
 }
 
 TEST_F(NMXInstrumentTest, NoEvents) {

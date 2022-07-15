@@ -55,16 +55,6 @@ NMXInstrument::NMXInstrument(struct Counters &counters,
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
-  // Reinit histogram size (was set to 1 in class definition)
-  // ADC is 10 bit 2^10 = 1024
-  // Each plane (x,y) has a maximum of NumCassettes * 64 channels
-  // eventhough there are only 32 wires so some bins will be empty
-  // Hists will automatically allocate space for both x and y planes
-  // uint32_t MaxADC = 1024;
-  // uint32_t MaxChannels =
-  //   Conf.NumHybrids * std::max(GeometryBase::NumWires,
-  //   GeometryBase::NumStrips);
-  // ADCHist = Hists(MaxChannels, MaxADC);
 }
 
 void NMXInstrument::loadConfigAndCalib() {
@@ -194,20 +184,27 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     if (!e.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
       counters.ClustersNoCoincidence++;
-      if (not e.ClusterB.empty()) {
-        counters.ClustersMatchedGridOnly++;
+      if (e.ClusterA.empty()) {
+        counters.ClustersMatchedYOnly++;
       }
 
-      if (not e.ClusterA.empty()) {
-        counters.ClustersMatchedWireOnly++;
+      if (e.ClusterB.empty()) {
+        counters.ClustersMatchedXOnly++;
       }
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxGridsSpan < e.ClusterB.coord_span()) {
-      XTRACE(EVENT, DEB, "Event spans too many grids, %u",
+    if (Conf.NMXFileParameters.MaxXSpan < e.ClusterA.coord_span()) {
+      XTRACE(EVENT, DEB, "Event spans too far in X direction, %u",
              e.ClusterA.coord_span());
-      counters.ClustersTooLargeGridSpan++;
+      counters.ClustersTooLargeXSpan++;
+      continue;
+    }
+
+    if (Conf.NMXFileParameters.MaxYSpan < e.ClusterB.coord_span()) {
+      XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
+             e.ClusterB.coord_span());
+      counters.ClustersTooLargeYSpan++;
       continue;
     }
 
