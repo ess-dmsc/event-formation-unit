@@ -39,7 +39,6 @@ auto InvalidRing = R"(
   "MaxSpanY" : 10,
   "MaxGapX" : 2,
   "MaxGapY" : 2,
-  "EventTimeWindowNS": 8000,
   "DefaultMinADC":50,
   "Config" : [
         {
@@ -91,7 +90,6 @@ auto DuplicateEntry = R"(
   "MaxSpanY" : 10,
   "MaxGapX" : 2,
   "MaxGapY" : 2,
-  "EventTimeWindowNS": 8000,
   "DefaultMinADC":50,
   "Config" : [
         {

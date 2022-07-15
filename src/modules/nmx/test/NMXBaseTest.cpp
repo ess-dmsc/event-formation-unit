@@ -46,7 +46,6 @@ std::vector<uint8_t> dummyreadout {
   "MaxSpanY" : 10,
   "MaxGapX" : 2,
   "MaxGapY" : 2,
-  "EventTimeWindowNS": 8000,
   "DefaultMinADC":50,
   "Config" : [
         {

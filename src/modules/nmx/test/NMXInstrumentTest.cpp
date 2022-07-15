@@ -44,7 +44,6 @@ std::string ConfigStr = R"(
   "MaxSpanY" : 3,
   "MaxGapX" : 2,
   "MaxGapY" : 2,
-  "EventTimeWindowNS": 8000,
   "DefaultMinADC":50,
   "Config" : [
         {
