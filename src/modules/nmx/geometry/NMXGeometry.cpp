@@ -20,7 +20,6 @@
 
 // returns integer describing the X and Z position in the flattened 2D space
 uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset, bool ReversedChannels) {
-  XTRACE(DATA, DEB, "Calculating coordinate value from Channel: %u, AsicId: %u, Offset: %u, ReversedChannels: %B", Channel, AsidId, Offset, ReversedChannels);
   uint16_t CoordNumber;
 
   // Wire equation defined in NMX ICD Document
@@ -30,6 +29,8 @@ uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offse
   else{
     CoordNumber = Offset + 64 * AsicId + Channel;
   }
+  XTRACE(DATA, DEB, "Calculating coordinate value from Channel: %u, AsicId: %u, Offset: %u, ReversedChannels: %B, got Coordinate %u", Channel, AsidId, Offset, ReversedChannels, CoordNumber);
+
   return CoordNumber;
 }
 
