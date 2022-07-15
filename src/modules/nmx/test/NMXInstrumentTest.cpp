@@ -18,20 +18,36 @@ using namespace Nmx;
 std::string BadConfigFile{"deleteme_nmx_instr_config_bad.json"};
 std::string BadConfigStr = R"(
   {
-    "Detector": "NMX",
-    "InstrumentGeometry" : "Not_NMX",
-
-    "Vessel_Config" : {
-      "0": {"NumGrids": 140, "Rotation": false, "XOffset":   0}
-    },
-
-    "Config" : [
-      { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""}
-    ],
-
-    "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
-  }
+  "NotARealDetector" : "NMX",
+  "InstrumentGeometry" : "NMX",
+  "MaxSpanX" : 3,
+  "MaxSpanY" : 3,
+  "MaxGapX" : 2,
+  "MaxGapY" : 2,
+  "DefaultMinADC":50,
+  "Config" : [
+        {
+          "Ring" :  0, 
+          "FEN": 0, 
+          "Hybrid" :  0, 
+          "Plane" : 0,
+          "Offset" : 0,
+          "ReversedChannels" : false,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000000"
+        },
+        {
+          "Ring" :  0, 
+          "FEN": 0, 
+          "Hybrid" :  1, 
+          "Plane" : 1,
+          "Offset" : 0,
+          "ReversedChannels" : false,
+          "Panel" : 0,
+          "HybridId" : "E5533333222222221111111100000001"
+        }
+]
+}
 )";
 
 
@@ -167,22 +183,22 @@ std::vector<uint8_t> HighTOFError {
 };
 
 
-std::vector<uint8_t> BadEventLargeGridSpan {
-  // First readout - plane Y - Grids
+std::vector<uint8_t> BadEventLargeYSpan {
+  // First readout - plane Y 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y - Grids
+  // Second readout - plane Y 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane Y - Grids
+  // Second readout - plane Y 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
@@ -213,14 +229,14 @@ std::vector<uint8_t> BadEventLargeTimeSpan {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y - Grids
+  // Second readout - plane Y 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0xFF, 0x04, 0x00, 0x00,  // Time LO 500 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane Y - Grids
+  // Second readout - plane Y 
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x14, 0x00, 0x00, 0x00,  // Time LO 20 tick
@@ -489,8 +505,8 @@ TEST_F(NMXInstrumentTest, PixelError) {
   ASSERT_EQ(counters.PixelErrors, 1);
 }
 
-TEST_F(NMXInstrumentTest, BadEventLargeGridSpan) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeGridSpan);
+TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
+  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeYSpan);
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 5);
   counters.VMMStats = nmx->VMMParser.Stats;
@@ -510,7 +526,7 @@ TEST_F(NMXInstrumentTest, BadEventLargeGridSpan) {
     nmx->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.ClustersTooLargeGridSpan, 1);
+  ASSERT_EQ(counters.ClustersTooLargeYSpan, 1);
 }
 
 TEST_F(NMXInstrumentTest, NegativeTOF) {
