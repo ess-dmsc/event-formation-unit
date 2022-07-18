@@ -53,9 +53,9 @@ void Nmx::SmileReadoutGenerator::generateData() {
       Panel = rand() % 4;
       if (Panel <=1) {
         XLocal = rand() % 80;
-        YLocal = sqrt(1600 - pow(XLocal-40, 2));
-        XLocal += 280;
-        YLocal += 280;
+        YLocal = sqrt(1600 - pow(XLocal-120, 2));
+        XLocal += 260;
+        YLocal += 260;
         YLocal = 640 - YLocal;
       }
       else if (Panel == 2) {
