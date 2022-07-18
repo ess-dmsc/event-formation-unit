@@ -28,7 +28,7 @@ void Nmx::SmileReadoutGenerator::generateData() {
   DP += HeaderSize;
 
   uint16_t Panel = 0;
-  uint16_t XLocal = 0;
+  float XLocal = 0;
   uint16_t YLocal = 0;
   uint8_t VMM = 0;
   uint16_t Channel = 0;
@@ -68,11 +68,11 @@ void Nmx::SmileReadoutGenerator::generateData() {
       }
 
       if (Panel <= 1){
-        Channel = 63 - XLocal%64;
+        Channel = 63 - int(XLocal)%64;
         VMM = 9 - XLocal/64;
       }
       else{
-        Channel = XLocal%64;
+        Channel = int(XLocal)%64;
         VMM = XLocal/64;
       }
       FEN = XPanelToFEN[Panel];
