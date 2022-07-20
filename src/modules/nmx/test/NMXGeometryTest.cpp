@@ -20,17 +20,29 @@ protected:
   void TearDown() override {}
 };
 
-// Should match the ICD
-TEST_F(NMXGeometryTest, DefaultNMX) {
-  
-}
-
 TEST_F(NMXGeometryTest, CoordinateCalculations) {
-  // coord takes FENID, HybridID, VMMID, Channel, XOffset, Rotated
-}
+  // coord takes Channel, AsicId, Offset, ReversedChannels
+  uint8_t AsicId = 0;
+  uint16_t Offset = 0;
+  bool ReversedChannels = false;
+  for (int Channel=0; Channel<64; ++Channel){
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), Channel);
+  }
+  ReversedChannels = true;
+  for (int Channel=0; Channel<64; ++Channel){
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), 127-Channel);
+  }
 
-TEST_F(NMXGeometryTest, InvalidCoordinates) {
-  
+  ReversedChannels = false;
+  AsicId = 1;
+  Offset = 512;
+  for (int Channel=0; Channel<64; ++Channel){
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), Channel+576);
+  }
+  ReversedChannels = true;
+  for (int Channel=0; Channel<64; ++Channel){
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), 575-Channel);
+  }
 }
 
 int main(int argc, char **argv) {
