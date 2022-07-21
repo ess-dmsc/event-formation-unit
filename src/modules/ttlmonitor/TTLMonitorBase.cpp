@@ -20,7 +20,6 @@
 #include <common/RuntimeStat.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
@@ -180,7 +179,6 @@ void TTLMonitorBase::processing_thread() {
   TTLMonitor.VMMParser.setMonitor(true);
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat(
@@ -230,15 +228,16 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
-    if (ProduceTimer.timeout()) {
 
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-      for (auto &serializer : Serializers){
+    RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+        {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+    for (auto &serializer : Serializers){
+      if (serializer.ProduceTimer.timeout()) {
         Counters.TxBytes += serializer.produce();
       }
-      Counters.KafkaStats = eventprod.stats;
     }
+    Counters.KafkaStats = eventprod.stats;
+    
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

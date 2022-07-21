@@ -13,7 +13,6 @@
 #include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <common/debug/Trace.h>
@@ -174,7 +173,6 @@ void LokiBase::processingThread() {
   Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer, DebugTimer;
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -220,7 +218,7 @@ void LokiBase::processingThread() {
     }
 
 #ifdef ECDC_DEBUG_READOUT
-    if (DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
+    if (Serializer->DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
       printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
       printf("-----------------------------------------------------------------------------------\n");
       for (int ring = 0; ring < 8; ring++) {
@@ -231,11 +229,11 @@ void LokiBase::processingThread() {
         printf("\n");
       }
       fflush(NULL);
-      DebugTimer.reset();
+      Serializer->DebugTimer.reset();
     }
 #endif
 
-    if (ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
@@ -251,7 +249,7 @@ void LokiBase::processingThread() {
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
 
-      ProduceTimer.reset();
+      Serializer->ProduceTimer.reset();
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
