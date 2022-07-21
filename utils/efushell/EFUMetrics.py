@@ -3,9 +3,11 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 try:
-   from utils.efushell.SocketDriver import SimpleSocket
+    from utils.efushell.SocketDriver import SimpleSocket
+
 except:
-   from SocketDriver import SimpleSocket
+    from SocketDriver import SimpleSocket
+
 
 class Metrics:
     def __init__(self, ip, port):

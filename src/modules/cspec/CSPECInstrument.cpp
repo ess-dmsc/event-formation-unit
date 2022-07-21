@@ -15,6 +15,7 @@
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>
 #include <cspec/geometry/CSPECGeometry.h>
+#include <cspec/geometry/LETGeometry.h>
 #include <math.h>
 
 // #undef TRC_LEVEL
@@ -44,6 +45,9 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "CSPEC") {
     GeometryInstance = &CSPECGeometryInstance;
+  }
+  else if (Conf.FileParameters.InstrumentGeometry == "LET"){
+    GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
@@ -98,29 +102,33 @@ void CSPECInstrument::processReadouts(void) {
       VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
 
-    XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.VMM, readout.Channel,
-           readout.TimeLow);
+    // Convert from physical rings to logical rings
+    uint8_t Ring = readout.RingId/2;
 
     uint8_t HybridId = readout.VMM >> 1;
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
+    
+    XTRACE(DATA, DEB,
+           "readout: Phys RingId %d, FENId %d, HybridId %d, VMM %d, Channel %d, TimeLow %d",
+           Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
+           readout.TimeLow);
+
+    
+    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId); 
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-             readout.RingId, readout.FENId, HybridId);
+             Ring, readout.FENId, HybridId);
       counters.HybridMappingErrors++;
       continue;
     }
 
-    // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
+
     uint8_t AsicId = readout.VMM & 0x1;
     uint16_t XOffset = Hybrid.XOffset;
     uint16_t YOffset = Hybrid.YOffset;
-    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
-    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
+    bool Rotated = Conf.Rotated[Ring][readout.FENId][HybridId];
+    bool Short = Conf.Short[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
     
@@ -167,7 +175,7 @@ void CSPECInstrument::processReadouts(void) {
     // insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(
+      uint16_t xAndzCoord = GeometryInstance->xAndzCoord( Ring,
           readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
 
       if (xAndzCoord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
@@ -176,9 +184,9 @@ void CSPECInstrument::processReadouts(void) {
         continue;
       }
 
-      XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u", xAndzCoord,
-             readout.Channel);
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert(
+      XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u, X: %u, Z: %u", xAndzCoord,
+             readout.Channel, xAndzCoord>>4, xAndzCoord%16);
+      builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, xAndzCoord, ADC, 0});
 
       //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips +
@@ -196,7 +204,7 @@ void CSPECInstrument::processReadouts(void) {
       }
 
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u", yCoord, readout.Channel);
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert(
+      builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, yCoord, ADC, 1});
 
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires +
