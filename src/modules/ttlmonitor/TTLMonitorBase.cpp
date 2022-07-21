@@ -26,8 +26,8 @@
 #include <ttlmonitor/TTLMonitorBase.h>
 #include <ttlmonitor/TTLMonitorInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace TTLMonitor {
 
