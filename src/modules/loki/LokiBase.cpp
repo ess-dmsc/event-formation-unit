@@ -21,8 +21,8 @@
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 // #define ECDC_DEBUG_READOUT
 
 namespace Loki {
@@ -130,7 +130,7 @@ void LokiBase::inputThread() {
     if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                          RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+      //XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
 
@@ -234,7 +234,7 @@ void LokiBase::processingThread() {
 #endif
 
     if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-
+      XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -248,8 +248,6 @@ void LokiBase::processingThread() {
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
-
-      Serializer->ProduceTimer.reset();
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

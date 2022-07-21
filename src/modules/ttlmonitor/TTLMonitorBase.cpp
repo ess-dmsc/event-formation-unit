@@ -27,7 +27,7 @@
 #include <ttlmonitor/TTLMonitorInstrument.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+#define TRC_LEVEL TRC_L_DEB
 
 namespace TTLMonitor {
 
@@ -233,6 +233,7 @@ void TTLMonitorBase::processing_thread() {
         {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
     for (auto &serializer : Serializers){
       if (serializer.ProduceTimer.timeout()) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer.produce();
       }
     }

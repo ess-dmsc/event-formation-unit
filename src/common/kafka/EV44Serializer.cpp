@@ -66,6 +66,7 @@ nonstd::span<const uint8_t> EV44Serializer::serialize() {
 }
 
 size_t EV44Serializer::produce() {
+  ProduceTimer.reset();
   if (EventCount != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
@@ -109,6 +110,7 @@ size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
   EventCount++;
 
   if (EventCount >= MaxEvents) {
+    XTRACE(DATA, DEB, "Serializer reached max events, producing message now");
     return produce();
   }
   return 0;
