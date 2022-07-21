@@ -88,6 +88,16 @@ void EV42Serializer::pulseTime(uint64_t Time) {
   EventMessage_->mutate_pulse_time(Time);
 }
 
+uint32_t EV42Serializer::checkAndSetPulseTime(uint64_t Time){
+  uint32_t bytesProduced = 0;
+  if (Time != pulseTime()){
+     XTRACE(OUTPUT, DEB, "Pulse time is new: %d\n", Time);
+     bytesProduced = produce();
+     pulseTime(Time);
+  }
+  return bytesProduced;
+}
+
 uint64_t EV42Serializer::pulseTime() const {
   return EventMessage_->pulse_time();
 }

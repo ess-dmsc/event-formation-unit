@@ -36,6 +36,15 @@ set(CSPECGeometryTest_SRC
 create_test_executable(CSPECGeometryTest)
 
 
+set(LETGeometryTest_INC
+  ../geometry/LETGeometry.h
+  ../geometry/Geometry.h)
+set(LETGeometryTest_SRC
+  ../test/LETGeometryTest.cpp
+  ../geometry/LETGeometry.cpp
+  ../geometry/Geometry.h)
+create_test_executable(LETGeometryTest)
+
 
 # set(CSPECChannelMappingTest_INC
 #   ../geometry/CSPECChannelMapping.h)

@@ -10,15 +10,23 @@
 /// Mapping from digital identifiers to x-, z- and y- coordinates
 //===----------------------------------------------------------------------===//
 
-#include <cspec/geometry/CSPECGeometry.h>
+#include <cspec/geometry/LETGeometry.h>
 
 #include <cmath>
 #include <utility>
 
 // returns integer describing the X and Z position in the flattened 2D space
-uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
+uint16_t Cspec::LETGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
                                           uint8_t VMMID, uint8_t Channel,
                                           uint16_t XOffset, bool Rotated) {
+  
+  if (Channel % 2 == 0) {
+    Channel = Channel + 1;
+  }
+  else {
+    Channel = Channel - 1;
+  }
+
   if (!validWireMapping(HybridID, VMMID, Channel)) {
     XTRACE(DATA, WAR,
            "Invalid Hybrid: %u, VMM: %u, and Channel: %u, combination for wire "
@@ -26,16 +34,17 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t
            HybridID, VMMID, Channel);
     return InvalidCoord;
   }
-  XTRACE(DATA, DEB, "Ring ID is %d", RingID);
+  XTRACE(DATA, DEB, "FEN ID is %d", FENID);
+
   // Wire equation defined in CSPEC ICD Document
-  uint16_t xAndzCoordNumber = (HybridID * 2 + VMMID) * 64 + Channel - 32;
+  uint16_t xAndzCoordNumber = VMMID * 64 + Channel - 32;
 
   uint8_t Depth = 16;
   uint8_t ColumnWidth = 6;
   uint8_t ColumnOffset = Depth * ColumnWidth;
 
-  // odd FENs are second column in a vessel, 6 * 16 wires over
-  if (FENID % 2) {
+  // even Rings are second column in a vessel, 6 * 16 wires over
+  if (!(RingID % 2)) {
     xAndzCoordNumber = xAndzCoordNumber + ColumnOffset;
   }
 
@@ -53,7 +62,7 @@ uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t
   return xAndzCoordNumber;
 }
 
-uint16_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
+uint16_t Cspec::LETGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
                                       uint8_t Channel, uint16_t YOffset,
                                       bool Rotated, bool Short) {
   uint16_t YCoord;
@@ -84,10 +93,10 @@ uint16_t Cspec::CSPECGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
 }
 
 // The valid combinations of these parameters are defined in CSPEC ICD document
-bool Cspec::CSPECGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
+bool Cspec::LETGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
                                             uint8_t Channel, bool Short) {
   if (Short) {
-    return (HybridID == 1 and VMMID == 0 and Channel <= 50);
+    return (HybridID == 0 and VMMID == 0 and Channel <= 50);
   }
   if (HybridID == 1) {
     if (VMMID == 0) {
@@ -106,9 +115,9 @@ bool Cspec::CSPECGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
 }
 
 // The valid combinations of these parameters are defined in CSPEC ICD document
-bool Cspec::CSPECGeometry::validWireMapping(uint8_t HybridID, uint8_t VMMID,
+bool Cspec::LETGeometry::validWireMapping(uint8_t HybridID, uint8_t VMMID,
                                             uint8_t Channel) {
-  if (HybridID != 0) {
+  if (HybridID != 1) {
     return false;
   }
   if (VMMID == 0) { // only channels 32-63 used on VMM0

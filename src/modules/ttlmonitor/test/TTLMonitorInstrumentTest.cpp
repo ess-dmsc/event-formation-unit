@@ -133,7 +133,6 @@ protected:
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
     ttlmonitor = new TTLMonitorInstrument(counters, ModuleSettings, serializers);
-    // ttlmonitor->setSerializer(serializers);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
@@ -189,7 +188,6 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
 TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
   ModuleSettings.FilePrefix = "deleteme_";
   TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializers);
-  //TTLMonDump.setSerializer(serializer);
 
   makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
   auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);

@@ -5,13 +5,7 @@
       "Module": "loki",
       "Config": "./src/modules/loki/configs/STFCTestII.json",
       "Generator": "loki_udp_generated",
-      "InitThrottle": 1
-    },
-    {
-      "Module": "cspec",
-      "Config": "./src/modules/cspec/configs/let.json",
-      "Generator": "let_udp_generated",
-      "InitThrottle": 1
+      "InitThrottle": 10
     }
   ]
 }
