@@ -161,15 +161,15 @@ void NMXInstrument::processReadouts(void) {
       continue;
     }
 
-    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u", Coord,
-            readout.Channel, Panel);
+    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u, ADC %u, Time %llu", Coord,
+            readout.Channel, Panel, ADC, TimeNS);
     builders[Panel].insert(
         {TimeNS, Coord, ADC, Plane});
     XTRACE(DATA, DEB, "inserted to builder");
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching
   }
 }
 
@@ -191,6 +191,11 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       if (e.ClusterB.empty()) {
         counters.ClustersMatchedXOnly++;
       }
+      continue;
+    }
+
+    if ( (Conf.NMXFileParameters.MaxXSpan < e.ClusterA.coord_span()) and (Conf.NMXFileParameters.MaxYSpan < e.ClusterB.coord_span()) and e.ClusterA.hits.size() > 1 and e.ClusterB.hits.size() > 1){
+      XTRACE(EVENT, DEB, "MULTI HIT DETECTED!!!");
       continue;
     }
 
