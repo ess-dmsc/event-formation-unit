@@ -38,7 +38,7 @@ public:
     return Pixel;
   }
 
-  uint16_t getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
+  int getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
     if (Sector > MaxSector) {
       XTRACE(EVENT, WAR, "Invalid Sector: %u", Sector);
       return -1;
@@ -61,7 +61,7 @@ public:
     return getXoffset(Sector) + SumoOffset[Sumo] + 2 * Cassette + Counter;
   }
 
-  uint16_t getY(uint8_t Wire, uint8_t Strip) {
+  int getY(uint8_t Wire, uint8_t Strip) {
     if (Wire > MaxWire) {
       XTRACE(EVENT, WAR, "Invalid Wire: %u", Wire);
       return -1;
