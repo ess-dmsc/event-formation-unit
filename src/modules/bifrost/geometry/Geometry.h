@@ -42,6 +42,6 @@ public:
 
 private:
   int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
-  int TripletTubes{3}; // a bit of apleonasm
+  int TripletTubes{3}; // tubes per triplet (might be obvious from the name)
 };
 } // namespace Bifrost

@@ -21,15 +21,6 @@ std::string ConfigStr = R"(
 )";
 
 
-std::vector<uint8_t> InvalidTOF{
-    0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
-    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
-    0x00, 0x00, 0x00, 0x00, // Time LO 0 tick
-    0x04, 0x00, 0x00, 0x00, // Bifrost, Tube 0
-    0xaa, 0xaa, 0xbb, 0xbb, // AmpA, AmpB
-    0x00, 0x00, 0x00, 0x00  //
-};
-
 class BifrostInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
@@ -79,6 +70,16 @@ TEST_F(BifrostInstrumentTest, InvalidRing) {
   ASSERT_EQ(counters.RingErrors, 1);
 }
 
+
+std::vector<uint8_t> InvalidTOF{
+    0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x00, 0x00, 0x00, 0x00, // Time LO 0 tick
+    0x04, 0x00, 0x00, 0x00, // Bifrost, Tube 0
+    0xaa, 0xaa, 0xbb, 0xbb, // AmpA, AmpB
+    0x00, 0x00, 0x00, 0x00  //
+};
+
 TEST_F(BifrostInstrumentTest, InvalidTOF) {
   makeHeader(bifrost->ESSReadoutParser.Packet, InvalidTOF);
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.PrevTofNegative, 0);
@@ -91,6 +92,30 @@ TEST_F(BifrostInstrumentTest, InvalidTOF) {
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.PrevTofNegative, 1);
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.TofNegative, 1);
 }
+
+
+std::vector<uint8_t> NullAmps{
+    0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x03, 0x00, 0x00, 0x00, // Time LO 0 tick - 0x03 (positive tof)
+    0x04, 0x00, 0x00, 0x00, // Bifrost, Tube 0
+    0x00, 0x00, 0x00, 0x00, // AmpA, AmpB - both 0
+    0x00, 0x00, 0x00, 0x00  //
+};
+
+TEST_F(BifrostInstrumentTest, InvalidAmpls) {
+  makeHeader(bifrost->ESSReadoutParser.Packet, NullAmps);
+  auto Res = bifrost->BifrostParser.parse(
+     bifrost->ESSReadoutParser.Packet.DataPtr,
+     bifrost->ESSReadoutParser.Packet.DataLength);
+  ASSERT_EQ(Res, 1);
+
+  bifrost->processReadouts();
+  ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.PrevTofNegative, 0);
+  ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.TofNegative, 0);
+  ASSERT_EQ(counters.PixelErrors, 1);
+}
+
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
