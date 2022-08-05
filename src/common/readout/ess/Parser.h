@@ -39,6 +39,7 @@ public:
   enum DetectorType { Reserved   = 0x00,
                       TTLMonitor = 0x10,
                       Loki4Amp   = 0x30,
+                      BIFROST    = 0x34,
                       CSPEC      = 0x40,
                       FREIA      = 0x48,
                       DREAM      = 0x60 };
