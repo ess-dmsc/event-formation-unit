@@ -29,16 +29,24 @@ public:
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int AmpA, int AmpB) {
-    return posAlongTube(AmpA, AmpB) % (PosResolution/3);
+    return reverse(posAlongTube(AmpA, AmpB)) % (PosResolution/3);
   }
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int AmpA, int AmpB) {
-    return (posAlongTube(AmpA, AmpB) * TripletTubes)/PosResolution;
+    return (reverse(posAlongTube(AmpA, AmpB)) * TripletTubes)/PosResolution;
   }
 
   /// \brief return the position along the tube
   int posAlongTube(int AmpA, int AmpB);
+
+  /// NullCalibration just reverses the middle position
+  int reverse(int OrgPos) {
+    if ((OrgPos < 100) or (OrgPos >= 200)) {
+      return OrgPos;
+    }
+    return 299 - OrgPos;
+  }
 
 private:
   int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
