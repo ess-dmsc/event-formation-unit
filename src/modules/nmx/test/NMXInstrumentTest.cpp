@@ -53,7 +53,7 @@ std::string BadConfigStr = R"(
 std::string BadConfig2File{"deleteme_nmx_instr_config_bad2.json"};
 std::string BadConfig2Str = R"(
   {
-  "NotARealDetector" : "NMX",
+  "Detector" : "NMX",
   "InstrumentGeometry" : "Invalid",
 }
 )";

@@ -15,8 +15,8 @@
 #include <cmath>
 #include <utility>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // returns integer describing the X and Z position in the flattened 2D space
 uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset, bool ReversedChannels) {
