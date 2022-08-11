@@ -37,7 +37,7 @@ void Config::applyConfig() {
       if((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber){
         MaxCassetteNumber = (uint8_t)Mapping["CassetteNumber"];
       }
-    }  
+    }
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
@@ -54,7 +54,7 @@ void Config::applyConfig() {
                          NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
-      } 
+      }
     }
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;

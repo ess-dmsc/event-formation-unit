@@ -45,7 +45,7 @@ uint32_t BifrostInstrument::calcPixel(int Ring, int Tube, int AmpA, int AmpB) {
   int ylocal = geom.yCoord(AmpA, AmpB);
   uint32_t pixel = lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
 
-  XTRACE(DATA, ALW, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
          xoff, xlocal, yoff, ylocal, pixel);
 
   return pixel;
@@ -73,7 +73,7 @@ void BifrostInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : BifrostParser.Result) {
-    XTRACE(DATA, ALW, "Ring %u, FEN %u, Tube %u",
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u",
            Section.RingId, Section.FENId, Section.TubeId);
 
     if (Section.RingId > BifrostConfiguration.MaxValidRing) {
