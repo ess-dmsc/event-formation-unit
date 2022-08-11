@@ -65,22 +65,22 @@ auto InvalidRing = R"(
 }
 )"_json;
 
-std::string InvalidConfig = R"(
+auto MinimalConfig = R"(
 {
   "Detector": "NMX",
-
+  "InstrumentGeometry" : "NMX",
   "Config" : [
     { "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
     { "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
     { "Ring" :  0, "FEN": 2, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
     { "Ring" :  0, "FEN": 2, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
-    { "Rinx" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
+    { "Ring" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
     { "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"}
   ],
 
   "MaxPulseTimeNS" : 357000000
 }
-)";
+)"_json;
 
 auto DuplicateEntry = R"(
 {
@@ -120,7 +120,7 @@ using namespace Nmx;
 
 class NMXConfigTest : public TestBase {
 protected:
-  Config config{"NMX", "config.json"};
+  Config config{"NMX", NMX_FULL};
   void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
@@ -132,11 +132,19 @@ TEST_F(NMXConfigTest, Constructor) {
 
 TEST_F(NMXConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
+  // ASSERT_EQ(config.getHybrid(0, 1, 0).Initialised, true);
 }
 
 TEST_F(NMXConfigTest, NoDetector) {
   config.root = NoDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
+}
+
+TEST_F(NMXConfigTest, MinimalConfig) {
+  config.root = MinimalConfig;
+  config.applyVMM3Config();
+  ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
+  ASSERT_EQ(config.getHybrid(0, 1, 0).Initialised, true);
 }
 
 TEST_F(NMXConfigTest, InvalidDetector) {
@@ -147,11 +155,6 @@ TEST_F(NMXConfigTest, InvalidDetector) {
 TEST_F(NMXConfigTest, InvalidRing) {
   config.root = InvalidRing;
   ASSERT_ANY_THROW(config.applyVMM3Config());
-}
-
-TEST_F(NMXConfigTest, InvalidConfig) {
-  config.root = InvalidConfig;
-  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(NMXConfigTest, Duplicate) {
