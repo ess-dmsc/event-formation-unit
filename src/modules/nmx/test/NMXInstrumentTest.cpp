@@ -50,6 +50,13 @@ std::string BadConfigStr = R"(
 }
 )";
 
+std::string BadConfig2File{"deleteme_nmx_instr_config_bad2.json"};
+std::string BadConfig2Str = R"(
+  {
+  "NotARealDetector" : "NMX",
+  "InstrumentGeometry" : "Invalid",
+}
+)";
 
 std::string ConfigFile{"deleteme_nmx_instr_config.json"};
 std::string ConfigStr = R"(
@@ -182,6 +189,43 @@ std::vector<uint8_t> HighTOFError {
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 };
 
+
+std::vector<uint8_t> BadEventLargeXSpan {
+  // First readout - plane Y 
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+  // Second readout - plane Y 
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+
+  // Second readout - plane X 
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x0F,  // GEO 0, TDC 0, VMM 1, CH 15
+
+  // Second readout - plane X 
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3F,  // GEO 0, TDC 0, VMM 1, CH 63
+
+  // Third readout - plane X
+  0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+};
 
 std::vector<uint8_t> BadEventLargeYSpan {
   // First readout - plane Y 
@@ -381,6 +425,12 @@ TEST_F(NMXInstrumentTest, BadConfig) {
                std::runtime_error);
 }
 
+TEST_F(NMXInstrumentTest, BadConfig2) {
+  ModuleSettings.ConfigFile = BadConfig2File;
+  EXPECT_THROW(NMXInstrument(counters, ModuleSettings, serializer),
+               std::runtime_error);
+}
+
 TEST_F(NMXInstrumentTest, Constructor) {
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 }
@@ -529,6 +579,30 @@ TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
   ASSERT_EQ(counters.ClustersTooLargeYSpan, 1);
 }
 
+TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
+  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeXSpan);
+  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 5);
+  counters.VMMStats = nmx->VMMParser.Stats;
+
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
+
+  nmx->processReadouts();
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
+  ASSERT_EQ(counters.VMMStats.Readouts, 5);
+
+  for (auto &builder : nmx->builders) {
+    builder.flush(true);
+    nmx->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.ClustersTooLargeXSpan, 1);
+}
+
 TEST_F(NMXInstrumentTest, NegativeTOF) {
   auto &Packet = nmx->ESSReadoutParser.Packet;
   makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
@@ -617,11 +691,13 @@ TEST_F(NMXInstrumentTest, EventCrossPackets) {
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(BadConfigFile, (void *)BadConfigStr.c_str(), BadConfigStr.size());
+  saveBuffer(BadConfig2File, (void *)BadConfig2Str.c_str(), BadConfig2Str.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(ConfigFile);
   deleteFile(BadConfigFile);
+  deleteFile(BadConfig2File);
   return RetVal;
 }
