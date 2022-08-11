@@ -193,7 +193,7 @@ void LokiInstrument::processReadouts() {
     if (PixelId == 0) {
       counters.PixelErrors++;
     } else {
-      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
       SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
     }
