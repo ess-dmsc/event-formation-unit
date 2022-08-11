@@ -143,6 +143,7 @@ TEST_F(NMXConfigTest, NoDetector) {
 TEST_F(NMXConfigTest, MinimalConfig) {
   config.root = MinimalConfig;
   config.applyVMM3Config();
+  config.applyConfig();
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
   ASSERT_EQ(config.getHybrid(0, 1, 0).Initialised, true);
 }
