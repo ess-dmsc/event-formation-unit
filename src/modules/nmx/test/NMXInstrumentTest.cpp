@@ -428,7 +428,7 @@ TEST_F(NMXInstrumentTest, BadConfig) {
 TEST_F(NMXInstrumentTest, BadConfig2) {
   ModuleSettings.ConfigFile = BadConfig2File;
   EXPECT_THROW(NMXInstrument(counters, ModuleSettings, serializer),
-               std::runtime_error);
+               nlohmann::detail::parse_error);
 }
 
 TEST_F(NMXInstrumentTest, Constructor) {
