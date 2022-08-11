@@ -248,7 +248,7 @@ void LokiBase::processingThread() {
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
-      Counters.TxBytes = Serializer.TxBytes;
+      Counters.TxBytes = Serializer->TxBytes;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
