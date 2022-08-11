@@ -56,6 +56,7 @@ public:
   nonstd::span<const uint8_t> serialize();
 
   TSCTimer ProduceTimer, DebugTimer;
+  int64_t TxBytes;
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?

@@ -238,7 +238,7 @@ void LokiBase::processingThread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
-      Counters.TxBytes += Serializer->produce();
+      Serializer->produce();
       SerializerII->produce();
 
       /// Kafka stats update - common to all detectors
@@ -248,6 +248,7 @@ void LokiBase::processingThread() {
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
       Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+      Counters.TxBytes = Serializer.TxBytes;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
