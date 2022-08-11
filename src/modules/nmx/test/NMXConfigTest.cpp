@@ -18,6 +18,12 @@ auto j2 = R"(
 }
 )"_json;
 
+auto InvalidJson = R"(
+{
+  Not a json file!
+}
+)";
+
 auto NoDetector = R"(
 {
   "MaxSpanX" : 10
@@ -133,6 +139,11 @@ TEST_F(NMXConfigTest, Constructor) {
 TEST_F(NMXConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
   // ASSERT_EQ(config.getHybrid(0, 1, 0).Initialised, true);
+}
+
+TEST_F(NMXConfigTest, InvalidJson) {
+  config.root = InvalidJson;
+  ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(NMXConfigTest, NoDetector) {
