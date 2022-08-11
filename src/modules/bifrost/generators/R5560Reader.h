@@ -32,6 +32,9 @@ public:
   //
   R5560Reader(std::string file);
 
+  //
+  ~R5560Reader();
+
   // Read a R5560Readout struct, return bytes read, 0 if line is
   // ignored, or -1 upon error/end
   int readReadout(struct raw_data_t &readout);
