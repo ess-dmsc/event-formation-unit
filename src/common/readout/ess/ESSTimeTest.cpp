@@ -72,8 +72,37 @@ TEST_F(ESSTimeTest, PrevPulse) {
 TEST_F(ESSTimeTest, AddConstantDelay) {
   Time.setReference(0, 0);
   ASSERT_EQ(Time.getTOF(0, 88052499), 999999988);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
   ASSERT_EQ(Time.getTOF(0, 88052499, 0), 999999988);
+  ASSERT_EQ(Time.Stats.TofCount, 2);
   ASSERT_EQ(Time.getTOF(0, 88052499, 11), 999999999);
+  ASSERT_EQ(Time.Stats.TofCount, 3);
+}
+
+TEST_F(ESSTimeTest, MaxTOFExceeded) {
+  Time.setReference(0, 0);
+
+  Time.getTOF(0, 2);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
+  ASSERT_EQ(Time.Stats.TofHigh, 0);
+
+  Time.setMaxTOF(0x01);
+  Time.getTOF(0, 2);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
+  ASSERT_EQ(Time.Stats.TofHigh, 1);
+}
+
+TEST_F(ESSTimeTest, MaxPrevTOFExceeded) {
+  Time.setPrevReference(0, 0);
+
+  Time.getPrevTOF(0, 2);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+
+  Time.setMaxTOF(0x01);
+  Time.getPrevTOF(0, 2);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 1);
 }
 
 TEST_F(ESSTimeTest, ExactPulseDelay) {

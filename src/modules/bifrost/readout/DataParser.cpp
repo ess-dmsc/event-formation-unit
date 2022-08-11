@@ -7,15 +7,15 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <loki/readout/DataParser.h>
+#include <bifrost/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Bifrost {
 
-constexpr unsigned int LokiReadoutSize{sizeof(DataParser::LokiReadout)};
+constexpr unsigned int BifrostReadoutSize{sizeof(DataParser::BifrostReadout)};
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -34,7 +34,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    auto Data = (LokiReadout *)((char *)DataPtr);
+    auto Data = (BifrostReadout *)((char *)DataPtr);
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
@@ -56,25 +56,22 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId,
-           Data->FENId, Data->DataLength);
     Stats.DataHeaders++;
 
-    if (Data->DataLength != LokiReadoutSize) {
+    if (Data->DataLength != BifrostReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
-            Data->DataLength, LokiReadoutSize);
+            Data->DataLength, BifrostReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
-           "0x%04x B "
-           "0x%04x C 0x%04x D 0x%04x",
+           "Ring %u, FEN %u, t(%11u,%11u) flags %02x, TubeId %3u, "
+           "A 0x%2x B 0x%2x",
            Data->RingId, Data->FENId, Data->TimeHigh,
-           Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
-           Data->AmpB, Data->AmpC, Data->AmpD);
+           Data->TimeLow, Data->Flags, Data->TubeId,
+           (uint16_t)Data->AmpA, (uint16_t)Data->AmpB);
 
     ParsedReadouts++;
     Stats.Readouts++;

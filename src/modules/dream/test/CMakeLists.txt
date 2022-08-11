@@ -14,6 +14,13 @@ set(DreamGeometryTest_SRC
 create_test_executable(DreamGeometryTest)
 
 
+set(CDTGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/CDTGeometry.h)
+set(CDTGeometryTest_SRC
+  CDTGeometryTest.cpp)
+create_test_executable(CDTGeometryTest)
+
+
 set(DreamConfigTest_INC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ${DREAM_BASE_DIR}/geometry/Config.h
