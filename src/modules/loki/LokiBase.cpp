@@ -242,7 +242,7 @@ void LokiBase::processingThread() {
       SerializerII->produce();
 
       /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
+      /// don't increment as Producer & Serializer keep absolute count
       Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
       Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
