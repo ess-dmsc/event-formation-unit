@@ -20,7 +20,6 @@
 namespace Bifrost {
 class Geometry {
 public:
-
   /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Tube);
 
@@ -29,12 +28,12 @@ public:
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int AmpA, int AmpB) {
-    return reverse(posAlongTube(AmpA, AmpB)) % (PosResolution/3);
+    return reverse(posAlongTube(AmpA, AmpB)) % (PosResolution / 3);
   }
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int AmpA, int AmpB) {
-    return (reverse(posAlongTube(AmpA, AmpB)) * TripletTubes)/PosResolution;
+    return (reverse(posAlongTube(AmpA, AmpB)) * TripletTubes) / PosResolution;
   }
 
   /// \brief return the position along the tube
@@ -50,6 +49,6 @@ public:
 
 private:
   int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
-  int TripletTubes{3}; // tubes per triplet (might be obvious from the name)
+  int TripletTubes{3};    // tubes per triplet (might be obvious from the name)
 };
 } // namespace Bifrost

@@ -17,7 +17,8 @@ void EventProcessingStats::clear() {
   events_geometry_err = 0;
 }
 
-EventProcessingStats &EventProcessingStats::operator+=(const EventProcessingStats &other) {
+EventProcessingStats &
+EventProcessingStats::operator+=(const EventProcessingStats &other) {
   invalid_planes += other.invalid_planes;
   time_seq_errors += other.time_seq_errors;
   wire_clusters += other.wire_clusters;
@@ -37,11 +38,12 @@ std::string EventProcessingStats::debug(std::string prepend) const {
   ss << prepend << "wire_clusters: " << wire_clusters << "\n";
   ss << prepend << "grid_clusters: " << grid_clusters << "\n";
   ss << prepend << "events_total: " << events_total << "\n";
-  ss << prepend << "events_multiplicity_rejects: " << events_multiplicity_rejects << "\n";
+  ss << prepend
+     << "events_multiplicity_rejects: " << events_multiplicity_rejects << "\n";
   ss << prepend << "hits_used: " << hits_used << "\n";
   ss << prepend << "events_bad: " << events_bad << "\n";
   ss << prepend << "events_geometry_err: " << events_geometry_err << "\n";
   return ss.str();
 }
 
-}
+} // namespace Multigrid

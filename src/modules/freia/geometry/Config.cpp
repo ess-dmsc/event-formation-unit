@@ -34,7 +34,7 @@ void Config::applyConfig() {
     auto PanelConfig = root["Config"];
     uint8_t MaxCassetteNumber = 0;
     for (auto &Mapping : PanelConfig) {
-      if((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber){
+      if ((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber) {
         MaxCassetteNumber = (uint8_t)Mapping["CassetteNumber"];
       }
     }
@@ -50,8 +50,9 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset = MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"] *
-                         NumWiresPerCassette;
+        Hybrid.YOffset =
+            MaxCassetteNumber -
+            (uint8_t)Mapping["CassetteNumber"] * NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }
@@ -59,10 +60,10 @@ void Config::applyConfig() {
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
   } catch (...) {
-      LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-          FileName);
-      throw std::runtime_error("Invalid Json file");
-      return;
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
+        FileName);
+    throw std::runtime_error("Invalid Json file");
+    return;
   }
 }
 

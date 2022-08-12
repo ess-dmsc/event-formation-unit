@@ -5,8 +5,8 @@
  *  \brief Unit tests.
  */
 
-#include <adc_readout/DelayLineProducer.h>
 #include "ev42_events_generated.h"
+#include <adc_readout/DelayLineProducer.h>
 #include <gtest/gtest.h>
 #include <ostream>
 #include <trompeloeil.hpp>

@@ -51,9 +51,9 @@ std::string ttlmonjson = R"(
 // clang-format on
 
 #include <common/testutils/SaveBuffer.h>
-#include <ttlmonitor/TTLMonitorBase.h>
-#include <common/testutils/TestUDPServer.h>
 #include <common/testutils/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
+#include <ttlmonitor/TTLMonitorBase.h>
 
 class TTLMonitorBaseStandIn : public TTLMonitor::TTLMonitorBase {
 public:

@@ -6,8 +6,8 @@
 /// \brief Parser for ESS readout of LoKI
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Trace.h>
 #include <bifrost/readout/DataParser.h>
+#include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 
 // #undef TRC_LEVEL
@@ -38,7 +38,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
-    Data->RingId = Data->RingId/2;
+    Data->RingId = Data->RingId / 2;
 
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -59,8 +59,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     Stats.DataHeaders++;
 
     if (Data->DataLength != BifrostReadoutSize) {
-      XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
-            Data->DataLength, BifrostReadoutSize);
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
+             BifrostReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -69,9 +69,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     XTRACE(DATA, DEB,
            "Ring %u, FEN %u, t(%11u,%11u) flags %02x, TubeId %3u, "
            "A 0x%2x B 0x%2x",
-           Data->RingId, Data->FENId, Data->TimeHigh,
-           Data->TimeLow, Data->Flags, Data->TubeId,
-           (uint16_t)Data->AmpA, (uint16_t)Data->AmpB);
+           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->Flags, Data->TubeId, (uint16_t)Data->AmpA,
+           (uint16_t)Data->AmpB);
 
     ParsedReadouts++;
     Stats.Readouts++;
@@ -83,4 +83,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Loki
+} // namespace Bifrost

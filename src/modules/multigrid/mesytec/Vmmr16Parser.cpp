@@ -44,31 +44,20 @@ static constexpr uint32_t AdcMask             {0x00000fff};
 
 // clang-format on
 
+void VMMR16Parser::spoof_high_time(bool spoof) { spoof_high_time_ = spoof; }
 
-void VMMR16Parser::spoof_high_time(bool spoof) {
-  spoof_high_time_ = spoof;
-}
+bool VMMR16Parser::spoof_high_time() const { return spoof_high_time_; }
 
-bool VMMR16Parser::spoof_high_time() const {
-  return spoof_high_time_;
-}
+uint64_t VMMR16Parser::time() const { return hit.total_time; }
 
-uint64_t VMMR16Parser::time() const {
-  return hit.total_time;
-}
+bool VMMR16Parser::externalTrigger() const { return external_trigger_; }
 
-bool VMMR16Parser::externalTrigger() const {
-  return external_trigger_;
-}
-
-size_t VMMR16Parser::trigger_count() const {
-  return trigger_count_;
-}
+size_t VMMR16Parser::trigger_count() const { return trigger_count_; }
 
 size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
   auto bytes = buffer.bytes();
-  bool time_good {false};
+  bool time_good{false};
 
   converted_data.clear();
   external_trigger_ = false;
@@ -88,13 +77,15 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
   }
    */
 
-  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d, trigger=%d", buffer.size, trigger_count_);
+  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d, trigger=%d", buffer.size,
+         trigger_count_);
 
-  for (;buffer; ++buffer)  {
+  for (; buffer; ++buffer) {
     switch (buffer[0] & TypeMask) {
     case Type::Header:
       words = static_cast<uint16_t>(buffer[0] & DataWordsMask);
-      hit.module = static_cast<uint8_t>((buffer[0] & ModuleMask) >> ModuleBitShift);
+      hit.module =
+          static_cast<uint8_t>((buffer[0] & ModuleMask) >> ModuleBitShift);
       external_trigger_ = (0 != (buffer[0] & ExternalTriggerMask));
       if (external_trigger_) {
         converted_data.push_back(hit);
@@ -103,8 +94,8 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
       XTRACE(DATA, DEB, "   Header:  module=%d, external_trigger=%s, words=%d",
              hit.module, external_trigger_ ? "true" : "false", words);
       if (words > buffer.size) {
-        XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d",
-               words, buffer.size);
+        XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d", words,
+               buffer.size);
         return buffer.bytes();
       }
       break;
@@ -119,20 +110,23 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
       }
       break;
 
-    case Type::DataEvent1:hit.bus = static_cast<uint8_t>((buffer[0] & BusMask) >> BusBitShift);
+    case Type::DataEvent1:
+      hit.bus = static_cast<uint8_t>((buffer[0] & BusMask) >> BusBitShift);
       hit.time_diff = static_cast<uint16_t>(buffer[0] & TimeDiffMask);
-      XTRACE(DATA, DEB, "   DataEvent1:  bus=%d, time_diff=%d", hit.bus, hit.time_diff);
+      XTRACE(DATA, DEB, "   DataEvent1:  bus=%d, time_diff=%d", hit.bus,
+             hit.time_diff);
       break;
 
     case Type::DataEvent2:
       // \todo use something like getValue(Buffer, NBits, Offset) ?
       hit.bus = static_cast<uint8_t>((buffer[0] & BusMask) >> BusBitShift);
-      hit.channel = static_cast<uint16_t>((buffer[0] & ChannelMask) >> ChannelBitShift);
+      hit.channel =
+          static_cast<uint16_t>((buffer[0] & ChannelMask) >> ChannelBitShift);
       hit.adc = static_cast<uint16_t>(buffer[0] & AdcMask);
       converted_data.push_back(hit);
 
-      XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
-             hit.bus, hit.channel, hit.adc);
+      XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d", hit.bus,
+             hit.channel, hit.adc);
 
       break;
 
@@ -147,7 +141,8 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
         time_good = true;
         XTRACE(DATA, DEB, "   EndOfEvent:  low_time=%d", hit.low_time);
       } else {
-        XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x", buffer[0]);
+        XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x",
+               buffer[0]);
         return buffer.bytes();
       }
 
@@ -176,7 +171,8 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
   // Apply timestamp to all readouts
   hit.high_time = high_time_;
-  hit.total_time = (static_cast<uint64_t>(high_time_) << LowTimeBits) + hit.low_time;
+  hit.total_time =
+      (static_cast<uint64_t>(high_time_) << LowTimeBits) + hit.low_time;
   for (auto &h : converted_data) {
     h.high_time = high_time_;
     h.low_time = hit.low_time;
@@ -187,4 +183,4 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
   return 0;
 }
 
-}
+} // namespace Multigrid

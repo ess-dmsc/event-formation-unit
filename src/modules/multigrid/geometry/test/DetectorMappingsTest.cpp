@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multigrid/geometry/DetectorMappings.h>
-#include <multigrid/geometry/MGSeqMappings.h>
 #include <multigrid/geometry/MG24Mappings.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 #include <multigrid/geometry/PlaneMappings.h>
 
 #include <common/testutils/TestBase.h>
@@ -14,10 +14,10 @@ protected:
   DetectorMappings mapping;
   std::shared_ptr<ChannelMappings> bus, bus2;
   Hit hit;
-  uint8_t invalid_plane {Hit::InvalidPlane};
-  uint16_t invalid_coordinate {Hit::InvalidCoord};
-  uint8_t wire_plane {Multigrid::wire_plane};
-  uint8_t grid_plane {Multigrid::grid_plane};
+  uint8_t invalid_plane{Hit::InvalidPlane};
+  uint16_t invalid_coordinate{Hit::InvalidCoord};
+  uint8_t wire_plane{Multigrid::wire_plane};
+  uint8_t grid_plane{Multigrid::grid_plane};
 
   void SetUp() override {}
   void TearDown() override {}
@@ -40,7 +40,6 @@ TEST_F(DetectorMappingsTest, Nothing) {
     EXPECT_EQ(hit.coordinate, invalid_coordinate);
   }
 }
-
 
 TEST_F(DetectorMappingsTest, OneBus) {
   bus = std::make_shared<MGSeqMappings>();
@@ -92,10 +91,10 @@ TEST_F(DetectorMappingsTest, TwoBuses) {
 
     EXPECT_TRUE(mapping.map(hit, 1, i, 0));
     EXPECT_EQ(hit.plane, 2 + wire_plane);
-    EXPECT_EQ(hit.coordinate,bus2->wire(i));
+    EXPECT_EQ(hit.coordinate, bus2->wire(i));
     hit = mapping.absolutify(hit);
     EXPECT_EQ(hit.plane, wire_plane);
-    EXPECT_EQ(hit.coordinate,bus2->wire(i) + bus->max_wire());
+    EXPECT_EQ(hit.coordinate, bus2->wire(i) + bus->max_wire());
 
     EXPECT_FALSE(mapping.map(hit, 2, i, 0));
     EXPECT_EQ(hit.plane, invalid_plane);
@@ -110,10 +109,10 @@ TEST_F(DetectorMappingsTest, TwoBuses) {
 
     EXPECT_TRUE(mapping.map(hit, 1, i, 0));
     EXPECT_EQ(hit.plane, 2 + grid_plane);
-    EXPECT_EQ(hit.coordinate,bus2->grid(i));
+    EXPECT_EQ(hit.coordinate, bus2->grid(i));
     hit = mapping.absolutify(hit);
     EXPECT_EQ(hit.plane, grid_plane);
-    EXPECT_EQ(hit.coordinate,bus2->grid(i) + bus->max_grid());
+    EXPECT_EQ(hit.coordinate, bus2->grid(i) + bus->max_grid());
 
     EXPECT_FALSE(mapping.map(hit, 2, i, 0));
     EXPECT_EQ(hit.plane, invalid_plane);

@@ -11,8 +11,8 @@
 
 #include <multigrid/geometry/DetectorMappings.h>
 
-#include <multigrid/geometry/MGSeqMappings.h>
 #include <multigrid/geometry/MG24Mappings.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 
 #include <multigrid/geometry/PlaneMappings.h>
 
@@ -23,11 +23,11 @@
 namespace Multigrid {
 
 std::string ModuleMapping::debug(std::string prefix) const {
-  return fmt::format("plan_offset={}  grids[{}-{}]  wires[{}-{}]",
-                     plane_offset,
+  return fmt::format("plan_offset={}  grids[{}-{}]  wires[{}-{}]", plane_offset,
                      grid_offset, (grid_offset + channel_mappings->max_grid()),
-                     wire_offset, (wire_offset + channel_mappings->max_wire()))
-      + channel_mappings->debug(prefix + "  ");
+                     wire_offset,
+                     (wire_offset + channel_mappings->max_wire())) +
+         channel_mappings->debug(prefix + "  ");
 }
 
 void DetectorMappings::add_bus(std::shared_ptr<ChannelMappings> mappings) {
@@ -41,7 +41,8 @@ void DetectorMappings::add_bus(std::shared_ptr<ChannelMappings> mappings) {
   buses.push_back(modmap);
 }
 
-bool DetectorMappings::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc) const {
+bool DetectorMappings::map(Hit &hit, uint8_t bus, uint16_t channel,
+                           uint16_t adc) const {
   if (bus >= buses.size()) {
     hit.plane = Hit::InvalidPlane;
     hit.coordinate = Hit::InvalidCoord;
@@ -58,7 +59,8 @@ bool DetectorMappings::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc
 }
 
 Hit DetectorMappings::absolutify(const Hit &original) const {
-  if ((original.plane == Hit::PulsePlane) || (original.plane == Hit::InvalidPlane))
+  if ((original.plane == Hit::PulsePlane) ||
+      (original.plane == Hit::InvalidPlane))
     return original;
 
   Hit transformed = original;
@@ -116,4 +118,4 @@ void from_json(const nlohmann::json &j, DetectorMappings &g) {
   }
 }
 
-}
+} // namespace Multigrid

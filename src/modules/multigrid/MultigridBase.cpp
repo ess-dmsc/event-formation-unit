@@ -24,15 +24,16 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <common/debug/Log.h>
 #include "MultigridBase.h"
+#include <common/debug/Log.h>
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz{2900};
 
-MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings)
+MultigridBase::MultigridBase(BaseSettings const &settings,
+                             MultigridSettings const &LocalSettings)
     : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -85,8 +86,7 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
       (ModuleSettings.monitor ? "YES" : "no"));
   if (!ModuleSettings.FilePrefix.empty())
-    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
-        ModuleSettings.FilePrefix);
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", ModuleSettings.FilePrefix);
 
   std::function<void()> inputFunc = [this]() { MultigridBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
@@ -112,7 +112,8 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
   Counters.wire_clusters = mg_config.reduction.stats.wire_clusters;
   Counters.grid_clusters = mg_config.reduction.stats.grid_clusters;
   Counters.events_total = mg_config.reduction.stats.events_total;
-  Counters.events_multiplicity_rejects = mg_config.reduction.stats.events_multiplicity_rejects;
+  Counters.events_multiplicity_rejects =
+      mg_config.reduction.stats.events_multiplicity_rejects;
   Counters.hits_used = mg_config.reduction.stats.hits_used;
   Counters.events_bad = mg_config.reduction.stats.events_bad;
   Counters.events_geometry_err = mg_config.reduction.stats.events_geometry_err;
@@ -142,9 +143,11 @@ void MultigridBase::mainThread() {
     return;
 
   /// Connection setup
-  Socket::Endpoint
-      local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
-  XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(
+      EFUSettings.DetectorAddress.c_str(),
+      EFUSettings.DetectorPort); // Change name or add more comments
+  XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(),
+         EFUSettings.DetectorPort);
   UDPReceiver cspecdata(local);
   cspecdata.setBufferSizes(EFUSettings.TxSocketBufferSize,
                            EFUSettings.RxSocketBufferSize);
@@ -165,23 +168,30 @@ void MultigridBase::mainThread() {
 
   TSCTimer report_timer;
 
-  RuntimeStat RtStat({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
+  RuntimeStat RtStat(
+      {Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
 
   while (true) {
     ssize_t ReadSize{0};
     if ((ReadSize = cspecdata.receive(buffer, EthernetBufferSize)) > 0) {
       Counters.rx_packets++;
       Counters.rx_bytes += ReadSize;
-//      XTRACE(PROCESS, DEB, "Processed UDP packet of size: %d", ReadSize);
+      //      XTRACE(PROCESS, DEB, "Processed UDP packet of size: %d",
+      //      ReadSize);
 
-      mg_config.builder->parse(Buffer<uint8_t>(buffer, static_cast<size_t>(ReadSize)));
+      mg_config.builder->parse(
+          Buffer<uint8_t>(buffer, static_cast<size_t>(ReadSize)));
 
       Counters.readouts_total = mg_config.builder->stats_readouts_total;
-      Counters.parser_discarded_bytes = mg_config.builder->stats_discarded_bytes;
+      Counters.parser_discarded_bytes =
+          mg_config.builder->stats_discarded_bytes;
       Counters.parser_triggers = mg_config.builder->stats_trigger_count;
-      Counters.builder_glitch_rejects = mg_config.builder->stats_bus_glitch_rejects;
-      Counters.builder_filter_rejects = mg_config.builder->stats_readout_filter_rejects;
-      Counters.builder_geometry_errors = mg_config.builder->stats_digital_geom_errors;
+      Counters.builder_glitch_rejects =
+          mg_config.builder->stats_bus_glitch_rejects;
+      Counters.builder_filter_rejects =
+          mg_config.builder->stats_readout_filter_rejects;
+      Counters.builder_geometry_errors =
+          mg_config.builder->stats_digital_geom_errors;
 
       if (!mg_config.builder->ConvertedData.empty()) {
         Counters.hits_total += mg_config.builder->ConvertedData.size();
@@ -191,14 +201,16 @@ void MultigridBase::mainThread() {
           for (const auto &hit : mg_config.builder->ConvertedData) {
             transformed = mg_config.mappings.absolutify(hit);
             if (monitor.hit_serializer)
-              monitor.hit_serializer->addEntry(transformed.plane + 1,
-                                               transformed.coordinate, transformed.time,
-                                               transformed.weight);
+              monitor.hit_serializer->addEntry(
+                  transformed.plane + 1, transformed.coordinate,
+                  transformed.time, transformed.weight);
             if (monitor.histograms) {
               if (transformed.plane == Multigrid::wire_plane)
-                monitor.histograms->bin_x(transformed.coordinate, transformed.weight);
+                monitor.histograms->bin_x(transformed.coordinate,
+                                          transformed.weight);
               else if (transformed.plane == Multigrid::grid_plane)
-                monitor.histograms->bin_y(transformed.coordinate, transformed.weight);
+                monitor.histograms->bin_y(transformed.coordinate,
+                                          transformed.weight);
             }
           }
         }
@@ -212,11 +224,13 @@ void MultigridBase::mainThread() {
     }
 
     /// Force periodic flushing
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       Counters.tx_bytes += ev42serializer.produce();
       monitor.produce_now();
 
-      RuntimeStatusMask =  RtStat.getRuntimeStatusMask({Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {Counters.rx_packets, Counters.events_total, Counters.tx_bytes});
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
@@ -234,7 +248,8 @@ void MultigridBase::mainThread() {
       LOG(PROCESS, Sev::Info, "Stop requested. Flushing queues.");
       /// flush anything that remains
 
-      LOG(PROCESS, Sev::Info, "Pipeline status\n" + mg_config.reduction.status("", false));
+      LOG(PROCESS, Sev::Info,
+          "Pipeline status\n" + mg_config.reduction.status("", false));
 
       mg_config.reduction.process_queues(true);
       process_events(ev42serializer);

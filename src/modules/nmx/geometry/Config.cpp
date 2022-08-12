@@ -108,7 +108,8 @@ void Config::applyConfig() {
     }
 
     // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels,
-    // resulting in 16,384 pixels per 2 hybrids, therefore 8192 pixels per hybrid
+    // resulting in 16,384 pixels per 2 hybrids, therefore 8192 pixels per
+    // hybrid
     NumPixels += NumHybrids * 8192;
 
   } catch (...) {

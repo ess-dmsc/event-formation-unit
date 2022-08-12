@@ -6,9 +6,9 @@
  * individual samples).
  */
 
-#include <adc_readout/SampleProcessing.h>
-#include <adc_readout/AdcReadoutConstants.h>
 #include "senv_data_generated.h"
+#include <adc_readout/AdcReadoutConstants.h>
+#include <adc_readout/SampleProcessing.h>
 #include <array>
 #include <cstring>
 #include <gtest/gtest.h>
@@ -168,7 +168,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   ASSERT_EQ(SampleData->Values_type(), ValueUnion::UInt16Array);
-  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(), TempModule.Data.size());
+  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(),
+            TempModule.Data.size());
   EXPECT_EQ(flatbuffers::IsFieldPresent(SampleData,
                                         SampleEnvironmentData::VT_TIMESTAMPS),
             false);
@@ -216,7 +217,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   ASSERT_EQ(SampleData->Values_type(), ValueUnion::UInt16Array);
-  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(), TempModule.Data.size());
+  EXPECT_EQ(SampleData->Values_as_UInt16Array()->value()->size(),
+            TempModule.Data.size());
   ASSERT_EQ(flatbuffers::IsFieldPresent(SampleData,
                                         SampleEnvironmentData::VT_TIMESTAMPS),
             true);

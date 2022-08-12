@@ -59,5 +59,4 @@ private:
 
 void from_json(const nlohmann::json &j, MGSeqMappings &g);
 
-}
-
+} // namespace Multigrid

@@ -13,9 +13,8 @@
 namespace Multigrid {
 
 bool Filter::trivial() const {
-  return ((rescale_factor == 1.0)
-      && (minimum == 0)
-      && (maximum == std::numeric_limits<uint16_t>::max()));
+  return ((rescale_factor == 1.0) && (minimum == 0) &&
+          (maximum == std::numeric_limits<uint16_t>::max()));
 }
 
 uint16_t Filter::rescale(uint16_t adc) const {
@@ -88,8 +87,7 @@ std::string FilterSet::debug(std::string prefix) const {
 }
 
 void from_json(const nlohmann::json &j, FilterSet &g) {
-  if (j.count("blanket"))
-  {
+  if (j.count("blanket")) {
     auto b = j["blanket"];
     g.set_filters(b["count"], b);
   }
@@ -101,6 +99,4 @@ void from_json(const nlohmann::json &j, FilterSet &g) {
   }
 }
 
-
-
-}
+} // namespace Multigrid

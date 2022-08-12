@@ -7,9 +7,8 @@
 /// \brief Unit test for Bifrost position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <common/testutils/TestBase.h>
 #include <bifrost/geometry/Geometry.h>
-
+#include <common/testutils/TestBase.h>
 
 using namespace Bifrost;
 
@@ -55,7 +54,6 @@ TEST_F(BifrostGeometryTest, Position) {
   ASSERT_EQ(geom.posAlongTube(0, 1), 0);
   ASSERT_EQ(geom.posAlongTube(1, 0), 299);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

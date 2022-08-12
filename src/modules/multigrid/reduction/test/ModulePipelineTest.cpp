@@ -7,9 +7,9 @@
 /// \todo this is currently poorly understood and probably needs better tests
 //===----------------------------------------------------------------------===//
 
-#include <multigrid/reduction/ModulePipeline.h>
-#include <multigrid/geometry/PlaneMappings.h>
 #include <common/testutils/TestBase.h>
+#include <multigrid/geometry/PlaneMappings.h>
+#include <multigrid/reduction/ModulePipeline.h>
 
 using namespace Multigrid;
 
@@ -21,7 +21,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(ModulePipelineTest, Constructor) {
   ASSERT_EQ(pipeline.out_queue.size(), 0);
   ASSERT_EQ(pipeline.stats.time_seq_errors, 0);
@@ -29,7 +28,6 @@ TEST_F(ModulePipelineTest, Constructor) {
   ASSERT_EQ(pipeline.grid_clusterer.stats_cluster_count, 0);
   ASSERT_EQ(pipeline.wire_clusterer.stats_cluster_count, 0);
 }
-
 
 TEST_F(ModulePipelineTest, Ingest) {
   pipeline.ingest({0, 0, 100, wire_plane}); // time, coord, weight, plane
@@ -44,8 +42,7 @@ TEST_F(ModulePipelineTest, Ingest) {
 
   ASSERT_EQ(pipeline.stats.time_seq_errors, 0);
   ASSERT_EQ(pipeline.stats.invalid_planes, 0);
- }
-
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
