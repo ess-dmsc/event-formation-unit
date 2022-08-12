@@ -14,6 +14,7 @@ add_subdirectory(loki)
 add_subdirectory(multigrid)
 add_subdirectory(perfgen)
 add_subdirectory(ttlmonitor)
+add_subdirectory(nmx)
 
 #=============================================================================
 # Support out-of-tree build

@@ -16,6 +16,9 @@
 #include <modules/freia/generators/ReadoutGenerator.h>
 #include <modules/loki/generators/ReadoutGenerator.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/SmileReadoutGenerator.h>
+
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -74,16 +77,26 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
 #endif
 
-  #ifdef LOKI_GENERATOR
-   Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-   gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
-   Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
-  #endif
+#ifdef LOKI_GENERATOR
+  Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
+  Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+#endif
 
-  #ifdef TTLMON_GENERATOR
-   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
-  #endif
+#ifdef TTLMON_GENERATOR
+  TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+#endif
+
+#ifdef NMX_GENERATOR
+  Nmx::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_SMILE_GENERATOR
+  Nmx::SmileReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
 
   do {
     uint16_t DataSize = gen.makePacket();
