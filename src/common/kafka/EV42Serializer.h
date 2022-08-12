@@ -20,7 +20,8 @@ public:
   /// \brief creates ev42 flat buffer serializer
   /// \param max_array_length maximum number of events
   /// \param source_name value for source_name field
-  EV42Serializer(size_t MaxArrayLength, std::string SourceName, ProducerCallback Callback = {});
+  EV42Serializer(size_t MaxArrayLength, std::string SourceName,
+                 ProducerCallback Callback = {});
 
   /// \brief sets producer callback
   /// \param cb function to be called to send buffer to Kafka
@@ -32,8 +33,8 @@ public:
   /// \returns the currently set pulse time
   uint64_t pulseTime() const;
 
-  /// \brief adds event, if maximum count is exceeded, sends data using the producer callback
-  /// \param time time of event in relation to pulse time
+  /// \brief adds event, if maximum count is exceeded, sends data using the
+  /// producer callback \param time time of event in relation to pulse time
   /// \param pixl id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
   size_t addEvent(uint32_t Time, uint32_t Pixel);
@@ -44,7 +45,8 @@ public:
   /// \returns current message counter
   uint64_t currentMessageId() const;
 
-  /// \brief checks if new reference time being used, if so message needs to be produced
+  /// \brief checks if new reference time being used, if so message needs to be
+  /// produced
   uint32_t checkAndSetPulseTime(uint64_t Time);
 
   /// \brief serializes and sends to producer

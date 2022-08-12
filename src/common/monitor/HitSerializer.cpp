@@ -1,8 +1,8 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <common/monitor/HitSerializer.h>
 #include <common/debug/Trace.h>
+#include <common/monitor/HitSerializer.h>
 #include <common/system/gccintel.h>
 
 //#undef TRC_LEVEL
@@ -36,13 +36,15 @@ size_t HitSerializer::produce() {
   auto adcvec = builder.CreateVector(adcs);
 
   auto dataoff = CreateMONHit(builder, planevec, timevec, channelvec, adcvec);
-  auto msg = CreateMonitorMessage(builder, SourceNameOffset,
-                                  DataField::MONHit, dataoff.Union());
+  auto msg = CreateMonitorMessage(builder, SourceNameOffset, DataField::MONHit,
+                                  dataoff.Union());
   FinishMonitorMessageBuffer(builder, msg);
 
-  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(),
+                                     builder.GetSize());
   if (producer_callback) {
-#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
+#pragma message(                                                               \
+    "Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
     producer_callback(buffer, time(nullptr) * 1000);
   }
 
@@ -56,7 +58,8 @@ size_t HitSerializer::produce() {
   return buffer.size_bytes();
 }
 
-size_t HitSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
+size_t HitSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time,
+                               uint16_t adc) {
   planes.push_back(plane);
   channels.push_back(channel);
   times.push_back(time);

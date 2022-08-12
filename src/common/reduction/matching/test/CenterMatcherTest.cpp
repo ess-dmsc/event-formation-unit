@@ -6,18 +6,16 @@
 
 class CenterMatcherTest : public TestBase {
 protected:
-
   ClusterContainer x, y;
   CenterMatcher matcher{1000, 0, 1};
 
-  void SetUp() override { 
+  void SetUp() override {
     matcher.set_max_delta_time(250);
-    matcher.set_time_algorithm("center-of-mass");	
+    matcher.set_time_algorithm("center-of-mass");
   }
-  
-  void TearDown() override { }
-  
-   
+
+  void TearDown() override {}
+
   Cluster mock_cluster(uint8_t plane, uint64_t time, uint16_t coordinate) {
     Cluster ret;
     Hit e;
@@ -28,7 +26,6 @@ protected:
     ret.insert(e);
     return ret;
   }
-  
 };
 
 TEST_F(CenterMatcherTest, Constructor) {
@@ -202,7 +199,6 @@ TEST_F(CenterMatcherTest, X_X_Y_Y) {
   EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 200);
 }
 
-
 TEST_F(CenterMatcherTest, Y_Y_X_X) {
   x.push_back(mock_cluster(1, 100, 10));
   y.push_back(mock_cluster(1, 140, 100));
@@ -222,7 +218,6 @@ TEST_F(CenterMatcherTest, Y_Y_X_X) {
   EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 100);
   EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 200);
 }
-
 
 TEST_F(CenterMatcherTest, X_Y_X_Y) {
   x.push_back(mock_cluster(0, 100, 10));
@@ -296,12 +291,9 @@ TEST_F(CenterMatcherTest, Y_X_X_Y) {
   EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 200);
 }
 
- 
-  
 // \todo do more tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

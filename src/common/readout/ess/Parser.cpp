@@ -7,19 +7,17 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <cstring>
+#include <arpa/inet.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <arpa/inet.h>
+#include <cstring>
 
 namespace ESSReadout {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-Parser::Parser() {
-  std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
-}
+Parser::Parser() { std::memset(NextSeqNum, 0, sizeof(NextSeqNum)); }
 
 int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
@@ -43,14 +41,15 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   }
 
   if ((VersionAndPad & 0xff) != 0x00) { //
-    XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d", VersionAndPad & 0xff);
+    XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d",
+           VersionAndPad & 0xff);
     Stats.ErrorVersion++;
     return -Parser::EHEADER;
   }
 
   // Check cookie
   uint32_t SwappedCookie = (*(uint32_t *)(Buffer + 2)) & 0xffffff;
-  //XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
+  // XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
     Stats.ErrorCookie++;
@@ -76,13 +75,12 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   }
 
   uint8_t Type = Packet.HeaderPtr->CookieAndType >> 24;
-  if ( Type!= ExpectedType) {
-      XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
+  if (Type != ExpectedType) {
+    XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
            Type, ExpectedType);
-           Stats.ErrorTypeSubType++;
-      return -Parser::EHEADER;
+    Stats.ErrorTypeSubType++;
+    return -Parser::EHEADER;
   }
-
 
   if (Packet.HeaderPtr->OutputQueue >= MaxOutputQueues) {
     XTRACE(PROCESS, WAR, "Output queue %u exceeds max size %u",
@@ -93,11 +91,9 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
   // Check per OutputQueue packet sequence number
   if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
-    XTRACE(PROCESS, WAR,
-           "Bad sequence number for OQ %u (expected %u, got %u)",
+    XTRACE(PROCESS, WAR, "Bad sequence number for OQ %u (expected %u, got %u)",
            Packet.HeaderPtr->OutputQueue,
-           NextSeqNum[Packet.HeaderPtr->OutputQueue],
-           Packet.HeaderPtr->SeqNum);
+           NextSeqNum[Packet.HeaderPtr->OutputQueue], Packet.HeaderPtr->SeqNum);
     Stats.ErrorSeqNum++;
     NextSeqNum[Packet.HeaderPtr->OutputQueue] = Packet.HeaderPtr->SeqNum;
   }
@@ -110,14 +106,15 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   // Check time values
   if (Packet.HeaderPtr->PulseLow > MaxFracTimeCount) {
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
-      Packet.HeaderPtr->PulseLow, MaxFracTimeCount);
+           Packet.HeaderPtr->PulseLow, MaxFracTimeCount);
     Stats.ErrorTimeFrac++;
     return -Parser::EHEADER;
   }
 
   if (Packet.HeaderPtr->PrevPulseLow > MaxFracTimeCount) {
-    XTRACE(PROCESS, WAR, "Prev pulse time low (%u) exceeds max cycle count (%u)",
-      Packet.HeaderPtr->PrevPulseLow, MaxFracTimeCount);
+    XTRACE(PROCESS, WAR,
+           "Prev pulse time low (%u) exceeds max cycle count (%u)",
+           Packet.HeaderPtr->PrevPulseLow, MaxFracTimeCount);
     Stats.ErrorTimeFrac++;
     return -Parser::EHEADER;
   }
@@ -128,19 +125,25 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
                                Packet.HeaderPtr->PrevPulseLow);
 
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)", Packet.HeaderPtr->PulseHigh,
-        Packet.HeaderPtr->PulseLow);
+         Packet.HeaderPtr->PulseLow);
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", Packet.HeaderPtr->PrevPulseHigh,
-        Packet.HeaderPtr->PrevPulseLow);
+         Packet.HeaderPtr->PrevPulseLow);
 
   if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiffNS) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 ". Max allowed %u",
-           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS), MaxPulseTimeDiffNS);
+    XTRACE(DATA, WAR,
+           "PulseTime and PrevPulseTime too far apart: %" PRIu64
+           ". Max allowed %u",
+           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS),
+           MaxPulseTimeDiffNS);
     XTRACE(DATA, WAR, "PulseTimeHi      0x%08x", Packet.HeaderPtr->PulseHigh);
     XTRACE(DATA, WAR, "PulseTimeLow     0x%08x", Packet.HeaderPtr->PulseLow);
     XTRACE(DATA, WAR, "PulseTime (ns)   %" PRIu64 "", Packet.Time.TimeInNS);
-    XTRACE(DATA, WAR, "PrevPulseTimeHi  0x%08x", Packet.HeaderPtr->PrevPulseHigh);
-    XTRACE(DATA, WAR, "PrevPulseTimeLow 0x%08x", Packet.HeaderPtr->PrevPulseLow);
-    XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "", Packet.Time.PrevTimeInNS);
+    XTRACE(DATA, WAR, "PrevPulseTimeHi  0x%08x",
+           Packet.HeaderPtr->PrevPulseHigh);
+    XTRACE(DATA, WAR, "PrevPulseTimeLow 0x%08x",
+           Packet.HeaderPtr->PrevPulseLow);
+    XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "",
+           Packet.Time.PrevTimeInNS);
     Stats.ErrorTimeHigh++;
 
     return -Parser::EHEADER;

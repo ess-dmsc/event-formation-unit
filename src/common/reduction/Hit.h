@@ -37,7 +37,7 @@
 #include <common/DumpFile.h>
 #include <limits>
 
-struct __attribute__ ((packed)) Hit {
+struct __attribute__((packed)) Hit {
   // \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "efu_hits"; }
   static uint16_t FormatVersion() { return 0; }
@@ -46,23 +46,23 @@ struct __attribute__ ((packed)) Hit {
   uint64_t time{0};
   uint16_t coordinate{0};
   uint16_t weight{0};
-  // \todo uint8 might not be enough, if detectors have more independent modules/segments
+  // \todo uint8 might not be enough, if detectors have more independent
+  // modules/segments
   uint8_t plane{0};
   /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   /// \brief prints values for debug purposes
   std::string to_string() const;
 
-  static constexpr uint16_t InvalidCoord {std::numeric_limits<uint16_t>::max()};
-  static constexpr uint8_t InvalidPlane {std::numeric_limits<uint8_t>::max()};
-  static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
+  static constexpr uint16_t InvalidCoord{std::numeric_limits<uint16_t>::max()};
+  static constexpr uint8_t InvalidPlane{std::numeric_limits<uint8_t>::max()};
+  static constexpr uint8_t PulsePlane{std::numeric_limits<uint8_t>::max() - 1};
 };
 
 namespace hdf5 {
 
 namespace datatype {
-template<>
-class TypeTrait<Hit> {
+template <> class TypeTrait<Hit> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Hit) {
     H5_COMPOUND_INIT;
@@ -74,8 +74,8 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-}
+} // namespace datatype
 
-}
+} // namespace hdf5
 
 using HitFile = DumpFile<Hit>;

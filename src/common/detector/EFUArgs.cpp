@@ -6,15 +6,15 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/DetectorModuleRegister.h>
-#include <common/detector/EFUArgs.h>
+#include <algorithm>
 #include <common/Version.h>
 #include <common/debug/Log.h>
+#include <common/detector/DetectorModuleRegister.h>
+#include <common/detector/EFUArgs.h>
 #include <cstdio>
 #include <fstream>
 #include <regex>
 #include <string>
-#include <algorithm>
 
 using namespace std::literals::string_literals;
 
@@ -153,7 +153,9 @@ bool EFUArgs::parseAffinityStrings(
 }
 
 bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
-  std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3}, {"Warning", 4}, {"Notice", 5}, {"Info", 6}, {"Debug", 7}};
+  std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3},
+                                      {"Warning", 4},  {"Notice", 5},
+                                      {"Info", 6},     {"Debug", 7}};
   if (LogLevelString.size() != 1) {
     return false;
   }
@@ -218,8 +220,8 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   } catch (const CLI::ParseError &e) {
     CLIParser.exit(e);
   }
-  if ((*HelpOption and not*DetectorOption) or
-      (not*HelpOption and not*DetectorOption)) {
+  if ((*HelpOption and not *DetectorOption) or
+      (not *HelpOption and not *DetectorOption)) {
     printHelp();
     return Status::EXIT;
   }

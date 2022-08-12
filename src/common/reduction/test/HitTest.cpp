@@ -8,17 +8,14 @@ protected:
   Hit hit;
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("hit_file_test_00000.h5"))
-    {
+    if (boost::filesystem::exists("hit_file_test_00000.h5")) {
       boost::filesystem::remove("hit_file_test_00000.h5");
     }
   }
-  void TearDown() override { }
+  void TearDown() override {}
 };
 
-TEST_F(HitTest, Debug) {
-  EXPECT_FALSE(hit.to_string().empty());
-}
+TEST_F(HitTest, Debug) { EXPECT_FALSE(hit.to_string().empty()); }
 
 TEST_F(HitTest, CompoundMapping) {
   // If you are forced to change anything here,
@@ -33,7 +30,7 @@ TEST_F(HitTest, CompoundMapping) {
   auto ct = hdf5::datatype::Compound(t);
 
   EXPECT_EQ(ct.field_name(0), "time");
-  EXPECT_EQ(ct[0], hdf5::datatype::create<uint64_t >());
+  EXPECT_EQ(ct[0], hdf5::datatype::create<uint64_t>());
 
   EXPECT_EQ(ct.field_name(1), "coordinate");
   EXPECT_EQ(ct[1], hdf5::datatype::create<uint16_t>());

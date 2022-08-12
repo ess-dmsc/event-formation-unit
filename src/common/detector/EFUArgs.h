@@ -45,8 +45,8 @@ public:
     return ThreadAffinity;
   };
 
-  int getLogLevel() {return LogMessageLevel;};
-  std::string getLogFileName() {return LogFileName;};
+  int getLogLevel() { return LogMessageLevel; };
+  std::string getLogFileName() { return LogFileName; };
 
   BaseSettings getBaseSettings() { return EFUSettings; };
 

@@ -15,14 +15,13 @@
 
 #include <generators/udpgen_hits/ReaderHits.h>
 
-#include <modules/multigrid/generators/ReaderReadouts.h>
 #include <modules/loki/generators/ReaderReadouts.h>
+#include <modules/multigrid/generators/ReaderReadouts.h>
 
 #include <common/system/Socket.h>
 
-
 // Non critical but somewhat arbitrary CPU clock speed guess
-static constexpr int TscMHz {2900};
+static constexpr int TscMHz{2900};
 
 constexpr size_t RxBufferSize{9000};
 
@@ -41,7 +40,7 @@ struct {
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
+  uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
   uint64_t PktThrottle{0};
   uint16_t MaxPacketSize{0};
   uint32_t KernelTxBufferSize{1000000};
@@ -51,13 +50,18 @@ struct {
 CLI::App app{"Readout to UDP data generator for Gd-GEM"};
 
 int main(int argc, char *argv[]) {
-  app.add_option("-f, --file", Settings.FileName, "Multiblade H5 file with raw readouts");
+  app.add_option("-f, --file", Settings.FileName,
+                 "Multiblade H5 file with raw readouts");
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
-  app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
-  app.add_option("-b, --bytes", Settings.MaxPacketSize, "Maximum number of bytes per packet");
-  app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
-  app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
+  app.add_option("-a, --packets", Settings.NumberOfPackets,
+                 "Number of packets to send");
+  app.add_option("-b, --bytes", Settings.MaxPacketSize,
+                 "Maximum number of bytes per packet");
+  app.add_option("-t, --throttle", Settings.SpeedThrottle,
+                 "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
+                 "Extra usleep() after n packets");
   CLI11_PARSE(app, argc, argv);
 
   if (Settings.FileName.empty()) {
@@ -84,25 +88,26 @@ int main(int argc, char *argv[]) {
 
   Settings.FileName = remove_extension(Settings.FileName);
 
-  #ifdef GENERATOR_UDP_HITS
+#ifdef GENERATOR_UDP_HITS
   Gem::ReaderHits file(Settings.FileName);
-  #endif
+#endif
 
-  #ifdef GENERATOR_MULTIGRID_READOUTS
+#ifdef GENERATOR_MULTIGRID_READOUTS
   Multigrid::ReaderReadouts file(Settings.FileName);
-  #endif
+#endif
 
-  #ifdef GENERATOR_LOKI_READOUTS
+#ifdef GENERATOR_LOKI_READOUTS
   Loki::ReaderReadouts file(Settings.FileName);
-  #endif
+#endif
 
   size_t ReadoutSize = file.getReadoutSize();
   uint16_t MaxTxSize = ReadoutSize * file.getChunkSize();
   assert(MaxTxSize <= RxBufferSize);
   if (Settings.MaxPacketSize != 0) {
-    MaxTxSize = (Settings.MaxPacketSize/ReadoutSize) * ReadoutSize;
+    MaxTxSize = (Settings.MaxPacketSize / ReadoutSize) * ReadoutSize;
   }
-  std::cout << fmt::format("Sending packets with maximum {} bytes\n", MaxTxSize);
+  std::cout << fmt::format("Sending packets with maximum {} bytes\n",
+                           MaxTxSize);
 
   uint64_t Bytes{0};
   uint64_t TotBytes{0};
@@ -115,16 +120,18 @@ int main(int argc, char *argv[]) {
   for (;;) {
     int BytesToSend = file.read(buffer);
 
-    if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
+    if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 ||
+                            TotPackets < Settings.NumberOfPackets)) {
       int BytesSent = 0;
-      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
+      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 ||
+                                 TotPackets < Settings.NumberOfPackets)) {
         int txsize = BytesToSend >= MaxTxSize ? MaxTxSize : BytesToSend;
         DataSource.send(buffer + BytesSent, txsize);
 
         BytesSent += txsize;
         BytesToSend -= txsize;
-        Bytes += txsize;  // Bytes is periodically cleared
-        Packets++; // Packets is periodically cleared
+        Bytes += txsize; // Bytes is periodically cleared
+        Packets++;       // Packets is periodically cleared
         TotBytes += txsize;
         TotPackets++;
 
@@ -135,18 +142,18 @@ int main(int argc, char *argv[]) {
         }
       }
     } else {
-      std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes, TotPackets);
+      std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes,
+                               TotPackets);
       return (EXIT_SUCCESS);
     }
 
-    if (unlikely((ReportTimer.timetsc() / TscMHz) >= Settings.UpdateIntervalSecs * 1000000)) {
+    if (unlikely((ReportTimer.timetsc() / TscMHz) >=
+                 Settings.UpdateIntervalSecs * 1000000)) {
       auto usecs = USClock.timeus();
-      std::cout << fmt::format("Tx rate: {:8.2f} Mbps ({:.2f} pps), tx {:5} MB (total: {:7} MB) {} usecs\n",
-                          Bytes * 8.0 / usecs,
-                          Packets * 1000000.0 / usecs,
-                          Bytes / B1M,
-                          TotBytes / B1M,
-                          usecs);
+      std::cout << fmt::format("Tx rate: {:8.2f} Mbps ({:.2f} pps), tx {:5} MB "
+                               "(total: {:7} MB) {} usecs\n",
+                               Bytes * 8.0 / usecs, Packets * 1000000.0 / usecs,
+                               Bytes / B1M, TotBytes / B1M, usecs);
       Bytes = 0;
       Packets = 0;
       USClock.reset();

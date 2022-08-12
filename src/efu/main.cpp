@@ -8,11 +8,13 @@
 //===----------------------------------------------------------------------===//
 
 #include <boost/filesystem.hpp>
-#include <cstdlib>
-#include <common/detector/EFUArgs.h>
 #include <common/StatPublisher.h>
-#include <common/debug/Log.h>
 #include <common/Version.h>
+#include <common/debug/Log.h>
+#include <common/detector/EFUArgs.h>
+#include <common/system/gccintel.h>
+#include <common/time/Timer.h>
+#include <cstdlib>
 #include <efu/ExitHandler.h>
 #include <efu/HwCheck.h>
 #include <efu/Launcher.h>
@@ -20,15 +22,14 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
-#include <common/time/Timer.h>
-#include <common/system/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
 
-static constexpr uint64_t MicrosecondsPerSecond {1000000};
+static constexpr uint64_t MicrosecondsPerSecond{1000000};
 
 std::string ConsoleFormatter(const Log::LogMessage &Msg) {
-  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
+  static const std::vector<std::string> SevToString{
+      "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
   for (auto &CField : Msg.AdditionalFields) {
@@ -39,16 +40,16 @@ std::string ConsoleFormatter(const Log::LogMessage &Msg) {
     }
   }
   return fmt::format("{:5}{:21}{:5} - {}",
-      SevToString.at(static_cast<size_t>(Msg.SeverityLevel)), FileName, LineNr,
-      Msg.MessageString);
+                     SevToString.at(static_cast<size_t>(Msg.SeverityLevel)),
+                     FileName, LineNr, Msg.MessageString);
 }
-
 
 std::string FileFormatter(const Log::LogMessage &Msg) {
   std::time_t cTime = std::chrono::system_clock::to_time_t(Msg.Timestamp);
   char timeBuffer[50];
   size_t bytes = std::strftime(timeBuffer, 50, "%F %T", std::localtime(&cTime));
-  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
+  static const std::vector<std::string> SevToString{
+      "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
   for (auto &CField : Msg.AdditionalFields) {
@@ -59,8 +60,8 @@ std::string FileFormatter(const Log::LogMessage &Msg) {
     }
   }
   return fmt::format("{} {:5}{:21}:{:<5} - {}", std::string(timeBuffer, bytes),
-      SevToString.at(static_cast<size_t>(Msg.SeverityLevel)), FileName, LineNr,
-      Msg.MessageString);
+                     SevToString.at(static_cast<size_t>(Msg.SeverityLevel)),
+                     FileName, LineNr, Msg.MessageString);
 }
 
 void EmptyGraylogMessageQueue() {
@@ -93,8 +94,8 @@ int main(int argc, char *argv[]) {
   HwCheck hwcheck;
   Timer RunTimer;
 
-
-  { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
+  { // Make sure that the EFUArgs instance is deallocated before the detector
+    // plugin is
     EFUArgs efu_args;
     if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
       return 0;
@@ -120,7 +121,8 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    { // This is to prevent accessing unloaded memory in a (potentially) unloaded
+    { // This is to prevent accessing unloaded memory in a (potentially)
+      // unloaded
       // plugin.
       auto CLIArgPopulator = loader.GetCLIParserPopulator();
       CLIArgPopulator(efu_args.CLIParser);
@@ -130,14 +132,18 @@ int main(int argc, char *argv[]) {
     }
     GLConfig = efu_args.getGraylogSettings();
     if (not GLConfig.address.empty()) {
-      Log::AddLogHandler(new Log::GraylogInterface(GLConfig.address, GLConfig.port));
+      Log::AddLogHandler(
+          new Log::GraylogInterface(GLConfig.address, GLConfig.port));
     }
     efu_args.printSettings();
     DetectorSettings = efu_args.getBaseSettings();
 
-    /// Automatically create the Graphite metric prefix from detector plugin name
-    /// remove leading path and trailing extension
-    auto p = boost::filesystem::path(efu_args.getDetectorName()).filename().stem().string();
+    /// Automatically create the Graphite metric prefix from detector plugin
+    /// name remove leading path and trailing extension
+    auto p = boost::filesystem::path(efu_args.getDetectorName())
+                 .filename()
+                 .stem()
+                 .string();
     DetectorSettings.GraphitePrefix = std::string("efu.") + p;
 
     detector = loader.createDetector(DetectorSettings);
@@ -151,7 +157,8 @@ int main(int argc, char *argv[]) {
 
   int64_t statUpTime{0};
   Statistics mainStats;
-  mainStats.setPrefix(DetectorSettings.GraphitePrefix, DetectorSettings.GraphiteRegion);
+  mainStats.setPrefix(DetectorSettings.GraphitePrefix,
+                      DetectorSettings.GraphiteRegion);
   mainStats.create("main.uptime", statUpTime);
 
   LOG(MAIN, Sev::Info, "Starting Event Formation Unit");
@@ -163,9 +170,10 @@ int main(int argc, char *argv[]) {
   } else {
     if (hwcheck.checkMTU(hwcheck.IgnoredInterfaces) == false) {
       LOG(MAIN, Sev::Error, "MTU checks failed, for a quick fix, try");
-      LOG(MAIN, Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
+      LOG(MAIN, Sev::Error,
+          "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
       LOG(MAIN, Sev::Error, "exiting...");
-      detector.reset(); //De-allocate detector before we unload detector module
+      detector.reset(); // De-allocate detector before we unload detector module
       EmptyGraylogMessageQueue();
       return -1;
     }
@@ -173,19 +181,17 @@ int main(int argc, char *argv[]) {
     // if (hwcheck.checkDiskSpace(hwcheck.DirectoriesToCheck) == false) {
     //   LOG(MAIN, Sev::Error, "Not enough space on filesystem");
     //   LOG(MAIN, Sev::Error, "exiting...");
-    //   detector.reset(); //De-allocate detector before we unload detector module
-    //   EmptyGraylogMessageQueue();
-    //   return -1;
+    //   detector.reset(); //De-allocate detector before we unload detector
+    //   module EmptyGraylogMessageQueue(); return -1;
     // }
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
     LOG(MAIN, Sev::Info, "Event Formation Unit Exit (Immediate)");
-    detector.reset(); //De-allocate detector before we unload detector module
+    detector.reset(); // De-allocate detector before we unload detector module
     EmptyGraylogMessageQueue();
     return 0;
   }
-
 
   LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorName);
 
@@ -193,7 +199,8 @@ int main(int argc, char *argv[]) {
 
   launcher.launchThreads(detector);
 
-  StatPublisher metrics(DetectorSettings.GraphiteAddress, DetectorSettings.GraphitePort);
+  StatPublisher metrics(DetectorSettings.GraphiteAddress,
+                        DetectorSettings.GraphitePort);
 
   Parser cmdParser(detector, mainStats, keep_running);
   Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
@@ -201,7 +208,7 @@ int main(int argc, char *argv[]) {
   Timer livestats;
 
   while (true) {
-    //Do not allow immediate exits
+    // Do not allow immediate exits
     if (RunTimer.timeus() >= MicrosecondsPerSecond / 10) {
       if (keep_running == 0) {
         LOG(MAIN, Sev::Info, "Application stop, Exiting...");
@@ -220,7 +227,7 @@ int main(int argc, char *argv[]) {
     }
 
     if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
-      statUpTime = RunTimer.timeus()/1000000;
+      statUpTime = RunTimer.timeus() / 1000000;
       metrics.publish(detector, mainStats);
       livestats.reset();
     }

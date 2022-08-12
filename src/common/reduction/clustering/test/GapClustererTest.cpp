@@ -6,14 +6,15 @@
 
 class GapClustererTest : public TestBase {
 protected:
-  void mock_cluster(HitVector &ret,
-                    uint16_t strip_start, uint16_t strip_end, uint16_t strip_step,
-                    uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+  void mock_cluster(HitVector &ret, uint16_t strip_start, uint16_t strip_end,
+                    uint16_t strip_step, uint64_t time_start, uint64_t time_end,
+                    uint64_t time_step) {
     Hit e;
     e.plane = 0;
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = strip_start; e.coordinate <= strip_end; e.coordinate += strip_step)
+      for (e.coordinate = strip_start; e.coordinate <= strip_end;
+           e.coordinate += strip_step)
         ret.push_back(e);
   }
 };
@@ -156,7 +157,6 @@ TEST_F(GapClustererTest, PrintStatus) {
   MESSAGE() << "SIMPLE:\n" << gc.status("  ", false);
   MESSAGE() << "VERBOSE:\n" << gc.status("  ", true);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

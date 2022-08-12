@@ -25,7 +25,8 @@ void ExitHandler::InitExitHandler() {
 }
 
 void ExitHandler::critical(int sig) {
-  // Calling printf is undefined behaviour but we accept that here as we call exit immediately anyways.
+  // Calling printf is undefined behaviour but we accept that here as we call
+  // exit immediately anyways.
   printf("efu terminated with critical signal %d\n", sig);
   printTrace();
   exit(1);

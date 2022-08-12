@@ -79,7 +79,7 @@ private:
   uint64_t TotalBytesReceived{0};
 
   int ServerPort{0}; /// server tcp port
-  int ServerFd{-1}; /// server file descriptor
+  int ServerFd{-1};  /// server file descriptor
   std::array<int, SERVER_MAX_CLIENTS> ClientFd;
 
   struct timeval Timeout; /// to set select() timeout

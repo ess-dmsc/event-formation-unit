@@ -11,9 +11,8 @@
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
-Monitor::Monitor(const std::string& broker,
-    const std::string& topic_prefix,
-    const std::string& source_name) {
+Monitor::Monitor(const std::string &broker, const std::string &topic_prefix,
+                 const std::string &source_name) {
   source_name_ = source_name;
   producer = std::make_shared<Producer>(broker, topic_prefix + "_monitor");
 }
@@ -28,13 +27,11 @@ void Monitor::init_histograms(size_t max_range) {
     ProducerPtr->produce(DataBuffer, Timestamp);
   };
 
-
   hist_serializer->set_callback(Produce);
 }
 
 void Monitor::init_hits(size_t max_readouts) {
-  hit_serializer = std::make_shared<HitSerializer>(
-      max_readouts, source_name_);
+  hit_serializer = std::make_shared<HitSerializer>(max_readouts, source_name_);
 
   auto ProducerPtr = producer.get();
   auto Produce = [ProducerPtr](auto DataBuffer, auto Timestamp) {
@@ -56,13 +53,15 @@ void Monitor::produce_now() {
     return;
 
   if (!histograms->isEmpty()) {
-    LOG(PROCESS, Sev::Debug, "Flushing histograms for {} readouts", histograms->hit_count());
+    LOG(PROCESS, Sev::Debug, "Flushing histograms for {} readouts",
+        histograms->hit_count());
     hist_serializer->produce(*histograms);
     histograms->clear();
   }
 
   if (hit_serializer->getNumEntries()) {
-    LOG(PROCESS, Sev::Debug, "Flushing readout data for {} readouts", hit_serializer->getNumEntries());
+    LOG(PROCESS, Sev::Debug, "Flushing readout data for {} readouts",
+        hit_serializer->getNumEntries());
     hit_serializer->produce();
   }
 }

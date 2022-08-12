@@ -51,8 +51,6 @@ TEST_F(RuntimeStatTest, CounterGood) {
   EXPECT_EQ(res, 0);
 }
 
-
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

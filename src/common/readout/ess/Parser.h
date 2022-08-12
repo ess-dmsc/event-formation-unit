@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <common/readout/ess/ESSTime.h>
 #include <cinttypes>
+#include <common/readout/ess/ESSTime.h>
 
 namespace ESSReadout {
 
@@ -36,15 +36,16 @@ const unsigned int MinDataSize{5}; // just pad, cookie and version
 class Parser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType { Reserved   = 0x00,
-                      TTLMonitor = 0x10,
-                      Loki4Amp   = 0x30,
-                      BIFROST    = 0x34,
-                      CSPEC      = 0x40,
-                      NMX        = 0x44,
-                      FREIA      = 0x48,
-                      DREAM      = 0x60
-                      };
+  enum DetectorType {
+    Reserved = 0x00,
+    TTLMonitor = 0x10,
+    Loki4Amp = 0x30,
+    BIFROST = 0x34,
+    CSPEC = 0x40,
+    NMX = 0x44,
+    FREIA = 0x48,
+    DREAM = 0x60
+  };
 
   uint64_t NextSeqNum[MaxOutputQueues];
 
@@ -68,12 +69,11 @@ public:
   static_assert(sizeof(Parser::PacketHeaderV0) == (30),
                 "Wrong header size (update assert or check packing)");
 
-
   // Holds data relevant for processing of the current packet
   struct PacketDataV0 {
-    PacketHeaderV0 * HeaderPtr{nullptr};
+    PacketHeaderV0 *HeaderPtr{nullptr};
     uint16_t DataLength{0};
-    char * DataPtr{nullptr};
+    char *DataPtr{nullptr};
     ESSTime Time;
   } Packet;
 
@@ -83,7 +83,6 @@ public:
     uint8_t FENId;
     uint16_t DataLength;
   } __attribute__((packed));
-
 
   //
   Parser();
@@ -104,7 +103,7 @@ public:
   struct ESSHeaderStats Stats;
   // Maximum allowed separation between PulseTime and PrevPulseTime
   ///\todo 6289464 is (maybe) 14Hz in ticks of ESS clock, or?
-  ///71428571 in ns, but for now we set max pt to 0 and require
+  /// 71428571 in ns, but for now we set max pt to 0 and require
   /// setting this in the config file.
   uint32_t MaxPulseTimeDiffNS{0};
 };
