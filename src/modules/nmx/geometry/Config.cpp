@@ -18,7 +18,8 @@ namespace Nmx {
 
 void Config::applyConfig() {
   try {
-    NMXFileParameters.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
+    NMXFileParameters.DefaultMinADC =
+        root["DefaultMinADC"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
   }
@@ -71,7 +72,7 @@ void Config::applyConfig() {
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Got Hybrid");
-      
+
       try {
         Plane[Ring][FEN][LocalHybrid] = Mapping["Plane"].get<uint8_t>();
         XTRACE(INIT, DEB, "Got Plane: %u", Plane[Ring][FEN][LocalHybrid]);
@@ -81,14 +82,15 @@ void Config::applyConfig() {
       }
 
       try {
-        ReversedChannels[Ring][FEN][LocalHybrid] = Mapping["ReversedChannels"].get<bool>();
-        XTRACE(INIT, DEB, "Got ReversedChannels: %u", ReversedChannels[Ring][FEN][LocalHybrid]);
+        ReversedChannels[Ring][FEN][LocalHybrid] =
+            Mapping["ReversedChannels"].get<bool>();
+        XTRACE(INIT, DEB, "Got ReversedChannels: %u",
+               ReversedChannels[Ring][FEN][LocalHybrid]);
       } catch (...) {
         ReversedChannels[Ring][FEN][LocalHybrid] = false;
       }
-     
 
-       try {
+      try {
         Offset[Ring][FEN][LocalHybrid] = Mapping["Offset"].get<uint64_t>();
         XTRACE(INIT, DEB, "Got Offset: %u", Offset[Ring][FEN][LocalHybrid]);
       } catch (...) {
@@ -104,12 +106,14 @@ void Config::applyConfig() {
 
       Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
     }
-  
-  // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels, resulting in 8192 pixels per hybrid
-  NumPixels += NumHybrids * 8192;
+
+    // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels,
+    // resulting in 16,384 pixels per 2 hybrids, therefore 8192 pixels per hybrid
+    NumPixels += NumHybrids * 8192;
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}", FileName);
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
+        FileName);
     throw std::runtime_error("Invalid Json file");
     return;
   }

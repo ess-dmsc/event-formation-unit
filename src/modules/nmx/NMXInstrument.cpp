@@ -13,9 +13,9 @@
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
+#include <math.h>
 #include <nmx/NMXInstrument.h>
 #include <nmx/geometry/NMXGeometry.h>
-#include <math.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -24,9 +24,9 @@ namespace Nmx {
 
 /// \brief load configuration and calibration files
 NMXInstrument::NMXInstrument(struct Counters &counters,
-                                 // BaseSettings & EFUSettings,
-                                 NMXSettings &moduleSettings,
-                                 EV42Serializer *serializer)
+                             // BaseSettings & EFUSettings,
+                             NMXSettings &moduleSettings,
+                             EV42Serializer *serializer)
     : counters(counters), ModuleSettings(moduleSettings),
       Serializer(serializer) {
   if (!ModuleSettings.FilePrefix.empty()) {
@@ -38,8 +38,8 @@ NMXInstrument::NMXInstrument(struct Counters &counters,
 
   loadConfigAndCalib();
 
-  essgeom =
-      ESSGeometry(Conf.NMXFileParameters.SizeX, Conf.NMXFileParameters.SizeY, 1, 1);
+  essgeom = ESSGeometry(Conf.NMXFileParameters.SizeX,
+                        Conf.NMXFileParameters.SizeY, 1, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "NMX") {
@@ -48,13 +48,13 @@ NMXInstrument::NMXInstrument(struct Counters &counters,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
+         Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
-
 }
 
 void NMXInstrument::loadConfigAndCalib() {
@@ -65,9 +65,7 @@ void NMXInstrument::loadConfigAndCalib() {
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
-  builders =
-      std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
-
+  builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
 
   /// \todo Add calibration processing
   // if (ModuleSettings.CalibFile != "") {
@@ -96,7 +94,8 @@ void NMXInstrument::processReadouts(void) {
            readout.TimeLow);
 
     uint8_t HybridId = readout.VMM >> 1;
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
+    ESSReadout::Hybrid &Hybrid =
+        Conf.getHybrid(readout.RingId, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
@@ -112,7 +111,8 @@ void NMXInstrument::processReadouts(void) {
     uint16_t Offset = Conf.Offset[readout.RingId][readout.FENId][HybridId];
     uint8_t Plane = Conf.Plane[readout.RingId][readout.FENId][HybridId];
     uint8_t Panel = Conf.Panel[readout.RingId][readout.FENId][HybridId];
-    bool ReversedChannels = Conf.ReversedChannels[readout.RingId][readout.FENId][HybridId];
+    bool ReversedChannels =
+        Conf.ReversedChannels[readout.RingId][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
@@ -152,19 +152,20 @@ void NMXInstrument::processReadouts(void) {
 
     //   // Now we add readouts with the calibrated time and adc to the panel
     //   builders
-    
-    uint16_t Coord = GeometryInstance->coord(readout.Channel, AsicId, Offset, ReversedChannels);
 
-    if (Coord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
+    uint16_t Coord = GeometryInstance->coord(readout.Channel, AsicId, Offset,
+                                             ReversedChannels);
+
+    if (Coord ==
+        GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
       XTRACE(DATA, ERR, "Invalid Coord");
       counters.MappingErrors++;
       continue;
     }
 
-    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u", Coord,
-            readout.Channel, Panel);
-    builders[Panel].insert(
-        {TimeNS, Coord, ADC, Plane});
+    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u", Coord, readout.Channel,
+           Panel);
+    builders[Panel].insert({TimeNS, Coord, ADC, Plane});
     XTRACE(DATA, DEB, "inserted to builder");
   }
 
@@ -237,9 +238,8 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR,
-             "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u", time,
-             TimeOfFlight, x, y, PixelId);
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u",
+             time, TimeOfFlight, x, y, PixelId);
       counters.PixelErrors++;
       continue;
     }

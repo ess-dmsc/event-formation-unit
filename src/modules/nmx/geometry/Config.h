@@ -27,18 +27,14 @@ namespace Nmx {
 
 class Config : public VMM3Config {
 public:
-
-  Config(){
-    FileParameters.InstrumentGeometry = "NMX";
-  };
+  Config() { FileParameters.InstrumentGeometry = "NMX"; };
 
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
-     : VMM3Config(Instrument, ConfigFile) {}
+      : VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
   void applyConfig() override;
-
 
 public:
   // Parameters obtained from JSON config file
@@ -50,9 +46,6 @@ public:
     uint16_t MaxYSpan{3};
     uint16_t DefaultMinADC{50};
   } NMXFileParameters;
-
-  
- 
 
   // Derived parameters
   // NMX specific Hybrid fields not included in common Hybrid class

@@ -444,7 +444,6 @@ TEST_F(NMXInstrumentTest, BadRingAndFENError) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
-
 TEST_F(NMXInstrumentTest, GoodEvent) {
   makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
@@ -474,7 +473,7 @@ TEST_F(NMXInstrumentTest, MaxADC) {
   counters.VMMStats = nmx->VMMParser.Stats;
 
   // ADC was above VMM threshold of 1023 once
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); 
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1);
   ASSERT_EQ(Res, 1);
 }
 
@@ -691,7 +690,8 @@ TEST_F(NMXInstrumentTest, EventCrossPackets) {
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(BadConfigFile, (void *)BadConfigStr.c_str(), BadConfigStr.size());
-  saveBuffer(BadConfig2File, (void *)BadConfig2Str.c_str(), BadConfig2Str.size());
+  saveBuffer(BadConfig2File, (void *)BadConfig2Str.c_str(),
+             BadConfig2Str.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

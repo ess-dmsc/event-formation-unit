@@ -23,7 +23,7 @@ namespace Nmx {
 class Geometry {
 public:
   virtual uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
-                           bool ReversedChannels) = 0;
+                         bool ReversedChannels) = 0;
   static constexpr uint16_t InvalidCoord = 65535;
 };
 } // namespace Nmx

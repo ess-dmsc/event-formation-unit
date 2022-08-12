@@ -109,7 +109,7 @@ auto DuplicateEntry = R"(
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  20, 
+          "Ring" :  0, 
           "FEN": 0, 
           "Hybrid" :  0, 
           "Plane" : 0,
