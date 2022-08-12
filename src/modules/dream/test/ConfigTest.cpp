@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <dream/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <dream/geometry/Config.h>
 
 std::string NotJsonFile{"deleteme_dream_notjson.json"};
 std::string NotJsonStr = R"(
@@ -55,9 +55,7 @@ TEST_F(ConfigTest, JsonFileNotExist) {
   ASSERT_THROW(config = Config("/this_file_doesnt_exist"), std::runtime_error);
 }
 
-TEST_F(ConfigTest, NotJson) {
-  ASSERT_ANY_THROW(config = Config(NotJsonFile));
-}
+TEST_F(ConfigTest, NotJson) { ASSERT_ANY_THROW(config = Config(NotJsonFile)); }
 
 TEST_F(ConfigTest, InvalidConfig) {
   ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
@@ -71,11 +69,10 @@ TEST_F(ConfigTest, InvalidConfig) {
 //   deleteFile(ValidConfigFile);
 // }
 
-
-
 int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
-  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(), InvalidConfigStr.size());
+  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
+             InvalidConfigStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

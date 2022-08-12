@@ -16,9 +16,10 @@
 #include <utility>
 
 // returns integer describing the X and Z position in the flattened 2D space
-uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
-                                          uint8_t VMMID, uint8_t Channel,
-                                          uint16_t XOffset, bool Rotated) {
+uint16_t Cspec::CSPECGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID,
+                                          uint8_t HybridID, uint8_t VMMID,
+                                          uint8_t Channel, uint16_t XOffset,
+                                          bool Rotated) {
   if (!validWireMapping(HybridID, VMMID, Channel)) {
     XTRACE(DATA, WAR,
            "Invalid Hybrid: %u, VMM: %u, and Channel: %u, combination for wire "

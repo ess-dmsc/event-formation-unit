@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief Handles mappings between (digitizers, channels) and (x,y,z) coordinates
+/// \brief Handles mappings between (digitizers, channels) and (x,y,z)
+/// coordinates
 ///
 /// This currently (18/1 2018) is compatible with MG.24, MG.24.T and MG.CNCS
 /// detector demonstrators although not all channels may be in use
@@ -25,17 +26,17 @@ public:
   uint16_t wire(uint16_t channel) const override {
     if (channel < 16) {
       return MGSeqMappings::wire(channel);
-    } else if (channel < 32){
+    } else if (channel < 32) {
       return MGSeqMappings::wire(channel + 4);
-    } else if (channel < 48){
+    } else if (channel < 48) {
       return MGSeqMappings::wire(channel + 8);
-    } else if (channel < 64){
+    } else if (channel < 64) {
       return MGSeqMappings::wire(channel + 12);
-    } else if (channel < 68){
+    } else if (channel < 68) {
       return MGSeqMappings::wire(channel - 48);
-    } else if (channel < 72){
+    } else if (channel < 72) {
       return MGSeqMappings::wire(channel - 32);
-    } else if (channel < 76){
+    } else if (channel < 76) {
       return MGSeqMappings::wire(channel - 16);
     } else {
       return MGSeqMappings::wire(channel);
@@ -52,21 +53,22 @@ class MG24MappingsB : public MGSeqMappings {
 public:
   /** \brief return the z coordinate of the detector */
 
-  // \todo this is wrong, need to draw a diagram for this module like for SRS tests
+  // \todo this is wrong, need to draw a diagram for this module like for SRS
+  // tests
   uint16_t wire(uint16_t channel) const override {
     if (channel < 16) {
       return MGSeqMappings::wire(channel);
-    } else if (channel < 32){
+    } else if (channel < 32) {
       return MGSeqMappings::wire(channel + 4);
-    } else if (channel < 48){
+    } else if (channel < 48) {
       return MGSeqMappings::wire(channel + 8);
-    } else if (channel < 64){
+    } else if (channel < 64) {
       return MGSeqMappings::wire(channel + 12);
-    } else if (channel < 68){
+    } else if (channel < 68) {
       return MGSeqMappings::wire(channel - 48);
-    } else if (channel < 72){
+    } else if (channel < 72) {
       return MGSeqMappings::wire(channel - 32);
-    } else if (channel < 76){
+    } else if (channel < 76) {
       return MGSeqMappings::wire(channel - 16);
     } else {
       return MGSeqMappings::wire(channel);
@@ -78,5 +80,4 @@ public:
   }
 };
 
-
-}
+} // namespace Multigrid

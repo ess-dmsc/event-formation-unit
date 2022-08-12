@@ -8,16 +8,16 @@
 
 #include "BifrostBase.h"
 
+#include <bifrost/BifrostInstrument.h>
 #include <cinttypes>
-#include <common/detector/EFUArgs.h>
-#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
+#include <common/detector/EFUArgs.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <common/debug/Trace.h>
-#include <bifrost/BifrostInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
@@ -30,8 +30,9 @@ namespace Bifrost {
 const char *classname = "Bifrost detector with ESS readout";
 
 BifrostBase::BifrostBase(BaseSettings const &Settings,
-                   struct BifrostSettings &LocalBifrostSettings)
-    : Detector("Bifrost", Settings), BifrostModuleSettings(LocalBifrostSettings) {
+                         struct BifrostSettings &LocalBifrostSettings)
+    : Detector("Bifrost", Settings),
+      BifrostModuleSettings(LocalBifrostSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -123,8 +124,9 @@ void BifrostBase::inputThread() {
 
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
-    if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                         RxRingbuffer.getMaxBufSize())) > 0) {
+    if ((readSize =
+             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                  RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -143,7 +145,6 @@ void BifrostBase::inputThread() {
   return;
 }
 
-
 ///
 /// \brief Normal processing thread
 void BifrostBase::processingThread() {
@@ -157,7 +158,8 @@ void BifrostBase::processingThread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "bifrost", Produce);
-  Bifrost.setSerializer(Serializer); // would rather have this in BifrostInstrument
+  Bifrost.setSerializer(
+      Serializer); // would rather have this in BifrostInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer, DebugTimer;
@@ -176,7 +178,8 @@ void BifrostBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Bifrost.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::BIFROST);
+      auto Res = Bifrost.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                   ESSReadout::Parser::BIFROST);
       Counters.ReadoutStats = Bifrost.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -186,26 +189,31 @@ void BifrostBase::processingThread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Bifrost.BifrostParser.parse(Bifrost.ESSReadoutParser.Packet.DataPtr,
-                                  Bifrost.ESSReadoutParser.Packet.DataLength);
+      Res = Bifrost.BifrostParser.parse(
+          Bifrost.ESSReadoutParser.Packet.DataPtr,
+          Bifrost.ESSReadoutParser.Packet.DataLength);
 
       // Process readouts, generate (end produce) events
       Bifrost.processReadouts();
 
       Counters.TofCount = Bifrost.ESSReadoutParser.Packet.Time.Stats.TofCount;
-      Counters.TofNegative = Bifrost.ESSReadoutParser.Packet.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
+      Counters.TofNegative =
+          Bifrost.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount =
+          Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative =
+          Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
       Counters.TofHigh = Bifrost.ESSReadoutParser.Packet.Time.Stats.TofHigh;
-      Counters.PrevTofHigh = Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
-
+      Counters.PrevTofHigh =
+          Bifrost.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
       usleep(10);
     }
 
-    if (ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (ProduceTimer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});

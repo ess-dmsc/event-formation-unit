@@ -38,62 +38,58 @@ Offset Offsets[] {    {32,  0}, {48,  0}, {64,  0},
 
 class CDTGeometry {
 public:
+  enum ModuleType { Undefined, Mantle, Cuboid, SUMO3, SUMO4, SUMO5, SUMO6 };
 
-  enum ModuleType {Undefined, Mantle, Cuboid, SUMO3, SUMO4, SUMO5, SUMO6};
-
-  CDTGeometry(ModuleType Type, int Cassettes, int Wires, int Strips, bool Sumo, int Xoffset)
-    : Type(Type),
-      Cassettes(Cassettes), Wires(Wires), Strips(Strips), Sumo(Sumo),
-      Xoffset(Xoffset) { }
+  CDTGeometry(ModuleType Type, int Cassettes, int Wires, int Strips, bool Sumo,
+              int Xoffset)
+      : Type(Type), Cassettes(Cassettes), Wires(Wires), Strips(Strips),
+        Sumo(Sumo), Xoffset(Xoffset) {}
 
   /// Works for SUMO 3 - 6
   int getXSUMO(int Sector, int Cassette, int Counter) {
-      return 56 * Sector + Xoffset + 2 * Cassette + Counter;
+    return 56 * Sector + Xoffset + 2 * Cassette + Counter;
   }
 
   /// Works for SUMO 3 - 6
-  int getYSUMO(int Wire, int Strip) {
-    return 16 * Strip + 15 - Wire;
-  }
-
-
+  int getYSUMO(int Wire, int Strip) { return 16 * Strip + 15 - Wire; }
 
   /// \todo range checking for array indexing
   int getXCuboid(int Index, int Cassette, int Counter, int Wire, int Rotate) {
     int LocalX = 2 * Cassette + Counter;
     int LocalY = 15 - Wire;
     switch (Rotate) {
-      case 1: // 90 deg. clockwise
-        LocalX = 15 - LocalY;
-        break;
-      case 2: // 180 deg. cockwise
-        LocalX = 15 - LocalX;
-        break;
-      case 3: // 270 deg. clockwise
-        LocalX = LocalY;
+    case 1: // 90 deg. clockwise
+      LocalX = 15 - LocalY;
+      break;
+    case 2: // 180 deg. cockwise
+      LocalX = 15 - LocalX;
+      break;
+    case 3: // 270 deg. clockwise
+      LocalX = LocalY;
       break;
     }
 
     return Offsets[Index].X + LocalX;
   }
 
-  int getYCuboid(int Index, int Cassette, int Counter, int Wire, int Strip, int Rotate) {
+  int getYCuboid(int Index, int Cassette, int Counter, int Wire, int Strip,
+                 int Rotate) {
     int LocalX = 2 * Cassette + Counter;
     int LocalY = 15 - Wire;
-    //printf("Local X/Y %d, %d\n", LocalX, LocalY);
+    // printf("Local X/Y %d, %d\n", LocalX, LocalY);
     switch (Rotate) {
-      case 1: // 90 deg. clockwise
-        LocalY = LocalX;
-        break;
-      case 2: // 180 deg. cockwise
-        LocalY = 15 - LocalY;
-        break;
-      case 3: // 270 deg. clockwise
-        LocalY = 15 - LocalX;
+    case 1: // 90 deg. clockwise
+      LocalY = LocalX;
+      break;
+    case 2: // 180 deg. cockwise
+      LocalY = 15 - LocalY;
+      break;
+    case 3: // 270 deg. clockwise
+      LocalY = 15 - LocalX;
       break;
     }
-    //printf("Final Y %d\n", LocalY);
-    constexpr int YDim {7 * 16};
+    // printf("Final Y %d\n", LocalY);
+    constexpr int YDim{7 * 16};
     return YDim * Strip + Offsets[Index].Y + LocalY;
   }
 
@@ -103,9 +99,8 @@ public:
   int Wires{0};
   int Strips{0};
   bool Sumo{true}; // if true, wires and strips encodes z and y positions
-  int Rotate{0}; // 0 == 0 degrees, 1 = 90 degrees, 2 == 180 degrees, 3 == 270
+  int Rotate{0};   // 0 == 0 degrees, 1 = 90 degrees, 2 == 180 degrees, 3 == 270
   int Xoffset{0};
-
 };
 
 } // namespace Dream

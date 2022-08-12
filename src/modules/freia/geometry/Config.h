@@ -26,9 +26,7 @@ public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
 
-  Config(){
-    FileParameters.InstrumentGeometry = "Freia";
-  };
+  Config() { FileParameters.InstrumentGeometry = "Freia"; };
 
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
@@ -40,13 +38,10 @@ public:
 public:
   // Parameters obtained from JSON config file
 
-   
-    
-
-    bool StripGapCheck{true};
-    bool WireGapCheck{true};
-    uint16_t MaxGapWire{0};
-    uint16_t MaxGapStrip{0};
+  bool StripGapCheck{true};
+  bool WireGapCheck{true};
+  uint16_t MaxGapWire{0};
+  uint16_t MaxGapStrip{0};
 };
 
 } // namespace Freia

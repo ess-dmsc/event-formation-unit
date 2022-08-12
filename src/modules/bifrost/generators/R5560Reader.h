@@ -41,6 +41,6 @@ public:
 
 private:
   std::string filename;
-  int fd; // file descriptor
+  int fd;       // file descriptor
   int readouts; // number of readouts in file
 };

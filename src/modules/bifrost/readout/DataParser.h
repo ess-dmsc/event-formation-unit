@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <modules/bifrost/Counters.h>
 #include <common/readout/ess/Parser.h>
+#include <modules/bifrost/Counters.h>
 #include <vector>
 
 namespace Bifrost {
@@ -35,7 +35,8 @@ public:
     int16_t AmpD;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(BifrostReadout) == 24, "Bifrost readout header length error");
+  static_assert(sizeof(BifrostReadout) == 24,
+                "Bifrost readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);

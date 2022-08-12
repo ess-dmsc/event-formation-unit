@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <fmt/format.h>
 #include <multigrid/mesytec/Readout.h>
 #include <sstream>
-#include <fmt/format.h>
 
 namespace Multigrid {
 
@@ -14,12 +14,12 @@ std::string Readout::debug() const {
   if (external_trigger) {
     ss << " external_trigger";
   } else {
-    ss << fmt::format(" bus={} chan={} adc={}",
-                      static_cast<uint16_t>(bus), channel, adc);
+    ss << fmt::format(" bus={} chan={} adc={}", static_cast<uint16_t>(bus),
+                      channel, adc);
   }
-// GCOVR_EXCL_STOP
+  // GCOVR_EXCL_STOP
 
   return ss.str();
 }
 
-}
+} // namespace Multigrid

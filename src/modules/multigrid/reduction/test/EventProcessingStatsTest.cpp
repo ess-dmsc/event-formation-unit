@@ -1,16 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/reduction/EventProcessingStats.h>
 #include <common/testutils/TestBase.h>
+#include <multigrid/reduction/EventProcessingStats.h>
 
 using namespace Multigrid;
 
 class EventProcessingStatsTest : public TestBase {
 protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(EventProcessingStatsTest, blah) {

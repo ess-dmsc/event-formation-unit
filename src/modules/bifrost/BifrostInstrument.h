@@ -11,16 +11,15 @@
 
 #pragma once
 
-#include <bifrost/Counters.h>
 #include <bifrost/BifrostBase.h> // to get BifrostSettings
+#include <bifrost/Counters.h>
 #include <bifrost/geometry/Config.h>
 #include <bifrost/geometry/Geometry.h>
-#include <bifrost/readout/Readout.h>
-#include <common/readout/ess/Parser.h>
-#include <common/readout/ess/ESSTime.h>
-#include <logical_geometry/ESSGeometry.h>
 #include <bifrost/readout/DataParser.h>
-
+#include <bifrost/readout/Readout.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
+#include <logical_geometry/ESSGeometry.h>
 
 namespace Bifrost {
 
@@ -54,7 +53,7 @@ public:
   Config BifrostConfiguration;
   ESSGeometry lgeom{900, 15, 1, 1};
   Geometry geom;
-  //Calibration BifrostCalibration;
+  // Calibration BifrostCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser BifrostParser{counters};
   EV42Serializer *Serializer{nullptr};

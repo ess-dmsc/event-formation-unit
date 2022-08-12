@@ -41,7 +41,8 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
+         Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }

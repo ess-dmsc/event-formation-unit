@@ -33,10 +33,10 @@ public:
   size_t read(char *buf);
 
   /// ReadoutSize refers to <loki/readout/Readout.h>
-  size_t getReadoutSize() const { return ReadoutSize;}
+  size_t getReadoutSize() const { return ReadoutSize; }
 
   /// ChunkSize is a HDF5 specific parameter.
-  size_t getChunkSize() const { return ChunkSize;}
+  size_t getChunkSize() const { return ChunkSize; }
 
 private:
   std::shared_ptr<ReadoutFile> file;
@@ -47,7 +47,8 @@ private:
   size_t ChunkSize{0};
   uint32_t SeqNum{0};
   const size_t LokiReadoutSize = sizeof(struct DataParser::LokiReadout);
-  const size_t ESSHeaderSize = sizeof(struct ESSReadout::Parser::PacketHeaderV0);
+  const size_t ESSHeaderSize =
+      sizeof(struct ESSReadout::Parser::PacketHeaderV0);
 
   // Need to keep track of when this changes so we can start a
   // new packet.
@@ -55,6 +56,6 @@ private:
   uint32_t CurPulseTimeLow{0};
 };
 
-}
+} // namespace Loki
 
 // GCOVR_EXCL_STOP

@@ -24,4 +24,4 @@ public:
   std::vector<Buffer<uint32_t>> buffers;
 };
 
-}
+} // namespace Multigrid

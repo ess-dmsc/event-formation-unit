@@ -8,16 +8,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/JsonFile.h>
-#include <multigrid/Config.h>
-#include <sstream>
-#include <multigrid/mesytec/BuilderReadouts.h>
-#include <multigrid/mesytec/BuilderMesytec.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <multigrid/Config.h>
+#include <multigrid/mesytec/BuilderMesytec.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
+#include <sstream>
 
 namespace Multigrid {
 
-Config::Config(const std::string& jsonfile, std::string dump_path) {
+Config::Config(const std::string &jsonfile, std::string dump_path) {
   nlohmann::json root = from_json_file(jsonfile);
 
   if (root.count("mappings")) {
@@ -26,7 +26,8 @@ Config::Config(const std::string& jsonfile, std::string dump_path) {
 
   auto br = root["builder"];
   if (br["type"] == "mesytec") {
-    builder = std::make_shared<BuilderMesytec>(mappings, br["spoof_high_time"], dump_path);
+    builder = std::make_shared<BuilderMesytec>(mappings, br["spoof_high_time"],
+                                               dump_path);
   } else if (br["type"] == "readouts") {
     builder = std::make_shared<BuilderReadouts>(mappings, dump_path);
   }
@@ -46,4 +47,4 @@ std::string Config::debug() const {
   return ss.str();
 }
 
-}
+} // namespace Multigrid

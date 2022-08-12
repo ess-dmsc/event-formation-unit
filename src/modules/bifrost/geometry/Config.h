@@ -24,8 +24,6 @@ public:
 
   int MaxValidRing{0};
 
-
 private:
-
 };
 } // namespace Bifrost
