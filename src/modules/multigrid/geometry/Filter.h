@@ -9,8 +9,8 @@
 
 #pragma once
 #include <cinttypes>
-#include <limits>
 #include <string>
+#include <limits>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -53,4 +53,4 @@ public:
 
 void from_json(const nlohmann::json &j, FilterSet &g);
 
-} // namespace Multigrid
+}

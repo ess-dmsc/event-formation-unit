@@ -7,11 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/readout/ess/Parser.h>
-#include <common/testutils/TestBase.h>
 #include <loki/Counters.h>
-#include <loki/generators/ReadoutGenerator.h>
+#include <common/readout/ess/Parser.h>
 #include <loki/readout/DataParser.h>
+#include <common/testutils/TestBase.h>
+#include <loki/generators/ReadoutGenerator.h>
+
 
 const uint32_t FirstSeqNum{0};
 
@@ -66,6 +67,7 @@ protected:
   void TearDown() override {}
 };
 
+
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGen) {
   const uint16_t BufferSize{8972};
@@ -80,31 +82,28 @@ TEST_F(CombinedParserTest, DataGen) {
     Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
 
     uint16_t DataSize = gen.makePacket();
-    ASSERT_EQ(DataSize,
-              sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
+    ASSERT_EQ(DataSize, sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections *(4 + 20));
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], DataSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
-    Res = LokiParser.parse(CommonReadout.Packet.DataPtr,
-                           CommonReadout.Packet.DataLength);
+    Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
   }
 }
 
+
 TEST_F(CombinedParserTest, ParseUDPPacket) {
-  auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(),
-                                    DataType);
+  auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(), DataType);
   ASSERT_EQ(Res, ESSReadout::Parser::OK);
-  Res = LokiParser.parse(CommonReadout.Packet.DataPtr,
-                         CommonReadout.Packet.DataLength);
+  Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
   ASSERT_EQ(Res, 2);
 
   // Just for visual inspection for now
-  for (auto &Data : LokiParser.Result) {
+  for (auto & Data : LokiParser.Result) {
     printf("Ring %u, FEN %u\n", Data.RingId, Data.FENId);
     printf("time (%u, %u), SeqNum %u, Tube %u, A %u, B %u, C %u, D %u\n",
-           Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA,
-           Data.AmpB, Data.AmpC, Data.AmpD);
+            Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId,
+            Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   }
 }
 

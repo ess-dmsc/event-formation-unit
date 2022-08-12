@@ -9,11 +9,11 @@
 
 #include <string>
 
-#include <common/readout/ess/Parser.h>
+#include <loki/LokiBase.h>
+#include <common/testutils/TestUDPServer.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
-#include <loki/LokiBase.h>
+#include <common/readout/ess/Parser.h>
 
 /// Test configuration - two rings used (0 and 1)
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and
@@ -151,8 +151,7 @@ TEST_F(LokiBaseTest, DataReceive) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket[0], TestPacket.size());
+  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&TestPacket[0], TestPacket.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
@@ -169,8 +168,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
+  TestUDPServer Server(43127, Settings.DetectorPort, (unsigned char *)&TestPacket2[0], TestPacket2.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();

@@ -31,8 +31,7 @@ bool DataPacket::addSamplingRun(void const *const DataPtr, size_t Bytes,
   return true;
 }
 
-std::pair<void *, size_t>
-DataPacket::formatPacketForSend(std::uint16_t ReadoutCount) {
+std::pair<void *, size_t> DataPacket::formatPacketForSend(std::uint16_t ReadoutCount) {
   std::uint32_t *TrailerPtr =
       reinterpret_cast<std::uint32_t *>(Buffer.get() + Size);
   auto TrailerVal = htonl(0xFEEDF00Du);

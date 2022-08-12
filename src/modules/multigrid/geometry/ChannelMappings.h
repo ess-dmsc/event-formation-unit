@@ -23,7 +23,7 @@ public:
   virtual uint16_t max_channel() const = 0;
 
   // \todo document this
-  bool map(Hit &hit, uint16_t channel, uint16_t adc) const;
+  bool map(Hit& hit, uint16_t channel, uint16_t adc) const;
 
   /** @brief identifies which channels are wires*/
   virtual bool isWire(uint16_t channel) const = 0;
@@ -48,4 +48,4 @@ public:
 
 void from_json(const nlohmann::json &j, ChannelMappings &g);
 
-} // namespace Multigrid
+}

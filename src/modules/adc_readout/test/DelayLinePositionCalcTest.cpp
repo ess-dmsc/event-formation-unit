@@ -5,8 +5,8 @@
  *  \brief Unit tests delay line position calc code.
  */
 
-#include <adc_readout/AdcReadoutConstants.h>
 #include <adc_readout/DelayLinePositionCalc.h>
+#include <adc_readout/AdcReadoutConstants.h>
 #include <cmath>
 #include <gtest/gtest.h>
 

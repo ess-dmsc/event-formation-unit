@@ -2,19 +2,21 @@
 
 #include <common/testutils/TestBase.h>
 
-#include <common/JsonFile.h>
-#include <generators/udpgenpcap/ReaderPcap.h>
 #include <multigrid/mesytec/BuilderMesytec.h>
 #include <multigrid/mesytec/test/TestData.h>
+#include <common/JsonFile.h>
+#include <generators/udpgenpcap/ReaderPcap.h>
 
 using namespace Multigrid;
 
 class BuilderMesytecTest : public TestBase {
 protected:
-  Multigrid::BuilderMesytec builder{{}, false};
+  Multigrid::BuilderMesytec builder {{}, false};
 
-  void SetUp() override {}
-  void TearDown() override {}
+  void SetUp() override {
+  }
+  void TearDown() override {
+  }
 
   void load_config(std::string jsonfile) {
     nlohmann::json root = from_json_file(jsonfile);
@@ -98,7 +100,7 @@ TEST_F(BuilderMesytecTest, PCap2) {
 
   uint8_t buffer[10000];
   int rdsize;
-  size_t packets{0};
+  size_t packets {0};
   while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
     if (rdsize == 0) {
       continue; // non udp data
@@ -108,7 +110,7 @@ TEST_F(BuilderMesytecTest, PCap2) {
   }
 
   EXPECT_EQ(packets, 12660); // was 25!
-  // EXPECT_EQ(builder.stats_discarded_bytes, 3784);
+  //EXPECT_EQ(builder.stats_discarded_bytes, 3784);
   EXPECT_EQ(builder.stats_trigger_count, 0);
   EXPECT_EQ(builder.stats_bus_glitch_rejects, 0);
   EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
@@ -125,7 +127,7 @@ TEST_F(BuilderMesytecTest, PCap3) {
 
   uint8_t buffer[10000];
   int rdsize;
-  size_t packets{0};
+  size_t packets {0};
   while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
     if (rdsize == 0) {
       continue; // non udp data
@@ -135,7 +137,7 @@ TEST_F(BuilderMesytecTest, PCap3) {
   }
 
   EXPECT_EQ(packets, 65309); // was 102
-  // EXPECT_EQ(builder.stats_discarded_bytes, 12047);
+  //EXPECT_EQ(builder.stats_discarded_bytes, 12047);
   EXPECT_EQ(builder.stats_trigger_count, 0);
   EXPECT_EQ(builder.stats_bus_glitch_rejects, 0);
   EXPECT_EQ(builder.stats_readout_filter_rejects, 0);

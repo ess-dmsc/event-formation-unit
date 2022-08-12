@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <multigrid/geometry/ChannelMappings.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
@@ -9,29 +9,35 @@ class MockMappings : public ChannelMappings {
 public:
   // Implementation
 
-  uint16_t max_channel() const override { return 0; }
+  uint16_t max_channel() const override {
+    return 0;
+  }
 
-  uint16_t max_wire() const override { return 0; }
+  uint16_t max_wire() const override {
+    return 0;
+  }
 
-  uint16_t max_grid() const override { return 0; }
+  uint16_t max_grid() const override {
+    return 0;
+  }
 
   bool isWire(uint16_t channel) const override {
-    (void)channel;
+    (void) channel;
     return true;
   }
 
   bool isGrid(uint16_t channel) const override {
-    (void)channel;
+    (void) channel;
     return true;
   }
 
   uint16_t wire(uint16_t channel) const override {
-    (void)channel;
+    (void) channel;
     return 0;
   }
 
   uint16_t grid(uint16_t channel) const override {
-    (void)channel;
+    (void) channel;
     return 0;
   }
 };
@@ -45,7 +51,8 @@ protected:
     f.maximum = 7;
     f.rescale_factor = 0.5;
   }
-  void TearDown() override {}
+  void TearDown()  override {
+  }
 };
 
 // \todo actual tests

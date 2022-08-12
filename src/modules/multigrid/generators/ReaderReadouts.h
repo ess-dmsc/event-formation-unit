@@ -38,6 +38,6 @@ private:
   size_t ChunkSize{0};
 };
 
-} // namespace Multigrid
+}
 
 // GCOVR_EXCL_STOP

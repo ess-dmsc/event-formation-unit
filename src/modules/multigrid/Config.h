@@ -7,16 +7,16 @@
 
 #pragma once
 
-#include <memory>
 #include <multigrid/AbstractBuilder.h>
 #include <multigrid/geometry/DetectorMappings.h>
 #include <multigrid/reduction/Reduction.h>
+#include <memory>
 
 namespace Multigrid {
 
 struct Config {
   Config() = default;
-  explicit Config(const std::string &jsonfile, std::string dump_path = "");
+  explicit Config(const std::string& jsonfile, std::string dump_path = "");
 
   DetectorMappings mappings;
   std::shared_ptr<AbstractBuilder> builder;
@@ -25,4 +25,4 @@ struct Config {
   std::string debug() const;
 };
 
-} // namespace Multigrid
+}

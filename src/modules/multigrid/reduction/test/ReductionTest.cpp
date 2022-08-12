@@ -25,15 +25,15 @@
 //    Filter events with higher multiplicities and spans in either dimension.
 //    Clustering across buses is a "mistake" and ideally should be avoided, but
 //      this likely requires more complexity (multiple clusterers and additional
-//      plane mappings), which will not be needed in the final VMM-based setup,
-//      so we should not bother mitigating this. Simply reject those events.
+//      plane mappings), which will not be needed in the final VMM-based setup, so
+//      we should not bother mitigating this. Simply reject those events.
 
-#include <common/monitor/DynamicHist.h>
 #include <common/testutils/TestBase.h>
-#include <multigrid/Config.h>
-#include <multigrid/generators/ReaderReadouts.h>
-#include <multigrid/mesytec/BuilderReadouts.h>
+#include <common/monitor/DynamicHist.h>
 #include <multigrid/reduction/Reduction.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
+#include <multigrid/generators/ReaderReadouts.h>
+#include <multigrid/Config.h>
 
 using namespace Multigrid;
 
@@ -49,11 +49,12 @@ protected:
   void SetUp() override {
     load_config(TEST_DATA_PATH "Sequoia_mappings2.json");
   }
-  void TearDown() override {}
+  void TearDown() override {
+  }
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    //    MESSAGE() << "Config:\n" << config.debug() << "\n";
+//    MESSAGE() << "Config:\n" << config.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
@@ -62,7 +63,7 @@ protected:
     uint8_t buffer[9000];
     size_t readsz;
 
-    while ((readsz = reader.read((char *)&buffer)) > 0) {
+    while ((readsz = reader.read((char *) &buffer)) > 0) {
       config.builder->parse(Buffer<uint8_t>(buffer, readsz));
       ingested_hits += config.builder->ConvertedData.size();
       config.reduction.ingest(config.builder->ConvertedData);
@@ -72,7 +73,7 @@ protected:
     }
     config.reduction.process_queues(true);
 
-    //    MESSAGE() << "Status:\n" << config.reduction.status("", false);
+//    MESSAGE() << "Status:\n" << config.reduction.status("", false);
   }
 
   void inspect_pulse_data(bool verbose = false) {
@@ -108,6 +109,7 @@ protected:
                   << pulse_negative_diff.visualize(true) << "\n";
       }
     }
+
   }
 
   void inspect_event_data(bool verbose = false) {
@@ -116,8 +118,7 @@ protected:
     uint64_t RecentTime{0};
 
     DynamicHist event_positive_diff, event_negative_diff;
-    DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span,
-        time_span;
+    DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
     for (const auto &e : config.reduction.out_queue) {
       if (e.pixel_id == 0) {
         continue;
@@ -125,11 +126,11 @@ protected:
 
       good_events++;
 
-      //      time_span.bin(e.time_span());
-      //      wire_multiplicity.bin(e.cluster1.hit_count());
-      //      wire_span.bin(e.cluster1.coord_span());
-      //      grid_mltiplicity.bin(e.cluster2.hit_count());
-      //      grid_span.bin(e.cluster2.coord_span());
+//      time_span.bin(e.time_span());
+//      wire_multiplicity.bin(e.cluster1.hit_count());
+//      wire_span.bin(e.cluster1.coord_span());
+//      grid_mltiplicity.bin(e.cluster2.hit_count());
+//      grid_span.bin(e.cluster2.coord_span());
 
       if (HaveTime) {
         auto t = e.time;
@@ -145,24 +146,24 @@ protected:
     }
 
     if (verbose) {
-      //      MESSAGE() << "Event positive time difference:\n"
-      //                << event_positive_diff.visualize(true) << "\n";
+//      MESSAGE() << "Event positive time difference:\n"
+//                << event_positive_diff.visualize(true) << "\n";
       if (!event_negative_diff.empty()) {
         MESSAGE() << "Event negative time difference:\n"
                   << event_negative_diff.visualize(true) << "\n";
       }
       MESSAGE() << "Event time span:\n" << time_span.visualize(true) << "\n";
-      MESSAGE() << "Wire multiplicity:\n"
-                << wire_multiplicity.visualize(true) << "\n";
+      MESSAGE() << "Wire multiplicity:\n" << wire_multiplicity.visualize(true) << "\n";
       MESSAGE() << "Wire span:\n" << wire_span.visualize(true) << "\n";
-      MESSAGE() << "Grid multiplicity:\n"
-                << grid_mltiplicity.visualize(true) << "\n";
+      MESSAGE() << "Grid multiplicity:\n" << grid_mltiplicity.visualize(true) << "\n";
       MESSAGE() << "Grid span:\n" << grid_span.visualize(true) << "\n";
     }
     //      if ((i > 80000) && (i < 85000)) {
-    //        MESSAGE() << h.to_string() << "\n";
-    //      }
+//        MESSAGE() << h.to_string() << "\n";
+//      }
+
   }
+
 };
 
 TEST_F(ReductionTest, t00004) {
@@ -184,8 +185,8 @@ TEST_F(ReductionTest, t00004) {
   inspect_event_data();
   EXPECT_EQ(pulse_times, 467);
   EXPECT_EQ(good_events, 121);
-  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects +
-                config.reduction.stats.events_bad,
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
@@ -205,12 +206,13 @@ TEST_F(ReductionTest, t00033) {
   EXPECT_EQ(config.reduction.stats.events_bad, 438);
   EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
 
+
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 2555);
   EXPECT_EQ(good_events, 1377);
-  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects +
-                config.reduction.stats.events_bad,
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
@@ -235,8 +237,8 @@ TEST_F(ReductionTest, t00311) {
   inspect_event_data();
   EXPECT_EQ(pulse_times, 975);
   EXPECT_EQ(good_events, 17986);
-  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects +
-                config.reduction.stats.events_bad,
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 0);
 }
@@ -261,8 +263,8 @@ TEST_F(ReductionTest, t03710) {
   inspect_event_data();
   EXPECT_EQ(pulse_times, 312);
   EXPECT_EQ(good_events, 11152);
-  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects +
-                config.reduction.stats.events_bad,
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
@@ -287,8 +289,8 @@ TEST_F(ReductionTest, t10392) {
   inspect_event_data();
   EXPECT_EQ(pulse_times, 300);
   EXPECT_EQ(good_events, 33339);
-  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects +
-                config.reduction.stats.events_bad,
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }

@@ -38,7 +38,7 @@
 
 namespace Multigrid {
 
-struct __attribute__((packed)) Readout {
+struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "mgmesytec_hits"; }
   static uint16_t FormatVersion() { return 0; }
@@ -61,12 +61,13 @@ struct __attribute__((packed)) Readout {
   std::string debug() const;
 };
 
-} // namespace Multigrid
+}
 
 namespace hdf5 {
 
 namespace datatype {
-template <> class TypeTrait<Multigrid::Readout> {
+template<>
+class TypeTrait<Multigrid::Readout> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Multigrid::Readout) {
     H5_COMPOUND_INIT;
@@ -84,9 +85,9 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-} // namespace datatype
+}
 
-} // namespace hdf5
+}
 
 namespace Multigrid {
 

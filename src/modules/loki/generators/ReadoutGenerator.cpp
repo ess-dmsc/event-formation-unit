@@ -40,11 +40,11 @@ void ReadoutGenerator::generateData() {
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
 
-    ReadoutData->RingId = (Readout / 10) % Settings.NRings;
+    ReadoutData->RingId = (Readout/10) % Settings.NRings;
     ReadoutData->FENId = Readout % 8;
     ReadoutData->DataLength = LokiDataSize;
 
-    ReadoutData->TubeId = (Readout / 10) % 8;
+    ReadoutData->TubeId = (Readout/10) % 8;
     ReadoutData->AmpA = Readout;
     ReadoutData->AmpB = 1;
     ReadoutData->AmpC = 1;
@@ -58,7 +58,7 @@ void ReadoutGenerator::generateData() {
     // All readouts are events for loki
     TimeLow += Settings.TicksBtwEvents;
 
-    if (TimeLow >= 88052499) {
+    if (TimeLow >= 88052499){
       TimeLow -= 88052499;
       TimeHigh += 1;
     }

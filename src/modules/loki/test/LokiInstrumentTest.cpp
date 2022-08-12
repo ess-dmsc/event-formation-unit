@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <loki/LokiInstrument.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <loki/LokiInstrument.h>
 
 using namespace Loki;
 

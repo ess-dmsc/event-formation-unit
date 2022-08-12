@@ -39,21 +39,20 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
 
   loadConfigAndCalib();
 
-  essgeom = ESSGeometry(Conf.CSPECFileParameters.SizeX,
-                        Conf.CSPECFileParameters.SizeY,
-                        Conf.CSPECFileParameters.SizeZ, 1);
+  essgeom =
+      ESSGeometry(Conf.CSPECFileParameters.SizeX, Conf.CSPECFileParameters.SizeY, Conf.CSPECFileParameters.SizeZ, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "CSPEC") {
     GeometryInstance = &CSPECGeometryInstance;
-  } else if (Conf.FileParameters.InstrumentGeometry == "LET") {
+  }
+  else if (Conf.FileParameters.InstrumentGeometry == "LET"){
     GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
@@ -104,17 +103,17 @@ void CSPECInstrument::processReadouts(void) {
     }
 
     // Convert from physical rings to logical rings
-    uint8_t Ring = readout.RingId / 2;
+    uint8_t Ring = readout.RingId/2;
 
     uint8_t HybridId = readout.VMM >> 1;
-
+    
     XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, HybridId %d, VMM %d, Channel "
-           "%d, TimeLow %d",
+           "readout: Phys RingId %d, FENId %d, HybridId %d, VMM %d, Channel %d, TimeLow %d",
            Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
+    
+    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId); 
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
@@ -124,12 +123,15 @@ void CSPECInstrument::processReadouts(void) {
       continue;
     }
 
+
     uint8_t AsicId = readout.VMM & 0x1;
     uint16_t XOffset = Hybrid.XOffset;
     uint16_t YOffset = Hybrid.YOffset;
     bool Rotated = Conf.Rotated[Ring][readout.FENId][HybridId];
     bool Short = Conf.Short[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
+
+    
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
@@ -173,19 +175,17 @@ void CSPECInstrument::processReadouts(void) {
     // insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      uint16_t xAndzCoord =
-          GeometryInstance->xAndzCoord(Ring, readout.FENId, HybridId, AsicId,
-                                       readout.Channel, XOffset, Rotated);
+      uint16_t xAndzCoord = GeometryInstance->xAndzCoord( Ring,
+          readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
 
-      if (xAndzCoord ==
-          GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
+      if (xAndzCoord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
         counters.MappingErrors++;
         continue;
       }
 
       XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u, X: %u, Z: %u", xAndzCoord,
-             readout.Channel, xAndzCoord >> 4, xAndzCoord % 16);
+             readout.Channel, xAndzCoord>>4, xAndzCoord%16);
       builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, xAndzCoord, ADC, 0});
 
@@ -197,8 +197,7 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord ==
-          GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
+      if (yCoord == GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;

@@ -29,7 +29,9 @@ static constexpr uint32_t LengthMask    {0x0000ffff};
 
 // \todo get rid of magic numbers
 
-Sis3153Parser::Sis3153Parser() { buffers.reserve(1000); }
+Sis3153Parser::Sis3153Parser() {
+  buffers.reserve(1000);
+}
 
 size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 
@@ -90,4 +92,4 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
   return 0;
 }
 
-} // namespace Multigrid
+}

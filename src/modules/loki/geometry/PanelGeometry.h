@@ -10,8 +10,8 @@
 #pragma once
 
 #include <assert.h>
-#include <common/debug/Trace.h>
 #include <cstdint>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -63,8 +63,7 @@ public:
 
     // Add the contributions to the total straw - this is the y coordinate
     // for the pixelid calculation, x comes from the position along the straw
-    auto AbsoluteStraw =
-        StrawOffset + LayerOffset + GroupOffset + TubeOffset + Straw;
+    auto AbsoluteStraw = StrawOffset + LayerOffset + GroupOffset + TubeOffset + Straw;
     assert(AbsoluteStraw < MaxStraw + StrawOffset);
     return AbsoluteStraw;
   }

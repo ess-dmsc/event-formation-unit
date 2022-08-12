@@ -30,8 +30,7 @@ TEST_F(GeometryTest, Coordinates) {
   uint YOffsetJumps = 32;
 
   for (unsigned int i = YCoordMinChannel; i < YCoordMaxChannel; i++) {
-    for (unsigned int YOffset = 0; YOffset < MaxYOffset;
-         YOffset += YOffsetJumps) {
+    for (unsigned int YOffset = 0; YOffset < MaxYOffset; YOffset += YOffsetJumps) {
       ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), YCoordMaxChannel - i + YOffset);
     }
   }

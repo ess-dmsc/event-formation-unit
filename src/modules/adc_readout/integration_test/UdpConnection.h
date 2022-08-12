@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "DataPacket.h"
 #include <adc_readout/AdcParse.h>
+#include "DataPacket.h"
 #include <common/system/Socket.h>
 #include <common/time/TimeNano.h>
 

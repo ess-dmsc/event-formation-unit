@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
+#include <common/readout/ess/Parser.h>
 #include <vector>
 
 namespace Dream {

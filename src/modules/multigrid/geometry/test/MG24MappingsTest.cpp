@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <multigrid/geometry/MG24Mappings.h>
+#include <common/testutils/TestBase.h>
 
 class MG24MappingsTest : public TestBase {
 protected:
@@ -29,31 +29,28 @@ TEST_F(MG24MappingsTest, WireOrGridVariantA) {
   EXPECT_FALSE(mgdet.isGrid(128));
 }
 
-// \todo these tests are possibly more confusing than the implementation being
-// tested
+// \todo these tests are possibly more confusing than the implementation being tested
 
 TEST_F(MG24MappingsTest, WiresVariantA) {
   Multigrid::MG24MappingsA mgdet;
   mgdet.max_channel(128);
 
   for (uint16_t offset = 0; offset < 4; offset++) {
-    MESSAGE() << "Lower wires: " << offset * 16 << " to " << (offset * 16 + 15)
-              << "\n";
+    MESSAGE() << "Lower wires: " << offset * 16 << " to " << (offset * 16 + 15) << "\n";
     for (uint16_t chan = 0; chan < 16; chan++) {
       uint16_t channel = offset * 16 + chan;
       EXPECT_EQ(channel + 4 * offset, mgdet.wire(channel))
-          << " for offset=" << offset << " chan=" << chan << "\n";
+              << " for offset=" << offset << " chan=" << chan << "\n";
     }
   }
 
   for (uint16_t offset = 0; offset < 4; offset++) {
-    MESSAGE() << "Upper wires: " << 64 + offset * 4 << " to "
-              << (64 + offset * 4 + 3) << "\n";
+    MESSAGE() << "Upper wires: " << 64 + offset * 4 << " to " << (64 + offset * 4 + 3) << "\n";
     for (uint16_t chan = 0; chan < 4; chan++) {
       uint16_t channel = 64 + offset * 4 + chan;
       uint16_t wire = channel - (3 - offset) * 16;
       EXPECT_EQ(wire, mgdet.wire(channel))
-          << " for offset=" << offset << " chan=" << chan << "\n";
+              << " for offset=" << offset << " chan=" << chan << "\n";
     }
   }
 }

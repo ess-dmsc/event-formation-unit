@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <multigrid/reduction/ModuleGeometry.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
@@ -9,8 +9,9 @@ class ModuleGeometryTest : public TestBase {
 protected:
   ModuleGeometry geo;
   void SetUp() override {}
-  void TearDown() override {}
+  void TearDown()  override {}
 };
+
 
 TEST_F(ModuleGeometryTest, GetX) {
   EXPECT_EQ(geo.num_wires(), 80);

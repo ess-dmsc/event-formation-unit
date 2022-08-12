@@ -16,21 +16,21 @@
 
 namespace Bifrost {
 
-int Geometry::xOffset(int Ring, int Tube) {
-  return Ring * PosResolution + (Tube % 3) * (PosResolution / 3);
-}
-
-int Geometry::yOffset(int Tube) {
-  int Triplet = Tube / 3;
-  return Triplet * 3;
-}
-
-int Geometry::posAlongTube(int AmpA, int AmpB) {
-  if (AmpA + AmpB == 0) {
-    ///\todo add counter
-    return -1;
+  int Geometry::xOffset(int Ring, int Tube) {
+    return Ring * PosResolution + (Tube % 3)*(PosResolution/3);
   }
-  return ((PosResolution - 1) * AmpA) / (AmpA + AmpB);
-}
 
-} // namespace Bifrost
+  int Geometry::yOffset(int Tube) {
+    int Triplet = Tube/3;
+    return Triplet * 3;
+  }
+
+  int Geometry::posAlongTube(int AmpA, int AmpB) {
+    if (AmpA + AmpB == 0) {
+      ///\todo add counter
+      return -1;
+    }
+    return ((PosResolution - 1) * AmpA) / (AmpA + AmpB);
+  }
+
+} //namespace

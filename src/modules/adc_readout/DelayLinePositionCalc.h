@@ -24,6 +24,7 @@ struct AxisEvent {
 
 class DelayLinePositionInterface {
 public:
+  
   struct CalibData {
     double Origin;
     double Slope;
@@ -37,7 +38,9 @@ public:
     Calib.Slope = NewSlope;
   };
 
-  virtual CalibData getCalibrationValues() { return Calib; };
+  virtual CalibData getCalibrationValues() {
+    return Calib;
+  };
 
   /// \brief Calculate event information based on available pulse data.
   ///
@@ -60,7 +63,7 @@ protected:
     return std::lround(RawPosition * Calib.Slope + Calib.Origin);
   };
 
-  CalibData Calib{0, 1.0};
+  CalibData Calib {0, 1.0};
 };
 
 class ConstDelayLinePosition : public DelayLinePositionInterface {

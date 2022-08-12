@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/time/TimeString.h>
 #include <multigrid/mesytec/BuilderReadouts.h>
+#include <common/time/TimeString.h>
 
 #include <common/debug/Trace.h>
 // #undef TRC_LEVEL
@@ -13,8 +13,7 @@ BuilderReadouts::BuilderReadouts(const DetectorMappings &geometry,
                                  std::string dump_dir)
     : mappings_(geometry) {
   if (!dump_dir.empty()) {
-    dumpfile_ =
-        HitFile::create(dump_dir + "multigrid_hits_" + timeString(), 100);
+    dumpfile_ = HitFile::create(dump_dir + "multigrid_hits_" + timeString(), 100);
   }
   parsed_data_.reserve(9000 / sizeof(Readout));
 }
@@ -33,13 +32,13 @@ std::string BuilderReadouts::debug() const {
 
 void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
 
-  size_t count =
-      std::min(buffer.size / sizeof(Readout), size_t(9000 / sizeof(Readout)));
+  size_t count = std::min(buffer.size / sizeof(Readout),
+                          size_t(9000 / sizeof(Readout)));
 
   parsed_data_.resize(count);
   memcpy(parsed_data_.data(), buffer.address, count * sizeof(Readout));
 
-  // stats_trigger_count = vmmr16Parser.trigger_count();
+  //stats_trigger_count = vmmr16Parser.trigger_count();
 
   build(parsed_data_);
 
@@ -77,4 +76,5 @@ void BuilderReadouts::build(const std::vector<Readout> &readouts) {
   }
 }
 
-} // namespace Multigrid
+
+}

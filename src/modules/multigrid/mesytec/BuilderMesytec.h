@@ -9,12 +9,13 @@ namespace Multigrid {
 
 class BuilderMesytec : public BuilderReadouts {
 public:
-  BuilderMesytec(const DetectorMappings &geometry, bool spoof_time,
+  BuilderMesytec(const DetectorMappings& geometry, bool spoof_time,
                  std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
   std::string debug() const override;
+
 
 private:
   std::shared_ptr<ReadoutFile> dumpfile_;
@@ -22,4 +23,4 @@ private:
   VMMR16Parser vmmr16Parser_;
 };
 
-} // namespace Multigrid
+}

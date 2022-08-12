@@ -19,8 +19,8 @@ struct EventProcessingStats {
   size_t events_geometry_err{0};
 
   void clear();
-  EventProcessingStats &operator+=(const EventProcessingStats &other);
+  EventProcessingStats& operator +=(const EventProcessingStats& other);
   std::string debug(std::string prepend) const;
 };
 
-} // namespace Multigrid
+}

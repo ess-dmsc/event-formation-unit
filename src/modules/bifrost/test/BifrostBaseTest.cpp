@@ -26,11 +26,11 @@ std::string bifrostjson = R"(
 class BifrostBaseStandIn : public Bifrost::BifrostBase {
 public:
   BifrostBaseStandIn(BaseSettings Settings,
-                     struct Bifrost::BifrostSettings ReadoutSettings)
+                   struct Bifrost::BifrostSettings ReadoutSettings)
       : Bifrost::BifrostBase(Settings, ReadoutSettings){};
   ~BifrostBaseStandIn() = default;
-  using Bifrost::BifrostBase::Counters;
   using Detector::Threads;
+  using Bifrost::BifrostBase::Counters;
 };
 
 class BifrostBaseTest : public ::testing::Test {
@@ -47,6 +47,7 @@ public:
   Bifrost::BifrostSettings LocalSettings;
 };
 
+
 TEST_F(BifrostBaseTest, Constructor) {
   BifrostBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
@@ -61,6 +62,7 @@ TEST_F(BifrostBaseTest, Constructor) {
   EXPECT_EQ(Readout.Counters.RingErrors, 0);
 }
 
+
 std::vector<uint8_t> TestPacket2{
     // ESS header
     0x00, 0x00,             // pad, v0
@@ -68,8 +70,9 @@ std::vector<uint8_t> TestPacket2{
     0x36, 0x00, 0x00, 0x00, // 0x002e - 54 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x11, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00,
-    0x00, // Seq number 1
+    0x11, 0x00, 0x00, 0x00,
+    0x00, 0x01, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00, // Seq number 1
 
     // Data Header 1
     0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 24 bytes

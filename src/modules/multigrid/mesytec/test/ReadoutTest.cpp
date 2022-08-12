@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <multigrid/mesytec/Readout.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
@@ -9,7 +9,8 @@ class MGHitTest : public TestBase {
 protected:
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("hit_file_test_00000.h5")) {
+    if (boost::filesystem::exists("hit_file_test_00000.h5"))
+    {
       boost::filesystem::remove("hit_file_test_00000.h5");
     }
   }

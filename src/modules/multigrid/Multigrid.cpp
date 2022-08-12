@@ -7,28 +7,19 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/Detector.h>
 #include <multigrid/MultigridBase.h>
+#include <common/detector/Detector.h>
 
 static struct MultigridSettings LocalMultigridSettings;
 
-void SetCLIArguments(CLI::App &parser) {
-  parser
-      .add_option("-f,--file", LocalMultigridSettings.ConfigFile, "config file")
-      ->group("Multigrid")
-      ->required()
-      ->configurable(true);
-  parser
-      .add_flag("--monitor", LocalMultigridSettings.monitor,
-                "stream monitor data")
-      ->group("Multigrid")
-      ->configurable(true)
-      ->default_val("true");
-  parser
-      .add_option("--dumptofile", LocalMultigridSettings.FilePrefix,
-                  "dump to specified file")
-      ->group("Multigrid")
-      ->configurable(true);
+void SetCLIArguments(CLI::App & parser) {
+  parser.add_option("-f,--file", LocalMultigridSettings.ConfigFile,
+                    "config file")->group("Multigrid")->
+                    required()->configurable(true);
+  parser.add_flag("--monitor", LocalMultigridSettings.monitor,
+                  "stream monitor data")->group("Multigrid")->configurable(true)->default_val("true");
+  parser.add_option("--dumptofile", LocalMultigridSettings.FilePrefix,
+                    "dump to specified file")->group("Multigrid")->configurable(true);
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

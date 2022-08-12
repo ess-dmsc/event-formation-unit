@@ -59,4 +59,5 @@ private:
 
 void from_json(const nlohmann::json &j, ModuleGeometry &g);
 
-} // namespace Multigrid
+}
+

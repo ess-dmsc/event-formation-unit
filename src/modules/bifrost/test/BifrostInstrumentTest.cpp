@@ -6,8 +6,8 @@
 
 #include <bifrost/BifrostInstrument.h>
 #include <common/testutils/SaveBuffer.h>
-#include <common/testutils/TestBase.h>
 #include <string.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Bifrost;
 
@@ -20,6 +20,7 @@ std::string ConfigStr = R"(
   }
 )";
 
+
 class BifrostInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
@@ -29,7 +30,7 @@ protected:
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
 
   void SetUp() override {
-    // ModuleSettings.ConfigFile = ConfigFile;
+    //ModuleSettings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "bifrost");
     counters = {};
 
@@ -50,6 +51,7 @@ protected:
     Packet.Time.setReference(0, 2);
     Packet.Time.setPrevReference(0, 1);
   }
+
 };
 
 /// Test cases below
@@ -63,11 +65,11 @@ TEST_F(BifrostInstrumentTest, CalcPixel) {
 }
 
 TEST_F(BifrostInstrumentTest, InvalidRing) {
-  bifrost->BifrostParser.Result.push_back(
-      {1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  bifrost->BifrostParser.Result.push_back({1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
   bifrost->processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
 }
+
 
 std::vector<uint8_t> InvalidTOF{
     0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
@@ -81,15 +83,16 @@ std::vector<uint8_t> InvalidTOF{
 TEST_F(BifrostInstrumentTest, InvalidTOF) {
   makeHeader(bifrost->ESSReadoutParser.Packet, InvalidTOF);
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.PrevTofNegative, 0);
-  auto Res =
-      bifrost->BifrostParser.parse(bifrost->ESSReadoutParser.Packet.DataPtr,
-                                   bifrost->ESSReadoutParser.Packet.DataLength);
+  auto Res = bifrost->BifrostParser.parse(
+     bifrost->ESSReadoutParser.Packet.DataPtr,
+     bifrost->ESSReadoutParser.Packet.DataLength);
   ASSERT_EQ(Res, 1);
 
   bifrost->processReadouts();
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.PrevTofNegative, 1);
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.TofNegative, 1);
 }
+
 
 std::vector<uint8_t> NullAmps{
     0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
@@ -102,9 +105,9 @@ std::vector<uint8_t> NullAmps{
 
 TEST_F(BifrostInstrumentTest, InvalidAmpls) {
   makeHeader(bifrost->ESSReadoutParser.Packet, NullAmps);
-  auto Res =
-      bifrost->BifrostParser.parse(bifrost->ESSReadoutParser.Packet.DataPtr,
-                                   bifrost->ESSReadoutParser.Packet.DataLength);
+  auto Res = bifrost->BifrostParser.parse(
+     bifrost->ESSReadoutParser.Packet.DataPtr,
+     bifrost->ESSReadoutParser.Packet.DataLength);
   ASSERT_EQ(Res, 1);
 
   bifrost->processReadouts();
@@ -112,6 +115,7 @@ TEST_F(BifrostInstrumentTest, InvalidAmpls) {
   ASSERT_EQ(bifrost->ESSReadoutParser.Packet.Time.Stats.TofNegative, 0);
   ASSERT_EQ(counters.PixelErrors, 1);
 }
+
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());

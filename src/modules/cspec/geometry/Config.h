@@ -27,14 +27,18 @@ namespace Cspec {
 
 class Config : public VMM3Config {
 public:
-  Config() { FileParameters.InstrumentGeometry = "CSPEC"; };
+
+  Config(){
+    FileParameters.InstrumentGeometry = "CSPEC";
+  };
 
   // Load and apply the json config
   Config(std::string Instrument, std::string ConfigFile)
-      : VMM3Config(Instrument, ConfigFile) {}
+     : VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
   void applyConfig() override;
+
 
 public:
   // Parameters obtained from JSON config file
@@ -45,6 +49,9 @@ public:
     uint16_t MaxGridsSpan{3};
     uint16_t DefaultMinADC{50};
   } CSPECFileParameters;
+
+  
+ 
 
   // Derived parameters
   // CSPEC specific Hybrid fields not included in common Hybrid class

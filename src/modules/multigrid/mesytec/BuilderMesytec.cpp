@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/time/TimeString.h>
 #include <multigrid/mesytec/BuilderMesytec.h>
+#include <common/time/TimeString.h>
 
 #include <common/debug/Trace.h>
 // #undef TRC_LEVEL
@@ -9,14 +9,14 @@
 
 namespace Multigrid {
 
-BuilderMesytec::BuilderMesytec(const DetectorMappings &geometry,
-                               bool spoof_time, std::string dump_dir)
+BuilderMesytec::BuilderMesytec(const DetectorMappings &geometry, bool spoof_time,
+                               std::string dump_dir)
     : BuilderReadouts(geometry) {
   vmmr16Parser_.spoof_high_time(spoof_time);
   if (!dump_dir.empty()) {
-    dumpfile_ = ReadoutFile::create(
-        dump_dir + "mgmesytec_readouts_" + timeString(), 100);
+    dumpfile_ = ReadoutFile::create(dump_dir + "mgmesytec_readouts_" + timeString(), 100);
   }
+
 }
 
 std::string BuilderMesytec::debug() const {
@@ -60,4 +60,4 @@ void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
   }
 }
 
-} // namespace Multigrid
+}

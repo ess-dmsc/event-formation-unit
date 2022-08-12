@@ -13,7 +13,8 @@
 
 static struct PerfGen::PerfGenSettings LocalPerfGenSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 

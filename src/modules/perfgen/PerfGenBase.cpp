@@ -11,12 +11,12 @@
 #include "PerfGenBase.h"
 
 #include <cinttypes>
-#include <common/TestImageUdder.h>
-#include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
 #include <common/kafka/Producer.h>
+#include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
+#include <common/TestImageUdder.h>
 
 #include <unistd.h>
 
@@ -34,8 +34,7 @@ namespace PerfGen {
 
 const char *classname = "PerfGen Pixel Generator";
 
-PerfGenBase::PerfGenBase(BaseSettings const &settings,
-                         struct PerfGenSettings &LocalPerfGenSettings)
+PerfGenBase::PerfGenBase(BaseSettings const &settings, struct PerfGenSettings &LocalPerfGenSettings)
     : Detector("PerfGen", settings), PerfGenSettings(LocalPerfGenSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -112,4 +111,4 @@ void PerfGenBase::processingThread() {
   return;
 }
 
-} // namespace PerfGen
+}

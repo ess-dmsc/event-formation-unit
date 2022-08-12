@@ -14,7 +14,9 @@
 
 namespace Multigrid {
 
-void ModuleGeometry::num_grids(uint16_t g) { grids_ = g; }
+void ModuleGeometry::num_grids(uint16_t g) {
+  grids_ = g;
+}
 
 void ModuleGeometry::num_wires(uint16_t w) {
   wires_ = w;
@@ -26,33 +28,55 @@ void ModuleGeometry::z_range(uint32_t z) {
   x_range_ = wires_ / z_range_;
 }
 
-void ModuleGeometry::flipped_x(bool f) { flipped_x_ = f; }
+void ModuleGeometry::flipped_x(bool f) {
+  flipped_x_ = f;
+}
 
-void ModuleGeometry::flipped_z(bool f) { flipped_z_ = f; }
+void ModuleGeometry::flipped_z(bool f) {
+  flipped_z_ = f;
+}
 
-bool ModuleGeometry::flipped_x() const { return flipped_x_; }
+bool ModuleGeometry::flipped_x() const {
+  return flipped_x_;
+}
 
-bool ModuleGeometry::flipped_z() const { return flipped_z_; }
+bool ModuleGeometry::flipped_z() const {
+  return flipped_z_;
+}
 
 // \todo cache this result
-uint32_t ModuleGeometry::x_range() const { return x_range_; }
+uint32_t ModuleGeometry::x_range() const {
+  return x_range_;
+}
 
-uint32_t ModuleGeometry::y_range() const { return num_grids(); }
+uint32_t ModuleGeometry::y_range() const {
+  return num_grids();
+}
 
-uint32_t ModuleGeometry::z_range() const { return z_range_; }
+uint32_t ModuleGeometry::z_range() const {
+  return z_range_;
+}
 
-uint16_t ModuleGeometry::num_wires() const { return wires_; }
+uint16_t ModuleGeometry::num_wires() const {
+  return wires_;
+}
 
-uint16_t ModuleGeometry::num_grids() const { return grids_; }
+uint16_t ModuleGeometry::num_grids() const {
+  return grids_;
+}
 
-inline uint32_t flip(uint32_t val, uint32_t max) { return max - val - 1u; }
+inline uint32_t flip(uint32_t val, uint32_t max) {
+  return max - val - 1u;
+}
 
 uint32_t ModuleGeometry::x_from_wire(uint16_t w) const {
   uint32_t ret = w / z_range_;
   return x_offset + (flipped_x() ? flip(ret, x_range_) : ret);
 }
 
-uint32_t ModuleGeometry::y_from_grid(uint16_t g) const { return y_offset + g; }
+uint32_t ModuleGeometry::y_from_grid(uint16_t g) const {
+  return y_offset + g;
+}
 
 uint32_t ModuleGeometry::z_from_wire(uint16_t w) const {
   uint32_t ret = w % z_range_;
@@ -62,13 +86,14 @@ uint32_t ModuleGeometry::z_from_wire(uint16_t w) const {
 std::string ModuleGeometry::debug(std::string prefix) const {
   std::string ret;
 
-  ret += prefix +
-         fmt::format("  wires: {},  grids: {}\n", num_wires(), num_grids());
+  ret += prefix + fmt::format("  wires: {},  grids: {}\n",
+                              num_wires(), num_grids());
 
-  ret += prefix + fmt::format("  x[{},{}] y[{},{}] z[{},{}]\n", x_offset,
-                              x_offset + x_range() - 1u, y_offset,
-                              y_offset + y_range() - 1u, z_offset,
-                              z_offset + z_range() - 1u);
+  ret += prefix + fmt::format("  x[{},{}] y[{},{}] z[{},{}]\n",
+                              x_offset, x_offset + x_range() - 1u,
+                              y_offset, y_offset + y_range() - 1u,
+                              z_offset, z_offset + z_range() - 1u
+                              );
 
   if (flipped_x_)
     ret += prefix + "  (flipped in X)\n";
@@ -99,4 +124,5 @@ void from_json(const nlohmann::json &j, ModuleGeometry &g) {
     g.x_offset = j["z_offset"];
 }
 
-} // namespace Multigrid
+}
+

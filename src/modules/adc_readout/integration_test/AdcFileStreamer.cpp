@@ -13,12 +13,12 @@
 #include "WaveformData.h"
 
 #include <CLI/CLI.hpp>
-#include <atomic>
 #include <h5cpp/hdf5.hpp>
 #include <string>
 #include <vector>
+#include <atomic>
 
-static std::atomic_bool RunLoop{true};
+static std::atomic_bool RunLoop {true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;

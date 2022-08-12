@@ -5,8 +5,8 @@
  *  \brief Testing of time stamp calculations.
  */
 
-#include <adc_readout/AdcReadoutConstants.h>
 #include <adc_readout/AdcTimeStamp.h>
+#include <adc_readout/AdcReadoutConstants.h>
 #include <cmath>
 #include <ctime>
 #include <gtest/gtest.h>

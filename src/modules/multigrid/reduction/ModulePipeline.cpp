@@ -1,17 +1,19 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/debug/Trace.h>
+#include <multigrid/reduction/ModulePipeline.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/geometry/PlaneMappings.h>
-#include <multigrid/mesytec/BuilderReadouts.h>
-#include <multigrid/reduction/ModulePipeline.h>
+#include <common/debug/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Multigrid {
 
-ModulePipeline::ModulePipeline() { matcher.set_minimum_time_gap(1); }
+ModulePipeline::ModulePipeline() {
+  matcher.set_minimum_time_gap(1);
+}
 
 void ModulePipeline::ingest(const Hit &hit) {
   if (previous_time_ > hit.time) {
@@ -39,11 +41,9 @@ void ModulePipeline::process_events(bool flush) {
   stats.wire_clusters = wire_clusterer.stats_cluster_count;
   stats.grid_clusters = grid_clusterer.stats_cluster_count;
   if (!wire_clusterer.clusters.empty())
-    matcher.insert(wire_clusterer.clusters.front().plane(),
-                   wire_clusterer.clusters);
+    matcher.insert(wire_clusterer.clusters.front().plane(), wire_clusterer.clusters);
   if (!grid_clusterer.clusters.empty())
-    matcher.insert(grid_clusterer.clusters.front().plane(),
-                   grid_clusterer.clusters);
+    matcher.insert(grid_clusterer.clusters.front().plane(), grid_clusterer.clusters);
   matcher.match(flush);
 
   for (auto &event : matcher.matched_events) {
@@ -62,20 +62,20 @@ void ModulePipeline::process_events(bool flush) {
       stats.events_bad++;
       continue;
     }
-    //            XTRACE(PROCESS, DEB, "Neutron: %s ",
-    //            neutron.to_string().c_str());
-    uint32_t pixel =
-        geometry.pixel3D(neutron.x.center_rounded(), neutron.y.center_rounded(),
-                         neutron.z.center_rounded());
+    //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.to_string().c_str());
+    uint32_t pixel = geometry.pixel3D(
+        neutron.x.center_rounded(),
+        neutron.y.center_rounded(),
+        neutron.z.center_rounded()
+    );
 
     if (pixel == 0) {
       XTRACE(PROCESS, DEB, "Event geometry error for %s\n      %s",
-             neutron.to_string().c_str(),
-             event.to_string("      ", true).c_str());
+             neutron.to_string().c_str(), event.to_string("      ", true).c_str());
       stats.events_geometry_err++;
       continue;
     }
-    //            XTRACE(PROCESS, DEB, "Event good");
+//            XTRACE(PROCESS, DEB, "Event good");
 
     out_queue.push_back({neutron.time, pixel});
   }
@@ -84,7 +84,7 @@ void ModulePipeline::process_events(bool flush) {
 
 // GCOVR_EXCL_START
 // debug strings excluded from coverage and unit tests
-std::string ModulePipeline::config(const std::string &prepend) const {
+std::string ModulePipeline::config(const std::string& prepend) const {
   std::stringstream ss;
   ss << prepend << "Wire clusterer:\n" + wire_clusterer.config(prepend + "  ");
   ss << prepend << "Grid clusterer:\n" + grid_clusterer.config(prepend + "  ");
@@ -95,8 +95,7 @@ std::string ModulePipeline::config(const std::string &prepend) const {
   return ss.str();
 }
 
-std::string ModulePipeline::status(const std::string &prepend,
-                                   bool verbose) const {
+std::string ModulePipeline::status(const std::string& prepend, bool verbose) const {
   std::stringstream ss;
   ss << prepend << "Stats:\n" << stats.debug(prepend + "  ");
   if (!out_queue.empty()) {
@@ -110,12 +109,10 @@ std::string ModulePipeline::status(const std::string &prepend,
   }
   ss << prepend << "Previous time: " << previous_time_ << "\n";
   ss << prepend << "Matcher:\n" + matcher.status(prepend + "  ", verbose);
-  ss << prepend
-     << "Wire clusterer:\n" + wire_clusterer.status(prepend + "  ", verbose);
-  ss << prepend
-     << "Grid clusterer:\n" + grid_clusterer.status(prepend + "  ", verbose);
+  ss << prepend << "Wire clusterer:\n" + wire_clusterer.status(prepend + "  ", verbose);
+  ss << prepend << "Grid clusterer:\n" + grid_clusterer.status(prepend + "  ", verbose);
   return ss.str();
 }
 // GCOVR_EXCL_STOP
 
-} // namespace Multigrid
+}

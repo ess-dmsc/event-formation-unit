@@ -38,11 +38,9 @@ public:
     XTRACE(INIT, DEB, "StrawNum: %d, PosNum: %d, Denominator: %d", StrawNum,
            PosNum, Denominator);
     if (Denominator == 0) {
-      XTRACE(INIT, WAR,
-             "Denominator is 0, StrawNum: %d, PosNum: %d, "
-             " Denominator: %d,  A %d, B %d, C %d, D %d",
-             StrawNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
-             AmplitudeD);
+      XTRACE(INIT, WAR, "Denominator is 0, StrawNum: %d, PosNum: %d, "
+        " Denominator: %d,  A %d, B %d, C %d, D %d", StrawNum, PosNum,
+        Denominator, AmplitudeA, AmplitudeB, AmplitudeC, AmplitudeD);
       Stats.AmplitudeZero++;
       StrawId = NStraws;
       PosVal = NPos;
@@ -51,8 +49,8 @@ public:
     double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
     StrawId = strawCalc(dStrawId);
     PosVal = ((NPos - 1) * PosNum * 1.0) / Denominator;
-    XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f", dStrawId,
-           StrawId, PosNum, PosVal);
+    XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f",
+      dStrawId, StrawId, PosNum, PosVal);
     return true;
   }
 

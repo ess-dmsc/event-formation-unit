@@ -16,14 +16,14 @@
 #include <utility>
 
 // returns integer describing the X and Z position in the flattened 2D space
-uint16_t Cspec::LETGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID,
-                                        uint8_t HybridID, uint8_t VMMID,
-                                        uint8_t Channel, uint16_t XOffset,
-                                        bool Rotated) {
-
+uint16_t Cspec::LETGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
+                                          uint8_t VMMID, uint8_t Channel,
+                                          uint16_t XOffset, bool Rotated) {
+  
   if (Channel % 2 == 0) {
     Channel = Channel + 1;
-  } else {
+  }
+  else {
     Channel = Channel - 1;
   }
 
@@ -63,8 +63,8 @@ uint16_t Cspec::LETGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID,
 }
 
 uint16_t Cspec::LETGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
-                                    uint8_t Channel, uint16_t YOffset,
-                                    bool Rotated, bool Short) {
+                                      uint8_t Channel, uint16_t YOffset,
+                                      bool Rotated, bool Short) {
   uint16_t YCoord;
   if (!validGridMapping(HybridID, VMMID, Channel, Short)) {
     XTRACE(DATA, ERR,
@@ -94,7 +94,7 @@ uint16_t Cspec::LETGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
 
 // The valid combinations of these parameters are defined in CSPEC ICD document
 bool Cspec::LETGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
-                                          uint8_t Channel, bool Short) {
+                                            uint8_t Channel, bool Short) {
   if (Short) {
     return (HybridID == 0 and VMMID == 0 and Channel <= 50);
   }
@@ -116,7 +116,7 @@ bool Cspec::LETGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
 
 // The valid combinations of these parameters are defined in CSPEC ICD document
 bool Cspec::LETGeometry::validWireMapping(uint8_t HybridID, uint8_t VMMID,
-                                          uint8_t Channel) {
+                                            uint8_t Channel) {
   if (HybridID != 1) {
     return false;
   }

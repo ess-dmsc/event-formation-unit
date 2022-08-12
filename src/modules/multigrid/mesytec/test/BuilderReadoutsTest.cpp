@@ -9,8 +9,8 @@
 //          we have been referring to as the "bus glitch".
 //
 // Geometry errors are legitimate -- channels are outside the range of where
-//    we expect to see valid data. These cases appear similar to the "bus
-//    glitch", since we see all channels firing.
+//    we expect to see valid data. These cases appear similar to the "bus glitch",
+//    since we see all channels firing.
 //
 // CONSEQUENCES FOR PIPELINE
 //    Timing errors: check for these and flush cluseters when this happens
@@ -18,15 +18,15 @@
 
 #include <common/testutils/TestBase.h>
 
-#include <common/JsonFile.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/mesytec/BuilderReadouts.h>
+#include <common/JsonFile.h>
 
 using namespace Multigrid;
 
 class BuilderReadoutsTest : public TestBase {
 protected:
-  Multigrid::BuilderReadouts builder{DetectorMappings()};
+  Multigrid::BuilderReadouts builder {DetectorMappings()};
 
   size_t packets{0};
   size_t readouts{0};
@@ -56,7 +56,7 @@ protected:
     uint8_t buffer[9000];
     size_t readsz;
 
-    while ((readsz = reader.read((char *)&buffer)) > 0) {
+    while ((readsz = reader.read((char *) &buffer)) > 0) {
       packets++;
       builder.parse(Buffer<uint8_t>(buffer, readsz));
     }
@@ -66,14 +66,13 @@ protected:
     uint64_t RecentPulseTime{0};
 
     uint64_t prev_time{0};
-    for (size_t i = 0; i < builder.ConvertedData.size(); ++i) {
+    for (size_t i=0; i < builder.ConvertedData.size(); ++i) {
 
       const auto &h = builder.ConvertedData[i];
 
       if (prev_time > h.time) {
         time_errors++;
-        //        MESSAGE() << "Timing error [" << i << "]: " << prev_time << "
-        //        > " << h.time << "\n";
+//        MESSAGE() << "Timing error [" << i << "]: " << prev_time << " > " << h.time << "\n";
       }
       prev_time = h.time;
 
@@ -89,15 +88,17 @@ protected:
         invalid_plane++;
       } else {
         if (h.plane >= plane_counts.size()) {
-          plane_counts.resize(h.plane + 1, 0);
+          plane_counts.resize(h.plane+1, 0);
         }
         plane_counts[h.plane]++;
       }
 
-      //      if ((i > 80000) && (i < 85000)) {
-      //        MESSAGE() << h.to_string() << "\n";
-      //      }
+//      if ((i > 80000) && (i < 85000)) {
+//        MESSAGE() << h.to_string() << "\n";
+//      }
+
     }
+
   }
 };
 
@@ -187,9 +188,10 @@ TEST_F(BuilderReadoutsTest, t00311) {
   EXPECT_EQ(builder.stats_digital_geom_errors, 8);
 
   EXPECT_EQ(builder.ConvertedData.size(), 84232);
-  EXPECT_EQ(readouts, builder.ConvertedData.size() +
-                          builder.stats_digital_geom_errors +
-                          builder.stats_readout_filter_rejects);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(time_errors, 34);
@@ -227,9 +229,10 @@ TEST_F(BuilderReadoutsTest, t03710) {
   EXPECT_EQ(builder.stats_digital_geom_errors, 60280);
 
   EXPECT_EQ(builder.ConvertedData.size(), 55666);
-  EXPECT_EQ(readouts, builder.ConvertedData.size() +
-                          builder.stats_digital_geom_errors +
-                          builder.stats_readout_filter_rejects);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(time_errors, 0);
@@ -267,9 +270,10 @@ TEST_F(BuilderReadoutsTest, t10392) {
   EXPECT_EQ(builder.stats_digital_geom_errors, 169752);
 
   EXPECT_EQ(builder.ConvertedData.size(), 178941);
-  EXPECT_EQ(readouts, builder.ConvertedData.size() +
-                          builder.stats_digital_geom_errors +
-                          builder.stats_readout_filter_rejects);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(time_errors, 1);

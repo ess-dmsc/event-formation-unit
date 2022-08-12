@@ -20,15 +20,15 @@ struct PerfGenSettings {
 
 class PerfGenBase : public Detector {
 public:
-  PerfGenBase(BaseSettings const &settings,
-              PerfGenSettings &LocalPerfGenSettings);
-  ~PerfGenBase() {}
+  PerfGenBase(BaseSettings const &settings, PerfGenSettings &LocalPerfGenSettings);
+  ~PerfGenBase() { }
   void inputThread();
   void processingThread();
 
   static const int kafka_buffer_size = 124000; /// entries
 
 protected:
+
   struct {
     // Processing Counters
     int64_t events_udder;
@@ -46,4 +46,4 @@ protected:
   struct PerfGenSettings PerfGenSettings;
 };
 
-} // namespace PerfGen
+}

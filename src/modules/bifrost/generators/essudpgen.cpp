@@ -12,14 +12,15 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <CLI/CLI.hpp>
 #include <common/system/Socket.h>
+#include <CLI/CLI.hpp>
 
 #ifdef ESSUDPGEN_BIFROST_DAT
 #include <bifrost/generators/R5560Reader.h>
 #endif
 
 #include <dream/generators/PacketGenerator.h>
+
 
 const uint16_t UdpMaxSizeBytes{8800};
 
@@ -36,29 +37,29 @@ struct {
 
 CLI::App app{"Raw (BIFROST .dat) files to UDP data generator"};
 
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[]) {
   app.add_option("-i, --ip", Config.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Config.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Config.TxPackets, "Packets to send");
-  app.add_option("-m, --multiplicity", Config.TxMultiplicity,
-                 "Repeat packet m times");
+  app.add_option("-m, --multiplicity", Config.TxMultiplicity, "Repeat packet m times");
   app.add_option("-f, --file", Config.FileName, "Raw DREAM (.txt) file");
   app.add_option("-r, --readouts", Config.TxReadouts, "Readouts to send");
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
   CLI11_PARSE(app, argc, argv);
 
-#ifdef ESSUDPGEN_BIFROST_DAT
+
+  #ifdef ESSUDPGEN_BIFROST_DAT
   R5560Reader reader(Config.FileName);
   struct R5560Reader::raw_data_t Readout;
-  PacketGenerator gen(ESSReadout::Parser::BIFROST,
-                      sizeof(struct R5560Reader::raw_data_t));
-#endif
+  PacketGenerator gen(ESSReadout::Parser::BIFROST, sizeof(struct R5560Reader::raw_data_t));
+  #endif
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
   UDPTransmitter DataSource(local, remote);
   DataSource.setBufferSizes(Config.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
+
 
   uint64_t SentPackets = 0;
   uint64_t SentReadouts = 0;
@@ -90,8 +91,7 @@ int main(int argc, char *argv[]) {
     SentPackets++;
   }
 
-  printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets,
-         SentReadouts);
+  printf("Sent %" PRIu64 " packets with %" PRIu64 " readouts\n", SentPackets, SentReadouts);
   return 0;
 }
 

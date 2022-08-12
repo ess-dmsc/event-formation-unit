@@ -9,14 +9,14 @@
 #include "LokiBase.h"
 
 #include <cinttypes>
-#include <common/RuntimeStat.h>
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/debug/Log.h>
+#include <common/RuntimeStat.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -128,9 +128,8 @@ void LokiBase::inputThread() {
 
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
-    if ((readSize =
-             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                  RxRingbuffer.getMaxBufSize())) > 0) {
+    if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                         RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -148,6 +147,7 @@ void LokiBase::inputThread() {
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
 }
+
 
 ///
 /// \brief Normal processing thread
@@ -171,8 +171,7 @@ void LokiBase::processingThread() {
   };
 
   SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
-  Loki.setSerializerII(
-      SerializerII); // would rather have this in LokiInstrument
+  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer, DebugTimer;
@@ -191,8 +190,7 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::Loki4Amp);
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::Loki4Amp);
       Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -209,15 +207,12 @@ void LokiBase::processingThread() {
       Loki.processReadouts();
 
       Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
-      Counters.TofNegative =
-          Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
-      Counters.PrevTofCount =
-          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative =
-          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
+      Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
       Counters.TofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.TofHigh;
-      Counters.PrevTofHigh =
-          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
+      Counters.PrevTofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
+    
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
@@ -226,10 +221,8 @@ void LokiBase::processingThread() {
 
 #ifdef ECDC_DEBUG_READOUT
     if (DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
-      printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     "
-             "FEN5     FEN6     FEN7\n");
-      printf("-----------------------------------------------------------------"
-             "------------------\n");
+      printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
+      printf("-----------------------------------------------------------------------------------\n");
       for (int ring = 0; ring < 8; ring++) {
         printf("ring %2d  | ", ring);
         for (int fen = 0; fen < 8; fen++) {
@@ -242,8 +235,7 @@ void LokiBase::processingThread() {
     }
 #endif
 
-    if (ProduceTimer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});

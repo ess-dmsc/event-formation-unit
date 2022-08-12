@@ -2,21 +2,21 @@
 
 #pragma once
 #include <multigrid/AbstractBuilder.h>
-#include <multigrid/geometry/DetectorMappings.h>
 #include <multigrid/mesytec/Readout.h>
+#include <multigrid/geometry/DetectorMappings.h>
 
 namespace Multigrid {
 
 class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderReadouts(const DetectorMappings &geometry, std::string dump_dir = "");
+  BuilderReadouts(const DetectorMappings& geometry, std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
   std::string debug() const override;
 
 protected:
-  void build(const std::vector<Readout> &readouts);
+  void build(const std::vector<Readout>& readouts);
 
   // preallocated
   Hit hit_;
@@ -28,4 +28,4 @@ private:
   std::vector<Readout> parsed_data_;
 };
 
-} // namespace Multigrid
+}

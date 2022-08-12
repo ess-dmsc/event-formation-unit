@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "ev42_events_generated.h"
-#include <adc_readout/EventData.h>
 #include <adc_readout/EventSerializer.h>
+#include <adc_readout/EventData.h>
+#include "ev42_events_generated.h"
 #include <chrono>
 #include <common/kafka/Producer.h>
 #include <gtest/gtest.h>

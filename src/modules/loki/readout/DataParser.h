@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <common/readout/ess/Parser.h>
 #include <modules/loki/Counters.h>
+#include <common/readout/ess/Parser.h>
 #include <vector>
 
 namespace Loki {

@@ -48,27 +48,27 @@ TEST_F(LETGeometryTest, XAndZCoordinateCalculations) {
 
   // for (int Channel = 32; Channel < 64; ++Channel) {
   //   ASSERT_EQ(
-  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset,
-  //       Rotated), Channel - 32);
+  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+  //       Channel - 32);
   // }
   // VMMID = 1;
   // for (int Channel = 0; Channel < 64; ++Channel) {
   //   ASSERT_EQ(
-  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset,
-  //       Rotated), Channel + 32);
+  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+  //       Channel + 32);
   // }
   // FENID = 1;
   // VMMID = 0;
   // for (int Channel = 32; Channel < 64; ++Channel) {
   //   ASSERT_EQ(
-  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset,
-  //       Rotated), Channel + 64);
+  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+  //       Channel + 64);
   // }
   // VMMID = 1;
   // for (int Channel = 0; Channel < 64; ++Channel) {
   //   ASSERT_EQ(
-  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset,
-  //       Rotated), Channel + 128);
+  //       Geom.xAndzCoord(RingID, FENID, HybridID, VMMID, Channel, XOffset, Rotated),
+  //       Channel + 128);
   // }
 }
 
@@ -87,13 +87,13 @@ TEST_F(LETGeometryTest, InvalidXAndZCoordinates) {
 
 TEST_F(LETGeometryTest, YCoordinateCalculations) {
   // yCoord = VMM & Channel specific value
-  // takes HybridID, VMMID, Channel, YOffset, Rotated, Short
+// takes HybridID, VMMID, Channel, YOffset, Rotated, Short
   // Full length vessel, grid 0 and grid 139
   ASSERT_EQ(Geom.yCoord(1, 0, 58, 0, false, false), 0);
   ASSERT_EQ(Geom.yCoord(2, 1, 5, 0, false, false), 139);
 
   // short rotated vessel - requires clarification
-  // ASSERT_EQ(Geom.yCoord(1, 0, 40, 50, true, true), 10);
+  //ASSERT_EQ(Geom.yCoord(1, 0, 40, 50, true, true), 10);
 
   // short not rotated vessel - requires clarification
   // ASSERT_EQ(Geom.yCoord(1, 0, 40, 89, false, true), 129);
@@ -131,16 +131,13 @@ TEST_F(LETGeometryTest, InvalidYCoordinates) {
   ASSERT_EQ(Geom.yCoord(1, 0, 60, 0, false, true), Geometry::InvalidCoord);
 
   // invalid channel on hybrid 1 vmm0
-  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 10, 0, false, false),
-            Geometry::InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 1, 0, 10, 0, false, false), Geometry::InvalidCoord);
 
   // invalid channel on hybrid 2 vmm 1
-  ASSERT_EQ(Geom.xAndzCoord(0, 2, 1, 10, 0, false, false),
-            Geometry::InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 2, 1, 10, 0, false, false), Geometry::InvalidCoord);
 
   // invalid hybrid
-  ASSERT_EQ(Geom.xAndzCoord(0, 3, 0, 0, 0, false, false),
-            Geometry::InvalidCoord);
+  ASSERT_EQ(Geom.xAndzCoord(0, 3, 0, 0, 0, false, false), Geometry::InvalidCoord);
 }
 
 int main(int argc, char **argv) {

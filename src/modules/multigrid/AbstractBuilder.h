@@ -21,12 +21,12 @@ public:
 
   HitVector ConvertedData;
 
-  size_t stats_readouts_total{0};
-  size_t stats_discarded_bytes{0};
-  size_t stats_trigger_count{0};
-  size_t stats_bus_glitch_rejects{0};
-  size_t stats_readout_filter_rejects{0};
-  size_t stats_digital_geom_errors{0};
+  size_t stats_readouts_total {0};
+  size_t stats_discarded_bytes {0};
+  size_t stats_trigger_count {0};
+  size_t stats_bus_glitch_rejects {0};
+  size_t stats_readout_filter_rejects {0};
+  size_t stats_digital_geom_errors {0};
 };
 
-} // namespace Multigrid
+}

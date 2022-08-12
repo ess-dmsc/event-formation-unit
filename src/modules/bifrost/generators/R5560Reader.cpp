@@ -21,7 +21,11 @@ R5560Reader::R5560Reader(std::string file) : filename(file) {
   fd = open(filename.c_str(), O_RDONLY);
 }
 
-R5560Reader::~R5560Reader() { close(fd); }
+
+R5560Reader::~R5560Reader() {
+  close(fd);
+}
+
 
 int R5560Reader::readReadout(struct raw_data_t &Readout) {
   int res = read(fd, &Readout, sizeof(struct raw_data_t));

@@ -106,14 +106,12 @@ uint32_t Calibration::strawCorrection(uint32_t StrawId, double Pos) {
   double CorrectedPos = Pos - Delta;
 
   if (CorrectedPos < 0) {
-    XTRACE(EVENT, INF, "Clamping to low value, straw: %u, pos: %g, delta %g",
-           StrawId, Pos, Delta);
+    XTRACE(EVENT, INF, "Clamping to low value, straw: %u, pos: %g, delta %g", StrawId, Pos, Delta);
     Stats.ClampLow++;
     CorrectedPos = 0;
   }
   if (CorrectedPos > StrawResolution) {
-    XTRACE(EVENT, INF, "Clamping to high value, straw: %u, pos: %g, delta %g",
-           StrawId, Pos, Delta);
+    XTRACE(EVENT, INF, "Clamping to high value, straw: %u, pos: %g, delta %g", StrawId, Pos, Delta);
     Stats.ClampHigh++;
     CorrectedPos = StrawResolution - 1;
   }

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <multigrid/geometry/Filter.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
@@ -9,9 +9,12 @@ class FilterTest : public TestBase {
 protected:
   Filter f;
   FilterSet fs;
-  void SetUp() override {}
-  void TearDown() override {}
+  void SetUp() override {
+  }
+  void TearDown() override {
+  }
 };
+
 
 TEST_F(FilterTest, DefaultConstructedValues) {
   EXPECT_EQ(f.minimum, 0);

@@ -10,9 +10,9 @@
 #pragma once
 
 #include <adc_readout/AdcParse.h>
-#include <common/memory/span.hpp>
 #include <cstdint>
 #include <memory>
+#include <common/memory/span.hpp>
 #include <utility>
 
 class DataModulariser {

@@ -61,6 +61,7 @@ void from_json(const nlohmann::json &j, ChannelMappings &g) {
   if (j.count("grid_filters")) {
     g.grid_filters = j["grid_filters"];
   }
+
 }
 
-} // namespace Multigrid
+}

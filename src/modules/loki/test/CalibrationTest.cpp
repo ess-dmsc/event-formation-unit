@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/testutils/SaveBuffer.h>
-#include <common/testutils/TestBase.h>
 #include <loki/geometry/Calibration.h>
+#include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
 
 std::string NotJsonFile{"deleteme_lokicalib_notjson.json"};
 std::string NotJsonStr = R"(
@@ -80,8 +80,7 @@ std::string StrawMappingNullStr = R"(
   }
 )";
 
-std::string StrawMappingConstFile{
-    "deleteme_lokicalib_strawmapping_strawid.json"};
+std::string StrawMappingConstFile{"deleteme_lokicalib_strawmapping_strawid.json"};
 std::string StrawMappingConstStr = R"(
   {
     "LokiCalibration" : {
@@ -103,7 +102,8 @@ using namespace Loki;
 class CalibrationTest : public TestBase {
 protected:
   void SetUp() override {}
-  void TearDown() override {}
+  void TearDown() override {
+  }
 };
 
 TEST_F(CalibrationTest, Constructor) {
@@ -141,10 +141,10 @@ TEST_F(CalibrationTest, NullCalibrationGood) {
   }
 }
 
+
 // Test clamping to 0 and max by manipulating polynomial coefficients
 TEST_F(CalibrationTest, ClampLowAndHigh) {
-  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
-             StrawMappingNullStr.size());
+  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
 
   calib.StrawCalibration[0][0] = 100.0; // a = 100
@@ -161,17 +161,15 @@ TEST_F(CalibrationTest, ClampLowAndHigh) {
 }
 
 TEST_F(CalibrationTest, LoadCalib) {
-  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
-             StrawMappingNullStr.size());
+  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(), StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
   ASSERT_EQ(calib.StrawCalibration.size(), 3);
-  ASSERT_EQ(calib.getMaxPixel(), 3 * 256);
+  ASSERT_EQ(calib.getMaxPixel(), 3*256);
   deleteFile(StrawMappingNullFile);
 }
 
 TEST_F(CalibrationTest, LoadCalibConst) {
-  saveBuffer(StrawMappingConstFile, (void *)StrawMappingConstStr.c_str(),
-             StrawMappingConstStr.size());
+  saveBuffer(StrawMappingConstFile, (void *)StrawMappingConstStr.c_str(), StrawMappingConstStr.size());
 
   uint32_t Straws{3};
   uint16_t Resolution{256};
@@ -189,6 +187,7 @@ TEST_F(CalibrationTest, LoadCalibConst) {
   deleteFile(StrawMappingConstFile);
 }
 
+
 TEST_F(CalibrationTest, NOTJson) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   ASSERT_ANY_THROW(Calibration calib = Calibration(NotJsonFile));
@@ -196,25 +195,23 @@ TEST_F(CalibrationTest, NOTJson) {
 }
 
 TEST_F(CalibrationTest, BadStrawOrder) {
-  saveBuffer(BadStrawOrderFile, (void *)BadStrawOrderStr.c_str(),
-             BadStrawOrderStr.size());
+  saveBuffer(BadStrawOrderFile, (void *)BadStrawOrderStr.c_str(), BadStrawOrderStr.size());
   ASSERT_ANY_THROW(Calibration calib = Calibration(BadStrawOrderFile));
   deleteFile(BadStrawOrderFile);
 }
 
 TEST_F(CalibrationTest, StrawMismatch) {
-  saveBuffer(StrawMismatchFile, (void *)StrawMismatchStr.c_str(),
-             StrawMismatchStr.size());
+  saveBuffer(StrawMismatchFile, (void *)StrawMismatchStr.c_str(), StrawMismatchStr.size());
   ASSERT_ANY_THROW(Calibration calib = Calibration(StrawMismatchFile));
   deleteFile(StrawMismatchFile);
 }
 
 TEST_F(CalibrationTest, InvalidCoeff) {
-  saveBuffer(InvalidCoeffFile, (void *)InvalidCoeffStr.c_str(),
-             InvalidCoeffStr.size());
+  saveBuffer(InvalidCoeffFile, (void *)InvalidCoeffStr.c_str(), InvalidCoeffStr.size());
   ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCoeffFile));
   deleteFile(InvalidCoeffFile);
 }
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -124,7 +124,7 @@ void EventSerializer::serialiseThreadFunc() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
-
+  
   std::uint64_t LastAddedRefTimestamp{0};
   auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
     auto NumberOfIterations{0};
