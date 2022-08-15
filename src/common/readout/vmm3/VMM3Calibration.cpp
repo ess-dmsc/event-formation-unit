@@ -41,7 +41,6 @@ double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) {
 double VMM3Calibration::ADCCorr(int Channel, uint16_t ADC) {
   XTRACE(DATA, DEB, "ADC Correction, Offset %d, Slope %d",
          Calibration[Channel].ADCOffset, Calibration[Channel].ADCSlope);
-  double ADCCorr =
-      (ADC - Calibration[Channel].ADCOffset) * Calibration[Channel].ADCSlope;
+  double ADCCorr = (ADC - Calibration[Channel].ADCOffset) * Calibration[Channel].ADCSlope;
   return std::max(std::min(1023.0, ADCCorr), 0.0);
 }

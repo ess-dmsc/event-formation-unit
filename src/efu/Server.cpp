@@ -10,6 +10,7 @@
 //#include <algorithm>
 #include <arpa/inet.h>
 #include <cinttypes>
+#include <common/debug/Hexdump.h>
 #include <common/debug/Log.h>
 #include <cstdio>
 #include <cstring>
@@ -163,8 +164,7 @@ void Server::serverPoll() {
       auto bytes = recv(sd, IBuffer.buffer, SERVER_BUFFER_SIZE, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK) && (errno != EAGAIN)) {
-        LOG(IPC, Sev::Warning,
-            "recv() failed (unclean close from peer?), errno: {}", errno);
+        LOG(IPC, Sev::Warning, "recv({}, ...) failed (unclean close from peer?), errno: {}", sd, errno);
         serverClose(sd);
         return;
       }
