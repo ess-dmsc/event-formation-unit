@@ -27,8 +27,8 @@
 #include <freia/FreiaInstrument.h>
 #include <stdio.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Freia {
 
@@ -73,8 +73,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-
-
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
