@@ -27,7 +27,7 @@ struct Counters {
   // ESSReadout parser
   struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
-  //int64_t RingRx[24];
+  // int64_t RingRx[24];
 
   // VMM3a Readouts
   struct ESSReadout::VMM3ParserStats VMMStats;
@@ -55,4 +55,4 @@ struct Counters {
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 
-  } __attribute__((aligned(64)));
+} __attribute__((aligned(64)));
