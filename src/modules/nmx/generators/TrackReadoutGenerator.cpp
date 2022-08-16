@@ -20,8 +20,8 @@
 #include <cstring>
 #include <stdexcept>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 void Nmx::TrackReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -76,7 +76,7 @@ void Nmx::TrackReadoutGenerator::generateData() {
       FEN = XPanelToFEN[Panel];
      
       XTRACE(DATA, DEB,
-              "Generating readout for X, Channel: %u, VMM: %u, FEN: %u", Channel,
+              "Generating readout for X Coord: %u, Channel: %u, VMM: %u, FEN: %u", XLocal, Channel,
               VMM, FEN);
     } else {
       YLocal = FinalYLocal + YDiff * ((ReadoutsPerEvent - (Readout % ReadoutsPerEvent))/2);
@@ -89,7 +89,7 @@ void Nmx::TrackReadoutGenerator::generateData() {
       }
       FEN = YPanelToFEN[Panel];
       XTRACE(DATA, DEB,
-             "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u", Channel,
+             "Generating readout for Y Coord: %u, Channel: %u, VMM: %u, FEN: %u",YLocal, Channel,
              VMM, FEN);
     }
 
