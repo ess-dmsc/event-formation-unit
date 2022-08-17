@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef NMX_TRACK_GENERATOR
-  Settings.TicksBtwReadouts = 10;
+  Settings.TicksBtwReadouts = 1;
   Nmx::TrackReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
