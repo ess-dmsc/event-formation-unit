@@ -56,7 +56,7 @@ void Nmx::TrackReadoutGenerator::generateData() {
     if ((Readout % ReadoutsPerEvent) == 0) {
       Panel = rand() % 4;
       FinalXLocal = rand() % 640;
-      FinalYLocal = 639 - (abs(1.2 * (XLocal - 128)));
+      FinalYLocal = 639 - (abs(1.2 * (FinalXLocal - 128)));
       XDiff = (((float)rand()/(float)(RAND_MAX)) * 2)-1;
       YDiff = (((float)rand()/(float)(RAND_MAX)) * 2)-1;
        XTRACE(DATA, DEB,
