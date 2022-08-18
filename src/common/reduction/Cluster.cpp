@@ -39,7 +39,7 @@ void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
     time_start_ = time_end_ = e.time;
-    coord_start_ = coord_end_ = coord_earliest_ = e.coordinate;
+    coord_start_ = coord_end_ = coord_earliest_ = coord_latest_ = e.coordinate;
     utpc_idx_min_ = 0;
     utpc_idx_max_ = 0;
   }
