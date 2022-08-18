@@ -84,7 +84,11 @@ void Cluster::insert(const Hit &e) {
 
   DebugSplitOptimizer();
 
-  time_start_ = std::min(time_start_, e.time);
+  if (e.time < time_start_){
+    time_start_ = e.time;
+    coord_earliest_ = e.coordinate;
+  }
+
 
   DebugSplitOptimizer();
 
@@ -95,13 +99,13 @@ void Cluster::insert(const Hit &e) {
     utpc_idx_min_ = static_cast<int>(hits.size() - 1);
     utpc_idx_max_ = utpc_idx_min_;
     time_end_ = e.time;
+    coord_latest_ = e.coordinate;
   }
 
   DebugSplitOptimizer();
 
   coord_start_ = std::min(coord_start_, e.coordinate);
   coord_end_ = std::max(coord_end_, e.coordinate);
-  coord_latest_ = e.coordinate;
 }
 
 void Cluster::merge(Cluster &other) {
