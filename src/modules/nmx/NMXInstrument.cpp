@@ -213,7 +213,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.time_end();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -233,8 +233,8 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // calculate local x and y using center of mass
-    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_latest()));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_latest()));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {
