@@ -11,8 +11,8 @@
 #include <common/reduction/Event.h>
 #include <fmt/format.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 Event::Event(uint8_t plane1, uint8_t plane2)
     : PlaneA_(plane1), PlaneB_(plane2) {}
