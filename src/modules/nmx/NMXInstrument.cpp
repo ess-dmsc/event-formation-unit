@@ -233,8 +233,8 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // calculate local x and y using center of mass
-    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_latest()));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_latest()));
+    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_utpc()));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_utpc()));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {
