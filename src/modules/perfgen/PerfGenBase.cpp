@@ -42,12 +42,9 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings,
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-
-  Stats.create("thread.processing_idle", mystats.rx_idle1);
-
-  Stats.create("events.count", mystats.events);
   Stats.create("events.udder", mystats.events_udder);
   Stats.create("transmit.bytes", mystats.tx_bytes);
+  Stats.create("transmit.produce", mystats.produce);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
@@ -82,30 +79,24 @@ void PerfGenBase::processingThread() {
   XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
   Udder UdderImage;
   UdderImage.cachePixels(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
-  uint32_t TimeOfFlight = 0;
+
+  int TimeOfFlight{0};
+  int EventsPerPulse{500};
+
   while (runThreads) {
-    static int EventCount = 0;
-    if (EventCount == 0) {
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      FlatBuffer.pulseTime(EfuTime);
+    uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+    FlatBuffer.pulseTime(EfuTime);
+
+    for (int i = 0; i < EventsPerPulse; i++) {
+      auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
+      auto TxBytes = FlatBuffer.addEvent(TimeOfFlight, PixelId);
+      mystats.tx_bytes += TxBytes;
+      mystats.events_udder++;
+      TimeOfFlight++;
     }
 
-    auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
-    auto TxBytes = FlatBuffer.addEvent(TimeOfFlight, PixelId);
-    mystats.tx_bytes += TxBytes;
-    mystats.events_udder++;
-
-    if (EFUSettings.TestImageUSleep != 0) {
-      usleep(EFUSettings.TestImageUSleep);
-    }
-
-    TimeOfFlight++;
-
-    if (TxBytes != 0) {
-      EventCount = 0;
-    } else {
-      EventCount++;
-    }
+    usleep(EFUSettings.TestImageUSleep);
+    TimeOfFlight = 0;
   }
   // \todo flush everything here
   XTRACE(INPUT, ALW, "Stopping processing thread.");

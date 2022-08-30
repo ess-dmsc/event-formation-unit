@@ -32,9 +32,8 @@ protected:
   struct {
     // Processing Counters
     int64_t events_udder;
-    int64_t rx_idle1;
     int64_t tx_bytes;
-    int64_t events;
+    int64_t produce;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
     int64_t kafka_ev_errors;
