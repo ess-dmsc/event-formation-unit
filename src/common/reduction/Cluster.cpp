@@ -39,7 +39,7 @@ void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
     time_start_ = time_end_ = e.time;
-    coord_start_ = coord_end_ = e.coordinate;
+    coord_start_ = coord_end_ = coord_earliest_ = coord_latest_ = e.coordinate;
     utpc_idx_min_ = 0;
     utpc_idx_max_ = 0;
   }
@@ -84,7 +84,11 @@ void Cluster::insert(const Hit &e) {
 
   DebugSplitOptimizer();
 
-  time_start_ = std::min(time_start_, e.time);
+  if (e.time < time_start_){
+    time_start_ = e.time;
+    coord_earliest_ = e.coordinate;
+  }
+
 
   DebugSplitOptimizer();
 
@@ -95,6 +99,7 @@ void Cluster::insert(const Hit &e) {
     utpc_idx_min_ = static_cast<int>(hits.size() - 1);
     utpc_idx_max_ = utpc_idx_min_;
     time_end_ = e.time;
+    coord_latest_ = e.coordinate;
   }
 
   DebugSplitOptimizer();
@@ -165,6 +170,11 @@ size_t Cluster::hit_count() const { return hits.size(); }
 uint16_t Cluster::coord_start() const { return coord_start_; }
 
 uint16_t Cluster::coord_end() const { return coord_end_; }
+
+uint16_t Cluster::coord_earliest() const { return coord_earliest_; }
+
+uint16_t Cluster::coord_latest() const { return coord_latest_; }
+
 
 uint16_t Cluster::coord_span() const {
   if (hits.empty()) {
