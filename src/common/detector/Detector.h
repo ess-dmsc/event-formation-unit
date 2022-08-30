@@ -12,15 +12,14 @@
 #include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/Statistics.h>
-#include <common/memory/SPSCFifo.h>
 #include <common/memory/RingBuffer.h>
+#include <common/memory/SPSCFifo.h>
 #include <functional>
 #include <map>
 #include <memory>
 #include <stdio.h>
 #include <string>
 #include <thread>
-
 
 // All settings should be initialized.
 // clang-format off
@@ -57,7 +56,8 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(), DetectorName(Name) {};
+  Detector(std::string Name, BaseSettings settings)
+      : EFUSettings(settings), Stats(), DetectorName(Name){};
 
   virtual ~Detector() = default;
 
@@ -98,12 +98,14 @@ public:
 
 protected:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
-  static const int EthernetBufferMaxEntries {2000};
-  static const int EthernetBufferSize {9000}; /// bytes
-  static const int KafkaBufferSize {124000}; /// entries ~ 1MB
+  static const int EthernetBufferMaxEntries{2000};
+  static const int EthernetBufferSize{9000}; /// bytes
+  static const int KafkaBufferSize{124000};  /// entries ~ 1MB
 
   /// Shared between input_thread and processing_thread
-  memory_sequential_consistent::CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
+  memory_sequential_consistent::CircularFifo<unsigned int,
+                                             EthernetBufferMaxEntries>
+      InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
@@ -142,7 +144,8 @@ public:
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
 };
 
-/// \brief Template for creating detector factories in dynamically loaded detector modules.
+/// \brief Template for creating detector factories in dynamically loaded
+/// detector modules.
 ///
 /// Usage example: DetectorFactory<Sonde> Factory;
 template <class DetectorModule>
@@ -150,7 +153,8 @@ class DetectorFactory : public DetectorFactoryBase {
 public:
   /// \brief Instantiates the corresponding detector module.
   ///
-  /// This member function is only called by the efu when loading a detector module.
+  /// This member function is only called by the efu when loading a detector
+  /// module.
   std::shared_ptr<Detector> create(BaseSettings Settings) override {
     return std::make_shared<DetectorModule>(Settings);
   }

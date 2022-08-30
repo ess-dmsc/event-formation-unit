@@ -6,10 +6,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/Event.h>
-#include <common/debug/Trace.h>
-#include <fmt/format.h>
 #include <cmath>
+#include <common/debug/Trace.h>
+#include <common/reduction/Event.h>
+#include <fmt/format.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -17,13 +17,9 @@
 Event::Event(uint8_t plane1, uint8_t plane2)
     : PlaneA_(plane1), PlaneB_(plane2) {}
 
-uint8_t Event::PlaneA() const {
-  return PlaneA_;
-}
+uint8_t Event::PlaneA() const { return PlaneA_; }
 
-uint8_t Event::PlaneB() const {
-  return PlaneB_;
-}
+uint8_t Event::PlaneB() const { return PlaneB_; }
 
 void Event::insert(const Hit &e) {
   if (e.plane == PlaneA_) {
@@ -52,9 +48,7 @@ void Event::clear() {
   ClusterB.clear();
 }
 
-bool Event::empty() const {
-  return ClusterA.empty() && ClusterB.empty();
-}
+bool Event::empty() const { return ClusterA.empty() && ClusterB.empty(); }
 
 bool Event::both_planes() const {
   return !ClusterA.empty() && !ClusterB.empty();
@@ -115,15 +109,17 @@ uint64_t Event::time_gap(const Cluster &other) const {
 
 std::string Event::to_string(const std::string &prepend, bool verbose) const {
   std::stringstream ss;
-  ss << fmt::format("Event planes({}{},{}{})",
-                    PlaneA_, (ClusterA.empty() ? "" : "*"),
-                    PlaneB_, (ClusterB.empty() ? "" : "*"));
+  ss << fmt::format("Event planes({}{},{}{})", PlaneA_,
+                    (ClusterA.empty() ? "" : "*"), PlaneB_,
+                    (ClusterB.empty() ? "" : "*"));
   if (!ClusterA.empty())
-    ss << "\n" << prepend << "  PlaneA:  "
-       << ClusterA.to_string(prepend + "  ", verbose);
+    ss << "\n"
+       << prepend
+       << "  PlaneA:  " << ClusterA.to_string(prepend + "  ", verbose);
   if (!ClusterB.empty())
-    ss << "\n" << prepend << "  PlaneB:  "
-       << ClusterB.to_string(prepend + "  ", verbose);
+    ss << "\n"
+       << prepend
+       << "  PlaneB:  " << ClusterB.to_string(prepend + "  ", verbose);
   return ss.str();
 }
 
@@ -133,10 +129,11 @@ std::string Event::visualize(const std::string &prepend,
   std::stringstream ss;
   if (!ClusterA.empty())
     ss << prepend << "  PlaneA:\n"
-       << ClusterA.visualize(prepend + "  ", downsample_time, downsample_coords);
+       << ClusterA.visualize(prepend + "  ", downsample_time,
+                             downsample_coords);
   if (!ClusterB.empty())
     ss << prepend << "  PlaneB:\n"
-       << ClusterB.visualize(prepend + "  ", downsample_time, downsample_coords);
+       << ClusterB.visualize(prepend + "  ", downsample_time,
+                             downsample_coords);
   return ss.str();
 }
-

@@ -6,10 +6,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/matching/OverlapMatcher.h>
-#include <common/debug/Trace.h>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <common/debug/Trace.h>
+#include <common/reduction/matching/OverlapMatcher.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -19,7 +19,8 @@ void OverlapMatcher::match(bool flush) {
     return c1.time_start() < c2.time_start();
   });
 
-  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
+         unmatched_clusters_.size());
 
   Event evt{PlaneA, PlaneB};
   while (!unmatched_clusters_.empty()) {

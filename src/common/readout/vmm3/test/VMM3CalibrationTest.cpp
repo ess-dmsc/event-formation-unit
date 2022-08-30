@@ -20,13 +20,13 @@ protected:
 
 TEST_F(VMM3CalibrationTest, Constructor) {
   for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
-    ASSERT_EQ(cal.ADCCorr(ch,     0),    0);
-    ASSERT_EQ(cal.ADCCorr(ch,    42),   42);
-    ASSERT_EQ(cal.ADCCorr(ch,  1023), 1023);
-    ASSERT_EQ(cal.ADCCorr(ch,  1024), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 0), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 42), 42);
+    ASSERT_EQ(cal.ADCCorr(ch, 1023), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 1024), 1023);
     ASSERT_EQ(cal.ADCCorr(ch, 65535), 1023);
 
-    ASSERT_EQ(cal.TDCCorr(ch,   0), 1.5 * 22.72     );
+    ASSERT_EQ(cal.TDCCorr(ch, 0), 1.5 * 22.72);
     ASSERT_EQ(cal.TDCCorr(ch, 255), 1.5 * 22.72 - 60);
   }
 }
@@ -34,11 +34,11 @@ TEST_F(VMM3CalibrationTest, Constructor) {
 TEST_F(VMM3CalibrationTest, ZeroCal) {
   for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
     cal.setCalibration(ch, 0.0, 0.0, 0.0, 0.0);
-    ASSERT_EQ(cal.ADCCorr(ch,    0), 0);
-    ASSERT_EQ(cal.ADCCorr(ch,   42), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 0), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 42), 0);
     ASSERT_EQ(cal.ADCCorr(ch, 1023), 0);
 
-    ASSERT_EQ(cal.TDCCorr(ch,   0), 0);
+    ASSERT_EQ(cal.TDCCorr(ch, 0), 0);
     ASSERT_EQ(cal.TDCCorr(ch, 255), 0);
   }
 }
@@ -46,31 +46,29 @@ TEST_F(VMM3CalibrationTest, ZeroCal) {
 TEST_F(VMM3CalibrationTest, ADCClampNegative) {
   for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
     cal.setCalibration(ch, 0.0, -1.0, 0.0, -1.0);
-    ASSERT_EQ(cal.ADCCorr(ch,     0), 0);
-    ASSERT_EQ(cal.ADCCorr(ch,    42), 0);
-    ASSERT_EQ(cal.ADCCorr(ch,  1023), 0);
-    ASSERT_EQ(cal.ADCCorr(ch,  1024), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 0), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 42), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 1023), 0);
+    ASSERT_EQ(cal.ADCCorr(ch, 1024), 0);
     ASSERT_EQ(cal.ADCCorr(ch, 65535), 0);
- }
+  }
 }
 
 TEST_F(VMM3CalibrationTest, ADCClampPositive) {
   for (int ch = 0; ch < VMM3Calibration::CHANNELS; ch++) {
     cal.setCalibration(ch, 0.0, -1.0, -1.0, 2000.0);
-    ASSERT_EQ(cal.ADCCorr(ch,     0), 1023);
-    ASSERT_EQ(cal.ADCCorr(ch,    42), 1023);
-    ASSERT_EQ(cal.ADCCorr(ch,  1023), 1023);
-    ASSERT_EQ(cal.ADCCorr(ch,  1024), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 0), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 42), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 1023), 1023);
+    ASSERT_EQ(cal.ADCCorr(ch, 1024), 1023);
     ASSERT_EQ(cal.ADCCorr(ch, 65535), 1023);
   }
 }
-
 
 TEST_F(VMM3CalibrationTest, InvalidChannel) {
   ASSERT_EQ(cal.setCalibration(63, 0.0, -1.0, -1.0, 2000.0), true);
   ASSERT_EQ(cal.setCalibration(64, 0.0, -1.0, -1.0, 2000.0), false);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

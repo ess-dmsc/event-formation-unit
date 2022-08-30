@@ -7,13 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/ChronoMerger.h>
 #include <algorithm>
+#include <common/reduction/ChronoMerger.h>
 
 #include <iosfwd>
 
 #include <sstream>
-
 
 ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
     : maximum_latency_(maximum_latency) {
@@ -25,15 +24,16 @@ void ChronoMerger::insert(size_t module, NeutronEvent event) {
   queue_.push_back(event);
 }
 
-void ChronoMerger::insert(size_t module, std::list<NeutronEvent>& events) {
-  for (const auto& event : events) {
+void ChronoMerger::insert(size_t module, std::list<NeutronEvent> &events) {
+  for (const auto &event : events) {
     latest_[module] = std::max(event.time, latest_.at(module));
   }
   queue_.splice(queue_.end(), events);
 }
 
 void ChronoMerger::sync_up(size_t module1, size_t module2) {
-  latest_[module1] = latest_[module2] = std::max(latest_[module1], latest_[module2]);
+  latest_[module1] = latest_[module2] =
+      std::max(latest_[module1], latest_[module2]);
 }
 
 void ChronoMerger::sort() {
@@ -42,17 +42,11 @@ void ChronoMerger::sort() {
   });
 }
 
-void ChronoMerger::reset() {
-  latest_.assign(latest_.size(), 0);
-}
+void ChronoMerger::reset() { latest_.assign(latest_.size(), 0); }
 
-bool ChronoMerger::empty() const {
-  return queue_.empty();
-}
+bool ChronoMerger::empty() const { return queue_.empty(); }
 
-uint64_t ChronoMerger::earliest() const {
-  return queue_.front().time;
-}
+uint64_t ChronoMerger::earliest() const { return queue_.front().time; }
 
 uint64_t ChronoMerger::horizon() const {
   uint64_t ret = std::numeric_limits<uint64_t>::max();
@@ -78,19 +72,19 @@ bool ChronoMerger::ready() const {
   return (earliest() < (h - maximum_latency_));
 }
 
-std::string ChronoMerger::debug(const std::string& prepend, bool verbose) const {
+std::string ChronoMerger::debug(const std::string &prepend,
+                                bool verbose) const {
   std::stringstream ss;
   ss << prepend << "Maximum latency: " << maximum_latency_ << "\n";
   ss << prepend << "Latest times:\n";
-  for (size_t i=0; i < latest_.size(); ++i) {
+  for (size_t i = 0; i < latest_.size(); ++i) {
     ss << prepend << "  [" << i << "]  " << latest_[i] << "\n";
   }
   if (verbose && !queue_.empty()) {
     ss << prepend << "Queue:\n";
-    for (const auto& e : queue_) {
+    for (const auto &e : queue_) {
       ss << prepend << "  " << e.to_string() << "\n";
     }
   }
   return ss.str();
 }
-

@@ -18,17 +18,17 @@ bool ReducedHit::is_center_good() const {
 }
 
 std::string ReducedHit::to_string() const {
-  return fmt::format("{}(lu={},uu={}) t={}(~{}) *{}",
-                     center, uncert_lower, uncert_upper, average_time, time, hits_used);
+  return fmt::format("{}(lu={},uu={}) t={}(~{}) *{}", center, uncert_lower,
+                     uncert_upper, average_time, time, hits_used);
 }
 
 std::string ReducedEvent::to_string() const {
-  return fmt::format("x=[{}]   y=[{}]   z=[{}]   t={}   {}",
-                     x.to_string(), y.to_string(), z.to_string(),
-                     time, (good ? "good" : "bad"));
+  return fmt::format("x=[{}]   y=[{}]   z=[{}]   t={}   {}", x.to_string(),
+                     y.to_string(), z.to_string(), time,
+                     (good ? "good" : "bad"));
 }
 
 std::string ReducedEvent::to_string_simple() const {
-  return fmt::format("x={}  y={}   z=[{}]   t={}", x.center, y.center,
-                     z.center, time);
+  return fmt::format("x={}  y={}   z=[{}]   t={}", x.center, y.center, z.center,
+                     time);
 }

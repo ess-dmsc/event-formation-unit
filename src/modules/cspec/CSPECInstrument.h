@@ -22,8 +22,8 @@
 #include <cspec/CSPECBase.h>
 #include <cspec/Counters.h>
 #include <cspec/geometry/CSPECGeometry.h>
-#include <cspec/geometry/LETGeometry.h>
 #include <cspec/geometry/Config.h>
+#include <cspec/geometry/LETGeometry.h>
 #include <logical_geometry/ESSGeometry.h>
 
 namespace Cspec {

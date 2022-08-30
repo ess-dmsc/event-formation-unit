@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <cmath>
 #include <common/readout/ess/ESSTime.h>
 #include <common/testutils/TestBase.h>
-#include <cmath>
 
 namespace ESSReadout {
 
@@ -20,13 +20,11 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(ESSTimeTest, Constructor) {
-  ASSERT_EQ(Time.getTOF(0, 0), 0);
-}
+TEST_F(ESSTimeTest, Constructor) { ASSERT_EQ(Time.getTOF(0, 0), 0); }
 
 TEST_F(ESSTimeTest, SetRef) {
   Time.setReference(100, 0);
-  ASSERT_EQ(Time.getTOF(100, 0),  0);
+  ASSERT_EQ(Time.getTOF(100, 0), 0);
   ASSERT_EQ(Time.getTOF(100, 1), 11);
   ASSERT_EQ(Time.getTOF(100, 2), 22);
   ASSERT_EQ(Time.getTOF(100, 3), 34);
@@ -38,7 +36,6 @@ TEST_F(ESSTimeTest, SetRef) {
   ASSERT_EQ(Time.Stats.PrevTofCount, 0);
   ASSERT_EQ(Time.Stats.PrevTofNegative, 0);
   ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
-
 }
 
 TEST_F(ESSTimeTest, Bounds) {
@@ -50,12 +47,11 @@ TEST_F(ESSTimeTest, Bounds) {
 
 TEST_F(ESSTimeTest, PrevPulse) {
   Time.setReference(100, 100000);
-  Time.setPrevReference(100,  50000);
+  Time.setPrevReference(100, 50000);
 
-  ASSERT_EQ(Time.getTOF(100, 100000),  0);
+  ASSERT_EQ(Time.getTOF(100, 100000), 0);
   ASSERT_EQ(Time.getTOF(100, 75000), (uint64_t)(25000 * Time.NsPerTick));
   ASSERT_EQ(Time.getTOF(100, 49999), Time.InvalidTOF);
-
 
   ASSERT_EQ(Time.getPrevTOF(100, 75000), (uint64_t)(25000 * Time.NsPerTick));
   ASSERT_EQ(Time.getPrevTOF(100, 50000), 0);
@@ -72,19 +68,48 @@ TEST_F(ESSTimeTest, PrevPulse) {
 TEST_F(ESSTimeTest, AddConstantDelay) {
   Time.setReference(0, 0);
   ASSERT_EQ(Time.getTOF(0, 88052499), 999999988);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
   ASSERT_EQ(Time.getTOF(0, 88052499, 0), 999999988);
+  ASSERT_EQ(Time.Stats.TofCount, 2);
   ASSERT_EQ(Time.getTOF(0, 88052499, 11), 999999999);
+  ASSERT_EQ(Time.Stats.TofCount, 3);
+}
+
+TEST_F(ESSTimeTest, MaxTOFExceeded) {
+  Time.setReference(0, 0);
+
+  Time.getTOF(0, 2);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
+  ASSERT_EQ(Time.Stats.TofHigh, 0);
+
+  Time.setMaxTOF(0x01);
+  Time.getTOF(0, 2);
+  ASSERT_EQ(Time.Stats.TofCount, 1);
+  ASSERT_EQ(Time.Stats.TofHigh, 1);
+}
+
+TEST_F(ESSTimeTest, MaxPrevTOFExceeded) {
+  Time.setPrevReference(0, 0);
+
+  Time.getPrevTOF(0, 2);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+
+  Time.setMaxTOF(0x01);
+  Time.getPrevTOF(0, 2);
+  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
+  ASSERT_EQ(Time.Stats.PrevTofHigh, 1);
 }
 
 TEST_F(ESSTimeTest, ExactPulseDelay) {
   Time.setReference(0, 6289464);
   ASSERT_EQ(Time.TimeInNS, 71428568);
 
-  Time.setReference(    0, 0x034a3c11);
+  Time.setReference(0, 0x034a3c11);
   Time.setPrevReference(0, 0x02ea43d9);
   ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428568);
 
-  Time.setReference(    0x615c414f, 0x034a3c11);
+  Time.setReference(0x615c414f, 0x034a3c11);
   Time.setPrevReference(0x615c414f, 0x02ea43d9);
   ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428568);
 }

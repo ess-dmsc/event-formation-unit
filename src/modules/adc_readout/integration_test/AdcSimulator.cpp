@@ -10,15 +10,15 @@
 #include "UdpConnection.h"
 #include <CLI/CLI.hpp>
 
+#include <atomic>
 #include <csignal>
 #include <iostream>
-#include <atomic>
 
 #ifndef ADCSIM_ONLY_CREATE_FIRST_GENERATOR
 #define ADCSIM_ONLY_CREATE_FIRST_GENERATOR 0
 #endif
 
-static std::atomic_bool RunLoop {true};
+static std::atomic_bool RunLoop{true};
 
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;

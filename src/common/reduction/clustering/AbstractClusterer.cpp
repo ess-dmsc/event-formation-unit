@@ -23,7 +23,7 @@ char *GreedyClusterStorage::MemBegin = nullptr;
 char *GreedyClusterStorage::MemEnd = nullptr;
 #endif
 
-ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::Pool =
+ClusterPoolStorage::AllocConfig::PoolType *ClusterPoolStorage::Pool =
     new AllocConfig::PoolType();
 
 // Note: We purposefully leak the storage, since the EFU doesn't guarantee that
@@ -54,8 +54,7 @@ std::string AbstractClusterer::status(const std::string &prepend,
   return ss.str();
 }
 
-bool AbstractClusterer::empty() const {
-  return clusters.empty(); }
+bool AbstractClusterer::empty() const { return clusters.empty(); }
 
 void AbstractClusterer::stash_cluster(Cluster &cluster) {
   XTRACE(CLUSTER, DEB, status("", true).c_str());

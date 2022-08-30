@@ -10,8 +10,8 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV42Serializer.h>
-#include <multigrid/Config.h>
 #include <common/monitor/Monitor.h>
+#include <multigrid/Config.h>
 
 struct MultigridSettings {
   std::string ConfigFile;
@@ -23,7 +23,8 @@ struct MultigridSettings {
 ///
 class MultigridBase : public Detector {
 public:
-  MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings);
+  MultigridBase(BaseSettings const &settings,
+                MultigridSettings const &LocalSettings);
   ~MultigridBase() = default;
   void mainThread();
 
@@ -31,7 +32,6 @@ public:
   static constexpr int one_tenth_second_usecs{100000}; ///
 
 protected:
-
   struct {
     // Input Counters
     int64_t rx_packets{0};
@@ -73,5 +73,4 @@ protected:
 
   bool init_config();
   void process_events(EV42Serializer &ev42serializer);
-
 };

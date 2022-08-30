@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <common/reduction/clustering/AbstractClusterer.h>
 #include <common/reduction/Event.h>
+#include <common/reduction/clustering/AbstractClusterer.h>
 #include <deque>
 
 /// \class AbstractMatcher AbstractMatcher.h
@@ -23,12 +23,14 @@ class AbstractMatcher {
 public:
   std::vector<Event> matched_events;
   mutable size_t stats_event_count{0}; ///< cumulative number of matched events
-  mutable size_t stats_rejected_clusters{0}; ///< cumulative number of rejected clusters
+  mutable size_t stats_rejected_clusters{
+      0}; ///< cumulative number of rejected clusters
   // \todo more counters?
 
 public:
   /// \brief AbstractMatcher constructor
-  /// \param maximum_latency Minimum time gap to latest cluster for a cluster to be
+  /// \param maximum_latency Minimum time gap to latest cluster for a cluster to
+  /// be
   ///         considered for matching. Of the latest clusters in both planes,
   ///         the earlier one will be considered for this comparison.
   /// \param planeA id of first plane selected for matching
@@ -38,7 +40,8 @@ public:
   virtual ~AbstractMatcher() = default;
 
   /// \brief inserts new cluster, queueing it up for matching
-  /// \param cluster Cluster to be inserted. Must belong to one of selected planes,
+  /// \param cluster Cluster to be inserted. Must belong to one of selected
+  /// planes,
   ///         otherwise will be rejected (not added to queue).
   /// \note Inserted clusters must be chronological to the extent at the latency
   ///        guarantee holds, i.e. if cluster has start_time=T, then no
@@ -54,8 +57,9 @@ public:
 
   /// \brief insert new clusters belonging to the same plane (optimized).
   /// \param plane identified plane of all clusters in container
-  /// \param clusters container of clusters in one plane, sorted chronologically.
-  /// \note Inserted clusters must be chronological to the extent at the latency
+  /// \param clusters container of clusters in one plane, sorted
+  /// chronologically. \note Inserted clusters must be chronological to the
+  /// extent at the latency
   ///        guarantee holds, i.e. if cluster has start_time=T, then no
   ///        subsequent clusters can arrive with end_time>=(T-latency).
   void insert(uint8_t plane, ClusterContainer &clusters);
@@ -74,7 +78,8 @@ public:
   virtual std::string status(const std::string &prepend, bool verbose) const;
 
 protected:
-  uint64_t maximum_latency_{0}; ///< time gap for a cluster to be considered for matching
+  uint64_t maximum_latency_{
+      0}; ///< time gap for a cluster to be considered for matching
   uint8_t PlaneA{0};
   uint8_t PlaneB{1};
 
@@ -92,10 +97,10 @@ protected:
   void requeue_clusters(Event &event);
 
   /// \brief Determines if cluster is ready to be matched, using maximum latency
-  ///         as time-out threshold. Compares the end time of submitted cluster to
-  ///         the start time of the latest cluster in queue. Of the latest clusters
-  ///         in both planes, the earlier one will be considered. Uses the latency
-  ///         criterion as threshold.
+  ///         as time-out threshold. Compares the end time of submitted cluster
+  ///         to the start time of the latest cluster in queue. Of the latest
+  ///         clusters in both planes, the earlier one will be considered. Uses
+  ///         the latency criterion as threshold.
   /// \param cluster to be considered for matching
   bool ready_to_be_matched(const Cluster &cluster) const;
 };

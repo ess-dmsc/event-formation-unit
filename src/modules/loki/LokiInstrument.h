@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
 #include <loki/Counters.h>
 #include <loki/LokiBase.h> // to get LokiSettings
 #include <loki/geometry/Calibration.h>
@@ -18,10 +20,7 @@
 #include <loki/geometry/PanelGeometry.h>
 #include <loki/geometry/TubeAmps.h>
 #include <loki/readout/Readout.h>
-#include <common/readout/ess/Parser.h>
-#include <common/readout/ess/ESSTime.h>
 #include <readout/DataParser.h>
-
 
 namespace Loki {
 

@@ -29,7 +29,7 @@ public:
   void match(bool flush) override;
 
   /// \brief print configuration of EndMatcher
-  std::string config(const std::string& prepend) const override;
+  std::string config(const std::string &prepend) const override;
 
 private:
   uint64_t max_delta_time_{0};

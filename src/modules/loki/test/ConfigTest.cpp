@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <loki/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <loki/geometry/Config.h>
 
 std::string NotJsonFile{"deleteme_loki_notjson.json"};
 std::string NotJsonStr = R"(
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
   saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
              InvalidConfigStr.size());
   saveBuffer(InvalidConfigIIFile, (void *)InvalidConfigIIStr.c_str(),
-            InvalidConfigIIStr.size());
+             InvalidConfigIIStr.size());
   saveBuffer(BadDetectorFile, (void *)BadDetectorStr.c_str(),
              BadDetectorStr.size());
   saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(),

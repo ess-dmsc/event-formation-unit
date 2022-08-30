@@ -7,8 +7,8 @@
 
 #include "UdpConnection.h"
 
-#include <common/time/Timer.h>
 #include <common/debug/Trace.h>
+#include <common/time/Timer.h>
 
 #include <unistd.h>
 

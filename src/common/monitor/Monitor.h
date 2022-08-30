@@ -15,9 +15,8 @@
 
 struct Monitor {
   Monitor() = default;
-  Monitor(const std::string& broker,
-          const std::string& topic_prefix,
-          const std::string& source_name);
+  Monitor(const std::string &broker, const std::string &topic_prefix,
+          const std::string &source_name);
   ~Monitor() { close(); }
 
   std::shared_ptr<Hists> histograms;

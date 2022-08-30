@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/reduction/ReducedEvent.h>
 #include <common/reduction/NeutronEvent.h>
+#include <common/reduction/ReducedEvent.h>
 
 #include <common/testutils/TestBase.h>
 
 class ReducedEventTest : public TestBase {
 protected:
-  void SetUp() override { }
-  void TearDown() override { }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(ReducedEventTest, DefaultReducedHitIsBad) {

@@ -2,7 +2,8 @@
 
 #ifndef __llvm__
 #if __GNUC__ == 4
-#pragma message("GCC4 does not implement regular expressions. Ignoring some unit tests.")
+#pragma message(                                                               \
+    "GCC4 does not implement regular expressions. Ignoring some unit tests.")
 #else
 #define RUN_REGEX_UNIT_TESTS
 #endif
@@ -20,59 +21,72 @@
 class EFUArgsTest : public TestBase {};
 
 TEST_F(EFUArgsTest, ExitOnHelp) {
-  const char *myargv[] = {"someName", "-h",};
-    int myargc = 2;
+  const char *myargv[] = {
+      "someName",
+      "-h",
+  };
+  int myargc = 2;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char**)myargv), EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
+            EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, DoNotExitOnHelp) {
   const char *myargv[] = {"someName", "-h", "-d some_det"};
   int myargc = 3;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char**)myargv), EFUArgs::Status::CONTINUE);
+  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
+            EFUArgs::Status::CONTINUE);
 }
 
 TEST_F(EFUArgsTest, ExitOnNoArgs) {
   const char *myargv[] = {"someName"};
   int myargc = 1;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char**)myargv), EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
+            EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, IgnoreFirstPassFailure) {
   const char *myargv[] = {"someName", "-h", "-d", "some_det", "-p", "hej"};
   int myargc = 6;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char**)myargv), EFUArgs::Status::CONTINUE);
+  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
+            EFUArgs::Status::CONTINUE);
 }
 
 TEST_F(EFUArgsTest, SecondPassExitOnHelp) {
   const char *myargv[] = {"someName", "-h"};
   int myargc = 2;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char**)myargv), EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
+            EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, SecondPassExitOnHelpAndDet) {
   const char *myargv[] = {"someName", "-h", "-d", "some_det"};
   int myargc = 4;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char**)myargv), EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
+            EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, SecondPassExitOnFailure) {
-  const char *myargv[] = {"someName",};
+  const char *myargv[] = {
+      "someName",
+  };
   int myargc = 1;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char**)myargv), EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
+            EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, SecondPassContinue) {
   const char *myargv[] = {"someName", "-d", "some_det"};
   int myargc = 3;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char**)myargv), EFUArgs::Status::CONTINUE);
+  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
+            EFUArgs::Status::CONTINUE);
 }
 
 TEST_F(EFUArgsTest, Constructor) {
@@ -126,11 +140,11 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 TEST_F(EFUArgsTest, CoreAffinityOption) {
   int myargc = 5;
   const char *myargv[] = {"progname", "-d", "dummydetector", "-c", "thread1:5"};
-  
+
   EFUArgs efu_args;
   auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
-  
+
   ASSERT_EQ(myargc, 5);
   ASSERT_TRUE(myargv != NULL);
 }
@@ -138,11 +152,11 @@ TEST_F(EFUArgsTest, CoreAffinityOption) {
 TEST_F(EFUArgsTest, CoreAffinityOptionFailure) {
   int myargc = 5;
   const char *myargv[] = {"progname", "-d", "dummydetector", "-c", "thread1:h"};
-  
+
   EFUArgs efu_args;
   auto ret = efu_args.parseSecondPass(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::EXIT); // has detector
-  
+
   ASSERT_EQ(myargc, 5);
   ASSERT_TRUE(myargv != NULL);
 }
@@ -161,26 +175,30 @@ TEST_F(EFUArgsTest, HelpText) {
 }
 
 TEST_F(EFUArgsTest, StoreConfigFile) {
-  //Delete contents of possible file
-  std::ofstream OutTestFile("ConfigFile.ini", std::ios::binary | std::ios::trunc);
+  // Delete contents of possible file
+  std::ofstream OutTestFile("ConfigFile.ini",
+                            std::ios::binary | std::ios::trunc);
   OutTestFile.close();
-  const char* Args[] = {"progname", "-d", "some_det", "--write_config", "ConfigFile.ini"};
+  const char *Args[] = {"progname", "-d", "some_det", "--write_config",
+                        "ConfigFile.ini"};
   EFUArgs efu_args;
-  efu_args.parseSecondPass(5, (char**)Args);
+  efu_args.parseSecondPass(5, (char **)Args);
   std::ifstream InTestFile("ConfigFile.ini", std::ios::binary);
   std::string FileContents((std::istreambuf_iterator<char>(InTestFile)),
-                  std::istreambuf_iterator<char>());
+                           std::istreambuf_iterator<char>());
   EXPECT_NE(FileContents.find("det=\"some_det\""), std::string::npos);
 }
 
 TEST_F(EFUArgsTest, LoadConfigFile) {
-  const char* Args1[] = {"progname", "-d", "no_real_detector_name", "--write_config", "ConfigB.ini"};
+  const char *Args1[] = {"progname", "-d", "no_real_detector_name",
+                         "--write_config", "ConfigB.ini"};
   EFUArgs efu_args;
-  EXPECT_EQ(efu_args.parseSecondPass(5, (char**)Args1), EFUArgs::Status::EXIT);
-  
-  const char* Args2[] = {"progname", "--read_config", "ConfigB.ini"};
+  EXPECT_EQ(efu_args.parseSecondPass(5, (char **)Args1), EFUArgs::Status::EXIT);
+
+  const char *Args2[] = {"progname", "--read_config", "ConfigB.ini"};
   EFUArgs efu_args2;
-  EXPECT_EQ(efu_args2.parseSecondPass(3, (char**)Args2), EFUArgs::Status::CONTINUE);
+  EXPECT_EQ(efu_args2.parseSecondPass(3, (char **)Args2),
+            EFUArgs::Status::CONTINUE);
   EXPECT_EQ(efu_args2.getDetectorName(), "no_real_detector_name");
 }
 

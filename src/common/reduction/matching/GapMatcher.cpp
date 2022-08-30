@@ -6,8 +6,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/matching/GapMatcher.h>
 #include <common/debug/Trace.h>
+#include <common/reduction/matching/GapMatcher.h>
 // #include <cmath>
 // #include <algorithm>
 
@@ -23,7 +23,8 @@ void GapMatcher::match(bool flush) {
     return c1.time_start() < c2.time_start();
   });
 
-  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
+         unmatched_clusters_.size());
 
   Event evt{PlaneA, PlaneB};
   while (!unmatched_clusters_.empty()) {
@@ -56,10 +57,9 @@ void GapMatcher::match(bool flush) {
   }
 }
 
-std::string GapMatcher::config(const std::string& prepend) const {
+std::string GapMatcher::config(const std::string &prepend) const {
   std::stringstream ss;
   ss << AbstractMatcher::config(prepend);
   ss << prepend << fmt::format("minimum_time_gap: {}\n", minimum_time_gap_);
   return ss.str();
 }
-

@@ -8,8 +8,12 @@
 
 #pragma once
 
+#include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #define ENABLE_GREEDY_HIT_ALLOCATOR 0
 
@@ -26,7 +30,7 @@ template <class T> struct GreedyHitAllocator {
   constexpr GreedyHitAllocator(const GreedyHitAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    RelAssertMsg (ENABLE_GREEDY_HIT_ALLOCATOR, "Remember to enable");
+    RelAssertMsg(ENABLE_GREEDY_HIT_ALLOCATOR, "Remember to enable");
     char *p = GreedyHitStorage::MemBegin;
     GreedyHitStorage::MemBegin += n * sizeof(T);
     if (GreedyHitStorage::MemBegin < GreedyHitStorage::MemEnd)
@@ -103,11 +107,14 @@ public:
   value_type *data() noexcept { return Vec.data(); }
   const value_type *data() const noexcept { return Vec.data(); }
 
-  void push_back(const value_type &x) { Vec.push_back(x); }
+  void push_back(const value_type &x) {
+    XTRACE(DATA, DEB, "pushing back constant value");
+    Vec.push_back(x);
+  }
 
   void push_back(value_type &&x) { Vec.push_back(std::move(x)); }
 
-  template <class... Args> void emplace_back(Args &&... args) {
+  template <class... Args> void emplace_back(Args &&...args) {
     Vec.emplace_back(std::forward<Args>(args)...);
   }
 
@@ -136,7 +143,8 @@ public:
 struct HitVectorStorage {
   enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
   using AllocConfig =
-      PoolAllocatorConfig<Hit, Bytes_1GB, MyVector<Hit>::MinReserveCount, false, true>;
+      PoolAllocatorConfig<Hit, Bytes_1GB, MyVector<Hit>::MinReserveCount, false,
+                          true>;
   static AllocConfig::PoolType *Pool;
   static PoolAllocator<AllocConfig> Alloc;
   static std::size_t MaxAllocCount;

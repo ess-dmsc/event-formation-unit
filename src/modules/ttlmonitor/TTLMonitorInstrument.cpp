@@ -135,7 +135,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
     if (UseEveryNEvents == 1) {
-      counters.TxBytes += Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
+      counters.TxBytes +=
+          Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
       counters.MonitorCounts++;
       UseEveryNEvents = ModuleSettings.ReduceEvents;
     } else {

@@ -19,9 +19,9 @@ struct {
   std::string FileName;
   std::string KafkaBroker{"172.30.242.20:9092"};
   std::string KafkaTopic{"freia_detector"};
-  bool DryRun{false}; // Do not stream to Kafka
-  bool Verbose{false}; // Do not print values
-  int KafkaBufferSize {124000}; /// entries ~ 1MB
+  bool DryRun{false};          // Do not stream to Kafka
+  bool Verbose{false};         // Do not print values
+  int KafkaBufferSize{124000}; /// entries ~ 1MB
 } Config;
 
 CLI::App app{"Read event_id from hdf5 files and send to Kafka"};

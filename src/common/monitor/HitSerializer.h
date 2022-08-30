@@ -17,24 +17,26 @@
 class HitSerializer {
 public:
   /// \brief Create the HitSerializer
-  /// \param maxentries the number of readout tuples to buffer before sending to Kafka
+  /// \param maxentries the number of readout tuples to buffer before sending to
+  /// Kafka
   HitSerializer(size_t maxentries, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
   // \todo use generic Hit struct
-  /// \brief function to add a readout tuple to an array for later publishing to Kafka
-  /// \param plane arbitrary data multiplexer (x, y, module, rack, ...)
+  /// \brief function to add a readout tuple to an array for later publishing to
+  /// Kafka \param plane arbitrary data multiplexer (x, y, module, rack, ...)
   /// \param channel datasource identifier (strip, wire, grid, ...)
   /// \param time timestamp
   /// \param adc digitizer adc value (charge, voltage, ...)
-  size_t addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
+  size_t addEntry(uint16_t plane, uint16_t channel, uint32_t time,
+                  uint16_t adc);
 
   /// \brief publish data to Kafka broker and clear internal counters
   size_t produce();
 
   /// \brief return the number of queues samples
-  size_t getNumEntries(){return entries;};
+  size_t getNumEntries() { return entries; };
 
 private:
   ProducerCallback producer_callback;
@@ -45,9 +47,9 @@ private:
   std::string SourceName;
 
   // Will be used to create MONHit
-  size_t entries{0}; ///< current number of queues entries
-  std::vector<uint16_t> planes; ///< described above
-  std::vector<uint32_t> times; ///< described above
+  size_t entries{0};              ///< current number of queues entries
+  std::vector<uint16_t> planes;   ///< described above
+  std::vector<uint32_t> times;    ///< described above
   std::vector<uint16_t> channels; ///< described above
-  std::vector<uint16_t> adcs; ///< described above
+  std::vector<uint16_t> adcs;     ///< described above
 };

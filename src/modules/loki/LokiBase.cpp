@@ -9,13 +9,13 @@
 #include "LokiBase.h"
 
 #include <cinttypes>
-#include <common/detector/EFUArgs.h>
-#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
+#include <common/detector/EFUArgs.h>
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <common/debug/Trace.h>
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -127,8 +127,9 @@ void LokiBase::inputThread() {
 
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
-    if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                         RxRingbuffer.getMaxBufSize())) > 0) {
+    if ((readSize =
+             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                  RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       //XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -146,7 +147,6 @@ void LokiBase::inputThread() {
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
 }
-
 
 ///
 /// \brief Normal processing thread
@@ -188,7 +188,8 @@ void LokiBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::Loki4Amp);
+      auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                ESSReadout::Parser::Loki4Amp);
       Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -205,12 +206,15 @@ void LokiBase::processingThread() {
       Loki.processReadouts();
 
       Counters.TofCount = Loki.ESSReadoutParser.Packet.Time.Stats.TofCount;
-      Counters.TofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
-      Counters.PrevTofCount = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
+      Counters.TofNegative =
+          Loki.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount =
+          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative =
+          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
       Counters.TofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.TofHigh;
-      Counters.PrevTofHigh = Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
-    
+      Counters.PrevTofHigh =
+          Loki.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

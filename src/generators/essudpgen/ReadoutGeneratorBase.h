@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <common/testutils/DataFuzzer.h>
 
 class ReadoutGeneratorBase {
 public:
@@ -77,7 +77,7 @@ protected:
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
   uint8_t ReadoutDataSize{sizeof(ESSReadout::VMM3Parser::VMM3Data)};
-  uint8_t * Buffer{nullptr};
+  uint8_t *Buffer{nullptr};
   uint16_t BufferSize{0};
   uint32_t SeqNum{0};
   uint32_t TimeHigh{0};

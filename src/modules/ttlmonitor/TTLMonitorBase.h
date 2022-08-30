@@ -22,20 +22,20 @@ struct TTLMonitorSettings {
   int NumberOfMonitors{1};
 };
 
-
 class TTLMonitorBase : public Detector {
 public:
-  TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSettings &LocalTTLMonitorSettings);
+  TTLMonitorBase(BaseSettings const &settings,
+                 struct TTLMonitorSettings &LocalTTLMonitorSettings);
   ~TTLMonitorBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
-  struct Counters Counters{};
+  struct Counters Counters {};
   TTLMonitorSettings TTLMonitorModuleSettings;
   std::vector<EV44Serializer> Serializers;
 
 };
 
-}
+} // namespace TTLMonitor

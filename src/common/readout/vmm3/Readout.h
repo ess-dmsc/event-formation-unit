@@ -54,15 +54,14 @@ struct __attribute__((packed)) Readout {
   uint32_t EventTimeLow{0};
   uint16_t BC{0};
   uint16_t OTADC{0};
-  uint8_t  GEO{0}; // also used for CBC HI
-  uint8_t  TDC{0}; // also used for CBC LO
-  uint8_t  VMM{0};
-  uint8_t  Channel{0};
+  uint8_t GEO{0}; // also used for CBC HI
+  uint8_t TDC{0}; // also used for CBC LO
+  uint8_t VMM{0};
+  uint8_t Channel{0};
 
   uint8_t OutputQueue{0};
   uint8_t RingId;
   uint8_t FENId;
-
 
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 

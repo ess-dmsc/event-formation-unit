@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include <iostream>
 #include <loki/generators/ReaderReadouts.h>
 #include <loki/readout/Readout.h>
-#include <iostream>
 
 namespace Loki {
 
@@ -20,7 +20,6 @@ ReaderReadouts::ReaderReadouts(std::string filename) {
   ReadoutSize = sizeof(Readout);
   ChunkSize = ReadoutFile::ChunkSize;
 }
-
 
 size_t ReaderReadouts::read(char *buf) {
   size_t size = ChunkSize;
@@ -34,13 +33,13 @@ size_t ReaderReadouts::read(char *buf) {
   if (size > 0) {
     try {
       file->readAt(current_, size);
-      Readout * LokiData = (Readout *)(file->Data.data());
-      auto * PacketHdr = (ESSReadout::Parser::PacketHeaderV0 *)buf;
+      Readout *LokiData = (Readout *)(file->Data.data());
+      auto *PacketHdr = (ESSReadout::Parser::PacketHeaderV0 *)buf;
 
       PacketHdr->Padding0 = 0x00;
       PacketHdr->Version = 0x00;
       PacketHdr->CookieAndType =
-            (ESSReadout::Parser::DetectorType::Loki4Amp << 24) + 0x00535345;
+          (ESSReadout::Parser::DetectorType::Loki4Amp << 24) + 0x00535345;
       PacketHdr->TotalLength = ESSHeaderSize;
       PacketHdr->OutputQueue = 0x00;
       PacketHdr->TimeSource = 0x00; /// \todo hardcoded
@@ -50,15 +49,16 @@ size_t ReaderReadouts::read(char *buf) {
       PacketHdr->PrevPulseLow = LokiData[0].PrevPulseTimeLow;
       PacketHdr->SeqNum = SeqNum++;
 
-      auto * LRDP = (struct DataParser::LokiReadout *)(buf
-                    + sizeof(struct ESSReadout::Parser::PacketHeaderV0));
+      auto *LRDP =
+          (struct DataParser::LokiReadout
+               *)(buf + sizeof(struct ESSReadout::Parser::PacketHeaderV0));
 
       CurPulseTimeHigh = LokiData[0].PulseTimeHigh;
       CurPulseTimeLow = LokiData[0].PulseTimeLow;
 
       for (unsigned int i = 0; i < size; i++) {
         if ((CurPulseTimeHigh != LokiData[i].PulseTimeHigh) or
-            (CurPulseTimeLow  != LokiData[i].PulseTimeLow )   ) {
+            (CurPulseTimeLow != LokiData[i].PulseTimeLow)) {
           break;
         }
         LRDP[i].RingId = LokiData[i].RingId;
@@ -79,8 +79,8 @@ size_t ReaderReadouts::read(char *buf) {
       }
 
     } catch (std::exception &e) {
-      std::cout << "<ReaderReadouts> failed to read slab ("
-                << current_ << ", " << (current_ + size) << ")"
+      std::cout << "<ReaderReadouts> failed to read slab (" << current_ << ", "
+                << (current_ + size) << ")"
                 << " max=" << total_ << "\n"
                 << hdf5::error::print_nested(e, 1) << std::endl;
     }
@@ -90,5 +90,5 @@ size_t ReaderReadouts::read(char *buf) {
   return TotalLength;
 }
 
-}
+} // namespace Loki
 // GCOVR_EXCL_STOP

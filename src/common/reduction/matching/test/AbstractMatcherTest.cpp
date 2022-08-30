@@ -1,36 +1,37 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <common/reduction/matching/AbstractMatcher.h>
+#include <common/testutils/TestBase.h>
 
 class MockMatcher : public AbstractMatcher {
 public:
   using AbstractMatcher::AbstractMatcher;
 
   void match(bool) override {}
+  using AbstractMatcher::LatestA;
+  using AbstractMatcher::LatestB;
   using AbstractMatcher::maximum_latency_;
   using AbstractMatcher::PlaneA;
   using AbstractMatcher::PlaneB;
-  using AbstractMatcher::LatestA;
-  using AbstractMatcher::LatestB;
-  using AbstractMatcher::unmatched_clusters_;
   using AbstractMatcher::ready_to_be_matched;
   using AbstractMatcher::stash_event;
+  using AbstractMatcher::unmatched_clusters_;
 };
 
 class AbstractMatcherTest : public TestBase {
 protected:
   ClusterContainer x, y;
 
-  void add_cluster(ClusterContainer &ret, uint8_t plane,
-                   uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,
-                   uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+  void add_cluster(ClusterContainer &ret, uint8_t plane, uint16_t coord_start,
+                   uint16_t coord_end, uint16_t coord_step, uint64_t time_start,
+                   uint64_t time_end, uint64_t time_step) {
     Cluster c;
     Hit e;
     e.plane = plane;
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = coord_start; e.coordinate <= coord_end; e.coordinate += coord_step)
+      for (e.coordinate = coord_start; e.coordinate <= coord_end;
+           e.coordinate += coord_step)
         c.insert(e);
     ret.push_back(c);
   }
@@ -52,7 +53,6 @@ TEST_F(AbstractMatcherTest, InsertingMovesData) {
 
   EXPECT_TRUE(x.empty());
 }
-
 
 TEST_F(AbstractMatcherTest, AcceptXY) {
   MockMatcher matcher(100, 0, 1);
@@ -182,12 +182,10 @@ TEST_F(AbstractMatcherTest, Stash) {
 TEST_F(AbstractMatcherTest, PrintConfigStatus) {
   MockMatcher matcher(100, 3, 4);
 
-  add_cluster(x, 3, 0, 3, 1,
-              100, 120, 10);
+  add_cluster(x, 3, 0, 3, 1, 100, 120, 10);
   matcher.insert(3, x);
 
-  add_cluster(y, 4, 0, 3, 1,
-              100, 120, 10);
+  add_cluster(y, 4, 0, 3, 1, 100, 120, 10);
   matcher.insert(4, y);
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
