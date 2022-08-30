@@ -256,7 +256,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
       XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
-      counters.TOFErrors++;
+      counters.MaxTOFErrors++;
       continue;
     }
 
