@@ -247,13 +247,13 @@ void LokiBase::processingThread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as Producer & Serializer keep absolute count
-      Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
-      Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
-      Counters.kafka_ev_others = EventProducer.stats.ev_others;
-      Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
-      Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
-      Counters.TxBytes = Serializer->TxBytes;
     }
+    Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+    Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
+    Counters.kafka_ev_others = EventProducer.stats.ev_others;
+    Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
+    Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    Counters.TxBytes = Serializer->TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
