@@ -221,22 +221,6 @@ void LokiBase::processingThread() {
       usleep(10);
     }
 
-#ifdef ECDC_DEBUG_READOUT
-    if (Serializer->DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
-      printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     FEN5     FEN6     FEN7\n");
-      printf("-----------------------------------------------------------------------------------\n");
-      for (int ring = 0; ring < 8; ring++) {
-        printf("ring %2d  | ", ring);
-        for (int fen = 0; fen < 8; fen++) {
-          printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
-        }
-        printf("\n");
-      }
-      fflush(NULL);
-      Serializer->DebugTimer.reset();
-    }
-#endif
-
     if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
@@ -244,10 +228,9 @@ void LokiBase::processingThread() {
 
       Serializer->produce();
       SerializerII->produce();
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as Producer & Serializer keep absolute count
     }
+    /// Kafka stats update - common to all detectors
+    /// don't increment as Producer & Serializer keep absolute count
     Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
     Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
     Counters.kafka_ev_others = EventProducer.stats.ev_others;
