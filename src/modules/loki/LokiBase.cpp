@@ -21,8 +21,8 @@
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 // #define ECDC_DEBUG_READOUT
 
 namespace Loki {
