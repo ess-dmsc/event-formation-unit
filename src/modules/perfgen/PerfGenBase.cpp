@@ -96,6 +96,11 @@ void PerfGenBase::processingThread() {
     }
 
     usleep(EFUSettings.TestImageUSleep);
+    mystats.kafka_produce_fails = EventProducer.stats.produce_fails;
+    mystats.kafka_ev_errors = EventProducer.stats.ev_errors;
+    mystats.kafka_ev_others = EventProducer.stats.ev_others;
+    mystats.kafka_dr_errors = EventProducer.stats.dr_errors;
+    mystats.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
     TimeOfFlight = 0;
   }
   // \todo flush everything here
