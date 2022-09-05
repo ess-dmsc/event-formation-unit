@@ -40,7 +40,7 @@ public:
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   /// \brief Bifrost pixel calculations
-  uint32_t calcPixel(int Ring, int Tube, int AmpA, int AmpB);
+  uint32_t calcPixel(uint8_t Ring, uint8_t Tube, uint16_t AmpA, uint16_t AmpB);
 
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::BifrostReadout &Data);

@@ -30,22 +30,25 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
                                    timeString());
   }
 
-  // ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeDiffNS);
   // ESSReadoutParser.Packet.Time.setMaxTOF(BifrostConfiguration.MaxTOFNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(0xFFFFFFFFFFFFFFFFULL);
 }
 
 BifrostInstrument::~BifrostInstrument() {}
 
-uint32_t BifrostInstrument::calcPixel(int Ring, int Tube, int AmpA, int AmpB) {
+uint32_t BifrostInstrument::calcPixel(uint8_t Ring, uint8_t Tube, uint16_t AmpA, uint16_t AmpB) {
   int xoff = geom.xOffset(Ring, Tube);
   int yoff = geom.yOffset(Tube);
   int xlocal = geom.xCoord(AmpA, AmpB);
   int ylocal = geom.yCoord(AmpA, AmpB);
   uint32_t pixel = lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
 
-  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+  if (pixel == 0) {
+  XTRACE(DATA, ALW, "Ring %d, Tube, %d, AmplA %d, AmplB %d", Ring, Tube, AmpA, AmpB);
+  XTRACE(DATA, ALW, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
          xoff, xlocal, yoff, ylocal, pixel);
+  }
 
   return pixel;
 }
@@ -107,7 +110,7 @@ void BifrostInstrument::processReadouts() {
       continue;
     }
 
-    XTRACE(DATA, DEB, "  Data: time (%10u, %10u) tof %llu, Tube %u, A %d, B %d",
+    XTRACE(DATA, DEB, "  Data: time (%10u, %10u) tof %llu, Tube %u, A %u, B %u",
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.TubeId, Data.AmpA,
            Data.AmpB);
 

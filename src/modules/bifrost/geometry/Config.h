@@ -22,7 +22,8 @@ class Config {
 public:
   Config() {}
 
-  int MaxValidRing{0};
+  int MaxValidRing{2};
+  uint32_t MaxPulseTimeDiffNS{0xffffffff};
 
 private:
 };
