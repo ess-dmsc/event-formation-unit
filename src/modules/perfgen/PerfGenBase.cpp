@@ -44,9 +44,9 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings,
   // clang-format off
   Stats.create("events.udder", mystats.events_udder);
   Stats.create("transmit.bytes", mystats.tx_bytes);
-  Stats.create("transmit.produce", mystats.produce);
 
   /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_calls", mystats.kafka_produce_calls);
   Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka.ev_others", mystats.kafka_ev_others);
@@ -72,7 +72,7 @@ void PerfGenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer FlatBuffer(kafka_buffer_size, "perfgen", Produce);
+  EV42Serializer Serializer(kafka_buffer_size, "perfgen", Produce);
 
   ESSGeometry ESSGeom(64, 64, 1, 1);
 
@@ -85,22 +85,25 @@ void PerfGenBase::processingThread() {
 
   while (runThreads) {
     uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-    FlatBuffer.pulseTime(EfuTime);
+    Serializer.pulseTime(EfuTime);
 
     for (int i = 0; i < EventsPerPulse; i++) {
       auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
-      auto TxBytes = FlatBuffer.addEvent(TimeOfFlight, PixelId);
-      mystats.tx_bytes += TxBytes;
+      Serializer.addEvent(TimeOfFlight, PixelId);
       mystats.events_udder++;
       TimeOfFlight++;
     }
 
     usleep(EFUSettings.TestImageUSleep);
+
+    /// Kafka stats update - common to all detectors
+    /// don't increment as Producer & Serializer keep absolute count
     mystats.kafka_produce_fails = EventProducer.stats.produce_fails;
     mystats.kafka_ev_errors = EventProducer.stats.ev_errors;
     mystats.kafka_ev_others = EventProducer.stats.ev_others;
     mystats.kafka_dr_errors = EventProducer.stats.dr_errors;
     mystats.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    mystats.tx_bytes = Serializer.TxBytes;
     TimeOfFlight = 0;
   }
   // \todo flush everything here

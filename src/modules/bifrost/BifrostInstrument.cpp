@@ -30,7 +30,7 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
                                    timeString());
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(0xFFFFFFFFUL);
+  // ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeNS);
   // ESSReadoutParser.Packet.Time.setMaxTOF(BifrostConfiguration.MaxTOFNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(0xFFFFFFFFFFFFFFFFULL);
 }

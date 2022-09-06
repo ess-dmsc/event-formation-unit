@@ -17,6 +17,8 @@ struct EventMessage;
 
 class EV42Serializer {
 public:
+  int64_t TxBytes;
+
   /// \brief creates ev42 flat buffer serializer
   /// \param max_array_length maximum number of events
   /// \param source_name value for source_name field
@@ -62,6 +64,7 @@ private:
   // \todo should this not be predefined in terms of jumbo frame?
   size_t MaxEvents{0};
   size_t EventCount{0};
+
 
   // \todo maybe should be mutated directly in buffer? Start at 0?
   uint64_t MessageId{1};
