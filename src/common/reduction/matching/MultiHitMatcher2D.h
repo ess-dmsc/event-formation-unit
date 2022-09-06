@@ -42,8 +42,12 @@ class MultiHitMatcher2D : public AbstractMatcher {
 
 private:
   void split_and_stash_event(Event evt);
+  std::vector<Cluster> split_cluster(Cluster cluster);
+  bool clusters_match(Cluster cluster_a, Cluster cluster_b);
 
   uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};
   uint16_t maximum_coord_span_{10};
+  float_t coefficient_{1};
+  float_t allowance_{10};
 };

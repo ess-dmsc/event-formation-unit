@@ -71,17 +71,49 @@ std::string MultiHitMatcher2D::config(const std::string &prepend) const {
 
 void MultiHitMatcher2D::split_and_stash_event(Event evt){
   Cluster new_cluster;
-  std::vector<Cluster> new_clusters_a;
-  std::vector<Cluster> new_clusters_b;
+  std::vector<Cluster> new_clusters_a = split_cluster(evt.ClusterA);
+  std::vector<Cluster> new_clusters_b = split_cluster(evt.ClusterB);
+  std::vector<Event> new_events;
 
-  sort_by_increasing_coordinate(evt.ClusterA.hits);
-  sort_by_increasing_coordinate(evt.ClusterB.hits);
+  for (Cluster cluster_a : new_clusters_a){
+    bool matched_a_to_b = false;
+    for (Cluster cluster_b : new_clusters_b){
+      if (clusters_match(cluster_a, cluster_b)){
+        if (matched_a_to_b){
+          XTRACE(DATA, DEB, "More than 1 Cluster in B plane matched Cluster in A plane, can't split events by ADC values, discarding them");
+          return;
+        }
+        Event evt;
+        evt.merge(cluster_a);
+        evt.merge(cluster_b);
+        new_events.push_back(evt);
+      }
+    }
+  }
+  for (Cluster cluster_b : new_clusters_b){
+    bool matched_b_to_a = false;
+    for (Cluster cluster_a : new_clusters_a){
+      if (clusters_match(cluster_a, cluster_b)){
+        if (matched_b_to_a){
+          XTRACE(DATA, DEB, "More than 1 Cluster in A plane matched Cluster in B plane, can't split events by ADC values, discarding them");
+          return;
+        }
+        matched_b_to_a = true;
+      }
+    }
+  }
+
+}
+
+std::vector<Cluster> MultiHitMatcher2D::split_cluster(Cluster cluster){
+  Cluster new_cluster;
+  std::vector<Cluster> new_clusters;
+  sort_by_increasing_coordinate(cluster.hits);
   uint last_coord = 0;
 
-
-  for(Hit hit : evt.ClusterA.hits){
+  for(Hit hit : cluster.hits){
     if ((!new_cluster.empty()) && (hit.coordinate - last_coord > minimum_coord_gap_)){
-      new_clusters_a.push_back(new_cluster);
+      new_clusters.push_back(new_cluster);
       new_cluster.clear();
       new_cluster.insert(hit);
     }
@@ -91,12 +123,22 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
     }
   }
   if (!new_cluster.empty()){
-    new_clusters_a.push_back(new_cluster);
+    new_clusters.push_back(new_cluster);
     new_cluster.clear();
   }
 
-  for(Cluster cluster : new_clusters_a){
+  for(Cluster cluster : new_clusters){
     XTRACE(DATA, DEB, "New cluster created, starts at coord %u, ends at coord %u", cluster.coord_start(), cluster.coord_end());
   }
-  
+
+  return new_clusters;
+}
+
+bool MultiHitMatcher2D::clusters_match(Cluster cluster_a, Cluster cluster_b){
+  if ((cluster_a.weight_sum() * coefficient_ >= cluster_b.weight_sum() - allowance_) && (cluster_a.weight_sum() * coefficient_ <= cluster_b.weight_sum() + allowance_)){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
