@@ -318,7 +318,7 @@ TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.TOFErrors, 1);
+  ASSERT_EQ(counters.MaxTOFErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, NoEvents) {

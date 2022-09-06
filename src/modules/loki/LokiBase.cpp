@@ -14,7 +14,6 @@
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <loki/LokiInstrument.h>
@@ -132,7 +131,7 @@ void LokiBase::inputThread() {
              dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                   RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+      //XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
 
@@ -161,7 +160,7 @@ void LokiBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "loki", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "loki", Produce);
   Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
   Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug");
@@ -170,12 +169,10 @@ void LokiBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
-  SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
-  Loki.setSerializerII(
-      SerializerII); // would rather have this in LokiInstrument
+  SerializerII = new EV44Serializer(KafkaBufferSize, "loki", ProduceII);
+  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer, DebugTimer;
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -224,43 +221,22 @@ void LokiBase::processingThread() {
       usleep(10);
     }
 
-#ifdef ECDC_DEBUG_READOUT
-    if (DebugTimer.timetsc() >= 5ULL * 1000000 * TSC_MHZ) {
-      printf("\nRING     |    FEN0     FEN1     FEN2     FEN3     FEN4     "
-             "FEN5     FEN6     FEN7\n");
-      printf("-----------------------------------------------------------------"
-             "------------------\n");
-      for (int ring = 0; ring < 8; ring++) {
-        printf("ring %2d  | ", ring);
-        for (int fen = 0; fen < 8; fen++) {
-          printf("%8u ", Loki.LokiParser.HeaderCounters[ring][fen]);
-        }
-        printf("\n");
-      }
-      fflush(NULL);
-      DebugTimer.reset();
-    }
-#endif
-
-    if (ProduceTimer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-
+    if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+      XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
-      Counters.TxBytes += Serializer->produce();
+      Serializer->produce();
       SerializerII->produce();
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-      Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
-      Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
-      Counters.kafka_ev_others = EventProducer.stats.ev_others;
-      Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
-      Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
-
-      ProduceTimer.reset();
     }
+    /// Kafka stats update - common to all detectors
+    /// don't increment as Producer & Serializer keep absolute count
+    Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+    Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
+    Counters.kafka_ev_others = EventProducer.stats.ev_others;
+    Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
+    Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    Counters.TxBytes = Serializer->TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
