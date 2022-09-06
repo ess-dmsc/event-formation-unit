@@ -13,7 +13,7 @@ set(nmx_common_inc
   geometry/Config.h
   geometry/NMXGeometry.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
+  ${ESS_SOURCE_DIR}/common/reduction/EventBuilderMultiHit2D.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
@@ -25,7 +25,7 @@ set(nmx_common_src
   NMXInstrument.cpp
   geometry/Config.cpp
   geometry/NMXGeometry.cpp
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
+  ${ESS_SOURCE_DIR}/common/reduction/EventBuilderMultiHit2D.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
