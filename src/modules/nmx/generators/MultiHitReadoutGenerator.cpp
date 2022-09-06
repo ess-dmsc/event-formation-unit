@@ -34,6 +34,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
   uint8_t FEN = 0;
+  uint16_t ADC = 0;
   std::map<uint8_t, uint8_t> XPanelToFEN { {0, 0}, {1, 1}, {2, 5}, {3, 4}};
   std::map<uint8_t, uint8_t> YPanelToFEN { {0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
@@ -53,7 +54,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
       Panel = rand() % 4;
     }
     if ((Readout % 2) == 0) {
-      ReadoutData->OTADC = (Readout % 4 + 1) * 1000;
+      ADC = (Readout % 4 + 1) * 100;
       XLocal = rand() % 640;
       YLocal = 639-(abs(1.2*(XLocal - 128)));
       if (Panel <= 1){
@@ -78,13 +79,15 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
         VMM = YLocal/64;
       }
       FEN = YPanelToFEN[Panel];
-      XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
+      XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u, ADC: %u", Channel, VMM, FEN, ADC);
     }
     
 
     ReadoutData->VMM = VMM;
     ReadoutData->Channel = Channel;
     ReadoutData->FENId = FEN;
+    ReadoutData->OTADC = ADC;
+
     DP += ReadoutDataSize;
 
     if ((Readout % 4) == 3) {
