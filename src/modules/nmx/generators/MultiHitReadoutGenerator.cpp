@@ -24,7 +24,7 @@
 #define TRC_LEVEL TRC_L_DEB
 
 void Nmx::MultiHitReadoutGenerator::generateData() {
-  Settings.TicksBtwReadouts = 30;
+  Settings.TicksBtwReadouts = 3;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
