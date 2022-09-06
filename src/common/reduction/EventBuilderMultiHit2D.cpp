@@ -13,8 +13,8 @@
 
 #include <algorithm>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_INF
 
 
 EventBuilderMultiHit2D::EventBuilderMultiHit2D() { matcher.set_minimum_time_gap(timegap); }
