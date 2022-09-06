@@ -53,7 +53,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
       Panel = rand() % 4;
     }
     if ((Readout % 2) == 0) {
-      ReadoutData->OTADC = (Readout % 4) * 1000;
+      ReadoutData->OTADC = (Readout % 4 + 1) * 1000;
       XLocal = rand() % 640;
       YLocal = 639-(abs(1.2*(XLocal - 128)));
       if (Panel <= 1){
