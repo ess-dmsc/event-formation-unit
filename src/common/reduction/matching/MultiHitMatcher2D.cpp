@@ -46,10 +46,13 @@ void MultiHitMatcher2D::match(bool flush) {
       }
       else{ //split clusters by coord gaps and attempt to match based on ADC values
         XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
+        XTRACE(CLUSTER, DEB, "Cluster A spans %u and contains %u hits, and Cluster B spans %u and contains %u hits", evt.ClusterA.coord_span(), evt.ClusterA.hit_count(), evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
         split_and_stash_event(evt);
+        evt.clear();
       }
     }
 
+    XTRACE(CLUSTER, DEB, "Merging cluster into event with time gap %u", evt.time_gap(*cluster) > minimum_time_gap_);
     evt.merge(*cluster);
 
     unmatched_clusters_.pop_front();

@@ -67,7 +67,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
         VMM = XLocal/64;
       }
       FEN = XPanelToFEN[Panel];
-      XTRACE(DATA, DEB, "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u", Panel, XLocal, YLocal);
+      XTRACE(DATA, DEB, "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u, ADC: %u", Panel, XLocal, YLocal, ADC);
       XTRACE(DATA, DEB, "Generating readout for X, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     else{
@@ -80,7 +80,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
         VMM = YLocal/64;
       }
       FEN = YPanelToFEN[Panel];
-      XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u, ADC: %u", Channel, VMM, FEN, ADC);
+      XTRACE(DATA, DEB, "Generating readout for Y, Channel: %u, VMM: %u, FEN: %u", Channel, VMM, FEN);
     }
     
 
