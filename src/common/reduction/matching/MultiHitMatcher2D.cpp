@@ -37,9 +37,10 @@ void MultiHitMatcher2D::match(bool flush) {
     }
 
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
-      XTRACE(CLUSTER, DEB, "time gap too large");
+      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, maximum is %u", evt.time_gap(*cluster), minimum_time_gap_);
       if ((evt.ClusterA.coord_span() < maximum_coord_span_) and (evt.ClusterB.coord_span() < maximum_coord_span_)){
         XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
+        XTRACE(CLUSTER, DEB, "Cluster A coord span = %u, Cluster B coord span = %u", evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
         stash_event(evt);
         evt.clear();
       }
