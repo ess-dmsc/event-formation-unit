@@ -8,6 +8,7 @@ set(matching_obj_SRC
   GapMatcher.cpp
   EndMatcher.cpp
   CenterMatcher.cpp
+  MultiHitMatcher2D.cpp
 )
 
 set(matching_obj_INC
@@ -16,6 +17,7 @@ set(matching_obj_INC
   GapMatcher.h
   EndMatcher.h
   CenterMatcher.h
+  MultiHitMatcher2D.h
 )
 
 add_library(MatchingLib OBJECT
