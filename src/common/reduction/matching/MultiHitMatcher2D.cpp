@@ -39,10 +39,12 @@ void MultiHitMatcher2D::match(bool flush) {
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
       XTRACE(CLUSTER, DEB, "time gap too large");
       if ((evt.ClusterA.coord_span() < maximum_coord_span_) and (evt.ClusterB.coord_span() < maximum_coord_span_)){
+        XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
         stash_event(evt);
         evt.clear();
       }
       else{ //split clusters by coord gaps and attempt to match based on ADC values
+        XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
         split_and_stash_event(evt);
       }
     }
@@ -80,9 +82,10 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
     for (Cluster cluster_b : new_clusters_b){
       if (clusters_match(cluster_a, cluster_b)){
         if (matched_a_to_b){
-          XTRACE(DATA, DEB, "More than 1 Cluster in B plane matched Cluster in A plane, can't split events by ADC values, discarding them");
+          XTRACE(CLUSTER, DEB, "More than 1 Cluster in B plane matched Cluster in A plane, can't split events by ADC values, discarding them");
           return;
         }
+        XTRACE(CLUSTER, DEB, "Matched cluster a and b");
         Event evt;
         evt.merge(cluster_a);
         evt.merge(cluster_b);
@@ -101,6 +104,10 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
         matched_b_to_a = true;
       }
     }
+  }
+
+  for (Event evt : new_events){
+    stash_event(evt);
   }
 
 }
