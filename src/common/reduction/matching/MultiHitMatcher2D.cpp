@@ -115,6 +115,7 @@ std::vector<Cluster> MultiHitMatcher2D::split_cluster(Cluster cluster){
     if ((!new_cluster.empty()) && (hit.coordinate - last_coord > minimum_coord_gap_)){
       new_clusters.push_back(new_cluster);
       new_cluster.clear();
+      last_coord = hit.coordinate;
       new_cluster.insert(hit);
     }
     else{

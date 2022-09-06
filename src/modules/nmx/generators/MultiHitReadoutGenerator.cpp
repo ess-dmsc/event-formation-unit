@@ -47,13 +47,13 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
 
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
-    ReadoutData->OTADC = 1000;
     ReadoutData->RingId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
     if ((Readout % 4) == 0){
       Panel = rand() % 4;
     }
     if ((Readout % 2) == 0) {
+      ReadoutData->OTADC = (Readout % 4) * 1000;
       XLocal = rand() % 640;
       YLocal = 639-(abs(1.2*(XLocal - 128)));
       if (Panel <= 1){
