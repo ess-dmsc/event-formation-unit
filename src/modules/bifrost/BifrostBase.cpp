@@ -22,8 +22,8 @@
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Bifrost {
 
@@ -71,7 +71,8 @@ BifrostBase::BifrostBase(BaseSettings const &Settings,
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
-  // Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
+  Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
+  Stats.create("geometry.tube_mapping_errors", Counters.TubeErrors);
   // Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
 
   // Events

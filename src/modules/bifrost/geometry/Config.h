@@ -22,7 +22,10 @@ class Config {
 public:
   Config() {}
 
-  int MaxValidRing{2};
+  const int MaxValidRing{2};
+  const int MaxValidFEN{0};
+  const int MaxValidTube{14};
+
   uint32_t MaxPulseTimeDiffNS{0xffffffff};
 
 private:

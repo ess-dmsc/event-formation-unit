@@ -88,6 +88,18 @@ void BifrostInstrument::processReadouts() {
       continue;
     }
 
+    if (Section.FENId > BifrostConfiguration.MaxValidFEN) {
+      XTRACE(DATA, WAR, "FEN %d is incompatible with config", Section.FENId);
+      counters.FENErrors++;
+      continue;
+    }
+
+    if (Section.TubeId > BifrostConfiguration.MaxValidTube) {
+      XTRACE(DATA, WAR, "Tube %d is incompatible with config", Section.TubeId);
+      counters.TubeErrors++;
+      continue;
+    }
+
     auto &Data = Section;
 
     if (DumpFile) {

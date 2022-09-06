@@ -64,7 +64,7 @@ TEST_F(BifrostInstrumentTest, CalcPixel) {
 
 TEST_F(BifrostInstrumentTest, InvalidRing) {
   bifrost->BifrostParser.Result.push_back(
-      {1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+      {3, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
   bifrost->processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
 }
