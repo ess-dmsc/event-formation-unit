@@ -91,6 +91,11 @@ void VMM3Config::applyVMM3Config() {
       Hybrid.Initialised = true;
       Hybrid.HybridId = IDString;
 
+      XTRACE(
+          INIT, DEB,
+          "JSON config - Detector %s, Hybrid %u, Ring %u, FEN %u, LocalHybrid "
+          "%u",
+          Name.c_str(), NumHybrids, Ring, FEN, LocalHybrid);
       LOG(INIT, Sev::Info,
           "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
           "{}",
@@ -105,6 +110,8 @@ void VMM3Config::applyVMM3Config() {
         "{} pixels",
         NumHybrids, NumPixels);
   } catch (...) {
+    XTRACE(INIT, ERR, "JSON config - error: Invalid Config file: %s",
+           FileName.c_str());
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
         FileName);
     throw std::runtime_error("Invalid Json file");

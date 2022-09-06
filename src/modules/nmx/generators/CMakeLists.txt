@@ -48,7 +48,6 @@ set_target_properties(nmx_udp_generated_smile
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
   )
 
-
   set(nmx_udp_generated_multihit_INC
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
@@ -66,6 +65,27 @@ target_compile_definitions(nmx_udp_generated_multihit
   PUBLIC NMX_MULTIHIT_GENERATOR
   )
 set_target_properties(nmx_udp_generated_multihit
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
+  )
+
+  set(nmx_udp_generated_track_INC
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_MODULE_DIR}/nmx/generators/TrackReadoutGenerator.h
+  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
+  )
+set(nmx_udp_generated_track_SRC
+  ${ESS_SOURCE_DIR}/generators/essudpgen/udpgen_template.cpp
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_MODULE_DIR}/nmx/generators/TrackReadoutGenerator.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
+  )
+create_executable(nmx_udp_generated_track)
+target_compile_definitions(nmx_udp_generated_track
+  PUBLIC NMX_TRACK_GENERATOR
+  )
+set_target_properties(nmx_udp_generated_track
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
   )

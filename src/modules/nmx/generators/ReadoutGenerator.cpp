@@ -20,8 +20,8 @@
 #include <cstring>
 #include <stdexcept>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void Nmx::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;

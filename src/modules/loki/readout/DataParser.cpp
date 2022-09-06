@@ -48,9 +48,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    ///\todo remove ad hoc conters sometime
-    HeaderCounters[Data->RingId & 0xf][Data->FENId & 0xf]++;
-
     if (Data->RingId > MaxRingId or Data->FENId > MaxFENId) {
       XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
              Data->FENId);

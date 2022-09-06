@@ -49,6 +49,5 @@ public:
   std::vector<struct LokiReadout> Result;
 
   struct Counters &Stats;
-  uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
 } // namespace Loki

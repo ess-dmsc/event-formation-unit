@@ -40,6 +40,7 @@ public:
     Reserved = 0x00,
     TTLMonitor = 0x10,
     Loki4Amp = 0x30,
+    BIFROST = 0x34,
     CSPEC = 0x40,
     NMX = 0x44,
     FREIA = 0x48,

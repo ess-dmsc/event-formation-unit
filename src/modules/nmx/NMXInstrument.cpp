@@ -17,8 +17,8 @@
 #include <nmx/NMXInstrument.h>
 #include <nmx/geometry/NMXGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Nmx {
 
@@ -171,7 +171,7 @@ void NMXInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush(true); // Do matching
+    builder.flush(); // Do matching
   }
 }
 
@@ -221,7 +221,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.time_end();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -241,8 +241,8 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // calculate local x and y using center of mass
-    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_utpc(false)));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_utpc(false)));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {

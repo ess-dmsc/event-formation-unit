@@ -50,12 +50,13 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset =
-            MaxCassetteNumber -
-            (uint8_t)Mapping["CassetteNumber"] * NumWiresPerCassette;
+        Hybrid.YOffset = (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
+                         NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }
+      XTRACE(INIT, DEB, "MaxCass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
+             MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
     }
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;

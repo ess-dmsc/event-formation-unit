@@ -63,7 +63,7 @@ public:
     return getXoffset(Sector) + SumoOffset[Sumo] + 2 * Cassette + Counter;
   }
 
-  uint16_t getY(uint8_t Wire, uint8_t Strip) {
+  int getY(uint8_t Wire, uint8_t Strip) {
     if (Wire > MaxWire) {
       XTRACE(EVENT, WAR, "Invalid Wire: %u", Wire);
       return -1;

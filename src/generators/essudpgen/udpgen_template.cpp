@@ -18,6 +18,7 @@
 #include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
+#include <modules/nmx/generators/TrackReadoutGenerator.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
 
 #include <stdio.h>
@@ -101,6 +102,12 @@ int main(int argc, char *argv[]) {
 
 #ifdef NMX_MULTIHIT_GENERATOR
   Nmx::MultiHitReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_TRACK_GENERATOR
+  Settings.TicksBtwReadouts = 1;
+  Nmx::TrackReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
 

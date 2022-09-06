@@ -12,6 +12,8 @@
 
 #include "Producer.h"
 #include "flatbuffers/flatbuffers.h"
+#include <common/time/TSCTimer.h>
+
 
 struct Event44Message;
 
@@ -54,6 +56,9 @@ public:
   /// \brief serializes buffer
   /// \returns reference to internally stor0ed buffer
   nonstd::span<const uint8_t> serialize();
+
+  TSCTimer ProduceTimer, DebugTimer;
+  int64_t TxBytes;
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
