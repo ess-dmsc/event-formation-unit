@@ -86,10 +86,10 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
           return;
         }
         XTRACE(CLUSTER, DEB, "Matched cluster a and b");
-        Event evt;
-        evt.merge(cluster_a);
-        evt.merge(cluster_b);
-        new_events.push_back(evt);
+        Event new_evt;
+        new_evt.merge(cluster_a);
+        new_evt.merge(cluster_b);
+        new_events.push_back(new_evt);
       }
     }
   }

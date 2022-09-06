@@ -90,8 +90,8 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     if ((Readout % 4) == 3) {
       TimeLow += Settings.TicksBtwEvents;
     } else {
-      // TimeLow += Settings.TicksBtwReadouts;
-      TimeLow += 30;
+      TimeLow += Settings.TicksBtwReadouts;
+      //TimeLow += 30;
     }
     if (TimeLow >= 88052499){
       TimeLow -= 88052499;
