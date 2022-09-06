@@ -169,9 +169,8 @@ void LokiBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
-  SerializerII = new EV42Serializer(KafkaBufferSize, "loki", ProduceII);
-  Loki.setSerializerII(
-      SerializerII); // would rather have this in LokiInstrument
+  SerializerII = new EV44Serializer(KafkaBufferSize, "loki", ProduceII);
+  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
 

@@ -39,8 +39,7 @@ public:
     return Pixel;
   }
 
-  uint16_t getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
-                uint8_t Counter) {
+  int getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
     if (Sector > MaxSector) {
       XTRACE(EVENT, WAR, "Invalid Sector: %u", Sector);
       return -1;
