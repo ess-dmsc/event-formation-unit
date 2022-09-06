@@ -11,14 +11,14 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
+#include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
 #include <modules/loki/generators/ReadoutGenerator.h>
-#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
-#include <modules/nmx/generators/MultiHitReadoutGenerator.h>
+#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
 
 #include <stdio.h>
 // GCOVR_EXCL_START

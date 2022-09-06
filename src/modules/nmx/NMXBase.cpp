@@ -33,7 +33,7 @@ namespace Nmx {
 const char *classname = "NMX detector with ESS readout";
 
 NMXBase::NMXBase(BaseSettings const &settings,
-                     struct NMXSettings &LocalNMXSettings)
+                 struct NMXSettings &LocalNMXSettings)
     : Detector("NMX", settings), NMXModuleSettings(LocalNMXSettings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -192,8 +192,7 @@ void NMXBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "nmx", Produce);
-  NMXInstrument NMX(Counters, /*EFUSettings,*/ NMXModuleSettings,
-                        Serializer);
+  NMXInstrument NMX(Counters, /*EFUSettings,*/ NMXModuleSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(NMX.ADCHist.needed_buffer_size(),
                                         "NMX");
@@ -218,7 +217,7 @@ void NMXBase::processing_thread() {
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = NMX.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::NMX);
+                                               ESSReadout::Parser::NMX);
       Counters.ReadoutStats = NMX.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

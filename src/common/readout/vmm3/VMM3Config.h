@@ -23,7 +23,7 @@ public:
   // Provide maximum values from all VMM3 detectors
   static constexpr uint8_t MaxRing{
       10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
-  static constexpr uint8_t MaxFEN{13};    // This is topology specific
+  static constexpr uint8_t MaxFEN{13};   // This is topology specific
   static constexpr uint8_t MaxHybrid{5}; // Hybrids are VMM >> 1
 
   VMM3Config(){};
@@ -35,8 +35,8 @@ public:
   // load file into json object and apply
   void loadAndApplyConfig();
 
-  /// \brief Loads calibration file and applies to each hybrid based on string ID matching
-  /// CalibFile parameter = string path to calibration json file
+  /// \brief Loads calibration file and applies to each hybrid based on string
+  /// ID matching CalibFile parameter = string path to calibration json file
   void loadAndApplyCalibration(std::string CalibFile);
 
   /// \brief Applies calibration json object to specified VMM on Hybrid
@@ -91,7 +91,6 @@ public:
 
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
-
 
   // Other parameters
   std::string ExpectedName{""};

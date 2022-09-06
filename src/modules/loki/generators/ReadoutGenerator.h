@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <common/testutils/DataFuzzer.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <loki/readout/DataParser.h>
 
 namespace Loki {

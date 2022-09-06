@@ -9,12 +9,12 @@
 #include <common/reduction/HitVector.h>
 #include <common/testutils/TestBase.h>
 
-#include <random>
 #include <chrono>
+#include <random>
 
 class HitVectorTest : public TestBase {
 protected:
-  double center_ {0.5};
+  double center_{0.5};
   double max_ = {80};
   double spread_ = {10};
   std::normal_distribution<double> dist;
@@ -27,17 +27,16 @@ protected:
     myclock::duration d = myclock::now() - beginning;
     gen_.seed(d.count());
   }
-  void TearDown() override { }
+  void TearDown() override {}
 
-  uint16_t generate_val()
-  {
+  uint16_t generate_val() {
     return std::round(std::max(std::min(dist(gen_), double(max_)), 0.0));
   }
 };
 
 TEST_F(HitVectorTest, Visualize) {
   HitVector hits;
-  for (size_t i=0; i < 10000; ++i) {
+  for (size_t i = 0; i < 10000; ++i) {
     Hit hit;
     hit.coordinate = generate_val();
     hit.weight = generate_val();
@@ -45,7 +44,7 @@ TEST_F(HitVectorTest, Visualize) {
     hits.push_back(hit);
   }
 
-//  MESSAGE() << "\n" << to_string(hits, {}) << "\n";
+  //  MESSAGE() << "\n" << to_string(hits, {}) << "\n";
 
   MESSAGE() << "\n" << visualize(hits, {}, 100, 100) << "\n";
   MESSAGE() << "\n" << visualize(hits, {}, 30, 30) << "\n";

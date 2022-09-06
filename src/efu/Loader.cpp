@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/DetectorModuleRegister.h>
 #include <common/debug/Log.h>
+#include <common/detector/DetectorModuleRegister.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
@@ -36,9 +36,10 @@ bool Loader::loadPlugin(const std::string lib) {
     LOG(INIT, Sev::Info, "Loaded statically linked detector module: " + lib);
     return true;
   } catch (std::runtime_error &Error) {
-    LOG(INIT, Sev::Notice, "Unable to find statically linked detector module with "
+    LOG(INIT, Sev::Notice,
+        "Unable to find statically linked detector module with "
         "name\"{}\". Attempting to open external plugin.",
-           lib);
+        lib);
   }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
 
@@ -48,11 +49,9 @@ bool Loader::loadPlugin(const std::string lib) {
     std::string TestLibName = Prefix + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
-      LOG(INIT, Sev::Info, "Loaded library \"{}\".",
-            TestLibName);
+      LOG(INIT, Sev::Info, "Loaded library \"{}\".", TestLibName);
       break;
-    }
-    else {
+    } else {
       LOG(INIT, Sev::Warning, "Could not open library {}: {}", TestLibName,
           dlerror());
     }
@@ -70,8 +69,8 @@ bool Loader::loadPlugin(const std::string lib) {
   PopulateCLIParser *tempParserPopulator =
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
-    LOG(INIT, Sev::Warning, "Unable to find function to populate CLI parser in {}",
-           lib);
+    LOG(INIT, Sev::Warning,
+        "Unable to find function to populate CLI parser in {}", lib);
   } else {
     if (nullptr == tempParserPopulator->Function) {
       LOG(INIT, Sev::Warning, "Function to populate CLI parser not set");
@@ -82,9 +81,7 @@ bool Loader::loadPlugin(const std::string lib) {
   return true;
 }
 
-bool Loader::IsOk() {
-  return not (myFactory == nullptr);
-}
+bool Loader::IsOk() { return not(myFactory == nullptr); }
 
 std::shared_ptr<Detector> Loader::createDetector(BaseSettings settings) {
   return myFactory->create(settings);

@@ -451,7 +451,6 @@ TEST_F(CSPECInstrumentTest, BadRingAndFENError) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
-
 TEST_F(CSPECInstrumentTest, GoodEvent) {
   makeHeader(cspec->ESSReadoutParser.Packet, GoodEvent);
   auto Res = cspec->VMMParser.parse(cspec->ESSReadoutParser.Packet);
@@ -506,7 +505,7 @@ TEST_F(CSPECInstrumentTest, MaxADC) {
   counters.VMMStats = cspec->VMMParser.Stats;
 
   // ADC was above VMM threshold of 1023 once
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); 
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1);
   ASSERT_EQ(Res, 1);
 }
 

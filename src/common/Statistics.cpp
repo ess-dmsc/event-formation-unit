@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Log.h>
 #include <common/Statistics.h>
+#include <common/debug/Log.h>
 
 int Statistics::create(std::string StatName, int64_t &Value) {
   LOG(UTILS, Sev::Info, "Adding stat {}", StatName);

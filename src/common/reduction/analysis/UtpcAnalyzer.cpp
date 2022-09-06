@@ -6,8 +6,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/analysis/UtpcAnalyzer.h>
 #include <cmath>
+#include <common/reduction/analysis/UtpcAnalyzer.h>
 #include <set>
 
 #include <common/debug/Trace.h>
@@ -18,8 +18,10 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif)
-    : weighted_(weighted), max_timebins_(max_timebins), max_timedif_(max_timedif) {}
+utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins,
+                           uint16_t max_timedif)
+    : weighted_(weighted), max_timebins_(max_timebins),
+      max_timedif_(max_timedif) {}
 
 ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
   ReducedHit ret;
@@ -36,8 +38,9 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
   uint16_t lspan_max = std::numeric_limits<uint16_t>::min();
   uint16_t uspan_min = std::numeric_limits<uint16_t>::max();
   uint16_t uspan_max = std::numeric_limits<uint16_t>::min();
-  uint64_t earliest = std::min(cluster.time_start(), cluster.time_end()
-      - static_cast<uint64_t>(max_timedif_));
+  uint64_t earliest =
+      std::min(cluster.time_start(),
+               cluster.time_end() - static_cast<uint64_t>(max_timedif_));
   std::set<uint64_t> timebins;
   for (auto it = cluster.hits.rbegin(); it != cluster.hits.rend(); ++it) {
     auto e = *it;
@@ -54,7 +57,8 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
       lspan_min = std::min(lspan_min, e.coordinate);
       lspan_max = std::max(lspan_max, e.coordinate);
     }
-    if ((e.time >= earliest) && ((max_timebins_ > timebins.size()) || (timebins.count(e.time)))) {
+    if ((e.time >= earliest) &&
+        ((max_timebins_ > timebins.size()) || (timebins.count(e.time)))) {
       timebins.insert(e.time);
       uspan_min = std::min(uspan_min, e.coordinate);
       uspan_max = std::max(uspan_max, e.coordinate);
@@ -63,8 +67,7 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
     }
   }
 
-  LOG(PROCESS, Sev::Debug, "uTPC center_sum={} center_count={}",
-      center_sum,
+  LOG(PROCESS, Sev::Debug, "uTPC center_sum={} center_count={}", center_sum,
       center_count);
 
   ret.center = center_sum / center_count;
@@ -87,13 +90,13 @@ uint64_t utpcAnalyzer::utpc_time(const Event &e) {
   return std::max(e.ClusterA.time_end(), e.ClusterB.time_end());
 }
 
-bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &y,
-                                         int16_t max_lu) {
+bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x,
+                                         const ReducedHit &y, int16_t max_lu) {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
 // GCOVR_EXCL_START
-std::string utpcAnalyzer::debug(const std::string& prepend) const {
+std::string utpcAnalyzer::debug(const std::string &prepend) const {
   std::stringstream ss;
   ss << "uTPC analysis\n";
   ss << prepend << fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));

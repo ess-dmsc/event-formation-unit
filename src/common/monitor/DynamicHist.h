@@ -14,9 +14,7 @@ public:
     hist[i]++;
   }
 
-  inline bool empty() const {
-    return hist.empty();
-  }
+  inline bool empty() const { return hist.empty(); }
 
   std::string debug() const;
   std::string visualize(bool non_empty_only = false) const;

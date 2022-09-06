@@ -394,7 +394,6 @@ TEST_F(NMXInstrumentTest, BadRingAndFENError) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
-
 TEST_F(NMXInstrumentTest, GoodEvent) {
   makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
@@ -424,7 +423,7 @@ TEST_F(NMXInstrumentTest, MaxADC) {
   counters.VMMStats = nmx->VMMParser.Stats;
 
   // ADC was above VMM threshold of 1023 once
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 1); 
+  ASSERT_EQ(counters.VMMStats.ErrorADC, 1);
   ASSERT_EQ(Res, 1);
 }
 

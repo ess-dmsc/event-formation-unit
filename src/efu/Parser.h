@@ -23,7 +23,8 @@ public:
   enum error { OK = 0, EUSIZE, EOSIZE, ENOTOKENS, EBADCMD, EBADARGS };
 
   /// \brief Create parser with the currently fixed commands
-  Parser(std::shared_ptr<Detector> detector, Statistics &stats, int &keep_running);
+  Parser(std::shared_ptr<Detector> detector, Statistics &stats,
+         int &keep_running);
 
   /// \brief used to register new commands with the Parser
   /// \param cmd_name name of command

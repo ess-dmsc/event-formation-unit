@@ -2,15 +2,14 @@
 
 #include <algorithm>
 #include <common/detector/EFUArgs.h>
+#include <common/testutils/TestBase.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
-#include <common/testutils/TestBase.h>
 
 #define UNUSED __attribute__((unused))
 
-static int dummy_command(std::vector<std::string>,
-                         char*, unsigned int*) {
+static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
   return 0;
 }
 
@@ -46,7 +45,8 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector("No StatName", settings) {
+  explicit TestDetector(UNUSED BaseSettings settings)
+      : Detector("No StatName", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -189,7 +189,8 @@ TEST_F(ParserTest, DuplicateCommands) {
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
   Statistics stats;
-  Parser parser(nullptr, stats, keeprunning); // No detector, no STAT_GET_COUNT command
+  Parser parser(nullptr, stats,
+                keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";
   std::memcpy(input, cmd, strlen(cmd));

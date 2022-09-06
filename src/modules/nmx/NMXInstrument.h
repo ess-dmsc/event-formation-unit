@@ -19,11 +19,11 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
 #include <common/reduction/EventBuilderMultiHit2D.h>
-#include <nmx/NMXBase.h>
-#include <nmx/Counters.h>
-#include <nmx/geometry/NMXGeometry.h>
-#include <nmx/geometry/Config.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <nmx/Counters.h>
+#include <nmx/NMXBase.h>
+#include <nmx/geometry/Config.h>
+#include <nmx/geometry/NMXGeometry.h>
 
 namespace Nmx {
 
@@ -34,7 +34,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   NMXInstrument(Counters &counters, NMXSettings &moduleSettings,
-                  EV42Serializer *serializer);
+                EV42Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.

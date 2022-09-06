@@ -12,7 +12,6 @@
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/GapMatcher.h>
 
-
 static constexpr uint64_t latency{2010}; // ns == 2.01us
 // expect readouts in a plane to be at least this close
 static constexpr uint64_t timegap{2000};
@@ -52,4 +51,3 @@ public:
   uint32_t TimeBoxSize{10000000};
 
 }; // class
-

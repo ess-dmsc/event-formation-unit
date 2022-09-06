@@ -56,7 +56,7 @@ public:
 
   /// \returns true if event contains no hits
   bool empty() const;
-  
+
   /// \returns true if event has both valid planes
   bool both_planes() const;
 
@@ -82,8 +82,7 @@ public:
   std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes both clusters with "text graphics"
-  std::string visualize(const std::string &prepend,
-                        uint8_t downsample_time = 0,
+  std::string visualize(const std::string &prepend, uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
 private:

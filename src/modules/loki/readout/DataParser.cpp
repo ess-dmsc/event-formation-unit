@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <loki/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
+#include <loki/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -38,7 +38,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
-    Data->RingId = Data->RingId/2;
+    Data->RingId = Data->RingId / 2;
 
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -59,13 +59,13 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId,
-           Data->FENId, Data->DataLength);
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId, Data->FENId,
+           Data->DataLength);
     Stats.DataHeaders++;
 
     if (Data->DataLength != LokiReadoutSize) {
-      XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
-            Data->DataLength, LokiReadoutSize);
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
+             LokiReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -75,9 +75,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           Data->RingId, Data->FENId, Data->TimeHigh,
-           Data->TimeLow, Data->DataSeqNum, Data->TubeId, Data->AmpA,
-           Data->AmpB, Data->AmpC, Data->AmpD);
+           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           Data->AmpD);
 
     ParsedReadouts++;
     Stats.Readouts++;

@@ -20,20 +20,21 @@ public:
   using AbstractMatcher::AbstractMatcher;
 
   /// \brief sets the minimum time gap criterion
-  /// \param minimum_time_gap minimum time gap between subsequent clusters for them
+  /// \param minimum_time_gap minimum time gap between subsequent clusters for
+  /// them
   ///         to be disambiguated into separate events. If time gap is smaller,
   ///         the clusters are merged into one event.
   void set_minimum_time_gap(uint64_t minimum_time_gap);
-  
+
   /// \brief Match queued up clusters into events.
-  ///         Clusters that either overlap in time or have time gaps that are smaller than
-  ///         the minimum time gap are joined into events.
+  ///         Clusters that either overlap in time or have time gaps that are
+  ///         smaller than the minimum time gap are joined into events.
   /// \param flush if all queued clusters should be matched regardless of
   ///        latency considerations.
   void match(bool flush) override;
 
   /// \brief print configuration of GapMatcher
-  std::string config(const std::string& prepend) const override;
+  std::string config(const std::string &prepend) const override;
 
 private:
   uint64_t minimum_time_gap_{0};

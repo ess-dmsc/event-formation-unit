@@ -101,14 +101,16 @@ std::string CalibStr = R"(
 
 std::vector<uint8_t> MaxRingMaxFENErrors{
     // First readout
-    0x18, 0x00, 0x14, 0x00, // Data Header - Ring 24 is greater than max ring number
+    0x18, 0x00, 0x14,
+    0x00, // Data Header - Ring 24 is greater than max ring number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x00, 0x10, // GEO 0, TDC 0, VMM 0, CH 16
 
     // Second readout
-    0x02, 0x18, 0x14, 0x00, // Data Header - FEN 24 is greater than max FEN number
+    0x02, 0x18, 0x14,
+    0x00, // Data Header - FEN 24 is greater than max FEN number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
@@ -117,14 +119,16 @@ std::vector<uint8_t> MaxRingMaxFENErrors{
 
 std::vector<uint8_t> MappingError{
     // First readout
-    0x00, 0x00, 0x14, 0x00, // Data Header - Ring 24 is greater than max ring number
+    0x00, 0x00, 0x14,
+    0x00, // Data Header - Ring 24 is greater than max ring number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x04, 0x10, // GEO 0, TDC 0, VMM 2, CH 16
 
     // Second readout
-    0x01, 0x00, 0x14, 0x00, // Data Header - FEN 10 is greater than max FEN number
+    0x01, 0x00, 0x14,
+    0x00, // Data Header - FEN 10 is greater than max FEN number
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 17 ticka
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
@@ -211,7 +215,6 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   counters.VMMStats = freia->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
-
 
   freia->processReadouts();
   ASSERT_EQ(counters.HybridMappingErrors, 2);

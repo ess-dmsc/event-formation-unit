@@ -18,7 +18,8 @@ namespace Nmx {
 
 class NMXGeometry : public Nmx::Geometry {
 public:
-  uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset, bool ReversedChannels) override;
+  uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
+                 bool ReversedChannels) override;
 };
 
 } // namespace Nmx

@@ -21,7 +21,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(ReadoutTest, Constructor) {
   ASSERT_EQ(RdOut.Stats.ErrorBuffer, 0);
   ASSERT_EQ(RdOut.Stats.ErrorSize, 0);
@@ -70,13 +69,15 @@ TEST_F(ReadoutTest, ErrorCookie) {
 }
 
 TEST_F(ReadoutTest, ErrorVersion) {
-  auto Res = RdOut.validate((char *)&ErrVersion[0], ErrVersion.size(), DataType);
+  auto Res =
+      RdOut.validate((char *)&ErrVersion[0], ErrVersion.size(), DataType);
   ASSERT_EQ(Res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
 }
 
 TEST_F(ReadoutTest, ErrMaxOutputQueue) {
-  auto Res = RdOut.validate((char *)&ErrMaxOutputQueue[0], ErrMaxOutputQueue.size(), DataType);
+  auto Res = RdOut.validate((char *)&ErrMaxOutputQueue[0],
+                            ErrMaxOutputQueue.size(), DataType);
   ASSERT_EQ(Res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 1);
 }
@@ -93,11 +94,11 @@ TEST_F(ReadoutTest, OkVersion) {
   }
   auto Res = RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
   ASSERT_EQ(Res, Parser::OK);
-  ASSERT_EQ(RdOut.Packet.DataPtr, (char *)(&OkVersion[0] + sizeof(Parser::PacketHeaderV0)));
+  ASSERT_EQ(RdOut.Packet.DataPtr,
+            (char *)(&OkVersion[0] + sizeof(Parser::PacketHeaderV0)));
   ASSERT_EQ(RdOut.Packet.DataLength, 0);
   ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
 }
-
 
 TEST_F(ReadoutTest, SeqNumbers) {
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
@@ -105,43 +106,48 @@ TEST_F(ReadoutTest, SeqNumbers) {
   RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 1);
 
-  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(), DataType);
+  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(),
+                 DataType);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 1);
 
-  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(), DataType);
+  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(),
+                 DataType);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 2);
 }
 
 TEST_F(ReadoutTest, BadReadoutType) {
-  auto Res = RdOut.validate((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size(), 0xff);
+  auto Res = RdOut.validate((char *)&OkThreeLokiReadouts[0],
+                            OkThreeLokiReadouts.size(), 0xff);
   ASSERT_EQ(Res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 1);
 }
 
 TEST_F(ReadoutTest, DataLengthMismatch) {
-  auto res = RdOut.validate((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size() - 1, DataType);
+  auto res = RdOut.validate((char *)&OkThreeLokiReadouts[0],
+                            OkThreeLokiReadouts.size() - 1, DataType);
   ASSERT_EQ(res, -Parser::ESIZE);
 }
 
 TEST_F(ReadoutTest, PulseTimeFracError) {
-  auto res = RdOut.validate((char *)&ErrPulseTimeFrac[0], ErrPulseTimeFrac.size(), DataType);
+  auto res = RdOut.validate((char *)&ErrPulseTimeFrac[0],
+                            ErrPulseTimeFrac.size(), DataType);
   ASSERT_EQ(res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 1);
 }
 
 TEST_F(ReadoutTest, PrevPulseTimeFracError) {
-  auto res = RdOut.validate((char *)&ErrPrevPulseTimeFrac[0], ErrPrevPulseTimeFrac.size(), DataType);
+  auto res = RdOut.validate((char *)&ErrPrevPulseTimeFrac[0],
+                            ErrPrevPulseTimeFrac.size(), DataType);
   ASSERT_EQ(res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 1);
 }
 
 TEST_F(ReadoutTest, MaxPulseTimeError) {
-  auto res = RdOut.validate((char *)&ErrMaxPulseTime[0], ErrMaxPulseTime.size(), DataType);
+  auto res = RdOut.validate((char *)&ErrMaxPulseTime[0], ErrMaxPulseTime.size(),
+                            DataType);
   ASSERT_EQ(res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorTimeHigh, 1);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

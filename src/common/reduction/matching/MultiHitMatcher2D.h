@@ -15,12 +15,12 @@
 ///         if time gaps between them are sufficiently small, and
 ///         handles multiple hits in a time window by splitting
 ///         clusters by coordinate gaps and using relationship
-///         between ADC values in different planes to match 
+///         between ADC values in different planes to match
 ///         resulting clusters
 
 class MultiHitMatcher2D : public AbstractMatcher {
 
-  public:
+public:
   /// Inherits constructor
   using AbstractMatcher::AbstractMatcher;
   /// \brief sets the minimum time gap criterion

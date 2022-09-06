@@ -37,22 +37,31 @@ void MultiHitMatcher2D::match(bool flush) {
     }
 
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
-      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, maximum is %u", evt.time_gap(*cluster), minimum_time_gap_);
-      if ((evt.ClusterA.coord_span() < maximum_coord_span_) and (evt.ClusterB.coord_span() < maximum_coord_span_)){
+      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, maximum is %u",
+             evt.time_gap(*cluster), minimum_time_gap_);
+      if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
+          (evt.ClusterB.coord_span() < maximum_coord_span_)) {
         XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
-        XTRACE(CLUSTER, DEB, "Cluster A coord span = %u, Cluster B coord span = %u", evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
+        XTRACE(CLUSTER, DEB,
+               "Cluster A coord span = %u, Cluster B coord span = %u",
+               evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
         stash_event(evt);
         evt.clear();
-      }
-      else{ //split clusters by coord gaps and attempt to match based on ADC values
+      } else { // split clusters by coord gaps and attempt to match based on ADC
+               // values
         XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
-        XTRACE(CLUSTER, DEB, "Cluster A spans %u and contains %u hits, and Cluster B spans %u and contains %u hits", evt.ClusterA.coord_span(), evt.ClusterA.hit_count(), evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+        XTRACE(CLUSTER, DEB,
+               "Cluster A spans %u and contains %u hits, and Cluster B spans "
+               "%u and contains %u hits",
+               evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
+               evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
         split_and_stash_event(evt);
         evt.clear();
       }
     }
 
-    XTRACE(CLUSTER, DEB, "Merging cluster into event with time gap %u", evt.time_gap(*cluster) > minimum_time_gap_);
+    XTRACE(CLUSTER, DEB, "Merging cluster into event with time gap %u",
+           evt.time_gap(*cluster) > minimum_time_gap_);
     evt.merge(*cluster);
 
     unmatched_clusters_.pop_front();
@@ -75,18 +84,20 @@ std::string MultiHitMatcher2D::config(const std::string &prepend) const {
   return ss.str();
 }
 
-void MultiHitMatcher2D::split_and_stash_event(Event evt){
+void MultiHitMatcher2D::split_and_stash_event(Event evt) {
   Cluster new_cluster;
   std::vector<Cluster> new_clusters_a = split_cluster(evt.ClusterA);
   std::vector<Cluster> new_clusters_b = split_cluster(evt.ClusterB);
   std::vector<Event> new_events;
 
-  for (Cluster cluster_a : new_clusters_a){
+  for (Cluster cluster_a : new_clusters_a) {
     bool matched_a_to_b = false;
-    for (Cluster cluster_b : new_clusters_b){
-      if (clusters_match(cluster_a, cluster_b)){
-        if (matched_a_to_b){
-          XTRACE(CLUSTER, DEB, "More than 1 Cluster in B plane matched Cluster in A plane, can't split events by ADC values, discarding them");
+    for (Cluster cluster_b : new_clusters_b) {
+      if (clusters_match(cluster_a, cluster_b)) {
+        if (matched_a_to_b) {
+          XTRACE(CLUSTER, DEB,
+                 "More than 1 Cluster in B plane matched Cluster in A plane, "
+                 "can't split events by ADC values, discarding them");
           evt.clear();
           return;
         }
@@ -98,12 +109,14 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
       }
     }
   }
-  for (Cluster cluster_b : new_clusters_b){
+  for (Cluster cluster_b : new_clusters_b) {
     bool matched_b_to_a = false;
-    for (Cluster cluster_a : new_clusters_a){
-      if (clusters_match(cluster_a, cluster_b)){
-        if (matched_b_to_a){
-          XTRACE(DATA, DEB, "More than 1 Cluster in A plane matched Cluster in B plane, can't split events by ADC values, discarding them");
+    for (Cluster cluster_a : new_clusters_a) {
+      if (clusters_match(cluster_a, cluster_b)) {
+        if (matched_b_to_a) {
+          XTRACE(DATA, DEB,
+                 "More than 1 Cluster in A plane matched Cluster in B plane, "
+                 "can't split events by ADC values, discarding them");
           evt.clear();
           return;
         }
@@ -112,48 +125,51 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
     }
   }
 
-  for (Event new_evt : new_events){
+  for (Event new_evt : new_events) {
     stash_event(new_evt);
   }
   evt.clear();
-
 }
 
-std::vector<Cluster> MultiHitMatcher2D::split_cluster(Cluster cluster){
+std::vector<Cluster> MultiHitMatcher2D::split_cluster(Cluster cluster) {
   Cluster new_cluster;
   std::vector<Cluster> new_clusters;
   sort_by_increasing_coordinate(cluster.hits);
   uint last_coord = 0;
 
-  for(Hit hit : cluster.hits){
-    if ((!new_cluster.empty()) && (hit.coordinate - last_coord > minimum_coord_gap_)){
+  for (Hit hit : cluster.hits) {
+    if ((!new_cluster.empty()) &&
+        (hit.coordinate - last_coord > minimum_coord_gap_)) {
       new_clusters.push_back(new_cluster);
       new_cluster.clear();
       last_coord = hit.coordinate;
       new_cluster.insert(hit);
-    }
-    else{
+    } else {
       last_coord = hit.coordinate;
       new_cluster.insert(hit);
     }
   }
-  if (!new_cluster.empty()){
+  if (!new_cluster.empty()) {
     new_clusters.push_back(new_cluster);
     new_cluster.clear();
   }
 
-  for(Cluster cluster : new_clusters){
-    XTRACE(DATA, DEB, "New cluster created, starts at coord %u, ends at coord %u", cluster.coord_start(), cluster.coord_end());
+  for (Cluster cluster : new_clusters) {
+    XTRACE(DATA, DEB,
+           "New cluster created, starts at coord %u, ends at coord %u",
+           cluster.coord_start(), cluster.coord_end());
   }
 
   return new_clusters;
 }
 
-bool MultiHitMatcher2D::clusters_match(Cluster cluster_a, Cluster cluster_b){
-  if ((cluster_a.weight_sum() * coefficient_ >= cluster_b.weight_sum() - allowance_) && (cluster_a.weight_sum() * coefficient_ <= cluster_b.weight_sum() + allowance_)){
+bool MultiHitMatcher2D::clusters_match(Cluster cluster_a, Cluster cluster_b) {
+  if ((cluster_a.weight_sum() * coefficient_ >=
+       cluster_b.weight_sum() - allowance_) &&
+      (cluster_a.weight_sum() * coefficient_ <=
+       cluster_b.weight_sum() + allowance_)) {
     return true;
-  }
-  else{
+  } else {
     return false;
   }
 }

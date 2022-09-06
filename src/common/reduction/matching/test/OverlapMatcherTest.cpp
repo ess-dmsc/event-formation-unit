@@ -8,15 +8,16 @@ protected:
   ClusterContainer x, y;
   OverlapMatcher matcher{600, 0, 1};
 
-  void add_cluster(ClusterContainer &ret, uint8_t plane,
-                   uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,
-                   uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+  void add_cluster(ClusterContainer &ret, uint8_t plane, uint16_t coord_start,
+                   uint16_t coord_end, uint16_t coord_step, uint64_t time_start,
+                   uint64_t time_end, uint64_t time_step) {
     Cluster c;
     Hit e;
     e.plane = plane;
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = coord_start; e.coordinate <= coord_end; e.coordinate += coord_step)
+      for (e.coordinate = coord_start; e.coordinate <= coord_end;
+           e.coordinate += coord_step)
         c.insert(e);
     ret.push_back(c);
   }

@@ -7,9 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/testutils/TestBase.h>
 #include <dream/readout/DataParser.h>
 #include <dream/test/DataParserTestData.h>
-#include <common/testutils/TestBase.h>
 
 using namespace Dream;
 

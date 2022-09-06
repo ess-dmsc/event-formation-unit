@@ -14,7 +14,8 @@
 #include <common/detector/Detector.h>
 #include <string>
 
-/// \brief Stores a factory function and CLI set-up function for a detector module.
+/// \brief Stores a factory function and CLI set-up function for a detector
+/// module.
 struct DetectorModuleSetup {
   DetectorModuleSetup() = default;
   DetectorModuleSetup(std::shared_ptr<DetectorFactoryBase> Factory,
@@ -30,23 +31,26 @@ std::map<std::string, DetectorModuleSetup> &getFactories();
 
 /// \brief Add a new detector module.
 /// \throws std::runtime_error If DetectorModuleName already exists.
-void addDetectorModule(std::string const &DetectorModuleName, DetectorModuleSetup Module);
+void addDetectorModule(std::string const &DetectorModuleName,
+                       DetectorModuleSetup Module);
 
 /// \brief Find a detector module, given a key.
 /// \throws std::runtime_error If the key is not found.
 DetectorModuleSetup &find(std::string const &DetectorModuleName);
 
-
 /// \brief Register a detector module by instantiating a member of
 /// this class.
 ///
-/// Usage example: DetectorModuleRegistration::Registrar<Sonde> Register("Sonde", CLIPopulatorFunction);
+/// Usage example: DetectorModuleRegistration::Registrar<Sonde>
+/// Register("Sonde", CLIPopulatorFunction);
 template <class Module> class Registrar {
 public:
   /// \brief Constructor used to register a statically linked detector module.
   ///
   /// \param[in] DetectorName The key (name) of the module.
-  /// \param[in] CLIPopulator Function pointer (std::function<>) to a function which can populate the CLI interface with additional command line arguments. Can be nullptr.
+  /// \param[in] CLIPopulator Function pointer (std::function<>) to a function
+  /// which can populate the CLI interface with additional command line
+  /// arguments. Can be nullptr.
   explicit Registrar(std::string const &DetectorName,
                      std::function<void(CLI::App &)> CLIPopulator) {
     std::shared_ptr<DetectorFactoryBase> Factory(new DetectorFactory<Module>());
@@ -55,8 +59,10 @@ public:
 };
 } // namespace DetectorModuleRegistration
 
-#define COMBINE1(X,Y) X##Y
-#define COMBINE(X,Y) COMBINE1(X,Y)
+#define COMBINE1(X, Y) X##Y
+#define COMBINE(X, Y) COMBINE1(X, Y)
 #define MAKE_STRING(s) #s
 
-#define REGISTER_MODULE(Module, CLIFunc) DetectorModuleRegistration::Registrar<Module> COMBINE(Module, __LINE__)(MAKE_STRING(Module), CLIFunc)
+#define REGISTER_MODULE(Module, CLIFunc)                                       \
+  DetectorModuleRegistration::Registrar<Module> COMBINE(Module, __LINE__)(     \
+      MAKE_STRING(Module), CLIFunc)

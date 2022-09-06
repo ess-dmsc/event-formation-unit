@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
+#include <common/debug/Log.h>
 #include <common/detector/Detector.h>
 #include <common/detector/EFUArgs.h>
-#include <common/debug/Log.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <map>
@@ -66,8 +66,9 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
         setThreadCoreAffinity(ThreadInfo.thread, AffinityMap[ThreadInfo.name]);
       } else {
         LOG(INIT, Sev::Notice,
-               "No thread core affinity information available for thread with "
-               "id: {}", ThreadInfo.name);
+            "No thread core affinity information available for thread with "
+            "id: {}",
+            ThreadInfo.name);
       }
     }
   }

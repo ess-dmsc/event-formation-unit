@@ -1,18 +1,16 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/testutils/TestBase.h>
 #include <multigrid/mesytec/Sis3153Parser.h>
 #include <multigrid/mesytec/test/TestData.h>
-#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
 class Sis3153ParserTest : public TestBase {
 protected:
   Sis3153Parser sis;
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 /** Test cases below */

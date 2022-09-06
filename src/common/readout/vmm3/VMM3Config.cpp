@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read configuration and calibration from file
+/// \brief using nlohmann json parser to read configuration and calibration from
+/// file
 ///         superclass for detector specific classes to inherit from
 //===----------------------------------------------------------------------===//
 
@@ -21,7 +22,7 @@ void VMM3Config::loadAndApplyConfig() {
   applyConfig();
 }
 
-void VMM3Config::applyVMM3Config(){
+void VMM3Config::applyVMM3Config() {
   std::string Name;
   try {
     FileParameters.InstrumentName = root["Detector"].get<std::string>();
@@ -36,11 +37,13 @@ void VMM3Config::applyVMM3Config(){
   }
 
   try {
-    FileParameters.InstrumentGeometry = root["InstrumentGeometry"].get<std::string>();
+    FileParameters.InstrumentGeometry =
+        root["InstrumentGeometry"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
   }
-  LOG(INIT, Sev::Info, "InstrumentGeometry {}", FileParameters.InstrumentGeometry);
+  LOG(INIT, Sev::Info, "InstrumentGeometry {}",
+      FileParameters.InstrumentGeometry);
 
   try {
     FileParameters.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
@@ -58,7 +61,7 @@ void VMM3Config::applyVMM3Config(){
 
   try {
     auto PanelConfig = root["Config"];
-    for (auto &Mapping : PanelConfig){
+    for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
@@ -71,8 +74,9 @@ void VMM3Config::applyVMM3Config(){
         throw std::runtime_error("Illegal Ring/FEN/VMM values");
       }
 
-      if (!validHybridId(IDString)){
-        XTRACE(INIT, ERR, "Invalid HybridId in config file: %s", IDString.c_str());
+      if (!validHybridId(IDString)) {
+        XTRACE(INIT, ERR, "Invalid HybridId in config file: %s",
+               IDString.c_str());
         throw std::runtime_error("Invalid HybridId in config file");
       }
 
@@ -95,7 +99,7 @@ void VMM3Config::applyVMM3Config(){
       Hybrid.HybridNumber = NumHybrids;
       NumHybrids++;
     }
-    
+
     LOG(INIT, Sev::Info,
         "JSON config - Detector has {} cassettes/hybrids and "
         "{} pixels",
@@ -131,14 +135,14 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
 
   for (auto &Calibration : Calibrations) {
     std::string HybridId = Calibration["VMMHybridCalibration"]["HybridId"];
-    if (!validHybridId(HybridId)){
+    if (!validHybridId(HybridId)) {
       throw std::runtime_error("Invalid HybridID in Calibration file");
     }
     applyCalibration(HybridId, Calibration);
   }
 }
 
-bool VMM3Config::validHybridId(std::string HybridID){
+bool VMM3Config::validHybridId(std::string HybridID) {
   return (HybridID.length() == 32);
 }
 
@@ -157,7 +161,6 @@ void VMM3Config::applyCalibration(std::string HybridID,
   auto &vmm1cal = Calibration["VMMHybridCalibration"]["vmm1"];
   applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
 }
-
 
 void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
                                       unsigned vmmid,
@@ -186,4 +189,3 @@ void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
            (double)adc_offset[Channel], (double)adc_slope[Channel]);
   }
 }
-

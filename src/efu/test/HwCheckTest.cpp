@@ -5,8 +5,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <efu/HwCheck.h>
 #include <common/testutils/TestBase.h>
+#include <efu/HwCheck.h>
 #include <vector>
 
 class HwCheckTest : public TestBase {
@@ -17,7 +17,7 @@ protected:
 
 /** Test cases below */
 TEST_F(HwCheckTest, HwCheckPass) {
-  std::vector<std::string> IgnoredInterfaces {"0", "00", "br-"};
+  std::vector<std::string> IgnoredInterfaces{"0", "00", "br-"};
   HwCheck check;
   bool pass = check.checkMTU(IgnoredInterfaces, true);
   ASSERT_TRUE(pass);

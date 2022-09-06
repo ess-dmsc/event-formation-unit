@@ -25,23 +25,26 @@ TEST_F(NMXGeometryTest, CoordinateCalculations) {
   uint8_t AsicId = 0;
   uint16_t Offset = 0;
   bool ReversedChannels = false;
-  for (int Channel=0; Channel<64; ++Channel){
+  for (int Channel = 0; Channel < 64; ++Channel) {
     ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), Channel);
   }
   ReversedChannels = true;
-  for (int Channel=0; Channel<64; ++Channel){
-    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), 127-Channel);
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels),
+              127 - Channel);
   }
 
   ReversedChannels = false;
   AsicId = 1;
   Offset = 512;
-  for (int Channel=0; Channel<64; ++Channel){
-    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), Channel+576);
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels),
+              Channel + 576);
   }
   ReversedChannels = true;
-  for (int Channel=0; Channel<64; ++Channel){
-    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels), 575-Channel);
+  for (int Channel = 0; Channel < 64; ++Channel) {
+    ASSERT_EQ(Geom.coord(Channel, AsicId, Offset, ReversedChannels),
+              575 - Channel);
   }
 }
 

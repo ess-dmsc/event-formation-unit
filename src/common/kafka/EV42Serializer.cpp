@@ -8,8 +8,8 @@
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV42Serializer.h>
 #include "ev42_events_generated.h"
+#include <common/kafka/EV42Serializer.h>
 #include <common/system/gccintel.h>
 
 #include <common/debug/Trace.h>
@@ -26,26 +26,35 @@ static constexpr uint64_t FBMutablePlaceholder = 1;
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName, ProducerCallback Callback)
-    : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256), ProduceFunctor(Callback) {
+EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName,
+                               ProducerCallback Callback)
+    : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256),
+      ProduceFunctor(Callback) {
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
-  auto TimeOffset = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
-  auto PixelOffset = Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
+  auto TimeOffset =
+      Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
+  auto PixelOffset =
+      Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
-  auto HeaderOffset = CreateEventMessage(Builder_, SourceNameOffset,
-      FBMutablePlaceholder, FBMutablePlaceholder, TimeOffset, PixelOffset);
+  auto HeaderOffset =
+      CreateEventMessage(Builder_, SourceNameOffset, FBMutablePlaceholder,
+                         FBMutablePlaceholder, TimeOffset, PixelOffset);
   FinishEventMessageBuffer(Builder_, HeaderOffset);
 
-  Buffer_ = nonstd::span<const uint8_t >(Builder_.GetBufferPointer(), Builder_.GetSize());
+  Buffer_ = nonstd::span<const uint8_t>(Builder_.GetBufferPointer(),
+                                        Builder_.GetSize());
 
-  EventMessage_ = const_cast<EventMessage *>(GetEventMessage(Builder_.GetBufferPointer()));
+  EventMessage_ =
+      const_cast<EventMessage *>(GetEventMessage(Builder_.GetBufferPointer()));
   TimeLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(EventMessage_->time_of_flight()->Data())) - 1;
+          const_cast<std::uint8_t *>(EventMessage_->time_of_flight()->Data())) -
+      1;
   PixelLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(EventMessage_->detector_id()->Data())) - 1;
+          const_cast<std::uint8_t *>(EventMessage_->detector_id()->Data())) -
+      1;
 
   EventMessage_->mutate_message_id(0);
   EventMessage_->mutate_pulse_time(0);
@@ -77,7 +86,7 @@ size_t EV42Serializer::produce() {
     serialize();
     if (ProduceFunctor) {
       // pulse_time is currently ns since 1970, produce time should be ms.
-      ProduceFunctor(Buffer_, EventMessage_->pulse_time()/1000000);
+      ProduceFunctor(Buffer_, EventMessage_->pulse_time() / 1000000);
     }
     return Buffer_.size_bytes();
   }
@@ -88,12 +97,12 @@ void EV42Serializer::pulseTime(uint64_t Time) {
   EventMessage_->mutate_pulse_time(Time);
 }
 
-uint32_t EV42Serializer::checkAndSetPulseTime(uint64_t Time){
+uint32_t EV42Serializer::checkAndSetPulseTime(uint64_t Time) {
   uint32_t bytesProduced = 0;
-  if (Time != pulseTime()){
-     XTRACE(OUTPUT, DEB, "Pulse time is new: %d\n", Time);
-     bytesProduced = produce();
-     pulseTime(Time);
+  if (Time != pulseTime()) {
+    XTRACE(OUTPUT, DEB, "Pulse time is new: %d\n", Time);
+    bytesProduced = produce();
+    pulseTime(Time);
   }
   return bytesProduced;
 }
@@ -102,18 +111,14 @@ uint64_t EV42Serializer::pulseTime() const {
   return EventMessage_->pulse_time();
 }
 
-size_t EV42Serializer::eventCount() const {
-  return EventCount;
-}
+size_t EV42Serializer::eventCount() const { return EventCount; }
 
-uint64_t EV42Serializer::currentMessageId() const {
-  return MessageId;
-}
+uint64_t EV42Serializer::currentMessageId() const { return MessageId; }
 
 size_t EV42Serializer::addEvent(uint32_t Time, uint32_t Pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", Time, Pixel);
-  reinterpret_cast<uint32_t*>(TimePtr)[EventCount] = Time;
-  reinterpret_cast<uint32_t*>(PixelPtr)[EventCount] = Pixel;
+  reinterpret_cast<uint32_t *>(TimePtr)[EventCount] = Time;
+  reinterpret_cast<uint32_t *>(PixelPtr)[EventCount] = Pixel;
   EventCount++;
 
   if (EventCount >= MaxEvents) {

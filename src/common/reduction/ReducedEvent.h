@@ -9,8 +9,8 @@
 #pragma once
 
 #include <cinttypes>
-#include <string>
 #include <limits>
+#include <string>
 
 /// \class ReducedHit ReducedHit.h
 /// \brief Contains the results of a 1-dimensional Cluster analysis.
@@ -49,7 +49,6 @@ struct ReducedHit {
   /// \brief prints values for debug purposes
   std::string to_string() const;
 };
-
 
 /// \class ReducedEvent ReducedEvent.h
 /// \brief Contains the results of a multi-dimensional Event analysis.

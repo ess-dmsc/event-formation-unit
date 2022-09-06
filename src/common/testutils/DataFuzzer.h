@@ -16,12 +16,10 @@
 
 class DataFuzzer {
 public:
-
   DataFuzzer() = default;
 
   /// \brief overwrite buffer with a number of random 8-bit values
-  void fuzz8Bits(void * Buffer, uint16_t BufferLength, uint16_t Repeats);
-
+  void fuzz8Bits(void *Buffer, uint16_t BufferLength, uint16_t Repeats);
 
   /// \brief generate random 8 bit values
   uint8_t random8() { return IntDist(Generator) & 0xFF; }
@@ -31,7 +29,7 @@ public:
 
   /// \brief Generate random ints in the interval [Begin ; End[
   uint16_t randomInterval(uint16_t Begin, uint16_t End) {
-    return Begin + RealDist(Generator)*(End - Begin);
+    return Begin + RealDist(Generator) * (End - Begin);
   }
 
 private:

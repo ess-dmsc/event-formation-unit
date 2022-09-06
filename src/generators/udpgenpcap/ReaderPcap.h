@@ -52,7 +52,7 @@ public:
   } Stats;
 
 private:
-  const char * FilterUdp = "ip and udp";
+  const char *FilterUdp = "ip and udp";
   struct bpf_program PcapFilter;
 
   /// \brief checking consistency and updating stats

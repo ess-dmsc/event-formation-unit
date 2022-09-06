@@ -16,12 +16,12 @@
 #include <fmt/format.h>
 #include <fstream>
 
-inline nlohmann::json from_json_file(const std::string& fname)
-{
+inline nlohmann::json from_json_file(const std::string &fname) {
   nlohmann::json j;
   std::ifstream ifs(fname, std::ofstream::in);
   if (ifs.fail()) {
-    throw std::runtime_error(fmt::format("file permission error or missing json file {}", fname));
+    throw std::runtime_error(
+        fmt::format("file permission error or missing json file {}", fname));
   }
   if (ifs.good())
     ifs >> j;
@@ -29,7 +29,6 @@ inline nlohmann::json from_json_file(const std::string& fname)
   return j;
 }
 
-inline void to_json_file(const nlohmann::json& j, const std::string& fname)
-{
+inline void to_json_file(const nlohmann::json &j, const std::string &fname) {
   std::ofstream(fname, std::ofstream::trunc) << j.dump(1);
 }

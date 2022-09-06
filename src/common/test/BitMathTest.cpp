@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source */
 
-#include <common/testutils/TestBase.h>
 #include <common/BitMath.h>
+#include <common/testutils/TestBase.h>
 
 struct pair16 {
   uint16_t input;
@@ -10,11 +10,8 @@ struct pair16 {
 
 // Is this a correct table?
 std::vector<struct pair16> graycode = {
-  { 0,  0}, { 1,  1}, { 3,  2}, { 2,  3},
-  { 6,  4}, { 7,  5}, { 5,  6}, { 4,  7},
-  {12,  8}, {13,  9}, {15, 10}, {14, 11},
-  {10, 12}, {11, 13}, { 9, 14}, { 8, 15}
-};
+    {0, 0},  {1, 1},  {3, 2},   {2, 3},   {6, 4},   {7, 5},   {5, 6},  {4, 7},
+    {12, 8}, {13, 9}, {15, 10}, {14, 11}, {10, 12}, {11, 13}, {9, 14}, {8, 15}};
 
 class BitMathTest : public ::testing::Test {
 protected:

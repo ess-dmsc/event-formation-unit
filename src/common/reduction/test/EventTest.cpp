@@ -9,7 +9,7 @@ protected:
 };
 
 TEST_F(EventTest, Planes) {
-  event = Event(3,7);
+  event = Event(3, 7);
   EXPECT_EQ(event.PlaneA(), 3);
   EXPECT_EQ(event.PlaneB(), 7);
 }
@@ -82,9 +82,7 @@ TEST_F(EventTest, MergeXY) {
   EXPECT_EQ(event.ClusterB.hit_count(), 3);
 }
 
-TEST_F(EventTest, TimeSpanEmpty) {
-  EXPECT_EQ(event.time_span(), 0);
-}
+TEST_F(EventTest, TimeSpanEmpty) { EXPECT_EQ(event.time_span(), 0); }
 
 TEST_F(EventTest, TimeSpanXOnly) {
   Cluster x;

@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
-#include <common/time/TimeString.h>
 #include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 #include <dream/DreamInstrument.h>
 
 // #undef TRC_LEVEL
@@ -25,13 +25,13 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
          ModuleSettings.ConfigFile.c_str());
   DreamConfiguration = Config(ModuleSettings.ConfigFile);
 
-
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
-uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
-                                    uint8_t Counter, uint8_t Wire, uint8_t Strip) {
-return EcGeom.getPixel(Sector, Sumo, Cassette, Counter, Wire, Strip);
+uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo,
+                                    uint8_t Cassette, uint8_t Counter,
+                                    uint8_t Wire, uint8_t Strip) {
+  return EcGeom.getPixel(Sector, Sumo, Cassette, Counter, Wire, Strip);
 }
 
 void DreamInstrument::processReadouts() {
@@ -66,10 +66,11 @@ void DreamInstrument::processReadouts() {
       auto TimeOfFlight = Time.getTOF(0, Data.Tof); // TOF in ns
 
       XTRACE(DATA, DEB,
-             "  Data: time (0, %u), sector %u, sumo %u, cassette %u, counter %u, wire "
+             "  Data: time (0, %u), sector %u, sumo %u, cassette %u, counter "
+             "%u, wire "
              "%u, strip %u",
-             Data.Tof, Data.Sector, Data.Sumo, Data.Cassette,
-             Data.Counter, Data.Wire, Data.Strip);
+             Data.Tof, Data.Sector, Data.Sumo, Data.Cassette, Data.Counter,
+             Data.Wire, Data.Strip);
 
       // Calculate pixelid and apply calibration
       uint32_t PixelId = calcPixel(Data.Sector, Data.Sumo, Data.Cassette,

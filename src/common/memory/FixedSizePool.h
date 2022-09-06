@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <common/debug/Assert.h>
 #include <common/BitMath.h>
+#include <common/debug/Assert.h>
 #include <common/debug/Expect.h>
 #include <common/debug/Trace.h>
 

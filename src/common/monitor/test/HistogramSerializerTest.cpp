@@ -17,16 +17,13 @@ class HistogramSerializerTest : public TestBase {
   void TearDown() override {}
 
 protected:
-
-  Hists hists {MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
+  Hists hists{MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
   char flatbuffer[1024 * 1024 * 5];
 
 public:
-  void copy_buffer(nonstd::span<const uint8_t> b)
-  {
+  void copy_buffer(nonstd::span<const uint8_t> b) {
     memcpy(flatbuffer, b.data(), b.size_bytes());
   }
-
 };
 
 TEST_F(HistogramSerializerTest, Serialize) {
@@ -61,7 +58,6 @@ TEST_F(HistogramSerializerTest, DeSerialize) {
     EXPECT_EQ((*xdat)[i], i);
     EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
-
 }
 
 int main(int argc, char **argv) {

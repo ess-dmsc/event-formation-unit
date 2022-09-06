@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #include <cassert>
-#include <common/detector/EFUArgs.h>
-#include <common/debug/Log.h>
 #include <common/Version.h>
+#include <common/debug/Log.h>
+#include <common/detector/EFUArgs.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
@@ -24,7 +24,8 @@
 //=============================================================================
 static int stat_get_count(std::vector<std::string> cmdargs, char *output,
                           unsigned int *obytes,
-                          std::shared_ptr<Detector> detector, Statistics stats) {
+                          std::shared_ptr<Detector> detector,
+                          Statistics stats) {
   auto nargs = cmdargs.size();
 
   LOG(CMD, Sev::Debug, "STAT_GET_COUNT");
@@ -41,7 +42,8 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
 
 //=============================================================================
 static int stat_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes, std::shared_ptr<Detector> detector, Statistics stats) {
+                    unsigned int *obytes, std::shared_ptr<Detector> detector,
+                    Statistics stats) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "STAT_GET");
   if (nargs != 2) {
@@ -85,8 +87,7 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
 
 //=============================================================================
 static int cmd_get_count(std::vector<std::string> cmdargs, char *output,
-                       unsigned int *obytes,
-                       int count) {
+                         unsigned int *obytes, int count) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "CMD_GET_COUNT");
   if (nargs != 1) {
@@ -101,8 +102,7 @@ static int cmd_get_count(std::vector<std::string> cmdargs, char *output,
 
 //=============================================================================
 static int cmd_get(std::vector<std::string> cmdargs, char *output,
-                       unsigned int *obytes,
-                       Parser * parser) {
+                   unsigned int *obytes, Parser *parser) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "CMD_GET");
   if (nargs != 2) {
@@ -112,14 +112,16 @@ static int cmd_get(std::vector<std::string> cmdargs, char *output,
 
   size_t index = atoi(cmdargs.at(1).c_str());
   if (index < 1 || index > parser->commands.size()) {
-    LOG(CMD, Sev::Warning, "CMD_GET: command index {}, out of range (1 - {})", index, parser->commands.size());
+    LOG(CMD, Sev::Warning, "CMD_GET: command index {}, out of range (1 - {})",
+        index, parser->commands.size());
     return -Parser::EBADARGS;
   }
 
   auto cmditerator = parser->commands.begin();
   std::advance(cmditerator, index - 1);
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "CMD_GET %s", cmditerator->first.c_str());
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "CMD_GET %s",
+                     cmditerator->first.c_str());
 
   return Parser::OK;
 }
@@ -159,7 +161,8 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
 
 //=============================================================================
 static int runtime_stats(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
+                         unsigned int *obytes,
+                         std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "RUNTIMESTATS");
   if (nargs != 1) {
@@ -175,17 +178,18 @@ static int runtime_stats(std::vector<std::string> cmdargs, char *output,
 
 /******************************************************************************/
 /******************************************************************************/
-Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &keep_running) {
+Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
+               int &keep_running) {
 
   registercmd("VERSION_GET", version_get);
 
   registercmd("CMD_GET_COUNT", [this](std::vector<std::string> cmd, char *resp,
-                                     unsigned int *nrChars) {
+                                      unsigned int *nrChars) {
     return cmd_get_count(cmd, resp, nrChars, this->commands.size());
   });
 
   registercmd("CMD_GET", [this](std::vector<std::string> cmd, char *resp,
-                                     unsigned int *nrChars) {
+                                unsigned int *nrChars) {
     return cmd_get(cmd, resp, nrChars, this);
   });
 
@@ -199,14 +203,16 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &k
     return;
   }
 
-  registercmd("STAT_GET", [detector, mainStats](std::vector<std::string> cmd, char *resp,
-                                     unsigned int *nrChars) {
-    return stat_get(cmd, resp, nrChars, detector, mainStats);
-  });
-  registercmd("STAT_GET_COUNT", [detector, mainStats](std::vector<std::string> cmd,
-                                           char *resp, unsigned int *nrChars) {
-    return stat_get_count(cmd, resp, nrChars, detector, mainStats);
-  });
+  registercmd("STAT_GET",
+              [detector, mainStats](std::vector<std::string> cmd, char *resp,
+                                    unsigned int *nrChars) {
+                return stat_get(cmd, resp, nrChars, detector, mainStats);
+              });
+  registercmd("STAT_GET_COUNT",
+              [detector, mainStats](std::vector<std::string> cmd, char *resp,
+                                    unsigned int *nrChars) {
+                return stat_get_count(cmd, resp, nrChars, detector, mainStats);
+              });
 
   registercmd("DETECTOR_INFO_GET",
               [detector](std::vector<std::string> cmd, char *resp,
@@ -214,9 +220,8 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats, int &k
                 return detector_info_get(cmd, resp, nrChars, detector);
               });
 
-
   registercmd("RUNTIMESTATS", [detector](std::vector<std::string> cmd,
-                                           char *resp, unsigned int *nrChars) {
+                                         char *resp, unsigned int *nrChars) {
     return runtime_stats(cmd, resp, nrChars, detector);
   });
 
@@ -308,7 +313,5 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   return res;
 }
 
-void Parser::clearCommands() {
-  commands.clear();
-}
+void Parser::clearCommands() { commands.clear(); }
 /******************************************************************************/

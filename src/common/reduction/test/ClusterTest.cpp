@@ -6,21 +6,24 @@
 class ClusterTest : public TestBase {
 protected:
   Cluster cluster;
-  uint8_t invalid_plane {Hit::InvalidPlane};
+  uint8_t invalid_plane{Hit::InvalidPlane};
 };
 
 struct CoordMass2TestData {
-  uint16_t weight;    uint16_t coord;    double coordMass2;
+  uint16_t weight;
+  uint16_t coord;
+  double coordMass2;
 };
 
-static const CoordMass2TestData CoordMass2TestCases [6] = {
-  { 0    , 0                  , static_cast<double>(0ULL*0ULL * 0ULL)                            },
-  { 1    , 2                  , static_cast<double>(1ULL*1ULL * 2ULL)                           },
-  { 11   , 22                 , static_cast<double>(11ULL*11ULL * 22ULL)                         },
-  { 1111 , 2222               , static_cast<double>(1111ULL*1111ULL * 2222ULL)                   },
-  { 11111, 22222              , static_cast<double>(11111ULL*11111ULL * 22222ULL)                },
-  { 65535, Hit::InvalidCoord-1, static_cast<double>(65535ULL*65535ULL * (uint64_t)(Hit::InvalidCoord-1))}
-};
+static const CoordMass2TestData CoordMass2TestCases[6] = {
+    {0, 0, static_cast<double>(0ULL * 0ULL * 0ULL)},
+    {1, 2, static_cast<double>(1ULL * 1ULL * 2ULL)},
+    {11, 22, static_cast<double>(11ULL * 11ULL * 22ULL)},
+    {1111, 2222, static_cast<double>(1111ULL * 1111ULL * 2222ULL)},
+    {11111, 22222, static_cast<double>(11111ULL * 11111ULL * 22222ULL)},
+    {65535, Hit::InvalidCoord - 1,
+     static_cast<double>(65535ULL * 65535ULL *
+                         (uint64_t)(Hit::InvalidCoord - 1))}};
 
 TEST_F(ClusterTest, DefaultConstructed) {
   EXPECT_TRUE(cluster.empty());
@@ -180,7 +183,7 @@ TEST_F(ClusterTest, CoordMass2_Sum) {
 TEST_F(ClusterTest, CoordMass2) {
   cluster.insert(Hit{0, 2, 3, 0});
   EXPECT_TRUE(cluster.valid());
-  EXPECT_EQ(cluster.coord_mass2(), 3*3 * 2);
+  EXPECT_EQ(cluster.coord_mass2(), 3 * 3 * 2);
 }
 
 TEST_F(ClusterTest, TimeOverlapNoOverlap) {
@@ -308,8 +311,6 @@ TEST_F(ClusterTest, PrintDebug) {
   MESSAGE() << "VERBOSE:\n" << cluster.to_string("  ", true);
   MESSAGE() << "VISUALIZE:\n" << cluster.visualize("  ");
 }
-
-
 
 TEST_F(ClusterTest, HasGap) {
   ASSERT_EQ(cluster.hasGap(0), false);

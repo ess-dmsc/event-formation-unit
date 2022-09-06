@@ -16,15 +16,16 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_INF
 
-
-EventBuilderMultiHit2D::EventBuilderMultiHit2D() { matcher.set_minimum_time_gap(timegap); }
+EventBuilderMultiHit2D::EventBuilderMultiHit2D() {
+  matcher.set_minimum_time_gap(timegap);
+}
 
 void EventBuilderMultiHit2D::insert(Hit hit) {
   XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time,
          hit.coordinate, hit.weight);
 
   if (hit.plane == PlaneX) {
-     XTRACE(CLUSTER, DEB, "pushing hit to HitsX");
+    XTRACE(CLUSTER, DEB, "pushing hit to HitsX");
     HitsX.push_back(hit);
   } else if (hit.plane == PlaneY) {
     XTRACE(CLUSTER, DEB, "pushing hit to HitsY");
@@ -44,7 +45,7 @@ void EventBuilderMultiHit2D::flush(bool full_flush) {
   sort_chronologically(HitsY);
   ClustererY.cluster(HitsY);
 
-  if(full_flush){
+  if (full_flush) {
     flushClusterers();
   }
 
@@ -67,6 +68,3 @@ void EventBuilderMultiHit2D::flushClusterers() {
   ClustererX.flush();
   ClustererY.flush();
 }
-
-
-

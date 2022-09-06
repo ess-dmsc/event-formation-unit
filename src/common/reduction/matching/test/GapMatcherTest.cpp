@@ -6,8 +6,8 @@
 
 class GapMatcherTest : public TestBase {
 protected:
-  void SetUp() override { }
-  void TearDown() override { }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(GapMatcherTest, Constructor) {

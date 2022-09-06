@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <cmath>
 #include <common/monitor/Histogram.h>
 #include <common/testutils/TestBase.h>
-#include <cmath>
 
 class HistsTest : public TestBase {};
 

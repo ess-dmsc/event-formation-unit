@@ -6,8 +6,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/matching/AbstractMatcher.h>
 #include <common/debug/Trace.h>
+#include <common/reduction/matching/AbstractMatcher.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -28,7 +28,8 @@ void AbstractMatcher::insert(const Cluster &cluster) {
     return;
   }
   unmatched_clusters_.push_back(cluster);
-  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
+         unmatched_clusters_.size());
 }
 
 void AbstractMatcher::insert(const ClusterContainer &clusters) {
@@ -65,11 +66,11 @@ void AbstractMatcher::requeue_clusters(Event &event) {
 }
 
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
-  XTRACE(CLUSTER, DEB,
-         "latest_x %u, latest_y %u, cl time end %u", LatestA, LatestB, cluster.time_end());
+  XTRACE(CLUSTER, DEB, "latest_x %u, latest_y %u, cl time end %u", LatestA,
+         LatestB, cluster.time_end());
   auto latest = std::min(LatestA, LatestB);
   return (latest > cluster.time_end()) &&
-      ((latest - cluster.time_end()) > maximum_latency_);
+         ((latest - cluster.time_end()) > maximum_latency_);
 }
 
 std::string AbstractMatcher::config(const std::string &prepend) const {
@@ -80,10 +81,12 @@ std::string AbstractMatcher::config(const std::string &prepend) const {
   return ss.str();
 }
 
-std::string AbstractMatcher::status(const std::string &prepend, bool verbose) const {
+std::string AbstractMatcher::status(const std::string &prepend,
+                                    bool verbose) const {
   std::stringstream ss;
   ss << prepend << fmt::format("stats_event_count: {}\n", stats_event_count);
-  ss << prepend << fmt::format("stats_rejected_clusters: {}\n", stats_rejected_clusters);
+  ss << prepend
+     << fmt::format("stats_rejected_clusters: {}\n", stats_rejected_clusters);
   if (!matched_events.empty()) {
     ss << prepend << "Matched events:\n";
     // \todo refactor: make function for this

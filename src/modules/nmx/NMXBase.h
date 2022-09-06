@@ -24,8 +24,7 @@ struct NMXSettings {
 
 class NMXBase : public Detector {
 public:
-  NMXBase(BaseSettings const &settings,
-            struct NMXSettings &LocalNMXSettings);
+  NMXBase(BaseSettings const &settings, struct NMXSettings &LocalNMXSettings);
   ~NMXBase() = default;
 
   void input_thread();

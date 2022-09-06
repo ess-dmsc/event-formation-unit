@@ -7,13 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <algorithm>
-#include <cstdint>
 #include <LokiFullGeometryTestData.h>
+#include <algorithm>
+#include <common/testutils/TestBase.h>
+#include <cstdint>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <memory>
-#include <common/testutils/TestBase.h>
 #include <vector>
 
 using namespace Loki;
@@ -23,13 +23,13 @@ protected:
   const bool Vertical{true};
   const bool Horizontal{false};
   const uint32_t StrawOffset0{0};
-  const uint16_t TZ4{4};      ///< # tubes in z-direction
+  const uint16_t TZ4{4}; ///< # tubes in z-direction
   ESSGeometry Geometry{512, 6272, 1, 1};
 
   std::vector<PanelGeometry *> Banks;
 
   void SetUp() override {
-    Banks.push_back(new PanelGeometry(TZ4, 56,    0)); // Panel 0
+    Banks.push_back(new PanelGeometry(TZ4, 56, 0));    // Panel 0
     Banks.push_back(new PanelGeometry(TZ4, 16, 1586)); // Panel 1
     Banks.push_back(new PanelGeometry(TZ4, 12, 2016));
     Banks.push_back(new PanelGeometry(TZ4, 16, 2352));
@@ -59,7 +59,7 @@ TEST_F(FullGeometryTest, BasicValidation) {
 // essential so here we just convert one counting convention into another.
 TEST_F(FullGeometryTest, FirstFewLines) {
 
-  for (auto & NG : NGData) {
+  for (auto &NG : NGData) {
     // helper values
     uint8_t NBTubes = Banks[NG.Bank]->getMaxGroup() * 2; // In non-Z direction
     uint8_t Column = NG.Tube / NBTubes;
@@ -67,15 +67,17 @@ TEST_F(FullGeometryTest, FirstFewLines) {
 
     uint32_t TubeGroup = (NG.Tube % NBTubes) / 2;
     uint8_t LocalTube = Row * 4 + Column;
-    uint32_t GlobalStraw = Banks[NG.Bank]->getGlobalStrawId(TubeGroup, LocalTube, NG.Straw % 7);
+    uint32_t GlobalStraw =
+        Banks[NG.Bank]->getGlobalStrawId(TubeGroup, LocalTube, NG.Straw % 7);
     uint32_t Pixel = Geometry.pixel2D(NG.Pos, GlobalStraw);
 
-    // printf("tube %u, tubegroup %u, loctube %u, locstraw %u, col %u, row %u, gblstraw %u, pixel %u\n",
-    //   NG.Tube, TubeGroup, LocalTube, NG.Straw % 7, Column, Row, GlobalStraw, Pixel);
+    // printf("tube %u, tubegroup %u, loctube %u, locstraw %u, col %u, row %u,
+    // gblstraw %u, pixel %u\n",
+    //   NG.Tube, TubeGroup, LocalTube, NG.Straw % 7, Column, Row, GlobalStraw,
+    //   Pixel);
     ASSERT_EQ(NG.Pixel, Pixel);
   }
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

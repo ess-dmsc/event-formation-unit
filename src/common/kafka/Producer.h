@@ -14,8 +14,8 @@
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
-#include <common/memory/span.hpp>
 #include <common/memory/Buffer.h>
+#include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
 
@@ -76,4 +76,5 @@ protected:
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
 };
 
-using ProducerCallback = std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;
+using ProducerCallback =
+    std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;
