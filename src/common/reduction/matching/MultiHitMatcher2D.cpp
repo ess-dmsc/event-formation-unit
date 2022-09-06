@@ -84,6 +84,7 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
       if (clusters_match(cluster_a, cluster_b)){
         if (matched_a_to_b){
           XTRACE(CLUSTER, DEB, "More than 1 Cluster in B plane matched Cluster in A plane, can't split events by ADC values, discarding them");
+          evt.clear();
           return;
         }
         XTRACE(CLUSTER, DEB, "Matched cluster a and b");
@@ -100,6 +101,7 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
       if (clusters_match(cluster_a, cluster_b)){
         if (matched_b_to_a){
           XTRACE(DATA, DEB, "More than 1 Cluster in A plane matched Cluster in B plane, can't split events by ADC values, discarding them");
+          evt.clear();
           return;
         }
         matched_b_to_a = true;
@@ -107,9 +109,10 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt){
     }
   }
 
-  for (Event evt : new_events){
-    stash_event(evt);
+  for (Event new_evt : new_events){
+    stash_event(new_evt);
   }
+  evt.clear();
 
 }
 

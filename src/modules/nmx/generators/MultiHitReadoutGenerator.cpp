@@ -25,6 +25,7 @@
 
 void Nmx::MultiHitReadoutGenerator::generateData() {
   Settings.TicksBtwReadouts = 3;
+  Settings.TicksBtwEvents = 500000;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
