@@ -103,6 +103,8 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
       const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
       MessageTimestampMS, NULL);
 
+  stats.produce_calls++;
+
   KafkaProducer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {
     XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
