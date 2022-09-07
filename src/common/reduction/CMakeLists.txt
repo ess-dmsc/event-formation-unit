@@ -13,7 +13,8 @@ set(reduction_obj_SRC
   Event.cpp
   ReducedEvent.cpp
   NeutronEvent.cpp
-
+  EventBuilder2D.cpp
+  EventBuilderMultiHit2D.cpp
   ChronoMerger.cpp
 )
 
@@ -24,6 +25,8 @@ set(reduction_obj_INC
   Event.h
   ReducedEvent.h
   NeutronEvent.h
+  EventBuilder2D.h
+  EventBuilderMultiHit2D.h
   ChronoMerger.h
 )
 
