@@ -8,6 +8,11 @@ set(OverlapMatcherTest_SRC
   )
 create_test_executable(OverlapMatcherTest)
 
+set(MultiHitMatcher2DTest_SRC
+  MultiHitMatcher2DTest.cpp
+  )
+create_test_executable(MultiHitMatcher2DTest)
+
 set(GapMatcherTest_SRC
   GapMatcherTest.cpp
   )
