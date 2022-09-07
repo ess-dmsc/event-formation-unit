@@ -11,13 +11,13 @@ protected:
   void SetUp() override {}
   void TearDown() override {}
 
-  void add_cluster(ClusterContainer &ret, uint8_t plane, uint16_t coord_start,
+  void add_cluster(ClusterContainer &ret, uint8_t plane, uint16_t weight, uint16_t coord_start,
                    uint16_t coord_end, uint16_t coord_step, uint64_t time_start,
                    uint64_t time_end, uint64_t time_step) {
     Cluster c;
     Hit e;
     e.plane = plane;
-    e.weight = 1;
+    e.weight = weight;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
       for (e.coordinate = coord_start; e.coordinate <= coord_end;
            e.coordinate += coord_step)
@@ -72,8 +72,8 @@ TEST_F(MultiHitMatcher2DTest, MatchSingleEvent){
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
 
-  add_cluster(x, 0, 50, 55, 1, 0, 5, 1);
-  add_cluster(y, 1, 100, 110, 2, 0, 5, 1);
+  add_cluster(x, 0, 10, 50, 55, 1, 0, 5, 1);
+  add_cluster(y, 1, 10, 100, 109, 2, 0, 5, 1);
 
   matcher.insert(0, x);
   matcher.insert(1, y);
@@ -84,6 +84,25 @@ TEST_F(MultiHitMatcher2DTest, MatchSingleEvent){
 
 }
 
+TEST_F(MultiHitMatcher2DTest, MatchSingleEventNoFlush){
+  MultiHitMatcher2D matcher(125, 0, 1);
+  matcher.set_minimum_time_gap(70);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+  ASSERT_EQ(matcher.matched_events.size(), 0);
+
+  add_cluster(x, 0, 10, 50, 55, 1, 0, 5, 1);
+  add_cluster(y, 1, 10, 100, 109, 2, 0, 5, 1);
+
+  matcher.insert(0, x);
+  matcher.insert(1, y);
+
+  matcher.match(false);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+
+}
+
 TEST_F(MultiHitMatcher2DTest, MatchMultiEvent){
   MultiHitMatcher2D matcher(125, 0, 1);
   matcher.set_minimum_time_gap(70);
@@ -91,8 +110,8 @@ TEST_F(MultiHitMatcher2DTest, MatchMultiEvent){
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
 
-  add_multi_hit_cluster(x, 0, 10, 50, 55, 1, 100, 200, 205, 1, 0, 5, 1);
-  add_multi_hit_cluster(y, 1, 10, 100, 110, 2, 100, 10, 15, 1, 0, 5, 1);
+  add_multi_hit_cluster(x, 0, 10, 50, 55, 1, 100, 200, 205, 1, 0, 1, 1);
+  add_multi_hit_cluster(y, 1, 10, 100, 105, 1, 100, 10, 15, 1, 0, 1, 1);
 
   matcher.insert(0, x);
   matcher.insert(1, y);
@@ -100,6 +119,43 @@ TEST_F(MultiHitMatcher2DTest, MatchMultiEvent){
   matcher.match(true);
 
   ASSERT_EQ(matcher.stats_event_count, 2);
+
+}
+
+TEST_F(MultiHitMatcher2DTest, FailedMatchMultiEventPlaneA){
+  MultiHitMatcher2D matcher(125, 0, 1);
+  matcher.set_minimum_time_gap(70);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+  ASSERT_EQ(matcher.matched_events.size(), 0);
+
+  add_multi_hit_cluster(x, 0, 10, 50, 55, 1, 100, 200, 205, 1, 0, 5, 1);
+  add_cluster(y, 1, 10, 100, 109, 2, 0, 5, 1);
+
+  matcher.insert(0, x);
+  matcher.insert(1, y);
+
+  matcher.match(true);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+}
+
+TEST_F(MultiHitMatcher2DTest, FailedMatchMultiEventPlaneB){
+  MultiHitMatcher2D matcher(125, 0, 1);
+  matcher.set_minimum_time_gap(70);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+  ASSERT_EQ(matcher.matched_events.size(), 0);
+
+  add_cluster(x, 0, 10, 100, 109, 2, 0, 5, 1);
+  add_multi_hit_cluster(y, 1, 10, 50, 55, 1, 100, 200, 205, 1, 0, 5, 1);
+
+  matcher.insert(0, x);
+  matcher.insert(1, y);
+
+  matcher.match(true);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
 
 }
 
