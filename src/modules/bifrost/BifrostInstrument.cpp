@@ -45,9 +45,9 @@ uint32_t BifrostInstrument::calcPixel(uint8_t Ring, uint8_t Tube, uint16_t AmpA,
   uint32_t pixel = lgeom.pixel2D(xoff + xlocal, yoff + ylocal);
 
   if (pixel == 0) {
-  XTRACE(DATA, ALW, "Ring %d, Tube, %d, AmplA %d, AmplB %d", Ring, Tube, AmpA, AmpB);
-  XTRACE(DATA, ALW, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
-         xoff, xlocal, yoff, ylocal, pixel);
+    XTRACE(DATA, WAR, "Ring %d, Tube, %d, AmplA %d, AmplB %d", Ring, Tube, AmpA, AmpB);
+    XTRACE(DATA, WAR, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+           xoff, xlocal, yoff, ylocal, pixel);
   }
 
   return pixel;
