@@ -33,7 +33,7 @@ protected:
     Hit e;
     e.plane = plane;
     
-    for (e.time = time_start; e.time <= time_end; e.time += time_step)
+    for (e.time = time_start; e.time <= time_end; e.time += time_step){
       e.weight = weight_a;
       for (e.coordinate = coord_start_a; e.coordinate <= coord_end_a;
            e.coordinate += coord_step_a)
@@ -42,6 +42,7 @@ protected:
       for (e.coordinate = coord_start_b; e.coordinate <= coord_end_b;
           e.coordinate += coord_step_b)
         c.insert(e);
+    }
     ret.push_back(c);
   }
 };
