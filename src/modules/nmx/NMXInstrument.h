@@ -18,7 +18,7 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
-#include <common/reduction/EventBuilderMultiHit2D.h>
+#include <common/reduction/EventBuilder2D.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <nmx/Counters.h>
 #include <nmx/NMXBase.h>
@@ -66,7 +66,7 @@ public:
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes
-  std::vector<EventBuilderMultiHit2D> builders; // reinit in ctor
+  std::vector<EventBuilder2D> builders; // reinit in ctor
 
   /// \brief Instrument configuration (rings, FENs, Hybrids, etc)
   Config Conf;

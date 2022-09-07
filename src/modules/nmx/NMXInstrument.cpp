@@ -66,7 +66,7 @@ void NMXInstrument::loadConfigAndCalib() {
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
   builders =
-      std::vector<EventBuilderMultiHit2D>(Conf.NMXFileParameters.NumPanels);
+      std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
 
   /// \todo Add calibration processing
   // if (ModuleSettings.CalibFile != "") {
