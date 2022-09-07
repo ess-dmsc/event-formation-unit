@@ -44,6 +44,7 @@ private:
   void split_and_stash_event(Event evt);
   std::vector<Cluster> split_cluster(Cluster cluster);
   bool clusters_match(Cluster cluster_a, Cluster cluster_b);
+  void check_and_stash_event(Event evt);
 
   uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};

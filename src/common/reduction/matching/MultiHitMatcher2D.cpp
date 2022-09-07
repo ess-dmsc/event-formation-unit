@@ -39,25 +39,7 @@ void MultiHitMatcher2D::match(bool flush) {
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
       XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, maximum is %u",
              evt.time_gap(*cluster), minimum_time_gap_);
-      if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
-          (evt.ClusterB.coord_span() < maximum_coord_span_)) {
-        XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
-        XTRACE(CLUSTER, DEB,
-               "Cluster A coord span = %u, Cluster B coord span = %u",
-               evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
-        stash_event(evt);
-        evt.clear();
-      } else { // split clusters by coord gaps and attempt to match based on ADC
-               // values
-        XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
-        XTRACE(CLUSTER, DEB,
-               "Cluster A spans %u and contains %u hits, and Cluster B spans "
-               "%u and contains %u hits",
-               evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
-               evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
-        split_and_stash_event(evt);
-        evt.clear();
-      }
+      check_and_stash_event(evt);
     }
 
     XTRACE(CLUSTER, DEB, "Merging cluster into event with time gap %u",
@@ -70,7 +52,7 @@ void MultiHitMatcher2D::match(bool flush) {
   /// If anything remains
   if (!evt.empty()) {
     if (flush) {
-      stash_event(evt);
+      check_and_stash_event(evt);
     } else {
       requeue_clusters(evt);
     }
@@ -172,4 +154,26 @@ bool MultiHitMatcher2D::clusters_match(Cluster cluster_a, Cluster cluster_b) {
   } else {
     return false;
   }
+}
+
+void MultiHitMatcher2D::check_and_stash_event(Event evt){
+  if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
+          (evt.ClusterB.coord_span() < maximum_coord_span_)) {
+        XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
+        XTRACE(CLUSTER, DEB,
+               "Cluster A coord span = %u, Cluster B coord span = %u",
+               evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
+        stash_event(evt);
+        evt.clear();
+      } else { // split clusters by coord gaps and attempt to match based on ADC
+               // values
+        XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
+        XTRACE(CLUSTER, DEB,
+               "Cluster A spans %u and contains %u hits, and Cluster B spans "
+               "%u and contains %u hits",
+               evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
+               evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+        split_and_stash_event(evt);
+        evt.clear();
+      }
 }
