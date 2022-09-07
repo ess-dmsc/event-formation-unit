@@ -103,6 +103,38 @@ TEST_F(MultiHitMatcher2DTest, MatchSingleEventNoFlush){
 
 }
 
+TEST_F(MultiHitMatcher2DTest, MatchSingleEventNoFlushTimeGap){
+  MultiHitMatcher2D matcher(125, 0, 1);
+  matcher.set_minimum_time_gap(70);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+  ASSERT_EQ(matcher.matched_events.size(), 0);
+
+  add_cluster(x, 0, 10, 50, 55, 1, 0, 5, 1);
+  add_cluster(y, 1, 10, 100, 109, 2, 0, 5, 1);
+
+  matcher.insert(0, x);
+  matcher.insert(1, y);
+
+  matcher.match(false);
+
+  ASSERT_EQ(matcher.stats_event_count, 0);
+
+  // these clusters will be added, triggering the processing of the first clusters
+  add_cluster(x, 0, 10, 50, 55, 1, 1000, 1001, 1);
+  add_cluster(y, 1, 10, 50, 55, 1, 1000, 1001, 1);
+
+  // these clusters will trigger the processing of the 2nd clusters, which will trigger
+  // the event formation of the first clusters
+  add_cluster(x, 0, 10, 50, 55, 1, 2000, 2001, 1);
+  add_cluster(y, 1, 10, 50, 55, 1, 2000, 2001, 1);
+  matcher.insert(0, x);
+  matcher.insert(1, y);
+  matcher.match(false);
+  ASSERT_EQ(matcher.stats_event_count, 1);
+
+}
+
 TEST_F(MultiHitMatcher2DTest, MatchMultiEvent){
   MultiHitMatcher2D matcher(125, 0, 1);
   matcher.set_minimum_time_gap(70);
@@ -129,8 +161,8 @@ TEST_F(MultiHitMatcher2DTest, FailedMatchMultiEventPlaneA){
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
 
-  add_multi_hit_cluster(x, 0, 10, 50, 55, 1, 100, 200, 205, 1, 0, 5, 1);
-  add_cluster(y, 1, 10, 100, 109, 2, 0, 5, 1);
+  add_multi_hit_cluster(x, 0, 10, 50, 55, 1, 10, 200, 205, 1, 0, 5, 1);
+  add_cluster(y, 1, 10, 100, 105, 1, 0, 5, 1);
 
   matcher.insert(0, x);
   matcher.insert(1, y);
@@ -147,8 +179,8 @@ TEST_F(MultiHitMatcher2DTest, FailedMatchMultiEventPlaneB){
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
 
-  add_cluster(x, 0, 10, 100, 109, 2, 0, 5, 1);
-  add_multi_hit_cluster(y, 1, 10, 50, 55, 1, 100, 200, 205, 1, 0, 5, 1);
+  add_cluster(x, 0, 10, 100, 105, 1, 0, 5, 1);
+  add_multi_hit_cluster(y, 1, 10, 50, 55, 1, 10, 200, 205, 1, 0, 5, 1);
 
   matcher.insert(0, x);
   matcher.insert(1, y);

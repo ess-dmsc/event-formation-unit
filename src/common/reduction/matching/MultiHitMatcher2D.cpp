@@ -23,6 +23,10 @@ void MultiHitMatcher2D::match(bool flush) {
     return c1.time_start() < c2.time_start();
   });
 
+  for (Cluster c : unmatched_clusters_){
+    XTRACE(CLUSTER, DEB, "Unmatched cluster time_start: %u, time_end: %u", c.time_start(), c.time_end());
+  }
+
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
          unmatched_clusters_.size());
 
@@ -35,6 +39,10 @@ void MultiHitMatcher2D::match(bool flush) {
       XTRACE(CLUSTER, DEB, "not ready to be matched");
       break;
     }
+   
+    XTRACE(CLUSTER, DEB, "Checking time gap, gap is %u, maximum is %u",
+             evt.time_gap(*cluster), minimum_time_gap_);
+    XTRACE(CLUSTER, DEB, "Checking if event is empty, evt.empty() = %d", evt.empty());
 
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
       XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, maximum is %u",
@@ -43,7 +51,7 @@ void MultiHitMatcher2D::match(bool flush) {
     }
 
     XTRACE(CLUSTER, DEB, "Merging cluster into event with time gap %u",
-           evt.time_gap(*cluster) > minimum_time_gap_);
+           evt.time_gap(*cluster));
     evt.merge(*cluster);
 
     unmatched_clusters_.pop_front();
@@ -83,6 +91,7 @@ void MultiHitMatcher2D::split_and_stash_event(Event evt) {
           evt.clear();
           return;
         }
+        matched_a_to_b = true;
         XTRACE(CLUSTER, DEB, "Matched cluster a and b");
         Event new_evt;
         new_evt.merge(cluster_a);

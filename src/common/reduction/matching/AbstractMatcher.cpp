@@ -43,6 +43,7 @@ void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
   }
   if (plane == PlaneA) {
     LatestA = std::max(LatestA, clusters.back().time_start());
+    XTRACE(CLUSTER, DEB, "Inserted cluster, Latest A: %u", LatestA);
   } else if (plane == PlaneB) {
     LatestB = std::max(LatestB, clusters.back().time_start());
   } else {
@@ -63,6 +64,7 @@ void AbstractMatcher::requeue_clusters(Event &event) {
     unmatched_clusters_.emplace_front(std::move(event.ClusterA));
   if (!event.ClusterB.empty())
     unmatched_clusters_.emplace_front(std::move(event.ClusterB));
+  XTRACE(CLUSTER, DEB, "Requeued clusters, Latest A: %u", LatestA);
 }
 
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
