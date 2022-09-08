@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2018 - 2022 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapMatcher.h
@@ -26,6 +26,9 @@ public:
   ///         the clusters are merged into one event.
   void set_minimum_time_gap(uint64_t minimum_time_gap);
 
+  
+  void set_split_multi_events(bool split_multi_events);
+
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
   ///         smaller than the minimum time gap are joined into events.
@@ -37,5 +40,16 @@ public:
   std::string config(const std::string &prepend) const override;
 
 private:
+private:
+  void split_and_stash_event(Event evt);
+  std::vector<Cluster> split_cluster(Cluster cluster);
+  bool clusters_match(Cluster cluster_a, Cluster cluster_b);
+  void check_and_stash_event(Event evt);
+
   uint64_t minimum_time_gap_{0};
+  uint16_t minimum_coord_gap_{10};
+  uint16_t maximum_coord_span_{10};
+  float_t coefficient_{1};
+  float_t allowance_{10};
+  bool split_multi_events_{false};
 };

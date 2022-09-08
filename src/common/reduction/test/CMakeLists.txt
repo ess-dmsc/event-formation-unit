@@ -23,11 +23,6 @@ set(ReducedEventTest_SRC
   )
 create_test_executable(ReducedEventTest)
 
-set(EventBuilderMultiHit2DTest_SRC
-  EventBuilderMultiHit2DTest.cpp
-  )
-create_test_executable(EventBuilderMultiHit2DTest)
-
 set(ChronoMergerTest_SRC
   ChronoMergerTest.cpp
   )

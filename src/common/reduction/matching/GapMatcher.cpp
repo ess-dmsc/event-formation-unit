@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2018-2022 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapMatcher.h
@@ -16,6 +16,10 @@
 
 void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;
+}
+
+void GapMatcher::set_split_multi_events(bool split_multi_events){
+  split_multi_events_ = split_multi_events;
 }
 
 void GapMatcher::match(bool flush) {
@@ -38,7 +42,7 @@ void GapMatcher::match(bool flush) {
 
     if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
       XTRACE(CLUSTER, DEB, "time gap too large");
-      stash_event(evt);
+      check_and_stash_event(evt);
       evt.clear();
     }
 
@@ -50,7 +54,7 @@ void GapMatcher::match(bool flush) {
   /// If anything remains
   if (!evt.empty()) {
     if (flush) {
-      stash_event(evt);
+      check_and_stash_event(evt);
     } else {
       requeue_clusters(evt);
     }
@@ -62,4 +66,124 @@ std::string GapMatcher::config(const std::string &prepend) const {
   ss << AbstractMatcher::config(prepend);
   ss << prepend << fmt::format("minimum_time_gap: {}\n", minimum_time_gap_);
   return ss.str();
+}
+
+void GapMatcher::split_and_stash_event(Event evt) {
+  Cluster new_cluster;
+  std::vector<Cluster> new_clusters_a = split_cluster(evt.ClusterA);
+  std::vector<Cluster> new_clusters_b = split_cluster(evt.ClusterB);
+  std::vector<Event> new_events;
+
+  for (Cluster cluster_a : new_clusters_a) {
+    bool matched_a_to_b = false;
+    for (Cluster cluster_b : new_clusters_b) {
+      if (clusters_match(cluster_a, cluster_b)) {
+        if (matched_a_to_b) {
+          XTRACE(CLUSTER, DEB,
+                 "More than 1 Cluster in B plane matched Cluster in A plane, "
+                 "can't split events by ADC values, discarding them");
+          evt.clear();
+          return;
+        }
+        matched_a_to_b = true;
+        XTRACE(CLUSTER, DEB, "Matched cluster a and b");
+        Event new_evt;
+        new_evt.merge(cluster_a);
+        new_evt.merge(cluster_b);
+        new_events.push_back(new_evt);
+      }
+    }
+  }
+  for (Cluster cluster_b : new_clusters_b) {
+    bool matched_b_to_a = false;
+    for (Cluster cluster_a : new_clusters_a) {
+      if (clusters_match(cluster_a, cluster_b)) {
+        if (matched_b_to_a) {
+          XTRACE(DATA, DEB,
+                 "More than 1 Cluster in A plane matched Cluster in B plane, "
+                 "can't split events by ADC values, discarding them");
+          evt.clear();
+          return;
+        }
+        matched_b_to_a = true;
+      }
+    }
+  }
+
+  for (Event new_evt : new_events) {
+    stash_event(new_evt);
+  }
+  evt.clear();
+}
+
+std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster) {
+  Cluster new_cluster;
+  std::vector<Cluster> new_clusters;
+  sort_by_increasing_coordinate(cluster.hits);
+  uint last_coord = 0;
+
+  for (Hit hit : cluster.hits) {
+    if ((!new_cluster.empty()) &&
+        (hit.coordinate - last_coord > minimum_coord_gap_)) {
+      new_clusters.push_back(new_cluster);
+      new_cluster.clear();
+      last_coord = hit.coordinate;
+      new_cluster.insert(hit);
+    } else {
+      last_coord = hit.coordinate;
+      new_cluster.insert(hit);
+    }
+  }
+  if (!new_cluster.empty()) {
+    new_clusters.push_back(new_cluster);
+    new_cluster.clear();
+  }
+
+  for (Cluster cluster : new_clusters) {
+    XTRACE(DATA, DEB,
+           "New cluster created, starts at coord %u, ends at coord %u",
+           cluster.coord_start(), cluster.coord_end());
+  }
+
+  return new_clusters;
+}
+
+bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
+  if ((cluster_a.weight_sum() * coefficient_ >=
+       cluster_b.weight_sum() - allowance_) &&
+      (cluster_a.weight_sum() * coefficient_ <=
+       cluster_b.weight_sum() + allowance_)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void GapMatcher::check_and_stash_event(Event evt){
+  if(!split_multi_events_){
+    XTRACE(CLUSTER, DEB, "Stashing event");
+    stash_event(evt);
+    evt.clear();
+    return;
+  }
+  if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
+          (evt.ClusterB.coord_span() < maximum_coord_span_)) {
+        XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
+        XTRACE(CLUSTER, DEB,
+               "Cluster A coord span = %u, Cluster B coord span = %u",
+               evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
+        stash_event(evt);
+        evt.clear();
+  } 
+  else { // split clusters by coord gaps and attempt to match based on ADC
+            // values
+    XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
+    XTRACE(CLUSTER, DEB,
+            "Cluster A spans %u and contains %u hits, and Cluster B spans "
+            "%u and contains %u hits",
+            evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
+            evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+    split_and_stash_event(evt);
+    evt.clear();
+  }
 }
