@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 struct NexusGeometry {
   uint16_t Bank;

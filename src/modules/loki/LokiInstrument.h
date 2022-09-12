@@ -39,7 +39,9 @@ public:
 
   //
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-  void setSerializerII(EV44Serializer *serializer) { SerializerII = serializer; }
+  void setSerializerII(EV44Serializer *serializer) {
+    SerializerII = serializer;
+  }
 
   /// \brief LoKI pixel calculations
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,

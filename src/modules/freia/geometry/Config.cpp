@@ -38,18 +38,22 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "SplitMultiEvents {}", SplitMultiEvents);
 
   try {
-    SplitMultiEventsCoefficient = root["SplitMultiEventsCoefficient"].get<float>();
+    SplitMultiEventsCoefficient =
+        root["SplitMultiEventsCoefficient"].get<float>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficient");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficient {}", SplitMultiEventsCoefficient);
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficient {}",
+      SplitMultiEventsCoefficient);
 
   try {
-    SplitMultiEventsAllowance = root["SplitMultiEventsAllowance"].get<std::uint16_t>();
+    SplitMultiEventsAllowance =
+        root["SplitMultiEventsAllowance"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsAllowance");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsAllowance {}", SplitMultiEventsAllowance);
+  LOG(INIT, Sev::Info, "SplitMultiEventsAllowance {}",
+      SplitMultiEventsAllowance);
 
   try {
     auto PanelConfig = root["Config"];
@@ -71,8 +75,9 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset = (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
-                         NumWiresPerCassette;
+        Hybrid.YOffset =
+            (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
+            NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }

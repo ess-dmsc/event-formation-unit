@@ -35,7 +35,6 @@ protected:
   struct Counters Counters {};
   TTLMonitorSettings TTLMonitorModuleSettings;
   std::vector<EV44Serializer> Serializers;
-
 };
 
 } // namespace TTLMonitor

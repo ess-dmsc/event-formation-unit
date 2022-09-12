@@ -169,8 +169,9 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
-    Serializers.push_back(EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+  for (int i = 0; i < TTLMonitorModuleSettings.NumberOfMonitors; ++i) {
+    Serializers.push_back(
+        EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
   TTLMonitorInstrument TTLMonitor(
@@ -228,17 +229,15 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
-
     RuntimeStatusMask = RtStat.getRuntimeStatusMask(
         {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-    for (auto &serializer : Serializers){
+    for (auto &serializer : Serializers) {
       if (serializer.ProduceTimer.timeout()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer.produce();
       }
     }
     Counters.KafkaStats = eventprod.stats;
-    
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

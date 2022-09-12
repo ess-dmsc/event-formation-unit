@@ -131,7 +131,8 @@ void LokiBase::inputThread() {
              dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                   RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      //XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+      // XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+      // readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
 
@@ -170,7 +171,8 @@ void LokiBase::processingThread() {
   };
 
   SerializerII = new EV44Serializer(KafkaBufferSize, "loki", ProduceII);
-  Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
+  Loki.setSerializerII(
+      SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
 
@@ -221,7 +223,8 @@ void LokiBase::processingThread() {
       usleep(10);
     }
 
-    if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (Serializer->ProduceTimer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});

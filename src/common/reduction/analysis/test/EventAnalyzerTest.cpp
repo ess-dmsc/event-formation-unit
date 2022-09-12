@@ -48,7 +48,7 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
   //
   // 4. utpc_weighted
   //-position: as in 3. utpc, determine the strip with the latest time.
-  //Depending
+  // Depending
   //   on its position in the track, the strip has one or two neighbours.
   //   Calculate the position with the charge2 algorithm (center-of-mass with
   //   charge squared as weights) from these 2-3 strips

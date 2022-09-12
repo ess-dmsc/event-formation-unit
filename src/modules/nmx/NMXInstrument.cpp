@@ -65,8 +65,7 @@ void NMXInstrument::loadConfigAndCalib() {
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
-  builders =
-      std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
+  builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
 
   /// \todo Add calibration processing
   // if (ModuleSettings.CalibFile != "") {
@@ -196,13 +195,6 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if ((Conf.NMXFileParameters.MaxXSpan < e.ClusterA.coord_span()) and
-        (Conf.NMXFileParameters.MaxYSpan < e.ClusterB.coord_span()) and
-        e.ClusterA.hits.size() > 1 and e.ClusterB.hits.size() > 1) {
-      XTRACE(EVENT, DEB, "MULTI HIT DETECTED!!!");
-      continue;
-    }
-
     if (Conf.NMXFileParameters.MaxXSpan < e.ClusterA.coord_span()) {
       XTRACE(EVENT, DEB, "Event spans too far in X direction, %u",
              e.ClusterA.coord_span());
@@ -241,8 +233,10 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // calculate local x and y using center of mass
-    uint16_t x = static_cast<uint16_t>(std::round(e.ClusterA.coord_utpc(false)));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_utpc(false)));
+    uint16_t x =
+        static_cast<uint16_t>(std::round(e.ClusterA.coord_utpc(false)));
+    uint16_t y =
+        static_cast<uint16_t>(std::round(e.ClusterB.coord_utpc(false)));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {

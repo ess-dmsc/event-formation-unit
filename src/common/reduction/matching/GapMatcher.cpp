@@ -18,7 +18,8 @@ void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;
 }
 
-void GapMatcher::set_split_multi_events(bool split_multi_events, float coefficient, uint16_t allowance){
+void GapMatcher::set_split_multi_events(bool split_multi_events,
+                                        float coefficient, uint16_t allowance) {
   split_multi_events_ = split_multi_events;
   coefficient_ = coefficient;
   allowance_ = allowance;
@@ -161,30 +162,28 @@ bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
   }
 }
 
-void GapMatcher::check_and_stash_event(Event evt){
-  if(!split_multi_events_){
+void GapMatcher::check_and_stash_event(Event evt) {
+  if (!split_multi_events_) {
     XTRACE(CLUSTER, DEB, "Stashing event");
     stash_event(evt);
     evt.clear();
     return;
   }
   if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
-          (evt.ClusterB.coord_span() < maximum_coord_span_)) {
-        XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
-        XTRACE(CLUSTER, DEB,
-               "Cluster A coord span = %u, Cluster B coord span = %u",
-               evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
-        stash_event(evt);
-        evt.clear();
-  } 
-  else { // split clusters by coord gaps and attempt to match based on ADC
-            // values
+      (evt.ClusterB.coord_span() < maximum_coord_span_)) {
+    XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
+    XTRACE(CLUSTER, DEB, "Cluster A coord span = %u, Cluster B coord span = %u",
+           evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
+    stash_event(evt);
+    evt.clear();
+  } else { // split clusters by coord gaps and attempt to match based on ADC
+           // values
     XTRACE(CLUSTER, DEB, "Span is too large, attempting to split event");
     XTRACE(CLUSTER, DEB,
-            "Cluster A spans %u and contains %u hits, and Cluster B spans "
-            "%u and contains %u hits",
-            evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
-            evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+           "Cluster A spans %u and contains %u hits, and Cluster B spans "
+           "%u and contains %u hits",
+           evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
+           evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
     split_and_stash_event(evt);
     evt.clear();
   }

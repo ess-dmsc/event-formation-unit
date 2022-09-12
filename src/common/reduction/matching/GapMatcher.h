@@ -1,4 +1,5 @@
-/* Copyright (C) 2018 - 2022 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2018 - 2022 European Spallation Source, ERIC. See LICENSE file
+ */
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapMatcher.h
@@ -26,8 +27,8 @@ public:
   ///         the clusters are merged into one event.
   void set_minimum_time_gap(uint64_t minimum_time_gap);
 
-  
-  void set_split_multi_events(bool split_multi_events, float coefficient, uint16_t allowance);
+  void set_split_multi_events(bool split_multi_events, float coefficient,
+                              uint16_t allowance);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
