@@ -31,6 +31,27 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "MaxGapStrip {}", MaxGapStrip);
 
   try {
+    SplitMultiEvents = root["SplitMultiEvents"].get<bool>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
+  }
+  LOG(INIT, Sev::Info, "SplitMultiEvents {}", SplitMultiEvents);
+
+  try {
+    SplitMultiEventsCoefficient = root["SplitMultiEventsCoefficient"].get<float>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficient");
+  }
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficient {}", SplitMultiEventsCoefficient);
+
+  try {
+    SplitMultiEventsAllowance = root["SplitMultiEventsAllowance"].get<std::uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsAllowance");
+  }
+  LOG(INIT, Sev::Info, "SplitMultiEventsAllowance {}", SplitMultiEventsAllowance);
+
+  try {
     auto PanelConfig = root["Config"];
     uint8_t MaxCassetteNumber = 0;
     for (auto &Mapping : PanelConfig) {

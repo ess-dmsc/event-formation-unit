@@ -42,6 +42,9 @@ public:
   bool WireGapCheck{true};
   uint16_t MaxGapWire{0};
   uint16_t MaxGapStrip{0};
+  bool SplitMultiEvents{false};
+  float SplitMultiEventsCoefficient{1.0};
+  uint16_t SplitMultiEventsAllowance{10};
 };
 
 } // namespace Freia

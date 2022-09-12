@@ -18,8 +18,10 @@ void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;
 }
 
-void GapMatcher::set_split_multi_events(bool split_multi_events){
+void GapMatcher::set_split_multi_events(bool split_multi_events, float coefficient, uint16_t allowance){
   split_multi_events_ = split_multi_events;
+  coefficient_ = coefficient;
+  allowance_ = allowance;
 }
 
 void GapMatcher::match(bool flush) {

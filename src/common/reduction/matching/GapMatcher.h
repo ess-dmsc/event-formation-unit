@@ -27,7 +27,7 @@ public:
   void set_minimum_time_gap(uint64_t minimum_time_gap);
 
   
-  void set_split_multi_events(bool split_multi_events);
+  void set_split_multi_events(bool split_multi_events, float coefficient, uint16_t allowance);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
@@ -50,6 +50,6 @@ private:
   uint16_t minimum_coord_gap_{10};
   uint16_t maximum_coord_span_{10};
   float_t coefficient_{1};
-  float_t allowance_{10};
+  uint16_t allowance_{10};
   bool split_multi_events_{false};
 };
