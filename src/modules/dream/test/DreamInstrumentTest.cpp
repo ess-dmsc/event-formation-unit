@@ -14,10 +14,14 @@ using namespace Dream;
 std::string ConfigFile{"deleteme_dream_instr_config.json"};
 std::string ConfigStr = R"(
   {
-    "Detector" : "Dream",
+    "Detector" : "DREAM",
 
     "MaxPulseTimeNS" : 357142855
-  }
+  },
+
+  "Config" : [
+    { "Ring" :  0, "FEN":  0, "Type": "BwEndCap"}
+  ]
 )";
 
 class DreamInstrumentTest : public TestBase {

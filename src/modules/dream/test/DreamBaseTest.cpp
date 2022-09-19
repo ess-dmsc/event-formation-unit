@@ -17,10 +17,14 @@
 
 std::string dreamjson = R"(
   {
-    "Detector" : "Dream",
+    "Detector" : "DREAM",
 
     "MaxPulseTimeNS" : 357142855
-  }
+  },
+
+  "Config" : [
+    { "Ring" :  0, "FEN":  0, "Type": "BwEndCap"}
+  ]
 )";
 
 class DreamBaseStandIn : public Dream::DreamBase {
