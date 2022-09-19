@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <map>
 #include <string>
 #include <vector>
 

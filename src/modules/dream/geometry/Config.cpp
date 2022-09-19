@@ -26,7 +26,7 @@ Config::Config(std::string ConfigFile) {
 
   try {
     Name = root["Detector"].get<std::string>();
-  } catch (nlohmann::json::exception) {
+  } catch (nlohmann::json::exception const &) {
     errorExit("Missing Detector in JSON");
   }
 
@@ -36,7 +36,7 @@ Config::Config(std::string ConfigFile) {
 
   try {
     MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-  } catch (...) {
+  } catch (nlohmann::json::exception const &) {
       LOG(INIT, Sev::Info, "MaxPulseTimeNS using default value");
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
@@ -53,7 +53,7 @@ Config::Config(std::string ConfigFile) {
       Ring = Module["Ring"].get<int>();
       FEN = Module["FEN"].get<int>();
       Type = Module["Type"];
-    } catch (nlohmann::json::exception) {
+    } catch (nlohmann::json::exception const &) {
       std::runtime_error("Malformed 'Config' section (Need RING, FEN, Type)");
     }
 
