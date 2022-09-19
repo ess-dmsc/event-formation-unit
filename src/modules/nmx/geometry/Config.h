@@ -45,6 +45,9 @@ public:
     uint16_t MaxXSpan{10};
     uint16_t MaxYSpan{10};
     uint16_t DefaultMinADC{50};
+    bool SplitMultiEvents{false};
+    float SplitMultiEventsCoefficientLow{0.8};
+    float SplitMultiEventsCoefficientHigh{1.2};
   } NMXFileParameters;
 
   // Derived parameters

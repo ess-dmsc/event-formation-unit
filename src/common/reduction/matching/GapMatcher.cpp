@@ -19,10 +19,10 @@ void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
 }
 
 void GapMatcher::set_split_multi_events(bool split_multi_events,
-                                        float coefficient, uint16_t allowance) {
+                                        float coefficient_low, float coefficient_high) {
   split_multi_events_ = split_multi_events;
-  coefficient_ = coefficient;
-  allowance_ = allowance;
+  coefficient_low_ = coefficient_low;
+  coefficient_high_ = coefficient_high;
 }
 
 void GapMatcher::match(bool flush) {
@@ -119,9 +119,8 @@ void GapMatcher::split_and_stash_event(Event evt) {
   evt.clear();
 }
 
-std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster) {
-  Cluster new_cluster;
-  std::vector<Cluster> new_clusters;
+std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster, Cluster *new_cluster_1, Cluster *new_cluster_2) {
+  Cluster new_cluster = &new_cluster_1;
   sort_by_increasing_coordinate(cluster.hits);
   uint last_coord = 0;
 
@@ -138,6 +137,9 @@ std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster) {
     }
   }
   if (!new_cluster.empty()) {
+    if (new_cluster_1.empty()){
+      new_cluster_1 = new_cluster;
+    }
     new_clusters.push_back(new_cluster);
     new_cluster.clear();
   }
@@ -152,10 +154,10 @@ std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster) {
 }
 
 bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
-  if ((cluster_a.weight_sum() * coefficient_ >=
-       cluster_b.weight_sum() - allowance_) &&
-      (cluster_a.weight_sum() * coefficient_ <=
-       cluster_b.weight_sum() + allowance_)) {
+  if ((cluster_a.weight_sum() * coefficient_low_ >=
+       cluster_b.weight_sum()) &&
+      (cluster_a.weight_sum() * coefficient_high_ <=
+       cluster_b.weight_sum()) {
     return true;
   } else {
     return false;

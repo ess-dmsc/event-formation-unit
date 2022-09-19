@@ -38,22 +38,22 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "SplitMultiEvents {}", SplitMultiEvents);
 
   try {
-    SplitMultiEventsCoefficient =
-        root["SplitMultiEventsCoefficient"].get<float>();
+    SplitMultiEventsCoefficientLow =
+        root["SplitMultiEventsCoefficientLow"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficient");
+    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientLow");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficient {}",
-      SplitMultiEventsCoefficient);
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
+      SplitMultiEventsCoefficientLow);
 
   try {
-    SplitMultiEventsAllowance =
-        root["SplitMultiEventsAllowance"].get<std::uint16_t>();
+    SplitMultiEventsCoefficientHigh =
+        root["SplitMultiEventsCoefficientHigh"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsAllowance");
+    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientHigh");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsAllowance {}",
-      SplitMultiEventsAllowance);
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
+      SplitMultiEventsCoefficientHigh);
 
   try {
     auto PanelConfig = root["Config"];

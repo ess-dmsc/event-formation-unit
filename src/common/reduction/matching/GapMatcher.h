@@ -27,8 +27,8 @@ public:
   ///         the clusters are merged into one event.
   void set_minimum_time_gap(uint64_t minimum_time_gap);
 
-  void set_split_multi_events(bool split_multi_events, float coefficient,
-                              uint16_t allowance);
+  void set_split_multi_events(bool split_multi_events, float coefficient_low,
+                               float coefficient_high);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
@@ -50,7 +50,7 @@ private:
   uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};
   uint16_t maximum_coord_span_{10};
-  float_t coefficient_{1};
-  uint16_t allowance_{10};
+  float_t coefficient_low_{1};
+  float_t coefficient_high_{1};
   bool split_multi_events_{false};
 };
