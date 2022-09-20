@@ -62,6 +62,19 @@ auto InvalidTypeConfParm = R"(
 }
 )"_json;
 
+auto DuplicateConfParm = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"},
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
 
 // finally a valid config file
 auto ValidConfig = R"(
@@ -133,6 +146,11 @@ TEST_F(ConfigTest, InvalidFENConfParm) {
 
 TEST_F(ConfigTest, InvalidTypeConfParm) {
   config.root = InvalidTypeConfParm;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, DuplicateConfParm) {
+  config.root = DuplicateConfParm;
   ASSERT_ANY_THROW(config.apply());
 }
 
