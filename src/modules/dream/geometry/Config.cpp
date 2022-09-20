@@ -6,7 +6,6 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <dream/geometry/Config.h>
 
@@ -17,11 +16,12 @@ void Config::errorExit(std::string ErrMsg) {
   throw std::runtime_error(ErrMsg);
 }
 
-///
-Config::Config() {}
+void Config::loadAndApply() {
+  root = from_json_file(FileName);
+  apply();
+}
 
-Config::Config(std::string ConfigFile) {
-  nlohmann::json root = from_json_file(ConfigFile);
+void Config::apply() {
   std::string Name;
 
   try {
@@ -38,8 +38,10 @@ Config::Config(std::string ConfigFile) {
     MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
   } catch (nlohmann::json::exception const &) {
       LOG(INIT, Sev::Info, "MaxPulseTimeNS using default value");
+      XTRACE(INIT, ALW, "MaxPulseTimeNS using default value");
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
+  XTRACE(INIT, ALW, "MaxPulseTimeNS: %u", MaxPulseTimeNS);
 
   // Initialise all configured modules
   int Entry{0};
@@ -64,7 +66,7 @@ Config::Config(std::string ConfigFile) {
     if (FEN > MaxFEN) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN, MaxFEN));
     }
-    if (RMConfig[Ring][FEN].Initialized != false) {
+    if (RMConfig[Ring][FEN].Initialised != false) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for RING {} FEN {}", Entry, Ring, FEN));
     }
 
@@ -76,7 +78,7 @@ Config::Config(std::string ConfigFile) {
     XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring, FEN, Type.c_str());
 
     // Final housekeeping
-    RMConfig[Ring][FEN].Initialized = true;
+    RMConfig[Ring][FEN].Initialised = true;
     Entry++;
   }
 }

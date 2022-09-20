@@ -15,11 +15,9 @@ create_test_executable(DreamGeometryTest)
 
 
 set(DreamConfigTest_INC
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   ${DREAM_BASE_DIR}/geometry/Config.h
   )
 set(DreamConfigTest_SRC
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ConfigTest.cpp
   )

@@ -25,6 +25,8 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
          ModuleSettings.ConfigFile.c_str());
   DreamConfiguration = Config(ModuleSettings.ConfigFile);
 
+  DreamConfiguration.loadAndApply();
+
 
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }

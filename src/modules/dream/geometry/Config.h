@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <common/JsonFile.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -33,7 +34,7 @@ public:
   };
 
   struct ModuleParms {
-    bool Initialized{false};
+    bool Initialised{false};
     ModuleType Type;
     bool WireIsZ;
     int Wires;
@@ -41,9 +42,17 @@ public:
     int Rotation;
   };
 
-  Config();
+  //
+  Config(std::string ConfigFile) : FileName(ConfigFile) {};
 
-  Config(std::string ConfigFile);
+  //
+  Config() {};
+
+  // load file into json object and apply
+  void loadAndApply();
+
+  // Apply the loaded json file
+  void apply();
 
   /// \brief log errormessage and throw runtime exception
   void errorExit(std::string errmsg);
@@ -51,6 +60,10 @@ public:
   uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
 
   ModuleParms RMConfig[MaxRing + 1][MaxFEN + 1];
+
+  //
+  std::string FileName{""};
+  nlohmann::json root;
 
 private:
 };
