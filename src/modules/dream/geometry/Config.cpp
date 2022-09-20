@@ -48,14 +48,15 @@ void Config::apply() {
   nlohmann::json Modules;
   Modules = root["Config"];
   for (auto & Module : Modules) {
-    int Ring, FEN;
-    std::string Type;
+    int Ring{MaxRing + 1};
+    int FEN{MaxFEN + 1};
+    std::string Type{""};
 
     try {
       Ring = Module["Ring"].get<int>();
       FEN = Module["FEN"].get<int>();
       Type = Module["Type"];
-    } catch (nlohmann::json::exception const &) {
+    } catch (...) {
       std::runtime_error("Malformed 'Config' section (Need RING, FEN, Type)");
     }
 
@@ -72,7 +73,7 @@ void Config::apply() {
 
     // Now add the relevant parameters
     if (ModuleTypeMap.find(Type) == ModuleTypeMap.end()) {
-      errorExit(fmt::format("ENtry: {}, CDT Module {} does not exist", Entry, Type));
+      errorExit(fmt::format("Entry: {}, CDT Module '{}' does not exist", Entry, Type));
     }
     RMConfig[Ring][FEN].Type = ModuleTypeMap[Type];
     XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring, FEN, Type.c_str());
