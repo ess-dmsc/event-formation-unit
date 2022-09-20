@@ -72,92 +72,100 @@ std::string GapMatcher::config(const std::string &prepend) const {
 }
 
 void GapMatcher::split_and_stash_event(Event evt) {
-  Cluster new_cluster;
-  std::vector<Cluster> new_clusters_a = split_cluster(evt.ClusterA);
-  std::vector<Cluster> new_clusters_b = split_cluster(evt.ClusterB);
-  std::vector<Event> new_events;
+  Cluster new_cluster_a_1;
+  Cluster new_cluster_a_2;
+  Cluster new_cluster_b_1;
+  Cluster new_cluster_b_2;
+  split_cluster(evt.ClusterA, &new_cluster_a_1, &new_cluster_a_2);
+  split_cluster(evt.ClusterB, &new_cluster_b_1, &new_cluster_b_2);
+  Event new_event_1;
+  Event new_event_2;
+  bool a1_b1_match = clusters_match(new_cluster_a_1, new_cluster_b_1);
+  bool a2_b2_match = clusters_match(new_cluster_a_2, new_cluster_b_2);
+  bool a1_b2_match = clusters_match(new_cluster_a_1, new_cluster_b_2);
+  bool a2_b1_match = clusters_match(new_cluster_a_2, new_cluster_b_1);
+  XTRACE(CLUSTER, DEB, "a1xb1: %d, a2xb2: %d, a1xb2: %d, a2xb1: %d", a1_b1_match, a2_b2_match, a1_b2_match, a2_b1_match);
 
-  for (Cluster cluster_a : new_clusters_a) {
-    bool matched_a_to_b = false;
-    for (Cluster cluster_b : new_clusters_b) {
-      if (clusters_match(cluster_a, cluster_b)) {
-        if (matched_a_to_b) {
-          XTRACE(CLUSTER, DEB,
-                 "More than 1 Cluster in B plane matched Cluster in A plane, "
-                 "can't split events by ADC values, discarding them");
-          evt.clear();
-          return;
-        }
-        matched_a_to_b = true;
-        XTRACE(CLUSTER, DEB, "Matched cluster a and b");
-        Event new_evt;
-        new_evt.merge(cluster_a);
-        new_evt.merge(cluster_b);
-        new_events.push_back(new_evt);
-      }
-    }
+  if (a1_b1_match && a2_b2_match && !a1_b2_match && !a2_b1_match) {
+    new_event_1.merge(new_cluster_a_1);
+    new_event_1.merge(new_cluster_b_1);
+    new_event_2.merge(new_cluster_a_2);
+    new_event_2.merge(new_cluster_b_2);
+  } else if (a1_b2_match && a2_b1_match && !a1_b1_match && !a2_b2_match) {
+    new_event_1.merge(new_cluster_a_1);
+    new_event_1.merge(new_cluster_b_2);
+    new_event_2.merge(new_cluster_a_2);
+    new_event_2.merge(new_cluster_b_1);
+  } else {
+    XTRACE(CLUSTER, DEB,
+           "Unable to match clusters into two distinct events, discarding "
+           "readouts");
+    //\todo count discarded multievents
+    return;
   }
-  for (Cluster cluster_b : new_clusters_b) {
-    bool matched_b_to_a = false;
-    for (Cluster cluster_a : new_clusters_a) {
-      if (clusters_match(cluster_a, cluster_b)) {
-        if (matched_b_to_a) {
-          XTRACE(DATA, DEB,
-                 "More than 1 Cluster in A plane matched Cluster in B plane, "
-                 "can't split events by ADC values, discarding them");
-          evt.clear();
-          return;
-        }
-        matched_b_to_a = true;
-      }
-    }
-  }
-
-  for (Event new_evt : new_events) {
-    stash_event(new_evt);
-  }
+  stash_event(new_event_1);
+  stash_event(new_event_2);
   evt.clear();
 }
 
-std::vector<Cluster> GapMatcher::split_cluster(Cluster cluster, Cluster *new_cluster_1, Cluster *new_cluster_2) {
-  Cluster new_cluster = &new_cluster_1;
+void GapMatcher::split_cluster(Cluster cluster,
+                                               Cluster *new_cluster_1,
+                                               Cluster *new_cluster_2) {
   sort_by_increasing_coordinate(cluster.hits);
   uint last_coord = 0;
+  bool filled_cluster_1 = false;
 
   for (Hit hit : cluster.hits) {
-    if ((!new_cluster.empty()) &&
-        (hit.coordinate - last_coord > minimum_coord_gap_)) {
-      new_clusters.push_back(new_cluster);
-      new_cluster.clear();
+    // no hits added to any clusters yet, automatically added to cluster 1
+    if ((new_cluster_1->empty())) {
       last_coord = hit.coordinate;
-      new_cluster.insert(hit);
-    } else {
+      new_cluster_1->insert(hit);
+      XTRACE(CLUSTER, DEB, "Adding first hit to cluster 1");
+    }
+    // cluster 1 not marked as full yet, and gap is small enough to still be
+    // cluster 1
+    else if ((hit.coordinate - last_coord <= minimum_coord_gap_) &&
+             (!filled_cluster_1)) {
       last_coord = hit.coordinate;
-      new_cluster.insert(hit);
+      new_cluster_1->insert(hit);
+      XTRACE(CLUSTER, DEB, "Adding another hit to cluster 1");
+    }
+    // cluster 1 not marked as full yet, and large enough gap to start new
+    // cluster hit goes into cluster 2
+    else if ((hit.coordinate - last_coord > minimum_coord_gap_) &&
+             (!filled_cluster_1)) {
+      last_coord = hit.coordinate;
+      filled_cluster_1 = true;
+      new_cluster_2->insert(hit);
+      XTRACE(CLUSTER, DEB, "Adding first hit to cluster 2");
+    }
+    // cluster 1 marked as full, and gap small enough to keep adding to cluster
+    // 2
+    else if ((hit.coordinate - last_coord <= minimum_coord_gap_) &&
+             (filled_cluster_1)) {
+      last_coord = hit.coordinate;
+      new_cluster_2->insert(hit);
+      XTRACE(CLUSTER, DEB, "Adding another hit to cluster 2");
+    }
+    // cluster 1 full, and gap large enough to finish cluster 2 and start a 3rd
+    // 3 or more clusters not supported, clusters are cleared and method exited
+    else if ((hit.coordinate - last_coord > minimum_coord_gap_) &&
+             (filled_cluster_1)) {
+      XTRACE(CLUSTER, DEB,
+             "More than 2 distinct clusters in plane, clearing clusters and "
+             "returning");
+      new_cluster_1->clear();
+      new_cluster_2->clear();
+      return;
     }
   }
-  if (!new_cluster.empty()) {
-    if (new_cluster_1.empty()){
-      new_cluster_1 = new_cluster;
-    }
-    new_clusters.push_back(new_cluster);
-    new_cluster.clear();
-  }
-
-  for (Cluster cluster : new_clusters) {
-    XTRACE(DATA, DEB,
-           "New cluster created, starts at coord %u, ends at coord %u",
-           cluster.coord_start(), cluster.coord_end());
-  }
-
-  return new_clusters;
 }
 
 bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
-  if ((cluster_a.weight_sum() * coefficient_low_ >=
+  if ((cluster_a.weight_sum() * coefficient_low_ <=
        cluster_b.weight_sum()) &&
-      (cluster_a.weight_sum() * coefficient_high_ <=
-       cluster_b.weight_sum()) {
+      (cluster_a.weight_sum() * coefficient_high_ >=
+       cluster_b.weight_sum())){
     return true;
   } else {
     return false;

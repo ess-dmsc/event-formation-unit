@@ -43,7 +43,7 @@ public:
 private:
 private:
   void split_and_stash_event(Event evt);
-  std::vector<Cluster> split_cluster(Cluster cluster);
+  void split_cluster(Cluster cluster, Cluster *new_cluster_1, Cluster *new_cluster_2);
   bool clusters_match(Cluster cluster_a, Cluster cluster_b);
   void check_and_stash_event(Event evt);
 

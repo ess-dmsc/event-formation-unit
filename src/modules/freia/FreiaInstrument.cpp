@@ -45,8 +45,8 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
          Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-    if Conf.SplitMultiEvents{
-      builder.set_split_multi_events(Conf.SplitMultiEvents, Conf.SplitMultiEventsCoefficientLow, Conf.SplitMultiEventsCoefficientHigh);
+    if (Conf.SplitMultiEvents){
+      builder.matcher.set_split_multi_events(Conf.SplitMultiEvents, Conf.SplitMultiEventsCoefficientLow, Conf.SplitMultiEventsCoefficientHigh);
     }
   }
 
