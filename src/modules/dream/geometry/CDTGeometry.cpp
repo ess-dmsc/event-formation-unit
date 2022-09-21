@@ -29,9 +29,6 @@ int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
     case Config::HR:
       return 1122304;
       break;
-    default:
-      return -1; // unreachable
-      break;
     __builtin_unreachable();
     return 0;
   }
