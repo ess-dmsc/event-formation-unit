@@ -24,6 +24,16 @@ set(DreamConfigTest_SRC
 create_test_executable(DreamConfigTest)
 
 
+set(CDTGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
+  )
+set(CDTGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
+  CDTGeometryTest.cpp
+  )
+create_test_executable(CDTGeometryTest)
+
+
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
