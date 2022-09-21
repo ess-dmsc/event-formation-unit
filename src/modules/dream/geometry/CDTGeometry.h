@@ -25,5 +25,9 @@ public:
   /// for that module (see ICD for full description)
   int getPixelOffset(Config::ModuleType Type);
 
+
+  /// \brief return local pixel id from the digital identifiers
+  int getLocalPixel(uint8_t Ring, uint8_t FEN, Config::ModuleType Type,
+      uint8_t Cathode, uint8_t Anode);
 };
 }
