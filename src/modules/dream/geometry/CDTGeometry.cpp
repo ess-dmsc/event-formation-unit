@@ -13,25 +13,25 @@
 namespace Dream {
 
 int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
+  int RetVal{-1};
   switch (Type) {
     case Config::FwEndCap:
-      return 0;
+      RetVal = 0;
       break;
     case Config::BwEndCap:
-      return 71680;
+      RetVal = 71680;
       break;
     case Config::Mantle:
-      return 229376;
+      RetVal = 229376;
       break;
     case Config::SANS:
-      return 720896;
+      RetVal = 720896;
       break;
     case Config::HR:
-      return 1122304;
+      RetVal = 1122304;
       break;
-    __builtin_unreachable();
-    return 0;
   }
+  return RetVal;;
 }
 
-}
+} // namespace
