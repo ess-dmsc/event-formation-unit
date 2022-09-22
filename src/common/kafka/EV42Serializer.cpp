@@ -88,6 +88,7 @@ size_t EV42Serializer::produce() {
       // pulse_time is currently ns since 1970, produce time should be ms.
       ProduceFunctor(Buffer_, EventMessage_->pulse_time() / 1000000);
     }
+    TxBytes += Buffer_.size_bytes();
     return Buffer_.size_bytes();
   }
   return 0;
