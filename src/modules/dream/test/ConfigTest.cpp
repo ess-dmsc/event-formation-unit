@@ -4,6 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <dream/geometry/Config.h>
 

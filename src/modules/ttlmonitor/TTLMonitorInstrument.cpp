@@ -22,7 +22,7 @@ namespace TTLMonitor {
 /// \brief load configuration and calibration files
 TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
                                            TTLMonitorSettings &moduleSettings,
-                                           std::vector<EV42Serializer> &serializers)
+                                           std::vector<EV44Serializer> &serializers)
 
     : counters(counters), ModuleSettings(moduleSettings),
       Serializers(serializers) {
@@ -54,8 +54,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   
   //TODO, have proper assertion heres
   //assert(Serializers != nullptr);
-  for (EV42Serializer &Serializer : Serializers){
-    counters.TxBytes += Serializer.checkAndSetPulseTime(ESSReadoutParser.Packet.Time
+  for (EV44Serializer &Serializer : Serializers){
+    counters.TxBytes += Serializer.checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   }
 
@@ -135,7 +135,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
     if (UseEveryNEvents == 1) {
-      counters.TxBytes += Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
+      counters.TxBytes +=
+          Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
       counters.MonitorCounts++;
       UseEveryNEvents = ModuleSettings.ReduceEvents;
     } else {

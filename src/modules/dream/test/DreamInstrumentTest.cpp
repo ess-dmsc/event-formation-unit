@@ -4,10 +4,10 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <dream/DreamInstrument.h>
 #include <common/testutils/SaveBuffer.h>
-#include <string.h>
 #include <common/testutils/TestBase.h>
+#include <dream/DreamInstrument.h>
+#include <string.h>
 
 using namespace Dream;
 
@@ -46,7 +46,7 @@ TEST_F(DreamInstrumentTest, Constructor) {
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, ModuleSettings);
   /// \todo this is not in agreement with Irina
-  ASSERT_EQ(Dream.calcPixel(22, 3,  3,  1, 15, 15), 329'728);
+  ASSERT_EQ(Dream.calcPixel(22, 3, 3, 1, 15, 15), 329'728);
 }
 
 int main(int argc, char **argv) {

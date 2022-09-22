@@ -6,11 +6,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <efu/HwCheck.h>
 #include <arpa/inet.h>
-#include <common/debug/Log.h>
 #include <cinttypes>
+#include <common/debug/Log.h>
 #include <cstring>
+#include <efu/HwCheck.h>
 #include <ifaddrs.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -22,31 +22,33 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-/// Checks for minimum MTU sizes by walking through the list of interfaces returned
-/// by getifaddrs() of type AF_INET, which are both UP and RUNNING. There is also
-/// support for ignoring certain interface name patterns to remove MTU check for
-/// irrelevant interfaces such as ppp0 and docker0
+/// Checks for minimum MTU sizes by walking through the list of interfaces
+/// returned by getifaddrs() of type AF_INET, which are both UP and RUNNING.
+/// There is also support for ignoring certain interface name patterns to remove
+/// MTU check for irrelevant interfaces such as ppp0 and docker0
 bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
   struct ifaddrs *ifaddr, *ifa;
   int n;
 
   if (getifaddrs(&ifaddr) == -1) {
     LOG(INIT, Sev::Error, "error getifaddrs()");
-     return false;
+    return false;
   }
 
-  /// Walk through linked list, maintaining head pointer so we can free list later
+  /// Walk through linked list, maintaining head pointer so we can free list
+  /// later
   for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
     if (ifa->ifa_addr == NULL) {
       continue;
     }
 
-    if (ifa->ifa_addr->sa_family != AF_INET || (ifa->ifa_flags & myflags) == 0) {
+    if (ifa->ifa_addr->sa_family != AF_INET ||
+        (ifa->ifa_flags & myflags) == 0) {
       continue;
     }
 
     bool tobeignored = false;
-    for (auto & ignorePattern : ignore) {
+    for (auto &ignorePattern : ignore) {
       if (strstr(ifa->ifa_name, ignorePattern.c_str()) != NULL) {
         tobeignored = true;
       }
@@ -56,7 +58,8 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
       LOG(INIT, Sev::Debug, "no checking of MTU for {}", ifa->ifa_name);
     } else {
       if (!checkMTU(ifa->ifa_name)) {
-        LOG(INIT, Sev::Warning, "MTU check failed for interface {}", ifa->ifa_name);
+        LOG(INIT, Sev::Warning, "MTU check failed for interface {}",
+            ifa->ifa_name);
         freeifaddrs(ifaddr);
         return false;
       } else {
@@ -72,7 +75,7 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
 }
 
 /// Check the MTU of a single interface
-bool HwCheck::checkMTU(const char * interface) {
+bool HwCheck::checkMTU(const char *interface) {
   int s, af = AF_INET;
   struct ifreq ifr;
 
@@ -93,7 +96,6 @@ bool HwCheck::checkMTU(const char * interface) {
   return ifr.ifr_mtu >= MinimumMtu;
 }
 
-
 // bool HwCheck::checkDiskSpace(std::vector<std::string> directories) {
 //    bool ok = true;
 //    for (auto file : directories) {
@@ -108,16 +110,17 @@ bool HwCheck::checkMTU(const char * interface) {
 //     uint64_t bytes_avail = fsstats.f_frsize * fsstats.f_bavail;
 //     float percent_avail = fsstats.f_blocks == 0 ?
 //            0.0 :(fsstats.f_bavail * 100.0) / fsstats.f_blocks;
-//     if ( (bytes_avail < MinDiskAvailable) or (percent_avail < MinDiskPercentFree) ) {
+//     if ( (bytes_avail < MinDiskAvailable) or (percent_avail <
+//     MinDiskPercentFree) ) {
 //       ok = false;
 //       passfail = "failed";
 //     }
-//     LOG(INIT, Sev::Warning, "Diskcheck {} for {}: available: {}B ({}%)", passfail, file, bytes_avail, percent_avail);
+//     LOG(INIT, Sev::Warning, "Diskcheck {} for {}: available: {}B ({}%)",
+//     passfail, file, bytes_avail, percent_avail);
 //   }
 //
 //   return ok;
 // }
-
 
 /// Display interface name and family (including symbolic
 /// form of the latter for the common families)

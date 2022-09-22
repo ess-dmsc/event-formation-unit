@@ -2,10 +2,10 @@
 
 #include "KafkaMocks.h"
 #include <common/kafka/Producer.h>
+#include <common/testutils/TestBase.h>
 #include <cstring>
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>
-#include <common/testutils/TestBase.h>
 
 #include <trompeloeil.hpp>
 
@@ -31,9 +31,9 @@ public:
   ProducerStandIn(std::string Broker, std::string Topic)
       : Producer(Broker, Topic) {}
   using Producer::Config;
-  using Producer::TopicConfig;
-  using Producer::KafkaTopic;
   using Producer::KafkaProducer;
+  using Producer::KafkaTopic;
+  using Producer::TopicConfig;
 };
 
 class ProducerTest : public TestBase {
@@ -53,7 +53,7 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_EQ(prod.stats.dr_errors, 0);
   ASSERT_EQ(prod.stats.dr_noerrors, 0);
   ASSERT_EQ(prod.stats.ev_errors, 0);
-  //ASSERT_EQ(prod.stats.ev_others, 0);
+  // ASSERT_EQ(prod.stats.ev_others, 0);
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
 

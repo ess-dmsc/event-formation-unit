@@ -18,16 +18,16 @@ class CenterMatcher : public AbstractMatcher {
 public:
   /// Inherit constructor
   using AbstractMatcher::AbstractMatcher;
-  
+
   /// \brief sets the maximum time gap criterion
-  /// \param maximum_time_gap maximum time gap between clusters in different planes
+  /// \param maximum_time_gap maximum time gap between clusters in different
+  /// planes
   void set_max_delta_time(uint64_t max_delta_time);
-  
-   /// \brief sets the time algorithm
+
+  /// \brief sets the time algorithm
   /// \param time_algorithm (center-of-mass, charge2, utpc, utpc-weighted)
   void set_time_algorithm(std::string time_algorithm);
-  
-  
+
   /// \brief CenterMatcher constructor
   /// \sa AbstractMatcher
   /// CenterMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
@@ -40,14 +40,11 @@ public:
   void match(bool flush) override;
 
   /// \brief print configuration of CenterMatcher
-  std::string config(const std::string& prepend) const override;
-  
+  std::string config(const std::string &prepend) const override;
+
 private:
   uint64_t max_delta_time_{0};
 
-  //Algorithm for time calculation, either center-of-mass, charge2, or utpc
+  // Algorithm for time calculation, either center-of-mass, charge2, or utpc
   std::string time_algorithm_{"center-of-mass"};
-
-  
 };
-

@@ -28,7 +28,8 @@ Config::Config(std::string ConfigFile) {
 
   if (InstrumentName != "LoKI") {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error("Inconsistent Json file - invalid name, expected LoKI");
+    throw std::runtime_error(
+        "Inconsistent Json file - invalid name, expected LoKI");
   }
 
   try {
@@ -78,7 +79,8 @@ Config::Config(std::string ConfigFile) {
 
     Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
     // This detector is made of individual 2D banks, so final 2 dimensions are 1
-    Geometry = new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
+    Geometry =
+        new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
     LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
 
   } catch (...) {

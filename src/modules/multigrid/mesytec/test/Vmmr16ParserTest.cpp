@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/testutils/TestBase.h>
 #include <multigrid/mesytec/Sis3153Parser.h>
 #include <multigrid/mesytec/Vmmr16Parser.h>
 #include <multigrid/mesytec/test/TestData.h>
-#include <common/testutils/TestBase.h>
 
 using namespace Multigrid;
 
@@ -11,10 +11,8 @@ class Vmmr16ParserTest : public TestBase {
 protected:
   Sis3153Parser sis;
   VMMR16Parser vmmr;
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 // \todo test default state
@@ -63,7 +61,7 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSDataIII) {
 
   size_t total_err{0};
   size_t total_parsed{0};
-  for (const auto&b : sis.buffers) {
+  for (const auto &b : sis.buffers) {
     total_err += vmmr.parse(b);
     total_parsed += vmmr.converted_data.size();
   }
@@ -78,7 +76,7 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSDataMultipleTriggers) {
 
   size_t total_err{0};
   size_t total_parsed{0};
-  for (const auto&b : sis.buffers) {
+  for (const auto &b : sis.buffers) {
     total_err += vmmr.parse(b);
     total_parsed += vmmr.converted_data.size();
   }

@@ -24,10 +24,11 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-Server::Server(int port, Parser &parse) : ServerPort(port), CommandParser(parse) {
+Server::Server(int port, Parser &parse)
+    : ServerPort(port), CommandParser(parse) {
   std::fill(ClientFd.begin(), ClientFd.end(), -1);
 
-  Timeout.tv_sec = 0;  /// Timeout for select()
+  Timeout.tv_sec = 0; /// Timeout for select()
   Timeout.tv_usec = 1000;
 
   serverOpen();
@@ -53,7 +54,8 @@ void Server::serverOpen() {
     throw std::runtime_error("socket() failed");
   }
 
-  ret = setsockopt(ServerFd, SOL_SOCKET, SO_REUSEADDR, &SocketOptionOn, sizeof(SocketOptionOn));
+  ret = setsockopt(ServerFd, SOL_SOCKET, SO_REUSEADDR, &SocketOptionOn,
+                   sizeof(SocketOptionOn));
   if (ret < 0) {
     LOG(IPC, Sev::Error, "setsockopt() failed");
     throw std::runtime_error("setsockopt() failed");
@@ -64,7 +66,8 @@ void Server::serverOpen() {
   socket_address.sin_addr.s_addr = htonl(INADDR_ANY);
   socket_address.sin_port = htons(ServerPort);
 
-  ret = bind(ServerFd, (struct sockaddr *)&socket_address, sizeof(socket_address));
+  ret = bind(ServerFd, (struct sockaddr *)&socket_address,
+             sizeof(socket_address));
   if (ret < 0) {
     LOG(IPC, Sev::Error, "tcp port {} is already in use", ServerPort);
     throw std::runtime_error("tcp port already in use");
@@ -82,7 +85,8 @@ void Server::serverClose(int socket) {
 
   auto client = std::find(ClientFd.begin(), ClientFd.end(), socket);
   if (client == ClientFd.end()) {
-    LOG(IPC, Sev::Error, "internal error socket {} not active but attempted closed", socket);
+    LOG(IPC, Sev::Error,
+        "internal error socket {} not active but attempted closed", socket);
     throw std::runtime_error("serverClose() internal error");
   }
   *client = -1;
@@ -90,7 +94,8 @@ void Server::serverClose(int socket) {
 }
 
 int Server::serverSend(int socketfd) {
-  LOG(IPC, Sev::Debug, "server_send() - socket {} - {} bytes", socketfd, OBuffer.bytes);
+  LOG(IPC, Sev::Debug, "server_send() - socket {} - {} bytes", socketfd,
+      OBuffer.bytes);
   if (send(socketfd, OBuffer.buffer, OBuffer.bytes, SEND_FLAGS) < 0) {
     LOG(IPC, Sev::Warning, "Error sending command reply");
     return -1;
@@ -135,16 +140,16 @@ void Server::serverPoll() {
         throw std::runtime_error("serverPoll() - internal error");
       }
       LOG(IPC, Sev::Debug, "New cilent socket: {}", *freefd);
-      #ifdef SYSTEM_NAME_DARWIN
-        LOG(IPC, Sev::Debug, "setsockopt() - MacOS specific");
-        int on = 1;
-        int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
-        if (ret != 0) {
-            LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
-            perror("setsockopt():");
-            throw std::runtime_error("setsockopt() failed");
-        }
-      #endif
+#ifdef SYSTEM_NAME_DARWIN
+      LOG(IPC, Sev::Debug, "setsockopt() - MacOS specific");
+      int on = 1;
+      int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
+      if (ret != 0) {
+        LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+        perror("setsockopt():");
+        throw std::runtime_error("setsockopt() failed");
+      }
+#endif
     }
   }
 
@@ -153,12 +158,12 @@ void Server::serverPoll() {
     if (sd == -1) {
       continue;
     }
-    //printf("Checking for activity on socket %d\n", sd);
+    // printf("Checking for activity on socket %d\n", sd);
     if (FD_ISSET(sd, &fds_working)) {
       auto bytes = recv(sd, IBuffer.buffer, SERVER_BUFFER_SIZE, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK) && (errno != EAGAIN)) {
-        LOG(IPC, Sev::Warning, "recv() failed (unclean close from peer?), errno: {}", errno);
+        LOG(IPC, Sev::Warning, "recv({}, ...) failed (unclean close from peer?), errno: {}", sd, errno);
         serverClose(sd);
         return;
       }
@@ -176,8 +181,8 @@ void Server::serverPoll() {
       }
 
       // Parse and generate reply
-      if (CommandParser.parse((char *)IBuffer.buffer, IBuffer.bytes, (char *)OBuffer.buffer,
-                       &OBuffer.bytes) < 0) {
+      if (CommandParser.parse((char *)IBuffer.buffer, IBuffer.bytes,
+                              (char *)OBuffer.buffer, &OBuffer.bytes) < 0) {
         LOG(IPC, Sev::Warning, "Parse error");
       }
       if (serverSend(sd) < 0) {
@@ -191,5 +196,5 @@ void Server::serverPoll() {
 
 int Server::getNumClients() {
   return std::count_if(ClientFd.begin(), ClientFd.end(),
-    [](int fd){return fd != -1;});
+                       [](int fd) { return fd != -1; });
 }

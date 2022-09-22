@@ -13,10 +13,10 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstring>
+#include <fmt/format.h>
 #include <generators/udpgenpcap/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
-#include <fmt/format.h>
 
 // GCOVR_EXCL_START
 
@@ -30,18 +30,15 @@ const int IP_HEADR_OFFSET = ETHERNET_HEADER_SIZE;
 const int UDP_HEADER_OFFSET = IP_HEADR_OFFSET + IP_HEADER_SIZE;
 const int UDP_DATA_OFFSET = UDP_HEADER_OFFSET + UDP_HEADER_SIZE;
 
-ReaderPcap::ReaderPcap(std::string FileName)
-  : FileName(FileName) {
+ReaderPcap::ReaderPcap(std::string FileName) : FileName(FileName) {
   memset(&Stats, 0, sizeof(stats_t));
 }
 
-
 ReaderPcap::~ReaderPcap() {
-  if (PcapHandle != NULL ) {
+  if (PcapHandle != NULL) {
     pcap_close(PcapHandle);
   }
 }
-
 
 int ReaderPcap::open() {
   char ErrorBuffer[PCAP_ERRBUF_SIZE];
@@ -50,13 +47,13 @@ int ReaderPcap::open() {
     return -1;
   }
 
-  if (pcap_compile(PcapHandle, &PcapFilter, FilterUdp, 1, PCAP_NETMASK_UNKNOWN) == -1) {
+  if (pcap_compile(PcapHandle, &PcapFilter, FilterUdp, 1,
+                   PCAP_NETMASK_UNKNOWN) == -1) {
     return -1;
   }
 
   return 0;
 }
-
 
 int ReaderPcap::validatePacket(pcap_pkthdr *Header, const unsigned char *Data) {
 
@@ -74,25 +71,26 @@ int ReaderPcap::validatePacket(pcap_pkthdr *Header, const unsigned char *Data) {
   }
 
   Stats.IpProtoUDP++;
-  assert(Stats.PacketsTotal == Stats.PacketsTruncated+ Stats.PacketsNoMatch + Stats.IpProtoUDP);
+  assert(Stats.PacketsTotal ==
+         Stats.PacketsTruncated + Stats.PacketsNoMatch + Stats.IpProtoUDP);
   assert(Header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
 
   udphdr *udp = (udphdr *)&Data[UDP_HEADER_OFFSET];
-  #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
+#ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
   uint16_t UdpLen = htons(udp->len);
-  #else
+#else
   uint16_t UdpLen = htons(udp->uh_ulen);
-  #endif
+#endif
   assert(UdpLen >= UDP_HEADER_SIZE);
 
-  #if 0
+#if 0
   fmt::print("UDP Payload, Packet {}, time: {}:{} seconds, size: {} bytes\n",
        Stats.PacketsTotal, (int)header->ts.tv_sec, (int)header->ts.tv_usec,
        (int)header->len);
   printf("ip src->dest: 0x%08x:%d ->0x%08x:%d\n",
          ntohl(*(uint32_t*)&ip->ip_src), ntohs(udp->uh_sport),
          ntohl(*(uint32_t*)&ip->ip_dst), ntohs(udp->uh_dport));
-  #endif
+#endif
 
   return UdpLen;
 }
@@ -114,12 +112,12 @@ int ReaderPcap::read(char *Buffer, size_t BufferSize) {
     return UdpDataLength;
   }
 
-  auto DataLength = std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), BufferSize);
+  auto DataLength =
+      std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), BufferSize);
   std::memcpy(Buffer, &Data[UDP_DATA_OFFSET], DataLength);
 
   return DataLength;
 }
-
 
 int ReaderPcap::getStats() {
   if (PcapHandle == nullptr) {
@@ -130,14 +128,13 @@ int ReaderPcap::getStats() {
     int RetVal;
     pcap_pkthdr *Header;
     const unsigned char *Data;
-    if ((RetVal = pcap_next_ex(PcapHandle, &Header, &Data))  < 0) {
+    if ((RetVal = pcap_next_ex(PcapHandle, &Header, &Data)) < 0) {
       break;
     }
     validatePacket(Header, Data);
   }
   return 0;
 }
-
 
 void ReaderPcap::printPacket(unsigned char *Data, size_t Size) {
   for (unsigned int i = 0; i < Size; i++) {
@@ -148,7 +145,6 @@ void ReaderPcap::printPacket(unsigned char *Data, size_t Size) {
   }
   printf("\n");
 }
-
 
 void ReaderPcap::printStats() {
   fmt::print("Total packets        {}\n", Stats.PacketsTotal);

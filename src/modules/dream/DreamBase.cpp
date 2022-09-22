@@ -9,15 +9,15 @@
 #include "DreamBase.h"
 
 #include <cinttypes>
-#include <common/detector/EFUArgs.h>
-#include <common/debug/Log.h>
 #include <common/RuntimeStat.h>
+#include <common/TestImageUdder.h>
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
+#include <common/detector/EFUArgs.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
-#include <common/TestImageUdder.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <common/debug/Trace.h>
 #include <dream/DreamInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -113,8 +113,9 @@ void DreamBase::inputThread() {
 
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
 
-    if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                         RxRingbuffer.getMaxBufSize())) > 0) {
+    if ((readSize =
+             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                  RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
@@ -165,7 +166,8 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, ESSReadout::Parser::DREAM);
+      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                 ESSReadout::Parser::DREAM);
       Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {

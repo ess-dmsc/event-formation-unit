@@ -8,9 +8,7 @@ protected:
   ClusterContainer x, y;
   EndMatcher matcher{600, 0, 1};
 
-  void SetUp() override {
-    matcher.set_max_delta_time(200);
-  }
+  void SetUp() override { matcher.set_max_delta_time(200); }
 
   Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        uint64_t time_start, uint64_t time_end) {
@@ -20,13 +18,13 @@ protected:
     e.weight = 1;
     double time_step = (time_end - time_start) / 10.0;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = strip_start; e.coordinate <= strip_end; ++e.coordinate)
+      for (e.coordinate = strip_start; e.coordinate <= strip_end;
+           ++e.coordinate)
         ret.insert(e);
     e.time = time_end;
     ret.insert(e);
     return ret;
   }
-
 };
 
 TEST_F(EndMatcherTest, OneX) {

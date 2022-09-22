@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/geometry/MGSeqMappings.h>
 #include <common/testutils/TestBase.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 
 using namespace Multigrid;
 
@@ -97,9 +97,9 @@ TEST_F(MGSeqMappingsTest, FromJsonMinimal) {
 
   mappings = j;
 
-//  EXPECT_EQ(mappings.max_x(), 10);
-//  EXPECT_EQ(mappings.max_y(), 50);
-//  EXPECT_EQ(mappings.max_z(), 5);
+  //  EXPECT_EQ(mappings.max_x(), 10);
+  //  EXPECT_EQ(mappings.max_y(), 50);
+  //  EXPECT_EQ(mappings.max_z(), 5);
 }
 
 TEST_F(MGSeqMappingsTest, FromJson) {

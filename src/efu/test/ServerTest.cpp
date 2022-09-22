@@ -2,9 +2,9 @@
 
 #include <arpa/inet.h>
 #include <chrono>
+#include <common/testutils/TestBase.h>
 #include <efu/Server.h>
 #include <sys/socket.h>
-#include <common/testutils/TestBase.h>
 #include <thread>
 
 uint16_t ServerPort = 8889;
@@ -12,31 +12,31 @@ uint16_t ServerPort = 8889;
 constexpr int mask_close = 0x0001;
 constexpr int mask_connect = 0x0002;
 constexpr int mask_send = 0x0004;
-const char * message = "DETECTOR_INFO_GET\n";
+const char *message = "DETECTOR_INFO_GET\n";
 
 /// Used in pthread to connect to server and send data
 void client_thread(int command) {
   struct sockaddr_in server;
 
-  int sock = socket(AF_INET , SOCK_STREAM , 0);
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock == -1) {
-      printf("Could not create socket\n");
+    printf("Could not create socket\n");
   }
 
   server.sin_addr.s_addr = inet_addr("127.0.0.1");
   server.sin_family = AF_INET;
-  server.sin_port = htons( ServerPort );
+  server.sin_port = htons(ServerPort);
 
-  //Connect to remote server
+  // Connect to remote server
   if (command & mask_connect) {
-    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
-        perror("connect failed. Error\n");
+    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
+      perror("connect failed. Error\n");
     }
   }
 
   if (command & mask_send) {
-    if( send(sock , message , strlen(message) , 0) < 0) {
-        printf("Send failed\n");
+    if (send(sock, message, strlen(message), 0) < 0) {
+      printf("Send failed\n");
     }
     /// Allow time for test to poll for data
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -49,7 +49,8 @@ void client_thread(int command) {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings) : Detector("No name", settings) { };
+  explicit TestDetector(BaseSettings settings)
+      : Detector("No name", settings){};
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
@@ -59,20 +60,17 @@ DetectorFactory<TestDetector> Factory;
 
 class ServerTest : public TestBase {
 protected:
-
   int keep_running = 1;
   EFUArgs efu_args;
   BaseSettings settings = efu_args.getBaseSettings();
-  Parser * parser;
+  Parser *parser;
   Statistics stats;
   void SetUp() override {
-      auto detectorif = Factory.create(settings);
-      parser = new Parser(detectorif, stats, keep_running);
+    auto detectorif = Factory.create(settings);
+    parser = new Parser(detectorif, stats, keep_running);
   }
 
-  void TearDown() override {
-    delete parser;
-  }
+  void TearDown() override { delete parser; }
 };
 
 /** Test cases below */

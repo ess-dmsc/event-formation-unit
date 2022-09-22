@@ -47,10 +47,10 @@ public:
 
   std::string debug(std::string prefix = "") const;
 
-//private:
+  // private:
   std::vector<ModuleMapping> buses;
 };
 
 void from_json(const nlohmann::json &j, DetectorMappings &g);
 
-}
+} // namespace Multigrid

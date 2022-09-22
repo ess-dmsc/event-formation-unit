@@ -9,8 +9,8 @@
 
 #include <cassert>
 #include <common/debug/Log.h>
-#include <common/kafka/Producer.h>
 #include <common/debug/Trace.h>
+#include <common/kafka/Producer.h>
 #include <common/system/gccintel.h>
 
 // #undef TRC_LEVEL
@@ -102,6 +102,8 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
       TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
       const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
       MessageTimestampMS, NULL);
+
+  stats.produce_calls++;
 
   KafkaProducer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {

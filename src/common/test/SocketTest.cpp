@@ -1,10 +1,12 @@
 /** Copyright (C) 2018 European Spallation Source */
 
-#include <common/testutils/TestBase.h>
 #include <common/system/Socket.h>
+#include <common/testutils/TestBase.h>
 
-std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1", "224.1.2.3", "255.255.255.255"};
-std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3", "1.2", "", "127.0.0.256", "metrics"};
+std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1",
+                                 "224.1.2.3", "255.255.255.255"};
+std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3",       "1.2",
+                                    "",        "127.0.0.256", "metrics"};
 
 class SocketTest : public ::testing::Test {
 protected:
@@ -46,9 +48,11 @@ TEST_F(SocketTest, ValidInvalidIp) {
 
 TEST_F(SocketTest, InetAtonInvalidIP) {
   Socket tcpsocket(Socket::SocketType::TCP);
-  ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000), std::runtime_error);
+  ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000),
+               std::runtime_error);
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
-  ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000), std::runtime_error);
+  ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000),
+               std::runtime_error);
 }
 
 TEST_F(SocketTest, PortInUse) {
@@ -57,17 +61,15 @@ TEST_F(SocketTest, PortInUse) {
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
 }
 
-
 TEST_F(SocketTest, IsMulticast) {
   ASSERT_TRUE(Socket::isMulticast("224.1.2.3"));
   ASSERT_FALSE(Socket::isMulticast("240.1.2.3"));
 }
 
-
 // Create tcp transmitter and send 0 and !=0 number of bytes
 // to localhost port 22 (ssh) which should always be active
 TEST_F(SocketTest, TCPTransmitter) {
-  char DummyData[] {0x01, 0x02, 0x03, 0x04};
+  char DummyData[]{0x01, 0x02, 0x03, 0x04};
   TCPTransmitter Xmitter("127.0.0.1", 22);
   auto res = Xmitter.senddata(DummyData, 0);
   ASSERT_EQ(res, 0);
@@ -85,16 +87,16 @@ TEST_F(SocketTest, UDPTransmitter) {
 }
 
 TEST_F(SocketTest, GetHostByName) {
-  std::string name {"localhost"};
+  std::string name{"localhost"};
   auto res = Socket::getHostByName(name);
   ASSERT_TRUE(res == "127.0.0.1");
   for (auto ipaddr : ipOk) {
-     res = Socket::getHostByName(ipaddr);
+    res = Socket::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
   // Checking weird case - not sure if this is right
   // this step can be deleted if it causes problems later
-  std::string weirdIp {"8.8.8"};
+  std::string weirdIp{"8.8.8"};
   res = Socket::getHostByName(weirdIp);
   ASSERT_TRUE(res == "8.8.0.8");
 }
@@ -104,7 +106,6 @@ TEST_F(SocketTest, GetHostByNameInvalid) {
   std::string InvalidHostName("#$%@^");
   ASSERT_THROW(tcpsocket.getHostByName(InvalidHostName), std::runtime_error);
 }
-
 
 TEST_F(SocketTest, MultiCastSetTTL) {
   Socket udpsocket(Socket::SocketType::UDP);

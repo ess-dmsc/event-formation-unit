@@ -9,22 +9,23 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <loki/Counters.h>
 
 namespace Loki {
 
 struct LokiSettings {
-  std::string ConfigFile{""};  ///< panel mappings
-  std::string CalibFile{""};   ///< calibration file
-  std::string FilePrefix{""};  ///< HDF5 file dumping
-  uint16_t MinStraw{0};        ///< debug \todo remove
-  uint16_t MaxStraw{65535};    ///< debug \todo remove
+  std::string ConfigFile{""}; ///< panel mappings
+  std::string CalibFile{""};  ///< calibration file
+  std::string FilePrefix{""}; ///< HDF5 file dumping
+  uint16_t MinStraw{0};       ///< debug \todo remove
+  uint16_t MaxStraw{65535};   ///< debug \todo remove
 };
 
 class LokiBase : public Detector {
 public:
-  LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings);
+  LokiBase(BaseSettings const &Settings,
+           struct LokiSettings &LocalLokiSettings);
   ~LokiBase() = default;
 
   void inputThread();
@@ -33,8 +34,8 @@ public:
 protected:
   struct Counters Counters;
   LokiSettings LokiModuleSettings;
-  EV42Serializer *Serializer;
-  EV42Serializer *SerializerII;
+  EV44Serializer *Serializer;
+  EV44Serializer *SerializerII;
 };
 
 } // namespace Loki

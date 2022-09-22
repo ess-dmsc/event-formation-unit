@@ -56,7 +56,7 @@ public:
   /// Only called by Producer.
   int getNextBuffer();
 
-  int getMaxBufSize() { return N; }          ///< return buffer size in bytes
+  int getMaxBufSize() { return N; }             ///< return buffer size in bytes
   int getMaxElements() { return max_entries_; } ///< return number of buffers
 
   bool verifyBufferCookies(unsigned int index) {

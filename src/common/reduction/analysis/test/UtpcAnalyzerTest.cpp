@@ -9,8 +9,8 @@ protected:
   Hit hit;
   Cluster cluster;
   Event event;
-  void SetUp() override { }
-  void TearDown() override { }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(UtpcAnalyzerTest, AnalyzeInvalid) {

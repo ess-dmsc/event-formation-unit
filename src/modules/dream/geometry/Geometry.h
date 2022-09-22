@@ -27,7 +27,8 @@ public:
 
   uint32_t getPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
                     uint8_t Counter, uint8_t Wire, uint8_t Strip) {
-    XTRACE(EVENT, DEB, "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
+    XTRACE(EVENT, DEB,
+           "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
            Sector, Sumo, Cassette, Counter, Wire, Strip);
 
     uint16_t X = getX(Sector, Sumo, Cassette, Counter);
@@ -38,7 +39,7 @@ public:
     return Pixel;
   }
 
-  uint16_t getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
+  int getX(uint8_t Sector, uint8_t Sumo, uint8_t Cassette, uint8_t Counter) {
     if (Sector > MaxSector) {
       XTRACE(EVENT, WAR, "Invalid Sector: %u", Sector);
       return -1;
@@ -61,7 +62,7 @@ public:
     return getXoffset(Sector) + SumoOffset[Sumo] + 2 * Cassette + Counter;
   }
 
-  uint16_t getY(uint8_t Wire, uint8_t Strip) {
+  int getY(uint8_t Wire, uint8_t Strip) {
     if (Wire > MaxWire) {
       XTRACE(EVENT, WAR, "Invalid Wire: %u", Wire);
       return -1;
@@ -79,17 +80,11 @@ private:
   const uint8_t SumoOffset[7] = {0, 0, 0, 48, 36, 20, 0};
   const uint8_t SumoCassetteCount[7] = {0, 0, 0, 4, 6, 8, 10};
 
-  uint16_t getLocalYCoord(uint8_t Wire) {
-    return Wire;
-  }
+  uint16_t getLocalYCoord(uint8_t Wire) { return Wire; }
 
-  uint16_t getXoffset(uint8_t Sector) {
-    return Sector * 56;
-  }
+  uint16_t getXoffset(uint8_t Sector) { return Sector * 56; }
 
-  uint16_t getYoffset(uint8_t Strip) {
-    return Strip * 16;
-  }
+  uint16_t getYoffset(uint8_t Strip) { return Strip * 16; }
 
   ESSGeometry Geometry{1288, 256, 1, 1};
 };

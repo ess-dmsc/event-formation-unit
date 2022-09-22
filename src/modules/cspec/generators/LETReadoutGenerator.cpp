@@ -100,7 +100,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     } else {
       TimeLow += Settings.TicksBtwEvents;
     }
-    if (TimeLow >= 88052499){
+    if (TimeLow >= 88052499) {
       TimeLow -= 88052499;
       TimeHigh += 1;
     }

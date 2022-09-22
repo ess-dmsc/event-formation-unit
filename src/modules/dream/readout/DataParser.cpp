@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <dream/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
+#include <dream/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

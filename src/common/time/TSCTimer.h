@@ -9,8 +9,8 @@
 /// as a high resolution timer.
 //===----------------------------------------------------------------------===//
 
-#include <cstdint>
 #include <common/system/gccintel.h>
+#include <cstdint>
 
 class TSCTimer {
 
@@ -20,7 +20,6 @@ public:
 
   /// Create a TSC timer with a timeout value
   TSCTimer(uint64_t TimeOut);
-
 
   // Has timeout occured? Then reset timer
   bool timeout(void);

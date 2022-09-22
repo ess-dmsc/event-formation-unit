@@ -66,11 +66,13 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
 
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
+  Stats.create("readouts.tof_toolarge", Counters.MaxTOFErrors);
+  Stats.create("readouts.error_hybrid_mapping", Counters.HybridMappingErrors);
+  Stats.create("readouts.error_ring_mapping", Counters.RingMappingErrors);
+  Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -87,7 +89,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
 
   // Clustering stats

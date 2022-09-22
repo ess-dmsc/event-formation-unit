@@ -7,14 +7,15 @@
 
 #include <common/reduction/matching/EndMatcher.h>
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 void EndMatcher::set_max_delta_time(uint64_t max_delta_time) {
   max_delta_time_ = max_delta_time;
 }
 
-uint64_t EndMatcher::delta_end(const Event &event, const Cluster &cluster) const {
+uint64_t EndMatcher::delta_end(const Event &event,
+                               const Cluster &cluster) const {
   if (event.time_end() > cluster.time_end())
     return event.time_end() - cluster.time_end();
   return cluster.time_end() - event.time_end();
@@ -56,7 +57,7 @@ void EndMatcher::match(bool flush) {
   }
 }
 
-std::string EndMatcher::config(const std::string& prepend) const {
+std::string EndMatcher::config(const std::string &prepend) const {
   std::stringstream ss;
   ss << AbstractMatcher::config(prepend);
   ss << prepend << fmt::format("max_delta_time: {}\n", max_delta_time_);

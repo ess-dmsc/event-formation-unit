@@ -39,7 +39,7 @@ TEST_F(RingBufferTest, CircularWrap) {
   char *first = buf.getDataBuffer(index); // Save for last
 
   for (int i = 0; i < N; i++) {
-    unsigned int InnerIndex= buf.getDataIndex();
+    unsigned int InnerIndex = buf.getDataIndex();
     ASSERT_EQ(i, InnerIndex);
 
     int *ip = (int *)buf.getDataBuffer(InnerIndex);

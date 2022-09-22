@@ -14,4 +14,4 @@
 /// \brief make a hexdump-like printout of a buffer, mainly debugging
 /// \param DataPtr void pointer to the buffer containing data
 /// \param DataLen length of the data
-void hexDump(const void* DataPtr, size_t DataLen);
+void hexDump(const void *DataPtr, size_t DataLen);

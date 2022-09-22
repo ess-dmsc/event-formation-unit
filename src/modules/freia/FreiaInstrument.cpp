@@ -41,7 +41,8 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
+  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
+         Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
@@ -113,6 +114,17 @@ void FreiaInstrument::processReadouts(void) {
 
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId / 2;
+
+    // Check for configuration mismatch
+    if (Ring > VMM3Config::MaxRing) {
+      counters.RingMappingErrors++;
+      continue;
+    }
+
+    if (readout.FENId > VMM3Config::MaxFEN) {
+      counters.FENMappingErrors++;
+      continue;
+    }
 
     uint8_t HybridId = readout.VMM >> 1;
     if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
@@ -244,7 +256,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
       XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
-      counters.TOFErrors++;
+      counters.MaxTOFErrors++;
       continue;
     }
 

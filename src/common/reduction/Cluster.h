@@ -1,4 +1,5 @@
-/** Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file **/
+/** Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+ * **/
 //===----------------------------------------------------------------------===//
 ///
 /// \file Cluster.h
@@ -22,8 +23,10 @@
 class Cluster {
 public:
   /// \todo should be protected?
-  /// \note This variable is left public, because event reduction/analysis strategies
-  ///       must be able to sort hits in their preferred way without copying the contents
+  /// \note This variable is left public, because event reduction/analysis
+  /// strategies
+  ///       must be able to sort hits in their preferred way without copying the
+  ///       contents
   HitVector hits;
 
 public:
@@ -70,6 +73,10 @@ public:
   uint16_t coord_start() const;
   /// \returns highest coordinate, undefined in case of empty cluster
   uint16_t coord_end() const;
+  /// \returns earliest coordinate added to cluster, undefined in case of empty cluster
+  uint16_t coord_earliest() const;
+  /// \returns latest coordinate added to cluster, undefined in case of empty cluster
+  uint16_t coord_latest() const;
   /// \returns coordinate span, 0 in case of empty cluster
   uint16_t coord_span() const;
 
@@ -83,7 +90,7 @@ public:
   /// \returns pre-calculated sum of each hit's weight
   double weight_sum() const;
 
- /// \returns pre-calculated sum of each hit's weight squared
+  /// \returns pre-calculated sum of each hit's weight squared
   double weight2_sum() const;
 
   /// \returns pre-calculated sum of each hit's weight*coord
@@ -110,7 +117,7 @@ public:
   ///          can be NaN if weight sum is zero
   double time_center2() const;
 
- /// \returns utpc coordinate, optionally weighted with charge
+  /// \returns utpc coordinate, optionally weighted with charge
   double coord_utpc(bool weighted) const;
 
   /// \brief calculates the overlapping time span of two clusters
@@ -128,19 +135,21 @@ public:
   std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes cluster with "text graphics"
-  std::string visualize(const std::string &prepend,
-                        uint8_t downsample_time = 0,
+  std::string visualize(const std::string &prepend, uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
 private:
-  /// \todo uint8 might not be enough, if detectors have more independent modules/segments
-  uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
+  /// \todo uint8 might not be enough, if detectors have more independent
+  /// modules/segments
+  uint8_t plane_{Hit::InvalidPlane}; ///< plane identity of cluster
 
-  uint16_t coord_start_ {Hit::InvalidCoord};
-  uint16_t coord_end_ {0};
+  uint16_t coord_start_{Hit::InvalidCoord};
+  uint16_t coord_end_{0};
+  uint16_t coord_earliest_{Hit::InvalidCoord};
+  uint16_t coord_latest_{Hit::InvalidCoord};
 
-  uint64_t time_start_ {0xFFFFFFFFFFFFFFFFULL};
-  uint64_t time_end_ {0};
+  uint64_t time_start_{0xFFFFFFFFFFFFFFFFULL};
+  uint64_t time_end_{0};
 
   double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight

@@ -6,23 +6,27 @@
 ///
 ///===--------------------------------------------------------------------===///
 
-#include <common/reduction/HitVector.h>
 #include <algorithm>
+#include <common/reduction/HitVector.h>
 
-#define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
-#define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+#define ASCII_grayscale94                                                      \
+  " .`:,;'_^\"></"                                                             \
+  "-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#" \
+  "RNEHBM@"
+#define ASCII_grayscale70                                                      \
+  " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #define ASCII_grayscale10 " .:-=+*#%@"
 
 #if ENABLE_GREEDY_HIT_ALLOCATOR
 const size_t Bytes_2GB = 2ULL * 1024 * 1024 * 1024;
-char *GreedyHitStorage::MemBegin = (char*)malloc(Bytes_2GB);
+char *GreedyHitStorage::MemBegin = (char *)malloc(Bytes_2GB);
 char *GreedyHitStorage::MemEnd = MemBegin + Bytes_2GB;
 #else
 char *GreedyHitStorage::MemBegin = nullptr;
 char *GreedyHitStorage::MemEnd = nullptr;
 #endif
 
-HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::Pool =
+HitVectorStorage::AllocConfig::PoolType *HitVectorStorage::Pool =
     new HitVectorStorage::AllocConfig::PoolType();
 
 // Note: We purposefully leak the storage, since the EFU doesn't guarantee that
@@ -69,8 +73,10 @@ std::string visualize(const HitVector &vec, const std::string &prepend,
   if (max_columns)
     coord_bins = std::min(coord_span, max_columns);
 
-  double time_rescale = static_cast<double>(time_bins) / static_cast<double>(time_span);
-  double coord_rescale = static_cast<double>(coord_bins) / static_cast<double>(coord_span);
+  double time_rescale =
+      static_cast<double>(time_bins) / static_cast<double>(time_span);
+  double coord_rescale =
+      static_cast<double>(coord_bins) / static_cast<double>(coord_span);
 
   /// Build matrix
   uint16_t weight_max{0};
@@ -113,7 +119,8 @@ std::string visualize(const HitVector &vec, const std::string &prepend,
   ss << "\u255A";
   for (auto i = 0; i < coord_bins + 1; ++i) {
     ss << "\u2550";
-    auto label = std::to_string(static_cast<uint16_t>(coord_min + i / coord_rescale));
+    auto label =
+        std::to_string(static_cast<uint16_t>(coord_min + i / coord_rescale));
     longest_label = std::max(longest_label, label.size());
     bottom_labels.push_back(label);
   }

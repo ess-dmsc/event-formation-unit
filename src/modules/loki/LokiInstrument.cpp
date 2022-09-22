@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
-#include <common/time/TimeString.h>
 #include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 #include <loki/LokiInstrument.h>
 
 // #undef TRC_LEVEL
@@ -55,12 +55,12 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
   }
 
   if (!ModuleSettings.FilePrefix.empty()) {
-    DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "loki_" + timeString());
+    DumpFile =
+        ReadoutFile::create(ModuleSettings.FilePrefix + "loki_" + timeString());
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(LokiConfiguration.MaxTOFNS);
-
 }
 
 LokiInstrument::~LokiInstrument() {}
@@ -75,7 +75,8 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   uint8_t TubeGroup = FEN;
   uint8_t LocalTube = Data.TubeId;
 
-  bool valid = Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+  bool valid =
+      Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
   counters.ReadoutsBadAmpl = Amp2Pos.Stats.AmplitudeZero;
 
@@ -96,7 +97,8 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
     return 0;
   }
 
-  if ((GlobalStraw < ModuleSettings.MinStraw) or (GlobalStraw > ModuleSettings.MaxStraw)) {
+  if ((GlobalStraw < ModuleSettings.MinStraw) or
+      (GlobalStraw > ModuleSettings.MaxStraw)) {
     counters.OutsideRegion++;
     return 0;
   }
@@ -118,8 +120,10 @@ void LokiInstrument::dumpReadoutToFile(DataParser::LokiReadout &Data) {
   Readout CurrentReadout;
   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
-  CurrentReadout.PrevPulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
-  CurrentReadout.PrevPulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+  CurrentReadout.PrevPulseTimeHigh =
+      ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+  CurrentReadout.PrevPulseTimeLow =
+      ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.DataSeqNum = Data.DataSeqNum;
@@ -135,8 +139,8 @@ void LokiInstrument::dumpReadoutToFile(DataParser::LokiReadout &Data) {
 }
 
 void LokiInstrument::processReadouts() {
-  Serializer->checkAndSetPulseTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
-  SerializerII->checkAndSetPulseTime(ESSReadoutParser.Packet.Time.TimeInNS);
+  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  SerializerII->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
   for (auto &Section : LokiParser.Result) {
@@ -165,9 +169,8 @@ void LokiInstrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow,
-                                    LokiConfiguration.ReadoutConstDelayNS);
-
+    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+        Data.TimeHigh, Data.TimeLow, LokiConfiguration.ReadoutConstDelayNS);
 
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
            ESSReadoutParser.Packet.Time.TimeInNS,
@@ -193,11 +196,10 @@ void LokiInstrument::processReadouts() {
     if (PixelId == 0) {
       counters.PixelErrors++;
     } else {
-      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
       SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
     }
-
 
   } // for()
   counters.ReadoutsClampLow = LokiCalibration.Stats.ClampLow;

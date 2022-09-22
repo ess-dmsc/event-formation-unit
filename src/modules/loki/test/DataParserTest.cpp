@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/testutils/TestBase.h>
 #include <loki/readout/DataParser.h>
 #include <loki/test/DataParserTestData.h>
-#include <common/testutils/TestBase.h>
 
 using namespace Loki;
 
@@ -14,7 +14,6 @@ protected:
   void SetUp() override { Counters = {}; }
   void TearDown() override {}
 };
-
 
 TEST_F(DataParserTest, Constructor) {
   ASSERT_EQ(Parser.Stats.Readouts, 0);
@@ -72,8 +71,7 @@ TEST_F(DataParserTest, DataSizeMismatch) {
 }
 
 TEST_F(DataParserTest, ParseOne) {
-  auto Res =
-      Parser.parse((char *)&OkLokiReadout[0], OkLokiReadout.size());
+  auto Res = Parser.parse((char *)&OkLokiReadout[0], OkLokiReadout.size());
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(Parser.Stats.Readouts, 1);
   ASSERT_EQ(Parser.Stats.DataHeaders, 1);
@@ -83,8 +81,7 @@ TEST_F(DataParserTest, ParseOne) {
 }
 
 TEST_F(DataParserTest, MultipleDataSection) {
-  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0],
-                          Ok2xLokiReadout.size());
+  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0], Ok2xLokiReadout.size());
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
@@ -94,8 +91,7 @@ TEST_F(DataParserTest, MultipleDataSection) {
 }
 
 TEST_F(DataParserTest, MultipleDataPackets) {
-  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0],
-                          Ok2xLokiReadout.size());
+  auto Res = Parser.parse((char *)&Ok2xLokiReadout[0], Ok2xLokiReadout.size());
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 2);
   ASSERT_EQ(Parser.Stats.DataHeaders, 2);
@@ -103,8 +99,7 @@ TEST_F(DataParserTest, MultipleDataPackets) {
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 2);
 
-  Res = Parser.parse((char *)&Ok2xLokiReadout[0],
-                     Ok2xLokiReadout.size());
+  Res = Parser.parse((char *)&Ok2xLokiReadout[0], Ok2xLokiReadout.size());
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Parser.Stats.Readouts, 4);
   ASSERT_EQ(Parser.Stats.DataHeaders, 4);
@@ -112,7 +107,6 @@ TEST_F(DataParserTest, MultipleDataPackets) {
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 2);
 }
-
 
 /// \todo confirm this response when passed too many readouts
 TEST_F(DataParserTest, BadThreeReadouts) {
@@ -124,7 +118,7 @@ TEST_F(DataParserTest, BadThreeReadouts) {
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 64);
   ASSERT_EQ(Parser.Result.size(), 0);
-} 
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

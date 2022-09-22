@@ -24,4 +24,3 @@ struct NeutronEvent {
 
   std::string to_string() const;
 };
-

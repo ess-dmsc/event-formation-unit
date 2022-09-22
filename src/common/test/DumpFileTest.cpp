@@ -3,7 +3,7 @@
 #include <common/DumpFile.h>
 #include <common/testutils/TestBase.h>
 
-struct __attribute__ ((packed)) Hit {
+struct __attribute__((packed)) Hit {
   size_t a{0};
   int8_t b{0};
   uint32_t c{0};
@@ -14,8 +14,7 @@ struct __attribute__ ((packed)) Hit {
 
 namespace hdf5 {
 namespace datatype {
-template<>
-class TypeTrait<Hit> {
+template <> class TypeTrait<Hit> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Hit) {
     H5_COMPOUND_INIT;
@@ -25,12 +24,12 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-}
-}
+} // namespace datatype
+} // namespace hdf5
 
 using HitFile = DumpFile<Hit>;
 
-struct __attribute__ ((packed)) Hit2 {
+struct __attribute__((packed)) Hit2 {
   size_t a{0};
   int8_t b{0};
   uint32_t c{0};
@@ -41,8 +40,7 @@ struct __attribute__ ((packed)) Hit2 {
 
 namespace hdf5 {
 namespace datatype {
-template<>
-class TypeTrait<Hit2> {
+template <> class TypeTrait<Hit2> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Hit2) {
     H5_COMPOUND_INIT;
@@ -52,8 +50,8 @@ public:
     H5_COMPOUND_RETURN;
   }
 };
-}
-}
+} // namespace datatype
+} // namespace hdf5
 
 using Hit2File = DumpFile<Hit2>;
 
@@ -61,13 +59,11 @@ class DumpFileTest : public TestBase {
 protected:
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("dumpfile_test_00000.h5"))
-    {
+    if (boost::filesystem::exists("dumpfile_test_00000.h5")) {
       boost::filesystem::remove("dumpfile_test_00000.h5");
     }
 
-    if (boost::filesystem::exists("dumpfile_test_00001.h5"))
-    {
+    if (boost::filesystem::exists("dumpfile_test_00001.h5")) {
       boost::filesystem::remove("dumpfile_test_00001.h5");
     }
   }
@@ -89,7 +85,7 @@ TEST_F(DumpFileTest, PushOne) {
   auto file = HitFile::create("dumpfile_test");
   file->push(Hit());
   EXPECT_EQ(file->count(), 0);
-  for (size_t i=0; i < 1000; ++i)
+  for (size_t i = 0; i < 1000; ++i)
     file->push(Hit());
   EXPECT_EQ(file->count(), 9000 / sizeof(Hit));
 }
@@ -164,7 +160,6 @@ TEST_F(DumpFileTest, FlushOnClose) {
   HitFile::read("dumpfile_test_00000", data);
   EXPECT_EQ(data.size(), 10);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

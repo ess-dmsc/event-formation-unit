@@ -11,7 +11,7 @@
 #include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -20,15 +20,14 @@
 #include <common/RuntimeStat.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <ttlmonitor/TTLMonitorBase.h>
 #include <ttlmonitor/TTLMonitorInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace TTLMonitor {
 
@@ -171,7 +170,7 @@ void TTLMonitorBase::processing_thread() {
   };
 
   for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
-    Serializers.push_back(EV42Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+    Serializers.push_back(EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
   TTLMonitorInstrument TTLMonitor(
@@ -180,7 +179,6 @@ void TTLMonitorBase::processing_thread() {
   TTLMonitor.VMMParser.setMonitor(true);
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat(
@@ -230,15 +228,17 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
-    if (ProduceTimer.timeout()) {
 
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-      for (auto &serializer : Serializers){
+    RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+        {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+    for (auto &serializer : Serializers){
+      if (serializer.ProduceTimer.timeout()) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer.produce();
       }
-      Counters.KafkaStats = eventprod.stats;
     }
+    Counters.KafkaStats = eventprod.stats;
+    
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

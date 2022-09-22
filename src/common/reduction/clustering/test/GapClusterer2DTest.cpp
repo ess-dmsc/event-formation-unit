@@ -6,14 +6,15 @@
 
 class GapClusterer2DTest : public TestBase {
 protected:
-  void mock_cluster(HitVector &ret,
-                    uint16_t strip_start, uint16_t strip_end, uint16_t strip_step,
-                    uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+  void mock_cluster(HitVector &ret, uint16_t strip_start, uint16_t strip_end,
+                    uint16_t strip_step, uint64_t time_start, uint64_t time_end,
+                    uint64_t time_step) {
     Hit e;
     e.plane = 0;
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = strip_start; e.coordinate <= strip_end; e.coordinate += strip_step)
+      for (e.coordinate = strip_start; e.coordinate <= strip_end;
+           e.coordinate += strip_step)
         ret.push_back(e);
   }
 };
@@ -123,20 +124,20 @@ TEST_F(GapClusterer2DTest, ExactlyFiveCoordGap) {
   EXPECT_EQ(gc.clusters.size(), 10);
 }
 
-//TEST_F(GapClusterer2DTest, JustOverFiveCoordGap) {
-//  HitVector hc;
-//  mock_cluster(hc, 1, 60, 6, 1, 10, 1);
+// TEST_F(GapClusterer2DTest, JustOverFiveCoordGap) {
+//   HitVector hc;
+//   mock_cluster(hc, 1, 60, 6, 1, 10, 1);
 //
-//  GapClusterer2D gc(0, 5);
-//  gc.cluster(hc);
+//   GapClusterer2D gc(0, 5);
+//   gc.cluster(hc);
 //
-//  EXPECT_EQ(gc.stats_cluster_count, 90);
-//  EXPECT_EQ(gc.clusters.size(), 90);
+//   EXPECT_EQ(gc.stats_cluster_count, 90);
+//   EXPECT_EQ(gc.clusters.size(), 90);
 //
-//  gc.flush();
-//  EXPECT_EQ(gc.stats_cluster_count, 100);
-//  EXPECT_EQ(gc.clusters.size(), 100);
-//}
+//   gc.flush();
+//   EXPECT_EQ(gc.stats_cluster_count, 100);
+//   EXPECT_EQ(gc.clusters.size(), 100);
+// }
 
 TEST_F(GapClusterer2DTest, PrintConfig) {
   GapClusterer2D gc(0, 5);
@@ -156,7 +157,6 @@ TEST_F(GapClusterer2DTest, PrintStatus) {
   MESSAGE() << "SIMPLE:\n" << gc.status("  ", false);
   MESSAGE() << "VERBOSE:\n" << gc.status("  ", true);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

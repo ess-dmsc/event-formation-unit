@@ -1,22 +1,18 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include "ev42_events_generated.h"
 #include <common/kafka/EV42Serializer.h>
 #include <common/kafka/Producer.h>
-#include <cstring>
 #include <common/testutils/TestBase.h>
-#include "ev42_events_generated.h"
+#include <cstring>
 
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
 
 struct MockProducer {
-  inline void produce(nonstd::span<const uint8_t>, int64_t)
-  {
-    NumberOfCalls++;
-  }
+  inline void produce(nonstd::span<const uint8_t>, int64_t) { NumberOfCalls++; }
 
-
-  size_t NumberOfCalls {0};
+  size_t NumberOfCalls{0};
 };
 
 class EV42SerializerTest : public TestBase {
@@ -37,19 +33,19 @@ protected:
 };
 
 TEST_F(EV42SerializerTest, Serialize) {
-  for (size_t i=0; i < ARRAYLENGTH; i++)
-    fb.addEvent(i,i);
+  for (size_t i = 0; i < ARRAYLENGTH; i++)
+    fb.addEvent(i, i);
   auto buffer = fb.serialize();
   EXPECT_GE(buffer.size_bytes(), ARRAYLENGTH * 8);
   EXPECT_LE(buffer.size_bytes(), ARRAYLENGTH * 8 + 2048);
   ASSERT_TRUE(not buffer.empty());
 
-  EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "ev42");
+  EXPECT_EQ(std::string(reinterpret_cast<const char *>(&buffer[4]), 4), "ev42");
 }
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
-  for (size_t i=0; i < ARRAYLENGTH-1; i++)
-    fb.addEvent(i,i);
+  for (size_t i = 0; i < ARRAYLENGTH - 1; i++)
+    fb.addEvent(i, i);
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
@@ -86,7 +82,7 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
     auto len = fb.addEvent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
-    ASSERT_EQ(fb.eventCount(), i+1);
+    ASSERT_EQ(fb.eventCount(), i + 1);
   }
 
   auto buffer = fb.serialize();
@@ -116,9 +112,7 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
   MockProducer mp;
-  auto Produce = [&mp](auto A, auto B) {
-    mp.produce(A, B);
-  };
+  auto Produce = [&mp](auto A, auto B) { mp.produce(A, B); };
   fb.setProducerCallback(Produce);
 
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {

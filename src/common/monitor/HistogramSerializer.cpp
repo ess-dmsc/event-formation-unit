@@ -8,10 +8,9 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistogramSerializer::HistogramSerializer(size_t buffer_half_size, std::string source_name)
-    : builder(2 * buffer_half_size + 256)
-    , SourceName (source_name) {}
-
+HistogramSerializer::HistogramSerializer(size_t buffer_half_size,
+                                         std::string source_name)
+    : builder(2 * buffer_half_size + 256), SourceName(source_name) {}
 
 void HistogramSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
@@ -47,15 +46,17 @@ size_t HistogramSerializer::produce(const Hists &hists) {
 
   auto SourceNameOffset = builder.CreateString(SourceName);
 
-  auto msg =
-      CreateMonitorMessage(builder, SourceNameOffset, DataField::GEMHist, dataoff.Union());
+  auto msg = CreateMonitorMessage(builder, SourceNameOffset, DataField::GEMHist,
+                                  dataoff.Union());
 
   FinishMonitorMessageBuffer(builder, msg);
 
-  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(),
+                                     builder.GetSize());
 
   if (producer_callback) {
-#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
+#pragma message(                                                               \
+    "Producer::produce() in HistogramSerializer should be provided with a proper timestamp.")
     producer_callback(buffer, time(nullptr) * 1000);
   }
 

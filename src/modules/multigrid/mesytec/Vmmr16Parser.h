@@ -31,7 +31,6 @@ public:
   std::vector<Readout> converted_data;
 
 private:
-
   Readout hit;
 
   size_t trigger_count_{0};
@@ -43,7 +42,6 @@ private:
   uint32_t previous_low_time_{0};
 
   uint32_t previous_high_time_{0};
-
 };
 
-}
+} // namespace Multigrid

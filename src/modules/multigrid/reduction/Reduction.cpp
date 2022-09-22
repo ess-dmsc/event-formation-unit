@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/reduction/Reduction.h>
 #include <multigrid/geometry/PlaneMappings.h>
+#include <multigrid/reduction/Reduction.h>
 
 #include <common/debug/Trace.h>
 //#undef TRC_LEVEL
@@ -19,14 +19,14 @@ void Reduction::ingest(HitVector &hits) {
 void Reduction::ingest(const Hit &h) {
   if (h.plane == Hit::PulsePlane) {
     merger.insert(pipelines.size(), {h.time, 0});
-//  } else if (h.plane == AbstractBuilder::wire_plane) {
-//    pipeline.ingest(h);
-//  } else if (h.plane == AbstractBuilder::grid_plane) {
-//    pipeline.ingest(h);
+    //  } else if (h.plane == AbstractBuilder::wire_plane) {
+    //    pipeline.ingest(h);
+    //  } else if (h.plane == AbstractBuilder::grid_plane) {
+    //    pipeline.ingest(h);
   } else {
     auto module = module_from_plane(h.plane);
     pipelines[module].ingest(h);
-//    stats.invalid_planes++;
+    //    stats.invalid_planes++;
   }
 }
 
@@ -68,24 +68,24 @@ void Reduction::process_queues(bool flush) {
 uint32_t Reduction::max_x() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry().x_offset
-        + b.analyzer.geometry().x_range());
+    ret = std::max(ret, b.analyzer.geometry().x_offset +
+                            b.analyzer.geometry().x_range());
   return ret;
 }
 
 uint32_t Reduction::max_y() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry().y_offset
-        + b.analyzer.geometry().y_range());
+    ret = std::max(ret, b.analyzer.geometry().y_offset +
+                            b.analyzer.geometry().y_range());
   return ret;
 }
 
 uint32_t Reduction::max_z() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry().z_offset
-        + b.analyzer.geometry().z_range());
+    ret = std::max(ret, b.analyzer.geometry().z_offset +
+                            b.analyzer.geometry().z_range());
   return ret;
 }
 
@@ -103,8 +103,7 @@ std::string Reduction::config(const std::string &prepend) const {
   if (!pipelines.empty()) {
     const auto &p = pipelines.back();
     ss << prepend
-       << fmt::format("  Logical geometry:  {}\n",
-                      p.geometry.to_string());
+       << fmt::format("  Logical geometry:  {}\n", p.geometry.to_string());
   }
 
   ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", false);
@@ -149,9 +148,8 @@ void from_json(const nlohmann::json &j, Reduction &g) {
 
     // \todo custom clusterer settings
 
-    pipeline.matcher = GapMatcher(max_latency,
-                                  2 * module_count,
-                                  2 * module_count + 1);
+    pipeline.matcher =
+        GapMatcher(max_latency, 2 * module_count, 2 * module_count + 1);
 
     pipeline.max_wire_hits = max_wire_multiplicity;
     pipeline.max_grid_hits = max_grid_multiplicity;
@@ -172,4 +170,4 @@ void from_json(const nlohmann::json &j, Reduction &g) {
   g.merger = ChronoMerger(max_latency, g.pipelines.size() + 1);
 }
 
-}
+} // namespace Multigrid
