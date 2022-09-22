@@ -19,7 +19,8 @@ void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
 }
 
 void GapMatcher::set_split_multi_events(bool split_multi_events,
-                                        float coefficient_low, float coefficient_high) {
+                                        float coefficient_low,
+                                        float coefficient_high) {
   split_multi_events_ = split_multi_events;
   coefficient_low_ = coefficient_low;
   coefficient_high_ = coefficient_high;
@@ -84,7 +85,8 @@ void GapMatcher::split_and_stash_event(Event evt) {
   bool a2_b2_match = clusters_match(new_cluster_a_2, new_cluster_b_2);
   bool a1_b2_match = clusters_match(new_cluster_a_1, new_cluster_b_2);
   bool a2_b1_match = clusters_match(new_cluster_a_2, new_cluster_b_1);
-  XTRACE(CLUSTER, DEB, "a1xb1: %d, a2xb2: %d, a1xb2: %d, a2xb1: %d", a1_b1_match, a2_b2_match, a1_b2_match, a2_b1_match);
+  XTRACE(CLUSTER, DEB, "a1xb1: %d, a2xb2: %d, a1xb2: %d, a2xb1: %d",
+         a1_b1_match, a2_b2_match, a1_b2_match, a2_b1_match);
 
   if (a1_b1_match && a2_b2_match && !a1_b2_match && !a2_b1_match) {
     new_event_1.merge(new_cluster_a_1);
@@ -100,17 +102,19 @@ void GapMatcher::split_and_stash_event(Event evt) {
     XTRACE(CLUSTER, DEB,
            "Unable to match clusters into two distinct events, discarding "
            "readouts");
+    Stats.DiscardedSpanTooLarge++;
+
     //\todo count discarded multievents
     return;
   }
+  Stats.SplitSpanTooLarge++;
   stash_event(new_event_1);
   stash_event(new_event_2);
   evt.clear();
 }
 
-void GapMatcher::split_cluster(Cluster cluster,
-                                               Cluster *new_cluster_1,
-                                               Cluster *new_cluster_2) {
+void GapMatcher::split_cluster(Cluster cluster, Cluster *new_cluster_1,
+                               Cluster *new_cluster_2) {
   sort_by_increasing_coordinate(cluster.hits);
   uint last_coord = 0;
   bool filled_cluster_1 = false;
@@ -162,10 +166,8 @@ void GapMatcher::split_cluster(Cluster cluster,
 }
 
 bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
-  if ((cluster_a.weight_sum() * coefficient_low_ <=
-       cluster_b.weight_sum()) &&
-      (cluster_a.weight_sum() * coefficient_high_ >=
-       cluster_b.weight_sum())){
+  if ((cluster_a.weight_sum() * coefficient_low_ <= cluster_b.weight_sum()) &&
+      (cluster_a.weight_sum() * coefficient_high_ >= cluster_b.weight_sum())) {
     return true;
   } else {
     return false;
@@ -194,6 +196,7 @@ void GapMatcher::check_and_stash_event(Event evt) {
            "%u and contains %u hits",
            evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
            evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+    Stats.SpanTooLarge++;
     split_and_stash_event(evt);
     evt.clear();
   }

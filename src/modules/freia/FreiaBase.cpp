@@ -247,6 +247,14 @@ void FreiaBase::processing_thread() {
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
+        if (Freia.Conf.SplitMultiEvents) {
+          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
+          Counters.EventsDiscardedSpanTooLarge +=
+              builder.matcher.Stats.DiscardedSpanTooLarge;
+          Counters.EventsSplitSpanTooLarge +=
+              builder.matcher.Stats.SplitSpanTooLarge;
+          builder.matcher.reset_stats();
+        }
       }
       // done processing data
     } else {

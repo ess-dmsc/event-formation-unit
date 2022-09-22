@@ -65,23 +65,28 @@ void Config::applyConfig() {
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}", NMXFileParameters.SplitMultiEvents);
+  LOG(INIT, Sev::Info, "SplitMultiEvents {}",
+      NMXFileParameters.SplitMultiEvents);
 
   try {
-    NMXFileParameters.SplitMultiEventsCoefficientLow = root["SplitMultiEventsCoefficientLow"].get<float>();
+    NMXFileParameters.SplitMultiEventsCoefficientLow =
+        root["SplitMultiEventsCoefficientLow"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientLow");
+    LOG(INIT, Sev::Info,
+        "Using default value for SplitMultiEventsCoefficientLow");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}", NMXFileParameters.SplitMultiEventsCoefficientLow);
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
+      NMXFileParameters.SplitMultiEventsCoefficientLow);
 
   try {
-    NMXFileParameters.SplitMultiEventsCoefficientHigh = root["SplitMultiEventsCoefficientHigh"].get<float>();
+    NMXFileParameters.SplitMultiEventsCoefficientHigh =
+        root["SplitMultiEventsCoefficientHigh"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientHigh");
+    LOG(INIT, Sev::Info,
+        "Using default value for SplitMultiEventsCoefficientHigh");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}", NMXFileParameters.SplitMultiEventsCoefficientHigh);
-
-  
+  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
+      NMXFileParameters.SplitMultiEventsCoefficientHigh);
 
   try {
     auto PanelConfig = root["Config"];

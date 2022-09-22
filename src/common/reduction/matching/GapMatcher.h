@@ -28,7 +28,7 @@ public:
   void set_minimum_time_gap(uint64_t minimum_time_gap);
 
   void set_split_multi_events(bool split_multi_events, float coefficient_low,
-                               float coefficient_high);
+                              float coefficient_high);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
@@ -40,10 +40,23 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
+  void reset_stats() {
+    Stats.SpanTooLarge = 0;
+    Stats.DiscardedSpanTooLarge = 0;
+    Stats.SplitSpanTooLarge = 0;
+  }
+
+  struct Stats {
+    uint16_t SpanTooLarge{0};
+    uint16_t DiscardedSpanTooLarge{0};
+    uint16_t SplitSpanTooLarge{0};
+  } Stats;
+
 private:
 private:
   void split_and_stash_event(Event evt);
-  void split_cluster(Cluster cluster, Cluster *new_cluster_1, Cluster *new_cluster_2);
+  void split_cluster(Cluster cluster, Cluster *new_cluster_1,
+                     Cluster *new_cluster_2);
   bool clusters_match(Cluster cluster_a, Cluster cluster_b);
   void check_and_stash_event(Event evt);
 

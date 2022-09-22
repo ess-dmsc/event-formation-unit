@@ -243,6 +243,14 @@ void NMXBase::processing_thread() {
 
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
+        if (NMX.Conf.NMXFileParameters.SplitMultiEvents) {
+          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
+          Counters.EventsDiscardedSpanTooLarge +=
+              builder.matcher.Stats.DiscardedSpanTooLarge;
+          Counters.EventsSplitSpanTooLarge +=
+              builder.matcher.Stats.SplitSpanTooLarge;
+          builder.matcher.reset_stats();
+        }
       }
 
     } else {

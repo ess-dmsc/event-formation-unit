@@ -48,6 +48,9 @@ struct Counters {
   int64_t EventsMatchedStripOnly;
   int64_t EventsInvalidStripGap;
   int64_t EventsInvalidWireGap;
+  int64_t EventsSpanTooLarge;
+  int64_t EventsDiscardedSpanTooLarge;
+  int64_t EventsSplitSpanTooLarge;
   int64_t PixelErrors;
   int64_t TimeErrors;
   struct ESSReadout::ESSTime::Stats_t TimeStats;

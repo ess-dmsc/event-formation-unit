@@ -41,7 +41,8 @@ void Config::applyConfig() {
     SplitMultiEventsCoefficientLow =
         root["SplitMultiEventsCoefficientLow"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientLow");
+    LOG(INIT, Sev::Info,
+        "Using default value for SplitMultiEventsCoefficientLow");
   }
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
       SplitMultiEventsCoefficientLow);
@@ -50,7 +51,8 @@ void Config::applyConfig() {
     SplitMultiEventsCoefficientHigh =
         root["SplitMultiEventsCoefficientHigh"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEventsCoefficientHigh");
+    LOG(INIT, Sev::Info,
+        "Using default value for SplitMultiEventsCoefficientHigh");
   }
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
       SplitMultiEventsCoefficientHigh);
