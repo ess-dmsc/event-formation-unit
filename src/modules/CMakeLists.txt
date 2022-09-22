@@ -5,7 +5,6 @@
 
 include_directories(.)
 
-add_subdirectory(adc_readout)
 add_subdirectory(bifrost)
 add_subdirectory(cspec)
 add_subdirectory(dream)
