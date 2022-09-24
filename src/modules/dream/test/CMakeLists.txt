@@ -7,11 +7,11 @@ set(DREAM_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 # independent dream unit tests
 #=============================================================================
 
-set(DreamGeometryTest_INC
-  ${DREAM_BASE_DIR}/geometry/Geometry.h)
-set(DreamGeometryTest_SRC
-  DreamGeometryTest.cpp)
-create_test_executable(DreamGeometryTest)
+set(SUMOGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/SUMO.h)
+set(SUMOGeometryTest_SRC
+  SUMOGeometryTest.cpp)
+create_test_executable(SUMOGeometryTest)
 
 
 set(CDTGeometryTest_INC
@@ -35,6 +35,7 @@ create_test_executable(DreamConfigTest)
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
+  ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
@@ -43,6 +44,7 @@ set(DreamInstrumentTest_SRC
   DreamInstrumentTest.cpp
   ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
+  ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp

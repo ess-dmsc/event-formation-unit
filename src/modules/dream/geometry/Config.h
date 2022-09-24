@@ -36,10 +36,11 @@ public:
   struct ModuleParms {
     bool Initialised{false};
     ModuleType Type;
-    bool WireIsZ;
-    int Wires;
-    int Strips;
-    int Rotation;
+    int Index{0}; // general purpose
+    // bool WireIsZ;
+    // int Wires;
+    // int Strips;
+    // int Rotation;
   };
 
   //

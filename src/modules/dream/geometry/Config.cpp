@@ -9,6 +9,9 @@
 #include <common/debug/Log.h>
 #include <dream/geometry/Config.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 namespace Dream {
 
 void Config::errorExit(std::string ErrMsg) {

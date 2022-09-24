@@ -12,7 +12,7 @@
 // fails InvalidSumo test on CentOS build - false positive
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-#include <dream/geometry/Geometry.h>
+#include <dream/geometry/SUMO.h>
 #pragma GCC diagnostic pop
 
 using namespace Dream;
@@ -26,7 +26,7 @@ protected:
   const uint8_t Counter0{0};
   const uint8_t Wire0{0};
   const uint8_t Strip0{0};
-  EndCapGeometry endcap;
+  SUMO endcap;
   void SetUp() override {}
   void TearDown() override {}
 };

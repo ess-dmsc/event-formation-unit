@@ -12,12 +12,12 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <stdint.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
-class EndCapGeometry {
+class SUMO {
 public:
   const uint8_t MaxSector{22};
   const uint8_t MaxSumo{6};

@@ -12,6 +12,8 @@ set(dream_common_inc
   DreamInstrument.h
   geometry/Config.h
   geometry/CDTGeometry.h
+  geometry/Cuboid.h
+  geometry/SUMO.h
   readout/DataParser.h
   readout/Readout.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h

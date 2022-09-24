@@ -24,8 +24,8 @@ protected:
 
 TEST_F(DataParserTest, Constructor) {
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.Headers, 0);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 0);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 0);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -34,8 +34,8 @@ TEST_F(DataParserTest, BadSize) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 3);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.Headers, 0);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 0);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 3);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -44,8 +44,8 @@ TEST_F(DataParserTest, HeaderSizeError) {
   auto Res = Parser.parse((char *)&ErrSizeMismatch[0], ErrSizeMismatch.size());
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.Headers, 1);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, ErrSizeMismatch.size());
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -54,7 +54,7 @@ TEST_F(DataParserTest, BadRingGoodFEN) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 4);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 4);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -63,7 +63,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
   auto Res = Parser.parse((char *)&ErrGoodRingBadFEN[0], 4);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 4);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -72,7 +72,7 @@ TEST_F(DataParserTest, DataSizeMismatch) {
   auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 10);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
@@ -82,10 +82,10 @@ TEST_F(DataParserTest, ParseThree) {
                           OkThreeDreamReadouts.size());
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(Parser.Stats.Readouts, 3);
-  ASSERT_EQ(Parser.Stats.Headers, 1);
-  ASSERT_EQ(Parser.Stats.ErrorHeaders, 0);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 3);
+  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
-  ASSERT_EQ(Parser.Result.size(), 1);
+  ASSERT_EQ(Parser.Result.size(), 3);
 }
 
 int main(int argc, char **argv) {
