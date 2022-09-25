@@ -6,11 +6,14 @@
 
 #include <common/testutils/TestBase.h>
 #include <dream/geometry/CDTGeometry.h>
+#include <dream/readout/DataParser.h>
 
 using namespace Dream;
 
 class CDTGeometryTest : public TestBase {
 protected:
+  DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, 0};
   CDTGeometry geometry;
   void SetUp() override {}
   void TearDown() override {}
@@ -23,6 +26,17 @@ TEST_F(CDTGeometryTest, PixelOffsets) {
   ASSERT_EQ(geometry.getPixelOffset(Config::Mantle), 229376);
   ASSERT_EQ(geometry.getPixelOffset(Config::SANS), 720896);
   ASSERT_EQ(geometry.getPixelOffset(Config::HR), 1122304);
+}
+
+TEST_F(CDTGeometryTest, GetPixel) {
+  Parms.Type = Config::ModuleType::BwEndCap;
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 71681);
+
+  Parms.Type = Config::ModuleType::Mantle;
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 229377);
+
+  Parms.Type = Config::ModuleType::HR;
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
 }
 
 

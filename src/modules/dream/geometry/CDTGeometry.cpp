@@ -39,7 +39,7 @@ int CDTGeometry::getPixel(
 
       case Config::Mantle:
         XTRACE(DATA, DEB, "Mantle");
-        Pixel = -1;
+        Pixel = 1;
         break;
 
       case Config::HR: /* fallthrough */
@@ -57,7 +57,6 @@ int CDTGeometry::getPixel(
         XTRACE(DATA, WAR, "Unknown detector");
         break;
     }
-    printf("hello\n");
     int GlobalPixel = getPixelOffset(Parms.Type) + Pixel;
     XTRACE(DATA, DEB, "Local Pixel: %d, Global Pixel: %d", Pixel, GlobalPixel);
     return GlobalPixel;
