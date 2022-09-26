@@ -45,6 +45,7 @@ TEST_F(DreamInstrumentTest, Constructor) {
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, ModuleSettings);
   DataParser::DreamReadout Data{0,0,0,0,0,0,0,0,0};
+  Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }
 

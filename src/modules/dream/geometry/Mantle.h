@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <common/debug/Trace.h>
+#include <dream/geometry/Config.h>
+#include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
 
 namespace Dream {
@@ -26,11 +29,18 @@ public:
     return 120 * Wire + 12 * MU + 2 * Cassette + Counter;
   }
 
-
   //
-  int getPixelId(int MU, int Cassette, int Counter, int Wire, int Strip) {
+  uint32_t getPixelId(Config::ModuleParms & Parms,
+                 DataParser::DreamReadout & Data) {
+    /// \todo fix and check all values
+    uint8_t MountingUnit = Parms.P1.MU;
+    uint8_t Cassette = Parms.P2.Cassette;
+    uint8_t Counter = 0; /// \todo part of anode field?
+    uint8_t Wire = Data.Cathode;
+    uint8_t Strip = Data.Anode;
+
     int x = getX(Strip);
-    int y = getY(MU, Cassette, Counter, Wire);
+    int y = getY(MountingUnit, Cassette, Counter, Wire);
     return Geometry.pixel2D(x, y);
   }
 

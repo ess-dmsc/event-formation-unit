@@ -7,13 +7,14 @@
 
 #pragma once
 
-#include <common/debug/Assert.h>
 #include <common/debug/Trace.h>
+#include <dream/geometry/Config.h>
+#include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <stdint.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
@@ -25,8 +26,17 @@ public:
   const uint8_t MaxWire{15};
   const uint8_t MaxStrip{15};
 
-  uint32_t getPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
-                    uint8_t Counter, uint8_t Wire, uint8_t Strip) {
+
+  /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
+  uint32_t getPixelId(Config::ModuleParms & Parms,
+                    DataParser::DreamReadout & Data) {
+    uint8_t Sector = Parms.P1.Sector;
+    uint8_t Sumo = Parms.P2.SumoPair;
+    uint8_t Cassette = Data.Anode / 32;
+    uint8_t Counter = Data.Anode % 32;
+    uint8_t Wire = Data.Anode;
+    uint8_t Strip = Data.Cathode;
+
     XTRACE(EVENT, DEB,
            "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
            Sector, Sumo, Cassette, Counter, Wire, Strip);

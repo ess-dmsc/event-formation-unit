@@ -30,12 +30,15 @@ TEST_F(CDTGeometryTest, PixelOffsets) {
 
 TEST_F(CDTGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::BwEndCap;
+  Parms.P2.SumoPair = 6;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 71681);
 
   Parms.Type = Config::ModuleType::Mantle;
+  Parms.P2.Cassette = 0;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 229377);
 
   Parms.Type = Config::ModuleType::HR;
+  Parms.P2.Rotate = 0;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
 }
 

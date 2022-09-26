@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <common/debug/Trace.h>
+#include <dream/geometry/Config.h>
+#include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
 
 namespace Dream {
@@ -92,11 +95,19 @@ public:
 
 
   //
-  int getPixelId(int Index, int Cassette, int Counter, int Wire, int Strip,
-                 int Rotate) {
-    int x = getX(Index, Cassette, Counter, Wire, Rotate);
-    int y = getY(Index, Cassette, Counter, Wire, Strip, Rotate);
-    return Geometry.pixel2D(x, y);
+  uint32_t getPixelId(Config::ModuleParms & Parms,
+                    DataParser::DreamReadout & Data) {
+  /// \todo fix and check all values
+  uint8_t Index = Parms.P1.Index;
+  uint8_t Cassette = 0;
+  uint8_t Counter = 0;
+  uint8_t Wire = Data.Cathode;
+  uint8_t Strip = Data.Anode;
+  uint8_t Rotate = Parms.P2.Rotate;
+
+  int x = getX(Index, Cassette, Counter, Wire, Rotate);
+  int y = getY(Index, Cassette, Counter, Wire, Strip, Rotate);
+  return Geometry.pixel2D(x, y);
   }
 
 
