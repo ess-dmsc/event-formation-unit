@@ -36,15 +36,22 @@ public:
   struct ModuleParms {
     bool Initialised{false};
     ModuleType Type;
-    int Index{0}; // general purpose
-    // bool WireIsZ;
-    // int Wires;
-    // int Strips;
-    // int Rotation;
+    union {
+      int Index; // for Cuboids
+      int MU; // for Mantle
+      int Sector; // for Endcaps
+    } P1;
+    union {
+      int Index;
+      int Cassette; // for Mantle
+      int SumoPair; // for endcaps
+    } P2;
   };
 
   //
-  Config(std::string ConfigFile) : FileName(ConfigFile) {};
+  Config(std::string ConfigFile) : FileName(ConfigFile) {
+    memset(RMConfig, 0, sizeof(RMConfig));
+  };
 
   //
   Config() {};

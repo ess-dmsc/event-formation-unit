@@ -15,6 +15,7 @@
 
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Cuboid.h>
+#include <dream/geometry/Mantle.h>
 #include <dream/geometry/SUMO.h>
 #include <dream/readout/DataParser.h>
 
@@ -35,5 +36,6 @@ public:
 
   SUMO sumo;
   Cuboid cuboid;
+  Mantle mantle;
 };
 }

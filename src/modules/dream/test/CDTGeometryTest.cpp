@@ -13,7 +13,7 @@ using namespace Dream;
 class CDTGeometryTest : public TestBase {
 protected:
   DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, 0};
+  Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
   CDTGeometry geometry;
   void SetUp() override {}
   void TearDown() override {}

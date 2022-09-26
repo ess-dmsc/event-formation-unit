@@ -26,31 +26,38 @@ int CDTGeometry::getPixel(
       case Config::BwEndCap: /* fallthrough */
       case Config::FwEndCap: {
         XTRACE(DATA, DEB, "Bw or Fw EndCap");
+        /// \todo fix and check all values
         uint8_t Sumo = 6; // function of Cathode/Anode
         uint8_t Cassette = 0; // function of Cathode/Anode?
         uint8_t Counter = 0; // function of Cathode/Anode?
         uint8_t Wire = Data.Cathode; // maybe
         uint8_t Strip = Data.Anode; // maybe
         XTRACE(DATA, DEB, "Index %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
-            Parms.Index, Sumo, Cassette, Counter, Wire, Strip);
-        Pixel = sumo.getPixel(Parms.Index, Sumo, Cassette, Counter, Wire, Strip);
+            Parms.P1.Sector, Sumo, Cassette, Counter, Wire, Strip);
+        Pixel = sumo.getPixel(Parms.P1.Sector, Sumo, Cassette, Counter, Wire, Strip);
         }
         break;
 
-      case Config::Mantle:
+      case Config::Mantle: {
         XTRACE(DATA, DEB, "Mantle");
-        Pixel = 1;
+        /// \todo fix and check all values
+        uint8_t Counter = 0; /// \todo part of anode field?
+        uint8_t Wire = Data.Cathode;
+        uint8_t Strip = Data.Anode;
+        Pixel = mantle.getPixelId(Parms.P1.MU, Parms.P2.Cassette, Counter, Wire, Strip);
+        }
         break;
 
       case Config::HR: /* fallthrough */
       case Config::SANS: {
         XTRACE(DATA, DEB, "HR or SANS");
+        /// \todo fix and check all values
         uint8_t Cassette = 0; // function of Cathode/Anode?
         uint8_t Counter = 0; // function of Cathode/Anode?
         uint8_t Wire = Data.Cathode; // maybe
         uint8_t Strip = Data.Anode; // maybe
         uint8_t Rotate = 0; // for now
-        Pixel = cuboid.getPixelId(Parms.Index, Cassette, Counter, Wire, Strip, Rotate);
+        Pixel = cuboid.getPixelId(Parms.P1.Index, Cassette, Counter, Wire, Strip, Rotate);
         }
         break;
       default:

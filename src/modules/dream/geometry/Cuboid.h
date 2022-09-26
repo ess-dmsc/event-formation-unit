@@ -39,7 +39,7 @@ public:
 
 
   /// \brief get global x-coordinate for Cuboid with a given index
-  int getXCuboid(int Index, int Cassette, int Counter, int Wire, int Rotate) {
+  int getX(int Index, int Cassette, int Counter, int Wire, int Rotate) {
     /// \todo add XTRACE and counter
     if (Index >= (int)Offsets.size()) {
       return -1;
@@ -64,7 +64,7 @@ public:
   }
 
   /// \brief get global y-coordinate for Cuboid with a given index
-  int getYCuboid(int Index, int Cassette, int Counter, int Wire, int Strip,
+  int getY(int Index, int Cassette, int Counter, int Wire, int Strip,
                  int Rotate) {
     /// \todo add XTRACE and counter
     if (Index >= (int)Offsets.size()) {
@@ -94,8 +94,8 @@ public:
   //
   int getPixelId(int Index, int Cassette, int Counter, int Wire, int Strip,
                  int Rotate) {
-    int x = getXCuboid(Index, Cassette, Counter, Wire, Rotate);
-    int y = getYCuboid(Index, Cassette, Counter, Wire, Strip, Rotate);
+    int x = getX(Index, Cassette, Counter, Wire, Rotate);
+    int y = getY(Index, Cassette, Counter, Wire, Strip, Rotate);
     return Geometry.pixel2D(x, y);
   }
 

@@ -13,6 +13,7 @@ set(dream_common_inc
   geometry/Config.h
   geometry/CDTGeometry.h
   geometry/Cuboid.h
+  geometry/Mantle.h
   geometry/SUMO.h
   readout/DataParser.h
   readout/Readout.h

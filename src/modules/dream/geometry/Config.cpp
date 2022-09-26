@@ -54,6 +54,8 @@ void Config::apply() {
     int Ring{MaxRing + 1};
     int FEN{MaxFEN + 1};
     std::string Type{""};
+    int Index{0};
+    int Index2{0};
 
     try {
       Ring = Module["Ring"].get<int>();
@@ -62,6 +64,11 @@ void Config::apply() {
     } catch (...) {
       std::runtime_error("Malformed 'Config' section (Need RING, FEN, Type)");
     }
+
+    try {
+      Index = Module["Index"];
+      Index2 = Module["Index2"];
+    } catch (...) {}
 
     // Check for array sizes and dupliacte entries
     if (Ring > MaxRing) {
@@ -79,6 +86,8 @@ void Config::apply() {
       errorExit(fmt::format("Entry: {}, CDT Module '{}' does not exist", Entry, Type));
     }
     RMConfig[Ring][FEN].Type = ModuleTypeMap[Type];
+    RMConfig[Ring][FEN].P1.Index = Index;
+    RMConfig[Ring][FEN].P2.Index = Index2;
     XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring, FEN, Type.c_str());
 
     // Final housekeeping
