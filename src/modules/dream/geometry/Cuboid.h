@@ -41,8 +41,38 @@ public:
   // clang-format on
 
 
-  /// \brief get global x-coordinate for Cuboid with a given index
-  int getX(int Index, int Cassette, int Counter, int Wire, int Rotate) {
+  /// \brief rotate (x,y)
+  void rotateXY(int & LocalX, int & LocalY, int Rotate) {
+    int SavedY = LocalY;
+
+    switch (Rotate) {
+    case 1: // 90 deg. clockwise
+      LocalY = LocalX;
+      LocalX = 15 - SavedY;
+      break;
+    case 2: // 180 deg. cockwise
+      LocalY = 15 - LocalY;
+      LocalX = 15 - LocalX;
+      break;
+    case 3: // 270 deg. clockwise
+      LocalY = 15 - LocalX;
+      LocalX = SavedY;
+      break;
+    }
+  }
+
+
+  //
+  uint32_t getPixelId(Config::ModuleParms & Parms,
+                    DataParser::DreamReadout & Data) {
+    /// \todo fix and check all values
+    uint8_t Index = Parms.P1.Index;
+    uint8_t Cassette = 0;
+    uint8_t Counter = 0;
+    uint8_t Wire = Data.Cathode;
+    uint8_t Strip = Data.Anode;
+    uint8_t Rotate = Parms.P2.Rotate;
+
     /// \todo add XTRACE and counter
     if (Index >= (int)Offsets.size()) {
       return -1;
@@ -51,63 +81,13 @@ public:
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
     int LocalY = 15 - Wire;
 
-    switch (Rotate) {
-    case 1: // 90 deg. clockwise
-      LocalX = 15 - LocalY;
-      break;
-    case 2: // 180 deg. cockwise
-      LocalX = 15 - LocalX;
-      break;
-    case 3: // 270 deg. clockwise
-      LocalX = LocalY;
-      break;
-    }
-
-    return Offsets[Index].X + LocalX;
-  }
-
-  /// \brief get global y-coordinate for Cuboid with a given index
-  int getY(int Index, int Cassette, int Counter, int Wire, int Strip,
-                 int Rotate) {
-    /// \todo add XTRACE and counter
-    if (Index >= (int)Offsets.size()) {
-     return -1;
-    }
-
-    int LocalX = 2 * Cassette + Counter; // unrotated x,y values
-    int LocalY = 15 - Wire;
-
-    switch (Rotate) {
-    case 1: // 90 deg. clockwise
-      LocalY = LocalX;
-      break;
-    case 2: // 180 deg. cockwise
-      LocalY = 15 - LocalY;
-      break;
-    case 3: // 270 deg. clockwise
-      LocalY = 15 - LocalX;
-      break;
-    }
+    rotateXY(LocalX, LocalY, Rotate);
 
     constexpr int YDim{7 * 16};
-    return YDim * Strip + Offsets[Index].Y + LocalY;
-  }
+    int x = Offsets[Index].X + LocalX;
+    int y = YDim * Strip + Offsets[Index].Y + LocalY;
 
-
-  //
-  uint32_t getPixelId(Config::ModuleParms & Parms,
-                    DataParser::DreamReadout & Data) {
-  /// \todo fix and check all values
-  uint8_t Index = Parms.P1.Index;
-  uint8_t Cassette = 0;
-  uint8_t Counter = 0;
-  uint8_t Wire = Data.Cathode;
-  uint8_t Strip = Data.Anode;
-  uint8_t Rotate = Parms.P2.Rotate;
-
-  int x = getX(Index, Cassette, Counter, Wire, Rotate);
-  int y = getY(Index, Cassette, Counter, Wire, Strip, Rotate);
-  return Geometry.pixel2D(x, y);
+    return Geometry.pixel2D(x, y);
   }
 
 

@@ -55,6 +55,6 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  //deleteFile(ConfigFile);
+  deleteFile(ConfigFile);
   return RetVal;
 }

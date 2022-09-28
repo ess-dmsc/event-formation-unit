@@ -31,6 +31,14 @@ set(DreamConfigTest_SRC
   )
 create_test_executable(DreamConfigTest)
 
+set(CuboidTest_INC
+  ${DREAM_BASE_DIR}/geometry/Cuboid.h
+  )
+set(CuboidTest_SRC
+  CuboidTest.cpp
+  )
+create_test_executable(CuboidTest)
+
 
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
