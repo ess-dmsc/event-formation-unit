@@ -20,17 +20,44 @@ protected:
 };
 
 
-TEST_F(CDTGeometryTest, Rotate) {
+TEST_F(CDTGeometryTest, Rotate0) {
   int x = 1;
   int y = 12;
   geometry.rotateXY(x, y, 0);
   ASSERT_EQ(x,  1);
   ASSERT_EQ(y, 12);
+}
+
+TEST_F(CDTGeometryTest, Rotate1) {
+  int x = 1;
+  int y = 12;
   geometry.rotateXY(x, y, 1);
   ASSERT_NE(x,  1);
   ASSERT_NE(y, 12);
   geometry.rotateXY(x, y, 1);
   geometry.rotateXY(x, y, 1);
+  geometry.rotateXY(x, y, 1);
+  ASSERT_EQ(x,  1);
+  ASSERT_EQ(y, 12);
+}
+
+TEST_F(CDTGeometryTest, Rotate2) {
+  int x = 1;
+  int y = 12;
+  geometry.rotateXY(x, y, 2);
+  ASSERT_NE(x,  1);
+  ASSERT_NE(y, 12);
+  geometry.rotateXY(x, y, 2);
+  ASSERT_EQ(x,  1);
+  ASSERT_EQ(y, 12);
+}
+
+TEST_F(CDTGeometryTest, Rotate3) {
+  int x = 1;
+  int y = 12;
+  geometry.rotateXY(x, y, 3);
+  ASSERT_NE(x,  1);
+  ASSERT_NE(y, 12);
   geometry.rotateXY(x, y, 1);
   ASSERT_EQ(x,  1);
   ASSERT_EQ(y, 12);
