@@ -1,4 +1,4 @@
-// Copyright (C) 2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -31,7 +31,7 @@ public:
   uint32_t getPixelId(Config::ModuleParms & Parms,
                     DataParser::DreamReadout & Data) {
     uint8_t Sector = Parms.P1.Sector;
-    uint8_t Sumo = Parms.P2.SumoPair;
+    uint8_t Sumo = Parms.P2.SumoPair; // definitely wrong
     uint8_t Cassette = Data.Anode / 32;
     uint8_t Counter = Data.Anode % 32;
     uint8_t Wire = Data.Anode;
