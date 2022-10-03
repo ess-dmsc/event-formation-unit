@@ -83,8 +83,14 @@ void PerfGenBase::processingThread() {
   int TimeOfFlight{0};
   int EventsPerPulse{500};
 
+  // ns since 1970 - but with a resolution of one second
+  uint64_t EfuTimeRef = 1000000000LU * (uint64_t)time(NULL);
+  Timer Elapsed; // provide a us timer
+
   while (runThreads) {
-    uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+    // ns since 1970 - but with us resolution
+    uint64_t EfuTime = EfuTimeRef + 1000 * Elapsed.timeus();
+    XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
     Serializer.pulseTime(EfuTime);
 
     for (int i = 0; i < EventsPerPulse; i++) {
@@ -93,6 +99,8 @@ void PerfGenBase::processingThread() {
       mystats.events_udder++;
       TimeOfFlight++;
     }
+    //Serializer.checkAndSetPulseTime(EfuTime);
+
 
     usleep(EFUSettings.TestImageUSleep);
 

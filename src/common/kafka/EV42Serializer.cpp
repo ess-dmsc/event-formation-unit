@@ -81,12 +81,15 @@ nonstd::span<const uint8_t> EV42Serializer::serialize() {
 }
 
 size_t EV42Serializer::produce() {
+  // pulse_time is given as ns since 1970, produce time should be ms.
+  uint64_t PulseTimeMs = EventMessage_->pulse_time()/1000000;
+
   if (EventCount != 0) {
-    XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
+    XTRACE(OUTPUT, INF, "produce %zu events, produce time (ms): %lu",
+       EventCount, PulseTimeMs);
     serialize();
     if (ProduceFunctor) {
-      // pulse_time is currently ns since 1970, produce time should be ms.
-      ProduceFunctor(Buffer_, EventMessage_->pulse_time() / 1000000);
+      ProduceFunctor(Buffer_, PulseTimeMs);
     }
     TxBytes += Buffer_.size_bytes();
     return Buffer_.size_bytes();
@@ -101,7 +104,7 @@ void EV42Serializer::pulseTime(uint64_t Time) {
 uint32_t EV42Serializer::checkAndSetPulseTime(uint64_t Time) {
   uint32_t bytesProduced = 0;
   if (Time != pulseTime()) {
-    XTRACE(OUTPUT, DEB, "Pulse time is new: %d\n", Time);
+    XTRACE(OUTPUT, INF, "Pulse time is new - force produce()", Time);
     bytesProduced = produce();
     pulseTime(Time);
   }
@@ -123,6 +126,7 @@ size_t EV42Serializer::addEvent(uint32_t Time, uint32_t Pixel) {
   EventCount++;
 
   if (EventCount >= MaxEvents) {
+    XTRACE(OUTPUT, INF, "Buffer Full - force produce()");
     return produce();
   }
   return 0;
