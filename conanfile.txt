@@ -1,6 +1,6 @@
 [requires]
 asio/1.16.1
-benchmark/1.5.0
+benchmark/1.7.0
 cli11/1.9.1
 fmt/6.2.0
 graylog-logger/2.0.4-dm1@ess-dmsc/stable
