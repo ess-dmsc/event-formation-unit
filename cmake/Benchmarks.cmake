@@ -17,10 +17,7 @@ function(create_benchmark_executable exec_name)
       ${${exec_name}_SRC}
       ${${exec_name}_INC})
     target_include_directories(${exec_name}
-      PRIVATE
-      ${GTEST_INCLUDE_DIRS}
-      ${benchmark_INCLUDE_DIRS}
-    )
+      PRIVATE ${GTEST_INCLUDE_DIRS})
     set_target_properties(${exec_name} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
