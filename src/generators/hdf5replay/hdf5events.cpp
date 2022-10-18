@@ -34,7 +34,8 @@ int main(int argc, char *argv[]) {
   app.add_flag("-n, --dry-run", Config.DryRun, "Do not produce");
   CLI11_PARSE(app, argc, argv);
 
-  Producer eventprod(Config.KafkaBroker, Config.KafkaTopic);
+  Producer eventprod(Config.KafkaBroker, Config.KafkaTopic,
+    Producer::DefaultConfig);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };

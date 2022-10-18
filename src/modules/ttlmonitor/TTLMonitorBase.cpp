@@ -164,7 +164,8 @@ void TTLMonitorBase::processing_thread() {
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
 
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    Producer::DefaultConfig);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
@@ -238,7 +239,7 @@ void TTLMonitorBase::processing_thread() {
       }
     }
     Counters.KafkaStats = eventprod.stats;
-    
+
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

@@ -154,7 +154,8 @@ void LokiBase::processingThread() {
 
   LokiInstrument Loki(Counters, LokiModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector",
+    Producer::DefaultConfig);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -163,7 +164,8 @@ void LokiBase::processingThread() {
   Serializer = new EV44Serializer(KafkaBufferSize, "loki", Produce);
   Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
-  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug");
+  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug",
+    Producer::DefaultConfig);
 
   auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
     EventProducerII.produce(DataBuffer, Timestamp);

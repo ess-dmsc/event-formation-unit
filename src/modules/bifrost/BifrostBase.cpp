@@ -151,7 +151,8 @@ void BifrostBase::processingThread() {
 
   BifrostInstrument Bifrost(Counters, BifrostModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector",
+    Producer::DefaultConfig);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

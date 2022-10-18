@@ -155,7 +155,8 @@ void MultigridBase::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
-  Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector");
+  Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector",
+    Producer::DefaultConfig);
   auto Produce = [&event_producer](auto DataBuffer, auto Timestamp) {
     event_producer.produce(DataBuffer, Timestamp);
   };

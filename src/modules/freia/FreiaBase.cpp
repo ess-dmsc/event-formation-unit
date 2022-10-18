@@ -185,12 +185,14 @@ void FreiaBase::processing_thread() {
     XTRACE(INIT, ALW, "Setting defailt Kafka topic to freia_detector");
     EFUSettings.KafkaTopic = "freia_detector";
   }
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    Producer::DefaultConfig);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug",
+    Producer::DefaultConfig);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };

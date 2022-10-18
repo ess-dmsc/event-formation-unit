@@ -46,7 +46,8 @@ void Producer::event_cb(RdKafka::Event &event) {
 }
 
 ///
-Producer::Producer(std::string Broker, std::string Topic)
+Producer::Producer(std::string Broker, std::string Topic,
+                   std::vector<std::pair<std::string, std::string>> & Configs)
     : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
@@ -62,12 +63,11 @@ Producer::Producer(std::string Broker, std::string Topic)
     return;
   }
 
-  setConfig("metadata.broker.list", Broker);
-  setConfig("message.max.bytes", "10000000");
-  setConfig("fetch.message.max.bytes", "10000000");
-  setConfig("message.copy.max.bytes", "10000000");
-  setConfig("queue.buffering.max.ms", "100");
-  setConfig("api.version.request", "true");
+  setConfig("metadata.broker.list", Broker); // can be overwritten
+
+  for (auto & Config : Configs) {
+    setConfig(Config.first, Config.second);
+  }
 
   if (Config->set("event_cb", this, ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");

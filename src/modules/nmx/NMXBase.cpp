@@ -181,12 +181,14 @@ void NMXBase::processing_thread() {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
     EFUSettings.KafkaTopic = "nmx_detector";
   }
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    Producer::DefaultConfig);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
+    Producer::DefaultConfig);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };

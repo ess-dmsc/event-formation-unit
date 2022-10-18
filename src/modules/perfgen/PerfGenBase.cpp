@@ -66,7 +66,8 @@ void PerfGenBase::processingThread() {
     EFUSettings.KafkaTopic = "perfgen_detector";
   }
 
-  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    Producer::DefaultConfig);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

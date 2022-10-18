@@ -14,7 +14,8 @@
 Monitor::Monitor(const std::string &broker, const std::string &topic_prefix,
                  const std::string &source_name) {
   source_name_ = source_name;
-  producer = std::make_shared<Producer>(broker, topic_prefix + "_monitor");
+  producer = std::make_shared<Producer>(broker, topic_prefix + "_monitor",
+      Producer::DefaultConfig);
 }
 
 void Monitor::init_histograms(size_t max_range) {

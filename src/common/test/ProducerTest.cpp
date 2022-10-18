@@ -29,7 +29,7 @@ void reporter<specialized>::send(severity s, char const *file,
 class ProducerStandIn : public Producer {
 public:
   ProducerStandIn(std::string Broker, std::string Topic)
-      : Producer(Broker, Topic) {}
+      : Producer(Broker, Topic, Producer::DefaultConfig) {}
   using Producer::Config;
   using Producer::KafkaProducer;
   using Producer::KafkaTopic;
@@ -107,7 +107,7 @@ TEST_F(ProducerTest, ProducerSuccess) {
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
-  Producer prod{"nobroker", "notopic"};
+  Producer prod{"nobroker", "notopic", Producer::DefaultConfig};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
