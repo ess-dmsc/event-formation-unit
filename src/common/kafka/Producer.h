@@ -69,14 +69,6 @@ public:
     int64_t produce_fails;
   } stats = {};
 
-  static inline std::vector<std::pair<std::string,std::string>> DefaultConfig {
-    {"message.max.bytes", "10000000"},
-    {"fetch.message.max.bytes", "10000000"},
-    {"message.copy.max.bytes", "10000000"},
-    {"queue.buffering.max.ms", "100"},
-    {"api.version.request", "true"}
-  };
-
 protected:
   std::string ErrorMessage;
   std::string TopicName;

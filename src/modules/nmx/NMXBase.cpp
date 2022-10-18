@@ -12,6 +12,7 @@
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/system/Socket.h>
@@ -181,14 +182,17 @@ void NMXBase::processing_thread() {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
     EFUSettings.KafkaTopic = "nmx_detector";
   }
+
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
   Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };

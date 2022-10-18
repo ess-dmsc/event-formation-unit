@@ -11,6 +11,7 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/kafka/EV42Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <h5cpp/hdf5.hpp>
 #include <unistd.h>
@@ -19,6 +20,7 @@ struct {
   std::string FileName;
   std::string KafkaBroker{"172.30.242.20:9092"};
   std::string KafkaTopic{"freia_detector"};
+  std::string KafkaConfigFile{""};
   bool DryRun{false};          // Do not stream to Kafka
   bool Verbose{false};         // Do not print values
   int KafkaBufferSize{124000}; /// entries ~ 1MB
@@ -29,13 +31,16 @@ CLI::App app{"Read event_id from hdf5 files and send to Kafka"};
 int main(int argc, char *argv[]) {
   app.add_option("-f, --file", Config.FileName, "FileWriter HDF5");
   app.add_option("-b, --broker", Config.KafkaBroker, "Kafka broker");
+  app.add_option("--kafka_config", Config.KafkaConfigFile, "Kafka configuration file");
   app.add_option("-t, --topic", Config.KafkaTopic, "Kafka topic");
   app.add_flag("-v, --verbose", Config.Verbose, "Print pixel and tof");
   app.add_flag("-n, --dry-run", Config.DryRun, "Do not produce");
   CLI11_PARSE(app, argc, argv);
 
+  KafkaConfig KafkaCfg(Config.KafkaConfigFile);
+
   Producer eventprod(Config.KafkaBroker, Config.KafkaTopic,
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };

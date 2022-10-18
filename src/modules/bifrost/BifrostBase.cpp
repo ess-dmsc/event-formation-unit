@@ -14,6 +14,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
@@ -151,8 +152,9 @@ void BifrostBase::processingThread() {
 
   BifrostInstrument Bifrost(Counters, BifrostModuleSettings);
 
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector",
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

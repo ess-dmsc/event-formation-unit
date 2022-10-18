@@ -17,14 +17,16 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 void Producer::setConfig(std::string Key, std::string Value) {
+  XTRACE(INIT, ALW, "%s %s", Key.c_str(), Value.c_str());
   RdKafka::Conf::ConfResult configResult;
   configResult = Config->set(Key, Value, ErrorMessage);
   LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, Value);
   if (configResult != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, Value);
   }
-  assert(configResult ==
-         RdKafka::Conf::CONF_OK); // compiles away in release build
+
+  // assert compiles away in release build
+  assert(configResult == RdKafka::Conf::CONF_OK);
 }
 
 ///

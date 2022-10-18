@@ -15,6 +15,7 @@
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <common/time/TimeString.h>
 
@@ -66,8 +67,9 @@ void PerfGenBase::processingThread() {
     EFUSettings.KafkaTopic = "perfgen_detector";
   }
 
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

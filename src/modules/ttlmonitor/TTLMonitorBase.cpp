@@ -12,6 +12,7 @@
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -164,8 +165,9 @@ void TTLMonitorBase::processing_thread() {
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
 
   // Event producer
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    Producer::DefaultConfig);
+    KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };

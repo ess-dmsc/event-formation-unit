@@ -5,9 +5,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Log.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/Monitor.h>
 
-#include <common/debug/Log.h>
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
@@ -15,7 +16,7 @@ Monitor::Monitor(const std::string &broker, const std::string &topic_prefix,
                  const std::string &source_name) {
   source_name_ = source_name;
   producer = std::make_shared<Producer>(broker, topic_prefix + "_monitor",
-      Producer::DefaultConfig);
+      KafkaConfig::DefaultConfig);
 }
 
 void Monitor::init_histograms(size_t max_range) {
