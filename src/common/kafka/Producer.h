@@ -18,6 +18,8 @@
 #include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
+#include <vector>
+#include <utility>
 
 ///
 class ProducerBase {
@@ -39,10 +41,12 @@ public:
 class Producer : public ProducerBase, public RdKafka::EventCb {
 public:
   /// \brief Construct a producer object.
-  /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
-  /// \param topicstr Name of Kafka topic according to agreement, example
+  /// \param Broker 'URL' specifying host and port, example "127.0.0.1:9009"
+  /// \param Topic Name of Kafka topic according to agreement, example
   /// "trex_detector"
-  Producer(std::string Broker, std::string topicstr);
+  /// \param Configs vector of configuration <type,value> pairs
+  Producer(std::string Broker, std::string Topic,
+    std::vector<std::pair<std::string, std::string>> & Configs);
 
   /// \brief cleans up by deleting allocated structures
   ~Producer() = default;
@@ -72,6 +76,8 @@ protected:
   std::unique_ptr<RdKafka::Conf> TopicConfig;
   std::unique_ptr<RdKafka::Topic> KafkaTopic;
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
+
+
 };
 
 using ProducerCallback =

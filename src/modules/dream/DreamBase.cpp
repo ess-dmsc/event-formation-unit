@@ -14,6 +14,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
@@ -140,7 +141,10 @@ void DreamBase::processingThread() {
 
   DreamInstrument Dream(Counters, DreamModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

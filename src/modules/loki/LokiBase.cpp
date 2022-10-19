@@ -13,6 +13,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
@@ -151,10 +152,11 @@ void LokiBase::inputThread() {
 ///
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
-
   LokiInstrument Loki(Counters, LokiModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -163,7 +165,8 @@ void LokiBase::processingThread() {
   Serializer = new EV44Serializer(KafkaBufferSize, "loki", Produce);
   Loki.setSerializer(Serializer); // would rather have this in LokiInstrument
 
-  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug");
+  Producer EventProducerII(EFUSettings.KafkaBroker, "LOKI_debug",
+    KafkaCfg.CfgParms);
 
   auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
     EventProducerII.produce(DataBuffer, Timestamp);

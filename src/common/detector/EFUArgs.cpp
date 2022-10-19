@@ -39,6 +39,9 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")
       ->group("EFU Options")->default_str("");
 
+  CLIParser.add_option("--kafka_config", EFUSettings.KafkaConfigFile, "Kafka configuration file")
+      ->group("EFU Options")->default_str("");
+
   CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
                     return parseAffinityStrings(Input);
                   }, "Thread to core affinity. Ex: \"-c input_t:4\"")
