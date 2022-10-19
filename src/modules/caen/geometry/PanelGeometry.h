@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Loki Panel Geometry
+/// \brief Caen Panel Geometry
 ///
 //===----------------------------------------------------------------------===//
 
@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Caen {
 
 class PanelGeometry {
 public:
@@ -77,4 +77,4 @@ private:
   uint32_t MaxStraw{0};
   uint32_t MaxGroup{0};
 };
-} // namespace Loki
+} // namespace Caen

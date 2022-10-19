@@ -118,7 +118,7 @@ TEST_F(ConfigTest, ValidConfig) {
   deleteFile(ValidConfigFile);
 }
 
-// Validate full instrument configuration (Caen.json)
+// Validate full Loki instrument configuration (Loki.json)
 // should match the definitions in the ICD
 TEST_F(ConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);

@@ -5,7 +5,7 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Caen.json" ABSOLUTE)
+get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Loki.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
@@ -14,15 +14,15 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Caen.json" ABSO
 ##
 ## Analog geometry - amplitude calculations
 ##
-set(TubeAmpsTest_INC ../geometry/TubeAmps.h)
-set(TubeAmpsTest_SRC TubeAmpsTest.cpp)
-create_test_executable(TubeAmpsTest)
+set(LokiGeometryTest_INC ../geometry/LokiGeometry.h)
+set(LokiGeometryTest_SRC LokiGeometryTest.cpp)
+create_test_executable(LokiGeometryTest)
 
 ##
 ## Panel geometry
 ##
 set(CaenPanelGeometryTest_INC
-  ../geometry/TubeAmps.h
+  ../geometry/LokiGeometry.h
   ../geometry/PanelGeometry.h)
 set(CaenPanelGeometryTest_SRC PanelGeometryTest.cpp)
 create_test_executable(CaenPanelGeometryTest)
@@ -32,7 +32,7 @@ create_test_executable(CaenPanelGeometryTest)
 ##
 set(CaenFullGeometryTest_INC
   CaenFullGeometryTestData.h
-  ../geometry/TubeAmps.h
+  ../geometry/LokiGeometry.h
   ../geometry/PanelGeometry.h)
 set(CaenFullGeometryTest_SRC CaenFullGeometryTest.cpp)
 create_test_executable(CaenFullGeometryTest)
@@ -85,11 +85,11 @@ set(CombinedParserTest_INC
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  ../generators/ReadoutGenerator.h
+  ../generators/LokiReadoutGenerator.h
   )
 set(CombinedParserTest_SRC
   CombinedParserTest.cpp
-  ../generators/ReadoutGenerator.cpp
+  ../generators/LokiReadoutGenerator.cpp
   ../readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp

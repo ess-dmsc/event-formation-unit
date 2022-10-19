@@ -12,8 +12,8 @@
 #include <common/time/TimeString.h>
 #include <caen/CaenInstrument.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 
@@ -30,7 +30,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
          ModuleSettings.ConfigFile.c_str());
   CaenConfiguration = Config(ModuleSettings.ConfigFile);
 
-  Amp2Pos.setResolution(CaenConfiguration.Resolution);
+  LokiGeom.setResolution(CaenConfiguration.Resolution);
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
@@ -45,6 +45,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
            ModuleSettings.CalibFile.c_str());
     CaenCalibration = Calibration(ModuleSettings.CalibFile);
   }
+  LokiGeom.setCalibration(CaenCalibration);
 
   if (CaenCalibration.getMaxPixel() != CaenConfiguration.getMaxPixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
@@ -71,50 +72,15 @@ CaenInstrument::~CaenInstrument() {}
 /// also applies the calibration
 uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
                                    DataParser::CaenReadout &Data) {
-
-  uint8_t TubeGroup = FEN;
-  uint8_t LocalTube = Data.TubeId;
-
-  bool valid =
-      Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
-  counters.ReadoutsBadAmpl = Amp2Pos.Stats.AmplitudeZero;
-
-  if (not valid) {
-    return 0;
+  if (CaenConfiguration.InstrumentName == "LoKI"){
+    auto pixel = LokiGeom.calcPixel(Panel, FEN, Data);
+    counters.ReadoutsBadAmpl = LokiGeom.Stats.AmplitudeZero;
+    counters.OutsideRegion = LokiGeom.Stats.OutsideRegion;
+    return pixel;
+  }
+  return 0;
   }
 
-  auto Straw = Amp2Pos.StrawId;
-  /// Position (and CalibratedPos) are per definition == X
-  double Position = Amp2Pos.PosVal; // position along the straw
-
-  /// Globalstraw is per its definition == Y
-  uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, Straw);
-
-  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
-  if (GlobalStraw == Panel.StrawError) {
-    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
-    return 0;
-  }
-
-  if ((GlobalStraw < ModuleSettings.MinStraw) or
-      (GlobalStraw > ModuleSettings.MaxStraw)) {
-    counters.OutsideRegion++;
-    return 0;
-  }
-
-  uint16_t CalibratedPos =
-      CaenCalibration.strawCorrection(GlobalStraw, Position);
-  XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
-
-  uint32_t PixelId =
-      CaenConfiguration.Geometry->pixel2D(CalibratedPos, GlobalStraw);
-
-  XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", Position,
-         CalibratedPos, GlobalStraw, PixelId);
-
-  return PixelId;
-}
 
 void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   Readout CurrentReadout;

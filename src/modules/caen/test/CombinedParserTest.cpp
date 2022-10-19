@@ -10,7 +10,7 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
 #include <caen/Counters.h>
-#include <caen/generators/ReadoutGenerator.h>
+#include <caen/generators/LokiReadoutGenerator.h>
 #include <caen/readout/DataParser.h>
 
 const uint32_t FirstSeqNum{0};
@@ -75,9 +75,9 @@ TEST_F(CombinedParserTest, DataGen) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
     Settings.NumReadouts = Sections;
-    Caen::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+    Caen::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-    Settings.Type = ESSReadout::Parser::DetectorType::Caen4Amp;
+    Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,

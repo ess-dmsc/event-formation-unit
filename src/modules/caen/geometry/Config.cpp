@@ -10,7 +10,7 @@
 #include <common/debug/Log.h>
 #include <caen/geometry/Config.h>
 
-namespace Loki {
+namespace Caen {
 
 ///
 Config::Config() {}
@@ -18,7 +18,6 @@ Config::Config() {}
 Config::Config(std::string ConfigFile) {
   nlohmann::json root = from_json_file(ConfigFile);
 
-  std::string InstrumentName;
   try {
     InstrumentName = root["Detector"].get<std::string>();
   } catch (...) {
@@ -26,10 +25,10 @@ Config::Config(std::string ConfigFile) {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (InstrumentName != "LoKI") {
+  if ((InstrumentName != "LoKI") and (InstrumentName != "BIFROST")) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error(
-        "Inconsistent Json file - invalid name, expected LoKI");
+        "Inconsistent Json file - invalid name, expected LoKI or BIFROST");
   }
 
   try {
@@ -91,4 +90,4 @@ Config::Config(std::string ConfigFile) {
   }
 }
 
-} // namespace Loki
+} // namespace Caen

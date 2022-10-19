@@ -18,7 +18,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Caen {
 class Config {
 public:
   Config();
@@ -28,7 +28,8 @@ public:
   uint32_t getMaxPixel() { return Pixels; }
 
   std::vector<PanelGeometry> Panels;
-  uint8_t NPanels{0};              // Loki panels, not logical geometry panels
+  std::string InstrumentName;
+  uint8_t NPanels{0};              // Caen panels, not logical geometry panels
   uint16_t NTubesTotal{0};         // total number of tubes in instrument
   uint16_t Resolution{0};          /// Resolution along straws
   uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
@@ -39,4 +40,4 @@ public:
 private:
   uint32_t Pixels{0};
 };
-} // namespace Loki
+} // namespace Caen

@@ -3,16 +3,16 @@
 ///
 /// \file
 ///
-/// \brief Parser for ESS readout of LoKI
+/// \brief Parser for ESS readout of Caen Modules
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <modules/loki/Counters.h>
+#include <modules/caen/Counters.h>
 #include <vector>
 
-namespace Loki {
+namespace Caen {
 
 class DataParser {
 public:
@@ -20,7 +20,7 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct LokiReadout {
+  struct CaenReadout {
     uint8_t RingId;
     uint8_t FENId;
     uint16_t DataLength;
@@ -35,7 +35,7 @@ public:
     int16_t AmpD;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(LokiReadout) == 24, "LoKI readout header length error");
+  static_assert(sizeof(CaenReadout) == 24, "Caen readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
@@ -46,8 +46,8 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
-  std::vector<struct LokiReadout> Result;
+  std::vector<struct CaenReadout> Result;
 
   struct Counters &Stats;
 };
-} // namespace Loki
+} // namespace Caen

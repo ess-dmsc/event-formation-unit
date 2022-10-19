@@ -12,10 +12,10 @@
 
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <loki/readout/DataParser.h>
+#include <caen/readout/DataParser.h>
 
-namespace Loki {
-class ReadoutGenerator : public ReadoutGeneratorBase {
+namespace Caen {
+class LokiReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 

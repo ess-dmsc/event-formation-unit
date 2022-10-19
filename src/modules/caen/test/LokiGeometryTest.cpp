@@ -2,27 +2,27 @@
 
 #include <algorithm>
 #include <common/testutils/TestBase.h>
-#include <caen/geometry/TubeAmps.h>
+#include <caen/geometry/LokiGeometry.h>
 #include <memory>
 
 using namespace Caen;
 
-class TubeAmpsTest : public TestBase {
+class LokiGeometryTest : public TestBase {
 protected:
   void SetUp() override {}
   void TearDown() override {}
 };
 
 /** Test cases below */
-TEST_F(TubeAmpsTest, Constructor) {
-  TubeAmps tube;
+TEST_F(LokiGeometryTest, Constructor) {
+  LokiGeometry tube;
   tube.setResolution(512);
   ASSERT_EQ(tube.StrawId, 7);  // valid: 0 - 6
   ASSERT_EQ(tube.PosVal, 512); // valid: 0 - 511
 }
 
-TEST_F(TubeAmpsTest, AllZeroes) {
-  TubeAmps tube;
+TEST_F(LokiGeometryTest, AllZeroes) {
+  LokiGeometry tube;
   tube.setResolution(512);
   tube.calcPositions(0, 0, 0, 0);
   ASSERT_EQ(tube.StrawId, 7);  // valid: 0 - 6
@@ -30,8 +30,8 @@ TEST_F(TubeAmpsTest, AllZeroes) {
   ASSERT_EQ(tube.Stats.AmplitudeZero, 1);
 }
 
-TEST_F(TubeAmpsTest, StrawLimits) {
-  TubeAmps tube;
+TEST_F(LokiGeometryTest, StrawLimits) {
+  LokiGeometry tube;
   double delta = 0.0001;
   ASSERT_EQ(tube.strawCalc(0.1), 0);
   ASSERT_EQ(tube.strawCalc(0.7 - delta), 0);
@@ -54,8 +54,8 @@ TEST_F(TubeAmpsTest, StrawLimits) {
   ASSERT_EQ(tube.strawCalc(5.30 + delta), 6);
 }
 
-TEST_F(TubeAmpsTest, MinMaxStraw) {
-  TubeAmps tube;
+TEST_F(LokiGeometryTest, MinMaxStraw) {
+  LokiGeometry tube;
   tube.setResolution(512);
   unsigned int iMax = 4096;
   for (unsigned int i = 1; i < iMax; i++) {
@@ -71,8 +71,8 @@ TEST_F(TubeAmpsTest, MinMaxStraw) {
   }
 }
 
-TEST_F(TubeAmpsTest, MinMaxPos) {
-  TubeAmps tube;
+TEST_F(LokiGeometryTest, MinMaxPos) {
+  LokiGeometry tube;
   tube.setResolution(512);
   for (unsigned int i = 1; i < 4095; i++) {
     tube.calcPositions(0, 0, i, 0);

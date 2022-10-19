@@ -18,7 +18,8 @@
 #include <caen/geometry/Calibration.h>
 #include <caen/geometry/Config.h>
 #include <caen/geometry/PanelGeometry.h>
-#include <caen/geometry/TubeAmps.h>
+#include <caen/geometry/LokiGeometry.h>
+#include <caen/geometry/BifrostGeometry.h>
 #include <caen/readout/Readout.h>
 #include <readout/DataParser.h>
 
@@ -57,7 +58,9 @@ public:
   Calibration CaenCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
-  TubeAmps Amp2Pos;
+  LokiGeometry LokiGeom;
+  ESSGeometry lgeom{900, 15, 1, 1};
+  BifrostGeometry BifrostGeom;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;

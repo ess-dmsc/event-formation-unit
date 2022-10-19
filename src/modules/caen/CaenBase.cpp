@@ -21,8 +21,8 @@
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 // #define ECDC_DEBUG_READOUT
 
 namespace Caen {
@@ -189,7 +189,7 @@ void CaenBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::Caen4Amp);
+                                                ESSReadout::Parser::Loki4Amp);
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -222,7 +222,7 @@ void CaenBase::processingThread() {
     }
 
     if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-      XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
+      // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
 

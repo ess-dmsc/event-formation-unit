@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Caen {
 class Calibration {
 public:
   Calibration();
@@ -50,4 +50,4 @@ private:
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0};      ///< The maximum pixelid in the map
 };
-} // namespace Loki
+} // namespace Caen

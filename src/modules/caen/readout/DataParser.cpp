@@ -3,19 +3,19 @@
 ///
 /// \file
 ///
-/// \brief Parser for ESS readout of LoKI
+/// \brief Parser for ESS readout of Caen Modules
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <loki/readout/DataParser.h>
+#include <caen/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-namespace Loki {
+namespace Caen {
 
-constexpr unsigned int LokiReadoutSize{sizeof(DataParser::LokiReadout)};
+constexpr unsigned int CaenReadoutSize{sizeof(DataParser::CaenReadout)};
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -34,7 +34,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    auto Data = (LokiReadout *)((char *)DataPtr);
+    auto Data = (CaenReadout *)((char *)DataPtr);
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
@@ -60,9 +60,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            Data->DataLength);
     Stats.DataHeaders++;
 
-    if (Data->DataLength != LokiReadoutSize) {
+    if (Data->DataLength != CaenReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
-             LokiReadoutSize);
+             CaenReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
@@ -86,4 +86,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Loki
+} // namespace Caen

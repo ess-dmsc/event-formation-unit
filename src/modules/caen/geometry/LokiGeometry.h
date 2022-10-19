@@ -14,13 +14,16 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <vector>
+#include <modules/caen/readout/DataParser.h>
+#include <logical_geometry/ESSGeometry.h>
+#include <modules/caen/geometry/Calibration.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_ERR
 
 namespace Caen {
 
-class LokiTubeAmps {
+class LokiGeometry {
 public:
   /// \brief The four amplitudes measured at certain points in the
   /// Helium tube circuit diagram are used to identify the straw that
@@ -57,9 +60,12 @@ public:
   }
 
   void setResolution(uint16_t Resolution) { NPos = Resolution; }
+  void setCalibration(Calibration Calib) { CaenCalibration = &Calib; }
+
 
   struct Stats {
     uint64_t AmplitudeZero{0};
+    uint64_t OutsideRegion{0};
   } Stats;
 
   uint8_t strawCalc(double straw) {
@@ -80,9 +86,53 @@ public:
       return 6;
   }
 
+  uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
+                      DataParser::CaenReadout &Data){
+    uint8_t TubeGroup = FEN;
+    uint8_t LocalTube = Data.TubeId;
+
+    bool valid =
+        calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+
+    if (not valid) {
+      return 0;
+    }
+    /// Globalstraw is per its definition == Y
+    uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, StrawId);
+
+    XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
+    if (GlobalStraw == Panel.StrawError) {
+      XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
+      return 0;
+    }
+
+    if ((GlobalStraw < MinStraw) or
+      (GlobalStraw > MaxStraw)) {
+      Stats.OutsideRegion++;
+      return 0;
+    }
+
+    uint16_t CalibratedPos =
+      CaenCalibration->strawCorrection(GlobalStraw, PosVal);
+    XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
+
+    uint32_t PixelId =
+      ESSGeom.pixel2D(CalibratedPos, GlobalStraw);
+
+    XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
+         CalibratedPos, GlobalStraw, PixelId);
+
+    return PixelId;
+}
+
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::uint16_t NPos{512};       ///< resolution of position
+  uint16_t MinStraw{0};          /// ported over from the original LoKI module
+  uint16_t MaxStraw{65535};      /// with a todo note to remove
+  Calibration *CaenCalibration;
+  ESSGeometry ESSGeom;
 
 public:
   /// holds latest calculated values for straw and position

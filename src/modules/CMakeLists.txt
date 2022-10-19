@@ -6,11 +6,10 @@
 include_directories(.)
 
 add_subdirectory(adc_readout)
-add_subdirectory(bifrost)
+add_subdirectory(caen)
 add_subdirectory(cspec)
 add_subdirectory(dream)
 add_subdirectory(freia)
-add_subdirectory(loki)
 add_subdirectory(multigrid)
 add_subdirectory(perfgen)
 add_subdirectory(ttlmonitor)

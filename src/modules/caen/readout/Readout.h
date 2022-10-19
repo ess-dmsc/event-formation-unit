@@ -28,7 +28,7 @@
 ///
 /// \file
 ///
-/// \brief Readout struct for LOKI event formation
+/// \brief Readout struct for Caen event formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -36,7 +36,7 @@
 
 #include <common/DumpFile.h>
 
-namespace Loki {
+namespace Caen {
 
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
@@ -67,14 +67,14 @@ struct __attribute__((packed)) Readout {
   std::string debug() const;
 };
 
-} // namespace Loki
+} // namespace Caen
 
 namespace hdf5 {
 
 namespace datatype {
-template <> class TypeTrait<Loki::Readout> {
+template <> class TypeTrait<Caen::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Loki::Readout) {
+  H5_COMPOUND_DEFINE_TYPE(Caen::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
@@ -100,7 +100,7 @@ public:
 
 } // namespace hdf5
 
-namespace Loki {
+namespace Caen {
 
 using ReadoutFile = DumpFile<Readout>;
 

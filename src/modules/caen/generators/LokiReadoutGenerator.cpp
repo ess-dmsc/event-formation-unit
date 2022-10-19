@@ -11,7 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <math.h>
-#include <modules/loki/generators/ReadoutGenerator.h>
+#include <modules/caen/generators/LokiReadoutGenerator.h>
 #include <time.h>
 
 #include <cassert>
@@ -23,16 +23,16 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Caen {
 
-void ReadoutGenerator::generateData() {
+void LokiReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
-  uint8_t LokiDataSize = sizeof(DataParser::LokiReadout);
+  uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
-    auto ReadoutData = (DataParser::LokiReadout *)DP;
+    auto ReadoutData = (DataParser::CaenReadout *)DP;
 
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
