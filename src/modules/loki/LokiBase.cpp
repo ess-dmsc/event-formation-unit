@@ -173,6 +173,7 @@ void LokiBase::processingThread() {
   Loki.setSerializerII(SerializerII); // would rather have this in LokiInstrument
 
   unsigned int DataIndex;
+  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -221,7 +222,7 @@ void LokiBase::processingThread() {
       usleep(10);
     }
 
-    if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (ProduceTimer.timeout()) {
       XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});
