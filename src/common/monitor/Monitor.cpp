@@ -12,6 +12,8 @@
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
+#pragma message("Monitor class currently uses default Kafka config an cannot be loaded from file")
+
 Monitor::Monitor(const std::string &broker, const std::string &topic_prefix,
                  const std::string &source_name) {
   source_name_ = source_name;
