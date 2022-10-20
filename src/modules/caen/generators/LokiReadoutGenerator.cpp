@@ -64,5 +64,5 @@ void LokiReadoutGenerator::generateData() {
     }
   }
 }
-} // namespace Loki
+} // namespace Caen
 // GCOVR_EXCL_STOP

@@ -1,8 +1,8 @@
 /** Copyright (C) 2016-2022 European Spallation Source ERIC */
 
+#include <caen/geometry/Calibration.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <caen/geometry/Calibration.h>
 
 std::string NotJsonFile{"deleteme_caencalib_notjson.json"};
 std::string NotJsonStr = R"(

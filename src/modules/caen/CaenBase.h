@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <caen/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
-#include <caen/Counters.h>
 
 namespace Caen {
 

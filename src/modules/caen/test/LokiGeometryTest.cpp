@@ -1,8 +1,8 @@
 /** Copyright (C) 2019-2022 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <common/testutils/TestBase.h>
 #include <caen/geometry/LokiGeometry.h>
+#include <common/testutils/TestBase.h>
 #include <memory>
 
 using namespace Caen;

@@ -8,6 +8,7 @@
 
 #include "CaenBase.h"
 
+#include <caen/CaenInstrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
@@ -17,7 +18,6 @@
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <caen/CaenInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
 // #include <common/debug/Hexdump.h>
@@ -132,7 +132,8 @@ void CaenBase::inputThread() {
              dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                   RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      //XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+      // XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+      // readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
 
@@ -156,7 +157,7 @@ void CaenBase::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "caen_detector",
-    KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -166,14 +167,15 @@ void CaenBase::processingThread() {
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
 
   Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug",
-    KafkaCfg.CfgParms);
+                           KafkaCfg.CfgParms);
 
   auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
   SerializerII = new EV44Serializer(KafkaBufferSize, "caen", ProduceII);
-  Caen.setSerializerII(SerializerII); // would rather have this in CaenInstrument
+  Caen.setSerializerII(
+      SerializerII); // would rather have this in CaenInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);

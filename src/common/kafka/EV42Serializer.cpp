@@ -82,11 +82,11 @@ nonstd::span<const uint8_t> EV42Serializer::serialize() {
 
 size_t EV42Serializer::produce() {
   // pulse_time is given as ns since 1970, produce time should be ms.
-  uint64_t PulseTimeMs = EventMessage_->pulse_time()/1000000;
+  uint64_t PulseTimeMs = EventMessage_->pulse_time() / 1000000;
 
   if (EventCount != 0) {
     XTRACE(OUTPUT, INF, "produce %zu events, produce time (ms): %lu",
-       EventCount, PulseTimeMs);
+           EventCount, PulseTimeMs);
     serialize();
     if (ProduceFunctor) {
       ProduceFunctor(Buffer_, PulseTimeMs);

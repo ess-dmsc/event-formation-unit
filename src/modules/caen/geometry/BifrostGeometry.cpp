@@ -33,4 +33,4 @@ int BifrostGeometry::posAlongTube(int AmpA, int AmpB) {
   return ((PosResolution - 1) * AmpA) / (AmpA + AmpB);
 }
 
-} // namespace Bifrost
+} // namespace Caen

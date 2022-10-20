@@ -6,9 +6,9 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
+#include <caen/geometry/Config.h>
 #include <common/JsonFile.h>
 #include <common/debug/Log.h>
-#include <caen/geometry/Config.h>
 
 namespace Caen {
 

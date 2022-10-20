@@ -7,18 +7,18 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multigrid/MultigridBase.h>
-#include <multigrid/geometry/PlaneMappings.h>
-#include <common/kafka/Producer.h>
-#include <common/kafka/KafkaConfig.h>
 #include <common/RuntimeStat.h>
-#include <common/system/Socket.h>
-#include <common/time/TimeString.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/Timer.h>
 #include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/kafka/Producer.h>
+#include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/TimeString.h>
+#include <common/time/Timer.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <multigrid/MultigridBase.h>
+#include <multigrid/geometry/PlaneMappings.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -156,7 +156,7 @@ void MultigridBase::mainThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector",
-    KafkaCfg.CfgParms);
+                          KafkaCfg.CfgParms);
   auto Produce = [&event_producer](auto DataBuffer, auto Timestamp) {
     event_producer.produce(DataBuffer, Timestamp);
   };

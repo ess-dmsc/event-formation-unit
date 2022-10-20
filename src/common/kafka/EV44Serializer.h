@@ -14,7 +14,6 @@
 #include "flatbuffers/flatbuffers.h"
 #include <common/time/TSCTimer.h>
 
-
 struct Event44Message;
 
 class EV44Serializer {

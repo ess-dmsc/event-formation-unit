@@ -130,7 +130,6 @@ protected:
     serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
     counters = {};
 
-
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
     ttlmonitor =

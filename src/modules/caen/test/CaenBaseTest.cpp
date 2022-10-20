@@ -9,12 +9,12 @@
 
 #include <string>
 
+#include <caen/CaenBase.h>
+#include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <common/testutils/TestUDPServer.h>
-#include <common/debug/Trace.h>
-#include <caen/CaenBase.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB

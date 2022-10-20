@@ -186,13 +186,13 @@ void NMXBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    KafkaCfg.CfgParms);
+                     KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
   Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
-    KafkaCfg.CfgParms);
+                           KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };

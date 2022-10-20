@@ -9,9 +9,9 @@
 
 #pragma once
 
+#include <caen/geometry/PanelGeometry.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <caen/geometry/PanelGeometry.h>
 #include <string>
 #include <vector>
 

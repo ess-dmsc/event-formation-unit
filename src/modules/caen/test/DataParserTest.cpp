@@ -1,8 +1,8 @@
 /** Copyright (C) 2016-2022 European Spallation Source ERIC */
 
-#include <common/testutils/TestBase.h>
 #include <caen/readout/DataParser.h>
 #include <caen/test/DataParserTestData.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Caen;
 

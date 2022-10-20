@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <caen/CaenInstrument.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <caen/CaenInstrument.h>
 
 using namespace Caen;
 

@@ -11,10 +11,10 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
+#include <modules/caen/generators/LokiReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
-#include <modules/caen/generators/LokiReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
 #include <modules/nmx/generators/TrackReadoutGenerator.h>

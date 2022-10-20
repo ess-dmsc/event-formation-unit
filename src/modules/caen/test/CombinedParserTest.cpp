@@ -7,11 +7,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/readout/ess/Parser.h>
-#include <common/testutils/TestBase.h>
 #include <caen/Counters.h>
 #include <caen/generators/LokiReadoutGenerator.h>
 #include <caen/readout/DataParser.h>
+#include <common/readout/ess/Parser.h>
+#include <common/testutils/TestBase.h>
 
 const uint32_t FirstSeqNum{0};
 

@@ -3,10 +3,10 @@
 
 #include <CLI/CLI.hpp>
 #include <cassert>
-#include <inttypes.h>
-#include <iostream>
 #include <common/system/Socket.h>
 #include <common/time/Timer.h>
+#include <inttypes.h>
+#include <iostream>
 #include <stdio.h>
 
 struct {
@@ -19,7 +19,8 @@ CLI::App app{"UDP receiver with 32 bit sequence number check."};
 
 int main(int argc, char *argv[]) {
   app.add_option("-p, --port", Settings.UDPPort, "UDP receive port");
-  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize, "socket buffer size (bytes)");
+  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize,
+                 "socket buffer size (bytes)");
   CLI11_PARSE(app, argc, argv);
 
   static const int BUFFERSIZE{9200};
@@ -60,8 +61,8 @@ int main(int argc, char *argv[]) {
       RxBytesTotal += RxBytes;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
              " MB) %" PRIu64 " usecs, PER %4.3e\n",
-             RxBytes * 8.0 / (USecs / 1000000.0) / B1M, RxBytes / B1M, RxBytesTotal / B1M,
-             USecs, (1.0 * SeqNo - RxPackets)/SeqNo);
+             RxBytes * 8.0 / (USecs / 1000000.0) / B1M, RxBytes / B1M,
+             RxBytesTotal / B1M, USecs, (1.0 * SeqNo - RxPackets) / SeqNo);
       RxBytes = 0;
       UpdateTimer.reset();
       USecs = UpdateTimer.timeus();

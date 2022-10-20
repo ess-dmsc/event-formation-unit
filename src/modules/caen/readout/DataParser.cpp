@@ -6,9 +6,9 @@
 /// \brief Parser for ESS readout of Caen Modules
 //===----------------------------------------------------------------------===//
 
+#include <caen/readout/DataParser.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <caen/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR

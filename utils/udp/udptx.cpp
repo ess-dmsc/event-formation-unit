@@ -3,11 +3,11 @@
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <iostream>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/Timer.h>
 #include <fmt/format.h>
+#include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -26,8 +26,10 @@ char Buffer[10000];
 
 int main(int argc, char *argv[]) {
   app.add_option("-p, --port", Settings.UDPPort, "UDP transmit port");
-  app.add_option("-d, --data_size", Settings.DataSize, "Size of UDP payload (bytes)");
-  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize, "socket buffer size (bytes)");
+  app.add_option("-d, --data_size", Settings.DataSize,
+                 "Size of UDP payload (bytes)");
+  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize,
+                 "socket buffer size (bytes)");
   CLI11_PARSE(app, argc, argv);
 
   uint64_t TxBytesTotal{0};
@@ -59,8 +61,8 @@ int main(int argc, char *argv[]) {
       auto USecs = RateTimer.timeus();
       TxBytesTotal += TxBytes;
       fmt::print("Tx rate: {} Mbps, {} pps, tx {} MB (total: {} MB) {} usecs\n",
-             TxBytes * 8.0 / USecs, TxPackets * 1000000.0 / USecs, TxBytes / B1M,
-             TxBytesTotal / B1M, USecs);
+                 TxBytes * 8.0 / USecs, TxPackets * 1000000.0 / USecs,
+                 TxBytes / B1M, TxBytesTotal / B1M, USecs);
       TxBytes = 0;
       TxPackets = 0;
       RateTimer.reset();

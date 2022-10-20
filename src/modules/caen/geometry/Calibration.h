@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include <common/debug/Trace.h>
 #include <caen/geometry/Config.h>
+#include <common/debug/Trace.h>
 #include <string>
 #include <vector>
 

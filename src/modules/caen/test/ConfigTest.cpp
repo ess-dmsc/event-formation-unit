@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <caen/geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <caen/geometry/Config.h>
 
 std::string NotJsonFile{"deleteme_caen_notjson.json"};
 std::string NotJsonStr = R"(

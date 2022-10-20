@@ -7,10 +7,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <caen/CaenInstrument.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
-#include <caen/CaenInstrument.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
@@ -39,18 +39,22 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
 
     XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
            CaenConfiguration.Resolution);
-    LokiGeom.CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
+    LokiGeom.CaenCalibration.nullCalibration(Straws,
+                                             CaenConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
            ModuleSettings.CalibFile.c_str());
     LokiGeom.CaenCalibration = Calibration(ModuleSettings.CalibFile);
   }
 
-  if (LokiGeom.CaenCalibration.getMaxPixel() != CaenConfiguration.getMaxPixel()) {
+  if (LokiGeom.CaenCalibration.getMaxPixel() !=
+      CaenConfiguration.getMaxPixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-           CaenConfiguration.getMaxPixel(), LokiGeom.CaenCalibration.getMaxPixel());
+           CaenConfiguration.getMaxPixel(),
+           LokiGeom.CaenCalibration.getMaxPixel());
     LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        CaenConfiguration.getMaxPixel(), LokiGeom.CaenCalibration.getMaxPixel());
+        CaenConfiguration.getMaxPixel(),
+        LokiGeom.CaenCalibration.getMaxPixel());
     throw std::runtime_error("Pixel mismatch");
   }
 
@@ -72,7 +76,7 @@ CaenInstrument::~CaenInstrument() {}
 uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
                                    DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
-  if (CaenConfiguration.InstrumentName == "LoKI"){
+  if (CaenConfiguration.InstrumentName == "LoKI") {
     XTRACE(DATA, DEB, "Using Loki Geometry");
     uint32_t pixel = LokiGeom.calcPixel(Panel, FEN, Data);
     counters.ReadoutsBadAmpl = LokiGeom.Stats.AmplitudeZero;
@@ -82,8 +86,7 @@ uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   }
   XTRACE(DATA, DEB, "Not using Loki geometry");
   return 0;
-  }
-
+}
 
 void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   Readout CurrentReadout;
@@ -108,7 +111,9 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
 }
 
 void CaenInstrument::processReadouts() {
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   SerializerII->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels

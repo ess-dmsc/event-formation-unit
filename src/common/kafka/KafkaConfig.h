@@ -10,8 +10,8 @@
 
 #include <common/JsonFile.h>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 class KafkaConfig {
 public:
@@ -22,11 +22,10 @@ public:
   // Parameters obtained from JSON config file
   std::vector<std::pair<std::string, std::string>> CfgParms;
 
-  static inline std::vector<std::pair<std::string,std::string>> DefaultConfig {
-    {"message.max.bytes", "10000000"},
-    {"fetch.message.max.bytes", "10000000"},
-    {"message.copy.max.bytes", "10000000"},
-    {"queue.buffering.max.ms", "100"},
-    {"api.version.request", "true"}
-  };
+  static inline std::vector<std::pair<std::string, std::string>> DefaultConfig{
+      {"message.max.bytes", "10000000"},
+      {"fetch.message.max.bytes", "10000000"},
+      {"message.copy.max.bytes", "10000000"},
+      {"queue.buffering.max.ms", "100"},
+      {"api.version.request", "true"}};
 };

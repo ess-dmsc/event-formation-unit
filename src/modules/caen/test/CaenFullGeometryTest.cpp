@@ -9,10 +9,10 @@
 
 #include <CaenFullGeometryTestData.h>
 #include <algorithm>
+#include <caen/geometry/PanelGeometry.h>
 #include <common/testutils/TestBase.h>
 #include <cstdint>
 #include <logical_geometry/ESSGeometry.h>
-#include <caen/geometry/PanelGeometry.h>
 #include <memory>
 #include <vector>
 

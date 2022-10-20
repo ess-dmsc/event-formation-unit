@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <iostream>
 #include <caen/generators/ReaderReadouts.h>
 #include <caen/readout/Readout.h>
+#include <iostream>
 
 namespace Caen {
 

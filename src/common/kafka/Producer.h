@@ -18,8 +18,8 @@
 #include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
-#include <vector>
 #include <utility>
+#include <vector>
 
 ///
 class ProducerBase {
@@ -46,7 +46,7 @@ public:
   /// "trex_detector"
   /// \param Configs vector of configuration <type,value> pairs
   Producer(std::string Broker, std::string Topic,
-    std::vector<std::pair<std::string, std::string>> & Configs);
+           std::vector<std::pair<std::string, std::string>> &Configs);
 
   /// \brief cleans up by deleting allocated structures
   ~Producer() = default;
@@ -76,8 +76,6 @@ protected:
   std::unique_ptr<RdKafka::Conf> TopicConfig;
   std::unique_ptr<RdKafka::Topic> KafkaTopic;
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
-
-
 };
 
 using ProducerCallback =

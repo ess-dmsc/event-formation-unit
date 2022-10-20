@@ -10,9 +10,9 @@
 
 #pragma once
 
+#include <caen/readout/DataParser.h>
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <caen/readout/DataParser.h>
 
 namespace Caen {
 class LokiReadoutGenerator : public ReadoutGeneratorBase {
@@ -23,5 +23,5 @@ protected:
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
 };
-} // namespace Loki
+} // namespace Caen
 // GCOVR_EXCL_STOP

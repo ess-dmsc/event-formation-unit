@@ -11,16 +11,16 @@
 
 #pragma once
 
-#include <common/readout/ess/ESSTime.h>
-#include <common/readout/ess/Parser.h>
-#include <caen/Counters.h>
 #include <caen/CaenBase.h> // to get CaenSettings
+#include <caen/Counters.h>
+#include <caen/geometry/BifrostGeometry.h>
 #include <caen/geometry/Calibration.h>
 #include <caen/geometry/Config.h>
-#include <caen/geometry/PanelGeometry.h>
 #include <caen/geometry/LokiGeometry.h>
-#include <caen/geometry/BifrostGeometry.h>
+#include <caen/geometry/PanelGeometry.h>
 #include <caen/readout/Readout.h>
+#include <common/readout/ess/ESSTime.h>
+#include <common/readout/ess/Parser.h>
 #include <readout/DataParser.h>
 
 namespace Caen {
@@ -40,7 +40,9 @@ public:
 
   //
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-  void setSerializerII(EV44Serializer *serializer) { SerializerII = serializer; }
+  void setSerializerII(EV44Serializer *serializer) {
+    SerializerII = serializer;
+  }
 
   /// \brief LoKI pixel calculations
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,

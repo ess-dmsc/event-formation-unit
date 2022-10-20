@@ -13,10 +13,10 @@
 #pragma once
 #include <cinttypes>
 #include <common/debug/Trace.h>
-#include <vector>
-#include <modules/caen/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Calibration.h>
+#include <modules/caen/readout/DataParser.h>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_ERR
@@ -38,7 +38,6 @@ public:
   void setResolution(uint16_t Resolution) { NPos = Resolution; }
   void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
 
-
   struct Stats {
     uint64_t AmplitudeZero{0};
     uint64_t OutsideRegion{0};
@@ -46,7 +45,7 @@ public:
 
   uint8_t strawCalc(double straw);
   uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
-                      DataParser::CaenReadout &Data);
+                     DataParser::CaenReadout &Data);
 
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
@@ -59,7 +58,6 @@ public:
   std::uint8_t StrawId{7};
   double PosVal{512.0};
   Calibration CaenCalibration;
-
 };
 
 } // namespace Caen
