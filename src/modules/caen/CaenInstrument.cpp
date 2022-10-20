@@ -39,19 +39,18 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
 
     XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
            CaenConfiguration.Resolution);
-    CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
+    LokiGeom.CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
            ModuleSettings.CalibFile.c_str());
-    CaenCalibration = Calibration(ModuleSettings.CalibFile);
+    LokiGeom.CaenCalibration = Calibration(ModuleSettings.CalibFile);
   }
-  LokiGeom.setCalibration(CaenCalibration);
 
-  if (CaenCalibration.getMaxPixel() != CaenConfiguration.getMaxPixel()) {
+  if (LokiGeom.CaenCalibration.getMaxPixel() != CaenConfiguration.getMaxPixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-           CaenConfiguration.getMaxPixel(), CaenCalibration.getMaxPixel());
+           CaenConfiguration.getMaxPixel(), LokiGeom.CaenCalibration.getMaxPixel());
     LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        CaenConfiguration.getMaxPixel(), CaenCalibration.getMaxPixel());
+        CaenConfiguration.getMaxPixel(), LokiGeom.CaenCalibration.getMaxPixel());
     throw std::runtime_error("Pixel mismatch");
   }
 
@@ -72,12 +71,15 @@ CaenInstrument::~CaenInstrument() {}
 /// also applies the calibration
 uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
                                    DataParser::CaenReadout &Data) {
+  XTRACE(DATA, DEB, "Calculating pixel");
   if (CaenConfiguration.InstrumentName == "LoKI"){
+    XTRACE(DATA, DEB, "Using Loki Geometry");
     auto pixel = LokiGeom.calcPixel(Panel, FEN, Data);
     counters.ReadoutsBadAmpl = LokiGeom.Stats.AmplitudeZero;
     counters.OutsideRegion = LokiGeom.Stats.OutsideRegion;
     return pixel;
   }
+  XTRACE(DATA, DEB, "Not using Loki geometry");
   return 0;
   }
 
@@ -168,8 +170,8 @@ void CaenInstrument::processReadouts() {
     }
 
   } // for()
-  counters.ReadoutsClampLow = CaenCalibration.Stats.ClampLow;
-  counters.ReadoutsClampHigh = CaenCalibration.Stats.ClampHigh;
+  counters.ReadoutsClampLow = LokiGeom.CaenCalibration.Stats.ClampLow;
+  counters.ReadoutsClampHigh = LokiGeom.CaenCalibration.Stats.ClampHigh;
 }
 
 } // namespace Caen

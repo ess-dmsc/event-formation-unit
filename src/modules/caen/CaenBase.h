@@ -18,8 +18,6 @@ struct CaenSettings {
   std::string ConfigFile{""}; ///< panel mappings
   std::string CalibFile{""};  ///< calibration file
   std::string FilePrefix{""}; ///< HDF5 file dumping
-  uint16_t MinStraw{0};       ///< debug \todo remove
-  uint16_t MaxStraw{65535};   ///< debug \todo remove
 };
 
 class CaenBase : public Detector {

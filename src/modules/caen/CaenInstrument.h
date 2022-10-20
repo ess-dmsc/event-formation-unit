@@ -55,7 +55,6 @@ public:
 
   CaenSettings &ModuleSettings;
   Config CaenConfiguration;
-  Calibration CaenCalibration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
   LokiGeometry LokiGeom;

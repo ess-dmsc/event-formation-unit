@@ -14,8 +14,15 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Loki.json" ABSO
 ##
 ## Analog geometry - amplitude calculations
 ##
-set(LokiGeometryTest_INC ../geometry/LokiGeometry.h)
-set(LokiGeometryTest_SRC LokiGeometryTest.cpp)
+set(LokiGeometryTest_INC 
+    ../geometry/LokiGeometry.h
+    ../geometry/Calibration.h
+)
+set(LokiGeometryTest_SRC 
+    LokiGeometryTest.cpp
+    ../geometry/LokiGeometry.cpp
+    ../geometry/Calibration.cpp
+)
 create_test_executable(LokiGeometryTest)
 
 ##
@@ -33,8 +40,11 @@ create_test_executable(CaenPanelGeometryTest)
 set(CaenFullGeometryTest_INC
   CaenFullGeometryTestData.h
   ../geometry/LokiGeometry.h
+  ../geometry/Calibration.h
   ../geometry/PanelGeometry.h)
-set(CaenFullGeometryTest_SRC CaenFullGeometryTest.cpp)
+set(CaenFullGeometryTest_SRC 
+  CaenFullGeometryTest.cpp
+  ../geometry/Calibration.cpp)
 create_test_executable(CaenFullGeometryTest)
 
 

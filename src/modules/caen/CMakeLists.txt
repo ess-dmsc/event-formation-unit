@@ -14,6 +14,7 @@ set(caen_common_inc
   geometry/PanelGeometry.h
   geometry/Config.h
   geometry/Calibration.h
+  geometry/LokiGeometry.h
   readout/DataParser.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
@@ -23,6 +24,7 @@ set(caen_common_src
   CaenInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
+  geometry/LokiGeometry.cpp
   readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp

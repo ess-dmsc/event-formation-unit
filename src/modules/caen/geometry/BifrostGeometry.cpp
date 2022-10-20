@@ -9,7 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <bifrost/geometry/BifrostGeometry.h>
+#include <caen/geometry/BifrostGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

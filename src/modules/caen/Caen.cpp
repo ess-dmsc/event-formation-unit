@@ -25,12 +25,6 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
       .add_option("--dumptofile", LocalCaenSettings.FilePrefix,
                   "dump to specified file")
       ->group("CAEN");
-  parser
-      .add_option("--min", LocalCaenSettings.MinStraw, "low values for straws")
-      ->group("CAEN");
-  parser
-      .add_option("--max", LocalCaenSettings.MaxStraw, "low values for straws")
-      ->group("CAEN");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
