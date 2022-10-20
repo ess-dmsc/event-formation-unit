@@ -13,6 +13,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
@@ -151,10 +152,11 @@ void CaenBase::inputThread() {
 ///
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
-
   CaenInstrument Caen(Counters, CaenModuleSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "caen_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer EventProducer(EFUSettings.KafkaBroker, "caen_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -163,7 +165,8 @@ void CaenBase::processingThread() {
   Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
 
-  Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug");
+  Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug",
+    KafkaCfg.CfgParms);
 
   auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
     EventProducerII.produce(DataBuffer, Timestamp);
@@ -173,6 +176,7 @@ void CaenBase::processingThread() {
   Caen.setSerializerII(SerializerII); // would rather have this in CaenInstrument
 
   unsigned int DataIndex;
+  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -221,7 +225,7 @@ void CaenBase::processingThread() {
       usleep(10);
     }
 
-    if (Serializer->ProduceTimer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (Serializer->ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});

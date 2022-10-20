@@ -12,6 +12,7 @@ set(efu_common_SRC
   detector/EFUArgs.cpp
   kafka/EV42Serializer.cpp
   kafka/EV44Serializer.cpp
+  kafka/KafkaConfig.cpp
   kafka/Producer.cpp
   system/Socket.cpp
   time/Timer.cpp
@@ -35,6 +36,7 @@ set(efu_common_INC
   detector/EFUArgs.h
   kafka/EV42Serializer.h
   kafka/EV44Serializer.h
+  kafka/KafkaConfig.h
   kafka/Producer.h
   memory/Buffer.h
   memory/FixedSizePool.h
