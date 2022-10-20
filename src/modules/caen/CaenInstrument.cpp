@@ -31,6 +31,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   CaenConfiguration = Config(ModuleSettings.ConfigFile);
 
   LokiGeom.setResolution(CaenConfiguration.Resolution);
+  LokiGeom.ESSGeom = CaenConfiguration.Geometry;
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");

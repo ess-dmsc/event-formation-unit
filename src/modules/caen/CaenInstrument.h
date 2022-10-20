@@ -60,7 +60,6 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
   LokiGeometry LokiGeom;
-  ESSGeometry lgeom{900, 15, 1, 1};
   BifrostGeometry BifrostGeom;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;

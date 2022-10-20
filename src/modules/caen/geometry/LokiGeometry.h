@@ -50,7 +50,6 @@ public:
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::uint16_t NPos{512};       ///< resolution of position
-  ESSGeometry ESSGeom{900, 15, 1, 1};
 
 public:
   /// holds latest calculated values for straw and position
@@ -58,6 +57,7 @@ public:
   std::uint8_t StrawId{7};
   double PosVal{512.0};
   Calibration CaenCalibration;
+  ESSGeometry *ESSGeom;
 };
 
 } // namespace Caen

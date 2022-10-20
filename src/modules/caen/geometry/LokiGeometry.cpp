@@ -84,7 +84,7 @@ uint32_t LokiGeometry::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   uint16_t CalibratedPos = CaenCalibration.strawCorrection(GlobalStraw, PosVal);
   XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
 
-  uint32_t PixelId = ESSGeom.pixel2D(CalibratedPos, GlobalStraw);
+  uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalStraw);
   // ESSGeom.pixel2D(PosVal, GlobalStraw);
 
   XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
