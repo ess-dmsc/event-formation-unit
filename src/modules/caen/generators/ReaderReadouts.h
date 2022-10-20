@@ -14,10 +14,10 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <modules/loki/readout/DataParser.h>
-#include <modules/loki/readout/Readout.h>
+#include <modules/caen/readout/DataParser.h>
+#include <modules/caen/readout/Readout.h>
 
-namespace Loki {
+namespace Caen {
 
 class ReaderReadouts {
 public:
@@ -46,7 +46,7 @@ private:
   size_t ReadoutSize{0};
   size_t ChunkSize{0};
   uint32_t SeqNum{0};
-  const size_t LokiReadoutSize = sizeof(struct DataParser::LokiReadout);
+  const size_t LokiReadoutSize = sizeof(struct DataParser::CaenReadout);
   const size_t ESSHeaderSize =
       sizeof(struct ESSReadout::Parser::PacketHeaderV0);
 
@@ -56,6 +56,6 @@ private:
   uint32_t CurPulseTimeLow{0};
 };
 
-} // namespace Loki
+} // namespace Caen
 
 // GCOVR_EXCL_STOP

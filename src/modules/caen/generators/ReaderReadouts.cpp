@@ -9,10 +9,10 @@
 // GCOVR_EXCL_START
 
 #include <iostream>
-#include <loki/generators/ReaderReadouts.h>
-#include <loki/readout/Readout.h>
+#include <caen/generators/ReaderReadouts.h>
+#include <caen/readout/Readout.h>
 
-namespace Loki {
+namespace Caen {
 
 ReaderReadouts::ReaderReadouts(std::string filename) {
   file = ReadoutFile::open(filename);
@@ -50,7 +50,7 @@ size_t ReaderReadouts::read(char *buf) {
       PacketHdr->SeqNum = SeqNum++;
 
       auto *LRDP =
-          (struct DataParser::LokiReadout
+          (struct DataParser::CaenReadout
                *)(buf + sizeof(struct ESSReadout::Parser::PacketHeaderV0));
 
       CurPulseTimeHigh = LokiData[0].PulseTimeHigh;
@@ -90,5 +90,5 @@ size_t ReaderReadouts::read(char *buf) {
   return TotalLength;
 }
 
-} // namespace Loki
+} // namespace Caen
 // GCOVR_EXCL_STOP

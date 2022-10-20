@@ -28,7 +28,7 @@
 ///
 /// \file
 ///
-/// \brief Readout struct for LOKI event formation
+/// \brief Readout struct for VMM3 event formation
 ///
 //===----------------------------------------------------------------------===//
 
