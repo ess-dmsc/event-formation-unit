@@ -93,9 +93,8 @@ uint8_t LokiGeometry::strawCalc(double straw) {
       ESSGeom.pixel2D(CalibratedPos, GlobalStraw);
       // ESSGeom.pixel2D(PosVal, GlobalStraw);
 
-    XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
-         CalibratedPos, GlobalStraw, PixelId);
-
+    XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal, CalibratedPos, GlobalStraw, PixelId); ///\todo this print statement prints a random number for pixel id
+    XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
     return PixelId;
 }
 

@@ -74,9 +74,10 @@ uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   XTRACE(DATA, DEB, "Calculating pixel");
   if (CaenConfiguration.InstrumentName == "LoKI"){
     XTRACE(DATA, DEB, "Using Loki Geometry");
-    auto pixel = LokiGeom.calcPixel(Panel, FEN, Data);
+    uint32_t pixel = LokiGeom.calcPixel(Panel, FEN, Data);
     counters.ReadoutsBadAmpl = LokiGeom.Stats.AmplitudeZero;
     counters.OutsideRegion = LokiGeom.Stats.OutsideRegion;
+    XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
     return pixel;
   }
   XTRACE(DATA, DEB, "Not using Loki geometry");
@@ -162,6 +163,7 @@ void CaenInstrument::processReadouts() {
     uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
 
     if (PixelId == 0) {
+      XTRACE(DATA, ERR, "Pixel error");
       counters.PixelErrors++;
     } else {
       Serializer->addEvent(TimeOfFlight, PixelId);

@@ -51,7 +51,7 @@ public:
 private:
   const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::uint16_t NPos{512};       ///< resolution of position
-  ESSGeometry ESSGeom;
+  ESSGeometry ESSGeom{900, 15, 1, 1};
 
 public:
   /// holds latest calculated values for straw and position
