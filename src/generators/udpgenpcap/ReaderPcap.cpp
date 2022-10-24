@@ -22,13 +22,11 @@
 
 // Protocol identifiers
 // Header and data location specifications
-const int ETHERNET_HEADER_SIZE = 14;
-const int IP_HEADER_SIZE = 20;
-const int UDP_HEADER_SIZE = 8;
-
-const int IP_HEADR_OFFSET = ETHERNET_HEADER_SIZE;
-const int UDP_HEADER_OFFSET = IP_HEADR_OFFSET + IP_HEADER_SIZE;
-const int UDP_DATA_OFFSET = UDP_HEADER_OFFSET + UDP_HEADER_SIZE;
+ const int IP_HEADER_SIZE = 20;
+ const int UDP_HEADER_SIZE = 8;
+//
+int UDP_HEADER_OFFSET;
+int UDP_DATA_OFFSET;
 
 ReaderPcap::ReaderPcap(std::string FileName) : FileName(FileName) {
   memset(&Stats, 0, sizeof(stats_t));
@@ -46,6 +44,21 @@ int ReaderPcap::open() {
   if (PcapHandle == nullptr) {
     return -1;
   }
+
+  LinkType = pcap_datalink(PcapHandle);
+  if (LinkType == DLT_NULL) { // Loopback
+    printf("Adjusting offset for loopback capture\n");
+    LinkLayerSize = 4;
+  } else if (LinkType == DLT_EN10MB) {
+    printf("Adjusting offset for Ethernet capture\n");
+    LinkLayerSize = 14;
+  } else {
+    printf("Unknown link layer, exiting...");
+    return -1;
+  }
+
+  UDP_HEADER_OFFSET = LinkLayerSize + IP_HEADER_SIZE;
+  UDP_DATA_OFFSET = UDP_HEADER_OFFSET + UDP_HEADER_SIZE;
 
   if (pcap_compile(PcapHandle, &PcapFilter, FilterUdp, 1,
                    PCAP_NETMASK_UNKNOWN) == -1) {
@@ -73,7 +86,14 @@ int ReaderPcap::validatePacket(pcap_pkthdr *Header, const unsigned char *Data) {
   Stats.IpProtoUDP++;
   assert(Stats.PacketsTotal ==
          Stats.PacketsTruncated + Stats.PacketsNoMatch + Stats.IpProtoUDP);
-  assert(Header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+  assert((int)Header->len > LinkLayerSize + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+
+  if (LinkType == DLT_NULL) {
+    if ((uint8_t)Data[0] != 2) {
+      printf("Loopback interface only replays IPv4\n");
+      return 0;
+    }
+  }
 
   udphdr *udp = (udphdr *)&Data[UDP_HEADER_OFFSET];
 #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
