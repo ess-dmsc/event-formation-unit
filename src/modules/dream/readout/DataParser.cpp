@@ -10,8 +10,8 @@
 #include <common/readout/ess/Parser.h>
 #include <dream/readout/DataParser.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
@@ -83,4 +83,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Loki
+} // namespace Dream
