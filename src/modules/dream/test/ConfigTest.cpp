@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,37 +8,106 @@
 #include <common/testutils/TestBase.h>
 #include <dream/geometry/Config.h>
 
-std::string NotJsonFile{"deleteme_dream_notjson.json"};
-std::string NotJsonStr = R"(
-{
-  Ceci n’est pas Json
-)";
+// clang-format off
 
 // Invalid config file
-std::string InvalidConfigFile{"deleteme_dream_invalidconfig.json"};
-std::string InvalidConfigStr = R"(
+auto InvalidCfgMissingDetectorField = R"(
 {
-  "NotDetector": "InvalidField",
+  "NotDetector" : "InvalidField",
 
-  "MaxPulseTimeNS" : 5000000000
+  "MaxPulseTimeNS" : 50000
 }
-)";
+)"_json;
 
-// // Good configuration file
-// std::string ValidConfigFile{"deleteme_loki_valid_conf.json"};
-// std::string ValidConfigStr = R"(
-// {
-//   "Detector": "DREAM",
-//
-//   "MaxPulseTimeNS" : 5000000000
-// }
-// )";
+auto InvalidCfgWrongDetectorName = R"(
+{
+  "Detector" : "Freia",
+
+  "MaxPulseTimeNS" : 50000
+}
+)"_json;
+
+auto InvalidRingConfParm = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 255, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+auto InvalidFENConfParm = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 255, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+auto InvalidTypeConfParm = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BadType"}
+  ]
+}
+)"_json;
+
+auto DuplicateConfParm = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"},
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+
+// finally a valid config file
+auto ValidConfig = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+auto ValidConfigDefaultPulseTime = R"(
+{
+  "Detector" : "DREAM",
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+
+// clang-format on
 
 using namespace Dream;
 
 class ConfigTest : public TestBase {
 protected:
-  Config config;
+  Config config{"config.json"}; // dummy filename, not used
   void SetUp() override {}
   void TearDown() override {}
 };
@@ -48,37 +117,65 @@ TEST_F(ConfigTest, Constructor) {
 }
 
 TEST_F(ConfigTest, NoConfigFile) {
-  ASSERT_THROW(config = Config(""), std::runtime_error);
+  Config config2;
+  ASSERT_THROW(config2.loadAndApply(), std::runtime_error);
 }
 
 TEST_F(ConfigTest, JsonFileNotExist) {
-  ASSERT_THROW(config = Config("/this_file_doesnt_exist"), std::runtime_error);
+  ASSERT_THROW(config.loadAndApply(), std::runtime_error);
 }
-
-TEST_F(ConfigTest, NotJson) { ASSERT_ANY_THROW(config = Config(NotJsonFile)); }
 
 TEST_F(ConfigTest, InvalidConfig) {
-  ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
+  config.root = InvalidCfgMissingDetectorField;
+  ASSERT_ANY_THROW(config.apply());
 }
-//
-// TEST_F(ConfigTest, ValidConfig) {
-//   config = Config(ValidConfigFile);
-//   ASSERT_EQ(config.getMaxPixel(), (32 + 24) * 4 * 7 * 256);
-//   ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
-//   ASSERT_EQ(config.Panels.size(), 2);
-//   deleteFile(ValidConfigFile);
-// }
+
+TEST_F(ConfigTest, InvalidConfigName) {
+  config.root = InvalidCfgWrongDetectorName;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, InvalidRingConfParm) {
+  config.root = InvalidRingConfParm;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, InvalidFENConfParm) {
+  config.root = InvalidFENConfParm;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, InvalidTypeConfParm) {
+  config.root = InvalidTypeConfParm;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+TEST_F(ConfigTest, DuplicateConfParm) {
+  config.root = DuplicateConfParm;
+  ASSERT_ANY_THROW(config.apply());
+}
+
+// Valid cfg file tests below
+
+TEST_F(ConfigTest, ValidConfig) {
+  ASSERT_FALSE(config.RMConfig[4][2].Initialised);
+
+  config.root = ValidConfig;
+  config.apply();
+
+  ASSERT_TRUE(config.RMConfig[4][2].Initialised);
+  ASSERT_EQ(config.MaxPulseTimeNS, 50000);
+}
+
+TEST_F(ConfigTest, ValidConfigDefaultPulseTime) {
+  config.root = ValidConfigDefaultPulseTime;
+  config.MaxPulseTimeNS = 1;
+  config.apply();
+  ASSERT_EQ(config.MaxPulseTimeNS, 1);
+}
+
 
 int main(int argc, char **argv) {
-  saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
-  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
-             InvalidConfigStr.size());
-
   testing::InitGoogleTest(&argc, argv);
-  auto RetVal = RUN_ALL_TESTS();
-
-  deleteFile(NotJsonFile);
-  deleteFile(InvalidConfigFile);
-
-  return RetVal;
+  return RUN_ALL_TESTS();
 }

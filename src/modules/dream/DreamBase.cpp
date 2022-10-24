@@ -59,9 +59,9 @@ DreamBase::DreamBase(BaseSettings const &Settings,
 
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
-  Stats.create("readouts.headers", Counters.Headers);
+  Stats.create("readouts.headers", Counters.DataHeaders);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
-  Stats.create("readouts.error_header", Counters.ErrorHeaders);
+  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
 
 
 
@@ -176,7 +176,7 @@ void DreamBase::processingThread() {
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
-        Counters.ErrorHeaders++;
+        Counters.ErrorESSHeaders++;
         continue;
       }
 

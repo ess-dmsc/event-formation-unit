@@ -17,10 +17,14 @@
 
 std::string dreamjson = R"(
   {
-    "Detector" : "Dream",
+    "Detector" : "DREAM",
 
     "MaxPulseTimeNS" : 357142855
-  }
+  },
+
+  "Config" : [
+    { "Ring" :  0, "FEN":  0, "Type": "BwEndCap"}
+  ]
 )";
 
 class DreamBaseStandIn : public Dream::DreamBase {
@@ -66,8 +70,9 @@ std::vector<uint8_t> TestPacket2{
     0x2e, 0x00, 0x00, 0x00, // 0x002e - 46 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x11, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00,
-    0x00, // Seq number 1
+    0x11, 0x00, 0x00, 0x00,
+    0x00, 0x01, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00, // Seq number 1
 
     // Data Header 1
     0x00, 0x01, 0x10, 0x00, // ring 0, fen 1, data size 16 bytes
@@ -75,7 +80,7 @@ std::vector<uint8_t> TestPacket2{
     // Readout 1
     0x22, 0x00, 0x00, 0x00, // tof 34 (0x22)
     0x00, 0x00, 0x14, 0x05, // unused 00 00 module 20, sumo 5
-    0x0e, 0x0b, 0x01, 0x01  // strip 14, wire 11, segment 1, counter 2
+    0x00, 0x00, 0xCC, 0xAA  // strip 14, wire 11, segment 1, counter 2
 };
 
 TEST_F(DreamBaseTest, DataReceiveGood) {
@@ -93,7 +98,7 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 1);
-  EXPECT_EQ(Readout.Counters.Headers, 1);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
   EXPECT_EQ(Readout.Counters.MappingErrors, 0);
 }

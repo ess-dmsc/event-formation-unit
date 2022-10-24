@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,7 +9,7 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <dream/Counters.h>
+#include <modules/dream/Counters.h>
 #include <vector>
 
 namespace Dream {
@@ -17,23 +17,22 @@ namespace Dream {
 class DataParser {
 public:
   const unsigned int MaxRingId{11};
-  const unsigned int MaxFENId{23};
+  const unsigned int MaxFENId{12};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct DreamReadout //
-  {
-    uint32_t Tof;
-    uint16_t unused;
-    uint8_t Sector;
-    uint8_t Sumo;
-    uint8_t Strip;
-    uint8_t Wire;
-    uint8_t Cassette;
-    uint8_t Counter;
+  struct DreamReadout {
+    uint8_t RingId;
+    uint8_t FENId;
+    uint16_t DataLength;
+    uint32_t TimeHigh;
+    uint32_t TimeLow;
+    uint8_t OM;
+    uint8_t Unused;
+    uint8_t Cathode;
+    uint8_t Anode;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(DreamReadout) == 12,
-                "DREAM readout header length error");
+  static_assert(sizeof(DreamReadout) == 16, "DREAM readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
@@ -43,15 +42,8 @@ public:
   //
   int parse(const char *buffer, unsigned int size);
 
-  //
-  struct ParsedData {
-    uint8_t RingId;
-    uint8_t FENId;
-    std::vector<DreamReadout> Data;
-  };
-
   // To be iterated over in processing thread
-  std::vector<struct ParsedData> Result;
+  std::vector<struct DreamReadout> Result;
 
   struct Counters &Stats;
 };

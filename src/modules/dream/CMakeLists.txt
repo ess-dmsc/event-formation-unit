@@ -11,6 +11,10 @@ set(dream_common_inc
   DreamBase.h
   DreamInstrument.h
   geometry/Config.h
+  geometry/CDTGeometry.h
+  geometry/Cuboid.h
+  geometry/Mantle.h
+  geometry/SUMO.h
   readout/DataParser.h
   readout/Readout.h
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
@@ -20,6 +24,7 @@ set(dream_common_src
   Dream.cpp
   DreamInstrument.cpp
   DreamBase.cpp
+  geometry/CDTGeometry.cpp
   geometry/Config.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
