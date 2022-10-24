@@ -235,6 +235,7 @@ def get_macos_pipeline()
 
                     // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
                     sh "conan remove -f FlatBuffers/*"
+                    sh "conan remove -f OpenSSL/*"
                     sh "conan remove -f cli11/*"
 
                     abs_dir = pwd()
