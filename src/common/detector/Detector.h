@@ -31,6 +31,7 @@ struct BaseSettings {
   std::int32_t  RxSocketBufferSize   {2000000}; // bytes
   std::int32_t  TxSocketBufferSize   {2000000}; // bytes
   std::string   KafkaBroker          {"localhost:9092"};
+  std::string   KafkaConfigFile      {""}; // use default
   std::string   GraphitePrefix       {"efu.null"};
   std::string   GraphiteRegion       {"0"};
   std::string   GraphiteAddress      {"127.0.0.1"};
