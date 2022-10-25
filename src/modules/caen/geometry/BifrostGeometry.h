@@ -23,8 +23,7 @@ class BifrostGeometry : public Geometry {
 public:
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
-private:
-  int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
+
   int TripletTubes{3};    // tubes per triplet (might be obvious from the name)
 
 
@@ -36,12 +35,12 @@ private:
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int AmpA, int AmpB) {
-    return reverse(posAlongTube(AmpA, AmpB)) % (PosResolution / 3);
+    return reverse(posAlongTube(AmpA, AmpB)) % (NPos / 3);
   }
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int AmpA, int AmpB) {
-    return (reverse(posAlongTube(AmpA, AmpB)) * TripletTubes) / PosResolution;
+    return (reverse(posAlongTube(AmpA, AmpB)) * TripletTubes) / NPos;
   }
 
   /// \brief return the position along the tube

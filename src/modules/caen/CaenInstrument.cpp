@@ -35,6 +35,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   }
   else if (CaenConfiguration.InstrumentName == "Bifrost"){
     Geom = new BifrostGeometry();
+    Geom->NPos = 300; ///\todo, move this into config file
   }
   else{
     XTRACE(INIT, ERR, "Invalid Detector Name");
