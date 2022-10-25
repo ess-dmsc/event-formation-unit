@@ -5,6 +5,7 @@
 
 include_directories(.)
 
+add_subdirectory(miracles)
 add_subdirectory(bifrost)
 add_subdirectory(cspec)
 add_subdirectory(dream)
