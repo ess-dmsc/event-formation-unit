@@ -15,6 +15,7 @@
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Calibration.h>
+#include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
 #include <vector>
 
@@ -23,8 +24,9 @@
 
 namespace Caen {
 
-class LokiGeometry {
+class LokiGeometry: public Geometry {
 public:
+  LokiGeometry(Config &CaenConfiguration);
   /// \brief The four amplitudes measured at certain points in the
   /// Helium tube circuit diagram are used to identify the straw that
   /// detected the neutron and also the position along the straw.
@@ -35,29 +37,19 @@ public:
   bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
                      std::int16_t AmplitudeC, std::int16_t AmplitudeD);
 
-  void setResolution(uint16_t Resolution) { NPos = Resolution; }
   void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
 
-  struct Stats {
-    uint64_t AmplitudeZero{0};
-    uint64_t OutsideRegion{0};
-  } Stats;
 
   uint8_t strawCalc(double straw);
-  uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
-                     DataParser::CaenReadout &Data);
+  uint32_t calcPixel(DataParser::CaenReadout &Data);
+  bool validateData(DataParser::CaenReadout &Data);
 
-private:
-  const std::uint8_t NStraws{7}; ///< number of straws per tube
-  std::uint16_t NPos{512};       ///< resolution of position
+  std::vector<PanelGeometry> &Panels;
 
-public:
   /// holds latest calculated values for straw and position
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
   double PosVal{512.0};
-  Calibration CaenCalibration;
-  ESSGeometry *ESSGeom;
 };
 
 } // namespace Caen

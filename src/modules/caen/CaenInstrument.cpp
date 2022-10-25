@@ -30,8 +30,19 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
          ModuleSettings.ConfigFile.c_str());
   CaenConfiguration = Config(ModuleSettings.ConfigFile);
 
-  LokiGeom.setResolution(CaenConfiguration.Resolution);
-  LokiGeom.ESSGeom = CaenConfiguration.Geometry;
+  if(CaenConfiguration.InstrumentName == "LoKI"){
+    Geom = new LokiGeometry(CaenConfiguration);
+  }
+  else if (CaenConfiguration.InstrumentName == "Bifrost"){
+    Geom = new BifrostGeometry();
+  }
+  else{
+    XTRACE(INIT, ERR, "Invalid Detector Name");
+     throw std::runtime_error("Invalid Detector Name");
+  }
+  Geom->setResolution(CaenConfiguration.Resolution);
+  Geom->ESSGeom = CaenConfiguration.Geometry;
+  Geom->MaxRing = CaenConfiguration.MaxRing;
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
@@ -40,22 +51,22 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
 
     XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
            CaenConfiguration.Resolution);
-    LokiGeom.CaenCalibration.nullCalibration(Straws,
+    Geom->CaenCalibration.nullCalibration(Straws,
                                              CaenConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
            ModuleSettings.CalibFile.c_str());
-    LokiGeom.CaenCalibration = Calibration(ModuleSettings.CalibFile);
+    Geom->CaenCalibration = Calibration(ModuleSettings.CalibFile);
   }
 
-  if (LokiGeom.CaenCalibration.getMaxPixel() !=
+  if (Geom->CaenCalibration.getMaxPixel() !=
       CaenConfiguration.getMaxPixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
            CaenConfiguration.getMaxPixel(),
-           LokiGeom.CaenCalibration.getMaxPixel());
+           Geom->CaenCalibration.getMaxPixel());
     LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
         CaenConfiguration.getMaxPixel(),
-        LokiGeom.CaenCalibration.getMaxPixel());
+        Geom->CaenCalibration.getMaxPixel());
     throw std::runtime_error("Pixel mismatch");
   }
 
@@ -74,19 +85,14 @@ CaenInstrument::~CaenInstrument() {}
 /// caen panel, FENId and a single readout dataset
 ///
 /// also applies the calibration
-uint32_t CaenInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
-                                   DataParser::CaenReadout &Data) {
+uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
-  if (CaenConfiguration.InstrumentName == "LoKI") {
-    XTRACE(DATA, DEB, "Using Loki Geometry");
-    uint32_t pixel = LokiGeom.calcPixel(Panel, FEN, Data);
-    counters.ReadoutsBadAmpl = LokiGeom.Stats.AmplitudeZero;
-    counters.OutsideRegion = LokiGeom.Stats.OutsideRegion;
-    XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
-    return pixel;
-  }
-  XTRACE(DATA, DEB, "Not using Loki geometry");
-  return 0;
+ 
+  uint32_t pixel = Geom->calcPixel(Data);
+  counters.ReadoutsBadAmpl = Geom->Stats.AmplitudeZero;
+  counters.OutsideRegion = Geom->Stats.OutsideRegion;
+  XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
+  return pixel;
 }
 
 void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
@@ -120,24 +126,12 @@ void CaenInstrument::processReadouts() {
   /// Traverse readouts, calculate pixels
   for (auto &Section : CaenParser.Result) {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
-
-    if (Section.RingId >= CaenConfiguration.Panels.size()) {
-      XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
-             Section.RingId, CaenConfiguration.Panels.size());
-      counters.RingErrors++;
-      continue;
-    }
-
-    PanelGeometry &Panel = CaenConfiguration.Panels[Section.RingId];
-
-    if (Section.FENId >= Panel.getMaxGroup()) {
-      XTRACE(DATA, WAR, "FENId %d outside valid range 0 - %d", Section.FENId,
-             Panel.getMaxGroup() - 1);
-      counters.FENErrors++;
-      continue;
-    }
-
     auto &Data = Section;
+    bool validData = Geom->validateData(Data);
+    if (not validData){
+      XTRACE(DATA, WAR, "Invalid Data, skipping readout");
+      continue;
+    }
 
     if (DumpFile) {
       dumpReadoutToFile(Data);
@@ -166,20 +160,23 @@ void CaenInstrument::processReadouts() {
            Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixelid and apply calibration
-    uint32_t PixelId = calcPixel(Panel, Section.FENId, Data);
+    uint32_t PixelId = calcPixel(Data);
 
     if (PixelId == 0) {
       XTRACE(DATA, ERR, "Pixel error");
       counters.PixelErrors++;
     } else {
+      XTRACE(DATA, DEB, "Valid data, adding to serializer");
       Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
       SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
     }
 
   } // for()
-  counters.ReadoutsClampLow = LokiGeom.CaenCalibration.Stats.ClampLow;
-  counters.ReadoutsClampHigh = LokiGeom.CaenCalibration.Stats.ClampHigh;
+  counters.ReadoutsClampLow = Geom->CaenCalibration.Stats.ClampLow;
+  counters.ReadoutsClampHigh = Geom->CaenCalibration.Stats.ClampHigh;
+  counters.FENErrors = Geom->Stats.FENErrors;
+  counters.RingErrors = Geom->Stats.RingErrors;
 }
 
 } // namespace Caen

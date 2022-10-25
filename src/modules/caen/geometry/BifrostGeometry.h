@@ -11,6 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <modules/caen/geometry/Geometry.h>
 #include <string>
 #include <vector>
 
@@ -18,9 +19,16 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class BifrostGeometry {
+class BifrostGeometry : public Geometry {
 public:
-  /// \brief return the global x-offset for the given identifiers
+  uint32_t calcPixel(DataParser::CaenReadout &Data);
+  bool validateData(DataParser::CaenReadout &Data);
+private:
+  int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
+  int TripletTubes{3};    // tubes per triplet (might be obvious from the name)
+
+
+   /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Tube);
 
   /// \brief return the global y-offset for the given identifiers
@@ -47,8 +55,5 @@ public:
     return 299 - OrgPos;
   }
 
-private:
-  int PosResolution{300}; // covers three tubes, so each tube has 100 pixels
-  int TripletTubes{3};    // tubes per triplet (might be obvious from the name)
 };
 } // namespace Caen

@@ -6,7 +6,7 @@
 /// \brief Separating Caen processing from pipeline main loop
 ///
 /// Holds efu stats, instrument readout mappings, logical geometry, pixel
-/// calculations and LoKI readout parser
+/// calculations and Caen readout parser
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -27,7 +27,7 @@ namespace Caen {
 
 class CaenInstrument {
 public:
-  /// \brief 'create' the LoKI instruments
+  /// \brief 'create' the Caen instruments
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
@@ -44,23 +44,21 @@ public:
     SerializerII = serializer;
   }
 
-  /// \brief LoKI pixel calculations
-  uint32_t calcPixel(PanelGeometry &Panel, uint8_t FEN,
-                     DataParser::CaenReadout &Data);
+  /// \brief Caen pixel calculations
+  uint32_t calcPixel(DataParser::CaenReadout &Data);
 
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::CaenReadout &Data);
 
 public:
-  /// \brief Stuff that 'ties' LoKI together
+  /// \brief Stuff that 'ties' Caen together
   struct Counters &counters;
 
   CaenSettings &ModuleSettings;
   Config CaenConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
-  LokiGeometry LokiGeom;
-  BifrostGeometry BifrostGeom;
+  Geometry *Geom;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;

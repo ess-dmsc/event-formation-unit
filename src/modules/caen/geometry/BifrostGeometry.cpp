@@ -16,8 +16,20 @@
 
 namespace Caen {
 
+bool BifrostGeometry::validateData(DataParser::CaenReadout &Data){
+   XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
+           Data.TubeId);
+
+    if (Data.RingId > MaxRing) {
+      XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+      Stats.RingErrors++;
+      return false;
+    }
+    return true;
+}
+
 int BifrostGeometry::xOffset(int Ring, int Tube) {
-  return Ring * PosResolution + (Tube % 3) * (PosResolution / 3);
+  return Ring * NPos + (Tube % 3) * (NPos / 3);
 }
 
 int BifrostGeometry::yOffset(int Tube) {
@@ -30,7 +42,20 @@ int BifrostGeometry::posAlongTube(int AmpA, int AmpB) {
     ///\todo add counter
     return -1;
   }
-  return ((PosResolution - 1) * AmpA) / (AmpA + AmpB);
+  return ((NPos - 1) * AmpA) / (AmpA + AmpB);
+}
+
+uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
+  int xoff = xOffset(Data.RingId, Data.TubeId);
+  int yoff = yOffset(Data.TubeId);
+  int xlocal = xCoord(Data.AmpA, Data.AmpB);
+  int ylocal = yCoord(Data.AmpA, Data.AmpB);
+  uint32_t pixel = ESSGeom->pixel2D(xoff + xlocal, yoff + ylocal);
+
+  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+         xoff, xlocal, yoff, ylocal, pixel);
+
+  return pixel;
 }
 
 } // namespace Caen

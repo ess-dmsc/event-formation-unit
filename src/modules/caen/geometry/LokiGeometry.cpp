@@ -11,10 +11,12 @@
 
 #include <modules/caen/geometry/LokiGeometry.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
+
+LokiGeometry::LokiGeometry(Config &CaenConfiguration) : Panels(CaenConfiguration.Panels) {}
 
 bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
                                  std::int16_t AmplitudeB,
@@ -62,16 +64,17 @@ uint8_t LokiGeometry::strawCalc(double straw) {
     return 6;
 }
 
-uint32_t LokiGeometry::calcPixel(PanelGeometry &Panel, uint8_t FEN,
-                                 DataParser::CaenReadout &Data) {
-  uint8_t TubeGroup = FEN;
+uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
+  uint8_t TubeGroup = Data.FENId;
   uint8_t LocalTube = Data.TubeId;
 
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
+  PanelGeometry Panel = Panels[Data.RingId];
+  XTRACE(DATA, DEB, "Ring ID %u", Data.RingId);
   if (not valid) {
     return 0;
   }
+  XTRACE(DATA, DEB, "Valid pixel id calculated");
   /// Globalstraw is per its definition == Y
   uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, StrawId);
 
@@ -85,7 +88,6 @@ uint32_t LokiGeometry::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
 
   uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalStraw);
-  // ESSGeom.pixel2D(PosVal, GlobalStraw);
 
   XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
          CalibratedPos, GlobalStraw,
@@ -93,6 +95,27 @@ uint32_t LokiGeometry::calcPixel(PanelGeometry &Panel, uint8_t FEN,
                    ///pixel id
   XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
   return PixelId;
+}
+
+bool LokiGeometry::validateData(DataParser::CaenReadout &Data){
+  if (Data.RingId >= Panels.size()) {
+      XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
+             Data.RingId, Panels.size());
+      Stats.RingErrors++;
+      return false;
+    }
+    XTRACE(DATA, DEB, "Panels size %u", Panels.size());
+
+    auto Panel = Panels[Data.RingId];
+
+    if (Data.FENId >= Panel.getMaxGroup()) {
+      XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
+             Panel.getMaxGroup() - 1);
+      Stats.FENErrors++;
+      return false;
+    }
+    XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId, Panel.getMaxGroup() - 1);
+    return true;
 }
 
 } // namespace Caen

@@ -9,20 +9,24 @@ using namespace Caen;
 
 class LokiGeometryTest : public TestBase {
 protected:
-  void SetUp() override {}
+  void SetUp() override {
+    PanelGeometry Panel(4, 7, 0);
+    CaenConfiguration.Panels.push_back(Panel);
+  }
   void TearDown() override {}
+  Config CaenConfiguration;
 };
 
 /** Test cases below */
 TEST_F(LokiGeometryTest, Constructor) {
-  LokiGeometry tube;
+  LokiGeometry tube(CaenConfiguration);
   tube.setResolution(512);
   ASSERT_EQ(tube.StrawId, 7);  // valid: 0 - 6
   ASSERT_EQ(tube.PosVal, 512); // valid: 0 - 511
 }
 
 TEST_F(LokiGeometryTest, AllZeroes) {
-  LokiGeometry tube;
+  LokiGeometry tube(CaenConfiguration);
   tube.setResolution(512);
   tube.calcPositions(0, 0, 0, 0);
   ASSERT_EQ(tube.StrawId, 7);  // valid: 0 - 6
@@ -31,7 +35,7 @@ TEST_F(LokiGeometryTest, AllZeroes) {
 }
 
 TEST_F(LokiGeometryTest, StrawLimits) {
-  LokiGeometry tube;
+  LokiGeometry tube(CaenConfiguration);
   double delta = 0.0001;
   ASSERT_EQ(tube.strawCalc(0.1), 0);
   ASSERT_EQ(tube.strawCalc(0.7 - delta), 0);
@@ -55,7 +59,7 @@ TEST_F(LokiGeometryTest, StrawLimits) {
 }
 
 TEST_F(LokiGeometryTest, MinMaxStraw) {
-  LokiGeometry tube;
+  LokiGeometry tube(CaenConfiguration);
   tube.setResolution(512);
   unsigned int iMax = 4096;
   for (unsigned int i = 1; i < iMax; i++) {
@@ -72,7 +76,7 @@ TEST_F(LokiGeometryTest, MinMaxStraw) {
 }
 
 TEST_F(LokiGeometryTest, MinMaxPos) {
-  LokiGeometry tube;
+  LokiGeometry tube(CaenConfiguration);
   tube.setResolution(512);
   for (unsigned int i = 1; i < 4095; i++) {
     tube.calcPositions(0, 0, i, 0);

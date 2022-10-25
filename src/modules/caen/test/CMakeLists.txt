@@ -16,11 +16,14 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Loki.json" ABSO
 ##
 set(LokiGeometryTest_INC 
     ../geometry/LokiGeometry.h
+    ../geometry/PanelGeometry.h
+    ../geometry/Config.h
     ../geometry/Calibration.h
 )
 set(LokiGeometryTest_SRC 
     LokiGeometryTest.cpp
     ../geometry/LokiGeometry.cpp
+    ../geometry/Config.cpp
     ../geometry/Calibration.cpp
 )
 create_test_executable(LokiGeometryTest)
