@@ -37,6 +37,10 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     Geom = new BifrostGeometry();
     Geom->NPos = 300; ///\todo, move this into config file
   }
+  else if (CaenConfiguration.InstrumentName == "Miracles"){
+    Geom = new MiraclesGeometry();
+    Geom->NPos = 128; ///\todo, move this into config file
+  }
   else{
     XTRACE(INIT, ERR, "Invalid Detector Name");
      throw std::runtime_error("Invalid Detector Name");
