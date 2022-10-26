@@ -15,17 +15,9 @@
 
 namespace Cspec {
 
-struct CSPECSettings {
-  std::string FilePrefix{""};
-  std::string ConfigFile{""};
-  std::string CalibFile{""};
-  //
-};
-
 class CSPECBase : public Detector {
 public:
-  CSPECBase(BaseSettings const &settings,
-            struct CSPECSettings &LocalCSPECSettings);
+  CSPECBase(BaseSettings const &settings);
   ~CSPECBase() = default;
 
   void input_thread();
@@ -33,7 +25,6 @@ public:
 
 protected:
   struct Counters Counters {};
-  CSPECSettings CSPECModuleSettings;
   EV42Serializer *Serializer;
 };
 

@@ -34,7 +34,7 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  CSPECInstrument(Counters &counters, CSPECSettings &moduleSettings,
+  CSPECInstrument(Counters &counters, BaseSettings &settings,
                   EV42Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
@@ -57,7 +57,7 @@ public:
 public:
   /// \brief Stuff that 'ties' CSPEC together
   struct Counters &counters;
-  CSPECSettings &ModuleSettings;
+  BaseSettings &Settings;
 
   /// \brief serialiser (and producer) for events
   EV42Serializer *Serializer{nullptr};
