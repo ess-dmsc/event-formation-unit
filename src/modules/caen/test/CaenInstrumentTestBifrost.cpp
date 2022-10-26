@@ -16,9 +16,7 @@ std::string ConfigStr = R"(
   {
     "Detector": "BIFROST",
     "MaxRing": 4,
-    "StrawResolution": 300,
-    "XPixels": 900,
-    "YPixels": 15
+    "StrawResolution": 300
   }
 )";
 

@@ -24,7 +24,7 @@
 /// four FENs per ring. FENs are enumerated 0 - 3 and
 /// Tube groups 0 - 4
 // clang-format off
-std::string caenjson = R"(
+std::string lokijson = R"(
 {
   "Detector" : "LoKI",
 
@@ -37,6 +37,14 @@ std::string caenjson = R"(
   "MaxTOFNS" : 800000000,
   "MaxRing" : 2
 }
+)";
+
+std::string bifrostjson = R"(
+  {
+    "Detector": "BIFROST",
+    "MaxRing": 2,
+    "StrawResolution": 300
+  }
 )";
 
 class CaenBaseStandIn : public Caen::CaenBase {
@@ -53,7 +61,7 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_caen.json";
+    LocalSettings.ConfigFile = "deleteme_loki.json";
   }
   void TearDown() override {}
 
@@ -62,7 +70,13 @@ public:
   Caen::CaenSettings LocalSettings;
 };
 
-TEST_F(CaenBaseTest, Constructor) {
+TEST_F(CaenBaseTest, LokiConstructor) {
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+}
+
+TEST_F(CaenBaseTest, BifrostConstructor) {
+  LocalSettings.ConfigFile = "deleteme_bifrost.json";
   CaenBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
@@ -101,7 +115,7 @@ std::vector<uint8_t> TestPacket2{
 
     // Data Header 2
     // Ring 5 is invalid -> RingErrors++
-    0x05, 0x00, 0x18, 0x00, // ring 5, fen 0, data size 64 bytes
+    0x07, 0x00, 0x18, 0x00, // ring 7, fen 0, data size 64 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00, //time high 17s
     0x01, 0x02, 0x00, 0x00, // time low (257 clocks)
@@ -150,7 +164,7 @@ std::vector<uint8_t> TestPacket2{
 };
 // clang-format on
 
-TEST_F(CaenBaseTest, DataReceive) {
+TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorPort = 9000;
   CaenBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
@@ -166,7 +180,24 @@ TEST_F(CaenBaseTest, DataReceive) {
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
-TEST_F(CaenBaseTest, DataReceiveGood) {
+TEST_F(CaenBaseTest, DataReceiveBifrost) {
+  Settings.DetectorPort = 9000;
+  LocalSettings.ConfigFile = "deleteme_bifrost.json";
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+
+  std::this_thread::sleep_for(SleepTime);
+  TestUDPServer Server(43126, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket[0], TestPacket.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.Counters.Readouts, 0);
+}
+
+TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
@@ -191,9 +222,36 @@ TEST_F(CaenBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
 }
 
+TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
+  XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  LocalSettings.ConfigFile = "deleteme_bifrost.json";
+  Settings.DetectorPort = 9001;
+  Settings.UpdateIntervalSec = 0;
+  LocalSettings.FilePrefix = "deleteme_";
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+
+  std::this_thread::sleep_for(SleepTime);
+  TestUDPServer Server(43127, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.Counters.Readouts, 6);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
+  EXPECT_EQ(Readout.Counters.RingErrors, 1);
+  EXPECT_EQ(Readout.Counters.TofHigh, 1);
+  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
+}
+
 int main(int argc, char **argv) {
-  std::string filename{"deleteme_caen.json"};
-  saveBuffer(filename, (void *)caenjson.c_str(), caenjson.size());
+  std::string lokifilename{"deleteme_loki.json"};
+  saveBuffer(lokifilename, (void *)lokijson.c_str(), lokijson.size());
+  std::string bifrostfilename{"deleteme_bifrost.json"};
+  saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
