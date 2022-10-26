@@ -15,16 +15,9 @@
 
 namespace Freia {
 
-struct FreiaSettings {
-  std::string FilePrefix{""};
-  std::string ConfigFile{""};
-  std::string CalibFile{""};
-};
-
 class FreiaBase : public Detector {
 public:
-  FreiaBase(BaseSettings const &settings,
-            struct FreiaSettings &LocalFreiaSettings);
+  FreiaBase(BaseSettings const &settings);
   ~FreiaBase() = default;
 
   void input_thread();
@@ -32,7 +25,6 @@ public:
 
 protected:
   struct Counters Counters {};
-  FreiaSettings FreiaModuleSettings;
   EV42Serializer *Serializer;
 };
 

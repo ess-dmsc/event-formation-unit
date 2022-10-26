@@ -159,7 +159,7 @@ class FreiaInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
-  FreiaSettings ModuleSettings;
+  BaseSettings Settings;
   EV42Serializer *serializer;
   FreiaInstrument *freia;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -167,13 +167,13 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "freia");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    freia = new FreiaInstrument(counters, ModuleSettings, serializer);
+    freia = new FreiaInstrument(counters, Settings, serializer);
     freia->setSerializer(serializer);
     freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
@@ -191,16 +191,16 @@ protected:
 
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  ModuleSettings.CalibFile = CalibFile;
-  FreiaInstrument Freia(counters, ModuleSettings, serializer);
+  Settings.CalibFile = CalibFile;
+  FreiaInstrument Freia(counters, Settings, serializer);
   counters.VMMStats = freia->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(FreiaInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_";
-  FreiaInstrument FreiaDump(counters, ModuleSettings, serializer);
+  Settings.DumpFilePrefix = "deleteme_";
+  FreiaInstrument FreiaDump(counters, Settings, serializer);
   FreiaDump.setSerializer(serializer);
 
   makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
