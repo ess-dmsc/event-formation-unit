@@ -55,40 +55,6 @@ TEST_F(EFUArgsTest, IgnoreFirstPassFailure) {
             EFUArgs::Status::CONTINUE);
 }
 
-TEST_F(EFUArgsTest, SecondPassExitOnHelp) {
-  const char *myargv[] = {"someName", "-h"};
-  int myargc = 2;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
-            EFUArgs::Status::EXIT);
-}
-
-TEST_F(EFUArgsTest, SecondPassExitOnHelpAndDet) {
-  const char *myargv[] = {"someName", "-h", "-d", "some_det"};
-  int myargc = 4;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
-            EFUArgs::Status::EXIT);
-}
-
-TEST_F(EFUArgsTest, SecondPassExitOnFailure) {
-  const char *myargv[] = {
-      "someName",
-  };
-  int myargc = 1;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
-            EFUArgs::Status::EXIT);
-}
-
-TEST_F(EFUArgsTest, SecondPassContinue) {
-  const char *myargv[] = {"someName", "-d", "some_det"};
-  int myargc = 3;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseSecondPass(myargc, (char **)myargv),
-            EFUArgs::Status::CONTINUE);
-}
-
 TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
   auto settings = efu_args.getBaseSettings();
@@ -119,7 +85,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   // clang-format on
   int myargc = 21;
   EFUArgs efu_args;
-  auto ret = efu_args.parseSecondPass(myargc, (char **)myargv);
+  auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
   auto settings = efu_args.getBaseSettings();
   auto glsettings = efu_args.getGraylogSettings();
@@ -146,34 +112,6 @@ TEST_F(EFUArgsTest, HelpText) {
 
   ASSERT_EQ(myargc, 2);
   ASSERT_TRUE(myargv != NULL);
-}
-
-TEST_F(EFUArgsTest, StoreConfigFile) {
-  // Delete contents of possible file
-  std::ofstream OutTestFile("ConfigFile.ini",
-                            std::ios::binary | std::ios::trunc);
-  OutTestFile.close();
-  const char *Args[] = {"progname", "-d", "some_det", "--write_config",
-                        "ConfigFile.ini"};
-  EFUArgs efu_args;
-  efu_args.parseSecondPass(5, (char **)Args);
-  std::ifstream InTestFile("ConfigFile.ini", std::ios::binary);
-  std::string FileContents((std::istreambuf_iterator<char>(InTestFile)),
-                           std::istreambuf_iterator<char>());
-  EXPECT_NE(FileContents.find("det=\"some_det\""), std::string::npos);
-}
-
-TEST_F(EFUArgsTest, LoadConfigFile) {
-  const char *Args1[] = {"progname", "-d", "no_real_detector_name",
-                         "--write_config", "ConfigB.ini"};
-  EFUArgs efu_args;
-  EXPECT_EQ(efu_args.parseSecondPass(5, (char **)Args1), EFUArgs::Status::EXIT);
-
-  const char *Args2[] = {"progname", "--read_config", "ConfigB.ini"};
-  EFUArgs efu_args2;
-  EXPECT_EQ(efu_args2.parseSecondPass(3, (char **)Args2),
-            EFUArgs::Status::CONTINUE);
-  EXPECT_EQ(efu_args2.getDetectorName(), "no_real_detector_name");
 }
 
 int main(int argc, char **argv) {

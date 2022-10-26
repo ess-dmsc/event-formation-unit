@@ -25,9 +25,8 @@ std::string miraclesjson = R"(
 
 class MiraclesBaseStandIn : public Miracles::MiraclesBase {
 public:
-  MiraclesBaseStandIn(BaseSettings Settings,
-                     struct Miracles::MiraclesSettings ReadoutSettings)
-      : Miracles::MiraclesBase(Settings, ReadoutSettings){};
+  MiraclesBaseStandIn(BaseSettings Settings)
+      : Miracles::MiraclesBase(Settings){};
   ~MiraclesBaseStandIn() = default;
   using Miracles::MiraclesBase::Counters;
   using Detector::Threads;
@@ -38,17 +37,16 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_miracles.json";
+    Settings.ConfigFile = "deleteme_miracles.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Miracles::MiraclesSettings LocalSettings;
 };
 
 TEST_F(MiraclesBaseTest, Constructor) {
-  MiraclesBaseStandIn Readout(Settings, LocalSettings);
+  MiraclesBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.RxBytes, 0);
 
@@ -86,8 +84,8 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(MiraclesBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_miraclesbasetest_";
-  MiraclesBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_miraclesbasetest_";
+  MiraclesBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -104,8 +102,8 @@ TEST_F(MiraclesBaseTest, DataReceiveGood) {
 TEST_F(MiraclesBaseTest, HeaderError) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_miraclesbasetest_";
-  MiraclesBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_miraclesbasetest_";
+  MiraclesBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
