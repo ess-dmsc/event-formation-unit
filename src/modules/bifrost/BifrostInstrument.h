@@ -29,7 +29,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  BifrostInstrument(Counters &counters, BifrostSettings &moduleSettings);
+  BifrostInstrument(Counters &counters, BaseSettings &settings);
 
   ~BifrostInstrument();
 
@@ -49,7 +49,7 @@ public:
   /// \brief Stuff that 'ties' Bifrost together
   struct Counters &counters;
 
-  BifrostSettings &ModuleSettings;
+  BaseSettings &Settings;
   Config BifrostConfiguration;
   ESSGeometry lgeom{900, 15, 1, 1};
   Geometry geom;

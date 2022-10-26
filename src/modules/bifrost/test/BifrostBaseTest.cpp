@@ -25,9 +25,8 @@ std::string bifrostjson = R"(
 
 class BifrostBaseStandIn : public Bifrost::BifrostBase {
 public:
-  BifrostBaseStandIn(BaseSettings Settings,
-                     struct Bifrost::BifrostSettings ReadoutSettings)
-      : Bifrost::BifrostBase(Settings, ReadoutSettings){};
+  BifrostBaseStandIn(BaseSettings Settings)
+      : Bifrost::BifrostBase(Settings){};
   ~BifrostBaseStandIn() = default;
   using Bifrost::BifrostBase::Counters;
   using Detector::Threads;
@@ -38,17 +37,16 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_bifrost.json";
+    Settings.ConfigFile = "deleteme_bifrost.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Bifrost::BifrostSettings LocalSettings;
 };
 
 TEST_F(BifrostBaseTest, Constructor) {
-  BifrostBaseStandIn Readout(Settings, LocalSettings);
+  BifrostBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.RxBytes, 0);
 
@@ -85,8 +83,8 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(BifrostBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_bifrostbasetest_";
-  BifrostBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_bifrostbasetest_";
+  BifrostBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -103,8 +101,8 @@ TEST_F(BifrostBaseTest, DataReceiveGood) {
 TEST_F(BifrostBaseTest, HeaderError) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_bifrostbasetest_";
-  BifrostBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_bifrostbasetest_";
+  BifrostBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
