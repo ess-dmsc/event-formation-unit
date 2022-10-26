@@ -16,8 +16,8 @@
 #include <common/testutils/TestBase.h>
 #include <common/testutils/TestUDPServer.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 /// Test configuration - two rings used (0 and 1)
 /// TubesN = 8 and TubesZ = 4 implies four tube groups and
