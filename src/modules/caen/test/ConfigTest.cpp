@@ -79,7 +79,6 @@ TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.Panels.size(), 0);
   ASSERT_EQ(config.Resolution, 0);
   ASSERT_EQ(config.NTubesTotal, 0);
-  ASSERT_EQ(config.getMaxPixel(), 0);
 }
 
 TEST_F(ConfigTest, NoConfigFile) {
@@ -112,7 +111,6 @@ TEST_F(ConfigTest, InvalidConfigII) {
 
 TEST_F(ConfigTest, ValidConfig) {
   config = Config(ValidConfigFile);
-  ASSERT_EQ(config.getMaxPixel(), (32 + 24) * 4 * 7 * 256);
   ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
   deleteFile(ValidConfigFile);
@@ -122,7 +120,6 @@ TEST_F(ConfigTest, ValidConfig) {
 // should match the definitions in the ICD
 TEST_F(ConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);
-  ASSERT_EQ(config.getMaxPixel(), 3211264);
   ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
   ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);
   ASSERT_EQ(config.Panels[2].getGlobalStrawId(0, 0, 0), 1568);

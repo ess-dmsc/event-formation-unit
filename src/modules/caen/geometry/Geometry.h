@@ -37,13 +37,9 @@ public:
     uint64_t FENErrors{0};
   } Stats;
 
-  /// holds latest calculated values for straw and position
-  /// they will hold out-of-range values if calculation fails
-  std::uint8_t StrawId{7};
-  double PosVal{512.0};
+
   Calibration CaenCalibration;
   ESSGeometry *ESSGeom;
-  const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::uint16_t NPos{512};       ///< resolution of position
   uint8_t MaxRing{0};
 };

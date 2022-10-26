@@ -35,7 +35,6 @@ protected:
 /** Test cases below */
 TEST_F(CaenInstrumentTestBifrost, Constructor) {
   CaenInstrument Caen(counters, ModuleSettings);
-  ASSERT_EQ(Caen.CaenConfiguration.getMaxPixel(), 900 * 15);
 }
 
 

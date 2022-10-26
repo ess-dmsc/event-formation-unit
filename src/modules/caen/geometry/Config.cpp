@@ -97,13 +97,6 @@ Config::Config(std::string ConfigFile) {
         PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
         Panels.push_back(Temp);
       }
-      Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
-    }
-    else if (InstrumentName == "BIFROST"){
-      Pixels = 900 * 15;
-    }
-    else if (InstrumentName == "Miracles"){
-      Pixels = 128 * 48;
     }
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",

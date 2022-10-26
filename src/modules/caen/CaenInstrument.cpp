@@ -48,7 +48,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
-    uint32_t MaxPixels = CaenConfiguration.getMaxPixel();
+    uint32_t MaxPixels = Geom->ESSGeom->max_pixel();
     uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
     XTRACE(INIT, DEB, "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u", MaxPixels, CaenConfiguration.Resolution, Straws);
 
@@ -63,12 +63,12 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   }
 
   if (Geom->CaenCalibration.getMaxPixel() !=
-      CaenConfiguration.getMaxPixel()) {
+     Geom->ESSGeom->max_pixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-           CaenConfiguration.getMaxPixel(),
+            Geom->ESSGeom->max_pixel(),
            Geom->CaenCalibration.getMaxPixel());
     LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        CaenConfiguration.getMaxPixel(),
+        Geom->ESSGeom->max_pixel(),
         Geom->CaenCalibration.getMaxPixel());
     throw std::runtime_error("Pixel mismatch");
   }

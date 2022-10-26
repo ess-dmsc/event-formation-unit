@@ -25,8 +25,6 @@ public:
 
   Config(std::string ConfigFile);
 
-  uint32_t getMaxPixel() { return Pixels; }
-
   std::vector<PanelGeometry> Panels;
   std::string InstrumentName;
   uint8_t NPanels{0};              // Caen panels, not logical geometry panels
@@ -36,8 +34,5 @@ public:
   uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
   uint32_t MaxTOFNS{800000000};
   uint8_t MaxRing{0};
-
-private:
-  uint32_t Pixels{0};
 };
 } // namespace Caen

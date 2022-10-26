@@ -50,6 +50,8 @@ public:
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
   double PosVal{512.0};
+  const std::uint8_t NStraws{7}; ///< number of straws per tube
+
 };
 
 } // namespace Caen

@@ -77,7 +77,6 @@ protected:
 TEST_F(CaenInstrumentTest, Constructor) {
   ModuleSettings.CalibFile = CalibFile;
   CaenInstrument Caen(counters, ModuleSettings);
-  ASSERT_EQ(Caen.CaenConfiguration.getMaxPixel(), 7 * 256);
 }
 
 TEST_F(CaenInstrumentTest, PixelMismatch) {
