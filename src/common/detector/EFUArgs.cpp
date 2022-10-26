@@ -42,11 +42,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--kafka_config", EFUSettings.KafkaConfigFile, "Kafka configuration file")
       ->group("EFU Options")->default_str("");
 
-  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
-                    return parseAffinityStrings(Input);
-                  }, "Thread to core affinity. Ex: \"-c input_t:4\"")
-      ->group("EFU Options");
-
   CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
     return parseLogLevel(Input);
   }, "Set log message level. Set to 1 - 7 or one of \n                              `Critical`, `Error`, `Warning`, `Notice`, `Info`,\n                              or `Debug`. Ex: \"-l Notice\"")
@@ -124,35 +119,6 @@ EFUArgs::EFUArgs() {
                   "Transmit to detector buffer size.")
       ->group("EFU Options")->default_str("9216");
   // clang-format on
-}
-
-bool EFUArgs::parseAffinityStrings(
-    std::vector<std::string> ThreadAffinityStrings) {
-  bool CoreIntegerCorrect = false;
-  int CoreNumber = 0;
-  try {
-    CoreNumber = std::stoi(ThreadAffinityStrings.at(0));
-    CoreIntegerCorrect = true;
-  } catch (std::invalid_argument &e) {
-    // No nothing
-  }
-  if (ThreadAffinityStrings.size() == 1 and CoreIntegerCorrect) {
-    ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{
-        "implicit_affinity", static_cast<std::uint16_t>(CoreNumber)});
-  } else {
-    std::string REPattern = "([^:]+):(\\d{1,2})";
-    std::regex AffinityRE(REPattern);
-    std::smatch AffinityRERes;
-    for (auto &AffinityStr : ThreadAffinityStrings) {
-      if (not std::regex_match(AffinityStr, AffinityRERes, AffinityRE)) {
-        return false;
-      }
-      ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{
-          AffinityRERes[1],
-          static_cast<std::uint16_t>(std::stoi(AffinityRERes[2]))});
-    }
-  }
-  return true;
 }
 
 bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
