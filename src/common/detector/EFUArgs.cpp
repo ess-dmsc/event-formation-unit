@@ -131,6 +131,12 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--dumptofile", EFUSettings.DumpFilePrefix,
                   "dump to specified file")
       ->group("EFU Options")->default_str("");
+
+  CLIParser.add_flag("--multigrid-monitor", EFUSettings.MultiGridMonitor,
+                "stream monitor data")
+      ->group("Multigrid")
+      ->configurable(true)
+      ->default_val("true");
   // clang-format on
 }
 

@@ -47,6 +47,8 @@ struct BaseSettings {
   // Used to be detector module specific
   std::string   CalibFile           {""};
   std::string   DumpFilePrefix      {""};
+  // multigrid
+  bool MultiGridMonitor{true};
 };
 // clang-format on
 
