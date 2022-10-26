@@ -30,9 +30,8 @@ namespace Loki {
 
 const char *classname = "Loki detector with ESS readout";
 
-LokiBase::LokiBase(BaseSettings const &Settings,
-                   struct LokiSettings &LocalLokiSettings)
-    : Detector("Loki", Settings), LokiModuleSettings(LocalLokiSettings) {
+LokiBase::LokiBase(BaseSettings const &Settings)
+    : Detector("Loki", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -80,8 +79,6 @@ LokiBase::LokiBase(BaseSettings const &Settings,
   // Events
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
-  Stats.create("events.outside_region", Counters.OutsideRegion);
-
 
   // System counters
   Stats.create("thread.input_idle", Counters.RxIdle);
@@ -152,7 +149,7 @@ void LokiBase::inputThread() {
 ///
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
-  LokiInstrument Loki(Counters, LokiModuleSettings);
+  LokiInstrument Loki(Counters, EFUSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "loki_detector",

@@ -30,7 +30,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  LokiInstrument(Counters &counters, LokiSettings &moduleSettings);
+  LokiInstrument(Counters &counters, BaseSettings &settings);
 
   ~LokiInstrument();
 
@@ -52,7 +52,7 @@ public:
   /// \brief Stuff that 'ties' LoKI together
   struct Counters &counters;
 
-  LokiSettings &ModuleSettings;
+  BaseSettings &Settings;
   Config LokiConfiguration;
   Calibration LokiCalibration;
   ESSReadout::Parser ESSReadoutParser;

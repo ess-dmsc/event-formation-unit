@@ -23,16 +23,16 @@ namespace Loki {
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 LokiInstrument::LokiInstrument(struct Counters &counters,
-                               LokiSettings &moduleSettings)
-    : counters(counters), ModuleSettings(moduleSettings) {
+                               BaseSettings &settings)
+    : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  LokiConfiguration = Config(ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  LokiConfiguration = Config(Settings.ConfigFile);
 
   Amp2Pos.setResolution(LokiConfiguration.Resolution);
 
-  if (ModuleSettings.CalibFile.empty()) {
+  if (Settings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
     uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
     uint32_t Straws = MaxPixels / LokiConfiguration.Resolution;
@@ -42,8 +42,8 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
     LokiCalibration.nullCalibration(Straws, LokiConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
-           ModuleSettings.CalibFile.c_str());
-    LokiCalibration = Calibration(ModuleSettings.CalibFile);
+           Settings.CalibFile.c_str());
+    LokiCalibration = Calibration(Settings.CalibFile);
   }
 
   if (LokiCalibration.getMaxPixel() != LokiConfiguration.getMaxPixel()) {
@@ -54,9 +54,9 @@ LokiInstrument::LokiInstrument(struct Counters &counters,
     throw std::runtime_error("Pixel mismatch");
   }
 
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     DumpFile =
-        ReadoutFile::create(ModuleSettings.FilePrefix + "loki_" + timeString());
+        ReadoutFile::create(Settings.DumpFilePrefix + "loki_" + timeString());
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(LokiConfiguration.MaxPulseTimeNS);
@@ -94,12 +94,6 @@ uint32_t LokiInstrument::calcPixel(PanelGeometry &Panel, uint8_t FEN,
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
   if (GlobalStraw == Panel.StrawError) {
     XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
-    return 0;
-  }
-
-  if ((GlobalStraw < ModuleSettings.MinStraw) or
-      (GlobalStraw > ModuleSettings.MaxStraw)) {
-    counters.OutsideRegion++;
     return 0;
   }
 
