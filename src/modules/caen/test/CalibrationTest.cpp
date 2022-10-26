@@ -146,15 +146,17 @@ TEST_F(CalibrationTest, ClampLowAndHigh) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
              StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
+  calib.Stats.ClampLow = new int64_t;
+  calib.Stats.ClampHigh = new int64_t;
 
   calib.StrawCalibration[0][0] = 100.0; // a = 100
   uint32_t res = calib.strawCorrection(0, 5.0);
-  ASSERT_EQ(calib.Stats.ClampLow, 1);
+  ASSERT_EQ(*calib.Stats.ClampLow, 1);
   ASSERT_EQ(res, 0);
 
   calib.StrawCalibration[0][0] = -2000;
   res = calib.strawCorrection(0, 5.0);
-  ASSERT_EQ(calib.Stats.ClampHigh, 1);
+  ASSERT_EQ(*calib.Stats.ClampHigh, 1);
   ASSERT_EQ(res, 255);
 
   deleteFile(StrawMappingNullFile);

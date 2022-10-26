@@ -12,7 +12,7 @@
 #include <modules/caen/geometry/Calibration.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_ERR
 
 namespace Caen {
 
@@ -108,13 +108,13 @@ uint32_t Calibration::strawCorrection(uint32_t StrawId, double Pos) {
   if (CorrectedPos < 0) {
     XTRACE(EVENT, INF, "Clamping to low value, straw: %u, pos: %g, delta %g",
            StrawId, Pos, Delta);
-    Stats.ClampLow++;
+    (*Stats.ClampLow)++;
     CorrectedPos = 0;
   }
   if (CorrectedPos > StrawResolution) {
     XTRACE(EVENT, INF, "Clamping to high value, straw: %u, pos: %g, delta %g",
            StrawId, Pos, Delta);
-    Stats.ClampHigh++;
+    (*Stats.ClampHigh)++;
     CorrectedPos = StrawResolution - 1;
   }
   return (uint32_t)CorrectedPos;

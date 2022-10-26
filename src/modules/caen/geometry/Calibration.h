@@ -41,8 +41,8 @@ public:
   std::vector<std::vector<double>> StrawCalibration;
 
   struct {
-    uint64_t ClampLow{0};
-    uint64_t ClampHigh{0};
+    int64_t *ClampLow;
+    int64_t *ClampHigh;
   } Stats;
 
 private:

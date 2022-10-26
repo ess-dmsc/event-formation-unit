@@ -80,6 +80,11 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
+
+  Geom->CaenCalibration.Stats.ClampLow = &counters.ReadoutsClampLow;
+  Geom->CaenCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
+  Geom->Stats.FENErrors = &counters.FENErrors;
+  Geom->Stats.RingErrors = &counters.RingErrors;
 }
 
 CaenInstrument::~CaenInstrument() {}
@@ -127,9 +132,8 @@ void CaenInstrument::processReadouts() {
   SerializerII->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
-  for (auto &Section : CaenParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
-    auto &Data = Section;
+  for (auto &Data : CaenParser.Result) {
+    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
     bool validData = Geom->validateData(Data);
     if (not validData){
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
@@ -176,10 +180,7 @@ void CaenInstrument::processReadouts() {
     }
 
   } // for()
-  counters.ReadoutsClampLow = Geom->CaenCalibration.Stats.ClampLow;
-  counters.ReadoutsClampHigh = Geom->CaenCalibration.Stats.ClampHigh;
-  counters.FENErrors = Geom->Stats.FENErrors;
-  counters.RingErrors = Geom->Stats.RingErrors;
+
 }
 
 } // namespace Caen

@@ -31,10 +31,10 @@ public:
   virtual bool validateData(DataParser::CaenReadout &Data) = 0;
 
   struct Stats {
-    uint64_t AmplitudeZero{0};
-    uint64_t OutsideRegion{0};
-    uint64_t RingErrors{0};
-    uint64_t FENErrors{0};
+    int64_t AmplitudeZero{0};
+    int64_t OutsideRegion{0};
+    int64_t *RingErrors;
+    int64_t *FENErrors;
   } Stats;
 
 
