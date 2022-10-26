@@ -16,7 +16,12 @@
 
 namespace Caen {
 
-LokiGeometry::LokiGeometry(Config &CaenConfiguration) : Panels(CaenConfiguration.Panels) {}
+LokiGeometry::LokiGeometry(Config &CaenConfiguration) : Panels(CaenConfiguration.Panels) {
+  ESSGeom =
+        new ESSGeometry(CaenConfiguration.Resolution, CaenConfiguration.NTubesTotal * PanelGeometry::NStraws, 1, 1);
+  setResolution(CaenConfiguration.Resolution);
+  MaxRing = CaenConfiguration.MaxRing;
+}
 
 bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
                                  std::int16_t AmplitudeB,

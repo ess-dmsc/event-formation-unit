@@ -34,20 +34,17 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     Geom = new LokiGeometry(CaenConfiguration);
   }
   else if (CaenConfiguration.InstrumentName == "BIFROST"){
-    Geom = new BifrostGeometry();
+    Geom = new BifrostGeometry(CaenConfiguration);
     Geom->NPos = 300; ///\todo, move this into config file
   }
   else if (CaenConfiguration.InstrumentName == "Miracles"){
-    Geom = new MiraclesGeometry();
+    Geom = new MiraclesGeometry(CaenConfiguration);
     Geom->NPos = 128; ///\todo, move this into config file
   }
   else{
     XTRACE(INIT, ERR, "Invalid Detector Name");
      throw std::runtime_error("Invalid Detector Name");
   }
-  Geom->setResolution(CaenConfiguration.Resolution);
-  Geom->ESSGeom = CaenConfiguration.Geometry;
-  Geom->MaxRing = CaenConfiguration.MaxRing;
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");

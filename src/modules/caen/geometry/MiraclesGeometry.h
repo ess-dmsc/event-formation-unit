@@ -23,6 +23,7 @@
 namespace Caen {
 class MiraclesGeometry : public Geometry {
 public:
+  MiraclesGeometry(Config &CaenConfiguration);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 

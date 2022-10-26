@@ -16,6 +16,12 @@
 
 namespace Caen {
 
+MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration){
+  ESSGeom = new ESSGeometry(48, 128, 1, 1);
+  setResolution(CaenConfiguration.Resolution);
+  MaxRing = CaenConfiguration.MaxRing;
+}
+
 uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int x = xCoord(Data.RingId, Data.TubeId, Data.AmpA, Data.AmpB);
   int y = yCoord(Data.RingId, Data.AmpA, Data.AmpB);

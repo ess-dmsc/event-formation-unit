@@ -16,6 +16,12 @@
 
 namespace Caen {
 
+BifrostGeometry::BifrostGeometry(Config &CaenConfiguration){
+  ESSGeom = new ESSGeometry(900, 15, 1, 1);
+  setResolution(CaenConfiguration.Resolution);
+  MaxRing = CaenConfiguration.MaxRing;
+}
+
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data){
    XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
            Data.TubeId);

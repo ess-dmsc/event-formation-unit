@@ -97,20 +97,14 @@ Config::Config(std::string ConfigFile) {
         PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
         Panels.push_back(Temp);
       }
-       Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
-        // This detector is made of individual 2D banks, so final 2 dimensions are 1
-        Geometry =
-            new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
-        LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
+      Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
     }
-    else{
-      Pixels = int(root["XPixels"]) * int(root["YPixels"]);
-      Geometry =
-            new ESSGeometry(root["XPixels"], root["YPixels"], 1, 1);
+    else if (InstrumentName == "BIFROST"){
+      Pixels = 900 * 15;
     }
-
-   
-    
+    else if (InstrumentName == "Miracles"){
+      Pixels = 128 * 48;
+    }
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
         ConfigFile);

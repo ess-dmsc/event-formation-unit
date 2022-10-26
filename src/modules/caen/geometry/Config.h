@@ -36,7 +36,6 @@ public:
   uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
   uint32_t MaxTOFNS{800000000};
   uint8_t MaxRing{0};
-  ESSGeometry *Geometry;
 
 private:
   uint32_t Pixels{0};

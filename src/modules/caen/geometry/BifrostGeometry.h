@@ -21,6 +21,7 @@
 namespace Caen {
 class BifrostGeometry : public Geometry {
 public:
+  BifrostGeometry(Config &CaenConfiguration);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 
