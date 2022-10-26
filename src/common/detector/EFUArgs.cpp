@@ -118,6 +118,19 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--txbuffer", EFUSettings.TxSocketBufferSize,
                   "Transmit to detector buffer size.")
       ->group("EFU Options")->default_str("9216");
+
+  //
+  CLIParser.add_option("-f,--file", EFUSettings.ConfigFile,
+                  "Detector configuration file (JSON)")
+      ->group("EFU Options")->default_str("");
+
+  CLIParser.add_option("--calibration", EFUSettings.CalibFile,
+                  "Detector calibration file (JSON)")
+      ->group("EFU Options")->default_str("");
+
+  CLIParser.add_option("--dumptofile", EFUSettings.DumpFilePrefix,
+                  "dump to specified file")
+      ->group("EFU Options")->default_str("");
   // clang-format on
 }
 
@@ -196,30 +209,5 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   }
   CLIParser.clear();
   CLIParser.allow_extras(false);
-  return Status::CONTINUE;
-}
-
-EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
-  try {
-    CLIParser.parse(argc, argv);
-  } catch (const CLI::ParseError &e) {
-    CLIParser.exit(e);
-    return Status::EXIT;
-  }
-  if (*HelpOption and *DetectorOption) {
-    printHelp();
-    return Status::EXIT;
-  }
-  if (*WriteConfigOption) {
-    std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
-    if (not ConfigFile.is_open()) {
-      LOG(INIT, Sev::Error, "Failed to open config file for writing.");
-      return Status::EXIT;
-    }
-    ConfigFile << CLIParser.config_to_str(true, true);
-    ConfigFile.close();
-    LOG(INIT, Sev::Info, "Config file created, now exiting.");
-    return Status::EXIT;
-  }
   return Status::CONTINUE;
 }

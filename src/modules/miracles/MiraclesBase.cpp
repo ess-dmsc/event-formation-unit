@@ -30,10 +30,8 @@ namespace Miracles {
 
 const char *classname = "Miracles detector with ESS readout";
 
-MiraclesBase::MiraclesBase(BaseSettings const &Settings,
-                         struct MiraclesSettings &LocalMiraclesSettings)
-    : Detector("Miracles", Settings),
-      MiraclesModuleSettings(LocalMiraclesSettings) {
+MiraclesBase::MiraclesBase(BaseSettings const &Settings)
+    : Detector("Miracles", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -150,7 +148,7 @@ void MiraclesBase::inputThread() {
 /// \brief Normal processing thread
 void MiraclesBase::processingThread() {
 
-  MiraclesInstrument Miracles(Counters, MiraclesModuleSettings);
+  MiraclesInstrument Miracles(Counters, EFUSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "miracles_detector",

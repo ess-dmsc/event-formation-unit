@@ -29,7 +29,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  MiraclesInstrument(Counters &counters, MiraclesSettings &moduleSettings);
+  MiraclesInstrument(Counters &counters, BaseSettings & Settings);
 
   ~MiraclesInstrument();
 
@@ -48,8 +48,7 @@ public:
 public:
   /// \brief Stuff that 'ties' Miracles together
   struct Counters &counters;
-
-  MiraclesSettings &ModuleSettings;
+  BaseSettings &Settings;
   Config MiraclesConfiguration;
   ESSGeometry lgeom{48, 128, 1, 1};
   Geometry geom;

@@ -120,15 +120,6 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    { // This is to prevent accessing unloaded memory in a (potentially)
-      // unloaded
-      // plugin.
-      auto CLIArgPopulator = loader.GetCLIParserPopulator();
-      CLIArgPopulator(efu_args.CLIParser);
-    }
-    if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
-      return 0;
-    }
     GLConfig = efu_args.getGraylogSettings();
     if (not GLConfig.address.empty()) {
       Log::AddLogHandler(

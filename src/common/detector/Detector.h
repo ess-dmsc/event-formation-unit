@@ -43,6 +43,10 @@ struct BaseSettings {
   bool          NoHwCheck            {false};
   bool          TestImage            {false};
   std::uint32_t TestImageUSleep      {10};
+
+  // Used to be detector module specific
+  std::string   CalibFile           {""};
+  std::string   DumpFilePrefix      {""};
 };
 // clang-format on
 
@@ -134,9 +138,6 @@ private:
   std::string DetectorName;
 };
 
-struct PopulateCLIParser {
-  std::function<void(CLI::App &)> Function;
-};
 
 /// \brief Base class for the creation of detector factories.
 class DetectorFactoryBase {
