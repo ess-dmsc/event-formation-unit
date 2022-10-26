@@ -34,11 +34,8 @@ namespace TTLMonitor {
 
 const char *classname = "TTLMonitor detector with ESS readout";
 
-TTLMonitorBase::TTLMonitorBase(
-    BaseSettings const &settings,
-    struct TTLMonitorSettings &LocalTTLMonitorSettings)
-    : Detector("TTLMON", settings),
-      TTLMonitorModuleSettings(LocalTTLMonitorSettings) {
+TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
+  : Detector("TTLMON", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -172,12 +169,11 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
+  for (int i = 0; i < EFUSettings.TTLMonitorNumberOfMonitors; ++i) {
     Serializers.push_back(EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
-  TTLMonitorInstrument TTLMonitor(
-      Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializers);
+  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings, Serializers);
 
   TTLMonitor.VMMParser.setMonitor(true);
 

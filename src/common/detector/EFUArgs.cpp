@@ -132,11 +132,17 @@ EFUArgs::EFUArgs() {
                   "dump to specified file")
       ->group("EFU Options")->default_str("");
 
+  // DETECTOR SPECIFIC MULTIGRID
   CLIParser.add_flag("--multigrid-monitor", EFUSettings.MultiGridMonitor,
                 "stream monitor data")
       ->group("Multigrid")
       ->configurable(true)
       ->default_val("true");
+
+  // DETECTOR SPECIFIC TTLMONITOR
+  CLIParser.add_option("--ttlmonitor-reduce", EFUSettings.TTLMonitorReduceEvents,
+          "use 1 out of N readouts")->group("TTLMonitor");
+
   // clang-format on
 }
 

@@ -30,7 +30,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   TTLMonitorInstrument(Counters & counters,
-                  TTLMonitorSettings & moduleSettings,
+                  BaseSettings & settings,
                   std::vector<EV44Serializer> &serializers);
 
   /// \brief process vmm-formatted monitor readouts
@@ -42,7 +42,7 @@ public:
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
   struct Counters &counters;
-  TTLMonitorSettings &ModuleSettings;
+  BaseSettings &Settings;
 
   /// \brief
   Config Conf;

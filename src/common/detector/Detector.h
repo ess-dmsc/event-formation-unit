@@ -45,10 +45,13 @@ struct BaseSettings {
   std::uint32_t TestImageUSleep      {10};
 
   // Used to be detector module specific
-  std::string   CalibFile           {""};
-  std::string   DumpFilePrefix      {""};
+  std::string   CalibFile            {""};
+  std::string   DumpFilePrefix       {""};
   // multigrid
-  bool MultiGridMonitor{true};
+  bool          MultiGridMonitor     {true};
+  // ttlmonitor
+  int           TTLMonitorReduceEvents{1};
+  int           TTLMonitorNumberOfMonitors{1};
 };
 // clang-format on
 
