@@ -52,6 +52,8 @@ set(CaenBaseTest_SRC
 )
 create_test_executable(CaenBaseTest)
 
+
+
 ##
 ## CaenInstrumentTest Module integration test
 ##
@@ -65,3 +67,17 @@ set(CaenInstrumentTest_SRC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(CaenInstrumentTest)
+
+##
+## CaenInstrumentTest Module integration test
+##
+set(CaenInstrumentTestBifrost_INC
+  ${caen_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  )
+set(CaenInstrumentTestBifrost_SRC
+  ${caen_common_src}
+  test/CaenInstrumentTestBifrost.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+)
+create_test_executable(CaenInstrumentTestBifrost)

@@ -21,7 +21,9 @@ namespace Caen {
 Config::Config() {}
 
 Config::Config(std::string ConfigFile) {
+  XTRACE(INIT, DEB, "Loading json file");
   nlohmann::json root = from_json_file(ConfigFile);
+  XTRACE(INIT, DEB, "Loaded json file");
 
   try {
     InstrumentName = root["Detector"].get<std::string>();
@@ -69,38 +71,46 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
     XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
 
-    auto PanelConfig = root["PanelConfig"];
-    for (auto &Mapping : PanelConfig) {
-      XTRACE(INIT, DEB, "Loading panel");
-      auto Bank = Mapping["Bank"].get<unsigned int>();
-      bool Vertical = Mapping["Vertical"].get<bool>();
-      auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
-      auto TubesN = Mapping["TubesN"].get<unsigned int>();
-      auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
+    if (InstrumentName == "LoKI") {
+      auto PanelConfig = root["PanelConfig"];
+      for (auto &Mapping : PanelConfig) {
+        XTRACE(INIT, DEB, "Loading panel");
+        auto Bank = Mapping["Bank"].get<unsigned int>();
+        bool Vertical = Mapping["Vertical"].get<bool>();
+        auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
+        auto TubesN = Mapping["TubesN"].get<unsigned int>();
+        auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
 
-      NTubesTotal += TubesZ * TubesN;
-      LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
+        NTubesTotal += TubesZ * TubesN;
+        LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
 
-      LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, TubesN "
-          "{}, StrawOffset {}",
-          InstrumentName, Bank, Vertical, TubesZ, TubesN, StrawOffset);
+        LOG(INIT, Sev::Info,
+            "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, TubesN "
+            "{}, StrawOffset {}",
+            InstrumentName, Bank, Vertical, TubesZ, TubesN, StrawOffset);
 
-      XTRACE(INIT, DEB,
-           "JSON config - TubesZ %u, TubesN %u "
-          ", StrawOffset %u",
-          TubesZ, TubesN, StrawOffset);
+        XTRACE(INIT, DEB,
+            "JSON config - TubesZ %u, TubesN %u "
+            ", StrawOffset %u",
+            TubesZ, TubesN, StrawOffset);
 
-      PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
-      Panels.push_back(Temp);
+        PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
+        Panels.push_back(Temp);
+      }
+       Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
+        // This detector is made of individual 2D banks, so final 2 dimensions are 1
+        Geometry =
+            new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
+        LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
+    }
+    else{
+      Pixels = int(root["XPixels"]) * int(root["YPixels"]);
+      Geometry =
+            new ESSGeometry(root["XPixels"], root["YPixels"], 1, 1);
     }
 
-    Pixels = NTubesTotal * PanelGeometry::NStraws * Resolution;
-    // This detector is made of individual 2D banks, so final 2 dimensions are 1
-    Geometry =
-        new ESSGeometry(Resolution, NTubesTotal * PanelGeometry::NStraws, 1, 1);
-    LOG(INIT, Sev::Info, "Total pixels: {}", Pixels);
-
+   
+    
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
         ConfigFile);

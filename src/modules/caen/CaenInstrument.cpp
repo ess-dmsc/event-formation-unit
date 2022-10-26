@@ -33,7 +33,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   if(CaenConfiguration.InstrumentName == "LoKI"){
     Geom = new LokiGeometry(CaenConfiguration);
   }
-  else if (CaenConfiguration.InstrumentName == "Bifrost"){
+  else if (CaenConfiguration.InstrumentName == "BIFROST"){
     Geom = new BifrostGeometry();
     Geom->NPos = 300; ///\todo, move this into config file
   }
@@ -53,6 +53,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
     uint32_t MaxPixels = CaenConfiguration.getMaxPixel();
     uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
+    XTRACE(INIT, DEB, "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u", MaxPixels, CaenConfiguration.Resolution, Straws);
 
     XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
            CaenConfiguration.Resolution);

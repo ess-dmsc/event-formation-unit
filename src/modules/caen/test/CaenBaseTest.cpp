@@ -35,7 +35,7 @@ std::string caenjson = R"(
     { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 224 }
   ],
   "MaxTOFNS" : 800000000,
-  "MaxRing" : 1
+  "MaxRing" : 2
 }
 )";
 

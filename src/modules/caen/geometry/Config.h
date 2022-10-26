@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 class Config {
