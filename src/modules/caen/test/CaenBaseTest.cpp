@@ -125,7 +125,7 @@ std::vector<uint8_t> TestPacket2{
 
 
     // Data Header 3
-    // FEN 4 is invalid -> FENErrors++
+    // FEN 4 is invalid -> FENErrors++ (for loki only so far)
     0x01, 0x04, 0x18, 0x00, // ring 1, fen 4, size 24 bytes
     // Readout
     0x11, 0x00, 0x00, 0x00,
@@ -254,5 +254,9 @@ int main(int argc, char **argv) {
   saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
 
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto RetVal = RUN_ALL_TESTS();
+
+  deleteFile(lokifilename);
+  deleteFile(bifrostfilename);
+  return RetVal;
 }

@@ -52,7 +52,8 @@ public:
       XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NStraws);
       return StrawError;
     }
-    XTRACE(EVENT, DEB, "LocalTube: %u, TZ: %u, NStraws: %u, TN: %u", LocalTube, TZ, NStraws, TN);
+    XTRACE(EVENT, DEB, "LocalTube: %u, TZ: %u, NStraws: %u, TN: %u", LocalTube,
+           TZ, NStraws, TN);
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)
     auto TubeLayer = LocalTube % TZ; /// 0 - 3

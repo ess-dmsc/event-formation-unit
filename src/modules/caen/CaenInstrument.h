@@ -14,10 +14,10 @@
 #include <caen/CaenBase.h> // to get CaenSettings
 #include <caen/Counters.h>
 #include <caen/geometry/BifrostGeometry.h>
-#include <caen/geometry/MiraclesGeometry.h>
 #include <caen/geometry/Calibration.h>
 #include <caen/geometry/Config.h>
 #include <caen/geometry/LokiGeometry.h>
+#include <caen/geometry/MiraclesGeometry.h>
 #include <caen/geometry/PanelGeometry.h>
 #include <caen/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>

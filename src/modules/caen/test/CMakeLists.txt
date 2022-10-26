@@ -54,14 +54,14 @@ create_test_executable(CaenPanelGeometryTest)
 ## Validate LoKI geometry between EFU and Nexus Constructor
 ##
 set(CaenFullGeometryTest_INC
-  CaenFullGeometryTestData.h
+  LokiFullGeometryTestData.h
   ../geometry/LokiGeometry.h
   ../geometry/Calibration.h
   ../geometry/PanelGeometry.h)
-set(CaenFullGeometryTest_SRC 
-  CaenFullGeometryTest.cpp
+set(LokiFullGeometryTest_SRC 
+  LokiFullGeometryTest.cpp
   ../geometry/Calibration.cpp)
-create_test_executable(CaenFullGeometryTest)
+create_test_executable(LokiFullGeometryTest)
 
 
 set(CaenCalibrationTest_INC

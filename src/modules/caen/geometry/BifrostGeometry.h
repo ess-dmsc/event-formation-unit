@@ -25,10 +25,9 @@ public:
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 
-  int TripletTubes{3};    // tubes per triplet (might be obvious from the name)
+  int TripletTubes{3}; // tubes per triplet (might be obvious from the name)
 
-
-   /// \brief return the global x-offset for the given identifiers
+  /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Tube);
 
   /// \brief return the global y-offset for the given identifiers
@@ -54,6 +53,5 @@ public:
     }
     return 299 - OrgPos;
   }
-
 };
 } // namespace Caen

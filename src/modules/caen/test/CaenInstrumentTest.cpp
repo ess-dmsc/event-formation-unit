@@ -13,8 +13,8 @@ using namespace Caen;
 // Contrieved but valid configuration file
 // The config one panel with 4 x 1 tubes with 7 straws each having a
 // resolution of 1 - this gives a total of 28 pixels
-std::string ConfigFile{"deleteme_caen_instr_config.json"};
-std::string ConfigStr = R"(
+std::string LokiConfigFile{"deleteme_loki_instr_config.json"};
+std::string LokiConfigStr = R"(
   {
     "Detector": "LoKI",
 
@@ -24,6 +24,15 @@ std::string ConfigStr = R"(
       { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 1, "TubesN" : 1, "StrawOffset" : 0    }
     ]
 
+  }
+)";
+
+std::string BifrostConfigFile{"deleteme_bifrost_instr_config.json"};
+std::string BifrostConfigStr = R"(
+  {
+    "Detector": "BIFROST",
+    "MaxRing": 4,
+    "StrawResolution": 300
   }
 )";
 
@@ -69,13 +78,18 @@ protected:
   struct Counters counters;
   CaenSettings ModuleSettings;
 
-  void SetUp() override { ModuleSettings.ConfigFile = ConfigFile; }
+  void SetUp() override { ModuleSettings.ConfigFile = LokiConfigFile; }
   void TearDown() override {}
 };
 
 /** Test cases below */
-TEST_F(CaenInstrumentTest, Constructor) {
+TEST_F(CaenInstrumentTest, LokiConstructor) {
   ModuleSettings.CalibFile = CalibFile;
+  CaenInstrument Caen(counters, ModuleSettings);
+}
+
+TEST_F(CaenInstrumentTest, BifrostConstructor) {
+  ModuleSettings.ConfigFile = BifrostConfigFile;
   CaenInstrument Caen(counters, ModuleSettings);
 }
 
@@ -86,14 +100,18 @@ TEST_F(CaenInstrumentTest, PixelMismatch) {
 }
 
 int main(int argc, char **argv) {
-  saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+  saveBuffer(LokiConfigFile, (void *)LokiConfigStr.c_str(),
+             LokiConfigStr.size());
+  saveBuffer(BifrostConfigFile, (void *)BifrostConfigStr.c_str(),
+             BifrostConfigStr.size());
   saveBuffer(Config512File, (void *)Config512Str.c_str(), Config512Str.size());
   saveBuffer(CalibFile, (void *)CalibStr.c_str(), CalibStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  deleteFile(ConfigFile);
+  deleteFile(LokiConfigFile);
+  deleteFile(BifrostConfigFile);
   deleteFile(Config512File);
   deleteFile(CalibFile);
   return RetVal;

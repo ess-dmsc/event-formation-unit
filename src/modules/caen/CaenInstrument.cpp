@@ -30,44 +30,39 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
          ModuleSettings.ConfigFile.c_str());
   CaenConfiguration = Config(ModuleSettings.ConfigFile);
 
-  if(CaenConfiguration.InstrumentName == "LoKI"){
+  if (CaenConfiguration.InstrumentName == "LoKI") {
     Geom = new LokiGeometry(CaenConfiguration);
-  }
-  else if (CaenConfiguration.InstrumentName == "BIFROST"){
+  } else if (CaenConfiguration.InstrumentName == "BIFROST") {
     Geom = new BifrostGeometry(CaenConfiguration);
-  }
-  else if (CaenConfiguration.InstrumentName == "Miracles"){
+  } else if (CaenConfiguration.InstrumentName == "Miracles") {
     Geom = new MiraclesGeometry(CaenConfiguration);
-  }
-  else{
+  } else {
     XTRACE(INIT, ERR, "Invalid Detector Name");
-     throw std::runtime_error("Invalid Detector Name");
+    throw std::runtime_error("Invalid Detector Name");
   }
 
   if (ModuleSettings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
     uint32_t MaxPixels = Geom->ESSGeom->max_pixel();
     uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
-    XTRACE(INIT, DEB, "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u", MaxPixels, CaenConfiguration.Resolution, Straws);
+    XTRACE(INIT, DEB,
+           "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u",
+           MaxPixels, CaenConfiguration.Resolution, Straws);
 
     XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
            CaenConfiguration.Resolution);
-    Geom->CaenCalibration.nullCalibration(Straws,
-                                             CaenConfiguration.Resolution);
+    Geom->CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
            ModuleSettings.CalibFile.c_str());
     Geom->CaenCalibration = Calibration(ModuleSettings.CalibFile);
   }
 
-  if (Geom->CaenCalibration.getMaxPixel() !=
-     Geom->ESSGeom->max_pixel()) {
+  if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
     XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-            Geom->ESSGeom->max_pixel(),
-           Geom->CaenCalibration.getMaxPixel());
+           Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
     LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        Geom->ESSGeom->max_pixel(),
-        Geom->CaenCalibration.getMaxPixel());
+        Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
     throw std::runtime_error("Pixel mismatch");
   }
 
@@ -93,7 +88,7 @@ CaenInstrument::~CaenInstrument() {}
 /// also applies the calibration
 uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
- 
+
   uint32_t pixel = Geom->calcPixel(Data);
   counters.ReadoutsBadAmpl = Geom->Stats.AmplitudeZero;
   counters.OutsideRegion = Geom->Stats.OutsideRegion;
@@ -133,7 +128,7 @@ void CaenInstrument::processReadouts() {
   for (auto &Data : CaenParser.Result) {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
     bool validData = Geom->validateData(Data);
-    if (not validData){
+    if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
       continue;
     }
@@ -178,7 +173,6 @@ void CaenInstrument::processReadouts() {
     }
 
   } // for()
-
 }
 
 } // namespace Caen

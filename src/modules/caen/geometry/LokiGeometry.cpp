@@ -16,9 +16,11 @@
 
 namespace Caen {
 
-LokiGeometry::LokiGeometry(Config &CaenConfiguration) : Panels(CaenConfiguration.Panels) {
-  ESSGeom =
-        new ESSGeometry(CaenConfiguration.Resolution, CaenConfiguration.NTubesTotal * PanelGeometry::NStraws, 1, 1);
+LokiGeometry::LokiGeometry(Config &CaenConfiguration)
+    : Panels(CaenConfiguration.Panels) {
+  ESSGeom = new ESSGeometry(
+      CaenConfiguration.Resolution,
+      CaenConfiguration.NTubesTotal * PanelGeometry::NStraws, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
 }
@@ -51,30 +53,31 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
          CalibratedPos, GlobalStraw,
          PixelId); ///\todo this print statement prints a random number for
-                   ///pixel id
+                   /// pixel id
   XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
   return PixelId;
 }
 
-bool LokiGeometry::validateData(DataParser::CaenReadout &Data){
+bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
   if (Data.RingId >= Panels.size()) {
-      XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d",
-             Data.RingId, Panels.size());
-      (*Stats.RingErrors)++;
-      return false;
-    }
-    XTRACE(DATA, DEB, "Panels size %u", Panels.size());
+    XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d", Data.RingId,
+           Panels.size());
+    (*Stats.RingErrors)++;
+    return false;
+  }
+  XTRACE(DATA, DEB, "Panels size %u", Panels.size());
 
-    auto Panel = Panels[Data.RingId];
+  auto Panel = Panels[Data.RingId];
 
-    if (Data.FENId >= Panel.getMaxGroup()) {
-      XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
-             Panel.getMaxGroup() - 1);
-      (*Stats.FENErrors)++;
-      return false;
-    }
-    XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId, Panel.getMaxGroup() - 1);
-    return true;
+  if (Data.FENId >= Panel.getMaxGroup()) {
+    XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
+           Panel.getMaxGroup() - 1);
+    (*Stats.FENErrors)++;
+    return false;
+  }
+  XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId,
+         Panel.getMaxGroup() - 1);
+  return true;
 }
 
 bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
@@ -122,7 +125,5 @@ uint8_t LokiGeometry::strawCalc(double straw) {
   else
     return 6;
 }
-
-
 
 } // namespace Caen

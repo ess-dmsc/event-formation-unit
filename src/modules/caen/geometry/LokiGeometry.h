@@ -24,7 +24,7 @@
 
 namespace Caen {
 
-class LokiGeometry: public Geometry {
+class LokiGeometry : public Geometry {
 public:
   LokiGeometry(Config &CaenConfiguration);
   /// \brief The four amplitudes measured at certain points in the
@@ -39,7 +39,6 @@ public:
 
   void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
 
-
   uint8_t strawCalc(double straw);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
@@ -51,7 +50,6 @@ public:
   std::uint8_t StrawId{7};
   double PosVal{512.0};
   const std::uint8_t NStraws{7}; ///< number of straws per tube
-
 };
 
 } // namespace Caen

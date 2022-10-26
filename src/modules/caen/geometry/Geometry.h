@@ -23,11 +23,10 @@
 namespace Caen {
 class Geometry {
 public:
-
   void setResolution(uint16_t Resolution) { NPos = Resolution; }
   void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
 
-  virtual uint32_t calcPixel(DataParser::CaenReadout &Data) = 0;  
+  virtual uint32_t calcPixel(DataParser::CaenReadout &Data) = 0;
   virtual bool validateData(DataParser::CaenReadout &Data) = 0;
 
   struct Stats {
@@ -37,10 +36,9 @@ public:
     int64_t *FENErrors;
   } Stats;
 
-
   Calibration CaenCalibration;
   ESSGeometry *ESSGeom;
-  std::uint16_t NPos{512};       ///< resolution of position
+  std::uint16_t NPos{512}; ///< resolution of position
   uint8_t MaxRing{0};
 };
 } // namespace Caen

@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <CaenFullGeometryTestData.h>
+#include <LokiFullGeometryTestData.h>
 #include <algorithm>
 #include <caen/geometry/PanelGeometry.h>
 #include <common/testutils/TestBase.h>

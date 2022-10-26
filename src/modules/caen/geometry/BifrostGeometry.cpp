@@ -16,22 +16,22 @@
 
 namespace Caen {
 
-BifrostGeometry::BifrostGeometry(Config &CaenConfiguration){
+BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
   ESSGeom = new ESSGeometry(900, 15, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
 }
 
-bool BifrostGeometry::validateData(DataParser::CaenReadout &Data){
-   XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
-           Data.TubeId);
+bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
+  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
+         Data.TubeId);
 
-    if (Data.RingId > MaxRing) {
-      XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
-      (*Stats.RingErrors)++;
-      return false;
-    }
-    return true;
+  if (Data.RingId > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+    (*Stats.RingErrors)++;
+    return false;
+  }
+  return true;
 }
 
 int BifrostGeometry::xOffset(int Ring, int Tube) {

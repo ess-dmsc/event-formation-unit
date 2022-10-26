@@ -11,11 +11,10 @@
 
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <string>
-#include <vector>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
-
+#include <string>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -33,11 +32,9 @@ public:
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int Ring, int AmpA, int AmpB);
 
-
   int tubeAorB(int AmpA, int AmpB);
 
   /// \brief return the position along the tube
   int posAlongTube(int AmpA, int AmpB);
-
 };
 } // namespace Caen
