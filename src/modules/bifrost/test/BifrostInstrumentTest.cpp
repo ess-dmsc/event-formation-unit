@@ -23,7 +23,7 @@ std::string ConfigStr = R"(
 class BifrostInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
-  BifrostSettings ModuleSettings;
+  BaseSettings Settings;
   EV42Serializer *serializer;
   BifrostInstrument *bifrost;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -35,7 +35,7 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    bifrost = new BifrostInstrument(counters, ModuleSettings);
+    bifrost = new BifrostInstrument(counters, Settings);
     bifrost->setSerializer(serializer);
     bifrost->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }

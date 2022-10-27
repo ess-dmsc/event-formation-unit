@@ -118,7 +118,7 @@ class TTLMonitorInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
-  TTLMonitorSettings ModuleSettings;
+  BaseSettings Settings;
   std::vector<EV44Serializer> serializers;
   TTLMonitorInstrument *ttlmonitor;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -126,7 +126,7 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = ConfigFile;
     serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
     counters = {};
 
@@ -134,7 +134,7 @@ protected:
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
     ttlmonitor =
-        new TTLMonitorInstrument(counters, ModuleSettings, serializers);
+        new TTLMonitorInstrument(counters, Settings, serializers);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
@@ -188,8 +188,8 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_";
-  TTLMonitorInstrument TTLMonDump(counters, ModuleSettings, serializers);
+  Settings.DumpFilePrefix = "deleteme_";
+  TTLMonitorInstrument TTLMonDump(counters, Settings, serializers);
 
   makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
   auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);

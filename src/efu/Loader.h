@@ -36,8 +36,4 @@ public:
   bool IsOk();
 
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
-
-  std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {
-    return ParserPopulator;
-  };
 };

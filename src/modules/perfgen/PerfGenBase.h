@@ -14,14 +14,9 @@
 
 namespace PerfGen {
 
-struct PerfGenSettings {
-  std::string FilePrefix{""};
-};
-
 class PerfGenBase : public Detector {
 public:
-  PerfGenBase(BaseSettings const &settings,
-              PerfGenSettings &LocalPerfGenSettings);
+  PerfGenBase(BaseSettings const &settings);
   ~PerfGenBase() {}
   void inputThread();
   void processingThread();
@@ -41,8 +36,6 @@ protected:
     int64_t kafka_dr_errors;
     int64_t kafka_dr_noerrors;
   } __attribute__((aligned(64))) mystats;
-
-  struct PerfGenSettings PerfGenSettings;
 };
 
 } // namespace PerfGen

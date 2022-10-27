@@ -14,16 +14,9 @@
 
 namespace Bifrost {
 
-struct BifrostSettings {
-  std::string ConfigFile{""}; ///< panel mappings
-  // std::string CalibFile{""};   ///< calibration file
-  std::string FilePrefix{""}; ///< HDF5 file dumping
-};
-
 class BifrostBase : public Detector {
 public:
-  BifrostBase(BaseSettings const &Settings,
-              struct BifrostSettings &LocalBifrostSettings);
+  BifrostBase(BaseSettings const &Settings);
   ~BifrostBase() = default;
 
   void inputThread();
@@ -31,7 +24,6 @@ public:
 
 protected:
   struct Counters Counters;
-  BifrostSettings BifrostModuleSettings;
   EV42Serializer *Serializer;
 };
 

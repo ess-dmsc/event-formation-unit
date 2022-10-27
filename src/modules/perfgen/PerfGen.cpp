@@ -11,16 +11,10 @@
 #include "PerfGenBase.h"
 #include <common/detector/Detector.h>
 
-static struct PerfGen::PerfGenSettings LocalPerfGenSettings;
-
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
-
-PopulateCLIParser PopulateParser{SetCLIArguments};
-
 class PERFGEN : public PerfGen::PerfGenBase {
 public:
   explicit PERFGEN(BaseSettings Settings)
-      : PerfGen::PerfGenBase(std::move(Settings), LocalPerfGenSettings) {}
+      : PerfGen::PerfGenBase(std::move(Settings)) {}
 };
 
 DetectorFactory<PERFGEN> Factory;

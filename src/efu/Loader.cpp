@@ -66,18 +66,6 @@ bool Loader::loadPlugin(const std::string lib) {
     return false;
   }
 
-  PopulateCLIParser *tempParserPopulator =
-      (PopulateCLIParser *)dlsym(handle, "PopulateParser");
-  if (nullptr == tempParserPopulator) {
-    LOG(INIT, Sev::Warning,
-        "Unable to find function to populate CLI parser in {}", lib);
-  } else {
-    if (nullptr == tempParserPopulator->Function) {
-      LOG(INIT, Sev::Warning, "Function to populate CLI parser not set");
-    } else {
-      ParserPopulator = tempParserPopulator->Function;
-    }
-  }
   return true;
 }
 

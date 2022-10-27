@@ -23,7 +23,7 @@ std::string ConfigStr = R"(
 class MiraclesInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
-  MiraclesSettings ModuleSettings;
+  BaseSettings EFUSettings;
   EV42Serializer *serializer;
   MiraclesInstrument *miracles;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -35,7 +35,7 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    miracles = new MiraclesInstrument(counters, ModuleSettings);
+    miracles = new MiraclesInstrument(counters, EFUSettings);
     miracles->setSerializer(serializer);
     miracles->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }

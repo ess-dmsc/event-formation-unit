@@ -32,7 +32,7 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  FreiaInstrument(Counters &counters, FreiaSettings &moduleSettings,
+  FreiaInstrument(Counters &counters, BaseSettings &settings,
                   EV42Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
@@ -60,7 +60,7 @@ public:
 public:
   /// \brief Stuff that 'ties' Freia together
   struct Counters &counters;
-  FreiaSettings &ModuleSettings;
+  BaseSettings &Settings;
 
   /// \brief serialiser (and producer) for events
   EV42Serializer *Serializer{nullptr};

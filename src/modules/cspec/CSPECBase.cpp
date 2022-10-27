@@ -33,9 +33,8 @@ namespace Cspec {
 
 const char *classname = "CSPEC detector with ESS readout";
 
-CSPECBase::CSPECBase(BaseSettings const &settings,
-                     struct CSPECSettings &LocalCSPECSettings)
-    : Detector("CSPEC", settings), CSPECModuleSettings(LocalCSPECSettings) {
+CSPECBase::CSPECBase(BaseSettings const &settings)
+    : Detector("CSPEC", settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -196,8 +195,7 @@ void CSPECBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "cspec", Produce);
-  CSPECInstrument CSPEC(Counters, /*EFUSettings,*/ CSPECModuleSettings,
-                        Serializer);
+  CSPECInstrument CSPEC(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(CSPEC.ADCHist.needed_buffer_size(),
                                         "CSPEC");

@@ -35,9 +35,8 @@ namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings,
-                     struct FreiaSettings &LocalFreiaSettings)
-    : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
+FreiaBase::FreiaBase(BaseSettings const &settings)
+    : Detector("FREIA", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -201,8 +200,7 @@ void FreiaBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings,
-                        Serializer);
+  FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
                                         "Freia");

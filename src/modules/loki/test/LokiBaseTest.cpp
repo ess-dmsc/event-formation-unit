@@ -36,8 +36,8 @@ std::string lokijson = R"(
 
 class LokiBaseStandIn : public Loki::LokiBase {
 public:
-  LokiBaseStandIn(BaseSettings Settings, struct Loki::LokiSettings ReadoutSettings)
-      : Loki::LokiBase(Settings, ReadoutSettings){};
+  LokiBaseStandIn(BaseSettings Settings)
+      : Loki::LokiBase(Settings){};
   ~LokiBaseStandIn() = default;
   using Detector::Threads;
   using Loki::LokiBase::Counters;
@@ -48,17 +48,16 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_loki.json";
+    Settings.ConfigFile = "deleteme_loki.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Loki::LokiSettings LocalSettings;
 };
 
 TEST_F(LokiBaseTest, Constructor) {
-  LokiBaseStandIn Readout(Settings, LocalSettings);
+  LokiBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
@@ -147,7 +146,7 @@ std::vector<uint8_t> TestPacket2{
 
 TEST_F(LokiBaseTest, DataReceive) {
   Settings.DetectorPort = 9000;
-  LokiBaseStandIn Readout(Settings, LocalSettings);
+  LokiBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -164,8 +163,8 @@ TEST_F(LokiBaseTest, DataReceive) {
 TEST_F(LokiBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_";
-  LokiBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_";
+  LokiBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);

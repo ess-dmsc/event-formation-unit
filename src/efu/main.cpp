@@ -86,7 +86,6 @@ void EmptyGraylogMessageQueue() {
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
-  std::vector<ThreadCoreAffinitySetting> AffinitySettings;
   std::shared_ptr<Detector> detector;
   std::string DetectorName;
   GraylogSettings GLConfig;
@@ -121,15 +120,6 @@ int main(int argc, char *argv[]) {
       return -1;
     }
 
-    { // This is to prevent accessing unloaded memory in a (potentially)
-      // unloaded
-      // plugin.
-      auto CLIArgPopulator = loader.GetCLIParserPopulator();
-      CLIArgPopulator(efu_args.CLIParser);
-    }
-    if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
-      return 0;
-    }
     GLConfig = efu_args.getGraylogSettings();
     if (not GLConfig.address.empty()) {
       Log::AddLogHandler(
@@ -147,7 +137,6 @@ int main(int argc, char *argv[]) {
     DetectorSettings.GraphitePrefix = std::string("efu.") + p;
 
     detector = loader.createDetector(DetectorSettings);
-    AffinitySettings = efu_args.getThreadCoreAffinity();
     DetectorName = efu_args.getDetectorName();
   }
 
@@ -195,7 +184,7 @@ int main(int argc, char *argv[]) {
 
   LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorName);
 
-  Launcher launcher(AffinitySettings);
+  Launcher launcher;
 
   launcher.launchThreads(detector);
 

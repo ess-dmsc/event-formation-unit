@@ -18,12 +18,12 @@
 namespace Dream {
 
 DreamInstrument::DreamInstrument(struct Counters &counters,
-                                 DreamSettings &moduleSettings)
-    : counters(counters), ModuleSettings(moduleSettings) {
+                                 BaseSettings &settings)
+    : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  DreamConfiguration = Config(ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  DreamConfiguration = Config(Settings.ConfigFile);
 
   DreamConfiguration.loadAndApply();
 

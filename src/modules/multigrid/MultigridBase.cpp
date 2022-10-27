@@ -31,9 +31,8 @@
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz{2900};
 
-MultigridBase::MultigridBase(BaseSettings const &settings,
-                             MultigridSettings const &LocalSettings)
-    : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
+MultigridBase::MultigridBase(BaseSettings const &Settings)
+    : Detector("CSPEC", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -83,20 +82,20 @@ MultigridBase::MultigridBase(BaseSettings const &settings,
   // clang-format on
 
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
-      (ModuleSettings.monitor ? "YES" : "no"));
-  if (!ModuleSettings.FilePrefix.empty())
-    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", ModuleSettings.FilePrefix);
+      (EFUSettings.MultiGridMonitor ? "YES" : "no"));
+  if (!EFUSettings.DumpFilePrefix.empty())
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", EFUSettings.DumpFilePrefix);
 
   std::function<void()> inputFunc = [this]() { MultigridBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
 }
 
 bool MultigridBase::init_config() {
-  LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
+  LOG(INIT, Sev::Info, "MG Config file: {}", EFUSettings.ConfigFile);
+  mg_config = Multigrid::Config(EFUSettings.ConfigFile);
 
   LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
-  if (ModuleSettings.monitor) {
+  if (EFUSettings.MultiGridMonitor) {
     monitor = Monitor(EFUSettings.KafkaBroker, "CSPEC", "multigrid");
     monitor.init_hits(KafkaBufferSize);
     monitor.init_histograms(std::numeric_limits<uint16_t>::max());

@@ -30,10 +30,8 @@ namespace Bifrost {
 
 const char *classname = "Bifrost detector with ESS readout";
 
-BifrostBase::BifrostBase(BaseSettings const &Settings,
-                         struct BifrostSettings &LocalBifrostSettings)
-    : Detector("Bifrost", Settings),
-      BifrostModuleSettings(LocalBifrostSettings) {
+BifrostBase::BifrostBase(BaseSettings const &Settings)
+    : Detector("Bifrost", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -150,7 +148,7 @@ void BifrostBase::inputThread() {
 /// \brief Normal processing thread
 void BifrostBase::processingThread() {
 
-  BifrostInstrument Bifrost(Counters, BifrostModuleSettings);
+  BifrostInstrument Bifrost(Counters, EFUSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector",

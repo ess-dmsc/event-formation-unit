@@ -27,7 +27,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  DreamInstrument(Counters &counters, DreamSettings &moduleSettings);
+  DreamInstrument(Counters &counters, BaseSettings &settings);
 
   ~DreamInstrument();
 
@@ -43,7 +43,7 @@ public:
 public:
   /// \brief Stuff that 'ties' DREAM together
   struct Counters &counters;
-  DreamSettings &ModuleSettings;
+  BaseSettings &Settings;
   Config DreamConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
