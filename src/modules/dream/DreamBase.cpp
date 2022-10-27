@@ -26,6 +26,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+MAKEPLUGIN(DREAM, Dream)
+
 namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";

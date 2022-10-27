@@ -29,11 +29,13 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
+MAKEPLUGIN(CSPEC, Cspec)
+
 namespace Cspec {
 
 const char *classname = "CSPEC detector with ESS readout";
 
-CSPECBase::CSPECBase(BaseSettings const &settings)
+CspecBase::CspecBase(BaseSettings const &settings)
     : Detector("CSPEC", settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -126,11 +128,11 @@ CSPECBase::CSPECBase(BaseSettings const &settings)
 
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { CSPECBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { CspecBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    CSPECBase::processing_thread();
+    CspecBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -138,7 +140,7 @@ CSPECBase::CSPECBase(BaseSettings const &settings)
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void CSPECBase::input_thread() {
+void CspecBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
@@ -174,7 +176,7 @@ void CSPECBase::input_thread() {
   return;
 }
 
-void CSPECBase::processing_thread() {
+void CspecBase::processing_thread() {
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");

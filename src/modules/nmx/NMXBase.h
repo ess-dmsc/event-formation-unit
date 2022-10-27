@@ -15,10 +15,10 @@
 
 namespace Nmx {
 
-class NMXBase : public Detector {
+class NmxBase : public Detector {
 public:
-  NMXBase(BaseSettings const &settings);
-  ~NMXBase() = default;
+  NmxBase(BaseSettings const &settings);
+  ~NmxBase() = default;
 
   void input_thread();
   void processing_thread();

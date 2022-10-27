@@ -29,11 +29,13 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+MAKEPLUGIN(NMX, Nmx)
+
 namespace Nmx {
 
 const char *classname = "NMX detector with ESS readout";
 
-NMXBase::NMXBase(BaseSettings const &settings)
+NmxBase::NmxBase(BaseSettings const &settings)
     : Detector("NMX", settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -127,11 +129,11 @@ NMXBase::NMXBase(BaseSettings const &settings)
 
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { NMXBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { NmxBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    NMXBase::processing_thread();
+    NmxBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -139,7 +141,7 @@ NMXBase::NMXBase(BaseSettings const &settings)
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void NMXBase::input_thread() {
+void NmxBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
@@ -175,7 +177,7 @@ void NMXBase::input_thread() {
   return;
 }
 
-void NMXBase::processing_thread() {
+void NmxBase::processing_thread() {
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");

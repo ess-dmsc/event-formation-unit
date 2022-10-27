@@ -25,7 +25,7 @@ set(bifrost_common_src
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 set(bifrost_INC ${bifrost_common_inc})
-set(bifrost_SRC Bifrost.cpp ${bifrost_common_src})
+set(bifrost_SRC ${bifrost_common_src})
 create_module(bifrost)
 
 

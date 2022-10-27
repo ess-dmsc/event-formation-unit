@@ -13,7 +13,7 @@
 // \todo use reference data instead
 #include <multigrid/mesytec/test/TestData.h>
 
-class MultigridBaseStandIn : public MultigridBase {
+class MultigridBaseStandIn : public Multigrid::MultigridBase {
 public:
   MultigridBaseStandIn(BaseSettings Settings)
       : MultigridBase(Settings){};

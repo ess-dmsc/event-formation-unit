@@ -28,7 +28,7 @@ set(loki_common_src
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 set(loki_INC ${loki_common_inc})
-set(loki_SRC Loki.cpp ${loki_common_src})
+set(loki_SRC ${loki_common_src})
 create_module(loki)
 
 #

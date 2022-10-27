@@ -28,6 +28,10 @@
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
+MAKEPLUGIN(MULTIGRID, Multigrid)
+
+namespace Multigrid {
+
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz{2900};
 
@@ -261,3 +265,4 @@ void MultigridBase::mainThread() {
     }
   }
 }
+} // namespace

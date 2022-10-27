@@ -15,10 +15,10 @@
 
 namespace Cspec {
 
-class CSPECBase : public Detector {
+class CspecBase : public Detector {
 public:
-  CSPECBase(BaseSettings const &settings);
-  ~CSPECBase() = default;
+  CspecBase(BaseSettings const &settings);
+  ~CspecBase() = default;
 
   void input_thread();
   void processing_thread();

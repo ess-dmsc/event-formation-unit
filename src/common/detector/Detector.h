@@ -55,6 +55,14 @@ struct BaseSettings {
 };
 // clang-format on
 
+#define MAKEPLUGIN(CLASS, NAMESPACE) \
+class CLASS : public NAMESPACE::NAMESPACE ## Base {\
+public:\
+  explicit CLASS(BaseSettings Settings)\
+      : NAMESPACE::NAMESPACE##Base(std::move(Settings)) {}\
+}; \
+DetectorFactory<CLASS> Factory;
+
 struct ThreadInfo {
   std::function<void(void)> func;
   std::string name;

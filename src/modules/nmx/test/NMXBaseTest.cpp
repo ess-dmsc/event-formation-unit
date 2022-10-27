@@ -89,13 +89,13 @@ std::vector<uint8_t> dummyreadout {
 #include <common/testutils/TestUDPServer.h>
 #include <nmx/NMXBase.h>
 
-class NMXBaseStandIn : public Nmx::NMXBase {
+class NMXBaseStandIn : public Nmx::NmxBase {
 public:
   NMXBaseStandIn(BaseSettings Settings)
-      : Nmx::NMXBase(Settings){};
+      : Nmx::NmxBase(Settings){};
   ~NMXBaseStandIn() = default;
   using Detector::Threads;
-  using Nmx::NMXBase::Counters;
+  using Nmx::NmxBase::Counters;
 };
 
 class NMXBaseTest : public ::testing::Test {
