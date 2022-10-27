@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
-#include <common/detector/DetectorModuleRegister.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
@@ -22,25 +21,12 @@ Loader::~Loader() {
 }
 
 void Loader::unloadPlugin() {
-  ParserPopulator = nullptr;
   if (nullptr != handle) {
     dlclose(handle);
   }
 }
 
 bool Loader::loadPlugin(const std::string lib) {
-  try {
-    auto &FoundModule = DetectorModuleRegistration::find(lib);
-    ParserPopulator = FoundModule.CLISetup;
-    myFactory = FoundModule.DetectorFactory.get();
-    LOG(INIT, Sev::Info, "Loaded statically linked detector module: " + lib);
-    return true;
-  } catch (std::runtime_error &Error) {
-    LOG(INIT, Sev::Notice,
-        "Unable to find statically linked detector module with "
-        "name\"{}\". Attempting to open external plugin.",
-        lib);
-  }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
 
   for (auto &CSuffix : PossibleSuffixes) {

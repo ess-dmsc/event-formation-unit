@@ -55,6 +55,8 @@ struct BaseSettings {
 };
 // clang-format on
 
+
+// Macro used in 'Detector'Base.cpp files to remove 'Detector'.cpp
 #define MAKEPLUGIN(CLASS, NAMESPACE) \
 class CLASS : public NAMESPACE::NAMESPACE ## Base {\
 public:\
@@ -62,6 +64,7 @@ public:\
       : NAMESPACE::NAMESPACE##Base(std::move(Settings)) {}\
 }; \
 DetectorFactory<CLASS> Factory;
+// end macro
 
 struct ThreadInfo {
   std::function<void(void)> func;
@@ -122,8 +125,7 @@ protected:
 
   /// Shared between input_thread and processing_thread
   memory_sequential_consistent::CircularFifo<unsigned int,
-                                             EthernetBufferMaxEntries>
-      InputFifo;
+      EthernetBufferMaxEntries> InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
@@ -133,13 +135,14 @@ protected:
   // it is not critical that this is precise.
   const int TSC_MHZ = 2900;
 
-  void AddThreadFunction(std::function<void(void)> &func,
-                         std::string funcName) {
+  void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
+
   void AddCommandFunction(std::string Name, CommandFunction FunctionObj) {
     DetectorCommands[Name] = FunctionObj;
   };
+
   ThreadList Threads;
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};

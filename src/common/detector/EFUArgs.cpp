@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <common/Version.h>
 #include <common/debug/Log.h>
-#include <common/detector/DetectorModuleRegister.h>
 #include <common/detector/EFUArgs.h>
 #include <cstdio>
 #include <fstream>
@@ -60,15 +59,7 @@ EFUArgs::EFUArgs() {
       ->group("EFU Options")->default_str("10");
 
   std::string DetectorDescription{"Detector name"};
-  std::map<std::string, DetectorModuleSetup> StaticDetModules =
-      DetectorModuleRegistration::getFactories();
-  if (not StaticDetModules.empty()) {
-    auto GetModuleName = [](std::string &A, auto const &B) {
-      return std::move(A) + " " + B.first;
-    };
-    auto TempString = std::accumulate(StaticDetModules.begin(), StaticDetModules.end(), " (Known modules:"s, GetModuleName);
-    DetectorDescription += TempString + ")";
-  }
+
   DetectorOption = CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
       ->group("EFU Options")->required();
 
@@ -97,15 +88,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-s,--stopafter", EFUSettings.StopAfterSec,
                        "Terminate after timeout seconds")
       ->group("EFU Options")->default_str("4294967295"); // 0xffffffffU
-
-  WriteConfigOption = CLIParser
-      .add_option("--write_config", ConfigFileName,
-                  "Write CLI options with default values to config file.")
-      ->group("EFU Options")->configurable(false);
-
-  ReadConfigOption =   CLIParser
-      .set_config("--read_config", "", "Read CLI options from config file.", false)
-      ->group("EFU Options")->excludes(WriteConfigOption);
 
   CLIParser.add_option("--updateinterval", EFUSettings.UpdateIntervalSec,
                        "Stats and event data update interval (seconds).")

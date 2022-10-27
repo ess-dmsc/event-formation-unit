@@ -8,7 +8,6 @@ add_subdirectory(readout)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
-  detector/DetectorModuleRegister.cpp
   detector/EFUArgs.cpp
   kafka/EV42Serializer.cpp
   kafka/EV44Serializer.cpp
@@ -32,7 +31,6 @@ set(efu_common_INC
   debug/Trace.h
   debug/TraceGroups.h
   detector/Detector.h
-  detector/DetectorModuleRegister.h
   detector/EFUArgs.h
   kafka/EV42Serializer.h
   kafka/EV44Serializer.h
