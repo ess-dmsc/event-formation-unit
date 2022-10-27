@@ -146,8 +146,10 @@ TEST_F(CalibrationTest, ClampLowAndHigh) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
              StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
-  calib.Stats.ClampLow = new int64_t;
-  calib.Stats.ClampHigh = new int64_t;
+  int64_t ClampLow = 0;
+  int64_t ClampHigh = 0;
+  calib.Stats.ClampLow = &ClampLow;
+  calib.Stats.ClampHigh = &ClampHigh;
 
   calib.StrawCalibration[0][0] = 100.0; // a = 100
   uint32_t res = calib.strawCorrection(0, 5.0);
