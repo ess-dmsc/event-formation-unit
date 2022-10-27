@@ -93,12 +93,12 @@ std::vector<uint8_t> dummyreadout {
 #include <common/testutils/TestUDPServer.h>
 #include <cspec/CSPECBase.h>
 
-class CSPECBaseStandIn : public Cspec::CSPECBase {
+class CSPECBaseStandIn : public Cspec::CspecBase {
 public:
   CSPECBaseStandIn(BaseSettings Settings)
-      : Cspec::CSPECBase(Settings){};
+      : Cspec::CspecBase(Settings){};
   ~CSPECBaseStandIn() = default;
-  using Cspec::CSPECBase::Counters;
+  using Cspec::CspecBase::Counters;
   using Detector::Threads;
 };
 
