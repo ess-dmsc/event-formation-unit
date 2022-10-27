@@ -33,7 +33,7 @@ set(nmx_common_src
   )
 
 set(nmx_INC ${nmx_common_inc})
-set(nmx_SRC NMX.cpp ${nmx_common_src})
+set(nmx_SRC ${nmx_common_src})
 create_module(nmx)
 
 
@@ -63,4 +63,3 @@ set(NMXInstrumentTest_SRC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(NMXInstrumentTest)
-

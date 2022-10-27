@@ -13,6 +13,8 @@
 #include <common/monitor/Monitor.h>
 #include <multigrid/Config.h>
 
+namespace Multigrid {
+
 ///
 class MultigridBase : public Detector {
 public:
@@ -65,3 +67,4 @@ protected:
   bool init_config();
   void process_events(EV42Serializer &ev42serializer);
 };
+} // namespace

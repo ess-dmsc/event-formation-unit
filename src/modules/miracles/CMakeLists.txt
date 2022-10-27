@@ -24,7 +24,7 @@ set(miracles_common_src
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 set(miracles_INC ${miracles_common_inc})
-set(miracles_SRC Miracles.cpp ${miracles_common_src})
+set(miracles_SRC ${miracles_common_src})
 create_module(miracles)
 
 

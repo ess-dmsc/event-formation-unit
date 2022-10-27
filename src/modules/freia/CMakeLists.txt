@@ -32,7 +32,7 @@ set(freia_common_src
   )
 
 set(freia_INC ${freia_common_inc})
-set(freia_SRC Freia.cpp ${freia_common_src})
+set(freia_SRC ${freia_common_src})
 create_module(freia)
 
 #

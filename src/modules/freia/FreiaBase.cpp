@@ -31,6 +31,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
+MAKEPLUGIN(FREIA, Freia)
+
 namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";

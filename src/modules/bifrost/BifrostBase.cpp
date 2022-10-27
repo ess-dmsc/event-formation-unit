@@ -26,6 +26,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+MAKEPLUGIN(BIFROST, Bifrost)
+
 namespace Bifrost {
 
 const char *classname = "Bifrost detector with ESS readout";

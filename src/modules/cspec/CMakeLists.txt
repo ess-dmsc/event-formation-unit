@@ -35,7 +35,7 @@ set(cspec_common_src
   )
 
 set(cspec_INC ${cspec_common_inc})
-set(cspec_SRC CSPEC.cpp ${cspec_common_src})
+set(cspec_SRC ${cspec_common_src})
 create_module(cspec)
 
 
@@ -65,4 +65,3 @@ set(CSPECInstrumentTest_SRC
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(CSPECInstrumentTest)
-

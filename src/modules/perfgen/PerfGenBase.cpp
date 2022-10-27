@@ -31,6 +31,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+MAKEPLUGIN(PERFGEN, PerfGen)
+
 namespace PerfGen {
 
 const char *classname = "PerfGen Pixel Generator";

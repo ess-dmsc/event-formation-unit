@@ -26,6 +26,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+MAKEPLUGIN(MIRACLES, Miracles)
+
 namespace Miracles {
 
 const char *classname = "Miracles detector with ESS readout";

@@ -21,7 +21,6 @@ set(dream_common_inc
 )
 
 set(dream_common_src
-  Dream.cpp
   DreamInstrument.cpp
   DreamBase.cpp
   geometry/CDTGeometry.cpp
