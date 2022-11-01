@@ -120,6 +120,61 @@ int main(int argc, char *argv[]) {
   HwCheck hwcheck;
   Timer RunTimer;
 
+  EFUArgs efu_args;
+  if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
+    return 0;
+  }
+  efu_args.printSettings();
+  DetectorSettings = efu_args.getBaseSettings();
+
+  #ifdef EFU_MIRACLES
+  DetectorName="miracles";
+  #endif
+  #ifdef EFU_BIFROST
+  DetectorName="bifrost";
+  #endif
+  #ifdef EFU_CSPEC
+  DetectorName="cspec";
+  #endif
+  #ifdef EFU_DREAM
+  DetectorName="dream";
+  #endif
+  #ifdef EFU_FREIA
+  DetectorName="freia";
+  #endif
+  #ifdef EFU_LOKI
+  DetectorName="loki";
+  #endif
+  #ifdef EFU_PERFGEN
+  DetectorName="perfgen";
+  #endif
+  #ifdef EFU_TTLMON
+  DetectorName="ttlmonitor";
+  #endif
+
+
+  // Set-up logging before we start doing important stuff
+  Log::RemoveAllHandlers();
+
+  auto CI = new Log::ConsoleInterface();
+  CI->setMessageStringCreatorFunction(ConsoleFormatter);
+  Log::AddLogHandler(CI);
+
+  Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
+  if (!efu_args.getLogFileName().empty()) {
+    auto FI = new Log::FileInterface(efu_args.getLogFileName());
+    FI->setMessageStringCreatorFunction(FileFormatter);
+    Log::AddLogHandler(FI);
+  }
+
+  GLConfig = efu_args.getGraylogSettings();
+  if (not GLConfig.address.empty()) {
+    Log::AddLogHandler(
+        new Log::GraylogInterface(GLConfig.address, GLConfig.port));
+  }
+
+
+  DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
 
   auto Base = new
   #ifdef EFU_MIRACLES
@@ -150,69 +205,9 @@ int main(int argc, char *argv[]) {
     TTLMonitor::TTLMonitorBase(DetectorSettings);
   #endif
 
-  { // Make sure that the EFUArgs instance is deallocated before the detector
-    // plugin is
-    EFUArgs efu_args;
-    if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
-      return 0;
-    }
-    // Set-up logging before we start doing important stuff
-    Log::RemoveAllHandlers();
 
-    auto CI = new Log::ConsoleInterface();
-    CI->setMessageStringCreatorFunction(ConsoleFormatter);
-    Log::AddLogHandler(CI);
+  detector = std::shared_ptr<Detector>(Base);
 
-    Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
-    if (!efu_args.getLogFileName().empty()) {
-      auto FI = new Log::FileInterface(efu_args.getLogFileName());
-      FI->setMessageStringCreatorFunction(FileFormatter);
-      Log::AddLogHandler(FI);
-    }
-
-    GLConfig = efu_args.getGraylogSettings();
-    if (not GLConfig.address.empty()) {
-      Log::AddLogHandler(
-          new Log::GraylogInterface(GLConfig.address, GLConfig.port));
-    }
-    efu_args.printSettings();
-    DetectorSettings = efu_args.getBaseSettings();
-
-    /// Automatically create the Graphite metric prefix from detector plugin
-    /// name remove leading path and trailing extension
-    auto p = boost::filesystem::path(efu_args.getDetectorName())
-                 .filename()
-                 .stem()
-                 .string();
-    DetectorSettings.GraphitePrefix = std::string("efu.") + p;
-
-
-    detector = std::shared_ptr<Detector>(Base);
-    #ifdef EFU_MIRACLES
-    DetectorName="miracles";
-    #endif
-    #ifdef EFU_BIFROST
-    DetectorName="bifrost";
-    #endif
-    #ifdef EFU_CSPEC
-    DetectorName="cspec";
-    #endif
-    #ifdef EFU_DREAM
-    DetectorName="dream";
-    #endif
-    #ifdef EFU_FREIA
-    DetectorName="freia";
-    #endif
-    #ifdef EFU_LOKI
-    DetectorName="loki";
-    #endif
-    #ifdef EFU_PERFGEN
-    DetectorName="perfgen";
-    #endif
-    #ifdef EFU_TTLMON
-    DetectorName="ttlmonitor";
-    #endif
-  }
 
   int keep_running = 1;
 
