@@ -31,30 +31,6 @@ TEST_F(EFUArgsTest, ExitOnHelp) {
             EFUArgs::Status::EXIT);
 }
 
-TEST_F(EFUArgsTest, DoNotExitOnHelp) {
-  const char *myargv[] = {"someName", "-h", "-d some_det"};
-  int myargc = 3;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
-            EFUArgs::Status::CONTINUE);
-}
-
-TEST_F(EFUArgsTest, ExitOnNoArgs) {
-  const char *myargv[] = {"someName"};
-  int myargc = 1;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
-            EFUArgs::Status::EXIT);
-}
-
-TEST_F(EFUArgsTest, IgnoreFirstPassFailure) {
-  const char *myargv[] = {"someName", "-h", "-d", "some_det", "-p", "hej"};
-  int myargc = 6;
-  EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
-            EFUArgs::Status::CONTINUE);
-}
-
 TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
   auto settings = efu_args.getBaseSettings();
@@ -74,7 +50,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   const char *myargv[] = {"progname",
                         "-b", "mybroker",
                         "-c" , "99",
-                        "-d", "myinst",
                         "-i", "1.2.3.4",
                         "-p", "9876",
                         "-g", "4.3.2.1",
@@ -83,7 +58,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-a", "10.0.0.1",
                         "-m", "8989" };
   // clang-format on
-  int myargc = 21;
+  int myargc = 19;
   EFUArgs efu_args;
   auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
@@ -91,8 +66,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   auto glsettings = efu_args.getGraylogSettings();
 
   ASSERT_EQ("mybroker", settings.KafkaBroker);
-  // ASSERT_EQ(99, opts.cpustart); /**< todo fixme */
-  ASSERT_EQ("myinst", efu_args.getDetectorName());
   ASSERT_EQ("1.2.3.4", settings.DetectorAddress);
   ASSERT_EQ(9876, settings.DetectorPort);
   ASSERT_EQ("4.3.2.1", settings.GraphiteAddress);

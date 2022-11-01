@@ -33,9 +33,10 @@ set(dream_common_src
 #=============================================================================
 # dream detector module
 #=============================================================================
-set(dream_INC ${dream_common_inc} )
-set(dream_SRC ${dream_common_src} )
-create_module(dream)
+set(dream_INC ${EFUCOMMON_INC} ${dream_common_inc} )
+set(dream_SRC ${EFUCOMMON_SRC} ${dream_common_src} )
+create_executable(dream)
+target_compile_definitions(dream PUBLIC EFU_DREAM)
 
 #=============================================================================
 # dream detector module test

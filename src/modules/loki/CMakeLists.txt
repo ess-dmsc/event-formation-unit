@@ -27,9 +27,10 @@ set(loki_common_src
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
-set(loki_INC ${loki_common_inc})
-set(loki_SRC ${loki_common_src})
-create_module(loki)
+set(loki_INC ${EFUCOMMON_INC} ${loki_common_inc})
+set(loki_SRC ${EFUCOMMON_SRC} ${loki_common_src})
+create_executable(loki)
+target_compile_definitions(loki PUBLIC EFU_LOKI)
 
 #
 set(LokiBaseTest_INC

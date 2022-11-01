@@ -17,17 +17,18 @@ set(ttlmonitor_common_inc
 
 
 set(ttlmonitor_common_src
-TTLMonitorBase.cpp
-TTLMonitorInstrument.cpp
-geometry/Config.cpp
-${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
-)
+  TTLMonitorBase.cpp
+  TTLMonitorInstrument.cpp
+  geometry/Config.cpp
+  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
+  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
+  )
 
 #
-set(ttlmonitor_INC ${ttlmonitor_common_inc})
-set(ttlmonitor_SRC ${ttlmonitor_common_src})
-create_module(ttlmonitor)
+set(ttlmonitor_INC ${EFUCOMMON_INC} ${ttlmonitor_common_inc})
+set(ttlmonitor_SRC ${EFUCOMMON_SRC} ${ttlmonitor_common_src})
+create_executable(ttlmonitor)
+target_compile_definitions(ttlmonitor PUBLIC EFU_TTLMON)
 
 
 #

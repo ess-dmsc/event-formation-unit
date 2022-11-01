@@ -34,9 +34,10 @@ set(cspec_common_src
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(cspec_INC ${cspec_common_inc})
-set(cspec_SRC ${cspec_common_src})
-create_module(cspec)
+set(cspec_INC ${EFUCOMMON_INC} ${cspec_common_inc})
+set(cspec_SRC ${EFUCOMMON_SRC} ${cspec_common_src})
+create_executable(cspec)
+target_compile_definitions(cspec PUBLIC EFU_CSPEC)
 
 
 set(CSPECBaseTest_INC

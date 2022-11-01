@@ -52,7 +52,6 @@ private:
   std::string LogFileName;
 
   bool PrintVersion{false};
-  CLI::Option *DetectorOption;
   CLI::Option *HelpOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};

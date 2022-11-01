@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <bifrost/Counters.h>
+#include <modules/bifrost/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV42Serializer.h>
 

@@ -25,10 +25,6 @@
 
 #include "MultigridBase.h"
 #include <common/debug/Log.h>
-//#undef TRC_MASK
-//#define TRC_MASK 0
-
-MAKEPLUGIN(MULTIGRID, Multigrid)
 
 namespace Multigrid {
 

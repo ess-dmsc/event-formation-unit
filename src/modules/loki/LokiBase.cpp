@@ -26,8 +26,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 // #define ECDC_DEBUG_READOUT
 
-MAKEPLUGIN(LOKI, Loki)
-
 namespace Loki {
 
 const char *classname = "Loki detector with ESS readout";

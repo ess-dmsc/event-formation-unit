@@ -29,8 +29,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-MAKEPLUGIN(CSPEC, Cspec)
-
 namespace Cspec {
 
 const char *classname = "CSPEC detector with ESS readout";

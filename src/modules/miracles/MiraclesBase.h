@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <miracles/Counters.h>
+#include <modules/miracles/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV42Serializer.h>
 

@@ -31,9 +31,11 @@ set(freia_common_src
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(freia_INC ${freia_common_inc})
-set(freia_SRC ${freia_common_src})
-create_module(freia)
+set(freia_INC   ${EFUCOMMON_INC} ${freia_common_inc})
+set(freia_SRC   ${EFUCOMMON_SRC} ${freia_common_src})
+create_executable(freia)
+target_compile_definitions(freia PUBLIC EFU_FREIA)
+
 
 #
 set(FreiaBaseTest_INC

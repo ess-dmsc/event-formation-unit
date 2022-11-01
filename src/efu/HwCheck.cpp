@@ -96,32 +96,6 @@ bool HwCheck::checkMTU(const char *interface) {
   return ifr.ifr_mtu >= MinimumMtu;
 }
 
-// bool HwCheck::checkDiskSpace(std::vector<std::string> directories) {
-//    bool ok = true;
-//    for (auto file : directories) {
-//      struct statvfs fsstats;
-//      int ret = statvfs(file.c_str(), &fsstats);
-//      if (ret < 0) {
-//        LOG(INIT, Sev::Info, "Diskcheck ignoring file/dir {}", file);
-//        continue;;
-//     }
-//
-//     std::string passfail = "passed";
-//     uint64_t bytes_avail = fsstats.f_frsize * fsstats.f_bavail;
-//     float percent_avail = fsstats.f_blocks == 0 ?
-//            0.0 :(fsstats.f_bavail * 100.0) / fsstats.f_blocks;
-//     if ( (bytes_avail < MinDiskAvailable) or (percent_avail <
-//     MinDiskPercentFree) ) {
-//       ok = false;
-//       passfail = "failed";
-//     }
-//     LOG(INIT, Sev::Warning, "Diskcheck {} for {}: available: {}B ({}%)",
-//     passfail, file, bytes_avail, percent_avail);
-//   }
-//
-//   return ok;
-// }
-
 /// Display interface name and family (including symbolic
 /// form of the latter for the common families)
 // void HwCheck::debugPrint(struct ifaddrs * ifa) {

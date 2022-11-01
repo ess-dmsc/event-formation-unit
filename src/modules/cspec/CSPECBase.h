@@ -11,7 +11,7 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV42Serializer.h>
-#include <cspec/Counters.h>
+#include <modules/cspec/Counters.h>
 
 namespace Cspec {
 

@@ -24,11 +24,11 @@ set(bifrost_common_src
   ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
-set(bifrost_INC ${bifrost_common_inc})
-set(bifrost_SRC ${bifrost_common_src})
-create_module(bifrost)
+set(bifrost_INC   ${EFUCOMMON_INC} ${bifrost_common_inc})
+set(bifrost_SRC   ${EFUCOMMON_SRC} ${bifrost_common_src})
+create_executable(bifrost)
 
-
+target_compile_definitions(bifrost PUBLIC EFU_BIFROST)
 
 
 #=============================================================================

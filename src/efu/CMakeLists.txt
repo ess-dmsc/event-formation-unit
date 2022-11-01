@@ -5,7 +5,6 @@ set(efu_SRC
   ExitHandler.cpp
   HwCheck.cpp
   Launcher.cpp
-  Loader.cpp
   main.cpp
   Parser.cpp
   Server.cpp
@@ -16,7 +15,6 @@ set(efu_INC
   ExitHandler.h
   HwCheck.h
   Launcher.h
-  Loader.h
   Parser.h
   Server.h
   )

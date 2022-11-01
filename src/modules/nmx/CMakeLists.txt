@@ -32,9 +32,10 @@ set(nmx_common_src
   ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(nmx_INC ${nmx_common_inc})
-set(nmx_SRC ${nmx_common_src})
-create_module(nmx)
+set(nmx_INC ${EFUCOMMON_INC} ${nmx_common_inc})
+set(nmx_SRC ${EFUCOMMON_SRC} ${nmx_common_src})
+create_executable(nmx)
+target_compile_definitions(nmx PUBLIC EFU_NMX)
 
 
 set(NMXBaseTest_INC

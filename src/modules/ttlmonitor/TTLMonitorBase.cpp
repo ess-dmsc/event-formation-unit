@@ -30,8 +30,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-MAKEPLUGIN(TTLMONITOR, TTLMonitor)
-
 namespace TTLMonitor {
 
 const char *classname = "TTLMonitor detector with ESS readout";

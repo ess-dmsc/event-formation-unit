@@ -29,8 +29,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-MAKEPLUGIN(NMX, Nmx)
-
 namespace Nmx {
 
 const char *classname = "NMX detector with ESS readout";
