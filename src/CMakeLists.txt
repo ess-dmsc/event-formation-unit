@@ -40,6 +40,7 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 # Include subdirs, do not change order
 #=============================================================================
 add_subdirectory(common)
+add_subdirectory(efu)
 add_subdirectory(modules)
 add_subdirectory(generators)
 
