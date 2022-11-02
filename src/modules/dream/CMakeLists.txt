@@ -17,7 +17,6 @@ set(dream_common_inc
   geometry/SUMO.h
   readout/DataParser.h
   readout/Readout.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
 )
 
 set(dream_common_src
@@ -27,15 +26,19 @@ set(dream_common_src
   geometry/Config.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
 )
 
 #=============================================================================
 # dream detector module
 #=============================================================================
-set(dream_INC ${EFUCOMMON_INC} ${dream_common_inc} )
-set(dream_SRC ${EFUCOMMON_SRC} ${dream_common_src} )
+set(dream_INC ${dream_common_inc})
+set(dream_SRC
+  ${dream_common_src}
+  ${ESS_SOURCE_DIR}/efu/main.cpp)
+set(dream_LIB efu_essreadout)
 create_executable(dream)
+
+add_dependencies(dream efu_essreadout)
 target_compile_definitions(dream PUBLIC EFU_DREAM)
 
 #=============================================================================

@@ -44,7 +44,6 @@ set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
@@ -53,7 +52,6 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )

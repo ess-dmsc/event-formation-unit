@@ -14,12 +14,6 @@ set(cspec_common_inc
   geometry/CSPECGeometry.h
   geometry/LETGeometry.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(cspec_common_src
   CSPECBase.cpp
@@ -27,16 +21,22 @@ set(cspec_common_src
   geometry/Config.cpp
   geometry/CSPECGeometry.cpp
   geometry/LETGeometry.cpp
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(cspec_INC ${EFUCOMMON_INC} ${cspec_common_inc})
-set(cspec_SRC ${EFUCOMMON_SRC} ${cspec_common_src})
+set(cspec_INC
+  ${cspec_common_inc}
+  )
+set(cspec_SRC
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  ${cspec_common_src}
+  )
+set(cspec_LIB
+  efu_reduction
+  efu_essreadout
+  )
 create_executable(cspec)
+
+add_dependencies(cspec efu_reduction efu_essreadout)
 target_compile_definitions(cspec PUBLIC EFU_CSPEC)
 
 

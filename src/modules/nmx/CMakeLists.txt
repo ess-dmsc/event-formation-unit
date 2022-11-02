@@ -13,28 +13,23 @@ set(nmx_common_inc
   geometry/Config.h
   geometry/NMXGeometry.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(nmx_common_src
   NMXBase.cpp
   NMXInstrument.cpp
   geometry/Config.cpp
   geometry/NMXGeometry.cpp
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(nmx_INC ${EFUCOMMON_INC} ${nmx_common_inc})
-set(nmx_SRC ${EFUCOMMON_SRC} ${nmx_common_src})
+set(nmx_INC ${nmx_common_inc})
+set(nmx_SRC
+  ${nmx_common_src}
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  )
+set(nmx_LIB efu_reduction efu_essreadout)
 create_executable(nmx)
+
+add_dependencies(nmx efu_reduction efu_essreadout)
 target_compile_definitions(nmx PUBLIC EFU_NMX)
 
 

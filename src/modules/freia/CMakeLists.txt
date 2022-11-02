@@ -13,27 +13,22 @@ set(freia_common_inc
   geometry/Config.h
   geometry/FreiaChannelMapping.h
   geometry/AMORChannelMapping.h
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(freia_common_src
   FreiaBase.cpp
   FreiaInstrument.cpp
   geometry/Config.cpp
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
   )
 
-set(freia_INC   ${EFUCOMMON_INC} ${freia_common_inc})
-set(freia_SRC   ${EFUCOMMON_SRC} ${freia_common_src})
+set(freia_INC ${freia_common_inc})
+set(freia_SRC
+  ${freia_common_src}
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  )
+set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
+
+add_dependencies(cspec efu_reduction efu_essreadout)
 target_compile_definitions(freia PUBLIC EFU_FREIA)
 
 

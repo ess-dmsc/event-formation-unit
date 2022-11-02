@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/RuntimeStat.h>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>

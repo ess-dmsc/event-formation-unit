@@ -82,7 +82,6 @@ create_test_executable(LokiDataParserTest)
 ##
 set(CombinedParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ../generators/ReadoutGenerator.h
@@ -91,7 +90,6 @@ set(CombinedParserTest_SRC
   CombinedParserTest.cpp
   ../generators/ReadoutGenerator.cpp
   ../readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   )

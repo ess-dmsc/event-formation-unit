@@ -13,21 +13,22 @@ set(bifrost_common_inc
   readout/DataParser.h
   geometry/Config.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 set(bifrost_common_src
   BifrostBase.cpp
   BifrostInstrument.cpp
   geometry/Geometry.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
-set(bifrost_INC   ${EFUCOMMON_INC} ${bifrost_common_inc})
-set(bifrost_SRC   ${EFUCOMMON_SRC} ${bifrost_common_src})
+set(bifrost_INC ${bifrost_common_inc})
+set(bifrost_SRC
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  ${bifrost_common_src}
+  )
+set(bifrost_LIB efu_essreadout)
 create_executable(bifrost)
 
+add_dependencies(bifrost efu_essreadout)
 target_compile_definitions(bifrost PUBLIC EFU_BIFROST)
 
 

@@ -15,8 +15,6 @@ set(loki_common_inc
   geometry/Config.h
   geometry/Calibration.h
   readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 set(loki_common_src
   LokiBase.cpp
@@ -24,12 +22,16 @@ set(loki_common_src
   geometry/Config.cpp
   geometry/Calibration.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
-set(loki_INC ${EFUCOMMON_INC} ${loki_common_inc})
-set(loki_SRC ${EFUCOMMON_SRC} ${loki_common_src})
+set(loki_INC ${loki_common_inc})
+set(loki_SRC
+  ${loki_common_src}
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  )
+set(loki_LIB efu_essreadout)
 create_executable(loki)
+
+add_dependencies(loki efu_essreadout)
 target_compile_definitions(loki PUBLIC EFU_LOKI)
 
 #

@@ -38,7 +38,6 @@ set(MiraclesInstrumentTest_INC
   ${MIRACLES_BASE_DIR}/geometry/Config.h
   ${MIRACLES_BASE_DIR}/geometry/Geometry.h
   ${MIRACLES_BASE_DIR}/readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(MiraclesInstrumentTest_SRC
@@ -46,7 +45,6 @@ set(MiraclesInstrumentTest_SRC
   ${MIRACLES_BASE_DIR}/MiraclesInstrument.cpp
   ${MIRACLES_BASE_DIR}/geometry/Geometry.cpp
   ${MIRACLES_BASE_DIR}/readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )
 create_test_executable(MiraclesInstrumentTest)

@@ -84,7 +84,8 @@ function(create_test_executable)
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
   target_include_directories(${exec_name}
-    PRIVATE ${GTEST_INCLUDE_DIRS})
+    PRIVATE ${GTEST_INCLUDE_DIRS}
+    )
 
   set_property(TARGET ${exec_name}
     APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT")
@@ -92,7 +93,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${CONAN_LIBS_GTEST} efu_common)
+    ${CONAN_LIBS_GTEST} efu_common efu_reduction efu_essreadout)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")

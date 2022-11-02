@@ -14,8 +14,6 @@ set(miracles_common_SRC
   MiraclesInstrument.cpp
   geometry/Geometry.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 
 set(miracles_common_INC
@@ -25,13 +23,17 @@ set(miracles_common_INC
   readout/DataParser.h
   geometry/Config.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 
-set(miracles_SRC ${EFUCOMMON_SRC} ${miracles_common_SRC})
-set(miracles_INC ${EFUCOMMON_INC} ${miracles_common_INC})
+set(miracles_INC ${miracles_common_INC})
+set(miracles_SRC
+  ${miracles_common_SRC}
+  ${ESS_SOURCE_DIR}/efu/main.cpp
+  )
+set(miracles_LIB efu_essreadout)
 create_executable(miracles)
+
+add_dependencies(miracles efu_essreadout)
 target_compile_definitions(miracles PUBLIC EFU_MIRACLES)
 
 
