@@ -54,9 +54,6 @@ private:
   bool PrintVersion{false};
   CLI::Option *DetectorOption;
   CLI::Option *HelpOption;
-  CLI::Option *WriteConfigOption;
-  std::string ConfigFileName;
-  CLI::Option *ReadConfigOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
   BaseSettings EFUSettings;

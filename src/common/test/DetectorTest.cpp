@@ -1,7 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/detector/Detector.h>
-#include <common/detector/DetectorModuleRegister.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
 
@@ -57,69 +56,6 @@ TEST_F(DetectorTest, ThreadInfoNoThreads) {
 TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
   auto commandmap = det->GetDetectorCommandFunctions();
   ASSERT_EQ(0, commandmap.size());
-}
-
-class DetectorRegistration : public TestBase {
-protected:
-  void SetUp() override {
-    auto &Factories = DetectorModuleRegistration::getFactories();
-    Factories.clear();
-    EXPECT_EQ(Factories.size(), 0);
-  }
-
-  void TearDown() override {}
-};
-
-TEST_F(DetectorRegistration, AddModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName,
-                                                                   nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  auto &DetSetUp = Factories.at(TestName);
-  EXPECT_EQ(DetSetUp.CLISetup, nullptr);
-}
-
-TEST_F(DetectorRegistration, AddTwoModules) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName,
-                                                                   nullptr);
-  std::string TestName2{"SomeName2"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector2(TestName2,
-                                                                    nullptr);
-  EXPECT_EQ(Factories.size(), 2);
-}
-
-TEST_F(DetectorRegistration, AddModuleFail) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName,
-                                                                   nullptr);
-  EXPECT_THROW(DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(
-                   TestName, nullptr),
-               std::runtime_error);
-  EXPECT_EQ(Factories.size(), 1);
-}
-
-TEST_F(DetectorRegistration, FindModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName,
-                                                                   nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  EXPECT_NO_THROW(DetectorModuleRegistration::find(TestName));
-}
-
-TEST_F(DetectorRegistration, FailFindModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName,
-                                                                   nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  std::string SomeOtherName("SomeOtherName");
-  EXPECT_THROW(DetectorModuleRegistration::find(SomeOtherName),
-               std::runtime_error);
 }
 
 int main(int argc, char **argv) {
