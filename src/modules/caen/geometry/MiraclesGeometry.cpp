@@ -33,7 +33,14 @@ uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
 }
 
 bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "todo, implement validate data. %u", Data.RingId);
+  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
+         Data.TubeId);
+
+  if (Data.RingId > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+    (*Stats.RingErrors)++;
+    return false;
+  }
   return true;
 }
 

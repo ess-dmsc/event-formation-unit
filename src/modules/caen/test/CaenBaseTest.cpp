@@ -278,6 +278,31 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
 }
 
+TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
+  XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  LocalSettings.ConfigFile = "deleteme_miracles.json";
+  Settings.DetectorPort = 9001;
+  Settings.UpdateIntervalSec = 0;
+  LocalSettings.FilePrefix = "deleteme_";
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+
+  std::this_thread::sleep_for(SleepTime);
+  TestUDPServer Server(43127, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.Counters.Readouts, 6);
+  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
+  EXPECT_EQ(Readout.Counters.RingErrors, 1);
+  EXPECT_EQ(Readout.Counters.TofHigh, 1);
+  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
+}
+
 int main(int argc, char **argv) {
   std::string lokifilename{"deleteme_loki.json"};
   saveBuffer(lokifilename, (void *)lokijson.c_str(), lokijson.size());
