@@ -154,7 +154,14 @@ int main(int argc, char *argv[]) {
 
 
   // Set-up logging before we start doing important stuff
+  // change process to "efu" and set process_name to Instrument
+  std::string ProcessKey{"process"};
+  std::string ProcessValue{"efu"};
+  std::string ProcessNameKey{"process_name"};
   Log::RemoveAllHandlers();
+  Log::Logger::Inst().addField(ProcessKey, ProcessValue);
+  Log::Logger::Inst().addField(ProcessNameKey, DetectorName);
+
 
   auto CI = new Log::ConsoleInterface();
   CI->setMessageStringCreatorFunction(ConsoleFormatter);
@@ -205,9 +212,7 @@ int main(int argc, char *argv[]) {
     TTLMonitor::TTLMonitorBase(DetectorSettings);
   #endif
 
-
   detector = std::shared_ptr<Detector>(Base);
-
 
   int keep_running = 1;
 
