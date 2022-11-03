@@ -1,21 +1,21 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Parser for ESS readout of DREAM
+/// \brief Parser for ESS readout of LoKI
 //===----------------------------------------------------------------------===//
 
+#include <miracles/readout/DataParser.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <dream/readout/DataParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace Miracles {
 
-constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};
+constexpr unsigned int MiraclesReadoutSize{sizeof(DataParser::MiraclesReadout)};
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -34,7 +34,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    auto Data = (DreamReadout *)((char *)DataPtr);
+    auto Data = (MiraclesReadout *)((char *)DataPtr);
 
     ///\todo clarify distinction between logical and physical rings
     // for now just divide by two
@@ -56,22 +56,22 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId, Data->FENId,
-           Data->DataLength);
     Stats.DataHeaders++;
 
-    if (Data->DataLength != DreamReadoutSize) {
+    if (Data->DataLength != MiraclesReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
-             DreamReadoutSize);
+             MiraclesReadoutSize);
       Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "ring %u, fen %u, time: 0x%08x %08x, OM %3u ,"
-           "Cathode 0x%3u Anode 0x%3u",
+    XTRACE(DATA, DEB,
+           "Ring %u, FEN %u, t(%11u,%11u) flags %02x, TubeId %3u, "
+           "A 0x%2x B 0x%2x",
            Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->OM, Data->Cathode, Data->Anode);
+           Data->Flags, Data->TubeId, (uint16_t)Data->AmpA,
+           (uint16_t)Data->AmpB);
 
     ParsedReadouts++;
     Stats.Readouts++;
@@ -83,4 +83,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Loki
+} // namespace Miracles

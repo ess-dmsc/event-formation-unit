@@ -10,13 +10,16 @@
 #include <string.h>
 
 using namespace Dream;
-
-std::string ConfigFile{"deleteme_dream_instr_config.json"};
+std::string ConfigFile {"deleteme_dreaminstrumenttest.json"};
 std::string ConfigStr = R"(
   {
-    "Detector" : "Dream",
+    "Detector" : "DREAM",
 
-    "MaxPulseTimeNS" : 357142855
+    "MaxPulseTimeNS" : 357142855,
+
+    "Config" : [
+      { "Ring" :  0, "FEN":  0, "Type": "FwEndCap"}
+    ]
   }
 )";
 
@@ -41,8 +44,9 @@ TEST_F(DreamInstrumentTest, Constructor) {
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, ModuleSettings);
-  /// \todo this is not in agreement with Irina
-  ASSERT_EQ(Dream.calcPixel(22, 3, 3, 1, 15, 15), 329'728);
+  DataParser::DreamReadout Data{0,0,0,0,0,0,0,0,0};
+  Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
+  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }
 
 int main(int argc, char **argv) {

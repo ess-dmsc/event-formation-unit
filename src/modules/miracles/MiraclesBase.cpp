@@ -1,16 +1,16 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Implementation of the detector pipeline plugin for DREAM
-/// \todo unofficial - not reviewed Readout structure
+/// \brief Implementation of the detector pipeline plugin for Miracles
+/// detectors
 //===----------------------------------------------------------------------===//
 
-#include "DreamBase.h"
+#include "MiraclesBase.h"
 
+#include <miracles/MiraclesInstrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
-#include <common/TestImageUdder.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
@@ -19,20 +19,21 @@
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <dream/DreamInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
+// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace Miracles {
 
-const char *classname = "DREAM detector with ESS readout";
+const char *classname = "Miracles detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings,
-                     struct DreamSettings &LocalDreamSettings)
-    : Detector("Dream", Settings), DreamModuleSettings(LocalDreamSettings) {
+MiraclesBase::MiraclesBase(BaseSettings const &Settings,
+                         struct MiraclesSettings &LocalMiraclesSettings)
+    : Detector("Miracles", Settings),
+      MiraclesModuleSettings(LocalMiraclesSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -57,22 +58,32 @@ DreamBase::DreamBase(BaseSettings const &Settings,
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
-  // ESS Readout Data Header
-  Stats.create("readouts.count", Counters.Readouts);
+  // Miracles Readout Data
   Stats.create("readouts.headers", Counters.DataHeaders);
-  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+  Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
+  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+  Stats.create("readouts.tof_count", Counters.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
+  Stats.create("readouts.tof_high", Counters.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+
+  // Logical and Digital geometry incl. Calibration
+  Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
+  // Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
+  // Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
+
+  // Events
+  Stats.create("events.count", Counters.Events);
+  Stats.create("events.pixel_errors", Counters.PixelErrors);
 
 
-
-  //
+  // System counters
   Stats.create("thread.input_idle", Counters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
-  Stats.create("events.count", Counters.Events);
-
-  Stats.create("events.mapping_errors", Counters.MappingErrors);
-  Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -84,19 +95,19 @@ DreamBase::DreamBase(BaseSettings const &Settings,
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { DreamBase::inputThread(); };
+  std::function<void()> inputFunc = [this]() { MiraclesBase::inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    DreamBase::processingThread();
+    MiraclesBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Dream Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d Miracles Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void DreamBase::inputThread() {
+void MiraclesBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -137,24 +148,24 @@ void DreamBase::inputThread() {
 
 ///
 /// \brief Normal processing thread
-void DreamBase::processingThread() {
+void MiraclesBase::processingThread() {
 
-  DreamInstrument Dream(Counters, DreamModuleSettings);
+  MiraclesInstrument Miracles(Counters, MiraclesModuleSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
-
-  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector",
-                         KafkaCfg.CfgParms);
+  Producer EventProducer(EFUSettings.KafkaBroker, "miracles_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "dream", Produce);
-  Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
+  Serializer = new EV42Serializer(KafkaBufferSize, "miracles", Produce);
+  Miracles.setSerializer(
+      Serializer); // would rather have this in MiraclesInstrument
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer;
+  TSCTimer ProduceTimer, DebugTimer;
 
   RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
 
@@ -170,9 +181,9 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::DREAM);
-      Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
+      auto Res = Miracles.ESSReadoutParser.validate(DataPtr, DataLen,
+                                                   ESSReadout::Parser::MIRACLES);
+      Counters.ReadoutStats = Miracles.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
@@ -181,11 +192,23 @@ void DreamBase::processingThread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr,
-                                    Dream.ESSReadoutParser.Packet.DataLength);
+      Res = Miracles.MiraclesParser.parse(
+          Miracles.ESSReadoutParser.Packet.DataPtr,
+          Miracles.ESSReadoutParser.Packet.DataLength);
 
       // Process readouts, generate (end produce) events
-      Dream.processReadouts();
+      Miracles.processReadouts();
+
+      Counters.TofCount = Miracles.ESSReadoutParser.Packet.Time.Stats.TofCount;
+      Counters.TofNegative =
+          Miracles.ESSReadoutParser.Packet.Time.Stats.TofNegative;
+      Counters.PrevTofCount =
+          Miracles.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
+      Counters.PrevTofNegative =
+          Miracles.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
+      Counters.TofHigh = Miracles.ESSReadoutParser.Packet.Time.Stats.TofHigh;
+      Counters.PrevTofHigh =
+          Miracles.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
@@ -214,4 +237,4 @@ void DreamBase::processingThread() {
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }
-} // namespace Dream
+} // namespace Miracles

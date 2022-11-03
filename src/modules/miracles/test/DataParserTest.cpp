@@ -1,17 +1,17 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief unit test for DREAM DataParser
+/// \brief unit test for Miracles DataParser
 ///
 //===----------------------------------------------------------------------===//
 
+#include <miracles/readout/DataParser.h>
+#include <miracles/test/DataParserTestData.h>
 #include <common/testutils/TestBase.h>
-#include <dream/readout/DataParser.h>
-#include <dream/test/DataParserTestData.h>
 
-using namespace Dream;
+using namespace Miracles;
 
 class DataParserTest : public TestBase {
 protected:
@@ -69,7 +69,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, DataSizeMismatch) {
-  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
+  auto Res = Parser.parse((char *)&OkThreeMiraclesReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
@@ -78,8 +78,8 @@ TEST_F(DataParserTest, DataSizeMismatch) {
 }
 
 TEST_F(DataParserTest, ParseThree) {
-  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0],
-                          OkThreeDreamReadouts.size());
+  auto Res = Parser.parse((char *)&OkThreeMiraclesReadouts[0],
+                          OkThreeMiraclesReadouts.size());
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(Parser.Stats.Readouts, 3);
   ASSERT_EQ(Parser.Stats.DataHeaders, 3);

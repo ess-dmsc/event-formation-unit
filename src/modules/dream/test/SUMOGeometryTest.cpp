@@ -12,56 +12,54 @@
 // fails InvalidSumo test on CentOS build - false positive
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-#include <dream/geometry/Geometry.h>
+#include <dream/geometry/SUMO.h>
 #pragma GCC diagnostic pop
 
 using namespace Dream;
 
 class DreamGeometryTest : public TestBase {
 protected:
-  const uint8_t Sector0{0};
-  const uint8_t Sumo0{0}; // invalid. Valid range is 3 - 6
-  const uint8_t Sumo3{3};
-  const uint8_t Cassette0{0};
-  const uint8_t Counter0{0};
-  const uint8_t Wire0{0};
-  const uint8_t Strip0{0};
-  EndCapGeometry endcap;
+  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
+  SUMO endcap;
   void SetUp() override {}
   void TearDown() override {}
 };
 
 TEST_F(DreamGeometryTest, Constructor) {
-  ASSERT_EQ(endcap.getPixel(Sector0, Sumo0, Cassette0, Counter0, Wire0, Strip0),
-            0);
+  ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
 }
 
 TEST_F(DreamGeometryTest, InvalidSector) {
-  ASSERT_EQ(endcap.getPixel(23, Sumo3, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(23, Sumo3, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(24, Sumo3, Cassette0, Counter0, Wire0, Strip0), 0);
+  Parms.P1.Sector = 23;
+  ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
+  Parms.P1.Sector = 24;
+  ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
 }
 
 TEST_F(DreamGeometryTest, ValidSector) {
+  Parms.P2.SumoPair = 6;
   for (uint8_t Sector = 0; Sector < 23; Sector++) {
-    ASSERT_NE(
-        endcap.getPixel(Sector, Sumo3, Cassette0, Counter0, Wire0, Strip0), 0);
+    Parms.P1.Sector = Sector;
+    ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
   }
 }
 
 TEST_F(DreamGeometryTest, InvalidSumo) {
-  ASSERT_EQ(endcap.getPixel(Sector0, 0, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(Sector0, 1, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(Sector0, 2, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(Sector0, 7, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_EQ(endcap.getPixel(Sector0, 8, Cassette0, Counter0, Wire0, Strip0), 0);
+  std::vector<int> SumoIDs{0, 1, 2, 7, 8};
+  for (auto & ID : SumoIDs) {
+    Parms.P2.SumoPair = ID;
+    ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
+  }
 }
 
+
 TEST_F(DreamGeometryTest, ValidSumo) {
-  ASSERT_NE(endcap.getPixel(Sector0, 3, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_NE(endcap.getPixel(Sector0, 4, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_NE(endcap.getPixel(Sector0, 5, Cassette0, Counter0, Wire0, Strip0), 0);
-  ASSERT_NE(endcap.getPixel(Sector0, 6, Cassette0, Counter0, Wire0, Strip0), 0);
+  std::vector<int> SumoIDs{3, 4, 5, 6};
+  for (auto & ID : SumoIDs) {
+    Parms.P2.SumoPair = ID;
+    ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
+  }
 }
 
 TEST_F(DreamGeometryTest, GetXInvalidCassette) {
@@ -116,15 +114,6 @@ TEST_F(DreamGeometryTest, GetYInvalidStrip) {
   ASSERT_NE(endcap.getY(15, 0), -1);
   ASSERT_NE(endcap.getY(15, 15), -1);
   ASSERT_EQ(endcap.getY(15, 16), -1);
-}
-
-TEST_F(DreamGeometryTest, TestingICD4Corners) {
-  //                        sec su cas ctr wir str
-  ASSERT_EQ(endcap.getPixel(0, 6, 0, 0, 0, 0), 1);  // upper left (z = 0)
-  ASSERT_EQ(endcap.getPixel(1, 6, 0, 0, 0, 0), 57); // next sector 'upper left'
-  ASSERT_EQ(endcap.getPixel(22, 3, 3, 1, 0, 0), 1288);      // upper right=
-  ASSERT_EQ(endcap.getPixel(0, 6, 0, 0, 15, 15), 328'441);  // bottom left
-  ASSERT_EQ(endcap.getPixel(22, 3, 3, 1, 15, 15), 329'728); // bottom right
 }
 
 TEST_F(DreamGeometryTest, TestingICD4BoxCorners) {
