@@ -46,6 +46,7 @@ int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
 }
 
 int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
+  XTRACE(DATA, DEB, "Calculating yCoord, Ring: %u, AmpA: %u, AmpB: %u", Ring, AmpA, AmpB);
   int offset{0};
   if ((Ring == 2) or (Ring == 3)) {
     offset += 100;
@@ -67,6 +68,7 @@ int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
 
 int MiraclesGeometry::posAlongTube(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
+    XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");
     ///\todo add counter
     return -1;
   }
@@ -75,9 +77,13 @@ int MiraclesGeometry::posAlongTube(int AmpA, int AmpB) {
   XTRACE(DATA, DEB, "Position along tube pair %d", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
+    XTRACE(DATA, DEB, "Tube A, returning pos: %u", pos);
     return pos;
   } else {
-    return 64 - (pos - 64);
+    int halfNPos = NPos / 2;
+    int returnVal = halfNPos - (pos - halfNPos);
+    XTRACE(DATA, DEB, "Tube B, returning halfNpos - (pos - halfNpos): %u, pos: %u, halfNpos: %u", returnVal, pos, halfNPos);
+    return returnVal;
   }
 }
 

@@ -41,6 +41,19 @@ set(BifrostGeometryTest_SRC
 )
 create_test_executable(BifrostGeometryTest)
 
+set(MiraclesGeometryTest_INC 
+    ../geometry/MiraclesGeometry.h
+    ../geometry/Config.h
+    ../geometry/Calibration.h
+)
+set(MiraclesGeometryTest_SRC 
+    MiraclesGeometryTest.cpp
+    ../geometry/MiraclesGeometry.cpp
+    ../geometry/Config.cpp
+    ../geometry/Calibration.cpp
+)
+create_test_executable(MiraclesGeometryTest)
+
 ##
 ## Panel geometry
 ##
