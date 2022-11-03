@@ -1,6 +1,5 @@
 
 
-
 // Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
@@ -16,7 +15,7 @@ using namespace Caen;
 
 class MiraclesGeometryTest : public TestBase {
 protected:
-  MiraclesGeometry* geom;
+  MiraclesGeometry *geom;
   Config CaenConfiguration;
   void SetUp() override {
     geom = new MiraclesGeometry(CaenConfiguration);
@@ -25,13 +24,12 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(MiraclesGeometryTest, Corner) {
-  ASSERT_EQ( 0, geom->xCoord(0, 0, 0, 5));
-  ASSERT_EQ( 0, geom->yCoord(0, 0, 5));
+  ASSERT_EQ(0, geom->xCoord(0, 0, 0, 5));
+  ASSERT_EQ(0, geom->yCoord(0, 0, 5));
 
   ASSERT_EQ(47, geom->xCoord(1, 11, 5, 0));
-  ASSERT_EQ( 0, geom->yCoord(1, 5, 0));
+  ASSERT_EQ(0, geom->yCoord(1, 5, 0));
 }
 
 int main(int argc, char **argv) {
