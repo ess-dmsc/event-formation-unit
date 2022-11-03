@@ -21,12 +21,9 @@
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
-MAKEPLUGIN(MIRACLES, Miracles)
 
 namespace Miracles {
 

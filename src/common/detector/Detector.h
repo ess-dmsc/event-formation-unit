@@ -56,16 +56,6 @@ struct BaseSettings {
 // clang-format on
 
 
-// Macro used in 'Detector'Base.cpp files to remove 'Detector'.cpp
-#define MAKEPLUGIN(CLASS, NAMESPACE) \
-class CLASS : public NAMESPACE::NAMESPACE ## Base {\
-public:\
-  explicit CLASS(BaseSettings Settings)\
-      : NAMESPACE::NAMESPACE##Base(std::move(Settings)) {}\
-}; \
-DetectorFactory<CLASS> Factory;
-// end macro
-
 struct ThreadInfo {
   std::function<void(void)> func;
   std::string name;

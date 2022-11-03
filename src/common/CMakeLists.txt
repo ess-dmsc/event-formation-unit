@@ -19,6 +19,11 @@ set(efu_common_SRC
   time/TSCTimer.cpp
   Statistics.cpp
   StatPublisher.cpp
+  ${ESS_SOURCE_DIR}/efu/ExitHandler.cpp
+  ${ESS_SOURCE_DIR}/efu/HwCheck.cpp
+  ${ESS_SOURCE_DIR}/efu/Launcher.cpp
+  ${ESS_SOURCE_DIR}/efu/Parser.cpp
+  ${ESS_SOURCE_DIR}/efu/Server.cpp
   )
 
 set(efu_common_INC
@@ -50,20 +55,35 @@ set(efu_common_INC
   JsonFile.h
   Statistics.h
   StatPublisher.h
+  ${ESS_SOURCE_DIR}/efu/ExitHandler.h
+  ${ESS_SOURCE_DIR}/efu/HwCheck.h
+  ${ESS_SOURCE_DIR}/efu/Launcher.h
+  ${ESS_SOURCE_DIR}/efu/Parser.h
+  ${ESS_SOURCE_DIR}/efu/Server.h
   )
 
 find_package(CLI11 REQUIRED)
 
+# Only include the 'minimum' necessary
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
+  )
 
+# To be used as a dependency in the module's CMakeLists.txt
+add_library(efu_reduction STATIC
   $<TARGET_OBJECTS:ReductionLib>
   $<TARGET_OBJECTS:ClusteringLib>
   $<TARGET_OBJECTS:MatchingLib>
   $<TARGET_OBJECTS:AnalysisLib>
   $<TARGET_OBJECTS:MonitorLib>
-  )
+)
+
+# To be used as a dependency in the module's CMakeLists.txt
+add_library(efu_essreadout STATIC
+  $<TARGET_OBJECTS:EssReadoutLib>
+)
+
 
 target_include_directories(efu_common
   PUBLIC ${CLI11_INCLUDE_DIR}

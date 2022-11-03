@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
@@ -29,8 +28,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
-MAKEPLUGIN(TTLMONITOR, TTLMonitor)
 
 namespace TTLMonitor {
 

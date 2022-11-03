@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
@@ -30,8 +29,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
-
-MAKEPLUGIN(FREIA, Freia)
 
 namespace Freia {
 

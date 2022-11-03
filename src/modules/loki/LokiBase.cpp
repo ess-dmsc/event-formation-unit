@@ -20,13 +20,9 @@
 #include <loki/LokiInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
-// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-// #define ECDC_DEBUG_READOUT
-
-MAKEPLUGIN(LOKI, Loki)
 
 namespace Loki {
 

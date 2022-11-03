@@ -60,9 +60,6 @@ EFUArgs::EFUArgs() {
 
   std::string DetectorDescription{"Detector name"};
 
-  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
-      ->group("EFU Options")->required();
-
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress,
                        "IP address of receive interface")
       ->group("EFU Options")->default_str("0.0.0.0");
@@ -196,8 +193,7 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   } catch (const CLI::ParseError &e) {
     CLIParser.exit(e);
   }
-  if ((*HelpOption and not *DetectorOption) or
-      (not *HelpOption and not *DetectorOption)) {
+  if ((*HelpOption)) {
     printHelp();
     return Status::EXIT;
   }
