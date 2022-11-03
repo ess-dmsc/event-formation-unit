@@ -76,27 +76,27 @@ std::string CalibStr = R"(
 class CaenInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
-  CaenSettings ModuleSettings;
+  BaseSettings Settings;
 
-  void SetUp() override { ModuleSettings.ConfigFile = LokiConfigFile; }
+  void SetUp() override { Settings.ConfigFile = ConfigFile; }
   void TearDown() override {}
 };
 
 /** Test cases below */
 TEST_F(CaenInstrumentTest, LokiConstructor) {
-  ModuleSettings.CalibFile = CalibFile;
-  CaenInstrument Caen(counters, ModuleSettings);
+  Settings.CalibFile = CalibFile;
+  CaenInstrument Caen(counters, Settings);
 }
 
 TEST_F(CaenInstrumentTest, BifrostConstructor) {
-  ModuleSettings.ConfigFile = BifrostConfigFile;
-  CaenInstrument Caen(counters, ModuleSettings);
+  Settings.ConfigFile = BifrostConfigFile;
+  CaenInstrument Caen(counters, Settings);
 }
 
 TEST_F(CaenInstrumentTest, PixelMismatch) {
-  ModuleSettings.ConfigFile = Config512File;
-  ModuleSettings.CalibFile = CalibFile;
-  ASSERT_ANY_THROW(CaenInstrument Caen(counters, ModuleSettings));
+  Settings.ConfigFile = Config512File;
+  Settings.CalibFile = CalibFile;
+  ASSERT_ANY_THROW(CaenInstrument Caen(counters, Settings));
 }
 
 int main(int argc, char **argv) {

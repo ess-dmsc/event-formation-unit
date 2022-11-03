@@ -11,9 +11,9 @@ set(reduction_obj_SRC
   HitVector.cpp
   Cluster.cpp
   Event.cpp
+  EventBuilder2D.cpp
   ReducedEvent.cpp
   NeutronEvent.cpp
-
   ChronoMerger.cpp
 )
 
@@ -22,6 +22,7 @@ set(reduction_obj_INC
   HitVector.h
   Cluster.h
   Event.h
+  EventBuilder2D.h
   ReducedEvent.h
   NeutronEvent.h
   ChronoMerger.h
@@ -39,4 +40,3 @@ enable_coverage_flags(ReductionLib)
 #=============================================================================
 
 add_subdirectory(test)
-

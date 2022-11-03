@@ -21,7 +21,6 @@
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -30,10 +29,8 @@ namespace Miracles {
 
 const char *classname = "Miracles detector with ESS readout";
 
-MiraclesBase::MiraclesBase(BaseSettings const &Settings,
-                         struct MiraclesSettings &LocalMiraclesSettings)
-    : Detector("Miracles", Settings),
-      MiraclesModuleSettings(LocalMiraclesSettings) {
+MiraclesBase::MiraclesBase(BaseSettings const &Settings)
+    : Detector("Miracles", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -150,7 +147,7 @@ void MiraclesBase::inputThread() {
 /// \brief Normal processing thread
 void MiraclesBase::processingThread() {
 
-  MiraclesInstrument Miracles(Counters, MiraclesModuleSettings);
+  MiraclesInstrument Miracles(Counters, EFUSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "miracles_detector",

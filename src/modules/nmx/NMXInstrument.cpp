@@ -24,14 +24,13 @@ namespace Nmx {
 
 /// \brief load configuration and calibration files
 NMXInstrument::NMXInstrument(struct Counters &counters,
-                             // BaseSettings & EFUSettings,
-                             NMXSettings &moduleSettings,
+                             BaseSettings & settings,
                              EV42Serializer *serializer)
-    : counters(counters), ModuleSettings(moduleSettings),
+    : counters(counters), Settings(settings),
       Serializer(serializer) {
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "nmx_" + timeString();
+        Settings.DumpFilePrefix + "nmx_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -59,8 +58,8 @@ NMXInstrument::NMXInstrument(struct Counters &counters,
 
 void NMXInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config("NMX", ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config("NMX", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
@@ -68,9 +67,9 @@ void NMXInstrument::loadConfigAndCalib() {
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
 
   /// \todo Add calibration processing
-  // if (ModuleSettings.CalibFile != "") {
+  // if (Settings.CalibFile != "") {
   //   XTRACE(INIT, ALW, "Loading and applying calibration file");
-  //   Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+  //   Conf.loadAndApplyCalibration(Settings.CalibFile);
   // }
 }
 

@@ -12,21 +12,21 @@
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Miracles {
 
 MiraclesInstrument::MiraclesInstrument(struct Counters &counters,
-                                     MiraclesSettings &moduleSettings)
-    : counters(counters), ModuleSettings(moduleSettings) {
+      BaseSettings & settings)
+    : counters(counters), Settings(settings) {
 
   // XTRACE(INIT, ALW, "Loading configuration file %s",
   //        ModuleSettings.ConfigFile.c_str());
   // MiraclesConfiguration = Config(ModuleSettings.ConfigFile);
 
-  if (not ModuleSettings.FilePrefix.empty()) {
-    DumpFile = ReadoutFile::create(ModuleSettings.FilePrefix + "miracles_" +
+  if (not Settings.DumpFilePrefix.empty()) {
+    DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "miracles_" +
                                    timeString());
   }
 

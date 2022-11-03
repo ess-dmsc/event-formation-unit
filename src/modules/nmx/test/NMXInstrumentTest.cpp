@@ -27,9 +27,9 @@ std::string BadConfigStr = R"(
   "DefaultMinADC":50,
   "Config" : [
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : false,
@@ -37,9 +37,9 @@ std::string BadConfigStr = R"(
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  1, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  1,
           "Plane" : 1,
           "Offset" : 0,
           "ReversedChannels" : false,
@@ -70,9 +70,9 @@ std::string ConfigStr = R"(
   "DefaultMinADC":50,
   "Config" : [
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : false,
@@ -80,9 +80,9 @@ std::string ConfigStr = R"(
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  1, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  1,
           "Plane" : 1,
           "Offset" : 0,
           "ReversedChannels" : false,
@@ -114,21 +114,21 @@ std::vector<uint8_t> BadRingAndFENError {
 
 
 std::vector<uint8_t> GoodEvent {
-  // First readout - plane Y 
+  // First readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 
-  // Third readout - plane X 
+  // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -139,7 +139,7 @@ std::vector<uint8_t> GoodEvent {
 
 
 std::vector<uint8_t> SplitEventA {
-  // First readout - plane Y 
+  // First readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
@@ -191,28 +191,28 @@ std::vector<uint8_t> HighTOFError {
 
 
 std::vector<uint8_t> BadEventLargeXSpan {
-  // First readout - plane Y 
+  // First readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane X 
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x0F,  // GEO 0, TDC 0, VMM 1, CH 15
 
-  // Second readout - plane X 
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
@@ -228,28 +228,28 @@ std::vector<uint8_t> BadEventLargeXSpan {
 };
 
 std::vector<uint8_t> BadEventLargeYSpan {
-  // First readout - plane Y 
+  // First readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x1E,  // GEO 0, TDC 0, VMM 1, CH 30
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
@@ -273,21 +273,21 @@ std::vector<uint8_t> BadEventLargeTimeSpan {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0xFF, 0x04, 0x00, 0x00,  // Time LO 500 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane Y 
+  // Second readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x14, 0x00, 0x00, 0x00,  // Time LO 20 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
 
-  // Third readout - plane X 
+  // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -313,21 +313,21 @@ std::vector<uint8_t> MaxADC {
 };
 
 std::vector<uint8_t> MinADC {
-  // First readout - plane X 
+  // First readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x28, 0x00,  // ADC = 40, under default threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
- 
-  // Second readout - plane X 
+
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x4B, 0x00,  // ADC = 75, over threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
-  // Third readout - plane X 
+  // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -352,7 +352,7 @@ std::vector<uint8_t> NoEventYOnly {
 };
 
 std::vector<uint8_t> NoEventXOnly {
-  // First readout - plane X 
+  // First readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
@@ -373,7 +373,7 @@ class NMXInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
-  NMXSettings ModuleSettings;
+  BaseSettings Settings;
   EV42Serializer *serializer;
   NMXInstrument *nmx;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -381,13 +381,13 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "nmx");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    nmx = new NMXInstrument(counters, ModuleSettings, serializer);
+    nmx = new NMXInstrument(counters, Settings, serializer);
     nmx->setSerializer(serializer);
     nmx->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
@@ -405,8 +405,8 @@ protected:
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(NMXInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_";
-  NMXInstrument NMXDump(counters, ModuleSettings, serializer);
+  Settings.DumpFilePrefix = "deleteme_";
+  NMXInstrument NMXDump(counters, Settings, serializer);
   NMXDump.setSerializer(serializer);
 
   makeHeader(NMXDump.ESSReadoutParser.Packet, GoodEvent);
@@ -420,14 +420,14 @@ TEST_F(NMXInstrumentTest, DumpTofile) {
 
 // Test cases below
 TEST_F(NMXInstrumentTest, BadConfig) {
-  ModuleSettings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(NMXInstrument(counters, ModuleSettings, serializer),
+  Settings.ConfigFile = BadConfigFile;
+  EXPECT_THROW(NMXInstrument(counters, Settings, serializer),
                std::runtime_error);
 }
 
 TEST_F(NMXInstrumentTest, BadConfig2) {
-  ModuleSettings.ConfigFile = BadConfig2File;
-  EXPECT_THROW(NMXInstrument(counters, ModuleSettings, serializer),
+  Settings.ConfigFile = BadConfig2File;
+  EXPECT_THROW(NMXInstrument(counters, Settings, serializer),
                nlohmann::detail::parse_error);
 }
 

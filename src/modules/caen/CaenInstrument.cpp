@@ -23,8 +23,8 @@ namespace Caen {
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 CaenInstrument::CaenInstrument(struct Counters &counters,
-                               CaenSettings &moduleSettings)
-    : counters(counters), ModuleSettings(moduleSettings) {
+                               BaseSettings &Settings)
+    : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          ModuleSettings.ConfigFile.c_str());
@@ -41,7 +41,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     throw std::runtime_error("Invalid Detector Name");
   }
 
-  if (ModuleSettings.CalibFile.empty()) {
+  if (Settings.CalibFile.empty()) {
     XTRACE(INIT, ALW, "Using the identity 'calibration'");
     uint32_t MaxPixels = Geom->ESSGeom->max_pixel();
     uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
@@ -54,8 +54,8 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     Geom->CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
   } else {
     XTRACE(INIT, ALW, "Loading calibration file %s",
-           ModuleSettings.CalibFile.c_str());
-    Geom->CaenCalibration = Calibration(ModuleSettings.CalibFile);
+           Settings.CalibFile.c_str());
+    Geom->CaenCalibration = Calibration(Settings.CalibFile);
   }
 
   if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
@@ -66,9 +66,9 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     throw std::runtime_error("Pixel mismatch");
   }
 
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     DumpFile =
-        ReadoutFile::create(ModuleSettings.FilePrefix + "caen_" + timeString());
+        ReadoutFile::create(Settings.DumpFilePrefix + "caen_" + timeString());
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);

@@ -22,8 +22,7 @@ struct CaenSettings {
 
 class CaenBase : public Detector {
 public:
-  CaenBase(BaseSettings const &Settings,
-           struct CaenSettings &LocalCaenSettings);
+  CaenBase(BaseSettings const &Settings);
   ~CaenBase() = default;
 
   void inputThread();
@@ -31,7 +30,6 @@ public:
 
 protected:
   struct Counters Counters;
-  CaenSettings CaenModuleSettings;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
 };

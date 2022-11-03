@@ -43,8 +43,18 @@ struct BaseSettings {
   bool          NoHwCheck            {false};
   bool          TestImage            {false};
   std::uint32_t TestImageUSleep      {10};
+
+  // Used to be detector module specific
+  std::string   CalibFile            {""};
+  std::string   DumpFilePrefix       {""};
+  // multigrid
+  bool          MultiGridMonitor     {true};
+  // ttlmonitor
+  int           TTLMonitorReduceEvents{1};
+  int           TTLMonitorNumberOfMonitors{1};
 };
 // clang-format on
+
 
 struct ThreadInfo {
   std::function<void(void)> func;
@@ -105,8 +115,7 @@ protected:
 
   /// Shared between input_thread and processing_thread
   memory_sequential_consistent::CircularFifo<unsigned int,
-                                             EthernetBufferMaxEntries>
-      InputFifo;
+      EthernetBufferMaxEntries> InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
@@ -116,13 +125,14 @@ protected:
   // it is not critical that this is precise.
   const int TSC_MHZ = 2900;
 
-  void AddThreadFunction(std::function<void(void)> &func,
-                         std::string funcName) {
+  void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
+
   void AddCommandFunction(std::string Name, CommandFunction FunctionObj) {
     DetectorCommands[Name] = FunctionObj;
   };
+
   ThreadList Threads;
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
@@ -134,9 +144,6 @@ private:
   std::string DetectorName;
 };
 
-struct PopulateCLIParser {
-  std::function<void(CLI::App &)> Function;
-};
 
 /// \brief Base class for the creation of detector factories.
 class DetectorFactoryBase {

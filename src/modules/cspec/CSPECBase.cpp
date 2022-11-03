@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/RuntimeStat.h>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
@@ -33,9 +32,8 @@ namespace Cspec {
 
 const char *classname = "CSPEC detector with ESS readout";
 
-CSPECBase::CSPECBase(BaseSettings const &settings,
-                     struct CSPECSettings &LocalCSPECSettings)
-    : Detector("CSPEC", settings), CSPECModuleSettings(LocalCSPECSettings) {
+CspecBase::CspecBase(BaseSettings const &settings)
+    : Detector("CSPEC", settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -127,11 +125,11 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
 
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { CSPECBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { CspecBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    CSPECBase::processing_thread();
+    CspecBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -139,7 +137,7 @@ CSPECBase::CSPECBase(BaseSettings const &settings,
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void CSPECBase::input_thread() {
+void CspecBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
@@ -175,7 +173,7 @@ void CSPECBase::input_thread() {
   return;
 }
 
-void CSPECBase::processing_thread() {
+void CspecBase::processing_thread() {
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ALW, "EFU is Detector, setting Kafka topic");
@@ -196,8 +194,7 @@ void CSPECBase::processing_thread() {
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "cspec", Produce);
-  CSPECInstrument CSPEC(Counters, /*EFUSettings,*/ CSPECModuleSettings,
-                        Serializer);
+  CSPECInstrument CSPEC(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(CSPEC.ADCHist.needed_buffer_size(),
                                         "CSPEC");

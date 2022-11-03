@@ -81,7 +81,7 @@ std::vector<uint8_t> dummyreadout {
     "DefaultMinADC": 50,
     "MaxGridsPerEvent": 5,
     "SizeX": 12,
-    "SizeY": 51, 
+    "SizeY": 51,
     "SizeZ": 16
   }
 )";
@@ -93,37 +93,35 @@ std::vector<uint8_t> dummyreadout {
 #include <common/testutils/TestUDPServer.h>
 #include <cspec/CSPECBase.h>
 
-class CSPECBaseStandIn : public Cspec::CSPECBase {
+class CSPECBaseStandIn : public Cspec::CspecBase {
 public:
-  CSPECBaseStandIn(BaseSettings Settings,
-                   struct Cspec::CSPECSettings ReadoutSettings)
-      : Cspec::CSPECBase(Settings, ReadoutSettings){};
+  CSPECBaseStandIn(BaseSettings Settings)
+      : Cspec::CspecBase(Settings){};
   ~CSPECBaseStandIn() = default;
-  using Cspec::CSPECBase::Counters;
+  using Cspec::CspecBase::Counters;
   using Detector::Threads;
 };
 
 class CSPECBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    LocalSettings.ConfigFile = "cspec.json";
+    Settings.ConfigFile = "cspec.json";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}
 
   BaseSettings Settings;
-  Cspec::CSPECSettings LocalSettings;
 };
 
 TEST_F(CSPECBaseTest, Constructor) {
-  CSPECBaseStandIn Readout(Settings, LocalSettings);
+  CSPECBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(CSPECBaseTest, DataReceive) {
-  CSPECBaseStandIn Readout(Settings, LocalSettings);
+  CSPECBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
@@ -140,7 +138,7 @@ TEST_F(CSPECBaseTest, DataReceive) {
 }
 
 TEST_F(CSPECBaseTest, DataReceiveBadHeader) {
-  CSPECBaseStandIn Readout(Settings, LocalSettings);
+  CSPECBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

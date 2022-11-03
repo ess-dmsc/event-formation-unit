@@ -29,9 +29,8 @@ std::string dreamjson = R"(
 
 class DreamBaseStandIn : public Dream::DreamBase {
 public:
-  DreamBaseStandIn(BaseSettings Settings,
-                   struct Dream::DreamSettings ReadoutSettings)
-      : Dream::DreamBase(Settings, ReadoutSettings){};
+  DreamBaseStandIn(BaseSettings Settings)
+      : Dream::DreamBase(Settings){};
   ~DreamBaseStandIn() = default;
   using Detector::Threads;
   using Dream::DreamBase::Counters;
@@ -42,17 +41,16 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_dream.json";
+    Settings.ConfigFile = "deleteme_dream.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Dream::DreamSettings LocalSettings;
 };
 
 TEST_F(DreamBaseTest, Constructor) {
-  DreamBaseStandIn Readout(Settings, LocalSettings);
+  DreamBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
@@ -86,7 +84,7 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(DreamBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  DreamBaseStandIn Readout(Settings, LocalSettings);
+  DreamBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);

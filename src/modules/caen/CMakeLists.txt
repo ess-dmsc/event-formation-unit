@@ -19,8 +19,6 @@ set(caen_common_inc
   geometry/BifrostGeometry.h
   geometry/MiraclesGeometry.h
   readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 set(caen_common_src
   CaenBase.cpp
@@ -31,8 +29,6 @@ set(caen_common_src
   geometry/BifrostGeometry.cpp
   geometry/MiraclesGeometry.cpp
   readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 set(caen_INC ${caen_common_inc})
 set(caen_SRC Caen.cpp ${caen_common_src})

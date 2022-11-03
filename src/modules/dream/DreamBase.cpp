@@ -30,9 +30,8 @@ namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings,
-                     struct DreamSettings &LocalDreamSettings)
-    : Detector("Dream", Settings), DreamModuleSettings(LocalDreamSettings) {
+DreamBase::DreamBase(BaseSettings const &Settings)
+    : Detector("Dream", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -139,7 +138,7 @@ void DreamBase::inputThread() {
 /// \brief Normal processing thread
 void DreamBase::processingThread() {
 
-  DreamInstrument Dream(Counters, DreamModuleSettings);
+  DreamInstrument Dream(Counters, EFUSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 

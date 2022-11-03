@@ -23,7 +23,6 @@ archive_what = "centos7-release"
 container_build_nodes = [
   'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
-  'centos7-gcc8': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
   'debian11': ContainerBuildNode.getDefaultContainerBuildNode('debian11'),
   'ubuntu2204': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2204')
 ]
@@ -194,7 +193,6 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
                                 cp -r ${project}/build/generators archive/event-formation-unit
-                                cp -r ${project}/build/modules archive/event-formation-unit
                                 cp -r ${project}/build/lib archive/event-formation-unit
                                 cp -r ${project}/build/licenses archive/event-formation-unit
                                 mkdir archive/event-formation-unit/util
@@ -235,6 +233,7 @@ def get_macos_pipeline()
 
                     // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
                     sh "conan remove -f FlatBuffers/*"
+                    sh "conan remove -f OpenSSL/*"
                     sh "conan remove -f cli11/*"
 
                     abs_dir = pwd()
@@ -335,4 +334,3 @@ if (env.CHANGE_ID) {
         }
     }
 }  // if
-

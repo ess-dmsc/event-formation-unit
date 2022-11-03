@@ -11,8 +11,8 @@
 
 #include <miracles/geometry/Geometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Miracles {
 
@@ -27,7 +27,7 @@ int Geometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
 int Geometry::yCoord(int Ring, int AmpA, int AmpB) {
   int offset{0};
   if ((Ring == 2) or (Ring == 3)) {
-    offset += 100;
+    offset += 64;
   }
   return offset + posAlongTube(AmpA, AmpB);
 }

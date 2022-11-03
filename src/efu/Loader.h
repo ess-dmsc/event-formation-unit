@@ -20,8 +20,6 @@ private:
 
   DetectorFactoryBase *myFactory{nullptr};
 
-  std::function<void(CLI::App &CLIParser)> ParserPopulator;
-
 public:
   /// \brief Load instrument plugin from detector name
   /// \param name Instrument name - .so suffix will be added
@@ -36,8 +34,4 @@ public:
   bool IsOk();
 
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
-
-  std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {
-    return ParserPopulator;
-  };
 };

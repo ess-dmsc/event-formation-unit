@@ -20,28 +20,28 @@
 namespace TTLMonitor {
 
 /// \brief load configuration and calibration files
-TTLMonitorInstrument::TTLMonitorInstrument(
-    struct Counters &counters, TTLMonitorSettings &moduleSettings,
-    std::vector<EV44Serializer> &serializers)
+TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
+                                           BaseSettings &settings,
+                                           std::vector<EV44Serializer> &serializers)
 
-    : counters(counters), ModuleSettings(moduleSettings),
+    : counters(counters), Settings(settings),
       Serializers(serializers) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config(ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config(Settings.ConfigFile);
   Conf.loadAndApply();
 
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "ttlmon_" + timeString();
+        Settings.DumpFilePrefix + "ttlmon_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
 
-  UseEveryNEvents = ModuleSettings.ReduceEvents;
+  UseEveryNEvents = Settings.TTLMonitorReduceEvents;
 }
 
 void TTLMonitorInstrument::processMonitorReadouts(void) {
@@ -51,12 +51,12 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
 
-  // TODO, have proper assertion heres
-  // assert(Serializers != nullptr);
-  for (EV44Serializer &Serializer : Serializers) {
-    counters.TxBytes += Serializer.checkAndSetReferenceTime(
-        ESSReadoutParser.Packet.Time
-            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+
+  //TODO, have proper assertion heres
+  //assert(Serializers != nullptr);
+  for (EV44Serializer &Serializer : Serializers){
+    counters.TxBytes += Serializer.checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
+                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts()");
@@ -138,7 +138,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
       counters.TxBytes +=
           Serializers[readout.Channel].addEvent(TimeOfFlight, PixelId);
       counters.MonitorCounts++;
-      UseEveryNEvents = ModuleSettings.ReduceEvents;
+      UseEveryNEvents = Settings.TTLMonitorReduceEvents;
     } else {
       counters.MonitorIgnored++;
       UseEveryNEvents--;

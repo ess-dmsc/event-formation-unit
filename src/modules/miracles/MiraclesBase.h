@@ -8,22 +8,15 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <miracles/Counters.h>
+#include <modules/miracles/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV42Serializer.h>
 
 namespace Miracles {
 
-struct MiraclesSettings {
-  std::string ConfigFile{""}; ///< panel mappings
-  // std::string CalibFile{""};   ///< calibration file
-  std::string FilePrefix{""}; ///< HDF5 file dumping
-};
-
 class MiraclesBase : public Detector {
 public:
-  MiraclesBase(BaseSettings const &Settings,
-              struct MiraclesSettings &LocalMiraclesSettings);
+  MiraclesBase(BaseSettings const &Settings);
   ~MiraclesBase() = default;
 
   void inputThread();
@@ -31,7 +24,6 @@ public:
 
 protected:
   struct Counters Counters;
-  MiraclesSettings MiraclesModuleSettings;
   EV42Serializer *Serializer;
 };
 

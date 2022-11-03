@@ -29,8 +29,9 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  TTLMonitorInstrument(Counters &counters, TTLMonitorSettings &moduleSettings,
-                       std::vector<EV44Serializer> &serializers);
+  TTLMonitorInstrument(Counters & counters,
+                  BaseSettings & settings,
+                  std::vector<EV44Serializer> &serializers);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
@@ -41,7 +42,7 @@ public:
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
   struct Counters &counters;
-  TTLMonitorSettings &ModuleSettings;
+  BaseSettings &Settings;
 
   /// \brief
   Config Conf;

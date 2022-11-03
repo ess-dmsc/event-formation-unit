@@ -30,12 +30,10 @@ set_target_properties(loki_udp_generated
 
 set(loki_udp_from_h5_INC
   ReaderReadouts.h
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.h
   )
 set(loki_udp_from_h5_SRC
   ${ESS_SOURCE_DIR}/generators/udpgen_hits/generator.cpp
   ReaderReadouts.cpp
-  ${ESS_SOURCE_DIR}/common/debug/Hexdump.cpp
   )
 create_executable(loki_udp_from_h5)
 target_compile_definitions(loki_udp_from_h5

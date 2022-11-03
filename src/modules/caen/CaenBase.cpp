@@ -20,18 +20,15 @@
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-// #include <common/debug/Hexdump.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-// #define ECDC_DEBUG_READOUT
 
 namespace Caen {
 
 const char *classname = "Caen detector with ESS readout";
 
-CaenBase::CaenBase(BaseSettings const &Settings,
-                   struct CaenSettings &LocalCaenSettings)
+CaenBase::CaenBase(BaseSettings const &Settings)
     : Detector("Caen", Settings), CaenModuleSettings(LocalCaenSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -80,8 +77,6 @@ CaenBase::CaenBase(BaseSettings const &Settings,
   // Events
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
-  Stats.create("events.outside_region", Counters.OutsideRegion);
-
 
   // System counters
   Stats.create("thread.input_idle", Counters.RxIdle);
