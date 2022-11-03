@@ -47,6 +47,14 @@ std::string bifrostjson = R"(
   }
 )";
 
+std::string miraclesjson = R"(
+  {
+    "Detector": "Miracles",
+    "MaxRing": 2,
+    "StrawResolution": 128
+  }
+)";
+
 class CaenBaseStandIn : public Caen::CaenBase {
 public:
   CaenBaseStandIn(BaseSettings Settings, struct Caen::CaenSettings ReadoutSettings)
@@ -77,6 +85,12 @@ TEST_F(CaenBaseTest, LokiConstructor) {
 
 TEST_F(CaenBaseTest, BifrostConstructor) {
   LocalSettings.ConfigFile = "deleteme_bifrost.json";
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+}
+
+TEST_F(CaenBaseTest, MiraclesConstructor) {
+  LocalSettings.ConfigFile = "deleteme_miracles.json";
   CaenBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
@@ -197,6 +211,23 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
+TEST_F(CaenBaseTest, DataReceiveMiracles) {
+  Settings.DetectorPort = 9000;
+  LocalSettings.ConfigFile = "deleteme_miracles.json";
+  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Readout.startThreads();
+
+  std::this_thread::sleep_for(SleepTime);
+  TestUDPServer Server(43126, Settings.DetectorPort,
+                       (unsigned char *)&TestPacket[0], TestPacket.size());
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.Counters.Readouts, 0);
+}
+
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorPort = 9001;
@@ -252,11 +283,14 @@ int main(int argc, char **argv) {
   saveBuffer(lokifilename, (void *)lokijson.c_str(), lokijson.size());
   std::string bifrostfilename{"deleteme_bifrost.json"};
   saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
+  std::string miraclesfilename{"deleteme_miracles.json"};
+  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(), miraclesjson.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(lokifilename);
   deleteFile(bifrostfilename);
+  deleteFile(miraclesfilename);
   return RetVal;
 }

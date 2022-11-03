@@ -12,7 +12,7 @@
 #include <modules/caen/geometry/Calibration.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_ERR
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 
@@ -77,7 +77,7 @@ Calibration::Calibration(std::string CalibrationFile) {
 
 /// \brief create a null calibration, or identity mapping
 void Calibration::nullCalibration(uint32_t Straws, uint16_t Resolution) {
-  if ((Straws <= 7) or (Resolution < 256) or (Resolution > 1024)) {
+  if ((Straws <= 7) or (Resolution < 128) or (Resolution > 1024)) {
     throw std::runtime_error("Invalid nullcalibration dimensions");
   }
 
