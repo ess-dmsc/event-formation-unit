@@ -8,7 +8,7 @@ from utils.efushell.EFUMetrics import Metrics
 
 def run_efu(efu, module, config):
     print("Running EFU")
-    efu_command = f"{efu}/bin/{module} --nohwcheck --file {config} --region 0 --graphite 127.0.0.1"
+    efu_command = f"{efu}/bin/efu --det {efu}/modules/{module}.so --nohwcheck --file {config} --region 0 --graphite 127.0.0.1"
     print(efu_command)
     efu_process = subprocess.Popen(
         f"exec {efu_command}",
