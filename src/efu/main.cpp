@@ -22,12 +22,6 @@
 #include <efu/Server.h>
 #include <iostream>
 
-#ifdef EFU_MIRACLES
-#include <modules/miracles/MiraclesBase.h>
-#endif
-#ifdef EFU_BIFROST
-#include <modules/bifrost/BifrostBase.h>
-#endif
 #ifdef EFU_CSPEC
 #include <modules/cspec/CSPECBase.h>
 #endif
@@ -37,8 +31,8 @@
 #ifdef EFU_FREIA
 #include <modules/freia/FreiaBase.h>
 #endif
-#ifdef EFU_LOKI
-#include <modules/loki/LokiBase.h>
+#ifdef EFU_CAEN
+#include <modules/caen/CaenBase.h>
 #endif
 #ifdef EFU_NMX
 #include <modules/nmx/NMXBase.h>
@@ -127,12 +121,6 @@ int main(int argc, char *argv[]) {
   efu_args.printSettings();
   DetectorSettings = efu_args.getBaseSettings();
 
-  #ifdef EFU_MIRACLES
-  DetectorName="miracles";
-  #endif
-  #ifdef EFU_BIFROST
-  DetectorName="bifrost";
-  #endif
   #ifdef EFU_CSPEC
   DetectorName="cspec";
   #endif
@@ -142,8 +130,8 @@ int main(int argc, char *argv[]) {
   #ifdef EFU_FREIA
   DetectorName="freia";
   #endif
-  #ifdef EFU_LOKI
-  DetectorName="loki";
+  #ifdef EFU_CAEN
+  DetectorName="caen";
   #endif
   #ifdef EFU_PERFGEN
   DetectorName="perfgen";
@@ -177,12 +165,6 @@ int main(int argc, char *argv[]) {
   DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
 
   auto Base = new
-  #ifdef EFU_MIRACLES
-    Miracles::MiraclesBase(DetectorSettings);
-  #endif
-  #ifdef EFU_BIFROST
-    Bifrost::BifrostBase(DetectorSettings);
-  #endif
   #ifdef EFU_CSPEC
     Cspec::CspecBase(DetectorSettings);
   #endif
@@ -192,8 +174,8 @@ int main(int argc, char *argv[]) {
   #ifdef EFU_FREIA
     Freia::FreiaBase(DetectorSettings);
   #endif
-  #ifdef EFU_LOKI
-    Loki::LokiBase(DetectorSettings);
+  #ifdef EFU_CAEN
+    Caen::CaenBase(DetectorSettings);
   #endif
   #ifdef EFU_NMX
     Nmx::NmxBase(DetectorSettings);
