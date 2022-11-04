@@ -22,9 +22,6 @@
 #include <efu/Server.h>
 #include <iostream>
 
-#ifdef EFU_MIRACLES
-#include <modules/miracles/MiraclesBase.h>
-#endif
 #ifdef EFU_BIFROST
 #include <modules/bifrost/BifrostBase.h>
 #endif
@@ -39,6 +36,9 @@
 #endif
 #ifdef EFU_LOKI
 #include <modules/loki/LokiBase.h>
+#endif
+#ifdef EFU_MIRACLES
+#include <modules/miracles/MiraclesBase.h>
 #endif
 #ifdef EFU_NMX
 #include <modules/nmx/NMXBase.h>
@@ -127,9 +127,6 @@ int main(int argc, char *argv[]) {
   efu_args.printSettings();
   DetectorSettings = efu_args.getBaseSettings();
 
-  #ifdef EFU_MIRACLES
-  DetectorName="miracles";
-  #endif
   #ifdef EFU_BIFROST
   DetectorName="bifrost";
   #endif
@@ -145,12 +142,19 @@ int main(int argc, char *argv[]) {
   #ifdef EFU_LOKI
   DetectorName="loki";
   #endif
+  #ifdef EFU_MIRACLES
+  DetectorName="miracles";
+  #endif
+  #ifdef EFU_NMX
+  DetectorName="nmx";
+  #endif
   #ifdef EFU_PERFGEN
   DetectorName="perfgen";
   #endif
   #ifdef EFU_TTLMON
   DetectorName="ttlmonitor";
   #endif
+
 
 
   // Set-up logging before we start doing important stuff
@@ -184,9 +188,6 @@ int main(int argc, char *argv[]) {
   DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
 
   auto Base = new
-  #ifdef EFU_MIRACLES
-    Miracles::MiraclesBase(DetectorSettings);
-  #endif
   #ifdef EFU_BIFROST
     Bifrost::BifrostBase(DetectorSettings);
   #endif
@@ -201,6 +202,9 @@ int main(int argc, char *argv[]) {
   #endif
   #ifdef EFU_LOKI
     Loki::LokiBase(DetectorSettings);
+  #endif
+  #ifdef EFU_MIRACLES
+    Miracles::MiraclesBase(DetectorSettings);
   #endif
   #ifdef EFU_NMX
     Nmx::NmxBase(DetectorSettings);
