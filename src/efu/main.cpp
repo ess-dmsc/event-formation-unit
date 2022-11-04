@@ -18,10 +18,38 @@
 #include <efu/ExitHandler.h>
 #include <efu/HwCheck.h>
 #include <efu/Launcher.h>
-#include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
+
+#ifdef EFU_BIFROST
+#include <modules/bifrost/BifrostBase.h>
+#endif
+#ifdef EFU_CSPEC
+#include <modules/cspec/CSPECBase.h>
+#endif
+#ifdef EFU_DREAM
+#include <modules/dream/DreamBase.h>
+#endif
+#ifdef EFU_FREIA
+#include <modules/freia/FreiaBase.h>
+#endif
+#ifdef EFU_LOKI
+#include <modules/loki/LokiBase.h>
+#endif
+#ifdef EFU_MIRACLES
+#include <modules/miracles/MiraclesBase.h>
+#endif
+#ifdef EFU_NMX
+#include <modules/nmx/NMXBase.h>
+#endif
+#ifdef EFU_PERFGEN
+#include <modules/perfgen/PerfGenBase.h>
+#endif
+#ifdef EFU_TTLMON
+#include <modules/ttlmonitor/TTLMonitorBase.h>
+#endif
+
 #include <unistd.h> // sleep()
 #include <vector>
 
@@ -86,70 +114,109 @@ void EmptyGraylogMessageQueue() {
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
-  std::vector<ThreadCoreAffinitySetting> AffinitySettings;
   std::shared_ptr<Detector> detector;
   std::string DetectorName;
   GraylogSettings GLConfig;
-  Loader loader;
   HwCheck hwcheck;
   Timer RunTimer;
 
-  { // Make sure that the EFUArgs instance is deallocated before the detector
-    // plugin is
-    EFUArgs efu_args;
-    if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
-      return 0;
-    }
-    // Set-up logging before we start doing important stuff
-    Log::RemoveAllHandlers();
-
-    auto CI = new Log::ConsoleInterface();
-    CI->setMessageStringCreatorFunction(ConsoleFormatter);
-    Log::AddLogHandler(CI);
-
-    Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
-    if (!efu_args.getLogFileName().empty()) {
-      auto FI = new Log::FileInterface(efu_args.getLogFileName());
-      FI->setMessageStringCreatorFunction(FileFormatter);
-      Log::AddLogHandler(FI);
-    }
-
-    loader.loadPlugin(efu_args.getDetectorName());
-    if (not loader.IsOk()) {
-      efu_args.printHelp();
-      EmptyGraylogMessageQueue();
-      return -1;
-    }
-
-    { // This is to prevent accessing unloaded memory in a (potentially)
-      // unloaded
-      // plugin.
-      auto CLIArgPopulator = loader.GetCLIParserPopulator();
-      CLIArgPopulator(efu_args.CLIParser);
-    }
-    if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
-      return 0;
-    }
-    GLConfig = efu_args.getGraylogSettings();
-    if (not GLConfig.address.empty()) {
-      Log::AddLogHandler(
-          new Log::GraylogInterface(GLConfig.address, GLConfig.port));
-    }
-    efu_args.printSettings();
-    DetectorSettings = efu_args.getBaseSettings();
-
-    /// Automatically create the Graphite metric prefix from detector plugin
-    /// name remove leading path and trailing extension
-    auto p = boost::filesystem::path(efu_args.getDetectorName())
-                 .filename()
-                 .stem()
-                 .string();
-    DetectorSettings.GraphitePrefix = std::string("efu.") + p;
-
-    detector = loader.createDetector(DetectorSettings);
-    AffinitySettings = efu_args.getThreadCoreAffinity();
-    DetectorName = efu_args.getDetectorName();
+  EFUArgs efu_args;
+  if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
+    return 0;
   }
+  efu_args.printSettings();
+  DetectorSettings = efu_args.getBaseSettings();
+
+  #ifdef EFU_BIFROST
+  DetectorName="bifrost";
+  #endif
+  #ifdef EFU_CSPEC
+  DetectorName="cspec";
+  #endif
+  #ifdef EFU_DREAM
+  DetectorName="dream";
+  #endif
+  #ifdef EFU_FREIA
+  DetectorName="freia";
+  #endif
+  #ifdef EFU_LOKI
+  DetectorName="loki";
+  #endif
+  #ifdef EFU_MIRACLES
+  DetectorName="miracles";
+  #endif
+  #ifdef EFU_NMX
+  DetectorName="nmx";
+  #endif
+  #ifdef EFU_PERFGEN
+  DetectorName="perfgen";
+  #endif
+  #ifdef EFU_TTLMON
+  DetectorName="ttlmonitor";
+  #endif
+
+
+
+  // Set-up logging before we start doing important stuff
+  // change process to "efu" and set process_name to Instrument
+  std::string ProcessKey{"process"};
+  std::string ProcessValue{"efu"};
+  std::string ProcessNameKey{"process_name"};
+  Log::RemoveAllHandlers();
+  Log::Logger::Inst().addField(ProcessKey, ProcessValue);
+  Log::Logger::Inst().addField(ProcessNameKey, DetectorName);
+
+
+  auto CI = new Log::ConsoleInterface();
+  CI->setMessageStringCreatorFunction(ConsoleFormatter);
+  Log::AddLogHandler(CI);
+
+  Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
+  if (!efu_args.getLogFileName().empty()) {
+    auto FI = new Log::FileInterface(efu_args.getLogFileName());
+    FI->setMessageStringCreatorFunction(FileFormatter);
+    Log::AddLogHandler(FI);
+  }
+
+  GLConfig = efu_args.getGraylogSettings();
+  if (not GLConfig.address.empty()) {
+    Log::AddLogHandler(
+        new Log::GraylogInterface(GLConfig.address, GLConfig.port));
+  }
+
+
+  DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
+
+  auto Base = new
+  #ifdef EFU_BIFROST
+    Bifrost::BifrostBase(DetectorSettings);
+  #endif
+  #ifdef EFU_CSPEC
+    Cspec::CspecBase(DetectorSettings);
+  #endif
+  #ifdef EFU_DREAM
+    Dream::DreamBase(DetectorSettings);
+  #endif
+  #ifdef EFU_FREIA
+    Freia::FreiaBase(DetectorSettings);
+  #endif
+  #ifdef EFU_LOKI
+    Loki::LokiBase(DetectorSettings);
+  #endif
+  #ifdef EFU_MIRACLES
+    Miracles::MiraclesBase(DetectorSettings);
+  #endif
+  #ifdef EFU_NMX
+    Nmx::NmxBase(DetectorSettings);
+  #endif
+  #ifdef EFU_PERFGEN
+    PerfGen::PerfGenBase(DetectorSettings);
+  #endif
+  #ifdef EFU_TTLMON
+    TTLMonitor::TTLMonitorBase(DetectorSettings);
+  #endif
+
+  detector = std::shared_ptr<Detector>(Base);
 
   int keep_running = 1;
 
@@ -177,13 +244,6 @@ int main(int argc, char *argv[]) {
       EmptyGraylogMessageQueue();
       return -1;
     }
-
-    // if (hwcheck.checkDiskSpace(hwcheck.DirectoriesToCheck) == false) {
-    //   LOG(MAIN, Sev::Error, "Not enough space on filesystem");
-    //   LOG(MAIN, Sev::Error, "exiting...");
-    //   detector.reset(); //De-allocate detector before we unload detector
-    //   module EmptyGraylogMessageQueue(); return -1;
-    // }
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
@@ -195,7 +255,7 @@ int main(int argc, char *argv[]) {
 
   LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorName);
 
-  Launcher launcher(AffinitySettings);
+  Launcher launcher;
 
   launcher.launchThreads(detector);
 

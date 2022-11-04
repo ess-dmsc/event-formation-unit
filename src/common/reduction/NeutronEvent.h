@@ -19,8 +19,8 @@
 #include <string>
 
 struct NeutronEvent {
-  uint64_t time;
-  uint32_t pixel_id;
+  uint64_t time{0};
+  uint32_t pixel_id{0};
 
   std::string to_string() const;
 };

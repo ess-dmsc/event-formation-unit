@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,11 +11,10 @@
 #include <dream/readout/DataParser.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
-constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::Parser::DataHeader)};
 constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};
 
 // Assume we start after the PacketHeader
@@ -29,67 +28,59 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   while (BytesLeft) {
     // Parse Data Header
     if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
-      XTRACE(DATA, DEB, "Not enough data left for header: %u", BytesLeft);
-      Stats.ErrorHeaders++;
+      XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
+    auto Data = (DreamReadout *)((char *)DataPtr);
 
-    if (BytesLeft < DataHdrPtr->DataLength) {
-      XTRACE(DATA, DEB, "Data size mismatch, header says %u got %d",
-             DataHdrPtr->DataLength, BytesLeft);
-      Stats.ErrorHeaders++;
+    ///\todo clarify distinction between logical and physical rings
+    // for now just divide by two
+    Data->RingId = Data->RingId / 2;
+
+    if (BytesLeft < Data->DataLength) {
+      XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
+             Data->DataLength, BytesLeft);
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
-             DataHdrPtr->FENId);
-      Stats.ErrorHeaders++;
+    if (Data->RingId > MaxRingId or Data->FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
+             Data->FENId);
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
-           DataHdrPtr->FENId, DataHdrPtr->DataLength);
-    Stats.Headers++;
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId, Data->FENId,
+           Data->DataLength);
+    Stats.DataHeaders++;
 
-    if (DataHdrPtr->DataLength < sizeof(DataParser::DreamReadout)) {
-      XTRACE(DATA, WAR, "Invalid data length %u", DataHdrPtr->DataLength);
-      Stats.ErrorHeaders++;
+    if (Data->DataLength != DreamReadoutSize) {
+      XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
+             DreamReadoutSize);
+      Stats.ErrorDataHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    ParsedData CurrentDataSection;
-    CurrentDataSection.RingId = DataHdrPtr->RingId;
-    CurrentDataSection.FENId = DataHdrPtr->FENId;
+    XTRACE(DATA, DEB, "ring %u, fen %u, time: 0x%08x %08x, OM %3u ,"
+           "Cathode 0x%3u Anode 0x%3u",
+           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->OM, Data->Cathode, Data->Anode);
 
-    // Loop through data here
-    auto ReadoutsInDataSection =
-        (DataHdrPtr->DataLength - DataHeaderSize) / DreamReadoutSize;
-    for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
-      auto Data = (DreamReadout *)((char *)DataHdrPtr + DataHeaderSize +
-                                   i * DreamReadoutSize);
-      // XTRACE(DATA, DEB, "%3u: ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId
-      // %3u , A 0x%04x B "
-      //                   "0x%04x C 0x%04x D 0x%04x",
-      //        i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-      //        Data->TimeHigh, Data->TimeLow, Data->DataSeqNum, Data->TubeId,
-      //        Data->AmpA, Data->AmpB, Data->AmpC, Data->AmpD);
+    ParsedReadouts++;
+    Stats.Readouts++;
 
-      CurrentDataSection.Data.push_back(*Data);
-      ParsedReadouts++;
-      Stats.Readouts++;
-    }
-    Result.push_back(CurrentDataSection);
-    BytesLeft -= DataHdrPtr->DataLength;
-    DataPtr += DataHdrPtr->DataLength;
+    Result.push_back(*Data);
+    BytesLeft -= Data->DataLength;
+    DataPtr += Data->DataLength;
   }
 
   return ParsedReadouts;
 }
-} // namespace Dream
+} // namespace Loki

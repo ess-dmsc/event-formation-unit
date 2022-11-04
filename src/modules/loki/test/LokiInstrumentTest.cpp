@@ -67,23 +67,23 @@ std::string CalibStr = R"(
 class LokiInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
-  LokiSettings ModuleSettings;
+  BaseSettings Settings;
 
-  void SetUp() override { ModuleSettings.ConfigFile = ConfigFile; }
+  void SetUp() override { Settings.ConfigFile = ConfigFile; }
   void TearDown() override {}
 };
 
 /** Test cases below */
 TEST_F(LokiInstrumentTest, Constructor) {
-  ModuleSettings.CalibFile = CalibFile;
-  LokiInstrument Loki(counters, ModuleSettings);
+  Settings.CalibFile = CalibFile;
+  LokiInstrument Loki(counters, Settings);
   ASSERT_EQ(Loki.LokiConfiguration.getMaxPixel(), 7 * 256);
 }
 
 TEST_F(LokiInstrumentTest, PixelMismatch) {
-  ModuleSettings.ConfigFile = Config512File;
-  ModuleSettings.CalibFile = CalibFile;
-  ASSERT_ANY_THROW(LokiInstrument Loki(counters, ModuleSettings));
+  Settings.ConfigFile = Config512File;
+  Settings.CalibFile = CalibFile;
+  ASSERT_ANY_THROW(LokiInstrument Loki(counters, Settings));
 }
 
 int main(int argc, char **argv) {

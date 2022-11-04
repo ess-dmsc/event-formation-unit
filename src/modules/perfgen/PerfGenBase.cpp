@@ -15,6 +15,7 @@
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <common/time/TimeString.h>
 
@@ -34,22 +35,18 @@ namespace PerfGen {
 
 const char *classname = "PerfGen Pixel Generator";
 
-PerfGenBase::PerfGenBase(BaseSettings const &settings,
-                         struct PerfGenSettings &LocalPerfGenSettings)
-    : Detector("PerfGen", settings), PerfGenSettings(LocalPerfGenSettings) {
+PerfGenBase::PerfGenBase(BaseSettings const &settings)
+    : Detector("PerfGen", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-
-  Stats.create("thread.processing_idle", mystats.rx_idle1);
-
-  Stats.create("events.count", mystats.events);
   Stats.create("events.udder", mystats.events_udder);
   Stats.create("transmit.bytes", mystats.tx_bytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_calls", mystats.kafka_produce_calls);
   Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka.ev_others", mystats.kafka_ev_others);
@@ -69,43 +66,55 @@ void PerfGenBase::processingThread() {
     EFUSettings.KafkaTopic = "perfgen_detector";
   }
 
-  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer FlatBuffer(kafka_buffer_size, "perfgen", Produce);
+  EV42Serializer Serializer(kafka_buffer_size, "perfgen", Produce);
 
   ESSGeometry ESSGeom(64, 64, 1, 1);
 
   XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
   Udder UdderImage;
   UdderImage.cachePixels(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
-  uint32_t TimeOfFlight = 0;
+
+  int TimeOfFlight{0};
+  int EventsPerPulse{500};
+
+  // ns since 1970 - but with a resolution of one second
+  uint64_t EfuTimeRef = 1000000000LU * (uint64_t)time(NULL);
+  Timer Elapsed; // provide a us timer
+
   while (runThreads) {
-    static int EventCount = 0;
-    if (EventCount == 0) {
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      FlatBuffer.pulseTime(EfuTime);
+    // ns since 1970 - but with us resolution
+    uint64_t EfuTime = EfuTimeRef + 1000 * Elapsed.timeus();
+    XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
+    Serializer.pulseTime(EfuTime);
+
+    for (int i = 0; i < EventsPerPulse; i++) {
+      auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
+      Serializer.addEvent(TimeOfFlight, PixelId);
+      mystats.events_udder++;
+      TimeOfFlight++;
     }
+    //Serializer.checkAndSetPulseTime(EfuTime);
 
-    auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
-    auto TxBytes = FlatBuffer.addEvent(TimeOfFlight, PixelId);
-    mystats.tx_bytes += TxBytes;
-    mystats.events_udder++;
 
-    if (EFUSettings.TestImageUSleep != 0) {
-      usleep(EFUSettings.TestImageUSleep);
-    }
+    usleep(EFUSettings.TestImageUSleep);
 
-    TimeOfFlight++;
-
-    if (TxBytes != 0) {
-      EventCount = 0;
-    } else {
-      EventCount++;
-    }
+    /// Kafka stats update - common to all detectors
+    /// don't increment as Producer & Serializer keep absolute count
+    mystats.kafka_produce_fails = EventProducer.stats.produce_fails;
+    mystats.kafka_ev_errors = EventProducer.stats.ev_errors;
+    mystats.kafka_ev_others = EventProducer.stats.ev_others;
+    mystats.kafka_dr_errors = EventProducer.stats.dr_errors;
+    mystats.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    mystats.tx_bytes = Serializer.TxBytes;
+    TimeOfFlight = 0;
   }
   // \todo flush everything here
   XTRACE(INPUT, ALW, "Stopping processing thread.");

@@ -25,14 +25,13 @@ namespace Cspec {
 
 /// \brief load configuration and calibration files
 CSPECInstrument::CSPECInstrument(struct Counters &counters,
-                                 // BaseSettings & EFUSettings,
-                                 CSPECSettings &moduleSettings,
+                                 BaseSettings & settings,
                                  EV42Serializer *serializer)
-    : counters(counters), ModuleSettings(moduleSettings),
+    : counters(counters), Settings(settings),
       Serializer(serializer) {
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "cspec_" + timeString();
+        Settings.DumpFilePrefix + "cspec_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -74,8 +73,8 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
 
 void CSPECInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config("CSPEC", ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config("CSPEC", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
@@ -83,9 +82,9 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
-  if (ModuleSettings.CalibFile != "") {
+  if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
-    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
 

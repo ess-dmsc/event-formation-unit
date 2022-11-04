@@ -41,18 +41,6 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
-# Compile detector module code for static linking into the EFU.
-#=============================================================================
-function(create_object_module module_name)
-  add_library(${module_name} OBJECT
-    ${${module_name}_SRC}
-    ${${module_name}_INC})
-  enable_coverage_flags(${module_name})
-  set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
-  set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
-endfunction(create_object_module)
-
-#=============================================================================
 # Generate an executable program
 #=============================================================================
 function(create_executable exec_name)
@@ -96,15 +84,16 @@ function(create_test_executable)
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
   target_include_directories(${exec_name}
-    PRIVATE ${GTEST_INCLUDE_DIRS})
+    PRIVATE ${GTEST_INCLUDE_DIRS}
+    )
 
-  set_property(TARGET ${exec_name} 
+  set_property(TARGET ${exec_name}
     APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT")
-  
+
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${CONAN_LIBS_GTEST} efu_common)
+    ${CONAN_LIBS_GTEST} efu_common efu_reduction efu_essreadout)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")

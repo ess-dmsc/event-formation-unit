@@ -13,18 +13,12 @@
 #include <common/monitor/Monitor.h>
 #include <multigrid/Config.h>
 
-struct MultigridSettings {
-  std::string ConfigFile;
-  std::string FilePrefix;
-  // \todo move this to json
-  bool monitor{false};
-};
+namespace Multigrid {
 
 ///
 class MultigridBase : public Detector {
 public:
-  MultigridBase(BaseSettings const &settings,
-                MultigridSettings const &LocalSettings);
+  MultigridBase(BaseSettings const &settings);
   ~MultigridBase() = default;
   void mainThread();
 
@@ -64,7 +58,6 @@ protected:
     int64_t kafka_dr_noerrors{0};
   } __attribute__((aligned(64))) Counters;
 
-  MultigridSettings ModuleSettings;
   Multigrid::Config mg_config;
   Monitor monitor;
 
@@ -74,3 +67,4 @@ protected:
   bool init_config();
   void process_events(EV42Serializer &ev42serializer);
 };
+} // namespace

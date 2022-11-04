@@ -14,13 +14,13 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-// #include <common/debug/Hexdump.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_WAR
@@ -29,10 +29,8 @@ namespace Bifrost {
 
 const char *classname = "Bifrost detector with ESS readout";
 
-BifrostBase::BifrostBase(BaseSettings const &Settings,
-                         struct BifrostSettings &LocalBifrostSettings)
-    : Detector("Bifrost", Settings),
-      BifrostModuleSettings(LocalBifrostSettings) {
+BifrostBase::BifrostBase(BaseSettings const &Settings)
+    : Detector("Bifrost", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -150,9 +148,11 @@ void BifrostBase::inputThread() {
 /// \brief Normal processing thread
 void BifrostBase::processingThread() {
 
-  BifrostInstrument Bifrost(Counters, BifrostModuleSettings);
+  BifrostInstrument Bifrost(Counters, EFUSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer EventProducer(EFUSettings.KafkaBroker, "bifrost_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

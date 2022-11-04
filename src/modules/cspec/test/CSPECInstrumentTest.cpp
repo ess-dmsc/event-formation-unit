@@ -73,13 +73,13 @@ std::string ConfigStr = R"(
       { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000022"},
       { "Ring" :  0, "VesselId": "3", "FEN": 7, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000023"}
     ],
-    
+
     "MaxPulseTimeNS" : 71428570,
     "TimeBoxNs" : 2010,
     "DefaultMinADC": 50,
     "MaxGridsPerEvent": 5,
     "SizeX": 12,
-    "SizeY": 51, 
+    "SizeY": 51,
     "SizeZ": 16
   }
 )";
@@ -332,7 +332,7 @@ std::vector<uint8_t> MinADC {
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
   0x00, 0x00, 0x28, 0x00,  // ADC = 40, under default threshold required
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
- 
+
   // Second readout - plane X & Z - Wires
   0x00, 0x01, 0x14, 0x00,  // Data Header, Ring 0, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
@@ -386,7 +386,7 @@ class CSPECInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
-  CSPECSettings ModuleSettings;
+  BaseSettings Settings;
   EV42Serializer *serializer;
   CSPECInstrument *cspec;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
@@ -394,13 +394,13 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "cspec");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    cspec = new CSPECInstrument(counters, ModuleSettings, serializer);
+    cspec = new CSPECInstrument(counters, Settings, serializer);
     cspec->setSerializer(serializer);
     cspec->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
@@ -418,8 +418,8 @@ protected:
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(CSPECInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_";
-  CSPECInstrument CSPECDump(counters, ModuleSettings, serializer);
+  Settings.DumpFilePrefix = "deleteme_";
+  CSPECInstrument CSPECDump(counters, Settings, serializer);
   CSPECDump.setSerializer(serializer);
 
   makeHeader(CSPECDump.ESSReadoutParser.Packet, GoodEvent);
@@ -433,8 +433,8 @@ TEST_F(CSPECInstrumentTest, DumpTofile) {
 
 // Test cases below
 TEST_F(CSPECInstrumentTest, BadConfig) {
-  ModuleSettings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(CSPECInstrument(counters, ModuleSettings, serializer),
+  Settings.ConfigFile = BadConfigFile;
+  EXPECT_THROW(CSPECInstrument(counters, Settings, serializer),
                std::runtime_error);
 }
 

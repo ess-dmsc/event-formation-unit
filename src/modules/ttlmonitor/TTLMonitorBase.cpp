@@ -8,10 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -33,11 +33,8 @@ namespace TTLMonitor {
 
 const char *classname = "TTLMonitor detector with ESS readout";
 
-TTLMonitorBase::TTLMonitorBase(
-    BaseSettings const &settings,
-    struct TTLMonitorSettings &LocalTTLMonitorSettings)
-    : Detector("TTLMON", settings),
-      TTLMonitorModuleSettings(LocalTTLMonitorSettings) {
+TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
+  : Detector("TTLMON", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -164,17 +161,18 @@ void TTLMonitorBase::processing_thread() {
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
 
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+    KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  for (int i=0; i< TTLMonitorModuleSettings.NumberOfMonitors; ++i){
+  for (int i = 0; i < EFUSettings.TTLMonitorNumberOfMonitors; ++i) {
     Serializers.push_back(EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
-  TTLMonitorInstrument TTLMonitor(
-      Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializers);
+  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings, Serializers);
 
   TTLMonitor.VMMParser.setMonitor(true);
 
@@ -238,7 +236,7 @@ void TTLMonitorBase::processing_thread() {
       }
     }
     Counters.KafkaStats = eventprod.stats;
-    
+
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

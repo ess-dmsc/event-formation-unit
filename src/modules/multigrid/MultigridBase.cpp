@@ -9,32 +9,30 @@
 
 #include <multigrid/MultigridBase.h>
 #include <multigrid/geometry/PlaneMappings.h>
-
 #include <common/kafka/Producer.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
+#include <common/system/Socket.h>
 #include <common/time/TimeString.h>
+#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
+#include <common/debug/Trace.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-#include <common/RuntimeStat.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/Timer.h>
-
-#include <common/debug/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 #include "MultigridBase.h"
 #include <common/debug/Log.h>
-//#undef TRC_MASK
-//#define TRC_MASK 0
+
+namespace Multigrid {
 
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz{2900};
 
-MultigridBase::MultigridBase(BaseSettings const &settings,
-                             MultigridSettings const &LocalSettings)
-    : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
+MultigridBase::MultigridBase(BaseSettings const &Settings)
+    : Detector("CSPEC", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -84,20 +82,20 @@ MultigridBase::MultigridBase(BaseSettings const &settings,
   // clang-format on
 
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
-      (ModuleSettings.monitor ? "YES" : "no"));
-  if (!ModuleSettings.FilePrefix.empty())
-    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", ModuleSettings.FilePrefix);
+      (EFUSettings.MultiGridMonitor ? "YES" : "no"));
+  if (!EFUSettings.DumpFilePrefix.empty())
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", EFUSettings.DumpFilePrefix);
 
   std::function<void()> inputFunc = [this]() { MultigridBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
 }
 
 bool MultigridBase::init_config() {
-  LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
+  LOG(INIT, Sev::Info, "MG Config file: {}", EFUSettings.ConfigFile);
+  mg_config = Multigrid::Config(EFUSettings.ConfigFile);
 
   LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
-  if (ModuleSettings.monitor) {
+  if (EFUSettings.MultiGridMonitor) {
     monitor = Monitor(EFUSettings.KafkaBroker, "CSPEC", "multigrid");
     monitor.init_hits(KafkaBufferSize);
     monitor.init_histograms(std::numeric_limits<uint16_t>::max());
@@ -155,7 +153,9 @@ void MultigridBase::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
-  Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer event_producer(EFUSettings.KafkaBroker, "cspec_detector",
+    KafkaCfg.CfgParms);
   auto Produce = [&event_producer](auto DataBuffer, auto Timestamp) {
     event_producer.produce(DataBuffer, Timestamp);
   };
@@ -261,3 +261,4 @@ void MultigridBase::mainThread() {
     }
   }
 }
+} // namespace

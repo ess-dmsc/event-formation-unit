@@ -38,7 +38,6 @@ set(BifrostInstrumentTest_INC
   ${BIFROST_BASE_DIR}/geometry/Config.h
   ${BIFROST_BASE_DIR}/geometry/Geometry.h
   ${BIFROST_BASE_DIR}/readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(BifrostInstrumentTest_SRC
@@ -46,7 +45,6 @@ set(BifrostInstrumentTest_SRC
   ${BIFROST_BASE_DIR}/BifrostInstrument.cpp
   ${BIFROST_BASE_DIR}/geometry/Geometry.cpp
   ${BIFROST_BASE_DIR}/readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )
 create_test_executable(BifrostInstrumentTest)

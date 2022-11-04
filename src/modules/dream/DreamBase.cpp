@@ -14,6 +14,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
@@ -29,9 +30,8 @@ namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings,
-                     struct DreamSettings &LocalDreamSettings)
-    : Detector("Dream", Settings), DreamModuleSettings(LocalDreamSettings) {
+DreamBase::DreamBase(BaseSettings const &Settings)
+    : Detector("Dream", Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -58,9 +58,9 @@ DreamBase::DreamBase(BaseSettings const &Settings,
 
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
-  Stats.create("readouts.headers", Counters.Headers);
+  Stats.create("readouts.headers", Counters.DataHeaders);
   Stats.create("readouts.error_bytes", Counters.ErrorBytes);
-  Stats.create("readouts.error_header", Counters.ErrorHeaders);
+  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
 
 
 
@@ -138,9 +138,12 @@ void DreamBase::inputThread() {
 /// \brief Normal processing thread
 void DreamBase::processingThread() {
 
-  DreamInstrument Dream(Counters, DreamModuleSettings);
+  DreamInstrument Dream(Counters, EFUSettings);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector");
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+
+  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector",
+    KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -172,7 +175,7 @@ void DreamBase::processingThread() {
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
-        Counters.ErrorHeaders++;
+        Counters.ErrorESSHeaders++;
         continue;
       }
 
