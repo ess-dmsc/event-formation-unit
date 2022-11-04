@@ -29,7 +29,6 @@ protected:
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
 
   void SetUp() override {
-    // ModuleSettings.ConfigFile = ConfigFile;
     serializer = new EV42Serializer(115000, "miracles");
     counters = {};
 

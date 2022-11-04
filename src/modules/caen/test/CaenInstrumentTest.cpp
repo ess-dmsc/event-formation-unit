@@ -78,7 +78,7 @@ protected:
   struct Counters counters;
   BaseSettings Settings;
 
-  void SetUp() override { Settings.ConfigFile = ConfigFile; }
+  void SetUp() override { Settings.ConfigFile = LokiConfigFile; }
   void TearDown() override {}
 };
 

@@ -14,12 +14,6 @@
 
 namespace Caen {
 
-struct CaenSettings {
-  std::string ConfigFile{""}; ///< panel mappings
-  std::string CalibFile{""};  ///< calibration file
-  std::string FilePrefix{""}; ///< HDF5 file dumping
-};
-
 class CaenBase : public Detector {
 public:
   CaenBase(BaseSettings const &Settings);

@@ -23,12 +23,12 @@ namespace Caen {
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 CaenInstrument::CaenInstrument(struct Counters &counters,
-                               BaseSettings &Settings)
+                               BaseSettings &settings)
     : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  CaenConfiguration = Config(ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  CaenConfiguration = Config(Settings.ConfigFile);
 
   if (CaenConfiguration.InstrumentName == "LoKI") {
     Geom = new LokiGeometry(CaenConfiguration);
@@ -91,7 +91,6 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
 
   uint32_t pixel = Geom->calcPixel(Data);
   counters.ReadoutsBadAmpl = Geom->Stats.AmplitudeZero;
-  counters.OutsideRegion = Geom->Stats.OutsideRegion;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }

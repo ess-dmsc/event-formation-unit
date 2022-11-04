@@ -32,7 +32,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  CaenInstrument(Counters &counters, CaenSettings &moduleSettings);
+  CaenInstrument(Counters &counters, BaseSettings &settings);
 
   ~CaenInstrument();
 
@@ -55,8 +55,8 @@ public:
   /// \brief Stuff that 'ties' Caen together
   struct Counters &counters;
 
-  CaenSettings &ModuleSettings;
   Config CaenConfiguration;
+  BaseSettings &Settings;
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
   Geometry *Geom;

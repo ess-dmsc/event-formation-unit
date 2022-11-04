@@ -21,9 +21,6 @@ MiraclesInstrument::MiraclesInstrument(struct Counters &counters,
       BaseSettings & settings)
     : counters(counters), Settings(settings) {
 
-  // XTRACE(INIT, ALW, "Loading configuration file %s",
-  //        ModuleSettings.ConfigFile.c_str());
-  // MiraclesConfiguration = Config(ModuleSettings.ConfigFile);
 
   if (not Settings.DumpFilePrefix.empty()) {
     DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "miracles_" +

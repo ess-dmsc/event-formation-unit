@@ -57,8 +57,8 @@ std::string miraclesjson = R"(
 
 class CaenBaseStandIn : public Caen::CaenBase {
 public:
-  CaenBaseStandIn(BaseSettings Settings, struct Caen::CaenSettings ReadoutSettings)
-      : Caen::CaenBase(Settings, ReadoutSettings){};
+  CaenBaseStandIn(BaseSettings Settings)
+      : Caen::CaenBase(Settings){};
   ~CaenBaseStandIn() = default;
   using Detector::Threads;
   using Caen::CaenBase::Counters;
@@ -69,29 +69,28 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    LocalSettings.ConfigFile = "deleteme_loki.json";
+    Settings.ConfigFile = "deleteme_loki.json";
   }
   void TearDown() override {}
 
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
-  Caen::CaenSettings LocalSettings;
 };
 
 TEST_F(CaenBaseTest, LokiConstructor) {
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  CaenBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, BifrostConstructor) {
-  LocalSettings.ConfigFile = "deleteme_bifrost.json";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.ConfigFile = "deleteme_bifrost.json";
+  CaenBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, MiraclesConstructor) {
-  LocalSettings.ConfigFile = "deleteme_miracles.json";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.ConfigFile = "deleteme_miracles.json";
+  CaenBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
@@ -180,7 +179,7 @@ std::vector<uint8_t> TestPacket2{
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorPort = 9000;
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -196,8 +195,8 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
 TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.DetectorPort = 9000;
-  LocalSettings.ConfigFile = "deleteme_bifrost.json";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.ConfigFile = "deleteme_bifrost.json";
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -213,8 +212,8 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
 
 TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.DetectorPort = 9000;
-  LocalSettings.ConfigFile = "deleteme_miracles.json";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.ConfigFile = "deleteme_miracles.json";
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -232,8 +231,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_";
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -255,11 +254,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
 
 TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  LocalSettings.ConfigFile = "deleteme_bifrost.json";
+  Settings.ConfigFile = "deleteme_bifrost.json";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_";
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -280,11 +279,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
 
 TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  LocalSettings.ConfigFile = "deleteme_miracles.json";
+  Settings.ConfigFile = "deleteme_miracles.json";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
-  LocalSettings.FilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, LocalSettings);
+  Settings.DumpFilePrefix = "deleteme_";
+  CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);

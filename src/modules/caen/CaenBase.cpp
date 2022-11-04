@@ -6,7 +6,7 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include "CaenBase.h"
+#include "caen/CaenBase.h"
 
 #include <caen/CaenInstrument.h>
 #include <cinttypes>
@@ -28,8 +28,8 @@ namespace Caen {
 
 const char *classname = "Caen detector with ESS readout";
 
-CaenBase::CaenBase(BaseSettings const &Settings)
-    : Detector("Caen", Settings), CaenModuleSettings(LocalCaenSettings) {
+CaenBase::CaenBase(BaseSettings const &settings)
+    : Detector("Caen", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -118,17 +118,15 @@ void CaenBase::inputThread() {
 
   while (runThreads) {
     int readSize;
-
     unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
-
     if ((readSize =
              dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                   RxRingbuffer.getMaxBufSize())) > 0) {
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      // XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-      // readSize);
+      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+      readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
 
@@ -148,7 +146,6 @@ void CaenBase::inputThread() {
 ///
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
-  CaenInstrument Caen(Counters, CaenModuleSettings);
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, "caen_detector",
@@ -159,7 +156,9 @@ void CaenBase::processingThread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
+  CaenInstrument Caen(Counters, EFUSettings);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
+
 
   Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug",
                            KafkaCfg.CfgParms);
