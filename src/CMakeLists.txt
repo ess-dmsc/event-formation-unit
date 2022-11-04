@@ -49,6 +49,7 @@ get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.jso
 get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 get_filename_component(TTLMON_CFG_FILE "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamon.json" ABSOLUTE)
 get_filename_component(NMX_CFG_FILE "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUTE)
+get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/caen/configs/STFCTestII.json" ABSOLUTE)
 
 
 add_custom_target(copycfgs
@@ -58,6 +59,7 @@ add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E copy ${CSPEC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${TTLMON_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${NMX_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${LOKI_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
