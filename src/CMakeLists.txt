@@ -69,6 +69,7 @@ add_custom_target(runefu
     COMMAND miracles "-s" "1" "--nohwcheck" "--log_file" "deleteme_miracles.log"
     COMMAND dream "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
     COMMAND bifrost "-s" "2" "--nohwcheck"
+    COMMAND bifrost "-s" "0" "--nohwcheck"
     COMMAND freia "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "5"
     COMMAND cspec "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
