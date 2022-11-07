@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 #ifdef LOKI_GENERATOR
   Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
-  Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+  Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
 #ifdef TTLMON_GENERATOR

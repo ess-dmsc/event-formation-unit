@@ -77,7 +77,7 @@ TEST_F(CombinedParserTest, DataGen) {
     Settings.NumReadouts = Sections;
     Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
     gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
-    Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+    Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,

@@ -188,7 +188,7 @@ void LokiBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = Loki.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::Loki4Amp);
+                                                ESSReadout::Parser::LOKI);
       Counters.ReadoutStats = Loki.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {

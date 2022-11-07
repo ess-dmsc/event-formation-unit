@@ -38,7 +38,8 @@ struct Counters {
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingErrors;
-  // int64_t FENErrors;
+  int64_t FENErrors;
+  int64_t TubeErrors;
   // int64_t CalibrationErrors;
   // int64_t ReadoutsClampLow;
   // int64_t ReadoutsClampHigh;

@@ -64,13 +64,30 @@ TEST_F(BifrostInstrumentTest, CalcPixel) {
 
 TEST_F(BifrostInstrumentTest, InvalidRing) {
   bifrost->BifrostParser.Result.push_back(
-      {1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  //   *
+      {3, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
   bifrost->processReadouts();
   ASSERT_EQ(counters.RingErrors, 1);
 }
 
+TEST_F(BifrostInstrumentTest, InvalidFEN) {
+  bifrost->BifrostParser.Result.push_back(
+  //      *
+      {2, 1, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  bifrost->processReadouts();
+  ASSERT_EQ(counters.FENErrors, 1);
+}
+
+TEST_F(BifrostInstrumentTest, InvalidTube) {
+  bifrost->BifrostParser.Result.push_back(
+  //                      *
+      {2, 0, 20, 0, 0, 0, 15, 0, 0, 0, 0, 0});
+  bifrost->processReadouts();
+  ASSERT_EQ(counters.TubeErrors, 1);
+}
+
 std::vector<uint8_t> InvalidTOF{
-    0x00, 0x00, 0x18, 0x00, // Data Header - Ring 4, FEN 0, 24 bytes
+    0x00, 0x00, 0x18, 0x00, // Data Header - Ring 0, FEN 0, 24 bytes
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x00, 0x00, 0x00, 0x00, // Time LO 0 tick
     0x04, 0x00, 0x00, 0x00, // Bifrost, Tube 0
