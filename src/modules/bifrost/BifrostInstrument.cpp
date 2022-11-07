@@ -26,8 +26,14 @@ BifrostInstrument::BifrostInstrument(struct Counters &counters,
   // BifrostConfiguration = Config(ModuleSettings.ConfigFile);
 
   if (not Settings.DumpFilePrefix.empty()) {
-    DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "bifrost_" +
+    if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+
+      DumpFile = ReadoutFile::create(
+                   boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
+    } else {
+      DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "bifrost_" +
                                    timeString());
+    }
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(BifrostConfiguration.MaxPulseTimeDiffNS);
