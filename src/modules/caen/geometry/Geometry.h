@@ -34,11 +34,14 @@ public:
     int64_t OutsideRegion{0};
     int64_t *RingErrors;
     int64_t *FENErrors;
+    int64_t *TubeErrors;
   } Stats;
 
   Calibration CaenCalibration;
   ESSGeometry *ESSGeom;
   std::uint16_t NPos{512}; ///< resolution of position
   uint8_t MaxRing{0};
+  uint8_t MaxFEN{0};
+  uint8_t MaxTube{0};
 };
 } // namespace Caen

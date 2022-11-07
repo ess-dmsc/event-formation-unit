@@ -20,6 +20,8 @@ BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
   ESSGeom = new ESSGeometry(900, 15, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
+  MaxFEN = CaenConfiguration.MaxFEN;
+  MaxTube = CaenConfiguration.MaxTube;
 }
 
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
@@ -29,6 +31,18 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   if (Data.RingId > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
     (*Stats.RingErrors)++;
+    return false;
+  }
+
+  if (Data.FENId > MaxFEN) {
+    XTRACE(DATA, WAR, "FEN %d is incompatible with config", Data.FENId);
+    (*Stats.FENErrors)++;
+    return false;
+  }
+
+  if (Data.TubeId > MaxTube) {
+    XTRACE(DATA, WAR, "Tube %d is incompatible with config", Data.TubeId);
+    (*Stats.TubeErrors)++;
     return false;
   }
   return true;

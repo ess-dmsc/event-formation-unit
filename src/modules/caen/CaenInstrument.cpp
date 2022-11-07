@@ -78,6 +78,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   Geom->CaenCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
   Geom->Stats.FENErrors = &counters.FENErrors;
   Geom->Stats.RingErrors = &counters.RingErrors;
+  Geom->Stats.TubeErrors = &counters.TubeErrors;
 }
 
 CaenInstrument::~CaenInstrument() {}

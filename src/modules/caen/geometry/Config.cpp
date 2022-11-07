@@ -70,6 +70,22 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
     XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
 
+    try {
+      MaxFEN = root["MaxFEN"].get<unsigned int>();
+    } catch (...) {
+      // Use default value
+    }
+    LOG(INIT, Sev::Info, "MaxFEN: {}", MaxFEN);
+    XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
+
+    try {
+      MaxTube = root["MaxTube"].get<unsigned int>();
+    } catch (...) {
+      // Use default value
+    }
+    LOG(INIT, Sev::Info, "MaxTube: {}", MaxTube);
+    XTRACE(INIT, DEB, "MaxTube: %u", MaxTube);
+
     if (InstrumentName == "LoKI") {
       auto PanelConfig = root["PanelConfig"];
       for (auto &Mapping : PanelConfig) {
