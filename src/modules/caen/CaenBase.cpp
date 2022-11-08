@@ -148,6 +148,11 @@ void CaenBase::inputThread() {
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
 
+  if (EFUSettings.KafkaTopic == "") {
+    XTRACE(INIT, ALW, "Setting default Kafka topic to loki_detector");
+    EFUSettings.KafkaTopic = "loki_detector";
+  }
+
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                          KafkaCfg.CfgParms);
