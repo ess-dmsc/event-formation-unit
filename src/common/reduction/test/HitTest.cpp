@@ -44,6 +44,8 @@ TEST_F(HitTest, CompoundMapping) {
 
 TEST_F(HitTest, CreateFile) {
   HitFile::create("hit_file_test");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test.h5"));
+  HitFile::create("hit_file_test", 10000);
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
 

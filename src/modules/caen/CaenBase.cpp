@@ -195,7 +195,7 @@ void CaenBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::Loki4Amp);
+                                                ESSReadout::Parser::LOKI);
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {

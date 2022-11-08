@@ -20,7 +20,7 @@ using namespace std::literals::string_literals;
 EFUArgs::EFUArgs() {
   // clang-format off
   CLIParser.set_help_flag(); // Removes the default help flag
-  CLIParser.allow_extras(true);
+  //CLIParser.allow_extras(false);
   CLIParser.get_formatter()->column_width(30);
 
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")
@@ -177,27 +177,23 @@ void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
 
 void EFUArgs::printVersion() { std::cout << efu_version() << '\n'; }
 
-EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
+EFUArgs::Status EFUArgs::parseArgs(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    // Do nothing, as we only care about the version flag in this pass.
+    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}", e.get_exit_code());
+    return Status::EXIT;
   }
+
+  if ((*HelpOption)) {
+    printHelp();
+    return Status::EXIT;
+  }
+
   if (PrintVersion) {
     printVersion();
     return Status::EXIT;
   }
 
-  try {
-    CLIParser.parse(argc, argv);
-  } catch (const CLI::ParseError &e) {
-    CLIParser.exit(e);
-  }
-  if ((*HelpOption)) {
-    printHelp();
-    return Status::EXIT;
-  }
-  CLIParser.clear();
-  CLIParser.allow_extras(false);
   return Status::CONTINUE;
 }

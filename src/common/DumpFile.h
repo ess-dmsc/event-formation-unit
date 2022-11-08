@@ -112,7 +112,11 @@ DumpFile<T>::open(const boost::filesystem::path &FilePath) {
 template <typename T>
 boost::filesystem::path DumpFile<T>::get_full_path() const {
   auto Ret = PathBase;
-  Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
+  if (MaxSize != 0) {
+    Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
+  } else {
+    Ret += ".h5";
+  }
   return Ret;
 }
 

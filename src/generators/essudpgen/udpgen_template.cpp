@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 #ifdef LOKI_GENERATOR
   Caen::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-  Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+  Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
 #ifdef TTLMON_GENERATOR

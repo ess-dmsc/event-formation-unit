@@ -66,8 +66,10 @@ TEST_F(MGHitTest, CompoundMapping) {
 }
 
 TEST_F(MGHitTest, CreateFile) {
-  ReadoutFile::create("hit_file_test");
+  ReadoutFile::create("hit_file_test", 10000);
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
+  ReadoutFile::create("hit_file_test_ii");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_ii.h5"));
 }
 
 int main(int argc, char **argv) {

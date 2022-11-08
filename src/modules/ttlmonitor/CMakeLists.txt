@@ -24,7 +24,7 @@ set(ttlmonitor_common_src
 set(ttlmonitor_INC ${ttlmonitor_common_inc})
 set(ttlmonitor_SRC
   ${ttlmonitor_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(ttlmonitor_LIB efu_essreadout)
 create_executable(ttlmonitor)

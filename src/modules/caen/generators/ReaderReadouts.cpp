@@ -39,7 +39,7 @@ size_t ReaderReadouts::read(char *buf) {
       PacketHdr->Padding0 = 0x00;
       PacketHdr->Version = 0x00;
       PacketHdr->CookieAndType =
-          (ESSReadout::Parser::DetectorType::Loki4Amp << 24) + 0x00535345;
+          (ESSReadout::Parser::DetectorType::LOKI << 24) + 0x00535345;
       PacketHdr->TotalLength = ESSHeaderSize;
       PacketHdr->OutputQueue = 0x00;
       PacketHdr->TimeSource = 0x00; /// \todo hardcoded

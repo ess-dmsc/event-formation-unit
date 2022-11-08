@@ -23,7 +23,7 @@ set(freia_common_src
 set(freia_INC ${freia_common_inc})
 set(freia_SRC
   ${freia_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
