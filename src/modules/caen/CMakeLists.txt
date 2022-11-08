@@ -32,7 +32,7 @@ set(caen_common_src
 set(caen_INC ${caen_common_inc})
 set(caen_SRC
   ${caen_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(caen_LIB efu_reduction efu_essreadout)
 create_executable(caen)
