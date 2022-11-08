@@ -34,7 +34,7 @@ set(dream_common_src
 set(dream_INC ${dream_common_inc})
 set(dream_SRC
   ${dream_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp)
+  main.cpp)
 set(dream_LIB efu_essreadout)
 create_executable(dream)
 

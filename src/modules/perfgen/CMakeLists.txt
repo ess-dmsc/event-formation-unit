@@ -9,7 +9,7 @@ set(perfgen_INC
 )
 set(perfgen_SRC
   PerfGenBase.cpp
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
 )
 create_executable(perfgen)
 target_compile_definitions(perfgen PUBLIC EFU_PERFGEN)

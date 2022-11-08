@@ -27,7 +27,7 @@ TEST_F(EFUArgsTest, ExitOnHelp) {
   };
   int myargc = 2;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseFirstPass(myargc, (char **)myargv),
+  EXPECT_EQ(Args.parseArgs(myargc, (char **)myargv),
             EFUArgs::Status::EXIT);
 }
 
@@ -49,7 +49,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   // clang-format off
   const char *myargv[] = {"progname",
                         "-b", "mybroker",
-                        "-c" , "99",
                         "-i", "1.2.3.4",
                         "-p", "9876",
                         "-g", "4.3.2.1",
@@ -58,9 +57,9 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-a", "10.0.0.1",
                         "-m", "8989" };
   // clang-format on
-  int myargc = 19;
+  int myargc = 17;
   EFUArgs efu_args;
-  auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
+  auto ret = efu_args.parseArgs(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
   auto settings = efu_args.getBaseSettings();
   auto glsettings = efu_args.getGraylogSettings();
@@ -80,7 +79,7 @@ TEST_F(EFUArgsTest, HelpText) {
   const char *myargv[] = {"progname", "-h"};
 
   EFUArgs efu_args;
-  auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
+  auto ret = efu_args.parseArgs(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::EXIT); // has detector
 
   ASSERT_EQ(myargc, 2);

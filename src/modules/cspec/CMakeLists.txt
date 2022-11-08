@@ -27,7 +27,7 @@ set(cspec_INC
   ${cspec_common_inc}
   )
 set(cspec_SRC
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   ${cspec_common_src}
   )
 set(cspec_LIB
