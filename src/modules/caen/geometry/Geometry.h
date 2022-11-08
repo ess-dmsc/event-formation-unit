@@ -40,8 +40,8 @@ public:
   Calibration CaenCalibration;
   ESSGeometry *ESSGeom;
   std::uint16_t NPos{512}; ///< resolution of position
-  uint8_t MaxRing{0};
+  uint8_t MaxRing{2};
   uint8_t MaxFEN{0};
-  uint8_t MaxTube{0};
+  uint8_t MaxTube{14};
 };
 } // namespace Caen

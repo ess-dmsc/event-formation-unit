@@ -148,7 +148,7 @@ void CaenBase::inputThread() {
 void CaenBase::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
-  Producer EventProducer(EFUSettings.KafkaBroker, "caen_detector",
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                          KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
