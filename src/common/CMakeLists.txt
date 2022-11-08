@@ -20,6 +20,7 @@ set(efu_common_SRC
   Statistics.cpp
   StatPublisher.cpp
   ${ESS_SOURCE_DIR}/efu/ExitHandler.cpp
+  ${ESS_SOURCE_DIR}/efu/Graylog.cpp
   ${ESS_SOURCE_DIR}/efu/HwCheck.cpp
   ${ESS_SOURCE_DIR}/efu/Launcher.cpp
   ${ESS_SOURCE_DIR}/efu/Parser.cpp
@@ -56,6 +57,7 @@ set(efu_common_INC
   Statistics.h
   StatPublisher.h
   ${ESS_SOURCE_DIR}/efu/ExitHandler.h
+  ${ESS_SOURCE_DIR}/efu/Graylog.h
   ${ESS_SOURCE_DIR}/efu/HwCheck.h
   ${ESS_SOURCE_DIR}/efu/Launcher.h
   ${ESS_SOURCE_DIR}/efu/Parser.h

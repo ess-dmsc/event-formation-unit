@@ -20,6 +20,7 @@
 #include <efu/Launcher.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <efu/Graylog.h>
 #include <iostream>
 
 #ifdef EFU_BIFROST
@@ -55,77 +56,22 @@
 
 static constexpr uint64_t MicrosecondsPerSecond{1000000};
 
-std::string ConsoleFormatter(const Log::LogMessage &Msg) {
-  static const std::vector<std::string> SevToString{
-      "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
-  std::string FileName;
-  std::int64_t LineNr = -1;
-  for (auto &CField : Msg.AdditionalFields) {
-    if (CField.first == "file") {
-      FileName = CField.second.strVal;
-    } else if (CField.first == "line") {
-      LineNr = CField.second.intVal;
-    }
-  }
-  return fmt::format("{:5}{:21}{:5} - {}",
-                     SevToString.at(static_cast<size_t>(Msg.SeverityLevel)),
-                     FileName, LineNr, Msg.MessageString);
-}
 
-std::string FileFormatter(const Log::LogMessage &Msg) {
-  std::time_t cTime = std::chrono::system_clock::to_time_t(Msg.Timestamp);
-  char timeBuffer[50];
-  size_t bytes = std::strftime(timeBuffer, 50, "%F %T", std::localtime(&cTime));
-  static const std::vector<std::string> SevToString{
-      "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
-  std::string FileName;
-  std::int64_t LineNr = -1;
-  for (auto &CField : Msg.AdditionalFields) {
-    if (CField.first == "file") {
-      FileName = CField.second.strVal;
-    } else if (CField.first == "line") {
-      LineNr = CField.second.intVal;
-    }
-  }
-  return fmt::format("{} {:5}{:21}:{:<5} - {}", std::string(timeBuffer, bytes),
-                     SevToString.at(static_cast<size_t>(Msg.SeverityLevel)),
-                     FileName, LineNr, Msg.MessageString);
-}
-
-void EmptyGraylogMessageQueue() {
-  std::vector<Log::LogHandler_P> GraylogHandlers(Log::GetHandlers());
-  if (not GraylogHandlers.empty()) {
-    int WaitLoops = 25;
-    auto SleepTime = std::chrono::milliseconds(20);
-    bool ContinueLoop = true;
-    for (int i = 0; i < WaitLoops and ContinueLoop; i++) {
-      std::this_thread::sleep_for(SleepTime);
-      ContinueLoop = false;
-      for (auto &Ptr : GraylogHandlers) {
-        if (not Ptr->emptyQueue()) {
-          ContinueLoop = true;
-        }
-      }
-    }
-  }
-  Log::RemoveAllHandlers();
-}
-
-/** Load detector, launch pipeline threads, then sleep until timeout or break */
+// Launch pipeline threads, then sleep until timeout or break
 int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
   std::shared_ptr<Detector> detector;
   std::string DetectorName;
-  GraylogSettings GLConfig;
+  Graylog graylog;
   HwCheck hwcheck;
   Timer RunTimer;
 
-  EFUArgs efu_args;
-  if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
+  EFUArgs Args;
+  if (EFUArgs::Status::EXIT == Args.parseFirstPass(argc, argv)) {
     return 0;
   }
-  efu_args.printSettings();
-  DetectorSettings = efu_args.getBaseSettings();
+  Args.printSettings();
+  DetectorSettings = Args.getBaseSettings();
 
   #ifdef EFU_BIFROST
   DetectorName="bifrost";
@@ -156,33 +102,13 @@ int main(int argc, char *argv[]) {
   #endif
 
 
-
-  // Set-up logging before we start doing important stuff
-  // change process to "efu" and set process_name to Instrument
-  std::string ProcessKey{"process"};
-  std::string ProcessValue{"efu"};
-  std::string ProcessNameKey{"process_name"};
-  Log::RemoveAllHandlers();
-  Log::Logger::Inst().addField(ProcessKey, ProcessValue);
-  Log::Logger::Inst().addField(ProcessNameKey, DetectorName);
-
-
-  auto CI = new Log::ConsoleInterface();
-  CI->setMessageStringCreatorFunction(ConsoleFormatter);
-  Log::AddLogHandler(CI);
-
-  Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
-  if (!efu_args.getLogFileName().empty()) {
-    auto FI = new Log::FileInterface(efu_args.getLogFileName());
-    FI->setMessageStringCreatorFunction(FileFormatter);
-    Log::AddLogHandler(FI);
-  }
-
-  GLConfig = efu_args.getGraylogSettings();
-  if (not GLConfig.address.empty()) {
-    Log::AddLogHandler(
-        new Log::GraylogInterface(GLConfig.address, GLConfig.port));
-  }
+  graylog.AddLoghandlerForNetwork(
+    DetectorName,
+    Args.getLogFileName(),
+    Args.getLogLevel(),
+    Args.getGraylogSettings().address,
+    Args.getGraylogSettings().port
+  );
 
 
   DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
@@ -240,16 +166,12 @@ int main(int argc, char *argv[]) {
       LOG(MAIN, Sev::Error,
           "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
       LOG(MAIN, Sev::Error, "exiting...");
-      detector.reset(); // De-allocate detector before we unload detector module
-      EmptyGraylogMessageQueue();
       return -1;
     }
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
     LOG(MAIN, Sev::Info, "Event Formation Unit Exit (Immediate)");
-    detector.reset(); // De-allocate detector before we unload detector module
-    EmptyGraylogMessageQueue();
     return 0;
   }
 
@@ -286,7 +208,7 @@ int main(int argc, char *argv[]) {
       break;
     }
 
-    if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
+    if (livestats.timeus() >= MicrosecondsPerSecond) {
       statUpTime = RunTimer.timeus() / 1000000;
       metrics.publish(detector, mainStats);
       livestats.reset();
@@ -300,8 +222,5 @@ int main(int argc, char *argv[]) {
     usleep(500);
   }
 
-  detector.reset();
-
-  EmptyGraylogMessageQueue();
   return 0;
 }
