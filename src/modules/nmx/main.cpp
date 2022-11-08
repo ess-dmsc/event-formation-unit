@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <modules/nmx/NmxBase.h>
+#include <modules/nmx/NMXBase.h>
 
 int main(int argc, char * argv[]) {
   MainProg Main("nmx", argc, argv);
