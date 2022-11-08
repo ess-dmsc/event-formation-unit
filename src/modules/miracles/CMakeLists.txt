@@ -28,7 +28,7 @@ set(miracles_common_INC
 set(miracles_INC ${miracles_common_INC})
 set(miracles_SRC
   ${miracles_common_SRC}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(miracles_LIB efu_essreadout)
 create_executable(miracles)

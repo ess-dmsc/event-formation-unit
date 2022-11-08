@@ -26,7 +26,7 @@ set(loki_common_src
 set(loki_INC ${loki_common_inc})
 set(loki_SRC
   ${loki_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(loki_LIB efu_essreadout)
 create_executable(loki)

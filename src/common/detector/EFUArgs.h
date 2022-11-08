@@ -23,9 +23,7 @@ class EFUArgs {
 public:
   enum class Status { EXIT, CONTINUE };
   EFUArgs();
-  Status parseFirstPass(const int argc, char *argv[]);
-
-  Status parseSecondPass(const int argc, char *argv[]);
+  Status parseArgs(const int argc, char *argv[]);
 
   void printHelp();
 

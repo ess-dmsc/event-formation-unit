@@ -1,149 +1,42 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-///
-/// \brief EFU main application
-///
+/// \brief Wrapper for EFU main application
 //===----------------------------------------------------------------------===//
 
-#include <boost/filesystem.hpp>
+#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <common/Version.h>
-#include <common/debug/Log.h>
-#include <common/detector/EFUArgs.h>
-#include <common/system/gccintel.h>
-#include <common/time/Timer.h>
-#include <cstdlib>
 #include <efu/ExitHandler.h>
-#include <efu/HwCheck.h>
 #include <efu/Launcher.h>
+#include <efu/MainProg.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <efu/Graylog.h>
-#include <iostream>
-
-#ifdef EFU_BIFROST
-#include <modules/bifrost/BifrostBase.h>
-#endif
-#ifdef EFU_CSPEC
-#include <modules/cspec/CSPECBase.h>
-#endif
-#ifdef EFU_DREAM
-#include <modules/dream/DreamBase.h>
-#endif
-#ifdef EFU_FREIA
-#include <modules/freia/FreiaBase.h>
-#endif
-#ifdef EFU_LOKI
-#include <modules/loki/LokiBase.h>
-#endif
-#ifdef EFU_MIRACLES
-#include <modules/miracles/MiraclesBase.h>
-#endif
-#ifdef EFU_NMX
-#include <modules/nmx/NMXBase.h>
-#endif
-#ifdef EFU_PERFGEN
-#include <modules/perfgen/PerfGenBase.h>
-#endif
-#ifdef EFU_TTLMON
-#include <modules/ttlmonitor/TTLMonitorBase.h>
-#endif
-
-#include <unistd.h> // sleep()
-#include <vector>
-
-static constexpr uint64_t MicrosecondsPerSecond{1000000};
+#include <cstdio>
 
 
-// Launch pipeline threads, then sleep until timeout or break
-int main(int argc, char *argv[]) {
-  BaseSettings DetectorSettings;
-  std::shared_ptr<Detector> detector;
-  std::string DetectorName;
-  Graylog graylog;
-  HwCheck hwcheck;
-  Timer RunTimer;
+MainProg::MainProg(std::string instrument, int argc, char * argv[])
+    : DetectorName(instrument) {
 
-  EFUArgs Args;
-  if (EFUArgs::Status::EXIT == Args.parseFirstPass(argc, argv)) {
-    return 0;
+  if (Args.parseArgs(argc, argv) == EFUArgs::Status::EXIT) {
+    exit(0);
   }
   Args.printSettings();
   DetectorSettings = Args.getBaseSettings();
 
-  #ifdef EFU_BIFROST
-  DetectorName="bifrost";
-  #endif
-  #ifdef EFU_CSPEC
-  DetectorName="cspec";
-  #endif
-  #ifdef EFU_DREAM
-  DetectorName="dream";
-  #endif
-  #ifdef EFU_FREIA
-  DetectorName="freia";
-  #endif
-  #ifdef EFU_LOKI
-  DetectorName="loki";
-  #endif
-  #ifdef EFU_MIRACLES
-  DetectorName="miracles";
-  #endif
-  #ifdef EFU_NMX
-  DetectorName="nmx";
-  #endif
-  #ifdef EFU_PERFGEN
-  DetectorName="perfgen";
-  #endif
-  #ifdef EFU_TTLMON
-  DetectorName="ttlmonitor";
-  #endif
-
-
   graylog.AddLoghandlerForNetwork(
     DetectorName,
-    Args.getLogFileName(),
-    Args.getLogLevel(),
-    Args.getGraylogSettings().address,
-    Args.getGraylogSettings().port
+    Args.getLogFileName(), Args.getLogLevel(),
+    Args.getGraylogSettings().address, Args.getGraylogSettings().port
   );
 
-
   DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
+}
 
-  auto Base = new
-  #ifdef EFU_BIFROST
-    Bifrost::BifrostBase(DetectorSettings);
-  #endif
-  #ifdef EFU_CSPEC
-    Cspec::CspecBase(DetectorSettings);
-  #endif
-  #ifdef EFU_DREAM
-    Dream::DreamBase(DetectorSettings);
-  #endif
-  #ifdef EFU_FREIA
-    Freia::FreiaBase(DetectorSettings);
-  #endif
-  #ifdef EFU_LOKI
-    Loki::LokiBase(DetectorSettings);
-  #endif
-  #ifdef EFU_MIRACLES
-    Miracles::MiraclesBase(DetectorSettings);
-  #endif
-  #ifdef EFU_NMX
-    Nmx::NmxBase(DetectorSettings);
-  #endif
-  #ifdef EFU_PERFGEN
-    PerfGen::PerfGenBase(DetectorSettings);
-  #endif
-  #ifdef EFU_TTLMON
-    TTLMonitor::TTLMonitorBase(DetectorSettings);
-  #endif
 
-  detector = std::shared_ptr<Detector>(Base);
-
+int MainProg::run(Detector * inst) {
+  detector = std::shared_ptr<Detector>(inst);
   int keep_running = 1;
 
   ExitHandler::InitExitHandler();

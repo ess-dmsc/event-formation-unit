@@ -22,7 +22,7 @@ set(bifrost_common_src
   )
 set(bifrost_INC ${bifrost_common_inc})
 set(bifrost_SRC
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   ${bifrost_common_src}
   )
 set(bifrost_LIB efu_essreadout)

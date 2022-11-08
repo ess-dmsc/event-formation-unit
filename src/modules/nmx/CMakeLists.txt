@@ -24,7 +24,7 @@ set(nmx_common_src
 set(nmx_INC ${nmx_common_inc})
 set(nmx_SRC
   ${nmx_common_src}
-  ${ESS_SOURCE_DIR}/efu/main.cpp
+  main.cpp
   )
 set(nmx_LIB efu_reduction efu_essreadout)
 create_executable(nmx)
