@@ -18,6 +18,7 @@
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <common/time/TSCTimer.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -155,7 +156,7 @@ void CaenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
+  Serializer = new EV42Serializer(KafkaBufferSize, "caen", Produce);
   CaenInstrument Caen(Counters, EFUSettings);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
 
@@ -167,7 +168,7 @@ void CaenBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
-  SerializerII = new EV44Serializer(KafkaBufferSize, "caen", ProduceII);
+  SerializerII = new EV42Serializer(KafkaBufferSize, "caen", ProduceII);
   Caen.setSerializerII(
       SerializerII); // would rather have this in CaenInstrument
 
@@ -221,7 +222,7 @@ void CaenBase::processingThread() {
       usleep(10);
     }
 
-    if (Serializer->ProduceTimer.timeout()) {
+    if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {Counters.RxPackets, Counters.Events, Counters.TxBytes});

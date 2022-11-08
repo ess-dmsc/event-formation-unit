@@ -10,7 +10,7 @@
 
 #include <caen/Counters.h>
 #include <common/detector/Detector.h>
-#include <common/kafka/EV44Serializer.h>
+#include <common/kafka/EV42Serializer.h>
 
 namespace Caen {
 
@@ -24,8 +24,8 @@ public:
 
 protected:
   struct Counters Counters;
-  EV44Serializer *Serializer;
-  EV44Serializer *SerializerII;
+  EV42Serializer *Serializer;
+  EV42Serializer *SerializerII;
 };
 
 } // namespace Caen
