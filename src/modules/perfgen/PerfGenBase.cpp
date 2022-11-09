@@ -68,7 +68,7 @@ void PerfGenBase::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -101,8 +101,7 @@ void PerfGenBase::processingThread() {
       mystats.events_udder++;
       TimeOfFlight++;
     }
-    //Serializer.checkAndSetPulseTime(EfuTime);
-
+    // Serializer.checkAndSetPulseTime(EfuTime);
 
     usleep(EFUSettings.TestImageUSleep);
 

@@ -73,9 +73,11 @@ public:
   uint16_t coord_start() const;
   /// \returns highest coordinate, undefined in case of empty cluster
   uint16_t coord_end() const;
-  /// \returns earliest coordinate added to cluster, undefined in case of empty cluster
+  /// \returns earliest coordinate added to cluster, undefined in case of empty
+  /// cluster
   uint16_t coord_earliest() const;
-  /// \returns latest coordinate added to cluster, undefined in case of empty cluster
+  /// \returns latest coordinate added to cluster, undefined in case of empty
+  /// cluster
   uint16_t coord_latest() const;
   /// \returns coordinate span, 0 in case of empty cluster
   uint16_t coord_span() const;

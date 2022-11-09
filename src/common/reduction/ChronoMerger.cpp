@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
-#include <limits>
 #include <common/reduction/ChronoMerger.h>
+#include <limits>
 
 #include <iosfwd>
 

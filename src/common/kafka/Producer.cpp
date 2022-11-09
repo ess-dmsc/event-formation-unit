@@ -49,7 +49,7 @@ void Producer::event_cb(RdKafka::Event &event) {
 
 ///
 Producer::Producer(std::string Broker, std::string Topic,
-                   std::vector<std::pair<std::string, std::string>> & Configs)
+                   std::vector<std::pair<std::string, std::string>> &Configs)
     : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
@@ -67,7 +67,7 @@ Producer::Producer(std::string Broker, std::string Topic,
 
   setConfig("metadata.broker.list", Broker); // can be overwritten
 
-  for (auto & Config : Configs) {
+  for (auto &Config : Configs) {
     setConfig(Config.first, Config.second);
   }
 

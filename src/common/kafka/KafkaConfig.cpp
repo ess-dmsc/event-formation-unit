@@ -6,9 +6,9 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/KafkaConfig.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
 #include <iostream>
 
 // #undef TRC_LEVEL
@@ -26,10 +26,10 @@ KafkaConfig::KafkaConfig(std::string KafkaConfigFile) {
   try {
     nlohmann::json KafkaParms = root["KafkaParms"];
 
-    for (const auto & Parm : KafkaParms) {
+    for (const auto &Parm : KafkaParms) {
       std::map<std::string, std::string> MyMap = Parm;
       for (auto it = MyMap.begin(); it != MyMap.end(); it++) {
-        std::pair<std::string, std::string> CfgPair {it->first, it->second};
+        std::pair<std::string, std::string> CfgPair{it->first, it->second};
         CfgParms.push_back(CfgPair);
       }
     }

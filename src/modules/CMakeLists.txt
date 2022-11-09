@@ -5,12 +5,10 @@
 
 include_directories(.)
 
-add_subdirectory(miracles)
-add_subdirectory(bifrost)
+add_subdirectory(caen)
 add_subdirectory(cspec)
 add_subdirectory(dream)
 add_subdirectory(freia)
-add_subdirectory(loki)
 add_subdirectory(perfgen)
 add_subdirectory(ttlmonitor)
 add_subdirectory(nmx)

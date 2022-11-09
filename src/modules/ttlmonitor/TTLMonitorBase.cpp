@@ -163,7 +163,7 @@ void TTLMonitorBase::processing_thread() {
   // Event producer
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-    KafkaCfg.CfgParms);
+                     KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
@@ -226,17 +226,15 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
-
     RuntimeStatusMask = RtStat.getRuntimeStatusMask(
         {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-    for (auto &serializer : Serializers){
+    for (auto &serializer : Serializers) {
       if (serializer.ProduceTimer.timeout()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer.produce();
       }
     }
     Counters.KafkaStats = eventprod.stats;
-
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

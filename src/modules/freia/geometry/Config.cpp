@@ -50,8 +50,9 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset = (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
-                         NumWiresPerCassette;
+        Hybrid.YOffset =
+            (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
+            NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }

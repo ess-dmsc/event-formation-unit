@@ -57,15 +57,16 @@ void Nmx::TrackReadoutGenerator::generateData() {
       Panel = rand() % 4;
       FinalXLocal = rand() % 640;
       FinalYLocal = 639 - (abs(1.2 * (FinalXLocal - 128)));
-      XDiff = (((float)rand()/(float)(RAND_MAX)) * 2)-1;
-      YDiff = (((float)rand()/(float)(RAND_MAX)) * 2)-1;
-       XTRACE(DATA, DEB,
-              "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u",
-              Panel, FinalXLocal, FinalYLocal);
+      XDiff = (((float)rand() / (float)(RAND_MAX)) * 2) - 1;
+      YDiff = (((float)rand() / (float)(RAND_MAX)) * 2) - 1;
+      XTRACE(DATA, DEB,
+             "Generating new coordinate, Panel: %u, XLocal: %u, YLocal: %u",
+             Panel, FinalXLocal, FinalYLocal);
     }
-      
-    if ((Readout % 2) == 0) { 
-      XLocal = FinalXLocal + XDiff * ((ReadoutsPerEvent - (Readout % ReadoutsPerEvent))/2);
+
+    if ((Readout % 2) == 0) {
+      XLocal = FinalXLocal +
+               XDiff * ((ReadoutsPerEvent - (Readout % ReadoutsPerEvent)) / 2);
       if (Panel <= 1) {
         Channel = 63 - XLocal % 64;
         VMM = 9 - XLocal / 64;
@@ -74,12 +75,14 @@ void Nmx::TrackReadoutGenerator::generateData() {
         VMM = XLocal / 64;
       }
       FEN = XPanelToFEN[Panel];
-     
-      XTRACE(DATA, DEB,
-              "Generating readout for X Coord: %u, Channel: %u, VMM: %u, FEN: %u", XLocal, Channel,
-              VMM, FEN);
+
+      XTRACE(
+          DATA, DEB,
+          "Generating readout for X Coord: %u, Channel: %u, VMM: %u, FEN: %u",
+          XLocal, Channel, VMM, FEN);
     } else {
-      YLocal = FinalYLocal + YDiff * ((ReadoutsPerEvent - (Readout % ReadoutsPerEvent))/2);
+      YLocal = FinalYLocal +
+               YDiff * ((ReadoutsPerEvent - (Readout % ReadoutsPerEvent)) / 2);
       if ((Panel % 2) != 0) {
         Channel = 63 - YLocal % 64;
         VMM = 9 - YLocal / 64;
@@ -88,9 +91,10 @@ void Nmx::TrackReadoutGenerator::generateData() {
         VMM = YLocal / 64;
       }
       FEN = YPanelToFEN[Panel];
-      XTRACE(DATA, DEB,
-             "Generating readout for Y Coord: %u, Channel: %u, VMM: %u, FEN: %u",YLocal, Channel,
-             VMM, FEN);
+      XTRACE(
+          DATA, DEB,
+          "Generating readout for Y Coord: %u, Channel: %u, VMM: %u, FEN: %u",
+          YLocal, Channel, VMM, FEN);
     }
 
     ReadoutData->VMM = VMM;

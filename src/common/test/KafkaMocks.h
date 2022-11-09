@@ -26,8 +26,8 @@ public:
   MAKE_MOCK0(sasl_background_callbacks_enable, RdKafka::Error *(), override);
   MAKE_MOCK0(get_sasl_queue, RdKafka::Queue *(), override);
   MAKE_MOCK0(get_background_queue, RdKafka::Queue *(), override);
-  void * mem_malloc(size_t size) override {return malloc(size);}
-  void mem_free(void * ptr) override {return free(ptr);}
+  void *mem_malloc(size_t size) override { return malloc(size); }
+  void mem_free(void *ptr) override { return free(ptr); }
   // end librdkafka 1.9.2
   MAKE_MOCK1(poll, int(int), override);
   MAKE_MOCK0(outq_len, int(), override);

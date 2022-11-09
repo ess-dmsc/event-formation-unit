@@ -84,11 +84,10 @@ void Cluster::insert(const Hit &e) {
 
   DebugSplitOptimizer();
 
-  if (e.time < time_start_){
+  if (e.time < time_start_) {
     time_start_ = e.time;
     coord_earliest_ = e.coordinate;
   }
-
 
   DebugSplitOptimizer();
 
@@ -174,7 +173,6 @@ uint16_t Cluster::coord_end() const { return coord_end_; }
 uint16_t Cluster::coord_earliest() const { return coord_earliest_; }
 
 uint16_t Cluster::coord_latest() const { return coord_latest_; }
-
 
 uint16_t Cluster::coord_span() const {
   if (hits.empty()) {
