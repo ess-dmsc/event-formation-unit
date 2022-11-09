@@ -52,6 +52,8 @@ struct BaseSettings {
   // ttlmonitor
   int           TTLMonitorReduceEvents{1};
   int           TTLMonitorNumberOfMonitors{1};
+  // legacy module support
+  bool          MultibladeAlignment{false};
 };
 // clang-format on
 

@@ -122,6 +122,11 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--ttlmonitor-reduce", EFUSettings.TTLMonitorReduceEvents,
           "use 1 out of N readouts")->group("TTLMonitor");
 
+  // EFU LEGACY MODULE
+  CLIParser.add_flag("--multiblade-alignment", EFUSettings.MultibladeAlignment,
+          "Enter alignment mode (2D)")
+          ->group("MBCAEN");
+
   // clang-format on
 }
 
