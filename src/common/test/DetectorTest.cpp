@@ -44,7 +44,7 @@ TEST_F(DetectorTest, StatAPI) {
   auto name = det->statname(1);
   ASSERT_EQ("", name);
 
-  auto detectorname = det->detectorname();
+  auto detectorname = det->EFUSettings.DetectorName;
   ASSERT_STREQ("no detector", detectorname);
 }
 

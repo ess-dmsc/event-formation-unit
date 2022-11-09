@@ -16,22 +16,22 @@
 #include <cstdio>
 
 
-MainProg::MainProg(std::string instrument, int argc, char * argv[])
-    : DetectorName(instrument) {
+MainProg::MainProg(std::string instrument, int argc, char * argv[]) {
 
   if (Args.parseArgs(argc, argv) == EFUArgs::Status::EXIT) {
     exit(0);
   }
   Args.printSettings();
   DetectorSettings = Args.getBaseSettings();
+  DetectorSettings.DetectorName = instrument;
 
   graylog.AddLoghandlerForNetwork(
-    DetectorName,
+    instrument,
     Args.getLogFileName(), Args.getLogLevel(),
     Args.getGraylogSettings().address, Args.getGraylogSettings().port
   );
 
-  DetectorSettings.GraphitePrefix = std::string("efu.") + DetectorName;
+  DetectorSettings.GraphitePrefix = std::string("efu.") + instrument;
 }
 
 
@@ -68,7 +68,7 @@ int MainProg::run(Detector * inst) {
     return 0;
   }
 
-  LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorName);
+  LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorSettings.DetectorName);
 
   Launcher launcher;
 

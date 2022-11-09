@@ -33,7 +33,7 @@ namespace Cspec {
 const char *classname = "CSPEC detector with ESS readout";
 
 CspecBase::CspecBase(BaseSettings const &settings)
-    : Detector("CSPEC", settings) {
+    : Detector(settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");

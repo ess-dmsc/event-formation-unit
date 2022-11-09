@@ -36,7 +36,7 @@ namespace PerfGen {
 const char *classname = "PerfGen Pixel Generator";
 
 PerfGenBase::PerfGenBase(BaseSettings const &settings)
-    : Detector("PerfGen", settings) {
+    : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 

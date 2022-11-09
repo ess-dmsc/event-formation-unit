@@ -32,7 +32,7 @@ namespace Multigrid {
 static constexpr int TscMHz{2900};
 
 MultigridBase::MultigridBase(BaseSettings const &Settings)
-    : Detector("CSPEC", Settings) {
+    : Detector(Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 

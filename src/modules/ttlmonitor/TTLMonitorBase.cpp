@@ -34,7 +34,7 @@ namespace TTLMonitor {
 const char *classname = "TTLMonitor detector with ESS readout";
 
 TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
-  : Detector("TTLMON", settings) {
+  : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 

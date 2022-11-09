@@ -29,16 +29,10 @@ set(caen_common_src
   readout/DataParser.cpp
   )
 
-set(caen_INC ${caen_common_inc})
-set(caen_SRC
+add_library(caen_common STATIC
   ${caen_common_src}
-  main.cpp
+  ${caen_common_inc}
   )
-set(caen_LIB efu_reduction efu_essreadout)
-create_executable(caen)
-
-add_dependencies(efu_reduction efu_essreadout)
-target_compile_definitions(caen PUBLIC EFU_CAEN)
 
 
 ##

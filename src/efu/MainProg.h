@@ -29,7 +29,6 @@ public:
   static constexpr uint64_t MicrosecondsPerSecond{1000000};
   BaseSettings DetectorSettings;
   std::shared_ptr<Detector> detector;
-  std::string DetectorName;
   Graylog graylog;
   HwCheck hwcheck;
   Timer RunTimer;

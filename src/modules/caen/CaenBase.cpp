@@ -30,7 +30,7 @@ namespace Caen {
 const char *classname = "Caen detector with ESS readout";
 
 CaenBase::CaenBase(BaseSettings const &settings)
-    : Detector("Caen", settings) {
+    : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
