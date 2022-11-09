@@ -66,7 +66,6 @@ add_custom_target(copycfgs
 add_custom_target(runefu
     COMMAND caen "-f" "../configs/STFCTestII.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND perfgen "-s" "1" "--nohwcheck"
-    COMMAND miracles "-s" "1" "--nohwcheck" "--log_file" "deleteme_miracles.log"
     COMMAND dream "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
     COMMAND freia "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "5"
     COMMAND cspec "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
