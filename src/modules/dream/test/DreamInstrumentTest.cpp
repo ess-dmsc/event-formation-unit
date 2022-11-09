@@ -65,6 +65,7 @@ TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
   Dream.ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow = 0;
   Dream.processReadouts();
 
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
   ASSERT_EQ(Dream.counters.ReadoutStats.ErrorTimeHigh, 1);
   ASSERT_EQ(Dream.counters.ErrorESSHeaders, 1);
 }
@@ -78,6 +79,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
   Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 0, 0, 0});
   ASSERT_EQ(Dream.counters.RingErrors, 0);
   Dream.processReadouts();
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
   ASSERT_EQ(Dream.counters.RingErrors, 1);
 }
 
@@ -90,7 +92,54 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
   Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 0, 0, 0});
   ASSERT_EQ(Dream.counters.FENErrors, 0);
   Dream.processReadouts();
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
   ASSERT_EQ(Dream.counters.FENErrors, 1);
+}
+
+TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
+  DreamInstrument Dream(counters, Settings);
+  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.Serializer = new EV42Serializer(115000, "dream");
+
+  // unconfigured ring,fen combination
+  Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 0, 0, 0});
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
+  Dream.processReadouts();
+  ASSERT_EQ(Dream.counters.ConfigErrors, 1);
+  ASSERT_EQ(Dream.counters.RingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENErrors, 0);
+}
+
+TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
+  DreamInstrument Dream(counters, Settings);
+  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.Serializer = new EV42Serializer(115000, "dream");
+
+  // geometry error (no sumo defined)
+  Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
+  Dream.processReadouts();
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
+  ASSERT_EQ(Dream.counters.RingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Dream.counters.GeometryErrors, 1);
+  ASSERT_EQ(Dream.counters.Events, 0);
+}
+
+TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
+  DreamInstrument Dream(counters, Settings);
+  Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
+  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.Serializer = new EV42Serializer(115000, "dream");
+
+  // finally an event
+  Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
+  ASSERT_EQ(Dream.counters.Events, 0);
+  Dream.processReadouts();
+  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
+  ASSERT_EQ(Dream.counters.RingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Dream.counters.GeometryErrors, 0);
+  ASSERT_EQ(Dream.counters.Events, 1);
 }
 
 int main(int argc, char **argv) {
