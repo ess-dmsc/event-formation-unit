@@ -73,5 +73,5 @@ add_custom_target(runefu
     COMMAND cspec "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
-    DEPENDS copycfgs efu dream caen freia cspec ttlmonitor nmx
+    DEPENDS copycfgs efu dream loki bifrost miracles freia cspec ttlmonitor nmx
     )
