@@ -15,7 +15,7 @@ auto InvalidCfgMissingDetectorField = R"(
 {
   "NotDetector" : "InvalidField",
 
-  "MaxPulseTimeNS" : 50000
+  "MaxPulseTimeDiffNS" : 50000
 }
 )"_json;
 
@@ -23,7 +23,7 @@ auto InvalidCfgWrongDetectorName = R"(
 {
   "Detector" : "Freia",
 
-  "MaxPulseTimeNS" : 50000
+  "MaxPulseTimeDiffNS" : 50000
 }
 )"_json;
 
@@ -31,7 +31,7 @@ auto InvalidRingConfParm = R"(
 {
   "Detector" : "DREAM",
 
-  "MaxPulseTimeNS" : 50000,
+  "MaxPulseTimeDiffNS" : 50000,
 
   "Config" : [
     { "Ring" : 255, "FEN" : 2, "Type" : "BwEndCap"}
@@ -43,7 +43,7 @@ auto InvalidFENConfParm = R"(
 {
   "Detector" : "DREAM",
 
-  "MaxPulseTimeNS" : 50000,
+  "MaxPulseTimeDiffNS" : 50000,
 
   "Config" : [
     { "Ring" : 4, "FEN" : 255, "Type" : "BwEndCap"}
@@ -55,7 +55,7 @@ auto InvalidTypeConfParm = R"(
 {
   "Detector" : "DREAM",
 
-  "MaxPulseTimeNS" : 50000,
+  "MaxPulseTimeDiffNS" : 50000,
 
   "Config" : [
     { "Ring" : 4, "FEN" : 2, "Type" : "BadType"}
@@ -67,7 +67,7 @@ auto DuplicateConfParm = R"(
 {
   "Detector" : "DREAM",
 
-  "MaxPulseTimeNS" : 50000,
+  "MaxPulseTimeDiffNS" : 50000,
 
   "Config" : [
     { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"},
@@ -82,7 +82,7 @@ auto ValidConfig = R"(
 {
   "Detector" : "DREAM",
 
-  "MaxPulseTimeNS" : 50000,
+  "MaxPulseTimeDiffNS" : 50000,
 
   "Config" : [
     { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
@@ -113,7 +113,7 @@ protected:
 };
 
 TEST_F(ConfigTest, Constructor) {
-  ASSERT_EQ(config.MaxPulseTimeNS, 5 * 71'428'571);
+  ASSERT_EQ(config.MaxPulseTimeDiffNS, 5 * 71'428'571);
 }
 
 TEST_F(ConfigTest, NoConfigFile) {
@@ -164,14 +164,14 @@ TEST_F(ConfigTest, ValidConfig) {
   config.apply();
 
   ASSERT_TRUE(config.RMConfig[4][2].Initialised);
-  ASSERT_EQ(config.MaxPulseTimeNS, 50000);
+  ASSERT_EQ(config.MaxPulseTimeDiffNS, 50000);
 }
 
 TEST_F(ConfigTest, ValidConfigDefaultPulseTime) {
   config.root = ValidConfigDefaultPulseTime;
-  config.MaxPulseTimeNS = 1;
+  config.MaxPulseTimeDiffNS = 1;
   config.apply();
-  ASSERT_EQ(config.MaxPulseTimeNS, 1);
+  ASSERT_EQ(config.MaxPulseTimeDiffNS, 1);
 }
 
 
