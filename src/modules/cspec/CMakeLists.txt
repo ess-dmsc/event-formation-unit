@@ -37,7 +37,6 @@ set(cspec_LIB
 create_executable(cspec)
 
 add_dependencies(cspec efu_reduction efu_essreadout)
-target_compile_definitions(cspec PUBLIC EFU_CSPEC)
 
 
 set(CSPECBaseTest_INC

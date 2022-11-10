@@ -39,7 +39,6 @@ set(dream_LIB efu_essreadout)
 create_executable(dream)
 
 add_dependencies(dream efu_essreadout)
-target_compile_definitions(dream PUBLIC EFU_DREAM)
 
 #=============================================================================
 # dream detector module test

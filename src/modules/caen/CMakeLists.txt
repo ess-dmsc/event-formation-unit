@@ -38,7 +38,6 @@ set(caen_LIB efu_reduction efu_essreadout)
 create_executable(caen)
 
 add_dependencies(efu_reduction efu_essreadout)
-target_compile_definitions(caen PUBLIC EFU_CAEN)
 
 
 ##
