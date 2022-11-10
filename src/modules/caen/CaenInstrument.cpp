@@ -39,7 +39,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   } else if (settings.DetectorName == "miracles") {
     Geom = new MiraclesGeometry(CaenConfiguration);
   } else {
-    XTRACE(INIT, ERR, "Invalid Detector Name");
+    XTRACE(INIT, ERR, "Invalid Detector Name %s", settings.DetectorName.c_str());
     throw std::runtime_error(fmt::format("Invalid Detector Name {}", settings.DetectorName));
   }
 

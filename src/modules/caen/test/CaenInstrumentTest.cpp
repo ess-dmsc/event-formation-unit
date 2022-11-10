@@ -16,7 +16,7 @@ using namespace Caen;
 std::string LokiConfigFile{"deleteme_loki_instr_config.json"};
 std::string LokiConfigStr = R"(
   {
-    "Detector": "LoKI",
+    "Detector": "loki",
 
     "StrawResolution" : 256,
 
@@ -30,7 +30,7 @@ std::string LokiConfigStr = R"(
 std::string BifrostConfigFile{"deleteme_bifrost_instr_config.json"};
 std::string BifrostConfigStr = R"(
   {
-    "Detector": "BIFROST",
+    "Detector": "bifrost",
     "MaxRing": 4,
     "StrawResolution": 300
   }
@@ -40,7 +40,7 @@ std::string BifrostConfigStr = R"(
 std::string Config512File{"deleteme_caen_instr_config_res_512.json"};
 std::string Config512Str = R"(
   {
-    "Detector": "LoKI",
+    "Detector": "loki",
 
     "StrawResolution" : 512,
 
@@ -78,7 +78,10 @@ protected:
   struct Counters counters;
   BaseSettings Settings;
 
-  void SetUp() override { Settings.ConfigFile = LokiConfigFile; }
+  void SetUp() override { 
+    Settings.DetectorName = "loki";
+    Settings.ConfigFile = LokiConfigFile; 
+  }
   void TearDown() override {}
 };
 
@@ -90,6 +93,7 @@ TEST_F(CaenInstrumentTest, LokiConstructor) {
 
 TEST_F(CaenInstrumentTest, BifrostConstructor) {
   Settings.ConfigFile = BifrostConfigFile;
+  Settings.DetectorName = "bifrost";
   CaenInstrument Caen(counters, Settings);
 }
 

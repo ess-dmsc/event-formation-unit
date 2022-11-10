@@ -1,7 +1,7 @@
 /** Copyright (C) 2019-2022 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <caen/geometry/PanelGeometry.h>
+#include <loki/geometry/PanelGeometry.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
 

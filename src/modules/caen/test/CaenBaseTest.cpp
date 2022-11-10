@@ -26,7 +26,7 @@
 // clang-format off
 std::string lokijson = R"(
 {
-  "Detector" : "LoKI",
+  "Detector" : "loki",
 
   "StrawResolution" : 512,
 

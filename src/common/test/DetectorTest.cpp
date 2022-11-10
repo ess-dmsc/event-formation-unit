@@ -9,7 +9,7 @@
 class TestDetector : public Detector {
 public:
   explicit TestDetector(BaseSettings settings)
-      : Detector("no detector", settings) {
+      : Detector(settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -33,6 +33,8 @@ protected:
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, StatAPI) {
+  settings.DetectorName = "no detector";
+  det = Factory.create(settings);
   int res = det->statsize();
   ASSERT_EQ(res, 0);
 
@@ -44,7 +46,7 @@ TEST_F(DetectorTest, StatAPI) {
   auto name = det->statname(1);
   ASSERT_EQ("", name);
 
-  auto detectorname = det->EFUSettings.DetectorName;
+  auto detectorname = det->EFUSettings.DetectorName.c_str();
   ASSERT_STREQ("no detector", detectorname);
 }
 

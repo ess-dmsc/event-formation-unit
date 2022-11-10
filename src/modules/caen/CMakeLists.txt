@@ -13,9 +13,9 @@ set(caen_common_inc
   geometry/Config.h
   geometry/Calibration.h
   geometry/Geometry.h
-  geometry/BifrostGeometry.h
-  geometry/LokiGeometry.h
-  geometry/MiraclesGeometry.h
+  ${ESS_SOURCE_DIR}/modules/bifrost/geometry/BifrostGeometry.h
+  ${ESS_SOURCE_DIR}/modules/loki/geometry/LokiGeometry.h
+  ${ESS_SOURCE_DIR}/modules/miracles/geometry/MiraclesGeometry.h
   readout/DataParser.h
   )
 set(caen_common_src
@@ -23,9 +23,9 @@ set(caen_common_src
   CaenInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
-  geometry/BifrostGeometry.cpp
-  geometry/LokiGeometry.cpp
-  geometry/MiraclesGeometry.cpp
+  ${ESS_SOURCE_DIR}/modules/bifrost/geometry/BifrostGeometry.cpp
+  ${ESS_SOURCE_DIR}/modules/loki/geometry/LokiGeometry.cpp
+  ${ESS_SOURCE_DIR}/modules/miracles/geometry/MiraclesGeometry.cpp
   readout/DataParser.cpp
   )
 

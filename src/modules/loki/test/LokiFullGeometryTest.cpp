@@ -9,7 +9,7 @@
 
 #include <LokiFullGeometryTestData.h>
 #include <algorithm>
-#include <caen/geometry/PanelGeometry.h>
+#include <loki/geometry/PanelGeometry.h>
 #include <common/testutils/TestBase.h>
 #include <cstdint>
 #include <logical_geometry/ESSGeometry.h>

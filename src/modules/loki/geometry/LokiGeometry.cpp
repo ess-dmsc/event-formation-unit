@@ -9,7 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <modules/caen/geometry/LokiGeometry.h>
+#include <modules/loki/geometry/LokiGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
