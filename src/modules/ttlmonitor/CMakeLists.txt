@@ -30,7 +30,6 @@ set(ttlmonitor_LIB efu_essreadout)
 create_executable(ttlmonitor)
 
 add_dependencies(ttlmonitor efu_essreadout)
-target_compile_definitions(ttlmonitor PUBLIC EFU_TTLMON)
 
 
 #

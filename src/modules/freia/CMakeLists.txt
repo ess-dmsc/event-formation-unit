@@ -29,7 +29,6 @@ set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
 
 add_dependencies(cspec efu_reduction efu_essreadout)
-target_compile_definitions(freia PUBLIC EFU_FREIA)
 
 
 #
