@@ -181,7 +181,8 @@ EFUArgs::Status EFUArgs::parseArgs(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}", e.get_exit_code());
+    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}",
+        e.get_exit_code());
     return Status::EXIT;
   }
 

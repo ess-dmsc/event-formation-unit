@@ -56,7 +56,6 @@ struct BaseSettings {
 };
 // clang-format on
 
-
 struct ThreadInfo {
   std::function<void(void)> func;
   std::string name;
@@ -68,8 +67,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings)
-      : EFUSettings(settings), Stats(){};
+  Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
 
   virtual ~Detector() = default;
 
@@ -117,7 +115,8 @@ protected:
 
   /// Shared between input_thread and processing_thread
   memory_sequential_consistent::CircularFifo<unsigned int,
-      EthernetBufferMaxEntries> InputFifo;
+                                             EthernetBufferMaxEntries>
+      InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
@@ -127,7 +126,8 @@ protected:
   // it is not critical that this is precise.
   const int TSC_MHZ = 2900;
 
-  void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
+  void AddThreadFunction(std::function<void(void)> &func,
+                         std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
 
@@ -141,7 +141,6 @@ protected:
   Statistics Stats;
   uint32_t RuntimeStatusMask{0};
 };
-
 
 /// \brief Base class for the creation of detector factories.
 class DetectorFactoryBase {

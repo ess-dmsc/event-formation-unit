@@ -33,7 +33,7 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  NMXInstrument(Counters &counters, BaseSettings & Settings,
+  NMXInstrument(Counters &counters, BaseSettings &Settings,
                 EV42Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration

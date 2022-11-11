@@ -84,7 +84,8 @@ MultigridBase::MultigridBase(BaseSettings const &Settings)
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
       (EFUSettings.MultiGridMonitor ? "YES" : "no"));
   if (!EFUSettings.DumpFilePrefix.empty())
-    LOG(INIT, Sev::Info, "Dump h5 data in path: {}", EFUSettings.DumpFilePrefix);
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
+        EFUSettings.DumpFilePrefix);
 
   std::function<void()> inputFunc = [this]() { MultigridBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
@@ -261,4 +262,4 @@ void MultigridBase::mainThread() {
     }
   }
 }
-} // namespace
+} // namespace Multigrid

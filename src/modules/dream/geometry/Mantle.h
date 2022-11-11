@@ -19,10 +19,7 @@ namespace Dream {
 
 class Mantle {
 public:
-
-  int getX(int Strip) {
-    return Strip;
-  }
+  int getX(int Strip) { return Strip; }
 
   /// \brief get global y-coordinate for Cuboid with a given index
   int getY(int MU, int Cassette, int Counter, int Wire) {
@@ -30,8 +27,8 @@ public:
   }
 
   //
-  uint32_t getPixelId(Config::ModuleParms & Parms,
-                 DataParser::DreamReadout & Data) {
+  uint32_t getPixelId(Config::ModuleParms &Parms,
+                      DataParser::DreamReadout &Data) {
     /// \todo fix and check all values
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
@@ -46,7 +43,5 @@ public:
 
 private:
   ESSGeometry Geometry{256, 1920, 1, 1};
-
-
 };
-} // namespace
+} // namespace Dream

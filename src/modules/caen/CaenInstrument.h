@@ -11,17 +11,17 @@
 
 #pragma once
 
+#include <bifrost/geometry/BifrostGeometry.h>
 #include <caen/CaenBase.h> // to get CaenSettings
 #include <caen/Counters.h>
-#include <bifrost/geometry/BifrostGeometry.h>
 #include <caen/geometry/Calibration.h>
 #include <caen/geometry/Config.h>
-#include <loki/geometry/LokiGeometry.h>
-#include <miracles/geometry/MiraclesGeometry.h>
-#include <loki/geometry/PanelGeometry.h>
 #include <caen/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <loki/geometry/LokiGeometry.h>
+#include <loki/geometry/PanelGeometry.h>
+#include <miracles/geometry/MiraclesGeometry.h>
 #include <readout/DataParser.h>
 
 namespace Caen {

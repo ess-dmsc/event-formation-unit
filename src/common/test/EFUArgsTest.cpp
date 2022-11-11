@@ -27,8 +27,7 @@ TEST_F(EFUArgsTest, ExitOnHelp) {
   };
   int myargc = 2;
   EFUArgs Args;
-  EXPECT_EQ(Args.parseArgs(myargc, (char **)myargv),
-            EFUArgs::Status::EXIT);
+  EXPECT_EQ(Args.parseArgs(myargc, (char **)myargv), EFUArgs::Status::EXIT);
 }
 
 TEST_F(EFUArgsTest, Constructor) {

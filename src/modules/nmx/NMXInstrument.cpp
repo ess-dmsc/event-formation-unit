@@ -23,14 +23,11 @@
 namespace Nmx {
 
 /// \brief load configuration and calibration files
-NMXInstrument::NMXInstrument(struct Counters &counters,
-                             BaseSettings & settings,
+NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
                              EV42Serializer *serializer)
-    : counters(counters), Settings(settings),
-      Serializer(serializer) {
+    : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
-    std::string DumpFileName =
-        Settings.DumpFilePrefix + "nmx_" + timeString();
+    std::string DumpFileName = Settings.DumpFilePrefix + "nmx_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }

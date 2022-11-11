@@ -5,18 +5,17 @@
 /// \brief Wrapper for EFU main application
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <common/Version.h>
+#include <common/debug/Log.h>
+#include <cstdio>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/MainProg.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <cstdio>
 
-
-MainProg::MainProg(std::string instrument, int argc, char * argv[]) {
+MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
 
   if (Args.parseArgs(argc, argv) == EFUArgs::Status::EXIT) {
     exit(0);
@@ -26,16 +25,13 @@ MainProg::MainProg(std::string instrument, int argc, char * argv[]) {
   DetectorSettings.DetectorName = instrument;
 
   graylog.AddLoghandlerForNetwork(
-    instrument,
-    Args.getLogFileName(), Args.getLogLevel(),
-    Args.getGraylogSettings().address, Args.getGraylogSettings().port
-  );
+      instrument, Args.getLogFileName(), Args.getLogLevel(),
+      Args.getGraylogSettings().address, Args.getGraylogSettings().port);
 
   DetectorSettings.GraphitePrefix = std::string("efu.") + instrument;
 }
 
-
-int MainProg::run(Detector * inst) {
+int MainProg::run(Detector *inst) {
   detector = std::shared_ptr<Detector>(inst);
   int keep_running = 1;
 
@@ -68,7 +64,8 @@ int MainProg::run(Detector * inst) {
     return 0;
   }
 
-  LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorSettings.DetectorName);
+  LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}",
+      DetectorSettings.DetectorName);
 
   Launcher launcher;
 

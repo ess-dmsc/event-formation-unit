@@ -308,7 +308,8 @@ int main(int argc, char **argv) {
   std::string bifrostfilename{"deleteme_bifrost.json"};
   saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
   std::string miraclesfilename{"deleteme_miracles.json"};
-  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(), miraclesjson.size());
+  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(),
+             miraclesjson.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

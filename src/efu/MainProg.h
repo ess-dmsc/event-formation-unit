@@ -15,15 +15,14 @@
 
 class MainProg {
 public:
-
   /// \brief initialise by passing the instrument name and the arguments
   /// cannot return but uses exit() instead.
   /// constructor - roughly this is first half of the old main() function
-  MainProg(std::string instrument, int argc, char * argv[]);
+  MainProg(std::string instrument, int argc, char *argv[]);
 
   /// \brief setup exithandlers, launch detector - roughly equivalent to the
   /// second half of the old main()
-  int run(Detector * detector);
+  int run(Detector *detector);
 
 public:
   static constexpr uint64_t MicrosecondsPerSecond{1000000};

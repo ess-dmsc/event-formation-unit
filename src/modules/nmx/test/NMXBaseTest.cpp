@@ -91,8 +91,7 @@ std::vector<uint8_t> dummyreadout {
 
 class NMXBaseStandIn : public Nmx::NmxBase {
 public:
-  NMXBaseStandIn(BaseSettings Settings)
-      : Nmx::NmxBase(Settings){};
+  NMXBaseStandIn(BaseSettings Settings) : Nmx::NmxBase(Settings){};
   ~NMXBaseStandIn() = default;
   using Detector::Threads;
   using Nmx::NmxBase::Counters;

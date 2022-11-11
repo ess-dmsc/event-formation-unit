@@ -27,11 +27,11 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 
   DreamConfiguration.loadAndApply();
 
-
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
 }
 
-uint32_t DreamInstrument::calcPixel(Config::ModuleParms & Parms, DataParser::DreamReadout & Data) {
+uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
+                                    DataParser::DreamReadout &Data) {
   return Geometry.getPixel(Parms, Data);
 }
 
@@ -75,7 +75,8 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    Config::ModuleParms & Parms = DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
+    Config::ModuleParms &Parms =
+        DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
 
     if (not Parms.Initialised) {
       XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
@@ -84,8 +85,8 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
-        Data.TimeHigh, Data.TimeLow);
+    auto TimeOfFlight =
+        ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow);
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Parms, Data);
@@ -96,8 +97,6 @@ void DreamInstrument::processReadouts() {
       counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
     }
-
-
   }
 }
 

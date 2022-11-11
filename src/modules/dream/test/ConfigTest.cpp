@@ -100,7 +100,6 @@ auto ValidConfigDefaultPulseTime = R"(
 }
 )"_json;
 
-
 // clang-format on
 
 using namespace Dream;
@@ -173,7 +172,6 @@ TEST_F(ConfigTest, ValidConfigDefaultPulseTime) {
   config.apply();
   ASSERT_EQ(config.MaxPulseTimeNS, 1);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

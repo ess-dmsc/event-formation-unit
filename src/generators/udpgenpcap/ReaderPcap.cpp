@@ -22,8 +22,8 @@
 
 // Protocol identifiers
 // Header and data location specifications
- const int IP_HEADER_SIZE = 20;
- const int UDP_HEADER_SIZE = 8;
+const int IP_HEADER_SIZE = 20;
+const int UDP_HEADER_SIZE = 8;
 //
 int UDP_HEADER_OFFSET;
 int UDP_DATA_OFFSET;

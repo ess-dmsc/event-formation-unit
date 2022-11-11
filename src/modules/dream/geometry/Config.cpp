@@ -40,8 +40,8 @@ void Config::apply() {
   try {
     MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
   } catch (nlohmann::json::exception const &) {
-      LOG(INIT, Sev::Info, "MaxPulseTimeNS using default value");
-      XTRACE(INIT, ALW, "MaxPulseTimeNS using default value");
+    LOG(INIT, Sev::Info, "MaxPulseTimeNS using default value");
+    XTRACE(INIT, ALW, "MaxPulseTimeNS using default value");
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
   XTRACE(INIT, ALW, "MaxPulseTimeNS: %u", MaxPulseTimeNS);
@@ -50,7 +50,7 @@ void Config::apply() {
   int Entry{0};
   nlohmann::json Modules;
   Modules = root["Config"];
-  for (auto & Module : Modules) {
+  for (auto &Module : Modules) {
     int Ring{MaxRing + 1};
     int FEN{MaxFEN + 1};
     std::string Type{""};
@@ -68,27 +68,33 @@ void Config::apply() {
     try {
       Index = Module["Index"];
       Index2 = Module["Index2"];
-    } catch (...) {}
+    } catch (...) {
+    }
 
     // Check for array sizes and dupliacte entries
     if (Ring > MaxRing) {
-      errorExit(fmt::format("Entry: {}, Invalid RING: {} Max: {}", Entry, Ring, MaxRing));
+      errorExit(fmt::format("Entry: {}, Invalid RING: {} Max: {}", Entry, Ring,
+                            MaxRing));
     }
     if (FEN > MaxFEN) {
-      errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN, MaxFEN));
+      errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
+                            MaxFEN));
     }
     if (RMConfig[Ring][FEN].Initialised != false) {
-      errorExit(fmt::format("Entry: {}, Duplicate entry for RING {} FEN {}", Entry, Ring, FEN));
+      errorExit(fmt::format("Entry: {}, Duplicate entry for RING {} FEN {}",
+                            Entry, Ring, FEN));
     }
 
     // Now add the relevant parameters
     if (ModuleTypeMap.find(Type) == ModuleTypeMap.end()) {
-      errorExit(fmt::format("Entry: {}, CDT Module '{}' does not exist", Entry, Type));
+      errorExit(fmt::format("Entry: {}, CDT Module '{}' does not exist", Entry,
+                            Type));
     }
     RMConfig[Ring][FEN].Type = ModuleTypeMap[Type];
     RMConfig[Ring][FEN].P1.Index = Index;
     RMConfig[Ring][FEN].P2.Index = Index2;
-    XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring, FEN, Type.c_str());
+    XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring,
+           FEN, Type.c_str());
 
     // Final housekeeping
     RMConfig[Ring][FEN].Initialised = true;

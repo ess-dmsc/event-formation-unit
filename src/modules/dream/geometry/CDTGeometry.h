@@ -23,19 +23,16 @@ namespace Dream {
 
 class CDTGeometry {
 public:
-
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
   /// for that module (see ICD for full description)
   int getPixelOffset(Config::ModuleType Type);
 
-
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms & Parms, DataParser::DreamReadout & Data);
-
+  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
   SUMO sumo;
   Cuboid cuboid;
   Mantle mantle;
 };
-}
+} // namespace Dream

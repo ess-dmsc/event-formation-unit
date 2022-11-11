@@ -19,7 +19,6 @@ namespace Dream {
 
 class Cuboid {
 public:
-
   ESSGeometry Geometry{112, 112 * 32, 1, 1};
 
   struct CuboidOffset {
@@ -40,9 +39,8 @@ public:
   };
   // clang-format on
 
-
   /// \brief rotate (x,y)
-  void rotateXY(int & LocalX, int & LocalY, int Rotate) {
+  void rotateXY(int &LocalX, int &LocalY, int Rotate) {
     int SavedY = LocalY;
 
     switch (Rotate) {
@@ -61,10 +59,9 @@ public:
     }
   }
 
-
   //
-  uint32_t getPixelId(Config::ModuleParms & Parms,
-                    DataParser::DreamReadout & Data) {
+  uint32_t getPixelId(Config::ModuleParms &Parms,
+                      DataParser::DreamReadout &Data) {
     /// \todo fix and check all values
     uint8_t Index = Parms.P1.Index;
     uint8_t Cassette = 0;
@@ -89,7 +86,5 @@ public:
 
     return Geometry.pixel2D(x, y);
   }
-
-
 };
-} // namespace
+} // namespace Dream

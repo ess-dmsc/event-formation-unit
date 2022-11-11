@@ -45,8 +45,7 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings)
-      : Detector(settings) {
+  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };

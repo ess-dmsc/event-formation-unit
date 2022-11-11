@@ -36,9 +36,6 @@ set(cspec_LIB
   )
 create_executable(cspec)
 
-target_compile_definitions(cspec PUBLIC EFU_CSPEC)
-
-
 set(CSPECBaseTest_INC
   ${cspec_common_inc}
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h

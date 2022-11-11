@@ -34,8 +34,7 @@ namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings)
-    : Detector(settings) {
+FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 

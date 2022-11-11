@@ -29,8 +29,7 @@ std::string dreamjson = R"(
 
 class DreamBaseStandIn : public Dream::DreamBase {
 public:
-  DreamBaseStandIn(BaseSettings Settings)
-      : Dream::DreamBase(Settings){};
+  DreamBaseStandIn(BaseSettings Settings) : Dream::DreamBase(Settings){};
   ~DreamBaseStandIn() = default;
   using Detector::Threads;
   using Dream::DreamBase::Counters;
@@ -68,9 +67,8 @@ std::vector<uint8_t> TestPacket2{
     0x2e, 0x00, 0x00, 0x00, // 0x002e - 46 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
-    0x11, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x00, 0x00,
-    0x01, 0x00, 0x00, 0x00, // Seq number 1
+    0x11, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00,
+    0x00, // Seq number 1
 
     // Data Header 1
     0x00, 0x01, 0x10, 0x00, // ring 0, fen 1, data size 16 bytes

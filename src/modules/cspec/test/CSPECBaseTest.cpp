@@ -95,8 +95,7 @@ std::vector<uint8_t> dummyreadout {
 
 class CSPECBaseStandIn : public Cspec::CspecBase {
 public:
-  CSPECBaseStandIn(BaseSettings Settings)
-      : Cspec::CspecBase(Settings){};
+  CSPECBaseStandIn(BaseSettings Settings) : Cspec::CspecBase(Settings){};
   ~CSPECBaseStandIn() = default;
   using Cspec::CspecBase::Counters;
   using Detector::Threads;

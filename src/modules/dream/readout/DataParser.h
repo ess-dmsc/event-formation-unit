@@ -32,7 +32,8 @@ public:
     uint8_t Anode;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(DreamReadout) == 16, "DREAM readout header length error");
+  static_assert(sizeof(DreamReadout) == 16,
+                "DREAM readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);

@@ -20,12 +20,11 @@
 namespace TTLMonitor {
 
 /// \brief load configuration and calibration files
-TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
-                                           BaseSettings &settings,
-                                           std::vector<EV44Serializer> &serializers)
+TTLMonitorInstrument::TTLMonitorInstrument(
+    struct Counters &counters, BaseSettings &settings,
+    std::vector<EV44Serializer> &serializers)
 
-    : counters(counters), Settings(settings),
-      Serializers(serializers) {
+    : counters(counters), Settings(settings), Serializers(serializers) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
@@ -51,12 +50,12 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
 
-
-  //TODO, have proper assertion heres
-  //assert(Serializers != nullptr);
-  for (EV44Serializer &Serializer : Serializers){
-    counters.TxBytes += Serializer.checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  // TODO, have proper assertion heres
+  // assert(Serializers != nullptr);
+  for (EV44Serializer &Serializer : Serializers) {
+    counters.TxBytes += Serializer.checkAndSetReferenceTime(
+        ESSReadoutParser.Packet.Time
+            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts()");

@@ -26,10 +26,9 @@ public:
   const uint8_t MaxWire{15};
   const uint8_t MaxStrip{15};
 
-
   /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
-  uint32_t getPixelId(Config::ModuleParms & Parms,
-                    DataParser::DreamReadout & Data) {
+  uint32_t getPixelId(Config::ModuleParms &Parms,
+                      DataParser::DreamReadout &Data) {
     uint8_t Sector = Parms.P1.Sector;
     uint8_t Sumo = Parms.P2.SumoPair; // definitely wrong
     uint8_t Cassette = Data.Anode / 32;

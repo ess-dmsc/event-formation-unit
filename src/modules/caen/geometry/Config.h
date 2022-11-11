@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <loki/geometry/PanelGeometry.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <loki/geometry/PanelGeometry.h>
 #include <string>
 #include <vector>
 

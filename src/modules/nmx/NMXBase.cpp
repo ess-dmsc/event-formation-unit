@@ -32,8 +32,7 @@ namespace Nmx {
 
 const char *classname = "NMX detector with ESS readout";
 
-NmxBase::NmxBase(BaseSettings const &settings)
-    : Detector(settings) {
+NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");

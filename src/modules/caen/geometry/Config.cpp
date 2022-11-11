@@ -31,10 +31,11 @@ Config::Config(std::string ConfigFile) {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if ((InstrumentName != "loki") and (InstrumentName != "bifrost") and (InstrumentName != "miracles")) {
+  if ((InstrumentName != "loki") and (InstrumentName != "bifrost") and
+      (InstrumentName != "miracles")) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error(
-        "Inconsistent Json file - invalid name, expected loki, bifrost, or miracles");
+    throw std::runtime_error("Inconsistent Json file - invalid name, expected "
+                             "loki, bifrost, or miracles");
   }
 
   try {

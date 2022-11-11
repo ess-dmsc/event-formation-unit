@@ -8,7 +8,7 @@
 #include <efu/MainProg.h>
 #include <modules/ttlmonitor/TTLMonitorBase.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   MainProg Main("ttlmonitor", argc, argv);
 
   auto Detector = new TTLMonitor::TTLMonitorBase(Main.DetectorSettings);

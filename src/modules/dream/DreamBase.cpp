@@ -30,8 +30,7 @@ namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings)
-    : Detector(Settings) {
+DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 

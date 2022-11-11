@@ -9,7 +9,6 @@
 
 #include <efu/Graylog.h>
 
-
 std::string Graylog::ConsoleFormatter(const Log::LogMessage &Msg) {
   static const std::vector<std::string> SevToString{
       "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
@@ -66,10 +65,9 @@ void Graylog::EmptyGraylogMessageQueue() {
   Log::RemoveAllHandlers();
 }
 
-
-void Graylog::AddLoghandlerForNetwork(
-    std::string DetectorName, std::string FileName,
-    int LogLevel, std::string Address, int Port) {
+void Graylog::AddLoghandlerForNetwork(std::string DetectorName,
+                                      std::string FileName, int LogLevel,
+                                      std::string Address, int Port) {
   // Set-up logging before we start doing important stuff
   // change process to "efu" and set process_name to Instrument
   std::string ProcessKey{"process"};
@@ -91,7 +89,6 @@ void Graylog::AddLoghandlerForNetwork(
   }
 
   if (not Address.empty()) {
-    Log::AddLogHandler(
-        new Log::GraylogInterface(Address, Port));
+    Log::AddLogHandler(new Log::GraylogInterface(Address, Port));
   }
 }

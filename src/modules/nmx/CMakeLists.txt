@@ -29,9 +29,6 @@ set(nmx_SRC
 set(nmx_LIB efu_reduction efu_essreadout)
 create_executable(nmx)
 
-target_compile_definitions(nmx PUBLIC EFU_NMX)
-
-
 set(NMXBaseTest_INC
   ${nmx_common_inc}
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
