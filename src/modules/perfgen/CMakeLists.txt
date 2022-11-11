@@ -12,4 +12,3 @@ set(perfgen_SRC
   main.cpp
 )
 create_executable(perfgen)
-target_compile_definitions(perfgen PUBLIC EFU_PERFGEN)

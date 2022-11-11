@@ -122,6 +122,11 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--ttlmonitor-reduce", EFUSettings.TTLMonitorReduceEvents,
           "use 1 out of N readouts")->group("TTLMonitor");
 
+  // EFU LEGACY MODULE
+  CLIParser.add_flag("--multiblade-alignment", EFUSettings.MultibladeAlignment,
+          "Enter alignment mode (2D)")
+          ->group("MBCAEN");
+
   // clang-format on
 }
 
@@ -182,7 +187,7 @@ EFUArgs::Status EFUArgs::parseArgs(const int argc, char *argv[]) {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}", e.get_exit_code());
-    return Status::EXIT;
+    return Status::ERREXIT;
   }
 
   if ((*HelpOption)) {

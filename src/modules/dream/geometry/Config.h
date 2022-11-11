@@ -66,7 +66,7 @@ public:
   /// \brief log errormessage and throw runtime exception
   void errorExit(std::string errmsg);
 
-  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
+  uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
 
   ModuleParms RMConfig[MaxRing + 1][MaxFEN + 1];
 
