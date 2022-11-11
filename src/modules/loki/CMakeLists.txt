@@ -6,7 +6,7 @@
 
 
 set(loki_SRC main.cpp)
-set(loki_LIB efu_reduction efu_essreadout caen_common)
+set(loki_LIB efu_reduction caen_common efu_essreadout)
 create_executable(loki)
 
-target_link_libraries(loki caen_common efu_reduction efu_essreadout)
+add_dependencies(loki caen_common efu_reduction efu_essreadout)

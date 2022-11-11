@@ -6,7 +6,7 @@
 
 
 set(bifrost_SRC main.cpp)
-set(bifrost_LIB efu_reduction efu_essreadout caen_common)
+set(bifrost_LIB efu_reduction caen_common efu_essreadout)
 create_executable(bifrost)
 
-target_link_libraries(bifrost caen_common efu_reduction efu_essreadout )
+add_dependencies(bifrost caen_common efu_reduction efu_essreadout )
