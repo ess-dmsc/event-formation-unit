@@ -8,5 +8,3 @@
 set(miracles_SRC main.cpp)
 set(miracles_LIB efu_reduction caen_common efu_essreadout)
 create_executable(miracles)
-
-add_dependencies(miracles caen_common efu_reduction efu_essreadout)

@@ -8,5 +8,3 @@
 set(loki_SRC main.cpp)
 set(loki_LIB efu_reduction caen_common efu_essreadout)
 create_executable(loki)
-
-add_dependencies(loki caen_common efu_reduction efu_essreadout)
