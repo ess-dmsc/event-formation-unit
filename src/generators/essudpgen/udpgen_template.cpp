@@ -11,10 +11,10 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
+#include <modules/caen/generators/LokiReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
-#include <modules/loki/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef LOKI_GENERATOR
-  Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-  gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
-  Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
+  Caen::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
 #ifdef TTLMON_GENERATOR

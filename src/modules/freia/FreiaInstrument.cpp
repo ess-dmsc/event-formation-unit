@@ -22,15 +22,13 @@ namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
-                                 // BaseSettings & EFUSettings,
-                                 FreiaSettings &moduleSettings,
+                                 BaseSettings & settings,
                                  EV42Serializer *serializer)
-    : counters(counters), ModuleSettings(moduleSettings),
-      Serializer(serializer) {
+    : counters(counters), Settings(settings), Serializer(serializer) {
 
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "freia_" + timeString();
+        Settings.DumpFilePrefix + "freia_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -67,17 +65,17 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
 void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config("Freia", ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config("Freia", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
   XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette/hybrid)",
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
-  if (ModuleSettings.CalibFile != "") {
+  if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
-    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
 

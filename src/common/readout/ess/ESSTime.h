@@ -52,13 +52,13 @@ public:
     uint64_t timeval = toNS(High, Low) + DelayNS;
     if (timeval < TimeInNS) {
       XTRACE(EVENT, WAR,
-             "TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
+             "TOF negative: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
              ", PrevPTns: %" PRIu64, High, Low, timeval, TimeInNS);
       Stats.TofNegative++;
       return getPrevTOF(High, Low, DelayNS);
     }
     if ((timeval - TimeInNS) > MaxTOF) {
-      XTRACE(EVENT, WAR, "High TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
+      XTRACE(EVENT, WAR, "High TOF: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
              ", PrevPTns: %" PRIu64, High, Low, timeval, TimeInNS);
       Stats.TofHigh++;
       return InvalidTOF;

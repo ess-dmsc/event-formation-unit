@@ -15,7 +15,7 @@
 
 #include <generators/udpgen_hits/ReaderHits.h>
 
-#include <modules/loki/generators/ReaderReadouts.h>
+#include <modules/caen/generators/ReaderReadouts.h>
 #include <modules/multigrid/generators/ReaderReadouts.h>
 
 #include <common/system/Socket.h>
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef GENERATOR_LOKI_READOUTS
-  Loki::ReaderReadouts file(Settings.FileName);
+  Caen::ReaderReadouts file(Settings.FileName);
 #endif
 
   size_t ReadoutSize = file.getReadoutSize();

@@ -8,7 +8,7 @@ add_subdirectory(reduction)
 # multigrid detector module and base test
 #=============================================================================
 
-set(mgmesytec_SRC Multigrid.cpp MultigridBase.cpp Config.cpp)
+set(mgmesytec_SRC MultigridBase.cpp Config.cpp)
 set(mgmesytec_INC MultigridBase.h AbstractBuilder.h Config.h)
 set(mgmesytec_LIB  MgGeometryLib MgMesytecLib MgReductionLib)
 create_module(mgmesytec)

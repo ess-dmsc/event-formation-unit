@@ -15,24 +15,16 @@
 
 namespace Nmx {
 
-struct NMXSettings {
-  std::string FilePrefix{""};
-  std::string ConfigFile{""};
-  std::string CalibFile{""};
-  //
-};
-
-class NMXBase : public Detector {
+class NmxBase : public Detector {
 public:
-  NMXBase(BaseSettings const &settings, struct NMXSettings &LocalNMXSettings);
-  ~NMXBase() = default;
+  NmxBase(BaseSettings const &settings);
+  ~NmxBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
   struct Counters Counters {};
-  NMXSettings NMXModuleSettings;
   EV42Serializer *Serializer;
 };
 

@@ -49,9 +49,9 @@ std::vector<uint8_t> dummyreadout {
   "DefaultMinADC":50,
   "Config" : [
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
@@ -59,9 +59,9 @@ std::vector<uint8_t> dummyreadout {
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  1, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  1,
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
@@ -69,9 +69,9 @@ std::vector<uint8_t> dummyreadout {
           "HybridId" : "E5533333222222221111111100000001"
         },
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  2, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  2,
           "Plane" : 0,
           "Offset" : 256,
           "ReversedChannels" : true,
@@ -89,36 +89,35 @@ std::vector<uint8_t> dummyreadout {
 #include <common/testutils/TestUDPServer.h>
 #include <nmx/NMXBase.h>
 
-class NMXBaseStandIn : public Nmx::NMXBase {
+class NMXBaseStandIn : public Nmx::NmxBase {
 public:
-  NMXBaseStandIn(BaseSettings Settings, struct Nmx::NMXSettings ReadoutSettings)
-      : Nmx::NMXBase(Settings, ReadoutSettings){};
+  NMXBaseStandIn(BaseSettings Settings)
+      : Nmx::NmxBase(Settings){};
   ~NMXBaseStandIn() = default;
   using Detector::Threads;
-  using Nmx::NMXBase::Counters;
+  using Nmx::NmxBase::Counters;
 };
 
 class NMXBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    LocalSettings.ConfigFile = "nmx.json";
+    Settings.ConfigFile = "nmx.json";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}
 
   BaseSettings Settings;
-  Nmx::NMXSettings LocalSettings;
 };
 
 TEST_F(NMXBaseTest, Constructor) {
-  NMXBaseStandIn Readout(Settings, LocalSettings);
+  NMXBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(NMXBaseTest, DataReceive) {
-  NMXBaseStandIn Readout(Settings, LocalSettings);
+  NMXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
@@ -135,7 +134,7 @@ TEST_F(NMXBaseTest, DataReceive) {
 }
 
 TEST_F(NMXBaseTest, DataReceiveBadHeader) {
-  NMXBaseStandIn Readout(Settings, LocalSettings);
+  NMXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

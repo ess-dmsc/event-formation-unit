@@ -72,12 +72,15 @@ protected:
 
 TEST_F(DumpFileTest, CreateFile) {
   HitFile::create("dumpfile_test");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test.h5"));
+
+  HitFile::create("dumpfile_test", 10000);
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 }
 
 TEST_F(DumpFileTest, OpenEmptyFile) {
   HitFile::create("dumpfile_test");
-  auto file = HitFile::open("dumpfile_test_00000");
+  auto file = HitFile::open("dumpfile_test");
   EXPECT_EQ(file->count(), 0);
 }
 
@@ -130,7 +133,7 @@ TEST_F(DumpFileTest, Read) {
   file_out->push(std::vector<Hit>(900, Hit()));
   file_out.reset();
 
-  auto file = HitFile::open("dumpfile_test_00000");
+  auto file = HitFile::open("dumpfile_test");
   EXPECT_EQ(file->Data.size(), 0);
   file->readAt(0, 3);
   EXPECT_EQ(file->Data.size(), 3);
@@ -146,7 +149,7 @@ TEST_F(DumpFileTest, ReadAll) {
   file_out.reset();
 
   std::vector<Hit> data;
-  HitFile::read("dumpfile_test_00000", data);
+  HitFile::read("dumpfile_test", data);
   EXPECT_EQ(data.size(), 900);
 }
 
@@ -157,7 +160,7 @@ TEST_F(DumpFileTest, FlushOnClose) {
   file_out.reset();
 
   std::vector<Hit> data;
-  HitFile::read("dumpfile_test_00000", data);
+  HitFile::read("dumpfile_test", data);
   EXPECT_EQ(data.size(), 10);
 }
 

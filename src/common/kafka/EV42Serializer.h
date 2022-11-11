@@ -65,7 +65,6 @@ private:
   size_t MaxEvents{0};
   size_t EventCount{0};
 
-
   // \todo maybe should be mutated directly in buffer? Start at 0?
   uint64_t MessageId{1};
 

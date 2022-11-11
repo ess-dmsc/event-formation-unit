@@ -5,7 +5,6 @@
 #=============================================================================
 
 set(nmx_udp_generated_INC
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_MODULE_DIR}/nmx/generators/ReadoutGenerator.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
@@ -28,7 +27,6 @@ set_target_properties(nmx_udp_generated
 
 
   set(nmx_udp_generated_smile_INC
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_MODULE_DIR}/nmx/generators/SmileReadoutGenerator.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
@@ -70,7 +68,6 @@ set_target_properties(nmx_udp_generated_multihit
   )
 
   set(nmx_udp_generated_track_INC
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_MODULE_DIR}/nmx/generators/TrackReadoutGenerator.h
   ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h

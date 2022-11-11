@@ -15,17 +15,9 @@
 
 namespace TTLMonitor {
 
-struct TTLMonitorSettings {
-  std::string ConfigFile{""};
-  std::string FilePrefix{""};
-  int ReduceEvents{1};
-  int NumberOfMonitors{1};
-};
-
 class TTLMonitorBase : public Detector {
 public:
-  TTLMonitorBase(BaseSettings const &settings,
-                 struct TTLMonitorSettings &LocalTTLMonitorSettings);
+  TTLMonitorBase(BaseSettings const &settings);
   ~TTLMonitorBase() = default;
 
   void input_thread();
@@ -33,7 +25,6 @@ public:
 
 protected:
   struct Counters Counters {};
-  TTLMonitorSettings TTLMonitorModuleSettings;
   std::vector<EV44Serializer> Serializers;
 };
 

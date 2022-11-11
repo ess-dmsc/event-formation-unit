@@ -13,11 +13,10 @@
 // \todo use reference data instead
 #include <multigrid/mesytec/test/TestData.h>
 
-class MultigridBaseStandIn : public MultigridBase {
+class MultigridBaseStandIn : public Multigrid::MultigridBase {
 public:
-  MultigridBaseStandIn(BaseSettings Settings,
-                       MultigridSettings const &ReadoutSettings)
-      : MultigridBase(Settings, ReadoutSettings){};
+  MultigridBaseStandIn(BaseSettings Settings)
+      : MultigridBase(Settings){};
   ~MultigridBaseStandIn() = default;
   using Detector::Threads;
   using MultigridBase::Counters;
@@ -26,25 +25,24 @@ public:
 class MultigridBaseTest : public TestBase {
 public:
   void SetUp() override {
-    LocalSettings.ConfigFile = TEST_JSON_PATH "ILL_mappings.json";
+    Settings.ConfigFile = TEST_JSON_PATH "ILL_mappings.json";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}
 
   BaseSettings Settings;
-  MultigridSettings LocalSettings;
 };
 
 TEST_F(MultigridBaseTest, Constructor) {
-  MultigridBaseStandIn Readout(Settings, LocalSettings);
+  MultigridBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.rx_packets, 0);
   EXPECT_EQ(Readout.Counters.rx_bytes, 0);
   EXPECT_EQ(Readout.Counters.tx_bytes, 0);
 }
 
 TEST_F(MultigridBaseTest, DataReceive) {
-  MultigridBaseStandIn Readout(Settings, LocalSettings);
+  MultigridBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> InitSleepTime{300};
   TestUDPServer Server(43126, Settings.DetectorPort, &ws4[0], ws4.size());

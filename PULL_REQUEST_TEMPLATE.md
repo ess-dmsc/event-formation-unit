@@ -9,9 +9,6 @@ The branch you merge from should already reference an event-formation-unit githu
 
 ---
 
-## Nominate for Group Code Review (Anyone can nominate it)
-Indicate if you think the code should be reviewed in a Thursday code review session.
+### Nominate for Group Code Review
 
-- [ ] Recommend for group code review
-
-Also, nominate it on the code_review Slack channel.
+- [ ] Nominate for code review

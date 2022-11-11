@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include "KafkaMocks.h"
+#include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <common/testutils/TestBase.h>
 #include <cstring>
@@ -8,6 +9,8 @@
 #include <librdkafka/rdkafkacpp.h>
 
 #include <trompeloeil.hpp>
+
+KafkaConfig KafkaCfg{""};
 
 using trompeloeil::_;
 
@@ -29,7 +32,7 @@ void reporter<specialized>::send(severity s, char const *file,
 class ProducerStandIn : public Producer {
 public:
   ProducerStandIn(std::string Broker, std::string Topic)
-      : Producer(Broker, Topic) {}
+      : Producer(Broker, Topic, KafkaCfg.CfgParms) {}
   using Producer::Config;
   using Producer::KafkaProducer;
   using Producer::KafkaTopic;
@@ -107,7 +110,9 @@ TEST_F(ProducerTest, ProducerSuccess) {
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
-  Producer prod{"nobroker", "notopic"};
+  KafkaConfig KafkaCfg2("");
+  ASSERT_EQ(KafkaCfg2.CfgParms.size(), 5);
+  Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);

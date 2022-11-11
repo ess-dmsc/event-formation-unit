@@ -8,7 +8,7 @@ set(perfgen_INC
   ${ESS_SOURCE_DIR}/common/TestImageUdder.h
 )
 set(perfgen_SRC
-  PerfGen.cpp
   PerfGenBase.cpp
+  main.cpp
 )
-create_module(perfgen)
+create_executable(perfgen)

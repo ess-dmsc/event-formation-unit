@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <common/reduction/ChronoMerger.h>
+#include <limits>
 
 #include <iosfwd>
 

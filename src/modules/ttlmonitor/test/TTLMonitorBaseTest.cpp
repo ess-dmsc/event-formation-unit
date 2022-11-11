@@ -57,9 +57,8 @@ std::string ttlmonjson = R"(
 
 class TTLMonitorBaseStandIn : public TTLMonitor::TTLMonitorBase {
 public:
-  TTLMonitorBaseStandIn(BaseSettings Settings,
-                        struct TTLMonitor::TTLMonitorSettings ReadoutSettings)
-      : TTLMonitor::TTLMonitorBase(Settings, ReadoutSettings){};
+  TTLMonitorBaseStandIn(BaseSettings Settings)
+      : TTLMonitor::TTLMonitorBase(Settings){};
   ~TTLMonitorBaseStandIn() = default;
   using Detector::Threads;
   using TTLMonitor::TTLMonitorBase::Counters;
@@ -68,7 +67,7 @@ public:
 class TTLMonitorBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    LocalSettings.ConfigFile = "TTLMonitor.json";
+    Settings.ConfigFile = "TTLMonitor.json";
     Settings.KafkaTopic = "freia_beam_monitor";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
@@ -76,17 +75,16 @@ public:
   void TearDown() override {}
 
   BaseSettings Settings;
-  TTLMonitor::TTLMonitorSettings LocalSettings;
 };
 
 TEST_F(TTLMonitorBaseTest, Constructor) {
-  TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
+  TTLMonitorBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.Counters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceive) {
-  TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
+  TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
@@ -103,7 +101,7 @@ TEST_F(TTLMonitorBaseTest, DataReceive) {
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
-  TTLMonitorBaseStandIn Readout(Settings, LocalSettings);
+  TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

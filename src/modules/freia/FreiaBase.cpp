@@ -8,10 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV42Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -34,9 +34,8 @@ namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings,
-                     struct FreiaSettings &LocalFreiaSettings)
-    : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
+FreiaBase::FreiaBase(BaseSettings const &settings)
+    : Detector("FREIA", settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -185,19 +184,22 @@ void FreiaBase::processing_thread() {
     XTRACE(INIT, ALW, "Setting defailt Kafka topic to freia_detector");
     EFUSettings.KafkaTopic = "freia_detector";
   }
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                     KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug",
+                           KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
   Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings,
-                        Serializer);
+  FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
                                         "Freia");
