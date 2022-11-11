@@ -37,6 +37,7 @@ add_library(caen_common STATIC
 if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(caen_common "-Wl,--no-as-needed")
 endif()
+
 ##
 ## CaeniInstrumentTest Module integration test
 ##
