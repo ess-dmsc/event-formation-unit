@@ -10,5 +10,3 @@ set(miracles_LIB efu_reduction efu_essreadout caen_common)
 create_executable(miracles)
 
 target_link_libraries(miracles caen_common efu_reduction efu_essreadout)
-# add_dependencies(miracles caen_common efu_reduction efu_essreadout)
-
