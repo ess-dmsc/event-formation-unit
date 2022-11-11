@@ -99,7 +99,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
 endif()
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
-  add_linker_flags(efu_ess_readout "-Wl,--no-as-needed")
+  add_linker_flags(efu_essreadout "-Wl,--no-as-needed")
 endif()
 
 enable_coverage(efu_common)
