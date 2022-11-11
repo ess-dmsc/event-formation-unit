@@ -9,4 +9,4 @@ set(bifrost_SRC main.cpp)
 set(bifrost_LIB efu_reduction efu_essreadout caen_common)
 create_executable(bifrost)
 
-add_dependencies(bifrost efu_reduction efu_essreadout caen_common)
+add_dependencies(bifrost caen_common efu_reduction efu_essreadout )
