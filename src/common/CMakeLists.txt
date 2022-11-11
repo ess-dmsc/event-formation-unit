@@ -98,6 +98,10 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_common "-Wl,--no-as-needed")
 endif()
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_ess_readout "-Wl,--no-as-needed")
+endif()
+
 enable_coverage(efu_common)
 
 target_link_libraries(efu_common
