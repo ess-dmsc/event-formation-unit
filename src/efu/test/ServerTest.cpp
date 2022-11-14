@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+// Copyright (C) 2018 - 2022 European Spallation Source ERIC
 
 #include <arpa/inet.h>
 #include <chrono>

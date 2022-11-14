@@ -60,7 +60,7 @@ protected:
   int keeprunning{1};
 
   void SetUp() override {
-    auto detectorif = Factory.create(settings);
+    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
     parser = new Parser(detectorif, stats, keeprunning);
   }
 
