@@ -12,7 +12,7 @@
 using namespace Dream;
 using HeaderV0 = ESSReadout::Parser::PacketHeaderV0;
 
-std::string ConfigFile {"deleteme_dreaminstrumenttest.json"};
+std::string ConfigFile{"deleteme_dreaminstrumenttest.json"};
 std::string ConfigStr = R"(
   {
     "Detector" : "DREAM",

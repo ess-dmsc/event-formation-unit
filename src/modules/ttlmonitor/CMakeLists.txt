@@ -29,8 +29,6 @@ set(ttlmonitor_SRC
 set(ttlmonitor_LIB efu_essreadout)
 create_executable(ttlmonitor)
 
-target_compile_definitions(ttlmonitor PUBLIC EFU_TTLMON)
-
 
 #
 set(TTLMonitorBaseTest_INC
