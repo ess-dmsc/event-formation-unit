@@ -39,12 +39,11 @@ void DreamInstrument::processReadouts() {
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   uint64_t PulseTime =
       Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t __attribute__((unused)) PrevPulseTime = Time.setPrevReference(
+  uint64_t PrevPulseTime = Time.setPrevReference(
       PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
 
-  /// \todo Add Dream config to handle max time between pulses
-  /// for now arbitrarily use 5 seconds
-  if (PulseTime - PrevPulseTime > 5 * 1'000'000'000ULL) {
+
+  if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
            (PulseTime - PrevPulseTime));
     counters.ReadoutStats.ErrorTimeHigh++;

@@ -38,13 +38,13 @@ void Config::apply() {
   }
 
   try {
-    MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
+    MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<unsigned int>();
   } catch (nlohmann::json::exception const &) {
     LOG(INIT, Sev::Info, "MaxPulseTimeNS using default value");
     XTRACE(INIT, ALW, "MaxPulseTimeNS using default value");
   }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
-  XTRACE(INIT, ALW, "MaxPulseTimeNS: %u", MaxPulseTimeNS);
+  LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS: {}", MaxPulseTimeDiffNS);
+  XTRACE(INIT, ALW, "MaxPulseTimeNS: %u", MaxPulseTimeDiffNS);
 
   // Initialise all configured modules
   int Entry{0};

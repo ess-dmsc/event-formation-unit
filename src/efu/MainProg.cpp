@@ -17,7 +17,7 @@
 
 MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
 
-  if (Args.parseArgs(argc, argv) == EFUArgs::Status::EXIT) {
+  if (Args.parseArgs(argc, argv) != EFUArgs::Status::CONTINUE) {
     exit(0);
   }
   Args.printSettings();

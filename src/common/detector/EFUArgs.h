@@ -21,7 +21,7 @@ struct GraylogSettings {
 
 class EFUArgs {
 public:
-  enum class Status { EXIT, CONTINUE };
+  enum class Status { EXIT, ERREXIT, CONTINUE };
   EFUArgs();
   Status parseArgs(const int argc, char *argv[]);
 

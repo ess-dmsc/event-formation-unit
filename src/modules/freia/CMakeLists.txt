@@ -54,7 +54,5 @@ set(FreiaInstrumentTest_SRC
   ${freia_common_src}
   test/FreiaInstrumentTest.cpp
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-
 )
 create_test_executable(FreiaInstrumentTest)

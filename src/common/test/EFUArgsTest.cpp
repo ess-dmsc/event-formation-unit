@@ -85,6 +85,30 @@ TEST_F(EFUArgsTest, HelpText) {
   ASSERT_TRUE(myargv != NULL);
 }
 
+TEST_F(EFUArgsTest, Version) {
+  int myargc = 2;
+  const char *myargv[] = {"progname", "--version"};
+
+  EFUArgs efu_args;
+  auto ret = efu_args.parseArgs(myargc, (char **)myargv);
+  ASSERT_EQ(ret, EFUArgs::Status::EXIT); // has detector
+
+  ASSERT_EQ(myargc, 2);
+  ASSERT_TRUE(myargv != NULL);
+}
+
+TEST_F(EFUArgsTest, InvalidArg) {
+  int myargc = 2;
+  const char *myargv[] = {"progname", "--nosuchoption"};
+
+  EFUArgs efu_args;
+  auto ret = efu_args.parseArgs(myargc, (char **)myargv);
+  ASSERT_EQ(ret, EFUArgs::Status::ERREXIT);
+
+  ASSERT_EQ(myargc, 2);
+  ASSERT_TRUE(myargv != NULL);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
