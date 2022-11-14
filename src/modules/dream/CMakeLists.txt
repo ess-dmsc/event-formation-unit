@@ -38,8 +38,6 @@ set(dream_SRC
 set(dream_LIB efu_essreadout)
 create_executable(dream)
 
-add_dependencies(dream efu_essreadout)
-
 #=============================================================================
 # dream detector module test
 #=============================================================================

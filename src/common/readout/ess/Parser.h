@@ -37,15 +37,15 @@ class Parser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType {
-    Reserved   = 0x00,
+    Reserved = 0x00,
     TTLMonitor = 0x10,
-    LOKI       = 0x30,
-    BIFROST    = 0x34,
-    MIRACLES   = 0x38,
-    CSPEC      = 0x40,
-    NMX        = 0x44,
-    FREIA      = 0x48,
-    DREAM      = 0x60
+    LOKI = 0x30,
+    BIFROST = 0x34,
+    MIRACLES = 0x38,
+    CSPEC = 0x40,
+    NMX = 0x44,
+    FREIA = 0x48,
+    DREAM = 0x60
   };
 
   uint64_t NextSeqNum[MaxOutputQueues];

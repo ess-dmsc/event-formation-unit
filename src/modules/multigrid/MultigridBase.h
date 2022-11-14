@@ -67,4 +67,4 @@ protected:
   bool init_config();
   void process_events(EV42Serializer &ev42serializer);
 };
-} // namespace
+} // namespace Multigrid

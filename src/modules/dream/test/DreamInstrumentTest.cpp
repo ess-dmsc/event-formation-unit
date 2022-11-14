@@ -12,7 +12,7 @@
 using namespace Dream;
 using HeaderV0 = ESSReadout::Parser::PacketHeaderV0;
 
-std::string ConfigFile {"deleteme_dreaminstrumenttest.json"};
+std::string ConfigFile{"deleteme_dreaminstrumenttest.json"};
 std::string ConfigStr = R"(
   {
     "Detector" : "DREAM",
@@ -48,7 +48,7 @@ TEST_F(DreamInstrumentTest, Constructor) {
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, Settings);
-  DataParser::DreamReadout Data{0,0,0,0,0,0,0,0,0};
+  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }

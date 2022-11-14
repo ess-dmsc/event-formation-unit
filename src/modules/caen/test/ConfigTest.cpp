@@ -31,7 +31,7 @@ std::string InvalidConfigStr = R"(
 std::string InvalidConfigIIFile{"deleteme_caen_invalidconfigii.json"};
 std::string InvalidConfigIIStr = R"(
 {
-  "Detector": "LoKI",
+  "Detector": "loki",
 
   "PanelConfig" : [
     { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
@@ -55,7 +55,7 @@ std::string BadDetectorStr = R"(
 std::string ValidConfigFile{"deleteme_caen_valid_conf.json"};
 std::string ValidConfigStr = R"(
 {
-  "Detector" : "LoKI",
+  "Detector" : "loki",
 
   "StrawResolution" : 256,
 

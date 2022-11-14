@@ -8,7 +8,7 @@
 #include <efu/MainProg.h>
 #include <modules/perfgen/PerfGenBase.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   MainProg Main("perfgen", argc, argv);
 
   auto Detector = new PerfGen::PerfGenBase(Main.DetectorSettings);

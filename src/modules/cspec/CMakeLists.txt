@@ -36,9 +36,6 @@ set(cspec_LIB
   )
 create_executable(cspec)
 
-add_dependencies(cspec efu_reduction efu_essreadout)
-
-
 set(CSPECBaseTest_INC
   ${cspec_common_inc}
   ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h

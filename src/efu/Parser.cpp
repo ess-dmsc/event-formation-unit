@@ -138,7 +138,7 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
-                     detector->detectorname());
+                     detector->EFUSettings.DetectorName.c_str());
 
   return Parser::OK;
 }

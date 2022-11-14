@@ -29,8 +29,6 @@ set(ttlmonitor_SRC
 set(ttlmonitor_LIB efu_essreadout)
 create_executable(ttlmonitor)
 
-add_dependencies(ttlmonitor efu_essreadout)
-
 
 #
 set(TTLMonitorBaseTest_INC

@@ -8,7 +8,7 @@
 #include <efu/MainProg.h>
 #include <modules/cspec/CSPECBase.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   MainProg Main("cspec", argc, argv);
 
   auto Detector = new Cspec::CspecBase(Main.DetectorSettings);

@@ -49,8 +49,7 @@ void client_thread(int command) {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings)
-      : Detector("No name", settings){};
+  explicit TestDetector(BaseSettings settings) : Detector(settings){};
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 

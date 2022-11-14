@@ -15,8 +15,7 @@
 
 class MultigridBaseStandIn : public Multigrid::MultigridBase {
 public:
-  MultigridBaseStandIn(BaseSettings Settings)
-      : MultigridBase(Settings){};
+  MultigridBaseStandIn(BaseSettings Settings) : MultigridBase(Settings){};
   ~MultigridBaseStandIn() = default;
   using Detector::Threads;
   using MultigridBase::Counters;

@@ -28,9 +28,6 @@ set(freia_SRC
 set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
 
-add_dependencies(cspec efu_reduction efu_essreadout)
-
-
 #
 set(FreiaBaseTest_INC
   ${freia_common_inc}

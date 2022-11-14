@@ -19,7 +19,7 @@ public:
   /// \param args Arguments to be passed to threads
   /// \param cpus vector of three cpuids for launching input, processing and
   /// output threads.
-  Launcher(){}
+  Launcher() {}
 
   void launchThreads(std::shared_ptr<Detector> &detector);
 

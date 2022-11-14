@@ -24,6 +24,7 @@
 // All settings should be initialized.
 // clang-format off
 struct BaseSettings {
+  std::string   DetectorName         {""};
   std::string   DetectorAddress      {"0.0.0.0"};
   std::uint16_t DetectorPort         {9000};
   std::uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
@@ -57,7 +58,6 @@ struct BaseSettings {
 };
 // clang-format on
 
-
 struct ThreadInfo {
   std::function<void(void)> func;
   std::string name;
@@ -69,8 +69,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(std::string Name, BaseSettings settings)
-      : EFUSettings(settings), Stats(), DetectorName(Name){};
+  Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
 
   virtual ~Detector() = default;
 
@@ -82,8 +81,6 @@ public:
 
   /// \brief document
   virtual std::string &statname(size_t index) { return Stats.name(index); }
-
-  virtual const char *detectorname() { return DetectorName.c_str(); }
 
   /// \brief return the current status mask (should be set in pipeline)
   virtual uint32_t runtimestat() { return RuntimeStatusMask; }
@@ -109,6 +106,9 @@ public:
     }
   };
 
+public:
+  BaseSettings EFUSettings;
+
 protected:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries{2000};
@@ -117,7 +117,8 @@ protected:
 
   /// Shared between input_thread and processing_thread
   memory_sequential_consistent::CircularFifo<unsigned int,
-      EthernetBufferMaxEntries> InputFifo;
+                                             EthernetBufferMaxEntries>
+      InputFifo;
   /// \todo the number 11 is a workaround
   RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
@@ -127,7 +128,8 @@ protected:
   // it is not critical that this is precise.
   const int TSC_MHZ = 2900;
 
-  void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
+  void AddThreadFunction(std::function<void(void)> &func,
+                         std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
 
@@ -138,14 +140,9 @@ protected:
   ThreadList Threads;
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
-  BaseSettings EFUSettings;
   Statistics Stats;
   uint32_t RuntimeStatusMask{0};
-
-private:
-  std::string DetectorName;
 };
-
 
 /// \brief Base class for the creation of detector factories.
 class DetectorFactoryBase {

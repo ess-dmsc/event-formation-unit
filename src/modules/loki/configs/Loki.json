@@ -1,6 +1,6 @@
 
 {
-  "Detector": "LoKI",
+  "Detector": "loki",
 
   "StrawResolution" : 512,
 

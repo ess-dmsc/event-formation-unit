@@ -19,7 +19,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(CDTGeometryTest, PixelOffsets) {
   ASSERT_EQ(geometry.getPixelOffset(Config::FwEndCap), 0);
   ASSERT_EQ(geometry.getPixelOffset(Config::BwEndCap), 71680);
@@ -41,7 +40,6 @@ TEST_F(CDTGeometryTest, GetPixel) {
   Parms.P2.Rotate = 0;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

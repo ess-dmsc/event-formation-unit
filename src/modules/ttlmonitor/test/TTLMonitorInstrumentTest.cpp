@@ -132,8 +132,7 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    ttlmonitor =
-        new TTLMonitorInstrument(counters, Settings, serializers);
+    ttlmonitor = new TTLMonitorInstrument(counters, Settings, serializers);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}

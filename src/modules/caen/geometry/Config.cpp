@@ -31,10 +31,11 @@ Config::Config(std::string ConfigFile) {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if ((InstrumentName != "LoKI") and (InstrumentName != "BIFROST") and (InstrumentName != "Miracles")) {
+  if ((InstrumentName != "loki") and (InstrumentName != "bifrost") and
+      (InstrumentName != "miracles")) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error(
-        "Inconsistent Json file - invalid name, expected LoKI, BIFROST, or Miracles");
+    throw std::runtime_error("Inconsistent Json file - invalid name, expected "
+                             "loki, bifrost, or miracles");
   }
 
   try {
@@ -86,7 +87,7 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Info, "MaxTube: {}", MaxTube);
     XTRACE(INIT, DEB, "MaxTube: %u", MaxTube);
 
-    if (InstrumentName == "LoKI") {
+    if (InstrumentName == "loki") {
       auto PanelConfig = root["PanelConfig"];
       for (auto &Mapping : PanelConfig) {
         XTRACE(INIT, DEB, "Loading panel");

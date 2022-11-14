@@ -9,14 +9,12 @@
 
 #pragma once
 
-#include <string>
 #include <common/debug/Log.h>
+#include <string>
 
 class Graylog {
 public:
-  ~Graylog() {
-    EmptyGraylogMessageQueue();
-  };
+  ~Graylog() { EmptyGraylogMessageQueue(); };
 
   static std::string ConsoleFormatter(const Log::LogMessage &Msg);
 
@@ -24,12 +22,6 @@ public:
 
   void EmptyGraylogMessageQueue();
 
-  void AddLoghandlerForNetwork(
-      std::string DetectorName,
-      std::string FileName,
-      int LogLevel,
-      std::string Address,
-      int Port
-    );
-
+  void AddLoghandlerForNetwork(std::string DetectorName, std::string FileName,
+                               int LogLevel, std::string Address, int Port);
 };

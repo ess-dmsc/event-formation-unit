@@ -68,10 +68,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "ring %u, fen %u, time: 0x%08x %08x, OM %3u ,"
+    XTRACE(DATA, DEB,
+           "ring %u, fen %u, time: 0x%08x %08x, OM %3u ,"
            "Cathode 0x%3u Anode 0x%3u",
-           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->OM, Data->Cathode, Data->Anode);
+           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow, Data->OM,
+           Data->Cathode, Data->Anode);
 
     ParsedReadouts++;
     Stats.Readouts++;
@@ -83,4 +84,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Loki
+} // namespace Dream

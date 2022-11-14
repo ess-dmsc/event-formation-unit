@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <common/debug/Trace.h>
 #include <common/JsonFile.h>
+#include <common/debug/Trace.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -24,28 +24,26 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum ModuleType {BwEndCap, FwEndCap, Mantle, HR, SANS};
-  std::map<std::string, ModuleType> ModuleTypeMap = {
-    {"BwEndCap", BwEndCap},
-    {"FwEndCap", FwEndCap},
-    {"Mantle",   Mantle},
-    {"HR",       HR},
-    {"SANS",     SANS}
-  };
+  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS };
+  std::map<std::string, ModuleType> ModuleTypeMap = {{"BwEndCap", BwEndCap},
+                                                     {"FwEndCap", FwEndCap},
+                                                     {"Mantle", Mantle},
+                                                     {"HR", HR},
+                                                     {"SANS", SANS}};
 
   struct ModuleParms {
     bool Initialised{false};
     ModuleType Type;
     union {
-      int Index; // for Cuboids
-      int MU; // for Mantle
+      int Index;  // for Cuboids
+      int MU;     // for Mantle
       int Sector; // for Endcaps
     } P1;
     union {
       int Index;
       int Cassette; // for Mantle
       int SumoPair; // for endcaps
-      int Rotate; // for Cuboids
+      int Rotate;   // for Cuboids
     } P2;
   };
 
@@ -55,7 +53,7 @@ public:
   };
 
   //
-  Config() {};
+  Config(){};
 
   // load file into json object and apply
   void loadAndApply();

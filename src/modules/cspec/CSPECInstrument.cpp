@@ -25,10 +25,9 @@ namespace Cspec {
 
 /// \brief load configuration and calibration files
 CSPECInstrument::CSPECInstrument(struct Counters &counters,
-                                 BaseSettings & settings,
+                                 BaseSettings &settings,
                                  EV42Serializer *serializer)
-    : counters(counters), Settings(settings),
-      Serializer(serializer) {
+    : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
         Settings.DumpFilePrefix + "cspec_" + timeString();

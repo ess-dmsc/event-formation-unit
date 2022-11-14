@@ -9,7 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <modules/caen/geometry/MiraclesGeometry.h>
+#include <modules/miracles/geometry/MiraclesGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
