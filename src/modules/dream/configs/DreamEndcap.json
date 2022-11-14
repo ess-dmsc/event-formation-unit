@@ -2,7 +2,7 @@
 {
   "Detector": "DREAM",
 
-  "MaxPulseTimeNS" : 5000000000,
+  "MaxPulseTimeDiffNS" : 5000000000,
 
   "Config" : [
     { "Ring" :  0, "FEN":  0, "Type": "BwEndCap"}

@@ -27,7 +27,7 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 
   DreamConfiguration.loadAndApply();
 
-  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 }
 
 uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,

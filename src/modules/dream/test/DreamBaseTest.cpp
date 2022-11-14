@@ -19,7 +19,7 @@ std::string dreamjson = R"(
   {
     "Detector" : "DREAM",
 
-    "MaxPulseTimeNS" : 357142855
+    "MaxPulseTimeDiffNS" : 357142855
   },
 
   "Config" : [
