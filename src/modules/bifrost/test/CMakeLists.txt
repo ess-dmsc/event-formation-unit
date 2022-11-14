@@ -5,7 +5,7 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/caen/configs/Loki.json" ABSOLUTE)
+get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
 
 ##
 ## Pure unit tests

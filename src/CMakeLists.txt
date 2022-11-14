@@ -49,7 +49,7 @@ get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.jso
 get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 get_filename_component(TTLMON_CFG_FILE "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamon.json" ABSOLUTE)
 get_filename_component(NMX_CFG_FILE "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUTE)
-get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/caen/configs/STFCTestII.json" ABSOLUTE)
+get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTestII.json" ABSOLUTE)
 
 
 add_custom_target(copycfgs
