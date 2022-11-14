@@ -19,7 +19,6 @@ public:
   CaenBase(BaseSettings const &Settings);
   ~CaenBase() = default;
 
-  void inputThread();
   void processingThread();
 
 protected:

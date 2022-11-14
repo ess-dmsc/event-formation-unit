@@ -115,7 +115,7 @@ public:
 
 TEST_F(CSPECBaseTest, Constructor) {
   CSPECBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.DCounters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
@@ -129,8 +129,8 @@ TEST_F(CSPECBaseTest, DataReceive) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
+  EXPECT_EQ(Readout.DCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.DCounters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
             2); // number of readouts dummyreadout
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
@@ -147,8 +147,8 @@ TEST_F(CSPECBaseTest, DataReceiveBadHeader) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, dummyreadout.size());
+  EXPECT_EQ(Readout.DCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.DCounters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
             0); // no readouts as header is bad

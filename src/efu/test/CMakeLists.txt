@@ -25,19 +25,10 @@ set(ServerTest_SRC
 create_test_executable(ServerTest)
 
 #
-set(ParserTestLibrary_SRC
-  ParserTest.cpp
-)
-set(ParserTestLibrary_INC
-)
-add_library(ParserTestLibrary STATIC ${ParserTestLibrary_SRC})
-
-#
 set(ParserTest_SRC
   ../Parser.cpp
 )
 set(ParserTest_INC
   ../Parser.h
-)
-set(ParserTest_LIB ParserTestLibrary)
+  )
 create_test_executable(ParserTest)

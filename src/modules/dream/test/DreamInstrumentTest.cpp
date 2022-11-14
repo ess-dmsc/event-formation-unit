@@ -42,7 +42,6 @@ protected:
 /// Test cases below
 TEST_F(DreamInstrumentTest, Constructor) {
   DreamInstrument Dream(counters, Settings);
-  ASSERT_EQ(Dream.counters.RxPackets, 0);
   ASSERT_EQ(Dream.counters.Readouts, 0);
 }
 

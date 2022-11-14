@@ -14,14 +14,12 @@ public:
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
-DetectorFactory<TestDetector> Factory;
-
 /** Test fixture and tests below */
 
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  void SetUp() override { det = Factory.create(settings); }
+  void SetUp() override { det = std::shared_ptr<Detector>(new Detector(settings)); }
 
   void TearDown() override {}
 
@@ -33,7 +31,7 @@ TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, StatAPI) {
   settings.DetectorName = "no detector";
-  det = Factory.create(settings);
+  det = std::shared_ptr<Detector>(new Detector(settings));
   int res = det->statsize();
   ASSERT_EQ(res, 0);
 
@@ -51,7 +49,7 @@ TEST_F(DetectorTest, StatAPI) {
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
   auto &threadlist = det->GetThreadInfo();
-  ASSERT_EQ(0, threadlist.size());
+  ASSERT_EQ(1, threadlist.size());
 }
 
 TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
