@@ -53,3 +53,16 @@ set(CaenInstrumentTest_SRC
 
 )
 create_test_executable(CaenInstrumentTest)
+
+set(CaenBaseTest_INC
+  ${caen_common_inc}
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+)
+set(CaenBaseTest_SRC
+  ${caen_common_src}
+  test/CaenBaseTest.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+)
+create_test_executable(CaenBaseTest)
