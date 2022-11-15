@@ -1,9 +1,9 @@
-/* Copyright (C) 2016-2022 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Factory and Class for dynamically loadable detector types
+/// \brief ESS Detector interface
 ///
 //===----------------------------------------------------------------------===//
 
@@ -47,17 +47,17 @@ struct BaseSettings {
   std::uint64_t UpdateIntervalSec    {1};
   std::uint32_t StopAfterSec         {0xffffffffU};
   bool          NoHwCheck            {false};
-  bool          TestImage            {false};
-  std::uint32_t TestImageUSleep      {10};
-
-  // Used to be detector module specific
   std::string   CalibFile            {""};
   std::string   DumpFilePrefix       {""};
+
   // multigrid
   bool          MultiGridMonitor     {true};
   // ttlmonitor
   int           TTLMonitorReduceEvents{1};
   int           TTLMonitorNumberOfMonitors{1};
+  // perfgen
+  bool          TestImage            {false};
+  std::uint32_t TestImageUSleep      {10};
   // legacy module support
   bool          MultibladeAlignment{false};
 };
@@ -76,18 +76,15 @@ public:
     int64_t RxBytes{0};
     int64_t FifoPushErrors{0};
     int64_t RxIdle{0};
-  } DCounters;
+  } ITCounters; // Input Thread Counters
 
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings) : EFUSettings(settings), Stats(){
-    std::function<void()> inputFunc = [this]() { inputThread(); };
-    AddThreadFunction(inputFunc, "input");
-  };
+  Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
 
+  /// Receiving UDP data is now common across all detectors
   void inputThread() {
-    /** Connection setup */
     XTRACE(INPUT, DEB, "Starting inputThread");
     Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                            EFUSettings.DetectorPort);
@@ -108,16 +105,16 @@ public:
                                     RxRingbuffer.getMaxBufSize())) > 0) {
         RxRingbuffer.setDataLength(rxBufferIndex, readSize);
         XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
-        DCounters.RxPackets++;
-        DCounters.RxBytes += readSize;
+        ITCounters.RxPackets++;
+        ITCounters.RxBytes += readSize;
 
         if (InputFifo.push(rxBufferIndex) == false) {
-          DCounters.FifoPushErrors++;
+          ITCounters.FifoPushErrors++;
         } else {
           RxRingbuffer.getNextBuffer();
         }
       } else {
-        DCounters.RxIdle++;
+        ITCounters.RxIdle++;
       }
     }
     XTRACE(INPUT, ALW, "Stopping input thread.");

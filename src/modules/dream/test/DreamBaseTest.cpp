@@ -50,7 +50,7 @@ public:
 
 TEST_F(DreamBaseTest, Constructor) {
   DreamBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.DCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 /// | ESS Header    |
@@ -114,8 +114,8 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.DCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.DCounters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
@@ -134,8 +134,8 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.DCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.DCounters.RxBytes, TestPacket3.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket3.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);

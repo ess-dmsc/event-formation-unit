@@ -36,9 +36,9 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", DCounters.RxPackets);
-  Stats.create("receive.bytes", DCounters.RxBytes);
-  Stats.create("receive.dropped", DCounters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
@@ -64,7 +64,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
 
   //
-  Stats.create("thread.input_idle", DCounters.RxIdle);
+  Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
@@ -81,6 +81,8 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     DreamBase::processingThread();
@@ -112,7 +114,7 @@ void DreamBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
 
-  RuntimeStat RtStat({DCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -152,7 +154,7 @@ void DreamBase::processingThread() {
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {DCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 

@@ -35,9 +35,9 @@ CaenBase::CaenBase(BaseSettings const &settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", DCounters.RxPackets);
-  Stats.create("receive.bytes", DCounters.RxBytes);
-  Stats.create("receive.dropped", DCounters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
@@ -79,7 +79,7 @@ CaenBase::CaenBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
   // System counters
-  Stats.create("thread.input_idle", DCounters.RxIdle);
+  Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
 
@@ -92,6 +92,8 @@ CaenBase::CaenBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     CaenBase::processingThread();
@@ -137,7 +139,7 @@ void CaenBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({DCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -187,7 +189,7 @@ void CaenBase::processingThread() {
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {DCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Serializer->produce();
       SerializerII->produce();

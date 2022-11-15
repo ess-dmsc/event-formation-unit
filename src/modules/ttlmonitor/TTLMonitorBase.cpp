@@ -42,9 +42,9 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   // clang-format off
 
   // Rx and Tx stats
-  Stats.create("receive.packets", DCounters.RxPackets);
-  Stats.create("receive.bytes", DCounters.RxBytes);
-  Stats.create("receive.dropped", DCounters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -91,7 +91,7 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
 
   //
-  Stats.create("thread.receive_idle", DCounters.RxIdle);
+  Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   /// \todo below stats are common to all detectors
@@ -101,6 +101,8 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   // clang-format on
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     TTLMonitorBase::processing_thread();
@@ -140,7 +142,7 @@ void TTLMonitorBase::processing_thread() {
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat(
-      {DCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -160,13 +162,13 @@ void TTLMonitorBase::processing_thread() {
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
-               DCounters.RxPackets);
+               ITCounters.RxPackets);
       }
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
-               DCounters.RxPackets);
+               ITCounters.RxPackets);
         // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
@@ -187,7 +189,7 @@ void TTLMonitorBase::processing_thread() {
     }
 
     RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-        {DCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+        {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
     for (auto &serializer : Serializers) {
       if (serializer.ProduceTimer.timeout()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");

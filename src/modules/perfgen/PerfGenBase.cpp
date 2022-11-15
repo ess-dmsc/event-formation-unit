@@ -56,7 +56,7 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   std::function<void()> processingFunc = [this]() {
     PerfGenBase::processingThread();
   };
-  Detector::AddThreadFunction(processingFunc, "processing");
+  Detector::AddThreadFunction(processingFunc, "generator");
 }
 
 void PerfGenBase::processingThread() {
@@ -115,7 +115,7 @@ void PerfGenBase::processingThread() {
     TimeOfFlight = 0;
   }
   // \todo flush everything here
-  XTRACE(INPUT, ALW, "Stopping processing thread.");
+  XTRACE(INPUT, ALW, "Stopping generator thread.");
   return;
 }
 
