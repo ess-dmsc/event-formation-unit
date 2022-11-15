@@ -4,6 +4,8 @@
 # bifrost detector module and base test
 #=============================================================================
 
+add_subdirectory(test)
+
 
 set(bifrost_SRC main.cpp)
 set(bifrost_LIB efu_reduction caen_common efu_essreadout)
