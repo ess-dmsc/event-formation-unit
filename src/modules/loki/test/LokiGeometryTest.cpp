@@ -1,7 +1,7 @@
 /** Copyright (C) 2019-2022 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <caen/geometry/LokiGeometry.h>
+#include <loki/geometry/LokiGeometry.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
 

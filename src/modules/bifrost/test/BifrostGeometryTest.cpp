@@ -6,7 +6,7 @@
 /// \brief Unit test for Bifrost position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <caen/geometry/BifrostGeometry.h>
+#include <bifrost/geometry/BifrostGeometry.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Caen;

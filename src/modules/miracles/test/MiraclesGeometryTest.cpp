@@ -8,7 +8,7 @@
 /// \brief Unit test for Miracles position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <caen/geometry/MiraclesGeometry.h>
+#include <miracles/geometry/MiraclesGeometry.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Caen;
