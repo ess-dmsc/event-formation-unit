@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 #include <bifrost/geometry/BifrostGeometry.h>
 #include <common/testutils/TestBase.h>
+#include <caen/readout/DataParser.h>
 
 using namespace Caen;
 
@@ -15,9 +16,15 @@ class BifrostGeometryTest : public TestBase {
 protected:
   Config CaenConfiguration;
   BifrostGeometry *geom;
+  int64_t RingErrors{0};
+  int64_t FENErrors{0};
+  int64_t TubeErrors{0};
   void SetUp() override {
     geom = new BifrostGeometry(CaenConfiguration);
     geom->NPos = 300;
+    geom->Stats.RingErrors = &RingErrors;
+    geom->Stats.FENErrors = &FENErrors;
+    geom->Stats.TubeErrors = &TubeErrors;
   }
   void TearDown() override {}
 };
@@ -56,6 +63,32 @@ TEST_F(BifrostGeometryTest, Position) {
   ASSERT_EQ(geom->posAlongTube(0, 0), -1);
   ASSERT_EQ(geom->posAlongTube(0, 1), 0);
   ASSERT_EQ(geom->posAlongTube(1, 0), 299);
+}
+
+TEST_F(BifrostGeometryTest, Validate) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_TRUE(geom->validateData(readout));
+
+  readout.RingId = 10;
+  ASSERT_FALSE(geom->validateData(readout));
+  ASSERT_EQ(RingErrors, 1);
+  ASSERT_EQ(FENErrors, 0);
+  ASSERT_EQ(TubeErrors, 0);
+
+  readout.RingId = 0;
+  readout.FENId = 20;
+  ASSERT_FALSE(geom->validateData(readout));
+  ASSERT_EQ(RingErrors, 1);
+  ASSERT_EQ(FENErrors, 1);
+  ASSERT_EQ(TubeErrors, 0);
+
+  readout.RingId = 0;
+  readout.FENId = 0;
+  readout.TubeId = 20;
+  ASSERT_FALSE(geom->validateData(readout));
+  ASSERT_EQ(RingErrors, 1);
+  ASSERT_EQ(FENErrors, 1);
+  ASSERT_EQ(TubeErrors, 1);
 }
 
 int main(int argc, char **argv) {
