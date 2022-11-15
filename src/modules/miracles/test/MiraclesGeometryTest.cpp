@@ -30,6 +30,7 @@ TEST_F(MiraclesGeometryTest, Corner) {
 
   ASSERT_EQ(47, geom->xCoord(1, 11, 5, 0));
   ASSERT_EQ(0, geom->yCoord(1, 5, 0));
+  ASSERT_EQ(100, geom->yCoord(2, 5, 0));
 }
 
 int main(int argc, char **argv) {
