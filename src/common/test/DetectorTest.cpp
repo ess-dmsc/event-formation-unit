@@ -49,7 +49,7 @@ TEST_F(DetectorTest, StatAPI) {
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
   auto &threadlist = det->GetThreadInfo();
-  ASSERT_EQ(1, threadlist.size());
+  ASSERT_EQ(0, threadlist.size());
 }
 
 TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
