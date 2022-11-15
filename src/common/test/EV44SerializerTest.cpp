@@ -68,13 +68,13 @@ TEST_F(EV44SerializerTest, SerPulseTime) {
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
 
-  auto events = GetEvent44Message(flatbuffer);
+  // auto events = GetEvent44Message(flatbuffer);
   ///\todo check contents of reference_time, it is a flatbuffers vector
   // ASSERT_NE(events->reference_time()->begin()->, 12345);
 
   memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev44");
-  events = GetEvent44Message(flatbuffer);
+  // events = GetEvent44Message(flatbuffer);
   ///\todo, work out why this test fails when all other source_name tests pass
   // EXPECT_EQ(events->source_name()->str(), "nameless");
   // ASSERT_EQ(events->reference_time()->front, 12345);
