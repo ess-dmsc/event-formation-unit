@@ -31,7 +31,8 @@ std::vector<std::string> commands_badargs {
   "CMD_GET 9999",
   "VERSION_GET 1",
   "DETECTOR_INFO_GET 1",
-  "EXIT 1"
+  "EXIT 1",
+  "RUNTIMESTATS 1"
 };
 
 // These commands should 'fail' when the detector is not loaded
