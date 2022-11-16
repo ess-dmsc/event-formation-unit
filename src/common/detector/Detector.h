@@ -108,6 +108,7 @@ public:
 
 public:
   BaseSettings EFUSettings;
+  Statistics Stats;
 
 protected:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
@@ -140,7 +141,6 @@ protected:
   ThreadList Threads;
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
-  Statistics Stats;
   uint32_t RuntimeStatusMask{0};
 };
 
