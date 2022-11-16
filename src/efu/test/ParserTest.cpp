@@ -45,10 +45,8 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
-    std::cout << "TestDetector" << std::endl;
-  };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings) {};
+  ~TestDetector() {};
 };
 
 DetectorFactory<TestDetector> Factory;
@@ -227,13 +225,14 @@ TEST_F(ParserTest, CmdGet) {
   ASSERT_EQ(res, -Parser::OK);
 }
 
-// TEST_F(ParserTest, ExitCommand) {
-//   const char *cmd = "EXIT";
-//   std::memcpy(input, cmd, strlen(cmd));
-//   int res = parser->parse(input, strlen(cmd), output, &obytes);
-//   ASSERT_EQ(res, -Parser::OK);
-//   ASSERT_EQ(efu_args->proc_cmd, efu_args->thread_cmd::EXIT);
-// }
+TEST_F(ParserTest, CmdRuntimetats) {
+  const char *cmd = "RUNTIMESTATS";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  MESSAGE() << output << '\n';
+  ASSERT_EQ(0, strcmp("RUNTIMESTATS 0", output));
+  ASSERT_EQ(res, -Parser::OK);
+}
 
 int main(int argc, char **argv) {
   int __attribute__((unused)) ret = chdir("src");

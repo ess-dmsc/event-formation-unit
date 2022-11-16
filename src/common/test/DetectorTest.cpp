@@ -9,9 +9,8 @@
 class TestDetector : public Detector {
 public:
   explicit TestDetector(BaseSettings settings) : Detector(settings) {
-    std::cout << "TestDetector" << std::endl;
   };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  ~TestDetector() {};
 };
 
 DetectorFactory<TestDetector> Factory;
