@@ -53,11 +53,6 @@ TEST_F(DetectorTest, ThreadInfoNoThreads) {
   ASSERT_EQ(0, threadlist.size());
 }
 
-TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
-  auto commandmap = det->GetDetectorCommandFunctions();
-  ASSERT_EQ(0, commandmap.size());
-}
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

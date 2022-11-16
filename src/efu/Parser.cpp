@@ -226,10 +226,6 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
     return runtime_stats(cmd, resp, nrChars, detector);
   });
 
-  auto DetCmdFuncsMap = detector->GetDetectorCommandFunctions();
-  for (auto &FuncObj : DetCmdFuncsMap) {
-    registercmd(FuncObj.first, FuncObj.second);
-  }
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {
