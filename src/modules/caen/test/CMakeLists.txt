@@ -35,7 +35,7 @@ target_compile_definitions(CaenConfigTest PRIVATE CAEN_FULL="${CAEN_FULL}")
 ##
 set(CaenDataParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
+  ${ESS_COMMON_DIR}/readout/ess/Parser.h)
 set(CaenDataParserTest_SRC
   ../readout/DataParser.cpp
   DataParserTest.cpp)
@@ -52,8 +52,8 @@ create_test_executable(CaenDataParserTest)
 ##
 set(CombinedParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
+  ${ESS_COMMON_DIR}/readout/ess/Parser.h
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ../generators/LokiReadoutGenerator.h
   )
@@ -61,8 +61,8 @@ set(CombinedParserTest_SRC
   CombinedParserTest.cpp
   ../generators/LokiReadoutGenerator.cpp
   ../readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
+  ${ESS_COMMON_DIR}/readout/ess/Parser.cpp
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   )
 create_test_executable(CombinedParserTest)

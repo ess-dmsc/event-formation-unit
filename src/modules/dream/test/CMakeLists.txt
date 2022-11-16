@@ -59,7 +59,7 @@ create_test_executable(DreamInstrumentTest)
 
 set(DreamDataParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
+  ${ESS_COMMON_DIR}/readout/ess/Parser.h)
 set(DreamDataParserTest_SRC
   ../readout/DataParser.cpp
   DataParserTest.cpp)
