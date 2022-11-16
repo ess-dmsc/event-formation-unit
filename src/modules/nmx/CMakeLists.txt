@@ -31,14 +31,14 @@ create_executable(nmx)
 
 set(NMXBaseTest_INC
   ${nmx_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
 )
 set(NMXBaseTest_SRC
   test/NMXBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   ${nmx_common_src}
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
 )
 create_test_executable(NMXBaseTest)
 
@@ -47,11 +47,11 @@ create_test_executable(NMXBaseTest)
 
 set(NMXInstrumentTest_INC
   ${nmx_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(NMXInstrumentTest_SRC
   ${nmx_common_src}
   test/NMXInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
 )
 create_test_executable(NMXInstrumentTest)

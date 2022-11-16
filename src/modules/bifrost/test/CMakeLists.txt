@@ -13,14 +13,14 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 
 set(BifrostGeometryTest_INC 
     ../geometry/BifrostGeometry.h
-    ../geometry/Config.h
-    ../geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Config.h
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
 )
 set(BifrostGeometryTest_SRC 
     BifrostGeometryTest.cpp
     ../geometry/BifrostGeometry.cpp
-    ../geometry/Config.cpp
-    ../geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
 )
 create_test_executable(BifrostGeometryTest)
 

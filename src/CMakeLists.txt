@@ -6,6 +6,7 @@ include_directories(${VERSION_INCLUDE_DIR})
 #=============================================================================
 set(ESS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(ESS_MODULE_DIR ${ESS_SOURCE_DIR}/modules/)
+set(ESS_COMMON_DIR ${ESS_SOURCE_DIR}/common/)
 
 #=============================================================================
 # Required external libraries
