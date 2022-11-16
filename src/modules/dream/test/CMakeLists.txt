@@ -45,7 +45,7 @@ set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/geometry/Config.h
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(DreamInstrumentTest_SRC
   DreamInstrumentTest.cpp
@@ -53,7 +53,7 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   )
 create_test_executable(DreamInstrumentTest)
 
@@ -61,7 +61,7 @@ create_test_executable(DreamInstrumentTest)
 
 set(DreamDataParserTest_INC
   ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
+  ${ESS_COMMON_DIR}/readout/ess/Parser.h)
 set(DreamDataParserTest_SRC
   ../readout/DataParser.cpp
   DataParserTest.cpp)

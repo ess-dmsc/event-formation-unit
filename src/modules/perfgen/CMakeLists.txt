@@ -5,7 +5,7 @@ include_directories(.)
 #=============================================================================
 set(perfgen_INC
   PerfGenBase.h
-  ${ESS_SOURCE_DIR}/common/TestImageUdder.h
+  ${ESS_COMMON_DIR}/TestImageUdder.h
 )
 set(perfgen_SRC
   PerfGenBase.cpp
