@@ -45,7 +45,6 @@ set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/geometry/Config.h
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(DreamInstrumentTest_SRC
   DreamInstrumentTest.cpp
@@ -53,7 +52,6 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   )
 create_test_executable(DreamInstrumentTest)
 

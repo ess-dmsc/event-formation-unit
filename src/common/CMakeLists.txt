@@ -108,6 +108,20 @@ target_link_libraries(efu_common
   PUBLIC ${EFU_COMMON_LIBS}
   )
 
+
+set(TestUtilsLib_INC
+    testutils/SaveBuffer.h
+    testutils/TestUDPServer.h
+  )
+set(TestUtilsLib_SRC
+    testutils/SaveBuffer.cpp
+    testutils/TestUDPServer.cpp
+  )
+add_library(TestUtilsLib OBJECT
+  ${TestUtilsLib_INC}
+  ${TestUtilsLib_SRC}
+  )
+
 #=============================================================================
 # Tests
 #=============================================================================

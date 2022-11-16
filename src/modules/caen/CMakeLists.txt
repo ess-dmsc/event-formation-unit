@@ -43,13 +43,9 @@ endif()
 ##
 set(CaenInstrumentTest_INC
   ${caen_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(CaenInstrumentTest_SRC
   ${caen_common_src}
   test/CaenInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-
 )
 create_test_executable(CaenInstrumentTest)
