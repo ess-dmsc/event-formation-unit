@@ -10,6 +10,7 @@
 #include <fmt/format.h>
 #include <sys/types.h>
 #include <unistd.h>
+// GCOVR_EXCL_START
 
 void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
   int fd;
@@ -28,3 +29,5 @@ void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
 }
 
 void deleteFile(std::string filename) { remove(filename.c_str()); }
+
+// GCOVR_EXCL_STOP

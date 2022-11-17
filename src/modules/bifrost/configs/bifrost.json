@@ -1,0 +1,5 @@
+{
+  "Detector": "bifrost",
+  "MaxRing": 4,
+  "StrawResolution": 300
+}

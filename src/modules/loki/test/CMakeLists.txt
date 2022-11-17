@@ -17,14 +17,14 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 set(LokiGeometryTest_INC 
     ../geometry/LokiGeometry.h
     ../geometry/PanelGeometry.h
-    ${ESS_SOURCE_DIR}/modules/caen/geometry/Config.h
-    ${ESS_SOURCE_DIR}/modules/caen/geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Config.h
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
 )
 set(LokiGeometryTest_SRC 
     LokiGeometryTest.cpp
     ../geometry/LokiGeometry.cpp
-    ${ESS_SOURCE_DIR}/modules/caen/geometry/Config.cpp
-    ${ESS_SOURCE_DIR}/modules/caen/geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
 )
 create_test_executable(LokiGeometryTest)
 
@@ -44,10 +44,10 @@ create_test_executable(CaenPanelGeometryTest)
 set(CaenFullGeometryTest_INC
   LokiFullGeometryTestData.h
   ../geometry/LokiGeometry.h
-  ${ESS_SOURCE_DIR}/modules/caen/geometry/Calibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
   ../geometry/PanelGeometry.h)
 set(LokiFullGeometryTest_SRC 
   LokiFullGeometryTest.cpp
-  ${ESS_SOURCE_DIR}/modules/caen/geometry/Calibration.cpp)
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp)
 create_test_executable(LokiFullGeometryTest)
 

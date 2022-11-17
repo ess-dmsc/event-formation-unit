@@ -13,9 +13,9 @@ set(caen_common_inc
   geometry/Config.h
   geometry/Calibration.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/modules/bifrost/geometry/BifrostGeometry.h
-  ${ESS_SOURCE_DIR}/modules/loki/geometry/LokiGeometry.h
-  ${ESS_SOURCE_DIR}/modules/miracles/geometry/MiraclesGeometry.h
+  ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.h
+  ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
+  ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
   readout/DataParser.h
   )
 set(caen_common_src
@@ -23,9 +23,9 @@ set(caen_common_src
   CaenInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
-  ${ESS_SOURCE_DIR}/modules/bifrost/geometry/BifrostGeometry.cpp
-  ${ESS_SOURCE_DIR}/modules/loki/geometry/LokiGeometry.cpp
-  ${ESS_SOURCE_DIR}/modules/miracles/geometry/MiraclesGeometry.cpp
+  ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.cpp
+  ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
+  ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp
   readout/DataParser.cpp
   )
 
@@ -43,13 +43,26 @@ endif()
 ##
 set(CaenInstrumentTest_INC
   ${caen_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(CaenInstrumentTest_SRC
   ${caen_common_src}
   test/CaenInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/readout/vmm3/VMM3Config.cpp
 
 )
 create_test_executable(CaenInstrumentTest)
+
+set(CaenBaseTest_INC
+  ${caen_common_inc}
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
+)
+set(CaenBaseTest_SRC
+  ${caen_common_src}
+  test/CaenBaseTest.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
+)
+create_test_executable(CaenBaseTest)

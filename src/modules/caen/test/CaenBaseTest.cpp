@@ -41,7 +41,7 @@ std::string lokijson = R"(
 
 std::string bifrostjson = R"(
   {
-    "Detector": "BIFROST",
+    "Detector": "bifrost",
     "MaxRing": 2,
     "StrawResolution": 300
   }
@@ -49,7 +49,7 @@ std::string bifrostjson = R"(
 
 std::string miraclesjson = R"(
   {
-    "Detector": "Miracles",
+    "Detector": "miracles",
     "MaxRing": 2,
     "StrawResolution": 128
   }
@@ -179,6 +179,7 @@ std::vector<uint8_t> TestPacket2{
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorPort = 9000;
+  Settings.DetectorName = "loki";
   CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
 
@@ -195,6 +196,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
 TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.DetectorPort = 9000;
+  Settings.DetectorName = "bifrost";
   Settings.ConfigFile = "deleteme_bifrost.json";
   CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
@@ -212,6 +214,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
 
 TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.DetectorPort = 9000;
+  Settings.DetectorName = "miracles";
   Settings.ConfigFile = "deleteme_miracles.json";
   CaenBaseStandIn Readout(Settings);
   Readout.startThreads();
@@ -229,6 +232,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  Settings.DetectorName = "loki";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
@@ -255,6 +259,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
 TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_bifrost.json";
+  Settings.DetectorName = "bifrost";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
@@ -280,6 +285,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
 TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_miracles.json";
+  Settings.DetectorName = "miracles";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";

@@ -43,13 +43,13 @@ create_executable(dream)
 #=============================================================================
 set(DreamBaseTest_INC
   ${dream_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
 )
 set(DreamBaseTest_SRC
   ${dream_common_src}
   test/DreamBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
+  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
+  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
 )
 create_test_executable(DreamBaseTest)
