@@ -79,19 +79,19 @@ public:
 
 TEST_F(CaenBaseTest, LokiConstructor) {
   CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.ConfigFile = "deleteme_bifrost.json";
   CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = "deleteme_miracles.json";
   CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 
@@ -189,8 +189,8 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
@@ -207,8 +207,8 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
@@ -225,8 +225,8 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
@@ -245,8 +245,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
@@ -272,8 +272,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
@@ -298,8 +298,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
