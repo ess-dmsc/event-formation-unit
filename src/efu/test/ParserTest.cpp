@@ -52,8 +52,6 @@ public:
   ~TestDetector() {};
 };
 
-DetectorFactory<TestDetector> Factory;
-
 class ParserTest : public TestBase {
 protected:
   int64_t DummyCounter;
@@ -64,6 +62,7 @@ protected:
   int keeprunning{1};
 
   void SetUp() override {
+    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
     auto detectorif = Factory.create(settings);
     auto res = detectorif->Stats.create("dummystat", DummyCounter);
     DummyCounter = 42;

@@ -1,9 +1,9 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Factory and Class for dynamically loadable detector types
+/// \brief ESS Detector interface
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,15 +11,20 @@
 
 #include <CLI/CLI.hpp>
 #include <atomic>
+#include <common/debug/Trace.h>
 #include <common/Statistics.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
+#include <common/system/Socket.h>
 #include <functional>
 #include <map>
 #include <memory>
 #include <stdio.h>
 #include <string>
 #include <thread>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // All settings should be initialized.
 // clang-format off
@@ -42,17 +47,17 @@ struct BaseSettings {
   std::uint64_t UpdateIntervalSec    {1};
   std::uint32_t StopAfterSec         {0xffffffffU};
   bool          NoHwCheck            {false};
-  bool          TestImage            {false};
-  std::uint32_t TestImageUSleep      {10};
-
-  // Used to be detector module specific
   std::string   CalibFile            {""};
   std::string   DumpFilePrefix       {""};
+
   // multigrid
   bool          MultiGridMonitor     {true};
   // ttlmonitor
   int           TTLMonitorReduceEvents{1};
   int           TTLMonitorNumberOfMonitors{1};
+  // perfgen
+  bool          TestImage            {false};
+  std::uint32_t TestImageUSleep      {10};
   // legacy module support
   bool          MultibladeAlignment{false};
 };
@@ -66,10 +71,55 @@ struct ThreadInfo {
 
 class Detector {
 public:
+  struct {
+    int64_t RxPackets{0};
+    int64_t RxBytes{0};
+    int64_t FifoPushErrors{0};
+    int64_t RxIdle{0};
+  } ITCounters; // Input Thread Counters
+
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
   Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
+
+  /// Receiving UDP data is now common across all detectors
+  void inputThread() {
+    XTRACE(INPUT, DEB, "Starting inputThread");
+    Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                           EFUSettings.DetectorPort);
+
+    UDPReceiver dataReceiver(local);
+    dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                                EFUSettings.RxSocketBufferSize);
+    dataReceiver.printBufferSizes();
+    dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+
+    while (runThreads) {
+      int readSize;
+      unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
+
+      RxRingbuffer.setDataLength(rxBufferIndex, 0);
+      if ((readSize =
+               dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                    RxRingbuffer.getMaxBufSize())) > 0) {
+        RxRingbuffer.setDataLength(rxBufferIndex, readSize);
+        XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+        ITCounters.RxPackets++;
+        ITCounters.RxBytes += readSize;
+
+        if (InputFifo.push(rxBufferIndex) == false) {
+          ITCounters.FifoPushErrors++;
+        } else {
+          RxRingbuffer.getNextBuffer();
+        }
+      } else {
+        ITCounters.RxIdle++;
+      }
+    }
+    XTRACE(INPUT, ALW, "Stopping input thread.");
+    return;
+  }
 
   virtual ~Detector() = default;
 
@@ -106,6 +156,7 @@ public:
   BaseSettings EFUSettings;
   Statistics Stats;
 
+
 protected:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries{2000};
@@ -138,27 +189,4 @@ protected:
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
   uint32_t RuntimeStatusMask{0};
-};
-
-/// \brief Base class for the creation of detector factories.
-class DetectorFactoryBase {
-public:
-  virtual ~DetectorFactoryBase() = default;
-  virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
-};
-
-/// \brief Template for creating detector factories in dynamically loaded
-/// detector modules.
-///
-/// Usage example: DetectorFactory<Sonde> Factory;
-template <class DetectorModule>
-class DetectorFactory : public DetectorFactoryBase {
-public:
-  /// \brief Instantiates the corresponding detector module.
-  ///
-  /// This member function is only called by the efu when loading a detector
-  /// module.
-  std::shared_ptr<Detector> create(BaseSettings Settings) override {
-    return std::make_shared<DetectorModule>(Settings);
-  }
 };

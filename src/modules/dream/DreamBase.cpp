@@ -36,9 +36,9 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", Counters.RxPackets);
-  Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
@@ -64,7 +64,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
 
   //
-  Stats.create("thread.input_idle", Counters.RxIdle);
+  Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
@@ -81,9 +81,8 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
-
-  std::function<void()> inputFunc = [this]() { DreamBase::inputThread(); };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     DreamBase::processingThread();
@@ -92,45 +91,6 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   XTRACE(INIT, ALW, "Creating %d Dream Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
-}
-
-void DreamBase::inputThread() {
-  /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
-                         EFUSettings.DetectorPort);
-
-  UDPReceiver dataReceiver(local);
-  dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
-                              EFUSettings.RxSocketBufferSize);
-  dataReceiver.printBufferSizes();
-  dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
-
-  while (runThreads) {
-    int readSize;
-
-    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
-
-    RxRingbuffer.setDataLength(rxBufferIndex, 0);
-
-    if ((readSize =
-             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                  RxRingbuffer.getMaxBufSize())) > 0) {
-      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
-      Counters.RxPackets++;
-      Counters.RxBytes += readSize;
-
-      if (InputFifo.push(rxBufferIndex) == false) {
-        Counters.FifoPushErrors++;
-      } else {
-        RxRingbuffer.getNextBuffer();
-      }
-    } else {
-      Counters.RxIdle++;
-    }
-  }
-  XTRACE(INPUT, ALW, "Stopping input thread.");
-  return;
 }
 
 ///
@@ -154,7 +114,7 @@ void DreamBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
 
-  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -194,7 +154,7 @@ void DreamBase::processingThread() {
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
 

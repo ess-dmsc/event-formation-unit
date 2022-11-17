@@ -19,7 +19,6 @@ public:
   explicit DreamBase(BaseSettings const &Settings);
   ~DreamBase() = default;
 
-  void inputThread();
   void processingThread();
 
 protected:
