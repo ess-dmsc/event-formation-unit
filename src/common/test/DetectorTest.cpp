@@ -9,9 +9,8 @@
 class TestDetector : public Detector {
 public:
   explicit TestDetector(BaseSettings settings) : Detector(settings) {
-    std::cout << "TestDetector" << std::endl;
   };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  ~TestDetector() {};
 };
 
 /** Test fixture and tests below */
@@ -50,11 +49,6 @@ TEST_F(DetectorTest, StatAPI) {
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
   auto &threadlist = det->GetThreadInfo();
   ASSERT_EQ(0, threadlist.size());
-}
-
-TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
-  auto commandmap = det->GetDetectorCommandFunctions();
-  ASSERT_EQ(0, commandmap.size());
 }
 
 int main(int argc, char **argv) {

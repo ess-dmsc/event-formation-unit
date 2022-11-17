@@ -53,10 +53,11 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   auto index = atoi(cmdargs.at(1).c_str());
   std::string name;
   int64_t value;
+  // Detector stats
   if (index <= detector->statsize()) {
     name = detector->statname(index);
     value = detector->statvalue(index);
-  } else {
+  } else { // User supplied stats
     index = index - detector->statsize();
     name = stats.name(index);
     value = stats.value(index);
@@ -225,10 +226,6 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
     return runtime_stats(cmd, resp, nrChars, detector);
   });
 
-  auto DetCmdFuncsMap = detector->GetDetectorCommandFunctions();
-  for (auto &FuncObj : DetCmdFuncsMap) {
-    registercmd(FuncObj.first, FuncObj.second);
-  }
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {

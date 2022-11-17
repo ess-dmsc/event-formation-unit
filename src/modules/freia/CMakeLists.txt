@@ -31,14 +31,10 @@ create_executable(freia)
 #
 set(FreiaBaseTest_INC
   ${freia_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
 )
 set(FreiaBaseTest_SRC
   FreiaBaseTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   ${freia_common_src}
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
 )
 create_test_executable(FreiaBaseTest)
 
@@ -48,11 +44,9 @@ create_test_executable(FreiaBaseTest)
 ##
 set(FreiaInstrumentTest_INC
   ${freia_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(FreiaInstrumentTest_SRC
   ${freia_common_src}
   test/FreiaInstrumentTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
 )
 create_test_executable(FreiaInstrumentTest)

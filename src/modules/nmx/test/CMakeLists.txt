@@ -12,11 +12,9 @@ get_filename_component(NMX_FULL "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUT
 ##
 
 set(NMXConfigTest_INC
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   ../geometry/Config.h)
 set(NMXConfigTest_SRC
   ../geometry/Config.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   NMXConfigTest.cpp)
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest PRIVATE NMX_FULL="${NMX_FULL}")

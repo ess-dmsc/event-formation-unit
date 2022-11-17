@@ -33,14 +33,10 @@ create_executable(ttlmonitor)
 #
 set(TTLMonitorBaseTest_INC
   ${ttlmonitor_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
 )
 set(TTLMonitorBaseTest_SRC
   test/TTLMonitorBaseTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   ${ttlmonitor_common_src}
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
 )
 create_test_executable(TTLMonitorBaseTest)
 
@@ -50,11 +46,9 @@ create_test_executable(TTLMonitorBaseTest)
 #
 set(TTLMonitorInstrumentTest_INC
   ${ttlmonitor_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(TTLMonitorInstrumentTest_SRC
   ${ttlmonitor_common_src}
   test/TTLMonitorInstrumentTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
 )
 create_test_executable(TTLMonitorInstrumentTest)

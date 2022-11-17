@@ -137,10 +137,6 @@ public:
 
   virtual ThreadList &GetThreadInfo() { return Threads; };
 
-  virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
-    return DetectorCommands;
-  }
-
   virtual void startThreads() {
     for (auto &tInfo : Threads) {
       tInfo.thread = std::thread(tInfo.func);
@@ -158,6 +154,7 @@ public:
 
 public:
   BaseSettings EFUSettings;
+  Statistics Stats;
 
 
 protected:
@@ -191,6 +188,5 @@ protected:
   ThreadList Threads;
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
-  Statistics Stats;
   uint32_t RuntimeStatusMask{0};
 };

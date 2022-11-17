@@ -12,11 +12,9 @@ get_filename_component(CSPEC_FULL "${ESS_MODULE_DIR}/cspec/configs/cspec.json" A
 ##
 
 set(CSPECConfigTest_INC
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   ../geometry/Config.h)
 set(CSPECConfigTest_SRC
   ../geometry/Config.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(CSPECConfigTest)
 target_compile_definitions(CSPECConfigTest PRIVATE CSPEC_FULL="${CSPEC_FULL}")

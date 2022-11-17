@@ -12,11 +12,9 @@ get_filename_component(FREIA_FULL "${ESS_MODULE_DIR}/freia/configs/freia.json" A
 ##
 
 set(FreiaConfigTest_INC
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   ../geometry/Config.h)
 set(FreiaConfigTest_SRC
   ../geometry/Config.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(FreiaConfigTest)
 target_compile_definitions(FreiaConfigTest PRIVATE FREIA_FULL="${FREIA_FULL}")

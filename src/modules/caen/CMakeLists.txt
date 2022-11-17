@@ -43,26 +43,18 @@ endif()
 ##
 set(CaenInstrumentTest_INC
   ${caen_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
   )
 set(CaenInstrumentTest_SRC
   ${caen_common_src}
   test/CaenInstrumentTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
-  ${ESS_COMMON_DIR}/readout/vmm3/VMM3Config.cpp
-
 )
 create_test_executable(CaenInstrumentTest)
 
 set(CaenBaseTest_INC
   ${caen_common_inc}
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.h
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.h
 )
 set(CaenBaseTest_SRC
   ${caen_common_src}
   test/CaenBaseTest.cpp
-  ${ESS_COMMON_DIR}/testutils/SaveBuffer.cpp
-  ${ESS_COMMON_DIR}/testutils/TestUDPServer.cpp
 )
 create_test_executable(CaenBaseTest)

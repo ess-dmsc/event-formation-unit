@@ -93,7 +93,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${CONAN_LIBS_GTEST} efu_common efu_reduction efu_essreadout)
+    ${CONAN_LIBS_GTEST} efu_common efu_reduction efu_essreadout TestUtilsLib)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
