@@ -35,6 +35,6 @@ public:
   uint32_t MaxTOFNS{800000000};
   uint8_t MaxRing{0};
   uint8_t MaxFEN{0};
-  uint8_t MaxTube{0};
+  uint8_t MaxTube{14};
 };
 } // namespace Caen
