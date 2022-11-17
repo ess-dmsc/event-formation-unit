@@ -63,7 +63,6 @@ protected:
 
   void SetUp() override {
     auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
-    auto detectorif = Factory.create(settings);
     auto res = detectorif->Stats.create("dummystat", DummyCounter);
     DummyCounter = 42;
     printf("stats.create() returns %d\n", res);
