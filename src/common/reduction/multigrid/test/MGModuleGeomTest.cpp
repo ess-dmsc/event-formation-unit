@@ -11,6 +11,19 @@
 
 #include <common/reduction/multigrid/ModuleGeometry.h>
 
+auto ModuleConfig = R"(
+{
+  "num_grids" : 140,
+  "num_wires" : 96,
+  "z_range" : 16,
+  "flipped_x" : true,
+  "flipped_z" : true,
+  "x_offset" : 42,
+  "y_offset" : 3,
+  "z_offset" : 50
+}
+)"_json;
+
 class MGModuleGeomTest : public TestBase {
 protected:
   Multigrid::ModuleGeometry MgGeom;
@@ -38,6 +51,15 @@ TEST_F(MGModuleGeomTest, XFromWire) {
   ASSERT_EQ(MgGeom.x_from_wire(0), 3);
 }
 
+
+TEST_F(MGModuleGeomTest, XZRange) {
+  ASSERT_EQ(MgGeom.z_range(), 20);
+  ASSERT_EQ(MgGeom.x_range(), 4);
+  MgGeom.z_range(16);
+  ASSERT_EQ(MgGeom.z_range(), 16);
+  ASSERT_EQ(MgGeom.x_range(), 5);
+}
+
 TEST_F(MGModuleGeomTest, ZFromWire) {
   ASSERT_EQ(MgGeom.z_from_wire(0), 0);
   MgGeom.flipped_z(true);
@@ -49,6 +71,20 @@ TEST_F(MGModuleGeomTest, NumWiresGrids) {
   MgGeom.num_wires(96);
   ASSERT_EQ(MgGeom.num_grids(), 140);
   ASSERT_EQ(MgGeom.num_wires(), 96);
+}
+
+TEST_F(MGModuleGeomTest, JsonConfig) {
+  ASSERT_FALSE(MgGeom.flipped_x());
+  from_json(ModuleConfig, MgGeom);
+  ASSERT_TRUE(MgGeom.flipped_x());
+}
+
+
+TEST_F(MGModuleGeomTest, NoTestDebug) {
+  MgGeom.flipped_x(true);
+  MgGeom.flipped_z(true);
+  std::string DebugStr = MgGeom.debug();
+  ASSERT_TRUE(true);
 }
 
 
