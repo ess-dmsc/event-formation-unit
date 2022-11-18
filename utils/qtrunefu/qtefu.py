@@ -14,7 +14,6 @@ class Configuration:
         self.options = {}
         self.config = configparser.RawConfigParser()
         self.config.read(os.path.join(expanduser("~"), ".efucfg"))
-        self._load("directories", "basedir")
         self._load("directories", "efudir")
         self._load("directories", "datadir")
         self._load("servers", "grafana_" + profile)
@@ -38,7 +37,6 @@ class Configuration:
 
     #  updates the [directories] section of the ~/.efucfg file
     def update_dirs(self, dirs):
-        self.config.set("directories", "basedir", dirs.basedir)
         self.config.set("directories", "datadir", dirs.datadir)
         self.config.set("directories", "efudir", dirs.efudir)
         self.write_config()
@@ -51,14 +49,12 @@ class Configuration:
 
 # Maintain a set of directories for searching
 class Directories:
-    def __init__(self, base, efu, data):
-        self.set_dirs(base, efu, data)
+    def __init__(self, efu, data):
+        self.set_dirs(efu, data)
 
-    def set_dirs(self, base, efu, data):
-        self.basedir = base
+    def set_dirs(self, efu, data):
         self.efudir = efu
         self.datadir = data
-        self.searchdirs = [self.basedir + self.datadir, self.basedir + self.efudir]
 
 
 # search for relevant files specified by regexp
@@ -69,25 +65,23 @@ class Searcher:
     # omit files matching 'exclude', then add files matching 'match'
     # since our filenaming is somewhat inconsistent there might be
     # false positives.
-    def find_files(self, dirs, match, exclude):
+    def find_files(self, dir, match, exclude):
         results = []
-        for dir in dirs:
-            for r, s, f in os.walk(dir):
-                if re.search(exclude, r):
-                    continue
-                for file in f:
-                    if re.search(match, file):
-                        filepath = os.path.join(r, file)
-                        results += [os.path.relpath(filepath, self.dirs.basedir)]
+        for r, s, f in os.walk(dir):
+            if re.search(exclude, r):
+                continue
+            for file in f:
+                if re.search(match, file):
+                    filepath = os.path.join(r, file)
+                    results += [os.path.relpath(filepath, dir)]                
         return results
 
     # Here we search for efu binary, module plugins (.so), config and calib files (.json)
     def get_values(self):
         return [
-            self.find_files(self.dirs.searchdirs, "efu$", "-X--xXX"),
-            self.find_files(self.dirs.searchdirs, "\.so", "-X--xXX"),
-            [""] + self.find_files(self.dirs.searchdirs, "\.json", "build"),
-            [""] + self.find_files(self.dirs.searchdirs, ".*calib.*\.json", "build"),
+            self.find_files(os.path.join(self.dirs.efudir, "bin"), "", "-X--xXX"),
+            [""] + self.find_files(self.dirs.datadir, "\.json", "build"),
+            [""] + self.find_files(self.dirs.datadir, ".*calib.*\.json", "build"),
         ]
 
 
@@ -124,8 +118,6 @@ class Dialog(QDialog):  # WMainWindow
         self.config_group_box = QGroupBox("Directories")
         toplayout = QFormLayout()
 
-        self.basedirle = QLineEdit(self.dirs.basedir)
-        self.add_row(toplayout, "basedir:", self.basedirle)
         self.efudirle = QLineEdit(self.dirs.efudir)
         self.add_row(toplayout, "efu dir:", self.efudirle)
         self.datadirle = QLineEdit(self.dirs.datadir)
@@ -138,8 +130,6 @@ class Dialog(QDialog):  # WMainWindow
 
         self.files_group_box = QGroupBox("Select configuration")
         fileslayout = QFormLayout()
-        self.efucb = QComboBox()
-        self.add_row(fileslayout, "EFU:", self.efucb)
         self.detcb = QComboBox()
         self.add_row(fileslayout, "Detector:", self.detcb)
         self.cfgcb = QComboBox()
@@ -163,8 +153,7 @@ class Dialog(QDialog):  # WMainWindow
         for name in list:
             field.addItem(name)
 
-    def populate(self, efu, detector, config, calib):
-        self._populate_field(self.efucb, efu)
+    def populate(self, detector, config, calib):
         self._populate_field(self.detcb, detector)
         self._populate_field(self.cfgcb, config)
         self._populate_field(self.calcb, calib)
@@ -184,7 +173,6 @@ class Dialog(QDialog):  # WMainWindow
 
     # Override builtin on_accepted method for pressing OK button
     def on_accepted(self):
-        self._efu = self.efucb.itemText(self.efucb.currentIndex())
         self._det = self.detcb.itemText(self.detcb.currentIndex())
         self._cfg = self.cfgcb.itemText(self.cfgcb.currentIndex())
         self._cal = self.calcb.itemText(self.calcb.currentIndex())
@@ -195,22 +183,17 @@ class Dialog(QDialog):  # WMainWindow
         self.accept()
 
     def update(self):
-        self.efucb.clear()
         self.detcb.clear()
         self.cfgcb.clear()
         self.calcb.clear()
         self.dirs.set_dirs(
-            self.basedirle.text(), self.efudirle.text(), self.datadirle.text()
+            self.efudirle.text(), self.datadirle.text()
         )
         search = Searcher(self.dirs)
-        efu, detector, config, calib = search.get_values()
-        self.populate(efu, detector, config, calib)
+        detector, config, calib = search.get_values()
+        self.populate(detector, config, calib)
 
     def set_defaults(self, cfg):
-        efu_index = self.efucb.findText(
-            dict(self.cfg.config.items("qtefu_latest"))["efu"]
-        )
-        self.efucb.setCurrentIndex(efu_index)
         det_index = self.detcb.findText(
             dict(self.cfg.config.items("qtefu_latest"))["det"]
         )
@@ -228,9 +211,7 @@ class Dialog(QDialog):  # WMainWindow
 # runs efu command with given directories and configuration selection
 def run_cmdlopts(dirs, selection):
     cmdlopts = [
-        os.path.join(dirs.basedir, selection["efu"]),
-        "--det",
-        os.path.join(dirs.basedir, selection["det"]),
+        os.path.join(dirs.efudir, selection["det"]),
     ]
     if selection["hwcheck"] == "False":
         cmdlopts += ["--nohwcheck"]
@@ -239,11 +220,11 @@ def run_cmdlopts(dirs, selection):
     if selection["kafka"] != "":
         cmdlopts += ["--broker_addr", selection["kafka"]]
     if selection["config"] != "":
-        cmdlopts += ["--file", os.path.join(dirs.basedir, selection["config"])]
+        cmdlopts += ["--file", os.path.join(dirs.datadir, selection["config"])]
     if selection["calib"] != "":
         cmdlopts += [
             "--calibration",
-            os.path.join(dirs.basedir, selection["calib"]),
+            os.path.join(dirs.datadir, selection["calib"]),
         ]
     if selection["region"] != "":
         cmdlopts += ["--region", selection["region"]]
@@ -271,7 +252,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cfg = Configuration(args.p)
     dirs = Directories(
-        cfg.options["basedir"], cfg.options["efudir"], cfg.options["datadir"]
+       cfg.options["efudir"], cfg.options["datadir"]
     )
 
     # if resume argument used, uses saved parameters in ~/.efucfg
@@ -286,8 +267,8 @@ if __name__ == "__main__":
         searcher = Searcher(dirs)
         dialog = Dialog(cfg, dirs)
 
-        efu, detector, config, calib = searcher.get_values()
-        dialog.populate(efu, detector, config, calib)
+        detector, config, calib = searcher.get_values()
+        dialog.populate(detector, config, calib)
 
         dialog.set_defaults(cfg)
 
