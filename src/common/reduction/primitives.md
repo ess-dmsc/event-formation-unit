@@ -88,8 +88,7 @@ The idea behind this class is that hits should be inserted and the above values 
 Merging clusters does essentially the same. There should never be any need to remove any hits from
 a cluster. Ideally, the vector holding the hits should be made private, but currently this is not
 practical, as some of the event reduction/analysis algorithms need to re-sort hits for their
-particular needs (compare uTPC to multigrid's ADC-prioritized CoM). For those purposes,
-subclassing and casting might be an option.
+particular needs. For those purposes, subclassing and casting might be an option.
 
 Lack of encapsulation is still a problem because currently you could still manually repopulate
 the Hit container, bypassing plane validation and bound calculation. This breaks the assumptions

@@ -50,8 +50,6 @@ struct BaseSettings {
   std::string   CalibFile            {""};
   std::string   DumpFilePrefix       {""};
 
-  // multigrid
-  bool          MultiGridMonitor     {true};
   // ttlmonitor
   int           TTLMonitorReduceEvents{1};
   int           TTLMonitorNumberOfMonitors{1};

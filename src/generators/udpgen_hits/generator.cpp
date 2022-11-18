@@ -16,7 +16,6 @@
 #include <generators/udpgen_hits/ReaderHits.h>
 
 #include <modules/caen/generators/ReaderReadouts.h>
-//#include <modules/multigrid/generators/ReaderReadouts.h>
 
 #include <common/system/Socket.h>
 
