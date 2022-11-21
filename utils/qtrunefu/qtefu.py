@@ -161,7 +161,6 @@ class Dialog(QDialog):  # WMainWindow
     # returns currently selected options as a dictionary
     def get_selection(self):
         return {
-            "efu": self._efu,
             "det": self._det,
             "config": self._cfg,
             "calib": self._cal,
@@ -211,7 +210,7 @@ class Dialog(QDialog):  # WMainWindow
 # runs efu command with given directories and configuration selection
 def run_cmdlopts(dirs, selection):
     cmdlopts = [
-        os.path.join(dirs.efudir, selection["det"]),
+        os.path.join(dirs.efudir, "bin", selection["det"]),
     ]
     if selection["hwcheck"] == "False":
         cmdlopts += ["--nohwcheck"]
