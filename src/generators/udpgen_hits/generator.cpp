@@ -91,10 +91,6 @@ int main(int argc, char *argv[]) {
   Gem::ReaderHits file(Settings.FileName);
 #endif
 
-// #ifdef GENERATOR_MULTIGRID_READOUTS
-//   Multigrid::ReaderReadouts file(Settings.FileName);
-// #endif
-
 #ifdef GENERATOR_LOKI_READOUTS
   Caen::ReaderReadouts file(Settings.FileName);
 #endif
