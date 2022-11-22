@@ -100,8 +100,8 @@ class Dialog(QDialog):  # WMainWindow
         buttonBox.rejected.connect(self.reject)
 
         mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.efu_group_box)
         mainLayout.addWidget(self.config_group_box)
-        mainLayout.addWidget(self.files_group_box)
         mainLayout.addWidget(self.options_box)
         mainLayout.addWidget(buttonBox)
         self.setLayout(mainLayout)
@@ -115,19 +115,16 @@ class Dialog(QDialog):  # WMainWindow
         layout.addRow(lbl, type)
 
     def create_layout(self):
-        self.config_group_box = QGroupBox("Select EFU")
+        self.efu_group_box = QGroupBox("Select EFU")
         toplayout = QFormLayout()
-
         self.efudirle = QLineEdit(self.dirs.efudir)
         self.efudirle.textChanged.connect(self.update)
         self.add_row(toplayout, "efu dir:", self.efudirle)
-
         self.detcb = QComboBox()
         self.add_row(toplayout, "Detector:", self.detcb)
+        self.efu_group_box.setLayout(toplayout)
 
-        self.config_group_box.setLayout(toplayout)
-
-        self.files_group_box = QGroupBox("Select configuration")
+        self.config_group_box = QGroupBox("Select configuration")
         fileslayout = QFormLayout()
         self.datadirle = QLineEdit(self.dirs.datadir)
         self.datadirle.textChanged.connect(self.update)
@@ -136,7 +133,8 @@ class Dialog(QDialog):  # WMainWindow
         self.add_row(fileslayout, "Config:", self.cfgcb)
         self.calcb = QComboBox()
         self.add_row(fileslayout, "Calib:", self.calcb)
-        self.files_group_box.setLayout(fileslayout)
+        self.config_group_box.setLayout(fileslayout)
+
         self.options_box = QGroupBox("Options")
         optslayout = QFormLayout()
         self.grafanale = QLineEdit(cfg.options["grafana_" + self.cfg.profile])
