@@ -24,6 +24,7 @@ protected:
   void TearDown() override {}
 };
 
+
 TEST_F(MiraclesGeometryTest, Corner) {
   ASSERT_EQ(0, geom->xCoord(0, 0, 0, 5));
   ASSERT_EQ(0, geom->yCoord(0, 0, 5));
@@ -31,6 +32,15 @@ TEST_F(MiraclesGeometryTest, Corner) {
   ASSERT_EQ(47, geom->xCoord(1, 11, 5, 0));
   ASSERT_EQ(0, geom->yCoord(1, 5, 0));
   ASSERT_EQ(100, geom->yCoord(2, 5, 0));
+}
+
+
+TEST_F(MiraclesGeometryTest, CalcPixel) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout), 0);
+
+  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout2), 1);
 }
 
 int main(int argc, char **argv) {
