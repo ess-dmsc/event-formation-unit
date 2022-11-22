@@ -115,23 +115,23 @@ class Dialog(QDialog):  # WMainWindow
         layout.addRow(lbl, type)
 
     def create_layout(self):
-        self.config_group_box = QGroupBox("Directories")
+        self.config_group_box = QGroupBox("Select EFU")
         toplayout = QFormLayout()
 
         self.efudirle = QLineEdit(self.dirs.efudir)
+        self.efudirle.textChanged.connect(self.update)
         self.add_row(toplayout, "efu dir:", self.efudirle)
-        self.datadirle = QLineEdit(self.dirs.datadir)
-        self.add_row(toplayout, "data dir:", self.datadirle)
-        updateb = QPushButton("Reload")
-        updateb.setMaximumWidth(100)
-        updateb.clicked.connect(self.update)
-        toplayout.addRow(updateb)
+
+        self.detcb = QComboBox()
+        self.add_row(toplayout, "Detector:", self.detcb)
+
         self.config_group_box.setLayout(toplayout)
 
         self.files_group_box = QGroupBox("Select configuration")
         fileslayout = QFormLayout()
-        self.detcb = QComboBox()
-        self.add_row(fileslayout, "Detector:", self.detcb)
+        self.datadirle = QLineEdit(self.dirs.datadir)
+        self.datadirle.textChanged.connect(self.update)
+        self.add_row(fileslayout, "data dir:", self.datadirle)
         self.cfgcb = QComboBox()
         self.add_row(fileslayout, "Config:", self.cfgcb)
         self.calcb = QComboBox()
