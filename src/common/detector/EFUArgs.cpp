@@ -105,13 +105,6 @@ EFUArgs::EFUArgs() {
                   "dump to specified file")
       ->group("EFU Options")->default_str("");
 
-  // DETECTOR SPECIFIC MULTIGRID
-  CLIParser.add_flag("--multigrid-monitor", EFUSettings.MultiGridMonitor,
-                "stream monitor data")
-      ->group("Multigrid")
-      ->configurable(true)
-      ->default_val("true");
-
   // DETECTOR SPECIFIC PERFGEN
   CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
       ->group("EFU Options");

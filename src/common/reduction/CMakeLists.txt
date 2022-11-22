@@ -5,6 +5,7 @@
 add_subdirectory(clustering)
 add_subdirectory(matching)
 add_subdirectory(analysis)
+add_subdirectory(multigrid)
 
 set(reduction_obj_SRC
   Hit.cpp
