@@ -35,6 +35,15 @@ TEST_F(MiraclesGeometryTest, Corner) {
 }
 
 
+TEST_F(MiraclesGeometryTest, ValidateData) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_TRUE(geom->validateData(readout));
+
+  DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  ASSERT_FALSE(geom->validateData(readout2));
+}
+
+
 TEST_F(MiraclesGeometryTest, CalcPixel) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
