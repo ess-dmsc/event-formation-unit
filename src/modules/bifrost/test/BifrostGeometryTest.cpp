@@ -65,6 +65,14 @@ TEST_F(BifrostGeometryTest, Position) {
   ASSERT_EQ(geom->posAlongTube(1, 0), 299);
 }
 
+TEST_F(BifrostGeometryTest, CalcPixel) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout), 0);
+
+  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout2), 1);
+}
+
 TEST_F(BifrostGeometryTest, Validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
