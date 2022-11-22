@@ -11,7 +11,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("bifrost", argc, argv);
 
-  auto Detector = new Caen::CaenBase(Main.DetectorSettings);
+  auto Detector = new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::BIFROST);
 
   return Main.run(Detector);
 }
