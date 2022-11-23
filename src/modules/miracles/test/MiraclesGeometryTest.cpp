@@ -17,9 +17,13 @@ class MiraclesGeometryTest : public TestBase {
 protected:
   MiraclesGeometry *geom;
   Config CaenConfiguration;
+  int64_t FENErrors, RingErrors, TubeErrors;
   void SetUp() override {
     geom = new MiraclesGeometry(CaenConfiguration);
     geom->NPos = 128;
+    geom->Stats.FENErrors = &FENErrors;
+    geom->Stats.RingErrors = &RingErrors;
+    geom->Stats.TubeErrors = &TubeErrors;
   }
   void TearDown() override {}
 };
