@@ -70,7 +70,7 @@ add_custom_target(copycfgs
 
 add_custom_target(runefu
     COMMAND loki "-f" "../configs/STFCTestII.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
-    COMMAND bifrost "-f" "../configs/bifrost.json" "-s" "2" "--nohwcheck"
+    COMMAND bifrost "-f" "../configs/bifrost.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_user.h5"
     COMMAND miracles "-f" "../configs/miracles.json" "-s" "2" "--nohwcheck"
     COMMAND perfgen "-s" "1" "--nohwcheck"
     COMMAND dream "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
