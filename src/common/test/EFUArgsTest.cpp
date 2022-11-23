@@ -54,9 +54,10 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-o", "2323",
                         "-s", "5",
                         "-a", "10.0.0.1",
+                        "-l", "Info",
                         "-m", "8989" };
   // clang-format on
-  int myargc = 17;
+  int myargc = 19;
   EFUArgs efu_args;
   auto ret = efu_args.parseArgs(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
@@ -71,6 +72,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_EQ(5, settings.StopAfterSec);
   ASSERT_EQ("10.0.0.1", glsettings.address);
   ASSERT_EQ(8989, settings.CommandServerPort);
+  ASSERT_EQ(6, efu_args.getLogLevel());
 }
 
 TEST_F(EFUArgsTest, HelpText) {
