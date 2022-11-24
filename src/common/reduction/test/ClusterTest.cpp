@@ -306,10 +306,10 @@ TEST_F(ClusterTest, PrintDebug) {
   cluster.insert({0, 5, 1, 0});
   cluster.insert({7, 5, 1, 0});
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n" << cluster.to_string("  ", false) << "\n";
-  MESSAGE() << "VERBOSE:\n" << cluster.to_string("  ", true);
-  MESSAGE() << "VISUALIZE:\n" << cluster.visualize("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "SIMPLE:\n" << cluster.to_string("  ", false) << "\n";
+  GTEST_COUT << "VERBOSE:\n" << cluster.to_string("  ", true);
+  GTEST_COUT << "VISUALIZE:\n" << cluster.visualize("  ");
 }
 
 TEST_F(ClusterTest, HasGap) {

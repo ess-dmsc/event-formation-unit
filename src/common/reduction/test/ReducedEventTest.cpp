@@ -27,8 +27,8 @@ TEST_F(ReducedEventTest, PrintHit) {
   ReducedHit hit;
   hit.center = 2.7;
   EXPECT_FALSE(hit.to_string().empty());
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << hit.to_string() << "\n";
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << hit.to_string() << "\n";
 }
 
 TEST_F(ReducedEventTest, DefaultReducedEventIsBad) {
@@ -40,16 +40,16 @@ TEST_F(ReducedEventTest, PrintEvent) {
   ReducedEvent event;
   event.x.center = 2.7;
   EXPECT_FALSE(event.to_string().empty());
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << event.to_string() << "\n";
-  MESSAGE() << event.to_string_simple() << "\n";
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << event.to_string() << "\n";
+  GTEST_COUT << event.to_string_simple() << "\n";
 }
 
 TEST_F(ReducedEventTest, PrintNeutronEvent) {
   NeutronEvent event;
   EXPECT_FALSE(event.to_string().empty());
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << event.to_string() << "\n";
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << event.to_string() << "\n";
 }
 
 int main(int argc, char **argv) {

@@ -32,4 +32,6 @@ protected:
                            uint64_t datasize);
   };
 #define MESSAGE Message
+
+#define GTEST_COUT std::cerr << "[ INFO     ] "
 };
