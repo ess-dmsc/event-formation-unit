@@ -74,7 +74,7 @@ add_custom_target(runefu
     COMMAND miracles "-f" "../configs/miracles.json" "-s" "2" "--nohwcheck"
     COMMAND perfgen "-s" "1" "--nohwcheck"
     COMMAND dream "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
-    COMMAND freia "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "5"
+    COMMAND freia "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND cspec "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
