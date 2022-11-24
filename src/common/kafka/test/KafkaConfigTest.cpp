@@ -9,6 +9,15 @@
 
 #include <common/kafka/KafkaConfig.h>
 #include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
+
+std::string badkafkaconfigjson = R"(
+  {
+    "KafkaParms" : [
+      {"message.max.bytes" : "10000000", "garbage" : true}
+    ]
+  }
+)";
 
 class KafkaConfigTest : public TestBase {};
 
@@ -21,12 +30,19 @@ TEST_F(KafkaConfigTest, LoadFileError) {
   ASSERT_THROW(KafkaConfig KafkaCfg("NoSuchFile"), std::runtime_error);
 }
 
+TEST_F(KafkaConfigTest, BadKafkaConfigJson) {
+  ASSERT_THROW(KafkaConfig KafkaCfg("NotKafkaConfig.json"), std::runtime_error);
+}
+
 TEST_F(KafkaConfigTest, LoadFileOK) {
   KafkaConfig KafkaCfg(KAFKACONFIG_FILE);
 }
 
 
 int main(int argc, char **argv) {
+  saveBuffer("NotKafkaConfig.json", (void *)badkafkaconfigjson.c_str(), badkafkaconfigjson.size());
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int res = RUN_ALL_TESTS();
+  deleteFile("NotKafkaConfig.json");
+  return res;
 }
