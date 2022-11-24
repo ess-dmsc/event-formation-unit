@@ -24,24 +24,24 @@ namespace Caen {
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 CaenInstrument::CaenInstrument(struct Counters &counters,
-                               BaseSettings &settings)
-    : counters(counters), Settings(settings) {
+                               BaseSettings &Settings)
+    : counters(counters), Settings(Settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
   CaenConfiguration = Config(Settings.ConfigFile);
 
-  if (settings.DetectorName == "loki") {
+  if (Settings.DetectorName == "loki") {
     Geom = new LokiGeometry(CaenConfiguration);
-  } else if (settings.DetectorName == "bifrost") {
+  } else if (Settings.DetectorName == "bifrost") {
     Geom = new BifrostGeometry(CaenConfiguration);
-  } else if (settings.DetectorName == "miracles") {
+  } else if (Settings.DetectorName == "miracles") {
     Geom = new MiraclesGeometry(CaenConfiguration);
   } else {
     XTRACE(INIT, ERR, "Invalid Detector Name %s",
-           settings.DetectorName.c_str());
+           Settings.DetectorName.c_str());
     throw std::runtime_error(
-        fmt::format("Invalid Detector Name {}", settings.DetectorName));
+        fmt::format("Invalid Detector Name {}", Settings.DetectorName));
   }
 
   if (Settings.CalibFile.empty()) {
@@ -69,9 +69,14 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     throw std::runtime_error("Pixel mismatch");
   }
 
-  if (!Settings.DumpFilePrefix.empty()) {
-    DumpFile =
-        ReadoutFile::create(Settings.DumpFilePrefix + "caen_" + timeString());
+  if (not Settings.DumpFilePrefix.empty()) {
+    if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+      DumpFile = ReadoutFile::create(
+                   boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
+    } else {
+      DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + Settings.DetectorName + "_" +
+                                   timeString());
+    }
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
