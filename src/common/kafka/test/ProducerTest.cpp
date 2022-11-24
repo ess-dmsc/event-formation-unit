@@ -1,4 +1,9 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016-2022 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// \brief Unit test for Kafka Producer
+//===----------------------------------------------------------------------===//
 
 #include "KafkaMocks.h"
 #include <common/kafka/KafkaConfig.h>
@@ -7,7 +12,6 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>
-
 #include <trompeloeil.hpp>
 
 KafkaConfig KafkaCfg{""};
@@ -60,6 +64,18 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
 
+TEST_F(ProducerTest, ConfigError) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  auto Res = prod.setConfig("queue.buffering.max.ms", "101");
+  ASSERT_EQ(Res, RdKafka::Conf::CONF_OK);
+  ASSERT_EQ(prod.stats.config_errors, 0);
+
+  Res = prod.setConfig("this.does.not.exist", "so.this.has.no.meaning");
+  ASSERT_NE(Res, RdKafka::Conf::CONF_OK);
+  ASSERT_EQ(prod.stats.config_errors, 1);
+}
+
+
 TEST_F(ProducerTest, CreateConfFail1) {
   ProducerStandIn prod{"nobroker", "notopic"};
   prod.KafkaProducer.reset(nullptr);
@@ -68,6 +84,7 @@ TEST_F(ProducerTest, CreateConfFail1) {
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
 }
 
+
 TEST_F(ProducerTest, CreateConfFail2) {
   ProducerStandIn prod{"nobroker", "notopic"};
   prod.KafkaTopic.reset(nullptr);
@@ -75,6 +92,7 @@ TEST_F(ProducerTest, CreateConfFail2) {
   int ret = prod.produce(Data, 10);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
 }
+
 
 TEST_F(ProducerTest, ProducerFail) {
   ProducerStandIn prod{"nobroker", "notopic"};
@@ -92,6 +110,7 @@ TEST_F(ProducerTest, ProducerFail) {
   ASSERT_EQ(prod.stats.produce_fails, 1);
 }
 
+
 TEST_F(ProducerTest, ProducerSuccess) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto *TempProducer = new MockProducer;
@@ -108,6 +127,7 @@ TEST_F(ProducerTest, ProducerSuccess) {
   ASSERT_EQ(ret, ReturnValue);
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
+
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
   KafkaConfig KafkaCfg2("");
