@@ -6,21 +6,21 @@
       "Config": "./src/modules/freia/configs/freia.json",
       "Generator": "freia_udp_generated",
       "InitThrottle": 10,
-      "KafkaTopic": ""
+      "KafkaTopic": "freia_detector"
     },
     {
       "Module": "loki",
       "Config": "./src/modules/loki/configs/STFCTestII.json",
       "Generator": "loki_udp_generated",
       "InitThrottle": 10,
-      "KafkaTopic": ""
+      "KafkaTopic": "loki_detector"
     },
     {
       "Module": "nmx",
       "Config": "./src/modules/nmx/configs/nmx.json",
       "Generator": "nmx_udp_generated",
       "InitThrottle": 10,
-      "KafkaTopic": ""
+      "KafkaTopic": "nmx_detector"
     },
     {
       "Module": "ttlmonitor",
