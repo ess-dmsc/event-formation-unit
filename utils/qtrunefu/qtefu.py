@@ -51,14 +51,12 @@ class Configuration:
 
 # search for relevant files specified by regexp
 class Searcher:
-    def __init__(self, cfg):
-        self.cfg = cfg
-
     # omit files matching 'exclude', then add files matching 'match'
     # since our filenaming is somewhat inconsistent there might be
     # false positives.
     def find_files(self, dir, match, exclude):
         results = []
+        print("Searching directory: " + dir)
         for r, s, f in os.walk(dir):
             if re.search(exclude, r):
                 continue
@@ -69,11 +67,11 @@ class Searcher:
         return results
 
     # Here we search for efu binary, module plugins (.so), config and calib files (.json)
-    def get_values(self):
+    def get_values(self, cfg):
         return [
-            self.find_files(os.path.join(self.cfg.options["efudir"], "bin"), "", "-X--xXX"),
-            [""] + self.find_files(self.cfg.options["datadir"], "\.json", "build"),
-            [""] + self.find_files(self.cfg.options["datadir"], ".*calib.*\.json", "build"),
+            self.find_files(os.path.join(cfg.options["efudir"], "bin"), "", "-X--xXX"),
+            [""] + self.find_files(cfg.options["datadir"], "\.json", "build"),
+            [""] + self.find_files(cfg.options["datadir"], ".*calib.*\.json", "build"),
         ]
 
 
@@ -108,7 +106,7 @@ class Dialog(QDialog):  # WMainWindow
     def create_layout(self):
         self.efu_group_box = QGroupBox("Select EFU")
         toplayout = QFormLayout()
-        self.efudirle = QLineEdit(self.cfg.options["efudir"])
+        self.efudirle = QLineEdit()
         self.efudirle.textChanged.connect(self.update)
         self.add_row(toplayout, "efu dir:", self.efudirle)
         self.detcb = QComboBox()
@@ -117,7 +115,7 @@ class Dialog(QDialog):  # WMainWindow
 
         self.config_group_box = QGroupBox("Select configuration")
         fileslayout = QFormLayout()
-        self.datadirle = QLineEdit(self.cfg.options["datadir"])
+        self.datadirle = QLineEdit()
         self.datadirle.textChanged.connect(self.update)
         self.add_row(fileslayout, "data dir:", self.datadirle)
         self.cfgcb = QComboBox()
@@ -178,8 +176,10 @@ class Dialog(QDialog):  # WMainWindow
         self.detcb.clear()
         self.cfgcb.clear()
         self.calcb.clear()
-        search = Searcher(self.cfg)
-        detector, config, calib = search.get_values()
+        search = Searcher()
+        self.cfg.options["efudir"] = self.efudirle.text()
+        self.cfg.options["datadir"] = self.datadirle.text()
+        detector, config, calib = search.get_values(self.cfg)
         self.populate(detector, config, calib)
 
     def set_defaults(self):
@@ -250,10 +250,10 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         app = QApplication(sys.argv)
 
-        searcher = Searcher(cfg)
+        searcher = Searcher()
         dialog = Dialog(cfg)
 
-        detector, config, calib = searcher.get_values()
+        detector, config, calib = searcher.get_values(cfg)
         dialog.populate(detector, config, calib)
 
         dialog.set_defaults()
