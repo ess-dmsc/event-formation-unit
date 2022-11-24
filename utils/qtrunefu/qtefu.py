@@ -14,20 +14,22 @@ class Configuration:
         self.options = {}
         self.config = configparser.RawConfigParser()
         self.config.read(os.path.join(expanduser("~"), ".efucfg"))
-        self._load("directories", "efudir")
-        self._load("directories", "datadir")
-        self._load("servers", "grafana_" + profile)
-        self._load("servers", "kafka_" + profile)
-        self._load("efuopts", "hwcheck")
-        self._load("efuopts", "region")
+        self._load("qtefu_latest", "efudir")
+        self._load("qtefu_latest", "datadir")
+        self._load("servers", "grafana_"+profile)
+        self._load("servers", "kafka_"+profile)
+        self._load("qtefu_latest", "grafana")
+        self._load("qtefu_latest", "kafka")
+        self._load("qtefu_latest", "hwcheck")
+        self._load("qtefu_latest", "region")
 
     # load option or use defult value
     def _load(self, group, opt):
         if self.config.has_option(group, opt):
             self.options[opt] = self.config.get(group, opt)
         else:
-            print("No option {}, exiting ...".format(opt))
-            sys.exit(0)
+            print("No option {}, using blank".format(opt))
+            self.options[opt] = ""
 
     #  updates the [qtefu_latest] section of the ~/.efucfg file
     def update_latest(self, selection):
@@ -35,11 +37,11 @@ class Configuration:
             self.config.set("qtefu_latest", name, value)
         self.write_config()
 
-    #  updates the [directories] section of the ~/.efucfg file
-    def update_dirs(self, dirs):
-        self.config.set("directories", "datadir", dirs.datadir)
-        self.config.set("directories", "efudir", dirs.efudir)
-        self.write_config()
+    def get_latest(self, name):
+        if self.config.has_option("qtefu_latest", name):
+            return self.config.get("qtefu_latest", name)
+        else:
+            return ""
 
     # writes current config settings to ~/.efucfg file
     def write_config(self):
@@ -47,20 +49,10 @@ class Configuration:
             self.config.write(configfile)
 
 
-# Maintain a set of directories for searching
-class Directories:
-    def __init__(self, efu, data):
-        self.set_dirs(efu, data)
-
-    def set_dirs(self, efu, data):
-        self.efudir = efu
-        self.datadir = data
-
-
 # search for relevant files specified by regexp
 class Searcher:
-    def __init__(self, dirs):
-        self.dirs = dirs
+    def __init__(self, cfg):
+        self.cfg = cfg
 
     # omit files matching 'exclude', then add files matching 'match'
     # since our filenaming is somewhat inconsistent there might be
@@ -79,9 +71,9 @@ class Searcher:
     # Here we search for efu binary, module plugins (.so), config and calib files (.json)
     def get_values(self):
         return [
-            self.find_files(os.path.join(self.dirs.efudir, "bin"), "", "-X--xXX"),
-            [""] + self.find_files(self.dirs.datadir, "\.json", "build"),
-            [""] + self.find_files(self.dirs.datadir, ".*calib.*\.json", "build"),
+            self.find_files(os.path.join(self.cfg.options["efudir"], "bin"), "", "-X--xXX"),
+            [""] + self.find_files(self.cfg.options["datadir"], "\.json", "build"),
+            [""] + self.find_files(self.cfg.options["datadir"], ".*calib.*\.json", "build"),
         ]
 
 
@@ -89,9 +81,8 @@ class Searcher:
 # #
 #
 class Dialog(QDialog):  # WMainWindow
-    def __init__(self, configuration, directories):
+    def __init__(self, configuration):
         super(QDialog, self).__init__()
-        self.dirs = directories
         self.cfg = configuration
         self.create_layout()
 
@@ -117,7 +108,7 @@ class Dialog(QDialog):  # WMainWindow
     def create_layout(self):
         self.efu_group_box = QGroupBox("Select EFU")
         toplayout = QFormLayout()
-        self.efudirle = QLineEdit(self.dirs.efudir)
+        self.efudirle = QLineEdit(self.cfg.options["efudir"])
         self.efudirle.textChanged.connect(self.update)
         self.add_row(toplayout, "efu dir:", self.efudirle)
         self.detcb = QComboBox()
@@ -126,7 +117,7 @@ class Dialog(QDialog):  # WMainWindow
 
         self.config_group_box = QGroupBox("Select configuration")
         fileslayout = QFormLayout()
-        self.datadirle = QLineEdit(self.dirs.datadir)
+        self.datadirle = QLineEdit(self.cfg.options["datadir"])
         self.datadirle.textChanged.connect(self.update)
         self.add_row(fileslayout, "data dir:", self.datadirle)
         self.cfgcb = QComboBox()
@@ -159,6 +150,8 @@ class Dialog(QDialog):  # WMainWindow
     # returns currently selected options as a dictionary
     def get_selection(self):
         return {
+            "efudir": self._efudir,
+            "datadir": self._datadir,
             "det": self._det,
             "config": self._cfg,
             "calib": self._cal,
@@ -170,6 +163,8 @@ class Dialog(QDialog):  # WMainWindow
 
     # Override builtin on_accepted method for pressing OK button
     def on_accepted(self):
+        self._efudir = self.efudirle.text()
+        self._datadir = self.datadirle.text()
         self._det = self.detcb.itemText(self.detcb.currentIndex())
         self._cfg = self.cfgcb.itemText(self.cfgcb.currentIndex())
         self._cal = self.calcb.itemText(self.calcb.currentIndex())
@@ -183,32 +178,29 @@ class Dialog(QDialog):  # WMainWindow
         self.detcb.clear()
         self.cfgcb.clear()
         self.calcb.clear()
-        self.dirs.set_dirs(
-            self.efudirle.text(), self.datadirle.text()
-        )
-        search = Searcher(self.dirs)
+        search = Searcher(self.cfg)
         detector, config, calib = search.get_values()
         self.populate(detector, config, calib)
 
-    def set_defaults(self, cfg):
-        det_index = self.detcb.findText(
-            dict(self.cfg.config.items("qtefu_latest"))["det"]
-        )
+    def set_defaults(self):
+        self.efudirle.setText(self.cfg.get_latest("efudir"))
+        self.datadirle.setText(self.cfg.get_latest("datadir"))
+        det_index = self.detcb.findText(self.cfg.get_latest("det"))
         self.detcb.setCurrentIndex(det_index)
         cfg_index = self.cfgcb.findText(
-            dict(self.cfg.config.items("qtefu_latest"))["config"]
+           self.cfg.get_latest("config")
         )
         self.cfgcb.setCurrentIndex(cfg_index)
         cal_index = self.calcb.findText(
-            dict(self.cfg.config.items("qtefu_latest"))["calib"]
+            self.cfg.get_latest("calib")
         )
         self.calcb.setCurrentIndex(cal_index)
 
 
 # runs efu command with given directories and configuration selection
-def run_cmdlopts(dirs, selection):
+def run_cmdlopts(selection):
     cmdlopts = [
-        os.path.join(dirs.efudir, "bin", selection["det"]),
+        os.path.join(selection["efudir"], "bin", selection["det"]),
     ]
     if selection["hwcheck"] == "False":
         cmdlopts += ["--nohwcheck"]
@@ -217,11 +209,11 @@ def run_cmdlopts(dirs, selection):
     if selection["kafka"] != "":
         cmdlopts += ["--broker_addr", selection["kafka"]]
     if selection["config"] != "":
-        cmdlopts += ["--file", os.path.join(dirs.datadir, selection["config"])]
+        cmdlopts += ["--file", os.path.join(selection["datadir"], selection["config"])]
     if selection["calib"] != "":
         cmdlopts += [
             "--calibration",
-            os.path.join(dirs.datadir, selection["calib"]),
+            os.path.join(selection["datadir"], selection["calib"]),
         ]
     if selection["region"] != "":
         cmdlopts += ["--region", selection["region"]]
@@ -238,7 +230,7 @@ if __name__ == "__main__":
         metavar="profile",
         help="profiles: grafana_profile",
         type=str,
-        default="office",
+        default="none",
     )
     parser.add_argument(
         "-r",
@@ -248,31 +240,27 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     cfg = Configuration(args.p)
-    dirs = Directories(
-       cfg.options["efudir"], cfg.options["datadir"]
-    )
 
     # if resume argument used, uses saved parameters in ~/.efucfg
     if args.resume:
         selection = dict(cfg.config.items("qtefu_latest"))
-        run_cmdlopts(dirs, selection)
+        run_cmdlopts(selection)
     # else loads GUI for parameter selection
     else:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         app = QApplication(sys.argv)
 
-        searcher = Searcher(dirs)
-        dialog = Dialog(cfg, dirs)
+        searcher = Searcher(cfg)
+        dialog = Dialog(cfg)
 
         detector, config, calib = searcher.get_values()
         dialog.populate(detector, config, calib)
 
-        dialog.set_defaults(cfg)
+        dialog.set_defaults()
 
         retval = dialog.exec_()
         if retval != 0:
             selection = dialog.get_selection()
             cfg.update_latest(selection)
-            cfg.update_dirs(dirs)
-            run_cmdlopts(dirs, selection)
+            run_cmdlopts(selection)
     sys.exit()
