@@ -56,7 +56,6 @@ class Searcher:
     # false positives.
     def find_files(self, dir, match, exclude):
         results = []
-        print("Searching directory: " + dir)
         for r, s, f in os.walk(dir):
             if re.search(exclude, r):
                 continue
