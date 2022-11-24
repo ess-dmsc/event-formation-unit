@@ -68,13 +68,13 @@ def bisect_throttle_settings(efu, generator, module, throttle):
     return best_passing_throttle
 
 def run_performance_test():
-    efu = "./event-formation-unit"
+    efu = "./build"
 
     with open('./test/performancetest.json') as f:
         data = json.load(f)
 
     for test in data['Tests']:
-        efu_process = run_efu(efu, test['Module'], test['Config'])
+        efu_process = run_efu(efu, test['Module'], test['Config'], test['KafkaTopic'])
         try:
             best_throttle = bisect_throttle_settings(efu, test['Generator'], test['Module'], test['InitThrottle'])
             assess_performance(efu, test['Generator'], test['Module'], best_throttle)
