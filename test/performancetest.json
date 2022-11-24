@@ -2,9 +2,21 @@
   "Tests":
   [
     {
+      "Module": "freia",
+      "Config": "./src/modules/freia/configs/freia.json",
+      "Generator": "freia_udp_generated",
+      "InitThrottle": 10
+    },
+    {
       "Module": "loki",
       "Config": "./src/modules/loki/configs/STFCTestII.json",
       "Generator": "loki_udp_generated",
+      "InitThrottle": 10
+    },
+    {
+      "Module": "nmx",
+      "Config": "./src/modules/nmx/configs/nmx.json",
+      "Generator": "nmx_udp_generated",
       "InitThrottle": 10
     }
   ]
