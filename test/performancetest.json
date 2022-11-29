@@ -21,13 +21,6 @@
       "Generator": "nmx_udp_generated",
       "InitThrottle": 10,
       "KafkaTopic": "nmx_detector"
-    },
-    {
-      "Module": "ttlmonitor",
-      "Config": "./src/modules/ttlmonitor/configs/freiamon.json",
-      "Generator": "ttlmon_udp_generated",
-      "InitThrottle": 10,
-      "KafkaTopic": "mon"
     }
   ]
 }
