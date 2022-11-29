@@ -10,6 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <modules/miracles/geometry/MiraclesGeometry.h>
+#include <cmath>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -17,6 +18,7 @@
 namespace Caen {
 
 MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration) {
+  ///\todo make config dependent
   ESSGeom = new ESSGeometry(48, 128, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
@@ -47,7 +49,7 @@ bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
 int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
   int xOffset = 2 * Tube;
   if ((Ring == 1) or (Ring == 3)) {
-    xOffset += 24;
+    xOffset += 24; ///\todo make config dependent
   }
   return xOffset + tubeAorB(AmpA, AmpB);
 }
@@ -57,7 +59,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
          AmpA, AmpB);
   int offset{0};
   if ((Ring == 2) or (Ring == 3)) {
-    offset += 100;
+    offset += NPos/2;
   }
   return offset + posAlongTube(AmpA, AmpB);
 }
@@ -65,7 +67,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
 // 0 is A, 1 is B
 int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
   float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
-  if (UnitPos < 0.5) {
+  if (UnitPos <= 0.5) {
     XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
     return 0;
   } else {
@@ -75,26 +77,24 @@ int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
 }
 
 int MiraclesGeometry::posAlongTube(int AmpA, int AmpB) {
+  int tubepos;
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");
     ///\todo add counter
     return -1;
   }
 
-  int pos = (1.0 * AmpA / (AmpA + AmpB)) * NPos;
-  XTRACE(DATA, DEB, "Position along tube pair %d", pos);
+  float pos = (1.0 * AmpA / (AmpA + AmpB));
+  XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    XTRACE(DATA, DEB, "Tube A, returning pos: %u", pos);
-    return pos;
+    tubepos = pos * 2 * (NPos/2 - 1);
+    XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
+    return tubepos;
   } else {
-    int halfNPos = NPos / 2;
-    int returnVal = halfNPos - (pos - halfNPos);
-    XTRACE(DATA, DEB,
-           "Tube B, returning halfNpos - (pos - halfNpos): %u, pos: %u, "
-           "halfNpos: %u",
-           returnVal, pos, halfNPos);
-    return returnVal;
+    tubepos = round(NPos/2 - 1 - (pos - 0.5) * 2 * (NPos/2 - 1));
+    XTRACE(DATA, DEB, "B: TubePos %u, pos %f", tubepos, pos);
+    return tubepos;
   }
 }
 
