@@ -31,7 +31,6 @@ protected:
     static void saveToFile(std::string filename, void *buffer,
                            uint64_t datasize);
   };
-#define MESSAGE Message
 
 #define GTEST_COUT std::cerr << "[ INFO     ] "
 };
