@@ -17,7 +17,7 @@ class ReadoutGeneratorBase {
 public:
   struct GeneratorSettings {
     uint16_t NRings{2};
-    uint8_t Type{72}; // Freia (see readout ICD for other instruments)
+    uint8_t Type{0}; // Will be determined at compile time, can be overridden
     uint8_t TypeOverride{0}; // to force a specific type field
     /// udp generator generic
     std::string IpAddress{"127.0.0.1"};

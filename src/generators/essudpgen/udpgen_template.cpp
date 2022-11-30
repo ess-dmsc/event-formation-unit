@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef FREIA_GENERATOR
   Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::FREIA;
 #endif
 
 #ifdef CSPEC_GENERATOR
