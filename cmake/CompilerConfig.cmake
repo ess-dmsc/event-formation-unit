@@ -8,7 +8,7 @@ if(NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
+set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra -Wno-deprecated")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -DRELEASE -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 #set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-ggdb -fno-omit-frame-pointer")
