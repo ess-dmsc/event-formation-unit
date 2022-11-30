@@ -69,10 +69,15 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     throw std::runtime_error("Pixel mismatch");
   }
 
-  if (!Settings.DumpFilePrefix.empty()) {
-    DumpFile =
-        ReadoutFile::create(Settings.DumpFilePrefix + "caen_" + timeString());
-  }
+  if (not Settings.DumpFilePrefix.empty()) {
+      if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+
+        DumpFile = ReadoutFile::create(
+                     boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
+      } else {
+        DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
+      }
+    }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
