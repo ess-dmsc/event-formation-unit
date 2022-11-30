@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 #include <bifrost/geometry/BifrostGeometry.h>
-#include <common/testutils/TestBase.h>
 #include <caen/readout/DataParser.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Caen;
 

@@ -16,6 +16,7 @@ namespace Caen {
 
 class CaenBase : public Detector {
   ESSReadout::Parser::DetectorType type;
+
 public:
   CaenBase(BaseSettings const &Settings, ESSReadout::Parser::DetectorType t);
   ~CaenBase() = default;

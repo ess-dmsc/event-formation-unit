@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/kafka/KafkaConfig.h>
-#include <common/testutils/TestBase.h>
 #include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 
 std::string badkafkaconfigjson = R"(
   {
@@ -34,13 +34,11 @@ TEST_F(KafkaConfigTest, BadKafkaConfigJson) {
   ASSERT_THROW(KafkaConfig KafkaCfg("NotKafkaConfig.json"), std::runtime_error);
 }
 
-TEST_F(KafkaConfigTest, LoadFileOK) {
-  KafkaConfig KafkaCfg(KAFKACONFIG_FILE);
-}
-
+TEST_F(KafkaConfigTest, LoadFileOK) { KafkaConfig KafkaCfg(KAFKACONFIG_FILE); }
 
 int main(int argc, char **argv) {
-  saveBuffer("NotKafkaConfig.json", (void *)badkafkaconfigjson.c_str(), badkafkaconfigjson.size());
+  saveBuffer("NotKafkaConfig.json", (void *)badkafkaconfigjson.c_str(),
+             badkafkaconfigjson.size());
   testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
   deleteFile("NotKafkaConfig.json");

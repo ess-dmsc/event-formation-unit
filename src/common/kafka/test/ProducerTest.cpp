@@ -75,7 +75,6 @@ TEST_F(ProducerTest, ConfigError) {
   ASSERT_EQ(prod.stats.config_errors, 1);
 }
 
-
 TEST_F(ProducerTest, CreateConfFail1) {
   ProducerStandIn prod{"nobroker", "notopic"};
   prod.KafkaProducer.reset(nullptr);
@@ -84,7 +83,6 @@ TEST_F(ProducerTest, CreateConfFail1) {
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
 }
 
-
 TEST_F(ProducerTest, CreateConfFail2) {
   ProducerStandIn prod{"nobroker", "notopic"};
   prod.KafkaTopic.reset(nullptr);
@@ -92,7 +90,6 @@ TEST_F(ProducerTest, CreateConfFail2) {
   int ret = prod.produce(Data, 10);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
 }
-
 
 TEST_F(ProducerTest, ProducerFail) {
   ProducerStandIn prod{"nobroker", "notopic"};
@@ -110,7 +107,6 @@ TEST_F(ProducerTest, ProducerFail) {
   ASSERT_EQ(prod.stats.produce_fails, 1);
 }
 
-
 TEST_F(ProducerTest, ProducerSuccess) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto *TempProducer = new MockProducer;
@@ -127,7 +123,6 @@ TEST_F(ProducerTest, ProducerSuccess) {
   ASSERT_EQ(ret, ReturnValue);
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
-
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
   KafkaConfig KafkaCfg2("");

@@ -43,9 +43,7 @@ TEST_F(EV42SerializerTest, Serialize) {
   EXPECT_EQ(std::string(reinterpret_cast<const char *>(&buffer[4]), 4), "ev42");
 }
 
-TEST_F(EV42SerializerTest, MessageId) {
-  ASSERT_EQ(fb.currentMessageId(), 1);
-}
+TEST_F(EV42SerializerTest, MessageId) { ASSERT_EQ(fb.currentMessageId(), 1); }
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
   for (size_t i = 0; i < ARRAYLENGTH - 1; i++)

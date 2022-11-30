@@ -8,8 +8,8 @@
 /// \brief Unit test for Miracles position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <miracles/geometry/MiraclesGeometry.h>
 #include <common/testutils/TestBase.h>
+#include <miracles/geometry/MiraclesGeometry.h>
 
 using namespace Caen;
 
@@ -28,7 +28,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(MiraclesGeometryTest, Corner) {
   ASSERT_EQ(0, geom->xCoord(0, 0, 0, 5));
   ASSERT_EQ(0, geom->yCoord(0, 0, 5));
@@ -38,7 +37,6 @@ TEST_F(MiraclesGeometryTest, Corner) {
   ASSERT_EQ(100, geom->yCoord(2, 5, 0));
 }
 
-
 TEST_F(MiraclesGeometryTest, ValidateData) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
@@ -46,7 +44,6 @@ TEST_F(MiraclesGeometryTest, ValidateData) {
   DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
   ASSERT_FALSE(geom->validateData(readout2));
 }
-
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

@@ -16,7 +16,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-RdKafka::Conf::ConfResult Producer::setConfig(std::string Key, std::string Value) {
+RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
+                                              std::string Value) {
   XTRACE(INIT, ALW, "%s %s", Key.c_str(), Value.c_str());
   RdKafka::Conf::ConfResult configResult;
   configResult = Config->set(Key, Value, ErrorMessage);

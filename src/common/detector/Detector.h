@@ -11,8 +11,8 @@
 
 #include <CLI/CLI.hpp>
 #include <atomic>
-#include <common/debug/Trace.h>
 #include <common/Statistics.h>
+#include <common/debug/Trace.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
@@ -102,7 +102,8 @@ public:
                dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                     RxRingbuffer.getMaxBufSize())) > 0) {
         RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-        XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
+        XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+               readSize);
         ITCounters.RxPackets++;
         ITCounters.RxBytes += readSize;
 
@@ -153,7 +154,6 @@ public:
 public:
   BaseSettings EFUSettings;
   Statistics Stats;
-
 
 protected:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
