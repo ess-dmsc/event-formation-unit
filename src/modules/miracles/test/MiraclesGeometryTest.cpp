@@ -30,11 +30,6 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(MiraclesGeometryTest, Validate) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
-}
-
 TEST_F(MiraclesGeometryTest, Corner) {
   ASSERT_EQ(0, geom->xCoord(0, 0, 0, 5));
   ASSERT_EQ(0, geom->yCoord(0, 0, 5));
@@ -57,23 +52,6 @@ TEST_F(MiraclesGeometryTest, PosAlongTube) {
   printf("B top\n");
   EXPECT_EQ(geom->tubeAorB(800, 1), TubeB); // 1 ia B
   EXPECT_EQ(geom->posAlongTube(800, 1),  0); // tube B - top 'pixel'
-}
-
-TEST_F(MiraclesGeometryTest, ValidateData) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
-
-  DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-  ASSERT_FALSE(geom->validateData(readout2));
-}
-
-
-TEST_F(MiraclesGeometryTest, CalcPixel) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout), 0);
-
-  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout2), 1);
 }
 
 TEST_F(MiraclesGeometryTest, ValidateData) {
