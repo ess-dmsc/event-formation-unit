@@ -52,7 +52,7 @@ TEST_F(EV44SerializerTest, SerDeserialize) {
 
   auto events = GetEvent44Message(flatbuffer);
 
-//ASSERT_NE(events->message_id(), 1);
+  // ASSERT_NE(events->message_id(), 1);
 
   memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev44");

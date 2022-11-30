@@ -225,7 +225,6 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
                                          char *resp, unsigned int *nrChars) {
     return runtime_stats(cmd, resp, nrChars, detector);
   });
-
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {

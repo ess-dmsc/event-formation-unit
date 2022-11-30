@@ -24,8 +24,8 @@ TEST_F(GapMatcherTest, PrintConfig) {
   GapMatcher matcher(125, 0, 1);
   matcher.set_minimum_time_gap(70);
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "CONFIG:\n" << matcher.config("  ");
 }
 
 // \todo do more tests

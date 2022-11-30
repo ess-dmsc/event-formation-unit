@@ -181,10 +181,10 @@ TEST_F(EventTest, DebugPrint) {
   event.insert({7, 5, 1, 0});
   event.insert({0, 5, 1, 1});
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n  " << event.to_string("  ", false) << "\n";
-  MESSAGE() << "VERBOSE:\n  " << event.to_string("  ", true);
-  MESSAGE() << "VISUALIZE:\n" << event.visualize("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "SIMPLE:\n  " << event.to_string("  ", false) << "\n";
+  GTEST_COUT << "VERBOSE:\n  " << event.to_string("  ", true);
+  GTEST_COUT << "VISUALIZE:\n" << event.visualize("  ");
 }
 
 int main(int argc, char **argv) {

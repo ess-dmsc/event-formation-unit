@@ -160,9 +160,10 @@ TEST_F(EventAnalyzerTest, InsertInvalid) {
 }
 
 TEST_F(EventAnalyzerTest, DebugPrint) {
-  MESSAGE() << "This is not a test, just calling debug print function\n";
+  GTEST_COUT << "This is not a test, just calling debug print functions\n";
   auto result = EventAnalyzer("utpc_weighted").analyze(event);
-  MESSAGE() << result.to_string() << "\n";
+  GTEST_COUT << result.to_string();
+  GTEST_COUT << EventAnalyzer("utpc_weighted").debug("Testing");
 }
 
 // \todo more & better tests of this required

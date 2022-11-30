@@ -5,6 +5,7 @@
 add_subdirectory(monitor)
 add_subdirectory(reduction)
 add_subdirectory(readout)
+add_subdirectory(kafka)
 
 set(efu_common_SRC
   debug/Hexdump.cpp

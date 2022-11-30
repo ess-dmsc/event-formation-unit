@@ -188,10 +188,10 @@ TEST_F(AbstractMatcherTest, PrintConfigStatus) {
   add_cluster(y, 4, 0, 3, 1, 100, 120, 10);
   matcher.insert(4, y);
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
-  MESSAGE() << "SIMPLE STATUS:\n" << matcher.status("  ", false);
-  MESSAGE() << "VERBOSE STATUS:\n" << matcher.status("  ", true);
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "CONFIG:\n" << matcher.config("  ");
+  GTEST_COUT << "SIMPLE STATUS:\n" << matcher.status("  ", false);
+  GTEST_COUT << "VERBOSE STATUS:\n" << matcher.status("  ", true);
 }
 
 int main(int argc, char **argv) {
