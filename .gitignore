@@ -16,6 +16,7 @@ a.out
 build*/
 cmake-build-*/
 doxygen/
+event-formation-unit/
 # MacOs folder metadata
 .DS_Store
 
