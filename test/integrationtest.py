@@ -79,7 +79,7 @@ def check_kafka(test):
 
 
 def run_tests():
-    efu = "./event-formation-unit"
+    efu = "./build/event-formation-unit"
 
     with open('./test/integrationtest.json') as f:
         data = json.load(f)

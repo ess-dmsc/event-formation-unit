@@ -52,7 +52,7 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
-private:
+
 private:
   void split_and_stash_event(Event evt);
   void split_cluster(Cluster cluster, Cluster *new_cluster_1,
