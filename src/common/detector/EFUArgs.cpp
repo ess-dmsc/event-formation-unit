@@ -1,4 +1,4 @@
-/** Copyright (C) 2016-2020 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -51,12 +51,6 @@ EFUArgs::EFUArgs() {
 
   CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
       ->group("EFU Options");
-
-  CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
-      ->group("EFU Options");
-
-  CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
-      ->group("EFU Options")->default_str("10");
 
   std::string DetectorDescription{"Detector name"};
 
@@ -111,12 +105,12 @@ EFUArgs::EFUArgs() {
                   "dump to specified file")
       ->group("EFU Options")->default_str("");
 
-  // DETECTOR SPECIFIC MULTIGRID
-  CLIParser.add_flag("--multigrid-monitor", EFUSettings.MultiGridMonitor,
-                "stream monitor data")
-      ->group("Multigrid")
-      ->configurable(true)
-      ->default_val("true");
+  // DETECTOR SPECIFIC PERFGEN
+  CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
+      ->group("EFU Options");
+
+  CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
+      ->group("EFU Options")->default_str("10");
 
   // DETECTOR SPECIFIC TTLMONITOR
   CLIParser.add_option("--ttlmonitor-reduce", EFUSettings.TTLMonitorReduceEvents,
@@ -186,7 +180,8 @@ EFUArgs::Status EFUArgs::parseArgs(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}", e.get_exit_code());
+    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}",
+        e.get_exit_code());
     return Status::ERREXIT;
   }
 

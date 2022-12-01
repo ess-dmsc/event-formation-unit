@@ -16,9 +16,9 @@
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
+#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <common/time/TSCTimer.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -29,16 +29,14 @@ namespace Caen {
 
 const char *classname = "Caen detector with ESS readout";
 
-CaenBase::CaenBase(BaseSettings const &settings)
-    : Detector("Caen", settings) {
-
+CaenBase::CaenBase(BaseSettings const &settings, ESSReadout::Parser::DetectorType t) : Detector(settings), type(t) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", Counters.RxPackets);
-  Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
@@ -80,7 +78,7 @@ CaenBase::CaenBase(BaseSettings const &settings)
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
   // System counters
-  Stats.create("thread.input_idle", Counters.RxIdle);
+  Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
 
@@ -93,9 +91,8 @@ CaenBase::CaenBase(BaseSettings const &settings)
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
-
-  std::function<void()> inputFunc = [this]() { CaenBase::inputThread(); };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     CaenBase::processingThread();
@@ -106,51 +103,12 @@ CaenBase::CaenBase(BaseSettings const &settings)
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void CaenBase::inputThread() {
-  /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
-                         EFUSettings.DetectorPort);
-
-  UDPReceiver dataReceiver(local);
-  dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
-                              EFUSettings.RxSocketBufferSize);
-  dataReceiver.printBufferSizes();
-  dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
-
-  while (runThreads) {
-    int readSize;
-    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
-
-    RxRingbuffer.setDataLength(rxBufferIndex, 0);
-    if ((readSize =
-             dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                  RxRingbuffer.getMaxBufSize())) > 0) {
-      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-      readSize);
-      Counters.RxPackets++;
-      Counters.RxBytes += readSize;
-
-      if (InputFifo.push(rxBufferIndex) == false) {
-        Counters.FifoPushErrors++;
-      } else {
-        RxRingbuffer.getNextBuffer();
-      }
-    } else {
-      Counters.RxIdle++;
-    }
-  }
-  XTRACE(INPUT, ALW, "Stopping input thread.");
-  return;
-}
-
 ///
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
-
   if (EFUSettings.KafkaTopic == "") {
-    XTRACE(INIT, ALW, "Setting default Kafka topic to loki_detector");
-    EFUSettings.KafkaTopic = "loki_detector";
+    XTRACE(INIT, ERR, "No kafka topic set, using DetectorName + _detector");
+    EFUSettings.KafkaTopic = EFUSettings.DetectorName + "_detector";
   }
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
@@ -164,7 +122,6 @@ void CaenBase::processingThread() {
   Serializer = new EV42Serializer(KafkaBufferSize, "caen", Produce);
   CaenInstrument Caen(Counters, EFUSettings);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
-
 
   Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug",
                            KafkaCfg.CfgParms);
@@ -180,7 +137,7 @@ void CaenBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -193,9 +150,7 @@ void CaenBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-
-      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::LOKI);
+      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, type);
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -230,7 +185,7 @@ void CaenBase::processingThread() {
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Serializer->produce();
       SerializerII->produce();

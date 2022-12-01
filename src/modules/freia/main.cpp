@@ -8,7 +8,7 @@
 #include <efu/MainProg.h>
 #include <modules/freia/FreiaBase.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   MainProg Main("freia", argc, argv);
 
   auto Detector = new Freia::FreiaBase(Main.DetectorSettings);

@@ -86,7 +86,7 @@ def run_tests():
 
     for test in data['Tests']:
         create_kafka_topic(test['KafkaTopic'])
-        efu_process = run_efu(efu, test['Module'], test['Config'])
+        efu_process = run_efu(efu, test['Module'], test['Config'], test['KafkaTopic'])
         try:
             run_data_generator(efu, test['Generator'], test['Packets'], test['Throttle'])
             time.sleep(1)

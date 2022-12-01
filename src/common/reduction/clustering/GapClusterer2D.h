@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/reduction/clustering/AbstractClusterer.h>
-#include <multigrid/reduction/ModuleGeometry.h>
+#include <common/reduction/multigrid/ModuleGeometry.h>
 
 // \todo update documentation for 2D version
 

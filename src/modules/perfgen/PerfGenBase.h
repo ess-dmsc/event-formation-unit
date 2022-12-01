@@ -18,7 +18,7 @@ class PerfGenBase : public Detector {
 public:
   PerfGenBase(BaseSettings const &settings);
   ~PerfGenBase() {}
-  void inputThread();
+
   void processingThread();
 
   static const int kafka_buffer_size = 124000; /// entries

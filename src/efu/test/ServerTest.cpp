@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+// Copyright (C) 2018 - 2022 European Spallation Source ERIC
 
 #include <arpa/inet.h>
 #include <chrono>
@@ -49,12 +49,9 @@ void client_thread(int command) {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings)
-      : Detector("No name", settings){};
+  explicit TestDetector(BaseSettings settings) : Detector(settings){};
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
-
-DetectorFactory<TestDetector> Factory;
 
 // clang-format on
 
@@ -66,7 +63,7 @@ protected:
   Parser *parser;
   Statistics stats;
   void SetUp() override {
-    auto detectorif = Factory.create(settings);
+    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
     parser = new Parser(detectorif, stats, keep_running);
   }
 

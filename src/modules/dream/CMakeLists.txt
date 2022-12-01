@@ -38,20 +38,14 @@ set(dream_SRC
 set(dream_LIB efu_essreadout)
 create_executable(dream)
 
-add_dependencies(dream efu_essreadout)
-
 #=============================================================================
 # dream detector module test
 #=============================================================================
 set(DreamBaseTest_INC
   ${dream_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(DreamBaseTest_SRC
   ${dream_common_src}
   test/DreamBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(DreamBaseTest)

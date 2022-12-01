@@ -26,7 +26,7 @@
 // clang-format off
 std::string lokijson = R"(
 {
-  "Detector" : "LoKI",
+  "Detector" : "loki",
 
   "StrawResolution" : 512,
 
@@ -41,7 +41,7 @@ std::string lokijson = R"(
 
 std::string bifrostjson = R"(
   {
-    "Detector": "BIFROST",
+    "Detector": "bifrost",
     "MaxRing": 2,
     "StrawResolution": 300
   }
@@ -49,7 +49,7 @@ std::string bifrostjson = R"(
 
 std::string miraclesjson = R"(
   {
-    "Detector": "Miracles",
+    "Detector": "miracles",
     "MaxRing": 2,
     "StrawResolution": 128
   }
@@ -57,8 +57,8 @@ std::string miraclesjson = R"(
 
 class CaenBaseStandIn : public Caen::CaenBase {
 public:
-  CaenBaseStandIn(BaseSettings Settings)
-      : Caen::CaenBase(Settings){};
+  CaenBaseStandIn(BaseSettings Settings, ESSReadout::Parser::DetectorType type)
+      : Caen::CaenBase(Settings, type){};
   ~CaenBaseStandIn() = default;
   using Detector::Threads;
   using Caen::CaenBase::Counters;
@@ -78,20 +78,20 @@ public:
 };
 
 TEST_F(CaenBaseTest, LokiConstructor) {
-  CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.ConfigFile = "deleteme_bifrost.json";
-  CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = "deleteme_miracles.json";
-  CaenBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 
@@ -179,7 +179,8 @@ std::vector<uint8_t> TestPacket2{
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorPort = 9000;
-  CaenBaseStandIn Readout(Settings);
+  Settings.DetectorName = "loki";
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -188,15 +189,16 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.DetectorPort = 9000;
+  Settings.DetectorName = "bifrost";
   Settings.ConfigFile = "deleteme_bifrost.json";
-  CaenBaseStandIn Readout(Settings);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -205,15 +207,16 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.DetectorPort = 9000;
+  Settings.DetectorName = "miracles";
   Settings.ConfigFile = "deleteme_miracles.json";
-  CaenBaseStandIn Readout(Settings);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -222,17 +225,18 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  Settings.DetectorName = "loki";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -241,8 +245,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
@@ -255,10 +259,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
 TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_bifrost.json";
+  Settings.DetectorName = "bifrost";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -267,23 +272,18 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 6);
-  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.RingErrors, 1);
-  EXPECT_EQ(Readout.Counters.TofHigh, 1);
-  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_miracles.json";
+  Settings.DetectorName = "miracles";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings);
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -292,14 +292,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 6);
-  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.RingErrors, 1);
-  EXPECT_EQ(Readout.Counters.TofHigh, 1);
-  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
 }
 
 int main(int argc, char **argv) {
@@ -308,7 +302,8 @@ int main(int argc, char **argv) {
   std::string bifrostfilename{"deleteme_bifrost.json"};
   saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
   std::string miraclesfilename{"deleteme_miracles.json"};
-  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(), miraclesjson.size());
+  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(),
+             miraclesjson.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

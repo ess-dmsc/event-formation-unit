@@ -14,13 +14,6 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 
 struct Counters {
-  // Input Counters - accessed in input thread
-  int64_t RxPackets;
-  int64_t RxBytes;
-  int64_t RxIdle;
-  int64_t FifoPushErrors;
-  int64_t PaddingFor64ByteAlignment[4]; // cppcheck-suppress unusedStructMember
-
   // Processing Counters - accessed in processing thread
   int64_t FifoSeqErrors;
 

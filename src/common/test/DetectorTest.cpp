@@ -8,21 +8,17 @@
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings)
-      : Detector("no detector", settings) {
-    std::cout << "TestDetector" << std::endl;
+  explicit TestDetector(BaseSettings settings) : Detector(settings) {
   };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  ~TestDetector() {};
 };
-
-DetectorFactory<TestDetector> Factory;
 
 /** Test fixture and tests below */
 
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  void SetUp() override { det = Factory.create(settings); }
+  void SetUp() override { det = std::shared_ptr<Detector>(new Detector(settings)); }
 
   void TearDown() override {}
 
@@ -33,6 +29,8 @@ protected:
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, StatAPI) {
+  settings.DetectorName = "no detector";
+  det = std::shared_ptr<Detector>(new Detector(settings));
   int res = det->statsize();
   ASSERT_EQ(res, 0);
 
@@ -44,18 +42,13 @@ TEST_F(DetectorTest, StatAPI) {
   auto name = det->statname(1);
   ASSERT_EQ("", name);
 
-  auto detectorname = det->detectorname();
+  auto detectorname = det->EFUSettings.DetectorName.c_str();
   ASSERT_STREQ("no detector", detectorname);
 }
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
   auto &threadlist = det->GetThreadInfo();
   ASSERT_EQ(0, threadlist.size());
-}
-
-TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
-  auto commandmap = det->GetDetectorCommandFunctions();
-  ASSERT_EQ(0, commandmap.size());
 }
 
 int main(int argc, char **argv) {

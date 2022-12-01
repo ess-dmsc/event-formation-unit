@@ -20,13 +20,6 @@ The main function is responsible for parsing launch-time configuration parameter
 ### Threads
 The behaviour of the processing threads is completely determined by the author of that plugin. In order for a plugin to be usable it needs to adhere to the detector C++ interface. This is described in a later section.
 
-Four examples of already implemented detector interfaces, somewhat alike but also differing are found here
-
-[Gd-GEM](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/gdgem/gdgem.cpp) <br>
-[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/multigrid/mgmesytec.cpp)  <br>
-[SoNDe](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/modules/sonde/sonde.cpp)
-
-
 ## Interfaces
 
 ![EFU Interfaces](figures/efu_architecture.png)

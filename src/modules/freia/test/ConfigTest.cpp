@@ -94,6 +94,7 @@ TEST_F(ConfigTest, Constructor) {
 
 TEST_F(ConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(1, 0, 0).Initialised, false);
+  ASSERT_ANY_THROW(config.getHybrid("not a hybrid ID"));
 }
 
 TEST_F(ConfigTest, NoDetector) {

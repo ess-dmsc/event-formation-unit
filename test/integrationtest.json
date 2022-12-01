@@ -2,7 +2,7 @@
   "Tests":
   [
     {
-      "Module": "caen",
+      "Module": "loki",
       "Config": "./src/modules/loki/configs/STFCTestII.json",
       "KafkaTopic": "loki_detector",
       "Generator": "loki_udp_generated",

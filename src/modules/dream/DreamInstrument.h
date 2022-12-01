@@ -15,8 +15,8 @@
 #include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
-#include <dream/geometry/Config.h>
 #include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 
 namespace Dream {
@@ -38,7 +38,8 @@ public:
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 
   //
-  uint32_t calcPixel(Config::ModuleParms & Parms, DataParser::DreamReadout & Data);
+  uint32_t calcPixel(Config::ModuleParms &Parms,
+                     DataParser::DreamReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' DREAM together

@@ -19,7 +19,7 @@ std::string dreamjson = R"(
   {
     "Detector" : "DREAM",
 
-    "MaxPulseTimeNS" : 357142855
+    "MaxPulseTimeDiffNS" : 357142855
   },
 
   "Config" : [
@@ -29,8 +29,7 @@ std::string dreamjson = R"(
 
 class DreamBaseStandIn : public Dream::DreamBase {
 public:
-  DreamBaseStandIn(BaseSettings Settings)
-      : Dream::DreamBase(Settings){};
+  DreamBaseStandIn(BaseSettings Settings) : Dream::DreamBase(Settings){};
   ~DreamBaseStandIn() = default;
   using Detector::Threads;
   using Dream::DreamBase::Counters;
@@ -51,7 +50,7 @@ public:
 
 TEST_F(DreamBaseTest, Constructor) {
   DreamBaseStandIn Readout(Settings);
-  EXPECT_EQ(Readout.Counters.RxPackets, 0);
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
 /// | ESS Header    |
@@ -61,6 +60,7 @@ TEST_F(DreamBaseTest, Constructor) {
 /// | Data header 1 |
 /// | Data block 1  |
 ///
+// clang-format off
 std::vector<uint8_t> TestPacket2{
     // ESS header
     0x00, 0x00,             // pad, v0
@@ -100,6 +100,7 @@ std::vector<uint8_t> TestPacket3{
     0x00, 0x00, 0x14, 0x05, // unused 00 00 module 20, sumo 5
     0x00, 0x00, 0xCC, 0xAA  // normal operation, cathode 0xcc, anode 0xaa
 };
+// clang-format off
 
 TEST_F(DreamBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
@@ -113,8 +114,8 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
@@ -133,14 +134,13 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.Counters.RxPackets, 1);
-  EXPECT_EQ(Readout.Counters.RxBytes, TestPacket3.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket3.size());
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
   EXPECT_EQ(Readout.Counters.MappingErrors, 0);
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-
 }
 
 int main(int argc, char **argv) {

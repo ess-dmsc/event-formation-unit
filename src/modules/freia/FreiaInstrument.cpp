@@ -22,7 +22,7 @@ namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
-                                 BaseSettings & settings,
+                                 BaseSettings &settings,
                                  EV42Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
 
@@ -196,7 +196,7 @@ void FreiaInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching
   }
 }
 

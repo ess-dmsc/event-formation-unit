@@ -98,10 +98,28 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_common "-Wl,--no-as-needed")
 endif()
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_essreadout "-Wl,--no-as-needed")
+endif()
+
 enable_coverage(efu_common)
 
 target_link_libraries(efu_common
   PUBLIC ${EFU_COMMON_LIBS}
+  )
+
+
+set(TestUtilsLib_INC
+    testutils/SaveBuffer.h
+    testutils/TestUDPServer.h
+  )
+set(TestUtilsLib_SRC
+    testutils/SaveBuffer.cpp
+    testutils/TestUDPServer.cpp
+  )
+add_library(TestUtilsLib OBJECT
+  ${TestUtilsLib_INC}
+  ${TestUtilsLib_SRC}
   )
 
 #=============================================================================

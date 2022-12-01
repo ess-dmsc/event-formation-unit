@@ -27,11 +27,11 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 
   DreamConfiguration.loadAndApply();
 
-
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 }
 
-uint32_t DreamInstrument::calcPixel(Config::ModuleParms & Parms, DataParser::DreamReadout & Data) {
+uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
+                                    DataParser::DreamReadout &Data) {
   return Geometry.getPixel(Parms, Data);
 }
 
@@ -39,9 +39,8 @@ void DreamInstrument::processReadouts() {
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   uint64_t PulseTime =
       Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t PrevPulseTime = Time.setPrevReference(
-      PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
-
+  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
+                                                 PacketHeader->PrevPulseLow);
 
   if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
@@ -74,7 +73,8 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    Config::ModuleParms & Parms = DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
+    Config::ModuleParms &Parms =
+        DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
 
     if (not Parms.Initialised) {
       XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
@@ -83,8 +83,8 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
-        Data.TimeHigh, Data.TimeLow);
+    auto TimeOfFlight =
+        ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow);
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Parms, Data);
@@ -95,8 +95,6 @@ void DreamInstrument::processReadouts() {
       counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
     }
-
-
   }
 }
 

@@ -6,13 +6,13 @@
 set(loki_udp_generated_INC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_MODULE_DIR}/caen/generators/LokiReadoutGenerator.h
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   )
 set(loki_udp_generated_SRC
   ${ESS_SOURCE_DIR}/generators/essudpgen/udpgen_template.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   ${ESS_MODULE_DIR}/caen/generators/LokiReadoutGenerator.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   )
 create_executable(loki_udp_generated)
 target_compile_definitions(loki_udp_generated

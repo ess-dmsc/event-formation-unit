@@ -36,19 +36,12 @@ set(cspec_LIB
   )
 create_executable(cspec)
 
-add_dependencies(cspec efu_reduction efu_essreadout)
-
-
 set(CSPECBaseTest_INC
   ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(CSPECBaseTest_SRC
   test/CSPECBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${cspec_common_src}
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(CSPECBaseTest)
 
@@ -57,11 +50,9 @@ create_test_executable(CSPECBaseTest)
 #
 set(CSPECInstrumentTest_INC
   ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(CSPECInstrumentTest_SRC
   ${cspec_common_src}
   test/CSPECInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(CSPECInstrumentTest)

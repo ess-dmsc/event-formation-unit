@@ -11,6 +11,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
+#include <fmt/format.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -30,15 +31,17 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
          Settings.ConfigFile.c_str());
   CaenConfiguration = Config(Settings.ConfigFile);
 
-  if (CaenConfiguration.InstrumentName == "LoKI") {
+  if (settings.DetectorName == "loki") {
     Geom = new LokiGeometry(CaenConfiguration);
-  } else if (CaenConfiguration.InstrumentName == "BIFROST") {
+  } else if (settings.DetectorName == "bifrost") {
     Geom = new BifrostGeometry(CaenConfiguration);
-  } else if (CaenConfiguration.InstrumentName == "Miracles") {
+  } else if (settings.DetectorName == "miracles") {
     Geom = new MiraclesGeometry(CaenConfiguration);
   } else {
-    XTRACE(INIT, ERR, "Invalid Detector Name");
-    throw std::runtime_error("Invalid Detector Name");
+    XTRACE(INIT, ERR, "Invalid Detector Name %s",
+           settings.DetectorName.c_str());
+    throw std::runtime_error(
+        fmt::format("Invalid Detector Name {}", settings.DetectorName));
   }
 
   if (Settings.CalibFile.empty()) {
@@ -66,10 +69,15 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     throw std::runtime_error("Pixel mismatch");
   }
 
-  if (!Settings.DumpFilePrefix.empty()) {
-    DumpFile =
-        ReadoutFile::create(Settings.DumpFilePrefix + "caen_" + timeString());
-  }
+  if (not Settings.DumpFilePrefix.empty()) {
+      if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+
+        DumpFile = ReadoutFile::create(
+                     boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
+      } else {
+        DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
+      }
+    }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);

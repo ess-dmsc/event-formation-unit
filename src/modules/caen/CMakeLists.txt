@@ -13,9 +13,9 @@ set(caen_common_inc
   geometry/Config.h
   geometry/Calibration.h
   geometry/Geometry.h
-  geometry/BifrostGeometry.h
-  geometry/LokiGeometry.h
-  geometry/MiraclesGeometry.h
+  ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.h
+  ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
+  ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
   readout/DataParser.h
   )
 set(caen_common_src
@@ -23,35 +23,38 @@ set(caen_common_src
   CaenInstrument.cpp
   geometry/Config.cpp
   geometry/Calibration.cpp
-  geometry/BifrostGeometry.cpp
-  geometry/LokiGeometry.cpp
-  geometry/MiraclesGeometry.cpp
+  ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.cpp
+  ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
+  ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp
   readout/DataParser.cpp
   )
 
-set(caen_INC ${caen_common_inc})
-set(caen_SRC
+add_library(caen_common STATIC
   ${caen_common_src}
-  main.cpp
+  ${caen_common_inc}
   )
-set(caen_LIB efu_reduction efu_essreadout)
-create_executable(caen)
 
-add_dependencies(efu_reduction efu_essreadout)
-
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(caen_common "-Wl,--no-as-needed")
+endif()
 
 ##
 ## CaeniInstrumentTest Module integration test
 ##
 set(CaenInstrumentTest_INC
   ${caen_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(CaenInstrumentTest_SRC
   ${caen_common_src}
   test/CaenInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-
 )
 create_test_executable(CaenInstrumentTest)
+
+set(CaenBaseTest_INC
+  ${caen_common_inc}
+)
+set(CaenBaseTest_SRC
+  ${caen_common_src}
+  test/CaenBaseTest.cpp
+)
+create_test_executable(CaenBaseTest)
