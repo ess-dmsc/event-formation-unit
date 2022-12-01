@@ -166,7 +166,7 @@ void NMXInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching
   }
 }
 
