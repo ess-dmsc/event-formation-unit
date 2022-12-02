@@ -108,10 +108,10 @@ bool operator!=(const ClusterPoolAllocator<T> &,
 
 //-----------------------------------------------------------------------------
 
-// \todo the abstract class code needs tests
+/// \todo the abstract class code needs tests
 
-// \todo refactor: move out to separate header
-// \todo replace by deque, or....?
+/// \todo refactor: move out to separate header
+/// \todo replace by deque, or....?
 // using ClusterContainer = std::list<Cluster,
 // ClusterContainerAllocator<Cluster>>;
 // using ClusterContainer = std::list<Cluster>;

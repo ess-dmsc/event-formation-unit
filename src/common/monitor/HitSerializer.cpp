@@ -20,8 +20,8 @@ void HitSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
-// \todo labels for planes
-// \todo offset time
+/// \todo labels for planes
+/// \todo offset time
 
 size_t HitSerializer::produce() {
   if (entries == 0) {

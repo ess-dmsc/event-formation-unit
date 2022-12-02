@@ -165,7 +165,7 @@ TEST_F(EventAnalyzerTest, DebugPrint) {
   MESSAGE() << result.to_string() << "\n";
 }
 
-// \todo more & better tests of this required
+/// \todo more & better tests of this required
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

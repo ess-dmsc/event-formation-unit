@@ -5,7 +5,7 @@
 /// \brief single producer single consumer lockless fifo
 ///
 //===----------------------------------------------------------------------===//
-//\
+///\
 Not any company's property but Public-Domain\
 Do with source-code as you will. No requirement to keep this\
 header if need to use it/change it/ or do whatever with it\

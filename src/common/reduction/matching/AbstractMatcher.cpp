@@ -59,7 +59,7 @@ void AbstractMatcher::stashEvent(Event &event) {
 }
 
 void AbstractMatcher::requeue_clusters(Event &event) {
-  // \todo this needs explicit testing
+  /// \todo this needs explicit testing
   if (!event.ClusterA.empty())
     unmatched_clusters_.emplace_front(std::move(event.ClusterA));
   if (!event.ClusterB.empty())
@@ -91,7 +91,7 @@ std::string AbstractMatcher::status(const std::string &prepend,
      << fmt::format("stats_rejected_clusters: {}\n", stats_rejected_clusters);
   if (!matched_events.empty()) {
     ss << prepend << "Matched events:\n";
-    // \todo refactor: make function for this
+    /// \todo refactor: make function for this
     for (const auto &e : matched_events) {
       ss << prepend << "  " << e.to_string(prepend + "  ", verbose) + "\n";
     }

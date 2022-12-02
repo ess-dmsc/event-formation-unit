@@ -25,7 +25,7 @@ public:
   mutable size_t stats_event_count{0}; ///< cumulative number of matched events
   mutable size_t stats_rejected_clusters{
       0}; ///< cumulative number of rejected clusters
-  // \todo more counters?
+  /// \todo more counters?
 
 public:
   /// \brief AbstractMatcher constructor

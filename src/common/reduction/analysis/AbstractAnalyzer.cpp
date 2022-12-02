@@ -8,4 +8,4 @@
 
 #include <common/reduction/analysis/AbstractAnalyzer.h>
 
-// \todo put stuff here, maybe? :)
+/// \todo put stuff here, maybe? :)

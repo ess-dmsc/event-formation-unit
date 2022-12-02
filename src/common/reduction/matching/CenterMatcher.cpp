@@ -92,7 +92,7 @@ void CenterMatcher::match(bool flush) {
       stashEvent(evt);
     } else {
       // Else return to queue
-      // \todo this needs explicit testing
+      /// \todo this needs explicit testing
       if (!evt.ClusterA.empty())
         unmatched_clusters_.push_front(std::move(evt.ClusterA));
       if (!evt.ClusterB.empty())

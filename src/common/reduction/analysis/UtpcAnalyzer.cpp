@@ -86,7 +86,7 @@ ReducedEvent utpcAnalyzer::analyze(Event &event) const {
 }
 
 uint64_t utpcAnalyzer::utpc_time(const Event &e) {
-  // \todo is this what we want?
+  /// \todo is this what we want?
   return std::max(e.ClusterA.timeEnd(), e.ClusterB.timeEnd());
 }
 

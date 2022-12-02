@@ -160,7 +160,7 @@ TEST_F(OverlapMatcherTest, DontForce) {
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
-  // \todo improve this. Not clear if the latency horizon is working as intended
+  /// \todo improve this. Not clear if the latency horizon is working as intended
 
   x.clear();
   add_cluster(x, 0, 0, 10, 1, 2010, 2200, 1);

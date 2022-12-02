@@ -291,7 +291,7 @@ TEST_F(CenterMatcherTest, Y_X_X_Y) {
   EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 200);
 }
 
-// \todo do more tests
+/// \todo do more tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

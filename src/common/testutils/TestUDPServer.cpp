@@ -1,6 +1,6 @@
 // Copyright (C) 2018 - 2020 European Spallation Source ERIC
 
-// @file\
+/// @file\
 \brief Code for testing the ADC UDP functionality.\
 \
 // GCOVR_EXCL_START

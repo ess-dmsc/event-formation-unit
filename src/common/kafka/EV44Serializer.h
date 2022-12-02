@@ -60,7 +60,7 @@ public:
   int64_t TxBytes;
 
 private:
-  // \todo should this not be predefined in terms of jumbo frame?
+  /// \todo should this not be predefined in terms of jumbo frame?
   size_t MaxEvents{0};
   size_t EventCount{0};
 

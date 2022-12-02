@@ -1,6 +1,6 @@
 // Copyright (C) 2017 European Spallation Source ERIC
 
-// @file\
+/// @file\
 \
 @brief Multigrid electronics\
 Handles mappings between (digitizer, channels) and (x,y,z) coordinates.\

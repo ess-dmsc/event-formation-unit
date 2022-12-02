@@ -11,7 +11,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/monitor/HitSerializer.h>
 
-// \todo document functions
+/// \todo document functions
 
 struct Monitor {
   Monitor() = default;

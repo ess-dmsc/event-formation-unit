@@ -13,7 +13,7 @@ protected:
   void TearDown() override {}
 };
 
-// \todo tests needed
+/// \todo tests needed
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
