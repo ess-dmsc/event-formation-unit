@@ -51,7 +51,7 @@ void GapClusterer::flush() {
 
 void GapClusterer::cluster_by_coordinate() {
   /// First, sort in terms of coordinate
-  sort_by_increasing_coordinate(current_time_cluster_);
+  sortByIncreasingCoordinate(current_time_cluster_);
 
   Cluster cluster;
   XTRACE(CLUSTER, DEB, "cur time cluster: first coord %u, last coord %u",
@@ -62,13 +62,13 @@ void GapClusterer::cluster_by_coordinate() {
   for (auto &hit : current_time_cluster_) {
     /// Stash cluster if coordinate gap to next hit is too large
     XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate,
-           cluster.coord_end());
+           cluster.coordEnd());
 
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.coord_end()) > max_coord_gap_) {
+        (hit.coordinate - cluster.coordEnd()) > max_coord_gap_) {
       XTRACE(CLUSTER, DEB,
              "Stashing cluster - max_coord_gap exceeded (%i > %i)",
-             hit.coordinate - cluster.coord_end(), max_coord_gap_);
+             hit.coordinate - cluster.coordEnd(), max_coord_gap_);
       stash_cluster(cluster);
       cluster.clear();
     }

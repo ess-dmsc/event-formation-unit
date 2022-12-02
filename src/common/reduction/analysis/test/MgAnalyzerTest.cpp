@@ -50,7 +50,7 @@ TEST_F(MgAnalyzerTest, InsertInvalid) {
   event.insert(hit);
   hit.plane = 2;
   event.insert(hit);
-  EXPECT_EQ(2, event.total_hit_count());
+  EXPECT_EQ(2, event.totalHitCount());
 }
 
 TEST_F(MgAnalyzerTest, DebugPrint) {

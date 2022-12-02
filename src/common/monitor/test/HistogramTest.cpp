@@ -10,7 +10,7 @@ TEST_F(HistsTest, Constructor) {
   Hists hists(64, 4096);
   ASSERT_EQ(hists.bin_width(), 1);
   ASSERT_TRUE(hists.isEmpty());
-  ASSERT_EQ(hists.hit_count(), 0);
+  ASSERT_EQ(hists.hitCount(), 0);
   ASSERT_EQ(hists.cluster_count(), 0);
 }
 

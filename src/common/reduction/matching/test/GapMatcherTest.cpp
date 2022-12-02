@@ -53,7 +53,7 @@ protected:
 
 TEST_F(GapMatcherTest, Constructor) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_minimum_time_gap(70);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -63,7 +63,7 @@ TEST_F(GapMatcherTest, Constructor) {
 
 TEST_F(GapMatcherTest, PrintConfig) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_minimum_time_gap(70);
+  matcher.setMinimumTimeGap(70);
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
   MESSAGE() << "CONFIG:\n" << matcher.config("  ");
@@ -71,8 +71,8 @@ TEST_F(GapMatcherTest, PrintConfig) {
 
 TEST_F(GapMatcherTest, MultiHitOnMatchSingleEvent) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -90,8 +90,8 @@ TEST_F(GapMatcherTest, MultiHitOnMatchSingleEvent) {
 
 TEST_F(GapMatcherTest, MultiHitOnMatchSingleEventNoFlush) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -109,8 +109,8 @@ TEST_F(GapMatcherTest, MultiHitOnMatchSingleEventNoFlush) {
 
 TEST_F(GapMatcherTest, MultiHitOnMatchSingleEventNoFlushTimeGap) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -142,8 +142,8 @@ TEST_F(GapMatcherTest, MultiHitOnMatchSingleEventNoFlushTimeGap) {
 
 TEST_F(GapMatcherTest, MultiHitOnMatchMultiEvent) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -161,8 +161,8 @@ TEST_F(GapMatcherTest, MultiHitOnMatchMultiEvent) {
 
 TEST_F(GapMatcherTest, MultiHitOnFailedMatchMultiEventPlaneA) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
@@ -180,8 +180,8 @@ TEST_F(GapMatcherTest, MultiHitOnFailedMatchMultiEventPlaneA) {
 
 TEST_F(GapMatcherTest, MultiHitOnFailedMatchMultiEventPlaneB) {
   GapMatcher matcher(125, 0, 1);
-  matcher.set_split_multi_events(true, 0.8, 1.2);
-  matcher.set_minimum_time_gap(70);
+  matcher.setSplitMultiEvents(true, 0.8, 1.2);
+  matcher.setMinimumTimeGap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);

@@ -68,7 +68,7 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
   cluster.insert(hit);
 
   auto result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(cluster.hit_count(), 2);
+  EXPECT_EQ(cluster.hitCount(), 2);
   EXPECT_EQ(result.center, 0);
   EXPECT_EQ(result.time, 2);
 
@@ -156,7 +156,7 @@ TEST_F(EventAnalyzerTest, InsertInvalid) {
   event.insert(hit);
   hit.plane = 2;
   event.insert(hit);
-  EXPECT_EQ(2, event.total_hit_count());
+  EXPECT_EQ(2, event.totalHitCount());
 }
 
 TEST_F(EventAnalyzerTest, DebugPrint) {

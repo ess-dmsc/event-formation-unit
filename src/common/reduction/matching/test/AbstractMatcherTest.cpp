@@ -14,7 +14,7 @@ public:
   using AbstractMatcher::PlaneA;
   using AbstractMatcher::PlaneB;
   using AbstractMatcher::ready_to_be_matched;
-  using AbstractMatcher::stash_event;
+  using AbstractMatcher::stashEvent;
   using AbstractMatcher::unmatched_clusters_;
 };
 
@@ -169,12 +169,12 @@ TEST_F(AbstractMatcherTest, Stash) {
   e.insert({0, 0, 0, 0});
   e.insert({0, 1, 0, 0});
 
-  matcher.stash_event(e);
+  matcher.stashEvent(e);
   EXPECT_EQ(matcher.matched_events.size(), 1);
   EXPECT_EQ(matcher.stats_event_count, 1);
 
   matcher.matched_events.clear();
-  matcher.stash_event(e);
+  matcher.stashEvent(e);
   EXPECT_EQ(matcher.matched_events.size(), 1);
   EXPECT_EQ(matcher.stats_event_count, 2);
 }

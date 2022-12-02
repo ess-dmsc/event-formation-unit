@@ -39,12 +39,12 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
   uint16_t uspan_min = std::numeric_limits<uint16_t>::max();
   uint16_t uspan_max = std::numeric_limits<uint16_t>::min();
   uint64_t earliest =
-      std::min(cluster.time_start(),
-               cluster.time_end() - static_cast<uint64_t>(max_timedif_));
+      std::min(cluster.timeStart(),
+               cluster.timeEnd() - static_cast<uint64_t>(max_timedif_));
   std::set<uint64_t> timebins;
   for (auto it = cluster.hits.rbegin(); it != cluster.hits.rend(); ++it) {
     auto e = *it;
-    if (e.time == cluster.time_end()) {
+    if (e.time == cluster.timeEnd()) {
       if (weighted_) {
         center_sum += (e.coordinate * e.weight);
         center_count += e.weight;
@@ -87,7 +87,7 @@ ReducedEvent utpcAnalyzer::analyze(Event &event) const {
 
 uint64_t utpcAnalyzer::utpc_time(const Event &e) {
   // \todo is this what we want?
-  return std::max(e.ClusterA.time_end(), e.ClusterB.time_end());
+  return std::max(e.ClusterA.timeEnd(), e.ClusterB.timeEnd());
 }
 
 bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x,

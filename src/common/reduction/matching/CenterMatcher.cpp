@@ -24,17 +24,17 @@ void CenterMatcher::match(bool flush) {
 
   if (time_algorithm_ == "center-of-mass") {
     unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.time_center() < c2.time_center();
+      return c1.timeCenter() < c2.timeCenter();
     });
   } else if (time_algorithm_ == "charge2") {
     unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.time_center2() < c2.time_center2();
+      return c1.timeCenter2() < c2.timeCenter2();
     });
   }
   // time_algorithm_ == "utpc" or time_algorithm_ == "utpc-weighted"
   else {
     unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.time_end() < c2.time_end();
+      return c1.timeEnd() < c2.timeEnd();
     });
   }
 
@@ -55,20 +55,20 @@ void CenterMatcher::match(bool flush) {
     // if the event is complete in both planes, stash it
     if (evt.both_planes()) {
       XTRACE(CLUSTER, DEB, "stash complete plane1/2 event");
-      stash_event(evt);
+      stashEvent(evt);
       evt.clear();
     }
     if (!evt.empty()) {
-      if (evt.time_gap(*cluster) > max_delta_time_) {
+      if (evt.timeGap(*cluster) > max_delta_time_) {
         XTRACE(CLUSTER, DEB, "time gap too large");
-        stash_event(evt);
+        stashEvent(evt);
         evt.clear();
       }
       // Plane 1 has value 0
       if (cluster->plane() == 0) {
         if (!evt.ClusterA.empty()) {
           XTRACE(CLUSTER, DEB, "stash plane 1 event");
-          stash_event(evt);
+          stashEvent(evt);
           evt.clear();
         }
       }
@@ -76,7 +76,7 @@ void CenterMatcher::match(bool flush) {
       else if (cluster->plane() == 1) {
         if (!evt.ClusterB.empty()) {
           XTRACE(CLUSTER, DEB, "stash plane 2 event");
-          stash_event(evt);
+          stashEvent(evt);
           evt.clear();
         }
       }
@@ -89,7 +89,7 @@ void CenterMatcher::match(bool flush) {
   if (!evt.empty()) {
     if (flush) {
       // If flushing, stash it
-      stash_event(evt);
+      stashEvent(evt);
     } else {
       // Else return to queue
       // \todo this needs explicit testing

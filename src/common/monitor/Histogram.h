@@ -43,7 +43,7 @@ public:
   void bincluster(uint32_t sum);
 
   bool isEmpty() const;
-  size_t hit_count() const;
+  size_t hitCount() const;
   size_t cluster_count() const;
 
   size_t bin_width() const;

@@ -25,9 +25,9 @@ public:
   /// them
   ///         to be disambiguated into separate events. If time gap is smaller,
   ///         the clusters are merged into one event.
-  void set_minimum_time_gap(uint64_t minimum_time_gap);
+  void setMinimumTimeGap(uint64_t minimum_time_gap);
 
-  void set_split_multi_events(bool split_multi_events, float coefficient_low,
+  void setSplitMultiEvents(bool split_multi_events, float coefficient_low,
                               float coefficient_high);
 
   /// \brief Match queued up clusters into events.
@@ -40,7 +40,7 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
-  void reset_stats() {
+  void resetStats() {
     Stats.SpanTooLarge = 0;
     Stats.DiscardedSpanTooLarge = 0;
     Stats.SplitSpanTooLarge = 0;
@@ -54,11 +54,11 @@ public:
 
 
 private:
-  void split_and_stash_event(Event evt);
-  void split_cluster(Cluster cluster, Cluster *new_cluster_1,
+  void splitAndStashEvent(Event evt);
+  void splitCluster(Cluster cluster, Cluster *new_cluster_1,
                      Cluster *new_cluster_2);
-  bool clusters_match(Cluster cluster_a, Cluster cluster_b);
-  void check_and_stash_event(Event evt);
+  bool clustersMatch(Cluster cluster_a, Cluster cluster_b);
+  void checkAndStashEvent(Event evt);
 
   uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};

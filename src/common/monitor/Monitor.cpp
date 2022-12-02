@@ -59,7 +59,7 @@ void Monitor::produce_now() {
 
   if (!histograms->isEmpty()) {
     LOG(PROCESS, Sev::Debug, "Flushing histograms for {} readouts",
-        histograms->hit_count());
+        histograms->hitCount());
     hist_serializer->produce(*histograms);
     histograms->clear();
   }

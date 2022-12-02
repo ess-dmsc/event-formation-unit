@@ -89,7 +89,7 @@ protected:
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
-  void stash_event(Event &event);
+  void stashEvent(Event &event);
 
   /// \brief Puts the event's constituent clusters back onto their respective
   ///         unmatched cluster queues.
