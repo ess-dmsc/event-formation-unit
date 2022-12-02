@@ -315,6 +315,7 @@ if (env.CHANGE_ID) {
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mkdir build"
             sh "mv event-formation-unit build"
             sh """
                 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
@@ -327,6 +328,7 @@ if (env.CHANGE_ID) {
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mkdir build"
             sh "mv event-formation-unit build"
             sh """
                 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
