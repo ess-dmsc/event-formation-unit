@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,12 +16,12 @@
 
 class HistogramSerializer {
 public:
-  /** \todo document */
+  /// \todo document
   HistogramSerializer(size_t buffer_half_size, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
-  /** \todo document */
+  /// \todo document
   size_t produce(const Hists &hists);
 
 private:

@@ -1,4 +1,4 @@
-/** Copyright (C) 2022 European Spallation Source ERIC */
+// Copyright (C) 2022 European Spallation Source ERIC
 
 #include "ev44_events_generated.h"
 #include <common/kafka/EV44Serializer.h>

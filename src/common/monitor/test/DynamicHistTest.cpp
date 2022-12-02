@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
+// Copyright (C) 2019 European Spallation Source ERIC
 
 #include <common/monitor/DynamicHist.h>
 #include <common/testutils/TestBase.h>

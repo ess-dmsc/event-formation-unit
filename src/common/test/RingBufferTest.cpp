@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/memory/RingBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -9,7 +9,7 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below 
 TEST_F(RingBufferTest, Constructor) {
   RingBuffer<9000> buf(100);
   ASSERT_EQ(buf.getMaxElements(), 100);

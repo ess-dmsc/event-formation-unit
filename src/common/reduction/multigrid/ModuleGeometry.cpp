@@ -1,11 +1,10 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC 
 
-/** @file
- *
- *  @brief Multigrid electronics
- * Handles mappings between (digitizer, channels) and (x,y,z) coordinates.
- *
- */
+// @file\
+\
+@brief Multigrid electronics\
+Handles mappings between (digitizer, channels) and (x,y,z) coordinates.\
+
 
 #include <common/reduction/multigrid/ModuleGeometry.h>
 

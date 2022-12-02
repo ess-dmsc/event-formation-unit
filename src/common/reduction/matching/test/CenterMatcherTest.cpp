@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
 #include <common/reduction/matching/CenterMatcher.h>
 #include <common/reduction/matching/EndMatcher.h>

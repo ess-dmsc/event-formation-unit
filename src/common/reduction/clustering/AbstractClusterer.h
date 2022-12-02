@@ -1,4 +1,4 @@
-/*Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file*/
+// Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file AbstractClusterer.h
@@ -34,7 +34,7 @@ template <class T> struct GreedyClusterAllocator {
       return (T *)p;
     throw std::bad_alloc();
   }
-  void deallocate(T *, std::size_t) noexcept { /* do nothing*/
+  void deallocate(T *, std::size_t) noexcept { // do nothing
   }
 };
 

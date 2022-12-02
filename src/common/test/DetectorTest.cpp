@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/detector/Detector.h>
 #include <common/testutils/TestBase.h>
@@ -13,7 +13,7 @@ public:
   ~TestDetector() {};
 };
 
-/** Test fixture and tests below */
+// Test fixture and tests below
 
 class DetectorTest : public TestBase {
 protected:
