@@ -85,7 +85,7 @@ function(enable_coverage coverage_target)
     set_target_properties(${coverage_target} PROPERTIES
         LINK_FLAGS ${COVERAGE_LINK_FLAGS})
     target_link_libraries(${coverage_target}
-        PUBLIC ${COVERAGE_LIBRARIES})
+        ${COVERAGE_LIBRARIES})
   endif()
 endfunction()
 
