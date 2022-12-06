@@ -147,20 +147,20 @@ void NMXInstrument::processReadouts(void) {
     /// \todo apply calibration and recheck if over max ADC, is this overall max
     /// adc or still vessel/channel specific?
 
-    //   // Now we add readouts with the calibrated time and adc to the panel
-    //   builders
+    // Now we add readouts with the calibrated time and adc to the panel
+    // builders
 
     uint16_t Coord = GeometryInstance->coord(readout.Channel, AsicId, Offset,
                                              ReversedChannels);
 
-    if (Coord ==
-        GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
+    // 65535 is used for invalid coordinate value
+    if (Coord == Geometry::InvalidCoord) {
       XTRACE(DATA, ERR, "Invalid Coord");
       counters.MappingErrors++;
       continue;
     }
 
-    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u", Coord, readout.Channel,
+    XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Panel %u", Plane, Coord, readout.Channel,
            Panel);
     builders[Panel].insert({TimeNS, Coord, ADC, Plane});
     XTRACE(DATA, DEB, "inserted to builder");
@@ -172,6 +172,7 @@ void NMXInstrument::processReadouts(void) {
 }
 
 void NMXInstrument::generateEvents(std::vector<Event> &Events) {
+  XTRACE(EVENT, DEB, "generateEvents()");
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
