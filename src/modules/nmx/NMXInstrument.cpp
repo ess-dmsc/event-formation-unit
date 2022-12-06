@@ -84,31 +84,32 @@ void NMXInstrument::processReadouts(void) {
       VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
 
+
     XTRACE(DATA, DEB,
            "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
+    // Convert from physical rings to logical rings
+    int LRingId = readout.RingId/2;
     uint8_t HybridId = readout.VMM >> 1;
     ESSReadout::Hybrid &Hybrid =
-        Conf.getHybrid(readout.RingId, readout.FENId, HybridId);
+        Conf.getHybrid(LRingId, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
-      XTRACE(DATA, WAR,
-             "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-             readout.RingId, readout.FENId, HybridId);
+      XTRACE(DATA, ALW,
+             "Hybrid for LRing %d, FEN %d, VMM %d not defined in config file",
+             LRingId, readout.FENId, HybridId);
       counters.HybridMappingErrors++;
       continue;
     }
 
-    // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
-    uint16_t Offset = Conf.Offset[readout.RingId][readout.FENId][HybridId];
-    uint8_t Plane = Conf.Plane[readout.RingId][readout.FENId][HybridId];
-    uint8_t Panel = Conf.Panel[readout.RingId][readout.FENId][HybridId];
+    uint16_t Offset = Conf.Offset[LRingId][readout.FENId][HybridId];
+    uint8_t Plane = Conf.Plane[LRingId][readout.FENId][HybridId];
+    uint8_t Panel = Conf.Panel[LRingId][readout.FENId][HybridId];
     bool ReversedChannels =
-        Conf.ReversedChannels[readout.RingId][readout.FENId][HybridId];
+        Conf.ReversedChannels[LRingId][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
