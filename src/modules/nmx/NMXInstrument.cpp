@@ -167,16 +167,16 @@ void NMXInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching, and flush the matcher
   }
 }
 
 void NMXInstrument::generateEvents(std::vector<Event> &Events) {
   XTRACE(EVENT, DEB, "generateEvents()");
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
-
   for (const auto &e : Events) {
     if (e.empty()) {
+      XTRACE(EVENT, DEB, "event empty");
       continue;
     }
 
