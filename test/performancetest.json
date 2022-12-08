@@ -21,6 +21,13 @@
       "Generator": "nmx_udp_generated",
       "InitThrottle": 10,
       "KafkaTopic": "nmx_detector"
+    },
+    {
+      "Module": "nmx",
+      "Config": "./src/modules/nmx/configs/nmx_split.json",
+      "Generator": "nmx_udp_generated_multihit",
+      "InitThrottle": 10,
+      "KafkaTopic": "nmx_detector"
     }
   ]
 }

@@ -15,6 +15,7 @@
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
 #include <modules/nmx/generators/TrackReadoutGenerator.h>
@@ -97,6 +98,11 @@ int main(int argc, char *argv[]) {
 
 #ifdef NMX_SMILE_GENERATOR
   Nmx::SmileReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_MULTIHIT_GENERATOR
+  Nmx::MultiHitReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
 

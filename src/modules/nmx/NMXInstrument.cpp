@@ -159,14 +159,14 @@ void NMXInstrument::processReadouts(void) {
       continue;
     }
 
-    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u", Coord, readout.Channel,
-           Panel);
+    XTRACE(DATA, DEB, "Coord %u, Channel %u, Panel %u, ADC %u, Time %llu",
+           Coord, readout.Channel, Panel, ADC, TimeNS);
     builders[Panel].insert({TimeNS, Coord, ADC, Plane});
     XTRACE(DATA, DEB, "inserted to builder");
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching
   }
 }
 

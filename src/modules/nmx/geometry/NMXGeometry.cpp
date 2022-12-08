@@ -22,6 +22,7 @@
 uint16_t Nmx::NMXGeometry::coord(uint8_t Channel, uint8_t AsicId,
                                  uint16_t Offset, bool ReversedChannels) {
   uint16_t CoordNumber;
+
   if ((Channel > 63) or (AsicId > 1)) {
     XTRACE(DATA, ERR,
            "Calculating coordinate value from Channel: %u, AsicId: %u, Offset: "
