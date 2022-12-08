@@ -29,6 +29,9 @@ public:
   void setSplitMultiEvents(bool split_multi_events, float coefficient_low,
                               float coefficient_high);
 
+  void set_split_multi_events(bool split_multi_events, float coefficient_low,
+                              float coefficient_high);
+
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
   ///         smaller than the minimum time gap are joined into events.

@@ -312,6 +312,7 @@ if (env.CHANGE_ID) {
     // This is a pull request build
     node('inttest') {
         stage('Integration Test') {
+            sh "rm -r build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
