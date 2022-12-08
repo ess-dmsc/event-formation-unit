@@ -317,7 +317,7 @@ if (env.CHANGE_ID) {
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
             sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/integrationtest.py
             """
         }  // stage
@@ -329,7 +329,7 @@ if (env.CHANGE_ID) {
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
             sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/performancetest.py
             """
         }
