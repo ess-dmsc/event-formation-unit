@@ -324,6 +324,7 @@ if (env.CHANGE_ID) {
     }  // node
     node('inttest'){
         stage('Performance Test'){
+            sh "rm -r build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
