@@ -35,8 +35,8 @@ TEST_F(CenterMatcherTest, Constructor) {
 }
 
 TEST_F(CenterMatcherTest, PrintConfig) {
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "CONFIG:\n" << matcher.config("  ");
 }
 
 TEST_F(CenterMatcherTest, X) {

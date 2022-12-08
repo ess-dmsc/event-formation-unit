@@ -39,6 +39,17 @@ TEST_F(HistsTest, BinCluster) {
   }
 }
 
+TEST_F(HistsTest, Clear) {
+  Hists hists(64, 4096);
+
+  hists.bincluster(1);
+  ASSERT_EQ(hists.cluster_count(), 1);
+  ASSERT_EQ(hists.cluster_adc_hist[1], 1);
+
+  hists.clear();
+  ASSERT_EQ(hists.cluster_count(), 0);
+}
+
 TEST_F(HistsTest, BinClusterWDownshift) {
   Hists hists(64, 4096);
   hists.set_cluster_adc_downshift(1);

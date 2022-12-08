@@ -20,6 +20,12 @@ protected:
   void TearDown() override {}
 };
 
+TEST_F(NMXGeometryTest, InvalidArguments) {
+  ASSERT_EQ(Geom.coord(64, 1, 0, false), 65535);
+  ASSERT_EQ(Geom.coord(63, 2, 0, false), 65535);
+  ASSERT_NE(Geom.coord(63, 1, 0, false), 65535);
+}
+
 TEST_F(NMXGeometryTest, CoordinateCalculations) {
   // coord takes Channel, AsicId, Offset, ReversedChannels
   uint8_t AsicId = 0;

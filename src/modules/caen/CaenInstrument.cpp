@@ -146,7 +146,7 @@ void CaenInstrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+    uint64_t TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
         Data.TimeHigh, Data.TimeLow, CaenConfiguration.ReadoutConstDelayNS);
 
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",

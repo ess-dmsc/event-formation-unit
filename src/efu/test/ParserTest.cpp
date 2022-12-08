@@ -47,9 +47,8 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
-  };
-  ~TestDetector() {};
+  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings){};
+  ~TestDetector(){};
 };
 
 class ParserTest : public TestBase {
@@ -114,13 +113,13 @@ TEST_F(ParserTest, InputBuffer) {
 
 TEST_F(ParserTest, OversizeData) {
   memset(input, 0x41, buffer_size);
-  MESSAGE() << "Max buffer size\n";
+  GTEST_COUT << "Max buffer size\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ('\0', input[buffer_size - 1]);
   ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 
-  MESSAGE() << "Max buffer size + 1\n";
+  GTEST_COUT << "Max buffer size + 1\n";
   res = parser->parse(input, buffer_size + 1, output, &obytes);
   ASSERT_EQ(-Parser::EOSIZE, res);
   ASSERT_EQ(strcmp("Error: <BADSIZE>", output), 0);
@@ -128,7 +127,7 @@ TEST_F(ParserTest, OversizeData) {
 
 TEST_F(ParserTest, NoTokens) {
   memset(input, 0x20, buffer_size);
-  MESSAGE() << "Spaces only\n";
+  GTEST_COUT << "Spaces only\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::ENOTOKENS, res);
   ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
@@ -140,7 +139,7 @@ TEST_F(ParserTest, ValidCommands) {
     const char *cmd = commands[i].c_str();
     const char *reply = commands[i + 1].c_str();
     std::memcpy(input, cmd, strlen(cmd));
-    MESSAGE() << "Checking command: " << cmd << "\n";
+    GTEST_COUT << "Checking command: " << cmd << "\n";
     printf("Checking command %s\n", cmd);
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
     ASSERT_EQ(obytes, strlen(reply));
@@ -153,7 +152,7 @@ TEST_F(ParserTest, BadArgsCommands) {
   for (auto cmdstr : commands_badargs) {
     const char *cmd = cmdstr.c_str();
     std::memcpy(input, cmd, strlen(cmd));
-    MESSAGE() << "Checking command: " << cmd << "\n";
+    GTEST_COUT << "Checking command: " << cmd << "\n";
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
     ASSERT_EQ(strcmp("Error: <BADARGS>", output), 0);
     ASSERT_EQ(-Parser::EBADARGS, res);
@@ -163,7 +162,7 @@ TEST_F(ParserTest, BadArgsCommands) {
 TEST_F(ParserTest, VersionGet) {
   auto cmd = "VERSION_GET";
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   auto res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(0, res);
 }
@@ -171,13 +170,13 @@ TEST_F(ParserTest, VersionGet) {
 TEST_F(ParserTest, ParserClearCommands) {
   auto cmd = "VERSION_GET";
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   auto res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(0, res);
 
   parser->clearCommands();
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::EBADCMD);
 }
@@ -219,7 +218,7 @@ TEST_F(ParserTest, CmdGetCount) {
   const char *cmd = "CMD_GET_COUNT";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  MESSAGE() << output << '\n';
+  GTEST_COUT << output << '\n';
   ASSERT_EQ(res, -Parser::OK);
 }
 
@@ -227,7 +226,7 @@ TEST_F(ParserTest, CmdGet) {
   const char *cmd = "CMD_GET 1";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  MESSAGE() << output << '\n';
+  GTEST_COUT << output << '\n';
   ASSERT_EQ(res, -Parser::OK);
 }
 
@@ -235,7 +234,7 @@ TEST_F(ParserTest, CmdRuntimetats) {
   const char *cmd = "RUNTIMESTATS";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  MESSAGE() << output << '\n';
+  GTEST_COUT << output << '\n';
   ASSERT_EQ(0, strcmp("RUNTIMESTATS 0", output));
   ASSERT_EQ(res, -Parser::OK);
 }

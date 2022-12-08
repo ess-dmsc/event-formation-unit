@@ -65,8 +65,8 @@ TEST_F(GapMatcherTest, PrintConfig) {
   GapMatcher matcher(125, 0, 1);
   matcher.setMinimumTimeGap(70);
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "CONFIG:\n" << matcher.config("  ");
 }
 
 TEST_F(GapMatcherTest, MultiHitOnMatchSingleEvent) {

@@ -14,7 +14,7 @@
 #include <modules/caen/geometry/Geometry.h>
 #include <string>
 #include <vector>
-
+//
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -35,7 +35,9 @@ public:
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int AmpA, int AmpB) {
-    return reverse(posAlongTube(AmpA, AmpB)) % (NPos / 3);
+    int Coord = reverse(posAlongTube(AmpA, AmpB)) % (NPos / 3);
+    XTRACE(DATA, DEB, "AmpA %d, AmpB %d, xCoord %d", AmpA, AmpB, Coord);
+    return Coord;
   }
 
   /// \brief return local y-coordinate from amplitudes

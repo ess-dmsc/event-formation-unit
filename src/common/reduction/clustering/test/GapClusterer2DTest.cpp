@@ -142,8 +142,8 @@ TEST_F(GapClusterer2DTest, ExactlyFiveCoordGap) {
 TEST_F(GapClusterer2DTest, PrintConfig) {
   GapClusterer2D gc(0, 5);
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "Config:\n  " << gc.config("  ") << "\n";
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "Config:\n  " << gc.config("  ") << "\n";
 }
 
 TEST_F(GapClusterer2DTest, PrintStatus) {
@@ -153,9 +153,9 @@ TEST_F(GapClusterer2DTest, PrintStatus) {
   GapClusterer2D gc(0, 5);
   gc.cluster(hc);
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n" << gc.status("  ", false);
-  MESSAGE() << "VERBOSE:\n" << gc.status("  ", true);
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "SIMPLE:\n" << gc.status("  ", false);
+  GTEST_COUT << "VERBOSE:\n" << gc.status("  ", true);
 }
 
 int main(int argc, char **argv) {

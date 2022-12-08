@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 #include <bifrost/geometry/BifrostGeometry.h>
-#include <common/testutils/TestBase.h>
 #include <caen/readout/DataParser.h>
+#include <common/testutils/TestBase.h>
 
 using namespace Caen;
 
@@ -63,6 +63,14 @@ TEST_F(BifrostGeometryTest, Position) {
   ASSERT_EQ(geom->posAlongTube(0, 0), -1);
   ASSERT_EQ(geom->posAlongTube(0, 1), 0);
   ASSERT_EQ(geom->posAlongTube(1, 0), 299);
+}
+
+TEST_F(BifrostGeometryTest, CalcPixel) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout), 0);
+
+  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout2), 1);
 }
 
 TEST_F(BifrostGeometryTest, Validate) {

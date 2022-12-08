@@ -148,9 +148,9 @@ TEST_F(ChronoMergerTest, Print) {
   merger.insert(1, {106, 0});
   merger.sort();
 
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n" << merger.debug("  ", false);
-  MESSAGE() << "VERBOSE:\n" << merger.debug("  ", true);
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "SIMPLE:\n" << merger.debug("  ", false);
+  GTEST_COUT << "VERBOSE:\n" << merger.debug("  ", true);
 }
 
 int main(int argc, char **argv) {

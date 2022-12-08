@@ -1,8 +1,8 @@
 // Copyright (C) 2019-2022 European Spallation Source ERIC
 
 #include <algorithm>
-#include <loki/geometry/LokiGeometry.h>
 #include <common/testutils/TestBase.h>
+#include <loki/geometry/LokiGeometry.h>
 #include <memory>
 
 using namespace Caen;
@@ -25,7 +25,6 @@ protected:
     geom->CaenCalibration.nullCalibration(28, 512);
   }
   void TearDown() override {}
-
 };
 
 // Test cases below
@@ -97,7 +96,7 @@ TEST_F(LokiGeometryTest, MinMaxPos) {
   }
 }
 
-TEST_F(LokiGeometryTest, validate){
+TEST_F(LokiGeometryTest, validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
@@ -113,7 +112,7 @@ TEST_F(LokiGeometryTest, validate){
   ASSERT_EQ(FENErrors, 1);
 }
 
-TEST_F(LokiGeometryTest, calcPixel){
+TEST_F(LokiGeometryTest, calcPixel) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 
@@ -125,7 +124,6 @@ TEST_F(LokiGeometryTest, calcPixel){
 
   readout.FENId = 30;
   ASSERT_EQ(geom->calcPixel(readout), 0);
-
 }
 
 int main(int argc, char **argv) {

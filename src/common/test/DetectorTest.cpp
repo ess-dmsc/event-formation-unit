@@ -8,9 +8,8 @@
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings) : Detector(settings) {
-  };
-  ~TestDetector() {};
+  explicit TestDetector(BaseSettings settings) : Detector(settings){};
+  ~TestDetector(){};
 };
 
 // Test fixture and tests below
@@ -18,7 +17,9 @@ public:
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  void SetUp() override { det = std::shared_ptr<Detector>(new Detector(settings)); }
+  void SetUp() override {
+    det = std::shared_ptr<Detector>(new Detector(settings));
+  }
 
   void TearDown() override {}
 

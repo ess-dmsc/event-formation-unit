@@ -55,7 +55,7 @@ public:
               std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
-  void setConfig(std::string Key, std::string Value);
+  RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
 
   /// \brief Kafka callback function for events
   void event_cb(RdKafka::Event &event) override;
@@ -67,6 +67,7 @@ public:
     int64_t dr_errors;
     int64_t dr_noerrors;
     int64_t produce_fails;
+    int64_t config_errors;
   } stats = {};
 
 protected:

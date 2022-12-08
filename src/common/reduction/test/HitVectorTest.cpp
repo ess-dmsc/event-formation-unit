@@ -44,11 +44,11 @@ TEST_F(HitVectorTest, Visualize) {
     hits.push_back(hit);
   }
 
-  //  MESSAGE() << "\n" << to_string(hits, {}) << "\n";
+  //  GTEST_COUT << "\n" << to_string(hits, {}) << "\n";
 
-  MESSAGE() << "\n" << visualize(hits, {}, 100, 100) << "\n";
-  MESSAGE() << "\n" << visualize(hits, {}, 30, 30) << "\n";
-  MESSAGE() << "\n" << visualize(hits, {}, 0, 30) << "\n";
+  GTEST_COUT << "\n" << visualize(hits, {}, 100, 100) << "\n";
+  GTEST_COUT << "\n" << visualize(hits, {}, 30, 30) << "\n";
+  GTEST_COUT << "\n" << visualize(hits, {}, 0, 30) << "\n";
 }
 
 TEST_F(HitVectorTest, VisualizeEmpty) {

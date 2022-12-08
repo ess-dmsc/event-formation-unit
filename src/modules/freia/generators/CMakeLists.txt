@@ -6,13 +6,13 @@
 
 
 set(freia_udp_generated_INC
- ${ESS_SOURCE_DIR}//generators/essudpgen/ReadoutGeneratorBase.h
+ ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
  ${ESS_MODULE_DIR}/freia/generators/ReadoutGenerator.h
  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   )
 set(freia_udp_generated_SRC
-  ${ESS_SOURCE_DIR}//generators/essudpgen/udpgen_template.cpp
-  ${ESS_SOURCE_DIR}//generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/essudpgen/udpgen_template.cpp
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   ${ESS_MODULE_DIR}/freia/generators/ReadoutGenerator.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   )

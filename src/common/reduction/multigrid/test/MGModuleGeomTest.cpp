@@ -51,7 +51,6 @@ TEST_F(MGModuleGeomTest, XFromWire) {
   ASSERT_EQ(MgGeom.x_from_wire(0), 3);
 }
 
-
 TEST_F(MGModuleGeomTest, XZRange) {
   ASSERT_EQ(MgGeom.z_range(), 20);
   ASSERT_EQ(MgGeom.x_range(), 4);
@@ -79,15 +78,12 @@ TEST_F(MGModuleGeomTest, JsonConfig) {
   ASSERT_TRUE(MgGeom.flipped_x());
 }
 
-
 TEST_F(MGModuleGeomTest, NoTestDebug) {
   MgGeom.flipped_x(true);
   MgGeom.flipped_z(true);
   std::string DebugStr = MgGeom.debug();
   ASSERT_TRUE(true);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Type, "Detector type id");
+  app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef FREIA_GENERATOR
   Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::FREIA;
 #endif
 
 #ifdef CSPEC_GENERATOR
@@ -110,6 +111,10 @@ int main(int argc, char *argv[]) {
   Nmx::TrackReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
+
+if (Settings.TypeOverride != 0) {
+  Settings.Type = Settings.TypeOverride;
+}
 
   do {
     uint16_t DataSize = gen.makePacket();
