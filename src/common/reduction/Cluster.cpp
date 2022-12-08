@@ -283,8 +283,8 @@ std::string Cluster::to_string(const std::string &prepend, bool verbose) const {
   std::stringstream ss;
   ss << fmt::format(
       "plane={} time=({},{})={} space=({},{})={} weight={} entries[{}]", plane_,
-      time_start_, time_end_, timeSpan(), coord_start_, coord_end_,
-      coordSpan(), weight_sum_, hits.size());
+      time_start_, time_end_, timeSpan(), coord_start_, coord_end_, coordSpan(),
+      weight_sum_, hits.size());
   if (verbose && !hits.empty()) {
     ss << "\n";
     for (const auto &h : hits) {

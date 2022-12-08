@@ -1,8 +1,8 @@
 // Copyright (C) 2018 - 2020 European Spallation Source ERIC
 
 /// @file
-//brief Code for testing the ADC UDP functionality.
-// GCOVR_EXCL_START
+// brief Code for testing the ADC UDP functionality.
+//  GCOVR_EXCL_START
 
 #include <ciso646>
 #include <common/testutils/TestUDPServer.h>

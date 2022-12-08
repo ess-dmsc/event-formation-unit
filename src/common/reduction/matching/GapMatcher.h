@@ -27,7 +27,7 @@ public:
   void setMinimumTimeGap(uint64_t minimum_time_gap);
 
   void setSplitMultiEvents(bool split_multi_events, float coefficient_low,
-                              float coefficient_high);
+                           float coefficient_high);
 
   void set_split_multi_events(bool split_multi_events, float coefficient_low,
                               float coefficient_high);
@@ -54,11 +54,10 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
-
 private:
   void splitAndStashEvent(Event evt);
   void splitCluster(Cluster cluster, Cluster *new_cluster_1,
-                     Cluster *new_cluster_2);
+                    Cluster *new_cluster_2);
   bool clustersMatch(Cluster cluster_a, Cluster cluster_b);
   void checkAndStashEvent(Event evt);
 

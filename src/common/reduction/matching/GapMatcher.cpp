@@ -19,8 +19,8 @@ void GapMatcher::setMinimumTimeGap(uint64_t minimum_time_gap) {
 }
 
 void GapMatcher::setSplitMultiEvents(bool split_multi_events,
-                                        float coefficient_low,
-                                        float coefficient_high) {
+                                     float coefficient_low,
+                                     float coefficient_high) {
   split_multi_events_ = split_multi_events;
   coefficient_low_ = coefficient_low;
   coefficient_high_ = coefficient_high;
@@ -114,7 +114,7 @@ void GapMatcher::splitAndStashEvent(Event evt) {
 }
 
 void GapMatcher::splitCluster(Cluster cluster, Cluster *new_cluster_1,
-                               Cluster *new_cluster_2) {
+                              Cluster *new_cluster_2) {
   sortByIncreasingCoordinate(cluster.hits);
   uint last_coord = 0;
   bool filled_cluster_1 = false;

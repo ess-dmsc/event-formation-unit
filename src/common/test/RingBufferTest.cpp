@@ -9,7 +9,7 @@ protected:
   void TearDown() override {}
 };
 
-// Test cases below 
+// Test cases below
 TEST_F(RingBufferTest, Constructor) {
   RingBuffer<9000> buf(100);
   ASSERT_EQ(buf.getMaxElements(), 100);

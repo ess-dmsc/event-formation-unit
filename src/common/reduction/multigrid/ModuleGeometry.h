@@ -5,7 +5,6 @@
 /// @brief Multigrid electronics
 /// Handles mappings between (digitizer, channels) and (x,y,z) coordinates.
 
-
 #pragma once
 
 #include <cinttypes>

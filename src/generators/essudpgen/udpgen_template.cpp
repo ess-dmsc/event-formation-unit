@@ -112,9 +112,9 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
 
-if (Settings.TypeOverride != 0) {
-  Settings.Type = Settings.TypeOverride;
-}
+  if (Settings.TypeOverride != 0) {
+    Settings.Type = Settings.TypeOverride;
+  }
 
   do {
     uint16_t DataSize = gen.makePacket();

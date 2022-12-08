@@ -49,7 +49,7 @@ ReducedHit EventAnalyzer::analyze(Cluster &cluster) const {
       ret.center = cluster.coordUtpc(true);
     }
     ret.time = cluster.timeEnd(); /// \TODO we get he nicest results for
-                                   /// HitGenerator with 'cluster.timeStart()'.
+                                  /// HitGenerator with 'cluster.timeStart()'.
   }
 
   return ret;

@@ -80,7 +80,7 @@ protected:
   char *output = (char *)outputbuffer;
 };
 
-// Test cases below 
+// Test cases below
 TEST_F(ParserTest, InputBuffer) {
   auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);

@@ -8,12 +8,9 @@
 
 #include <common/time/Timer.h>
 
-
 Timer::Timer(void) { T0 = HRClock::now(); }
 
-
 void Timer::reset(void) { T0 = HRClock::now(); }
-
 
 uint64_t Timer::timeus(void) {
   Timer::TP T1 = Timer::HRClock::now();

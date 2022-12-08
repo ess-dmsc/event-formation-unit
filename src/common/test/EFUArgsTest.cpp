@@ -34,7 +34,7 @@ TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
   auto settings = efu_args.getBaseSettings();
 
-  ///\todo fixme ASSERT_EQ(12, settings.cpustart); 
+  ///\todo fixme ASSERT_EQ(12, settings.cpustart);
   EXPECT_EQ("0.0.0.0", settings.DetectorAddress);
   EXPECT_EQ(9000, settings.DetectorPort);
   EXPECT_EQ("localhost:9092", settings.KafkaBroker);

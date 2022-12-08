@@ -15,7 +15,7 @@ protected:
   void TearDown() override {}
 };
 
-// Test cases below 
+// Test cases below
 TEST_F(HwCheckTest, HwCheckPass) {
   std::vector<std::string> IgnoredInterfaces{"0", "00", "br-"};
   HwCheck check;

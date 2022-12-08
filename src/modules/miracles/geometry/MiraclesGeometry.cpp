@@ -9,8 +9,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <modules/miracles/geometry/MiraclesGeometry.h>
 #include <cmath>
+#include <modules/miracles/geometry/MiraclesGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -59,7 +59,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
          AmpA, AmpB);
   int offset{0};
   if ((Ring == 2) or (Ring == 3)) {
-    offset += NPos/2;
+    offset += NPos / 2;
   }
   return offset + posAlongTube(AmpA, AmpB);
 }
@@ -88,11 +88,11 @@ int MiraclesGeometry::posAlongTube(int AmpA, int AmpB) {
   XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    tubepos = pos * 2 * (NPos/2 - 1);
+    tubepos = pos * 2 * (NPos / 2 - 1);
     XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   } else {
-    tubepos = round(NPos/2 - 1 - (pos - 0.5) * 2 * (NPos/2 - 1));
+    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
     XTRACE(DATA, DEB, "B: TubePos %u, pos %f", tubepos, pos);
     return tubepos;
   }
