@@ -43,17 +43,14 @@ TTLMonitorInstrument::TTLMonitorInstrument(
 
 void TTLMonitorInstrument::processMonitorReadouts(void) {
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
-  // All readouts are potentially now valid, negative TOF is not
-  // possible, but rings and fens
-  // could still be outside the configured range, also
-  // illegal time intervals can be detected here
+  // All readouts are now potentially valid, negative TOF is not
+  // possible, or 0 ADC values, but rings and fens could still be outside the
+  // configured range, also illegal time intervals can be detected here
 
-  // TODO, have proper assertion heres
-  // assert(Serializers != nullptr);
   for (EV44Serializer *Serializer : Serializers) {
     counters.TxBytes += Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time.TimeInNS);
       /// \todo sometimes PrevPulseTime maybe?
-        ESSReadoutParser.Packet.Time.TimeInNS);
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts() - has %zu entries",

@@ -21,7 +21,6 @@ struct ParserStats {
   int64_t ErrorFEN{0};
   int64_t ErrorDataLength{0};
   int64_t ErrorTimeFrac{0};
-  int64_t ErrorPos{0};
   int64_t ErrorADC{0};
   int64_t Readouts{0};
 };
