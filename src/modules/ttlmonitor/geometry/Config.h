@@ -38,6 +38,7 @@ public:
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
     uint8_t MonitorRing{11};
     uint8_t MonitorFEN{0};
+    uint8_t NumberOfMonitors{1};
   } Parms;
 
   std::string FileName{""};

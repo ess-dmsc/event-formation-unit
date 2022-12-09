@@ -52,7 +52,7 @@ struct BaseSettings {
 
   // ttlmonitor
   int           TTLMonitorReduceEvents{1};
-  int           TTLMonitorNumberOfMonitors{1};
+  int           TTLMonitorNumberOfMonitors{3};
   // perfgen
   bool          TestImage            {false};
   std::uint32_t TestImageUSleep      {10};

@@ -27,89 +27,70 @@ std::string ConfigStr = R"(
 
     "MaxTOFNS" : 1000000000,
 
-    "NumberOfMonitors" : 1
+    "NumberOfMonitors" : 3
   }
 )";
 
 std::vector<uint8_t> MonitorReadout {
+  // Errors caught when parsing readouts
+
   // First monitor readout - Valid
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
+  0x16, 0x00, 0x10, 0x00,  // Data Header - PRing 22, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 
-  // Second monitor readout - invalid VMM
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
+  // Second monitor readout - invalid Ring
+  0x18, 0x00, 0x10, 0x00,  // Data Header, PRing 24, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x01, 0x00,  // VMM 1 invalid
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 
-  // Third monitor readout - invalid TDC
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
+  // Third monitor readout - invalid FEN
+  0x17, 0x22, 0x10, 0x00,  // Data Header, PRing 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x01, 0x00, 0x00,  // TDC 1 invalid
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 
-  // Fourth monitor readout - invalid GEO
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
+  // Fourth monitor readout - invalid Channel
+  0x17, 0x00, 0x10, 0x00,  // Data Header, PRing 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x01, 0x00, 0x00, 0x00,  // GEO 1 invalid
+  0x00, 0x07, 0x01, 0x00,  // Pos 0, Ch 7, ADC 1
 
-  // Fifth monitor readout - invalid BC
-  0x17, 0x00, 0x14, 0x00,  // Data Header, Ring 23, FEN 0
+  // Fifth monitor readout - invalid ADC
+  0x17, 0x00, 0x10, 0x00,  // Data Header, PRing 23, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x01, 0x00, 0x00, 0x00,  // BC 1 invalid
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x00, 0x00, 0x00, 0x00,  // Pos 0, Ch 0, ADC 0
 
-  // Sixth monitor readout - invalid Ring
-  0x15, 0x00, 0x14, 0x00,  // Data Header - Ring 21 invalid, FEN 0
+  // Errors caught when processing readouts
+
+  // Sixth monitor readout - invalid RingCfg
+  0x12, 0x00, 0x10, 0x00,  // Data Header, PRing 18, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 
-  // Seventh monitor readout - invalid FEN
-  0x16, 0x01, 0x14, 0x00,  // Data Header - Ring 22, FEN 1 invalid
+  // Seventh monitor readout - invalid FENCfg
+  0x17, 0x01, 0x10, 0x00,  // Data Header, PRing 18, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-
-  // Eights monitor readout - TOF too large
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
-  0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
-
-  // Nineth monitor readout - OTADC nonzero
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0xff, 0xff,  // OTADC 0xffff
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 };
 
 
 std::vector<uint8_t> MonitorReadoutTOF {
   // First monitor readout - Negative PrevTOF - possibly unreachable!
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
+  0x16, 0x00, 0x10, 0x00,  // Data Header - Ring 22, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
 
   // Second monitor readout - Negative TOF, positive PrevTOF
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Ring 22, FEN 0
+  0x16, 0x00, 0x10, 0x00,  // Data Header - Ring 22, FEN 0
   0x01, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x00,  // 0x00000000
   0x00, 0x00, 0x00, 0x00,  // 0x00000000
 };
 // clang-format on
@@ -132,7 +113,8 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    ttlmonitor = new TTLMonitorInstrument(counters, Settings, serializers);
+    ttlmonitor = new TTLMonitorInstrument(counters, Settings);
+    ttlmonitor->Serializers.push_back(&serializers[0]);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
@@ -156,18 +138,25 @@ TEST_F(TTLMonitorInstrumentTest, Constructor) {
 TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadout);
 
-  ttlmonitor->VMMParser.setMonitor(true);
-  auto Readouts =
-      ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
-  ASSERT_EQ(Readouts, 9);
+  auto GoodReadouts =
+      ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+  counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
+
+  ASSERT_EQ(GoodReadouts, 5);
+  ASSERT_EQ(counters.TTLMonStats.Readouts, 7);
+  ASSERT_EQ(counters.TTLMonStats.ErrorRing, 1);
+  ASSERT_EQ(counters.TTLMonStats.ErrorFEN, 1);
+  ASSERT_EQ(counters.TTLMonStats.ErrorADC, 1);
+  //ASSERT_EQ(counters.TTLMonStats.ErrorTimeFrac, 1);
 
   ttlmonitor->processMonitorReadouts();
-  ASSERT_EQ(counters.MonitorCounts, 1);
-  ASSERT_EQ(counters.MonitorErrors, 5);
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.FENCfgErrors, 1);
-  ASSERT_EQ(counters.TOFErrors, 1);
-  ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
+  ASSERT_EQ(counters.MonitorCounts, 2);
+
+  ASSERT_EQ(counters.FENCfgErrors, 1);
+  //ASSERT_EQ(counters.TOFErrors, 1);
+
 }
 
 TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
@@ -175,28 +164,14 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1, 100000);
   ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
 
-  ttlmonitor->VMMParser.setMonitor(true);
   auto Readouts =
-      ttlmonitor->VMMParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+      ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+      counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
   ASSERT_EQ(Readouts, 1);
 
   ttlmonitor->processMonitorReadouts();
-  ASSERT_EQ(counters.MonitorErrors, 0);
 }
 
-/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(TTLMonitorInstrumentTest, DumpTofile) {
-  Settings.DumpFilePrefix = "deleteme_";
-  TTLMonitorInstrument TTLMonDump(counters, Settings, serializers);
-
-  makeHeader(TTLMonDump.ESSReadoutParser.Packet, MonitorReadoutTOF);
-  auto Res = TTLMonDump.VMMParser.parse(TTLMonDump.ESSReadoutParser.Packet);
-  TTLMonDump.processMonitorReadouts();
-
-  counters.VMMStats = TTLMonDump.VMMParser.Stats;
-  ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.VMMStats.Readouts, 2);
-}
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
