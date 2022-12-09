@@ -87,12 +87,12 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
-#ifdef TTLMON_GENERATOR
+#ifdef TTLMON_GENERATOR_VMM
   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
 #endif
 
-#ifdef TTLMON_GENERATOR_NEW
+#ifdef TTLMON_GENERATOR
   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   gen.setReadoutDataSize(sizeof(TTLMonitor::Parser::Data));
   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;

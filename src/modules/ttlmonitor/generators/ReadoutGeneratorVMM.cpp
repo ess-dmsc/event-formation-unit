@@ -3,15 +3,15 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial TTLMon readout
-/// based on TTLMon ICD
-/// \todo add link
+/// \brief Generator of artificial VMM3 readouts
+/// based on LoKI ICD:
+///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
 #include <math.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
 #include <time.h>
 #include <cassert>
@@ -31,22 +31,22 @@ void ReadoutGenerator::generateData() {
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
-    auto ReadoutData = (Parser::Data *)DP;
+    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
-    ReadoutData->DataLength = sizeof(Parser::Data);
-    // TTLMon (new foprmat) readouts all have DataLength 16
-    assert(ReadoutData->DataLength == 16);
+    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+    // CSPEC VMM readouts all have DataLength 20
+    assert(ReadoutData->DataLength == 20);
 
     // Monitor is (so far) always on logical ring 11, fen 0
     ReadoutData->RingId = 22;
     ReadoutData->FENId = 0;
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
-    ReadoutData->Pos = 0;
-    ReadoutData->ADC = 12345;
+    ReadoutData->OTADC = 0;
+    ReadoutData->VMM = 0;
     ReadoutData->Channel = (Readout % 3) & 0x01; // 0 0 1, 0 0 1, ...
 
-    DP += sizeof(Parser::Data);
+    DP += ReadoutDataSize;
 
     TimeLow += Settings.TicksBtwEvents;
   }
