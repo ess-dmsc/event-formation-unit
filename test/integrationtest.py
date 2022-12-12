@@ -57,6 +57,7 @@ def check_kafka(test):
         shell=True,
         stdout=subprocess.PIPE,
     )
+    # superficial change
     # waiting 30 seconds for kafka consumer to consume all messages
     time.sleep(30)
     kafka_process.kill()
