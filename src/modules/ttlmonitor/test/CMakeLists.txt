@@ -11,6 +11,13 @@ get_filename_component(TTLMON_FULL "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamo
 ## Pure unit tests
 ##
 
+set(TTLMonitorParserTest_INC
+  ../geometry/Parser.h)
+set(TTLMonitorParserTest_SRC
+  ../geometry/Parser.cpp
+  ParserTest.cpp)
+create_test_executable(TTLMonitorParserTest)
+
 set(TTLMonitorConfigTest_INC
   ../geometry/Config.h)
 set(TTLMonitorConfigTest_SRC

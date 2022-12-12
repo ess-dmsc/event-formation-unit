@@ -15,8 +15,8 @@
 
 namespace TTLMonitor {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
 int Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
