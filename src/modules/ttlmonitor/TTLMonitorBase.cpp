@@ -185,17 +185,17 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
+    // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+
       for (auto &serializer : Serializers) {
-        if (serializer.ProduceTimer.timeout()) {
           XTRACE(DATA, DEB, "Serializer timed out, producing message now");
           Counters.TxBytes += serializer.produce();
-        }
       }
       Counters.KafkaStats = eventprod.stats;
-    }
+    } // ProduceTimer
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

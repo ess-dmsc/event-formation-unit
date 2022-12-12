@@ -147,7 +147,6 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   ASSERT_EQ(counters.TTLMonStats.ErrorRing, 1);
   ASSERT_EQ(counters.TTLMonStats.ErrorFEN, 1);
   ASSERT_EQ(counters.TTLMonStats.ErrorADC, 1);
-  //ASSERT_EQ(counters.TTLMonStats.ErrorTimeFrac, 1);
 
   ttlmonitor->processMonitorReadouts();
   ASSERT_EQ(counters.RingCfgErrors, 1);
@@ -155,8 +154,6 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   ASSERT_EQ(counters.MonitorCounts, 2);
 
   ASSERT_EQ(counters.FENCfgErrors, 1);
-  //ASSERT_EQ(counters.TOFErrors, 1);
-
 }
 
 TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {

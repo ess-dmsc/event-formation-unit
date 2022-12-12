@@ -4,7 +4,6 @@
 /// \file
 ///
 /// \brief Generator of artificial VMM3 readouts
-/// based on LoKI ICD:
 ///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
