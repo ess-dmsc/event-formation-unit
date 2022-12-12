@@ -20,6 +20,7 @@
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
 #include <modules/nmx/generators/TrackReadoutGenerator.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/ttlmonitor/geometry/Parser.h>
 
 #include <stdio.h>
 // GCOVR_EXCL_START
@@ -86,8 +87,14 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
+#ifdef TTLMON_GENERATOR_VMM
+  TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+#endif
+
 #ifdef TTLMON_GENERATOR
   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(TTLMonitor::Parser::Data));
   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
 #endif
 

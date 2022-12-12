@@ -63,27 +63,22 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   //
-  Stats.create("monitors.error", Counters.MonitorErrors);
   Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("monitors.reduced", Counters.MonitorIgnored);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
   Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
-  // VMM3Parser stats
-  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
-  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
-  Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
-  Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
-  Stats.create("readouts.error_bc", Counters.VMMStats.ErrorBC);
-  Stats.create("readouts.error_adc", Counters.VMMStats.ErrorADC);
-  Stats.create("readouts.error_vmm", Counters.VMMStats.ErrorVMM);
-  Stats.create("readouts.error_channel", Counters.VMMStats.ErrorChannel);
-  Stats.create("readouts.count", Counters.VMMStats.Readouts);
-  Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
-  Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
-  Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
+  Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
+
+  Stats.create("readouts.error_size", Counters.TTLMonStats.ErrorSize);
+  Stats.create("readouts.error_ring", Counters.TTLMonStats.ErrorRing);
+  Stats.create("readouts.error_fen", Counters.TTLMonStats.ErrorFEN);
+  Stats.create("readouts.error_adc", Counters.TTLMonStats.ErrorADC);
+  Stats.create("readouts.error_datalen", Counters.TTLMonStats.ErrorDataLength);
+  Stats.create("readouts.error_timefrac", Counters.TTLMonStats.ErrorTimeFrac);
+  Stats.create("readouts.count", Counters.TTLMonStats.Readouts);
+
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
@@ -129,18 +124,20 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  for (int i = 0; i < EFUSettings.TTLMonitorNumberOfMonitors; ++i) {
+  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings);
+
+  for (int i = 0; i < TTLMonitor.Conf.Parms.NumberOfMonitors; ++i) {
     Serializers.push_back(
         EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
-  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings, Serializers);
-
-  TTLMonitor.VMMParser.setMonitor(true);
+  for (auto & s : Serializers) {
+    TTLMonitor.Serializers.push_back(&s);
+  }
 
   unsigned int DataIndex;
-  Timer h5flushtimer;
   // Monitor these counters
+  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   RuntimeStat RtStat(
       {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
@@ -175,9 +172,9 @@ void TTLMonitorBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      Res = TTLMonitor.VMMParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      Res = TTLMonitor.TTLMonParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      Counters.TTLMonStats = TTLMonitor.TTLMonParser.Stats;
       Counters.TimeStats = TTLMonitor.ESSReadoutParser.Packet.Time.Stats;
-      Counters.VMMStats = TTLMonitor.VMMParser.Stats;
 
       TTLMonitor.processMonitorReadouts();
 
@@ -188,15 +185,17 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
-    RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-        {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
-    for (auto &serializer : Serializers) {
-      if (serializer.ProduceTimer.timeout()) {
-        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        Counters.TxBytes += serializer.produce();
+    // Not only flush serializer data but also update runtime stats
+    if (ProduceTimer.timeout()) {
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+
+      for (auto &serializer : Serializers) {
+          XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+          Counters.TxBytes += serializer.produce();
       }
-    }
-    Counters.KafkaStats = eventprod.stats;
+      Counters.KafkaStats = eventprod.stats;
+    } // ProduceTimer
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

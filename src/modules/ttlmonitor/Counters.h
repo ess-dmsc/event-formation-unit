@@ -11,7 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
-#include <common/readout/vmm3/VMM3Parser.h>
+#include <ttlmonitor/geometry/Parser.h>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -22,13 +22,13 @@ struct Counters {
   int64_t ErrorESSHeaders;
 
   // VMM3a Readouts
-  struct ESSReadout::VMM3ParserStats VMMStats;
+  struct TTLMonitor::ParserStats TTLMonStats;
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgErrors;
   int64_t FENCfgErrors;
+  int64_t ChannelCfgErrors;
   int64_t TOFErrors;
-  int64_t MonitorErrors;
   int64_t MonitorCounts;
   int64_t MonitorIgnored;
   int64_t MaxADC;
