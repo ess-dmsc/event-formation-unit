@@ -65,7 +65,7 @@ struct __attribute__((packed)) Readout {
 
   static constexpr uint32_t chopper_sub_id{std::numeric_limits<uint8_t>::max()};
 
-  // \brief prints values for debug purposes
+  /// \brief prints values for debug purposes
   std::string debug() const;
 };
 

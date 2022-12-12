@@ -1,4 +1,4 @@
-/*Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file*/
+// Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file AbstractClusterer.h
@@ -34,7 +34,7 @@ template <class T> struct GreedyClusterAllocator {
       return (T *)p;
     throw std::bad_alloc();
   }
-  void deallocate(T *, std::size_t) noexcept { /* do nothing*/
+  void deallocate(T *, std::size_t) noexcept { // do nothing
   }
 };
 
@@ -108,10 +108,10 @@ bool operator!=(const ClusterPoolAllocator<T> &,
 
 //-----------------------------------------------------------------------------
 
-// \todo the abstract class code needs tests
+/// \todo the abstract class code needs tests
 
-// \todo refactor: move out to separate header
-// \todo replace by deque, or....?
+/// \todo refactor: move out to separate header
+/// \todo replace by deque, or....?
 // using ClusterContainer = std::list<Cluster,
 // ClusterContainerAllocator<Cluster>>;
 // using ClusterContainer = std::list<Cluster>;

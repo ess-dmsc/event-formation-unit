@@ -27,7 +27,7 @@
 #define SEND_FLAGS 0
 #endif
 
-/** \todo make this work with public static unsigned int */
+/// \todo make this work with public static unsigned int
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
 #define SERVER_MAX_BACKLOG 3

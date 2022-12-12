@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file Cluster.cpp
@@ -159,58 +159,58 @@ bool Cluster::valid() const {
 }
 
 bool Cluster::hasGap(uint8_t MaxAllowedGap) const {
-  return hits.size() + MaxAllowedGap < coord_span();
+  return hits.size() + MaxAllowedGap < coordSpan();
 }
 
 uint8_t Cluster::plane() const { return plane_; }
 
-size_t Cluster::hit_count() const { return hits.size(); }
+size_t Cluster::hitCount() const { return hits.size(); }
 
-uint16_t Cluster::coord_start() const { return coord_start_; }
+uint16_t Cluster::coordStart() const { return coord_start_; }
 
-uint16_t Cluster::coord_end() const { return coord_end_; }
+uint16_t Cluster::coordEnd() const { return coord_end_; }
 
-uint16_t Cluster::coord_earliest() const { return coord_earliest_; }
+uint16_t Cluster::coordEarliest() const { return coord_earliest_; }
 
-uint16_t Cluster::coord_latest() const { return coord_latest_; }
+uint16_t Cluster::coordLatest() const { return coord_latest_; }
 
-uint16_t Cluster::coord_span() const {
+uint16_t Cluster::coordSpan() const {
   if (hits.empty()) {
     return 0;
   }
   return (coord_end_ - coord_start_) + 1ul;
 }
 
-uint64_t Cluster::time_start() const { return time_start_; }
+uint64_t Cluster::timeStart() const { return time_start_; }
 
-uint64_t Cluster::time_end() const { return time_end_; }
+uint64_t Cluster::timeEnd() const { return time_end_; }
 
-uint64_t Cluster::time_span() const {
+uint64_t Cluster::timeSpan() const {
   if (hits.empty()) {
     return 0;
   }
   return (time_end_ - time_start_) + 1ul;
 }
 
-double Cluster::weight_sum() const { return weight_sum_; }
+double Cluster::weightSum() const { return weight_sum_; }
 
-double Cluster::coord_mass() const { return coord_mass_; }
+double Cluster::coordMass() const { return coord_mass_; }
 
-double Cluster::coord_center() const { return coord_mass_ / weight_sum_; }
+double Cluster::coordCenter() const { return coord_mass_ / weight_sum_; }
 
-double Cluster::time_mass() const { return time_mass_; }
+double Cluster::timeMass() const { return time_mass_; }
 
-double Cluster::time_center() const { return time_mass_ / weight_sum_; }
+double Cluster::timeCenter() const { return time_mass_ / weight_sum_; }
 
-double Cluster::coord_mass2() const { return coord_mass2_; }
+double Cluster::coordMass2() const { return coord_mass2_; }
 
-double Cluster::coord_center2() const { return coord_mass2_ / weight2_sum_; }
+double Cluster::coordCenter2() const { return coord_mass2_ / weight2_sum_; }
 
-double Cluster::time_mass2() const { return time_mass2_; }
+double Cluster::timeMass2() const { return time_mass2_; }
 
-double Cluster::time_center2() const { return time_mass2_ / weight2_sum_; }
+double Cluster::timeCenter2() const { return time_mass2_ / weight2_sum_; }
 
-double Cluster::coord_utpc(bool weighted) const {
+double Cluster::coordUtpc(bool weighted) const {
   int utpc_idx;
   if (utpc_idx_min_ == utpc_idx_max_) {
     utpc_idx = utpc_idx_max_;
@@ -253,7 +253,7 @@ double Cluster::coord_utpc(bool weighted) const {
   return pos_utpc;
 }
 
-uint64_t Cluster::time_overlap(const Cluster &other) const {
+uint64_t Cluster::timeOverlap(const Cluster &other) const {
   if (empty() || other.empty())
     return 0;
   auto latest_start = std::max(other.time_start_, time_start_);
@@ -264,7 +264,7 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start) + 1u;
 }
 
-uint64_t Cluster::time_gap(const Cluster &other) const {
+uint64_t Cluster::timeGap(const Cluster &other) const {
   if (empty() || other.empty()) {
     /// In case of two empty clusters time gap ought to be undefined or "inf"
     /// Returning max value of the used type, but throwing an exception
@@ -283,8 +283,8 @@ std::string Cluster::to_string(const std::string &prepend, bool verbose) const {
   std::stringstream ss;
   ss << fmt::format(
       "plane={} time=({},{})={} space=({},{})={} weight={} entries[{}]", plane_,
-      time_start_, time_end_, time_span(), coord_start_, coord_end_,
-      coord_span(), weight_sum_, hits.size());
+      time_start_, time_end_, timeSpan(), coord_start_, coord_end_, coordSpan(),
+      weight_sum_, hits.size());
   if (verbose && !hits.empty()) {
     ss << "\n";
     for (const auto &h : hits) {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2018-2022 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018-2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapMatcher.h
@@ -14,13 +14,13 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
+void GapMatcher::setMinimumTimeGap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;
 }
 
-void GapMatcher::set_split_multi_events(bool split_multi_events,
-                                        float coefficient_low,
-                                        float coefficient_high) {
+void GapMatcher::setSplitMultiEvents(bool split_multi_events,
+                                     float coefficient_low,
+                                     float coefficient_high) {
   split_multi_events_ = split_multi_events;
   coefficient_low_ = coefficient_low;
   coefficient_high_ = coefficient_high;
@@ -28,7 +28,7 @@ void GapMatcher::set_split_multi_events(bool split_multi_events,
 
 void GapMatcher::match(bool flush) {
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-    return c1.time_start() < c2.time_start();
+    return c1.timeStart() < c2.timeStart();
   });
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
@@ -44,9 +44,9 @@ void GapMatcher::match(bool flush) {
       break;
     }
 
-    if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
+    if (!evt.empty() && (evt.timeGap(*cluster) > minimum_time_gap_)) {
       XTRACE(CLUSTER, DEB, "time gap too large");
-      check_and_stash_event(evt);
+      checkAndStashEvent(evt);
       evt.clear();
     }
 
@@ -58,7 +58,7 @@ void GapMatcher::match(bool flush) {
   /// If anything remains
   if (!evt.empty()) {
     if (flush) {
-      check_and_stash_event(evt);
+      checkAndStashEvent(evt);
     } else {
       requeue_clusters(evt);
     }
@@ -72,19 +72,19 @@ std::string GapMatcher::config(const std::string &prepend) const {
   return ss.str();
 }
 
-void GapMatcher::split_and_stash_event(Event evt) {
+void GapMatcher::splitAndStashEvent(Event evt) {
   Cluster new_cluster_a_1;
   Cluster new_cluster_a_2;
   Cluster new_cluster_b_1;
   Cluster new_cluster_b_2;
-  split_cluster(evt.ClusterA, &new_cluster_a_1, &new_cluster_a_2);
-  split_cluster(evt.ClusterB, &new_cluster_b_1, &new_cluster_b_2);
+  splitCluster(evt.ClusterA, &new_cluster_a_1, &new_cluster_a_2);
+  splitCluster(evt.ClusterB, &new_cluster_b_1, &new_cluster_b_2);
   Event new_event_1;
   Event new_event_2;
-  bool a1_b1_match = clusters_match(new_cluster_a_1, new_cluster_b_1);
-  bool a2_b2_match = clusters_match(new_cluster_a_2, new_cluster_b_2);
-  bool a1_b2_match = clusters_match(new_cluster_a_1, new_cluster_b_2);
-  bool a2_b1_match = clusters_match(new_cluster_a_2, new_cluster_b_1);
+  bool a1_b1_match = clustersMatch(new_cluster_a_1, new_cluster_b_1);
+  bool a2_b2_match = clustersMatch(new_cluster_a_2, new_cluster_b_2);
+  bool a1_b2_match = clustersMatch(new_cluster_a_1, new_cluster_b_2);
+  bool a2_b1_match = clustersMatch(new_cluster_a_2, new_cluster_b_1);
   XTRACE(CLUSTER, DEB, "a1xb1: %d, a2xb2: %d, a1xb2: %d, a2xb1: %d",
          a1_b1_match, a2_b2_match, a1_b2_match, a2_b1_match);
 
@@ -108,14 +108,14 @@ void GapMatcher::split_and_stash_event(Event evt) {
     return;
   }
   Stats.SplitSpanTooLarge++;
-  stash_event(new_event_1);
-  stash_event(new_event_2);
+  stashEvent(new_event_1);
+  stashEvent(new_event_2);
   evt.clear();
 }
 
-void GapMatcher::split_cluster(Cluster cluster, Cluster *new_cluster_1,
-                               Cluster *new_cluster_2) {
-  sort_by_increasing_coordinate(cluster.hits);
+void GapMatcher::splitCluster(Cluster cluster, Cluster *new_cluster_1,
+                              Cluster *new_cluster_2) {
+  sortByIncreasingCoordinate(cluster.hits);
   uint last_coord = 0;
   bool filled_cluster_1 = false;
 
@@ -165,28 +165,28 @@ void GapMatcher::split_cluster(Cluster cluster, Cluster *new_cluster_1,
   }
 }
 
-bool GapMatcher::clusters_match(Cluster cluster_a, Cluster cluster_b) {
-  if ((cluster_a.weight_sum() * coefficient_low_ <= cluster_b.weight_sum()) &&
-      (cluster_a.weight_sum() * coefficient_high_ >= cluster_b.weight_sum())) {
+bool GapMatcher::clustersMatch(Cluster cluster_a, Cluster cluster_b) {
+  if ((cluster_a.weightSum() * coefficient_low_ <= cluster_b.weightSum()) &&
+      (cluster_a.weightSum() * coefficient_high_ >= cluster_b.weightSum())) {
     return true;
   } else {
     return false;
   }
 }
 
-void GapMatcher::check_and_stash_event(Event evt) {
+void GapMatcher::checkAndStashEvent(Event evt) {
   if (!split_multi_events_) {
     XTRACE(CLUSTER, DEB, "Stashing event");
-    stash_event(evt);
+    stashEvent(evt);
     evt.clear();
     return;
   }
-  if ((evt.ClusterA.coord_span() < maximum_coord_span_) and
-      (evt.ClusterB.coord_span() < maximum_coord_span_)) {
+  if ((evt.ClusterA.coordSpan() < maximum_coord_span_) and
+      (evt.ClusterB.coordSpan() < maximum_coord_span_)) {
     XTRACE(CLUSTER, DEB, "Stashing event, span isn't too large");
     XTRACE(CLUSTER, DEB, "Cluster A coord span = %u, Cluster B coord span = %u",
-           evt.ClusterA.coord_span(), evt.ClusterB.coord_span());
-    stash_event(evt);
+           evt.ClusterA.coordSpan(), evt.ClusterB.coordSpan());
+    stashEvent(evt);
     evt.clear();
   } else { // split clusters by coord gaps and attempt to match based on ADC
            // values
@@ -194,10 +194,10 @@ void GapMatcher::check_and_stash_event(Event evt) {
     XTRACE(CLUSTER, DEB,
            "Cluster A spans %u and contains %u hits, and Cluster B spans "
            "%u and contains %u hits",
-           evt.ClusterA.coord_span(), evt.ClusterA.hit_count(),
-           evt.ClusterB.coord_span(), evt.ClusterB.hit_count());
+           evt.ClusterA.coordSpan(), evt.ClusterA.hitCount(),
+           evt.ClusterB.coordSpan(), evt.ClusterB.hitCount());
     Stats.SpanTooLarge++;
-    split_and_stash_event(evt);
+    splitAndStashEvent(evt);
     evt.clear();
   }
 }

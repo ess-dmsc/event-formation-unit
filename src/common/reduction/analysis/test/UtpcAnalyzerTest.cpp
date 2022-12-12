@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/testutils/TestBase.h>
 
@@ -32,7 +32,7 @@ TEST_F(UtpcAnalyzerTest, AnalyzeAverage) {
   hit.weight = 4;
   cluster.insert(hit);
   result = utpcAnalyzer(false, 1, 1).analyze(cluster);
-  EXPECT_EQ(cluster.hit_count(), 3);
+  EXPECT_EQ(cluster.hitCount(), 3);
   EXPECT_EQ(result.center, 1);
   result = utpcAnalyzer(true, 1, 1).analyze(cluster);
   EXPECT_EQ(result.center, 1.2);
@@ -107,7 +107,7 @@ TEST_F(UtpcAnalyzerTest, InsertInvalid) {
   event.insert(hit);
   hit.plane = 2;
   event.insert(hit);
-  EXPECT_EQ(2, event.total_hit_count());
+  EXPECT_EQ(2, event.totalHitCount());
 }
 
 TEST_F(UtpcAnalyzerTest, DebugPrint) {
@@ -116,7 +116,7 @@ TEST_F(UtpcAnalyzerTest, DebugPrint) {
   GTEST_COUT << result.to_string() << "\n";
 }
 
-// \todo more & better tests of this required
+/// \todo more & better tests of this required
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

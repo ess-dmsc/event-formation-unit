@@ -24,7 +24,7 @@ class EventBuilder2D {
 public:
   EventBuilder2D();
 
-  // \todo pass by rvalue?
+  /// \todo pass by rvalue?
   void insert(Hit hit);
 
   void flush(bool full_flush = false);
@@ -37,10 +37,10 @@ public:
 
   HitVector HitsX, HitsY;
 
-  // \todo parametrize
+  /// \todo parametrize
   GapClusterer ClustererX{timegap, coordgap}, ClustererY{timegap, coordgap};
 
-  // \todo parametrize
+  /// \todo parametrize
   GapMatcher matcher{latency, PlaneX, PlaneY};
 
   // final vector of reconstructed events

@@ -85,7 +85,7 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(CaenInstrumentTest, LokiConstructor) {
   Settings.CalibFile = CalibFile;
   CaenInstrument Caen(counters, Settings);

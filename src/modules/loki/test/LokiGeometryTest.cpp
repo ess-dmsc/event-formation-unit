@@ -1,4 +1,4 @@
-/** Copyright (C) 2019-2022 European Spallation Source ERIC */
+// Copyright (C) 2019-2022 European Spallation Source ERIC
 
 #include <algorithm>
 #include <common/testutils/TestBase.h>
@@ -27,7 +27,7 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(LokiGeometryTest, Constructor) {
   geom->setResolution(512);
   ASSERT_EQ(geom->StrawId, 7);  // valid: 0 - 6

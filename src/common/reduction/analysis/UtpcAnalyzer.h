@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file utpcAnalyzer.h
@@ -17,7 +17,7 @@
 ///        hits for each dimension, and averaging these. It also calculates
 ///        two uncertainties for this average. Produces 2-dimensional events.
 
-// \todo Make reference to Doro paper
+/// \todo Make reference to Doro paper
 
 class utpcAnalyzer : public AbstractAnalyzer {
 public:
@@ -40,7 +40,7 @@ public:
   /// \brief returns timestamp for start of event (earlier of 2 planes)
   static uint64_t utpc_time(const Event &e);
 
-  // \todo refactor: move this out to some filter class
+  /// \todo refactor: move this out to some filter class
   /// \brief indicates if both dimensions meet lower uncertainty criterion
   static bool meets_lower_criterion(const ReducedHit &x, const ReducedHit &y,
                                     int16_t max_lu);

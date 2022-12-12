@@ -225,13 +225,13 @@ void CspecBase::processing_thread() {
 
       if (!CSPEC.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               CSPEC.ADCHist.hit_count());
+               CSPEC.ADCHist.hitCount());
         ADCHistSerializer.produce(CSPEC.ADCHist);
         CSPEC.ADCHist.clear();
       }
       // if (!CSPEC.TDCHist.isEmpty()) {
       //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      CSPEC.TDCHist.hit_count());
+      //      CSPEC.TDCHist.hitCount());
       //   TDCHistSerializer.produce(CSPEC.TDCHist);
       //   CSPEC.TDCHist.clear();
       // }

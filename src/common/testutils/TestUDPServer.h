@@ -1,4 +1,4 @@
-/* Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,7 +29,8 @@ public:
   TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort, int PacketSize);
   TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort,
                 std::uint8_t *DataPtr, size_t DataLength);
-  // \brief Call before TestUDPServer::startPacketPtransmission() if it is to be
+  /// \brief Call before TestUDPServer::startPacketPtransmission() if it is to
+  /// be
   // called.
   void setConfigPacket(std::uint8_t *DataPtr, size_t DataLength);
   void startPacketTransmission(int TotalPackets, int PacketGapNS);
