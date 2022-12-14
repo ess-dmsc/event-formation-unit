@@ -138,11 +138,9 @@ TEST_F(TTLMonitorInstrumentTest, Constructor) {
 TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadout);
 
-  auto GoodReadouts =
-      ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+  ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
   counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
 
-  ASSERT_EQ(GoodReadouts, 5);
   ASSERT_EQ(counters.TTLMonStats.Readouts, 7);
   ASSERT_EQ(counters.TTLMonStats.ErrorRing, 1);
   ASSERT_EQ(counters.TTLMonStats.ErrorFEN, 1);
@@ -161,10 +159,8 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1, 100000);
   ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
 
-  auto Readouts =
-      ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
+  ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
       counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
-  ASSERT_EQ(Readouts, 1);
 
   ttlmonitor->processMonitorReadouts();
 }
