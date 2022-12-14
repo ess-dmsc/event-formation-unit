@@ -1,5 +1,5 @@
-/* Copyright (C) 2018, 2019 European Spallation Source, ERIC. See LICENSE file
- */
+// Copyright (C) 2018, 2019 European Spallation Source, ERIC. See LICENSE file
+//
 //===----------------------------------------------------------------------===//
 ///
 /// \file

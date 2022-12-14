@@ -1,5 +1,4 @@
-/* Copyright (C) 2018 - 2022 European Spallation Source, ERIC. See LICENSE file
- */
+// Copyright (C) 2018 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapMatcher.h
@@ -25,7 +24,10 @@ public:
   /// them
   ///         to be disambiguated into separate events. If time gap is smaller,
   ///         the clusters are merged into one event.
-  void set_minimum_time_gap(uint64_t minimum_time_gap);
+  void setMinimumTimeGap(uint64_t minimum_time_gap);
+
+  void setSplitMultiEvents(bool split_multi_events, float coefficient_low,
+                           float coefficient_high);
 
   void set_split_multi_events(bool split_multi_events, float coefficient_low,
                               float coefficient_high);
@@ -40,7 +42,7 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
-  void reset_stats() {
+  void resetStats() {
     Stats.SpanTooLarge = 0;
     Stats.DiscardedSpanTooLarge = 0;
     Stats.SplitSpanTooLarge = 0;
@@ -52,13 +54,12 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
-
 private:
-  void split_and_stash_event(Event evt);
-  void split_cluster(Cluster cluster, Cluster *new_cluster_1,
-                     Cluster *new_cluster_2);
-  bool clusters_match(Cluster cluster_a, Cluster cluster_b);
-  void check_and_stash_event(Event evt);
+  void splitAndStashEvent(Event evt);
+  void splitCluster(Cluster cluster, Cluster *new_cluster_1,
+                    Cluster *new_cluster_2);
+  bool clustersMatch(Cluster cluster_a, Cluster cluster_b);
+  void checkAndStashEvent(Event evt);
 
   uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};

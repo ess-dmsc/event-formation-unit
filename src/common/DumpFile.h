@@ -29,7 +29,7 @@
               datatype::create<decltype(Type::member)>())
 #define H5_COMPOUND_RETURN return type
 
-// \todo improve reading for multiple files
+/// \todo improve reading for multiple files
 template <typename T> class DumpFile {
 public:
   ~DumpFile();

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@ public:
 
   void set_callback(ProducerCallback cb);
 
-  // \todo use generic Hit struct
+  /// \todo use generic Hit struct
   /// \brief function to add a readout tuple to an array for later publishing to
   /// Kafka \param plane arbitrary data multiplexer (x, y, module, rack, ...)
   /// \param channel datasource identifier (strip, wire, grid, ...)

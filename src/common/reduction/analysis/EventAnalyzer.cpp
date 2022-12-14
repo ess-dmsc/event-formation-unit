@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <algorithm>
 #include <cmath>
@@ -37,19 +37,19 @@ ReducedHit EventAnalyzer::analyze(Cluster &cluster) const {
   }
 
   if (time_algo == TA_center_of_mass) {
-    ret.center = cluster.coord_center();
-    ret.time = cluster.time_center();
+    ret.center = cluster.coordCenter();
+    ret.time = cluster.timeCenter();
   } else if (time_algo == TA_charge2) {
-    ret.center = cluster.coord_center2();
-    ret.time = cluster.time_center2();
+    ret.center = cluster.coordCenter2();
+    ret.time = cluster.timeCenter2();
   } else {
     if (time_algo == TA_utpc) {
-      ret.center = cluster.coord_utpc(false);
+      ret.center = cluster.coordUtpc(false);
     } else {
-      ret.center = cluster.coord_utpc(true);
+      ret.center = cluster.coordUtpc(true);
     }
-    ret.time = cluster.time_end(); /// \TODO we get he nicest results for
-                                   /// HitGenerator with 'cluster.time_start()'.
+    ret.time = cluster.timeEnd(); /// \TODO we get he nicest results for
+                                  /// HitGenerator with 'cluster.timeStart()'.
   }
 
   return ret;

@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include "ev42_events_generated.h"
 #include <common/kafka/EV42Serializer.h>

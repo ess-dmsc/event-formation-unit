@@ -1,11 +1,9 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
-/** @file
- *
- *  @brief Multigrid electronics
- * Handles mappings between (digitizer, channels) and (x,y,z) coordinates.
- *
- */
+/// @file
+
+/// @brief Multigrid electronics
+/// Handles mappings between (digitizer, channels) and (x,y,z) coordinates.
 
 #include <common/reduction/multigrid/ModuleGeometry.h>
 
@@ -34,7 +32,7 @@ bool ModuleGeometry::flipped_x() const { return flipped_x_; }
 
 bool ModuleGeometry::flipped_z() const { return flipped_z_; }
 
-// \todo cache this result
+/// \todo cache this result
 uint32_t ModuleGeometry::x_range() const { return x_range_; }
 
 uint32_t ModuleGeometry::y_range() const { return num_grids(); }

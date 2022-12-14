@@ -44,7 +44,7 @@ ExitHandler::Exit ExitHandler::HandleLastSignal() {
   return DoExit;
 }
 
-/* Obtain a backtrace and print it to stdout. */
+// Obtain a backtrace and print it to stdout.
 void ExitHandler::printTrace(void) {
   void *array[10];
   size_t size;
