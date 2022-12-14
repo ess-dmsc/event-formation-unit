@@ -19,9 +19,8 @@ namespace TTLMonitor {
 // #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
-int Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
+void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   Result.clear();
-  uint32_t GoodReadouts{0};
 
   char *Buffer = (char *)PacketData.DataPtr;
   unsigned int Size = PacketData.DataLength;
@@ -30,13 +29,19 @@ int Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
     XTRACE(DATA, WAR, "Invalid data pointer");
-    return GoodReadouts;
+    return;
+  }
+
+  if (Size == 0) {
+    Stats.NoData++;
+    XTRACE(DATA, WAR, "Data size is 0");
+    return;
   }
 
   if (Size % DataLength != 0) {
     Stats.ErrorSize++;
     XTRACE(DATA, WAR, "Bad data length - %d should be multiple of %d", Size, DataLength);
-    return GoodReadouts;
+    return;
   }
 
   Parser::Data *DataPtr = (struct Data *)Buffer;
@@ -87,12 +92,10 @@ int Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    // Validation done, increment stats for decoded parameters
-    GoodReadouts++;
     Result.push_back(Readout);
   }
 
-  return GoodReadouts;
+  return;
 }
 
 } // namespace

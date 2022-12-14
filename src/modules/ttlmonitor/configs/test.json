@@ -6,7 +6,11 @@
 
   "MaxPulseTimeDiffNS" : 1000000000,
 
-  "MaxTOFNS" : 1000000000,
+  "MaxTOFNS" : 10000000000,
+
+  "MonitorRing" : 11,
+
+  "MonitorFEN" : 0,
 
   "NumberOfMonitors" : 1
 }
