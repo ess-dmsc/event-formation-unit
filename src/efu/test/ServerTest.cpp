@@ -15,7 +15,7 @@ constexpr int mask_send = 0x0004;
 const char *message = "DETECTOR_INFO_GET\n";
 
 /// Used in pthread to connect to server and send data
-void client_thread(int command) {
+void clientThread(int command) {
   struct sockaddr_in server;
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -70,7 +70,7 @@ protected:
   void TearDown() override { delete parser; }
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(ServerTest, Constructor) {
   Server server(ServerPort, *parser);
   ASSERT_TRUE(server.getServerFd() != -1);
@@ -92,7 +92,7 @@ TEST_F(ServerTest, PollNoData) {
 
 TEST_F(ServerTest, PollConnect) {
   Server server(ServerPort, *parser);
-  std::thread client(client_thread, mask_connect);
+  std::thread client(clientThread, mask_connect);
   client.join();
   server.serverPoll();
   server.serverPoll();
@@ -102,7 +102,7 @@ TEST_F(ServerTest, PollConnect) {
 
 TEST_F(ServerTest, PollWData) {
   Server server(ServerPort, *parser);
-  std::thread client(client_thread, mask_connect | mask_send);
+  std::thread client(clientThread, mask_connect | mask_send);
   client.join();
   server.serverPoll();
   server.serverPoll();
@@ -112,7 +112,7 @@ TEST_F(ServerTest, PollWData) {
 
 TEST_F(ServerTest, PollWDataClose) {
   Server server(ServerPort, *parser);
-  std::thread client(client_thread, mask_connect | mask_send | mask_close);
+  std::thread client(clientThread, mask_connect | mask_send | mask_close);
   client.join();
   server.serverPoll();
   server.serverPoll();

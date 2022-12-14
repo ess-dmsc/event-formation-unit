@@ -70,7 +70,7 @@ int ReaderPcap::open() {
 
 int ReaderPcap::validatePacket(pcap_pkthdr *Header, const unsigned char *Data) {
 
-  Stats.PacketsTotal++; /**< total packets in pcap file */
+  Stats.PacketsTotal++; //< total packets in pcap file
   Stats.BytesTotal += Header->len;
 
   if (Header->len != Header->caplen) {

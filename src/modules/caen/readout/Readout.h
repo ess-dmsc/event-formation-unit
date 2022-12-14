@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -63,7 +63,7 @@ struct __attribute__((packed)) Readout {
 
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
-  // \brief prints values for to_string purposes
+  /// \brief prints values for to_string purposes
   std::string debug() const;
 };
 

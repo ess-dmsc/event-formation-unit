@@ -63,7 +63,7 @@ void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
 
 nonstd::span<const uint8_t> EV44Serializer::serialize() {
   if (EventCount > MaxEvents) {
-    // \todo this should probably throw instead?
+    /// \todo this should probably throw instead?
     return {};
   }
   *TimeLengthPtr = EventCount;

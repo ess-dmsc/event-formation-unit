@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source */
+// Copyright (C) 2018 European Spallation Source
 
 #include <common/system/Socket.h>
 #include <common/testutils/TestBase.h>

@@ -53,7 +53,7 @@ public:
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
-  // \brief initialise the serializer. This is used both in FreiaInstrument
+  /// \brief initialise the serializer. This is used both in FreiaInstrument
   // and FreiaBase. Called from FreiaBase
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 

@@ -90,6 +90,7 @@ TEST_F(TTLMonitorParserTest, ErrorBufferPtr) {
   ASSERT_EQ(parser.Stats.Readouts, 0);
 }
 
+
 // no data in buffer
 TEST_F(TTLMonitorParserTest, NoData) {
   makeHeader(DataGood);

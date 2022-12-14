@@ -80,6 +80,7 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("readouts.count", Counters.TTLMonStats.Readouts);
   Stats.create("readouts.empty", Counters.TTLMonStats.NoData);
 
+
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);

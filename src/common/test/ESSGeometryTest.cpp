@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source */
+// Copyright (C) 2018 European Spallation Source
 
 #include <common/testutils/TestBase.h>
 #include <logical_geometry/ESSGeometry.h>

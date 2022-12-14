@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
 #include <common/reduction/matching/EndMatcher.h>
 #include <common/testutils/TestBase.h>
@@ -33,9 +33,9 @@ TEST_F(EndMatcherTest, OneX) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
 }
 
 TEST_F(EndMatcherTest, OneY) {
@@ -44,9 +44,9 @@ TEST_F(EndMatcherTest, OneY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 122);
 }
 
 TEST_F(EndMatcherTest, TwoX) {
@@ -56,12 +56,12 @@ TEST_F(EndMatcherTest, TwoX) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
 }
 
 TEST_F(EndMatcherTest, TwoY) {
@@ -71,12 +71,12 @@ TEST_F(EndMatcherTest, TwoY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 122);
 }
 
 TEST_F(EndMatcherTest, OneXOneY) {
@@ -87,12 +87,12 @@ TEST_F(EndMatcherTest, OneXOneY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 122);
 }
 
 TEST_F(EndMatcherTest, OneXY) {
@@ -103,9 +103,9 @@ TEST_F(EndMatcherTest, OneXY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 122);
 }
 
 TEST_F(EndMatcherTest, TwoXY) {
@@ -118,12 +118,12 @@ TEST_F(EndMatcherTest, TwoXY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 301);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 251);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 301);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 251);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 122);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 122);
 }
 
 TEST_F(EndMatcherTest, JustIntside) {
