@@ -93,7 +93,7 @@ Producer::Producer(std::string Broker, std::string Topic,
   }
 }
 
-/** called to actually send data to Kafka cluster */
+// called to actually send data to Kafka cluster
 int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) {
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {

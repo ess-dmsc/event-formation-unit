@@ -70,14 +70,16 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   }
 
   if (not Settings.DumpFilePrefix.empty()) {
-      if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+    if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
 
-        DumpFile = ReadoutFile::create(
-                     boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
-      } else {
-        DumpFile = ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
-      }
+      DumpFile =
+          ReadoutFile::create(boost::filesystem::path(Settings.DumpFilePrefix)
+                                  .replace_extension(""));
+    } else {
+      DumpFile =
+          ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
     }
+  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);

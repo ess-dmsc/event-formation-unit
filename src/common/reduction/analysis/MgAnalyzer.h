@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file MGAnalyzer.h
@@ -63,6 +63,6 @@ protected:
 private:
   bool weighted_{true};
 
-  // \todo refactor: use pre-generated look-up table
+  /// \todo refactor: use pre-generated look-up table
   Multigrid::ModuleGeometry geometry_;
 };

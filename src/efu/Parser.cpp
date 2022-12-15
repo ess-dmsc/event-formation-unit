@@ -177,8 +177,6 @@ static int runtime_stats(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-/******************************************************************************/
-/******************************************************************************/
 Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
                int &keep_running) {
 
@@ -310,4 +308,3 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
 }
 
 void Parser::clearCommands() { commands.clear(); }
-/******************************************************************************/

@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/testutils/TestBase.h>
 
@@ -50,7 +50,7 @@ TEST_F(MgAnalyzerTest, InsertInvalid) {
   event.insert(hit);
   hit.plane = 2;
   event.insert(hit);
-  EXPECT_EQ(2, event.total_hit_count());
+  EXPECT_EQ(2, event.totalHitCount());
 }
 
 TEST_F(MgAnalyzerTest, DebugPrint) {
@@ -59,7 +59,7 @@ TEST_F(MgAnalyzerTest, DebugPrint) {
   GTEST_COUT << result.to_string() << "\n";
 }
 
-// \todo more & better tests of this required
+/// \todo more & better tests of this required
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

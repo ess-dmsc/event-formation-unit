@@ -209,6 +209,14 @@ void NmxBase::processing_thread() {
 
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
+        if (NMX.Conf.NMXFileParameters.SplitMultiEvents) {
+          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
+          Counters.EventsDiscardedSpanTooLarge +=
+              builder.matcher.Stats.DiscardedSpanTooLarge;
+          Counters.EventsSplitSpanTooLarge +=
+              builder.matcher.Stats.SplitSpanTooLarge;
+          builder.matcher.resetStats();
+        }
       }
 
     } else {
@@ -227,13 +235,13 @@ void NmxBase::processing_thread() {
 
       if (!NMX.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               NMX.ADCHist.hit_count());
+               NMX.ADCHist.hitCount());
         ADCHistSerializer.produce(NMX.ADCHist);
         NMX.ADCHist.clear();
       }
       // if (!NMX.TDCHist.isEmpty()) {
       //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      NMX.TDCHist.hit_count());
+      //      NMX.TDCHist.hitCount());
       //   TDCHistSerializer.produce(NMX.TDCHist);
       //   NMX.TDCHist.clear();
       // }

@@ -49,7 +49,7 @@ public:
   /// \brief dump readout data to HDF5
   void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
-  // \brief initialise the serializer. This is used both in NMXInstrument
+  /// \brief initialise the serializer. This is used both in NMXInstrument
   // and NMXBase. Called from NMXBase
   void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
 

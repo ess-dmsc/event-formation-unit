@@ -305,7 +305,7 @@ using std::span;
 span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 
 #else
-# define span_RESTORE_WARNINGS()  /*empty*/
+# define span_RESTORE_WARNINGS()  //empty
 #endif
 
 // Presence of language and library features:
@@ -394,19 +394,19 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 #if span_HAVE_CONSTEXPR_11
 # define span_constexpr constexpr
 #else
-# define span_constexpr /*span_constexpr*/
+# define span_constexpr //span_constexpr
 #endif
 
 #if span_HAVE_CONSTEXPR_14
 # define span_constexpr14 constexpr
 #else
-# define span_constexpr14 /*span_constexpr*/
+# define span_constexpr14 //span_constexpr
 #endif
 
 #if span_HAVE_EXPLICIT_CONVERSION
 # define span_explicit explicit
 #else
-# define span_explicit /*explicit*/
+# define span_explicit //explicit
 #endif
 
 #if span_HAVE_IS_DELETE
@@ -424,7 +424,7 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 #if span_HAVE_NOEXCEPT && ! span_CONFIG_CONTRACT_VIOLATION_THROWS_V
 # define span_noexcept noexcept
 #else
-# define span_noexcept /*noexcept*/
+# define span_noexcept //noexcept//
 #endif
 
 #if span_HAVE_NULLPTR
@@ -436,19 +436,19 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 #if span_HAVE_DEPRECATED
 # define span_deprecated(msg) [[deprecated(msg)]]
 #else
-# define span_deprecated(msg) /*[[deprecated]]*/
+# define span_deprecated(msg) //[[deprecated]]
 #endif
 
 #if span_HAVE_NODISCARD
 # define span_nodiscard [[nodiscard]]
 #else
-# define span_nodiscard /*[[nodiscard]]*/
+# define span_nodiscard //[[nodiscard]]
 #endif
 
 #if span_HAVE_NORETURN
 # define span_noreturn [[noreturn]]
 #else
-# define span_noreturn /*[[noreturn]]*/
+# define span_noreturn //[[noreturn]]
 #endif
 
 // Other features:
@@ -497,7 +497,7 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 
 #if span_ELIDE_CONTRACT_EXPECTS
 # define span_constexpr_exp    span_constexpr
-# define span_EXPECTS( cond )  /* Expect elided */
+# define span_EXPECTS( cond )  // Expect elided
 #else
 # define span_constexpr_exp    span_constexpr14
 # define span_EXPECTS( cond )  span_CONTRACT_CHECK( "Precondition", cond )
@@ -505,7 +505,7 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 
 #if span_ELIDE_CONTRACT_ENSURES
 # define span_constexpr_ens    span_constexpr
-# define span_ENSURES( cond )  /* Ensures elided */
+# define span_ENSURES( cond )  // Ensures elided
 #else
 # define span_constexpr_ens    span_constexpr14
 # define span_ENSURES( cond )  span_CONTRACT_CHECK( "Postcondition", cond )
@@ -545,10 +545,10 @@ span_DISABLE_MSVC_WARNINGS( 26439 26440 26472 26473 26481 26490 )
 
 #else
 
-# define span_REQUIRES_0(VA)    /*empty*/
-# define span_REQUIRES_T(VA)    /*empty*/
+# define span_REQUIRES_0(VA)    //empty
+# define span_REQUIRES_T(VA)    //empty
 # define span_REQUIRES_R(R, VA) R
-# define span_REQUIRES_A(VA)    /*empty*/
+# define span_REQUIRES_A(VA)    //empty
 
 #endif
 
@@ -1820,10 +1820,10 @@ namespace std {
 #else
 namespace std {
     template< typename T >
-    class tuple_size; /*undefined*/
+    class tuple_size; // undefined
 
     template< std::size_t I, typename T >
-    class tuple_element; /* undefined */
+    class tuple_element; // undefined
 }
 #endif // span_CPP14_OR_GREATER
 

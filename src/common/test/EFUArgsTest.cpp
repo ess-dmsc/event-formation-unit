@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #ifndef __llvm__
 #if __GNUC__ == 4
@@ -34,7 +34,7 @@ TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
   auto settings = efu_args.getBaseSettings();
 
-  // ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
+  ///\todo fixme ASSERT_EQ(12, settings.cpustart);
   EXPECT_EQ("0.0.0.0", settings.DetectorAddress);
   EXPECT_EQ(9000, settings.DetectorPort);
   EXPECT_EQ("localhost:9092", settings.KafkaBroker);

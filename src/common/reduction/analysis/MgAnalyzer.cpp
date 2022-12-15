@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file MGAnalyzer.h
@@ -45,7 +45,7 @@ ReducedEvent MGAnalyzer::analyze(Event &event) const {
 
   ret.y = analyze_grids(GridCluster(event));
 
-  ret.time = event.time_start();
+  ret.time = event.timeStart();
   ret.good = ret.x.is_center_good() && ret.y.is_center_good() &&
              ret.z.is_center_good();
   return ret;
@@ -53,7 +53,7 @@ ReducedEvent MGAnalyzer::analyze(Event &event) const {
 
 ReducedHit MGAnalyzer::analyze_grids(Cluster &cluster) const {
   ReducedHit ret;
-  ret.time = cluster.time_start();
+  ret.time = cluster.timeStart();
 
   if (cluster.empty()) {
     return ret;
@@ -85,7 +85,7 @@ ReducedHit MGAnalyzer::analyze_grids(Cluster &cluster) const {
 void MGAnalyzer::analyze_wires(Cluster &cluster, ReducedHit &x,
                                ReducedHit &z) const {
 
-  x.time = z.time = cluster.time_start();
+  x.time = z.time = cluster.timeStart();
 
   if (cluster.empty()) {
     return;

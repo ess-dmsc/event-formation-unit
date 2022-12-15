@@ -231,7 +231,6 @@ int Socket::send(void const *buffer, int len) {
   return ret;
 }
 
-/** */
 ssize_t Socket::receive(void *buffer, int buflen) {
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call

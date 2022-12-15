@@ -55,17 +55,17 @@ public:
   /// \returns bytes transmitted
   size_t produce();
 
-  // \todo make private?
+  /// \todo make private?
   /// \brief serializes buffer
   /// \returns reference to internally stored buffer
   nonstd::span<const uint8_t> serialize();
 
 private:
-  // \todo should this not be predefined in terms of jumbo frame?
+  /// \todo should this not be predefined in terms of jumbo frame?
   size_t MaxEvents{0};
   size_t EventCount{0};
 
-  // \todo maybe should be mutated directly in buffer? Start at 0?
+  /// \todo maybe should be mutated directly in buffer? Start at 0?
   uint64_t MessageId{1};
 
   // All of this is the flatbuffer

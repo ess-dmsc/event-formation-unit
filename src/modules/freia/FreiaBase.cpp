@@ -211,6 +211,14 @@ void FreiaBase::processing_thread() {
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
+        if (Freia.Conf.SplitMultiEvents) {
+          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
+          Counters.EventsDiscardedSpanTooLarge +=
+              builder.matcher.Stats.DiscardedSpanTooLarge;
+          Counters.EventsSplitSpanTooLarge +=
+              builder.matcher.Stats.SplitSpanTooLarge;
+          builder.matcher.resetStats();
+        }
       }
       // done processing data
     } else {
@@ -230,13 +238,13 @@ void FreiaBase::processing_thread() {
 
       if (!Freia.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               Freia.ADCHist.hit_count());
+               Freia.ADCHist.hitCount());
         ADCHistSerializer.produce(Freia.ADCHist);
         Freia.ADCHist.clear();
       }
       // if (!Freia.TDCHist.isEmpty()) {
       //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      Freia.TDCHist.hit_count());
+      //      Freia.TDCHist.hitCount());
       //   TDCHistSerializer.produce(Freia.TDCHist);
       //   Freia.TDCHist.clear();
       // }
