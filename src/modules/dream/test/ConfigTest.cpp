@@ -76,6 +76,19 @@ auto DuplicateConfParm = R"(
 }
 )"_json;
 
+auto MissingRing = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeDiffNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"},
+    { "Ringz" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
 
 // finally a valid config file
 auto ValidConfig = R"(
@@ -96,6 +109,18 @@ auto ValidConfigDefaultPulseTime = R"(
 
   "Config" : [
     { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap"}
+  ]
+}
+)"_json;
+
+auto ValidConfigIndexes = R"(
+{
+  "Detector" : "DREAM",
+
+  "MaxPulseTimeDiffNS" : 50000,
+
+  "Config" : [
+    { "Ring" : 4, "FEN" : 2, "Type" : "BwEndCap", "Index" : 42, "Index2" : 84}
   ]
 }
 )"_json;
@@ -154,6 +179,11 @@ TEST_F(ConfigTest, DuplicateConfParm) {
   ASSERT_ANY_THROW(config.apply());
 }
 
+TEST_F(ConfigTest, MissingRing) {
+  config.root = MissingRing;
+  ASSERT_ANY_THROW(config.apply());
+}
+
 // Valid cfg file tests below
 
 TEST_F(ConfigTest, ValidConfig) {
@@ -171,6 +201,19 @@ TEST_F(ConfigTest, ValidConfigDefaultPulseTime) {
   config.MaxPulseTimeDiffNS = 1;
   config.apply();
   ASSERT_EQ(config.MaxPulseTimeDiffNS, 1);
+}
+
+TEST_F(ConfigTest, ValidIndexes) {
+  ASSERT_FALSE(config.RMConfig[4][2].Initialised);
+  ASSERT_EQ(config.RMConfig[4][2].P1.Index, 0);
+  ASSERT_EQ(config.RMConfig[4][2].P2.Index, 0);
+
+  config.root = ValidConfigIndexes;
+  config.apply();
+
+  ASSERT_TRUE(config.RMConfig[4][2].Initialised);
+  ASSERT_EQ(config.RMConfig[4][2].P1.Index, 42);
+  ASSERT_EQ(config.RMConfig[4][2].P2.Index, 84);
 }
 
 int main(int argc, char **argv) {
