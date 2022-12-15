@@ -85,9 +85,17 @@ TEST_F(TTLMonitorParserTest, Constructor) {
 TEST_F(TTLMonitorParserTest, ErrorBufferPtr) {
   PacketData.DataPtr = 0;
   PacketData.DataLength = 100;
-  auto Res = parser.parse(PacketData);
-  ASSERT_EQ(Res, 0);
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorSize, 1);
+  ASSERT_EQ(parser.Stats.Readouts, 0);
+}
+
+
+// no data in buffer
+TEST_F(TTLMonitorParserTest, NoData) {
+  makeHeader(DataGood);
+  PacketData.DataLength = 0;
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.Readouts, 0);
 }
 
@@ -96,8 +104,7 @@ TEST_F(TTLMonitorParserTest, ErrorHdrDataSize) {
   makeHeader(DataGood);
   PacketData.DataLength = 19;
 
-  auto Res = parser.parse(PacketData);
-  ASSERT_EQ(Res, 0);
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorSize, 1);
   ASSERT_EQ(parser.Stats.Readouts, 0);
 }
@@ -106,8 +113,7 @@ TEST_F(TTLMonitorParserTest, ErrorHdrDataSize) {
 TEST_F(TTLMonitorParserTest, ErrorDataSize) {
   makeHeader(DataBadSize);
 
-  auto Res = parser.parse(PacketData);
-  ASSERT_EQ(Res, 0);
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorDataLength, 2);
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
@@ -116,8 +122,7 @@ TEST_F(TTLMonitorParserTest, ErrorDataSize) {
 TEST_F(TTLMonitorParserTest, ErrorDataTime) {
   makeHeader(DataBadFracTime);
 
-  auto Res = parser.parse(PacketData);
-  ASSERT_EQ(Res, 1);
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorTimeFrac, 1);
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
@@ -127,8 +132,7 @@ TEST_F(TTLMonitorParserTest, ErrorDataTime) {
 TEST_F(TTLMonitorParserTest, DataGood) {
   makeHeader(DataGood);
 
-  auto Res = parser.parse(PacketData);
-  ASSERT_EQ(Res, 2);
+  parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorSize, 0);
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }

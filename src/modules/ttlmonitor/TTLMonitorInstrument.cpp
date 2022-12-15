@@ -62,12 +62,14 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     // }
 
     XTRACE(DATA, DEB,
-           "readout: RingId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
+           "readout: PRingId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
            readout.RingId, readout.FENId, readout.Pos, readout.Channel,
            readout.ADC, readout.TimeLow);
 
-    if (readout.RingId / 2 != Conf.Parms.MonitorRing) {
-      XTRACE(DATA, WAR, "Invalid ring %u for monitor readout", readout.RingId);
+    int LRingId = readout.RingId/2;
+    if (LRingId != Conf.Parms.MonitorRing) {
+      XTRACE(DATA, WAR, "Invalid lring %u (expect %u) for monitor readout",
+        LRingId, Conf.Parms.MonitorRing);
       counters.RingCfgErrors++;
       continue;
     }
@@ -106,7 +108,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 
 
     uint32_t PixelId = 1;
-    XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "", PixelId, TimeOfFlight);
+    XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
       counters.TxBytes +=
          Serializers[readout.Channel]->addEvent(TimeOfFlight, PixelId);
       counters.MonitorCounts++;
@@ -133,7 +135,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 //   CurrentReadout.TDC = Data.TDC;
 //   CurrentReadout.VMM = Data.VMM;
 //   CurrentReadout.Channel = Data.Channel;
-//   CurrentReadout.RingId = Data.RingId;
+//   CurrentReadout.PRingId = Data.PRingId;
 //   CurrentReadout.FENId = Data.FENId;
 //
 //   DumpFile->push(CurrentReadout);

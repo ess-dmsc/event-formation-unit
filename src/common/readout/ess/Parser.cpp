@@ -124,9 +124,9 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   Packet.Time.setPrevReference(Packet.HeaderPtr->PrevPulseHigh,
                                Packet.HeaderPtr->PrevPulseLow);
 
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", Packet.HeaderPtr->PulseHigh,
+  XTRACE(DATA, DEB, "PulseTime     (0x%08x,0x%08x)", Packet.HeaderPtr->PulseHigh,
          Packet.HeaderPtr->PulseLow);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", Packet.HeaderPtr->PrevPulseHigh,
+  XTRACE(DATA, DEB, "PrevPulseTime (0x%08x,0x%08x)", Packet.HeaderPtr->PrevPulseHigh,
          Packet.HeaderPtr->PrevPulseLow);
 
   if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiffNS) {

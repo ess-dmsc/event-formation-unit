@@ -23,6 +23,7 @@ struct ParserStats {
   int64_t ErrorTimeFrac{0};
   int64_t ErrorADC{0};
   int64_t Readouts{0};
+  int64_t NoData{0};
 };
 
 class Parser {
@@ -53,7 +54,7 @@ public:
   ~Parser(){};
 
   //
-  int parse(ESSReadout::Parser::PacketDataV0 &PacketData);
+  void parse(ESSReadout::Parser::PacketDataV0 &PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct Data> Result;

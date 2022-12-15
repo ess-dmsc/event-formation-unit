@@ -78,6 +78,8 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("readouts.error_datalen", Counters.TTLMonStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.TTLMonStats.ErrorTimeFrac);
   Stats.create("readouts.count", Counters.TTLMonStats.Readouts);
+  Stats.create("readouts.empty", Counters.TTLMonStats.NoData);
+
 
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
@@ -172,7 +174,7 @@ void TTLMonitorBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      Res = TTLMonitor.TTLMonParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      TTLMonitor.TTLMonParser.parse(TTLMonitor.ESSReadoutParser.Packet);
       Counters.TTLMonStats = TTLMonitor.TTLMonParser.Stats;
       Counters.TimeStats = TTLMonitor.ESSReadoutParser.Packet.Time.Stats;
 
