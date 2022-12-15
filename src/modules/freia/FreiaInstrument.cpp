@@ -79,19 +79,6 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
-  if (Ids.size() != Conf.NumHybrids) {
-    throw std::runtime_error("Hybrid Id size mismatch");
-  }
-  for (uint8_t i = 0; i < Ids.size(); i++) {
-    if (not ESSReadout::Hybrid::isAvailable(Ids[i], Hybrids)) {
-      XTRACE(INIT, ERR, "Duplicate Hybrid ID: %s", Ids[i].c_str());
-      throw std::runtime_error("Duplicate Hybrid ID");
-    }
-    Hybrids[i].HybridId = Ids[i];
-    XTRACE(INIT, ALW, "Config: Hybrid %u has ID: %s", i, Ids[i].c_str());
-  }
-}
 
 void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
