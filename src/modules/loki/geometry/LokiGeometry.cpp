@@ -109,7 +109,7 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
 }
 
 uint8_t LokiGeometry::strawCalc(double straw) {
-  std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
+  // limits is a vector defined in LokiGeometry.h
   if (straw <= limits[0])
     return 0;
   else if (straw <= limits[1])
