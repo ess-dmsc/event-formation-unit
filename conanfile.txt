@@ -3,15 +3,15 @@ asio/1.16.1
 benchmark/1.7.0
 cli11/1.9.1
 fmt/6.2.0
-graylog-logger/2.0.4-dm1@ess-dmsc/stable
+graylog-logger/2.1.4-1@ess-dmsc/stable
 gtest/1.11.0
-h5cpp/0.4.0@ess-dmsc/stable
+h5cpp/95f0e70@ess-dmsc/stable
 nlohmann_json/3.9.1
 libpcap/1.10.1
 librdkafka/1.9.2
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
-concurrentqueue/8f7e861@ess-dmsc/stable
+concurrentqueue/1.0.3
 streaming-data-types/e644b3c@ess-dmsc/stable
 trompeloeil/40
 
