@@ -58,6 +58,7 @@ void NMXInstrument::loadConfigAndCalib() {
          Settings.ConfigFile.c_str());
   Conf = Config("NMX", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
+  checkConfigAndGeometry();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
@@ -168,6 +169,39 @@ void NMXInstrument::processReadouts(void) {
 
   for (auto &builder : builders) {
     builder.flush(true); // Do matching, and flush the matcher
+  }
+}
+
+void NMXInstrument::checkConfigAndGeometry(){
+  std::pair<std::set<int>, std::set<int>> Coords;
+  std::set<int>* CurrentCoordSet;
+
+  for (int RingId = 0; RingId <= Conf.MaxRing; RingId++){
+    for (int FENId = 0; FENId <= Conf.MaxFEN; FENId++){
+       for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++){
+         ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
+         if (h.Initialised){
+           if(Conf.Plane[RingId][FENId][HybridId] == 0){
+             CurrentCoordSet = &Coords.first;
+           }
+           else{
+             CurrentCoordSet = &Coords.second;
+           }
+           for(int Asic = 0; Asic < 2; Asic++){
+            XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId, HybridId);
+            for (int channel = 0; channel < 64; channel++){
+              int coord = NMXGeometryInstance.coord(channel, Asic, Conf.Offset[RingId][FENId][HybridId], Conf.ReversedChannels[RingId][FENId][HybridId]);
+                if (CurrentCoordSet->count(coord)) {
+                  XTRACE(EVENT, ERR, "Channel %u, Coordinate %u already covered in Plane 0 by another hybrid", channel, coord);
+                  throw std::runtime_error("Invalid config, coordinates overlap");
+                } else {
+                  CurrentCoordSet->insert(coord);
+                }
+            }
+           }
+         }
+       }
+    }
   }
 }
 

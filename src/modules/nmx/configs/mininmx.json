@@ -13,7 +13,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 4,
+      "Hybrid": 0,
       "Plane": 0,
       "Offset": 0,
       "ReversedChannels": false,
@@ -23,7 +23,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 3,
+      "Hybrid": 1,
       "Plane": 0,
       "Offset": 128,
       "ReversedChannels": false,
@@ -43,7 +43,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 3,
       "Plane": 0,
       "Offset": 384,
       "ReversedChannels": false,
@@ -53,7 +53,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 4,
       "Plane": 0,
       "Offset": 512,
       "ReversedChannels": false,
