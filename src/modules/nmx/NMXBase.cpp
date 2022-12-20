@@ -183,7 +183,7 @@ void NmxBase::processing_thread() {
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = NMX.ESSReadoutParser.validate(DataPtr, DataLen,
-                                               ESSReadout::Parser::LOKI);
+                                               ESSReadout::Parser::NMX);
       Counters.ReadoutStats = NMX.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

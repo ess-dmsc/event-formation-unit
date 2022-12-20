@@ -192,7 +192,7 @@ void NMXInstrument::checkConfigAndGeometry(){
             for (int channel = 0; channel < 64; channel++){
               int coord = NMXGeometryInstance.coord(channel, Asic, Conf.Offset[RingId][FENId][HybridId], Conf.ReversedChannels[RingId][FENId][HybridId]);
                 if (CurrentCoordSet->count(coord)) {
-                  XTRACE(EVENT, ERR, "Channel %u, Coordinate %u already covered in Plane 0 by another hybrid", channel, coord);
+                  XTRACE(INIT, ERR, "Channel %u, Coordinate %u already covered by another hybrid", channel, coord);
                   throw std::runtime_error("Invalid config, coordinates overlap");
                 } else {
                   CurrentCoordSet->insert(coord);
