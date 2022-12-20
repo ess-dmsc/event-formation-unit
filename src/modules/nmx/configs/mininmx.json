@@ -7,13 +7,13 @@
   "MaxGapY": 2,
   "SizeX": 1280,
   "SizeY": 1280,
-  "TimeBoxNs": 2010,
+  "TimeBoxNs": 500,
   "DefaultMinADC": 50,
   "Config": [
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 8,
+      "Hybrid": 4,
       "Plane": 0,
       "Offset": 0,
       "ReversedChannels": false,
@@ -23,17 +23,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 9,
-      "Plane": 0,
-      "Offset": 64,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000001"
-    },
-    {
-      "Ring": 0,
-      "FEN": 0,
-      "Hybrid": 6,
+      "Hybrid": 3,
       "Plane": 0,
       "Offset": 128,
       "ReversedChannels": false,
@@ -43,17 +33,7 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 7,
-      "Plane": 0,
-      "Offset": 192,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000003"
-    },
-    {
-      "Ring": 0,
-      "FEN": 0,
-      "Hybrid": 4,
+      "Hybrid": 2,
       "Plane": 0,
       "Offset": 256,
       "ReversedChannels": false,
@@ -63,32 +43,12 @@
     {
       "Ring": 0,
       "FEN": 0,
-      "Hybrid": 5,
-      "Plane": 0,
-      "Offset": 320,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000005"
-    },
-    {
-      "Ring": 0,
-      "FEN": 0,
-      "Hybrid": 2,
+      "Hybrid": 1,
       "Plane": 0,
       "Offset": 384,
       "ReversedChannels": false,
       "Panel": 0,
       "HybridId": "E5533333222222221111111100000006"
-    },
-    {
-      "Ring": 0,
-      "FEN": 0,
-      "Hybrid": 3,
-      "Plane": 0,
-      "Offset": 448,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000007"
     },
     {
       "Ring": 0,
@@ -99,16 +59,6 @@
       "ReversedChannels": false,
       "Panel": 0,
       "HybridId": "E5533333222222221111111100000008"
-    },
-    {
-      "Ring": 0,
-      "FEN": 0,
-      "Hybrid": 1,
-      "Plane": 0,
-      "Offset": 576,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000009"
     },
     {
       "Ring": 0,
@@ -125,16 +75,6 @@
       "FEN": 1,
       "Hybrid": 1,
       "Plane": 1,
-      "Offset": 64,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000011"
-    },
-    {
-      "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 2,
-      "Plane": 1,
       "Offset": 128,
       "ReversedChannels": false,
       "Panel": 0,
@@ -143,17 +83,7 @@
     {
       "Ring": 0,
       "FEN": 1,
-      "Hybrid": 3,
-      "Plane": 1,
-      "Offset": 192,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000013"
-    },
-    {
-      "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 4,
+      "Hybrid": 2,
       "Plane": 1,
       "Offset": 256,
       "ReversedChannels": false,
@@ -163,17 +93,7 @@
     {
       "Ring": 0,
       "FEN": 1,
-      "Hybrid": 5,
-      "Plane": 1,
-      "Offset": 320,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000015"
-    },
-    {
-      "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 6,
+      "Hybrid": 3,
       "Plane": 1,
       "Offset": 384,
       "ReversedChannels": false,
@@ -183,32 +103,12 @@
     {
       "Ring": 0,
       "FEN": 1,
-      "Hybrid": 7,
-      "Plane": 1,
-      "Offset": 448,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000017"
-    },
-    {
-      "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 8,
+      "Hybrid": 4,
       "Plane": 1,
       "Offset": 512,
       "ReversedChannels": false,
       "Panel": 0,
       "HybridId": "E5533333222222221111111100000018"
-    },
-    {
-      "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 9,
-      "Plane": 1,
-      "Offset": 576,
-      "ReversedChannels": false,
-      "Panel": 0,
-      "HybridId": "E5533333222222221111111100000019"
     }
   ]
 }
