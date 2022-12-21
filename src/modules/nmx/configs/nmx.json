@@ -7,7 +7,6 @@
   "MaxGapY": 2,
   "SizeX": 1280,
   "SizeY": 1280,
-  "TimeBoxNs": 2010,
   "DefaultMinADC": 50,
   "Config": [
     {

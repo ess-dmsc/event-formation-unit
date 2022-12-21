@@ -58,8 +58,7 @@ std::string ConfigStr = R"(
 
     "MaxPulseTimeNS" : 71428570,
     "MaxGapWire"  : 0,
-    "MaxGapStrip" : 0,
-    "TimeBoxNs" : 2010
+    "MaxGapStrip" : 0
   }
 )";
 

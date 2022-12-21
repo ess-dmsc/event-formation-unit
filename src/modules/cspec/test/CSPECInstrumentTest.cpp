@@ -29,8 +29,7 @@ std::string BadConfigStr = R"(
       { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""}
     ],
 
-    "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
+    "MaxPulseTimeNS" : 71428570
   }
 )";
 
@@ -75,7 +74,6 @@ std::string ConfigStr = R"(
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010,
     "DefaultMinADC": 50,
     "MaxGridsPerEvent": 5,
     "SizeX": 12,

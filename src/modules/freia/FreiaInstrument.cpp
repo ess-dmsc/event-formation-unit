@@ -38,12 +38,8 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   // We can now use the settings in Conf
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
-
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-    if (Conf.SplitMultiEvents) {
+  if (Conf.SplitMultiEvents) {
+    for (auto &builder : builders) {
       builder.matcher.setSplitMultiEvents(Conf.SplitMultiEvents,
                                           Conf.SplitMultiEventsCoefficientLow,
                                           Conf.SplitMultiEventsCoefficientHigh);

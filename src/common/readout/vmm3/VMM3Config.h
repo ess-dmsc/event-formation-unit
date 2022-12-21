@@ -83,7 +83,6 @@ public:
     std::string InstrumentGeometry{""};
     uint32_t MaxTOFNS{1'000'000'000};
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
-    uint32_t TimeBoxNs{0xffffffff};
   } FileParameters;
 
   // Derived parameters
