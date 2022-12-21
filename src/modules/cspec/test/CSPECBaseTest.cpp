@@ -77,7 +77,6 @@ std::vector<uint8_t> dummyreadout {
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010,
     "DefaultMinADC": 50,
     "MaxGridsPerEvent": 5,
     "SizeX": 12,

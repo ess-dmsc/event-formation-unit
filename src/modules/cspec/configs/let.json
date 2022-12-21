@@ -16,7 +16,6 @@
 
 
   "MaxPulseTimeNS" : 71438570,
-  "TimeBoxNs" : 2010,
   "DefaultMinADC": 50,
   "MaxGridsPerEvent": 5,
   "SizeX": 12,

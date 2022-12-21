@@ -53,13 +53,6 @@ void VMM3Config::applyVMM3Config() {
   LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", FileParameters.MaxPulseTimeNS);
 
   try {
-    FileParameters.TimeBoxNs = root["TimeBoxNs"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for TimeBoxNs");
-  }
-  LOG(INIT, Sev::Info, "TimeBoxNs {}", FileParameters.TimeBoxNs);
-
-  try {
     auto PanelConfig = root["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
