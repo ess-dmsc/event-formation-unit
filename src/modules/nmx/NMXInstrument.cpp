@@ -173,7 +173,7 @@ void NMXInstrument::processReadouts(void) {
 }
 
 void NMXInstrument::checkConfigAndGeometry(){
-  std::pair<std::set<int>, std::set<int>> Coords;
+  std::set<int> Coords[4][2];
   std::set<int>* CurrentCoordSet;
 
   for (int RingId = 0; RingId <= Conf.MaxRing; RingId++){
@@ -181,12 +181,7 @@ void NMXInstrument::checkConfigAndGeometry(){
        for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++){
          ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
          if (h.Initialised){
-           if(Conf.Plane[RingId][FENId][HybridId] == 0){
-             CurrentCoordSet = &Coords.first;
-           }
-           else{
-             CurrentCoordSet = &Coords.second;
-           }
+           CurrentCoordSet = &Coords[Conf.Panel[RingId][FENId][HybridId]][Conf.Plane[RingId][FENId][HybridId]];
            for(int Asic = 0; Asic < 2; Asic++){
             XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId, HybridId);
             for (int channel = 0; channel < 64; channel++){
