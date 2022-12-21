@@ -26,7 +26,7 @@ To build and run this software the following dependencies are required.
 Conan is used to download dependencies. For conan to know where the dependencies can
 be downloaded from, the ecdc package repository must be added by running the following command:
 
-* `conan remote add ecdc https://artifactoryconan.esss.dk/artifactory/api/conan/ecdc`
+* `conan remote add ecdc-conan-release https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-release`
 
 Note also that for additional functionality you might want to install the following dependencies manually:
 
