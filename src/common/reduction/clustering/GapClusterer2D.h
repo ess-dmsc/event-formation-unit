@@ -1,5 +1,4 @@
-/** Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file
- * **/
+// Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapClusterer2D.h
@@ -12,7 +11,7 @@
 #include <common/reduction/clustering/AbstractClusterer.h>
 #include <common/reduction/multigrid/ModuleGeometry.h>
 
-// \todo update documentation for 2D version
+/// \todo update documentation for 2D version
 
 /// \class GapClusterer2D GapClusterer2D.h
 /// \brief Clusterer for hits in one plane, discriminating clusters

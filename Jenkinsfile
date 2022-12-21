@@ -5,7 +5,7 @@ import ecdcpipeline.PipelineBuilder
 project = "event-formation-unit"
 module_src="${project}/src/modules/"
 coverage_on = "centos7"
-clangformat_os = "debian10"
+clangformat_os = "debian11"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -312,22 +312,26 @@ if (env.CHANGE_ID) {
     // This is a pull request build
     node('inttest') {
         stage('Integration Test') {
+            sh "rm -rf build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/integrationtest.py
             """
         }  // stage
     }  // node
     node('inttest'){
         stage('Performance Test'){
+            sh "rm -rf build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/performancetest.py
             """
         }

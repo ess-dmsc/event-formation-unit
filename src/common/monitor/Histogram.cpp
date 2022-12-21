@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
 #include <cmath>
 #include <common/monitor/Histogram.h>
@@ -29,7 +29,7 @@ void Hists::set_cluster_adc_downshift(uint8_t bits) {
 
 bool Hists::isEmpty() const { return !(hit_count_ || cluster_count_); }
 
-size_t Hists::hit_count() const { return hit_count_; }
+size_t Hists::hitCount() const { return hit_count_; }
 
 size_t Hists::cluster_count() const { return cluster_count_; }
 

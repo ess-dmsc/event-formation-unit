@@ -237,9 +237,9 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.CSPECFileParameters.MaxGridsSpan < e.ClusterB.coord_span()) {
+    if (Conf.CSPECFileParameters.MaxGridsSpan < e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
-             e.ClusterA.coord_span());
+             e.ClusterA.coordSpan());
       counters.ClustersTooLargeGridSpan++;
       continue;
     }
@@ -248,7 +248,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -269,8 +269,8 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
 
     // calculate local x and y using center of mass
     uint16_t xandz =
-        static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+        static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
     uint16_t x = floor(xandz / 16);
     uint16_t z = xandz % 16;
     auto PixelId = essgeom.pixel3D(x, y, z);

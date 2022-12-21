@@ -15,10 +15,12 @@
 #include <modules/cspec/generators/LETReadoutGenerator.h>
 #include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
 #include <modules/nmx/generators/TrackReadoutGenerator.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/ttlmonitor/geometry/Parser.h>
 
 #include <stdio.h>
 // GCOVR_EXCL_START
@@ -85,8 +87,14 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 #endif
 
+#ifdef TTLMON_GENERATOR_VMM
+  TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+#endif
+
 #ifdef TTLMON_GENERATOR
   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(TTLMonitor::Parser::Data));
   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
 #endif
 
@@ -100,15 +108,20 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
 
+#ifdef NMX_MULTIHIT_GENERATOR
+  Nmx::MultiHitReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
 #ifdef NMX_TRACK_GENERATOR
   Settings.TicksBtwReadouts = 1;
   Nmx::TrackReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
   Settings.Type = ESSReadout::Parser::DetectorType::NMX;
 #endif
 
-if (Settings.TypeOverride != 0) {
-  Settings.Type = Settings.TypeOverride;
-}
+  if (Settings.TypeOverride != 0) {
+    Settings.Type = Settings.TypeOverride;
+  }
 
   do {
     uint16_t DataSize = gen.makePacket();

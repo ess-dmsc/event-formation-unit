@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file AbstractMatcher.h
@@ -25,7 +25,7 @@ public:
   mutable size_t stats_event_count{0}; ///< cumulative number of matched events
   mutable size_t stats_rejected_clusters{
       0}; ///< cumulative number of rejected clusters
-  // \todo more counters?
+  /// \todo more counters?
 
 public:
   /// \brief AbstractMatcher constructor
@@ -89,7 +89,7 @@ protected:
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
-  void stash_event(Event &event);
+  void stashEvent(Event &event);
 
   /// \brief Puts the event's constituent clusters back onto their respective
   ///         unmatched cluster queues.

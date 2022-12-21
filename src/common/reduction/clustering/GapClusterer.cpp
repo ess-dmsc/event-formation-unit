@@ -26,14 +26,16 @@ void GapClusterer::insert(const Hit &hit) {
   }
 
   /// Insert hit in either case
-  XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
+  XTRACE(CLUSTER, DEB, "about to emplace back hit to current time cluster: %s",
+         hit.to_string().c_str());
   current_time_cluster_.emplace_back(hit);
 }
 
 void GapClusterer::cluster(const HitVector &hits) {
   /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
-    XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
+    XTRACE(CLUSTER, DEB, "about to run insert(hit) on hit: %s",
+           hit.to_string().c_str());
     insert(hit);
   }
 }
@@ -49,35 +51,39 @@ void GapClusterer::flush() {
 
 void GapClusterer::cluster_by_coordinate() {
   /// First, sort in terms of coordinate
-  sort_by_increasing_coordinate(current_time_cluster_);
+  sortByIncreasingCoordinate(current_time_cluster_);
 
   Cluster cluster;
   XTRACE(CLUSTER, DEB, "cur time cluster: first coord %u, last coord %u",
          current_time_cluster_.front().coordinate,
          current_time_cluster_.back().coordinate);
+  XTRACE(CLUSTER, DEB, "running cluster_by_coordinate now");
 
   for (auto &hit : current_time_cluster_) {
     /// Stash cluster if coordinate gap to next hit is too large
     XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate,
-           cluster.coord_end());
+           cluster.coordEnd());
 
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.coord_end()) > max_coord_gap_) {
+        (hit.coordinate - cluster.coordEnd()) > max_coord_gap_) {
       XTRACE(CLUSTER, DEB,
              "Stashing cluster - max_coord_gap exceeded (%i > %i)",
-             hit.coordinate - cluster.coord_end(), max_coord_gap_);
+             hit.coordinate - cluster.coordEnd(), max_coord_gap_);
       stash_cluster(cluster);
       cluster.clear();
     }
 
     /// insert in either case
-    XTRACE(CLUSTER, DEB, "insert hit=%s", hit.to_string().c_str());
+    XTRACE(CLUSTER, DEB, "about to run cluster.insert(hit) on hit=%s",
+           hit.to_string().c_str());
     cluster.insert(hit);
   }
 
   /// Stash any leftovers
-  if (!cluster.empty())
+  if (!cluster.empty()) {
+    XTRACE(CLUSTER, DEB, "stashing cluster");
     stash_cluster(cluster);
+  }
 }
 
 std::string GapClusterer::config(const std::string &prepend) const {

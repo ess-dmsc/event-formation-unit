@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
 
-EventBuilder2D::EventBuilder2D() { matcher.set_minimum_time_gap(timegap); }
+EventBuilder2D::EventBuilder2D() { matcher.setMinimumTimeGap(timegap); }
 
 void EventBuilder2D::insert(Hit hit) {
   XTRACE(CLUSTER, DEB, "hit: {%u, %llu %u %u}", hit.plane, hit.time,

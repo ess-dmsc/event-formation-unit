@@ -11,6 +11,7 @@ set(ttlmonitor_common_inc
   TTLMonitorBase.h
   TTLMonitorInstrument.h
   geometry/Config.h
+  geometry/Parser.h
   )
 
 
@@ -18,6 +19,7 @@ set(ttlmonitor_common_src
   TTLMonitorBase.cpp
   TTLMonitorInstrument.cpp
   geometry/Config.cpp
+  geometry/Parser.cpp
   )
 
 #

@@ -14,34 +14,32 @@
 // clang-format off
 std::vector<uint8_t> dummyreadout {
               0x00, 0x00, // pad, v0
-  0x45, 0x53, 0x53, 0x48, // 'E', 'S', 'S', type 0x48
-  0x46, 0x00, 0x17, 0x00, // len(0x005e), OQ23, TSrc0
+  0x45, 0x53, 0x53, 0x10, // 'E', 'S', 'S', type 0x10
+  0x3E, 0x00, 0x17, 0x00, // len(0x003e), OQ23, TSrc0
   0x00, 0x00, 0x00, 0x00, // PT HI
   0x00, 0x00, 0x00, 0x00, // PT LO
   0x00, 0x00, 0x00, 0x00, // PPT HI
   0x00, 0x00, 0x00, 0x00, // PPT Lo
   0x08, 0x00, 0x00, 0x00, // Seq number 8
 
-  // First readout
-  0x01, 0x01, 0x14, 0x00,  // Data Header
-  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  // First monitor readout - Valid
+  0x16, 0x00, 0x10, 0x00,  // Data Header - PRing 22, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 
-  // Second readout
-  0x02, 0x02, 0x14, 0x00,  // Data Header
-  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x00,  // GEO 0, TDC 0, VMM 0, CH 0
+  // Second monitor readout - invalid Ring
+  0x12, 0x00, 0x10, 0x00,  // Data Header, PRing 24, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 };
 
 std::string ttlmonjson = R"(
   {
    "Detector" : "TTLMonitor",
 
-   "TypeSubType" : 72,
+   "TypeSubType" : 16,
 
    "MaxPulseTimeDiffNS" : 1000000000,
 
@@ -80,7 +78,7 @@ public:
 TEST_F(TTLMonitorBaseTest, Constructor) {
   TTLMonitorBaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 0);
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceive) {
@@ -95,9 +93,7 @@ TEST_F(TTLMonitorBaseTest, DataReceive) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, dummyreadout.size());
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            2); // number of readouts dummyreadout
-  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
+  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 2);
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
@@ -114,9 +110,9 @@ TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, dummyreadout.size());
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            0); // no readouts as header is bad
-  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
+
+  // no readouts as header is bad
+  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 0);
 }
 
 int main(int argc, char **argv) {

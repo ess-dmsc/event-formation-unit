@@ -43,6 +43,11 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
          Conf.FileParameters.TimeBoxNs);
   for (auto &builder : builders) {
     builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
+    if (Conf.SplitMultiEvents) {
+      builder.matcher.setSplitMultiEvents(Conf.SplitMultiEvents,
+                                          Conf.SplitMultiEventsCoefficientLow,
+                                          Conf.SplitMultiEventsCoefficientHigh);
+    }
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
@@ -74,19 +79,6 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
-  if (Ids.size() != Conf.NumHybrids) {
-    throw std::runtime_error("Hybrid Id size mismatch");
-  }
-  for (uint8_t i = 0; i < Ids.size(); i++) {
-    if (not ESSReadout::Hybrid::isAvailable(Ids[i], Hybrids)) {
-      XTRACE(INIT, ERR, "Duplicate Hybrid ID: %s", Ids[i].c_str());
-      throw std::runtime_error("Duplicate Hybrid ID");
-    }
-    Hybrids[i].HybridId = Ids[i];
-    XTRACE(INIT, ALW, "Config: Hybrid %u has ID: %s", i, Ids[i].c_str());
-  }
-}
 
 void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
@@ -239,7 +231,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -259,8 +251,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     // calculate local x and y using center of mass
-    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
+    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {

@@ -34,5 +34,5 @@
 #if defined(BUILD_IS_TEST_ENVIRONMENT) || !defined(NDEBUG)
 #define TestEnvAssertMsg(exp, msg) RelAssertMsg(exp, msg)
 #else
-#define TestEnvAssertMsg(exp, msg) /**/
+#define TestEnvAssertMsg(exp, msg)
 #endif

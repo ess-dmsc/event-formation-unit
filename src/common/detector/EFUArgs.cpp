@@ -112,10 +112,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
       ->group("EFU Options")->default_str("10");
 
-  // DETECTOR SPECIFIC TTLMONITOR
-  CLIParser.add_option("--ttlmonitor-reduce", EFUSettings.TTLMonitorReduceEvents,
-          "use 1 out of N readouts")->group("TTLMonitor");
-
   // EFU LEGACY MODULE
   CLIParser.add_flag("--multiblade-alignment", EFUSettings.MultibladeAlignment,
           "Enter alignment mode (2D)")

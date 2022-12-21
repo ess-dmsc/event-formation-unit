@@ -114,7 +114,7 @@ void PerfGenBase::processingThread() {
     mystats.tx_bytes = Serializer.TxBytes;
     TimeOfFlight = 0;
   }
-  // \todo flush everything here
+  /// \todo flush everything here
   XTRACE(INPUT, ALW, "Stopping generator thread.");
   return;
 }

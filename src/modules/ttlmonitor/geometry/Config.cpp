@@ -68,6 +68,13 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for MonitorFEN");
   }
   LOG(INIT, Sev::Info, "MonitorFEN {}", Parms.MonitorFEN);
+
+  try {
+    Parms.NumberOfMonitors = root["NumberOfMonitors"].get<std::uint8_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for NumberOfMonitors");
+  }
+  LOG(INIT, Sev::Info, "NumberOfMonitors {}", Parms.NumberOfMonitors);
 }
 
 } // namespace TTLMonitor

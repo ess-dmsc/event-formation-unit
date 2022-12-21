@@ -50,9 +50,6 @@ struct BaseSettings {
   std::string   CalibFile            {""};
   std::string   DumpFilePrefix       {""};
 
-  // ttlmonitor
-  int           TTLMonitorReduceEvents{1};
-  int           TTLMonitorNumberOfMonitors{1};
   // perfgen
   bool          TestImage            {false};
   std::uint32_t TestImageUSleep      {10};

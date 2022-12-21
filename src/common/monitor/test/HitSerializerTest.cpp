@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+// Copyright (C) 2018 European Spallation Source ERIC
 
 #include <common/monitor/HitSerializer.h>
 #include <common/testutils/TestBase.h>
