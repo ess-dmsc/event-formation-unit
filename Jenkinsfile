@@ -5,7 +5,7 @@ import ecdcpipeline.PipelineBuilder
 project = "event-formation-unit"
 module_src="${project}/src/modules/"
 coverage_on = "centos7"
-clangformat_os = "debian10"
+clangformat_os = "debian11"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
