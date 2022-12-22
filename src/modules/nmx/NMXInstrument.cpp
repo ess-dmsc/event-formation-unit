@@ -181,17 +181,21 @@ void NMXInstrument::checkConfigAndGeometry(){
        for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++){
          ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
          if (h.Initialised){
-           CurrentCoordSet = &Coords[Conf.Panel[RingId][FENId][HybridId]][Conf.Plane[RingId][FENId][HybridId]];
+           int Panel = Conf.Panel[RingId][FENId][HybridId];
+           int Plane = Conf.Plane[RingId][FENId][HybridId];
+           CurrentCoordSet = &Coords[Panel][Plane];
            for(int Asic = 0; Asic < 2; Asic++){
             XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId, HybridId);
             for (int channel = 0; channel < 64; channel++){
-              int coord = NMXGeometryInstance.coord(channel, Asic, Conf.Offset[RingId][FENId][HybridId], Conf.ReversedChannels[RingId][FENId][HybridId]);
-                if (CurrentCoordSet->count(coord)) {
-                  XTRACE(INIT, ERR, "Channel %u, Coordinate %u already covered by another hybrid", channel, coord);
-                  throw std::runtime_error("Invalid config, coordinates overlap");
-                } else {
-                  CurrentCoordSet->insert(coord);
-                }
+              int Offset = Conf.Offset[RingId][FENId][HybridId];
+              int ReversedChannels = Conf.ReversedChannels[RingId][FENId][HybridId];
+              int coord = NMXGeometryInstance.coord(channel, Asic, Offset, ReversedChannels);
+              if (CurrentCoordSet->count(coord)) {
+                XTRACE(INIT, ERR, "Channel %u, Coordinate %u already covered by another hybrid", channel, coord);
+                throw std::runtime_error("Invalid config, coordinates overlap");
+              } else {
+                CurrentCoordSet->insert(coord);
+              }
             }
            }
          }
