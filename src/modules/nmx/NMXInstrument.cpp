@@ -229,10 +229,24 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
+    if (Conf.NMXFileParameters.MaxTimeSpan < e.ClusterA.timeSpan()) {
+      XTRACE(EVENT, DEB, "Event spans too long a time in X cluster, %u",
+             e.ClusterA.timeSpan());
+      counters.ClustersTooLargeTimeSpan++;
+      continue;
+    }
+
     if (Conf.NMXFileParameters.MaxYSpan < e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
              e.ClusterB.coordSpan());
       counters.ClustersTooLargeYSpan++;
+      continue;
+    }
+
+    if (Conf.NMXFileParameters.MaxTimeSpan < e.ClusterB.timeSpan()) {
+      XTRACE(EVENT, DEB, "Event spans too long a time in Y cluster, %u",
+             e.ClusterB.timeSpan());
+      counters.ClustersTooLargeTimeSpan++;
       continue;
     }
 

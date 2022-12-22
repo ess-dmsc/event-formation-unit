@@ -48,6 +48,7 @@ public:
     bool SplitMultiEvents{false};
     float SplitMultiEventsCoefficientLow{0.8};
     float SplitMultiEventsCoefficientHigh{1.2};
+    uint16_t MaxTimeSpan{500};
   } NMXFileParameters;
 
   // Derived parameters

@@ -41,6 +41,7 @@ struct Counters {
   int64_t ClustersMatchedYOnly;
   int64_t ClustersTooLargeXSpan;
   int64_t ClustersTooLargeYSpan;
+  int64_t ClustersTooLargeTimeSpan;
   int64_t EventsMatchedClusters;
   int64_t EventsSpanTooLarge;
   int64_t EventsDiscardedSpanTooLarge;
