@@ -22,7 +22,7 @@
 #define UNUSED __attribute__((unused))
 
 //=============================================================================
-static int stat_get_count(std::vector<std::string> cmdargs, char *output,
+static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
                           unsigned int *obytes,
                           std::shared_ptr<Detector> detector,
                           Statistics stats) {
@@ -71,7 +71,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 }
 
 //=============================================================================
-static int version_get(std::vector<std::string> cmdargs, char *output,
+static int version_get(const std::vector<std::string> &cmdargs, char *output,
                        unsigned int *obytes) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "VERSION_GET");
@@ -87,7 +87,7 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
 }
 
 //=============================================================================
-static int cmd_get_count(std::vector<std::string> cmdargs, char *output,
+static int cmd_get_count(const std::vector<std::string> &cmdargs, char *output,
                          unsigned int *obytes, int count) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "CMD_GET_COUNT");

@@ -119,7 +119,6 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
         ConfigFile);
     throw std::runtime_error("Invalid Json file");
-    return;
   }
 }
 

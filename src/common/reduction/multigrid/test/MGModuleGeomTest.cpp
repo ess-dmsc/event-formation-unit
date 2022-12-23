@@ -82,7 +82,7 @@ TEST_F(MGModuleGeomTest, NoTestDebug) {
   MgGeom.flipped_x(true);
   MgGeom.flipped_z(true);
   std::string DebugStr = MgGeom.debug();
-  ASSERT_TRUE(true);
+  ASSERT_TRUE(DebugStr.size() != 0);
 }
 
 int main(int argc, char **argv) {
