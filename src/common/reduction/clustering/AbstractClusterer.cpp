@@ -37,7 +37,7 @@ std::string to_string(const ClusterContainer &container,
     return {};
   std::stringstream ss;
   for (const auto &cluster : container) {
-    ss << prepend << cluster.to_string(prepend, verbose) << "\n";
+    ss << prepend << cluster.second.to_string(prepend, verbose) << "\n";
   }
   return ss.str();
 }
@@ -59,6 +59,6 @@ bool AbstractClusterer::empty() const { return clusters.empty(); }
 void AbstractClusterer::stash_cluster(Cluster &cluster) {
   XTRACE(CLUSTER, DEB, status("", true).c_str());
 
-  clusters.emplace_back(std::move(cluster));
+  clusters.insert(std::pair<int,Cluster>(cluster.timeStart(), cluster));
   stats_cluster_count++;
 }

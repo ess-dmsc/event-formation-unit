@@ -26,9 +26,9 @@ bool EndMatcher::belongs_end(const Event &event, const Cluster &cluster) const {
 }
 
 void EndMatcher::match(bool flush) {
-  unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-    return c1.timeEnd() < c2.timeEnd();
-  });
+  // unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //   return c1.timeEnd() < c2.timeEnd();
+  // });
 
   Event evt{PlaneA, PlaneB};
   while (!unmatched_clusters_.empty()) {

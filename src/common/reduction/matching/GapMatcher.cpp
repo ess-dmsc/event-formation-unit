@@ -11,8 +11,8 @@
 // #include <cmath>
 // #include <algorithm>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 void GapMatcher::setMinimumTimeGap(uint64_t minimum_time_gap) {
   minimum_time_gap_ = minimum_time_gap;
@@ -27,9 +27,13 @@ void GapMatcher::setSplitMultiEvents(bool split_multi_events,
 }
 
 void GapMatcher::match(bool flush) {
-  unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-    return c1.timeStart() < c2.timeStart();
-  });
+  for (Cluster c: unmatched_clusters_){
+    XTRACE(EVENT, DEB, "Cluster time %u", c.timeStart());
+  }
+  throw std::runtime_error("");
+  // unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //   return c1.timeStart() < c2.timeStart();
+  // });
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
          unmatched_clusters_.size());

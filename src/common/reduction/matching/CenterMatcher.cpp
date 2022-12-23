@@ -22,21 +22,21 @@ void CenterMatcher::set_time_algorithm(std::string time_algorithm) {
 
 void CenterMatcher::match(bool flush) {
 
-  if (time_algorithm_ == "center-of-mass") {
-    unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.timeCenter() < c2.timeCenter();
-    });
-  } else if (time_algorithm_ == "charge2") {
-    unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.timeCenter2() < c2.timeCenter2();
-    });
-  }
-  // time_algorithm_ == "utpc" or time_algorithm_ == "utpc-weighted"
-  else {
-    unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.timeEnd() < c2.timeEnd();
-    });
-  }
+  // if (time_algorithm_ == "center-of-mass") {
+  //   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //     return c1.timeCenter() < c2.timeCenter();
+  //   });
+  // } else if (time_algorithm_ == "charge2") {
+  //   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //     return c1.timeCenter2() < c2.timeCenter2();
+  //   });
+  // }
+  // // time_algorithm_ == "utpc" or time_algorithm_ == "utpc-weighted"
+  // else {
+  //   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //     return c1.timeEnd() < c2.timeEnd();
+  //   });
+  // }
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
          unmatched_clusters_.size());

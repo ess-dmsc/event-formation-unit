@@ -15,9 +15,9 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 void OverlapMatcher::match(bool flush) {
-  unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-    return c1.timeStart() < c2.timeStart();
-  });
+  // unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+  //   return c1.timeStart() < c2.timeStart();
+  // });
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
          unmatched_clusters_.size());
@@ -27,18 +27,18 @@ void OverlapMatcher::match(bool flush) {
 
     auto cluster = unmatched_clusters_.begin();
 
-    if (!flush && !ready_to_be_matched(*cluster)) {
+    if (!flush && !ready_to_be_matched(*cluster.second)) {
       XTRACE(CLUSTER, DEB, "not ready to be matched");
       break;
     }
 
-    if (!evt.empty() && !evt.timeOverlap(*cluster)) {
+    if (!evt.empty() && !evt.timeOverlap(*cluster.second)) {
       XTRACE(CLUSTER, DEB, "no time overlap");
       stashEvent(evt);
       evt.clear();
     }
 
-    evt.merge(*cluster);
+    evt.merge(*cluster.second);
 
     unmatched_clusters_.pop_front();
   }

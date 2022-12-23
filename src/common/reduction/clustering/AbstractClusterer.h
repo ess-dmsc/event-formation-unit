@@ -115,7 +115,9 @@ bool operator!=(const ClusterPoolAllocator<T> &,
 // using ClusterContainer = std::list<Cluster,
 // ClusterContainerAllocator<Cluster>>;
 // using ClusterContainer = std::list<Cluster>;
-using ClusterContainer = std::list<Cluster, ClusterPoolAllocator<Cluster>>;
+// using ClusterContainer = std::list<Cluster, ClusterPoolAllocator<Cluster>>;
+using ClusterContainer = std::map<int, Cluster>;
+
 
 /// \brief convenience function for printing a ClusterContainer
 std::string to_string(const ClusterContainer &container,
