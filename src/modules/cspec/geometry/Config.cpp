@@ -94,7 +94,7 @@ void Config::applyConfig() {
     // assumed 6 * 16 wires per column and 2 columns per vessel
     try {
       uint8_t NumGrids = 0;
-      for (auto &Vessel : root["Vessel_Config"]) {
+      for (auto const &Vessel : root["Vessel_Config"]) {
         NumGrids = Vessel["NumGrids"];
         NumPixels += NumGrids * 6 * 16 * 2;
       }

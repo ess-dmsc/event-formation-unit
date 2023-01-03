@@ -90,7 +90,7 @@ void NMXInstrument::processReadouts(void) {
            readout.TimeLow);
 
     uint8_t HybridId = readout.VMM >> 1;
-    ESSReadout::Hybrid &Hybrid =
+    ESSReadout::Hybrid const &Hybrid =
         Conf.getHybrid(readout.RingId, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
