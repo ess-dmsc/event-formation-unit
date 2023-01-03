@@ -42,10 +42,6 @@ set(ESSGeometryTest_SRC
   )
 create_test_executable(ESSGeometryTest)
 
-set(BitMathTest_SRC
-  BitMathTest.cpp
-  )
-create_test_executable(BitMathTest)
 
 set(SocketTest_SRC
   SocketTest.cpp
