@@ -11,8 +11,8 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 
