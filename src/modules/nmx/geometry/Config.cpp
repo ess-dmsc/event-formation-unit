@@ -54,6 +54,20 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "MaxYSpan {}", NMXFileParameters.MaxYSpan);
 
   try {
+    NMXFileParameters.MaxXGap = root["MaxXGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxXGap");
+  }
+  LOG(INIT, Sev::Info, "MaxXGap {}", NMXFileParameters.MaxXGap);
+
+  try {
+    NMXFileParameters.MaxYGap = root["MaxYGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxYGap");
+  }
+  LOG(INIT, Sev::Info, "MaxYGap {}", NMXFileParameters.MaxYGap);
+
+  try {
     NMXFileParameters.NumPanels = root["NumPanels"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for NumPanels");

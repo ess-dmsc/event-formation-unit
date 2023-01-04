@@ -44,6 +44,8 @@ public:
     uint16_t NumPanels{4};
     uint16_t MaxXSpan{10};
     uint16_t MaxYSpan{10};
+    uint16_t MaxXGap{10};
+    uint16_t MaxYGap{10};
     uint16_t DefaultMinADC{50};
     bool SplitMultiEvents{false};
     float SplitMultiEventsCoefficientLow{0.8};
