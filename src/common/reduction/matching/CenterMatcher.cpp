@@ -82,8 +82,11 @@ void CenterMatcher::match(bool flush) {
       }
     }
     // Add only to the cluster, if the plane is empty
-    evt.merge(*cluster);
-    unmatched_clusters_.pop_front();
+     // Create a copy of the element
+    Cluster c = *cluster;
+    evt.merge(c);
+    // Erase the element from the set
+    unmatched_clusters_.erase(cluster);
   }
 
   if (!evt.empty()) {
@@ -94,9 +97,9 @@ void CenterMatcher::match(bool flush) {
       // Else return to queue
       /// \todo this needs explicit testing
       if (!evt.ClusterA.empty())
-        unmatched_clusters_.push_front(std::move(evt.ClusterA));
+        unmatched_clusters_.insert(evt.ClusterA);
       if (!evt.ClusterB.empty())
-        unmatched_clusters_.push_front(std::move(evt.ClusterB));
+        unmatched_clusters_.insert(evt.ClusterB);
     }
   }
 }

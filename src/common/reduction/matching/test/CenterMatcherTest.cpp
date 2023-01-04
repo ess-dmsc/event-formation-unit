@@ -40,7 +40,7 @@ TEST_F(CenterMatcherTest, PrintConfig) {
 }
 
 TEST_F(CenterMatcherTest, X) {
-  x.push_back(mock_cluster(0, 100, 10));
+  x.insert(mock_cluster(0, 100, 10));
   matcher.insert(0, x);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
@@ -50,7 +50,7 @@ TEST_F(CenterMatcherTest, X) {
 }
 
 TEST_F(CenterMatcherTest, Y) {
-  y.push_back(mock_cluster(1, 100, 100));
+  y.insert(mock_cluster(1, 100, 100));
   matcher.insert(1, y);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
@@ -60,8 +60,8 @@ TEST_F(CenterMatcherTest, Y) {
 }
 
 TEST_F(CenterMatcherTest, X_X_SmallDeltaT) {
-  x.push_back(mock_cluster(0, 100, 10));
-  x.push_back(mock_cluster(0, 120, 20));
+  x.insert(mock_cluster(0, 100, 10));
+  x.insert(mock_cluster(0, 120, 20));
   matcher.insert(0, x);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -73,8 +73,8 @@ TEST_F(CenterMatcherTest, X_X_SmallDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, X_X_LargeDeltaT) {
-  x.push_back(mock_cluster(0, 100, 10));
-  x.push_back(mock_cluster(0, 1000, 20));
+  x.insert(mock_cluster(0, 100, 10));
+  x.insert(mock_cluster(0, 1000, 20));
   matcher.insert(0, x);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -86,8 +86,8 @@ TEST_F(CenterMatcherTest, X_X_LargeDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, Y_Y_SmallDeltaT) {
-  y.push_back(mock_cluster(1, 100, 10));
-  y.push_back(mock_cluster(1, 120, 20));
+  y.insert(mock_cluster(1, 100, 10));
+  y.insert(mock_cluster(1, 120, 20));
   matcher.insert(1, y);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -99,8 +99,8 @@ TEST_F(CenterMatcherTest, Y_Y_SmallDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, Y_Y_LargeDeltaT) {
-  y.push_back(mock_cluster(1, 100, 10));
-  y.push_back(mock_cluster(1, 1000, 20));
+  y.insert(mock_cluster(1, 100, 10));
+  y.insert(mock_cluster(1, 1000, 20));
   matcher.insert(1, y);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -112,8 +112,8 @@ TEST_F(CenterMatcherTest, Y_Y_LargeDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, X_Y_SmallDeltaT) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(1, 125, 100));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(1, 125, 100));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -124,8 +124,8 @@ TEST_F(CenterMatcherTest, X_Y_SmallDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, X_Y_LargeDeltaT) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(1, 1000, 100));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(1, 1000, 100));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -138,9 +138,9 @@ TEST_F(CenterMatcherTest, X_Y_LargeDeltaT) {
 }
 
 TEST_F(CenterMatcherTest, X_Y_X) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(1, 150, 20));
-  x.push_back(mock_cluster(0, 160, 200));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(1, 150, 20));
+  x.insert(mock_cluster(0, 160, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -159,9 +159,9 @@ TEST_F(CenterMatcherTest, X_Y_X) {
 }
 
 TEST_F(CenterMatcherTest, X_X_Y) {
-  x.push_back(mock_cluster(0, 100, 10));
-  x.push_back(mock_cluster(0, 150, 20));
-  y.push_back(mock_cluster(1, 160, 200));
+  x.insert(mock_cluster(0, 100, 10));
+  x.insert(mock_cluster(0, 150, 20));
+  y.insert(mock_cluster(1, 160, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -180,10 +180,10 @@ TEST_F(CenterMatcherTest, X_X_Y) {
 }
 
 TEST_F(CenterMatcherTest, X_X_Y_Y) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(0, 140, 100));
-  x.push_back(mock_cluster(1, 150, 20));
-  y.push_back(mock_cluster(1, 200, 200));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(0, 140, 100));
+  x.insert(mock_cluster(1, 150, 20));
+  y.insert(mock_cluster(1, 200, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -200,10 +200,10 @@ TEST_F(CenterMatcherTest, X_X_Y_Y) {
 }
 
 TEST_F(CenterMatcherTest, Y_Y_X_X) {
-  x.push_back(mock_cluster(1, 100, 10));
-  y.push_back(mock_cluster(1, 140, 100));
-  x.push_back(mock_cluster(0, 150, 20));
-  y.push_back(mock_cluster(0, 200, 200));
+  x.insert(mock_cluster(1, 100, 10));
+  y.insert(mock_cluster(1, 140, 100));
+  x.insert(mock_cluster(0, 150, 20));
+  y.insert(mock_cluster(0, 200, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -220,10 +220,10 @@ TEST_F(CenterMatcherTest, Y_Y_X_X) {
 }
 
 TEST_F(CenterMatcherTest, X_Y_X_Y) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(1, 140, 100));
-  x.push_back(mock_cluster(0, 150, 20));
-  y.push_back(mock_cluster(1, 200, 200));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(1, 140, 100));
+  x.insert(mock_cluster(0, 150, 20));
+  y.insert(mock_cluster(1, 200, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -244,10 +244,10 @@ TEST_F(CenterMatcherTest, X_Y_X_Y) {
 }
 
 TEST_F(CenterMatcherTest, X_Y_Y_X) {
-  x.push_back(mock_cluster(0, 100, 10));
-  y.push_back(mock_cluster(1, 140, 100));
-  y.push_back(mock_cluster(1, 140, 200));
-  x.push_back(mock_cluster(0, 200, 20));
+  x.insert(mock_cluster(0, 100, 10));
+  y.insert(mock_cluster(1, 140, 100));
+  y.insert(mock_cluster(1, 140, 200));
+  x.insert(mock_cluster(0, 200, 20));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -268,10 +268,10 @@ TEST_F(CenterMatcherTest, X_Y_Y_X) {
 }
 
 TEST_F(CenterMatcherTest, Y_X_X_Y) {
-  y.push_back(mock_cluster(1, 100, 10));
-  x.push_back(mock_cluster(0, 140, 100));
-  x.push_back(mock_cluster(0, 140, 200));
-  y.push_back(mock_cluster(1, 200, 20));
+  y.insert(mock_cluster(1, 100, 10));
+  x.insert(mock_cluster(0, 140, 100));
+  x.insert(mock_cluster(0, 140, 200));
+  y.insert(mock_cluster(1, 200, 20));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);

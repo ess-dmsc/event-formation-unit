@@ -9,6 +9,7 @@
 #pragma once
 
 #include <common/reduction/HitVector.h>
+#include <set>
 
 /// \class Cluster Cluster.h
 /// \brief A container of hits, aware of its plane, bounds and weight.
@@ -139,6 +140,8 @@ public:
   std::string visualize(const std::string &prepend, uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
+  
+
 private:
   /// \todo uint8 might not be enough, if detectors have more independent
   /// modules/segments
@@ -163,3 +166,13 @@ private:
   int utpc_idx_min_{0};
   int utpc_idx_max_{0};
 };
+
+
+// Comparison function for sorting Person objects by age
+struct CompareClustersByTimeStart {
+  bool operator()(const Cluster& a, const Cluster& b) const{
+    return a.timeStart() < b.timeStart();
+  }
+};
+
+using ClusterContainer = std::multiset<Cluster, CompareClustersByTimeStart>;

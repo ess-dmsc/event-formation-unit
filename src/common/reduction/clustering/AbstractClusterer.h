@@ -10,6 +10,7 @@
 
 #include <common/reduction/Cluster.h>
 #include <list>
+#include <set>
 
 #define ENABLE_GREEDY_CLUSTER_ALLOCATOR 0
 
@@ -107,16 +108,6 @@ bool operator!=(const ClusterPoolAllocator<T> &,
 }
 
 //-----------------------------------------------------------------------------
-
-/// \todo the abstract class code needs tests
-
-/// \todo refactor: move out to separate header
-/// \todo replace by deque, or....?
-// using ClusterContainer = std::list<Cluster,
-// ClusterContainerAllocator<Cluster>>;
-// using ClusterContainer = std::list<Cluster>;
-// using ClusterContainer = std::list<Cluster, ClusterPoolAllocator<Cluster>>;
-using ClusterContainer = std::map<int, Cluster>;
 
 
 /// \brief convenience function for printing a ClusterContainer

@@ -23,7 +23,7 @@ protected:
       for (e.coordinate = coord_start; e.coordinate <= coord_end;
            e.coordinate += coord_step)
         c.insert(e);
-    ret.push_back(c);
+    ret.insert(c);
   }
 
   void add_multi_hit_cluster(ClusterContainer &ret, uint8_t plane,
@@ -47,7 +47,7 @@ protected:
            e.coordinate += coord_step_b)
         c.insert(e);
     }
-    ret.push_back(c);
+    ret.insert(c);
   }
 };
 

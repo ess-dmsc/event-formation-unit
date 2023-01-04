@@ -42,9 +42,11 @@ void EndMatcher::match(bool flush) {
       stashEvent(evt);
       evt.clear();
     }
-
-    evt.merge(*cluster);
-    unmatched_clusters_.pop_front();
+    // Create a copy of the element
+    Cluster c = *cluster;
+    evt.merge(c);
+    // Erase the element from the set
+    unmatched_clusters_.erase(cluster);
   }
 
   /// If anything remains

@@ -13,8 +13,8 @@
 
 #include <algorithm>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_INF
 
 EventBuilder2D::EventBuilder2D() { matcher.setMinimumTimeGap(timegap); }
 
@@ -49,6 +49,8 @@ void EventBuilder2D::flush(bool full_flush) {
 
   matcher.insert(PlaneX, ClustererX.clusters);
   matcher.insert(PlaneY, ClustererY.clusters);
+  ClustererX.clusters.clear();
+  ClustererY.clusters.clear();
   matcher.match(full_flush);
 
   auto &e = matcher.matched_events;

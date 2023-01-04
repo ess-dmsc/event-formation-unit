@@ -30,7 +30,6 @@ void GapMatcher::match(bool flush) {
   for (Cluster c: unmatched_clusters_){
     XTRACE(EVENT, DEB, "Cluster time %u", c.timeStart());
   }
-  throw std::runtime_error("");
   // unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
   //   return c1.timeStart() < c2.timeStart();
   // });
@@ -53,10 +52,11 @@ void GapMatcher::match(bool flush) {
       checkAndStashEvent(evt);
       evt.clear();
     }
-
-    evt.merge(*cluster);
-
-    unmatched_clusters_.pop_front();
+    // Create a copy of the cluster
+    Cluster c = *cluster;
+    evt.merge(c);
+    // Erase the element from the set
+    unmatched_clusters_.erase(cluster);
   }
 
   /// If anything remains

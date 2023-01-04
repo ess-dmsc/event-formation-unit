@@ -27,20 +27,21 @@ void AbstractMatcher::insert(const Cluster &cluster) {
     stats_rejected_clusters++;
     return;
   }
-  unmatched_clusters_.insert(std::pair<int, Cluster>(cluster.timeStart(), cluster));
+  unmatched_clusters_.insert(cluster);
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u",
          unmatched_clusters_.size());
 }
 
 void AbstractMatcher::insert(const ClusterContainer &clusters) {
   for (auto &cluster : clusters)
-    insert(cluster.second);
+    insert(cluster);
 }
 
-// void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
-//    for (auto &cluster : clusters)
-//     insert(cluster.second);
-// }
+void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
+  XTRACE(DATA, DEB, "Plane %d", plane);
+   for (auto &cluster : clusters)
+    insert(cluster);
+}
 
 void AbstractMatcher::stashEvent(Event &event) {
   matched_events.emplace_back(std::move(event));
@@ -50,9 +51,9 @@ void AbstractMatcher::stashEvent(Event &event) {
 void AbstractMatcher::requeue_clusters(Event &event) {
   /// \todo this needs explicit testing
   if (!event.ClusterA.empty())
-    unmatched_clusters_.insert(std::pair<int, Cluster>(event.ClusterA.timeStart(), event.ClusterA));
+    unmatched_clusters_.insert(event.ClusterA);
   if (!event.ClusterB.empty())
-    unmatched_clusters_.insert(std::pair<int, Cluster>(event.ClusterB.timeStart(), event.ClusterB));
+    unmatched_clusters_.insert(event.ClusterB);
   XTRACE(CLUSTER, DEB, "Requeued clusters, Latest A: %u", LatestA);
 }
 

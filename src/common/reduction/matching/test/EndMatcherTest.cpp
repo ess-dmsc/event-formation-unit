@@ -28,7 +28,7 @@ protected:
 };
 
 TEST_F(EndMatcherTest, OneX) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
   matcher.insert(0, x);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
@@ -39,7 +39,7 @@ TEST_F(EndMatcherTest, OneX) {
 }
 
 TEST_F(EndMatcherTest, OneY) {
-  y.push_back(mock_cluster(1, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 0, 200));
   matcher.insert(1, y);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
@@ -50,8 +50,8 @@ TEST_F(EndMatcherTest, OneY) {
 }
 
 TEST_F(EndMatcherTest, TwoX) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  x.push_back(mock_cluster(0, 0, 10, 500, 700));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  x.insert(mock_cluster(0, 0, 10, 500, 700));
   matcher.insert(0, x);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -65,8 +65,8 @@ TEST_F(EndMatcherTest, TwoX) {
 }
 
 TEST_F(EndMatcherTest, TwoY) {
-  y.push_back(mock_cluster(1, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 500, 700));
+  y.insert(mock_cluster(1, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 500, 700));
   matcher.insert(1, y);
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
@@ -80,8 +80,8 @@ TEST_F(EndMatcherTest, TwoY) {
 }
 
 TEST_F(EndMatcherTest, OneXOneY) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 500, 700));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 500, 700));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -96,8 +96,8 @@ TEST_F(EndMatcherTest, OneXOneY) {
 }
 
 TEST_F(EndMatcherTest, OneXY) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 0, 200));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 0, 200));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -109,10 +109,10 @@ TEST_F(EndMatcherTest, OneXY) {
 }
 
 TEST_F(EndMatcherTest, TwoXY) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 1, 300));
-  x.push_back(mock_cluster(0, 0, 10, 600, 800));
-  y.push_back(mock_cluster(1, 0, 10, 650, 850));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 1, 300));
+  x.insert(mock_cluster(0, 0, 10, 600, 800));
+  y.insert(mock_cluster(1, 0, 10, 650, 850));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -127,8 +127,8 @@ TEST_F(EndMatcherTest, TwoXY) {
 }
 
 TEST_F(EndMatcherTest, JustIntside) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 200, 400));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 200, 400));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -136,8 +136,8 @@ TEST_F(EndMatcherTest, JustIntside) {
 }
 
 TEST_F(EndMatcherTest, JustOutside) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 200, 401));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 200, 401));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
@@ -145,33 +145,33 @@ TEST_F(EndMatcherTest, JustOutside) {
 }
 
 TEST_F(EndMatcherTest, DontForce) {
-  x.push_back(mock_cluster(0, 0, 10, 0, 200));
-  y.push_back(mock_cluster(1, 0, 10, 200, 401));
+  x.insert(mock_cluster(0, 0, 10, 0, 200));
+  y.insert(mock_cluster(1, 0, 10, 200, 401));
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
   x.clear();
-  x.push_back(mock_cluster(0, 0, 10, 800, 1000));
+  x.insert(mock_cluster(0, 0, 10, 800, 1000));
   matcher.insert(0, x);
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
   y.clear();
-  y.push_back(mock_cluster(1, 0, 10, 900, 1000));
+  y.insert(mock_cluster(1, 0, 10, 900, 1000));
   matcher.insert(1, y);
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
   x.clear();
-  x.push_back(mock_cluster(0, 0, 10, 1002, 1200));
+  x.insert(mock_cluster(0, 0, 10, 1002, 1200));
   matcher.insert(0, x);
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
   y.clear();
-  y.push_back(mock_cluster(1, 0, 10, 1002, 1200));
+  y.insert(mock_cluster(1, 0, 10, 1002, 1200));
   matcher.insert(1, y);
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 1);

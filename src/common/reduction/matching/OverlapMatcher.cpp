@@ -27,20 +27,22 @@ void OverlapMatcher::match(bool flush) {
 
     auto cluster = unmatched_clusters_.begin();
 
-    if (!flush && !ready_to_be_matched(*cluster.second)) {
+    if (!flush && !ready_to_be_matched(*cluster)) {
       XTRACE(CLUSTER, DEB, "not ready to be matched");
       break;
     }
 
-    if (!evt.empty() && !evt.timeOverlap(*cluster.second)) {
+    if (!evt.empty() && !evt.timeOverlap(*cluster)) {
       XTRACE(CLUSTER, DEB, "no time overlap");
       stashEvent(evt);
       evt.clear();
     }
 
-    evt.merge(*cluster.second);
-
-    unmatched_clusters_.pop_front();
+    // Create a copy of the element
+    Cluster c = *cluster;
+    evt.merge(c);
+    // Erase the element from the set
+    unmatched_clusters_.erase(cluster);
   }
 
   /// If anything remains
