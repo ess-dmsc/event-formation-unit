@@ -35,7 +35,7 @@ void reporter<specialized>::send(severity s, char const *file,
 
 class ProducerStandIn : public Producer {
 public:
-  ProducerStandIn(std::string Broker, std::string Topic)
+  ProducerStandIn(const std::string &Broker, const std::string &Topic)
       : Producer(Broker, Topic, KafkaCfg.CfgParms) {}
   using Producer::Config;
   using Producer::KafkaProducer;

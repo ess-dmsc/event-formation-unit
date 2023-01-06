@@ -106,7 +106,7 @@ void CSPECInstrument::processReadouts(void) {
            Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
+    ESSReadout::Hybrid const &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,

@@ -49,14 +49,10 @@ TEST_F(EV44SerializerTest, SerDeserialize) {
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
-
-  auto events = GetEvent44Message(flatbuffer);
-
-  // ASSERT_NE(events->message_id(), 1);
-
   memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
+
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev44");
-  events = GetEvent44Message(flatbuffer);
+  auto events = GetEvent44Message(flatbuffer);
   EXPECT_EQ(events->source_name()->str(), "nameless");
   // ASSERT_EQ(events->message_id(), 1);
 }
