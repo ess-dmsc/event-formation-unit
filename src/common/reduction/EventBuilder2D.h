@@ -14,7 +14,8 @@
 
 static constexpr uint64_t latency{2010}; // ns == 2.01us
 // expect readouts in a plane to be at least this close
-static constexpr uint64_t timegap{200};
+static constexpr uint64_t clusteringtimegap{200};
+static constexpr uint64_t matchingtimegap{500};
 static constexpr uint64_t coordgap{1}; // allow no gaps between channels
 
 const uint8_t PlaneX{0};
@@ -38,7 +39,7 @@ public:
   HitVector HitsX, HitsY;
 
   /// \todo parametrize
-  GapClusterer ClustererX{timegap, coordgap}, ClustererY{timegap, coordgap};
+  GapClusterer ClustererX{clusteringtimegap, coordgap}, ClustererY{clusteringtimegap, coordgap};
 
   /// \todo parametrize
   GapMatcher matcher{latency, PlaneX, PlaneY};

@@ -24,7 +24,7 @@ public:
     uint16_t UDPPort{9000};
     uint64_t NumberOfPackets{0};     // 0 == all packets
     uint32_t NumReadouts{370};       // # readouts in packet
-    uint32_t TicksBtwReadouts{88};   // 88 ticks ~ 1us
+    uint32_t TicksBtwReadouts{10};   // 88 ticks ~ 1us
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
