@@ -233,6 +233,13 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
+    if (Conf.NMXFileParameters.MinXSpan > e.ClusterA.coordSpan()) {
+      XTRACE(EVENT, DEB, "Event doesn't span far enough in X direction, %u",
+             e.ClusterA.coordSpan());
+      counters.ClustersTooSmallXSpan++;
+      continue;
+    }
+
     if (Conf.NMXFileParameters.MaxTimeSpan < e.ClusterA.timeSpan()) {
       XTRACE(EVENT, DEB, "Event spans too long a time in X cluster, %u",
              e.ClusterA.timeSpan());
@@ -244,6 +251,13 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
              e.ClusterB.coordSpan());
       counters.ClustersTooLargeYSpan++;
+      continue;
+    }
+
+    if (Conf.NMXFileParameters.MinYSpan > e.ClusterB.coordSpan()) {
+      XTRACE(EVENT, DEB, "Event doesn't span far enough in Y direction, %u",
+             e.ClusterB.coordSpan());
+      counters.ClustersTooSmallYSpan++;
       continue;
     }
 

@@ -93,6 +93,8 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.matched_y_only", Counters.ClustersMatchedYOnly);
   Stats.create("cluster.too_large_x_span", Counters.ClustersTooLargeXSpan);
   Stats.create("cluster.too_large_y_span", Counters.ClustersTooLargeYSpan);
+  Stats.create("cluster.too_small_x_span", Counters.ClustersTooSmallXSpan);
+  Stats.create("cluster.too_small_y_span", Counters.ClustersTooSmallYSpan);
 
   // Event stats
   Stats.create("events.count", Counters.Events);
