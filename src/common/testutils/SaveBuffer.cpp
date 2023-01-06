@@ -28,6 +28,6 @@ void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
   }
 }
 
-void deleteFile(std::string filename) { remove(filename.c_str()); }
+void deleteFile(const std::string &filename) { remove(filename.c_str()); }
 
 // GCOVR_EXCL_STOP
