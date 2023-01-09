@@ -19,12 +19,12 @@ public:
   /// Inherits constructor
   using AbstractMatcher::AbstractMatcher;
 
-  /// \brief sets the minimum time gap criterion
-  /// \param minimum_time_gap minimum time gap between subsequent clusters for
+  /// \brief sets the maximum time gap criterion
+  /// \param max_time_gap maximum time gap between subsequent clusters for
   /// them
-  ///         to be disambiguated into separate events. If time gap is smaller,
-  ///         the clusters are merged into one event.
-  void setMinimumTimeGap(uint64_t minimum_time_gap);
+  ///         to be clustered into one event. If time gap is larger,
+  ///         the clusters are split into two events.
+  void setMaximumTimeGap(uint64_t max_time_gap);
 
   void setSplitMultiEvents(bool split_multi_events, float coefficient_low,
                            float coefficient_high);
@@ -34,7 +34,7 @@ public:
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that either overlap in time or have time gaps that are
-  ///         smaller than the minimum time gap are joined into events.
+  ///         smaller than the maximum time gap are joined into events.
   /// \param flush if all queued clusters should be matched regardless of
   ///        latency considerations.
   void match(bool flush) override;
@@ -54,7 +54,8 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
-  uint64_t minimum_time_gap_{0};
+  uint64_t max_time_gap_;
+  uint64_t dummy_variable;
 
 
 private:
