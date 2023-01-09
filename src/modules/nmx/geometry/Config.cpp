@@ -83,6 +83,20 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "MaxYGap {}", NMXFileParameters.MaxYGap);
 
   try {
+    NMXFileParameters.MaxMatchingTimeGap = root["MaxMatchingTimeGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
+  }
+  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}", NMXFileParameters.MaxMatchingTimeGap);
+
+  try {
+    NMXFileParameters.MaxClusteringTimeGap = root["MaxClusteringTimeGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
+  }
+  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", NMXFileParameters.MaxClusteringTimeGap);
+
+  try {
     NMXFileParameters.NumPanels = root["NumPanels"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for NumPanels");

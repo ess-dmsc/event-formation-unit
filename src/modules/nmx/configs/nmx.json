@@ -5,6 +5,8 @@
   "MaxSpanY": 10,
   "MaxGapX": 2,
   "MaxGapY": 2,
+  "MaxMatchingTimeGap": 500,
+  "MaxClusteringTimeGap": 200,
   "SizeX": 1280,
   "SizeY": 1280,
   "TimeBoxNs": 2010,

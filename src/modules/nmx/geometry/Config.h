@@ -53,6 +53,8 @@ public:
     float SplitMultiEventsCoefficientLow{0.8};
     float SplitMultiEventsCoefficientHigh{1.2};
     uint16_t MaxTimeSpan{500};
+    uint16_t MaxMatchingTimeGap{500};
+    uint16_t MaxClusteringTimeGap{500};
   } NMXFileParameters;
 
   // Derived parameters

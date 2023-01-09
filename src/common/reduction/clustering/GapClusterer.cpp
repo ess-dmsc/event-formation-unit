@@ -40,6 +40,10 @@ void GapClusterer::cluster(const HitVector &hits) {
   }
 }
 
+void GapClusterer::setMaximumTimeGap(uint64_t max_time_gap){
+  max_time_gap_ = max_time_gap;
+}
+
 void GapClusterer::flush() {
   XTRACE(CLUSTER, DEB, "flushing");
   if (current_time_cluster_.empty()) {

@@ -63,7 +63,12 @@ void NMXInstrument::loadConfigAndCalib() {
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
   //        Conf.getNumHybrids());
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
-
+  for (EventBuilder2D b : builders){
+    b.matcher.minimum_time_gap_ = Conf.NMXFileParameters.MaxMatchingTimeGap;
+    b.ClustererX.setMaximumTimeGap(Conf.NMXFileParameters.MaxClusteringTimeGap);
+    b.ClustererY.setMaximumTimeGap(Conf.NMXFileParameters.MaxClusteringTimeGap);
+    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u", b.matcher.minimum_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_);
+  }
   /// \todo Add calibration processing
   // if (Settings.CalibFile != "") {
   //   XTRACE(INIT, ALW, "Loading and applying calibration file");

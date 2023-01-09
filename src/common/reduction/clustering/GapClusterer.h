@@ -32,6 +32,9 @@ public:
   /// \sa GapClusterer::cluster
   void insert(const Hit &hit) override;
 
+
+  void setMaximumTimeGap(uint64_t max_time_gap);
+
   /// \brief insert new hits and perform clustering
   /// \param hits container of hits to be processed. Hits must be
   /// chronologically
@@ -47,8 +50,11 @@ public:
   /// \brief print current status of GapClusterer
   std::string status(const std::string &prepend, bool verbose) const override;
 
-private:
+
   uint64_t max_time_gap_;
+
+
+private:
   uint16_t max_coord_gap_;
 
   HitVector

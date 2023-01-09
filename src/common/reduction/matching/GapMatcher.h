@@ -54,6 +54,9 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
+  uint64_t minimum_time_gap_{0};
+
+
 private:
   void splitAndStashEvent(Event evt);
   void splitCluster(Cluster cluster, Cluster *new_cluster_1,
@@ -61,7 +64,6 @@ private:
   bool clustersMatch(Cluster cluster_a, Cluster cluster_b);
   void checkAndStashEvent(Event evt);
 
-  uint64_t minimum_time_gap_{0};
   uint16_t minimum_coord_gap_{10};
   uint16_t maximum_coord_span_{10};
   float_t coefficient_low_{1};
