@@ -31,8 +31,8 @@ Server::Server(int port, Parser &parse)
   Timeout.tv_sec = 0; /// Timeout for select()
   Timeout.tv_usec = 1000;
 
-  memset(&IBuffer, 0, sizeof(IBUffer));
-  memset(&OBuffer, 0, sizeof(IBUffer));
+  memset(&IBuffer, 0, sizeof(IBuffer));
+  memset(&OBuffer, 0, sizeof(OBuffer));
 
   serverOpen();
 }
