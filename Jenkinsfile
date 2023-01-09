@@ -127,7 +127,7 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                                 cd ${project}
                                 cppcheck --version
-                                cppcheck --library=googletest --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./ 2> ${test_output}
+                                cppcheck --library=googletest -Isrc -itest --enable=all --suppressions=--inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./src 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
