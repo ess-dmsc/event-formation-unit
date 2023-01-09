@@ -126,9 +126,8 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                ./cppcheck_filelist.sh src > filelist.txt
                                 cppcheck --version
-                                cppcheck --library=googletest -Isrc --file-list=filelist.txt --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2  2> ${test_output}
+                                cppcheck --library=googletest --suppress=unusedFunction -I ./src --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./src  2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
