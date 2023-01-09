@@ -89,7 +89,8 @@ add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
 add_custom_target(valgrind DEPENDS ${valgrind_targets})
 add_custom_target(benchmark DEPENDS ${benchmark_targets})
 add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
-add_custom_target(cppcheck COMMAND cppcheck --library=googletest -itest --enable=all -I ../src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ../src &>cppcheck.xml)
+
+add_custom_target(cppcheck COMMAND cppcheck --platform=unix64  --force --enable=all -I ../src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ../src &>cppcheck.xml)
 add_custom_target(cppcheckhtml COMMAND cppcheck-htmlreport --file cppcheck.xml --report-dir cppcheckhtml)
 
 #=============================================================================
