@@ -127,7 +127,7 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                                 cd ${project}
                                 cppcheck --version
-                                cppcheck --library=googletest --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./ 2> ${test_output}
+                                cppcheck  -v `./cppcheck_exclude_tests.sh src` --platform=unix64  --force --enable=all -I ./src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ./src --output-file=${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"

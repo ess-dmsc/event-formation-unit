@@ -11,8 +11,6 @@
 #include <common/debug/Trace.h>
 #include <ttlmonitor/geometry/Parser.h>
 
-#include <common/memory/span.hpp>
-
 namespace TTLMonitor {
 
 // #undef TRC_LEVEL
