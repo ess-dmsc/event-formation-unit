@@ -40,8 +40,8 @@ public:
   void processReadouts();
 
   //
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
-  void setSerializerII(EV42Serializer *serializer) {
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
+  void setSerializerII(EV44Serializer *serializer) {
     SerializerII = serializer;
   }
 
@@ -60,8 +60,8 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser{counters};
   Geometry *Geom;
-  EV42Serializer *Serializer;
-  EV42Serializer *SerializerII;
+  EV44Serializer *Serializer;
+  EV44Serializer *SerializerII;
   std::shared_ptr<ReadoutFile> DumpFile;
 };
 
