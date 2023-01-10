@@ -11,8 +11,8 @@
 // #include <cmath>
 // #include <algorithm>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void GapMatcher::setMaximumTimeGap(uint64_t max_time_gap) {
   max_time_gap_ = max_time_gap;

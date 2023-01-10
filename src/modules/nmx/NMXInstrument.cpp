@@ -17,8 +17,8 @@
 #include <nmx/NMXInstrument.h>
 #include <nmx/geometry/NMXGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Nmx {
 
@@ -60,8 +60,6 @@ void NMXInstrument::loadConfigAndCalib() {
   Conf.loadAndApplyConfig();
   checkConfigAndGeometry();
 
-  // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
-  //        Conf.getNumHybrids());
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
     for (EventBuilder2D& builder: builders) {
     builder.matcher.setMaximumTimeGap(Conf.NMXFileParameters.MaxMatchingTimeGap);
