@@ -32,7 +32,9 @@ public:
   /// \sa GapClusterer::cluster
   void insert(const Hit &hit) override;
 
-
+  /// \brief sets maximum time gap between hits in clusters
+  /// \param max_time_gap maximum difference in time between hits such that
+  ///        they would be considered part of the same cluster
   void setMaximumTimeGap(uint64_t max_time_gap);
 
   /// \brief insert new hits and perform clustering
@@ -49,8 +51,6 @@ public:
 
   /// \brief print current status of GapClusterer
   std::string status(const std::string &prepend, bool verbose) const override;
-
-
 
 
 private:
