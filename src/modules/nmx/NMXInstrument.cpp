@@ -44,12 +44,6 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-  }
-
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 }
 
