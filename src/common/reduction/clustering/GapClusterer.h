@@ -51,11 +51,12 @@ public:
   std::string status(const std::string &prepend, bool verbose) const override;
 
 
-  uint64_t max_time_gap_;
 
 
 private:
+  uint64_t max_time_gap_;
   uint16_t max_coord_gap_;
+
 
   HitVector
       current_time_cluster_; ///< kept in memory until time gap encountered

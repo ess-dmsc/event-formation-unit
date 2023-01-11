@@ -77,29 +77,11 @@ void NMXInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-  for (EventBuilder2D b : builders){
-    b.matcher.setMaximumTimeGap(Conf.NMXFileParameters.MaxMatchingTimeGap);
-    b.matcher.dummy_variable = 70;
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
-  }
-  sleep(5); 
-  for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
-    }
   assert(Serializer != nullptr);
   Serializer->pulseTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
-  for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
-    }
   XTRACE(DATA, DEB, "processReadouts()");
-  for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
-    }
   for (const auto &readout : VMMParser.Result) {
-    for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
-    }
     if (DumpFile) {
       VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
@@ -122,9 +104,6 @@ void NMXInstrument::processReadouts(void) {
              LRingId, readout.FENId, HybridId);
       counters.HybridMappingErrors++;
       continue;
-    }
-    for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u, dummy variable = %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_, b.matcher.dummy_variable);
     }
 
     uint8_t AsicId = readout.VMM & 0x1;
@@ -150,9 +129,7 @@ void NMXInstrument::processReadouts(void) {
     // uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
     // no calibration yet, so using raw ADC value
     uint16_t ADC = readout.OTADC & 0x3FF;
-    for (EventBuilder2D b : builders){
-       XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_);
-    }
+
     if (ADC < MinADC) {
       XTRACE(DATA, ERR, "Under MinADC value, got %u, minimum is %u", ADC,
              MinADC);
@@ -175,9 +152,6 @@ void NMXInstrument::processReadouts(void) {
     // Now we add readouts with the calibrated time and adc to the panel
     // builders
 
-  for (EventBuilder2D b : builders){
-    XTRACE(INIT, DEB, "Event builder matching time gap = %u, clustering time gaps = %u, %u", b.matcher.max_time_gap_, b.ClustererX.max_time_gap_, b.ClustererY.max_time_gap_);
-  }
 
     uint16_t Coord = GeometryInstance->coord(readout.Channel, AsicId, Offset,
                                              ReversedChannels);

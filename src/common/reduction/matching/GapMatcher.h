@@ -54,8 +54,6 @@ public:
     uint16_t SplitSpanTooLarge{0};
   } Stats;
 
-  uint64_t max_time_gap_;
-  uint64_t dummy_variable;
 
 
 private:
@@ -70,4 +68,5 @@ private:
   float_t coefficient_low_{1};
   float_t coefficient_high_{1};
   bool split_multi_events_{false};
+  uint64_t max_time_gap_;
 };
