@@ -19,12 +19,6 @@
 
 class GapClusterer : public AbstractClusterer {
 public:
-  /// \brief GapClusterer constructor
-  /// \param max_time_gap maximum difference in time between hits such that
-  ///        they would be considered part of the same cluster
-  /// \param max_coord_gap maximum difference in coordinates between hits such
-  ///        that they would be considered part of the same cluster
-  GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
   /// \brief insert new hit and perform clustering
   /// \param hit to be added to cluster. Hits must be chronological between
@@ -36,6 +30,11 @@ public:
   /// \param max_time_gap maximum difference in time between hits such that
   ///        they would be considered part of the same cluster
   void setMaximumTimeGap(uint64_t max_time_gap);
+
+  /// \brief sets maximum coordinate gap between hits in clusters
+  /// \param max_coord_gap_ maximum difference in coordinates between hits such that
+  ///        they would be considered part of the same cluster
+  void setMaximumCoordGap(uint64_t max_coord_gap_);
 
   /// \brief insert new hits and perform clustering
   /// \param hits container of hits to be processed. Hits must be
@@ -54,8 +53,8 @@ public:
 
 
 private:
-  uint64_t max_time_gap_;
-  uint16_t max_coord_gap_;
+  uint64_t max_time_gap_{200};
+  uint16_t max_coord_gap_{0};
 
 
   HitVector

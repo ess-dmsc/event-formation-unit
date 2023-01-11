@@ -39,16 +39,6 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-    if (Conf.FreiaFileParameters.SplitMultiEvents) {
-      builder.matcher.setSplitMultiEvents(Conf.FreiaFileParameters.SplitMultiEvents,
-                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
-                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
-    }
-  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
@@ -77,6 +67,11 @@ void FreiaInstrument::loadConfigAndCalib() {
     builder.matcher.setMaximumTimeGap(Conf.FreiaFileParameters.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    if (Conf.FreiaFileParameters.SplitMultiEvents) {
+      builder.matcher.setSplitMultiEvents(Conf.FreiaFileParameters.SplitMultiEvents,
+                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
+                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
+    }
   }
 
 
