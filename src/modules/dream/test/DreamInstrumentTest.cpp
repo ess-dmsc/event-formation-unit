@@ -72,7 +72,7 @@ TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
   DreamInstrument Dream(counters, Settings);
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
-  Dream.Serializer = new EV42Serializer(115000, "dream");
+  Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid RingId
   Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 0, 0, 0});
@@ -85,7 +85,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
   DreamInstrument Dream(counters, Settings);
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
-  Dream.Serializer = new EV42Serializer(115000, "dream");
+  Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid FENId
   Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 0, 0, 0});
@@ -98,7 +98,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
 TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
   DreamInstrument Dream(counters, Settings);
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
-  Dream.Serializer = new EV42Serializer(115000, "dream");
+  Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // unconfigured ring,fen combination
   Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 0, 0, 0});
@@ -112,7 +112,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
 TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
   DreamInstrument Dream(counters, Settings);
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
-  Dream.Serializer = new EV42Serializer(115000, "dream");
+  Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // geometry error (no sumo defined)
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
@@ -128,7 +128,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
   DreamInstrument Dream(counters, Settings);
   Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
-  Dream.Serializer = new EV42Serializer(115000, "dream");
+  Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // finally an event
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});

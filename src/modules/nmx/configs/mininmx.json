@@ -1,4 +1,5 @@
 {
+  "comment": "mininmx is small version of nmx Doro is testing at CERN",
   "Detector": "NMX",
   "InstrumentGeometry": "NMX",
   "MaxSpanX": 10,

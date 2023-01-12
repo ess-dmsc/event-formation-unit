@@ -10,7 +10,7 @@
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
@@ -91,10 +91,10 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
   Stats.create("cluster.matched_x_only", Counters.ClustersMatchedXOnly);
   Stats.create("cluster.matched_y_only", Counters.ClustersMatchedYOnly);
-  Stats.create("cluster.too_large_x_span", Counters.ClustersTooLargeXSpan);
-  Stats.create("cluster.too_large_y_span", Counters.ClustersTooLargeYSpan);
-  Stats.create("cluster.too_small_x_span", Counters.ClustersTooSmallXSpan);
-  Stats.create("cluster.too_small_y_span", Counters.ClustersTooSmallYSpan);
+  Stats.create("cluster.span.x_too_large", Counters.ClustersTooLargeXSpan);
+  Stats.create("cluster.span.y_too_large", Counters.ClustersTooLargeYSpan);
+  Stats.create("cluster.span.x_too_small", Counters.ClustersTooSmallXSpan);
+  Stats.create("cluster.span.y_too_small", Counters.ClustersTooSmallYSpan);
 
   // Event stats
   Stats.create("events.count", Counters.Events);
@@ -159,7 +159,7 @@ void NmxBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "nmx", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(NMX.ADCHist.needed_buffer_size(),

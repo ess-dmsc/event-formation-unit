@@ -42,7 +42,7 @@ TEST_F(TestImageUdderTest, CachePixels) {
 }
 
 TEST_F(TestImageUdderTest, CachePixelsWrap) {
-  uint32_t FirstPixel, LastPixel;
+  uint32_t FirstPixel, LastPixel{0};
   UdderTestImage.cachePixels(UdderTestImage.ImageWidth,
                              UdderTestImage.ImageHeight, &Geometry);
   FirstPixel = UdderTestImage.getPixel(UdderTestImage.ImageWidth,

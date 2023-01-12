@@ -35,7 +35,7 @@ public:
   void processReadouts();
 
   //
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
   //
   uint32_t calcPixel(Config::ModuleParms &Parms,
@@ -49,7 +49,7 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
   ESSReadout::ESSTime Time;
-  EV42Serializer *Serializer;
+  EV44Serializer *Serializer;
   CDTGeometry Geometry;
 };
 

@@ -126,7 +126,8 @@ builders = pipeline_builder.createBuilders { container ->
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" --xml --xml-version=2 ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --version
+                                cppcheck  -v `./cppcheck_exclude_tests.sh src` --platform=unix64  --force --enable=all -I ./src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ./src --output-file=${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"

@@ -14,7 +14,7 @@
 #include <common/TestImageUdder.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <common/time/TimeString.h>
@@ -73,7 +73,7 @@ void PerfGenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer Serializer(kafka_buffer_size, "perfgen", Produce);
+  EV44Serializer Serializer(kafka_buffer_size, "perfgen", Produce);
 
   ESSGeometry ESSGeom(64, 64, 1, 1);
 
@@ -92,7 +92,7 @@ void PerfGenBase::processingThread() {
     // ns since 1970 - but with us resolution
     uint64_t EfuTime = EfuTimeRef + 1000 * Elapsed.timeus();
     XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
-    Serializer.pulseTime(EfuTime);
+    Serializer.checkAndSetReferenceTime(EfuTime);
 
     for (int i = 0; i < EventsPerPulse; i++) {
       auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
@@ -100,7 +100,7 @@ void PerfGenBase::processingThread() {
       mystats.events_udder++;
       TimeOfFlight++;
     }
-    // Serializer.checkAndSetPulseTime(EfuTime);
+    // Serializer.checkAndSetReferenceTime(EfuTime);
 
     usleep(EFUSettings.TestImageUSleep);
 

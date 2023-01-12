@@ -71,7 +71,6 @@ Calibration::Calibration(std::string CalibrationFile) {
     LOG(INIT, Sev::Error, "Caen calibration - error: Invalid Json file: {}",
         CalibrationFile);
     throw std::runtime_error("Invalid Json file");
-    return;
   }
 }
 

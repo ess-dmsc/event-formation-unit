@@ -38,6 +38,5 @@ KafkaConfig::KafkaConfig(std::string KafkaConfigFile) {
     LOG(INIT, Sev::Error, "Kafka JSON config - error: Invalid Json file: {}",
         KafkaConfigFile);
     throw std::runtime_error("Invalid Json file for Kafka config");
-    return;
   }
 }
