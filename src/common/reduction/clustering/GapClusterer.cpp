@@ -12,10 +12,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
-    : AbstractClusterer(), max_time_gap_(max_time_gap),
-      max_coord_gap_(max_coord_gap) {}
-
 void GapClusterer::insert(const Hit &hit) {
   /// Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
@@ -38,6 +34,14 @@ void GapClusterer::cluster(const HitVector &hits) {
            hit.to_string().c_str());
     insert(hit);
   }
+}
+
+void GapClusterer::setMaximumTimeGap(uint64_t max_time_gap){
+  max_time_gap_ = max_time_gap;
+}
+
+void GapClusterer::setMaximumCoordGap(uint64_t max_coord_gap){
+  max_coord_gap_ = max_coord_gap;
 }
 
 void GapClusterer::flush() {

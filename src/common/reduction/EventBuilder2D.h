@@ -14,8 +14,6 @@
 
 static constexpr uint64_t latency{2010}; // ns == 2.01us
 // expect readouts in a plane to be at least this close
-static constexpr uint64_t timegap{2000};
-static constexpr uint64_t coordgap{1}; // allow no gaps between channels
 
 const uint8_t PlaneX{0};
 const uint8_t PlaneY{1};
@@ -33,21 +31,15 @@ public:
 
   void flushClusterers();
 
-  void setTimeBox(uint32_t TimeBoxValue) { TimeBoxSize = TimeBoxValue; }
-
   HitVector HitsX, HitsY;
 
   /// \todo parametrize
-  GapClusterer ClustererX{timegap, coordgap}, ClustererY{timegap, coordgap};
+  GapClusterer ClustererX, ClustererY;
 
   /// \todo parametrize
   GapMatcher matcher{latency, PlaneX, PlaneY};
 
   // final vector of reconstructed events
   std::vector<Event> Events;
-
-  // Support for new timebox based clustering (Oct 2020)
-  uint64_t TimeBoxT0{0};
-  uint32_t TimeBoxSize{10000000};
 
 }; // class

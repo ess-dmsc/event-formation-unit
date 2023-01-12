@@ -75,6 +75,12 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
+  for (EventBuilder2D& builder: builders) {
+    builder.matcher.setMaximumTimeGap(Conf.CSPECFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(Conf.CSPECFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(Conf.CSPECFileParameters.MaxClusteringTimeGap);
+  }
+
   if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
     Conf.loadAndApplyCalibration(Settings.CalibFile);

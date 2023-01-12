@@ -6,6 +6,7 @@ include_directories(.)
 include_directories(..)
 
 get_filename_component(NMX_FULL "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUTE)
+get_filename_component(NMX_MINI "${ESS_MODULE_DIR}/nmx/configs/mininmx.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
@@ -18,8 +19,6 @@ set(NMXConfigTest_SRC
   NMXConfigTest.cpp)
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest PRIVATE NMX_FULL="${NMX_FULL}")
-
-
 
 
 set(NMXGeometryTest_INC

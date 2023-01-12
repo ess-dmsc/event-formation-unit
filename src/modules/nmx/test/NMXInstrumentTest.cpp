@@ -63,10 +63,11 @@ std::string ConfigStr = R"(
 {
   "Detector" : "NMX",
   "InstrumentGeometry" : "NMX",
-  "MaxSpanX" : 3,
-  "MaxSpanY" : 3,
-  "MaxGapX" : 2,
-  "MaxGapY" : 2,
+  "MaxXSpan" : 3,
+  "MaxYSpan" : 3,
+  "MinXSpan" : 2,
+  "MaxXGap" : 2,
+  "MaxYGap" : 2,
   "DefaultMinADC":50,
   "Config" : [
         {
@@ -114,7 +115,31 @@ std::vector<uint8_t> BadRingAndFENError {
 
 
 std::vector<uint8_t> GoodEvent {
-  // First readout - plane Y
+  // First readout - plane X
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
+
+  // Second readout - plane X
+  0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+
+  // Third readout - plane Y
+  0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
+
+};
+
+std::vector<uint8_t> BadEventSmallXSpan {
+  // First readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
@@ -126,9 +151,9 @@ std::vector<uint8_t> GoodEvent {
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Third readout - plane X
+  // Third readout - plane Y
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -163,6 +188,13 @@ std::vector<uint8_t> SplitEventB {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x00, 0x3C,  // GEO 0, TDC 0, VMM 0, CH 60
 
+   // Fourth readout - plane X
+  0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
+  0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
+
 };
 
 
@@ -174,12 +206,12 @@ std::vector<uint8_t> HighTOFError {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3C,  // GEO 0, TDC 0, VMM 1, CH 60
 
-  // Second readout - plane Y
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 
   // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
@@ -249,12 +281,12 @@ std::vector<uint8_t> BadEventLargeYSpan {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
 
-  // Second readout - plane Y
+  // Second readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x02, 0x00, 0x00, 0x00,  // Time LO 2 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x02, 0x3F,  // GEO 0, TDC 0, VMM 1, CH 63
+  0x00, 0x00, 0x00, 0x3D,  // GEO 0, TDC 0, VMM 0, CH 61
 
   // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
@@ -280,14 +312,14 @@ std::vector<uint8_t> BadEventLargeTimeSpan {
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
   0x00, 0x00, 0x02, 0x3D,  // GEO 0, TDC 0, VMM 1, CH 61
 
-  // Second readout - plane Y
+  // Third readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header - Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x14, 0x00, 0x00, 0x00,  // Time LO 20 tick
   0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  0x00, 0x00, 0x02, 0x3E,  // GEO 0, TDC 0, VMM 1, CH 62
+  0x00, 0x00, 0x00, 0x3E,  // GEO 0, TDC 0, VMM 0, CH 62
 
-  // Third readout - plane X
+  // Fourth readout - plane X
   0x00, 0x00, 0x14, 0x00,  // Data Header, Ring 0, FEN 0
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x05, 0x00, 0x00, 0x00,  // Time LO 5 ticks
@@ -547,6 +579,7 @@ TEST_F(NMXInstrumentTest, NoEvents) {
 
 TEST_F(NMXInstrumentTest, PixelError) {
   TestEvent.ClusterA.insert({0, 1, 100, 0});
+  TestEvent.ClusterA.insert({0, 2, 100, 0});
   TestEvent.ClusterB.insert({0, 60000, 100, 1});
   Events.push_back(TestEvent);
   nmx->generateEvents(Events);
@@ -576,6 +609,30 @@ TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
   }
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.ClustersTooLargeYSpan, 1);
+}
+
+TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
+  makeHeader(nmx->ESSReadoutParser.Packet, BadEventSmallXSpan);
+  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  ASSERT_EQ(Res, 3);
+  counters.VMMStats = nmx->VMMParser.Stats;
+
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
+
+  nmx->processReadouts();
+  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+
+  for (auto &builder : nmx->builders) {
+    builder.flush(true);
+    nmx->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(counters.Events, 0);
+  ASSERT_EQ(counters.ClustersTooSmallXSpan, 1);
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
@@ -682,8 +739,8 @@ TEST_F(NMXInstrumentTest, EventCrossPackets) {
     nmx->generateEvents(builder.Events);
   }
 
-  ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 4);
   ASSERT_EQ(counters.Events, 1);
 }
 

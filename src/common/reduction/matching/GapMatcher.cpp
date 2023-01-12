@@ -14,8 +14,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void GapMatcher::setMinimumTimeGap(uint64_t minimum_time_gap) {
-  minimum_time_gap_ = minimum_time_gap;
+void GapMatcher::setMaximumTimeGap(uint64_t max_time_gap) {
+  max_time_gap_ = max_time_gap;
 }
 
 void GapMatcher::setSplitMultiEvents(bool split_multi_events,
@@ -44,8 +44,8 @@ void GapMatcher::match(bool flush) {
       break;
     }
 
-    if (!evt.empty() && (evt.timeGap(*cluster) > minimum_time_gap_)) {
-      XTRACE(CLUSTER, DEB, "time gap too large");
+    if (!evt.empty() && (evt.timeGap(*cluster) > max_time_gap_)) {
+      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, max is %u", evt.timeGap(*cluster), max_time_gap_);
       checkAndStashEvent(evt);
       evt.clear();
     }
@@ -68,7 +68,7 @@ void GapMatcher::match(bool flush) {
 std::string GapMatcher::config(const std::string &prepend) const {
   std::stringstream ss;
   ss << AbstractMatcher::config(prepend);
-  ss << prepend << fmt::format("minimum_time_gap: {}\n", minimum_time_gap_);
+  ss << prepend << fmt::format("max_time_gap: {}\n", max_time_gap_);
   return ss.str();
 }
 

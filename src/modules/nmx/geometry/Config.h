@@ -44,10 +44,17 @@ public:
     uint16_t NumPanels{4};
     uint16_t MaxXSpan{10};
     uint16_t MaxYSpan{10};
+    uint16_t MinXSpan{1};
+    uint16_t MinYSpan{1};
+    uint16_t MaxXGap{10};
+    uint16_t MaxYGap{10};
     uint16_t DefaultMinADC{50};
     bool SplitMultiEvents{false};
     float SplitMultiEventsCoefficientLow{0.8};
     float SplitMultiEventsCoefficientHigh{1.2};
+    uint16_t MaxTimeSpan{500};
+    uint16_t MaxMatchingTimeGap{500};
+    uint16_t MaxClusteringTimeGap{500};
   } NMXFileParameters;
 
   // Derived parameters

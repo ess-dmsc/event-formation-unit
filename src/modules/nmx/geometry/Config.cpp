@@ -54,6 +54,49 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "MaxYSpan {}", NMXFileParameters.MaxYSpan);
 
   try {
+    NMXFileParameters.MinXSpan = root["MinXSpan"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MinXSpan");
+  }
+  LOG(INIT, Sev::Info, "MinXSpan {}", NMXFileParameters.MinXSpan);
+
+  try {
+    NMXFileParameters.MinYSpan = root["MinYSpan"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MinYSpan");
+  }
+  LOG(INIT, Sev::Info, "MinYSpan {}", NMXFileParameters.MinYSpan);
+
+
+  try {
+    NMXFileParameters.MaxXGap = root["MaxXGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxXGap");
+  }
+  LOG(INIT, Sev::Info, "MaxXGap {}", NMXFileParameters.MaxXGap);
+
+  try {
+    NMXFileParameters.MaxYGap = root["MaxYGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxYGap");
+  }
+  LOG(INIT, Sev::Info, "MaxYGap {}", NMXFileParameters.MaxYGap);
+
+  try {
+    NMXFileParameters.MaxMatchingTimeGap = root["MaxMatchingTimeGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
+  }
+  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}", NMXFileParameters.MaxMatchingTimeGap);
+
+  try {
+    NMXFileParameters.MaxClusteringTimeGap = root["MaxClusteringTimeGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
+  }
+  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", NMXFileParameters.MaxClusteringTimeGap);
+
+  try {
     NMXFileParameters.NumPanels = root["NumPanels"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for NumPanels");

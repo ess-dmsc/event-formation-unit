@@ -53,6 +53,8 @@ public:
   // and NMXBase. Called from NMXBase
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
+  void checkConfigAndGeometry();
+
 public:
   /// \brief Stuff that 'ties' NMX together
   struct Counters &counters;

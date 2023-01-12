@@ -211,7 +211,7 @@ void FreiaBase::processing_thread() {
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
-        if (Freia.Conf.SplitMultiEvents) {
+        if (Freia.Conf.FreiaFileParameters.SplitMultiEvents) {
           Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
           Counters.EventsDiscardedSpanTooLarge +=
               builder.matcher.Stats.DiscardedSpanTooLarge;
