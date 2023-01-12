@@ -53,8 +53,6 @@ public:
   // and NMXBase. Called from NMXBase
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
-  void checkConfigAndGeometry();
-
 
   ///\brief ensures the combination of config and geometry doesn't result
   /// in overlapping pixels. If it does, throws a runtime error.
