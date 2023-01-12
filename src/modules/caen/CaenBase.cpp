@@ -121,7 +121,7 @@ void CaenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "caen", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
   CaenInstrument Caen(Counters, EFUSettings);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
 
@@ -132,7 +132,7 @@ void CaenBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
-  SerializerII = new EV42Serializer(KafkaBufferSize, "caen", ProduceII);
+  SerializerII = new EV44Serializer(KafkaBufferSize, "caen", ProduceII);
   Caen.setSerializerII(
       SerializerII); // would rather have this in CaenInstrument
 

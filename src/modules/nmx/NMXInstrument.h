@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
@@ -34,7 +34,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   NMXInstrument(Counters &counters, BaseSettings &Settings,
-                EV42Serializer *serializer);
+                EV44Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -51,7 +51,7 @@ public:
 
   /// \brief initialise the serializer. This is used both in NMXInstrument
   // and NMXBase. Called from NMXBase
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
 public:
   /// \brief Stuff that 'ties' NMX together
@@ -60,7 +60,7 @@ public:
   BaseSettings &Settings;
 
   /// \brief serialiser (and producer) for events
-  EV42Serializer *Serializer{nullptr};
+  EV44Serializer *Serializer{nullptr};
 
   /// ADC value histograms for all channels
   Hists ADCHist{1, 1}; // reinit in ctor

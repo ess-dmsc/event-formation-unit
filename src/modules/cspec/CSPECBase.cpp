@@ -10,7 +10,7 @@
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
@@ -155,7 +155,7 @@ void CspecBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "cspec", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "cspec", Produce);
   CSPECInstrument CSPEC(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(CSPEC.ADCHist.needed_buffer_size(),
