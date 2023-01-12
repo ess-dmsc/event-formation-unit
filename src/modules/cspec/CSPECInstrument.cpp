@@ -26,7 +26,7 @@ namespace Cspec {
 /// \brief load configuration and calibration files
 CSPECInstrument::CSPECInstrument(struct Counters &counters,
                                  BaseSettings &settings,
-                                 EV42Serializer *serializer)
+                                 EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
@@ -92,7 +92,7 @@ void CSPECInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
+  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
                             .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");

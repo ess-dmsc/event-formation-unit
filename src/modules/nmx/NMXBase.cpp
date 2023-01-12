@@ -10,7 +10,7 @@
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
@@ -159,7 +159,7 @@ void NmxBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "nmx", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(NMX.ADCHist.needed_buffer_size(),
