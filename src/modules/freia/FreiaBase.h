@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <freia/Counters.h>
 
 namespace Freia {
@@ -25,7 +25,7 @@ public:
 
 protected:
   struct Counters Counters {};
-  EV42Serializer *Serializer;
+  EV44Serializer *Serializer;
 };
 
 } // namespace Freia

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
@@ -33,7 +33,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   FreiaInstrument(Counters &counters, BaseSettings &settings,
-                  EV42Serializer *serializer);
+                  EV44Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -55,7 +55,7 @@ public:
 
   /// \brief initialise the serializer. This is used both in FreiaInstrument
   // and FreiaBase. Called from FreiaBase
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
 public:
   /// \brief Stuff that 'ties' Freia together
@@ -63,7 +63,7 @@ public:
   BaseSettings &Settings;
 
   /// \brief serialiser (and producer) for events
-  EV42Serializer *Serializer{nullptr};
+  EV44Serializer *Serializer{nullptr};
 
   /// ADC value histograms for all channels
   Hists ADCHist{1, 1}; // reinit in ctor

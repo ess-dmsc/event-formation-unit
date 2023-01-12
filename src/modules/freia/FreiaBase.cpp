@@ -10,7 +10,7 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
@@ -160,7 +160,7 @@ void FreiaBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
   FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
