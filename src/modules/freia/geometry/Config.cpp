@@ -89,7 +89,6 @@ void Config::applyConfig() {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
-      std::string IDString = Mapping["HybridId"];
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
@@ -112,7 +111,6 @@ void Config::applyConfig() {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
         FileName);
     throw std::runtime_error("Invalid Json file");
-    return;
   }
 }
 

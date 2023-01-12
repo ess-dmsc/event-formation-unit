@@ -53,7 +53,6 @@ void Cspec::ReadoutGenerator::generateData() {
 
     // Readout generated for LET test, with Ring 5 and FENId 0 or 1
     ReadoutData->RingId = 5;
-    ReadoutData->FENId = 0 + (Readout % 2);
 
     // Each column is 6 wires wide
     // Select the FEN based on whether XGlobal is in column 0 or column 1
