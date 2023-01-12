@@ -23,10 +23,22 @@
 namespace Caen {
 class Geometry {
 public:
+  /// \brief sets the pixel resolution of a straw
+  /// \param Resolution integer value to set straw resolution to
   void setResolution(uint16_t Resolution) { NPos = Resolution; }
+
+  /// \brief sets the calibration parameters for straw stretch corrections
+  /// \param Calib Calibration object containing polynomial correction values
   void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
 
+  /// \brief calculates an integer pixel value from a CaenReadout object
+  /// \param Data CaenReadout object, containing ADC value information,
+  ///         TubeID, and other information needed to determine pixel of 
+  ///         event. If a Calibration has been set, it will be applied here.
   virtual uint32_t calcPixel(DataParser::CaenReadout &Data) = 0;
+
+  /// \brief returns true if Data is a valid readout with the given config
+  /// \param Data CaenReadout to check validity of.
   virtual bool validateData(DataParser::CaenReadout &Data) = 0;
 
   struct Stats {
