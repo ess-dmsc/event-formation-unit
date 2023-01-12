@@ -45,10 +45,10 @@ std::vector<std::string> check_detector_loaded {
 
 // clang-format on
 
-class TestDetector : public Detector {
+class ParserTestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings){};
-  ~TestDetector(){};
+  explicit ParserTestDetector(UNUSED BaseSettings settings) : Detector(settings){};
+  ~ParserTestDetector(){};
 };
 
 class ParserTest : public TestBase {

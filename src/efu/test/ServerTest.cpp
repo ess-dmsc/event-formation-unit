@@ -47,10 +47,10 @@ void clientThread(int command) {
   }
 }
 
-class TestDetector : public Detector {
+class ServerTestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings) : Detector(settings){};
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  explicit ServerTestDetector(BaseSettings settings) : Detector(settings){};
+  ~ServerTestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
 // clang-format on

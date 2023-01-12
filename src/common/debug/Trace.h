@@ -34,7 +34,7 @@ const unsigned int TRC_L_DEB = 7;
 /// \todo See if there is a better solution than pragma
 #pragma GCC system_header
 
-//#define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_DEB
 
 #ifndef TRC_LEVEL
 const unsigned int USED_TRC_LEVEL = TRC_L_ERR;
