@@ -39,6 +39,8 @@ int MiraclesDatReader::readReadout(struct dat_data_t &Readout) {
     Readout.tube = stoi(tube);
     Readout.ampl_a = stoi(ampl_a);
     Readout.ampl_b = stoi(ampl_b);
+    Readout.ampl_c = 0;
+    Readout.ampl_d = 0;
 
     printf("time (%u, %u) - tube %u, amplitudes A: %u, B: %u\n",
         Readout.tofhi, Readout.toflow, Readout.tube, Readout.ampl_a,
