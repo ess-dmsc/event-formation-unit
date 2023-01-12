@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -124,6 +124,11 @@ public:
 
   /// \brief document
   virtual int64_t statvalue(size_t index) { return Stats.value(index); }
+
+  /// \brief document
+  virtual int64_t statvaluebyname(std::string name) {
+    return Stats.valueByName(name);
+  }
 
   /// \brief document
   virtual std::string &statname(size_t index) { return Stats.name(index); }
