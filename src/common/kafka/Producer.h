@@ -52,7 +52,7 @@ public:
   ~Producer() = default;
 
   ///\brief Produce kafka messages and send to cluster
-  ///\return int 
+  ///\return int, 0 if successful
   int produce(nonstd::span<const std::uint8_t> Buffer,
               std::int64_t MessageTimestampMS) override;
 
