@@ -100,7 +100,6 @@ void PerfGenBase::processingThread() {
       mystats.events_udder++;
       TimeOfFlight++;
     }
-    // Serializer.checkAndSetPulseTime(EfuTime);
 
     usleep(EFUSettings.TestImageUSleep);
 
