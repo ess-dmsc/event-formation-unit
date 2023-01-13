@@ -119,18 +119,22 @@ public:
 
   virtual ~Detector() = default;
 
-  /// \brief document
+  /// \brief returns the number of runtime counters (efustats)
+  /// used by Parser.cpp for command query
   virtual int statsize() { return Stats.size(); }
 
-  /// \brief document
+  /// \brief returns the value of a runtime counter (efustat) based on its index
+  /// used by Parser.cpp for command query
   virtual int64_t statvalue(size_t index) { return Stats.value(index); }
 
-  /// \brief document
+  /// \brief returns the value of a runtime counter (efustat) based on name
+  /// used by Parser.cpp for command query
   virtual int64_t statvaluebyname(std::string name) {
     return Stats.valueByName(name);
   }
 
-  /// \brief document
+  /// \brief returns the name of a runtime counter (efustat) based on its index
+  /// used by Parser.cpp for command query
   virtual std::string &statname(size_t index) { return Stats.name(index); }
 
   /// \brief return the current status mask (should be set in pipeline)
