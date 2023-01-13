@@ -67,6 +67,7 @@ void FreiaInstrument::loadConfigAndCalib() {
     builder.matcher.setMaximumTimeGap(Conf.FreiaFileParameters.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    builder.matcher.Stats = &counters.MatcherStats;
     if (Conf.FreiaFileParameters.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(Conf.FreiaFileParameters.SplitMultiEvents,
                                           Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,

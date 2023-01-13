@@ -14,6 +14,13 @@
 /// \brief Matcher implementation that joins clusters into events
 ///         if time gaps between them are sufficiently small.
 
+struct GapMatcherStats {
+  uint16_t SpanTooLarge{0};
+  uint16_t DiscardedSpanTooLarge{0};
+  uint16_t SplitSpanTooLarge{0};
+};
+
+
 class GapMatcher : public AbstractMatcher {
 public:
   /// Inherits constructor
@@ -49,16 +56,12 @@ public:
   std::string config(const std::string &prepend) const override;
 
   void resetStats() {
-    Stats.SpanTooLarge = 0;
-    Stats.DiscardedSpanTooLarge = 0;
-    Stats.SplitSpanTooLarge = 0;
+    Stats->SpanTooLarge = 0;
+    Stats->DiscardedSpanTooLarge = 0;
+    Stats->SplitSpanTooLarge = 0;
   }
 
-  struct Stats {
-    uint16_t SpanTooLarge{0};
-    uint16_t DiscardedSpanTooLarge{0};
-    uint16_t SplitSpanTooLarge{0};
-  } Stats;
+  struct GapMatcherStats *Stats {new GapMatcherStats};
 
 
 
