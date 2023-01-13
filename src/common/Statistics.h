@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016-2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -43,6 +43,9 @@ public:
 
   /// \brief return value of stat based on index
   int64_t value(size_t Index);
+
+  /// \brief return value by name
+  int64_t valueByName(std::string name);
 
   /// \brief create grafana metric prefix by concatenation of strings
   /// PointChar will be added to the end
