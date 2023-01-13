@@ -11,6 +11,7 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 #include <cinttypes>
 
@@ -33,6 +34,8 @@ struct Counters {
   int64_t MaxADC;
   int64_t MappingErrors;
 
+
+  struct GapMatcherStats MatcherStats;
   //
   int64_t ProcessingIdle;
   int64_t Events;
@@ -45,9 +48,6 @@ struct Counters {
   int64_t ClustersTooSmallYSpan;
   int64_t ClustersTooLargeTimeSpan;
   int64_t EventsMatchedClusters;
-  int64_t EventsSpanTooLarge;
-  int64_t EventsDiscardedSpanTooLarge;
-  int64_t EventsSplitSpanTooLarge;
   int64_t PixelErrors;
   int64_t TimeErrors;
   struct ESSReadout::ESSTime::Stats_t TimeStats;

@@ -56,6 +56,7 @@ void NMXInstrument::loadConfigAndCalib() {
 
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
   for (EventBuilder2D& builder: builders) {
+    builder.matcher.Stats = &counters.MatcherStats;
     builder.matcher.setMaximumTimeGap(Conf.NMXFileParameters.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(Conf.NMXFileParameters.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(Conf.NMXFileParameters.MaxClusteringTimeGap);
