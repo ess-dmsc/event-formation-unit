@@ -15,9 +15,10 @@
 ///         if time gaps between them are sufficiently small.
 
 struct GapMatcherStats {
-  int16_t SpanTooLarge{0};
-  int16_t DiscardedSpanTooLarge{0};
-  int16_t SplitSpanTooLarge{0};
+  int64_t SpanTooLarge{0};
+  int64_t DiscardedSpanTooLarge{0};
+  int64_t SplitSpanTooLarge{0};
+  int64_t MatchAttemptCount{0};
 };
 
 

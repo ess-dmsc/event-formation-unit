@@ -98,6 +98,7 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.matcherstats.span_too_large", Counters.MatcherStats.SpanTooLarge);
   Stats.create("cluster.matcherstats.discared_span_too_large", Counters.MatcherStats.DiscardedSpanTooLarge);
   Stats.create("cluster.matcherstats.split_span_too_large", Counters.MatcherStats.SplitSpanTooLarge);
+  Stats.create("cluster.matcherstats.match_attempt_count", Counters.MatcherStats.MatchAttemptCount);
 
   // Event stats
   Stats.create("events.count", Counters.Events);
