@@ -55,12 +55,6 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
-  void resetStats() {
-    Stats->SpanTooLarge = 0;
-    Stats->DiscardedSpanTooLarge = 0;
-    Stats->SplitSpanTooLarge = 0;
-  }
-
   struct GapMatcherStats *Stats {new GapMatcherStats};
 
 
