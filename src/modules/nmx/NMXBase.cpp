@@ -95,9 +95,9 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.span.y_too_large", Counters.ClustersTooLargeYSpan);
   Stats.create("cluster.span.x_too_small", Counters.ClustersTooSmallXSpan);
   Stats.create("cluster.span.y_too_small", Counters.ClustersTooSmallYSpan);
-  Stats.create("cluster.matcherstats.span_too_large", &Counters.MatcherStats.SpanTooLarge);
-  Stats.create("cluster.matcherstats.discared_span_too_large", &Counters.MatcherStats.DiscardedSpanTooLarge);
-  Stats.create("cluster.matcherstats.split_span_too_large", &Counters.MatcherStats.SplitSpanTooLarge);
+  Stats.create("cluster.matcherstats.span_too_large", *Counters.MatcherStats.SpanTooLarge);
+  Stats.create("cluster.matcherstats.discared_span_too_large", *Counters.MatcherStats.DiscardedSpanTooLarge);
+  Stats.create("cluster.matcherstats.split_span_too_large", *Counters.MatcherStats.SplitSpanTooLarge);
 
   // Event stats
   Stats.create("events.count", Counters.Events);
