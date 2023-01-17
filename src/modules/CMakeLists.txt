@@ -15,6 +15,7 @@ add_subdirectory(miracles)
 add_subdirectory(nmx)
 add_subdirectory(perfgen)
 add_subdirectory(ttlmonitor)
+add_subdirectory(vmm)
 
 
 #=============================================================================
