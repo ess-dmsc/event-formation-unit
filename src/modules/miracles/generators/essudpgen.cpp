@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
          (SentReadouts < Config.TxReadouts)) {
 
     /// \todo change RING+FEN to match digital geometry
-    /// for now all goes on ring 0, fen 1
+    /// for now all goes on ring 0, fen 0
     gen.addReadout(&Readout, 0, 0); // Ring 0, FEN 0
     SentReadouts++;
     if (gen.getSize() > UdpMaxSizeBytes) {
