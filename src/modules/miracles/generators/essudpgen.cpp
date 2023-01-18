@@ -1,22 +1,19 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief UDP generator from simulated DREAM detector data
+/// \brief UDP generator for MIRACLES from dat files
 ///
-/// Simulation data from Irina Stefanescu
-/// Uses the SimReader class for reading the *.txt files
-/// and common PacketGenerator class for creating ESS readout data
-/// which can be sent using the UDPTransmitter class.
+/// Uses real data acquired bu CAEN digitisers
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
 #include <common/system/Socket.h>
 
-#ifdef ESSUDPGEN_DREAM_SIM
-#include <dream/generators/SimReader.h>
+#ifdef ESSUDPGEN_MIRCLES_DAT
+#include <miracles/generators/DatReader.h>
 #endif
 
 #include <generators/PacketGenerator.h>
@@ -34,7 +31,7 @@ struct {
   uint32_t KernelTxBufferSize{1000000};
 } Config;
 
-CLI::App app{"Raw (DREAM .txt/LOKI .dat) files to UDP data generator"};
+CLI::App app{"Raw (MIRACLES .dat) files to UDP data generator"};
 
 int main(int argc, char *argv[]) {
   app.add_option("-i, --ip", Config.IpAddress, "Destination IP address");
@@ -47,11 +44,11 @@ int main(int argc, char *argv[]) {
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
   CLI11_PARSE(app, argc, argv);
 
-#ifdef ESSUDPGEN_DREAM_SIM
-  DreamSimReader reader(Config.FileName);
-  struct DreamSimReader::sim_data_t Readout;
-  PacketGenerator gen(ESSReadout::Parser::DREAM,
-                      sizeof(struct DreamSimReader::sim_data_t));
+#ifdef ESSUDPGEN_MIRCLES_DAT
+  MiraclesDatReader reader(Config.FileName);
+  struct MiraclesDatReader::dat_data_t Readout;
+  PacketGenerator gen(ESSReadout::Parser::MIRACLES,
+                      sizeof(struct MiraclesDatReader::dat_data_t));
 #endif
 
   Socket::Endpoint local("0.0.0.0", 0);
