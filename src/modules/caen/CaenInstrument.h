@@ -36,11 +36,13 @@ public:
 
   ~CaenInstrument();
 
-  //
+  /// \brief Generates Events from Readouts, and adds them to a serializer
   void processReadouts();
 
-  //
+  /// \brief Sets the serializer to send events to
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
+  
+  /// \brief Sets the second serializer to send events to, recording Amp values
   void setSerializerII(EV44Serializer *serializer) {
     SerializerII = serializer;
   }
