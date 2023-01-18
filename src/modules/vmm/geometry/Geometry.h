@@ -12,8 +12,8 @@
 #include <common/debug/Trace.h>
 #include <freia/geometry/AMORChannelMapping.h>
 #include <freia/geometry/FreiaChannelMapping.h>
-#include <nmx/geometry/NMXChannelMapping.h>
-#include <cspec/geometry/CSPECChannelMapping.h>
+#include <nmx/geometry/NMXGeometry.h>
+#include <cspec/geometry/CSPECGeometry.h>
 #include <string>
 
 // #undef TRC_LEVEL

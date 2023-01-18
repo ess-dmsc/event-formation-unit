@@ -8,11 +8,11 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <freia/FreiaInstrument.h>
+#include <vmm/VMMInstrument.h>
 #include <stdio.h>
 #include <string.h>
 
-using namespace Freia;
+using namespace VMM;
 // clang-format off
 std::string ConfigFile{"deleteme_freia_instr_config.json"};
 std::string ConfigStr = R"(
@@ -154,13 +154,13 @@ std::vector<uint8_t> GoodEvent{
 };
 // clang-format on
 
-class FreiaInstrumentTest : public TestBase {
+class VMMInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
   EV44Serializer *serializer;
-  FreiaInstrument *freia;
+  VMMInstrument *vmm;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
@@ -172,9 +172,9 @@ protected:
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    freia = new FreiaInstrument(counters, Settings, serializer);
-    freia->setSerializer(serializer);
-    freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    vmm = new VMMInstrument(counters, Settings, serializer);
+    vmm->setSerializer(serializer);
+    vmm->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
   void TearDown() override {}
 
@@ -189,40 +189,40 @@ protected:
 };
 
 // Test cases below
-TEST_F(FreiaInstrumentTest, Constructor) {
+TEST_F(VMMInstrumentTest, Constructor) {
   Settings.CalibFile = CalibFile;
-  FreiaInstrument Freia(counters, Settings, serializer);
-  counters.VMMStats = freia->VMMParser.Stats;
+  VMMInstrument VMM(counters, Settings, serializer);
+  counters.VMMStats = vmm->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(FreiaInstrumentTest, DumpTofile) {
+TEST_F(VMMInstrumentTest, DumpTofile) {
   Settings.DumpFilePrefix = "deleteme_";
-  FreiaInstrument FreiaDump(counters, Settings, serializer);
-  FreiaDump.setSerializer(serializer);
+  VMMInstrument VMMDump(counters, Settings, serializer);
+  VMMDump.setSerializer(serializer);
 
-  makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
-  auto Res = FreiaDump.VMMParser.parse(FreiaDump.ESSReadoutParser.Packet);
-  FreiaDump.processReadouts();
+  makeHeader(VMMDump.ESSReadoutParser.Packet, GoodEvent);
+  auto Res = VMMDump.VMMParser.parse(VMMDump.ESSReadoutParser.Packet);
+  VMMDump.processReadouts();
 
-  counters.VMMStats = FreiaDump.VMMParser.Stats;
+  counters.VMMStats = VMMDump.VMMParser.Stats;
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
 }
 
-TEST_F(FreiaInstrumentTest, MappingError) {
-  makeHeader(freia->ESSReadoutParser.Packet, MappingError);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+TEST_F(VMMInstrumentTest, MappingError) {
+  makeHeader(vmm->ESSReadoutParser.Packet, MappingError);
+  auto Res = vmm->VMMParser.parse(vmm->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
-  counters.VMMStats = freia->VMMParser.Stats;
+  counters.VMMStats = vmm->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.RingMappingErrors, 0);
   ASSERT_EQ(counters.FENMappingErrors, 0);
 
-  freia->processReadouts();
+  vmm->processReadouts();
   ASSERT_EQ(counters.HybridMappingErrors, 1);
   ASSERT_EQ(counters.RingMappingErrors, 1);
   ASSERT_EQ(counters.FENMappingErrors, 1);
@@ -230,99 +230,99 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
 }
 
-TEST_F(FreiaInstrumentTest, MaxRingMaxFENErrors) {
-  makeHeader(freia->ESSReadoutParser.Packet, MaxRingMaxFENErrors);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+TEST_F(VMMInstrumentTest, MaxRingMaxFENErrors) {
+  makeHeader(vmm->ESSReadoutParser.Packet, MaxRingMaxFENErrors);
+  auto Res = vmm->VMMParser.parse(vmm->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 0);
-  counters.VMMStats = freia->VMMParser.Stats;
+  counters.VMMStats = vmm->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
-TEST_F(FreiaInstrumentTest, WireGap) {
+TEST_F(VMMInstrumentTest, WireGap) {
   TestEvent.ClusterA.insert({0, 1, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   TestEvent.ClusterB.insert({0, 3, 100, 1});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.EventsInvalidWireGap, 1);
 }
 
-TEST_F(FreiaInstrumentTest, StripGap) {
+TEST_F(VMMInstrumentTest, StripGap) {
   TestEvent.ClusterA.insert({0, 1, 100, 0});
   TestEvent.ClusterA.insert({0, 3, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.EventsInvalidStripGap, 1);
 }
 
-TEST_F(FreiaInstrumentTest, ClusterWireOnly) {
+TEST_F(VMMInstrumentTest, ClusterWireOnly) {
   TestEvent.ClusterB.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.EventsMatchedWireOnly, 1);
 }
 
-TEST_F(FreiaInstrumentTest, ClusterStripOnly) {
+TEST_F(VMMInstrumentTest, ClusterStripOnly) {
   TestEvent.ClusterA.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.EventsMatchedStripOnly, 1);
 }
 
-TEST_F(FreiaInstrumentTest, PixelError) {
+TEST_F(VMMInstrumentTest, PixelError) {
   //                         t  c  w    p
   TestEvent.ClusterA.insert({0, 2000, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.PixelErrors, 1);
 }
 
-TEST_F(FreiaInstrumentTest, EventTOFError) {
-  auto &Packet = freia->ESSReadoutParser.Packet;
+TEST_F(VMMInstrumentTest, EventTOFError) {
+  auto &Packet = vmm->ESSReadoutParser.Packet;
   makeHeader(Packet, GoodEvent);
 
   Packet.Time.setReference(200, 0);
-  auto Res = freia->VMMParser.parse(Packet);
-  counters.VMMStats = freia->VMMParser.Stats;
+  auto Res = vmm->VMMParser.parse(Packet);
+  counters.VMMStats = vmm->VMMParser.Stats;
 
-  freia->processReadouts();
-  for (auto &builder : freia->builders) {
+  vmm->processReadouts();
+  for (auto &builder : vmm->builders) {
     builder.flush(true);
-    freia->generateEvents(builder.Events);
+    vmm->generateEvents(builder.Events);
   }
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
   ASSERT_EQ(counters.TimeErrors, 1);
 }
 
-TEST_F(FreiaInstrumentTest, GoodEvent) {
+TEST_F(VMMInstrumentTest, GoodEvent) {
   //                         t  c  w    p
   TestEvent.ClusterA.insert({0, 3, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.Events, 1);
 }
 
-TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
+TEST_F(VMMInstrumentTest, EventTOFTooLarge) {
   TestEvent.ClusterA.insert({3000000000, 3, 100, 0});
   TestEvent.ClusterB.insert({3000000000, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(counters.MaxTOFErrors, 1);
 }
 
-TEST_F(FreiaInstrumentTest, NoEvents) {
+TEST_F(VMMInstrumentTest, NoEvents) {
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
+  vmm->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
 }
 

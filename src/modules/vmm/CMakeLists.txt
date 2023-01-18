@@ -1,7 +1,6 @@
 # Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
-add_subdirectory(generators)
 include_directories(.)
 
 #=============================================================================
@@ -11,8 +10,6 @@ set(vmm_common_inc
   VMMBase.h
   VMMInstrument.h
   geometry/Config.h
-  geometry/VMMChannelMapping.h
-  geometry/AMORChannelMapping.h
   )
 set(vmm_common_src
   VMMBase.cpp
