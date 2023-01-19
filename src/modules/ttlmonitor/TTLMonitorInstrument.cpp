@@ -12,8 +12,8 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
-#include <ttlmonitor/geometry/Parser.h>
 #include <ttlmonitor/TTLMonitorInstrument.h>
+#include <ttlmonitor/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,8 +21,8 @@
 namespace TTLMonitor {
 
 /// \brief load configuration and calibration files
-TTLMonitorInstrument::TTLMonitorInstrument(
-    struct Counters &counters, BaseSettings &settings)
+TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
+                                           BaseSettings &settings)
 
     : counters(counters), Settings(settings) {
 
@@ -49,8 +49,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 
   for (EV44Serializer *Serializer : Serializers) {
     counters.TxBytes += Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time.TimeInNS);
-      /// \todo sometimes PrevPulseTime maybe?
+        ESSReadoutParser.Packet.Time.TimeInNS);
+    /// \todo sometimes PrevPulseTime maybe?
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts() - has %zu entries",
@@ -61,15 +61,16 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     //   dumpReadoutToFile(readout);
     // }
 
-    XTRACE(DATA, DEB,
-           "readout: PRingId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.Pos, readout.Channel,
-           readout.ADC, readout.TimeLow);
+    XTRACE(
+        DATA, DEB,
+        "readout: PRingId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
+        readout.RingId, readout.FENId, readout.Pos, readout.Channel,
+        readout.ADC, readout.TimeLow);
 
-    int LRingId = readout.RingId/2;
+    int LRingId = readout.RingId / 2;
     if (LRingId != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid lring %u (expect %u) for monitor readout",
-        LRingId, Conf.Parms.MonitorRing);
+             LRingId, Conf.Parms.MonitorRing);
       counters.RingCfgErrors++;
       continue;
     }
@@ -81,8 +82,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     }
 
     if (readout.Channel >= Conf.Parms.NumberOfMonitors) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (max is %d)",
-             readout.Channel, Conf.Parms.NumberOfMonitors - 1);
+      XTRACE(DATA, WAR, "Invalid Channel %d (max is %d)", readout.Channel,
+             Conf.Parms.NumberOfMonitors - 1);
       counters.ChannelCfgErrors++;
       continue;
     }
@@ -106,13 +107,11 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
-      counters.TxBytes +=
-         Serializers[readout.Channel]->addEvent(TimeOfFlight, PixelId);
-      counters.MonitorCounts++;
-
+    counters.TxBytes +=
+        Serializers[readout.Channel]->addEvent(TimeOfFlight, PixelId);
+    counters.MonitorCounts++;
   }
 }
 
@@ -120,18 +119,18 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 // void TTLMonitorInstrument::dumpReadoutToFile(
 //     const ESSReadout::VMM3Parser::VMM3Data &Data) {
 //   VMM3::Readout CurrentReadout;
-//   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-//   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+//   CurrentReadout.PulseTimeHigh =
+//   ESSReadoutParser.Packet.HeaderPtr->PulseHigh; CurrentReadout.PulseTimeLow =
+//   ESSReadoutParser.Packet.HeaderPtr->PulseLow;
 //   CurrentReadout.PrevPulseTimeHigh =
 //       ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
 //   CurrentReadout.PrevPulseTimeLow =
 //       ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
 //   CurrentReadout.EventTimeHigh = Data.TimeHigh;
 //   CurrentReadout.EventTimeLow = Data.TimeLow;
-//   CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
-//   CurrentReadout.BC = Data.BC;
-//   CurrentReadout.OTADC = Data.OTADC;
-//   CurrentReadout.GEO = Data.GEO;
+//   CurrentReadout.OutputQueue =
+//   ESSReadoutParser.Packet.HeaderPtr->OutputQueue; CurrentReadout.BC =
+//   Data.BC; CurrentReadout.OTADC = Data.OTADC; CurrentReadout.GEO = Data.GEO;
 //   CurrentReadout.TDC = Data.TDC;
 //   CurrentReadout.VMM = Data.VMM;
 //   CurrentReadout.Channel = Data.Channel;

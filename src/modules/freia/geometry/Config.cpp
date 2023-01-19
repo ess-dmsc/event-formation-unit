@@ -35,7 +35,8 @@ void Config::applyConfig() {
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}", FreiaFileParameters.SplitMultiEvents);
+  LOG(INIT, Sev::Info, "SplitMultiEvents {}",
+      FreiaFileParameters.SplitMultiEvents);
 
   try {
     FreiaFileParameters.SplitMultiEventsCoefficientLow =
@@ -57,12 +58,11 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
       FreiaFileParameters.SplitMultiEventsCoefficientHigh);
 
-   try {
+  try {
     FreiaFileParameters.MaxMatchingTimeGap =
         root["MaxMatchingTimeGap"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for MaxMatchingTimeGap");
+    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
   }
   LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}",
       FreiaFileParameters.MaxMatchingTimeGap);
@@ -71,8 +71,7 @@ void Config::applyConfig() {
     FreiaFileParameters.MaxClusteringTimeGap =
         root["MaxClusteringTimeGap"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for MaxClusteringTimeGap");
+    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
   }
   LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}",
       FreiaFileParameters.MaxClusteringTimeGap);

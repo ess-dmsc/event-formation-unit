@@ -66,7 +66,7 @@ TEST_F(EV44SerializerTest, SerializeReferenceTime) {
   memset(flatbuffer, 0, sizeof(flatbuffer));
   memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
 
-  auto events = GetEvent44Message(flatbuffer);  
+  auto events = GetEvent44Message(flatbuffer);
 
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev44");
   ASSERT_TRUE(events);

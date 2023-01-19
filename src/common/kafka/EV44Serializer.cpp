@@ -13,9 +13,13 @@
 #include <common/system/gccintel.h>
 
 #include <common/debug/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
+// defining the lengths of elements of the flatbuffer schema
+//  eg. ReferenceTimeSize is 64 bits, the size of the reference_time elements
+//  and OffsetTimeSize is 32 bits, the size of the reference_time_offset
+//  elements
 static constexpr size_t ReferenceTimeSize = sizeof(uint64_t);
 static constexpr size_t OffsetTimeSize = sizeof(uint32_t);
 static constexpr size_t PixelSize = sizeof(uint32_t);
@@ -29,12 +33,12 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       ProduceFunctor(Callback) {
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
-  auto ReferenceTimeOffset =
-      Builder_.CreateUninitializedVector(1, ReferenceTimeSize, &ReferenceTimePtr);
+  auto ReferenceTimeOffset = Builder_.CreateUninitializedVector(
+      1, ReferenceTimeSize, &ReferenceTimePtr);
   auto ReferenceTimeIndexOffset =
       Builder_.CreateVector<int32_t>(std::vector(1, 0));
-  auto OffsetTimeOffset =
-      Builder_.CreateUninitializedVector(MaxEvents, OffsetTimeSize, &OffsetTimePtr);
+  auto OffsetTimeOffset = Builder_.CreateUninitializedVector(
+      MaxEvents, OffsetTimeSize, &OffsetTimePtr);
   auto PixelOffset =
       Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
@@ -97,7 +101,7 @@ size_t EV44Serializer::eventCount() const { return EventCount; }
 uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time) {
   uint32_t bytesProduced = 0;
   if (Time != referenceTime()) {
-    XTRACE(OUTPUT, DEB, "Reference time is new: %d\n", Time);
+    XTRACE(OUTPUT, DEB, "Reference time is new: %" PRIi64 "\n", Time);
     bytesProduced = produce();
     setReferenceTime(Time);
   }
