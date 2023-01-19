@@ -129,6 +129,8 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
 }
 
 void CaenInstrument::processReadouts() {
+  XTRACE(DATA, DEB, "Reference time is %u", ESSReadoutParser.Packet.Time
+          .TimeInNS);
   Serializer->checkAndSetReferenceTime(
       ESSReadoutParser.Packet.Time
           .TimeInNS); /// \todo sometimes PrevPulseTime maybe?

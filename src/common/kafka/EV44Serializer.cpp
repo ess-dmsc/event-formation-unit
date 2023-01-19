@@ -16,7 +16,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-static constexpr size_t TimeSize = sizeof(uint32_t);
+static constexpr size_t ReferenceTimeSize = sizeof(uint64_t);
+static constexpr size_t OffsetTimeSize = sizeof(uint32_t);
 static constexpr size_t PixelSize = sizeof(uint32_t);
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
@@ -29,11 +30,11 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
   auto ReferenceTimeOffset =
-      Builder_.CreateUninitializedVector(1, TimeSize, &ReferenceTimePtr);
+      Builder_.CreateUninitializedVector(1, ReferenceTimeSize, &ReferenceTimePtr);
   auto ReferenceTimeIndexOffset =
       Builder_.CreateVector<int32_t>(std::vector(1, 0));
   auto OffsetTimeOffset =
-      Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &OffsetTimePtr);
+      Builder_.CreateUninitializedVector(MaxEvents, OffsetTimeSize, &OffsetTimePtr);
   auto PixelOffset =
       Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
@@ -104,7 +105,7 @@ uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time) {
 }
 
 void EV44Serializer::setReferenceTime(int64_t Time) {
-  XTRACE(OUTPUT, DEB, "Set reference time: %d\n", Time);
+  XTRACE(OUTPUT, DEB, "Set reference time: %" PRIi64, Time);
   reinterpret_cast<int64_t *>(ReferenceTimePtr)[0] = Time;
 }
 

@@ -37,13 +37,13 @@ TEST_F(EV44SerializerTest, Serialize) {
     fb.addEvent(i, i);
   auto buffer = fb.serialize();
   EXPECT_GE(buffer.size_bytes(), ARRAYLENGTH * 8);
-  EXPECT_LE(buffer.size_bytes(), ARRAYLENGTH * 8 + 2048);
+  EXPECT_LE(buffer.size_bytes(), ARRAYLENGTH * 8 + 128);
   ASSERT_TRUE(not buffer.empty());
 
   EXPECT_EQ(std::string(reinterpret_cast<const char *>(&buffer[4]), 4), "ev44");
 }
 
-TEST_F(EV44SerializerTest, SerDeserialize) {
+TEST_F(EV44SerializerTest, SerializeDeserialize) {
   for (size_t i = 0; i < ARRAYLENGTH - 1; i++)
     fb.addEvent(i, i);
   auto buffer = fb.serialize();
@@ -57,23 +57,22 @@ TEST_F(EV44SerializerTest, SerDeserialize) {
   // ASSERT_EQ(events->message_id(), 1);
 }
 
-TEST_F(EV44SerializerTest, SerPulseTime) {
-  fb.setReferenceTime(12345);
-  ASSERT_EQ(fb.referenceTime(), 12345);
+TEST_F(EV44SerializerTest, SerializeReferenceTime) {
+  fb.setReferenceTime(300000000000);
+  ASSERT_EQ(fb.referenceTime(), 300000000000);
+  fb.addEvent(2000000000, 500);
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
-
-  // auto events = GetEvent44Message(flatbuffer);
-  ///\todo check contents of reference_time, it is a flatbuffers vector
-  // ASSERT_NE(events->reference_time()->begin()->, 12345);
-
   memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
+
+  auto events = GetEvent44Message(flatbuffer);  
+
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev44");
-  // events = GetEvent44Message(flatbuffer);
-  ///\todo, work out why this test fails when all other source_name tests pass
+  ASSERT_TRUE(events);
+  ASSERT_TRUE(events->reference_time());
+  ASSERT_EQ((*events->reference_time())[0], 300000000000);
   // EXPECT_EQ(events->source_name()->str(), "nameless");
-  // ASSERT_EQ(events->reference_time()->front, 12345);
 }
 
 TEST_F(EV44SerializerTest, DeserializeCheckData) {
