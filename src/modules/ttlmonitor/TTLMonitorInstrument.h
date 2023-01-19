@@ -33,7 +33,7 @@ public:
   void processMonitorReadouts(void);
 
   /// \brief dump readout data to HDF5
-  //void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
+  // void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
@@ -53,7 +53,7 @@ public:
   Parser TTLMonParser;
 
   /// \brief for dumping raw VMM3 readouts to HDF5 files
-  //std::shared_ptr<VMM3::ReadoutFile> DumpFile;
+  // std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
 } // namespace TTLMonitor

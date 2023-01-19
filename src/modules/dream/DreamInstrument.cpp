@@ -50,7 +50,8 @@ void DreamInstrument::processReadouts() {
     return;
   }
 
-  Serializer->checkAndSetReferenceTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
          PacketHeader->PulseLow);
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,

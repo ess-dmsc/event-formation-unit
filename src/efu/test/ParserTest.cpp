@@ -49,7 +49,8 @@ std::vector<std::string> check_detector_loaded {
 
 class ParserTestDetector : public Detector {
 public:
-  explicit ParserTestDetector(UNUSED BaseSettings settings) : Detector(settings){};
+  explicit ParserTestDetector(UNUSED BaseSettings settings)
+      : Detector(settings){};
   ~ParserTestDetector(){};
 };
 
