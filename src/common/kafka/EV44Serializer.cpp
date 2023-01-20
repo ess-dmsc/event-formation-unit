@@ -24,6 +24,11 @@ static constexpr size_t ReferenceTimeSize = sizeof(uint64_t);
 static constexpr size_t OffsetTimeSize = sizeof(uint32_t);
 static constexpr size_t PixelSize = sizeof(uint32_t);
 
+// These must be non-0 because of Flatbuffers being stupid
+// If they are initially set to 0, they will not be mutable
+static constexpr int64_t FBMutablePlaceholder = 1;
+
+
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
@@ -43,7 +48,7 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
   auto HeaderOffset = CreateEvent44Message(
-      Builder_, SourceNameOffset, ReferenceTimeOffset, ReferenceTimeIndexOffset,
+      Builder_, SourceNameOffset, FBMutablePlaceholder, ReferenceTimeOffset, ReferenceTimeIndexOffset,
       OffsetTimeOffset, PixelOffset);
   FinishEvent44MessageBuffer(Builder_, HeaderOffset);
 
@@ -60,6 +65,8 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       reinterpret_cast<flatbuffers::uoffset_t *>(
           const_cast<std::uint8_t *>(Event44Message_->pixel_id()->Data())) -
       1;
+
+  Event44Message_->mutate_message_id(0);
 }
 
 void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
@@ -71,11 +78,13 @@ nonstd::span<const uint8_t> EV44Serializer::serialize() {
     /// \todo this should probably throw instead?
     return {};
   }
+  Event44Message_->mutate_message_id(MessageId);
   *TimeLengthPtr = EventCount;
   *PixelLengthPtr = EventCount;
 
   // reset counter and increment message counter
   EventCount = 0;
+  MessageId++;
 
   return Buffer_;
 }
@@ -116,6 +125,9 @@ void EV44Serializer::setReferenceTime(int64_t Time) {
 int64_t EV44Serializer::referenceTime() const {
   return reinterpret_cast<int64_t *>(ReferenceTimePtr)[0];
 }
+
+uint64_t EV44Serializer::currentMessageId() const { return MessageId; }
+
 
 size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", Time, Pixel);
