@@ -24,6 +24,8 @@ static constexpr size_t ReferenceTimeSize = sizeof(uint64_t);
 static constexpr size_t OffsetTimeSize = sizeof(uint32_t);
 static constexpr size_t PixelSize = sizeof(uint32_t);
 
+// These must be non-0 because of Flatbuffers being stupid
+// If they are initially set to 0, they will not be mutable
 static constexpr int64_t FBMutablePlaceholder = 1;
 
 
