@@ -1,7 +1,7 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
-#include <common/monitor/Histogram.h>
 #include <cmath>
+#include <common/monitor/Histogram.h>
 
 size_t Hists::strip_hist_size() { return strip_max_val + 1; }
 
@@ -9,7 +9,7 @@ size_t Hists::adc_hist_size() { return adc_max_val + 1; }
 
 size_t Hists::needed_buffer_size() {
   return elem_size *
-      (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
+         (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
 }
 
 Hists::Hists(size_t strip_max, size_t adc_max)
@@ -29,11 +29,13 @@ void Hists::set_cluster_adc_downshift(uint8_t bits) {
 
 bool Hists::isEmpty() const { return !(hit_count_ || cluster_count_); }
 
-size_t Hists::hit_count() const { return hit_count_; }
+size_t Hists::hitCount() const { return hit_count_; }
 
 size_t Hists::cluster_count() const { return cluster_count_; }
 
-size_t Hists::bin_width() const { return static_cast<size_t>(pow(2, downshift_)); }
+size_t Hists::bin_width() const {
+  return static_cast<size_t>(pow(2, downshift_));
+}
 
 void Hists::clear() {
   std::fill(x_strips_hist.begin(), x_strips_hist.end(), 0);

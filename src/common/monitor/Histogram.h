@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <vector>
 #include <cinttypes>
 #include <cstddef>
+#include <vector>
 
 class Hists {
 public:
@@ -43,7 +43,7 @@ public:
   void bincluster(uint32_t sum);
 
   bool isEmpty() const;
-  size_t hit_count() const;
+  size_t hitCount() const;
   size_t cluster_count() const;
 
   size_t bin_width() const;

@@ -11,7 +11,7 @@ TEST_F(PoolAllocatorTest, Small_Empty) {
   using AllocConfig = PoolAllocatorConfig<int, sizeof(int) * 1, 1, true>;
   AllocConfig::PoolType pool;
   PoolAllocator<AllocConfig> alloc(pool);
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(PoolAllocatorTest, Small_1) {
@@ -23,7 +23,7 @@ TEST_F(PoolAllocatorTest, Small_1) {
     v.push_back(1);
     ASSERT_TRUE(v[0] == 1);
   }
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(PoolAllocatorTest, Small_OverflowSlotSize) {
@@ -42,7 +42,7 @@ TEST_F(PoolAllocatorTest, Small_OverflowSlotSize) {
     ASSERT_EQ(pool.Contains(v.data()), false);
     ASSERT_EQ(pool.Stats.MallocFallbackCount, 1);
   }
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(PoolAllocatorTest, Small_OverflowPoolCapacity) {
@@ -67,7 +67,7 @@ TEST_F(PoolAllocatorTest, Small_OverflowPoolCapacity) {
     ASSERT_EQ(pool.Contains(v3.data()), false);
     ASSERT_EQ(pool.Stats.MallocFallbackCount, 2);
   }
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(PoolAllocatorTest, Small_2) {
@@ -82,7 +82,7 @@ TEST_F(PoolAllocatorTest, Small_2) {
     ASSERT_TRUE(v[0] == 1);
     ASSERT_TRUE(v[1] == 2);
   }
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(PoolAllocatorTest, Share_2) {
@@ -108,5 +108,5 @@ TEST_F(PoolAllocatorTest, Share_2) {
     ASSERT_EQ(v2[0], 2);
   }
   ASSERT_EQ(pool.NumSlotsUsed, 0);
-  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }

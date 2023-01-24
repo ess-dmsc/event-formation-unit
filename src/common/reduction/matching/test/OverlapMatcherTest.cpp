@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
 #include <common/reduction/matching/OverlapMatcher.h>
 #include <common/testutils/TestBase.h>
@@ -8,15 +8,16 @@ protected:
   ClusterContainer x, y;
   OverlapMatcher matcher{600, 0, 1};
 
-  void add_cluster(ClusterContainer &ret, uint8_t plane,
-                   uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,
-                   uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+  void add_cluster(ClusterContainer &ret, uint8_t plane, uint16_t coord_start,
+                   uint16_t coord_end, uint16_t coord_step, uint64_t time_start,
+                   uint64_t time_end, uint64_t time_step) {
     Cluster c;
     Hit e;
     e.plane = plane;
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.coordinate = coord_start; e.coordinate <= coord_end; e.coordinate += coord_step)
+      for (e.coordinate = coord_start; e.coordinate <= coord_end;
+           e.coordinate += coord_step)
         c.insert(e);
     ret.push_back(c);
   }
@@ -28,9 +29,9 @@ TEST_F(OverlapMatcherTest, OneX) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
 }
 
 TEST_F(OverlapMatcherTest, OneY) {
@@ -39,9 +40,9 @@ TEST_F(OverlapMatcherTest, OneY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 110);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 110);
 }
 
 TEST_F(OverlapMatcherTest, TwoX) {
@@ -51,12 +52,12 @@ TEST_F(OverlapMatcherTest, TwoX) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
 }
 
 TEST_F(OverlapMatcherTest, TwoY) {
@@ -66,12 +67,12 @@ TEST_F(OverlapMatcherTest, TwoY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 110);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 110);
 }
 
 TEST_F(OverlapMatcherTest, OneXOneY) {
@@ -82,12 +83,12 @@ TEST_F(OverlapMatcherTest, OneXOneY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 110);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 110);
 }
 
 TEST_F(OverlapMatcherTest, OneXY) {
@@ -98,9 +99,9 @@ TEST_F(OverlapMatcherTest, OneXY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 110);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 110);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 201);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 110);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 110);
 }
 
 TEST_F(OverlapMatcherTest, TwoXY) {
@@ -113,12 +114,12 @@ TEST_F(OverlapMatcherTest, TwoXY) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().time_span(), 301);
-  EXPECT_EQ(matcher.matched_events.back().time_span(), 251);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 2010);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 3000);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 2010);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 2010);
+  EXPECT_EQ(matcher.matched_events.front().timeSpan(), 301);
+  EXPECT_EQ(matcher.matched_events.back().timeSpan(), 251);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 2010);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 3000);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 2010);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 2010);
 }
 
 TEST_F(OverlapMatcherTest, JustIntside) {
@@ -159,7 +160,8 @@ TEST_F(OverlapMatcherTest, DontForce) {
   matcher.match(false);
   EXPECT_EQ(matcher.matched_events.size(), 0);
 
-  // \todo improve this. Not clear if the latency horizon is working as intended
+  /// \todo improve this. Not clear if the latency horizon is working as
+  /// intended
 
   x.clear();
   add_cluster(x, 0, 0, 10, 1, 2010, 2200, 1);

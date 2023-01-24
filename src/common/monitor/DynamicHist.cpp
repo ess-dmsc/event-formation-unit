@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/monitor/DynamicHist.h>
 #include <fmt/format.h>
@@ -33,7 +33,7 @@ std::string DynamicHist::visualize(bool non_empty_only) const {
   std::string largesti = fmt::format("{}", end);
   std::string pad = "{:<" + fmt::format("{}", largesti.size()) + "}";
 
-  // \todo parametrize this
+  /// \todo parametrize this
   size_t nstars{60};
 
   std::stringstream ss;

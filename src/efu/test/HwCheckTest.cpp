@@ -1,12 +1,12 @@
-/** Copyright (C) 2019 European Spallation Source */
+// Copyright (C) 2019 European Spallation Source
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 //===----------------------------------------------------------------------===//
 
-#include <efu/HwCheck.h>
 #include <common/testutils/TestBase.h>
+#include <efu/HwCheck.h>
 #include <vector>
 
 class HwCheckTest : public TestBase {
@@ -15,9 +15,9 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(HwCheckTest, HwCheckPass) {
-  std::vector<std::string> IgnoredInterfaces {"0", "00", "br-"};
+  std::vector<std::string> IgnoredInterfaces{"0", "00", "br-"};
   HwCheck check;
   bool pass = check.checkMTU(IgnoredInterfaces, true);
   ASSERT_TRUE(pass);

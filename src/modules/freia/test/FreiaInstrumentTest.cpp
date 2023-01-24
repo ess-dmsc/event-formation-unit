@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -13,7 +13,7 @@
 #include <string.h>
 
 using namespace Freia;
-
+// clang-format off
 std::string ConfigFile{"deleteme_freia_instr_config.json"};
 std::string ConfigStr = R"(
   {
@@ -58,8 +58,7 @@ std::string ConfigStr = R"(
 
     "MaxPulseTimeNS" : 71428570,
     "MaxGapWire"  : 0,
-    "MaxGapStrip" : 0,
-    "TimeBoxNs" : 2010
+    "MaxGapStrip" : 0
   }
 )";
 
@@ -116,15 +115,22 @@ std::vector<uint8_t> MaxRingMaxFENErrors{
 };
 
 std::vector<uint8_t> MappingError{
-    // First readout
-    0x00, 0x00, 0x14, 0x00, // Data Header - Ring 24 is greater than max ring number
+    // First readout - RingMappingErrors
+    0x16, 0x00, 0x14, 0x00, // Data Header - Ring 22 is reserved for monitor
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x04, 0x10, // GEO 0, TDC 0, VMM 2, CH 16
 
-    // Second readout
-    0x01, 0x00, 0x14, 0x00, // Data Header - FEN 10 is greater than max FEN number
+    // Second readout - FENMappingError
+    0x00, 0x0F, 0x14, 0x00, // Data Header - FEN 15 is greater config
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 17 ticka
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x00, 0x04, 0x10, // GEO 0, TDC 0, VMM 2, CH 16
+
+    // Third readout - HybridMappingError
+    0x01, 0x02, 0x14, 0x00, // Data Header - Ring1, FEN 2 is bad config
     0x00, 0x00, 0x00, 0x00, // Time HI 0 s
     0x01, 0x00, 0x00, 0x00, // Time LO 17 ticka
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
@@ -146,26 +152,27 @@ std::vector<uint8_t> GoodEvent{
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x01, 0x10, // GEO 0, TDC 0, VMM 1, CH 16
 };
+// clang-format on
 
 class FreiaInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
-  FreiaSettings ModuleSettings;
-  EV42Serializer *serializer;
+  BaseSettings Settings;
+  EV44Serializer *serializer;
   FreiaInstrument *freia;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    ModuleSettings.ConfigFile = ConfigFile;
-    serializer = new EV42Serializer(115000, "freia");
+    Settings.ConfigFile = ConfigFile;
+    serializer = new EV44Serializer(115000, "freia");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));
 
-    freia = new FreiaInstrument(counters, ModuleSettings, serializer);
+    freia = new FreiaInstrument(counters, Settings, serializer);
     freia->setSerializer(serializer);
     freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
   }
@@ -183,16 +190,16 @@ protected:
 
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
-  ModuleSettings.CalibFile = CalibFile;
-  FreiaInstrument Freia(counters, ModuleSettings, serializer);
+  Settings.CalibFile = CalibFile;
+  FreiaInstrument Freia(counters, Settings, serializer);
   counters.VMMStats = freia->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
 TEST_F(FreiaInstrumentTest, DumpTofile) {
-  ModuleSettings.FilePrefix = "deleteme_";
-  FreiaInstrument FreiaDump(counters, ModuleSettings, serializer);
+  Settings.DumpFilePrefix = "deleteme_";
+  FreiaInstrument FreiaDump(counters, Settings, serializer);
   FreiaDump.setSerializer(serializer);
 
   makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
@@ -207,14 +214,18 @@ TEST_F(FreiaInstrumentTest, DumpTofile) {
 TEST_F(FreiaInstrumentTest, MappingError) {
   makeHeader(freia->ESSReadoutParser.Packet, MappingError);
   auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Res, 3);
   counters.VMMStats = freia->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
-
+  ASSERT_EQ(counters.HybridMappingErrors, 0);
+  ASSERT_EQ(counters.RingMappingErrors, 0);
+  ASSERT_EQ(counters.FENMappingErrors, 0);
 
   freia->processReadouts();
-  ASSERT_EQ(counters.HybridMappingErrors, 2);
+  ASSERT_EQ(counters.HybridMappingErrors, 1);
+  ASSERT_EQ(counters.RingMappingErrors, 1);
+  ASSERT_EQ(counters.FENMappingErrors, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
 }
@@ -306,7 +317,7 @@ TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
   Events.push_back(TestEvent);
   freia->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.TOFErrors, 1);
+  ASSERT_EQ(counters.MaxTOFErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, NoEvents) {

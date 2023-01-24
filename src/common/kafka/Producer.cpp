@@ -9,22 +9,30 @@
 
 #include <cassert>
 #include <common/debug/Log.h>
-#include <common/kafka/Producer.h>
 #include <common/debug/Trace.h>
+#include <common/kafka/Producer.h>
 #include <common/system/gccintel.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Producer::setConfig(std::string Key, std::string Value) {
+RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
+                                              std::string Value) {
+  // Don't log passwords
+  std::string LogValue{Value};
+  if (Key == "sasl.password") {
+    LogValue = "<REDACTED>";
+  }
+
+  XTRACE(INIT, ALW, "%s %s", Key.c_str(), LogValue.c_str());
   RdKafka::Conf::ConfResult configResult;
   configResult = Config->set(Key, Value, ErrorMessage);
-  LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, Value);
+  LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, LogValue);
   if (configResult != RdKafka::Conf::CONF_OK) {
-    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, Value);
+    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, LogValue);
+    stats.config_errors++;
   }
-  assert(configResult ==
-         RdKafka::Conf::CONF_OK); // compiles away in release build
+  return configResult;
 }
 
 ///
@@ -46,7 +54,8 @@ void Producer::event_cb(RdKafka::Event &event) {
 }
 
 ///
-Producer::Producer(std::string Broker, std::string Topic)
+Producer::Producer(std::string Broker, std::string Topic,
+                   std::vector<std::pair<std::string, std::string>> &Configs)
     : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
@@ -62,12 +71,11 @@ Producer::Producer(std::string Broker, std::string Topic)
     return;
   }
 
-  setConfig("metadata.broker.list", Broker);
-  setConfig("message.max.bytes", "10000000");
-  setConfig("fetch.message.max.bytes", "10000000");
-  setConfig("message.copy.max.bytes", "10000000");
-  setConfig("queue.buffering.max.ms", "100");
-  setConfig("api.version.request", "true");
+  setConfig("metadata.broker.list", Broker); // can be overwritten
+
+  for (auto &Config : Configs) {
+    setConfig(Config.first, Config.second);
+  }
 
   if (Config->set("event_cb", this, ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
@@ -91,7 +99,7 @@ Producer::Producer(std::string Broker, std::string Topic)
   }
 }
 
-/** called to actually send data to Kafka cluster */
+// called to actually send data to Kafka cluster
 int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) {
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
@@ -102,6 +110,8 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
       TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
       const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
       MessageTimestampMS, NULL);
+
+  stats.produce_calls++;
 
   KafkaProducer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {

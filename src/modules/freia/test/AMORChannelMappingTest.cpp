@@ -9,7 +9,7 @@
 
 using namespace Freia;
 
-class GeometryTest : public TestBase {
+class AMORChannelMappingTest : public TestBase {
 protected:
   AMORGeometry Geom;
   uint16_t Cassette1{1};
@@ -19,7 +19,7 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(GeometryTest, Coordinates) {
+TEST_F(AMORChannelMappingTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
   }
@@ -30,18 +30,19 @@ TEST_F(GeometryTest, Coordinates) {
   uint YOffsetJumps = 32;
 
   for (unsigned int i = YCoordMinChannel; i < YCoordMaxChannel; i++) {
-    for (unsigned int YOffset = 0; YOffset < MaxYOffset; YOffset += YOffsetJumps) {
+    for (unsigned int YOffset = 0; YOffset < MaxYOffset;
+         YOffset += YOffsetJumps) {
       ASSERT_EQ(Geom.yCoord(YOffset, VMMY, i), YCoordMaxChannel - i + YOffset);
     }
   }
 }
 
-TEST_F(GeometryTest, XCoordErrors) {
+TEST_F(AMORChannelMappingTest, XCoordErrors) {
   ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
   ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
-TEST_F(GeometryTest, YCoordErrors) {
+TEST_F(AMORChannelMappingTest, YCoordErrors) {
   ASSERT_EQ(Geom.yCoord(1, VMMX, 32), Geom.InvalidCoord); // bad VMM
   ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
   ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel

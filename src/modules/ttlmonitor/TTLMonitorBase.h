@@ -10,30 +10,22 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <ttlmonitor/Counters.h>
 
 namespace TTLMonitor {
 
-struct TTLMonitorSettings {
-  std::string ConfigFile{""};
-  std::string FilePrefix{""};
-  int ReduceEvents{1};
-};
-
-
 class TTLMonitorBase : public Detector {
 public:
-  TTLMonitorBase(BaseSettings const &settings, struct TTLMonitorSettings &LocalTTLMonitorSettings);
+  TTLMonitorBase(BaseSettings const &settings);
   ~TTLMonitorBase() = default;
 
   void input_thread();
   void processing_thread();
 
 protected:
-  struct Counters Counters{};
-  TTLMonitorSettings TTLMonitorModuleSettings;
-  EV42Serializer *Serializer;
+  struct Counters Counters {};
+  std::vector<EV44Serializer> Serializers;
 };
 
-}
+} // namespace TTLMonitor

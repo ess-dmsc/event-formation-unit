@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/RuntimeStat.h>
 #include <common/testutils/TestBase.h>
@@ -50,8 +50,6 @@ TEST_F(RuntimeStatTest, CounterGood) {
   res = stats.getRuntimeStatusMask({CtrA, CtrB, CtrC});
   EXPECT_EQ(res, 0);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

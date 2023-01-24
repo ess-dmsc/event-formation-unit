@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/reduction/analysis/AbstractAnalyzer.h>
 
@@ -9,11 +9,11 @@ protected:
   Hit hit;
   Cluster cluster;
   Event event;
-  void SetUp() override { }
-  void TearDown() override { }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
-// \todo tests needed
+/// \todo tests needed
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

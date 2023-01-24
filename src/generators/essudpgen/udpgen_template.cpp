@@ -11,11 +11,17 @@
 #include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <common/system/Socket.h>
-#include <modules/cspec/generators/ReadoutGenerator.h>
+#include <modules/caen/generators/LokiReadoutGenerator.h>
 #include <modules/cspec/generators/LETReadoutGenerator.h>
+#include <modules/cspec/generators/ReadoutGenerator.h>
 #include <modules/freia/generators/ReadoutGenerator.h>
-#include <modules/loki/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/MultiHitReadoutGenerator.h>
+#include <modules/nmx/generators/ReadoutGenerator.h>
+#include <modules/nmx/generators/SmileReadoutGenerator.h>
+#include <modules/nmx/generators/TrackReadoutGenerator.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/ttlmonitor/geometry/Parser.h>
+
 #include <stdio.h>
 // GCOVR_EXCL_START
 
@@ -32,7 +38,7 @@ int main(int argc, char *argv[]) {
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Type, "Detector type id");
+  app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
   app.add_option("-r, --rings", Settings.NRings,
                  "Number of Rings used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
@@ -62,6 +68,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef FREIA_GENERATOR
   Freia::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::FREIA;
 #endif
 
 #ifdef CSPEC_GENERATOR
@@ -74,16 +81,47 @@ int main(int argc, char *argv[]) {
   Settings.Type = ESSReadout::Parser::DetectorType::CSPEC;
 #endif
 
-  #ifdef LOKI_GENERATOR
-   Loki::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-   gen.setReadoutDataSize(sizeof(Loki::DataParser::LokiReadout));
-   Settings.Type = ESSReadout::Parser::DetectorType::Loki4Amp;
-  #endif
+#ifdef LOKI_GENERATOR
+  Caen::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
+#endif
 
-  #ifdef TTLMON_GENERATOR
-   TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
-   Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
-  #endif
+#ifdef TTLMON_GENERATOR_VMM
+  TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+#endif
+
+#ifdef TTLMON_GENERATOR
+  TTLMonitor::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  gen.setReadoutDataSize(sizeof(TTLMonitor::Parser::Data));
+  Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+#endif
+
+#ifdef NMX_GENERATOR
+  Nmx::ReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_SMILE_GENERATOR
+  Nmx::SmileReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_MULTIHIT_GENERATOR
+  Nmx::MultiHitReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+#ifdef NMX_TRACK_GENERATOR
+  Settings.TicksBtwReadouts = 1;
+  Nmx::TrackReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+  Settings.Type = ESSReadout::Parser::DetectorType::NMX;
+#endif
+
+  if (Settings.TypeOverride != 0) {
+    Settings.Type = Settings.TypeOverride;
+  }
 
   do {
     uint16_t DataSize = gen.makePacket();

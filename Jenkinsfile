@@ -5,7 +5,7 @@ import ecdcpipeline.PipelineBuilder
 project = "event-formation-unit"
 module_src="${project}/src/modules/"
 coverage_on = "centos7"
-clangformat_os = "debian10"
+clangformat_os = "debian11"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -21,10 +21,10 @@ archive_what = "centos7-release"
  ]]);
 
 container_build_nodes = [
-  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
-  'debian10': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
-  'ubuntu2004': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2004')
+  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
+  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
+  'debian11': ContainerBuildNode.getDefaultContainerBuildNode('debian11'),
+  'ubuntu2204': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2204')
 ]
 
 def error_messages = []
@@ -88,7 +88,6 @@ builders = pipeline_builder.createBuilders { container ->
                 cd ${project}
                 mkdir build
                 cd build
-                conan remote add --insert 0 ess-dmsc-local ${local_conan_server}
                 conan install --build=outdated ..
             """
         }  // stage
@@ -113,7 +112,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                 cd ${project}/build
                 make --version
-                make -j${pipeline_builder.numCpus} all unit_tests benchmark
+                make -j${pipeline_builder.numMakeJobs} all unit_tests benchmark
                 cd ../utils/udpredirect
                 make
             """
@@ -123,11 +122,12 @@ builders = pipeline_builder.createBuilders { container ->
     if (container.key == clangformat_os) {
         pipeline_builder.stage("${container.key}: cppcheck") {
         try {
-                def test_output = "cppcheck.txt"
+                def test_output = "cppcheck.xml"
                 // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/modules/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
+                                cppcheck --version
+                                cppcheck  -j${pipeline_builder.numMakeJobs} -v `./cppcheck_exclude_tests.sh src` --platform=unix64  --force --enable=all -I ./src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ./src --output-file=${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"
@@ -136,7 +136,7 @@ builders = pipeline_builder.createBuilders { container ->
                 throw e
             }
         }  // stage
-        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+        recordIssues(tools: [cppCheck(pattern: 'cppcheck.xml')])
     }
 
     if (container.key == coverage_on) {
@@ -147,9 +147,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                         cd ${project}/build
                         . ./activate_run.sh
-                        make -j${pipeline_builder.numCpus} runefu
+                        make -j${pipeline_builder.numMakeJobs} runefu
                         make coverage
-                        echo skipping make -j${pipeline_builder.numCpus} valgrind
+                        echo skipping make -j${pipeline_builder.numMakeJobs} valgrind
                     """
                 container.copyFrom("${project}", '.')
             } catch(e) {
@@ -194,14 +194,11 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
                                 cp -r ${project}/build/generators archive/event-formation-unit
-                                cp -r ${project}/build/modules archive/event-formation-unit
                                 cp -r ${project}/build/lib archive/event-formation-unit
                                 cp -r ${project}/build/licenses archive/event-formation-unit
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${module_src}/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${module_src}/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
 
@@ -236,6 +233,7 @@ def get_macos_pipeline()
 
                     // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
                     sh "conan remove -f FlatBuffers/*"
+                    sh "conan remove -f OpenSSL/*"
                     sh "conan remove -f cli11/*"
 
                     abs_dir = pwd()
@@ -315,22 +313,26 @@ if (env.CHANGE_ID) {
     // This is a pull request build
     node('inttest') {
         stage('Integration Test') {
+            sh "rm -rf build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/integrationtest.py
             """
         }  // stage
     }  // node
     node('inttest'){
         stage('Performance Test'){
+            sh "rm -rf build"
             checkout scm
             unstash 'event-formation-unit-centos7.tar.gz'
             sh "tar xzvf event-formation-unit-centos7.tar.gz"
+            sh "mv event-formation-unit build"
             sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./event-formation-unit/lib/
+                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
                 python3 -u ./test/performancetest.py
             """
         }

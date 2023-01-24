@@ -24,12 +24,10 @@
 
 class RuntimeStat {
 public:
-
-  RuntimeStat(std::vector<int64_t> Counters) :
-     OldStats(Counters) {
-       if (Counters.size() == 0) {
-         throw std::runtime_error("RuntimeStat array must have nonzero size");
-       }
+  RuntimeStat(std::vector<int64_t> Counters) : OldStats(Counters) {
+    if (Counters.size() == 0) {
+      throw std::runtime_error("RuntimeStat array must have nonzero size");
+    }
   }
 
   /// \brief Get  vector of current counters and compare with old values
@@ -44,7 +42,7 @@ public:
 
     for (int i = 0; i < (int)Stats.size(); i++) {
       if (Stats[i] - OldStats[i] != 0) {
-        Status |= 1<<i; // Set stage flag
+        Status |= 1 << i; // Set stage flag
       }
       OldStats[i] = Stats[i];
     }

@@ -1,4 +1,4 @@
-/** Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file Cluster.h
@@ -22,8 +22,10 @@
 class Cluster {
 public:
   /// \todo should be protected?
-  /// \note This variable is left public, because event reduction/analysis strategies
-  ///       must be able to sort hits in their preferred way without copying the contents
+  /// \note This variable is left public, because event reduction/analysis
+  /// strategies
+  ///       must be able to sort hits in their preferred way without copying the
+  ///       contents
   HitVector hits;
 
 public:
@@ -64,83 +66,91 @@ public:
   uint8_t plane_header() const { return plane_; }
 
   /// \returns number of hits in cluster
-  size_t hit_count() const;
+  size_t hitCount() const;
 
   /// \returns lowest coordinate, undefined in case of empty cluster
-  uint16_t coord_start() const;
+  uint16_t coordStart() const;
   /// \returns highest coordinate, undefined in case of empty cluster
-  uint16_t coord_end() const;
+  uint16_t coordEnd() const;
+  /// \returns earliest coordinate added to cluster, undefined in case of empty
+  /// cluster
+  uint16_t coordEarliest() const;
+  /// \returns latest coordinate added to cluster, undefined in case of empty
+  /// cluster
+  uint16_t coordLatest() const;
   /// \returns coordinate span, 0 in case of empty cluster
-  uint16_t coord_span() const;
+  uint16_t coordSpan() const;
 
   /// \returns earliest timestamp, undefined in case of empty cluster
-  uint64_t time_start() const;
+  uint64_t timeStart() const;
   /// \returns latest timestamp, undefined in case of empty cluster
-  uint64_t time_end() const;
+  uint64_t timeEnd() const;
   /// \returns time span, 0 in case of empty cluster
-  uint64_t time_span() const;
+  uint64_t timeSpan() const;
 
   /// \returns pre-calculated sum of each hit's weight
-  double weight_sum() const;
+  double weightSum() const;
 
- /// \returns pre-calculated sum of each hit's weight squared
-  double weight2_sum() const;
+  /// \returns pre-calculated sum of each hit's weight squared
+  double weight2Sum() const;
 
   /// \returns pre-calculated sum of each hit's weight*coord
-  double coord_mass() const;
+  double coordMass() const;
   /// \returns center of mass in the coordinate dimension
   ///          can be NaN if weight sum is zero
-  double coord_center() const;
+  double coordCenter() const;
 
   /// \returns pre-calculated sum of each hit's weight*time
-  double time_mass() const;
+  double timeMass() const;
   /// \returns center of mass in the time dimension
   ///          can be NaN if weight sum is zero
-  double time_center() const;
+  double timeCenter() const;
 
   /// \returns pre-calculated sum of each hit's weight*weigtht*coord
-  double coord_mass2() const;
+  double coordMass2() const;
   /// \returns center of masss quared in the coordinate dimension
   ///          can be NaN if weight sum is zero
-  double coord_center2() const;
+  double coordCenter2() const;
 
   /// \returns pre-calculated sum of each hit's weight*weight*time
-  double time_mass2() const;
+  double timeMass2() const;
   /// \returns center of mass squared in the time dimension
   ///          can be NaN if weight sum is zero
-  double time_center2() const;
+  double timeCenter2() const;
 
- /// \returns utpc coordinate, optionally weighted with charge
-  double coord_utpc(bool weighted) const;
+  /// \returns utpc coordinate, optionally weighted with charge
+  double coordUtpc(bool weighted) const;
 
   /// \brief calculates the overlapping time span of two clusters
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
-  uint64_t time_overlap(const Cluster &other) const;
+  uint64_t timeOverlap(const Cluster &other) const;
 
   /// \brief calculates the time gap of two clusters
   /// \param other cluster to be compared
   /// \returns time gap between clusters
-  uint64_t time_gap(const Cluster &other) const;
+  uint64_t timeGap(const Cluster &other) const;
 
   /// \returns string describing cluster bounds and weights
   /// \param verbose also print hits
   std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes cluster with "text graphics"
-  std::string visualize(const std::string &prepend,
-                        uint8_t downsample_time = 0,
+  std::string visualize(const std::string &prepend, uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
 private:
-  /// \todo uint8 might not be enough, if detectors have more independent modules/segments
-  uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
+  /// \todo uint8 might not be enough, if detectors have more independent
+  /// modules/segments
+  uint8_t plane_{Hit::InvalidPlane}; ///< plane identity of cluster
 
-  uint16_t coord_start_ {Hit::InvalidCoord};
-  uint16_t coord_end_ {0};
+  uint16_t coord_start_{Hit::InvalidCoord};
+  uint16_t coord_end_{0};
+  uint16_t coord_earliest_{Hit::InvalidCoord};
+  uint16_t coord_latest_{Hit::InvalidCoord};
 
-  uint64_t time_start_ {0xFFFFFFFFFFFFFFFFULL};
-  uint64_t time_end_ {0};
+  uint64_t time_start_{0xFFFFFFFFFFFFFFFFULL};
+  uint64_t time_end_{0};
 
   double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight

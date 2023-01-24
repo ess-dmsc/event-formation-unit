@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file EndMatcher.h
@@ -19,7 +19,7 @@ public:
   /// Inherit constructor
   using AbstractMatcher::AbstractMatcher;
 
-  // \todo document this
+  /// \todo document this
   void set_max_delta_time(uint64_t max_delta_time);
 
   /// \brief Match queued up clusters into events.
@@ -29,7 +29,7 @@ public:
   void match(bool flush) override;
 
   /// \brief print configuration of EndMatcher
-  std::string config(const std::string& prepend) const override;
+  std::string config(const std::string &prepend) const override;
 
 private:
   uint64_t max_delta_time_{0};

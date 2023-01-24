@@ -19,7 +19,7 @@ namespace ESSReadout {
 
 class Hybrid {
 public:
-  static constexpr int NumVMMs{2};          // #VMMs per cassette
+  static constexpr int NumVMMs{2};          // #VMMs per hybrid
   static constexpr unsigned int IdSize{32}; // chars
 
   static bool isAvailable(std::string NewId, std::vector<Hybrid> &Hybrids) {
@@ -35,10 +35,10 @@ public:
 
   // indicates if hybrid was initialised in config file
   bool Initialised{false};
-  
+
   std::string HybridId{""};
   uint8_t HybridNumber;
-  
+
   // holds calibration info for each VMM ASIC on hybrid
   std::vector<VMM3Calibration> VMMs{NumVMMs};
 
@@ -46,7 +46,7 @@ public:
   uint16_t XOffset{0};
   uint16_t YOffset{0};
 
-  //defines the minimum ADC value threshold, under this is discarded as noise
+  // defines the minimum ADC value threshold, under this is discarded as noise
   uint16_t MinADC{0};
 }; // class Hybrid
 

@@ -31,8 +31,8 @@ size_t ReaderHits::read(char *buf) {
       file->readAt(current_, size);
       memcpy(buf, file->Data.data(), sizeof(Hit) * size);
     } catch (std::exception &e) {
-      std::cout << "<ReaderHits> failed to read slab ("
-                << current_ << ", " << (current_ + size) << ")"
+      std::cout << "<ReaderHits> failed to read slab (" << current_ << ", "
+                << (current_ + size) << ")"
                 << " max=" << total_ << "\n"
                 << hdf5::error::print_nested(e, 1) << std::endl;
     }
@@ -42,5 +42,5 @@ size_t ReaderHits::read(char *buf) {
   return sizeof(Hit) * size;
 }
 
-}
+} // namespace Gem
 // GCOVR_EXCL_STOP

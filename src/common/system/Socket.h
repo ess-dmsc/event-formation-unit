@@ -14,10 +14,10 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <sys/socket.h>
 #include <netinet/ip.h>
-#include <unistd.h>
 #include <string>
+#include <sys/socket.h>
+#include <unistd.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {
@@ -56,14 +56,15 @@ public:
   void setMulticastTTL();
 
   /// Allow reuse of ip and port, send igmp membership info
-  //void setMulticastReceive(std::string MultiCastAddress);
+  // void setMulticastReceive(std::string MultiCastAddress);
   void setMulticastReceive();
 
-  /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
+  /// Attempt to specify the socket receive and transmit buffer sizes (for
+  /// performance)
   int setBufferSizes(int sndbuf, int rcvbuf);
 
   /// Get tx and rx buffer sizes
-  void getBufferSizes(int & sendBuffer, int & receiveBuffer);
+  void getBufferSizes(int &sendBuffer, int &receiveBuffer);
 
   /// Check that buffer sizes meet expectations
   void checkRxBufferSizes(std::int32_t MinRxBufferSize);
@@ -74,10 +75,12 @@ public:
   /// Set a timeout for recv() function rather than wait for ever
   int setRecvTimeout(int seconds, int usecs);
 
-  /// Set socket option (Mac only) for not sending SIGPIPE on transmitting on invalid socket
+  /// Set socket option (Mac only) for not sending SIGPIPE on transmitting on
+  /// invalid socket
   int setNOSIGPIPE();
 
-  /// Specify ip address of interface to receive data on and port number to listen on
+  /// Specify ip address of interface to receive data on and port number to
+  /// listen on
   void setLocalSocket(const std::string ipaddr, int port);
 
   /// Specify ip address and port number of remote end
@@ -104,7 +107,7 @@ private:
   int SocketFileDescriptor{-1};
   bool SocketIsGood{true};
   int SockOptFlagOn{1};
-  struct ip_mreq  MulticastRequest;
+  struct ip_mreq MulticastRequest;
   std::string RemoteIp;
   int RemotePort;
   struct sockaddr_in remoteSockAddr;
@@ -128,7 +131,8 @@ public:
 /// UDP transmitter needs to specify both local and remote socket
 class UDPTransmitter : public Socket {
 public:
-  UDPTransmitter(Endpoint Local, Endpoint Remote) : Socket(Socket::SocketType::UDP) {
+  UDPTransmitter(Endpoint Local, Endpoint Remote)
+      : Socket(Socket::SocketType::UDP) {
     this->setLocalSocket(Local.IpAddress, Local.Port);
     this->setRemoteSocket(Remote.IpAddress, Remote.Port);
   };

@@ -1,11 +1,11 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
+// Copyright (C) 2019-2022 European Spallation Source ERIC
 
 #include <algorithm>
+#include <common/testutils/TestBase.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <memory>
-#include <common/testutils/TestBase.h>
 
-using namespace Loki;
+using namespace Caen;
 
 class PanelGeometryTest : public TestBase {
 protected:
@@ -18,7 +18,7 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(PanelGeometryTest, Constructor) {
   PanelGeometry PG(TZ4, TubesXY8, StrawOffset0);
   const uint8_t TubeGroup{0};

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 project("event-formation-unit")
 
 #=============================================================================
@@ -90,6 +90,9 @@ add_custom_target(valgrind DEPENDS ${valgrind_targets})
 add_custom_target(benchmark DEPENDS ${benchmark_targets})
 add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 
+add_custom_target(cppcheck COMMAND cppcheck  -v `../cppcheck_exclude_tests.sh ../src` --platform=unix64  --force --enable=all -I ../src '--template={file},{line},{severity},{id},{message}' --xml --xml-version=2 ../src --output-file=cppcheck.xml)
+add_custom_target(cppcheckhtml COMMAND cppcheck-htmlreport --file cppcheck.xml --report-dir cppcheckhtml)
+
 #=============================================================================
 # Finalize coverage
 #=============================================================================
@@ -116,9 +119,13 @@ add_custom_target(hints
   COMMAND echo "command."
   COMMAND echo "--------------------------------------------------------------------------------"
   COMMAND echo "Run unit tests:                         make runtest"
+  COMMAND echo "Build unit tests:                       make unit_tests"
   COMMAND echo "Run memcheck  tests:                    make valgrind"
   COMMAND echo "Run coverage tests:                     make coverage"
   COMMAND echo "Verbose output:                         make VERBOSE=1"
+  COMMAND echo ""
+  COMMAND echo "Run cppcheck:                           make cppcheck"
+  COMMAND echo "Generate cppcheck html report:          make cppcheckhtml"
   COMMAND echo ""
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"

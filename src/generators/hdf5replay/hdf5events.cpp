@@ -10,7 +10,8 @@
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <h5cpp/hdf5.hpp>
 #include <unistd.h>
@@ -19,9 +20,10 @@ struct {
   std::string FileName;
   std::string KafkaBroker{"172.30.242.20:9092"};
   std::string KafkaTopic{"freia_detector"};
-  bool DryRun{false}; // Do not stream to Kafka
-  bool Verbose{false}; // Do not print values
-  int KafkaBufferSize {124000}; /// entries ~ 1MB
+  std::string KafkaConfigFile{""};
+  bool DryRun{false};          // Do not stream to Kafka
+  bool Verbose{false};         // Do not print values
+  int KafkaBufferSize{124000}; /// entries ~ 1MB
 } Config;
 
 CLI::App app{"Read event_id from hdf5 files and send to Kafka"};
@@ -29,20 +31,24 @@ CLI::App app{"Read event_id from hdf5 files and send to Kafka"};
 int main(int argc, char *argv[]) {
   app.add_option("-f, --file", Config.FileName, "FileWriter HDF5");
   app.add_option("-b, --broker", Config.KafkaBroker, "Kafka broker");
+  app.add_option("--kafka_config", Config.KafkaConfigFile,
+                 "Kafka configuration file");
   app.add_option("-t, --topic", Config.KafkaTopic, "Kafka topic");
   app.add_flag("-v, --verbose", Config.Verbose, "Print pixel and tof");
   app.add_flag("-n, --dry-run", Config.DryRun, "Do not produce");
   CLI11_PARSE(app, argc, argv);
 
-  Producer eventprod(Config.KafkaBroker, Config.KafkaTopic);
+  KafkaConfig KafkaCfg(Config.KafkaConfigFile);
+
+  Producer eventprod(Config.KafkaBroker, Config.KafkaTopic, KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(Config.KafkaBufferSize, "hdf5pixel", Produce);
+  EV44Serializer flatbuffer(Config.KafkaBufferSize, "hdf5pixel", Produce);
 
   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-  flatbuffer.pulseTime(efu_time);
+  flatbuffer.checkAndSetReferenceTime(efu_time);
 
   auto HDF5File = hdf5::file::open(Config.FileName);
   auto RootGroup = HDF5File.root();

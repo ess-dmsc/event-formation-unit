@@ -18,7 +18,8 @@ namespace Cspec {
 
 void Config::applyConfig() {
   try {
-    CSPECFileParameters.DefaultMinADC = root["DefaultMinADC"].get<std::uint16_t>();
+    CSPECFileParameters.DefaultMinADC =
+        root["DefaultMinADC"].get<std::uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
   }
@@ -57,32 +58,31 @@ void Config::applyConfig() {
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
-      
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =
           root["Vessel_Config"][VesselID]["Rotation"];
-     
+
       try {
-        Short[Ring][FEN][LocalHybrid] = root["Vessel_Config"][VesselID]["Short"];
+        Short[Ring][FEN][LocalHybrid] =
+            root["Vessel_Config"][VesselID]["Short"];
       } catch (...) {
         Short[Ring][FEN][LocalHybrid] = false;
       }
 
       try {
-       Hybrid.XOffset = root["Vessel_Config"][VesselID]["XOffset"];
+        Hybrid.XOffset = root["Vessel_Config"][VesselID]["XOffset"];
       } catch (...) {
         Hybrid.XOffset = 0;
       }
 
       try {
-       Hybrid.YOffset = root["Vessel_Config"][VesselID]["YOffset"];
+        Hybrid.YOffset = root["Vessel_Config"][VesselID]["YOffset"];
       } catch (...) {
         Hybrid.YOffset = 0;
       }
 
       try {
-        Hybrid.MinADC =
-            root["Vessel_Config"][VesselID]["MinADC"];
+        Hybrid.MinADC = root["Vessel_Config"][VesselID]["MinADC"];
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
@@ -94,7 +94,7 @@ void Config::applyConfig() {
     // assumed 6 * 16 wires per column and 2 columns per vessel
     try {
       uint8_t NumGrids = 0;
-      for (auto &Vessel : root["Vessel_Config"]) {
+      for (auto const &Vessel : root["Vessel_Config"]) {
         NumGrids = Vessel["NumGrids"];
         NumPixels += NumGrids * 6 * 16 * 2;
       }
@@ -103,9 +103,9 @@ void Config::applyConfig() {
     }
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}", FileName);
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
+        FileName);
     throw std::runtime_error("Invalid Json file");
-    return;
   }
 }
 

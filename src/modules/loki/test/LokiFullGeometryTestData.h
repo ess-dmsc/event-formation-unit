@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021-2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <cstdint>
 #include <vector>
 
 struct NexusGeometry {
@@ -17,7 +18,7 @@ struct NexusGeometry {
   uint32_t Pixel;
 };
 
-
+// clang-format off
 std::vector<struct NexusGeometry> NGData {
   {0,0,0,0,1},
   {0,0,0,1,2},
@@ -7636,3 +7637,4 @@ std::vector<struct NexusGeometry> NGData {
   {4,47,3135,510,1605631},
   {4,47,3135,511,1605632}
 };
+// clang-format on

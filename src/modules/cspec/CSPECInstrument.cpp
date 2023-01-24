@@ -15,6 +15,7 @@
 #include <common/time/TimeString.h>
 #include <cspec/CSPECInstrument.h>
 #include <cspec/geometry/CSPECGeometry.h>
+#include <cspec/geometry/LETGeometry.h>
 #include <math.h>
 
 #undef TRC_LEVEL
@@ -24,33 +25,29 @@ namespace Cspec {
 
 /// \brief load configuration and calibration files
 CSPECInstrument::CSPECInstrument(struct Counters &counters,
-                                 // BaseSettings & EFUSettings,
-                                 CSPECSettings &moduleSettings,
-                                 EV42Serializer *serializer)
-    : counters(counters), ModuleSettings(moduleSettings),
-      Serializer(serializer) {
-  if (!ModuleSettings.FilePrefix.empty()) {
+                                 BaseSettings &settings,
+                                 EV44Serializer *serializer)
+    : counters(counters), Settings(settings), Serializer(serializer) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "cspec_" + timeString();
+        Settings.DumpFilePrefix + "cspec_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
   loadConfigAndCalib();
 
-  essgeom =
-      ESSGeometry(Conf.CSPECFileParameters.SizeX, Conf.CSPECFileParameters.SizeY, Conf.CSPECFileParameters.SizeZ, 1);
+  essgeom = ESSGeometry(Conf.CSPECFileParameters.SizeX,
+                        Conf.CSPECFileParameters.SizeY,
+                        Conf.CSPECFileParameters.SizeZ, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "CSPEC") {
     GeometryInstance = &CSPECGeometryInstance;
+  } else if (Conf.FileParameters.InstrumentGeometry == "LET") {
+    GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
-  }
-
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
@@ -69,8 +66,8 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
 
 void CSPECInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config("CSPEC", ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config("CSPEC", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
   // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
@@ -78,9 +75,18 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
-  if (ModuleSettings.CalibFile != "") {
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
+  }
+
+  if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
-    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
 
@@ -89,8 +95,9 @@ void CSPECInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -98,32 +105,34 @@ void CSPECInstrument::processReadouts(void) {
       VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
 
-    XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.VMM, readout.Channel,
-           readout.TimeLow);
+    // Convert from physical rings to logical rings
+    uint8_t Ring = readout.RingId / 2;
 
     uint8_t HybridId = readout.VMM >> 1;
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(readout.RingId, readout.FENId, HybridId); 
+
+    XTRACE(DATA, DEB,
+           "readout: Phys RingId %d, FENId %d, HybridId %d, VMM %d, Channel "
+           "%d, TimeLow %d",
+           Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
+           readout.TimeLow);
+
+    ESSReadout::Hybrid const &Hybrid =
+        Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
              "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-             readout.RingId, readout.FENId, HybridId);
+             Ring, readout.FENId, HybridId);
       counters.HybridMappingErrors++;
       continue;
     }
 
-    // Convert from physical rings to logical rings
-    // uint8_t Ring = readout.RingId/2;
     uint8_t AsicId = readout.VMM & 0x1;
     uint16_t XOffset = Hybrid.XOffset;
     uint16_t YOffset = Hybrid.YOffset;
-    bool Rotated = Conf.Rotated[readout.RingId][readout.FENId][HybridId];
-    bool Short = Conf.Short[readout.RingId][readout.FENId][HybridId];
+    bool Rotated = Conf.Rotated[Ring][readout.FENId][HybridId];
+    bool Short = Conf.Short[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
-
-    
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
@@ -167,18 +176,20 @@ void CSPECInstrument::processReadouts(void) {
     // insulated and events don't span multiples of them
     if (GeometryInstance->isWire(HybridId)) {
       XTRACE(DATA, DEB, "Is wire, calculating x and z coordinate");
-      uint16_t xAndzCoord = GeometryInstance->xAndzCoord(
-          readout.FENId, HybridId, AsicId, readout.Channel, XOffset, Rotated);
+      uint16_t xAndzCoord =
+          GeometryInstance->xAndzCoord(Ring, readout.FENId, HybridId, AsicId,
+                                       readout.Channel, XOffset, Rotated);
 
-      if (xAndzCoord == GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
+      if (xAndzCoord ==
+          GeometryInstance->InvalidCoord) { // 65535 is invalid xandzCoordinate
         XTRACE(DATA, ERR, "Invalid X and Z Coord");
         counters.MappingErrors++;
         continue;
       }
 
-      XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u", xAndzCoord,
-             readout.Channel);
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert(
+      XTRACE(DATA, DEB, "XandZ: Coord %u, Channel %u, X: %u, Z: %u", xAndzCoord,
+             readout.Channel, xAndzCoord >> 4, xAndzCoord % 16);
+      builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, xAndzCoord, ADC, 0});
 
       //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips +
@@ -189,14 +200,15 @@ void CSPECInstrument::processReadouts(void) {
       uint16_t yCoord = GeometryInstance->yCoord(
           HybridId, AsicId, readout.Channel, YOffset, Rotated, Short);
 
-      if (yCoord == GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
+      if (yCoord ==
+          GeometryInstance->InvalidCoord) { // invalid coordinate is 65535
         XTRACE(DATA, ERR, "Invalid Y Coord");
         counters.MappingErrors++;
         continue;
       }
 
       XTRACE(DATA, DEB, "Y: Coord %u, Channel %u", yCoord, readout.Channel);
-      builders[readout.RingId * Conf.MaxFEN + readout.FENId].insert(
+      builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, yCoord, ADC, 1});
 
       // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires +
@@ -234,9 +246,9 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.CSPECFileParameters.MaxGridsSpan < e.ClusterB.coord_span()) {
+    if (Conf.CSPECFileParameters.MaxGridsSpan < e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
-             e.ClusterA.coord_span());
+             e.ClusterA.coordSpan());
       counters.ClustersTooLargeGridSpan++;
       continue;
     }
@@ -245,7 +257,7 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -266,8 +278,8 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
 
     // calculate local x and y using center of mass
     uint16_t xandz =
-        static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+        static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
+    uint16_t y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
     uint16_t x = floor(xandz / 16);
     uint16_t z = xandz % 16;
     auto PixelId = essgeom.pixel3D(x, y, z);

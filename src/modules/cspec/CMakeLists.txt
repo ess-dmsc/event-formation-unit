@@ -12,41 +12,36 @@ set(cspec_common_inc
   CSPECInstrument.h
   geometry/Config.h
   geometry/CSPECGeometry.h
+  geometry/LETGeometry.h
   geometry/Geometry.h
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/Hybrid.h
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.h
   )
 set(cspec_common_src
   CSPECBase.cpp
   CSPECInstrument.cpp
   geometry/Config.cpp
   geometry/CSPECGeometry.cpp
-  ${ESS_SOURCE_DIR}/common/reduction/EventBuilder2D.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Parser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Config.cpp
-  ${ESS_SOURCE_DIR}/common/readout/vmm3/VMM3Calibration.cpp
+  geometry/LETGeometry.cpp
   )
 
-set(cspec_INC ${cspec_common_inc})
-set(cspec_SRC CSPEC.cpp ${cspec_common_src})
-create_module(cspec)
-
+set(cspec_INC
+  ${cspec_common_inc}
+  )
+set(cspec_SRC
+  main.cpp
+  ${cspec_common_src}
+  )
+set(cspec_LIB
+  efu_reduction
+  efu_essreadout
+  )
+create_executable(cspec)
 
 set(CSPECBaseTest_INC
   ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.h
 )
 set(CSPECBaseTest_SRC
   test/CSPECBaseTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
   ${cspec_common_src}
-  ${ESS_SOURCE_DIR}/common/testutils/TestUDPServer.cpp
 )
 create_test_executable(CSPECBaseTest)
 
@@ -55,12 +50,9 @@ create_test_executable(CSPECBaseTest)
 #
 set(CSPECInstrumentTest_INC
   ${cspec_common_inc}
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
   )
 set(CSPECInstrumentTest_SRC
   ${cspec_common_src}
   test/CSPECInstrumentTest.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
 )
 create_test_executable(CSPECInstrumentTest)
-

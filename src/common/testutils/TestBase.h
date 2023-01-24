@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,9 +27,10 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
 class TestBase : public ::testing::Test {
 protected:
   class Message : public std::stringstream {
-public:
-  static void saveToFile(std::string filename, void *buffer, uint64_t datasize);
-
+  public:
+    static void saveToFile(std::string filename, void *buffer,
+                           uint64_t datasize);
   };
-#define MESSAGE Message
+
+#define GTEST_COUT std::cerr << "[ INFO     ] "
 };

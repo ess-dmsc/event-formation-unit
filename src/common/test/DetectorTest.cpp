@@ -1,29 +1,25 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/detector/Detector.h>
-#include <common/detector/DetectorModuleRegister.h>
-#include <memory>
 #include <common/testutils/TestBase.h>
+#include <memory>
 
 #define UNUSED __attribute__((unused))
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(BaseSettings settings)
-      : Detector("no detector", settings) {
-    std::cout << "TestDetector" << std::endl;
-  };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  explicit TestDetector(BaseSettings settings) : Detector(settings){};
+  ~TestDetector(){};
 };
 
-DetectorFactory<TestDetector> Factory;
-
-/** Test fixture and tests below */
+// Test fixture and tests below
 
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  void SetUp() override { det = Factory.create(settings); }
+  void SetUp() override {
+    det = std::shared_ptr<Detector>(new Detector(settings));
+  }
 
   void TearDown() override {}
 
@@ -34,6 +30,8 @@ protected:
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, StatAPI) {
+  settings.DetectorName = "no detector";
+  det = std::shared_ptr<Detector>(new Detector(settings));
   int res = det->statsize();
   ASSERT_EQ(res, 0);
 
@@ -45,7 +43,7 @@ TEST_F(DetectorTest, StatAPI) {
   auto name = det->statname(1);
   ASSERT_EQ("", name);
 
-  auto detectorname = det->detectorname();
+  auto detectorname = det->EFUSettings.DetectorName.c_str();
   ASSERT_STREQ("no detector", detectorname);
 }
 
@@ -53,66 +51,6 @@ TEST_F(DetectorTest, ThreadInfoNoThreads) {
   auto &threadlist = det->GetThreadInfo();
   ASSERT_EQ(0, threadlist.size());
 }
-
-TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
-  auto commandmap = det->GetDetectorCommandFunctions();
-  ASSERT_EQ(0, commandmap.size());
-}
-
-class DetectorRegistration : public TestBase {
-protected:
-  void SetUp() override {
-    auto &Factories = DetectorModuleRegistration::getFactories();
-    Factories.clear();
-    EXPECT_EQ(Factories.size(), 0);
-  }
-
-  void TearDown() override {}
-};
-
-TEST_F(DetectorRegistration, AddModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  auto &DetSetUp = Factories.at(TestName);
-  EXPECT_EQ(DetSetUp.CLISetup, nullptr);
-}
-
-TEST_F(DetectorRegistration, AddTwoModules) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr);
-  std::string TestName2{"SomeName2"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector2(TestName2, nullptr);
-  EXPECT_EQ(Factories.size(), 2);
-}
-
-TEST_F(DetectorRegistration, AddModuleFail) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr);
-  EXPECT_THROW(DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr), std::runtime_error);
-  EXPECT_EQ(Factories.size(), 1);
-}
-
-TEST_F(DetectorRegistration, FindModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  EXPECT_NO_THROW(DetectorModuleRegistration::find(TestName));
-}
-
-TEST_F(DetectorRegistration, FailFindModule) {
-  auto &Factories = DetectorModuleRegistration::getFactories();
-  std::string TestName{"SomeName"};
-  DetectorModuleRegistration::Registrar<TestDetector> SomeDetector(TestName, nullptr);
-  EXPECT_EQ(Factories.size(), 1);
-  std::string SomeOtherName("SomeOtherName");
-  EXPECT_THROW(DetectorModuleRegistration::find(SomeOtherName), std::runtime_error);
-}
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

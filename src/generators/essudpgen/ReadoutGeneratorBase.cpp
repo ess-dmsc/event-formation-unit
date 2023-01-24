@@ -13,25 +13,22 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <common/debug/Trace.h>
-#include <math.h>
-#include <time.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <math.h>
 #include <stdexcept>
+#include <time.h>
+#include <common/debug/Trace.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 
-
-ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr, uint16_t MaxPayloadSize,
-  uint32_t InitialSeqNum, GeneratorSettings& Settings)
-  : Settings(Settings)
-  , Buffer(BufferPtr)
-  , BufferSize(MaxPayloadSize)
-  , SeqNum(InitialSeqNum)
-  {}
-
+ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr,
+                                           uint16_t MaxPayloadSize,
+                                           uint32_t InitialSeqNum,
+                                           GeneratorSettings &Settings)
+    : Settings(Settings), Buffer(BufferPtr), BufferSize(MaxPayloadSize),
+      SeqNum(InitialSeqNum) {}
 
 uint16_t ReadoutGeneratorBase::makePacket() {
   generateHeader();

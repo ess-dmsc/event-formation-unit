@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016-2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Log.h>
 #include <common/Statistics.h>
+#include <common/debug/Log.h>
 
 int Statistics::create(std::string StatName, int64_t &Value) {
   LOG(UTILS, Sev::Info, "Adding stat {}", StatName);
@@ -39,6 +39,15 @@ int64_t Statistics::value(size_t Index) {
     return -1;
   }
   return stats.at(Index - 1).StatValue;
+}
+
+int64_t Statistics::valueByName(std::string name) {
+  for (const auto & stat : stats) {
+    if (stat.StatName.find(name) != std::string::npos) {
+      return stat.StatValue;
+    }
+  }
+  return -1;
 }
 
 void Statistics::setPrefix(std::string StatsPrefix, std::string StatsRegion) {

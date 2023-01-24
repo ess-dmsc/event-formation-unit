@@ -1,4 +1,4 @@
-/** Copyright (C) 2016-2020 European Spallation Source ERIC */
+// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,22 +6,21 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/DetectorModuleRegister.h>
-#include <common/detector/EFUArgs.h>
+#include <algorithm>
 #include <common/Version.h>
 #include <common/debug/Log.h>
+#include <common/detector/EFUArgs.h>
 #include <cstdio>
 #include <fstream>
 #include <regex>
 #include <string>
-#include <algorithm>
 
 using namespace std::literals::string_literals;
 
 EFUArgs::EFUArgs() {
   // clang-format off
   CLIParser.set_help_flag(); // Removes the default help flag
-  CLIParser.allow_extras(true);
+  //CLIParser.allow_extras(false);
   CLIParser.get_formatter()->column_width(30);
 
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")
@@ -39,10 +38,8 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")
       ->group("EFU Options")->default_str("");
 
-  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
-                    return parseAffinityStrings(Input);
-                  }, "Thread to core affinity. Ex: \"-c input_t:4\"")
-      ->group("EFU Options");
+  CLIParser.add_option("--kafka_config", EFUSettings.KafkaConfigFile, "Kafka configuration file")
+      ->group("EFU Options")->default_str("");
 
   CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
     return parseLogLevel(Input);
@@ -55,24 +52,7 @@ EFUArgs::EFUArgs() {
   CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
       ->group("EFU Options");
 
-  CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
-      ->group("EFU Options");
-
-  CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
-      ->group("EFU Options")->default_str("10");
-
   std::string DetectorDescription{"Detector name"};
-  std::map<std::string, DetectorModuleSetup> StaticDetModules =
-      DetectorModuleRegistration::getFactories();
-  if (not StaticDetModules.empty()) {
-    auto GetModuleName = [](std::string &A, auto const &B) {
-      return std::move(A) + " " + B.first;
-    };
-    auto TempString = std::accumulate(StaticDetModules.begin(), StaticDetModules.end(), " (Known modules:"s, GetModuleName);
-    DetectorDescription += TempString + ")";
-  }
-  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
-      ->group("EFU Options")->required();
 
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress,
                        "IP address of receive interface")
@@ -100,15 +80,6 @@ EFUArgs::EFUArgs() {
                        "Terminate after timeout seconds")
       ->group("EFU Options")->default_str("4294967295"); // 0xffffffffU
 
-  WriteConfigOption = CLIParser
-      .add_option("--write_config", ConfigFileName,
-                  "Write CLI options with default values to config file.")
-      ->group("EFU Options")->configurable(false);
-
-  ReadConfigOption =   CLIParser
-      .set_config("--read_config", "", "Read CLI options from config file.", false)
-      ->group("EFU Options")->excludes(WriteConfigOption);
-
   CLIParser.add_option("--updateinterval", EFUSettings.UpdateIntervalSec,
                        "Stats and event data update interval (seconds).")
       ->group("EFU Options")->default_str("1");
@@ -120,47 +91,46 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--txbuffer", EFUSettings.TxSocketBufferSize,
                   "Transmit to detector buffer size.")
       ->group("EFU Options")->default_str("9216");
+
+  //
+  CLIParser.add_option("-f,--file", EFUSettings.ConfigFile,
+                  "Detector configuration file (JSON)")
+      ->group("EFU Options")->default_str("");
+
+  CLIParser.add_option("--calibration", EFUSettings.CalibFile,
+                  "Detector calibration file (JSON)")
+      ->group("EFU Options")->default_str("");
+
+  CLIParser.add_option("--dumptofile", EFUSettings.DumpFilePrefix,
+                  "dump to specified file")
+      ->group("EFU Options")->default_str("");
+
+  // DETECTOR SPECIFIC PERFGEN
+  CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
+      ->group("EFU Options");
+
+  CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
+      ->group("EFU Options")->default_str("10");
+
+  // EFU LEGACY MODULE
+  CLIParser.add_flag("--multiblade-alignment", EFUSettings.MultibladeAlignment,
+          "Enter alignment mode (2D)")
+          ->group("MBCAEN");
+
   // clang-format on
 }
 
-bool EFUArgs::parseAffinityStrings(
-    std::vector<std::string> ThreadAffinityStrings) {
-  bool CoreIntegerCorrect = false;
-  int CoreNumber = 0;
-  try {
-    CoreNumber = std::stoi(ThreadAffinityStrings.at(0));
-    CoreIntegerCorrect = true;
-  } catch (std::invalid_argument &e) {
-    // No nothing
-  }
-  if (ThreadAffinityStrings.size() == 1 and CoreIntegerCorrect) {
-    ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{
-        "implicit_affinity", static_cast<std::uint16_t>(CoreNumber)});
-  } else {
-    std::string REPattern = "([^:]+):(\\d{1,2})";
-    std::regex AffinityRE(REPattern);
-    std::smatch AffinityRERes;
-    for (auto &AffinityStr : ThreadAffinityStrings) {
-      if (not std::regex_match(AffinityStr, AffinityRERes, AffinityRE)) {
-        return false;
-      }
-      ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{
-          AffinityRERes[1],
-          static_cast<std::uint16_t>(std::stoi(AffinityRERes[2]))});
-    }
-  }
-  return true;
-}
-
 bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
-  std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3}, {"Warning", 4}, {"Notice", 5}, {"Info", 6}, {"Debug", 7}};
+  std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3},
+                                      {"Warning", 4},  {"Notice", 5},
+                                      {"Info", 6},     {"Debug", 7}};
   if (LogLevelString.size() != 1) {
     return false;
   }
   try {
     LogMessageLevel = LevelMap.at(LogLevelString.at(0));
     return true;
-  } catch (std::out_of_range &e) {
+  } catch (const std::out_of_range &e) {
     // Do nothing
   }
   try {
@@ -169,7 +139,7 @@ bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
       return false;
     }
     LogMessageLevel = TempLogMessageLevel;
-  } catch (std::invalid_argument &e) {
+  } catch (const std::invalid_argument &e) {
     return false;
   }
   return true;
@@ -202,53 +172,24 @@ void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
 
 void EFUArgs::printVersion() { std::cout << efu_version() << '\n'; }
 
-EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
+EFUArgs::Status EFUArgs::parseArgs(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    // Do nothing, as we only care about the version flag in this pass.
+    LOG(INIT, Sev::Error, "Invalid CLI argument(s) - error code {}",
+        e.get_exit_code());
+    return Status::ERREXIT;
   }
+
+  if ((*HelpOption)) {
+    printHelp();
+    return Status::EXIT;
+  }
+
   if (PrintVersion) {
     printVersion();
     return Status::EXIT;
   }
 
-  try {
-    CLIParser.parse(argc, argv);
-  } catch (const CLI::ParseError &e) {
-    CLIParser.exit(e);
-  }
-  if ((*HelpOption and not*DetectorOption) or
-      (not*HelpOption and not*DetectorOption)) {
-    printHelp();
-    return Status::EXIT;
-  }
-  CLIParser.clear();
-  CLIParser.allow_extras(false);
-  return Status::CONTINUE;
-}
-
-EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
-  try {
-    CLIParser.parse(argc, argv);
-  } catch (const CLI::ParseError &e) {
-    CLIParser.exit(e);
-    return Status::EXIT;
-  }
-  if (*HelpOption and *DetectorOption) {
-    printHelp();
-    return Status::EXIT;
-  }
-  if (*WriteConfigOption) {
-    std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
-    if (not ConfigFile.is_open()) {
-      LOG(INIT, Sev::Error, "Failed to open config file for writing.");
-      return Status::EXIT;
-    }
-    ConfigFile << CLIParser.config_to_str(true, true);
-    ConfigFile.close();
-    LOG(INIT, Sev::Info, "Config file created, now exiting.");
-    return Status::EXIT;
-  }
   return Status::CONTINUE;
 }

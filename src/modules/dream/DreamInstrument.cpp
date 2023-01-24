@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
-#include <common/time/TimeString.h>
 #include <common/debug/Trace.h>
+#include <common/time/TimeString.h>
 #include <dream/DreamInstrument.h>
 
 // #undef TRC_LEVEL
@@ -18,32 +18,31 @@
 namespace Dream {
 
 DreamInstrument::DreamInstrument(struct Counters &counters,
-                                 DreamSettings &moduleSettings)
-    : counters(counters), ModuleSettings(moduleSettings) {
+                                 BaseSettings &settings)
+    : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  DreamConfiguration = Config(ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  DreamConfiguration = Config(Settings.ConfigFile);
 
+  DreamConfiguration.loadAndApply();
 
-  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 }
 
-uint32_t DreamInstrument::calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
-                                    uint8_t Counter, uint8_t Wire, uint8_t Strip) {
-return EcGeom.getPixel(Sector, Sumo, Cassette, Counter, Wire, Strip);
+uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
+                                    DataParser::DreamReadout &Data) {
+  return Geometry.getPixel(Parms, Data);
 }
 
 void DreamInstrument::processReadouts() {
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
   uint64_t PulseTime =
       Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t __attribute__((unused)) PrevPulseTime = Time.setPrevReference(
-      PacketHeader->PrevPulseHigh, PacketHeader->PrevPulseLow);
+  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
+                                                 PacketHeader->PrevPulseLow);
 
-  /// \todo Add Dream config to handle max time between pulses
-  /// for now arbitrarily use 5 seconds
-  if (PulseTime - PrevPulseTime > 5 * 1'000'000'000ULL) {
+  if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
            (PulseTime - PrevPulseTime));
     counters.ReadoutStats.ErrorTimeHigh++;
@@ -51,7 +50,8 @@ void DreamInstrument::processReadouts() {
     return;
   }
 
-  Serializer->pulseTime(PulseTime); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      PulseTime); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
          PacketHeader->PulseLow);
   XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
@@ -59,28 +59,42 @@ void DreamInstrument::processReadouts() {
   //
 
   /// Traverse readouts, calculate pixels
-  for (auto &Section : DreamParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
+  for (auto &Data : DreamParser.Result) {
+    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
 
-    for (auto &Data : Section.Data) {
-      auto TimeOfFlight = Time.getTOF(0, Data.Tof); // TOF in ns
+    if (Data.RingId > DreamConfiguration.MaxRing) {
+      XTRACE(DATA, WAR, "Invalid RING: %u", Data.RingId);
+      counters.RingErrors++;
+      continue;
+    }
 
-      XTRACE(DATA, DEB,
-             "  Data: time (0, %u), sector %u, sumo %u, cassette %u, counter %u, wire "
-             "%u, strip %u",
-             Data.Tof, Data.Sector, Data.Sumo, Data.Cassette,
-             Data.Counter, Data.Wire, Data.Strip);
+    if (Data.FENId > DreamConfiguration.MaxFEN) {
+      XTRACE(DATA, WAR, "Invalid FEN: %u", Data.FENId);
+      counters.FENErrors++;
+      continue;
+    }
 
-      // Calculate pixelid and apply calibration
-      uint32_t PixelId = calcPixel(Data.Sector, Data.Sumo, Data.Cassette,
-                                   Data.Counter, Data.Wire, Data.Strip);
+    Config::ModuleParms &Parms =
+        DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
 
-      if (PixelId == 0) {
-        counters.GeometryErrors++;
-      } else {
-        counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
-        counters.Events++;
-      }
+    if (not Parms.Initialised) {
+      XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
+             Data.RingId, Data.FENId);
+      counters.ConfigErrors++;
+      continue;
+    }
+
+    auto TimeOfFlight =
+        ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow);
+
+    // Calculate pixelid and apply calibration
+    uint32_t PixelId = calcPixel(Parms, Data);
+
+    if (PixelId == 0) {
+      counters.GeometryErrors++;
+    } else {
+      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      counters.Events++;
     }
   }
 }

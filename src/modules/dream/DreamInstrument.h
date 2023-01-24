@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include <dream/Counters.h>
-#include <dream/DreamBase.h> // to get DreamSettings
-#include <dream/geometry/Config.h>
-#include <dream/geometry/Geometry.h>
-#include <dream/readout/DataParser.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <dream/Counters.h>
+#include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/Config.h>
+#include <dream/readout/DataParser.h>
 
 namespace Dream {
 
@@ -27,7 +27,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  DreamInstrument(Counters &counters, DreamSettings &moduleSettings);
+  DreamInstrument(Counters &counters, BaseSettings &settings);
 
   ~DreamInstrument();
 
@@ -35,22 +35,22 @@ public:
   void processReadouts();
 
   //
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
   //
-  uint32_t calcPixel(uint8_t Sector, uint8_t Sumo, uint8_t Cassette,
-                     uint8_t Counter, uint8_t Wire, uint8_t Strip);
+  uint32_t calcPixel(Config::ModuleParms &Parms,
+                     DataParser::DreamReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' DREAM together
   struct Counters &counters;
-  DreamSettings &ModuleSettings;
+  BaseSettings &Settings;
   Config DreamConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
-  EndCapGeometry EcGeom;
   ESSReadout::ESSTime Time;
-  EV42Serializer *Serializer;
+  EV44Serializer *Serializer;
+  CDTGeometry Geometry;
 };
 
 } // namespace Dream

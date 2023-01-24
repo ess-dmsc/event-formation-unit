@@ -12,7 +12,7 @@
 const char *classname = "Demo Detector";
 
 /// \brief Needed even if there are no custom CLI commands to register
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) { }
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 /// \brief the detector interface specification
 class DemoDetector : public Detector {
@@ -32,7 +32,7 @@ private:
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 ///
-DemoDetector::~DemoDetector() { }
+DemoDetector::~DemoDetector() {}
 
 ///
 DemoDetector::DemoDetector(BaseSettings settings) : Detector("Demo", settings) {
@@ -49,7 +49,8 @@ const char *DemoDetector::detectorname() { return classname; }
 ///
 void DemoDetector::main_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPReceiver eth_receive(local);
   eth_receive.setRecvTimeout(0, 100000); /// secs, usecs
 

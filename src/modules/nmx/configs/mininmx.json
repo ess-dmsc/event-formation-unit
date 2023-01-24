@@ -1,0 +1,114 @@
+{
+  "comment": "mininmx is small version of nmx Doro is testing at CERN",
+  "Detector": "NMX",
+  "InstrumentGeometry": "NMX",
+  "MaxSpanX": 10,
+  "MaxSpanY": 10,
+  "MaxGapX": 2,
+  "MaxGapY": 2,
+  "SizeX": 1280,
+  "SizeY": 1280,
+  "DefaultMinADC": 50,
+  "Config": [
+    {
+      "Ring": 0,
+      "FEN": 0,
+      "Hybrid": 0,
+      "Plane": 0,
+      "Offset": 0,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000000"
+    },
+    {
+      "Ring": 0,
+      "FEN": 0,
+      "Hybrid": 1,
+      "Plane": 0,
+      "Offset": 128,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000002"
+    },
+    {
+      "Ring": 0,
+      "FEN": 0,
+      "Hybrid": 2,
+      "Plane": 0,
+      "Offset": 256,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000004"
+    },
+    {
+      "Ring": 0,
+      "FEN": 0,
+      "Hybrid": 3,
+      "Plane": 0,
+      "Offset": 384,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000006"
+    },
+    {
+      "Ring": 0,
+      "FEN": 0,
+      "Hybrid": 4,
+      "Plane": 0,
+      "Offset": 512,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000008"
+    },
+    {
+      "Ring": 0,
+      "FEN": 1,
+      "Hybrid": 0,
+      "Plane": 1,
+      "Offset": 0,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000010"
+    },
+    {
+      "Ring": 0,
+      "FEN": 1,
+      "Hybrid": 1,
+      "Plane": 1,
+      "Offset": 128,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000012"
+    },
+    {
+      "Ring": 0,
+      "FEN": 1,
+      "Hybrid": 2,
+      "Plane": 1,
+      "Offset": 256,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000014"
+    },
+    {
+      "Ring": 0,
+      "FEN": 1,
+      "Hybrid": 3,
+      "Plane": 1,
+      "Offset": 384,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000016"
+    },
+    {
+      "Ring": 0,
+      "FEN": 1,
+      "Hybrid": 4,
+      "Plane": 1,
+      "Offset": 512,
+      "ReversedChannels": false,
+      "Panel": 0,
+      "HybridId": "E5533333222222221111111100000018"
+    }
+  ]
+}

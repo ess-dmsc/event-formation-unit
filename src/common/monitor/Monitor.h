@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,13 +11,12 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/monitor/HitSerializer.h>
 
-// \todo document functions
+/// \todo document functions
 
 struct Monitor {
   Monitor() = default;
-  Monitor(const std::string& broker,
-          const std::string& topic_prefix,
-          const std::string& source_name);
+  Monitor(const std::string &broker, const std::string &topic_prefix,
+          const std::string &source_name);
   ~Monitor() { close(); }
 
   std::shared_ptr<Hists> histograms;

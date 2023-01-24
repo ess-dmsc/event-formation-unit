@@ -23,10 +23,10 @@ public:
   size_t read(char *buf);
 
   ///
-  size_t getReadoutSize() const { return ReadoutSize;}
+  size_t getReadoutSize() const { return ReadoutSize; }
 
   ///
-  size_t getChunkSize() const { return ChunkSize;}
+  size_t getChunkSize() const { return ChunkSize; }
 
 private:
   std::shared_ptr<HitFile> file;
@@ -37,5 +37,5 @@ private:
   size_t ChunkSize{0};
 };
 
-}
+} // namespace Gem
 // GCOVR_EXCL_STOP

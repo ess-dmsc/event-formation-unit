@@ -1,30 +1,31 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <algorithm>
 #include <common/detector/EFUArgs.h>
+#include <common/testutils/TestBase.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
-#include <common/testutils/TestBase.h>
 
 #define UNUSED __attribute__((unused))
 
-static int dummy_command(std::vector<std::string>,
-                         char*, unsigned int*) {
+static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
   return 0;
 }
 
 // clang-format off
 std::vector<std::string> commands {
-  "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
-  "CMD_GET_COUNT",                  "CMD_GET_COUNT 8",
-  "STAT_GET 1",                     "STAT_GET  -1",
+  "STAT_GET_COUNT",                 "STAT_GET_COUNT 1",
+  "CMD_GET_COUNT",                  "CMD_GET_COUNT 9",
+  "STAT_GET 1",                     "STAT_GET dummystat 42",
+  "STAT_GET 2",                     "STAT_GET  -1",
   "EXIT",                           "<OK>"
 };
 
 std::vector<std::string> commands_badargs {
   "STAT_GET_COUNT 1",
   "STAT_GET",
+  "STAT_GET_NAME",
   "CMD_GET_COUNT 1",
   "CMD_GET",
   "CMD_GET 1 2",
@@ -32,30 +33,30 @@ std::vector<std::string> commands_badargs {
   "CMD_GET 9999",
   "VERSION_GET 1",
   "DETECTOR_INFO_GET 1",
-  "EXIT 1"
+  "EXIT 1",
+  "RUNTIMESTATS 1"
 };
 
 // These commands should 'fail' when the detector is not loaded
 std::vector<std::string> check_detector_loaded {
   "DETECTOR_INFO_GET",
   "STAT_GET_COUNT",
+  "STAT_GET_NAME main.uptime",
   "STAT_GET 1"
 };
 
 // clang-format on
 
-class TestDetector : public Detector {
+class ParserTestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector("No StatName", settings) {
-    std::cout << "TestDetector" << std::endl;
-  };
-  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
+  explicit ParserTestDetector(UNUSED BaseSettings settings)
+      : Detector(settings){};
+  ~ParserTestDetector(){};
 };
-
-DetectorFactory<TestDetector> Factory;
 
 class ParserTest : public TestBase {
 protected:
+  int64_t DummyCounter;
   Parser *parser;
   EFUArgs efu_args;
   Statistics stats;
@@ -63,7 +64,10 @@ protected:
   int keeprunning{1};
 
   void SetUp() override {
-    auto detectorif = Factory.create(settings);
+    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
+    auto res = detectorif->Stats.create("dummystat", DummyCounter);
+    DummyCounter = 42;
+    printf("stats.create() returns %d\n", res);
     parser = new Parser(detectorif, stats, keeprunning);
   }
 
@@ -79,7 +83,7 @@ protected:
   char *output = (char *)outputbuffer;
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(ParserTest, InputBuffer) {
   auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);
@@ -112,13 +116,13 @@ TEST_F(ParserTest, InputBuffer) {
 
 TEST_F(ParserTest, OversizeData) {
   memset(input, 0x41, buffer_size);
-  MESSAGE() << "Max buffer size\n";
+  GTEST_COUT << "Max buffer size\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ('\0', input[buffer_size - 1]);
   ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 
-  MESSAGE() << "Max buffer size + 1\n";
+  GTEST_COUT << "Max buffer size + 1\n";
   res = parser->parse(input, buffer_size + 1, output, &obytes);
   ASSERT_EQ(-Parser::EOSIZE, res);
   ASSERT_EQ(strcmp("Error: <BADSIZE>", output), 0);
@@ -126,7 +130,7 @@ TEST_F(ParserTest, OversizeData) {
 
 TEST_F(ParserTest, NoTokens) {
   memset(input, 0x20, buffer_size);
-  MESSAGE() << "Spaces only\n";
+  GTEST_COUT << "Spaces only\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::ENOTOKENS, res);
   ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
@@ -138,7 +142,8 @@ TEST_F(ParserTest, ValidCommands) {
     const char *cmd = commands[i].c_str();
     const char *reply = commands[i + 1].c_str();
     std::memcpy(input, cmd, strlen(cmd));
-    MESSAGE() << "Checking command: " << cmd << "\n";
+    GTEST_COUT << "Checking command: " << cmd << "\n";
+    printf("Checking command %s\n", cmd);
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
     ASSERT_EQ(obytes, strlen(reply));
     ASSERT_EQ(0, strcmp(output, reply));
@@ -150,7 +155,7 @@ TEST_F(ParserTest, BadArgsCommands) {
   for (auto cmdstr : commands_badargs) {
     const char *cmd = cmdstr.c_str();
     std::memcpy(input, cmd, strlen(cmd));
-    MESSAGE() << "Checking command: " << cmd << "\n";
+    GTEST_COUT << "Checking command: " << cmd << "\n";
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
     ASSERT_EQ(strcmp("Error: <BADARGS>", output), 0);
     ASSERT_EQ(-Parser::EBADARGS, res);
@@ -160,7 +165,7 @@ TEST_F(ParserTest, BadArgsCommands) {
 TEST_F(ParserTest, VersionGet) {
   auto cmd = "VERSION_GET";
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   auto res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(0, res);
 }
@@ -168,13 +173,13 @@ TEST_F(ParserTest, VersionGet) {
 TEST_F(ParserTest, ParserClearCommands) {
   auto cmd = "VERSION_GET";
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   auto res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(0, res);
 
   parser->clearCommands();
   std::memcpy(input, cmd, strlen(cmd));
-  MESSAGE() << "Checking command: " << cmd << "\n";
+  GTEST_COUT << "Checking command: " << cmd << "\n";
   res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::EBADCMD);
 }
@@ -189,7 +194,8 @@ TEST_F(ParserTest, DuplicateCommands) {
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
   Statistics stats;
-  Parser parser(nullptr, stats, keeprunning); // No detector, no STAT_GET_COUNT command
+  Parser parser(nullptr, stats,
+                keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";
   std::memcpy(input, cmd, strlen(cmd));
@@ -215,7 +221,7 @@ TEST_F(ParserTest, CmdGetCount) {
   const char *cmd = "CMD_GET_COUNT";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  MESSAGE() << output << '\n';
+  GTEST_COUT << output << '\n';
   ASSERT_EQ(res, -Parser::OK);
 }
 
@@ -223,17 +229,18 @@ TEST_F(ParserTest, CmdGet) {
   const char *cmd = "CMD_GET 1";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  MESSAGE() << output << '\n';
+  GTEST_COUT << output << '\n';
   ASSERT_EQ(res, -Parser::OK);
 }
 
-// TEST_F(ParserTest, ExitCommand) {
-//   const char *cmd = "EXIT";
-//   std::memcpy(input, cmd, strlen(cmd));
-//   int res = parser->parse(input, strlen(cmd), output, &obytes);
-//   ASSERT_EQ(res, -Parser::OK);
-//   ASSERT_EQ(efu_args->proc_cmd, efu_args->thread_cmd::EXIT);
-// }
+TEST_F(ParserTest, CmdRuntimetats) {
+  const char *cmd = "RUNTIMESTATS";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  GTEST_COUT << output << '\n';
+  ASSERT_EQ(0, strcmp("RUNTIMESTATS 0", output));
+  ASSERT_EQ(res, -Parser::OK);
+}
 
 int main(int argc, char **argv) {
   int __attribute__((unused)) ret = chdir("src");

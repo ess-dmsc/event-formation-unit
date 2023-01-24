@@ -10,62 +10,50 @@
 
 #pragma once
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
-#include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ESSTime.h>
-#include <common/readout/vmm3/Readout.h>
-#include <common/readout/vmm3/VMM3Parser.h>
-#include <common/readout/vmm3/Hybrid.h>
+#include <common/readout/ess/Parser.h>
 #include <ttlmonitor/Counters.h>
-#include <ttlmonitor/geometry/Config.h>
 #include <ttlmonitor/TTLMonitorBase.h>
+#include <ttlmonitor/geometry/Config.h>
+#include <ttlmonitor/geometry/Parser.h>
 
 namespace TTLMonitor {
 
 class TTLMonitorInstrument {
 public:
-
   /// \brief 'create' the TTLMonitor instrument
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  TTLMonitorInstrument(Counters & counters,
-                  TTLMonitorSettings & moduleSettings,
-                  EV42Serializer * serializer);
+  TTLMonitorInstrument(Counters &counters, BaseSettings &settings);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
 
   /// \brief dump readout data to HDF5
-  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data & Data);
-
-  // \brief initialise the serializer. This is used both in TTLMonitorInstrument
-  // and TTLMonitorBase. Called from TTLMonitorBase
-  void setSerializer(EV42Serializer *serializer) { Serializer = serializer; }
+  // void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
 public:
   /// \brief Stuff that 'ties' TTLMonitor together
-  struct Counters & counters;
-  TTLMonitorSettings & ModuleSettings;
+  struct Counters &counters;
+  BaseSettings &Settings;
 
   /// \brief
   Config Conf;
 
   /// \brief serialiser (and producer) for events
-  EV42Serializer *Serializer{nullptr};
+  std::vector<EV44Serializer *> Serializers;
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;
 
-  /// \brief parser for VMM3 readout data
-  ESSReadout::VMM3Parser VMMParser;
+  /// \brief parser for TTLMon readout data
+  Parser TTLMonParser;
 
   /// \brief for dumping raw VMM3 readouts to HDF5 files
-  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
-
-  /// \brief experimental: monitor rate reduction
-  int UseEveryNEvents{1};
+  // std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
-} // namespace
+} // namespace TTLMonitor

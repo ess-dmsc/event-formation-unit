@@ -11,8 +11,8 @@
 #pragma once
 
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <common/testutils/DataFuzzer.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Cspec {
 class ReadoutGenerator : public ReadoutGeneratorBase {

@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include <string>
 #include <cinttypes>
+#include <string>
 
 /// \brief save buffer to file
 void saveBuffer(std::string filename, void *buffer, uint64_t datasize);
 
 /// \brief helper function to remove temporary files after test
-void deleteFile(std::string filename);
+void deleteFile(const std::string &filename);

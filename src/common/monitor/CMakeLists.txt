@@ -7,7 +7,6 @@ set(monitor_obj_SRC
   HistogramSerializer.cpp
   DynamicHist.cpp
   HitSerializer.cpp
-  Monitor.cpp
 )
 
 set(monitor_obj_INC
@@ -15,7 +14,6 @@ set(monitor_obj_INC
   HistogramSerializer.h
   DynamicHist.h
   HitSerializer.h
-  Monitor.h
 )
 
 add_library(MonitorLib OBJECT

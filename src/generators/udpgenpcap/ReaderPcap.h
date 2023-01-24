@@ -52,7 +52,7 @@ public:
   } Stats;
 
 private:
-  const char * FilterUdp = "ip and udp";
+  const char *FilterUdp = "ip and udp";
   struct bpf_program PcapFilter;
 
   /// \brief checking consistency and updating stats
@@ -61,5 +61,7 @@ private:
 
   std::string FileName;
   pcap_t *PcapHandle{nullptr};
+  int LinkLayerSize{0};
+  int LinkType{0}; // see https://www.tcpdump.org/linktypes.html
 };
 // GCOVR_EXCL_STOP

@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/memory/RingBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -9,7 +9,7 @@ protected:
   void TearDown() override {}
 };
 
-/** Test cases below */
+// Test cases below
 TEST_F(RingBufferTest, Constructor) {
   RingBuffer<9000> buf(100);
   ASSERT_EQ(buf.getMaxElements(), 100);
@@ -39,7 +39,7 @@ TEST_F(RingBufferTest, CircularWrap) {
   char *first = buf.getDataBuffer(index); // Save for last
 
   for (int i = 0; i < N; i++) {
-    unsigned int InnerIndex= buf.getDataIndex();
+    unsigned int InnerIndex = buf.getDataIndex();
     ASSERT_EQ(i, InnerIndex);
 
     int *ip = (int *)buf.getDataBuffer(InnerIndex);
@@ -66,11 +66,11 @@ TEST_F(RingBufferTest, OverWriteLocal) {
   char *buffer = buf.getDataBuffer(index);
   std::fill_n(buffer, 9001, 0);
 
-  MESSAGE() << "Next buffer should be ok\n";
+  GTEST_COUT << "Next buffer should be ok\n";
   index = buf.getNextBuffer();
   ASSERT_TRUE(buf.verifyBufferCookies(index));
 
-  MESSAGE() << "Next2 buffer should be corrupt\n";
+  GTEST_COUT << "Next2 buffer should be corrupt\n";
   index = buf.getNextBuffer();
   ASSERT_FALSE(buf.verifyBufferCookies(index));
 }
@@ -80,7 +80,7 @@ TEST_F(RingBufferTest, OverWriteNext) {
   unsigned int index = buf.getDataIndex();
   char *buffer = buf.getDataBuffer(index);
   std::fill_n(buffer, 9005, 0);
-  MESSAGE() << "Next buffer should be corrupt\n";
+  GTEST_COUT << "Next buffer should be corrupt\n";
   index = buf.getNextBuffer();
   ASSERT_FALSE(buf.verifyBufferCookies(index));
 }

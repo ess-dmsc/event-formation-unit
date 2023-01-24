@@ -6,19 +6,13 @@
 /// \brief Implementation (\todo put in header?
 //===----------------------------------------------------------------------===//
 
-
 #include <common/time/TSCTimer.h>
 
 ///
-TSCTimer::TSCTimer(void) {
-  T0 = rdtsc();
-}
+TSCTimer::TSCTimer(void) { T0 = rdtsc(); }
 
 ///
-TSCTimer::TSCTimer(uint64_t Timeout)
-  : TimeoutTicks(Timeout) {
-  T0 = rdtsc();
-}
+TSCTimer::TSCTimer(uint64_t Timeout) : TimeoutTicks(Timeout) { T0 = rdtsc(); }
 
 /// Determine if a timeout has occured and reset timer
 bool TSCTimer::timeout(void) {
@@ -30,11 +24,7 @@ bool TSCTimer::timeout(void) {
 }
 
 ///
-void TSCTimer::reset(void) {
-  T0 = rdtsc();
-}
+void TSCTimer::reset(void) { T0 = rdtsc(); }
 
 ///
-uint64_t TSCTimer::timetsc(void) {
-  return (rdtsc() - T0);
-}
+uint64_t TSCTimer::timetsc(void) { return (rdtsc() - T0); }

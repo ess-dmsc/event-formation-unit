@@ -57,8 +57,8 @@ def check_kafka(test):
         shell=True,
         stdout=subprocess.PIPE,
     )
-    # waiting 5 seconds for kafka consumer to consume all messages
-    time.sleep(5)
+    # waiting 30 seconds for kafka consumer to consume all messages
+    time.sleep(30)
     kafka_process.kill()
     out, err = kafka_process.communicate()
     results_dict = [
@@ -79,14 +79,14 @@ def check_kafka(test):
 
 
 def run_tests():
-    efu = "./event-formation-unit"
+    efu = "./build"
 
     with open('./test/integrationtest.json') as f:
         data = json.load(f)
 
     for test in data['Tests']:
         create_kafka_topic(test['KafkaTopic'])
-        efu_process = run_efu(efu, test['Module'], test['Config'])
+        efu_process = run_efu(efu, test['Module'], test['Config'], test['KafkaTopic'])
         try:
             run_data_generator(efu, test['Generator'], test['Packets'], test['Throttle'])
             time.sleep(1)

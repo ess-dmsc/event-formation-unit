@@ -80,43 +80,44 @@ auto DuplicateEntry = R"(
 
 using namespace Freia;
 
-class ConfigTest : public TestBase {
+class FreiaConfigTest : public TestBase {
 protected:
   Config config{"Freia", "config.json"};
   void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(FreiaConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
   ASSERT_EQ(config.NumHybrids, 0);
 }
 
-TEST_F(ConfigTest, UninitialisedHybrids) {
+TEST_F(FreiaConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(1, 0, 0).Initialised, false);
+  ASSERT_ANY_THROW(config.getHybrid("not a hybrid ID"));
 }
 
-TEST_F(ConfigTest, NoDetector) {
+TEST_F(FreiaConfigTest, NoDetector) {
   config.root = NoDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidDetector) {
+TEST_F(FreiaConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidRing) {
+TEST_F(FreiaConfigTest, InvalidRing) {
   config.root = InvalidRing;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidConfig) {
+TEST_F(FreiaConfigTest, InvalidConfig) {
   config.root = InvalidConfig;
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
-TEST_F(ConfigTest, Duplicate) {
+TEST_F(FreiaConfigTest, Duplicate) {
   config.root = DuplicateEntry;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
@@ -140,7 +141,7 @@ std::vector<RingCfg> ReferenceConfig{
     {10, 1, 0}, {10, 1, 1},
 };
 
-TEST_F(ConfigTest, FullInstrument) {
+TEST_F(FreiaConfigTest, FullInstrument) {
   config = Config("Freia", FREIA_FULL);
   config.loadAndApplyConfig();
   ASSERT_EQ(config.NumPixels, 65536);

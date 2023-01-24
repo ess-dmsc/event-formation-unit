@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2017 European Spallation Source ERIC
 
 #include <common/reduction/matching/CenterMatcher.h>
 #include <common/reduction/matching/EndMatcher.h>
@@ -6,18 +6,16 @@
 
 class CenterMatcherTest : public TestBase {
 protected:
-
   ClusterContainer x, y;
   CenterMatcher matcher{1000, 0, 1};
 
-  void SetUp() override { 
+  void SetUp() override {
     matcher.set_max_delta_time(250);
-    matcher.set_time_algorithm("center-of-mass");	
+    matcher.set_time_algorithm("center-of-mass");
   }
-  
-  void TearDown() override { }
-  
-   
+
+  void TearDown() override {}
+
   Cluster mock_cluster(uint8_t plane, uint64_t time, uint16_t coordinate) {
     Cluster ret;
     Hit e;
@@ -28,7 +26,6 @@ protected:
     ret.insert(e);
     return ret;
   }
-  
 };
 
 TEST_F(CenterMatcherTest, Constructor) {
@@ -38,8 +35,8 @@ TEST_F(CenterMatcherTest, Constructor) {
 }
 
 TEST_F(CenterMatcherTest, PrintConfig) {
-  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+  GTEST_COUT << "NOT A UNIT TEST: please manually check output\n";
+  GTEST_COUT << "CONFIG:\n" << matcher.config("  ");
 }
 
 TEST_F(CenterMatcherTest, X) {
@@ -48,8 +45,8 @@ TEST_F(CenterMatcherTest, X) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
 }
 
 TEST_F(CenterMatcherTest, Y) {
@@ -58,8 +55,8 @@ TEST_F(CenterMatcherTest, Y) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
 }
 
 TEST_F(CenterMatcherTest, X_X_SmallDeltaT) {
@@ -69,10 +66,10 @@ TEST_F(CenterMatcherTest, X_X_SmallDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
 }
 
 TEST_F(CenterMatcherTest, X_X_LargeDeltaT) {
@@ -82,10 +79,10 @@ TEST_F(CenterMatcherTest, X_X_LargeDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
 }
 
 TEST_F(CenterMatcherTest, Y_Y_SmallDeltaT) {
@@ -95,10 +92,10 @@ TEST_F(CenterMatcherTest, Y_Y_SmallDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
 }
 
 TEST_F(CenterMatcherTest, Y_Y_LargeDeltaT) {
@@ -108,10 +105,10 @@ TEST_F(CenterMatcherTest, Y_Y_LargeDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
 }
 
 TEST_F(CenterMatcherTest, X_Y_SmallDeltaT) {
@@ -122,8 +119,8 @@ TEST_F(CenterMatcherTest, X_Y_SmallDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 1);
   EXPECT_EQ(matcher.matched_events.size(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
 }
 
 TEST_F(CenterMatcherTest, X_Y_LargeDeltaT) {
@@ -134,10 +131,10 @@ TEST_F(CenterMatcherTest, X_Y_LargeDeltaT) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
 }
 
 TEST_F(CenterMatcherTest, X_Y_X) {
@@ -149,16 +146,16 @@ TEST_F(CenterMatcherTest, X_Y_X) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.coord_center(), 20);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 150);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 160);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.coordCenter(), 20);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.timeCenter(), 150);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 160);
 }
 
 TEST_F(CenterMatcherTest, X_X_Y) {
@@ -170,16 +167,16 @@ TEST_F(CenterMatcherTest, X_X_Y) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 20);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 150);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 160);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 20);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 150);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 160);
 }
 
 TEST_F(CenterMatcherTest, X_X_Y_Y) {
@@ -192,16 +189,15 @@ TEST_F(CenterMatcherTest, X_X_Y_Y) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 3);
   EXPECT_EQ(matcher.matched_events.size(), 3);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 200);
 }
-
 
 TEST_F(CenterMatcherTest, Y_Y_X_X) {
   x.push_back(mock_cluster(1, 100, 10));
@@ -213,16 +209,15 @@ TEST_F(CenterMatcherTest, Y_Y_X_X) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 3);
   EXPECT_EQ(matcher.matched_events.size(), 3);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 0);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 200);
 }
-
 
 TEST_F(CenterMatcherTest, X_Y_X_Y) {
   x.push_back(mock_cluster(0, 100, 10));
@@ -234,18 +229,18 @@ TEST_F(CenterMatcherTest, X_Y_X_Y) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.coord_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 20);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 140);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 150);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.coordCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 20);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.timeCenter(), 140);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 150);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 200);
 }
 
 TEST_F(CenterMatcherTest, X_Y_Y_X) {
@@ -258,18 +253,18 @@ TEST_F(CenterMatcherTest, X_Y_Y_X) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.coord_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 20);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 140);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 200);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 140);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.coordCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 20);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.timeCenter(), 140);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 140);
 }
 
 TEST_F(CenterMatcherTest, Y_X_X_Y) {
@@ -282,26 +277,23 @@ TEST_F(CenterMatcherTest, Y_X_X_Y) {
   matcher.match(true);
   EXPECT_EQ(matcher.stats_event_count, 2);
   EXPECT_EQ(matcher.matched_events.size(), 2);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.hit_count(), 1);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.coord_center(), 100);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.coord_center(), 10);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.coord_center(), 200);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.coord_center(), 20);
-  EXPECT_EQ(matcher.matched_events.front().ClusterA.time_center(), 140);
-  EXPECT_EQ(matcher.matched_events.front().ClusterB.time_center(), 100);
-  EXPECT_EQ(matcher.matched_events.back().ClusterA.time_center(), 140);
-  EXPECT_EQ(matcher.matched_events.back().ClusterB.time_center(), 200);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.hitCount(), 1);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.coordCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.coordCenter(), 10);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.coordCenter(), 200);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.coordCenter(), 20);
+  EXPECT_EQ(matcher.matched_events.front().ClusterA.timeCenter(), 140);
+  EXPECT_EQ(matcher.matched_events.front().ClusterB.timeCenter(), 100);
+  EXPECT_EQ(matcher.matched_events.back().ClusterA.timeCenter(), 140);
+  EXPECT_EQ(matcher.matched_events.back().ClusterB.timeCenter(), 200);
 }
 
- 
-  
-// \todo do more tests
+/// \todo do more tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

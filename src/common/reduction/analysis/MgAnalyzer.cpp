@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file MGAnalyzer.h
@@ -6,9 +6,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/analysis/MgAnalyzer.h>
-#include <common/reduction/ReducedEvent.h>
 #include <common/reduction/Event.h>
+#include <common/reduction/ReducedEvent.h>
+#include <common/reduction/analysis/MgAnalyzer.h>
 
 #include <common/debug/Trace.h>
 //#undef TRC_LEVEL
@@ -18,17 +18,13 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-void MGAnalyzer::weighted(bool weighted) {
-  weighted_ = weighted;
-}
+void MGAnalyzer::weighted(bool weighted) { weighted_ = weighted; }
 
 void MGAnalyzer::set_geometry(const Multigrid::ModuleGeometry &geom) {
   geometry_ = geom;
 }
 
-Multigrid::ModuleGeometry MGAnalyzer::geometry() const {
-  return geometry_;
-}
+Multigrid::ModuleGeometry MGAnalyzer::geometry() const { return geometry_; }
 
 std::string MGAnalyzer::debug(const std::string &prepend) const {
   std::stringstream ss;
@@ -49,14 +45,15 @@ ReducedEvent MGAnalyzer::analyze(Event &event) const {
 
   ret.y = analyze_grids(GridCluster(event));
 
-  ret.time = event.time_start();
-  ret.good = ret.x.is_center_good() && ret.y.is_center_good() && ret.z.is_center_good();
+  ret.time = event.timeStart();
+  ret.good = ret.x.is_center_good() && ret.y.is_center_good() &&
+             ret.z.is_center_good();
   return ret;
 }
 
 ReducedHit MGAnalyzer::analyze_grids(Cluster &cluster) const {
   ReducedHit ret;
-  ret.time = cluster.time_start();
+  ret.time = cluster.timeStart();
 
   if (cluster.empty()) {
     return ret;
@@ -85,9 +82,10 @@ ReducedHit MGAnalyzer::analyze_grids(Cluster &cluster) const {
   return ret;
 }
 
-void MGAnalyzer::analyze_wires(Cluster &cluster, ReducedHit &x, ReducedHit &z) const {
+void MGAnalyzer::analyze_wires(Cluster &cluster, ReducedHit &x,
+                               ReducedHit &z) const {
 
-  x.time = z.time = cluster.time_start();
+  x.time = z.time = cluster.timeStart();
 
   if (cluster.empty()) {
     return;
@@ -123,4 +121,3 @@ void MGAnalyzer::analyze_wires(Cluster &cluster, ReducedHit &x, ReducedHit &z) c
   x.center = xmass / xsum;
   z.center = zmass / zsum;
 }
-

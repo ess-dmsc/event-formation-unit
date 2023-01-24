@@ -8,10 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -20,25 +20,21 @@
 #include <common/RuntimeStat.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
 #include <ttlmonitor/TTLMonitorBase.h>
 #include <ttlmonitor/TTLMonitorInstrument.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace TTLMonitor {
 
 const char *classname = "TTLMonitor detector with ESS readout";
 
-TTLMonitorBase::TTLMonitorBase(
-    BaseSettings const &settings,
-    struct TTLMonitorSettings &LocalTTLMonitorSettings)
-    : Detector("TTLMON", settings),
-      TTLMonitorModuleSettings(LocalTTLMonitorSettings) {
+TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
+    : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -46,9 +42,9 @@ TTLMonitorBase::TTLMonitorBase(
   // clang-format off
 
   // Rx and Tx stats
-  Stats.create("receive.packets", Counters.RxPackets);
-  Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -67,27 +63,24 @@ TTLMonitorBase::TTLMonitorBase(
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   //
-  Stats.create("monitors.error", Counters.MonitorErrors);
   Stats.create("monitors.count", Counters.MonitorCounts);
   Stats.create("monitors.reduced", Counters.MonitorIgnored);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
   Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
-  // VMM3Parser stats
-  Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
-  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
-  Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
-  Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
-  Stats.create("readouts.error_bc", Counters.VMMStats.ErrorBC);
-  Stats.create("readouts.error_adc", Counters.VMMStats.ErrorADC);
-  Stats.create("readouts.error_vmm", Counters.VMMStats.ErrorVMM);
-  Stats.create("readouts.error_channel", Counters.VMMStats.ErrorChannel);
-  Stats.create("readouts.count", Counters.VMMStats.Readouts);
-  Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
-  Stats.create("readouts.data", Counters.VMMStats.DataReadouts);
-  Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
+  Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
+
+  Stats.create("readouts.error_size", Counters.TTLMonStats.ErrorSize);
+  Stats.create("readouts.error_ring", Counters.TTLMonStats.ErrorRing);
+  Stats.create("readouts.error_fen", Counters.TTLMonStats.ErrorFEN);
+  Stats.create("readouts.error_adc", Counters.TTLMonStats.ErrorADC);
+  Stats.create("readouts.error_datalen", Counters.TTLMonStats.ErrorDataLength);
+  Stats.create("readouts.error_timefrac", Counters.TTLMonStats.ErrorTimeFrac);
+  Stats.create("readouts.count", Counters.TTLMonStats.Readouts);
+  Stats.create("readouts.empty", Counters.TTLMonStats.NoData);
+
+
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
@@ -95,7 +88,7 @@ TTLMonitorBase::TTLMonitorBase(
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
 
   //
-  Stats.create("thread.receive_idle", Counters.RxIdle);
+  Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   /// \todo below stats are common to all detectors
@@ -105,11 +98,8 @@ TTLMonitorBase::TTLMonitorBase(
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   // clang-format on
-
-  std::function<void()> inputFunc = [this]() {
-    TTLMonitorBase::input_thread();
-  };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     TTLMonitorBase::processing_thread();
@@ -118,42 +108,6 @@ TTLMonitorBase::TTLMonitorBase(
 
   XTRACE(INIT, ALW, "Creating %d TTLMonitor Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
-}
-
-void TTLMonitorBase::input_thread() {
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
-                         EFUSettings.DetectorPort);
-  UDPReceiver receiver(local);
-  receiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
-                          EFUSettings.RxSocketBufferSize);
-  receiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
-  receiver.printBufferSizes();
-  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
-
-  while (runThreads) {
-    int readSize;
-    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
-
-    // this is the processing step
-    RxRingbuffer.setDataLength(rxBufferIndex, 0);
-    if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                     RxRingbuffer.getMaxBufSize())) > 0) {
-      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
-      Counters.RxPackets++;
-      Counters.RxBytes += readSize;
-
-      if (InputFifo.push(rxBufferIndex) == false) {
-        Counters.FifoPushErrors++;
-      } else {
-        RxRingbuffer.getNextBuffer();
-      }
-    } else {
-      Counters.RxIdle++;
-    }
-  }
-  XTRACE(INPUT, ALW, "Stopping input thread.");
-  return;
 }
 
 void TTLMonitorBase::processing_thread() {
@@ -165,23 +119,29 @@ void TTLMonitorBase::processing_thread() {
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
 
   // Event producer
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                     KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "ttlmon", Produce);
-  TTLMonitorInstrument TTLMonitor(
-      Counters, /*EFUSettings,*/ TTLMonitorModuleSettings, Serializer);
+  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings);
 
-  TTLMonitor.VMMParser.setMonitor(true);
+  for (int i = 0; i < TTLMonitor.Conf.Parms.NumberOfMonitors; ++i) {
+    Serializers.push_back(
+        EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+  }
+
+  for (auto &s : Serializers) {
+    TTLMonitor.Serializers.push_back(&s);
+  }
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  Timer h5flushtimer;
   // Monitor these counters
+  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   RuntimeStat RtStat(
-      {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -201,22 +161,22 @@ void TTLMonitorBase::processing_thread() {
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
-               Counters.RxPackets);
+               ITCounters.RxPackets);
       }
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
-               Counters.RxPackets);
+               ITCounters.RxPackets);
         // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }
 
       // We have good header information, now parse readout data
-      Res = TTLMonitor.VMMParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      TTLMonitor.TTLMonParser.parse(TTLMonitor.ESSReadoutParser.Packet);
+      Counters.TTLMonStats = TTLMonitor.TTLMonParser.Stats;
       Counters.TimeStats = TTLMonitor.ESSReadoutParser.Packet.Time.Stats;
-      Counters.VMMStats = TTLMonitor.VMMParser.Stats;
 
       TTLMonitor.processMonitorReadouts();
 
@@ -227,14 +187,17 @@ void TTLMonitorBase::processing_thread() {
       usleep(10);
     }
 
+    // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
-
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
-      Counters.TxBytes += Serializer->produce();
+      for (auto &serializer : Serializers) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+        Counters.TxBytes += serializer.produce();
+      }
       Counters.KafkaStats = eventprod.stats;
-    }
+    } // ProduceTimer
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

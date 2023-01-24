@@ -5,12 +5,13 @@
 add_subdirectory(monitor)
 add_subdirectory(reduction)
 add_subdirectory(readout)
+add_subdirectory(kafka)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
-  detector/DetectorModuleRegister.cpp
   detector/EFUArgs.cpp
-  kafka/EV42Serializer.cpp
+  kafka/EV44Serializer.cpp
+  kafka/KafkaConfig.cpp
   kafka/Producer.cpp
   system/Socket.cpp
   time/Timer.cpp
@@ -18,6 +19,13 @@ set(efu_common_SRC
   time/TSCTimer.cpp
   Statistics.cpp
   StatPublisher.cpp
+  ${ESS_SOURCE_DIR}/efu/ExitHandler.cpp
+  ${ESS_SOURCE_DIR}/efu/Graylog.cpp
+  ${ESS_SOURCE_DIR}/efu/HwCheck.cpp
+  ${ESS_SOURCE_DIR}/efu/Launcher.cpp
+  ${ESS_SOURCE_DIR}/efu/MainProg.cpp
+  ${ESS_SOURCE_DIR}/efu/Parser.cpp
+  ${ESS_SOURCE_DIR}/efu/Server.cpp
   )
 
 set(efu_common_INC
@@ -30,9 +38,9 @@ set(efu_common_INC
   debug/Trace.h
   debug/TraceGroups.h
   detector/Detector.h
-  detector/DetectorModuleRegister.h
   detector/EFUArgs.h
-  kafka/EV42Serializer.h
+  kafka/EV44Serializer.h
+  kafka/KafkaConfig.h
   kafka/Producer.h
   memory/Buffer.h
   memory/FixedSizePool.h
@@ -48,20 +56,37 @@ set(efu_common_INC
   JsonFile.h
   Statistics.h
   StatPublisher.h
+  ${ESS_SOURCE_DIR}/efu/ExitHandler.h
+  ${ESS_SOURCE_DIR}/efu/Graylog.h
+  ${ESS_SOURCE_DIR}/efu/HwCheck.h
+  ${ESS_SOURCE_DIR}/efu/Launcher.h
+  ${ESS_SOURCE_DIR}/efu/MainProg.h
+  ${ESS_SOURCE_DIR}/efu/Parser.h
+  ${ESS_SOURCE_DIR}/efu/Server.h
   )
 
 find_package(CLI11 REQUIRED)
 
+# Only include the 'minimum' necessary
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
+  )
 
+# To be used as a dependency in the module's CMakeLists.txt
+add_library(efu_reduction STATIC
   $<TARGET_OBJECTS:ReductionLib>
   $<TARGET_OBJECTS:ClusteringLib>
   $<TARGET_OBJECTS:MatchingLib>
   $<TARGET_OBJECTS:AnalysisLib>
   $<TARGET_OBJECTS:MonitorLib>
-  )
+)
+
+# To be used as a dependency in the module's CMakeLists.txt
+add_library(efu_essreadout STATIC
+  $<TARGET_OBJECTS:EssReadoutLib>
+)
+
 
 target_include_directories(efu_common
   PUBLIC ${CLI11_INCLUDE_DIR}
@@ -72,10 +97,26 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_common "-Wl,--no-as-needed")
 endif()
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_essreadout "-Wl,--no-as-needed")
+endif()
+
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common
-  PUBLIC ${EFU_COMMON_LIBS}
+target_link_libraries(efu_common ${EFU_COMMON_LIBS})
+
+
+set(TestUtilsLib_INC
+    testutils/SaveBuffer.h
+    testutils/TestUDPServer.h
+  )
+set(TestUtilsLib_SRC
+    testutils/SaveBuffer.cpp
+    testutils/TestUDPServer.cpp
+  )
+add_library(TestUtilsLib OBJECT
+  ${TestUtilsLib_INC}
+  ${TestUtilsLib_SRC}
   )
 
 #=============================================================================

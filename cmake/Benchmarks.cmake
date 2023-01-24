@@ -39,7 +39,7 @@ function(create_benchmark_executable exec_name)
       ${EFU_COMMON_LIBS}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-      -lbenchmark -lpthread efu_common)
+      -lbenchmark -lpthread efu_common efu_reduction)
 
     set(benchmark_targets
       ${exec_name}

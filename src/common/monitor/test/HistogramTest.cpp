@@ -1,8 +1,8 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 
+#include <cmath>
 #include <common/monitor/Histogram.h>
 #include <common/testutils/TestBase.h>
-#include <cmath>
 
 class HistsTest : public TestBase {};
 
@@ -10,7 +10,7 @@ TEST_F(HistsTest, Constructor) {
   Hists hists(64, 4096);
   ASSERT_EQ(hists.bin_width(), 1);
   ASSERT_TRUE(hists.isEmpty());
-  ASSERT_EQ(hists.hit_count(), 0);
+  ASSERT_EQ(hists.hitCount(), 0);
   ASSERT_EQ(hists.cluster_count(), 0);
 }
 
@@ -37,6 +37,17 @@ TEST_F(HistsTest, BinCluster) {
     ASSERT_EQ(hists.cluster_count(), i);
     ASSERT_EQ(hists.cluster_adc_hist[i], 1);
   }
+}
+
+TEST_F(HistsTest, Clear) {
+  Hists hists(64, 4096);
+
+  hists.bincluster(1);
+  ASSERT_EQ(hists.cluster_count(), 1);
+  ASSERT_EQ(hists.cluster_adc_hist[1], 1);
+
+  hists.clear();
+  ASSERT_EQ(hists.cluster_count(), 0);
 }
 
 TEST_F(HistsTest, BinClusterWDownshift) {

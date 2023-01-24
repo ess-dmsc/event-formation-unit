@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,17 +11,17 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <common/monitor/Histogram.h>
 #include <common/kafka/Producer.h>
+#include <common/monitor/Histogram.h>
 
 class HistogramSerializer {
 public:
-  /** \todo document */
+  /// \todo document
   HistogramSerializer(size_t buffer_half_size, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
-  /** \todo document */
+  /// \todo document
   size_t produce(const Hists &hists);
 
 private:

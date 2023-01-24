@@ -11,8 +11,8 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <generators/udpgenpcap/ReaderPcap.h>
 #include <common/system/Socket.h>
+#include <generators/udpgenpcap/ReaderPcap.h>
 #include <string.h>
 #include <string>
 #include <unistd.h>
@@ -23,8 +23,8 @@ struct {
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
-  uint64_t PktThrottle{0}; // 0 is fastest
+  uint64_t SpeedThrottle{0};   // 0 is fastest higher is slower
+  uint64_t PktThrottle{0};     // 0 is fastest
   bool Read{false};
   bool Loop{false}; // Keep looping the same file forever
   bool Multicast{false};
@@ -39,10 +39,14 @@ int main(int argc, char *argv[]) {
   app.add_option("-f, --file", Settings.FileName, "Wireshark PCAP file");
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
-  app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
-  app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
-  app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
-  app.add_flag("-r, --read_only", Settings.Read, "Read pcap file and return stats");
+  app.add_option("-a, --packets", Settings.NumberOfPackets,
+                 "Number of packets to send");
+  app.add_option("-t, --throttle", Settings.SpeedThrottle,
+                 "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
+                 "Extra usleep() after n packets");
+  app.add_flag("-r, --read_only", Settings.Read,
+               "Read pcap file and return stats");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
   app.add_flag("-m, --multicast", Settings.Multicast, "Allow IP multicast");
   CLI11_PARSE(app, argc, argv);
@@ -105,7 +109,8 @@ int main(int argc, char *argv[]) {
             usleep(10);
           }
         }
-        if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
+        if (Settings.NumberOfPackets != 0 and
+            Packets >= Settings.NumberOfPackets) {
           printf("Sent %" PRIu64 " packets\n", TotPackets);
           Packets = 0;
           break;

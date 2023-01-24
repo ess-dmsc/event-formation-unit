@@ -8,8 +8,8 @@
 #pragma once
 
 #include <common/debug/Assert.h>
-#include <common/memory/FixedSizePool.h>
 #include <common/debug/Trace.h>
+#include <common/memory/FixedSizePool.h>
 
 #include <cstdint>
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,10 +14,12 @@
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
-#include <common/memory/span.hpp>
 #include <common/memory/Buffer.h>
+#include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
+#include <utility>
+#include <vector>
 
 ///
 class ProducerBase {
@@ -39,32 +41,35 @@ public:
 class Producer : public ProducerBase, public RdKafka::EventCb {
 public:
   /// \brief Construct a producer object.
-  /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
-  /// \param topicstr Name of Kafka topic according to agreement, example
+  /// \param Broker 'URL' specifying host and port, example "127.0.0.1:9009"
+  /// \param Topic Name of Kafka topic according to agreement, example
   /// "trex_detector"
-  Producer(std::string Broker, std::string topicstr);
+  /// \param Configs vector of configuration <type,value> pairs
+  Producer(std::string Broker, std::string Topic,
+           std::vector<std::pair<std::string, std::string>> &Configs);
 
   /// \brief cleans up by deleting allocated structures
   ~Producer() = default;
 
+  ///\brief Produce kafka messages and send to cluster
+  ///\return int, 0 if successful
   int produce(nonstd::span<const std::uint8_t> Buffer,
               std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
-  void setConfig(std::string Key, std::string Value);
+  RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
 
   /// \brief Kafka callback function for events
   void event_cb(RdKafka::Event &event) override;
 
   struct ProducerStats {
+    int64_t produce_calls;
     int64_t ev_errors;
     int64_t ev_others;
-    // int64_t ev_log;
-    // int64_t ev_stats;
-    // int64_t ev_throttle;
     int64_t dr_errors;
     int64_t dr_noerrors;
     int64_t produce_fails;
+    int64_t config_errors;
   } stats = {};
 
 protected:
@@ -76,4 +81,5 @@ protected:
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
 };
 
-using ProducerCallback = std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;
+using ProducerCallback =
+    std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;

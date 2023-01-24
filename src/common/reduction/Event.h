@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file Event.h
@@ -42,7 +42,7 @@ public:
   void insert(const Hit &e);
 
   /// \returns total hit count in both constituent clusters
-  size_t total_hit_count() const;
+  size_t totalHitCount() const;
 
   /// \brief merges a cluster into event.
   ///        Merges the cluster into the appropriate plane.
@@ -56,34 +56,33 @@ public:
 
   /// \returns true if event contains no hits
   bool empty() const;
-  
+
   /// \returns true if event has both valid planes
   bool both_planes() const;
 
   /// \returns earliest timestamp, undefined in case of empty event
-  uint64_t time_start() const;
+  uint64_t timeStart() const;
   /// \returns latest timestamp, undefined in case of empty event
-  uint64_t time_end() const;
+  uint64_t timeEnd() const;
   /// \returns time span, 0 in case of empty event
-  uint64_t time_span() const;
+  uint64_t timeSpan() const;
 
   /// \brief calculates the overlapping time span of event and cluster
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
-  uint64_t time_overlap(const Cluster &other) const;
+  uint64_t timeOverlap(const Cluster &other) const;
 
   /// \brief calculates the time gap of event and cluster
   /// \param other cluster to be compared
   /// \returns time gap
-  uint64_t time_gap(const Cluster &other) const;
+  uint64_t timeGap(const Cluster &other) const;
 
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits
   std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes both clusters with "text graphics"
-  std::string visualize(const std::string &prepend,
-                        uint8_t downsample_time = 0,
+  std::string visualize(const std::string &prepend, uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
 private:

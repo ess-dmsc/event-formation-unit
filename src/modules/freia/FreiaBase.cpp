@@ -8,10 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
-#include <common/debug/Hexdump.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
+#include <common/kafka/KafkaConfig.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
@@ -34,9 +34,7 @@ namespace Freia {
 
 const char *classname = "Freia detector with ESS readout";
 
-FreiaBase::FreiaBase(BaseSettings const &settings,
-                     struct FreiaSettings &LocalFreiaSettings)
-    : Detector("FREIA", settings), FreiaModuleSettings(LocalFreiaSettings) {
+FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -44,9 +42,9 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   // clang-format off
 
   // Rx and Tx stats
-  Stats.create("receive.packets", Counters.RxPackets);
-  Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.packets", ITCounters.RxPackets);
+  Stats.create("receive.bytes", ITCounters.RxBytes);
+  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -66,11 +64,13 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
 
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
+  Stats.create("readouts.tof_toolarge", Counters.MaxTOFErrors);
+  Stats.create("readouts.error_hybrid_mapping", Counters.HybridMappingErrors);
+  Stats.create("readouts.error_ring_mapping", Counters.RingMappingErrors);
+  Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
-  Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);
@@ -87,7 +87,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
   Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
 
 
   // Clustering stats
@@ -104,7 +103,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
   //
-  Stats.create("thread.receive_idle", Counters.RxIdle);
+  Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
 
@@ -128,9 +127,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
   Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
 
   // clang-format on
-
-  std::function<void()> inputFunc = [this]() { FreiaBase::input_thread(); };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     FreiaBase::processing_thread();
@@ -141,42 +139,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings,
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void FreiaBase::input_thread() {
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
-                         EFUSettings.DetectorPort);
-  UDPReceiver receiver(local);
-  receiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
-                          EFUSettings.RxSocketBufferSize);
-  receiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
-  receiver.printBufferSizes();
-  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
-
-  while (runThreads) {
-    int readSize;
-    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
-
-    // this is the processing step
-    RxRingbuffer.setDataLength(rxBufferIndex, 0);
-    if ((readSize = receiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                     RxRingbuffer.getMaxBufSize())) > 0) {
-      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
-      Counters.RxPackets++;
-      Counters.RxBytes += readSize;
-
-      if (InputFifo.push(rxBufferIndex) == false) {
-        Counters.FifoPushErrors++;
-      } else {
-        RxRingbuffer.getNextBuffer();
-      }
-    } else {
-      Counters.RxIdle++;
-    }
-  }
-  XTRACE(INPUT, ALW, "Stopping input thread.");
-  return;
-}
-
 void FreiaBase::processing_thread() {
 
   // Event producer
@@ -184,19 +146,22 @@ void FreiaBase::processing_thread() {
     XTRACE(INIT, ALW, "Setting defailt Kafka topic to freia_detector");
     EFUSettings.KafkaTopic = "freia_detector";
   }
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+
+  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
+  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                     KafkaCfg.CfgParms);
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug",
+                           KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, /*EFUSettings,*/ FreiaModuleSettings,
-                        Serializer);
+  Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
+  FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
                                         "Freia");
@@ -206,7 +171,7 @@ void FreiaBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({Counters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -226,13 +191,13 @@ void FreiaBase::processing_thread() {
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
-               Counters.RxPackets);
+               ITCounters.RxPackets);
       }
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
-               Counters.RxPackets);
+               ITCounters.RxPackets);
         Counters.ErrorESSHeaders++;
         continue;
       }
@@ -246,6 +211,14 @@ void FreiaBase::processing_thread() {
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
+        if (Freia.Conf.FreiaFileParameters.SplitMultiEvents) {
+          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
+          Counters.EventsDiscardedSpanTooLarge +=
+              builder.matcher.Stats.DiscardedSpanTooLarge;
+          Counters.EventsSplitSpanTooLarge +=
+              builder.matcher.Stats.SplitSpanTooLarge;
+          builder.matcher.resetStats();
+        }
       }
       // done processing data
     } else {
@@ -258,20 +231,20 @@ void FreiaBase::processing_thread() {
     if (ProduceTimer.timeout()) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {Counters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
       Counters.KafkaStats = eventprod.stats;
 
       if (!Freia.ADCHist.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               Freia.ADCHist.hit_count());
+               Freia.ADCHist.hitCount());
         ADCHistSerializer.produce(Freia.ADCHist);
         Freia.ADCHist.clear();
       }
       // if (!Freia.TDCHist.isEmpty()) {
       //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      Freia.TDCHist.hit_count());
+      //      Freia.TDCHist.hitCount());
       //   TDCHistSerializer.produce(Freia.TDCHist);
       //   Freia.TDCHist.clear();
       // }

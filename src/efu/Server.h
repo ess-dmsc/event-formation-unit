@@ -27,7 +27,7 @@
 #define SEND_FLAGS 0
 #endif
 
-/** \todo make this work with public static unsigned int */
+/// \todo make this work with public static unsigned int
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
 #define SERVER_MAX_BACKLOG 3
@@ -79,7 +79,7 @@ private:
   uint64_t TotalBytesReceived{0};
 
   int ServerPort{0}; /// server tcp port
-  int ServerFd{-1}; /// server file descriptor
+  int ServerFd{-1};  /// server file descriptor
   std::array<int, SERVER_MAX_CLIENTS> ClientFd;
 
   struct timeval Timeout; /// to set select() timeout

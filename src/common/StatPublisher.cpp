@@ -6,8 +6,8 @@
 ///
 //===----------------------------------------------------------------------===//
 //
-#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
+#include <common/debug/Log.h>
 #include <fmt/format.h>
 
 ///

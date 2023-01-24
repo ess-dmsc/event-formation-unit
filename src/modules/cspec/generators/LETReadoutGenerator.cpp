@@ -111,7 +111,7 @@ void Cspec::LETReadoutGenerator::generateData() {
       TimeLow += Settings.TicksBtwEvents;
       XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u", TimeLow);
     }
-    if (TimeLow >= 88052499){
+    if (TimeLow >= 88052499) {
       TimeLow -= 88052499;
       TimeHigh += 1;
     }

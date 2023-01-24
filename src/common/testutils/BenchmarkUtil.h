@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-
 #include <benchmark/benchmark.h>
 
 #ifdef BUILD_SUPPORT_VALGRIND_SDK

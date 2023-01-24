@@ -10,20 +10,21 @@
 
 #pragma once
 
-#include <common/testutils/DataFuzzer.h>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <common/testutils/DataFuzzer.h>
 
 class ReadoutGeneratorBase {
 public:
   struct GeneratorSettings {
     uint16_t NRings{2};
-    uint8_t Type{72}; // Freia (see readout ICD for other instruments)
+    uint8_t Type{0}; // Will be determined at compile time, can be overridden
+    uint8_t TypeOverride{0}; // to force a specific type field
     /// udp generator generic
     std::string IpAddress{"127.0.0.1"};
     uint16_t UDPPort{9000};
     uint64_t NumberOfPackets{0};     // 0 == all packets
     uint32_t NumReadouts{370};       // # readouts in packet
-    uint32_t TicksBtwReadouts{88};   // 88 ticks ~ 1us
+    uint32_t TicksBtwReadouts{10};   // 88 ticks ~ 1us
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
@@ -77,7 +78,7 @@ protected:
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
   uint8_t ReadoutDataSize{sizeof(ESSReadout::VMM3Parser::VMM3Data)};
-  uint8_t * Buffer{nullptr};
+  uint8_t *Buffer{nullptr};
   uint16_t BufferSize{0};
   uint32_t SeqNum{0};
   uint32_t TimeHigh{0};

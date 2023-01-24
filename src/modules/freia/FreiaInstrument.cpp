@@ -22,15 +22,13 @@ namespace Freia {
 
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
-                                 // BaseSettings & EFUSettings,
-                                 FreiaSettings &moduleSettings,
-                                 EV42Serializer *serializer)
-    : counters(counters), ModuleSettings(moduleSettings),
-      Serializer(serializer) {
+                                 BaseSettings &settings,
+                                 EV44Serializer *serializer)
+    : counters(counters), Settings(settings), Serializer(serializer) {
 
-  if (!ModuleSettings.FilePrefix.empty()) {
+  if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
-        ModuleSettings.FilePrefix + "freia_" + timeString();
+        Settings.DumpFilePrefix + "freia_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -40,11 +38,6 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   // We can now use the settings in Conf
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
-
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns", Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
@@ -61,31 +54,32 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
 void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
-         ModuleSettings.ConfigFile.c_str());
-  Conf = Config("Freia", ModuleSettings.ConfigFile);
+         Settings.ConfigFile.c_str());
+  Conf = Config("Freia", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
   XTRACE(INIT, ALW, "Creating vector of %d builders (one per cassette/hybrid)",
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
-  if (ModuleSettings.CalibFile != "") {
-    XTRACE(INIT, ALW, "Loading and applying calibration file");
-    Conf.loadAndApplyCalibration(ModuleSettings.CalibFile);
-  }
-}
-
-void FreiaInstrument::setHybridIds(std::vector<std::string> Ids) {
-  if (Ids.size() != Conf.NumHybrids) {
-    throw std::runtime_error("Hybrid Id size mismatch");
-  }
-  for (uint8_t i = 0; i < Ids.size(); i++) {
-    if (not ESSReadout::Hybrid::isAvailable(Ids[i], Hybrids)) {
-      XTRACE(INIT, ERR, "Duplicate Hybrid ID: %s", Ids[i].c_str());
-      throw std::runtime_error("Duplicate Hybrid ID");
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    if (Conf.FreiaFileParameters.SplitMultiEvents) {
+      builder.matcher.setSplitMultiEvents(
+          Conf.FreiaFileParameters.SplitMultiEvents,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
     }
-    Hybrids[i].HybridId = Ids[i];
-    XTRACE(INIT, ALW, "Config: Hybrid %u has ID: %s", i, Ids[i].c_str());
+  }
+
+  if (Settings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file");
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
 
@@ -94,8 +88,9 @@ void FreiaInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -113,6 +108,17 @@ void FreiaInstrument::processReadouts(void) {
 
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.RingId / 2;
+
+    // Check for configuration mismatch
+    if (Ring > VMM3Config::MaxRing) {
+      counters.RingMappingErrors++;
+      continue;
+    }
+
+    if (readout.FENId > VMM3Config::MaxFEN) {
+      counters.FENMappingErrors++;
+      continue;
+    }
 
     uint8_t HybridId = readout.VMM >> 1;
     if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
@@ -181,7 +187,7 @@ void FreiaInstrument::processReadouts(void) {
   }
 
   for (auto &builder : builders) {
-    builder.flush(); // Do matching
+    builder.flush(true); // Do matching
   }
 }
 
@@ -210,7 +216,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.MaxGapWire)) {
+      if (e.ClusterB.hasGap(Conf.FreiaFileParameters.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -218,7 +224,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.MaxGapStrip)) {
+      if (e.ClusterA.hasGap(Conf.FreiaFileParameters.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
@@ -229,7 +235,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.time_start();
+    uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.TimeInNS);
@@ -244,13 +250,13 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
       XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
-      counters.TOFErrors++;
+      counters.MaxTOFErrors++;
       continue;
     }
 
     // calculate local x and y using center of mass
-    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
-    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
+    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
+    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
     auto PixelId = essgeom.pixel2D(x, y);
 
     if (PixelId == 0) {

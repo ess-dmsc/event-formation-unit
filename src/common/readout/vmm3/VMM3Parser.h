@@ -75,8 +75,9 @@ public:
   int parse(Parser::PacketDataV0 &PacketData);
 
   ///\brief Dumps VMM3 readouts to file
-  void dumpReadoutToFile(const VMM3Data &Data, const ESSReadout::Parser ESSReadoutParser, std::shared_ptr<VMM3::ReadoutFile> DumpFile);
-
+  void dumpReadoutToFile(const VMM3Data &Data,
+                         const ESSReadout::Parser ESSReadoutParser,
+                         std::shared_ptr<VMM3::ReadoutFile> DumpFile);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;

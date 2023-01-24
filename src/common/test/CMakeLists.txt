@@ -1,10 +1,3 @@
-find_package(Trompeloeil REQUIRED)
-set(ProducerTest_SRC
-  ProducerTest.cpp)
-set(ProducerTest_INC
-  KafkaMocks.h)
-create_test_executable(ProducerTest)
-target_include_directories(ProducerTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
 set(BufferTest_SRC
   BufferTest.cpp
@@ -25,11 +18,6 @@ set(EFUArgsTest_SRC
   EFUArgsTest.cpp
   )
 create_test_executable(EFUArgsTest)
-
-set(EV42SerializerTest_SRC
-  EV42SerializerTest.cpp
-  )
-create_test_executable(EV42SerializerTest)
 
 set(StatisticsTest_SRC
     StatisticsTest.cpp
@@ -54,10 +42,6 @@ set(ESSGeometryTest_SRC
   )
 create_test_executable(ESSGeometryTest)
 
-set(BitMathTest_SRC
-  BitMathTest.cpp
-  )
-create_test_executable(BitMathTest)
 
 set(SocketTest_SRC
   SocketTest.cpp

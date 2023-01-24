@@ -1,22 +1,22 @@
-/* Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Loki Panel Geometry
+/// \brief Caen Panel Geometry
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <assert.h>
-#include <cstdint>
 #include <common/debug/Trace.h>
+#include <cstdint>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Loki {
+namespace Caen {
 
 class PanelGeometry {
 public:
@@ -52,6 +52,8 @@ public:
       XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NStraws);
       return StrawError;
     }
+    XTRACE(EVENT, DEB, "LocalTube: %u, TZ: %u, NStraws: %u, TN: %u", LocalTube,
+           TZ, NStraws, TN);
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)
     auto TubeLayer = LocalTube % TZ; /// 0 - 3
@@ -63,7 +65,8 @@ public:
 
     // Add the contributions to the total straw - this is the y coordinate
     // for the pixelid calculation, x comes from the position along the straw
-    auto AbsoluteStraw = StrawOffset + LayerOffset + GroupOffset + TubeOffset + Straw;
+    auto AbsoluteStraw =
+        StrawOffset + LayerOffset + GroupOffset + TubeOffset + Straw;
     assert(AbsoluteStraw < MaxStraw + StrawOffset);
     return AbsoluteStraw;
   }
@@ -76,4 +79,4 @@ private:
   uint32_t MaxStraw{0};
   uint32_t MaxGroup{0};
 };
-} // namespace Loki
+} // namespace Caen

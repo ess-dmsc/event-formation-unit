@@ -8,7 +8,6 @@
 
 #pragma once
 
-
 #if 1
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)

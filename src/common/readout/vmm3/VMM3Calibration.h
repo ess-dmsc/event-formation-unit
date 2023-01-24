@@ -27,9 +27,7 @@ public:
     double ADCSlope;
   };
 
-  VMM3Calibration() {
-    InitCal();
-  };
+  VMM3Calibration() { InitCal(); };
 
   ///\brief Set the calibration parameters for the specified channel
   ///\param Channel VMM Channel
@@ -38,9 +36,8 @@ public:
   ///\param ADCOffset (see VMM3 ICD)
   ///\param ADCSlope (see VMM3 ICD)
   ///\returns true if channel is valid (configuration was set) else false
-  bool setCalibration(int Channel,
-                 double TDCOffset, double TDCSlope,
-                 double ADCOffset, double ADCSlope);
+  bool setCalibration(int Channel, double TDCOffset, double TDCSlope,
+                      double ADCOffset, double ADCSlope);
 
   ///\brief return the corrected TDC time in ns for the specified channel
   /// It is assumed that Channel is within the valid range (0 - 63)

@@ -5,7 +5,7 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(LOKI_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
+get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
@@ -14,85 +14,40 @@ get_filename_component(LOKI_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ##
 ## Analog geometry - amplitude calculations
 ##
-set(TubeAmpsTest_INC ../geometry/TubeAmps.h)
-set(TubeAmpsTest_SRC TubeAmpsTest.cpp)
-create_test_executable(TubeAmpsTest)
+set(LokiGeometryTest_INC 
+    ../geometry/LokiGeometry.h
+    ../geometry/PanelGeometry.h
+    ${ESS_MODULE_DIR}/caen/geometry/Config.h
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+)
+set(LokiGeometryTest_SRC 
+    LokiGeometryTest.cpp
+    ../geometry/LokiGeometry.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+)
+create_test_executable(LokiGeometryTest)
+
 
 ##
 ## Panel geometry
 ##
-set(LokiPanelGeometryTest_INC
-  ../geometry/TubeAmps.h
+set(CaenPanelGeometryTest_INC
+  ../geometry/LokiGeometry.h
   ../geometry/PanelGeometry.h)
-set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
-create_test_executable(LokiPanelGeometryTest)
+set(CaenPanelGeometryTest_SRC PanelGeometryTest.cpp)
+create_test_executable(CaenPanelGeometryTest)
 
 ##
 ## Validate LoKI geometry between EFU and Nexus Constructor
 ##
-set(LokiFullGeometryTest_INC
+set(CaenFullGeometryTest_INC
   LokiFullGeometryTestData.h
-  ../geometry/TubeAmps.h
+  ../geometry/LokiGeometry.h
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
   ../geometry/PanelGeometry.h)
-set(LokiFullGeometryTest_SRC LokiFullGeometryTest.cpp)
+set(LokiFullGeometryTest_SRC 
+  LokiFullGeometryTest.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp)
 create_test_executable(LokiFullGeometryTest)
 
-
-set(LokiCalibrationTest_INC
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ../geometry/Config.h
-  ../geometry/Calibration.h)
-set(LokiCalibrationTest_SRC
-  ../geometry/Config.cpp
-  ../geometry/Calibration.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  CalibrationTest.cpp)
-create_test_executable(LokiCalibrationTest)
-
-
-set(LokiConfigTest_INC
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.h
-  ../geometry/Config.h)
-set(LokiConfigTest_SRC
-  ../geometry/Config.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/SaveBuffer.cpp
-  ConfigTest.cpp)
-create_test_executable(LokiConfigTest)
-target_compile_definitions(LokiConfigTest PRIVATE LOKI_FULL="${LOKI_FULL}")
-
-##
-## readout/
-##
-set(LokiDataParserTest_INC
-  ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h)
-set(LokiDataParserTest_SRC
-  ../readout/DataParser.cpp
-  DataParserTest.cpp)
-create_test_executable(LokiDataParserTest)
-
-
-##
-## Module Integration tests below
-##
-
-
-##
-## Module integration test for both generic readout and LoKI
-##
-set(CombinedParserTest_INC
-  ../readout/DataParser.h
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.h
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.h
-  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  ../generators/ReadoutGenerator.h
-  )
-set(CombinedParserTest_SRC
-  CombinedParserTest.cpp
-  ../generators/ReadoutGenerator.cpp
-  ../readout/DataParser.cpp
-  ${ESS_SOURCE_DIR}/common/readout/ess/Parser.cpp
-  ${ESS_SOURCE_DIR}/common/testutils/DataFuzzer.cpp
-  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
-  )
-create_test_executable(CombinedParserTest)
