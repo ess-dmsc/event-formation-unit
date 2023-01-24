@@ -62,7 +62,7 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
 
-  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", PulseTimeHigh, PulseTimeLow);
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh, TimeLowOffset);
 }
 
 void ReadoutGeneratorBase::finishPacket() {
