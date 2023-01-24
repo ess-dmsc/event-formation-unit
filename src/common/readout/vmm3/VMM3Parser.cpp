@@ -8,15 +8,14 @@
 /// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
-// #include <common/debug/Trace.h>
-// #include <common/readout/vmm3/VMM3Parser.h>
-
+#include <common/debug/Trace.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 #include <common/memory/span.hpp>
 
 namespace ESSReadout {
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
 int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
