@@ -9,8 +9,8 @@
 #include <common/debug/Trace.h>
 #include <common/reduction/clustering/GapClusterer.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void GapClusterer::insert(const Hit &hit) {
   /// Process time-cluster if time gap to next hit is large enough

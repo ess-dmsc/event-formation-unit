@@ -20,8 +20,8 @@
 #include <cstring>
 #include <stdexcept>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void Cspec::LETReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -37,10 +37,6 @@ void Cspec::LETReadoutGenerator::generateData() {
 
 
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
-    if((Time.toNS(TimeHigh, TimeLow) - Time.toNS(PulseTimeHigh, PulseTimeLow) > MaxTOF) && !(GlobalReadout%2)){
-      XTRACE(DATA, DEB, "Event tof longer than max tof, need to start new packet, expected %u readouts and generated %u", Settings.NumReadouts, Readout);
-      break;
-    }
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
