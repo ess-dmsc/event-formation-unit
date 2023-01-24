@@ -84,7 +84,6 @@ protected:
   uint32_t TimeHigh{0};
   uint32_t TimeLow{0};
   uint16_t DataSize{0}; // Number of data bytes in packet
-  ESSReadout::ESSTime Time;
 
   DataFuzzer Fuzzer;
 };
