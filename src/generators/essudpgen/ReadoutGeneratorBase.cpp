@@ -57,15 +57,6 @@ void ReadoutGeneratorBase::generateHeader() {
 
   TimeHigh = time(NULL);
 
-
-  if ((Time.toNS(TimeHigh, TimeLow) - Time.toNS(PulseTimeHigh, PulseTimeLow)) > MaxTOF){
-    XTRACE(DATA, DEB, "New pulse");
-    PrevPulseTimeHigh = PulseTimeHigh;
-    PrevPulseTimeLow = PulseTimeLow;
-    PulseTimeHigh = TimeHigh;
-    PulseTimeLow = TimeLow;
-  }
-
   Header->PulseHigh = PulseTimeHigh;
   Header->PulseLow = PulseTimeLow;
   Header->PrevPulseHigh = PrevPulseTimeHigh;
