@@ -160,11 +160,10 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
   ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
 
   ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
-      counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
+  counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
 
   ttlmonitor->processMonitorReadouts();
 }
-
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());

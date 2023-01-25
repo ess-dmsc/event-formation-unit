@@ -9,16 +9,16 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/debug/Trace.h>
-#include <math.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
-#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
-#include <time.h>
 #include <cassert>
+#include <common/debug/Trace.h>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <math.h>
+#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
+#include <modules/ttlmonitor/geometry/Parser.h>
 #include <stdexcept>
+#include <time.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

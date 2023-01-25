@@ -34,7 +34,6 @@ struct Counters {
   int64_t MaxADC;
   int64_t MappingErrors;
 
-
   struct GapMatcherStats MatcherStats;
   //
   int64_t ProcessingIdle;

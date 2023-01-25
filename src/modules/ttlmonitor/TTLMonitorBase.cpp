@@ -133,7 +133,7 @@ void TTLMonitorBase::processing_thread() {
         EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
-  for (auto & s : Serializers) {
+  for (auto &s : Serializers) {
     TTLMonitor.Serializers.push_back(&s);
   }
 
@@ -193,8 +193,8 @@ void TTLMonitorBase::processing_thread() {
           {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
       for (auto &serializer : Serializers) {
-          XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-          Counters.TxBytes += serializer.produce();
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+        Counters.TxBytes += serializer.produce();
       }
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer

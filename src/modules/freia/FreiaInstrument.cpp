@@ -39,7 +39,6 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
@@ -63,18 +62,21 @@ void FreiaInstrument::loadConfigAndCalib() {
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
-  for (EventBuilder2D& builder: builders) {
-    builder.matcher.setMaximumTimeGap(Conf.FreiaFileParameters.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(Conf.FreiaFileParameters.MaxClusteringTimeGap);
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
     builder.matcher.Stats = &counters.MatcherStats;
     if (Conf.FreiaFileParameters.SplitMultiEvents) {
-      builder.matcher.setSplitMultiEvents(Conf.FreiaFileParameters.SplitMultiEvents,
-                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
-                                          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
+      builder.matcher.setSplitMultiEvents(
+          Conf.FreiaFileParameters.SplitMultiEvents,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
     }
   }
-
 
   if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
@@ -82,14 +84,14 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-
 void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {

@@ -46,7 +46,8 @@ void GapMatcher::match(bool flush) {
     }
 
     if (!evt.empty() && (evt.timeGap(*cluster) > max_time_gap_)) {
-      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, max is %u", evt.timeGap(*cluster), max_time_gap_);
+      XTRACE(CLUSTER, DEB, "time gap too large, gap is %u, max is %u",
+             evt.timeGap(*cluster), max_time_gap_);
       checkAndStashEvent(evt);
       evt.clear();
     }

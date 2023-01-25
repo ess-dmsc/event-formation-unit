@@ -43,7 +43,6 @@ struct Counters {
   int64_t EventsInvalidStripGap;
   int64_t EventsInvalidWireGap;
   struct GapMatcherStats MatcherStats;
-  
 
   int64_t PixelErrors;
   int64_t TimeErrors;
