@@ -13,19 +13,19 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 
 
 set(CaenCalibrationTest_INC
-  ../geometry/Config.h
-  ../geometry/Calibration.h)
+  ${ESS_MODULE_DIR}/caen/geometry/Config.h
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.h)
 set(CaenCalibrationTest_SRC
-  ../geometry/Config.cpp
-  ../geometry/Calibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
   CalibrationTest.cpp)
 create_test_executable(CaenCalibrationTest)
 
 
 set(CaenConfigTest_INC
-  ../geometry/Config.h)
+  ${ESS_MODULE_DIR}/caen/geometry/Config.h)
 set(CaenConfigTest_SRC
-  ../geometry/Config.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
   ConfigTest.cpp)
 create_test_executable(CaenConfigTest)
 target_compile_definitions(CaenConfigTest PRIVATE CAEN_FULL="${CAEN_FULL}")
@@ -34,10 +34,10 @@ target_compile_definitions(CaenConfigTest PRIVATE CAEN_FULL="${CAEN_FULL}")
 ## readout/
 ##
 set(CaenDataParserTest_INC
-  ../readout/DataParser.h
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.h
   ${ESS_COMMON_DIR}/readout/ess/Parser.h)
 set(CaenDataParserTest_SRC
-  ../readout/DataParser.cpp
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.cpp
   DataParserTest.cpp)
 create_test_executable(CaenDataParserTest)
 
@@ -51,16 +51,16 @@ create_test_executable(CaenDataParserTest)
 ## Module integration test for both generic readout and LoKI
 ##
 set(CombinedParserTest_INC
-  ../readout/DataParser.h
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.h
   ${ESS_COMMON_DIR}/readout/ess/Parser.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  ../generators/LokiReadoutGenerator.h
+  ${ESS_MODULE_DIR}/loki/generators/LokiReadoutGenerator.h
   )
 set(CombinedParserTest_SRC
   CombinedParserTest.cpp
-  ../generators/LokiReadoutGenerator.cpp
-  ../readout/DataParser.cpp
+  ${ESS_MODULE_DIR}/loki/generators/LokiReadoutGenerator.cpp
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.cpp
   ${ESS_COMMON_DIR}/readout/ess/Parser.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp

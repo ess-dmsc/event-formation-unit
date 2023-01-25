@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial VMM3 readouts
+/// \brief Generator of artificial CAEN readouts
 /// for Loki ICD:
 ///
 //===----------------------------------------------------------------------===//
@@ -11,7 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <math.h>
-#include <modules/caen/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/LokiReadoutGenerator.h>
 #include <time.h>
 
 #include <cassert>
