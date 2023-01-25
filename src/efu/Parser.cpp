@@ -87,6 +87,32 @@ static int version_get(const std::vector<std::string> &cmdargs, char *output,
 }
 
 //=============================================================================
+static int stat_get_name(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes, std::shared_ptr<Detector> detector,
+                    Statistics stats) {
+  auto nargs = cmdargs.size();
+  LOG(CMD, Sev::Debug, "STAT_GET_NAME");
+  if (nargs != 2) {
+    LOG(CMD, Sev::Warning, "STAT_GET_NAME: wrong number of arguments");
+    return -Parser::EBADARGS;
+  }
+
+  std::string name = cmdargs.at(1);
+
+  int64_t value = detector->statvaluebyname(name);
+  if (value == -1) {
+    value = stats.valueByName(name);
+  }
+
+  LOG(CMD, Sev::Debug, "STAT_GET_NAME {} {}", name, value);
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_NAME %s %" PRIi64,
+                     name.c_str(), value);
+
+  return Parser::OK;
+}
+
+//=============================================================================
 static int cmd_get_count(const std::vector<std::string> &cmdargs, char *output,
                          unsigned int *obytes, int count) {
   auto nargs = cmdargs.size();
@@ -208,6 +234,13 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
                                     char *resp, unsigned int *nrChars) {
                 return stat_get(cmd, resp, nrChars, detector, mainStats);
               });
+
+  registercmd("STAT_GET_NAME",
+              [detector, mainStats](const std::vector<std::string> &cmd, char *resp,
+                                    unsigned int *nrChars) {
+                return stat_get_name(cmd, resp, nrChars, detector, mainStats);
+              });
+
   registercmd("STAT_GET_COUNT",
               [detector, mainStats](const std::vector<std::string> &cmd,
                                     char *resp, unsigned int *nrChars) {

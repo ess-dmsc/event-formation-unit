@@ -129,9 +129,10 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
 }
 
 void CaenInstrument::processReadouts() {
-  Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time
-          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  XTRACE(DATA, DEB, "Reference time is %" PRIi64,
+         ESSReadoutParser.Packet.Time.TimeInNS);
+  /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
   SerializerII->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
 
   /// Traverse readouts, calculate pixels
