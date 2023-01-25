@@ -215,8 +215,7 @@ void NmxBase::processing_thread() {
 
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
-        if (NMX.Conf.NMXFileParameters.SplitMultiEvents) {
-        }
+        Counters.MatcherStats.addAndReset(builder.matcher.Stats);
       }
 
     } else {

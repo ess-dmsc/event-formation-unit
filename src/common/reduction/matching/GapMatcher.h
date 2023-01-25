@@ -19,6 +19,21 @@ struct GapMatcherStats {
   int64_t DiscardedSpanTooLarge{0};
   int64_t SplitSpanTooLarge{0};
   int64_t MatchAttemptCount{0};
+
+  void addAndReset(const GapMatcherStats& other) {
+    SpanTooLarge += other.SpanTooLarge;
+    DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
+    SplitSpanTooLarge += other.SplitSpanTooLarge;
+    MatchAttemptCount += other.MatchAttemptCount;
+    this->reset();
+  }
+
+  void reset() {
+    SpanTooLarge = 0;
+    DiscardedSpanTooLarge = 0;
+    SplitSpanTooLarge = 0;
+    MatchAttemptCount = 0;
+  }
 };
 
 class GapMatcher : public AbstractMatcher {
@@ -55,7 +70,7 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
-  struct GapMatcherStats *Stats{new GapMatcherStats};
+  struct GapMatcherStats Stats;
 
 private:
   void splitAndStashEvent(Event evt);

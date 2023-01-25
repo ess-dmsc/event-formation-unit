@@ -27,7 +27,7 @@ void GapMatcher::setSplitMultiEvents(bool split_multi_events,
 }
 
 void GapMatcher::match(bool flush) {
-  Stats->MatchAttemptCount++;
+  Stats.MatchAttemptCount++;
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.timeStart() < c2.timeStart();
   });
@@ -104,12 +104,12 @@ void GapMatcher::splitAndStashEvent(Event evt) {
     XTRACE(CLUSTER, DEB,
            "Unable to match clusters into two distinct events, discarding "
            "readouts");
-    Stats->DiscardedSpanTooLarge++;
+    Stats.DiscardedSpanTooLarge++;
 
     //\todo count discarded multievents
     return;
   }
-  Stats->SplitSpanTooLarge++;
+  Stats.SplitSpanTooLarge++;
   stashEvent(new_event_1);
   stashEvent(new_event_2);
   evt.clear();
@@ -198,7 +198,7 @@ void GapMatcher::checkAndStashEvent(Event evt) {
            "%u and contains %u hits",
            evt.ClusterA.coordSpan(), evt.ClusterA.hitCount(),
            evt.ClusterB.coordSpan(), evt.ClusterB.hitCount());
-    Stats->SpanTooLarge++;
+  Stats.SpanTooLarge++;
     splitAndStashEvent(evt);
     evt.clear();
   }
