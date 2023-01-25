@@ -58,8 +58,6 @@ public:
   /// in overlapping pixels. If it does, throws a runtime error.
   void checkConfigAndGeometry();
 
-  void checkConfigAndGeometry();
-
 public:
   /// \brief Stuff that 'ties' NMX together
   struct Counters &counters;
