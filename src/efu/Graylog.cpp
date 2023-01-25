@@ -14,7 +14,7 @@ std::string Graylog::ConsoleFormatter(const Log::LogMessage &Msg) {
       "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
-  for (auto &CField : Msg.AdditionalFields) {
+  for (auto const &CField : Msg.AdditionalFields) {
     if (CField.first == "file") {
       FileName = CField.second.strVal;
     } else if (CField.first == "line") {
@@ -34,7 +34,7 @@ std::string Graylog::FileFormatter(const Log::LogMessage &Msg) {
       "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
-  for (auto &CField : Msg.AdditionalFields) {
+  for (auto const &CField : Msg.AdditionalFields) {
     if (CField.first == "file") {
       FileName = CField.second.strVal;
     } else if (CField.first == "line") {

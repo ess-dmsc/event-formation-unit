@@ -9,6 +9,8 @@
 /// as a high resolution timer.
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
 #include <common/system/gccintel.h>
 #include <cstdint>
 

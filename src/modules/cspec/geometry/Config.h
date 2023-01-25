@@ -44,6 +44,8 @@ public:
     uint16_t SizeZ{16};
     uint16_t MaxGridsSpan{3};
     uint16_t DefaultMinADC{50};
+    uint16_t MaxMatchingTimeGap{500};
+    uint16_t MaxClusteringTimeGap{500};
   } CSPECFileParameters;
 
   // Derived parameters

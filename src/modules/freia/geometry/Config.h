@@ -40,11 +40,15 @@ public:
 
   bool StripGapCheck{true};
   bool WireGapCheck{true};
-  uint16_t MaxGapWire{0};
-  uint16_t MaxGapStrip{0};
-  bool SplitMultiEvents{false};
-  float SplitMultiEventsCoefficientLow{0.8};
-  float SplitMultiEventsCoefficientHigh{1.2};
+  struct {
+    uint16_t MaxGapWire{0};
+    uint16_t MaxGapStrip{0};
+    bool SplitMultiEvents{false};
+    float SplitMultiEventsCoefficientLow{0.8};
+    float SplitMultiEventsCoefficientHigh{1.2};
+    uint16_t MaxMatchingTimeGap{500};
+    uint16_t MaxClusteringTimeGap{500};
+  } FreiaFileParameters;
 };
 
 } // namespace Freia

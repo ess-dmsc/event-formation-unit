@@ -12,12 +12,6 @@ create_test_executable(ProducerTest)
 target_include_directories(ProducerTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
 
-set(EV42SerializerTest_SRC
-  test/EV42SerializerTest.cpp
-  )
-create_test_executable(EV42SerializerTest)
-
-
 set(EV44SerializerTest_SRC
   test/EV44SerializerTest.cpp
   )

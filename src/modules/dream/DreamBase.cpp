@@ -108,7 +108,7 @@ void DreamBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV42Serializer(KafkaBufferSize, "dream", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, "dream", Produce);
   Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
 
   unsigned int DataIndex;

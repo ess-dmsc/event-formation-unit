@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -58,8 +58,7 @@ std::string ConfigStr = R"(
 
     "MaxPulseTimeNS" : 71428570,
     "MaxGapWire"  : 0,
-    "MaxGapStrip" : 0,
-    "TimeBoxNs" : 2010
+    "MaxGapStrip" : 0
   }
 )";
 
@@ -160,7 +159,7 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  EV42Serializer *serializer;
+  EV44Serializer *serializer;
   FreiaInstrument *freia;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
@@ -168,7 +167,7 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
-    serializer = new EV42Serializer(115000, "freia");
+    serializer = new EV44Serializer(115000, "freia");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));

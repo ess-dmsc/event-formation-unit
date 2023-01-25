@@ -16,7 +16,7 @@ static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
 // clang-format off
 std::vector<std::string> commands {
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 1",
-  "CMD_GET_COUNT",                  "CMD_GET_COUNT 8",
+  "CMD_GET_COUNT",                  "CMD_GET_COUNT 9",
   "STAT_GET 1",                     "STAT_GET dummystat 42",
   "STAT_GET 2",                     "STAT_GET  -1",
   "EXIT",                           "<OK>"
@@ -25,6 +25,7 @@ std::vector<std::string> commands {
 std::vector<std::string> commands_badargs {
   "STAT_GET_COUNT 1",
   "STAT_GET",
+  "STAT_GET_NAME",
   "CMD_GET_COUNT 1",
   "CMD_GET",
   "CMD_GET 1 2",
@@ -40,15 +41,17 @@ std::vector<std::string> commands_badargs {
 std::vector<std::string> check_detector_loaded {
   "DETECTOR_INFO_GET",
   "STAT_GET_COUNT",
+  "STAT_GET_NAME main.uptime",
   "STAT_GET 1"
 };
 
 // clang-format on
 
-class TestDetector : public Detector {
+class ParserTestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector(settings){};
-  ~TestDetector(){};
+  explicit ParserTestDetector(UNUSED BaseSettings settings)
+      : Detector(settings){};
+  ~ParserTestDetector(){};
 };
 
 class ParserTest : public TestBase {

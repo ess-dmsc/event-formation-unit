@@ -34,7 +34,7 @@ auto InvalidDetector = R"(
 auto InvalidRing = R"(
 {
   "Detector": "CSPEC",
-  
+
   "Vessel_Config" : {
     "0":  {"NumGrids": 140, "Rotation": false, "XOffset":   0},
     "1":  {"NumGrids": 140, "Rotation": false, "XOffset":  12}
@@ -86,48 +86,48 @@ auto DuplicateEntry = R"(
 
 using namespace Cspec;
 
-class ConfigTest : public TestBase {
+class CspecConfigTest : public TestBase {
 protected:
   Config config{"CSPEC", "config.json"};
   void SetUp() override { config.root = j2; }
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(CspecConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
   ASSERT_EQ(config.NumHybrids, 0);
 }
 
-TEST_F(ConfigTest, UninitialisedHybrids) {
+TEST_F(CspecConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
 }
 
-TEST_F(ConfigTest, NoDetector) {
+TEST_F(CspecConfigTest, NoDetector) {
   config.root = NoDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidDetector) {
+TEST_F(CspecConfigTest, InvalidDetector) {
   config.root = InvalidDetector;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidRing) {
+TEST_F(CspecConfigTest, InvalidRing) {
   config.root = InvalidRing;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, InvalidConfig) {
+TEST_F(CspecConfigTest, InvalidConfig) {
   config.root = InvalidConfig;
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
-TEST_F(ConfigTest, Duplicate) {
+TEST_F(CspecConfigTest, Duplicate) {
   config.root = DuplicateEntry;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
-TEST_F(ConfigTest, FullInstrument) {
+TEST_F(CspecConfigTest, FullInstrument) {
   config = Config("CSPEC", CSPEC_FULL);
   config.loadAndApplyConfig();
   ASSERT_EQ(config.NumPixels, 838272);

@@ -9,7 +9,7 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <dream/Counters.h>
 
 namespace Dream {
@@ -23,7 +23,7 @@ public:
 
 protected:
   struct Counters Counters;
-  EV42Serializer *Serializer;
+  EV44Serializer *Serializer;
 };
 
 } // namespace Dream

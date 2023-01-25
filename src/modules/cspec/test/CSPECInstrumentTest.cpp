@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -29,8 +29,7 @@ std::string BadConfigStr = R"(
       { "Ring" :  0, "VesselId": "0", "FEN": 0, "Hybrid" :  1, "HybridId" : ""}
     ],
 
-    "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010
+    "MaxPulseTimeNS" : 71428570
   }
 )";
 
@@ -75,7 +74,6 @@ std::string ConfigStr = R"(
     ],
 
     "MaxPulseTimeNS" : 71428570,
-    "TimeBoxNs" : 2010,
     "DefaultMinADC": 50,
     "MaxGridsPerEvent": 5,
     "SizeX": 12,
@@ -387,7 +385,7 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  EV42Serializer *serializer;
+  EV44Serializer *serializer;
   CSPECInstrument *cspec;
   ESSReadout::Parser::PacketHeaderV0 PacketHeader;
   Event TestEvent;           // used for testing generateEvents()
@@ -395,7 +393,7 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
-    serializer = new EV42Serializer(115000, "cspec");
+    serializer = new EV44Serializer(115000, "cspec");
     counters = {};
 
     memset(&PacketHeader, 0, sizeof(PacketHeader));

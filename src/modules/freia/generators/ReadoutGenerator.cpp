@@ -22,9 +22,9 @@ void Freia::ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
-  double Angle = 0;
-  double XChannel = 32;
-  double YChannel = 32;
+  double Angle{0};
+  double XChannel{32};
+  double YChannel{32};
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
@@ -44,13 +44,11 @@ void Freia::ReadoutGenerator::generateData() {
       XChannel =
           44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
       YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
-    }
-
-    if ((Readout % 2) == 0) {
       ReadoutData->Channel = YChannel;
     } else {
       ReadoutData->Channel = XChannel;
     }
+
     DP += ReadoutDataSize;
     if ((Readout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;

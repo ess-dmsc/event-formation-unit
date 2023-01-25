@@ -10,7 +10,7 @@
 
 #include <CLI/CLI.hpp>
 #include <cinttypes>
-#include <common/kafka/EV42Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <h5cpp/hdf5.hpp>
@@ -45,10 +45,10 @@ int main(int argc, char *argv[]) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(Config.KafkaBufferSize, "hdf5pixel", Produce);
+  EV44Serializer flatbuffer(Config.KafkaBufferSize, "hdf5pixel", Produce);
 
   uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-  flatbuffer.pulseTime(efu_time);
+  flatbuffer.checkAndSetReferenceTime(efu_time);
 
   auto HDF5File = hdf5::file::open(Config.FileName);
   auto RootGroup = HDF5File.root();

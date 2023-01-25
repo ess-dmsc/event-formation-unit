@@ -9,7 +9,7 @@
 
 using namespace Freia;
 
-class GeometryTest : public TestBase {
+class FreiaChannelMappingTest : public TestBase {
 protected:
   FreiaGeometry Geom;
   uint16_t Cassette0{0};
@@ -19,7 +19,7 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(GeometryTest, Coordinates) {
+TEST_F(FreiaChannelMappingTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
     ASSERT_EQ(Geom.xCoord(VMMX, i), i);
   }
@@ -28,12 +28,12 @@ TEST_F(GeometryTest, Coordinates) {
   }
 }
 
-TEST_F(GeometryTest, XCoordErrors) {
+TEST_F(FreiaChannelMappingTest, XCoordErrors) {
   ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
   ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
-TEST_F(GeometryTest, YCoordErrors) {
+TEST_F(FreiaChannelMappingTest, YCoordErrors) {
   ASSERT_EQ(Geom.yCoord(1, VMMX, 32), Geom.InvalidCoord); // bad VMM
   ASSERT_EQ(Geom.yCoord(1, VMMY, 15), Geom.InvalidCoord); // bad Channel
   ASSERT_EQ(Geom.yCoord(1, VMMY, 48), Geom.InvalidCoord); // bad Channel

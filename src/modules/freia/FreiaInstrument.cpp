@@ -23,7 +23,7 @@ namespace Freia {
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
                                  BaseSettings &settings,
-                                 EV42Serializer *serializer)
+                                 EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
 
   if (!Settings.DumpFilePrefix.empty()) {
@@ -38,17 +38,6 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   // We can now use the settings in Conf
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
-
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-    if (Conf.SplitMultiEvents) {
-      builder.matcher.setSplitMultiEvents(Conf.SplitMultiEvents,
-                                          Conf.SplitMultiEventsCoefficientLow,
-                                          Conf.SplitMultiEventsCoefficientHigh);
-    }
-  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
@@ -73,20 +62,35 @@ void FreiaInstrument::loadConfigAndCalib() {
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+    if (Conf.FreiaFileParameters.SplitMultiEvents) {
+      builder.matcher.setSplitMultiEvents(
+          Conf.FreiaFileParameters.SplitMultiEvents,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
+    }
+  }
+
   if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
     Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
 
-
 void FreiaInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -212,7 +216,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.MaxGapWire)) {
+      if (e.ClusterB.hasGap(Conf.FreiaFileParameters.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -220,7 +224,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.MaxGapStrip)) {
+      if (e.ClusterA.hasGap(Conf.FreiaFileParameters.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;

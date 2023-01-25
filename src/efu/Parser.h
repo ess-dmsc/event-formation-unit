@@ -29,7 +29,7 @@ public:
   /// \brief used to register new commands with the Parser
   /// \param cmd_name name of command
   /// \param function pointer to command implementation
-  int registercmd(std::string cmd_name, cmdFunction cmd_fn);
+  int registercmd(const std::string &cmd_name, cmdFunction cmd_fn);
 
   void clearCommands();
 

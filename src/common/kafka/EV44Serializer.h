@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief flatbuffer serialization into ev42 schema
+/// \brief flatbuffer serialization into ev44 schema
 ///
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
@@ -44,6 +44,9 @@ public:
   /// \returns bytes transmitted, if any
   size_t addEvent(int32_t Time, int32_t Pixel);
 
+  /// \returns current message counter
+  uint64_t currentMessageId() const;
+
   /// \brief returns event count
   size_t eventCount() const;
 
@@ -63,6 +66,8 @@ private:
   /// \todo should this not be predefined in terms of jumbo frame?
   size_t MaxEvents{0};
   size_t EventCount{0};
+
+  uint64_t MessageId{1};
 
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder Builder_;

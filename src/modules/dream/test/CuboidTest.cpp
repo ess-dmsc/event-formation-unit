@@ -10,7 +10,7 @@
 
 using namespace Dream;
 
-class CDTGeometryTest : public TestBase {
+class CuboidGeometryTest : public TestBase {
 protected:
   DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Config::ModuleParms Parms{false, Config::ModuleType::HR, {0}, {0}};
@@ -19,7 +19,7 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(CDTGeometryTest, Rotate0) {
+TEST_F(CuboidGeometryTest, Rotate0) {
   int x = 1;
   int y = 12;
   geometry.rotateXY(x, y, 0);
@@ -27,7 +27,7 @@ TEST_F(CDTGeometryTest, Rotate0) {
   ASSERT_EQ(y, 12);
 }
 
-TEST_F(CDTGeometryTest, Rotate1) {
+TEST_F(CuboidGeometryTest, Rotate1) {
   int x = 1;
   int y = 12;
   geometry.rotateXY(x, y, 1);
@@ -40,7 +40,7 @@ TEST_F(CDTGeometryTest, Rotate1) {
   ASSERT_EQ(y, 12);
 }
 
-TEST_F(CDTGeometryTest, Rotate2) {
+TEST_F(CuboidGeometryTest, Rotate2) {
   int x = 1;
   int y = 12;
   geometry.rotateXY(x, y, 2);
@@ -51,7 +51,7 @@ TEST_F(CDTGeometryTest, Rotate2) {
   ASSERT_EQ(y, 12);
 }
 
-TEST_F(CDTGeometryTest, Rotate3) {
+TEST_F(CuboidGeometryTest, Rotate3) {
   int x = 1;
   int y = 12;
   geometry.rotateXY(x, y, 3);

@@ -37,14 +37,14 @@ auto RingAndFEN = R"(
 
 using namespace TTLMonitor;
 
-class ConfigTest : public TestBase {
+class TTLMonitorConfigTest : public TestBase {
 protected:
   Config config{"config.json"}; // dummy filename, not used
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(TTLMonitorConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
   ASSERT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
@@ -52,17 +52,17 @@ TEST_F(ConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.MonitorFEN, 0);
 }
 
-TEST_F(ConfigTest, MissingMandatoryField) {
+TEST_F(TTLMonitorConfigTest, MissingMandatoryField) {
   config.root = MissingDetector;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, InvalidInstrument) {
+TEST_F(TTLMonitorConfigTest, InvalidInstrument) {
   config.root = InvalidDetector;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, DefaultValues) {
+TEST_F(TTLMonitorConfigTest, DefaultValues) {
   config.root = DefaultValuesOnly;
   config.apply();
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
@@ -70,14 +70,14 @@ TEST_F(ConfigTest, DefaultValues) {
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
 }
 
-TEST_F(ConfigTest, RingAndFENConfig) {
+TEST_F(TTLMonitorConfigTest, RingAndFENConfig) {
   config.root = RingAndFEN;
   config.apply();
   ASSERT_EQ(config.Parms.MonitorRing, 88);
   ASSERT_EQ(config.Parms.MonitorFEN, 77);
 }
 
-TEST_F(ConfigTest, FullInstrument) {
+TEST_F(TTLMonitorConfigTest, FullInstrument) {
   config = Config(TTLMON_FULL);
   config.loadAndApply();
   ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::FREIA);

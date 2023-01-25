@@ -11,8 +11,6 @@
 #include <common/debug/Trace.h>
 #include <ttlmonitor/geometry/Parser.h>
 
-#include <common/memory/span.hpp>
-
 namespace TTLMonitor {
 
 // #undef TRC_LEVEL
@@ -40,7 +38,8 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
   if (Size % DataLength != 0) {
     Stats.ErrorSize++;
-    XTRACE(DATA, WAR, "Bad data length - %d should be multiple of %d", Size, DataLength);
+    XTRACE(DATA, WAR, "Bad data length - %d should be multiple of %d", Size,
+           DataLength);
     return;
   }
 
@@ -98,4 +97,4 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   return;
 }
 
-} // namespace
+} // namespace TTLMonitor

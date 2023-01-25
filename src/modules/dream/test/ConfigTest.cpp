@@ -129,64 +129,64 @@ auto ValidConfigIndexes = R"(
 
 using namespace Dream;
 
-class ConfigTest : public TestBase {
+class DreamConfigTest : public TestBase {
 protected:
   Config config{"config.json"}; // dummy filename, not used
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(DreamConfigTest, Constructor) {
   ASSERT_EQ(config.MaxPulseTimeDiffNS, 5 * 71'428'571);
 }
 
-TEST_F(ConfigTest, NoConfigFile) {
+TEST_F(DreamConfigTest, NoConfigFile) {
   Config config2;
   ASSERT_THROW(config2.loadAndApply(), std::runtime_error);
 }
 
-TEST_F(ConfigTest, JsonFileNotExist) {
+TEST_F(DreamConfigTest, JsonFileNotExist) {
   ASSERT_THROW(config.loadAndApply(), std::runtime_error);
 }
 
-TEST_F(ConfigTest, InvalidConfig) {
+TEST_F(DreamConfigTest, InvalidConfig) {
   config.root = InvalidCfgMissingDetectorField;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, InvalidConfigName) {
+TEST_F(DreamConfigTest, InvalidConfigName) {
   config.root = InvalidCfgWrongDetectorName;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, InvalidRingConfParm) {
+TEST_F(DreamConfigTest, InvalidRingConfParm) {
   config.root = InvalidRingConfParm;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, InvalidFENConfParm) {
+TEST_F(DreamConfigTest, InvalidFENConfParm) {
   config.root = InvalidFENConfParm;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, InvalidTypeConfParm) {
+TEST_F(DreamConfigTest, InvalidTypeConfParm) {
   config.root = InvalidTypeConfParm;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, DuplicateConfParm) {
+TEST_F(DreamConfigTest, DuplicateConfParm) {
   config.root = DuplicateConfParm;
   ASSERT_ANY_THROW(config.apply());
 }
 
-TEST_F(ConfigTest, MissingRing) {
+TEST_F(DreamConfigTest, MissingRing) {
   config.root = MissingRing;
   ASSERT_ANY_THROW(config.apply());
 }
 
 // Valid cfg file tests below
 
-TEST_F(ConfigTest, ValidConfig) {
+TEST_F(DreamConfigTest, ValidConfig) {
   ASSERT_FALSE(config.RMConfig[4][2].Initialised);
 
   config.root = ValidConfig;
@@ -196,14 +196,14 @@ TEST_F(ConfigTest, ValidConfig) {
   ASSERT_EQ(config.MaxPulseTimeDiffNS, 50000);
 }
 
-TEST_F(ConfigTest, ValidConfigDefaultPulseTime) {
+TEST_F(DreamConfigTest, ValidConfigDefaultPulseTime) {
   config.root = ValidConfigDefaultPulseTime;
   config.MaxPulseTimeDiffNS = 1;
   config.apply();
   ASSERT_EQ(config.MaxPulseTimeDiffNS, 1);
 }
 
-TEST_F(ConfigTest, ValidIndexes) {
+TEST_F(DreamConfigTest, ValidIndexes) {
   ASSERT_FALSE(config.RMConfig[4][2].Initialised);
   ASSERT_EQ(config.RMConfig[4][2].P1.Index, 0);
   ASSERT_EQ(config.RMConfig[4][2].P2.Index, 0);

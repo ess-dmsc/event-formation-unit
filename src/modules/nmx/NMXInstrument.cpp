@@ -24,7 +24,7 @@ namespace Nmx {
 
 /// \brief load configuration and calibration files
 NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
-                             EV42Serializer *serializer)
+                             EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName = Settings.DumpFilePrefix + "nmx_" + timeString();
@@ -44,12 +44,6 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
-  }
-
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 }
 
@@ -60,10 +54,15 @@ void NMXInstrument::loadConfigAndCalib() {
   Conf.loadAndApplyConfig();
   checkConfigAndGeometry();
 
-  // XTRACE(INIT, ALW, "Creating vector of %d builders (one per hybrid)",
-  //        Conf.getNumHybrids());
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
-
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.NMXFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.NMXFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.NMXFileParameters.MaxClusteringTimeGap);
+  }
   /// \todo Add calibration processing
   // if (Settings.CalibFile != "") {
   //   XTRACE(INIT, ALW, "Loading and applying calibration file");
@@ -76,9 +75,9 @@ void NMXInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
-
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
     if (DumpFile) {
@@ -92,7 +91,7 @@ void NMXInstrument::processReadouts(void) {
            readout.TimeLow);
 
     // Convert from physical rings to logical rings
-    int LRingId = readout.RingId/2;
+    int LRingId = readout.RingId / 2;
     uint8_t HybridId = readout.VMM >> 1;
     ESSReadout::Hybrid &Hybrid =
         Conf.getHybrid(LRingId, readout.FENId, HybridId);
@@ -161,8 +160,8 @@ void NMXInstrument::processReadouts(void) {
       continue;
     }
 
-    XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Panel %u", Plane, Coord, readout.Channel,
-           Panel);
+    XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Panel %u", Plane, Coord,
+           readout.Channel, Panel);
     builders[Panel].insert({TimeNS, Coord, ADC, Plane});
     XTRACE(DATA, DEB, "inserted to builder");
   }
@@ -172,34 +171,40 @@ void NMXInstrument::processReadouts(void) {
   }
 }
 
-void NMXInstrument::checkConfigAndGeometry(){
+void NMXInstrument::checkConfigAndGeometry() {
   std::set<int> Coords[4][2];
-  std::set<int>* CurrentCoordSet;
+  std::set<int> *CurrentCoordSet;
 
-  for (int RingId = 0; RingId <= Conf.MaxRing; RingId++){
-    for (int FENId = 0; FENId <= Conf.MaxFEN; FENId++){
-       for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++){
-         ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
-         if (h.Initialised){
-           int Panel = Conf.Panel[RingId][FENId][HybridId];
-           int Plane = Conf.Plane[RingId][FENId][HybridId];
-           CurrentCoordSet = &Coords[Panel][Plane];
-           for(int Asic = 0; Asic < 2; Asic++){
-            XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId, HybridId);
-            for (int channel = 0; channel < 64; channel++){
+  for (int RingId = 0; RingId <= Conf.MaxRing; RingId++) {
+    for (int FENId = 0; FENId <= Conf.MaxFEN; FENId++) {
+      for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++) {
+        ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
+        if (h.Initialised) {
+          int Panel = Conf.Panel[RingId][FENId][HybridId];
+          int Plane = Conf.Plane[RingId][FENId][HybridId];
+          CurrentCoordSet = &Coords[Panel][Plane];
+          for (int Asic = 0; Asic < 2; Asic++) {
+            XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId,
+                   HybridId);
+            for (int channel = 0; channel < 64; channel++) {
               int Offset = Conf.Offset[RingId][FENId][HybridId];
-              int ReversedChannels = Conf.ReversedChannels[RingId][FENId][HybridId];
-              int coord = NMXGeometryInstance.coord(channel, Asic, Offset, ReversedChannels);
+              int ReversedChannels =
+                  Conf.ReversedChannels[RingId][FENId][HybridId];
+              int coord = NMXGeometryInstance.coord(channel, Asic, Offset,
+                                                    ReversedChannels);
               if (CurrentCoordSet->count(coord)) {
-                XTRACE(INIT, ERR, "Channel %u, Coordinate %u already covered by another hybrid", channel, coord);
+                XTRACE(INIT, ERR,
+                       "Channel %u, Coordinate %u already covered by another "
+                       "hybrid",
+                       channel, coord);
                 throw std::runtime_error("Invalid config, coordinates overlap");
               } else {
                 CurrentCoordSet->insert(coord);
               }
             }
-           }
-         }
-       }
+          }
+        }
+      }
     }
   }
 }
@@ -233,6 +238,13 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
+    if (Conf.NMXFileParameters.MinXSpan > e.ClusterA.coordSpan()) {
+      XTRACE(EVENT, DEB, "Event doesn't span far enough in X direction, %u",
+             e.ClusterA.coordSpan());
+      counters.ClustersTooSmallXSpan++;
+      continue;
+    }
+
     if (Conf.NMXFileParameters.MaxTimeSpan < e.ClusterA.timeSpan()) {
       XTRACE(EVENT, DEB, "Event spans too long a time in X cluster, %u",
              e.ClusterA.timeSpan());
@@ -244,6 +256,13 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
              e.ClusterB.coordSpan());
       counters.ClustersTooLargeYSpan++;
+      continue;
+    }
+
+    if (Conf.NMXFileParameters.MinYSpan > e.ClusterB.coordSpan()) {
+      XTRACE(EVENT, DEB, "Event doesn't span far enough in Y direction, %u",
+             e.ClusterB.coordSpan());
+      counters.ClustersTooSmallYSpan++;
       continue;
     }
 

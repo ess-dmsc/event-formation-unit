@@ -26,7 +26,7 @@ namespace Cspec {
 /// \brief load configuration and calibration files
 CSPECInstrument::CSPECInstrument(struct Counters &counters,
                                  BaseSettings &settings,
-                                 EV42Serializer *serializer)
+                                 EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
     std::string DumpFileName =
@@ -48,12 +48,6 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
     GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
-  }
-
-  XTRACE(INIT, ALW, "Set EventBuilder timebox to %u ns",
-         Conf.FileParameters.TimeBoxNs);
-  for (auto &builder : builders) {
-    builder.setTimeBox(Conf.FileParameters.TimeBoxNs); // Time boxing
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
@@ -81,6 +75,15 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
+  }
+
   if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
     Conf.loadAndApplyCalibration(Settings.CalibFile);
@@ -92,8 +95,9 @@ void CSPECInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->pulseTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -112,7 +116,8 @@ void CSPECInstrument::processReadouts(void) {
            Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
+    ESSReadout::Hybrid const &Hybrid =
+        Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,

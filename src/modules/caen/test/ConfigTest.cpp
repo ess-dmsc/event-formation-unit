@@ -68,48 +68,48 @@ std::string ValidConfigStr = R"(
 
 using namespace Caen;
 
-class ConfigTest : public TestBase {
+class CaenConfigTest : public TestBase {
 protected:
   Config config;
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(ConfigTest, Constructor) {
+TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.Panels.size(), 0);
   ASSERT_EQ(config.Resolution, 0);
   ASSERT_EQ(config.NTubesTotal, 0);
 }
 
-TEST_F(ConfigTest, NoConfigFile) {
+TEST_F(CaenConfigTest, NoConfigFile) {
   ASSERT_THROW(config = Config(""), std::runtime_error);
 }
 
-TEST_F(ConfigTest, JsonFileNotExist) {
+TEST_F(CaenConfigTest, JsonFileNotExist) {
   ASSERT_THROW(config = Config("/this_file_doesnt_exist"), std::runtime_error);
 }
 
-TEST_F(ConfigTest, NotJson) {
+TEST_F(CaenConfigTest, NotJson) {
   ASSERT_ANY_THROW(config = Config(NotJsonFile));
   deleteFile(NotJsonFile);
 }
 
-TEST_F(ConfigTest, BadDetectorName) {
+TEST_F(CaenConfigTest, BadDetectorName) {
   ASSERT_ANY_THROW(config = Config(BadDetectorFile));
   deleteFile(BadDetectorFile);
 }
 
-TEST_F(ConfigTest, InvalidConfig) {
+TEST_F(CaenConfigTest, InvalidConfig) {
   ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
   deleteFile(InvalidConfigFile);
 }
 
-TEST_F(ConfigTest, InvalidConfigII) {
+TEST_F(CaenConfigTest, InvalidConfigII) {
   ASSERT_ANY_THROW(config = Config(InvalidConfigIIFile));
   deleteFile(InvalidConfigIIFile);
 }
 
-TEST_F(ConfigTest, ValidConfig) {
+TEST_F(CaenConfigTest, ValidConfig) {
   config = Config(ValidConfigFile);
   ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
@@ -118,7 +118,7 @@ TEST_F(ConfigTest, ValidConfig) {
 
 // Validate full Loki instrument configuration (Loki.json)
 // should match the definitions in the ICD
-TEST_F(ConfigTest, CaenICDGeometryFull) {
+TEST_F(CaenConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);
   ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
   ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);

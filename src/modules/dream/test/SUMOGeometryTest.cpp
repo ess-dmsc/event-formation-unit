@@ -47,7 +47,7 @@ TEST_F(DreamGeometryTest, ValidSector) {
 
 TEST_F(DreamGeometryTest, InvalidSumo) {
   std::vector<int> SumoIDs{0, 1, 2, 7, 8};
-  for (auto &ID : SumoIDs) {
+  for (auto const &ID : SumoIDs) {
     Parms.P2.SumoPair = ID;
     ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
   }
@@ -55,7 +55,7 @@ TEST_F(DreamGeometryTest, InvalidSumo) {
 
 TEST_F(DreamGeometryTest, ValidSumo) {
   std::vector<int> SumoIDs{3, 4, 5, 6};
-  for (auto &ID : SumoIDs) {
+  for (auto const &ID : SumoIDs) {
     Parms.P2.SumoPair = ID;
     ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
   }

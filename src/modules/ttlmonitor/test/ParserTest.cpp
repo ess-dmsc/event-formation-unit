@@ -8,55 +8,55 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/readout/ess/Parser.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
 #include <common/testutils/TestBase.h>
+#include <modules/ttlmonitor/geometry/Parser.h>
 
 namespace TTLMonitor {
 
-  /// \brief Badsize in readout data field
-  std::vector<uint8_t> DataBadFracTime {
+/// \brief Badsize in readout data field
+std::vector<uint8_t> DataBadFracTime{
     // First readout
-    0x16, 0x00, 0x10, 0x00,  // Data header - Ring 22, FEN 0, Size 17
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x13, 0x93, 0x3f, 0x05,  // Time LO 88.052.499 ok, max value
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+    0x16, 0x00, 0x10, 0x00, // Data header - Ring 22, FEN 0, Size 17
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x13, 0x93, 0x3f, 0x05, // Time LO 88.052.499 ok, max value
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
 
     // Second readout
-    0x16, 0x00, 0x10, 0x00,  // Data header - Ring 22, FEN 0, Size 15
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x14, 0x93, 0x3f, 0x15,  // Time LO 88.052.500 not ok
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  };
+    0x16, 0x00, 0x10, 0x00, // Data header - Ring 22, FEN 0, Size 15
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x14, 0x93, 0x3f, 0x15, // Time LO 88.052.500 not ok
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+};
 
-  /// \brief Badsize in readout data field
-  std::vector<uint8_t> DataBadSize {
+/// \brief Badsize in readout data field
+std::vector<uint8_t> DataBadSize{
     // First readout
-    0x16, 0x00, 0x11, 0x00,  // Data header - Ring 22, FEN 0, Size 17
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+    0x16, 0x00, 0x11, 0x00, // Data header - Ring 22, FEN 0, Size 17
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
 
     // Second readout
-    0x16, 0x00, 0x0f, 0x00,  // Data header - Ring 22, FEN 0, Size 15
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  };
+    0x16, 0x00, 0x0f, 0x00, // Data header - Ring 22, FEN 0, Size 15
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+};
 
-  /// \brief Good Data
-  std::vector<uint8_t> DataGood {
+/// \brief Good Data
+std::vector<uint8_t> DataGood{
     // First readout
-    0x16, 0x00, 0x10, 0x00,  // Data header - Ring 22, FEN 0, Size 16
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
+    0x16, 0x00, 0x10, 0x00, // Data header - Ring 22, FEN 0, Size 16
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
 
     // Second readout
-    0x16, 0x00, 0x10, 0x00,  // Data header - Ring 22, FEN 0, Size 16
-    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
-    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-    0x00, 0x00, 0x00, 0x01,  // ADC 0x100
-  };
+    0x16, 0x00, 0x10, 0x00, // Data header - Ring 22, FEN 0, Size 16
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+};
 
 class TTLMonitorParserTest : public TestBase {
 protected:
@@ -89,7 +89,6 @@ TEST_F(TTLMonitorParserTest, ErrorBufferPtr) {
   ASSERT_EQ(parser.Stats.ErrorSize, 1);
   ASSERT_EQ(parser.Stats.Readouts, 0);
 }
-
 
 // no data in buffer
 TEST_F(TTLMonitorParserTest, NoData) {
@@ -127,8 +126,6 @@ TEST_F(TTLMonitorParserTest, ErrorDataTime) {
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
 
-
-
 TEST_F(TTLMonitorParserTest, DataGood) {
   makeHeader(DataGood);
 
@@ -137,9 +134,8 @@ TEST_F(TTLMonitorParserTest, DataGood) {
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
 
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-} // namespace ESSReadout
+} // namespace TTLMonitor

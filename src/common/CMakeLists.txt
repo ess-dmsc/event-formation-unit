@@ -10,7 +10,6 @@ add_subdirectory(kafka)
 set(efu_common_SRC
   debug/Hexdump.cpp
   detector/EFUArgs.cpp
-  kafka/EV42Serializer.cpp
   kafka/EV44Serializer.cpp
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
@@ -40,7 +39,6 @@ set(efu_common_INC
   debug/TraceGroups.h
   detector/Detector.h
   detector/EFUArgs.h
-  kafka/EV42Serializer.h
   kafka/EV44Serializer.h
   kafka/KafkaConfig.h
   kafka/Producer.h
