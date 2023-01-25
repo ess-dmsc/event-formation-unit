@@ -66,14 +66,13 @@ protected:
 
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGen) {
-  ReadoutGeneratorBase::GeneratorSettings Settings;
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
     Caen::LokiReadoutGenerator gen;
     gen.Settings.NumReadouts = Sections;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-    Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
+    gen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,
