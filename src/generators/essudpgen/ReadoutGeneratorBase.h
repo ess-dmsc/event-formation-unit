@@ -62,6 +62,10 @@ public:
   void transmitLoop();
 
 
+  static constexpr int BufferSize{8972};
+  uint8_t Buffer[BufferSize];
+
+
 protected:
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
@@ -82,8 +86,7 @@ protected:
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
   uint8_t ReadoutDataSize{0};
-  static constexpr int BufferSize{8972};
-  uint8_t Buffer[BufferSize];
+
   uint64_t Packets{0};
   uint32_t SeqNum{0};
   uint32_t TimeHigh{0};
