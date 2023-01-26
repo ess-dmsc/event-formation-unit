@@ -130,6 +130,9 @@ TEST_F(NMXBaseTest, DataReceive) {
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
             2); // number of readouts dummyreadout
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
+  // this instance of NMX has 4 event builders, each attempts
+  // matching once per packet received, so expecting counter to be 4
+  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 4);
 }
 
 TEST_F(NMXBaseTest, DataReceiveBadHeader) {
