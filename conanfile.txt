@@ -1,5 +1,4 @@
 [requires]
-asio/1.16.1
 benchmark/1.7.0
 cli11/1.9.1
 fmt/6.2.0

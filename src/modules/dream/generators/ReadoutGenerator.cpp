@@ -30,12 +30,12 @@ void DreamReadoutGenerator::getRandomReadout(
 
   DR.RingId = S6RingId[Sector];
   DR.FENId = S6FENId[Sector];
-  DR.DataLength = DataSize;
+  DR.DataLength = ReadoutDataSize;
 
   DR.OM = 0;
   DR.Unused = 0;
-  DR.Anode = 0; ///\todo wires - still dont fully understand sumo geometry
-  DR.Cathode = 0; ///\todo cathodes are strips - same as above
+  DR.Anode = Fuzzer.random8();; ///\todo wires - still dont fully understand sumo geometry
+  DR.Cathode = Fuzzer.random8(); ///\todo cathodes are strips - same as above
 }
 
 
@@ -48,10 +48,9 @@ void DreamReadoutGenerator::generateData() {
   DataParser::DreamReadout DR;
 
   while (Readouts < Settings.NumReadouts) {
-
     getRandomReadout(DR);
-    memcpy(DP, &DR, DataSize);
-    DP += DataSize;
+    memcpy(DP, &DR, ReadoutDataSize);
+    DP += ReadoutDataSize;
 
     // All readouts are events for DREAM
     TimeLow += Settings.TicksBtwEvents;

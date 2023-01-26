@@ -16,10 +16,9 @@ int main(int argc, char *argv[]) {
   DreamGen.setReadoutDataSize(DreamDataSize);
 
   DreamGen.argParse(argc, argv);
-  DreamGen.main();
-
   DreamGen.Settings.Type = ESSReadout::Parser::DetectorType::DREAM;
 
+  DreamGen.main();
   DreamGen.transmitLoop();
 
   return 0;

@@ -11,12 +11,12 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <cassert>
 
-
+///\brief No work to do for constructor
 ReadoutGeneratorBase::ReadoutGeneratorBase() { }
 
-
+///\brief
 uint16_t ReadoutGeneratorBase::makePacket() {
-  assert (ReadoutDataSize != 0);
+  assert(ReadoutDataSize != 0); // must be set in generator application
   generateHeader();
   generateData();
   finishPacket();
@@ -24,7 +24,7 @@ uint16_t ReadoutGeneratorBase::makePacket() {
 }
 
 void ReadoutGeneratorBase::generateHeader() {
-
+  assert(HeaderSize == 30);
   DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
   if (DataSize >= BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
@@ -96,7 +96,7 @@ void ReadoutGeneratorBase::transmitLoop() {
   do {
     uint16_t DataSize = makePacket();
 
-    DataSource->send(Buffer, DataSize);
+    DataSource->send(&Buffer[0], DataSize);
 
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
