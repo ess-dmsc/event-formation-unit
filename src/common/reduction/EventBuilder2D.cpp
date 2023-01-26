@@ -14,7 +14,7 @@
 #include <algorithm>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+// #define TRC_LEVEL TRC_L_DEB
 
 EventBuilder2D::EventBuilder2D() {}
 

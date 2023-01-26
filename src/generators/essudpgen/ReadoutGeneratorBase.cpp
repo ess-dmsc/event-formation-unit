@@ -17,6 +17,11 @@
 #include <math.h>
 #include <stdexcept>
 #include <time.h>
+#include <common/debug/Trace.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
 
 ReadoutGeneratorBase::ReadoutGeneratorBase(uint8_t *BufferPtr,
                                            uint16_t MaxPayloadSize,
@@ -39,8 +44,6 @@ void ReadoutGeneratorBase::generateHeader() {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
-  TimeHigh = time(NULL);
-
   memset(Buffer, 0, BufferSize);
   auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
 
@@ -51,10 +54,15 @@ void ReadoutGeneratorBase::generateHeader() {
 
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
+
+  TimeHigh = time(NULL);
+
   Header->PulseHigh = TimeHigh;
   Header->PulseLow = TimeLowOffset;
   Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
+
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh, TimeLowOffset);
 }
 
 void ReadoutGeneratorBase::finishPacket() {
