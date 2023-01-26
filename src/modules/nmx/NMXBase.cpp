@@ -25,8 +25,8 @@
 
 #include <cinttypes>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Nmx {
 
@@ -215,7 +215,10 @@ void NmxBase::processing_thread() {
 
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
-        Counters.MatcherStats.addAndReset(builder.matcher.Stats);
+        XTRACE(DATA, DEB, "Generated events. Internal counters for matcher stats are now: %" PRIi64 ", %" PRIi64 ", %" PRIi64 ", %" PRIi64, builder.matcher.Stats.SpanTooLarge, builder.matcher.Stats.SplitSpanTooLarge, builder.matcher.Stats.DiscardedSpanTooLarge, builder.matcher.Stats.MatchAttemptCount);
+        Counters.MatcherStats.add(builder.matcher.Stats);
+        builder.matcher.Stats.reset();
+        XTRACE(DATA, DEB, "Generated events. Counters for matcher stats are now: %" PRIi64 ", %" PRIi64 ", %" PRIi64 ", %" PRIi64, Counters.MatcherStats.SpanTooLarge, Counters.MatcherStats.SplitSpanTooLarge, Counters.MatcherStats.DiscardedSpanTooLarge, Counters.MatcherStats.MatchAttemptCount);
       }
 
     } else {

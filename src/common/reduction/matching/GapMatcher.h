@@ -20,12 +20,11 @@ struct GapMatcherStats {
   int64_t SplitSpanTooLarge{0};
   int64_t MatchAttemptCount{0};
 
-  void addAndReset(const GapMatcherStats& other) {
+  void add(const GapMatcherStats& other) {
     SpanTooLarge += other.SpanTooLarge;
     DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
     SplitSpanTooLarge += other.SplitSpanTooLarge;
     MatchAttemptCount += other.MatchAttemptCount;
-    this->reset();
   }
 
   void reset() {
