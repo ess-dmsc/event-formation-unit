@@ -75,10 +75,13 @@ void CSPECInstrument::loadConfigAndCalib() {
   builders =
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
-  for (EventBuilder2D& builder: builders) {
-    builder.matcher.setMaximumTimeGap(Conf.CSPECFileParameters.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(Conf.CSPECFileParameters.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(Conf.CSPECFileParameters.MaxClusteringTimeGap);
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.CSPECFileParameters.MaxClusteringTimeGap);
   }
 
   if (Settings.CalibFile != "") {
@@ -92,8 +95,9 @@ void CSPECInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -112,7 +116,8 @@ void CSPECInstrument::processReadouts(void) {
            Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    ESSReadout::Hybrid const &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
+    ESSReadout::Hybrid const &Hybrid =
+        Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,

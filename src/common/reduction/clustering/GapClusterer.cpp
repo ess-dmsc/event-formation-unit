@@ -36,11 +36,11 @@ void GapClusterer::cluster(const HitVector &hits) {
   }
 }
 
-void GapClusterer::setMaximumTimeGap(uint64_t max_time_gap){
+void GapClusterer::setMaximumTimeGap(uint64_t max_time_gap) {
   max_time_gap_ = max_time_gap;
 }
 
-void GapClusterer::setMaximumCoordGap(uint64_t max_coord_gap){
+void GapClusterer::setMaximumCoordGap(uint64_t max_coord_gap) {
   max_coord_gap_ = max_coord_gap;
 }
 

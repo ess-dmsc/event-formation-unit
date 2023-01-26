@@ -9,7 +9,6 @@
 
 using namespace Freia;
 
-
 class AMORChannelMappingTest : public TestBase {
 protected:
   AMORGeometry Geom;

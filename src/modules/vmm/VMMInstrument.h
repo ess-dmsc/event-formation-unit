@@ -18,11 +18,11 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/EventBuilder2D.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <vmm/Counters.h>
 #include <vmm/VMMBase.h>
 #include <vmm/geometry/Config.h>
 #include <vmm/geometry/Geometry.h>
-#include <logical_geometry/ESSGeometry.h>
 
 namespace VMM {
 
@@ -33,7 +33,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   VMMInstrument(Counters &counters, BaseSettings &settings,
-                  EV44Serializer *serializer);
+                EV44Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.

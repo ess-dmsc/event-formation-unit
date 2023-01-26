@@ -106,7 +106,7 @@ TEST_F(GapClustererTest, JustUnderFiveCoordGap) {
   mock_cluster(hc, 1, 40, 4, 1, 10, 1);
 
   GapClusterer gc;
-  gc.setMaximumTimeGap(0);  
+  gc.setMaximumTimeGap(0);
   gc.setMaximumCoordGap(5);
   gc.cluster(hc);
 

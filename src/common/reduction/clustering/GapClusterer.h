@@ -19,7 +19,6 @@
 
 class GapClusterer : public AbstractClusterer {
 public:
-
   /// \brief insert new hit and perform clustering
   /// \param hit to be added to cluster. Hits must be chronological between
   ///         subsequent calls. It may be more efficient to use:
@@ -32,7 +31,8 @@ public:
   void setMaximumTimeGap(uint64_t max_time_gap);
 
   /// \brief sets maximum coordinate gap between hits in clusters
-  /// \param max_coord_gap_ maximum difference in coordinates between hits such that
+  /// \param max_coord_gap_ maximum difference in coordinates between hits such
+  /// that
   ///        they would be considered part of the same cluster
   void setMaximumCoordGap(uint64_t max_coord_gap_);
 
@@ -51,11 +51,9 @@ public:
   /// \brief print current status of GapClusterer
   std::string status(const std::string &prepend, bool verbose) const override;
 
-
 private:
   uint64_t max_time_gap_{200};
   uint16_t max_coord_gap_{0};
-
 
   HitVector
       current_time_cluster_; ///< kept in memory until time gap encountered

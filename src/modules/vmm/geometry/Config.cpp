@@ -35,7 +35,8 @@ void Config::applyConfig() {
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}", VMMFileParameters.SplitMultiEvents);
+  LOG(INIT, Sev::Info, "SplitMultiEvents {}",
+      VMMFileParameters.SplitMultiEvents);
 
   try {
     VMMFileParameters.SplitMultiEventsCoefficientLow =
@@ -57,12 +58,11 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
       VMMFileParameters.SplitMultiEventsCoefficientHigh);
 
-   try {
+  try {
     VMMFileParameters.MaxMatchingTimeGap =
         root["MaxMatchingTimeGap"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for MaxMatchingTimeGap");
+    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
   }
   LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}",
       VMMFileParameters.MaxMatchingTimeGap);
@@ -71,8 +71,7 @@ void Config::applyConfig() {
     VMMFileParameters.MaxClusteringTimeGap =
         root["MaxClusteringTimeGap"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for MaxClusteringTimeGap");
+    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
   }
   LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}",
       VMMFileParameters.MaxClusteringTimeGap);

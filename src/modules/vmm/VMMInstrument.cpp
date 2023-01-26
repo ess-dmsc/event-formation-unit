@@ -21,14 +21,12 @@
 namespace VMM {
 
 /// \brief load configuration and calibration files
-VMMInstrument::VMMInstrument(struct Counters &counters,
-                                 BaseSettings &settings,
-                                 EV44Serializer *serializer)
+VMMInstrument::VMMInstrument(struct Counters &counters, BaseSettings &settings,
+                             EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
 
   if (!Settings.DumpFilePrefix.empty()) {
-    std::string DumpFileName =
-        Settings.DumpFilePrefix + "vmm_" + timeString();
+    std::string DumpFileName = Settings.DumpFilePrefix + "vmm_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
@@ -38,7 +36,6 @@ VMMInstrument::VMMInstrument(struct Counters &counters,
   // We can now use the settings in Conf
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
-
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
@@ -63,17 +60,20 @@ void VMMInstrument::loadConfigAndCalib() {
          Conf.NumHybrids);
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
-  for (EventBuilder2D& builder: builders) {
-    builder.matcher.setMaximumTimeGap(Conf.VMMFileParameters.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(Conf.VMMFileParameters.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(Conf.VMMFileParameters.MaxClusteringTimeGap);
+  for (EventBuilder2D &builder : builders) {
+    builder.matcher.setMaximumTimeGap(
+        Conf.VMMFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.VMMFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.VMMFileParameters.MaxClusteringTimeGap);
     if (Conf.VMMFileParameters.SplitMultiEvents) {
-      builder.matcher.setSplitMultiEvents(Conf.VMMFileParameters.SplitMultiEvents,
-                                          Conf.VMMFileParameters.SplitMultiEventsCoefficientLow,
-                                          Conf.VMMFileParameters.SplitMultiEventsCoefficientHigh);
+      builder.matcher.setSplitMultiEvents(
+          Conf.VMMFileParameters.SplitMultiEvents,
+          Conf.VMMFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.VMMFileParameters.SplitMultiEventsCoefficientHigh);
     }
   }
-
 
   if (Settings.CalibFile != "") {
     XTRACE(INIT, ALW, "Loading and applying calibration file");
@@ -81,14 +81,14 @@ void VMMInstrument::loadConfigAndCalib() {
   }
 }
 
-
 void VMMInstrument::processReadouts(void) {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time
-                            .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time
+          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {

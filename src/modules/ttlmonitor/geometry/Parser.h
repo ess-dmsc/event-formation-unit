@@ -10,8 +10,8 @@
 #pragma once
 
 #include <cinttypes>
-#include <vector>
 #include <common/readout/ess/Parser.h>
+#include <vector>
 
 namespace TTLMonitor {
 

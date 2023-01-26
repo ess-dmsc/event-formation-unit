@@ -8,9 +8,9 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <vmm/VMMInstrument.h>
 #include <stdio.h>
 #include <string.h>
+#include <vmm/VMMInstrument.h>
 
 using namespace VMM;
 // clang-format off

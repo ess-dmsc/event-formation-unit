@@ -23,9 +23,9 @@
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <stdio.h>
 #include <vmm/VMMBase.h>
 #include <vmm/VMMInstrument.h>
-#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -186,7 +186,7 @@ void VMMBase::processing_thread() {
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = VMM.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::FREIA);
+                                               ESSReadout::Parser::FREIA);
       Counters.ReadoutStats = VMM.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

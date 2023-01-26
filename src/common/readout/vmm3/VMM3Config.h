@@ -23,7 +23,7 @@ public:
   // Provide maximum values from all VMM3 detectors
   static constexpr uint8_t MaxRing{
       10}; // 12 (logical) rings from 0 to 11, 11 reserved for monitors
-  static constexpr uint8_t MaxFEN{13};   // This is topology specific
+  static constexpr uint8_t MaxFEN{13};    // This is topology specific
   static constexpr uint8_t MaxHybrid{10}; // Hybrids are VMM >> 1
 
   VMM3Config(){};
