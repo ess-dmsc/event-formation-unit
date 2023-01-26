@@ -34,6 +34,9 @@ void Cspec::LETReadoutGenerator::generateData() {
   uint16_t Channel = 0;
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+
+
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
@@ -47,7 +50,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     // CSPEC is 16 wires deep in Z direction
     // X is selected as a number between 0 and 11 as there are
     // 2 columns of 6 wires in the LET setup
-    if ((Readout % 16) == 0) {
+    if ((GlobalReadout % 16) == 0) {
       XGlobal = Fuzzer.random8() * 12 / 255;
     }
     // Forms a tick shape, and stretches it into a taller rectangle
@@ -70,7 +73,7 @@ void Cspec::LETReadoutGenerator::generateData() {
 
     // Wire X and Z direction
     // All channel calculations are based on ICD linked at top of file
-    if ((Readout % 2) == 0) {
+    if ((GlobalReadout % 2) == 0) {
       uint8_t ZLocal = 12 - abs(XGlobal - 2);
       if (XLocal < 2) {
         VMM = 0;
@@ -79,6 +82,7 @@ void Cspec::LETReadoutGenerator::generateData() {
         VMM = 1;
         Channel = (XLocal - 2) * 16 + ZLocal;
       }
+      XTRACE(DATA, DEB, "Readout for Wires");
     }
     // Grid Y direction
     // Mappings of Y coordinates to channels and VMMs is complicated
@@ -86,6 +90,7 @@ void Cspec::LETReadoutGenerator::generateData() {
     else {
       VMM = 2;
       Channel = 50 - YLocal;
+      XTRACE(DATA, DEB, "Readout for grids");
     }
 
     ReadoutData->VMM = VMM;
@@ -95,15 +100,19 @@ void Cspec::LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    if ((Readout % 2) == 0) {
+    if ((GlobalReadout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
+      XTRACE(DATA, DEB, "Ticking between readouts for same event, Time Low = %u", TimeLow);
     } else {
       TimeLow += Settings.TicksBtwEvents;
+      XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u", TimeLow);
     }
     if (TimeLow >= 88052499) {
       TimeLow -= 88052499;
       TimeHigh += 1;
     }
+    GlobalReadout++;
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", TimeLow, TimeHigh);
   }
 }
 

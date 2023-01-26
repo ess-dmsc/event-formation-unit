@@ -60,8 +60,10 @@ void GapMatcher::match(bool flush) {
   if (!evt.empty()) {
     if (flush) {
       checkAndStashEvent(evt);
+      XTRACE(EVENT, DEB, "Flushing matcher");
     } else {
       requeue_clusters(evt);
+      XTRACE(EVENT, DEB, "Requeuing clusters in matcher");
     }
   }
 }

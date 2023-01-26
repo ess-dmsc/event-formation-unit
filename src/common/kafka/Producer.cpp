@@ -18,12 +18,18 @@
 
 RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
                                               std::string Value) {
-  XTRACE(INIT, ALW, "%s %s", Key.c_str(), Value.c_str());
+  // Don't log passwords
+  std::string LogValue{Value};
+  if (Key == "sasl.password") {
+    LogValue = "<REDACTED>";
+  }
+
+  XTRACE(INIT, ALW, "%s %s", Key.c_str(), LogValue.c_str());
   RdKafka::Conf::ConfResult configResult;
   configResult = Config->set(Key, Value, ErrorMessage);
-  LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, Value);
+  LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, LogValue);
   if (configResult != RdKafka::Conf::CONF_OK) {
-    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, Value);
+    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, LogValue);
     stats.config_errors++;
   }
   return configResult;
