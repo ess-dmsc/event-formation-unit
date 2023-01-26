@@ -20,11 +20,15 @@ struct GapMatcherStats {
   int64_t SplitSpanTooLarge{0};
   int64_t MatchAttemptCount{0};
 
-  void add(const GapMatcherStats& other) {
+  /// \brief adds the stats from the passed in GapMatcherStats struct
+  /// to this struct, and then resets the stats in the passed in struct
+  /// to 0, removing ability to accidentally count these stats multiple times
+  void addAndReset(GapMatcherStats& other) {
     SpanTooLarge += other.SpanTooLarge;
     DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
     SplitSpanTooLarge += other.SplitSpanTooLarge;
     MatchAttemptCount += other.MatchAttemptCount;
+    other.reset();
   }
 
   void reset() {

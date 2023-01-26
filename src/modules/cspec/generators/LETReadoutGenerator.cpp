@@ -35,7 +35,6 @@ void Cspec::LETReadoutGenerator::generateData() {
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
-
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
@@ -102,10 +101,12 @@ void Cspec::LETReadoutGenerator::generateData() {
 
     if ((GlobalReadout % 2) == 0) {
       TimeLow += Settings.TicksBtwReadouts;
-      XTRACE(DATA, DEB, "Ticking between readouts for same event, Time Low = %u", TimeLow);
+      XTRACE(DATA, DEB,
+             "Ticking between readouts for same event, Time Low = %u", TimeLow);
     } else {
       TimeLow += Settings.TicksBtwEvents;
-      XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u", TimeLow);
+      XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u",
+             TimeLow);
     }
     if (TimeLow >= 88052499) {
       TimeLow -= 88052499;

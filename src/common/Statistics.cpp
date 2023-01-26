@@ -42,7 +42,7 @@ int64_t Statistics::value(size_t Index) {
 }
 
 int64_t Statistics::valueByName(std::string name) {
-  for (const auto & stat : stats) {
+  for (const auto &stat : stats) {
     if (stat.StatName.find(name) != std::string::npos) {
       return stat.StatValue;
     }

@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <assert.h>
-#include <miracles/generators/DatReader.h>
 #include <caen/readout/Readout.h>
 #include <fstream>
+#include <miracles/generators/DatReader.h>
 #include <sstream>
 #include <string>
 
@@ -43,9 +43,8 @@ int MiraclesDatReader::readReadout(struct dat_data_t &Readout) {
     Readout.unused2 = 0;
     Readout.unused3 = 0;
 
-    printf("time (%u, %u) - tube %u, amplitudes A: %u, B: %u\n",
-        Readout.tofhi, Readout.toflow, Readout.tube, Readout.ampl_a,
-        Readout.ampl_b);
+    printf("time (%u, %u) - tube %u, amplitudes A: %u, B: %u\n", Readout.tofhi,
+           Readout.toflow, Readout.tube, Readout.ampl_a, Readout.ampl_b);
     lines++;
     return 1;
   } else {

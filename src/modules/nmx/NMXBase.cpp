@@ -213,12 +213,11 @@ void NmxBase::processing_thread() {
 
       NMX.processReadouts();
 
+      // After each builder has generated events, we add the matcher stats to the
+      // global counters, and reset the internal matcher stats to 0
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
-        XTRACE(DATA, DEB, "Generated events. Internal counters for matcher stats are now: %" PRIi64 ", %" PRIi64 ", %" PRIi64 ", %" PRIi64, builder.matcher.Stats.SpanTooLarge, builder.matcher.Stats.SplitSpanTooLarge, builder.matcher.Stats.DiscardedSpanTooLarge, builder.matcher.Stats.MatchAttemptCount);
-        Counters.MatcherStats.add(builder.matcher.Stats);
-        builder.matcher.Stats.reset();
-        XTRACE(DATA, DEB, "Generated events. Counters for matcher stats are now: %" PRIi64 ", %" PRIi64 ", %" PRIi64 ", %" PRIi64, Counters.MatcherStats.SpanTooLarge, Counters.MatcherStats.SplitSpanTooLarge, Counters.MatcherStats.DiscardedSpanTooLarge, Counters.MatcherStats.MatchAttemptCount);
+        Counters.MatcherStats.addAndReset(builder.matcher.Stats);
       }
 
     } else {

@@ -32,7 +32,7 @@ public:
   ///\param ReversedChannels boolean determining if channel order
   ///         is reversed, ie. top half of a panel in X plane,
   ///         or right side of a panel in Y plane.
-  ///\return uint16_t 
+  ///\return uint16_t
   ///
   virtual uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
                          bool ReversedChannels) = 0;

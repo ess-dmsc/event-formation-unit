@@ -200,7 +200,7 @@ void GapMatcher::checkAndStashEvent(Event evt) {
            "%u and contains %u hits",
            evt.ClusterA.coordSpan(), evt.ClusterA.hitCount(),
            evt.ClusterB.coordSpan(), evt.ClusterB.hitCount());
-  Stats.SpanTooLarge++;
+    Stats.SpanTooLarge++;
     splitAndStashEvent(evt);
     evt.clear();
   }

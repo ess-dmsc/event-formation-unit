@@ -29,7 +29,8 @@ RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
   configResult = Config->set(Key, Value, ErrorMessage);
   LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", Key, LogValue);
   if (configResult != RdKafka::Conf::CONF_OK) {
-    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, LogValue);
+    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key,
+        LogValue);
     stats.config_errors++;
   }
   return configResult;

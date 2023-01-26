@@ -28,7 +28,6 @@ static constexpr size_t PixelSize = sizeof(uint32_t);
 // If they are initially set to 0, they will not be mutable
 static constexpr int64_t FBMutablePlaceholder = 1;
 
-
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
@@ -48,8 +47,8 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
   auto HeaderOffset = CreateEvent44Message(
-      Builder_, SourceNameOffset, FBMutablePlaceholder, ReferenceTimeOffset, ReferenceTimeIndexOffset,
-      OffsetTimeOffset, PixelOffset);
+      Builder_, SourceNameOffset, FBMutablePlaceholder, ReferenceTimeOffset,
+      ReferenceTimeIndexOffset, OffsetTimeOffset, PixelOffset);
   FinishEvent44MessageBuffer(Builder_, HeaderOffset);
 
   Buffer_ = nonstd::span<const uint8_t>(Builder_.GetBufferPointer(),
@@ -127,7 +126,6 @@ int64_t EV44Serializer::referenceTime() const {
 }
 
 uint64_t EV44Serializer::currentMessageId() const { return MessageId; }
-
 
 size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", Time, Pixel);
