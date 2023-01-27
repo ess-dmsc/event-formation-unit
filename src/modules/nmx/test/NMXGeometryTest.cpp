@@ -7,7 +7,7 @@
 #include <common/testutils/TestBase.h>
 #include <nmx/geometry/NMXGeometry.h>
 
-using namespace Nmx;
+using namespace VMM;
 
 class NMXGeometryTest : public TestBase {
 protected:

@@ -10,7 +10,6 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <cspec/geometry/CSPECGeometry.h>
 #include <freia/geometry/AMORChannelMapping.h>
 #include <freia/geometry/FreiaChannelMapping.h>
 #include <nmx/geometry/NMXGeometry.h>
@@ -38,10 +37,6 @@ public:
       GeometryInst = &NMXGeom;
       return true;
     }
-    if (NewGeometry == "CSPEC") {
-      GeometryInst = &CSPECGeom;
-      return true;
-    }
     XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
     return false;
   }
@@ -66,7 +61,6 @@ private:
   AMORGeometry AMORGeom;
   FreiaGeometry FreiaGeom;
   NMXGeometry NMXGeom;
-  CSPECGeometry CSPECGeom;
   GeometryBase *GeometryInst{nullptr};
 };
 } // namespace VMM

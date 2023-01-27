@@ -11,14 +11,14 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <freia/geometry/GeometryBase.h>
+#include <vmm/geometry/GeometryBase.h>
 #include <string>
 #include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Freia {
+namespace VMM {
 
 class AMORGeometry : public GeometryBase {
 public:

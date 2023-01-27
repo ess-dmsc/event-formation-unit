@@ -12,11 +12,11 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <nmx/geometry/Geometry.h>
+#include <vmm/geometry/Geometry.h>
 
-namespace Nmx {
+namespace VMM {
 
-class NMXGeometry : public Nmx::Geometry {
+class NMXGeometry : public GeometryBase {
 public:
   uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
                  bool ReversedChannels) override;
