@@ -27,6 +27,7 @@ void GapMatcher::setSplitMultiEvents(bool split_multi_events,
 }
 
 void GapMatcher::match(bool flush) {
+  Stats.MatchAttemptCount++;
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.timeStart() < c2.timeStart();
   });

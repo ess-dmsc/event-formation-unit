@@ -40,7 +40,6 @@ public:
   /// \brief flushes both clusterers, ClustererX and ClustererY, forming cluster
   void flushClusterers();
 
- 
   HitVector HitsX, HitsY;
 
   /// \todo parametrize

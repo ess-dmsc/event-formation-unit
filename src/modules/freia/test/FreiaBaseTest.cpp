@@ -124,14 +124,17 @@ TEST_F(FreiaBaseTest, DataReceive) {
   std::this_thread::sleep_for(SleepTime);
   TestUDPServer Server(43126, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
-  Server.startPacketTransmission(1, 100);
+  Server.startPacketTransmission(2, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, dummyreadout.size());
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 2);
+  EXPECT_EQ(Readout.ITCounters.RxBytes, 2 * dummyreadout.size());
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            2); // number of readouts dummyreadout
-  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
+            4); // number of readouts dummyreadout
+  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 4);
+  // Freia has 32 cassettes, and 32 event builders, so match attempt
+  // count increases by 32 for each packet received
+  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 64);
 }
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {

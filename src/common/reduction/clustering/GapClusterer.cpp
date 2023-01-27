@@ -19,11 +19,11 @@ void GapClusterer::insert(const Hit &hit) {
     XTRACE(CLUSTER, DEB, "timegap > %lu, hit: %lu, current: %lu", max_time_gap_,
            hit.time, current_time_cluster_.back().time);
     flush();
-  }
-  else{
+  } else {
     XTRACE(CLUSTER, DEB, "timegap < %lu, hit: %lu, current: %lu", max_time_gap_,
            hit.time, current_time_cluster_.back().time);
-    XTRACE(CLUSTER, DEB, "current time cluster length: %u", current_time_cluster_.size());
+    XTRACE(CLUSTER, DEB, "current time cluster length: %u",
+           current_time_cluster_.size());
   }
 
   /// Insert hit in either case

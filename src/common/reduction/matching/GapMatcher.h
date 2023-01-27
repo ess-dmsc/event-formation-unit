@@ -14,6 +14,33 @@
 /// \brief Matcher implementation that joins clusters into events
 ///         if time gaps between them are sufficiently small.
 
+struct GapMatcherStats {
+
+  /// !!! WHEN ADDING A NEW VARIABLE HERE, ALSO ADD TO METHODS BELOW !!!
+  int64_t SpanTooLarge{0};
+  int64_t DiscardedSpanTooLarge{0};
+  int64_t SplitSpanTooLarge{0};
+  int64_t MatchAttemptCount{0};
+
+  /// \brief adds the stats from the passed in GapMatcherStats struct
+  /// to this struct, and then clears the stats in the passed in struct
+  /// to 0, removing ability to accidentally count these stats multiple times
+  void addAndClear(GapMatcherStats& other) {
+    SpanTooLarge += other.SpanTooLarge;
+    DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
+    SplitSpanTooLarge += other.SplitSpanTooLarge;
+    MatchAttemptCount += other.MatchAttemptCount;
+    other.clear();
+  }
+
+  void clear() {
+    SpanTooLarge = 0;
+    DiscardedSpanTooLarge = 0;
+    SplitSpanTooLarge = 0;
+    MatchAttemptCount = 0;
+  }
+};
+
 class GapMatcher : public AbstractMatcher {
 public:
   /// Inherits constructor
@@ -48,17 +75,7 @@ public:
   /// \brief print configuration of GapMatcher
   std::string config(const std::string &prepend) const override;
 
-  void resetStats() {
-    Stats.SpanTooLarge = 0;
-    Stats.DiscardedSpanTooLarge = 0;
-    Stats.SplitSpanTooLarge = 0;
-  }
-
-  struct Stats {
-    uint16_t SpanTooLarge{0};
-    uint16_t DiscardedSpanTooLarge{0};
-    uint16_t SplitSpanTooLarge{0};
-  } Stats;
+  struct GapMatcherStats Stats;
 
 private:
   void splitAndStashEvent(Event evt);

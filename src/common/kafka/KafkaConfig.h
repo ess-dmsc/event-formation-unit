@@ -16,7 +16,7 @@
 class KafkaConfig {
 public:
   ///\brief Load Kafka configuration from file
-  ///\param KafkaConfigFile 
+  ///\param KafkaConfigFile
   KafkaConfig(std::string KafkaConfigFile);
 
 public:

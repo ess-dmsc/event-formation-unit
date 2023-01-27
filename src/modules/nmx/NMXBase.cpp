@@ -95,6 +95,10 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.span.y_too_large", Counters.ClustersTooLargeYSpan);
   Stats.create("cluster.span.x_too_small", Counters.ClustersTooSmallXSpan);
   Stats.create("cluster.span.y_too_small", Counters.ClustersTooSmallYSpan);
+  Stats.create("cluster.matcherstats.span_too_large", Counters.MatcherStats.SpanTooLarge);
+  Stats.create("cluster.matcherstats.discared_span_too_large", Counters.MatcherStats.DiscardedSpanTooLarge);
+  Stats.create("cluster.matcherstats.split_span_too_large", Counters.MatcherStats.SplitSpanTooLarge);
+  Stats.create("cluster.matcherstats.match_attempt_count", Counters.MatcherStats.MatchAttemptCount);
 
   // Event stats
   Stats.create("events.count", Counters.Events);
@@ -209,16 +213,11 @@ void NmxBase::processing_thread() {
 
       NMX.processReadouts();
 
+      // After each builder has generated events, we add the matcher stats to the
+      // global counters, and reset the internal matcher stats to 0
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
-        if (NMX.Conf.NMXFileParameters.SplitMultiEvents) {
-          Counters.EventsSpanTooLarge += builder.matcher.Stats.SpanTooLarge;
-          Counters.EventsDiscardedSpanTooLarge +=
-              builder.matcher.Stats.DiscardedSpanTooLarge;
-          Counters.EventsSplitSpanTooLarge +=
-              builder.matcher.Stats.SplitSpanTooLarge;
-          builder.matcher.resetStats();
-        }
+        Counters.MatcherStats.addAndClear(builder.matcher.Stats);
       }
 
     } else {

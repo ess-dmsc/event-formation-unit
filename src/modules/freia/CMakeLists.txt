@@ -33,7 +33,7 @@ set(FreiaBaseTest_INC
   ${freia_common_inc}
 )
 set(FreiaBaseTest_SRC
-  FreiaBaseTest.cpp
+  test/FreiaBaseTest.cpp
   ${freia_common_src}
 )
 create_test_executable(FreiaBaseTest)

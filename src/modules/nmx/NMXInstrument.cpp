@@ -62,6 +62,12 @@ void NMXInstrument::loadConfigAndCalib() {
         Conf.NMXFileParameters.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
         Conf.NMXFileParameters.MaxClusteringTimeGap);
+    if (Conf.NMXFileParameters.SplitMultiEvents) {
+      builder.matcher.setSplitMultiEvents(
+          Conf.NMXFileParameters.SplitMultiEvents,
+          Conf.NMXFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.NMXFileParameters.SplitMultiEventsCoefficientHigh);
+    }
   }
   /// \todo Add calibration processing
   // if (Settings.CalibFile != "") {

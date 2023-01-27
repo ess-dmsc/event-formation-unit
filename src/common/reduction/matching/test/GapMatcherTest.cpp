@@ -7,7 +7,6 @@
 class GapMatcherTest : public TestBase {
 protected:
   ClusterContainer x, y;
-
   void SetUp() override {}
   void TearDown() override {}
 

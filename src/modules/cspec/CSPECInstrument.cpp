@@ -234,12 +234,14 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
       counters.ClustersNoCoincidence++;
       if (not e.ClusterB.empty()) {
         counters.ClustersMatchedGridOnly++;
-        XTRACE(EVENT, DEB, "Event matched grids only, start time is %u", e.ClusterB.timeStart());
+        XTRACE(EVENT, DEB, "Event matched grids only, start time is %u",
+               e.ClusterB.timeStart());
       }
 
       if (not e.ClusterA.empty()) {
         counters.ClustersMatchedWireOnly++;
-        XTRACE(EVENT, DEB, "Event matched wires only, start time is %u", e.ClusterB.timeStart());
+        XTRACE(EVENT, DEB, "Event matched wires only, start time is %u",
+               e.ClusterB.timeStart());
       }
       continue;
     }
@@ -261,7 +263,8 @@ void CSPECInstrument::generateEvents(std::vector<Event> &Events) {
            TimeRef.TimeInNS);
 
     if (TimeRef.TimeInNS > EventTime) {
-      XTRACE(EVENT, WAR, "Negative TOF, pulse = %u, event time = %u", TimeRef.TimeInNS, EventTime);
+      XTRACE(EVENT, WAR, "Negative TOF, pulse = %u, event time = %u",
+             TimeRef.TimeInNS, EventTime);
       counters.TimeErrors++;
       continue;
     }

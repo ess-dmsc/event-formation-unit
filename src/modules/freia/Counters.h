@@ -12,6 +12,7 @@
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -41,9 +42,8 @@ struct Counters {
   int64_t EventsMatchedStripOnly;
   int64_t EventsInvalidStripGap;
   int64_t EventsInvalidWireGap;
-  int64_t EventsSpanTooLarge;
-  int64_t EventsDiscardedSpanTooLarge;
-  int64_t EventsSplitSpanTooLarge;
+  struct GapMatcherStats MatcherStats;
+
   int64_t PixelErrors;
   int64_t TimeErrors;
   struct ESSReadout::ESSTime::Stats_t TimeStats;

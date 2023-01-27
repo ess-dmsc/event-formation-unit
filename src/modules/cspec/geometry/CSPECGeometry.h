@@ -55,9 +55,9 @@ public:
   ///         a readout is from
   ///\param XOffset integer value identifying the offset in the X direction
   ///\param Rotated boolean identifying whether a vessel is rotated, ie. above
-  ///         the beamstop vessels are rotated so the electronics are in the 
+  ///         the beamstop vessels are rotated so the electronics are in the
   ///         correct location.
-  ///\return uint16_t 
+  ///\return uint16_t
   ///
   uint16_t xAndzCoord(uint8_t RingID, uint8_t FENID, uint8_t HybridID,
                       uint8_t VMMID, uint8_t Channel, uint16_t XOffset,
@@ -74,11 +74,11 @@ public:
   ///         ie. below the beamstop the vessel is at a different height to
   ///         normal, so doesn't start at 0 in the Y direction.
   ///\param Rotated boolean identifying whether a vessel is rotated, ie. above
-  ///         the beamstop vessels are rotated so the electronics are in the 
+  ///         the beamstop vessels are rotated so the electronics are in the
   ///         correct location.
   ///\param Short boolean identifying whether the vessel is a short or standard
   ///         length, ie. around the beamstop shorter vessels are used.
-  ///\return uint16_t 
+  ///\return uint16_t
   ///
   uint16_t yCoord(uint8_t HybridID, uint8_t VMMID, uint8_t Channel,
                   uint16_t YOffset, bool Rotated, bool Short) override;
