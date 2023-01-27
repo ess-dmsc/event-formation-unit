@@ -11,6 +11,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 #include <string>
 
 // #undef TRC_LEVEL
@@ -20,13 +21,10 @@ namespace VMM {
 
 class GeometryBase {
 public:
-  virtual bool isXCoord(uint8_t VMM) = 0;
 
-  virtual bool isYCoord(uint8_t VMM) = 0;
-
-  virtual uint16_t xCoord(uint8_t VMM, uint8_t Channel) = 0;
-
-  virtual uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) = 0;
+  virtual uint8_t getPlane(ESSReadout::VMM3Parser::VMM3Data& Data) = 0;
+ 
+  virtual uint64_t getPixel(ESSReadout::VMM3Parser::VMM3Data& Data) = 0;
 
   static const uint16_t InvalidCoord;
   static const uint16_t NumStrips;

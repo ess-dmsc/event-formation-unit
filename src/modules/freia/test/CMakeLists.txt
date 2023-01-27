@@ -14,15 +14,15 @@ get_filename_component(FREIA_FULL "${ESS_MODULE_DIR}/freia/configs/freia.json" A
 
 
 
-set(FreiaChannelMappingTest_INC
-  ../geometry/FreiaChannelMapping.h)
-set(FreiaChannelMappingTest_SRC
-  ../test/FreiaChannelMappingTest.cpp)
-create_test_executable(FreiaChannelMappingTest)
+set(FreiaGeometryTest_INC
+  ../geometry/FreiaGeometry.h)
+set(FreiaGeometryTest_SRC
+  ../test/FreiaGeometryTest.cpp)
+create_test_executable(FreiaGeometryTest)
 
 
-set(AMORChannelMappingTest_INC
-  ../geometry/AMORChannelMapping.h)
-set(AMORChannelMappingTest_SRC
-  ../test/AMORChannelMappingTest.cpp)
-create_test_executable(AMORChannelMappingTest)
+set(AmorGeometryTest_INC
+  ../geometry/AmorGeometry.h)
+set(AmorGeometryTest_SRC
+  ../test/AmorGeometryTest.cpp)
+create_test_executable(AmorGeometryTest)

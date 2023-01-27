@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,51 +20,70 @@
 
 namespace VMM {
 
-class FreiaGeometry : public GeometryBase {
+class AMORGeometry : public GeometryBase {
 public:
+
+  uint8_t getPlane(ESSReadout::VMM3Parser::VMM3Data& Data){
+    if (xCoord(Data.VMM, Data.Channel)){
+      return 0;
+    }
+    else{
+      return 1;
+    }
+  }
+
+  uint64_t getPixel(ESSReadout::VMM3Parser::VMM3Data& Data){
+    if (xCoord(Data.VMM, Data.Channel)){
+      return xCoord(Data.VMM, Data.Channel);
+    }
+    else{
+      return yCoord(Data.VMM, Data.Channel);
+    }
+  }
+
   ///\brief return global x-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// strip = channel + 1
-  /// x = strip - 1
+  /// Formulae taken from the Freia ICD, AMOR section
+  /// strip = 64 - channel
+  /// x = strip - 1       ( == 63 - channel )
   uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
-      return GeometryBase::InvalidCoord;
+      return InvalidCoord;
     }
 
     if (not isXCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
-      return GeometryBase::InvalidCoord;
+      return InvalidCoord;
     } else {
-      return Channel;
+      return 63 - Channel;
     }
   }
 
   ///\brief return global y-coordinate from the digital geometry
-  /// Formulae taken from the Freia ICD
-  /// wire = 32 - (channel - 16)
-  /// y = cass * 32 + 32 - wire
+  /// Formulae taken from the Freia ICD, AMOR section
+  /// wire = channel + 1 - 16
+  /// y = (cass - 1) * 32 + 47 - channel
   uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)", Channel,
              MinWireChannel, MaxWireChannel);
-      return GeometryBase::InvalidCoord;
+      return InvalidCoord;
     }
 
     if (not isYCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
-      return GeometryBase::InvalidCoord;
+      return InvalidCoord;
     } else {
-      return YOffset + Channel - MinWireChannel;
+      return YOffset + MaxWireChannel - Channel;
     }
   }
 
-  // x-coordinates are strips, which are on VMM 1
-  bool isXCoord(uint8_t VMM) { return (VMM & 0x1); }
+  // x-coordinates are strips, which are on VMM 0
+  bool isXCoord(uint8_t VMM) { return not isYCoord(VMM); }
 
-  // y-coordinates are wires, which are on VMM 0
-  bool isYCoord(uint8_t VMM) { return not isXCoord(VMM); }
+  // y-coordinates are wires, which are on VMM 1
+  bool isYCoord(uint8_t VMM) { return (VMM & 0x1); }
 };
 
 } // namespace Freia

@@ -10,8 +10,8 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <freia/geometry/AMORChannelMapping.h>
-#include <freia/geometry/FreiaChannelMapping.h>
+#include <freia/geometry/AmorGeometry.h>
+#include <freia/geometry/FreiaGeometry.h>
 #include <nmx/geometry/NMXGeometry.h>
 #include <string>
 
