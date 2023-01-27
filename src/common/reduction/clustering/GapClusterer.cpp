@@ -20,6 +20,11 @@ void GapClusterer::insert(const Hit &hit) {
            hit.time, current_time_cluster_.back().time);
     flush();
   }
+  else{
+    XTRACE(CLUSTER, DEB, "timegap < %lu, hit: %lu, current: %lu", max_time_gap_,
+           hit.time, current_time_cluster_.back().time);
+    XTRACE(CLUSTER, DEB, "current time cluster length: %u", current_time_cluster_.size());
+  }
 
   /// Insert hit in either case
   XTRACE(CLUSTER, DEB, "about to emplace back hit to current time cluster: %s",
@@ -45,7 +50,7 @@ void GapClusterer::setMaximumCoordGap(uint64_t max_coord_gap) {
 }
 
 void GapClusterer::flush() {
-  XTRACE(CLUSTER, DEB, "flushing");
+  XTRACE(CLUSTER, DEB, "flushing clusterer");
   if (current_time_cluster_.empty()) {
     return;
   }
