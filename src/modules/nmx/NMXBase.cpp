@@ -217,7 +217,7 @@ void NmxBase::processing_thread() {
       // global counters, and reset the internal matcher stats to 0
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
-        Counters.MatcherStats.addAndReset(builder.matcher.Stats);
+        Counters.MatcherStats.addAndClear(builder.matcher.Stats);
       }
 
     } else {

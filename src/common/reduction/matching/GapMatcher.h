@@ -15,23 +15,25 @@
 ///         if time gaps between them are sufficiently small.
 
 struct GapMatcherStats {
+
+  /// !!! WHEN ADDING A NEW VARIABLE HERE, ALSO ADD TO METHODS BELOW !!!
   int64_t SpanTooLarge{0};
   int64_t DiscardedSpanTooLarge{0};
   int64_t SplitSpanTooLarge{0};
   int64_t MatchAttemptCount{0};
 
   /// \brief adds the stats from the passed in GapMatcherStats struct
-  /// to this struct, and then resets the stats in the passed in struct
+  /// to this struct, and then clears the stats in the passed in struct
   /// to 0, removing ability to accidentally count these stats multiple times
-  void addAndReset(GapMatcherStats& other) {
+  void addAndClear(GapMatcherStats& other) {
     SpanTooLarge += other.SpanTooLarge;
     DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
     SplitSpanTooLarge += other.SplitSpanTooLarge;
     MatchAttemptCount += other.MatchAttemptCount;
-    other.reset();
+    other.clear();
   }
 
-  void reset() {
+  void clear() {
     SpanTooLarge = 0;
     DiscardedSpanTooLarge = 0;
     SplitSpanTooLarge = 0;

@@ -211,7 +211,7 @@ void FreiaBase::processing_thread() {
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);
-        Counters.MatcherStats.addAndReset(builder.matcher.Stats);
+        Counters.MatcherStats.addAndClear(builder.matcher.Stats);
       }
       // done processing data
     } else {
