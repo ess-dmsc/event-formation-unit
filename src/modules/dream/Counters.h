@@ -24,7 +24,6 @@ struct Counters {
   int64_t Readouts;
   int64_t DataHeaders;
   int64_t ErrorDataHeaders;
-  int64_t ErrorBytes;
   int64_t RingErrors;
   int64_t FENErrors;
   int64_t DataLenErrors;

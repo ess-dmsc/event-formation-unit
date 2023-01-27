@@ -31,7 +31,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -45,7 +44,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              DataHdrPtr->DataLength, BytesLeft);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -56,7 +54,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
              DataHdrPtr->FENId);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -68,7 +65,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u",
              DataHdrPtr->DataLength, DataHeaderSize + CSPECReadoutSize);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 

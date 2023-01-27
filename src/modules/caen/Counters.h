@@ -28,7 +28,6 @@ struct Counters {
   int64_t Readouts;
   int64_t ReadoutsBadAmpl;
   int64_t ErrorDataHeaders;
-  int64_t ErrorBytes;
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingErrors;
