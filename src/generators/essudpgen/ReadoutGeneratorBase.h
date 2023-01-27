@@ -1,20 +1,21 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Generator of artificial VMM3a readouts with variable number
-/// of readouts
+/// \brief Generator of artificial ESS readouts
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #pragma once
 
-#include <common/readout/vmm3/VMM3Parser.h>
+#include <common/system/Socket.h>
+#include <common/readout/ess/Parser.h>
 #include <common/testutils/DataFuzzer.h>
 
 class ReadoutGeneratorBase {
 public:
+
   struct GeneratorSettings {
     uint16_t NRings{2};
     uint8_t Type{0}; // Will be determined at compile time, can be overridden
@@ -33,16 +34,10 @@ public:
     bool Randomise{false}; // Randomise header and data
     // Not yet CLI settings
     uint32_t KernelTxBufferSize{1000000};
-  };
+  } Settings;
 
-  /// \brief Setup buffer and sequence number
-  /// \param Buffer pointer to the buffer to be filled out with packet data
-  /// \param BufferSize Maximum size of generated packet
-  /// \param SeqNum sequence number
-  /// \param Randomise whether to randomize (fuzz) some of the data
-  ReadoutGeneratorBase(uint8_t *Buffer, uint16_t BufferSize,
-                       uint32_t InitialSeqNum, GeneratorSettings &Settings);
-  // ReadoutGeneratorBase() = default;
+  /// \brief
+  ReadoutGeneratorBase();
 
   /// \brief create a packet ready for UDP transmission, calls private methods
   /// \param Type Data type as specified in the ESS Readout ICD
@@ -50,20 +45,34 @@ public:
   /// \param Rings number if rings in use
   uint16_t makePacket();
 
-  /// \brief Change the readout data size (if not VMM3)
+  /// \brief Set the readout data size (required)
   void setReadoutDataSize(uint8_t ReadoutSize) {
     ReadoutDataSize = ReadoutSize;
   }
 
+  /// \brief update Settings based on CLI arguments
+  int argParse(int argc, char * argv[]);
+
+
+  /// \brief setup buffers, socket etc.
+  void main();
+
+
+  /// \brief transmit the specified packets
+  void transmitLoop();
+
+
+  static constexpr int BufferSize{8972};
+  uint8_t Buffer[BufferSize];
+
+
 protected:
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
-  /// \param NumReadouts number of VMM readouts in the UDP packet
+  /// \param NumReadouts number of readouts in the UDP packet
   void generateHeader();
 
-  /// \brief Fill out specified buffer with VMM3 readouts
-  /// \param Rings number if rings in use
-  /// \param NumReadouts number of VMM readouts in the UDP packet
+  /// \brief Fill out specified buffer with readouts
   virtual void generateData() = 0;
 
   /// \brief Increment sequence number and do fuzzing
@@ -71,20 +80,21 @@ protected:
 
   const uint16_t HeaderSize = sizeof(ESSReadout::Parser::PacketHeaderV0);
 
-  GeneratorSettings &Settings;
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks
   const uint32_t PrevTimeLowOffset{10000}; // ticks
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
-  uint8_t ReadoutDataSize{sizeof(ESSReadout::VMM3Parser::VMM3Data)};
-  uint8_t *Buffer{nullptr};
-  uint16_t BufferSize{0};
+  uint8_t ReadoutDataSize{0};
+
+  uint64_t Packets{0};
   uint32_t SeqNum{0};
   uint32_t TimeHigh{0};
   uint32_t TimeLow{0};
   uint16_t DataSize{0}; // Number of data bytes in packet
 
   DataFuzzer Fuzzer;
+
+  UDPTransmitter * DataSource{nullptr};
 };
 // GCOVR_EXCL_STOP

@@ -8,12 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <caen/Counters.h>
-#include <caen/generators/LokiReadoutGenerator.h>
+#include <loki/generators/LokiReadoutGenerator.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-
-const uint32_t FirstSeqNum{0};
 
 // Example of UDP readout
 // Two Data Sections each containing three readouts
@@ -68,22 +66,19 @@ protected:
 
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGen) {
-  const uint16_t BufferSize{8972};
-  uint8_t Buffer[BufferSize];
-  uint32_t SeqNum{FirstSeqNum};
-  ReadoutGeneratorBase::GeneratorSettings Settings;
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
-    Settings.NumReadouts = Sections;
-    Caen::LokiReadoutGenerator gen(Buffer, BufferSize, SeqNum, Settings);
+
+    Caen::LokiReadoutGenerator gen;
+    gen.Settings.NumReadouts = Sections;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-    Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
+    gen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,
               sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
 
-    auto Res = CommonReadout.validate((char *)&Buffer[0], DataSize, DataType);
+    auto Res = CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
     Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
                            CommonReadout.Packet.DataLength);

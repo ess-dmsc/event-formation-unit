@@ -89,6 +89,7 @@ void DreamInstrument::processReadouts() {
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Parms, Data);
+    XTRACE(DATA, DEB, "PixelId: %u", PixelId);
 
     if (PixelId == 0) {
       counters.GeometryErrors++;

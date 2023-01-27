@@ -28,7 +28,8 @@ public:
 
   // clang-format off
   /// \brief Showing offsets roughly as the detector Cuboids are arranged
-  std::vector<CuboidOffset> Offsets {
+  ///
+  std::vector<CuboidOffset> OffsetsSANS {
                         {32,  0}, {48,  0}, {64,  0},
               {16, 16}, {32, 16}, {48, 16}, {64, 16}, {80, 16},
     { 0, 32}, {16, 32}, {32, 32}, {48, 32}, {64, 32}, {80, 32}, {96, 32},
@@ -36,6 +37,16 @@ public:
     { 0, 64}, {16, 64}, {32, 64},           {64, 64}, {80, 64}, {96, 64},
               {16, 80}, {32, 80},           {64, 80}, {80, 80},
                         {32, 96},           {64, 96}
+  };
+
+  std::vector<CuboidOffset> OffsetsHR {
+                        {32,  0}, {48,  0}, {64,  0},
+              {16, 16}, {32, 16}, {48, 16}, {64, 16}, {80, 16},
+    { 0, 32}, {16, 32}, {32, 32}, {48, 32}, {64, 32}, {80, 32}, {96, 32},
+    { 0, 48}, {16, 48}, {32, 48},           {64, 48}, {80, 48}, {96, 48},
+    { 0, 64}, {16, 64}, {32, 64}, {48, 64}, {64, 64}, {80, 64}, {96, 64},
+              {16, 80}, {32, 80}, {48, 80}, {64, 80}, {80, 80},
+                        {32, 96}, {48, 96}, {64, 96}
   };
   // clang-format on
 
@@ -69,6 +80,11 @@ public:
     uint8_t Wire = Data.Cathode;
     uint8_t Strip = Data.Anode;
     uint8_t Rotate = Parms.P2.Rotate;
+
+    auto & Offsets = OffsetsHR;
+    if (Parms.Type == Config::ModuleType::SANS) {
+      Offsets = OffsetsSANS;
+    }
 
     /// \todo add XTRACE and counter
     if (Index >= (int)Offsets.size()) {

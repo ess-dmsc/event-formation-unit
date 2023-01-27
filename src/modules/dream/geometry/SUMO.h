@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
@@ -32,9 +32,9 @@ public:
     uint8_t Sector = Parms.P1.Sector;
     uint8_t Sumo = Parms.P2.SumoPair; // definitely wrong
     uint8_t Cassette = Data.Anode / 32;
-    uint8_t Counter = Data.Anode % 32;
-    uint8_t Wire = Data.Anode;
-    uint8_t Strip = Data.Cathode;
+    uint8_t Counter = Data.Anode % 2;
+    uint8_t Wire = Data.Anode%16;
+    uint8_t Strip = Data.Cathode%16;
 
     XTRACE(EVENT, DEB,
            "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
