@@ -8,23 +8,16 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <cassert>
-#include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <math.h>
-#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
-#include <stdexcept>
-#include <time.h>
+#include <modules/ttlmonitor/generators/ReadoutGeneratorVMM.h>
+
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace TTLMonitor {
 
-void ReadoutGenerator::generateData() {
+void ReadoutGeneratorVMM::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 

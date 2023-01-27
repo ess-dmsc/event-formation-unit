@@ -11,7 +11,7 @@
 #include <dream/readout/DataParser.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
@@ -30,7 +30,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -44,7 +43,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              Data->DataLength, BytesLeft);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -52,7 +50,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
              Data->FENId);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
@@ -64,7 +61,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
              DreamReadoutSize);
       Stats.ErrorDataHeaders++;
-      Stats.ErrorBytes += BytesLeft;
+      Stats.DataLenErrors++;
       return ParsedReadouts;
     }
 

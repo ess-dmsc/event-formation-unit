@@ -60,7 +60,6 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
-  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
   Stats.create("readouts.tof_count", Counters.TofCount);
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);

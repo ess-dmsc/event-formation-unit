@@ -9,16 +9,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <cassert>
 #include <common/debug/Trace.h>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <math.h>
 #include <modules/ttlmonitor/generators/ReadoutGenerator.h>
 #include <modules/ttlmonitor/geometry/Parser.h>
-#include <stdexcept>
-#include <time.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -34,7 +27,7 @@ void ReadoutGenerator::generateData() {
     auto ReadoutData = (Parser::Data *)DP;
 
     ReadoutData->DataLength = sizeof(Parser::Data);
-    // TTLMon (new foprmat) readouts all have DataLength 16
+    // TTLMon (new format) readouts all have DataLength 16
     assert(ReadoutData->DataLength == 16);
 
     // Monitor is (so far) always on logical ring 11, fen 0
