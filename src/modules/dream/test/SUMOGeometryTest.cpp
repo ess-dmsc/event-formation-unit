@@ -21,7 +21,7 @@ class DreamGeometryTest : public TestBase {
 protected:
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
-  SUMO endcap;
+  SUMO endcap{616,256};
   void SetUp() override {}
   void TearDown() override {}
 };
@@ -39,7 +39,7 @@ TEST_F(DreamGeometryTest, InvalidSector) {
 
 TEST_F(DreamGeometryTest, ValidSector) {
   Parms.P2.SumoPair = 6;
-  for (uint8_t Sector = 0; Sector < 23; Sector++) {
+  for (uint8_t Sector = 0; Sector < 11; Sector++) {
     Parms.P1.Sector = Sector;
     ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
   }

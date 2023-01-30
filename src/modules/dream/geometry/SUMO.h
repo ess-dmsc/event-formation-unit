@@ -26,6 +26,9 @@ public:
   const uint8_t MaxWire{15};
   const uint8_t MaxStrip{15};
 
+  SUMO(uint16_t xdim, uint16_t ydim) :
+    Geometry(xdim, ydim, 1, 1) {}
+
   /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
   uint32_t getPixelId(Config::ModuleParms &Parms,
                       DataParser::DreamReadout &Data) {
@@ -84,6 +87,8 @@ public:
     return getYoffset(Strip) + getLocalYCoord(Wire);
   }
 
+ESSGeometry Geometry{1, 1, 1, 1}; // initialised by constructor
+
 private:
   // these map Sumo Id (3..6) to various SUMO properties.
   const uint8_t SumoOffset[7] = {0, 0, 0, 48, 36, 20, 0};
@@ -94,8 +99,6 @@ private:
   uint16_t getXoffset(uint8_t Sector) { return Sector * 56; }
 
   uint16_t getYoffset(uint8_t Strip) { return Strip * 16; }
-
-  ESSGeometry Geometry{1288, 256, 1, 1};
 };
 
 } // namespace Dream
