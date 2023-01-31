@@ -6,7 +6,7 @@
 /// \brief Gets detector configuration from json file,
 ///  and optionally detector calibration from json file
 ///
-/// Inherits from common/readout/VMM3Config.h
+/// Inherits from modules/vmm/geometry/Config.h
 /// Provides CSPEC specific applyConfig function
 //===----------------------------------------------------------------------===//
 
@@ -15,7 +15,7 @@
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Hybrid.h>
-#include <common/readout/vmm3/VMM3Config.h>
+#include <modules/vmm/geometry/Config.h>
 
 #include <string>
 #include <vector>

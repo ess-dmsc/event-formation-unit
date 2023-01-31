@@ -16,10 +16,10 @@
 
 namespace VMM {
 
-class NMXGeometry : public GeometryBase {
+class NMXGeometry : public Geometry {
 public:
   uint16_t coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
-                 bool ReversedChannels) override;
+                 bool ReversedChannels);
 };
 
 } // namespace Nmx

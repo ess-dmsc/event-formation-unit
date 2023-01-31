@@ -73,11 +73,11 @@ public:
   std::vector<EventBuilder2D> builders; // reinit in ctor
 
   /// \brief Instrument configuration (rings, cassettes, FENs)
-  Config Conf;
+  VMM3Config Conf;
 
   /// \brief digital geometry
   /// get x- and y- coordinates from cassettes and channels
-  Geometry Geom;
+  Geometry *Geom;
 
   /// \brief logical geometry
   /// get pixel IDs from x- and y- coordinates

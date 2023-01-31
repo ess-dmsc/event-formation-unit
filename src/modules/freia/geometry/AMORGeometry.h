@@ -11,7 +11,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <vmm/geometry/GeometryBase.h>
+#include <vmm/geometry/Geometry.h>
 #include <string>
 #include <vector>
 
@@ -20,10 +20,13 @@
 
 namespace VMM {
 
-class AMORGeometry : public GeometryBase {
+class AMORGeometry : public Geometry {
 public:
+  AMORGeometry(Config &VMMConfiguration){
+    Conf = VMMConfiguration;
+  };
 
-  uint8_t getPlane(ESSReadout::VMM3Parser::VMM3Data& Data){
+  uint8_t getPlane(const ESSReadout::VMM3Parser::VMM3Data& Data){
     if (xCoord(Data.VMM, Data.Channel)){
       return 0;
     }
@@ -32,12 +35,12 @@ public:
     }
   }
 
-  uint64_t getPixel(ESSReadout::VMM3Parser::VMM3Data& Data){
+  uint16_t getPixel(const ESSReadout::VMM3Parser::VMM3Data& Data){
     if (xCoord(Data.VMM, Data.Channel)){
       return xCoord(Data.VMM, Data.Channel);
     }
     else{
-      return yCoord(Data.VMM, Data.Channel);
+      return yCoord(0, Data.VMM, Data.Channel);
     }
   }
 

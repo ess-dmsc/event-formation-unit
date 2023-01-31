@@ -6,7 +6,7 @@
 
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <freia/geometry/Config.h>
+#include <vmm/geometry/Config.h>
 
 auto j2 = R"(
 {
@@ -78,7 +78,7 @@ auto DuplicateEntry = R"(
 }
 )"_json;
 
-using namespace Freia;
+using namespace VMM;
 
 class FreiaConfigTest : public TestBase {
 protected:

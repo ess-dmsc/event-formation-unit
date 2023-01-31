@@ -14,6 +14,9 @@
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <vmm/VMMInstrument.h>
+#include <freia/geometry/FreiaGeometry.h>
+#include <freia/geometry/AMORGeometry.h>
+
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -35,7 +38,18 @@ VMMInstrument::VMMInstrument(struct Counters &counters, BaseSettings &settings,
 
   // We can now use the settings in Conf
 
-  Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
+  if (settings.DetectorName == "freia") {
+    Geom = new FreiaGeometry(Conf);
+  } else if (settings.DetectorName == "amor") {
+    Geom = new AMORGeometry(Conf);
+  // } else if (settings.DetectorName == "nmx") {
+  //   Geom = new NMXGeometry(Conf);
+  } else {
+    XTRACE(INIT, ERR, "Invalid Detector Name %s",
+           settings.DetectorName.c_str());
+    throw std::runtime_error(
+        fmt::format("Invalid Detector Name {}", settings.DetectorName));
+  }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
@@ -45,8 +59,8 @@ VMMInstrument::VMMInstrument(struct Counters &counters, BaseSettings &settings,
   // eventhough there are only 32 wires so some bins will be empty
   // Hists will automatically allocate space for both x and y planes
   uint32_t MaxADC = 1024;
-  uint32_t MaxChannels = Conf.NumHybrids * std::max(GeometryBase::NumWires,
-                                                    GeometryBase::NumStrips);
+  uint32_t MaxChannels = Conf.NumHybrids * std::max(Geometry::NumWires,
+                                                    Geometry::NumStrips);
   ADCHist = Hists(MaxChannels, MaxADC);
 }
 
@@ -158,30 +172,10 @@ void VMMInstrument::processReadouts(void) {
     }
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
-    if (Geom.isXCoord(readout.VMM)) {
-      XTRACE(DATA, DEB,
-             "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel),
-             readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert(
-          {TimeNS, Geom.xCoord(readout.VMM, readout.Channel), ADC, PlaneX});
-
-      uint32_t GlobalXChannel = Hybrid.XOffset + readout.Channel;
-      ADCHist.bin_x(GlobalXChannel, ADC);
-
-    } else { // implicit isYCoord
-      XTRACE(DATA, DEB,
-             "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneY,
-             Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
-             readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert(
-          {TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
-           ADC, PlaneY});
-
-      uint32_t GlobalYChannel = Hybrid.YOffset + readout.Channel;
-      ADCHist.bin_y(GlobalYChannel, ADC);
-    }
+    
+    builders[Hybrid.HybridNumber].insert(
+        {TimeNS, Geom->getPixel(readout), ADC, Geom->getPlane(readout)});
+    
   }
 
   for (auto &builder : builders) {

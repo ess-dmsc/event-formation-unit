@@ -6,12 +6,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <modules/freia/FreiaBase.h>
+#include <modules/vmm/VMMBase.h>
 
 int main(int argc, char *argv[]) {
   MainProg Main("freia", argc, argv);
 
-  auto Detector = new Freia::FreiaBase(Main.DetectorSettings);
+  auto Detector = new VMM::VMMBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

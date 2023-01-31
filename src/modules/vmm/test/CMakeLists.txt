@@ -19,10 +19,3 @@ set(VMMConfigTest_SRC
 create_test_executable(VMMConfigTest)
 target_compile_definitions(VMMConfigTest PRIVATE FREIA_FULL="${FREIA_FULL}")
 
-
-
-set(VMMGeometryTest_INC
-  ../geometry/Geometry.h)
-set(VMMGeometryTest_SRC
-  ../test/GeometryTest.cpp)
-create_test_executable(VMMGeometryTest)

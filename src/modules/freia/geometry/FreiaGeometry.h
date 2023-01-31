@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,7 +11,8 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <vmm/geometry/GeometryBase.h>
+#include <vmm/geometry/Geometry.h>
+#include <vmm/geometry/Config.h>
 #include <string>
 #include <vector>
 
@@ -20,27 +21,14 @@
 
 namespace VMM {
 
-class FreiaGeometry : public GeometryBase {
+class FreiaGeometry : public Geometry {
 public:
-  FreiaGeometry(Config &VMMConfiguration);
-  uint8_t getPlane(ESSReadout::VMM3Parser::VMM3Data& Data){
-    if (xCoord(Data.VMM, Data.Channel)){
-      return 0;
-    }
-    else{
-      return 1;
-    }
-  }
+  FreiaGeometry(Config &VMMConfiguration){
+    Conf = VMMConfiguration;
+  };
+  uint8_t getPlane(const ESSReadout::VMM3Parser::VMM3Data& Data) override;
 
-  uint64_t getPixel(ESSReadout::VMM3Parser::VMM3Data& Data){
-    if (xCoord(Data.VMM, Data.Channel)){
-      return xCoord(Data.VMM, Data.Channel);
-    }
-    else{
-      return yCoord(Data.VMM, Data.Channel);
-    }
-  }
-
+  uint16_t getPixel(const ESSReadout::VMM3Parser::VMM3Data& Data) override;
   ///\brief return global x-coordinate from the digital geometry
   /// Formulae taken from the Freia ICD
   /// strip = channel + 1
@@ -48,12 +36,12 @@ public:
   uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
-      return GeometryBase::InvalidCoord;
+      return Geometry::InvalidCoord;
     }
 
     if (not isXCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
-      return GeometryBase::InvalidCoord;
+      return Geometry::InvalidCoord;
     } else {
       return Channel;
     }
@@ -68,12 +56,12 @@ public:
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)", Channel,
              MinWireChannel, MaxWireChannel);
-      return GeometryBase::InvalidCoord;
+      return Geometry::InvalidCoord;
     }
 
     if (not isYCoord(VMM)) {
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
-      return GeometryBase::InvalidCoord;
+      return Geometry::InvalidCoord;
     } else {
       return YOffset + Channel - MinWireChannel;
     }

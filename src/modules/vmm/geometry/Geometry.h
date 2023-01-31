@@ -1,18 +1,18 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief VMM geometry selector class
+/// \brief VMM geometry class
 ///
+/// Mapping from digital identifiers to x- and y- coordinates
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <freia/geometry/AmorGeometry.h>
-#include <freia/geometry/FreiaGeometry.h>
-#include <nmx/geometry/NMXGeometry.h>
+#include <common/readout/vmm3/VMM3Parser.h>
+#include <modules/vmm/geometry/Config.h>
 #include <string>
 
 // #undef TRC_LEVEL
@@ -22,45 +22,21 @@ namespace VMM {
 
 class Geometry {
 public:
-  Geometry() { GeometryInst = &FreiaGeom; }
 
-  bool setGeometry(std::string NewGeometry) {
-    if (NewGeometry == "AMOR") {
-      GeometryInst = &AMORGeom;
-      return true;
-    }
-    if (NewGeometry == "Freia") {
-      GeometryInst = &FreiaGeom;
-      return true;
-    }
-    if (NewGeometry == "NMX") {
-      GeometryInst = &NMXGeom;
-      return true;
-    }
-    XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
-    return false;
-  }
+  virtual uint8_t getPlane(const ESSReadout::VMM3Parser::VMM3Data& Data) = 0;
+ 
+  virtual uint16_t getPixel(const ESSReadout::VMM3Parser::VMM3Data& Data) = 0;
 
-  // wrapper function for specific instrument geometry instance
-  uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
-    return GeometryInst->xCoord(VMM, Channel);
-  }
-
-  // wrapper function for specific instrument geometry instance
-  uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
-    return GeometryInst->yCoord(YOffset, VMM, Channel);
-  }
-
-  // wrapper function for specific instrument geometry instance
-  bool isXCoord(uint8_t VMM) { return GeometryInst->isXCoord(VMM); }
-
-  // wrapper function for specific instrument geometry instance
-  bool isYCoord(uint8_t VMM) { return GeometryInst->isYCoord(VMM); }
-
-private:
-  AMORGeometry AMORGeom;
-  FreiaGeometry FreiaGeom;
-  NMXGeometry NMXGeom;
-  GeometryBase *GeometryInst{nullptr};
+  static const uint16_t InvalidCoord;
+  static const uint16_t NumStrips;
+  static const uint16_t NumWires;
+  static const uint16_t MinWireChannel;
+  static const uint16_t MaxWireChannel;
+  Config Conf;
 };
+inline uint16_t const Geometry::InvalidCoord = 0xFFFF;
+inline uint16_t const Geometry::NumStrips = 64;
+inline uint16_t const Geometry::NumWires = 32;
+inline uint16_t const Geometry::MinWireChannel = 16;
+inline uint16_t const Geometry::MaxWireChannel = 47;
 } // namespace VMM

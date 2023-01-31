@@ -10,11 +10,25 @@ set(vmm_common_inc
   VMMBase.h
   VMMInstrument.h
   geometry/Config.h
+  geometry/Geometry.h
+  ${ESS_MODULE_DIR}/freia/geometry/FreiaGeometry.h
+  ${ESS_MODULE_DIR}/freia/geometry/AMORGeometry.h
+  # ${ESS_MODULE_DIR}/nmx/geometry/NMXGeometry.h
+  ${ESS_COMMON_DIR}/readout/vmm3/VMM3Parser.h
   )
+
 set(vmm_common_src
   VMMBase.cpp
   VMMInstrument.cpp
   geometry/Config.cpp
+  ${ESS_MODULE_DIR}/freia/geometry/FreiaGeometry.cpp
+  # ${ESS_MODULE_DIR}/freia/geometry/AMORGeometry.cpp
+  ${ESS_COMMON_DIR}/readout/vmm3/VMM3Parser.cpp
+  )
+
+  add_library(vmm_common STATIC
+  ${vmm_common_src}
+  ${vmm_common_inc}
   )
 
 set(vmm_INC ${vmm_common_inc})

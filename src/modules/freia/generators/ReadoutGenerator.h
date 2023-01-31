@@ -14,8 +14,8 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Freia {
-class ReadoutGenerator : public ReadoutGeneratorBase {
+namespace VMM {
+class FreiaReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 

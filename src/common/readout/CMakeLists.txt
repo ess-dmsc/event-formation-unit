@@ -12,7 +12,6 @@ add_subdirectory(vmm3)
 set(essreadout_obj_SRC
   ess/Parser.cpp
   vmm3/VMM3Calibration.cpp
-  vmm3/VMM3Config.cpp
   vmm3/VMM3Parser.cpp
 )
 
@@ -22,7 +21,6 @@ set(essreadout_obj_INC
   vmm3/Hybrid.h
   vmm3/Readout.h
   vmm3/VMM3Calibration.h
-  vmm3/VMM3Config.h
   vmm3/VMM3Parser.h
 )
 

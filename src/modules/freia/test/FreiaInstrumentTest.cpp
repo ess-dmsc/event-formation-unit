@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-using namespace Freia;
+using namespace VMM;
 // clang-format off
 std::string ConfigFile{"deleteme_freia_instr_config.json"};
 std::string ConfigStr = R"(

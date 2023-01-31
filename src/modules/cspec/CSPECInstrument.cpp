@@ -59,8 +59,8 @@ CSPECInstrument::CSPECInstrument(struct Counters &counters,
   // Hists will automatically allocate space for both x and y planes
   // uint32_t MaxADC = 1024;
   // uint32_t MaxChannels =
-  //   Conf.NumHybrids * std::max(GeometryBase::NumWires,
-  //   GeometryBase::NumStrips);
+  //   Conf.NumHybrids * std::max(Geometry::NumWires,
+  //   Geometry::NumStrips);
   // ADCHist = Hists(MaxChannels, MaxADC);
 }
 
@@ -192,7 +192,7 @@ void CSPECInstrument::processReadouts(void) {
       builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, xAndzCoord, ADC, 0});
 
-      //     uint32_t GlobalXChannel = Hybrid * GeometryBase::NumStrips +
+      //     uint32_t GlobalXChannel = Hybrid * Geometry::NumStrips +
       //     readout.Channel; ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
@@ -211,7 +211,7 @@ void CSPECInstrument::processReadouts(void) {
       builders[Ring * Conf.MaxFEN + readout.FENId].insert(
           {TimeNS, yCoord, ADC, 1});
 
-      // uint32_t GlobalYChannel = Hybrid * GeometryBase::NumWires +
+      // uint32_t GlobalYChannel = Hybrid * Geometry::NumWires +
       // readout.Channel; ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }
