@@ -19,22 +19,25 @@ namespace Dream {
 
 class Mantle {
 public:
+
+  const uint8_t WiresPerCounter{32};
+  const uint16_t StripsPerCass{256};
+
   int getX(int Strip) { return Strip; }
 
   /// \brief get global y-coordinate for Cuboid with a given index
   int getY(int MU, int Cassette, int Counter, int Wire) {
-    return 120 * Wire + 12 * MU + 2 * Cassette + Counter;
+    return 60 * Wire + 12 * MU + 2 * Cassette + Counter;
   }
 
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
                       DataParser::DreamReadout &Data) {
-    /// \todo fix and check all values
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
-    uint8_t Counter = 0; /// \todo part of anode field?
-    uint8_t Wire = Data.Cathode;
-    uint8_t Strip = Data.Anode;
+    uint8_t Counter = (Data.Anode/WiresPerCounter)%2;
+    uint8_t Wire = Data.Anode % WiresPerCounter;
+    uint8_t Strip = Data.Cathode % StripsPerCass;
 
     int x = getX(Strip);
     int y = getY(MountingUnit, Cassette, Counter, Wire);

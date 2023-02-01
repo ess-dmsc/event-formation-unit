@@ -26,18 +26,54 @@ public:
   const uint8_t MaxWire{15};
   const uint8_t MaxStrip{15};
 
+  const uint8_t CountersPerCass{2};
+  const uint8_t StripsPerCass{16};
+  const uint8_t WiresPerCounter{16};
+
   SUMO(uint16_t xdim, uint16_t ydim) :
     Geometry(xdim, ydim, 1, 1) {}
+
+
+    uint8_t getCassette(uint8_t Sumo, uint8_t Anode, uint8_t Cathode) {
+      XTRACE(DATA, DEB, "sumo %u, anode %u, cathode %u", Sumo, Anode, Cathode);
+      switch (Sumo) {
+        case 6:
+          return -(Anode/32) + 2 * (Cathode/16);
+          break;
+        case 5:
+          return (Anode/32) + 2 * (Cathode/16);
+          break;
+        case 4:
+          return (Anode/32) + 2 * (Cathode/16) - 1;
+          break;
+        case 3:
+          return (Anode/32) + 2 * (Cathode/32);
+          break;
+        default:
+          return 255;
+          break;
+      }
+    }
 
   /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
   uint32_t getPixelId(Config::ModuleParms &Parms,
                       DataParser::DreamReadout &Data) {
     uint8_t Sector = Parms.P1.Sector;
-    uint8_t Sumo = Parms.P2.SumoPair; // definitely wrong
-    uint8_t Cassette = Data.Anode / 32;
-    uint8_t Counter = Data.Anode % 2;
-    uint8_t Wire = Data.Anode%16;
-    uint8_t Strip = Data.Cathode%16;
+    ///\todo sumo should be identified by the 'Unused' field
+    /// and sanity checked with config
+    /// config of SumoPair could be an encoding like:
+    /// high four nibbles = instance 0 type
+    /// low four nibbles - instance 1 type
+    /// \todo below is still wrong as we do not mask out the
+    /// instance value and the type field fom 'Unused'
+    /// But it is less wrong than before ;-)
+    uint8_t Sumo = Data.Unused;
+
+    uint8_t Cassette = getCassette(Sumo, Data.Anode, Data.Cathode);
+
+    uint8_t Counter = (Data.Anode / WiresPerCounter) % CountersPerCass;
+    uint8_t Wire = Data.Anode % WiresPerCounter;
+    uint8_t Strip = Data.Cathode % StripsPerCass;
 
     XTRACE(EVENT, DEB,
            "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",

@@ -8,12 +8,8 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/debug/Trace.h>
 #include <modules/dream/generators/ReadoutGenerator.h>
-#include <string.h>
-
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#include <algorithm>
 
 namespace Dream {
 
@@ -30,13 +26,15 @@ void DreamReadoutGenerator::getRandomReadout(
   DR.Unused = 0;
 
   uint8_t DetectorSegment = Fuzzer.random8()%5;
+  //DetectorSegment = 3;
   switch (DetectorSegment) {
     case 0: { // BW EndCap
       uint8_t Sector = Fuzzer.random8()%11;
       DR.RingId = BWES6RingId[Sector];
       DR.FENId = BWES6FENId[Sector];
-      DR.Anode = Fuzzer.random8(); /// anodes == wires
-      DR.Cathode = Fuzzer.random8(); /// cathodes == strips
+      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
+      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      DR.Unused = 6; // SUMO6 \todo not correct
       }
     break;
 
@@ -44,8 +42,9 @@ void DreamReadoutGenerator::getRandomReadout(
       uint8_t Sector = Fuzzer.random8()%5;
       DR.RingId = FWES6RingId[Sector];
       DR.FENId = FWES6FENId[Sector];
-      DR.Anode = Fuzzer.random8(); /// anodes == wires
-      DR.Cathode = Fuzzer.random8(); /// cathodes == strips
+      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63); /// anodes == wires
+      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      DR.Unused = 6; // SUMO6 \todo not correct
       }
     break;
 
@@ -53,26 +52,32 @@ void DreamReadoutGenerator::getRandomReadout(
       uint8_t Sector = Fuzzer.random8()%30;
       DR.RingId = MNTLRingId[Sector];
       DR.FENId = MNTLFENId[Sector];
-      DR.Anode = Fuzzer.random8();
+      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)127);
       DR.Cathode = Fuzzer.random8();
       }
     break;
 
     case 3: { // HR
       uint8_t Sector = Fuzzer.random8()%17;
+      uint8_t Instance = Fuzzer.random8()%2;
       DR.RingId = HRRingId[Sector];
       DR.FENId =  HRFENId[Sector];
-      DR.Anode = 0;
-      DR.Cathode = 0;
+      DR.Anode = Fuzzer.random8();
+      DR.Cathode = Fuzzer.random8() & 0x3f;
+      //DR.Cathode = 0;
+      DR.Unused = Instance;
       }
     break;
 
     case 4: { // SANS
-      uint8_t Sector = Fuzzer.random8()%17;
+      uint8_t Sector = Fuzzer.random8()%18;
+      uint8_t Instance = Fuzzer.random8()%2;
       DR.RingId = SANSRingId[Sector];
       DR.FENId =  SANSFENId[Sector];
-      DR.Anode = 0;
-      DR.Cathode = 0;
+      DR.Anode = Fuzzer.random8();
+      DR.Cathode = Fuzzer.random8() & 0x3f;
+      //DR.Cathode = 0;// Front?
+      DR.Unused = Instance;
       }
     break;
   }
