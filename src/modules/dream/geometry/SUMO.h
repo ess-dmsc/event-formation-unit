@@ -34,6 +34,12 @@ public:
     Geometry(xdim, ydim, 1, 1) {}
 
 
+    ///\brief calculate the cassette id from the digital identifiers:
+    /// sumo, anode and cathode.
+    /// CDT promises that anodes and cathodes are guaranteed to be consistent
+    /// this is necessary because not all combination of the two values are
+    /// meaningful.
+    /// \todo possibly add some checks here
     uint8_t getCassette(uint8_t Sumo, uint8_t Anode, uint8_t Cathode) {
       XTRACE(DATA, DEB, "sumo %u, anode %u, cathode %u", Sumo, Anode, Cathode);
       switch (Sumo) {
