@@ -47,8 +47,7 @@ TEST_F(DreamInstrumentTest, Constructor) {
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, Settings);
-  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
+  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }
 
@@ -75,7 +74,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid RingId
-  Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 0, 0, 0});
+  Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 6, 0, 0});
   ASSERT_EQ(Dream.counters.RingErrors, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
@@ -88,7 +87,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid FENId
-  Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 0, 0, 0});
+  Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 6, 0, 0});
   ASSERT_EQ(Dream.counters.FENErrors, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
@@ -101,7 +100,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // unconfigured ring,fen combination
-  Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 0, 0, 0});
+  Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 6, 0, 0});
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 1);
@@ -131,7 +130,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // finally an event
-  Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
+  Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 6, 0, 0});
   ASSERT_EQ(Dream.counters.Events, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
