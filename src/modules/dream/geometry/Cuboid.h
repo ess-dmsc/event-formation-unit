@@ -15,11 +15,17 @@
 #include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
+
 namespace Dream {
 
 class Cuboid {
 public:
   ESSGeometry Geometry{112, 112 * 32, 1, 1};
+
+  const uint8_t WiresPerCounter{16};
+  const uint8_t StripsPerCass{32};
 
   struct CuboidOffset {
     int X;
@@ -29,7 +35,7 @@ public:
   // clang-format off
   /// \brief Showing offsets roughly as the detector Cuboids are arranged
   ///
-  std::vector<CuboidOffset> OffsetsSANS {
+  std::vector<CuboidOffset> OffsetsHR {
                         {32,  0}, {48,  0}, {64,  0},
               {16, 16}, {32, 16}, {48, 16}, {64, 16}, {80, 16},
     { 0, 32}, {16, 32}, {32, 32}, {48, 32}, {64, 32}, {80, 32}, {96, 32},
@@ -39,7 +45,7 @@ public:
                         {32, 96},           {64, 96}
   };
 
-  std::vector<CuboidOffset> OffsetsHR {
+  std::vector<CuboidOffset> OffsetsSANS {
                         {32,  0}, {48,  0}, {64,  0},
               {16, 16}, {32, 16}, {48, 16}, {64, 16}, {80, 16},
     { 0, 32}, {16, 32}, {32, 32}, {48, 32}, {64, 32}, {80, 32}, {96, 32},
@@ -73,32 +79,49 @@ public:
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
                       DataParser::DreamReadout &Data) {
-    /// \todo fix and check all values
     uint8_t Index = Parms.P1.Index;
-    uint8_t Cassette = 0;
-    uint8_t Counter = 0;
-    uint8_t Wire = Data.Cathode;
-    uint8_t Strip = Data.Anode;
+    Index += Data.Unused; // used as instance
     uint8_t Rotate = Parms.P2.Rotate;
+    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u",
+        Index, Data.Anode, Data.Cathode);
+    uint8_t Cassette = Data.Anode/32 + 2 * (Data.Cathode/32);
+    uint8_t Counter = (Data.Anode/WiresPerCounter) % 2;
+    uint8_t Wire = Data.Anode % WiresPerCounter;
+    uint8_t Strip = Data.Cathode % StripsPerCass;
 
-    auto & Offsets = OffsetsHR;
+    XTRACE(DATA, DEB, "cass %u, ctr %u, wire %u, strip %u",
+        Cassette, Counter, Wire, Strip);
+
+    CuboidOffset COff;
     if (Parms.Type == Config::ModuleType::SANS) {
-      Offsets = OffsetsSANS;
-    }
-
-    /// \todo add XTRACE and counter
-    if (Index >= (int)Offsets.size()) {
+      if (Index >= (int)OffsetsSANS.size()) {
+        XTRACE(DATA, WAR, "Bad SANS index %u", Index);
+        return -1;
+      }
+      COff = OffsetsSANS[Index];
+    } else if (Parms.Type == Config::ModuleType::HR) {
+      if (Index >= (int)OffsetsHR.size()) {
+        XTRACE(DATA, WAR, "Bad HR index %u", Index);
+        return -1;
+      }
+      COff = OffsetsHR[Index];
+    } else {
+      XTRACE(DATA, WAR, "Inconsistent type (%d) for Cuboid", Parms.Type);
       return -1;
     }
+
 
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
     int LocalY = 15 - Wire;
 
+    XTRACE(DATA, DEB, "local x %u, local y %u", LocalX, LocalY);
+
     rotateXY(LocalX, LocalY, Rotate);
 
     constexpr int YDim{7 * 16};
-    int x = Offsets[Index].X + LocalX;
-    int y = YDim * Strip + Offsets[Index].Y + LocalY;
+    int x = COff.X + LocalX;
+    int y = YDim * Strip + COff.Y + LocalY;
+    XTRACE(DATA, DEB, "x %u, y %u", x, y);
 
     return Geometry.pixel2D(x, y);
   }

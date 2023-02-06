@@ -29,7 +29,7 @@ TEST_F(CDTGeometryTest, PixelOffsets) {
 
 TEST_F(CDTGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::BwEndCap;
-  Parms.P2.SumoPair = 6;
+  Readout.Unused = 6;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 71681);
 
   Parms.Type = Config::ModuleType::Mantle;

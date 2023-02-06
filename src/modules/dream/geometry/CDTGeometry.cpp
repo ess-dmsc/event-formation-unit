@@ -22,16 +22,19 @@ int CDTGeometry::getPixel(Config::ModuleParms &Parms,
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
-  case Config::BwEndCap: // fallthrough */
+  case Config::BwEndCap:
+    Pixel = bwec.getPixelId(Parms, Data);
+    break;
+
   case Config::FwEndCap:
-    Pixel = sumo.getPixelId(Parms, Data);
+    Pixel = fwec.getPixelId(Parms, Data);
     break;
 
   case Config::Mantle:
     Pixel = mantle.getPixelId(Parms, Data);
     break;
 
-  case Config::HR: // fallthrough */
+  case Config::HR: // fallthrough \todo might or might not work
   case Config::SANS:
     Pixel = cuboid.getPixelId(Parms, Data);
     break;

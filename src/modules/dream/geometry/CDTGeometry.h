@@ -31,7 +31,8 @@ public:
   /// \brief return pixel id from the digital identifiers
   int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
-  SUMO sumo;
+  SUMO fwec{280, 256};
+  SUMO bwec{616, 256};
   Cuboid cuboid;
   Mantle mantle;
 };
