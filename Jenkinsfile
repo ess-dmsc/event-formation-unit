@@ -89,6 +89,7 @@ builders = pipeline_builder.createBuilders { container ->
                 mkdir build
                 cd build
                 conan install --build=outdated ..
+                conan info ../conanfile.txt > CONAN_INFO
             """
         }  // stage
 
@@ -201,6 +202,8 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/configs
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
+
+                                cp ${project}/build/CONAN_INFO archive/event-formation-unit
 
                                 # Create file with build information
                                 touch archive/event-formation-unit/BUILD_INFO
