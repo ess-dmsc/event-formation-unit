@@ -20,8 +20,11 @@
 
 class MockProducer : public trompeloeil::mock_interface<RdKafka::Producer> {
 public:
-  MAKE_CONST_MOCK0(name, const std::string(), override);
-  MAKE_CONST_MOCK0(memberid, const std::string(), override);
+  MAKE_CONST_MOCK0(name, std::string(), override);
+  MAKE_CONST_MOCK0(memberid, std::string(), override);
+  // New with librdkafka 2.0.2
+  MAKE_MOCK2(sasl_set_credentials, RdKafka::Error *(const std::string &, const std::string &), override);
+  // end librdkafka 2.0.2
   // New with librdkafka 1.9.2
   MAKE_MOCK0(sasl_background_callbacks_enable, RdKafka::Error *(), override);
   MAKE_MOCK0(get_sasl_queue, RdKafka::Queue *(), override);
@@ -56,7 +59,7 @@ public:
              RdKafka::Queue *(const RdKafka::TopicPartition *), override);
   MAKE_MOCK1(set_log_queue, RdKafka::ErrorCode(RdKafka::Queue *), override);
   MAKE_MOCK0(yield, void(), override);
-  MAKE_MOCK1(clusterid, const std::string(int), override);
+  MAKE_MOCK1(clusterid, std::string(int), override);
   MAKE_MOCK0(c_ptr, rd_kafka_s *(), override);
   MAKE_MOCK2(create, RdKafka::Producer *(RdKafka::Conf *, std::string));
   MAKE_MOCK7(produce,
@@ -103,7 +106,7 @@ class FakeTopic : public RdKafka::Topic {
 public:
   FakeTopic() = default;
   ~FakeTopic() override = default;
-  const std::string name() const override { return ""; };
+  std::string name() const override { return ""; };
   bool partition_available(int32_t) const override { return true; };
   RdKafka::ErrorCode offset_store(int32_t, int64_t) override {
     return RdKafka::ERR_NO_ERROR;
