@@ -43,6 +43,7 @@ public:
     BIFROST = 0x34,
     MIRACLES = 0x38,
     CSPEC = 0x40,
+    HE3CSPEC = 0x41,
     NMX = 0x44,
     FREIA = 0x48,
     DREAM = 0x60

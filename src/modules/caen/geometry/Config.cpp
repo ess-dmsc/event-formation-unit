@@ -32,7 +32,7 @@ Config::Config(std::string ConfigFile) {
   }
 
   if ((InstrumentName != "loki") and (InstrumentName != "bifrost") and
-      (InstrumentName != "miracles")) {
+      (InstrumentName != "miracles") and (InstrumentName != "he3cspec")) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name, expected "
                              "loki, bifrost, or miracles");
