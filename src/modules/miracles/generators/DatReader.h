@@ -15,6 +15,9 @@
 class MiraclesDatReader {
 public:
   struct dat_data_t {
+    uint8_t ring;
+    uint8_t fen;
+    uint16_t datalen;
     uint32_t tofhi;
     uint32_t toflow;
     uint8_t unused1;
@@ -24,10 +27,10 @@ public:
     uint16_t ampl_b;
     uint32_t unused3;
   } __attribute__((__packed__));
-  static_assert(sizeof(struct dat_data_t) == 20, "wrong packing");
+  static_assert(sizeof(struct dat_data_t) == 24, "wrong packing");
 
   //
-  MiraclesDatReader(std::string file);
+  MiraclesDatReader(std::string file, bool Verbose);
 
   // Read a DreamReadout struct, return bytes read, 0 if line is
   // ignored, or -1 upon error/end
@@ -37,4 +40,5 @@ private:
   std::string filename;
   std::ifstream *infile;
   uint32_t lines{0};
+  bool Verbose{false};
 };

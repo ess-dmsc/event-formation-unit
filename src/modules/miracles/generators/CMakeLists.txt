@@ -19,9 +19,6 @@ set(miracles_udp_from_dat_INC
   PacketGenerator.h
   )
 create_executable(miracles_udp_from_dat)
-target_compile_definitions(miracles_udp_from_dat
-  PUBLIC ESSUDPGEN_MIRCLES_DAT
-  )
 set_target_properties(miracles_udp_from_dat
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
