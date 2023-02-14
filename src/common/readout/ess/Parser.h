@@ -41,11 +41,11 @@ public:
     TTLMonitor = 0x10,
     LOKI = 0x30,
     BIFROST = 0x34,
-    CSPEC = 0x36,
     MIRACLES = 0x38,
-    TREX = 0x40,
+    CSPEC = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
+    TREX = 0x50,
     DREAM = 0x60
   };
 
