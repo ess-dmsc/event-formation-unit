@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     uint8_t Ring = Readout.ring * 2;
     uint8_t FEN = Readout.fen;
     // add the readout data (skip first four bytes of struct)
-    gen.addReadout(&Readout + 4, Ring, FEN);
+    gen.addReadout((uint8_t *)&Readout + 4, Ring, FEN);
     SentReadouts++;
 
     if (gen.getSize() > UdpMaxSizeBytes) {

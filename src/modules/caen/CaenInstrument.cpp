@@ -174,7 +174,7 @@ void CaenInstrument::processReadouts() {
     uint32_t PixelId = calcPixel(Data);
 
     if (PixelId == 0) {
-      XTRACE(DATA, ERR, "Pixel error");
+      XTRACE(DATA, WAR, "Pixel error");
       counters.PixelErrors++;
     } else {
       XTRACE(DATA, DEB, "Valid data, adding to serializer");
