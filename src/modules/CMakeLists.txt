@@ -7,7 +7,7 @@ include_directories(.)
 
 add_subdirectory(bifrost)
 add_subdirectory(caen)
-add_subdirectory(cspec)
+add_subdirectory(trex)
 add_subdirectory(he3cspec)
 add_subdirectory(dream)
 add_subdirectory(freia)
