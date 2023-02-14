@@ -16,7 +16,7 @@ set(caen_common_inc
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.h
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
-  ${ESS_MODULE_DIR}/he3cspec/geometry/He3cspecGeometry.h
+  ${ESS_MODULE_DIR}/cspec/geometry/CspecGeometry.h
   readout/DataParser.h
   )
 set(caen_common_src
@@ -27,7 +27,7 @@ set(caen_common_src
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp
-  ${ESS_MODULE_DIR}/he3cspec/geometry/He3cspecGeometry.cpp
+  ${ESS_MODULE_DIR}/cspec/geometry/CspecGeometry.cpp
   readout/DataParser.cpp
   )
 

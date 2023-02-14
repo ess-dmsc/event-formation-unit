@@ -19,9 +19,9 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class He3cspecGeometry : public Geometry {
+class CspecGeometry : public Geometry {
 public:
-    He3cspecGeometry(Config &CaenConfiguration);
+    CspecGeometry(Config &CaenConfiguration);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 

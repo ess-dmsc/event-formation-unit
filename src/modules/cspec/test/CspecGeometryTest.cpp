@@ -3,24 +3,24 @@
 ///
 /// \file
 ///
-/// \brief Unit test for Bifrost position calculations
+/// \brief Unit test for CSPEC position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <he3cspec/geometry/He3cspecGeometry.h>
+#include <cspec/geometry/CspecGeometry.h>
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Caen;
 
-class He3cspecGeometryTest : public TestBase {
+class CspecGeometryTest : public TestBase {
 protected:
   Config CaenConfiguration;
-  He3cspecGeometry *geom;
+  CspecGeometry *geom;
   int64_t RingErrors{0};
   int64_t FENErrors{0};
   int64_t TubeErrors{0};
   void SetUp() override {
-    geom = new He3cspecGeometry(CaenConfiguration);
+    geom = new CspecGeometry(CaenConfiguration);
     geom->NPos = 300;
     geom->Stats.RingErrors = &RingErrors;
     geom->Stats.FENErrors = &FENErrors;
@@ -29,7 +29,7 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(He3cspecGeometryTest, YOffset) {
+TEST_F(CspecGeometryTest, YOffset) {
   ASSERT_EQ(geom->yOffset(0), 0);
   ASSERT_EQ(geom->yOffset(1), 0);
   ASSERT_EQ(geom->yOffset(2), 0);
@@ -47,7 +47,7 @@ TEST_F(He3cspecGeometryTest, YOffset) {
   ASSERT_EQ(geom->yOffset(14), 12);
 }
 
-TEST_F(He3cspecGeometryTest, XOffset) {
+TEST_F(CspecGeometryTest, XOffset) {
   ASSERT_EQ(geom->xOffset(0, 0), 0);
   ASSERT_EQ(geom->xOffset(0, 1), 100);
   ASSERT_EQ(geom->xOffset(0, 2), 200);
@@ -59,13 +59,13 @@ TEST_F(He3cspecGeometryTest, XOffset) {
   ASSERT_EQ(geom->xOffset(2, 2), 800);
 }
 
-TEST_F(He3cspecGeometryTest, Position) {
+TEST_F(CspecGeometryTest, Position) {
   ASSERT_EQ(geom->posAlongTube(0, 0), -1);
   ASSERT_EQ(geom->posAlongTube(0, 1), 0);
   ASSERT_EQ(geom->posAlongTube(1, 0), 299);
 }
 
-TEST_F(He3cspecGeometryTest, CalcPixel) {
+TEST_F(CspecGeometryTest, CalcPixel) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 
@@ -73,7 +73,7 @@ TEST_F(He3cspecGeometryTest, CalcPixel) {
   ASSERT_EQ(geom->calcPixel(readout2), 1);
 }
 
-TEST_F(He3cspecGeometryTest, Validate) {
+TEST_F(CspecGeometryTest, Validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 

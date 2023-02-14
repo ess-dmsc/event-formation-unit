@@ -9,14 +9,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <modules/he3cspec/geometry/He3cspecGeometry.h>
+#include <modules/cspec/geometry/CspecGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 
-He3cspecGeometry::He3cspecGeometry(Config &CaenConfiguration) {
+CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
   ESSGeom = new ESSGeometry(900, 180, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
@@ -24,7 +24,7 @@ He3cspecGeometry::He3cspecGeometry(Config &CaenConfiguration) {
   MaxTube = CaenConfiguration.MaxTube;
 }
 
-bool He3cspecGeometry::validateData(DataParser::CaenReadout &Data) {
+bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
          Data.TubeId);
 
@@ -48,16 +48,16 @@ bool He3cspecGeometry::validateData(DataParser::CaenReadout &Data) {
   return true;
 }
 
-int He3cspecGeometry::xOffset(int Ring, int Tube) {
+int CspecGeometry::xOffset(int Ring, int Tube) {
   return Ring * NPos + (Tube % 24) * (NPos / 24);
 }
 
-int He3cspecGeometry::yOffset(int Tube) {
+int CspecGeometry::yOffset(int Tube) {
   int Pack = Tube / 24;
   return Pack * 24;
 }
 
-int He3cspecGeometry::posAlongTube(int AmpA, int AmpB) {
+int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
     ///\todo add counter
     return -1;
@@ -65,7 +65,7 @@ int He3cspecGeometry::posAlongTube(int AmpA, int AmpB) {
   return ((NPos - 1) * AmpA) / (AmpA + AmpB);
 }
 
-uint32_t He3cspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
+uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);
   int yoff = yOffset(Data.TubeId);
   int xlocal = xCoord(Data.AmpA, Data.AmpB);

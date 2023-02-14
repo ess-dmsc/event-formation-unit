@@ -41,7 +41,7 @@ public:
     TTLMonitor = 0x10,
     LOKI = 0x30,
     BIFROST = 0x34,
-    HE3CSPEC = 0x36,
+    CSPEC = 0x36,
     MIRACLES = 0x38,
     TREX = 0x40,
     NMX = 0x44,

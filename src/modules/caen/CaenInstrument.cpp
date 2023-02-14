@@ -37,8 +37,8 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     Geom = new BifrostGeometry(CaenConfiguration);
   } else if (settings.DetectorName == "miracles") {
       Geom = new MiraclesGeometry(CaenConfiguration);
-  } else if (settings.DetectorName == "he3cspec") {
-      Geom = new He3cspecGeometry(CaenConfiguration);
+  } else if (settings.DetectorName == "cspec") {
+      Geom = new CspecGeometry(CaenConfiguration);
   } else {
     XTRACE(INIT, ERR, "Invalid Detector Name %s",
            settings.DetectorName.c_str());

@@ -1,5 +1,5 @@
 {
-  "Detector": "he3cspec",
+  "Detector": "cspec",
   "MaxRing": 4,
   "StrawResolution": 300,
   "MaxTube": 180

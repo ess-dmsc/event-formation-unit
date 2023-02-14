@@ -5,22 +5,22 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
+get_filename_component(CSPEC_FULL "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
 ##
 
-set(He3cspecGeometryTest_INC
-    ../geometry/He3cspecGeometry.h
+set(CspecGeometryTest_INC
+    ../geometry/CspecGeometry.h
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
     ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
 )
-set(He3cspecGeometryTest_SRC
-    He3cspecGeometryTest.cpp
-    ../geometry/He3cspecGeometry.cpp
+set(CspecGeometryTest_SRC
+    CspecGeometryTest.cpp
+    ../geometry/CspecGeometry.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
 )
-create_test_executable(He3cspecGeometryTest)
+create_test_executable(CspecGeometryTest)
 

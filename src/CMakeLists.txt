@@ -53,7 +53,7 @@ get_filename_component(NMX_CFG_FILE "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABS
 get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTestII.json" ABSOLUTE)
 get_filename_component(BIFROST_CFG_FILE "${ESS_MODULE_DIR}/bifrost/configs/bifrost.json" ABSOLUTE)
 get_filename_component(MIRACLES_CFG_FILE "${ESS_MODULE_DIR}/miracles/configs/miracles.json" ABSOLUTE)
-get_filename_component(HE3CSPEC_CFG_FILE "${ESS_MODULE_DIR}/he3cspec/configs/he3cspec.json" ABSOLUTE)
+get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 
 
 add_custom_target(copycfgs
@@ -66,7 +66,7 @@ add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E copy ${LOKI_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${BIFROST_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${MIRACLES_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
-    COMMAND ${CMAKE_COMMAND} -E copy ${HE3CSPEC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CSPEC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
@@ -80,6 +80,6 @@ add_custom_target(runefu
     COMMAND trex "-f" "../configs/tex.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
-    COMMAND he3cspec "-f" "../configs/he3cpec.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_he3cspec.h5"
-    DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx he3cspec
+    COMMAND cspec "-f" "../configs/he3cpec.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
+    DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx cspec
     )
