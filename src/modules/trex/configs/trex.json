@@ -255,6 +255,6 @@
   "MaxGridsSpan": 5,
   "DefaultMinADC": 50,
   "SizeX": 384,
-  "SizeY": 51, 
+  "SizeY": 51,
   "SizeZ": 16
 }
