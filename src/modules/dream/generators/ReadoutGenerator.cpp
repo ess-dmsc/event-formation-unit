@@ -62,9 +62,8 @@ void DreamReadoutGenerator::getRandomReadout(
       uint8_t Instance = Fuzzer.random8()%2;
       DR.RingId = HRRingId[Sector];
       DR.FENId =  HRFENId[Sector];
-      DR.Anode = Fuzzer.random8();
+      DR.Anode = (Fuzzer.random8() & 0x7) * 32;
       DR.Cathode = Fuzzer.random8() & 0x3f;
-      //DR.Cathode = 0;
       DR.Unused = Instance;
       }
     break;
@@ -76,7 +75,6 @@ void DreamReadoutGenerator::getRandomReadout(
       DR.FENId =  SANSFENId[Sector];
       DR.Anode = Fuzzer.random8();
       DR.Cathode = Fuzzer.random8() & 0x3f;
-      //DR.Cathode = 0;// Front?
       DR.Unused = Instance;
       }
     break;

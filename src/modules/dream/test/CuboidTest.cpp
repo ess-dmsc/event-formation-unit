@@ -19,6 +19,11 @@ protected:
   void TearDown() override {}
 };
 
+TEST_F(CuboidGeometryTest, IndexSizes) {
+  ASSERT_EQ(geometry.OffsetsHR.size(), geometry.RotateHR.size());
+  ASSERT_EQ(geometry.OffsetsSANS.size(), geometry.RotateSANS.size());
+}
+
 TEST_F(CuboidGeometryTest, Rotate0) {
   int x = 1;
   int y = 12;
