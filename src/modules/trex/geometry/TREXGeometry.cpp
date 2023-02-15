@@ -17,9 +17,9 @@
 
 // returns integer describing the X and Z position in the flattened 2D space
 uint16_t Trex::TREXGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID,
-                                          uint8_t HybridID, uint8_t VMMID,
-                                          uint8_t Channel, uint16_t XOffset,
-                                          bool Rotated) {
+                                        uint8_t HybridID, uint8_t VMMID,
+                                        uint8_t Channel, uint16_t XOffset,
+                                        bool Rotated) {
   if (!validWireMapping(HybridID, VMMID, Channel)) {
     XTRACE(DATA, WAR,
            "Invalid Hybrid: %u, VMM: %u, and Channel: %u, combination for wire "
@@ -55,8 +55,8 @@ uint16_t Trex::TREXGeometry::xAndzCoord(uint8_t RingID, uint8_t FENID,
 }
 
 uint16_t Trex::TREXGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
-                                      uint8_t Channel, uint16_t YOffset,
-                                      bool Rotated, bool Short) {
+                                    uint8_t Channel, uint16_t YOffset,
+                                    bool Rotated, bool Short) {
   uint16_t YCoord;
   if (!validGridMapping(HybridID, VMMID, Channel, Short)) {
     XTRACE(DATA, ERR,
@@ -86,7 +86,7 @@ uint16_t Trex::TREXGeometry::yCoord(uint8_t HybridID, uint8_t VMMID,
 
 // The valid combinations of these parameters are defined in TREX ICD document
 bool Trex::TREXGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
-                                            uint8_t Channel, bool Short) {
+                                          uint8_t Channel, bool Short) {
   if (Short) {
     return (HybridID == 1 and VMMID == 0 and Channel <= 50);
   }
@@ -108,7 +108,7 @@ bool Trex::TREXGeometry::validGridMapping(uint8_t HybridID, uint8_t VMMID,
 
 // The valid combinations of these parameters are defined in TREX ICD document
 bool Trex::TREXGeometry::validWireMapping(uint8_t HybridID, uint8_t VMMID,
-                                            uint8_t Channel) {
+                                          uint8_t Channel) {
   if (HybridID != 0) {
     return false;
   }

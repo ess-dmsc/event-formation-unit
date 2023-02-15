@@ -21,7 +21,7 @@
 namespace Caen {
 class CspecGeometry : public Geometry {
 public:
-    CspecGeometry(Config &CaenConfiguration);
+  CspecGeometry(Config &CaenConfiguration);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 

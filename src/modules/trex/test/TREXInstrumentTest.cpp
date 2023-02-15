@@ -8,9 +8,9 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <trex/TREXInstrument.h>
 #include <stdio.h>
 #include <string.h>
+#include <trex/TREXInstrument.h>
 
 using namespace Trex;
 

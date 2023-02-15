@@ -30,36 +30,34 @@ public:
   const uint8_t StripsPerCass{16};
   const uint8_t WiresPerCounter{16};
 
-  SUMO(uint16_t xdim, uint16_t ydim) :
-    Geometry(xdim, ydim, 1, 1) {}
+  SUMO(uint16_t xdim, uint16_t ydim) : Geometry(xdim, ydim, 1, 1) {}
 
-
-    ///\brief calculate the cassette id from the digital identifiers:
-    /// sumo, anode and cathode.
-    /// CDT promises that anodes and cathodes are guaranteed to be consistent
-    /// this is necessary because not all combination of the two values are
-    /// meaningful.
-    /// \todo possibly add some checks here
-    uint8_t getCassette(uint8_t Sumo, uint8_t Anode, uint8_t Cathode) {
-      XTRACE(DATA, DEB, "sumo %u, anode %u, cathode %u", Sumo, Anode, Cathode);
-      switch (Sumo) {
-        case 6:
-          return -(Anode/32) + 2 * (Cathode/16);
-          break;
-        case 5:
-          return (Anode/32) + 2 * (Cathode/16);
-          break;
-        case 4:
-          return (Anode/32) + 2 * (Cathode/16) - 1;
-          break;
-        case 3:
-          return (Anode/32) + 2 * (Cathode/32);
-          break;
-        default:
-          return 255;
-          break;
-      }
+  ///\brief calculate the cassette id from the digital identifiers:
+  /// sumo, anode and cathode.
+  /// CDT promises that anodes and cathodes are guaranteed to be consistent
+  /// this is necessary because not all combination of the two values are
+  /// meaningful.
+  /// \todo possibly add some checks here
+  uint8_t getCassette(uint8_t Sumo, uint8_t Anode, uint8_t Cathode) {
+    XTRACE(DATA, DEB, "sumo %u, anode %u, cathode %u", Sumo, Anode, Cathode);
+    switch (Sumo) {
+    case 6:
+      return -(Anode / 32) + 2 * (Cathode / 16);
+      break;
+    case 5:
+      return (Anode / 32) + 2 * (Cathode / 16);
+      break;
+    case 4:
+      return (Anode / 32) + 2 * (Cathode / 16) - 1;
+      break;
+    case 3:
+      return (Anode / 32) + 2 * (Cathode / 32);
+      break;
+    default:
+      return 255;
+      break;
     }
+  }
 
   /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
   uint32_t getPixelId(Config::ModuleParms &Parms,
@@ -129,7 +127,7 @@ public:
     return getYoffset(Strip) + getLocalYCoord(Wire);
   }
 
-ESSGeometry Geometry{1, 1, 1, 1}; // initialised by constructor
+  ESSGeometry Geometry{1, 1, 1, 1}; // initialised by constructor
 
 private:
   // these map Sumo Id (3..6) to various SUMO properties.

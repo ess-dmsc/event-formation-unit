@@ -96,8 +96,8 @@ class TREXBaseStandIn : public Trex::TrexBase {
 public:
   TREXBaseStandIn(BaseSettings Settings) : Trex::TrexBase(Settings){};
   ~TREXBaseStandIn() = default;
-  using Trex::TrexBase::Counters;
   using Detector::Threads;
+  using Trex::TrexBase::Counters;
 };
 
 class TREXBaseTest : public ::testing::Test {

@@ -12,7 +12,6 @@
 #pragma once
 
 #include <bifrost/geometry/BifrostGeometry.h>
-#include <cspec/geometry/CspecGeometry.h>
 #include <caen/CaenBase.h> // to get CaenSettings
 #include <caen/Counters.h>
 #include <caen/geometry/Calibration.h>
@@ -20,6 +19,7 @@
 #include <caen/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <cspec/geometry/CspecGeometry.h>
 #include <loki/geometry/LokiGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <miracles/geometry/MiraclesGeometry.h>

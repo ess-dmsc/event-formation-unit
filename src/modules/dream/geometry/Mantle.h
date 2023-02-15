@@ -19,7 +19,6 @@ namespace Dream {
 
 class Mantle {
 public:
-
   const uint8_t WiresPerCounter{32};
   const uint16_t StripsPerCass{256};
 
@@ -35,7 +34,7 @@ public:
                       DataParser::DreamReadout &Data) {
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
-    uint8_t Counter = (Data.Anode/WiresPerCounter)%2;
+    uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 

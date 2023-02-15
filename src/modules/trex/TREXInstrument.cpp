@@ -13,10 +13,10 @@
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
-#include <trex/TREXInstrument.h>
-#include <trex/geometry/TREXGeometry.h>
-#include <trex/geometry/LETGeometry.h>
 #include <math.h>
+#include <trex/TREXInstrument.h>
+#include <trex/geometry/LETGeometry.h>
+#include <trex/geometry/TREXGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -25,21 +25,20 @@ namespace Trex {
 
 /// \brief load configuration and calibration files
 TREXInstrument::TREXInstrument(struct Counters &counters,
-                                 BaseSettings &settings,
-                                 EV44Serializer *serializer)
+                               BaseSettings &settings,
+                               EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
   if (!Settings.DumpFilePrefix.empty()) {
-    std::string DumpFileName =
-        Settings.DumpFilePrefix + "trex_" + timeString();
+    std::string DumpFileName = Settings.DumpFilePrefix + "trex_" + timeString();
     XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
     DumpFile = VMM3::ReadoutFile::create(DumpFileName);
   }
 
   loadConfigAndCalib();
 
-  essgeom = ESSGeometry(Conf.TREXFileParameters.SizeX,
-                        Conf.TREXFileParameters.SizeY,
-                        Conf.TREXFileParameters.SizeZ, 1);
+  essgeom =
+      ESSGeometry(Conf.TREXFileParameters.SizeX, Conf.TREXFileParameters.SizeY,
+                  Conf.TREXFileParameters.SizeZ, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "TREX") {

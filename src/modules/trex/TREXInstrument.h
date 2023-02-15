@@ -19,12 +19,12 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
 #include <common/reduction/EventBuilder2D.h>
-#include <trex/TREXBase.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <trex/Counters.h>
-#include <trex/geometry/TREXGeometry.h>
+#include <trex/TREXBase.h>
 #include <trex/geometry/Config.h>
 #include <trex/geometry/LETGeometry.h>
-#include <logical_geometry/ESSGeometry.h>
+#include <trex/geometry/TREXGeometry.h>
 
 namespace Trex {
 
@@ -35,7 +35,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   TREXInstrument(Counters &counters, BaseSettings &settings,
-                  EV44Serializer *serializer);
+                 EV44Serializer *serializer);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.

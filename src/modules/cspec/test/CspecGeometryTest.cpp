@@ -6,9 +6,9 @@
 /// \brief Unit test for CSPEC position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include <cspec/geometry/CspecGeometry.h>
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
+#include <cspec/geometry/CspecGeometry.h>
 
 using namespace Caen;
 

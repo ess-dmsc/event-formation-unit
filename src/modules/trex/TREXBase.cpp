@@ -18,9 +18,9 @@
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <stdio.h>
 #include <trex/TREXBase.h>
 #include <trex/TREXInstrument.h>
-#include <stdio.h>
 #include <unistd.h>
 
 #include <cinttypes>
@@ -181,7 +181,7 @@ void TrexBase::processing_thread() {
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
       auto Res = TREX.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::TREX);
+                                                ESSReadout::Parser::TREX);
       Counters.ReadoutStats = TREX.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

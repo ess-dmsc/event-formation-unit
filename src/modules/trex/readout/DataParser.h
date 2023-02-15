@@ -31,8 +31,7 @@ public:
 
   } __attribute__((__packed__));
 
-  static_assert(sizeof(TREXReadout) == 20,
-                "TREX readout header length error");
+  static_assert(sizeof(TREXReadout) == 20, "TREX readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
