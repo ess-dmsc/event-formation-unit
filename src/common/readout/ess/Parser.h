@@ -45,6 +45,7 @@ public:
     CSPEC = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
+    TREX = 0x50,
     DREAM = 0x60
   };
 
