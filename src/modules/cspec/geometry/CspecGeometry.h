@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,35 +25,19 @@ public:
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 
-  int PackTubes{24}; // tubes per triplet (might be obvious from the name)
-
   /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Tube);
 
-  /// \brief return the global y-offset for the given identifiers
-  int yOffset(int Tube);
-
-  /// \brief return local x-coordinate from amplitudes
-  int xCoord(int AmpA, int AmpB) {
-    int Coord = reverse(posAlongTube(AmpA, AmpB)) % (NPos / 3);
-    XTRACE(DATA, DEB, "AmpA %d, AmpB %d, xCoord %d", AmpA, AmpB, Coord);
-    return Coord;
-  }
+//  /// \brief return the global y-offset for the given identifiers
+//  int yOffset(int Tube);
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int AmpA, int AmpB) {
-    return (reverse(posAlongTube(AmpA, AmpB)) * PackTubes) / NPos;
+    return posAlongTube(AmpA, AmpB);
   }
 
   /// \brief return the position along the tube
   int posAlongTube(int AmpA, int AmpB);
 
-  /// NullCalibration just reverses the middle position
-  int reverse(int OrgPos) {
-    if ((OrgPos < 100) or (OrgPos >= 200)) {
-      return OrgPos;
-    }
-    return 299 - OrgPos;
-  }
 };
 } // namespace Caen

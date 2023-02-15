@@ -1,11 +1,11 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief Calculate pixelid from digital identifiers, see latest reviewed
-/// ICD for Bifrost:
-/// https://project.esss.dk/owncloud/index.php/s/AMKp67jcTGmCFmt
+/// ICD for CSPEC:
+/// https://project.esss.dk/owncloud/index.php/s/3i0RtWiVwNM6EBY (v1 -- out of date as of 2023-02)
 ///
 //===----------------------------------------------------------------------===//
 
@@ -49,13 +49,16 @@ bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
 }
 
 int CspecGeometry::xOffset(int Ring, int Tube) {
+  ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He CSPEC
   return Ring * NPos + (Tube % 24) * (NPos / 24);
 }
 
-int CspecGeometry::yOffset(int Tube) {
-  int Pack = Tube / 24;
-  return Pack * 24;
-}
+// This is always zero for a cylindrical detector with tubes in a plane, aligned along its axis
+//int CspecGeometry::yOffset(int Tube) {
+//  ///\todo Determine the 'real' y-offset once a new ICD is decided for 3He CSPEC
+//  int Pack = Tube / 24;
+//  return Pack * 24;
+//}
 
 int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
@@ -67,13 +70,11 @@ int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
 
 uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);
-  int yoff = yOffset(Data.TubeId);
-  int xlocal = xCoord(Data.AmpA, Data.AmpB);
   int ylocal = yCoord(Data.AmpA, Data.AmpB);
-  uint32_t pixel = ESSGeom->pixel2D(xoff + xlocal, yoff + ylocal);
+  uint32_t pixel = ESSGeom->pixel2D(xoff, ylocal);
 
-  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
-         xoff, xlocal, yoff, ylocal, pixel);
+  XTRACE(DATA, DEB, "xoffset %d, ylocal %d, pixel %hu",
+         xoff, ylocal, pixel);
 
   return pixel;
 }

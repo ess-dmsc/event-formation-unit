@@ -1,4 +1,4 @@
-# Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 
 #=============================================================================
 # bifrost detector module and base test
