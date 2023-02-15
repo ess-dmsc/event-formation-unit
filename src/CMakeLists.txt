@@ -80,6 +80,6 @@ add_custom_target(runefu
     COMMAND trex "-f" "../configs/tex.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
-    COMMAND cspec "-f" "../configs/he3cpec.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
+    COMMAND cspec "-f" "../configs/cpec.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
     DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx cspec
     )

@@ -8,18 +8,18 @@ include_directories(.)
 # trex detector module and base test
 #=============================================================================
 set(trex_common_inc
-        TREXBase.h
-        TREXInstrument.h
+  TREXBase.h
+  TREXInstrument.h
   geometry/Config.h
-        geometry/TREXGeometry.h
+  geometry/TREXGeometry.h
   geometry/LETGeometry.h
   geometry/Geometry.h
   )
 set(trex_common_src
-        TREXBase.cpp
-        TREXInstrument.cpp
+  TREXBase.cpp
+  TREXInstrument.cpp
   geometry/Config.cpp
-        geometry/TREXGeometry.cpp
+  geometry/TREXGeometry.cpp
   geometry/LETGeometry.cpp
   )
 
@@ -40,7 +40,7 @@ set(TREXBaseTest_INC
   ${trex_common_inc}
 )
 set(TREXBaseTest_SRC
-        test/TREXBaseTest.cpp
+  test/TREXBaseTest.cpp
   ${trex_common_src}
 )
 create_test_executable(TREXBaseTest)
@@ -53,6 +53,6 @@ set(TREXInstrumentTest_INC
   )
 set(TREXInstrumentTest_SRC
   ${trex_common_src}
-        test/TREXInstrumentTest.cpp
+  test/TREXInstrumentTest.cpp
 )
 create_test_executable(TREXInstrumentTest)
