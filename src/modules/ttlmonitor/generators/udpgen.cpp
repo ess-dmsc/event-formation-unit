@@ -10,7 +10,6 @@
 #include <modules/ttlmonitor/geometry/Parser.h>
 // GCOVR_EXCL_START
 
-
 int main(int argc, char *argv[]) {
 
   TTLMonitor::ReadoutGenerator TTLMonGen;

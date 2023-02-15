@@ -82,15 +82,15 @@ public:
     uint8_t Index = Parms.P1.Index;
     Index += Data.Unused; // used as instance
     uint8_t Rotate = Parms.P2.Rotate;
-    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u",
-        Index, Data.Anode, Data.Cathode);
-    uint8_t Cassette = Data.Anode/32 + 2 * (Data.Cathode/32);
-    uint8_t Counter = (Data.Anode/WiresPerCounter) % 2;
+    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
+           Data.Cathode);
+    uint8_t Cassette = Data.Anode / 32 + 2 * (Data.Cathode / 32);
+    uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 
-    XTRACE(DATA, DEB, "cass %u, ctr %u, wire %u, strip %u",
-        Cassette, Counter, Wire, Strip);
+    XTRACE(DATA, DEB, "cass %u, ctr %u, wire %u, strip %u", Cassette, Counter,
+           Wire, Strip);
 
     CuboidOffset COff;
     if (Parms.Type == Config::ModuleType::SANS) {
@@ -109,7 +109,6 @@ public:
       XTRACE(DATA, WAR, "Inconsistent type (%d) for Cuboid", Parms.Type);
       return -1;
     }
-
 
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
     int LocalY = 15 - Wire;

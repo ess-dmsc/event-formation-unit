@@ -8,10 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <caen/Counters.h>
-#include <loki/generators/LokiReadoutGenerator.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
+#include <loki/generators/LokiReadoutGenerator.h>
 
 // Example of UDP readout
 // Two Data Sections each containing three readouts
@@ -78,7 +78,8 @@ TEST_F(CombinedParserTest, DataGen) {
     ASSERT_EQ(DataSize,
               sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
 
-    auto Res = CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
+    auto Res =
+        CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
     Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
                            CommonReadout.Packet.DataLength);

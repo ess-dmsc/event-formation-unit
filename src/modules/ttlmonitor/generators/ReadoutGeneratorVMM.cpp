@@ -11,7 +11,6 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <modules/ttlmonitor/generators/ReadoutGeneratorVMM.h>
 
-
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 

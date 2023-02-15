@@ -11,39 +11,16 @@ get_filename_component(CSPEC_FULL "${ESS_MODULE_DIR}/cspec/configs/cspec.json" A
 ## Pure unit tests
 ##
 
-set(CSPECConfigTest_INC
-  ../geometry/Config.h)
-set(CSPECConfigTest_SRC
-  ../geometry/Config.cpp
-  ConfigTest.cpp)
-create_test_executable(CSPECConfigTest)
-target_compile_definitions(CSPECConfigTest PRIVATE CSPEC_FULL="${CSPEC_FULL}")
+set(CspecGeometryTest_INC
+    ../geometry/CspecGeometry.h
+    ${ESS_MODULE_DIR}/caen/geometry/Config.h
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+)
+set(CspecGeometryTest_SRC
+    CspecGeometryTest.cpp
+    ../geometry/CspecGeometry.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+)
+create_test_executable(CspecGeometryTest)
 
-
-
-
-set(CSPECGeometryTest_INC
-  ../geometry/CSPECGeometry.h
-  ../geometry/Geometry.h)
-set(CSPECGeometryTest_SRC
-  ../test/CSPECGeometryTest.cpp
-  ../geometry/CSPECGeometry.cpp
-  ../geometry/Geometry.h)
-create_test_executable(CSPECGeometryTest)
-
-
-set(LETGeometryTest_INC
-  ../geometry/LETGeometry.h
-  ../geometry/Geometry.h)
-set(LETGeometryTest_SRC
-  ../test/LETGeometryTest.cpp
-  ../geometry/LETGeometry.cpp
-  ../geometry/Geometry.h)
-create_test_executable(LETGeometryTest)
-
-
-# set(CSPECChannelMappingTest_INC
-#   ../geometry/CSPECChannelMapping.h)
-# set(CSPECChannelMappingTest_SRC
-#   ../test/CSPECChannelMappingTest.cpp)
-# create_test_executable(CSPECChannelMappingTest)

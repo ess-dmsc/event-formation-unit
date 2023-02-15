@@ -8,19 +8,18 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <cassert>
+#include <common/debug/Trace.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <math.h>
 #include <stdexcept>
 #include <time.h>
-#include <common/debug/Trace.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-
 ///\brief No work to do for constructor
-ReadoutGeneratorBase::ReadoutGeneratorBase() { }
+ReadoutGeneratorBase::ReadoutGeneratorBase() {}
 
 ///\brief
 uint16_t ReadoutGeneratorBase::makePacket() {
@@ -70,8 +69,7 @@ void ReadoutGeneratorBase::finishPacket() {
   }
 }
 
-
-int ReadoutGeneratorBase::argParse(int argc, char * argv[]) {
+int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
   CLI::App app{"UDP data generator for ESS readout data"};
 
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
@@ -98,7 +96,6 @@ int ReadoutGeneratorBase::argParse(int argc, char * argv[]) {
   CLI11_PARSE(app, argc, argv);
   return 0;
 }
-
 
 void ReadoutGeneratorBase::transmitLoop() {
   if (Settings.TypeOverride != 0) {

@@ -21,7 +21,7 @@ class DreamGeometryTest : public TestBase {
 protected:
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
   Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
-  SUMO endcap{616,256};
+  SUMO endcap{616, 256};
   void SetUp() override {}
   void TearDown() override {}
 };
@@ -134,48 +134,48 @@ TEST_F(DreamGeometryTest, TestingICD4BoxCorners) {
 // From dream_voxel_position_relations[3].png
 // provided by Daniel Hollain 30 Jan 2023
 TEST_F(DreamGeometryTest, CDTMappingSumo6) {
-  ASSERT_EQ(endcap.getCassette(6,  0,  0), 0);
+  ASSERT_EQ(endcap.getCassette(6, 0, 0), 0);
   ASSERT_EQ(endcap.getCassette(6, 31, 15), 0);
 
-  ASSERT_EQ(endcap.getCassette(6,  0, 16), 2);
+  ASSERT_EQ(endcap.getCassette(6, 0, 16), 2);
   ASSERT_EQ(endcap.getCassette(6, 32, 16), 1);
-  ASSERT_EQ(endcap.getCassette(6,  0, 32), 4);
+  ASSERT_EQ(endcap.getCassette(6, 0, 32), 4);
   ASSERT_EQ(endcap.getCassette(6, 32, 32), 3);
-  ASSERT_EQ(endcap.getCassette(6,  0, 48), 6);
+  ASSERT_EQ(endcap.getCassette(6, 0, 48), 6);
   ASSERT_EQ(endcap.getCassette(6, 32, 48), 5);
-  ASSERT_EQ(endcap.getCassette(6,  0, 64), 8);
+  ASSERT_EQ(endcap.getCassette(6, 0, 64), 8);
   ASSERT_EQ(endcap.getCassette(6, 32, 64), 7);
   ASSERT_EQ(endcap.getCassette(6, 32, 80), 9);
 }
 
 TEST_F(DreamGeometryTest, CDTMappingSumo5) {
-  ASSERT_EQ(endcap.getCassette(5,  0,  0), 0);
-  ASSERT_EQ(endcap.getCassette(5, 32,  0), 1);
-  ASSERT_EQ(endcap.getCassette(5,  0, 16), 2);
+  ASSERT_EQ(endcap.getCassette(5, 0, 0), 0);
+  ASSERT_EQ(endcap.getCassette(5, 32, 0), 1);
+  ASSERT_EQ(endcap.getCassette(5, 0, 16), 2);
   ASSERT_EQ(endcap.getCassette(5, 32, 16), 3);
-  ASSERT_EQ(endcap.getCassette(5,  0, 32), 4);
+  ASSERT_EQ(endcap.getCassette(5, 0, 32), 4);
   ASSERT_EQ(endcap.getCassette(5, 32, 32), 5);
-  ASSERT_EQ(endcap.getCassette(5,  0, 48), 6);
+  ASSERT_EQ(endcap.getCassette(5, 0, 48), 6);
   ASSERT_EQ(endcap.getCassette(5, 32, 48), 7);
 }
 
 TEST_F(DreamGeometryTest, CDTMappingSumo4) {
-  ASSERT_EQ(endcap.getCassette(4, 32,  0), 0);
-  ASSERT_EQ(endcap.getCassette(4,  0, 16), 1);
+  ASSERT_EQ(endcap.getCassette(4, 32, 0), 0);
+  ASSERT_EQ(endcap.getCassette(4, 0, 16), 1);
   ASSERT_EQ(endcap.getCassette(4, 32, 16), 2);
-  ASSERT_EQ(endcap.getCassette(4,  0, 32), 3);
+  ASSERT_EQ(endcap.getCassette(4, 0, 32), 3);
   ASSERT_EQ(endcap.getCassette(4, 32, 32), 4);
-  ASSERT_EQ(endcap.getCassette(4,  0, 48), 5);
+  ASSERT_EQ(endcap.getCassette(4, 0, 48), 5);
 }
 
 TEST_F(DreamGeometryTest, CDTMappingSumo3) {
-  ASSERT_EQ(endcap.getCassette(3,  0,  0), 0);
+  ASSERT_EQ(endcap.getCassette(3, 0, 0), 0);
   ASSERT_EQ(endcap.getCassette(3, 31, 15), 0);
 
   ASSERT_EQ(endcap.getCassette(3, 32, 16), 1);
   ASSERT_EQ(endcap.getCassette(3, 47, 31), 1);
 
-  ASSERT_EQ(endcap.getCassette(3,  0, 32), 2);
+  ASSERT_EQ(endcap.getCassette(3, 0, 32), 2);
   ASSERT_EQ(endcap.getCassette(3, 31, 47), 2);
 
   ASSERT_EQ(endcap.getCassette(3, 32, 48), 3);

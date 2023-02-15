@@ -213,8 +213,8 @@ void NmxBase::processing_thread() {
 
       NMX.processReadouts();
 
-      // After each builder has generated events, we add the matcher stats to the
-      // global counters, and reset the internal matcher stats to 0
+      // After each builder has generated events, we add the matcher stats to
+      // the global counters, and reset the internal matcher stats to 0
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
         Counters.MatcherStats.addAndClear(builder.matcher.Stats);

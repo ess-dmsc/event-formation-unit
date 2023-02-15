@@ -23,7 +23,9 @@ public:
   MAKE_CONST_MOCK0(name, std::string(), override);
   MAKE_CONST_MOCK0(memberid, std::string(), override);
   // New with librdkafka 2.0.2
-  MAKE_MOCK2(sasl_set_credentials, RdKafka::Error *(const std::string &, const std::string &), override);
+  MAKE_MOCK2(sasl_set_credentials,
+             RdKafka::Error *(const std::string &, const std::string &),
+             override);
   // end librdkafka 2.0.2
   // New with librdkafka 1.9.2
   MAKE_MOCK0(sasl_background_callbacks_enable, RdKafka::Error *(), override);
