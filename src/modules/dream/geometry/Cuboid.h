@@ -45,6 +45,16 @@ public:
                         {32, 96},           {64, 96}
   };
 
+  std::vector<int> RotateHR = {
+        0, 0, 1,
+     0, 0, 0, 1, 1,
+  0, 0, 0, 0, 1, 1, 1,
+  3, 3, 3,    1, 1, 1,
+  3, 3, 3,    2, 2, 2,
+     3, 3,    2, 2,
+        3,    2
+  };
+
   std::vector<CuboidOffset> OffsetsSANS {
                         {32,  0}, {48,  0}, {64,  0},
               {16, 16}, {32, 16}, {48, 16}, {64, 16}, {80, 16},
@@ -54,6 +64,18 @@ public:
               {16, 80}, {32, 80}, {48, 80}, {64, 80}, {80, 80},
                         {32, 96}, {48, 96}, {64, 96}
   };
+
+
+  std::vector<int> RotateSANS = {
+        0, 0, 1,
+     0, 0, 0, 1, 1,
+  0, 0, 0, 0, 1, 1, 1,
+  3, 3, 3,    1, 1, 1,
+  3, 3, 3, 2, 2, 2, 2,
+     3, 3, 2, 2, 2,
+        3, 2, 2
+  };
+
   // clang-format on
 
   /// \brief rotate (x,y)
@@ -81,30 +103,33 @@ public:
                       DataParser::DreamReadout &Data) {
     uint8_t Index = Parms.P1.Index;
     Index += Data.Unused; // used as instance
-    uint8_t Rotate = Parms.P2.Rotate;
-    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
-           Data.Cathode);
-    uint8_t Cassette = Data.Anode / 32 + 2 * (Data.Cathode / 32);
-    uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
+
+    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u",
+        Index, Data.Anode, Data.Cathode);
+    uint8_t Cassette = Data.Anode/32 + 2 * (Data.Cathode/32);
+    uint8_t Counter = (Data.Anode/WiresPerCounter) % 2;
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 
     XTRACE(DATA, DEB, "cass %u, ctr %u, wire %u, strip %u", Cassette, Counter,
            Wire, Strip);
 
-    CuboidOffset COff;
+    CuboidOffset Offset;
+    int Rotation;
     if (Parms.Type == Config::ModuleType::SANS) {
       if (Index >= (int)OffsetsSANS.size()) {
         XTRACE(DATA, WAR, "Bad SANS index %u", Index);
         return -1;
       }
-      COff = OffsetsSANS[Index];
+      Offset = OffsetsSANS[Index];
+      Rotation = RotateSANS[Index];
     } else if (Parms.Type == Config::ModuleType::HR) {
       if (Index >= (int)OffsetsHR.size()) {
         XTRACE(DATA, WAR, "Bad HR index %u", Index);
         return -1;
       }
-      COff = OffsetsHR[Index];
+      Offset = OffsetsHR[Index];
+      Rotation = RotateHR[Index];
     } else {
       XTRACE(DATA, WAR, "Inconsistent type (%d) for Cuboid", Parms.Type);
       return -1;
@@ -113,13 +138,13 @@ public:
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
     int LocalY = 15 - Wire;
 
-    XTRACE(DATA, DEB, "local x %u, local y %u", LocalX, LocalY);
+    XTRACE(DATA, DEB, "local x %u, local y %u, rotate %u", LocalX, LocalY, Rotation);
 
-    rotateXY(LocalX, LocalY, Rotate);
+    rotateXY(LocalX, LocalY, Rotation);
 
     constexpr int YDim{7 * 16};
-    int x = COff.X + LocalX;
-    int y = YDim * Strip + COff.Y + LocalY;
+    int x = Offset.X + LocalX;
+    int y = YDim * Strip + Offset.Y + LocalY;
     XTRACE(DATA, DEB, "x %u, y %u", x, y);
 
     return Geometry.pixel2D(x, y);
