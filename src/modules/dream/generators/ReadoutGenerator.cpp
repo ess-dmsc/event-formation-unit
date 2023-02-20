@@ -8,16 +8,15 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <modules/dream/generators/ReadoutGenerator.h>
 #include <algorithm>
+#include <modules/dream/generators/ReadoutGenerator.h>
 
 namespace Dream {
 
 ///\brief until ICD is reviewed this should be
 /// considered completely wrong
 /// Note to self RING is PHYSICAL RING!!!
-void DreamReadoutGenerator::getRandomReadout(
-      DataParser::DreamReadout & DR) {
+void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
 
   DR.DataLength = ReadoutDataSize;
   DR.TimeHigh = TimeHigh;
@@ -25,37 +24,34 @@ void DreamReadoutGenerator::getRandomReadout(
   DR.OM = 0;
   DR.Unused = 0;
 
-  uint8_t DetectorSegment = Fuzzer.random8()%5;
-  //DetectorSegment = 3;
+  uint8_t DetectorSegment = Fuzzer.random8() % 5;
+  // DetectorSegment = 3;
   switch (DetectorSegment) {
-    case 0: { // BW EndCap
-      uint8_t Sector = Fuzzer.random8()%11;
-      DR.RingId = BWES6RingId[Sector];
-      DR.FENId = BWES6FENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
-      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-      DR.Unused = 6; // SUMO6 \todo not correct
-      }
-    break;
+  case 0: { // BW EndCap
+    uint8_t Sector = Fuzzer.random8() % 11;
+    DR.RingId = BWES6RingId[Sector];
+    DR.FENId = BWES6FENId[Sector];
+    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
+    DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+    DR.Unused = 6; // SUMO6 \todo not correct
+  } break;
 
-    case 1: { // FW EndCap
-      uint8_t Sector = Fuzzer.random8()%5;
-      DR.RingId = FWES6RingId[Sector];
-      DR.FENId = FWES6FENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63); /// anodes == wires
-      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-      DR.Unused = 6; // SUMO6 \todo not correct
-      }
-    break;
+  case 1: { // FW EndCap
+    uint8_t Sector = Fuzzer.random8() % 5;
+    DR.RingId = FWES6RingId[Sector];
+    DR.FENId = FWES6FENId[Sector];
+    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
+    DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+    DR.Unused = 6; // SUMO6 \todo not correct
+  } break;
 
-    case 2: { // Mantle
-      uint8_t Sector = Fuzzer.random8()%30;
-      DR.RingId = MNTLRingId[Sector];
-      DR.FENId = MNTLFENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)127);
-      DR.Cathode = Fuzzer.random8();
-      }
-    break;
+  case 2: { // Mantle
+    uint8_t Sector = Fuzzer.random8() % 30;
+    DR.RingId = MNTLRingId[Sector];
+    DR.FENId = MNTLFENId[Sector];
+    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)127);
+    DR.Cathode = Fuzzer.random8();
+  } break;
 
     case 3: { // HR
       uint8_t Sector = Fuzzer.random8()%17;
@@ -81,9 +77,9 @@ void DreamReadoutGenerator::getRandomReadout(
   }
   // DR.RingId = 2; // debug
   // DR.FENId = 0; // debug
-  // printf("Detector %u, Ring %u, FEN %u\n", DetectorSegment, DR.RingId, DR.FENId);
+  // printf("Detector %u, Ring %u, FEN %u\n", DetectorSegment, DR.RingId,
+  // DR.FENId);
 }
-
 
 /// \brief implementation of virtual functio from base class
 void DreamReadoutGenerator::generateData() {

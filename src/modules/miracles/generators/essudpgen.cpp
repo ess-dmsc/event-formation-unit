@@ -6,16 +6,15 @@
 /// \brief UDP generator for MIRACLES from dat files
 ///
 /// Uses real data acquired bu CAEN digitisers
+/// Expected file format: one line per readout
+/// Separator: space
+/// Line: (logical)ring fen timehi timelo tube(pair) ampl_A ampl_B
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
 #include <common/system/Socket.h>
-
-#ifdef ESSUDPGEN_MIRCLES_DAT
 #include <miracles/generators/DatReader.h>
-#endif
-
 #include <generators/PacketGenerator.h>
 
 const uint16_t UdpMaxSizeBytes{8800};
@@ -29,9 +28,10 @@ struct {
   uint32_t TxPackets{0xFFFFFFFF};
   uint32_t TxReadouts{0xFFFFFFFF};
   uint32_t KernelTxBufferSize{1000000};
+  bool Verbose{false};
 } Config;
 
-CLI::App app{"Raw (MIRACLES .dat) files to UDP data generator"};
+CLI::App app{"Raw MIRACLES text files to UDP data generator"};
 
 int main(int argc, char *argv[]) {
   app.add_option("-i, --ip", Config.IpAddress, "Destination IP address");
@@ -42,14 +42,13 @@ int main(int argc, char *argv[]) {
   app.add_option("-f, --file", Config.FileName, "Raw DREAM (.txt) file");
   app.add_option("-r, --readouts", Config.TxReadouts, "Readouts to send");
   app.add_option("-t, --throttle", Config.TxUSleep, "usleep between packets");
+  app.add_flag("-v, --verbose", Config.Verbose, "print additional info");
   CLI11_PARSE(app, argc, argv);
 
-#ifdef ESSUDPGEN_MIRCLES_DAT
-  MiraclesDatReader reader(Config.FileName);
+  MiraclesDatReader reader(Config.FileName, Config.Verbose);
   struct MiraclesDatReader::dat_data_t Readout;
   PacketGenerator gen(ESSReadout::Parser::MIRACLES,
-                      sizeof(struct MiraclesDatReader::dat_data_t));
-#endif
+                      sizeof(struct MiraclesDatReader::dat_data_t)-4);
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
@@ -65,10 +64,14 @@ int main(int argc, char *argv[]) {
          (SentPackets < Config.TxPackets) and
          (SentReadouts < Config.TxReadouts)) {
 
-    /// \todo change RING+FEN to match digital geometry
-    /// for now all goes on ring 0, fen 0
-    gen.addReadout(&Readout, 0, 0); // Ring 0, FEN 0
+    // extract Logical Ring, FEN from file
+    // convert to physical ring
+    uint8_t Ring = Readout.ring * 2;
+    uint8_t FEN = Readout.fen;
+    // add the readout data (skip first four bytes of struct)
+    gen.addReadout((uint8_t *)&Readout + 4, Ring, FEN);
     SentReadouts++;
+
     if (gen.getSize() > UdpMaxSizeBytes) {
       for (unsigned int i = 0; i < Config.TxMultiplicity; i++) {
         DataSource.send(gen.getBuffer(), gen.getSize());

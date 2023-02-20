@@ -25,7 +25,7 @@ struct GapMatcherStats {
   /// \brief adds the stats from the passed in GapMatcherStats struct
   /// to this struct, and then clears the stats in the passed in struct
   /// to 0, removing ability to accidentally count these stats multiple times
-  void addAndClear(GapMatcherStats& other) {
+  void addAndClear(GapMatcherStats &other) {
     SpanTooLarge += other.SpanTooLarge;
     DiscardedSpanTooLarge += other.DiscardedSpanTooLarge;
     SplitSpanTooLarge += other.SplitSpanTooLarge;

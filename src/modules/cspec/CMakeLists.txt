@@ -1,58 +1,12 @@
-# Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
-
-add_subdirectory(test)
-add_subdirectory(generators)
-include_directories(.)
+# Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 
 #=============================================================================
 # cspec detector module and base test
 #=============================================================================
-set(cspec_common_inc
-  CSPECBase.h
-  CSPECInstrument.h
-  geometry/Config.h
-  geometry/CSPECGeometry.h
-  geometry/LETGeometry.h
-  geometry/Geometry.h
-  )
-set(cspec_common_src
-  CSPECBase.cpp
-  CSPECInstrument.cpp
-  geometry/Config.cpp
-  geometry/CSPECGeometry.cpp
-  geometry/LETGeometry.cpp
-  )
 
-set(cspec_INC
-  ${cspec_common_inc}
-  )
-set(cspec_SRC
-  main.cpp
-  ${cspec_common_src}
-  )
-set(cspec_LIB
-  efu_reduction
-  efu_essreadout
-  )
+add_subdirectory(test)
+
+
+set(cspec_SRC main.cpp)
+set(cspec_LIB efu_reduction caen_common efu_essreadout)
 create_executable(cspec)
-
-set(CSPECBaseTest_INC
-  ${cspec_common_inc}
-)
-set(CSPECBaseTest_SRC
-  test/CSPECBaseTest.cpp
-  ${cspec_common_src}
-)
-create_test_executable(CSPECBaseTest)
-
-#
-# CSPEC InstrumentTest Module integration test
-#
-set(CSPECInstrumentTest_INC
-  ${cspec_common_inc}
-  )
-set(CSPECInstrumentTest_SRC
-  ${cspec_common_src}
-  test/CSPECInstrumentTest.cpp
-)
-create_test_executable(CSPECInstrumentTest)

@@ -19,6 +19,7 @@
 #include <caen/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <cspec/geometry/CspecGeometry.h>
 #include <loki/geometry/LokiGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <miracles/geometry/MiraclesGeometry.h>

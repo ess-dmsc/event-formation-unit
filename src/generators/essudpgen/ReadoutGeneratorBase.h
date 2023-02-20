@@ -9,13 +9,12 @@
 
 #pragma once
 
-#include <common/system/Socket.h>
 #include <common/readout/ess/Parser.h>
+#include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
 
 class ReadoutGeneratorBase {
 public:
-
   struct GeneratorSettings {
     uint16_t NRings{2};
     uint8_t Type{0}; // Will be determined at compile time, can be overridden
@@ -51,20 +50,16 @@ public:
   }
 
   /// \brief update Settings based on CLI arguments
-  int argParse(int argc, char * argv[]);
-
+  int argParse(int argc, char *argv[]);
 
   /// \brief setup buffers, socket etc.
   void main();
 
-
   /// \brief transmit the specified packets
   void transmitLoop();
 
-
   static constexpr int BufferSize{8972};
   uint8_t Buffer[BufferSize];
-
 
 protected:
   /// \brief Generate common readout header
@@ -95,6 +90,6 @@ protected:
 
   DataFuzzer Fuzzer;
 
-  UDPTransmitter * DataSource{nullptr};
+  UDPTransmitter *DataSource{nullptr};
 };
 // GCOVR_EXCL_STOP
