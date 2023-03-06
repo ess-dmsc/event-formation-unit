@@ -1,0 +1,5 @@
+{
+  "Detector": "timepix3",
+  "XResolution" : 256,
+  "YResolution" : 256
+}
