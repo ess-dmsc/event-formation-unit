@@ -39,10 +39,10 @@ public:
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
   /// \brief Timepix3 pixel calculations
-  uint32_t calcPixel(DataParser::Timepix3Readout &Data);
+  uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief writes a single readout to file
-  void dumpReadoutToFile(DataParser::Timepix3Readout &Data);
+  void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' Timepix3 together

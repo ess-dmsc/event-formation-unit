@@ -18,7 +18,7 @@ class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct Timepix3Readout {
+  struct Timepix3PixelReadout {
     uint16_t dcol;
     uint16_t spix;
     uint8_t pix;
@@ -30,6 +30,13 @@ public:
      // each variable has an odd number of bits, and need to be extracted
      // with bitwise operations, this isn't like other detectors
 
+    struct Timepix3TDCReadout {
+    uint8_t packet_type;
+    uint16_t trigger_counter;
+    uint32_t timestamp;
+    uint8_t stamp;
+  };
+
   DataParser(struct Counters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
   };
@@ -39,7 +46,7 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
-  std::vector<struct Timepix3Readout> Result;
+  std::vector<struct Timepix3PixelReadout> Result;
 
   struct Counters &Stats;
 };

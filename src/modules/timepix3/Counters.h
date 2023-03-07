@@ -30,7 +30,10 @@ struct Counters {
   int64_t PrevTofHigh;
 
   int64_t TxBytes;
-  int64_t Readouts;
+  int64_t PixelReadouts;
+  int64_t TDCReadouts;
+  int64_t GlobalTimestampReadouts;
+  int64_t UndefinedReadouts;
   // Kafka stats below are common to all detectors
   int64_t kafka_produce_fails;
   int64_t kafka_ev_errors;

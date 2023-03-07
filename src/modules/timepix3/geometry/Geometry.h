@@ -27,15 +27,15 @@ public:
   void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
   void setYResolution(uint16_t Resolution) { YResolution = Resolution; }
 
-  /// \brief calculates an integer pixel value from a Timepix3Readout object
-  /// \param Data Timepix3Readout object, containing ADC value information,
+  /// \brief calculates an integer pixel value from a Timepix3PixelReadout object
+  /// \param Data Timepix3PixelReadout object, containing ADC value information,
   ///         TubeID, and other information needed to determine pixel of
   ///         event. If a Calibration has been set, it will be applied here.
-  uint32_t calcPixel(DataParser::Timepix3Readout &Data);
+  uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief returns true if Data is a valid readout with the given config
-  /// \param Data Timepix3Readout to check validity of.
-  bool validateData(DataParser::Timepix3Readout &Data);
+  /// \param Data Timepix3PixelReadout to check validity of.
+  bool validateData(DataParser::Timepix3PixelReadout &Data);
 
   ESSGeometry *ESSGeom;
   std::uint16_t XResolution{512}; ///< resolution of X axis

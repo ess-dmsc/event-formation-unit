@@ -14,7 +14,7 @@
 
 namespace Timepix3 {
 
-  uint32_t Geometry::calcPixel(DataParser::Timepix3Readout &Data){
+  uint32_t Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data){
     XTRACE(DATA, DEB, "calculating pixel");
     uint16_t col = Data.dcol + Data.pix / 4;
     uint16_t row = Data.spix + (Data.pix & 0x3);
@@ -23,7 +23,7 @@ namespace Timepix3 {
     return ESSGeom->pixel2D(col, row);
   }
 
-  bool Geometry::validateData(DataParser::Timepix3Readout &Data){
+  bool Geometry::validateData(DataParser::Timepix3PixelReadout &Data){
     XTRACE(DATA, DEB, "validate data, dcol = %u", Data.dcol);
     return true;
   }

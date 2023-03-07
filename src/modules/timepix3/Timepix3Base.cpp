@@ -41,7 +41,9 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
  
-  Stats.create("readouts.count", Counters.Readouts);
+  Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
+  Stats.create("readouts.tdc_readout_count", Counters.TDCReadouts);
+  Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
   Stats.create("readouts.tof_count", Counters.TofCount);
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);

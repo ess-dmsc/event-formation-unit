@@ -54,7 +54,7 @@ Timepix3Instrument::~Timepix3Instrument() {}
 /// timepix3 panel, FENId and a single readout dataset
 ///
 /// also applies the calibration
-uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3Readout &Data) {
+uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
 
   uint32_t pixel = Geom->calcPixel(Data);
@@ -63,7 +63,7 @@ uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3Readout &Data) {
 }
 
 // TODO, fix this
-// void Timepix3Instrument::dumpReadoutToFile(DataParser::Timepix3Readout &Data) {
+// void Timepix3Instrument::dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data) {
 //   Readout CurrentReadout;
 //   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
 //   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
