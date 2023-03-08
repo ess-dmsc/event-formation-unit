@@ -2,7 +2,7 @@
 benchmark/1.7.0
 cli11/1.9.1
 fmt/8.1.1
-graylog-logger/2.1.4-1@ess-dmsc/stable
+graylog-logger/2.1.4-2@ess-dmsc/stable
 gtest/1.11.0
 h5cpp/0.4.0@ess-dmsc/stable
 nlohmann_json/3.10.5
