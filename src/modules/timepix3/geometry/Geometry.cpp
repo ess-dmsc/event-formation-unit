@@ -9,8 +9,8 @@
 #include <modules/timepix3/geometry/Geometry.h>
 #include <common/debug/Trace.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
