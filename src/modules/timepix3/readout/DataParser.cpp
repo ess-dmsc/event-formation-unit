@@ -64,6 +64,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       ParsedReadouts++;
       Stats.TDCReadouts++;
     }
+    else if (packet_type == 4){
+      Timepix3GlobalTimeReadout Data;
+
+      Data.timestamp = (dataBytes & 0x00FFFFFFFFFFFF00) >> 8;
+      Data.stamp = (dataBytes & 0x00000000000000F0) >> 4;
+   
+
+      XTRACE(DATA, DEB, "Processed readout, packet_type = %u, timestamp = %u, stamp = %u", packet_type, Data.timestamp, Data.stamp);
+      ParsedReadouts++;
+      Stats.GlobalTimestampReadouts++;
+    }
     BytesLeft -= sizeof(dataBytes);
     DataPtr += sizeof(dataBytes);
   }

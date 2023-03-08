@@ -31,9 +31,13 @@ public:
      // with bitwise operations, this isn't like other detectors
 
     struct Timepix3TDCReadout {
-    uint8_t packet_type;
     uint16_t trigger_counter;
     uint32_t timestamp;
+    uint8_t stamp;
+  };
+
+  struct Timepix3GlobalTimeReadout {
+    uint64_t timestamp;
     uint8_t stamp;
   };
 
