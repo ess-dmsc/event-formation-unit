@@ -15,7 +15,6 @@
 #include <timepix3/Counters.h>
 #include <timepix3/geometry/Config.h>
 #include <timepix3/geometry/Geometry.h>
-#include <timepix3/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <readout/DataParser.h>
