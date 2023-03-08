@@ -24,41 +24,18 @@
 /// four FENs per ring. FENs are enumerated 0 - 3 and
 /// Tube groups 0 - 4
 // clang-format off
-std::string lokijson = R"(
+std::string configjson = R"(
 {
-  "Detector" : "loki",
-
-  "StrawResolution" : 512,
-
-  "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :   0 },
-    { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 224 }
-  ],
-  "MaxTOFNS" : 800000000,
-  "MaxRing" : 2
+  "Detector" : "timepix3",
+  "XResolution" : 256,
+  "YResolution" : 256
 }
-)";
-
-std::string bifrostjson = R"(
-  {
-    "Detector": "bifrost",
-    "MaxRing": 2,
-    "StrawResolution": 300
-  }
-)";
-
-std::string miraclesjson = R"(
-  {
-    "Detector": "miracles",
-    "MaxRing": 2,
-    "StrawResolution": 128
-  }
 )";
 
 class Timepix3BaseStandIn : public Timepix3::Timepix3Base {
 public:
-  Timepix3BaseStandIn(BaseSettings Settings, ESSReadout::Parser::DetectorType type)
-      : Timepix3::Timepix3Base(Settings, type){};
+  Timepix3BaseStandIn(BaseSettings Settings)
+      : Timepix3::Timepix3Base(Settings){};
   ~Timepix3BaseStandIn() = default;
   using Detector::Threads;
   using Timepix3::Timepix3Base::Counters;
@@ -69,7 +46,7 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    Settings.ConfigFile = "deleteme_loki.json";
+    Settings.ConfigFile = "deleteme_timepix.json";
   }
   void TearDown() override {}
 
@@ -77,22 +54,11 @@ public:
   BaseSettings Settings;
 };
 
-TEST_F(Timepix3BaseTest, LokiConstructor) {
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+TEST_F(Timepix3BaseTest, Constructor) {
+  Timepix3BaseStandIn Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
-TEST_F(Timepix3BaseTest, BifrostConstructor) {
-  Settings.ConfigFile = "deleteme_bifrost.json";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
-}
-
-TEST_F(Timepix3BaseTest, MiraclesConstructor) {
-  Settings.ConfigFile = "deleteme_miracles.json";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
-}
 
 
 std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
@@ -177,10 +143,10 @@ std::vector<uint8_t> TestPacket2{
 };
 // clang-format on
 
-TEST_F(Timepix3BaseTest, DataReceiveLoki) {
+TEST_F(Timepix3BaseTest, DataReceive) {
   Settings.DetectorPort = 9000;
-  Settings.DetectorName = "loki";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Settings.DetectorName = "timepix3";
+  Timepix3BaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -191,52 +157,17 @@ TEST_F(Timepix3BaseTest, DataReceiveLoki) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.PixelReadouts, 0);
 }
 
-TEST_F(Timepix3BaseTest, DataReceiveBifrost) {
-  Settings.DetectorPort = 9000;
-  Settings.DetectorName = "bifrost";
-  Settings.ConfigFile = "deleteme_bifrost.json";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
-  Readout.startThreads();
 
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket[0], TestPacket.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
-}
-
-TEST_F(Timepix3BaseTest, DataReceiveMiracles) {
-  Settings.DetectorPort = 9000;
-  Settings.DetectorName = "miracles";
-  Settings.ConfigFile = "deleteme_miracles.json";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
-  Readout.startThreads();
-
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket[0], TestPacket.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
-}
-
-TEST_F(Timepix3BaseTest, DataReceiveGoodLoki) {
+TEST_F(Timepix3BaseTest, DataReceiveGood) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  Settings.DetectorName = "loki";
+  Settings.DetectorName = "timepix3";
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Timepix3BaseStandIn Readout(Settings);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -247,69 +178,17 @@ TEST_F(Timepix3BaseTest, DataReceiveGoodLoki) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 6);
-  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.RingErrors, 1);
-  EXPECT_EQ(Readout.Counters.FENErrors, 1);
-  EXPECT_EQ(Readout.Counters.TofHigh, 1);
-  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
-}
-
-TEST_F(Timepix3BaseTest, DataReceiveGoodBifrost) {
-  XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  Settings.ConfigFile = "deleteme_bifrost.json";
-  Settings.DetectorName = "bifrost";
-  Settings.DetectorPort = 9001;
-  Settings.UpdateIntervalSec = 0;
-  Settings.DumpFilePrefix = "deleteme_";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
-  Readout.startThreads();
-
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-}
-
-TEST_F(Timepix3BaseTest, DataReceiveGoodMiracles) {
-  XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  Settings.ConfigFile = "deleteme_miracles.json";
-  Settings.DetectorName = "miracles";
-  Settings.DetectorPort = 9001;
-  Settings.UpdateIntervalSec = 0;
-  Settings.DumpFilePrefix = "deleteme_";
-  Timepix3BaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
-  Readout.startThreads();
-
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
+  // todo, write correct pixel readout packet format
+  // EXPECT_EQ(Readout.Counters.PixelReadouts, 6);
 }
 
 int main(int argc, char **argv) {
-  std::string lokifilename{"deleteme_loki.json"};
-  saveBuffer(lokifilename, (void *)lokijson.c_str(), lokijson.size());
-  std::string bifrostfilename{"deleteme_bifrost.json"};
-  saveBuffer(bifrostfilename, (void *)bifrostjson.c_str(), bifrostjson.size());
-  std::string miraclesfilename{"deleteme_miracles.json"};
-  saveBuffer(miraclesfilename, (void *)miraclesjson.c_str(),
-             miraclesjson.size());
+  std::string configfilename{"deleteme_timepix.json"};
+  saveBuffer(configfilename, (void *)configjson.c_str(), configjson.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  deleteFile(lokifilename);
-  deleteFile(bifrostfilename);
-  deleteFile(miraclesfilename);
+  deleteFile(configfilename);
   return RetVal;
 }

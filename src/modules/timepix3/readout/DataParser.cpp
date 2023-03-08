@@ -17,6 +17,7 @@ namespace Timepix3 {
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
+  XTRACE(DATA, DEB, "parsing data");
   Result.clear();
   unsigned int ParsedReadouts = 0;
 
@@ -28,6 +29,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     if (BytesLeft <= sizeof(dataBytes)){
       //TODO add some error handling here
+      XTRACE(DATA, DEB, "not enough bytes left");
+      break;
     }
     // Copy 2 bytes starting from offset 0 into dcolBytes variable
     memcpy(&dataBytes, DataPtr, sizeof(dataBytes));
