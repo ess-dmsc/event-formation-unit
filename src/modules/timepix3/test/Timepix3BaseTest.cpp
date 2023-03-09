@@ -144,7 +144,7 @@ std::vector<uint8_t> TestPacket2{
 // clang-format on
 
 TEST_F(Timepix3BaseTest, DataReceive) {
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9002;
   Settings.DetectorName = "timepix3";
   Timepix3BaseStandIn Readout(Settings);
   Readout.startThreads();
@@ -164,7 +164,7 @@ TEST_F(Timepix3BaseTest, DataReceive) {
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorName = "timepix3";
-  Settings.DetectorPort = 9001;
+  Settings.DetectorPort = 9002;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   Timepix3BaseStandIn Readout(Settings);
