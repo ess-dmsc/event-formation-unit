@@ -54,7 +54,7 @@ get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTestII.
 get_filename_component(BIFROST_CFG_FILE "${ESS_MODULE_DIR}/bifrost/configs/bifrost.json" ABSOLUTE)
 get_filename_component(MIRACLES_CFG_FILE "${ESS_MODULE_DIR}/miracles/configs/miracles.json" ABSOLUTE)
 get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
-get_filename_component(ODIN_CFG_FILE "${ESS_MODULE_DIR}/timepix3/configs/odin.json" ABSOLUTE)
+get_filename_component(ODIN_CFG_FILE "${ESS_MODULE_DIR}/timepix3/configs/timepix3.json" ABSOLUTE)
 
 
 add_custom_target(copycfgs
@@ -83,6 +83,6 @@ add_custom_target(runefu
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
     COMMAND cspec "-f" "../configs/cspec.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
-    COMMAND odin "-f" "../configs/odin.json" "-s" "2" "--nohwcheck"
+    COMMAND odin "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
     DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx cspec odin
     )
