@@ -39,14 +39,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (packet_type == 11){
       Timepix3PixelReadout Data;
 
-      Data.dcol = (dataBytes & 0x0FE0000000000000) >> 52;
-      Data.spix = (dataBytes & 0x001F800000000000) >> 45;
-      Data.pix = (dataBytes & 0x0000700000000000) >> 44;
-      uint64_t timeData = (dataBytes & 0x00000FFFFFFF0000) >> 16;
-      Data.spidr_time = dataBytes & 0x000000000000FFFF;
-      Data.ToA = (timeData & 0x0FFFC000) >> 14;
-      Data.FToA = timeData & 0xF;
-      Data.ToT = ((timeData & 0x00003FF0) >> 4) * 25;
+      Data.dcol = (dataBytes & DCOL_MASK) >> DCOL_OFFS;
+      Data.spix = (dataBytes & SPIX_MASK) >> SPIX_OFFS;
+      Data.pix =  (dataBytes & PIX_MASK) >> PIX_OFFS;
+      Data.ToA = (dataBytes & TOA_MASK) >> TOA_OFFS;
+      Data.ToT = ((dataBytes & TOT_MASK) >> TOT_OFFS) * 25;
+      Data.FToA = (dataBytes & FTOA_MASK) >> FTOA_OFFS;
+      Data.spidr_time = dataBytes & SPTIME_MASK;
+
    
 
       XTRACE(DATA, DEB, "Processed readout, packet_type = %u, dcol = %u, spix = %u, pix = %u, spidr_time = %u, ToA = %u, FToA = %u, ToT = %u", packet_type, Data.dcol, Data.spix, Data.pix, Data.spidr_time, Data.ToA, Data.FToA, Data.ToT);
