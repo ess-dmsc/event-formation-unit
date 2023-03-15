@@ -123,7 +123,7 @@ TEST_F(FreiaBaseTest, DataReceive) {
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43129, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(2, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -145,7 +145,7 @@ TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
   dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43129, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
