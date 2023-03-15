@@ -119,6 +119,7 @@ TEST_F(TREXBaseTest, Constructor) {
 }
 
 TEST_F(TREXBaseTest, DataReceive) {
+  Settings.DetectorPort = 9007;
   TREXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
@@ -136,6 +137,7 @@ TEST_F(TREXBaseTest, DataReceive) {
 }
 
 TEST_F(TREXBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9007;
   TREXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};

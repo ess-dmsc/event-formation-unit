@@ -116,6 +116,7 @@ TEST_F(NMXBaseTest, Constructor) {
 }
 
 TEST_F(NMXBaseTest, DataReceive) {
+  Settings.DetectorPort = 9005;
   NMXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
@@ -136,6 +137,7 @@ TEST_F(NMXBaseTest, DataReceive) {
 }
 
 TEST_F(NMXBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9005;
   NMXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};

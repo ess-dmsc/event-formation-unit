@@ -118,6 +118,7 @@ TEST_F(FreiaBaseTest, Constructor) {
 }
 
 TEST_F(FreiaBaseTest, DataReceive) {
+  Settings.DetectorPort = 9003;
   FreiaBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
@@ -138,6 +139,7 @@ TEST_F(FreiaBaseTest, DataReceive) {
 }
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9003;
   FreiaBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};

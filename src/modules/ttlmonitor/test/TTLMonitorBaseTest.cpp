@@ -82,6 +82,7 @@ TEST_F(TTLMonitorBaseTest, Constructor) {
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceive) {
+  Settings.DetectorPort = 9004;
   TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
@@ -97,6 +98,7 @@ TEST_F(TTLMonitorBaseTest, DataReceive) {
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9004;
   TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
