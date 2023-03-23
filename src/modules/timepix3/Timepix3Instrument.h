@@ -18,6 +18,8 @@
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <readout/DataParser.h>
+#include <common/reduction/EventBuilder1D.h>
+
 
 namespace Timepix3 {
 
@@ -40,6 +42,9 @@ public:
   /// \brief Timepix3 pixel calculations
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
+   /// \brief Timepix3 tof calculations
+  uint64_t calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data);
+
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
 
@@ -47,6 +52,7 @@ public:
   /// \brief Stuff that 'ties' Timepix3 together
   struct Counters &counters;
 
+  EventBuilder1D Builder; 
   Config Timepix3Configuration;
   BaseSettings &Settings;
   DataParser Timepix3Parser{counters};

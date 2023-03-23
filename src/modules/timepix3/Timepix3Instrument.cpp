@@ -62,6 +62,16 @@ uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   return pixel;
 }
 
+uint64_t Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data){
+  XTRACE(DATA, DEB, "Calculating TOF");
+  XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA, Data.spidr_time);
+  // uint64_t ToF = 25 * Data.ToA - 1.5625 * Data.FToA;
+  uint64_t ToF = int(409600 * Data.spidr_time + 25 * Data.ToA - 1.5625 * Data.FToA);
+  XTRACE(DATA, DEB, "%u", ToF);
+  // std::cout << ToF << std::endl;
+  return ToF;
+}
+
 // TODO, fix this
 // void Timepix3Instrument::dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data) {
 //   Readout CurrentReadout;
@@ -100,7 +110,7 @@ void Timepix3Instrument::processReadouts() {
     // }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight = 0; /// todo, fix this
+    uint64_t TimeOfFlight = calcTimeOfFlight(Data); /// todo, fix this
 
 
     // Calculate pixelid and apply calibration
