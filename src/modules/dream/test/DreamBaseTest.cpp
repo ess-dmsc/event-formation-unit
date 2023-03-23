@@ -109,7 +109,7 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
+  TestUDPServer Server(43128, Settings.DetectorPort,
                        (unsigned char *)&TestPacket2[0], TestPacket2.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -129,7 +129,7 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
+  TestUDPServer Server(43128, Settings.DetectorPort,
                        (unsigned char *)&TestPacket3[0], TestPacket3.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);

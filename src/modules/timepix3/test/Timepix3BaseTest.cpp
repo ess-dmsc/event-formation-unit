@@ -150,7 +150,7 @@ TEST_F(Timepix3BaseTest, DataReceive) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43131, Settings.DetectorPort,
                        (unsigned char *)&TestPacket[0], TestPacket.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -171,7 +171,7 @@ TEST_F(Timepix3BaseTest, DataReceiveGood) {
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43127, Settings.DetectorPort,
+  TestUDPServer Server(43131, Settings.DetectorPort,
                        (unsigned char *)&TestPacket2[0], TestPacket2.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
