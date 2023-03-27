@@ -18,7 +18,6 @@
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <readout/DataParser.h>
-#include <common/reduction/EventBuilder1D.h>
 
 
 namespace Timepix3 {
@@ -33,7 +32,7 @@ public:
 
   ~Timepix3Instrument();
 
-  /// \brief Generates Events from Readouts, and adds them to a serializer
+  /// \brief Generates Hits from Readouts, and adds them to event builder
   void processReadouts();
 
   /// \brief Sets the serializer to send events to
@@ -52,12 +51,14 @@ public:
   /// \brief Stuff that 'ties' Timepix3 together
   struct Counters &counters;
 
-  EventBuilder1D Builder; 
   Config Timepix3Configuration;
   BaseSettings &Settings;
   DataParser Timepix3Parser{counters};
   Geometry *Geom;
   EV44Serializer *Serializer;
+  uint32_t MaxTimeGapNS{2};
+  uint32_t MinEventSizeHits{1};
+  uint32_t MinimumToTSum{0};
   //TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
 };
 

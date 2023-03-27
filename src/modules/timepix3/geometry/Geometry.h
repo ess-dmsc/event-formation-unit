@@ -33,6 +33,10 @@ public:
   ///         event. If a Calibration has been set, it will be applied here.
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
+  uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
+  
+  uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
+
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data Timepix3PixelReadout to check validity of.
   bool validateData(DataParser::Timepix3PixelReadout &Data);

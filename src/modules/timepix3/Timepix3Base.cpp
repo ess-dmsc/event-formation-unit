@@ -43,7 +43,12 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
  
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.tdc_readout_count", Counters.TDCReadouts);
+  Stats.create("readouts.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
+  Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
+  Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
+  Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
   Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
+  Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
   Stats.create("readouts.tof_count", Counters.TofCount);
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);

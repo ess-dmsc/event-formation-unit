@@ -34,7 +34,7 @@ set(odin_SRC
   ${timepix3_common_src}
   main.cpp
   )
-set(nmx_LIB efu_reduction efu_essreadout)
+set(odin_LIB efu_reduction efu_essreadout)
 create_executable(odin)
 
 

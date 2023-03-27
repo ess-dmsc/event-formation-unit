@@ -55,7 +55,8 @@ public:
      // each variable has an odd number of bits, and need to be extracted
      // with bitwise operations, this isn't like other detectors
 
-    struct Timepix3TDCReadout {
+  struct Timepix3TDCReadout {
+    uint8_t type;
     uint16_t trigger_counter;
     uint32_t timestamp;
     uint8_t stamp;

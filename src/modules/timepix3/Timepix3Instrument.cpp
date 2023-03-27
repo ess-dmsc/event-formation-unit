@@ -95,8 +95,16 @@ uint64_t Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &
 //   DumpFile->push(CurrentReadout);
 // }
 
+struct TimepixHit{
+  uint32_t X;
+  uint32_t Y;
+  uint64_t TimeOfFlight;
+  uint16_t ToT;
+};
+
 void Timepix3Instrument::processReadouts() {
 
+  std::vector<TimepixHit> hits;
   /// Traverse readouts, calculate pixels
   for (auto &Data : Timepix3Parser.Result) {
     bool validData = Geom->validateData(Data);
@@ -112,19 +120,38 @@ void Timepix3Instrument::processReadouts() {
     // Calculate TOF in ns
     uint64_t TimeOfFlight = calcTimeOfFlight(Data); /// todo, fix this
 
-
-    // Calculate pixelid and apply calibration
-    uint32_t PixelId = calcPixel(Data);
-
-    if (PixelId == 0) {
-      XTRACE(DATA, ERR, "Pixel error");
-      counters.PixelErrors++;
-    } else {
-      XTRACE(DATA, DEB, "Valid data, adding to serializer");
-      Serializer->addEvent(TimeOfFlight, PixelId);
+    if((not hits.empty()) and (TimeOfFlight > hits.back().TimeOfFlight + MaxTimeGapNS)){
+      if(hits.size() < MinEventSizeHits){
+        hits.clear();
+        continue;
+      }
+      uint64_t sum_X = 0;
+      uint64_t sum_Y = 0;
+      uint64_t sum_ToT = 0;
+      for (TimepixHit h : hits){
+        sum_X += h.X;
+        sum_Y += h.Y;
+        sum_ToT += h.ToT;
+      }
+      if (sum_ToT < MinimumToTSum){
+        hits.clear();
+        continue;
+      }
+      uint32_t X = sum_X / hits.size();
+      uint32_t Y = sum_Y / hits.size();
+      uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
+      uint64_t ToF = hits.front().TimeOfFlight;
+      counters.TxBytes += Serializer->addEvent(ToF, PixelId);
       counters.Events++;
+      hits.clear();
     }
 
+    // Calculate pixelid and apply calibration
+    uint32_t X = Geom->calcX(Data);
+    uint32_t Y = Geom->calcY(Data);
+    uint16_t ToT = Data.ToT;
+
+    hits.push_back({X, Y, TimeOfFlight, ToT});
   } // for()
 }
 

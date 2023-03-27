@@ -57,7 +57,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
     else if (packet_type == 6){
       Timepix3TDCReadout Data;
-
+      Data.type =  (dataBytes & 0x0F00000000000000) >> 56;
       Data.trigger_counter =  (dataBytes & 0x00FFF00000000000) >> 44;
       Data.timestamp = (dataBytes & 0x00000FFFFFFFFE00) >> 10;
       Data.stamp = (dataBytes & 0x00000000000001E0) >> 8;
@@ -66,10 +66,23 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, DEB, "Processed readout, packet_type = %u, trigger_counter = %u, timestamp = %u, stamp = %u", packet_type, Data.trigger_counter, Data.timestamp, Data.stamp);
       ParsedReadouts++;
       Stats.TDCReadouts++;
+
+       if (Data.type == 15 ){
+        Stats.TDC1RisingReadouts++;
+      }
+      else if (Data.type == 10){
+        Stats.TDC1FallingReadouts++;
+      }
+      else if (Data.type == 14){
+        Stats.TDC2RisingReadouts++;
+      }
+      else if (Data.type == 11){
+        Stats.TDC2FallingReadouts++;
+      }
     }
     else if (packet_type == 4){
       Timepix3GlobalTimeReadout Data;
-
+      
       Data.timestamp = (dataBytes & 0x00FFFFFFFFFFFF00) >> 8;
       Data.stamp = (dataBytes & 0x00000000000000F0) >> 4;
    
@@ -77,6 +90,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, DEB, "Processed readout, packet_type = %u, timestamp = %u, stamp = %u", packet_type, Data.timestamp, Data.stamp);
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
+     
+    }
+    else{
+      XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
+      Stats.UndefinedReadouts++;
     }
     BytesLeft -= sizeof(dataBytes);
     DataPtr += sizeof(dataBytes);
