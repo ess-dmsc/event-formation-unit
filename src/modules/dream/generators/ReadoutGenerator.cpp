@@ -53,27 +53,25 @@ void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
     DR.Cathode = Fuzzer.random8();
   } break;
 
-    case 3: { // HR
-      uint8_t Sector = Fuzzer.random8()%17;
-      uint8_t Instance = Fuzzer.random8()%2;
-      DR.RingId = HRRingId[Sector];
-      DR.FENId =  HRFENId[Sector];
-      DR.Anode = (Fuzzer.random8() & 0x7) * 32;
-      DR.Cathode = Fuzzer.random8() & 0x3f;
-      DR.Unused = Instance;
-      }
-    break;
+  case 3: { // HR
+    uint8_t Sector = Fuzzer.random8() % 17;
+    uint8_t Instance = Fuzzer.random8() % 2;
+    DR.RingId = HRRingId[Sector];
+    DR.FENId = HRFENId[Sector];
+    DR.Anode = (Fuzzer.random8() & 0x7) * 32;
+    DR.Cathode = Fuzzer.random8() & 0x3f;
+    DR.Unused = Instance;
+  } break;
 
-    case 4: { // SANS
-      uint8_t Sector = Fuzzer.random8()%18;
-      uint8_t Instance = Fuzzer.random8()%2;
-      DR.RingId = SANSRingId[Sector];
-      DR.FENId =  SANSFENId[Sector];
-      DR.Anode = Fuzzer.random8();
-      DR.Cathode = Fuzzer.random8() & 0x3f;
-      DR.Unused = Instance;
-      }
-    break;
+  case 4: { // SANS
+    uint8_t Sector = Fuzzer.random8() % 18;
+    uint8_t Instance = Fuzzer.random8() % 2;
+    DR.RingId = SANSRingId[Sector];
+    DR.FENId = SANSFENId[Sector];
+    DR.Anode = Fuzzer.random8();
+    DR.Cathode = Fuzzer.random8() & 0x3f;
+    DR.Unused = Instance;
+  } break;
   }
   // DR.RingId = 2; // debug
   // DR.FENId = 0; // debug

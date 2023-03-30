@@ -8,16 +8,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <assert.h>
-#include <miracles/generators/DatReader.h>
 #include <caen/readout/Readout.h>
 #include <fstream>
+#include <miracles/generators/DatReader.h>
 #include <sstream>
 #include <string>
 
 // GCOVR_EXCL_START
 
-MiraclesDatReader::MiraclesDatReader(std::string file, bool Verbose) :
-  filename(file), Verbose(Verbose){
+MiraclesDatReader::MiraclesDatReader(std::string file, bool Verbose)
+    : filename(file), Verbose(Verbose) {
   infile = new std::ifstream(filename);
 }
 
@@ -48,8 +48,8 @@ int MiraclesDatReader::readReadout(struct dat_data_t &Readout) {
 
     if (Verbose) {
       printf("ring %2u, fen %2u, time (%5u, %7u) - tube %2u, A: %5u, B: %5u\n",
-          Readout.ring, Readout.fen, Readout.tofhi, Readout.toflow,
-          Readout.tube, Readout.ampl_a,Readout.ampl_b);
+             Readout.ring, Readout.fen, Readout.tofhi, Readout.toflow,
+             Readout.tube, Readout.ampl_a, Readout.ampl_b);
     }
     lines++;
     return 1;

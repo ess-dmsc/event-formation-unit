@@ -11,14 +11,13 @@
 
 #pragma once
 
-#include <timepix3/Timepix3Base.h> // to get Timepix3Settings
-#include <timepix3/Counters.h>
-#include <timepix3/geometry/Config.h>
-#include <timepix3/geometry/Geometry.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <readout/DataParser.h>
-
+#include <timepix3/Counters.h>
+#include <timepix3/Timepix3Base.h> // to get Timepix3Settings
+#include <timepix3/geometry/Config.h>
+#include <timepix3/geometry/Geometry.h>
 
 namespace Timepix3 {
 
@@ -41,7 +40,7 @@ public:
   /// \brief Timepix3 pixel calculations
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
-   /// \brief Timepix3 tof calculations
+  /// \brief Timepix3 tof calculations
   uint64_t calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief writes a single readout to file
@@ -59,7 +58,7 @@ public:
   uint32_t MaxTimeGapNS{2};
   uint32_t MinEventSizeHits{1};
   uint32_t MinimumToTSum{0};
-  //TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
+  // TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 } // namespace Timepix3

@@ -14,8 +14,8 @@
 
 #include <CLI/CLI.hpp>
 #include <common/system/Socket.h>
-#include <miracles/generators/DatReader.h>
 #include <generators/PacketGenerator.h>
+#include <miracles/generators/DatReader.h>
 
 const uint16_t UdpMaxSizeBytes{8800};
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   MiraclesDatReader reader(Config.FileName, Config.Verbose);
   struct MiraclesDatReader::dat_data_t Readout;
   PacketGenerator gen(ESSReadout::Parser::MIRACLES,
-                      sizeof(struct MiraclesDatReader::dat_data_t)-4);
+                      sizeof(struct MiraclesDatReader::dat_data_t) - 4);
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);

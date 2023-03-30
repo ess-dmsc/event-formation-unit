@@ -7,11 +7,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <timepix3/Timepix3Instrument.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <fmt/format.h>
+#include <timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -24,7 +24,7 @@ namespace Timepix3 {
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
-                               BaseSettings &settings)
+                                       BaseSettings &settings)
     : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -32,8 +32,8 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
   Timepix3Configuration = Config(Settings.ConfigFile);
 
   Geom = new Geometry();
-  Geom->ESSGeom = new ESSGeometry(Timepix3Configuration.XResolution, Timepix3Configuration.YResolution,1,1);
-
+  Geom->ESSGeom = new ESSGeometry(Timepix3Configuration.XResolution,
+                                  Timepix3Configuration.YResolution, 1, 1);
 
   // if (not Settings.DumpFilePrefix.empty()) {
   //   if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
@@ -46,7 +46,7 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
   //         ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
   //   }
   // }
- }
+}
 
 Timepix3Instrument::~Timepix3Instrument() {}
 
@@ -62,21 +62,26 @@ uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   return pixel;
 }
 
-uint64_t Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data){
+uint64_t
+Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating TOF");
-  XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA, Data.spidr_time);
+  XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA,
+         Data.spidr_time);
   // uint64_t ToF = 25 * Data.ToA - 1.5625 * Data.FToA;
-  uint64_t ToF = int(409600 * Data.spidr_time + 25 * Data.ToA - 1.5625 * Data.FToA);
+  uint64_t ToF =
+      int(409600 * Data.spidr_time + 25 * Data.ToA - 1.5625 * Data.FToA);
   XTRACE(DATA, DEB, "%u", ToF);
   // std::cout << ToF << std::endl;
   return ToF;
 }
 
 // TODO, fix this
-// void Timepix3Instrument::dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data) {
+// void Timepix3Instrument::dumpReadoutToFile(DataParser::Timepix3PixelReadout
+// &Data) {
 //   Readout CurrentReadout;
-//   CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-//   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+//   CurrentReadout.PulseTimeHigh =
+//   ESSReadoutParser.Packet.HeaderPtr->PulseHigh; CurrentReadout.PulseTimeLow =
+//   ESSReadoutParser.Packet.HeaderPtr->PulseLow;
 //   CurrentReadout.PrevPulseTimeHigh =
 //       ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
 //   CurrentReadout.PrevPulseTimeLow =
@@ -84,18 +89,15 @@ uint64_t Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &
 //   CurrentReadout.EventTimeHigh = Data.TimeHigh;
 //   CurrentReadout.EventTimeLow = Data.TimeLow;
 //   CurrentReadout.DataSeqNum = Data.DataSeqNum;
-//   CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
-//   CurrentReadout.AmpA = Data.AmpA;
-//   CurrentReadout.AmpB = Data.AmpB;
-//   CurrentReadout.AmpC = Data.AmpC;
-//   CurrentReadout.AmpD = Data.AmpD;
-//   CurrentReadout.RingId = Data.RingId;
-//   CurrentReadout.FENId = Data.FENId;
-//   CurrentReadout.TubeId = Data.TubeId;
-//   DumpFile->push(CurrentReadout);
+//   CurrentReadout.OutputQueue =
+//   ESSReadoutParser.Packet.HeaderPtr->OutputQueue; CurrentReadout.AmpA =
+//   Data.AmpA; CurrentReadout.AmpB = Data.AmpB; CurrentReadout.AmpC =
+//   Data.AmpC; CurrentReadout.AmpD = Data.AmpD; CurrentReadout.RingId =
+//   Data.RingId; CurrentReadout.FENId = Data.FENId; CurrentReadout.TubeId =
+//   Data.TubeId; DumpFile->push(CurrentReadout);
 // }
 
-struct TimepixHit{
+struct TimepixHit {
   uint32_t X;
   uint32_t Y;
   uint64_t TimeOfFlight;
@@ -120,20 +122,21 @@ void Timepix3Instrument::processReadouts() {
     // Calculate TOF in ns
     uint64_t TimeOfFlight = calcTimeOfFlight(Data); /// todo, fix this
 
-    if((not hits.empty()) and (TimeOfFlight > hits.back().TimeOfFlight + MaxTimeGapNS)){
-      if(hits.size() < MinEventSizeHits){
+    if ((not hits.empty()) and
+        (TimeOfFlight > hits.back().TimeOfFlight + MaxTimeGapNS)) {
+      if (hits.size() < MinEventSizeHits) {
         hits.clear();
         continue;
       }
       uint64_t sum_X = 0;
       uint64_t sum_Y = 0;
       uint64_t sum_ToT = 0;
-      for (TimepixHit h : hits){
+      for (TimepixHit h : hits) {
         sum_X += h.X;
         sum_Y += h.Y;
         sum_ToT += h.ToT;
       }
-      if (sum_ToT < MinimumToTSum){
+      if (sum_ToT < MinimumToTSum) {
         hits.clear();
         continue;
       }

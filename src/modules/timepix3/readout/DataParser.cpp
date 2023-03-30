@@ -6,12 +6,12 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
-#include <timepix3/readout/DataParser.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
+#include <timepix3/readout/DataParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
@@ -27,72 +27,85 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   while (BytesLeft) {
     uint64_t dataBytes;
 
-    if (BytesLeft <= sizeof(dataBytes)){
-      //TODO add some error handling here
+    if (BytesLeft <= sizeof(dataBytes)) {
+      // TODO add some error handling here
       XTRACE(DATA, DEB, "not enough bytes left");
       break;
     }
-    // Copy 2 bytes starting from offset 0 into dcolBytes variable
+    // Copy 8 bytes into dataBytes variable
     memcpy(&dataBytes, DataPtr, sizeof(dataBytes));
 
     uint8_t packet_type = (dataBytes & 0xF000000000000000) >> 60;
-    if (packet_type == 11){
+    if (packet_type == 11) {
       Timepix3PixelReadout Data;
 
       Data.dcol = (dataBytes & DCOL_MASK) >> DCOL_OFFS;
       Data.spix = (dataBytes & SPIX_MASK) >> SPIX_OFFS;
-      Data.pix =  (dataBytes & PIX_MASK) >> PIX_OFFS;
+      Data.pix = (dataBytes & PIX_MASK) >> PIX_OFFS;
       Data.ToA = (dataBytes & TOA_MASK) >> TOA_OFFS;
       Data.ToT = ((dataBytes & TOT_MASK) >> TOT_OFFS) * 25;
       Data.FToA = (dataBytes & FTOA_MASK) >> FTOA_OFFS;
       Data.spidr_time = dataBytes & SPTIME_MASK;
 
-   
-
-      XTRACE(DATA, DEB, "Processed readout, packet_type = %u, dcol = %u, spix = %u, pix = %u, spidr_time = %u, ToA = %u, FToA = %u, ToT = %u", packet_type, Data.dcol, Data.spix, Data.pix, Data.spidr_time, Data.ToA, Data.FToA, Data.ToT);
+      XTRACE(DATA, DEB,
+             "Processed readout, packet_type = %u, dcol = %u, spix = %u, pix = "
+             "%u, spidr_time = %u, ToA = %u, FToA = %u, ToT = %u",
+             packet_type, Data.dcol, Data.spix, Data.pix, Data.spidr_time,
+             Data.ToA, Data.FToA, Data.ToT);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
       Result.push_back(Data);
-    }
-    else if (packet_type == 6){
+    } else if (packet_type == 6) {
       Timepix3TDCReadout Data;
-      Data.type =  (dataBytes & 0x0F00000000000000) >> 56;
-      Data.trigger_counter =  (dataBytes & 0x00FFF00000000000) >> 44;
+      Data.type = (dataBytes & 0x0F00000000000000) >> 56;
+      Data.trigger_counter = (dataBytes & 0x00FFF00000000000) >> 44;
       Data.timestamp = (dataBytes & 0x00000FFFFFFFFE00) >> 10;
       Data.stamp = (dataBytes & 0x00000000000001E0) >> 8;
-   
 
-      XTRACE(DATA, DEB, "Processed readout, packet_type = %u, trigger_counter = %u, timestamp = %u, stamp = %u", packet_type, Data.trigger_counter, Data.timestamp, Data.stamp);
+      XTRACE(DATA, DEB,
+             "Processed readout, packet_type = %u, trigger_counter = %u, "
+             "timestamp = %u, stamp = %u",
+             packet_type, Data.trigger_counter, Data.timestamp, Data.stamp);
       ParsedReadouts++;
       Stats.TDCReadouts++;
 
-       if (Data.type == 15 ){
+      if (Data.type == 15) {
         Stats.TDC1RisingReadouts++;
-      }
-      else if (Data.type == 10){
+      } else if (Data.type == 10) {
         Stats.TDC1FallingReadouts++;
-      }
-      else if (Data.type == 14){
+      } else if (Data.type == 14) {
         Stats.TDC2RisingReadouts++;
-      }
-      else if (Data.type == 11){
+      } else if (Data.type == 11) {
         Stats.TDC2FallingReadouts++;
       }
-    }
-    else if (packet_type == 4){
+    } else if (packet_type == 4) {
       Timepix3GlobalTimeReadout Data;
-      
+
       Data.timestamp = (dataBytes & 0x00FFFFFFFFFFFF00) >> 8;
       Data.stamp = (dataBytes & 0x00000000000000F0) >> 4;
-   
 
-      XTRACE(DATA, DEB, "Processed readout, packet_type = %u, timestamp = %u, stamp = %u", packet_type, Data.timestamp, Data.stamp);
+      XTRACE(DATA, DEB,
+             "Processed readout, packet_type = %u, timestamp = %u, stamp = %u",
+             packet_type, Data.timestamp, Data.stamp);
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
-     
-    }
-    else{
+
+    } else if (packet_type == 0) {
+      EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
+      XTRACE(DATA, DEB,
+             "Processed readout, packet type = %u, pulsetime seconds = %u, "
+             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
+             "previous pulsetime nanoseconds = %u",
+             packet_type, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
+             Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
+      Stats.EVRTimestampReadouts++;
+      
+      //EVR timestamps are larger than other data readouts, so extra needs to be 
+      // removed from bytes left and added to data pointer
+      BytesLeft -= 96;
+      DataPtr += 96;
+    } else {
       XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
       Stats.UndefinedReadouts++;
     }

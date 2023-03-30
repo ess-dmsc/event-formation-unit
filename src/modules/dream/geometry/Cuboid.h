@@ -104,10 +104,10 @@ public:
     uint8_t Index = Parms.P1.Index;
     Index += Data.Unused; // used as instance
 
-    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u",
-        Index, Data.Anode, Data.Cathode);
-    uint8_t Cassette = Data.Anode/32 + 2 * (Data.Cathode/32);
-    uint8_t Counter = (Data.Anode/WiresPerCounter) % 2;
+    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
+           Data.Cathode);
+    uint8_t Cassette = Data.Anode / 32 + 2 * (Data.Cathode / 32);
+    uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 
@@ -138,7 +138,8 @@ public:
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
     int LocalY = 15 - Wire;
 
-    XTRACE(DATA, DEB, "local x %u, local y %u, rotate %u", LocalX, LocalY, Rotation);
+    XTRACE(DATA, DEB, "local x %u, local y %u, rotate %u", LocalX, LocalY,
+           Rotation);
 
     rotateXY(LocalX, LocalY, Rotation);
 

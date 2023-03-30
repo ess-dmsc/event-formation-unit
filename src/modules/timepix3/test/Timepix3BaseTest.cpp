@@ -9,12 +9,12 @@
 
 #include <string>
 
-#include <timepix3/Timepix3Base.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <common/testutils/TestUDPServer.h>
+#include <timepix3/Timepix3Base.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -159,7 +159,6 @@ TEST_F(Timepix3BaseTest, DataReceive) {
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
   EXPECT_EQ(Readout.Counters.PixelReadouts, 0);
 }
-
 
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");

@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <timepix3/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <timepix3/Counters.h>
 
 namespace Timepix3 {
 

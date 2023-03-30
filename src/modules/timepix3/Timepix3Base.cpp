@@ -8,7 +8,6 @@
 
 #include "timepix3/Timepix3Base.h"
 
-#include <timepix3/Timepix3Instrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
@@ -20,6 +19,7 @@
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
+#include <timepix3/Timepix3Instrument.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -29,8 +29,7 @@ namespace Timepix3 {
 
 const char *classname = "Timepix3 detector with ESS readout";
 
-Timepix3Base::Timepix3Base(BaseSettings const &settings)
-    : Detector(settings) {
+Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -48,6 +47,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
   Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
   Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
+  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimestampReadouts);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
   Stats.create("readouts.tof_count", Counters.TofCount);
   Stats.create("readouts.tof_neg", Counters.TofNegative);
@@ -104,7 +104,8 @@ void Timepix3Base::processingThread() {
 
   Serializer = new EV44Serializer(KafkaBufferSize, "timepix3", Produce);
   Timepix3Instrument Timepix3(Counters, EFUSettings);
-  Timepix3.setSerializer(Serializer); // would rather have this in Timepix3Instrument
+  Timepix3.setSerializer(
+      Serializer); // would rather have this in Timepix3Instrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -124,7 +125,7 @@ void Timepix3Base::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       XTRACE(DATA, DEB, "parsing data");
-      //parse readout data
+      // parse readout data
       Timepix3.Timepix3Parser.parse(DataPtr, DataLen);
 
       XTRACE(DATA, DEB, "processing data");

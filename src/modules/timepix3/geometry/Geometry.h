@@ -27,14 +27,15 @@ public:
   void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
   void setYResolution(uint16_t Resolution) { YResolution = Resolution; }
 
-  /// \brief calculates an integer pixel value from a Timepix3PixelReadout object
-  /// \param Data Timepix3PixelReadout object, containing ADC value information,
+  /// \brief calculates an integer pixel value from a Timepix3PixelReadout
+  /// object \param Data Timepix3PixelReadout object, containing ADC value
+  /// information,
   ///         TubeID, and other information needed to determine pixel of
   ///         event. If a Calibration has been set, it will be applied here.
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
   uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
-  
+
   uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief returns true if Data is a valid readout with the given config

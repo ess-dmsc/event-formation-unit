@@ -6,10 +6,10 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <timepix3/geometry/Config.h>
 #include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <timepix3/geometry/Config.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -33,13 +33,14 @@ Config::Config(std::string ConfigFile) {
 
   if (InstrumentName != "timepix3") {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
-    throw std::runtime_error("Inconsistent Json file - invalid name, expected timepix3");
+    throw std::runtime_error(
+        "Inconsistent Json file - invalid name, expected timepix3");
   }
 
   try {
     XResolution = root["XResolution"].get<uint16_t>();
     YResolution = root["YResolution"].get<uint16_t>();
-   
+
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
         ConfigFile);

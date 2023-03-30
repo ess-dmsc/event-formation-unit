@@ -37,6 +37,7 @@ struct Counters {
   int64_t TDC2RisingReadouts;
   int64_t TDC2FallingReadouts;
   int64_t GlobalTimestampReadouts;
+  int64_t EVRTimestampReadouts;
   int64_t UndefinedReadouts;
   // Kafka stats below are common to all detectors
   int64_t kafka_produce_fails;
