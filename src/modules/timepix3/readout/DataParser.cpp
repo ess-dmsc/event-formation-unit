@@ -17,15 +17,15 @@ namespace Timepix3 {
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
-  XTRACE(DATA, DEB, "parsing data");
+  XTRACE(DATA, DEB, "parsing data, size is %u", Size);
   Result.clear();
   unsigned int ParsedReadouts = 0;
 
   unsigned int BytesLeft = Size;
   char *DataPtr = (char *)Buffer;
 
-  if(Size == 192){
-    XTRACE(DATA, DEB, "size is 192, could be EVR timestamp");
+  if(Size == 24){
+    XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     if (BytesLeft >= 192){
         EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
         XTRACE(DATA, DEB,
@@ -110,6 +110,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
 
+    } else if (packet_type == 1) {
+      EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
+        XTRACE(DATA, DEB,
+             "Processed readout, packet type = %u, pulsetime seconds = %u, "
+             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
+             "previous pulsetime nanoseconds = %u",
+             1, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
+             Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
+        Stats.EVRTimestampReadouts++;
+      
+        return ParsedReadouts + 1;
     } else {
       XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
       Stats.UndefinedReadouts++;
