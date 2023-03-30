@@ -24,12 +24,28 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   unsigned int BytesLeft = Size;
   char *DataPtr = (char *)Buffer;
 
+  if(Size == 192){
+    XTRACE(DATA, DEB, "size is 192, could be EVR timestamp");
+    if (BytesLeft >= 192){
+        EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
+        XTRACE(DATA, DEB,
+             "Processed readout, packet type = %u, pulsetime seconds = %u, "
+             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
+             "previous pulsetime nanoseconds = %u",
+             1, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
+             Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
+        Stats.EVRTimestampReadouts++;
+      
+        return 1;
+    }
+  }
+
   while (BytesLeft) {
     uint64_t dataBytes;
 
     if (BytesLeft <= sizeof(dataBytes)) {
       // TODO add some error handling here
-      XTRACE(DATA, DEB, "not enough bytes left");
+      XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
       break;
     }
     // Copy 8 bytes into dataBytes variable
@@ -79,6 +95,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       } else if (Data.type == 11) {
         Stats.TDC2FallingReadouts++;
       }
+      // else {
+      //   Stats.UnknownTDC++;
+      // }
     } else if (packet_type == 4) {
       Timepix3GlobalTimeReadout Data;
 
@@ -91,23 +110,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
 
-    } else if (packet_type == 0) {
-      if (BytesLeft >= 160){
-        EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-        XTRACE(DATA, DEB,
-             "Processed readout, packet type = %u, pulsetime seconds = %u, "
-             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
-             "previous pulsetime nanoseconds = %u",
-             packet_type, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
-             Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
-        Stats.EVRTimestampReadouts++;
-      
-        //EVR timestamps are longer than normal readouts, and also are always
-        //single readouts in a packet, setting bytes left to sizeof(dataBytes)
-        // which will then be calculated to be 0 to stop parsing
-        //the rest of this packet
-        BytesLeft = sizeof(dataBytes);
-      }
     } else {
       XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
       Stats.UndefinedReadouts++;
