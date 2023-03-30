@@ -69,6 +69,7 @@ public:
     uint8_t type;
     uint8_t unused;
     uint16_t unused2;
+    uint32_t counter;
     uint32_t pulseTimeSeconds;
     uint32_t pulseTimeNanoSeconds;
     uint32_t prevPulseTimeSeconds;

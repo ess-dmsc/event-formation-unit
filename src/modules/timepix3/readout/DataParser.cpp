@@ -29,10 +29,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
     if (Data->type == 1){
       XTRACE(DATA, DEB,
-          "Processed readout, packet type = %u, pulsetime seconds = %u, "
+          "Processed readout, packet type = %u, counter = %u, pulsetime seconds = %u, "
           "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
           "previous pulsetime nanoseconds = %u",
-          1, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
+          1, Data->counter, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
           Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
         Stats.EVRTimestampReadouts++;
       
