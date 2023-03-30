@@ -27,7 +27,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   if(Size == 24){
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-    XTRACE(DATA, DEB,
+    if (Data->type == 1){
+      XTRACE(DATA, DEB,
           "Processed readout, packet type = %u, pulsetime seconds = %u, "
           "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
           "previous pulsetime nanoseconds = %u",
@@ -35,13 +36,15 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
         Stats.EVRTimestampReadouts++;
       
-    return 1;
+      return 1;
+    }
+    XTRACE(DATA, DEB, "Not type = 1, not an EVR timestamp, processing as normal");
   }
 
   while (BytesLeft) {
     uint64_t dataBytes;
 
-    if (BytesLeft <= sizeof(dataBytes)) {
+    if (BytesLeft < sizeof(dataBytes)) {
       // TODO add some error handling here
       XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
       break;
