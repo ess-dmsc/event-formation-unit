@@ -92,19 +92,22 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       Stats.GlobalTimestampReadouts++;
 
     } else if (packet_type == 0) {
-      EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-      XTRACE(DATA, DEB,
+      if (BytesLeft >= 160){
+        EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
+        XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, pulsetime seconds = %u, "
              "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
              "previous pulsetime nanoseconds = %u",
              packet_type, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
              Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
-      Stats.EVRTimestampReadouts++;
+        Stats.EVRTimestampReadouts++;
       
-      //EVR timestamps are larger than other data readouts, so extra needs to be 
-      // removed from bytes left and added to data pointer
-      BytesLeft -= 96;
-      DataPtr += 96;
+        //EVR timestamps are longer than normal readouts, and also are always
+        //single readouts in a packet, setting bytes left to sizeof(dataBytes)
+        // which will then be calculated to be 0 to stop parsing
+        //the rest of this packet
+        BytesLeft = sizeof(dataBytes);
+      }
     } else {
       XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
       Stats.UndefinedReadouts++;
