@@ -77,8 +77,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       Timepix3TDCReadout Data;
       Data.type = (dataBytes & 0x0F00000000000000) >> 56;
       Data.trigger_counter = (dataBytes & 0x00FFF00000000000) >> 44;
-      Data.timestamp = (dataBytes & 0x00000FFFFFFFFE00) >> 10;
-      Data.stamp = (dataBytes & 0x00000000000001E0) >> 8;
+      Data.timestamp = (dataBytes & 0x00000FFFFFFFFE00) >> 9;
+      Data.stamp = (dataBytes & 0x00000000000001E0) >> 5;
 
       XTRACE(DATA, DEB,
              "Processed readout, packet_type = %u, trigger_counter = %u, "

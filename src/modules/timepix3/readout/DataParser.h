@@ -56,7 +56,7 @@ public:
   struct Timepix3TDCReadout {
     uint8_t type;
     uint16_t trigger_counter;
-    uint32_t timestamp;
+    uint64_t timestamp;
     uint8_t stamp;
   };
 
