@@ -18,7 +18,7 @@ namespace Timepix3 {
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
-  Result.clear();
+  PixelResult.clear();
   unsigned int ParsedReadouts = 0;
 
   unsigned int BytesLeft = Size;
@@ -64,15 +64,15 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       Data.FToA = (dataBytes & FTOA_MASK) >> FTOA_OFFS;
       Data.spidr_time = dataBytes & SPTIME_MASK;
 
-      XTRACE(DATA, DEB,
-             "Processed readout, packet_type = %u, dcol = %u, spix = %u, pix = "
-             "%u, spidr_time = %u, ToA = %u, FToA = %u, ToT = %u",
-             packet_type, Data.dcol, Data.spix, Data.pix, Data.spidr_time,
-             Data.ToA, Data.FToA, Data.ToT);
+      // XTRACE(DATA, DEB,
+      //        "Processed readout, packet_type = %u, dcol = %u, spix = %u, pix = "
+      //        "%u, spidr_time = %u, ToA = %u, FToA = %u, ToT = %u",
+      //        packet_type, Data.dcol, Data.spix, Data.pix, Data.spidr_time,
+      //        Data.ToA, Data.FToA, Data.ToT);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
-      Result.push_back(Data);
+      PixelResult.push_back(Data);
     } else if (packet_type == 6) {
       Timepix3TDCReadout Data;
       Data.type = (dataBytes & 0x0F00000000000000) >> 56;

@@ -77,7 +77,7 @@ public:
   } __attribute__((__packed__));
 
   DataParser(struct Counters &counters) : Stats(counters) {
-    Result.reserve(MaxReadoutsInPacket);
+    PixelResult.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
 
@@ -85,7 +85,7 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
-  std::vector<struct Timepix3PixelReadout> Result;
+  std::vector<struct Timepix3PixelReadout> PixelResult;
 
   struct Counters &Stats;
 };

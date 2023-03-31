@@ -108,7 +108,7 @@ void Timepix3Instrument::processReadouts() {
 
   std::vector<TimepixHit> hits;
   /// Traverse readouts, calculate pixels
-  for (auto &Data : Timepix3Parser.Result) {
+  for (auto &Data : Timepix3Parser.PixelResult) {
     bool validData = Geom->validateData(Data);
     if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
