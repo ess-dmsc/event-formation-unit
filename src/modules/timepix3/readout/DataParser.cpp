@@ -10,8 +10,8 @@
 #include <common/readout/ess/Parser.h>
 #include <timepix3/readout/DataParser.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 

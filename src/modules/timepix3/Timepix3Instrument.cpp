@@ -69,9 +69,8 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
          Data.spidr_time);
   // uint64_t ToF = 25 * Data.ToA - 1.5625 * Data.FToA;
   uint64_t ToF =
-      int(409600 * Data.spidr_time + 25 * Data.ToA - 1.5625 * Data.FToA);
+      int(409600 * Data.spidr_time + 25 * Data.ToA + 1.5625 * Data.FToA);
   XTRACE(DATA, DEB, "%u", ToF);
-  // std::cout << ToF << std::endl;
   return ToF;
 }
 
@@ -104,10 +103,19 @@ struct TimepixHit {
   uint16_t ToT;
 };
 
+bool compareByTimeOfFlight(const TimepixHit& hit1, const TimepixHit& hit2) {
+  return hit1.TimeOfFlight < hit2.TimeOfFlight;
+}
+
 void Timepix3Instrument::processReadouts() {
 
-  std::vector<TimepixHit> hits;
-  /// Traverse readouts, calculate pixels
+  /// vector of all hits in packet - so hits can be sorted before event formation
+  std::vector<TimepixHit> all_hits;
+
+  /// vector of hits per event - cleared after event pushed to serializer
+  std::vector<TimepixHit> event_hits;
+
+  /// Traverse readouts, push back to all_hits
   for (auto &Data : Timepix3Parser.PixelResult) {
     bool validData = Geom->validateData(Data);
     if (not validData) {
@@ -120,41 +128,58 @@ void Timepix3Instrument::processReadouts() {
     // }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight = calcTimeOfFlight(Data); /// todo, fix this
-
-    if ((not hits.empty()) and
-        (TimeOfFlight > hits.back().TimeOfFlight + MaxTimeGapNS)) {
-      if (hits.size() < MinEventSizeHits) {
-        hits.clear();
-        continue;
-      }
-      uint64_t sum_X = 0;
-      uint64_t sum_Y = 0;
-      uint64_t sum_ToT = 0;
-      for (TimepixHit h : hits) {
-        sum_X += h.X;
-        sum_Y += h.Y;
-        sum_ToT += h.ToT;
-      }
-      if (sum_ToT < MinimumToTSum) {
-        hits.clear();
-        continue;
-      }
-      uint32_t X = sum_X / hits.size();
-      uint32_t Y = sum_Y / hits.size();
-      uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
-      uint64_t ToF = hits.front().TimeOfFlight;
-      counters.TxBytes += Serializer->addEvent(ToF, PixelId);
-      counters.Events++;
-      hits.clear();
-    }
-
-    // Calculate pixelid and apply calibration
+    uint64_t TimeOfFlight = calcTimeOfFlight(Data); 
     uint32_t X = Geom->calcX(Data);
     uint32_t Y = Geom->calcY(Data);
     uint16_t ToT = Data.ToT;
 
-    hits.push_back({X, Y, TimeOfFlight, ToT});
+    all_hits.push_back({X, Y, TimeOfFlight, ToT});
+
+  }
+
+  // sort hits by time of flight for clustering in time
+  std::sort(all_hits.begin(), all_hits.end(), compareByTimeOfFlight);
+
+  // iterate over sorted hits, clustering into events
+  for (TimepixHit hit:all_hits){
+    uint64_t TimeOfFlight = hit.TimeOfFlight; 
+    uint32_t X = hit.X;
+    uint32_t Y = hit.Y;
+    uint16_t ToT = hit.ToT;
+    // std::cout << TimeOfFlight << std::endl;
+
+    if ((not event_hits.empty()) and
+        (TimeOfFlight > event_hits.back().TimeOfFlight + MaxTimeGapNS)) {
+      XTRACE(DATA, DEB, "Time gap greater than %u, forming new event", MaxTimeGapNS);
+      // if (hits.size() < MinEventSizeHits) {
+      //   hits.clear();
+      //   continue;
+      // }
+      uint64_t sum_X = 0;
+      uint64_t sum_Y = 0;
+      uint64_t sum_ToT = 0;
+      for (TimepixHit h : event_hits) {
+        sum_X += h.X;
+        sum_Y += h.Y;
+        sum_ToT += h.ToT;
+      }
+      // if (sum_ToT < MinimumToTSum) {
+      //   hits.clear();
+      //   continue;
+      // }
+      uint32_t X = sum_X / event_hits.size();
+      uint32_t Y = sum_Y / event_hits.size();
+      uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
+      uint64_t ToF = event_hits.front().TimeOfFlight;
+      counters.TxBytes += Serializer->addEvent(ToF, PixelId);
+      counters.Events++;
+      XTRACE(DATA, DEB, "Added event to serializer, hits: %u, ToF: %u, PixelId: %u", event_hits.size(), ToF, PixelId);
+      event_hits.clear();
+    }
+
+    event_hits.push_back({X, Y, TimeOfFlight, ToT});
+    XTRACE(DATA, DEB, "Added hit to event, event now contains %u hits", event_hits.size());
+
   } // for()
 }
 

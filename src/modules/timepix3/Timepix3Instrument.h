@@ -55,7 +55,7 @@ public:
   DataParser Timepix3Parser{counters};
   Geometry *Geom;
   EV44Serializer *Serializer;
-  uint32_t MaxTimeGapNS{2};
+  uint32_t MaxTimeGapNS{0};
   uint32_t MinEventSizeHits{1};
   uint32_t MinimumToTSum{0};
   // TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
