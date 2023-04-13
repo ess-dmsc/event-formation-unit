@@ -146,7 +146,7 @@ void Timepix3Instrument::processReadouts() {
     uint32_t X = hit.X;
     uint32_t Y = hit.Y;
     uint16_t ToT = hit.ToT;
-    std::cout << TimeOfFlight << std::endl;
+    // std::cout << TimeOfFlight << std::endl;
 
     if ((not event_hits.empty()) and
         (TimeOfFlight > event_hits.back().TimeOfFlight + MaxTimeGapNS)) {

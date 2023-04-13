@@ -10,14 +10,14 @@
 #include <common/readout/ess/Parser.h>
 #include <timepix3/readout/DataParser.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
-  XTRACE(DATA, DEB, "parsing data, size is %u", Size);
+  // XTRACE(DATA, DEB, "parsing data, size is %u", Size);
   PixelResult.clear();
   unsigned int ParsedReadouts = 0;
 
@@ -25,7 +25,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   char *DataPtr = (char *)Buffer;
 
   if(Size == 24){
-    XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
+    // XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
     if (Data->type == 1){
       XTRACE(DATA, DEB,
@@ -38,7 +38,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       
       return 1;
     }
-    XTRACE(DATA, DEB, "Not type = 1, not an EVR timestamp, processing as normal");
+    // XTRACE(DATA, DEB, "Not type = 1, not an EVR timestamp, processing as normal");
   }
 
   while (BytesLeft) {
@@ -46,7 +46,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     if (BytesLeft < sizeof(dataBytes)) {
       // TODO add some error handling here
-      XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
+      // XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
       break;
     }
     // Copy 8 bytes into dataBytes variable
@@ -111,17 +111,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
 
-    } else if (packet_type == 1) {
-      EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-        XTRACE(DATA, DEB,
-             "Processed readout, packet type = %u, pulsetime seconds = %u, "
-             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
-             "previous pulsetime nanoseconds = %u",
-             1, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
-             Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
-        Stats.EVRTimestampReadouts++;
-      
-        return ParsedReadouts + 1;
     } else {
       XTRACE(DATA, WAR, "Unknown packet type: %u", packet_type);
       Stats.UndefinedReadouts++;
