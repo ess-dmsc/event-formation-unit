@@ -146,15 +146,15 @@ void Timepix3Instrument::processReadouts() {
     uint32_t X = hit.X;
     uint32_t Y = hit.Y;
     uint16_t ToT = hit.ToT;
-    // std::cout << TimeOfFlight << std::endl;
+    std::cout << TimeOfFlight << std::endl;
 
     if ((not event_hits.empty()) and
         (TimeOfFlight > event_hits.back().TimeOfFlight + MaxTimeGapNS)) {
       XTRACE(DATA, DEB, "Time gap greater than %u, forming new event", MaxTimeGapNS);
-      // if (hits.size() < MinEventSizeHits) {
-      //   hits.clear();
-      //   continue;
-      // }
+      if (event_hits.size() < MinEventSizeHits) {
+        event_hits.clear();
+        continue;
+      }
       uint64_t sum_X = 0;
       uint64_t sum_Y = 0;
       uint64_t sum_ToT = 0;
@@ -163,16 +163,17 @@ void Timepix3Instrument::processReadouts() {
         sum_Y += h.Y;
         sum_ToT += h.ToT;
       }
-      // if (sum_ToT < MinimumToTSum) {
-      //   hits.clear();
-      //   continue;
-      // }
+      if (sum_ToT < MinimumToTSum) {
+        event_hits.clear();
+        continue;
+      }
       uint32_t X = sum_X / event_hits.size();
       uint32_t Y = sum_Y / event_hits.size();
       uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
       uint64_t ToF = event_hits.front().TimeOfFlight;
       counters.TxBytes += Serializer->addEvent(ToF, PixelId);
       counters.Events++;
+      // std::cout << X << " " << Y << std::endl;
       XTRACE(DATA, DEB, "Added event to serializer, hits: %u, ToF: %u, PixelId: %u", event_hits.size(), ToF, PixelId);
       event_hits.clear();
     }
