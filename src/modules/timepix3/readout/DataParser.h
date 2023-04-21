@@ -16,26 +16,28 @@ namespace Timepix3 {
 
 // | 8b  |      12b        |     35b   |  4b   |  5b  |
 // | 0x6 | Trigger counter | Timestamp | Stamp | Resv |
-#define TSTAMP_MASK 0x00000FFFFFFFFE00
-#define STAMP_MASK 0x00000000000001E0
-#define TSTAMP_OFFS 10 // 9?
-#define STAMP_OFFS 8   // 5?
 
-#define TYPE_MASK 0xF000000000000000
-#define DCOL_MASK 0x0FE0000000000000
-#define SPIX_MASK 0x001F800000000000
-#define PIX_MASK 0x0000700000000000
-#define TOA_MASK 0x00000FFFC0000000
-#define TOT_MASK 0x000000003FF00000
-#define FTOA_MASK 0x00000000000F0000
-#define SPTIME_MASK 0x000000000000FFFF
+
+#define TYPE_MASK   0xF000000000000000
 #define TYPE_OFFS 60
-#define DCOL_OFFS 52
-#define SPIX_OFFS 45
-#define PIX_OFFS 44
-#define TOA_OFFS 28
-#define TOT_OFFS 20
-#define FTOA_OFFS 16
+
+//pixel type data
+#define PIXEL_DCOL_MASK   0x0FE0000000000000
+#define PIXEL_SPIX_MASK   0x001F800000000000
+#define PIXEL_PIX_MASK    0x0000700000000000
+#define PIXEL_TOA_MASK    0x00000FFFC0000000
+#define PIXEL_TOT_MASK    0x000000003FF00000
+#define PIXEL_FTOA_MASK   0x00000000000F0000
+#define PIXEL_SPTIME_MASK 0x000000000000FFFF
+#define PIXEL_DCOL_OFFS 52
+#define PIXEL_SPIX_OFFS 45
+#define PIXEL_PIX_OFFS 44
+#define PIXEL_TOA_OFFS 28
+#define PIXEL_TOT_OFFS 20
+#define PIXEL_FTOA_OFFS 16
+
+//
+
 
 class DataParser {
 public:
@@ -86,6 +88,9 @@ public:
 
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
+
+  uint64_t lastEVRTime;
+  uint64_t lastTDCTime;
 
   struct Counters &Stats;
 };
