@@ -164,8 +164,9 @@ TEST_F(VMM3ParserTest, GoodCalib1) {
   ASSERT_EQ(VMMParser.Stats.CalibReadouts, 2);
 }
 
+} // namespace ESSReadout
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-} // namespace ESSReadout

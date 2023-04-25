@@ -124,8 +124,10 @@ TEST_F(ESSTimeTest, Issue2021_11_08) {
   ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428579);
 }
 
+} // namespace ESSReadout
+
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-} // namespace ESSReadout
