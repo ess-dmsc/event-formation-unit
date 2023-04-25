@@ -149,8 +149,9 @@ TEST_F(ReadoutTest, MaxPulseTimeError) {
   ASSERT_EQ(RdOut.Stats.ErrorTimeHigh, 1);
 }
 
+} // namespace ESSReadout
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-} // namespace ESSReadout

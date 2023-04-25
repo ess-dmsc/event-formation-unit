@@ -80,7 +80,7 @@ private:
 
 template <typename T> DumpFile<T>::~DumpFile() {
   if (Data.size() && File.is_valid() &&
-      (File.intent() != hdf5::file::AccessFlags::READONLY)) {
+      (File.intent() != hdf5::file::AccessFlags::ReadOnly)) {
     flush();
   }
 }
@@ -122,15 +122,15 @@ boost::filesystem::path DumpFile<T>::get_full_path() const {
 template <typename T> void DumpFile<T>::openRW() {
   using namespace hdf5;
 
-  File = file::create(get_full_path(), file::AccessFlags::TRUNCATE);
+  File = file::create(get_full_path(), file::AccessFlags::Truncate);
 
   property::DatasetCreationList dcpl;
-  dcpl.layout(property::DatasetLayout::CHUNKED);
+  dcpl.layout(property::DatasetLayout::Chunked);
   dcpl.chunk({ChunkSize});
 
   DataSet = File.root().create_dataset(
       T::DatasetName(), DataType,
-      dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
+      dataspace::Simple({0}, {dataspace::Simple::unlimited}), dcpl);
   DataSet.attributes.create_from("format_version", T::FormatVersion());
   DataSet.attributes.create_from("EFU_version", efu_version());
   DataSet.attributes.create_from("EFU_build_string", efu_buildstr());
@@ -147,7 +147,7 @@ template <typename T> void DumpFile<T>::openR() {
   auto Path = PathBase;
   Path += ".h5";
 
-  File = file::open(Path, file::AccessFlags::READONLY);
+  File = file::open(Path, file::AccessFlags::ReadOnly);
   DataSet = File.root().get_dataset(T::DatasetName());
   // if not initial version, expect it to be well formed
   if (T::FormatVersion() > 0) {

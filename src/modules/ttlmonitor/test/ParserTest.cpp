@@ -133,9 +133,9 @@ TEST_F(TTLMonitorParserTest, DataGood) {
   ASSERT_EQ(parser.Stats.ErrorSize, 0);
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
+} // namespace TTLMonitor
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-} // namespace TTLMonitor

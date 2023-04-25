@@ -25,7 +25,7 @@ TEST_F(HitTest, CompoundMapping) {
   auto t = hdf5::datatype::create<Hit>();
 
   EXPECT_EQ(t.number_of_fields(), 4ul);
-  EXPECT_EQ(t.get_class(), hdf5::datatype::Class::COMPOUND);
+  EXPECT_EQ(t.get_class(), hdf5::datatype::Class::Compound);
 
   auto ct = hdf5::datatype::Compound(t);
 

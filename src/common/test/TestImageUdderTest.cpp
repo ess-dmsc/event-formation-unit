@@ -55,3 +55,8 @@ TEST_F(TestImageUdderTest, CachePixelsWrap) {
   ASSERT_EQ(LastPixel, 123);
   ASSERT_EQ(FirstPixel, LastPixel);
 }
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
