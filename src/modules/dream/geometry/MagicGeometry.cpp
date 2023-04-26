@@ -8,36 +8,28 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/MagicGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
-int CDTGeometry::getPixel(Config::ModuleParms &Parms,
+int MagicGeometry::getPixel(Config::ModuleParms &Parms,
                           DataParser::DreamReadout &Data) {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
-  case Config::BwEndCap:
-    Pixel = bwec.getPixelId(Parms, Data);
-    break;
-
-  case Config::FwEndCap:
-    Pixel = fwec.getPixelId(Parms, Data);
+  case Config::MagicB:
+    Pixel = magicb.getPixelId(Parms, Data);
     break;
 
   case Config::Mantle:
     Pixel = mantle.getPixelId(Parms, Data);
     break;
 
-  case Config::HR: // fallthrough \todo might or might not work
-  case Config::SANS:
-    Pixel = cuboid.getPixelId(Parms, Data);
-    break;
   default:
     XTRACE(DATA, WAR, "Unknown detector");
     break;
@@ -47,26 +39,17 @@ int CDTGeometry::getPixel(Config::ModuleParms &Parms,
   return GlobalPixel;
 }
 
-int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
+int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
-  case Config::FwEndCap:
+  case Config::MagicB:
     RetVal = 0;
-    break;
-  case Config::BwEndCap:
-    RetVal = 71680;
     break;
   case Config::Mantle:
     RetVal = 229376;
     break;
-  case Config::SANS:
-    RetVal = 720896;
-    break;
-  case Config::HR:
-    RetVal = 1122304;
-    break;
   default:
-    XTRACE(DATA, WAR, "Module type not valid for DREAM");
+    XTRACE(DATA, WAR, "Module type not valid for MAGIC");
     break;
   }
   return RetVal;

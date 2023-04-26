@@ -16,6 +16,7 @@
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/MagicGeometry.h>
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 
@@ -51,6 +52,7 @@ public:
   ESSReadout::ESSTime Time;
   EV44Serializer *Serializer;
   CDTGeometry Geometry;
+  MagicGeometry Magic;
 };
 
 } // namespace Dream
