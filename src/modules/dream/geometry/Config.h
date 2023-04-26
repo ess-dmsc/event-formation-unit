@@ -74,6 +74,7 @@ public:
   std::string FileName{""};
   nlohmann::json root;
   DetectorInstance Instance{NONE};
+  std::string Name; // Name specified in json, used to check later
 
 private:
 };

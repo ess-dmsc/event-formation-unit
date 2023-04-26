@@ -51,8 +51,8 @@ public:
   DataParser DreamParser{counters};
   ESSReadout::ESSTime Time;
   EV44Serializer *Serializer;
-  CDTGeometry Geometry;
-  MagicGeometry Magic;
+  CDTGeometry DreamGeometry;
+  MagicGeometry MagicGeometry;
 };
 
 } // namespace Dream

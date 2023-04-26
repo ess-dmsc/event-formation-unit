@@ -51,3 +51,14 @@ set(DreamBaseTest_SRC
   test/DreamBaseTest.cpp
 )
 create_test_executable(DreamBaseTest)
+
+
+#=============================================================================
+# magic detector module - identical to dream except instrument name
+#=============================================================================
+set(magic_INC ${dream_common_inc})
+set(magic_SRC
+  ${dream_common_src}
+  main_magic.cpp)
+set(magic_LIB efu_essreadout)
+create_executable(magic)

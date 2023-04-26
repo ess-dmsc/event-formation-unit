@@ -25,7 +25,6 @@ void Config::loadAndApply() {
 }
 
 void Config::apply() {
-  std::string Name;
 
   try {
     Name = root["Detector"].get<std::string>();
