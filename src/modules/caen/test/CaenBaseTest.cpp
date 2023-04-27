@@ -233,7 +233,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorName = "loki";
-  Settings.DetectorPort = 9001;
+  Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
@@ -260,7 +260,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_bifrost.json";
   Settings.DetectorName = "bifrost";
-  Settings.DetectorPort = 9001;
+  Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
@@ -280,7 +280,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.ConfigFile = "deleteme_miracles.json";
   Settings.DetectorName = "miracles";
-  Settings.DetectorPort = 9001;
+  Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);

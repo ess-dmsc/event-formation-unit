@@ -82,11 +82,12 @@ TEST_F(TTLMonitorBaseTest, Constructor) {
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceive) {
+  Settings.DetectorPort = 9004;
   TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43133, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -97,12 +98,13 @@ TEST_F(TTLMonitorBaseTest, DataReceive) {
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9004;
   TTLMonitorBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
   dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43133, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);

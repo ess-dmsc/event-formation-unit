@@ -5,7 +5,8 @@
 ///
 /// \brief Calculate pixelid from digital identifiers, see latest reviewed
 /// ICD for CSPEC:
-/// https://project.esss.dk/owncloud/index.php/s/3i0RtWiVwNM6EBY (v1 -- out of date as of 2023-02)
+/// https://project.esss.dk/owncloud/index.php/s/3i0RtWiVwNM6EBY (v1 -- out of
+/// date as of 2023-02)
 ///
 //===----------------------------------------------------------------------===//
 
@@ -53,11 +54,11 @@ int CspecGeometry::xOffset(int Ring, int Tube) {
   return Ring * NPos + (Tube % 24) * (NPos / 24);
 }
 
-// This is always zero for a cylindrical detector with tubes in a plane, aligned along its axis
-//int CspecGeometry::yOffset(int Tube) {
-//  ///\todo Determine the 'real' y-offset once a new ICD is decided for 3He CSPEC
-//  int Pack = Tube / 24;
-//  return Pack * 24;
+// This is always zero for a cylindrical detector with tubes in a plane, aligned
+// along its axis
+// int CspecGeometry::yOffset(int Tube) {
+//  ///\todo Determine the 'real' y-offset once a new ICD is decided for 3He
+//  CSPEC int Pack = Tube / 24; return Pack * 24;
 //}
 
 int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
@@ -73,8 +74,7 @@ uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int ylocal = yCoord(Data.AmpA, Data.AmpB);
   uint32_t pixel = ESSGeom->pixel2D(xoff, ylocal);
 
-  XTRACE(DATA, DEB, "xoffset %d, ylocal %d, pixel %hu",
-         xoff, ylocal, pixel);
+  XTRACE(DATA, DEB, "xoffset %d, ylocal %d, pixel %hu", xoff, ylocal, pixel);
 
   return pixel;
 }

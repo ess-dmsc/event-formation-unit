@@ -119,11 +119,12 @@ TEST_F(TREXBaseTest, Constructor) {
 }
 
 TEST_F(TREXBaseTest, DataReceive) {
+  Settings.DetectorPort = 9007;
   TREXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43132, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -136,12 +137,13 @@ TEST_F(TREXBaseTest, DataReceive) {
 }
 
 TEST_F(TREXBaseTest, DataReceiveBadHeader) {
+  Settings.DetectorPort = 9007;
   TREXBaseStandIn Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
   dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43126, Settings.DetectorPort,
+  TestUDPServer Server(43132, Settings.DetectorPort,
                        (unsigned char *)&dummyreadout[0], dummyreadout.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
