@@ -30,6 +30,6 @@ public:
   int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
   SUMO magicb{128,512};
-  Mantle mantle;
+  Mantle mantle{128};
 };
 } // namespace Dream

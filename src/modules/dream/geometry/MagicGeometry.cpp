@@ -1,10 +1,13 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Attempt to handle the complex DREAM geometry which is assembled
-/// from five different CDT module types with different characeteristics
+/// \brief Handle MAGIC geometry similarly as DREAM
+///
+/// Uses the formulae and parameters from the MAGIC ICD which can be
+/// located through
+/// https://confluence.esss.lu.se/display/ECDC/Instrument+Status+Overview
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>

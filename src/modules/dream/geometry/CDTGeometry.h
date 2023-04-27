@@ -34,6 +34,6 @@ public:
   SUMO fwec{280, 256};
   SUMO bwec{616, 256};
   Cuboid cuboid;
-  Mantle mantle;
+  Mantle mantle{256};
 };
 } // namespace Dream
