@@ -8,14 +8,14 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/DreamGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
-int CDTGeometry::getPixel(Config::ModuleParms &Parms,
+int DreamGeometry::getPixel(Config::ModuleParms &Parms,
                           DataParser::DreamReadout &Data) {
 
   int Pixel{0};
@@ -47,7 +47,7 @@ int CDTGeometry::getPixel(Config::ModuleParms &Parms,
   return GlobalPixel;
 }
 
-int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
+int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
   case Config::FwEndCap:

@@ -11,7 +11,7 @@ set(dream_common_inc
   DreamBase.h
   DreamInstrument.h
   geometry/Config.h
-  geometry/CDTGeometry.h
+  geometry/DreamGeometry.h
   geometry/MagicGeometry.h
   geometry/Cuboid.h
   geometry/Mantle.h
@@ -23,7 +23,7 @@ set(dream_common_inc
 set(dream_common_src
   DreamInstrument.cpp
   DreamBase.cpp
-  geometry/CDTGeometry.cpp
+  geometry/DreamGeometry.cpp
   geometry/MagicGeometry.cpp
   geometry/Config.cpp
   readout/DataParser.cpp

@@ -21,7 +21,7 @@
 
 namespace Dream {
 
-class CDTGeometry {
+class DreamGeometry {
 public:
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
