@@ -44,38 +44,38 @@ public:
   const unsigned int MaxReadoutsInPacket{500};
 
   struct Timepix3PixelReadout {
-    uint16_t dcol;
-    uint16_t spix;
-    uint8_t pix;
+    uint16_t Dcol;
+    uint16_t Spix;
+    uint8_t Pix;
     uint16_t ToA;
     uint16_t ToT;
     uint8_t FToA;
-    uint16_t spidr_time;
+    uint16_t SpidrTime;
   }; // WARNING timepix3 readouts aren't packed like other detector readouts
      // each variable has an odd number of bits, and need to be extracted
      // with bitwise operations, this isn't like other detectors
 
   struct Timepix3TDCReadout {
-    uint8_t type;
-    uint16_t trigger_counter;
-    uint64_t timestamp;
-    uint8_t stamp;
+    uint8_t Type;
+    uint16_t TriggerCounter;
+    uint64_t Timestamp;
+    uint8_t Stamp;
   };
 
   struct Timepix3GlobalTimeReadout {
-    uint64_t timestamp;
-    uint8_t stamp;
+    uint64_t Timestamp;
+    uint8_t Stamp;
   };
 
   struct EVRTimeReadout {
-    uint8_t type;
-    uint8_t unused;
-    uint16_t unused2;
-    uint32_t counter;
-    uint32_t pulseTimeSeconds;
-    uint32_t pulseTimeNanoSeconds;
-    uint32_t prevPulseTimeSeconds;
-    uint32_t prevPulseTimeNanoSeconds;
+    uint8_t Type;
+    uint8_t Unused;
+    uint16_t Unused2;
+    uint32_t Counter;
+    uint32_t PulseTimeSeconds;
+    uint32_t PulseTimeNanoSeconds;
+    uint32_t PrevPulseTimeSeconds;
+    uint32_t PrevPulseTimeNanoSeconds;
   } __attribute__((__packed__));
 
   DataParser(struct Counters &counters) : Stats(counters) {
@@ -89,8 +89,8 @@ public:
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
 
-  uint64_t lastEVRTime;
-  uint64_t lastTDCTime;
+  uint64_t LastEVRTime;
+  uint64_t LastTDCTime;
 
   struct Counters &Stats;
 };
