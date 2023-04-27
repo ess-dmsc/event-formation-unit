@@ -42,7 +42,12 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
     XTRACE(DATA, WAR, "Unknown detector");
     break;
   }
-  int GlobalPixel = getPixelOffset(Parms.Type) + Pixel;
+
+  int Offset = getPixelOffset(Parms.Type);
+  if (Offset == -1) {
+    return 0;
+  }
+  int GlobalPixel = Offset + Pixel;
   XTRACE(DATA, DEB, "Local Pixel: %d, Global Pixel: %d", Pixel, GlobalPixel);
   return GlobalPixel;
 }
