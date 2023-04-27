@@ -23,6 +23,15 @@ set(DreamGeometryTest_SRC
   DreamGeometryTest.cpp)
 create_test_executable(DreamGeometryTest)
 
+set(MagicGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
+set(MagicGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  MagicGeometryTest.cpp)
+create_test_executable(MagicGeometryTest)
+
 
 set(DreamConfigTest_INC
   ${DREAM_BASE_DIR}/geometry/Config.h
