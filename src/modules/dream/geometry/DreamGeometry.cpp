@@ -75,7 +75,6 @@ int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
     break;
   }
   return RetVal;
-  ;
 }
 
 } // namespace Dream
