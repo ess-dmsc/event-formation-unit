@@ -42,14 +42,15 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
   return GlobalPixel;
 }
 
+///\brief the pixel offset values are defined in the MAGIC ICD
 int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
   case Config::MagicB:
-    RetVal = 0;
+    RetVal = 245760;
     break;
   case Config::Mantle:
-    RetVal = 229376;
+    RetVal = 0;
     break;
   default:
     XTRACE(DATA, WAR, "Module type not valid for MAGIC");
