@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,12 +24,14 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS };
+  enum DetectorInstance {DREAM, MAGIC, NONE};
+  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, MagicB};
   std::map<std::string, ModuleType> ModuleTypeMap = {{"BwEndCap", BwEndCap},
                                                      {"FwEndCap", FwEndCap},
                                                      {"Mantle", Mantle},
                                                      {"HR", HR},
-                                                     {"SANS", SANS}};
+                                                     {"SANS", SANS},
+                                                     {"MagicB", MagicB}};
 
   struct ModuleParms {
     bool Initialised{false};
@@ -71,6 +73,8 @@ public:
   //
   std::string FileName{""};
   nlohmann::json root;
+  DetectorInstance Instance{NONE};
+  std::string Name; // Name specified in json, used to check later
 
 private:
 };

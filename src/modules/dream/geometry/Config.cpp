@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,7 +25,6 @@ void Config::loadAndApply() {
 }
 
 void Config::apply() {
-  std::string Name;
 
   try {
     Name = root["Detector"].get<std::string>();
@@ -33,9 +32,18 @@ void Config::apply() {
     errorExit("Missing Detector in JSON");
   }
 
-  if (Name != "DREAM") {
-    errorExit(fmt::format("Invalid instrument name {}, expected DREAM", Name));
+  if (Name == "DREAM") {
+    Instance = DREAM;
+    LOG(INIT, Sev::Info, "Instance is DREAM Instrument");
+    XTRACE(INIT, ALW, "Instance is DREAM Instrument");
+  } else if (Name == "MAGIC") {
+    Instance = MAGIC;
+    LOG(INIT, Sev::Info, "Instance is MAGIC Instrument");
+    XTRACE(INIT, ALW, "Instance is MAGIC Instrument");
+  } else {
+    errorExit(fmt::format("Invalid instrument name {}, expected DREAM or MAGIC", Name));
   }
+
 
   try {
     MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<unsigned int>();

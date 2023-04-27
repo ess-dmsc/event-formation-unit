@@ -21,7 +21,7 @@
 
 namespace Dream {
 
-class CDTGeometry {
+class DreamGeometry {
 public:
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
@@ -34,6 +34,6 @@ public:
   SUMO fwec{280, 256};
   SUMO bwec{616, 256};
   Cuboid cuboid;
-  Mantle mantle;
+  Mantle mantle{256};
 };
 } // namespace Dream

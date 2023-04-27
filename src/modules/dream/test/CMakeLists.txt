@@ -14,12 +14,23 @@ set(SUMOGeometryTest_SRC
 create_test_executable(SUMOGeometryTest)
 
 
-set(CDTGeometryTest_INC
-  ${DREAM_BASE_DIR}/geometry/CDTGeometry.h)
-set(CDTGeometryTest_SRC
-  ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
-  CDTGeometryTest.cpp)
-create_test_executable(CDTGeometryTest)
+set(DreamGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
+set(DreamGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  DreamGeometryTest.cpp)
+create_test_executable(DreamGeometryTest)
+
+set(MagicGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
+set(MagicGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  MagicGeometryTest.cpp)
+create_test_executable(MagicGeometryTest)
 
 
 set(DreamConfigTest_INC
@@ -43,14 +54,16 @@ create_test_executable(CuboidTest)
 set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
-  ${DREAM_BASE_DIR}/geometry/CDTGeometry.h
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
   )
 set(DreamInstrumentTest_SRC
   DreamInstrumentTest.cpp
   ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
-  ${DREAM_BASE_DIR}/geometry/CDTGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   )
 create_test_executable(DreamInstrumentTest)

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,8 @@
 #include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
-#include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/DreamGeometry.h>
+#include <dream/geometry/MagicGeometry.h>
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 
@@ -50,7 +51,8 @@ public:
   DataParser DreamParser{counters};
   ESSReadout::ESSTime Time;
   EV44Serializer *Serializer;
-  CDTGeometry Geometry;
+  DreamGeometry DreamGeom;
+  MagicGeometry MagicGeom;
 };
 
 } // namespace Dream

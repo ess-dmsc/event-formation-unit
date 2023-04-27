@@ -8,14 +8,14 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <dream/geometry/CDTGeometry.h>
+#include <dream/geometry/DreamGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
-int CDTGeometry::getPixel(Config::ModuleParms &Parms,
+int DreamGeometry::getPixel(Config::ModuleParms &Parms,
                           DataParser::DreamReadout &Data) {
 
   int Pixel{0};
@@ -42,12 +42,17 @@ int CDTGeometry::getPixel(Config::ModuleParms &Parms,
     XTRACE(DATA, WAR, "Unknown detector");
     break;
   }
-  int GlobalPixel = getPixelOffset(Parms.Type) + Pixel;
+
+  int Offset = getPixelOffset(Parms.Type);
+  if (Offset == -1) {
+    return 0;
+  }
+  int GlobalPixel = Offset + Pixel;
   XTRACE(DATA, DEB, "Local Pixel: %d, Global Pixel: %d", Pixel, GlobalPixel);
   return GlobalPixel;
 }
 
-int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
+int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
   case Config::FwEndCap:
@@ -65,9 +70,11 @@ int CDTGeometry::getPixelOffset(Config::ModuleType Type) {
   case Config::HR:
     RetVal = 1122304;
     break;
+  default:
+    XTRACE(DATA, WAR, "Module type not valid for DREAM");
+    break;
   }
   return RetVal;
-  ;
 }
 
 } // namespace Dream
