@@ -32,7 +32,7 @@ int BifrostDatReader::readReadout(struct dat_data_t &Readout) {
     }
     Readouts++;
     if (Readouts % 1000000 == 0) {
-      printf("Count %u\n", Readouts);
+      printf("Count %" PRIu64"\n", Readouts);
     }
     return 1;
   }
