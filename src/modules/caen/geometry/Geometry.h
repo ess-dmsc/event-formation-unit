@@ -42,11 +42,11 @@ public:
   virtual bool validateData(DataParser::CaenReadout &Data) = 0;
 
   struct Stats {
-    int64_t AmplitudeZero{0};
-    int64_t OutsideRegion{0};
     int64_t *RingErrors;
     int64_t *FENErrors;
     int64_t *TubeErrors;
+    int64_t *AmplitudeZero;
+    int64_t *OutsideTube;
   } Stats;
 
   Calibration CaenCalibration;
