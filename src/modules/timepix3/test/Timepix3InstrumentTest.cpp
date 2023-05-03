@@ -19,10 +19,18 @@ std::string ConfigStr = R"(
   }
 )";
 
+std::vector<uint8_t> SingleGoodReadout{
+    // Single readout
+    0x91, 0xc6, 0x30, 0x80,
+    0x8b, 0xa8, 0x3a, 0xbf
+};
+
 class Timepix3InstrumentTest : public TestBase {
 protected:
   struct Counters counters;
   BaseSettings Settings;
+
+  Timepix3Instrument *timepix3;
 
   void SetUp() override { Settings.ConfigFile = ConfigFile; }
   void TearDown() override {}
@@ -31,6 +39,14 @@ protected:
 // Test cases below
 TEST_F(Timepix3InstrumentTest, Constructor) {
   Timepix3Instrument Timepix3(counters, Settings);
+}
+
+TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
+  auto Res = timepix3->Timepix3Parser.parse(SingleGoodReadout*, 64);
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.PixelReadouts, 1);
+
+  timepix3->processReadouts();
 }
 
 int main(int argc, char **argv) {
