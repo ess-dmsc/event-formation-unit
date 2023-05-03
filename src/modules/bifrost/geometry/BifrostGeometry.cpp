@@ -48,20 +48,24 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   return true;
 }
 
+
 int BifrostGeometry::xOffset(int Ring, int TubeId) {
   int RingOffset = Ring * NPos;
-  int TubeOffset = (TubeId % 3) * (NPos / 3);
+  int TubeOffset = (TubeId % 3) * TubePixellation;
   XTRACE(DATA, DEB, "RingOffset %d, TubeOffset %d", RingOffset, TubeOffset);
   return RingOffset + TubeOffset;
 }
 
+
 int BifrostGeometry::yOffset(int TubeId) {
-  int Triplet = TubeId / 3;
-  return Triplet * 3;
+  int Arc = TubeId / 3; // 3 == triplets per arc (for a given ring)
+  return Arc * TubesPerTriplet;
 }
 
 
-std::pair<int, float> BifrostGeometry::calcTubeAndPos(int AmpA, int AmpB) {
+std::pair<int, float> BifrostGeometry::calcTubeAndPos(
+  std::vector<float> &Calib,int AmpA, int AmpB) {
+
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
     (*Stats.AmplitudeZero)++;
@@ -70,11 +74,10 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(int AmpA, int AmpB) {
 
   float GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
   int i;
-  float Upper;
-  float Lower;
+  float Upper, Lower;
   for (i = 0; i < 6; i+=2) {
-    Lower = CaenCalibration.BifrostCalibration.Calib[i];
-    Upper = CaenCalibration.BifrostCalibration.Calib[i+1];
+    Lower = Calib[i];
+    Upper = Calib[i+1];
     if ((GlobalPos >= Lower) and (GlobalPos <= Upper)) {
       break;
     }
@@ -85,9 +88,12 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(int AmpA, int AmpB) {
     (*Stats.OutsideTube)++;
     return std::pair(-1, -1.0);
   }
-  float NormPos = (GlobalPos - Lower)/(Upper - Lower);
-  XTRACE(DATA, DEB, "interval %d, GlobalPos %f, NormPos %f", i/2, GlobalPos, NormPos);
-  return std::make_pair(i/2, NormPos);
+
+  ///\brief unit pos is in the interval [0;1] regardless of the width of the
+  /// interval
+  float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  XTRACE(DATA, DEB, "interval %d, GlobalPos %f, UnitPos %f", i/2, GlobalPos, UnitPos);
+  return std::make_pair(i/2, UnitPos);
 }
 
 
@@ -95,7 +101,10 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);
   int yoff = yOffset(Data.TubeId);
 
-  std::pair<int, float> TubePos = calcTubeAndPos(Data.AmpA, Data.AmpB);
+  int GlobalTriplet = Data.RingId * TripletsPerRing + Data.TubeId;
+  auto & Calib = CaenCalibration.BifrostCalibration.TripletCalib[GlobalTriplet];
+  std::pair<int, float> TubePos = calcTubeAndPos(Calib, Data.AmpA, Data.AmpB);
+
   int ylocal = TubePos.first;
   int xlocal = TubePos.second * (TubePixellation - 1);
 
@@ -104,8 +113,8 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
     XTRACE(DATA, WAR, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
            xoff, xlocal, yoff, ylocal, pixel);
   } else {
-  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
-         xoff, xlocal, yoff, ylocal, pixel);
+    XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+           xoff, xlocal, yoff, ylocal, pixel);
   }
 
   return pixel;

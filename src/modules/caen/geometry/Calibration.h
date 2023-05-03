@@ -12,6 +12,7 @@
 #pragma once
 
 #include <caen/geometry/Config.h>
+#include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <string>
 #include <vector>
@@ -37,6 +38,10 @@ public:
   /// \brief apply the position correction
   uint32_t strawCorrection(uint32_t StrawId, double Pos);
 
+  /// \brief detector specific loading
+  void loadBifrostParameters();
+  void loadLokiParameters();
+
   /// \brief vector of (vector of) polynomial coefficients
   std::vector<std::vector<double>> StrawCalibration;
 
@@ -49,10 +54,6 @@ public:
   ///\todo let's later worry about where to put this and
   /// how to read it.
   struct {
-    ///\brief intervals for snipping out positions for the three tubes
-    std::vector<float> Intervals{0.030, 0.290, 0.363, 0.627, 0.705, 0.97};
-    std::vector<float> Calib{0.00, 0.333, 0.333, 0.667, 0.667, 1.00};
-
     // Per triplet, so 45 in total
     // so far only 'null' calibration nadonly intervals
     std::vector<std::vector<float>> TripletCalib{
@@ -113,5 +114,7 @@ private:
   uint32_t NumberOfStraws{0};  ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0};      ///< The maximum pixelid in the map
+
+  nlohmann::json root;
 };
 } // namespace Caen

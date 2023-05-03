@@ -55,7 +55,7 @@ std::string Config512Str = R"(
 std::string CalibFile{"deleteme_caen_instr_calib.json"};
 std::string CalibStr = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 7,
       "resolution" : 256,

@@ -1,10 +1,13 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief Calculate pixelid from tube and amplitudes
 ///
+/// Pixel definitions taken from the ICD, the latest version of which
+/// can be found through Instrument Status Overview
+/// https://confluence.esss.lu.se/display/ECDC/Instrument+Status+Overview
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -16,45 +19,42 @@
 #include <string>
 #include <utility>
 #include <vector>
-//
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 class BifrostGeometry : public Geometry {
 public:
+
   BifrostGeometry(Config &CaenConfiguration);
+
+  ///\brief virtual method inherited from base class
   uint32_t calcPixel(DataParser::CaenReadout &Data);
+
+  ///\brief virtual method inherited from base class
   bool validateData(DataParser::CaenReadout &Data);
 
-  int TripletTubes{3}; // tubes per triplet (might be obvious from the name)
-
   /// \brief return the global x-offset for the given identifiers
+  /// \param Ring logical ring as defined in the ICD
+  /// \param TubeId - identifies a tube triplet
   int xOffset(int Ring, int TubeId);
 
   /// \brief return the global y-offset for the given identifiers
+  /// \param TubeId - identifies a tube triplet
   int yOffset(int TubeId);
 
-  /// \brief return local x-coordinate from amplitudes
-  int xCoord(int LocalTube, float UnitPos) {
-    if (LocalTube == 1) { // middle tube reversed
-      return (TubePixellation - 1) * (1.0 - UnitPos);
-    } else {
-      return (TubePixellation - 1) * UnitPos;
-    }
-  }
-
-
-  int yCoord(int LocalTube) {
-    return LocalTube;
-  }
-
   /// \brief return the position along the tube
+  /// \param AmpA amplitude A from readout data
+  /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
-  /// or (-01, -1.0) if invalid
-  std::pair<int, float> calcTubeAndPos(int AmpA, int AmpB);
+  /// or (-1, -1.0) if invalid
+  std::pair<int, float> calcTubeAndPos(std::vector<float> &Calib,
+    int AmpA, int AmpB);
 
-  /// Number of pixels along a He tube.
-  int TubePixellation{100};
+
+  const int TubesPerTriplet{3};
+  const int TripletsPerRing{15};
+  int TubePixellation{100}; ///< Number of pixels along a single He tube.
 };
 } // namespace Caen

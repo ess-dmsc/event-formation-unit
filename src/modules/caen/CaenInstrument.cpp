@@ -61,6 +61,11 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     XTRACE(INIT, ALW, "Loading calibration file %s",
            Settings.CalibFile.c_str());
     Geom->CaenCalibration = Calibration(Settings.CalibFile);
+    if (settings.DetectorName == "loki") {
+      Geom->CaenCalibration.loadLokiParameters();
+    } else if (settings.DetectorName == "bifrost") {
+      Geom->CaenCalibration.loadBifrostParameters();
+    }
   }
 
   if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
