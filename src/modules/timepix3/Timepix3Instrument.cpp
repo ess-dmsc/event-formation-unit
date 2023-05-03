@@ -97,12 +97,7 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
 //   Data.TubeId; DumpFile->push(CurrentReadout);
 // }
 
-struct TimepixHit {
-  uint32_t X;
-  uint32_t Y;
-  uint64_t TimeOfFlight;
-  uint16_t ToT;
-};
+
 
 bool compareByTimeOfFlight(const TimepixHit& Hit1, const TimepixHit& Hit2) {
   return Hit1.TimeOfFlight < Hit2.TimeOfFlight;
@@ -143,7 +138,40 @@ std::vector<std::vector<TimepixHit>> clusterByCoordinate(std::vector<TimepixHit>
     return clusters;
 }
 
+void Timepix3Instrument::formEvents(std::vector<TimepixHit> ClusteredInTimeEventHits) {
+      // EventHits contains hits in given time window, now need clustering by coordinate
+      std::vector<std::vector<TimepixHit>> ClusteredInSpaceEventHits = clusterByCoordinate(ClusteredInTimeEventHits, 10.0);
+      XTRACE(DATA, DEB, "Split time window of %u photon events into clusters by coordinate, made %u clusters.", ClusteredInTimeEventHits.size(), ClusteredInSpaceEventHits.size() );
+      
 
+      for(std::vector<TimepixHit> EventHits : ClusteredInSpaceEventHits){
+        if (EventHits.size() < MinEventSizeHits) {
+          XTRACE(DATA, DEB, "Not enough events in cluster, got %u, minimum %u", EventHits.size(), MinEventSizeHits);
+          continue;
+        }
+      
+        uint64_t SumX = 0;
+        uint64_t SumY = 0;
+        uint64_t SumToT = 0;
+        for (TimepixHit EventHit : EventHits) {
+          SumX += EventHit.X;
+          SumY += EventHit.Y;
+          SumToT += EventHit.ToT;
+        }
+        if (SumToT < MinimumToTSum) {
+          XTRACE(DATA, DEB, "Not high enough ToT, got %u, minimum %u", SumToT, MinimumToTSum);
+          continue;
+        }
+        uint32_t X = SumX / EventHits.size();
+        uint32_t Y = SumY / EventHits.size();
+        uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
+        uint64_t ToF = EventHits.front().TimeOfFlight;
+        counters.TxBytes += Serializer->addEvent(ToF, PixelId);
+        counters.Events++;
+        std::cout << X << " " << Y << " "<< ToF << std::endl;
+        XTRACE(DATA, DEB, "Added event to serializer, hits: %u, ToF: %u, PixelId: %u", EventHits.size(), ToF, PixelId);
+      }
+}
 
 void Timepix3Instrument::processReadouts() {
 
@@ -153,7 +181,6 @@ void Timepix3Instrument::processReadouts() {
   /// vector of hits per event - cleared after event pushed to serializer
   std::vector<TimepixHit> ClusteredInTimeEventHits;
 
-  std::vector<std::vector<TimepixHit>> ClusteredInSpaceEventHits;
 
   /// Traverse readouts, push back to AllHits
   for (auto &Data : Timepix3Parser.PixelResult) {
@@ -191,45 +218,20 @@ void Timepix3Instrument::processReadouts() {
     if ((not ClusteredInTimeEventHits.empty()) and
         (TimeOfFlight > ClusteredInTimeEventHits.back().TimeOfFlight + MaxTimeGapNS)) {
       XTRACE(DATA, DEB, "Time gap greater than %u, forming new events", MaxTimeGapNS);
-      // EventHits contains hits in given time window, now need clustering by coordinate
-      ClusteredInSpaceEventHits = clusterByCoordinate(ClusteredInTimeEventHits, 10.0);
-      XTRACE(DATA, DEB, "Split time window of %u photon events into clusters by coordinate, made %u clusters.", ClusteredInTimeEventHits.size(), ClusteredInSpaceEventHits.size() );
+      
+      formEvents(ClusteredInTimeEventHits);
       ClusteredInTimeEventHits.clear();
 
-      for(std::vector<TimepixHit> EventHits : ClusteredInSpaceEventHits){
-        if (EventHits.size() < MinEventSizeHits) {
-          XTRACE(DATA, DEB, "Not enough events in cluster, got %u, minimum %u", EventHits.size(), MinEventSizeHits);
-          continue;
-        }
-      
-        uint64_t SumX = 0;
-        uint64_t SumY = 0;
-        uint64_t SumToT = 0;
-        for (TimepixHit EventHit : EventHits) {
-          SumX += EventHit.X;
-          SumY += EventHit.Y;
-          SumToT += EventHit.ToT;
-        }
-        if (SumToT < MinimumToTSum) {
-          XTRACE(DATA, DEB, "Not high enough ToT, got %u, minimum %u", SumToT, MinimumToTSum);
-          continue;
-        }
-        uint32_t X = SumX / EventHits.size();
-        uint32_t Y = SumY / EventHits.size();
-        uint32_t PixelId = Geom->ESSGeom->pixel2D(X, Y);
-        uint64_t ToF = EventHits.front().TimeOfFlight;
-        counters.TxBytes += Serializer->addEvent(ToF, PixelId);
-        counters.Events++;
-        std::cout << X << " " << Y << " "<< ToF << std::endl;
-        XTRACE(DATA, DEB, "Added event to serializer, hits: %u, ToF: %u, PixelId: %u", EventHits.size(), ToF, PixelId);
-      }
-      ClusteredInSpaceEventHits.clear();
     }
 
     ClusteredInTimeEventHits.push_back({X, Y, TimeOfFlight, ToT});
     XTRACE(DATA, DEB, "Added hit to time window, window now contains %u hits", ClusteredInTimeEventHits.size());
 
   } // for()
+
+  if (not ClusteredInTimeEventHits.empty()){
+      formEvents(ClusteredInTimeEventHits);
+  }
 }
 
 } // namespace Timepix3

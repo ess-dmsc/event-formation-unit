@@ -21,6 +21,13 @@
 
 namespace Timepix3 {
 
+struct TimepixHit {
+  uint32_t X;
+  uint32_t Y;
+  uint64_t TimeOfFlight;
+  uint16_t ToT;
+};
+
 class Timepix3Instrument {
 public:
   /// \brief 'create' the Timepix3 instruments
@@ -45,6 +52,8 @@ public:
 
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
+
+  void formEvents(std::vector<TimepixHit> ClusteredInTimeEventHits);
 
 public:
   /// \brief Stuff that 'ties' Timepix3 together
