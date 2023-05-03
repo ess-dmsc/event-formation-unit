@@ -92,8 +92,12 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
   ///\brief unit pos is in the interval [0;1] regardless of the width of the
   /// interval
   float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  int Tube = i/2;
+  if (Tube == 1) {
+    UnitPos = 1.0 - UnitPos;
+  }
   XTRACE(DATA, DEB, "interval %d, GlobalPos %f, UnitPos %f", i/2, GlobalPos, UnitPos);
-  return std::make_pair(i/2, UnitPos);
+  return std::make_pair(Tube, UnitPos);
 }
 
 
