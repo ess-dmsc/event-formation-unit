@@ -42,7 +42,7 @@ TEST_F(Timepix3InstrumentTest, Constructor) {
 }
 
 TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  auto Res = timepix3->Timepix3Parser.parse(SingleGoodReadout*, 64);
+  auto Res = timepix3->Timepix3Parser.parse(&SingleGoodReadout, 64);
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.PixelReadouts, 1);
 

@@ -16,7 +16,6 @@
 
 namespace Timepix3 {
 
-// Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
   PixelResult.clear();
