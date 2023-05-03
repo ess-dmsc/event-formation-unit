@@ -32,7 +32,10 @@ protected:
 
   Timepix3Instrument *timepix3;
 
-  void SetUp() override { Settings.ConfigFile = ConfigFile; }
+  void SetUp() override {
+     Settings.ConfigFile = ConfigFile;
+     timepix3 = new Timepix3Instrument(counters, Settings);
+   }
   void TearDown() override {}
 };
 
@@ -42,7 +45,7 @@ TEST_F(Timepix3InstrumentTest, Constructor) {
 }
 
 TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  auto Res = timepix3->Timepix3Parser.parse(&SingleGoodReadout, 64);
+  auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.PixelReadouts, 1);
 
