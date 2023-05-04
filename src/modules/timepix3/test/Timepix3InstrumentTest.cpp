@@ -14,8 +14,8 @@ std::string ConfigFile{"deleteme_instr_config.json"};
 std::string ConfigStr = R"(
   {
     "Detector": "timepix3",
-    "XResolution": 128,
-    "YResolution": 128
+    "XResolution": 256,
+    "YResolution": 256
   }
 )";
 
