@@ -98,6 +98,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   Geom->Stats.TubeErrors = &counters.TubeErrors;
   Geom->Stats.AmplitudeZero = &counters.AmplitudeZero;
   Geom->Stats.OutsideTube = &counters.OutsideTube;
+  Geom->Stats.CalibrationErrors = &counters.CalibrationErrors;
 }
 
 CaenInstrument::~CaenInstrument() {}

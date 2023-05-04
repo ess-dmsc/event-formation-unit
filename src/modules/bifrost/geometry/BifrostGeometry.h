@@ -56,5 +56,7 @@ public:
   const int TubesPerTriplet{3};
   const int TripletsPerRing{15};
   int TubePixellation{100}; ///< Number of pixels along a single He tube.
+
+  const std::pair<int, float> InvalidPos{-1, -1.0};
 };
 } // namespace Caen

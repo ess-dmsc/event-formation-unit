@@ -69,10 +69,14 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
     (*Stats.AmplitudeZero)++;
-    return std::pair(-1, -1.0);
+    return InvalidPos;
   }
 
   float GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
+  if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
+    XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    return InvalidPos;
+  }
   int i;
   float Upper, Lower;
   for (i = 0; i < 6; i+=2) {
@@ -86,12 +90,18 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region",
            AmpA, AmpB, GlobalPos);
     (*Stats.OutsideTube)++;
-    return std::pair(-1, -1.0);
+    return InvalidPos;
   }
 
   ///\brief unit pos is in the interval [0;1] regardless of the width of the
   /// interval
   float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  if ((UnitPos < 0.0) or (UnitPos > 1.0)) {
+    XTRACE(DATA, WAR, "Error UnitPos %f not in unit interval", UnitPos);
+    (*Stats.CalibrationErrors)++;
+    return InvalidPos;
+  }
+
   int Tube = i/2;
   if (Tube == 1) {
     UnitPos = 1.0 - UnitPos;
@@ -109,10 +119,16 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   auto & Calib = CaenCalibration.BifrostCalibration.TripletCalib[GlobalTriplet];
   std::pair<int, float> TubePos = calcTubeAndPos(Calib, Data.AmpA, Data.AmpB);
 
+  if (TubePos.first == -1) {
+    return 0;
+  }
+
   int ylocal = TubePos.first;
   int xlocal = TubePos.second * (TubePixellation - 1);
+  int X = xoff + xlocal;
+  int Y = yoff + ylocal;
 
-  uint32_t pixel = ESSGeom->pixel2D(xoff + xlocal, yoff + ylocal);
+  uint32_t pixel = ESSGeom->pixel2D(X, Y);
   if (pixel == 0) {
     XTRACE(DATA, WAR, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
            xoff, xlocal, yoff, ylocal, pixel);

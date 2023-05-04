@@ -47,6 +47,7 @@ public:
     int64_t *TubeErrors;
     int64_t *AmplitudeZero;
     int64_t *OutsideTube;
+    int64_t *CalibrationErrors;
   } Stats;
 
   Calibration CaenCalibration;
