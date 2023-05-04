@@ -181,6 +181,8 @@ void Timepix3Instrument::processReadouts() {
   /// vector of hits per event - cleared after event pushed to serializer
   std::vector<TimepixHit> ClusteredInTimeEventHits;
 
+  // TODO - handle changing reference time mid-packet
+  Serializer->setReferenceTime(Timepix3Parser.LastEVRTime);
 
   /// Traverse readouts, push back to AllHits
   for (auto &Data : Timepix3Parser.PixelResult) {
