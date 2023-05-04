@@ -11,6 +11,7 @@ class LokiGeometryTest : public TestBase {
 protected:
   int64_t RingErrors{0};
   int64_t FENErrors{0};
+  int64_t AmplitudeZero{0};
   LokiGeometry *geom;
   Config CaenConfiguration;
   void SetUp() override {
@@ -22,6 +23,7 @@ protected:
     geom->setResolution(512);
     geom->Stats.RingErrors = &RingErrors;
     geom->Stats.FENErrors = &FENErrors;
+    geom->Stats.AmplitudeZero = &AmplitudeZero;
     geom->CaenCalibration.nullCalibration(28, 512);
   }
   void TearDown() override {}
@@ -35,11 +37,12 @@ TEST_F(LokiGeometryTest, Constructor) {
 }
 
 TEST_F(LokiGeometryTest, AllZeroes) {
+  AmplitudeZero = 0;
   geom->setResolution(512);
   geom->calcPositions(0, 0, 0, 0);
   ASSERT_EQ(geom->StrawId, 7);  // valid: 0 - 6
   ASSERT_EQ(geom->PosVal, 512); // valid: 0 - 511
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
+  ASSERT_EQ(AmplitudeZero, 1);
 }
 
 TEST_F(LokiGeometryTest, StrawLimits) {

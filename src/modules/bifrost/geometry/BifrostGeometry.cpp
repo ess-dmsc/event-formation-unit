@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -48,32 +48,94 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   return true;
 }
 
-int BifrostGeometry::xOffset(int Ring, int Tube) {
-  return Ring * NPos + (Tube % 3) * (NPos / 3);
+
+int BifrostGeometry::xOffset(int Ring, int TubeId) {
+  int RingOffset = Ring * NPos;
+  int TubeOffset = (TubeId % 3) * TubePixellation;
+  XTRACE(DATA, DEB, "RingOffset %d, TubeOffset %d", RingOffset, TubeOffset);
+  return RingOffset + TubeOffset;
 }
 
-int BifrostGeometry::yOffset(int Tube) {
-  int Triplet = Tube / 3;
-  return Triplet * 3;
+
+int BifrostGeometry::yOffset(int TubeId) {
+  int Arc = TubeId / 3; // 3 == triplets per arc (for a given ring)
+  return Arc * TubesPerTriplet;
 }
 
-int BifrostGeometry::posAlongTube(int AmpA, int AmpB) {
+
+std::pair<int, float> BifrostGeometry::calcTubeAndPos(
+  std::vector<float> &Calib,int AmpA, int AmpB) {
+
   if (AmpA + AmpB == 0) {
-    ///\todo add counter
-    return -1;
+    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+    (*Stats.AmplitudeZero)++;
+    return InvalidPos;
   }
-  return ((NPos - 1) * AmpA) / (AmpA + AmpB);
+
+  float GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
+  if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
+    XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    return InvalidPos;
+  }
+  int i;
+  float Upper, Lower;
+  for (i = 0; i < 6; i+=2) {
+    Lower = Calib[i];
+    Upper = Calib[i+1];
+    if ((GlobalPos >= Lower) and (GlobalPos <= Upper)) {
+      break;
+    }
+  }
+  if (i == 6) {
+    XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region",
+           AmpA, AmpB, GlobalPos);
+    (*Stats.OutsideTube)++;
+    return InvalidPos;
+  }
+
+  ///\brief unit pos is in the interval [0;1] regardless of the width of the
+  /// interval
+  float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  if ((UnitPos < 0.0) or (UnitPos > 1.0)) {
+    XTRACE(DATA, WAR, "Error UnitPos %f not in unit interval", UnitPos);
+    (*Stats.CalibrationErrors)++;
+    return InvalidPos;
+  }
+
+  int Tube = i/2;
+  if (Tube == 1) {
+    UnitPos = 1.0 - UnitPos;
+  }
+  XTRACE(DATA, DEB, "interval %d, GlobalPos %f, UnitPos %f", i/2, GlobalPos, UnitPos);
+  return std::make_pair(Tube, UnitPos);
 }
+
 
 uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);
   int yoff = yOffset(Data.TubeId);
-  int xlocal = xCoord(Data.AmpA, Data.AmpB);
-  int ylocal = yCoord(Data.AmpA, Data.AmpB);
-  uint32_t pixel = ESSGeom->pixel2D(xoff + xlocal, yoff + ylocal);
 
-  XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
-         xoff, xlocal, yoff, ylocal, pixel);
+  int GlobalTriplet = Data.RingId * TripletsPerRing + Data.TubeId;
+  auto & Calib = CaenCalibration.BifrostCalibration.TripletCalib[GlobalTriplet];
+  std::pair<int, float> TubePos = calcTubeAndPos(Calib, Data.AmpA, Data.AmpB);
+
+  if (TubePos.first == -1) {
+    return 0;
+  }
+
+  int ylocal = TubePos.first;
+  int xlocal = TubePos.second * (TubePixellation - 1);
+  int X = xoff + xlocal;
+  int Y = yoff + ylocal;
+
+  uint32_t pixel = ESSGeom->pixel2D(X, Y);
+  if (pixel == 0) {
+    XTRACE(DATA, WAR, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+           xoff, xlocal, yoff, ylocal, pixel);
+  } else {
+    XTRACE(DATA, DEB, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
+           xoff, xlocal, yoff, ylocal, pixel);
+  }
 
   return pixel;
 }

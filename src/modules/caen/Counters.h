@@ -33,6 +33,8 @@ struct Counters {
   int64_t RingErrors;
   int64_t FENErrors;
   int64_t TubeErrors;
+  int64_t AmplitudeZero;
+  int64_t OutsideTube;
   int64_t CalibrationErrors;
   int64_t ReadoutsClampLow;
   int64_t ReadoutsClampHigh;

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file, ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,12 +19,19 @@ protected:
   int64_t RingErrors{0};
   int64_t FENErrors{0};
   int64_t TubeErrors{0};
+  int64_t AmplitudeZero{0};
+  int64_t OutsideTube{0};
+  std::vector<float> NullCalib{0.000, 0.333, 0.333, 0.667, 0.667, 1.000};
+  std::vector<float> ManualCalib{0.030, 0.290, 0.363, 0.627, 0.705, 0.97};
+
   void SetUp() override {
     geom = new BifrostGeometry(CaenConfiguration);
     geom->NPos = 300;
     geom->Stats.RingErrors = &RingErrors;
     geom->Stats.FENErrors = &FENErrors;
     geom->Stats.TubeErrors = &TubeErrors;
+    geom->Stats.AmplitudeZero = &AmplitudeZero;
+    geom->Stats.OutsideTube = &OutsideTube;
   }
   void TearDown() override {}
 };
@@ -60,9 +67,18 @@ TEST_F(BifrostGeometryTest, XOffset) {
 }
 
 TEST_F(BifrostGeometryTest, Position) {
-  ASSERT_EQ(geom->posAlongTube(0, 0), -1);
-  ASSERT_EQ(geom->posAlongTube(0, 1), 0);
-  ASSERT_EQ(geom->posAlongTube(1, 0), 299);
+  ASSERT_EQ(geom->calcTubeAndPos(NullCalib, 0, 0).first, -1);
+  ASSERT_EQ(geom->calcTubeAndPos(NullCalib, 0, 1).second, 0.0);
+  ASSERT_EQ(geom->calcTubeAndPos(NullCalib, 1, 0).second, 1.0);
+}
+
+TEST_F(BifrostGeometryTest, PosOutsideInterval) {
+  // geom->CaenCalibration.BifrostCalibration.Calib =
+  //       geom->CaenCalibration.BifrostCalibration.Intervals;
+  ASSERT_EQ(OutsideTube, 0);
+  std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, 100,0);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(OutsideTube, 1);
 }
 
 TEST_F(BifrostGeometryTest, CalcPixel) {
