@@ -27,16 +27,14 @@ TEST_F(MagicGeometryTest, PixelOffsets) {
 
 TEST_F(MagicGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::BwEndCap;
-  Readout.Unused = 6;
   ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
 
-  // Parms.Type = Config::ModuleType::Mantle;
-  // Parms.P2.Cassette = 0;
-  // ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 229377);
-  //
-  // Parms.Type = Config::ModuleType::HR;
-  // Parms.P2.Rotate = 0;
-  // ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
+  Parms.Type = Config::ModuleType::Mantle;
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1);
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) < 245761);
+
+  Parms.Type = Config::ModuleType::MagicB;
+  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 245761);
 }
 
 int main(int argc, char **argv) {

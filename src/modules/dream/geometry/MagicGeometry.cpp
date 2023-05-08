@@ -52,18 +52,17 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
 int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
-  case Config::MagicB:
-    RetVal = 245760;
-    break;
-  case Config::Mantle:
-    RetVal = 0;
-    break;
-  default:
-    XTRACE(DATA, WAR, "Module type not valid for MAGIC");
-    break;
+    case Config::Mantle:
+      RetVal = 0;
+      break;
+    case Config::MagicB:
+      RetVal = 245760;
+      break;
+    default:
+      XTRACE(DATA, WAR, "Module type not valid for MAGIC");
+      break;
   }
   return RetVal;
-  ;
 }
 
 } // namespace Dream

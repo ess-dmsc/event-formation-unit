@@ -14,7 +14,7 @@
 
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Mantle.h>
-#include <dream/geometry/SUMO.h>
+#include <dream/geometry/DetB.h>
 #include <dream/readout/DataParser.h>
 
 namespace Dream {
@@ -29,7 +29,7 @@ public:
   /// \brief return pixel id from the digital identifiers
   int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
-  SUMO magicb{128,512};
+  DetB magicb{256,512};
   Mantle mantle{128};
 };
 } // namespace Dream
