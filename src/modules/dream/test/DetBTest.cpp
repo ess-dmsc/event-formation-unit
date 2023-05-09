@@ -22,7 +22,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(DetBTest, InvalidSector) {
   Parms.P1.Sector = 7;
   ASSERT_NE(detb.getPixelId(Parms, Data), 0);
@@ -41,7 +40,7 @@ TEST_F(DetBTest, GetXInvalidCassette) {
   uint8_t Sector{0};
   uint8_t Counter{0};
   for (int Cassette = 0; Cassette < 16; Cassette++) {
-  //                      Cassette
+    //                      Cassette
     ASSERT_NE(detb.getX(Sector, Cassette, Counter), -1);
   }
   ASSERT_EQ(detb.getX(Sector, 16, Counter), -1);
@@ -80,12 +79,12 @@ TEST_F(DetBTest, GetYInvalidStrip) {
 
 TEST_F(DetBTest, TestingLogicalGeometryCorners) {
   //                 sec cas ctr
-  ASSERT_EQ(detb.getX(0,  0, 0),   0); // left
+  ASSERT_EQ(detb.getX(0, 0, 0), 0);    // left
   ASSERT_EQ(detb.getX(7, 15, 1), 255); // right
 
   //                wire strip
-  ASSERT_EQ(detb.getY( 0,  0),   0);   // top
-  ASSERT_EQ(detb.getY(15, 31), 511);   // bottom
+  ASSERT_EQ(detb.getY(0, 0), 0);     // top
+  ASSERT_EQ(detb.getY(15, 31), 511); // bottom
 }
 
 int main(int argc, char **argv) {

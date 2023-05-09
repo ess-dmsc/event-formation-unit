@@ -74,7 +74,8 @@ TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   Settings.ConfigFile = ConfigFileMagic;
   DreamInstrument Dream(counters, Settings);
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),  245760 + 1);
+  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),
+            245760 + 1);
 }
 
 TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
@@ -168,7 +169,8 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
-  saveBuffer(ConfigFileMagic, (void *)ConfigStrMagic.c_str(), ConfigStrMagic.size());
+  saveBuffer(ConfigFileMagic, (void *)ConfigStrMagic.c_str(),
+             ConfigStrMagic.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
