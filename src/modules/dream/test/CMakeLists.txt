@@ -13,6 +13,12 @@ set(SUMOGeometryTest_SRC
   SUMOGeometryTest.cpp)
 create_test_executable(SUMOGeometryTest)
 
+set(DetBTest_INC
+  ${DREAM_BASE_DIR}/geometry/DetB.h)
+set(DetBTest_SRC
+  DetBTest.cpp)
+create_test_executable(DetBTest)
+
 
 set(DreamGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.h

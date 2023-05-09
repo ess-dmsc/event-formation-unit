@@ -93,7 +93,11 @@ public:
       XTRACE(EVENT, WAR, "Invalid Strip: %u", Strip);
       return -1;
     }
-    return getYoffset(Strip) + getLocalYCoord(Wire);
+
+    int YOffset = getYoffset(Strip);
+    int YLocal = getLocalYCoord(Wire);
+    XTRACE(EVENT, DEB, "yoffset: %d, localy %d", YOffset, YLocal);
+    return  YOffset + YLocal;
   }
 
   ESSGeometry Geometry{1, 1, 1, 1}; // initialised by constructor
@@ -104,9 +108,9 @@ private:
 
   uint16_t getLocalYCoord(uint8_t Wire) { return Wire; }
 
-  uint16_t getXoffset(uint8_t Sector) { return Sector * 32; }
+  uint16_t getXoffset(uint8_t Sector) { return Sector * StripsPerCass; }
 
-  uint16_t getYoffset(uint8_t Strip) { return Strip * 32; }
+  uint16_t getYoffset(uint8_t Strip) { return Strip * WiresPerCounter; }
 };
 
 } // namespace Dream
