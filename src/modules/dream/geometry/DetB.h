@@ -53,8 +53,7 @@ public:
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 
-    XTRACE(EVENT, DEB,
-           "Sector %u, Cassette %u, Counter %u, Wire %u, Strip %u",
+    XTRACE(EVENT, DEB, "Sector %u, Cassette %u, Counter %u, Wire %u, Strip %u",
            Sector, Cassette, Counter, Wire, Strip);
 
     uint16_t X = getX(Sector, Cassette, Counter);
@@ -97,7 +96,7 @@ public:
     int YOffset = getYoffset(Strip);
     int YLocal = getLocalYCoord(Wire);
     XTRACE(EVENT, DEB, "yoffset: %d, localy %d", YOffset, YLocal);
-    return  YOffset + YLocal;
+    return YOffset + YLocal;
   }
 
   ESSGeometry Geometry{1, 1, 1, 1}; // initialised by constructor

@@ -24,14 +24,12 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum DetectorInstance {DREAM, MAGIC, NONE};
-  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, MagicB};
-  std::map<std::string, ModuleType> ModuleTypeMap = {{"BwEndCap", BwEndCap},
-                                                     {"FwEndCap", FwEndCap},
-                                                     {"Mantle", Mantle},
-                                                     {"HR", HR},
-                                                     {"SANS", SANS},
-                                                     {"MagicB", MagicB}};
+  enum DetectorInstance { DREAM, MAGIC, NONE };
+  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, MagicB };
+  std::map<std::string, ModuleType> ModuleTypeMap = {
+      {"BwEndCap", BwEndCap}, {"FwEndCap", FwEndCap},
+      {"Mantle", Mantle},     {"HR", HR},
+      {"SANS", SANS},         {"MagicB", MagicB}};
 
   struct ModuleParms {
     bool Initialised{false};
