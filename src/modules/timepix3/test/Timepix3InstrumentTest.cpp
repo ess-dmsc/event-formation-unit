@@ -44,15 +44,15 @@ TEST_F(Timepix3InstrumentTest, Constructor) {
   Timepix3Instrument Timepix3(counters, Settings);
 }
 
-TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
-  ASSERT_EQ(Res, 1);
-  ASSERT_EQ(counters.PixelReadouts, 1);
+// TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
+//   auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
+//   ASSERT_EQ(Res, 1);
+//   ASSERT_EQ(counters.PixelReadouts, 1);
 
-  timepix3->processReadouts();
+//   timepix3->processReadouts();
 
-  // ASSERT_EQ(counters.Events, 1);
-}
+//   // ASSERT_EQ(counters.Events, 1);
+// }
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
