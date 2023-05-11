@@ -33,13 +33,12 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
                                     DataParser::DreamReadout &Data) {
   if (DreamConfiguration.Instance == Config::DREAM) {
-      return DreamGeom.getPixel(Parms, Data);
+    return DreamGeom.getPixel(Parms, Data);
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
-      return MagicGeom.getPixel(Parms, Data);
+    return MagicGeom.getPixel(Parms, Data);
   } else {
     return 0;
   }
-
 }
 
 void DreamInstrument::processReadouts() {

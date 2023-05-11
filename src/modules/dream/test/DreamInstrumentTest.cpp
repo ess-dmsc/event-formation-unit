@@ -25,6 +25,19 @@ std::string ConfigStr = R"(
   }
 )";
 
+std::string ConfigFileMagic{"deleteme_dreaminstrumenttestmagic.json"};
+std::string ConfigStrMagic = R"(
+  {
+    "Detector" : "MAGIC",
+
+    "MaxPulseTimeDiffNS" : 16,
+
+    "Config" : [
+      { "Ring" :  0, "FEN":  0, "Type": "MagicB"}
+    ]
+  }
+)";
+
 class DreamInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
@@ -45,10 +58,24 @@ TEST_F(DreamInstrumentTest, Constructor) {
   ASSERT_EQ(Dream.counters.Readouts, 0);
 }
 
+TEST_F(DreamInstrumentTest, ConstructorMagic) {
+  Settings.ConfigFile = ConfigFileMagic;
+  DreamInstrument Dream(counters, Settings);
+  ASSERT_EQ(Dream.counters.Readouts, 0);
+}
+
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, Settings);
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
+}
+
+TEST_F(DreamInstrumentTest, CalcPixelMagic) {
+  Settings.ConfigFile = ConfigFileMagic;
+  DreamInstrument Dream(counters, Settings);
+  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),
+            245760 + 1);
 }
 
 TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
@@ -142,10 +169,13 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
 
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
+  saveBuffer(ConfigFileMagic, (void *)ConfigStrMagic.c_str(),
+             ConfigStrMagic.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(ConfigFile);
+  deleteFile(ConfigFileMagic);
   return RetVal;
 }
