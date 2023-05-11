@@ -50,7 +50,7 @@ private:
 
   /// \brief log an error messages after this many attempts
   /// multiply with reconnectDelayUs to determine when this occurs
-  const uint64_t MaxReconnectAttempts{240};
+  const uint64_t MaxReconnectAttempts{2};
 
   /// \brief delay in us between reconnection attempts
   const uint64_t ReconnectDelayUS{30'000'000};

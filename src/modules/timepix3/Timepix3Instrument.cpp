@@ -14,8 +14,8 @@
 #include <timepix3/Timepix3Instrument.h>
 #include <math.h>     
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
@@ -145,8 +145,8 @@ void Timepix3Instrument::formEvents(std::vector<TimepixHit> ClusteredInTimeEvent
       
 
       for(std::vector<TimepixHit> EventHits : ClusteredInSpaceEventHits){
-        if (EventHits.size() < MinEventSizeHits) {
-          XTRACE(DATA, DEB, "Not enough events in cluster, got %u, minimum %u", EventHits.size(), MinEventSizeHits);
+        if (EventHits.size() < Timepix3Configuration.MinEventSizeHits) {
+          XTRACE(DATA, DEB, "Not enough events in cluster, got %u, minimum %u", EventHits.size(), Timepix3Configuration.MinEventSizeHits);
           continue;
         }
       
@@ -158,8 +158,8 @@ void Timepix3Instrument::formEvents(std::vector<TimepixHit> ClusteredInTimeEvent
           SumY += EventHit.Y;
           SumToT += EventHit.ToT;
         }
-        if (SumToT < MinimumToTSum) {
-          XTRACE(DATA, DEB, "Not high enough ToT, got %u, minimum %u", SumToT, MinimumToTSum);
+        if (SumToT < Timepix3Configuration.MinimumToTSum) {
+          XTRACE(DATA, DEB, "Not high enough ToT, got %u, minimum %u", SumToT, Timepix3Configuration.MinimumToTSum);
           continue;
         }
         uint32_t X = SumX / EventHits.size();
@@ -168,7 +168,7 @@ void Timepix3Instrument::formEvents(std::vector<TimepixHit> ClusteredInTimeEvent
         uint64_t ToF = EventHits.front().TimeOfFlight;
         counters.TxBytes += Serializer->addEvent(ToF, PixelId);
         counters.Events++;
-        std::cout << X << " " << Y << " "<< ToF << std::endl;
+        // std::cout << X << " " << Y << " "<< ToF << std::endl;
         XTRACE(DATA, DEB, "Added event to serializer, hits: %u, ToF: %u, PixelId: %u", EventHits.size(), ToF, PixelId);
       }
 }
@@ -218,8 +218,8 @@ void Timepix3Instrument::processReadouts() {
     // std::cout << TimeOfFlight << std::endl;
 
     if ((not ClusteredInTimeEventHits.empty()) and
-        (TimeOfFlight > ClusteredInTimeEventHits.back().TimeOfFlight + MaxTimeGapNS)) {
-      XTRACE(DATA, DEB, "Time gap greater than %u, forming new events", MaxTimeGapNS);
+        (TimeOfFlight > ClusteredInTimeEventHits.back().TimeOfFlight + Timepix3Configuration.MaxTimeGapNS)) {
+      XTRACE(DATA, DEB, "Time gap greater than %u, forming new events", Timepix3Configuration.MaxTimeGapNS);
       
       formEvents(ClusteredInTimeEventHits);
       ClusteredInTimeEventHits.clear();

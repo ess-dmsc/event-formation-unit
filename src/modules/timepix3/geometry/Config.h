@@ -32,5 +32,10 @@ public:
   uint32_t ReadoutConstDelayNS{0};         /// added to readout data timestamp
   uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
   uint32_t MaxTOFNS{800000000};
+  
+  uint32_t MaxTimeGapNS{1};
+  uint32_t MinEventSizeHits{1};
+  uint32_t MinimumToTSum{0};
+
 };
 } // namespace Timepix3

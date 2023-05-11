@@ -11,8 +11,8 @@
 #include <common/debug/Trace.h>
 #include <timepix3/geometry/Config.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
@@ -45,6 +45,24 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
         ConfigFile);
     throw std::runtime_error("Invalid Json file");
+  }
+
+  try {
+    MaxTimeGapNS = root["MaxTimeGapNS"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MaxTimeGapNS");
+  }
+
+  try {
+    MinEventSizeHits = root["MinEventSizeHits"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MinEventSizeHits");
+  }
+
+  try {
+    MinimumToTSum = root["MinimumToTSum"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MinimumToTSum");
   }
 }
 
