@@ -61,6 +61,11 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
     XTRACE(INIT, ALW, "Loading calibration file %s",
            Settings.CalibFile.c_str());
     Geom->CaenCalibration = Calibration(Settings.CalibFile);
+    if (settings.DetectorName == "loki") {
+      Geom->CaenCalibration.loadLokiParameters();
+    } else if (settings.DetectorName == "bifrost") {
+      Geom->CaenCalibration.loadBifrostParameters();
+    }
   }
 
   if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
@@ -91,6 +96,9 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   Geom->Stats.FENErrors = &counters.FENErrors;
   Geom->Stats.RingErrors = &counters.RingErrors;
   Geom->Stats.TubeErrors = &counters.TubeErrors;
+  Geom->Stats.AmplitudeZero = &counters.AmplitudeZero;
+  Geom->Stats.OutsideTube = &counters.OutsideTube;
+  Geom->Stats.CalibrationErrors = &counters.CalibrationErrors;
 }
 
 CaenInstrument::~CaenInstrument() {}
@@ -103,7 +111,7 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
 
   uint32_t pixel = Geom->calcPixel(Data);
-  counters.ReadoutsBadAmpl = Geom->Stats.AmplitudeZero;
+  counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }
@@ -176,10 +184,10 @@ void CaenInstrument::processReadouts() {
     uint32_t PixelId = calcPixel(Data);
 
     if (PixelId == 0) {
-      XTRACE(DATA, ERR, "Pixel error");
+      XTRACE(EVENT, WAR, "Pixel error");
       counters.PixelErrors++;
     } else {
-      XTRACE(DATA, DEB, "Valid data, adding to serializer");
+      XTRACE(EVENT, DEB, "Pixel %u, TOF %u", PixelId, TimeOfFlight);
       Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
       SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);

@@ -6,7 +6,6 @@
 /// \brief using nlohmann json parser to read calibrations from file
 //===----------------------------------------------------------------------===//
 
-#include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <modules/caen/geometry/Calibration.h>
@@ -23,9 +22,48 @@ Calibration::Calibration() {}
 Calibration::Calibration(std::string CalibrationFile) {
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
 
-  nlohmann::json root = from_json_file(CalibrationFile);
   try {
-    auto CaenCalibration = root["CaenCalibration"];
+    root = from_json_file(CalibrationFile);
+  } catch (...) {
+    LOG(INIT, Sev::Error, "Caen calibration - error: Invalid Json file: {}",
+        CalibrationFile);
+    throw std::runtime_error("Invalid Json file for CAEN");
+  }
+}
+
+///\brief load BIFROST specific calibration parameters
+void Calibration::loadBifrostParameters() {
+  try {
+    auto BifrostCalibJson = root["BifrostCalibration"];
+
+    auto Intervals = BifrostCalibJson["Intervals"];
+    for (auto & Triplet : Intervals) {
+      uint32_t TripletId = Triplet[0].get<uint32_t>();
+      if (TripletId > 44) {
+        XTRACE(INIT, ERR, "Invalid TripletId %u (Max is 44)", TripletId);
+        throw std::runtime_error("Invalid TripletId (max 44)");
+      }
+      float p0 = Triplet[1].get<float>();
+      float p1 = Triplet[2].get<float>();
+      float p2 = Triplet[3].get<float>();
+      float p3 = Triplet[4].get<float>();
+      float p4 = Triplet[5].get<float>();
+      float p5 = Triplet[6].get<float>();
+      std::vector<float> Calib{p0, p1, p2, p3, p4, p5};
+      BifrostCalibration.TripletCalib[TripletId] = Calib;
+    }
+
+  }  catch (...) {
+      throw std::runtime_error("Invalid BIFROST calibration");
+  }
+
+  MaxPixelId = 45 * 3 * 100; ///\todo I know
+}
+
+
+void Calibration::loadLokiParameters() {
+  try {
+    auto CaenCalibration = root["LokiCalibration"];
 
     uint32_t NTubes = CaenCalibration["ntubes"].get<uint32_t>();
     uint32_t NStraws = CaenCalibration["nstraws"].get<uint32_t>();
@@ -68,9 +106,7 @@ Calibration::Calibration(std::string CalibrationFile) {
     MaxPixelId = NumberOfStraws * StrawResolution;
 
   } catch (...) {
-    LOG(INIT, Sev::Error, "Caen calibration - error: Invalid Json file: {}",
-        CalibrationFile);
-    throw std::runtime_error("Invalid Json file");
+    throw std::runtime_error("Invalid LOKI calibration");
   }
 }
 

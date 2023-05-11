@@ -95,7 +95,7 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
            " Denominator: %d,  A %d, B %d, C %d, D %d",
            StrawNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
            AmplitudeD);
-    Stats.AmplitudeZero++;
+    (*Stats.AmplitudeZero)++;
     StrawId = NStraws;
     PosVal = NPos;
     return false;

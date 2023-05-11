@@ -66,7 +66,7 @@ std::string InvalidCoeffStr = R"(
 std::string StrawMappingNullFile{"deleteme_caencalib_strawmapping_null.json"};
 std::string StrawMappingNullStr = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 256,
@@ -84,7 +84,7 @@ std::string StrawMappingConstFile{
     "deleteme_caencalib_strawmapping_strawid.json"};
 std::string StrawMappingConstStr = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 256,
@@ -146,6 +146,7 @@ TEST_F(CalibrationTest, ClampLowAndHigh) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
              StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
+  calib.loadLokiParameters();
   int64_t ClampLow = 0;
   int64_t ClampHigh = 0;
   calib.Stats.ClampLow = &ClampLow;
@@ -168,6 +169,7 @@ TEST_F(CalibrationTest, LoadCalib) {
   saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
              StrawMappingNullStr.size());
   Calibration calib = Calibration(StrawMappingNullFile);
+  calib.loadLokiParameters();
   ASSERT_EQ(calib.StrawCalibration.size(), 3);
   ASSERT_EQ(calib.getMaxPixel(), 3 * 256);
   deleteFile(StrawMappingNullFile);
@@ -181,6 +183,7 @@ TEST_F(CalibrationTest, LoadCalibConst) {
   uint16_t Resolution{256};
 
   Calibration calib = Calibration(StrawMappingConstFile);
+  calib.loadLokiParameters();
   ASSERT_EQ(calib.StrawCalibration.size(), Straws);
   ASSERT_EQ(calib.getMaxPixel(), Straws * Resolution);
 
@@ -202,21 +205,24 @@ TEST_F(CalibrationTest, NOTJson) {
 TEST_F(CalibrationTest, BadStrawOrder) {
   saveBuffer(BadStrawOrderFile, (void *)BadStrawOrderStr.c_str(),
              BadStrawOrderStr.size());
-  ASSERT_ANY_THROW(Calibration calib = Calibration(BadStrawOrderFile));
+  Calibration calib = Calibration(BadStrawOrderFile);
+  ASSERT_ANY_THROW(calib.loadLokiParameters());
   deleteFile(BadStrawOrderFile);
 }
 
 TEST_F(CalibrationTest, StrawMismatch) {
   saveBuffer(StrawMismatchFile, (void *)StrawMismatchStr.c_str(),
              StrawMismatchStr.size());
-  ASSERT_ANY_THROW(Calibration calib = Calibration(StrawMismatchFile));
+  Calibration calib = Calibration(StrawMismatchFile);
+  ASSERT_ANY_THROW(calib.loadLokiParameters());
   deleteFile(StrawMismatchFile);
 }
 
 TEST_F(CalibrationTest, InvalidCoeff) {
   saveBuffer(InvalidCoeffFile, (void *)InvalidCoeffStr.c_str(),
              InvalidCoeffStr.size());
-  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCoeffFile));
+  Calibration calib = Calibration(InvalidCoeffFile);
+  ASSERT_ANY_THROW(calib.loadLokiParameters());
   deleteFile(InvalidCoeffFile);
 }
 
