@@ -16,7 +16,7 @@
 namespace Dream {
 
 int DreamGeometry::getPixel(Config::ModuleParms &Parms,
-                          DataParser::DreamReadout &Data) {
+                            DataParser::DreamReadout &Data) {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);

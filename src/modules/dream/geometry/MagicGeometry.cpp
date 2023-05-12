@@ -19,7 +19,7 @@
 namespace Dream {
 
 int MagicGeometry::getPixel(Config::ModuleParms &Parms,
-                          DataParser::DreamReadout &Data) {
+                            DataParser::DreamReadout &Data) {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
@@ -43,7 +43,7 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
     return 0;
   }
 
-  int GlobalPixel = Offset  + Pixel;
+  int GlobalPixel = Offset + Pixel;
   XTRACE(DATA, DEB, "Local Pixel: %d, Global Pixel: %d", Pixel, GlobalPixel);
   return GlobalPixel;
 }
@@ -52,18 +52,17 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
 int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
-  case Config::MagicB:
-    RetVal = 245760;
-    break;
   case Config::Mantle:
     RetVal = 0;
+    break;
+  case Config::MagicB:
+    RetVal = 245760;
     break;
   default:
     XTRACE(DATA, WAR, "Module type not valid for MAGIC");
     break;
   }
   return RetVal;
-  ;
 }
 
 } // namespace Dream

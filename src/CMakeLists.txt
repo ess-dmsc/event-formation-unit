@@ -46,6 +46,7 @@ add_subdirectory(modules)
 add_subdirectory(generators)
 
 get_filename_component(DREAM_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/DreamEndcap.json" ABSOLUTE)
+get_filename_component(MAGIC_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/MagicInst.json" ABSOLUTE)
 get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
 get_filename_component(TREX_CFG_FILE "${ESS_MODULE_DIR}/trex/configs/trex.json" ABSOLUTE)
 get_filename_component(TTLMON_CFG_FILE "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamon.json" ABSOLUTE)
@@ -60,6 +61,7 @@ get_filename_component(ODIN_CFG_FILE "${ESS_MODULE_DIR}/timepix3/configs/timepix
 add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
     COMMAND ${CMAKE_COMMAND} -E copy ${DREAM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${MAGIC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${FREIA_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${TREX_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${TTLMON_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
@@ -78,6 +80,7 @@ add_custom_target(runefu
     COMMAND miracles "-f" "../configs/miracles.json" "-s" "2" "--nohwcheck"
     COMMAND perfgen "-s" "1" "--nohwcheck"
     COMMAND dream "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
+    COMMAND magic "-f" "../configs/MagicInst.json" "-s" "2" "--nohwcheck"
     COMMAND freia "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND trex "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"

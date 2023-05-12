@@ -15,9 +15,9 @@
 #include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
+#include <dream/geometry/Config.h>
 #include <dream/geometry/DreamGeometry.h>
 #include <dream/geometry/MagicGeometry.h>
-#include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 
 namespace Dream {

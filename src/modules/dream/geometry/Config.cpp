@@ -41,9 +41,9 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Instance is MAGIC Instrument");
     XTRACE(INIT, ALW, "Instance is MAGIC Instrument");
   } else {
-    errorExit(fmt::format("Invalid instrument name {}, expected DREAM or MAGIC", Name));
+    errorExit(fmt::format("Invalid instrument name {}, expected DREAM or MAGIC",
+                          Name));
   }
-
 
   try {
     MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<unsigned int>();

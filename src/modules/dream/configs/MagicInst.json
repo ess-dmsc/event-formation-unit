@@ -5,8 +5,8 @@
   "MaxPulseTimeDiffNS" : 5000000000,
 
   "Config" : [
-  { "Ring" :  0, "FEN":  0, "Type": "Mantle", "Index" : 0, "Index2" : 0},
-  { "Ring" :  0, "FEN":  1, "Type": "MagicB", "Index" : 0, "Index2" : 0}
-]
+    { "Ring" :  0, "FEN":  0, "Type": "Mantle", "Index" : 0, "Index2" : 0},
+    { "Ring" :  0, "FEN":  1, "Type": "MagicB", "Index" : 0, "Index2" : 0}
+  ]
 
 }
