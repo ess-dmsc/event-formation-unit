@@ -4,39 +4,39 @@
 ///
 /// \file
 ///
-/// \brief Unit test for DetB
+/// \brief Unit test for PADetector
 ///
 //===----------------------------------------------------------------------===//
 #include <common/testutils/TestBase.h>
-#include <dream/geometry/DetB.h>
+#include <dream/geometry/PADetector.h>
 
 using namespace Dream;
 
-class DetBTest : public TestBase {
+class PADetectorTest : public TestBase {
 protected:
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
 
   Config::ModuleParms Parms{false, Config::ModuleType::MagicB, {0}, {0}};
-  DetB detb{256, 512};
+  PADetector detb{256, 512};
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(DetBTest, InvalidSector) {
+TEST_F(PADetectorTest, InvalidSector) {
   Parms.P1.Sector = 7;
   ASSERT_NE(detb.getPixelId(Parms, Data), 0);
   Parms.P1.Sector = 8;
   ASSERT_EQ(detb.getPixelId(Parms, Data), 0);
 }
 
-TEST_F(DetBTest, ValidSector) {
+TEST_F(PADetectorTest, ValidSector) {
   for (uint8_t Sector = 0; Sector < 8; Sector++) {
     Parms.P1.Sector = Sector;
     ASSERT_NE(detb.getPixelId(Parms, Data), 0);
   }
 }
 
-TEST_F(DetBTest, GetXInvalidCassette) {
+TEST_F(PADetectorTest, GetXInvalidCassette) {
   uint8_t Sector{0};
   uint8_t Counter{0};
   for (int Cassette = 0; Cassette < 16; Cassette++) {
@@ -46,7 +46,7 @@ TEST_F(DetBTest, GetXInvalidCassette) {
   ASSERT_EQ(detb.getX(Sector, 16, Counter), -1);
 }
 
-TEST_F(DetBTest, GetXInvalidCounter) {
+TEST_F(PADetectorTest, GetXInvalidCounter) {
   uint8_t Sector{0};
   uint8_t Cassette{1};
   //                            Sumo  Cassette  Counter
@@ -55,7 +55,7 @@ TEST_F(DetBTest, GetXInvalidCounter) {
   ASSERT_EQ(detb.getX(Sector, Cassette, 2), -1);
 }
 
-TEST_F(DetBTest, GetYInvalidWire) {
+TEST_F(PADetectorTest, GetYInvalidWire) {
   //                    Wire, Strip
   ASSERT_NE(detb.getY(0, 0), -1);
   ASSERT_NE(detb.getY(15, 0), -1);
@@ -66,7 +66,7 @@ TEST_F(DetBTest, GetYInvalidWire) {
   ASSERT_EQ(detb.getY(16, 15), -1);
 }
 
-TEST_F(DetBTest, GetYInvalidStrip) {
+TEST_F(PADetectorTest, GetYInvalidStrip) {
   //               Wire, Strip
   ASSERT_NE(detb.getY(0, 0), -1);
   ASSERT_NE(detb.getY(0, 31), -1);
@@ -77,7 +77,7 @@ TEST_F(DetBTest, GetYInvalidStrip) {
   ASSERT_EQ(detb.getY(15, 32), -1);
 }
 
-TEST_F(DetBTest, TestingLogicalGeometryCorners) {
+TEST_F(PADetectorTest, TestingLogicalGeometryCorners) {
   //                 sec cas ctr
   ASSERT_EQ(detb.getX(0, 0, 0), 0);    // left
   ASSERT_EQ(detb.getX(7, 15, 1), 255); // right

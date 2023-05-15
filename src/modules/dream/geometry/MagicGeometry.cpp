@@ -26,11 +26,11 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
 
   switch (Parms.Type) {
   case Config::MagicB:
-    Pixel = magicb.getPixelId(Parms, Data);
+    Pixel = padetector.getPixelId(Parms, Data);
     break;
 
   case Config::Mantle:
-    Pixel = mantle.getPixelId(Parms, Data);
+    Pixel = frdetector.getPixelId(Parms, Data);
     break;
 
   default:

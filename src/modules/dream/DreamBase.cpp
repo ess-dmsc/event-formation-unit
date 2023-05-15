@@ -101,14 +101,14 @@ void DreamBase::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
-  Producer EventProducer(EFUSettings.KafkaBroker, "dream_detector",
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                          KafkaCfg.CfgParms);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "dream", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, EFUSettings.DetectorName, Produce);
   Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
 
   unsigned int DataIndex;
@@ -128,8 +128,7 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::DREAM);
+      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, Dream.Type);
       Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {

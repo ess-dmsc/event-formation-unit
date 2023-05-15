@@ -50,6 +50,7 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
   ESSReadout::ESSTime Time;
+  ESSReadout::Parser::DetectorType Type;
   EV44Serializer *Serializer;
   DreamGeometry DreamGeom;
   MagicGeometry MagicGeom;
