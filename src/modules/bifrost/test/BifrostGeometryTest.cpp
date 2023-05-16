@@ -21,6 +21,7 @@ protected:
   int64_t TubeErrors{0};
   int64_t AmplitudeZero{0};
   int64_t OutsideTube{0};
+  int64_t CalibrationErrors{0};
   std::vector<float> NullCalib{0.000, 0.333, 0.333, 0.667, 0.667, 1.000};
   std::vector<float> ManualCalib{0.030, 0.290, 0.363, 0.627, 0.705, 0.97};
 
@@ -32,6 +33,7 @@ protected:
     geom->Stats.TubeErrors = &TubeErrors;
     geom->Stats.AmplitudeZero = &AmplitudeZero;
     geom->Stats.OutsideTube = &OutsideTube;
+    geom->Stats.CalibrationErrors = &CalibrationErrors;
   }
   void TearDown() override {}
 };
@@ -79,6 +81,19 @@ TEST_F(BifrostGeometryTest, PosOutsideInterval) {
   std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, 100,0);
   ASSERT_EQ(Result.first, -1);
   ASSERT_EQ(OutsideTube, 1);
+}
+
+TEST_F(BifrostGeometryTest, BadAmplitudes) {
+  // A = -1, B = 20 -> pos < 0
+  std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, -1, 20);
+  ASSERT_EQ(Result.first, -1);
+}
+
+TEST_F(BifrostGeometryTest, MiddleTube) {
+  // 11/(11+9) > 0.5, middle tube swaps so pos should be < 0.5
+  std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, 11, 9);
+  ASSERT_EQ(Result.first, 1);
+  ASSERT_TRUE(Result.second < 0.5);
 }
 
 TEST_F(BifrostGeometryTest, CalcPixel) {
