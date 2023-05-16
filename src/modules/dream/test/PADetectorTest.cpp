@@ -16,7 +16,7 @@ class PADetectorTest : public TestBase {
 protected:
   DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
 
-  Config::ModuleParms Parms{false, Config::ModuleType::MagicB, {0}, {0}};
+  Config::ModuleParms Parms{false, Config::ModuleType::PA, {0}, {0}};
   PADetector detb{256, 512};
   void SetUp() override {}
   void TearDown() override {}

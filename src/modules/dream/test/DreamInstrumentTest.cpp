@@ -33,7 +33,7 @@ std::string ConfigStrMagic = R"(
     "MaxPulseTimeDiffNS" : 16,
 
     "Config" : [
-      { "Ring" :  0, "FEN":  0, "Type": "MagicB"}
+      { "Ring" :  0, "FEN":  0, "Type": "PADetector"}
     ]
   }
 )";

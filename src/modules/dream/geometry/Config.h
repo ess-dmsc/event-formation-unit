@@ -24,12 +24,21 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum DetectorInstance { DREAM, MAGIC, NONE };
-  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, MagicB };
+  enum DetectorInstance { NONE, DREAM, MAGIC};
+  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, FR, PA};
+  // clang-format off
   std::map<std::string, ModuleType> ModuleTypeMap = {
-      {"BwEndCap", BwEndCap}, {"FwEndCap", FwEndCap},
-      {"Mantle", Mantle},     {"HR", HR},
-      {"SANS", SANS},         {"MagicB", MagicB}};
+      // DREAM Detectors
+      {"BwEndCap", BwEndCap},
+      {"FwEndCap", FwEndCap},
+      {"Mantle", Mantle},
+      {"HR", HR},
+      {"SANS", SANS},
+      // MAGIC Detectors
+      {"PADetector", PA},
+      {"FRDetector", FR}
+    };
+  // clang-format on
 
   struct ModuleParms {
     bool Initialised{false};

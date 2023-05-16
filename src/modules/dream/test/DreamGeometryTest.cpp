@@ -28,7 +28,7 @@ TEST_F(DreamGeometryTest, PixelOffsets) {
 }
 
 TEST_F(DreamGeometryTest, PixelOffsetsError) {
-  ASSERT_EQ(geometry.getPixelOffset(Config::MagicB), -1);
+  ASSERT_EQ(geometry.getPixelOffset(Config::PA), -1);
 }
 
 TEST_F(DreamGeometryTest, GetPixel) {
@@ -46,7 +46,7 @@ TEST_F(DreamGeometryTest, GetPixel) {
 }
 
 TEST_F(DreamGeometryTest, GetPixelError) {
-  Parms.Type = Config::ModuleType::MagicB;
+  Parms.Type = Config::ModuleType::PA;
   Readout.Unused = 6;
   ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
 }
