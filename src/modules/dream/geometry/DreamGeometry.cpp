@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -59,16 +59,16 @@ int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
     RetVal = 0;
     break;
   case Config::BwEndCap:
-    RetVal = 71680;
+    RetVal = 71680; ///< Offset value from ICD
     break;
   case Config::Mantle:
-    RetVal = 229376;
+    RetVal = 229376; ///< Offset value from ICD
     break;
   case Config::SANS:
-    RetVal = 720896;
+    RetVal = 720896; ///< Offset value from ICD
     break;
   case Config::HR:
-    RetVal = 1122304;
+    RetVal = 1122304; ///< Offset value from ICD
     break;
   default:
     XTRACE(DATA, WAR, "Module type not valid for DREAM");
