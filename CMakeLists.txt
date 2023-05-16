@@ -77,7 +77,6 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 #=============================================================================
 
 add_subdirectory(src)
-add_subdirectory(utils/udp)
 
 #=============================================================================
 # Finalize tests
