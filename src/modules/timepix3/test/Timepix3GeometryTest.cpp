@@ -7,6 +7,10 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <timepix3/geometry/Geometry.h>
+#include <modules/timepix3/readout/DataParser.h>
+#include <logical_geometry/ESSGeometry.h>
+
+
 
 
 using namespace Timepix3;
@@ -19,13 +23,15 @@ protected:
 
   void SetUp() override {
      timepix3geom = new Geometry();
+     timepix3geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
    }
   void TearDown() override {}
 };
 
 // Test cases below
-TEST_F(Timepix3GeometryTest, Constructor) {
-  Geometry Timepix3;
+TEST_F(Timepix3GeometryTest, DefaultTimepix3) {
+  DataParser::Timepix3PixelReadout Data = {0, 0, 0, 0, 0, 0, 0};
+  EXPECT_EQ(timepix3geom->calcPixel(Data), 1);
 }
 
 

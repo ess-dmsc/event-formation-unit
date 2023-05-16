@@ -19,7 +19,7 @@ uint32_t Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   uint16_t Col = Data.Dcol + Data.Pix / 4;
   uint16_t Row = Data.Spix + (Data.Pix & 0x3);
 
-  XTRACE(DATA, DEB, "using ESS Geom to calculate pixel id");
+  XTRACE(DATA, DEB, "using ESS Geom to calculate pixel id from Col %u, Row %u", Col, Row);
   return ESSGeom->pixel2D(Col, Row);
 }
 
