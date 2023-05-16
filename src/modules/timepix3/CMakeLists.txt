@@ -59,7 +59,14 @@ set(Timepix3BaseTest_SRC
 )
 create_test_executable(Timepix3BaseTest)
 
-
+set(Timepix3ParserTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3ParserTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3ParserTest.cpp
+)
+create_test_executable(Timepix3ParserTest)
 
 set(Timepix3GeometryTest_INC
   ${timepix3_common_inc}
@@ -69,3 +76,5 @@ set(Timepix3GeometryTest_SRC
   test/Timepix3GeometryTest.cpp
 )
 create_test_executable(Timepix3GeometryTest)
+
+
