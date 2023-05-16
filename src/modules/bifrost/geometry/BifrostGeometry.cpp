@@ -93,14 +93,9 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
     return InvalidPos;
   }
 
-  ///\brief unit pos is in the interval [0;1] regardless of the width of the
-  /// interval
+  ///\brief unit pos will be in the interval [0;1] regardless of the width of
+  /// the interval
   float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
-  if ((UnitPos < 0.0) or (UnitPos > 1.0)) {
-    XTRACE(DATA, WAR, "Error UnitPos %f not in unit interval", UnitPos);
-    (*Stats.CalibrationErrors)++;
-    return InvalidPos;
-  }
 
   int Tube = i/2;
   if (Tube == 1) {

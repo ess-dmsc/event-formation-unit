@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <common/JsonFile.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <string>
@@ -21,9 +22,14 @@
 namespace Caen {
 class Config {
 public:
+  ///\brief default constructor (useful for unit tests)
   Config();
 
+  ///\brief constructor used in EFU to load json from file
   Config(std::string ConfigFile);
+
+  ///\brief parse the loaded json object
+  void parseConfig();
 
   std::vector<PanelGeometry> Panels;
   std::string InstrumentName;
@@ -36,5 +42,8 @@ public:
   uint8_t MaxRing{0};
   uint8_t MaxFEN{0};
   uint8_t MaxTube{14};
+
+  std::string ConfigFileName{""};
+  nlohmann::json root; // configuration (json)
 };
 } // namespace Caen
