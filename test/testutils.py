@@ -48,7 +48,7 @@ def run_data_generator_timed(efu, generator, throttle, readouts_per_packet, time
     print("Running Data Generator")
     packet_options = ""
     if (generator[:11] != "udpgen_pcap"):
-        packet_options = "-o {readouts_per_packet}"
+        packet_options = f"-o {readouts_per_packet}"
     print(f"{efu}/generators/{generator} -l {packet_options} -t {int(throttle)}")
     generator_process = subprocess.Popen(
         f"{efu}/generators/{generator} -l {packet_options}  -t {int(throttle)}",
