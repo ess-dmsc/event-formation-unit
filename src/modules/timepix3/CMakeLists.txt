@@ -29,13 +29,13 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(timepix3_common "-Wl,--no-as-needed")
 endif()
 
-set(odin_INC ${timepix3_common_inc})
-set(odin_SRC
+set(timepix3_INC ${timepix3_common_inc})
+set(timepix3_SRC
   ${timepix3_common_src}
   main.cpp
   )
-set(odin_LIB efu_reduction efu_essreadout)
-create_executable(odin)
+set(timepix3_LIB efu_reduction efu_essreadout)
+create_executable(timepix3)
 
 
 ##

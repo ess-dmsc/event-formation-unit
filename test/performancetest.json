@@ -2,6 +2,13 @@
   "Tests":
   [
     {
+      "Module": "timepix3",
+      "Config": "./src/modules/timepix3/configs/timepix3.json",
+      "Generator": "udpgen_pcap -f /Users/jenniferwalker/ownCloud/DM/data/timepix3/SENJU-Jan2023/tpxCommunicationFileAcq_test06_openBeam_00001/file001.pcap",
+      "InitThrottle": 100,
+      "KafkaTopic": "odin_detector"
+    },
+    {
       "Module": "freia",
       "Config": "./src/modules/freia/configs/freia.json",
       "Generator": "freia_udp_generated",
