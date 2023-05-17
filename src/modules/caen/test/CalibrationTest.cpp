@@ -108,6 +108,34 @@ auto BifrostGood = R"(
   }
 )"_json;
 
+auto BifrostBadNames = R"(
+  {
+    "BadName":
+    {
+      "BadIntervals" :
+      [
+        [ 0, 0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 1, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 2, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
+      ]
+    }
+  }
+)"_json;
+
+auto BifrostBadTripletId = R"(
+  {
+    "BifrostCalibration":
+    {
+      "Intervals" :
+      [
+        [ 0,  0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 45, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 46, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
+      ]
+    }
+  }
+)"_json;
+
 using namespace Caen;
 
 class CalibrationTest : public TestBase {
@@ -228,6 +256,18 @@ TEST_F(CalibrationTest, BifrostGood) {
   calib.root = BifrostGood;
   calib.loadBifrostParameters();
   ASSERT_NEAR(calib.BifrostCalibration.TripletCalib[0][0], 0.001, 0.0001);
+}
+
+TEST_F(CalibrationTest, BifrostBadNames) {
+  Calibration calib;
+  calib.root = BifrostBadNames;
+  ASSERT_ANY_THROW(calib.loadBifrostParameters());
+}
+
+TEST_F(CalibrationTest, BifrostBadTripletId) {
+  Calibration calib;
+  calib.root = BifrostBadTripletId;
+  ASSERT_ANY_THROW(calib.loadBifrostParameters());
 }
 
 int main(int argc, char **argv) {

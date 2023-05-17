@@ -37,11 +37,15 @@ void Calibration::loadBifrostParameters() {
     auto BifrostCalibJson = root["BifrostCalibration"];
 
     auto Intervals = BifrostCalibJson["Intervals"];
+    if (Intervals.size() == 0) {
+      XTRACE(INIT, ALW, "No interval data provided");
+      throw std::runtime_error("rethrow");
+    }
     for (auto & Triplet : Intervals) {
       uint32_t TripletId = Triplet[0].get<uint32_t>();
       if (TripletId > 44) {
-        XTRACE(INIT, ERR, "Invalid TripletId %u (Max is 44)", TripletId);
-        throw std::runtime_error("Invalid TripletId (max 44)");
+        XTRACE(INIT, ALW, "Invalid TripletId %u (Max is 44)", TripletId);
+        throw std::runtime_error("rethrow");
       }
       float p0 = Triplet[1].get<float>();
       float p1 = Triplet[2].get<float>();
@@ -49,6 +53,8 @@ void Calibration::loadBifrostParameters() {
       float p3 = Triplet[4].get<float>();
       float p4 = Triplet[5].get<float>();
       float p5 = Triplet[6].get<float>();
+      XTRACE(INIT, DEB, "Calibration entry - Triplet %d: intervals [%g ; %g] [%g ; %g] [%g ; %g]",
+             TripletId, p0, p1, p2, p3, p4, p5);
       std::vector<float> Calib{p0, p1, p2, p3, p4, p5};
       BifrostCalibration.TripletCalib[TripletId] = Calib;
     }
