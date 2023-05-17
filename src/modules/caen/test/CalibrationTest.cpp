@@ -12,7 +12,7 @@ std::string NotJsonStr = R"(
 /// \brief straws should go 0, 1, 2, 3, ...
 auto BadStrawOrder = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 512,
@@ -29,7 +29,7 @@ auto BadStrawOrder = R"(
 /// \brief three calibration entries and four straws promised
 auto StrawMismatch = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 4,
       "resolution" : 512,
@@ -46,7 +46,7 @@ auto StrawMismatch = R"(
 /// \brief one entry has too few coefficients
 auto InvalidCoeff = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 512,
@@ -251,6 +251,7 @@ TEST_F(CalibrationTest, InvalidCoeff) {
   ASSERT_ANY_THROW(calib.loadLokiParameters());
 }
 
+
 TEST_F(CalibrationTest, BifrostGood) {
   Calibration calib;
   calib.root = BifrostGood;
@@ -269,6 +270,7 @@ TEST_F(CalibrationTest, BifrostBadTripletId) {
   calib.root = BifrostBadTripletId;
   ASSERT_ANY_THROW(calib.loadBifrostParameters());
 }
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

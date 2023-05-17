@@ -20,6 +20,7 @@ Calibration::Calibration() {}
 
 /// loads calibration from file
 Calibration::Calibration(std::string CalibrationFile) {
+  XTRACE(INIT, ALW, "Loading calibration file %s", CalibrationFile.c_str());
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
 
   try {
@@ -79,6 +80,7 @@ void Calibration::loadLokiParameters() {
 
     auto Pols = CaenCalibration["polynomials"];
     if (Pols.size() != NumberOfStraws) {
+      XTRACE(INIT, ALW, "Straw number mismatch in calibration file");
       throw std::runtime_error("Straw number mismatch in calibration file");
     }
 
@@ -89,6 +91,7 @@ void Calibration::loadLokiParameters() {
 
     for (auto &e : Pols) {
       if (e.size() != 5) {
+        XTRACE(INIT, ALW, "Wrong number of polynomial coefficients");
         throw std::runtime_error("Wrong number of coefficients");
       }
 
