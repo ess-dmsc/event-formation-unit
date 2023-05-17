@@ -110,11 +110,11 @@ public:
     };
   } BifrostCalibration;
 
+  nlohmann::json root;
+
 private:
   uint32_t NumberOfStraws{0};  ///< number of straws in the calibration
   uint16_t StrawResolution{0}; ///< resolution along a straw
   uint32_t MaxPixelId{0};      ///< The maximum pixelid in the map
-
-  nlohmann::json root;
 };
 } // namespace Caen

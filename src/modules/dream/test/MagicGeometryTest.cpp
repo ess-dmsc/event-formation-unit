@@ -13,15 +13,15 @@ using namespace Dream;
 class MagicGeometryTest : public TestBase {
 protected:
   DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Config::ModuleParms Parms{false, Config::ModuleType::MagicB, {0}, {0}};
+  Config::ModuleParms Parms{false, Config::ModuleType::PA, {0}, {0}};
   MagicGeometry geometry;
   void SetUp() override {}
   void TearDown() override {}
 };
 
 TEST_F(MagicGeometryTest, PixelOffsets) {
-  ASSERT_EQ(geometry.getPixelOffset(Config::Mantle), 0);
-  ASSERT_EQ(geometry.getPixelOffset(Config::MagicB), 245760);
+  ASSERT_EQ(geometry.getPixelOffset(Config::FR), 0);
+  ASSERT_EQ(geometry.getPixelOffset(Config::PA), 245760);
   ASSERT_EQ(geometry.getPixelOffset(Config::HR), -1);
 }
 
@@ -29,11 +29,11 @@ TEST_F(MagicGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::BwEndCap;
   ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
 
-  Parms.Type = Config::ModuleType::Mantle;
+  Parms.Type = Config::ModuleType::FR;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1);
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) < 245761);
 
-  Parms.Type = Config::ModuleType::MagicB;
+  Parms.Type = Config::ModuleType::PA;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 245761);
 }
 

@@ -28,6 +28,14 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   DreamConfiguration.loadAndApply();
 
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
+
+  if (DreamConfiguration.Instance == Config::DREAM) {
+    Type = ESSReadout::Parser::DREAM;
+  } else if (DreamConfiguration.Instance == Config::MAGIC) {
+    Type = ESSReadout::Parser::MAGIC;
+  } else {
+    throw std::runtime_error("Unsupported instrument instance (not DREAM/MAGIC)");
+  }
 }
 
 uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,

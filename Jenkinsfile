@@ -114,7 +114,6 @@ builders = pipeline_builder.createBuilders { container ->
                 cd ${project}/build
                 make --version
                 make -j${pipeline_builder.numMakeJobs} all unit_tests benchmark
-                cd ../utils/udpredirect
                 make
             """
         }  // stage
@@ -200,7 +199,6 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
 
                                 cp ${project}/build/CONAN_INFO archive/event-formation-unit

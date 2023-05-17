@@ -30,6 +30,7 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
   CaenConfiguration = Config(Settings.ConfigFile);
+  CaenConfiguration.parseConfig();
 
   if (settings.DetectorName == "loki") {
     Geom = new LokiGeometry(CaenConfiguration);

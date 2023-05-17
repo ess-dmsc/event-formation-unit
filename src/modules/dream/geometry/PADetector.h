@@ -18,7 +18,7 @@
 
 namespace Dream {
 
-class DetB {
+class PADetector {
 public:
   const uint8_t MaxSector{7};
   const uint8_t MaxWire{15};
@@ -28,7 +28,7 @@ public:
   const uint8_t StripsPerCass{32};
   const uint8_t WiresPerCounter{16};
 
-  DetB(uint16_t xdim, uint16_t ydim) : Geometry(xdim, ydim, 1, 1) {}
+  PADetector(uint16_t xdim, uint16_t ydim) : Geometry(xdim, ydim, 1, 1) {}
 
   ///\brief calculate the cassette id from the digital identifiers:
   /// sumo, anode and cathode.

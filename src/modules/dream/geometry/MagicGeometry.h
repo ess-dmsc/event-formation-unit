@@ -13,7 +13,7 @@
 #pragma once
 
 #include <dream/geometry/Config.h>
-#include <dream/geometry/DetB.h>
+#include <dream/geometry/PADetector.h>
 #include <dream/geometry/Mantle.h>
 #include <dream/readout/DataParser.h>
 
@@ -29,7 +29,7 @@ public:
   /// \brief return pixel id from the digital identifiers
   int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
-  DetB magicb{256, 512};
-  Mantle mantle{128};
+  PADetector padetector{256, 512};
+  Mantle frdetector{128};
 };
 } // namespace Dream

@@ -16,8 +16,7 @@ std::string NotJsonStr = R"(
 
 // Invalid config file: StrawResolution missing, invalid names:
 // NotDetector
-std::string InvalidConfigFile{"deleteme_caen_invalidconfig.json"};
-std::string InvalidConfigStr = R"(
+auto InvalidConfig = R"(
 {
   "NotDetector": "LoKI4x8",
 
@@ -25,11 +24,10 @@ std::string InvalidConfigStr = R"(
     { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
   ]
 }
-)";
+)"_json;
 
 // Invalid config file: StrawResolution missing
-std::string InvalidConfigIIFile{"deleteme_caen_invalidconfigii.json"};
-std::string InvalidConfigIIStr = R"(
+auto InvalidConfigII = R"(
 {
   "Detector": "loki",
 
@@ -37,11 +35,10 @@ std::string InvalidConfigIIStr = R"(
     { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
   ]
 }
-)";
+)"_json;
 
 // Invalid config file: Detector name is not LoKI
-std::string BadDetectorFile{"deleteme_caen_baddetector.json"};
-std::string BadDetectorStr = R"(
+auto BadDetector = R"(
 {
   "Detector": "LoKI4x8",
 
@@ -49,11 +46,10 @@ std::string BadDetectorStr = R"(
     { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
   ]
 }
-)";
+)"_json;
 
 // Good configuration file
-std::string ValidConfigFile{"deleteme_caen_valid_conf.json"};
-std::string ValidConfigStr = R"(
+auto ValidConfig = R"(
 {
   "Detector" : "loki",
 
@@ -64,7 +60,7 @@ std::string ValidConfigStr = R"(
     { "Bank" : 1, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 24, "StrawOffset" : 896  }
   ]
 }
-)";
+)"_json;
 
 using namespace Caen;
 
@@ -95,31 +91,32 @@ TEST_F(CaenConfigTest, NotJson) {
 }
 
 TEST_F(CaenConfigTest, BadDetectorName) {
-  ASSERT_ANY_THROW(config = Config(BadDetectorFile));
-  deleteFile(BadDetectorFile);
+  config.root = BadDetector;
+  ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, InvalidConfig) {
-  ASSERT_ANY_THROW(config = Config(InvalidConfigFile));
-  deleteFile(InvalidConfigFile);
+  config.root = InvalidConfig;
+  ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, InvalidConfigII) {
-  ASSERT_ANY_THROW(config = Config(InvalidConfigIIFile));
-  deleteFile(InvalidConfigIIFile);
+  config.root = InvalidConfigII;
+  ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, ValidConfig) {
-  config = Config(ValidConfigFile);
+  config.root = ValidConfig;
+  config.parseConfig();
   ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
-  deleteFile(ValidConfigFile);
 }
 
 // Validate full Loki instrument configuration (Loki.json)
 // should match the definitions in the ICD
 TEST_F(CaenConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);
+  config.parseConfig();
   ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
   ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);
   ASSERT_EQ(config.Panels[2].getGlobalStrawId(0, 0, 0), 1568);
@@ -134,14 +131,6 @@ TEST_F(CaenConfigTest, CaenICDGeometryFull) {
 
 int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
-  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(),
-             InvalidConfigStr.size());
-  saveBuffer(InvalidConfigIIFile, (void *)InvalidConfigIIStr.c_str(),
-             InvalidConfigIIStr.size());
-  saveBuffer(BadDetectorFile, (void *)BadDetectorStr.c_str(),
-             BadDetectorStr.size());
-  saveBuffer(ValidConfigFile, (void *)ValidConfigStr.c_str(),
-             ValidConfigStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

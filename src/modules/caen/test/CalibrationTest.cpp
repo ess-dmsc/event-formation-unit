@@ -10,8 +10,7 @@ std::string NotJsonStr = R"(
 )";
 
 /// \brief straws should go 0, 1, 2, 3, ...
-std::string BadStrawOrderFile{"deleteme_caencalib_badstraworder.json"};
-std::string BadStrawOrderStr = R"(
+auto BadStrawOrder = R"(
   {
     "CaenCalibration" : {
       "ntubes" : 1,
@@ -25,11 +24,10 @@ std::string BadStrawOrderStr = R"(
       ]
     }
   }
-)";
+)"_json;
 
 /// \brief three calibration entries and four straws promised
-std::string StrawMismatchFile{"deleteme_caencalib_strawmismatch.json"};
-std::string StrawMismatchStr = R"(
+auto StrawMismatch = R"(
   {
     "CaenCalibration" : {
       "ntubes" : 1,
@@ -46,8 +44,7 @@ std::string StrawMismatchStr = R"(
 )";
 
 /// \brief one entry has too few coefficients
-std::string InvalidCoeffFile{"deleteme_caencalib_invalidcoeff.json"};
-std::string InvalidCoeffStr = R"(
+auto InvalidCoeff = R"(
   {
     "CaenCalibration" : {
       "ntubes" : 1,
@@ -61,10 +58,10 @@ std::string InvalidCoeffStr = R"(
       ]
     }
   }
-)";
+)"_json;
 
-std::string StrawMappingNullFile{"deleteme_caencalib_strawmapping_null.json"};
-std::string StrawMappingNullStr = R"(
+
+auto StrawMappingNull = R"(
   {
     "LokiCalibration" : {
       "ntubes" : 1,
@@ -78,11 +75,9 @@ std::string StrawMappingNullStr = R"(
       ]
     }
   }
-)";
+)"_json;
 
-std::string StrawMappingConstFile{
-    "deleteme_caencalib_strawmapping_strawid.json"};
-std::string StrawMappingConstStr = R"(
+auto StrawMappingConst = R"(
   {
     "LokiCalibration" : {
       "ntubes" : 1,
@@ -96,7 +91,22 @@ std::string StrawMappingConstStr = R"(
       ]
     }
   }
-)";
+)"_json;
+
+/// Adding a BIFROST calibration file
+auto BifrostGood = R"(
+  {
+    "BifrostCalibration":
+    {
+      "Intervals" :
+      [
+        [ 0, 0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 1, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 2, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
+      ]
+    }
+  }
+)"_json;
 
 using namespace Caen;
 
@@ -105,6 +115,7 @@ protected:
   void SetUp() override {}
   void TearDown() override {}
 };
+
 
 TEST_F(CalibrationTest, Constructor) {
   Calibration calib;
@@ -143,9 +154,8 @@ TEST_F(CalibrationTest, NullCalibrationGood) {
 
 // Test clamping to 0 and max by manipulating polynomial coefficients
 TEST_F(CalibrationTest, ClampLowAndHigh) {
-  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
-             StrawMappingNullStr.size());
-  Calibration calib = Calibration(StrawMappingNullFile);
+  Calibration calib;
+  calib.root = StrawMappingNull;
   calib.loadLokiParameters();
   int64_t ClampLow = 0;
   int64_t ClampHigh = 0;
@@ -161,28 +171,22 @@ TEST_F(CalibrationTest, ClampLowAndHigh) {
   res = calib.strawCorrection(0, 5.0);
   ASSERT_EQ(*calib.Stats.ClampHigh, 1);
   ASSERT_EQ(res, 255);
-
-  deleteFile(StrawMappingNullFile);
 }
 
 TEST_F(CalibrationTest, LoadCalib) {
-  saveBuffer(StrawMappingNullFile, (void *)StrawMappingNullStr.c_str(),
-             StrawMappingNullStr.size());
-  Calibration calib = Calibration(StrawMappingNullFile);
+  Calibration calib;
+  calib.root = StrawMappingNull;
   calib.loadLokiParameters();
   ASSERT_EQ(calib.StrawCalibration.size(), 3);
   ASSERT_EQ(calib.getMaxPixel(), 3 * 256);
-  deleteFile(StrawMappingNullFile);
 }
 
 TEST_F(CalibrationTest, LoadCalibConst) {
-  saveBuffer(StrawMappingConstFile, (void *)StrawMappingConstStr.c_str(),
-             StrawMappingConstStr.size());
-
   uint32_t Straws{3};
   uint16_t Resolution{256};
 
-  Calibration calib = Calibration(StrawMappingConstFile);
+  Calibration calib;
+  calib.root = StrawMappingConst;
   calib.loadLokiParameters();
   ASSERT_EQ(calib.StrawCalibration.size(), Straws);
   ASSERT_EQ(calib.getMaxPixel(), Straws * Resolution);
@@ -193,7 +197,6 @@ TEST_F(CalibrationTest, LoadCalibConst) {
       ASSERT_EQ(calib.strawCorrection(Straw, Pos), Pos - Straw);
     }
   }
-  deleteFile(StrawMappingConstFile);
 }
 
 TEST_F(CalibrationTest, NOTJson) {
@@ -203,27 +206,28 @@ TEST_F(CalibrationTest, NOTJson) {
 }
 
 TEST_F(CalibrationTest, BadStrawOrder) {
-  saveBuffer(BadStrawOrderFile, (void *)BadStrawOrderStr.c_str(),
-             BadStrawOrderStr.size());
-  Calibration calib = Calibration(BadStrawOrderFile);
+  Calibration calib;
+  calib.root = BadStrawOrder;
   ASSERT_ANY_THROW(calib.loadLokiParameters());
-  deleteFile(BadStrawOrderFile);
 }
 
 TEST_F(CalibrationTest, StrawMismatch) {
-  saveBuffer(StrawMismatchFile, (void *)StrawMismatchStr.c_str(),
-             StrawMismatchStr.size());
-  Calibration calib = Calibration(StrawMismatchFile);
+  Calibration calib;
+  calib.root = StrawMismatch;
   ASSERT_ANY_THROW(calib.loadLokiParameters());
-  deleteFile(StrawMismatchFile);
 }
 
 TEST_F(CalibrationTest, InvalidCoeff) {
-  saveBuffer(InvalidCoeffFile, (void *)InvalidCoeffStr.c_str(),
-             InvalidCoeffStr.size());
-  Calibration calib = Calibration(InvalidCoeffFile);
+  Calibration calib;
+  calib.root = InvalidCoeff;
   ASSERT_ANY_THROW(calib.loadLokiParameters());
-  deleteFile(InvalidCoeffFile);
+}
+
+TEST_F(CalibrationTest, BifrostGood) {
+  Calibration calib;
+  calib.root = BifrostGood;
+  calib.loadBifrostParameters();
+  ASSERT_NEAR(calib.BifrostCalibration.TripletCalib[0][0], 0.001, 0.0001);
 }
 
 int main(int argc, char **argv) {
