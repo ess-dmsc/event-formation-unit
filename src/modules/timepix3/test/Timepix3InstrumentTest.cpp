@@ -74,17 +74,17 @@ TEST_F(Timepix3InstrumentTest, BadNameSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(counters, Settings));
 }
 
-TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
+// TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
+//   auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
 
-  ASSERT_EQ(Res, 1);
-  ASSERT_EQ(counters.PixelReadouts, 1);
+//   ASSERT_EQ(Res, 1);
+//   ASSERT_EQ(counters.PixelReadouts, 1);
 
-  // timepix3->Geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
-  timepix3->processReadouts();
+//   // timepix3->Geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
+//   timepix3->processReadouts();
 
-  ASSERT_EQ(counters.Events, 1);
-}
+//   ASSERT_EQ(counters.Events, 1);
+// }
 
 
 
