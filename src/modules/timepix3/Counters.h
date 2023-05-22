@@ -15,6 +15,9 @@
 struct Counters {
   // Processing Counters - accessed in processing thread
 
+  // Temporary timepix characterising counters
+  int64_t PixelReadoutFromBeforeTDC;
+
   // System counters
   int64_t FifoSeqErrors;
   int64_t ProcessingIdle;

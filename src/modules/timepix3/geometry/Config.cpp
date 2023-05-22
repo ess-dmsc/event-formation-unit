@@ -11,8 +11,8 @@
 #include <common/debug/Trace.h>
 #include <timepix3/geometry/Config.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 

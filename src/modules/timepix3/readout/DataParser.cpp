@@ -69,9 +69,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              "%u, SpidrTime = %u, ToA = %u, FToA = %u, ToT = %u",
              PacketType, Data.Dcol, Data.Spix, Data.Pix, Data.SpidrTime,
              Data.ToA, Data.FToA, Data.ToT);
-      XTRACE(DATA, DEB, "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: %u, difference: %u", int(409600 * Data.SpidrTime + 25 * Data.ToA + 1.5625 * Data.FToA), LastTDCTime, int(409600 * Data.SpidrTime + 25 * Data.ToA + 1.5625 * Data.FToA) - LastTDCTime);
+      uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) + 25 * uint64_t(Data.ToA) + 1.5625 * Data.FToA);
+      XTRACE(DATA, DEB, "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: %u, difference: %u", toa , LastTDCTime, int(409600 * Data.SpidrTime + 25 * Data.ToA + 1.5625 * Data.FToA) - LastTDCTime);
       ParsedReadouts++;
       Stats.PixelReadouts++;
+      if(toa < LastTDCTime){
+        XTRACE(DATA, DEB, "Pixel readout from before TDC");
+        Stats.PixelReadoutFromBeforeTDC++;
+      }
 
       PixelResult.push_back(Data);
     } else if (PacketType == 6) {
