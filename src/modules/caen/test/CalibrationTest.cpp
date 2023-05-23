@@ -12,7 +12,7 @@ std::string NotJsonStr = R"(
 /// \brief straws should go 0, 1, 2, 3, ...
 auto BadStrawOrder = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 512,
@@ -29,7 +29,7 @@ auto BadStrawOrder = R"(
 /// \brief three calibration entries and four straws promised
 auto StrawMismatch = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 4,
       "resolution" : 512,
@@ -46,7 +46,7 @@ auto StrawMismatch = R"(
 /// \brief one entry has too few coefficients
 auto InvalidCoeff = R"(
   {
-    "CaenCalibration" : {
+    "LokiCalibration" : {
       "ntubes" : 1,
       "nstraws" : 3,
       "resolution" : 512,
@@ -103,6 +103,34 @@ auto BifrostGood = R"(
         [ 0, 0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
         [ 1, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
         [ 2, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
+      ]
+    }
+  }
+)"_json;
+
+auto BifrostBadNames = R"(
+  {
+    "BadName":
+    {
+      "BadIntervals" :
+      [
+        [ 0, 0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 1, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 2, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
+      ]
+    }
+  }
+)"_json;
+
+auto BifrostBadTripletId = R"(
+  {
+    "BifrostCalibration":
+    {
+      "Intervals" :
+      [
+        [ 0,  0.001, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 45, 0.002, 0.333, 0.333, 0.667, 0.667, 1.000],
+        [ 46, 0.003, 0.333, 0.333, 0.667, 0.667, 1.000]
       ]
     }
   }
@@ -223,12 +251,26 @@ TEST_F(CalibrationTest, InvalidCoeff) {
   ASSERT_ANY_THROW(calib.loadLokiParameters());
 }
 
+
 TEST_F(CalibrationTest, BifrostGood) {
   Calibration calib;
   calib.root = BifrostGood;
   calib.loadBifrostParameters();
   ASSERT_NEAR(calib.BifrostCalibration.TripletCalib[0][0], 0.001, 0.0001);
 }
+
+TEST_F(CalibrationTest, BifrostBadNames) {
+  Calibration calib;
+  calib.root = BifrostBadNames;
+  ASSERT_ANY_THROW(calib.loadBifrostParameters());
+}
+
+TEST_F(CalibrationTest, BifrostBadTripletId) {
+  Calibration calib;
+  calib.root = BifrostBadTripletId;
+  ASSERT_ANY_THROW(calib.loadBifrostParameters());
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
