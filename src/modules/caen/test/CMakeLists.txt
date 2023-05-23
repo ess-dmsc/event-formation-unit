@@ -22,6 +22,15 @@ set(CaenCalibrationTest_SRC
 create_test_executable(CaenCalibrationTest)
 
 
+# New calibration scheme
+set(CaenCDCalibrationTest_INC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h)
+set(CaenCDCalibrationTest_SRC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  CDCalibrationTest.cpp)
+create_test_executable(CaenCDCalibrationTest)
+
+
 set(CaenConfigTest_INC
   ${ESS_MODULE_DIR}/caen/geometry/Config.h)
 set(CaenConfigTest_SRC
