@@ -113,6 +113,7 @@ TEST_F(CalibrationTest, NotJsonFile) {
 
 TEST_F(CalibrationTest, BadName) {
   calib = CDCalibration("wotan");
+  calib.root = LokiExample;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
