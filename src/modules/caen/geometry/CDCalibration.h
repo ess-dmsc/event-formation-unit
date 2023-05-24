@@ -40,7 +40,7 @@ public:
 
 
   /// \brief vector of (vector of) polynomial coefficients
-  std::vector<std::vector<double>> StrawCalibration;
+  //std::vector<std::vector<double>> StrawCalibration;
 
   // Grafana Counters
   // struct {
@@ -61,16 +61,35 @@ public:
   } Parms;
 
 
-  // File and Json
   std::string ConfigFile{""};
   nlohmann::json root;
 
 private:
 
-  void consistencyCheck(); // called from parseCaibration()
+  ///\brief Do an initial sanity check of the provided json file
+  /// called from parseCaibration()
+  void consistencyCheck();
+
+  ///\brief validate that the supplied intervals are consistent
+  ///\param Index groupindex used for error messages
+  ///\param Parameter the parameter section object
+  void validateIntervals(int Index, nlohmann::json Parameter);
+
+  ///\brief validate that the provided polynomial coefficients have the
+  /// expected sizes. More checks can be added for example we could calculate
+  /// how large a fraction of the unit interval would clamp to high or low
+  /// values and complain if the fraction is too large.
+  ///\param Index groupindex used for error messages
+    ///\param Parameter the parameter section object
+  void validatePolynomials(int Index, nlohmann::json Parameter);
+
+  ///\brief helper function to check that the returned value is an object.
+  /// \todo not torally sure when it is expected to be this. For example if
+  /// the returned value can be parsed as a string it is not an object.
+  /// might be removed in the future if not useful.
   nlohmann::json getObjectAndCheck(nlohmann::json JsonObject, std::string Property);
 
-  std::string Name;
-  uint32_t MaxPixelId{0};      ///< The maximum pixelid in the map
+  std::string Name{""};   ///< Detector/instrument name prvided in constructor
+  uint32_t MaxPixelId{0}; ///< The maximum calculated pixelid in the map
 };
 } // namespace Caen

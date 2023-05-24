@@ -58,13 +58,14 @@ void CDCalibration::consistencyCheck() {
   printf("%s, %d, %d, %d, %d\n", Name.c_str(), Parms.Groups, Parms.GroupSize,
         Parms.Amplitudes, Parms.Pixellation);
   int Pixels = Parms.Groups * Parms.GroupSize * Parms.Pixellation;
-  printf("NUMBER OF PIXELS: %d\n", Pixels);
+  printf("Number of pixels: %d\n", Pixels);
 
   auto DefaultIntervals = Calibration["default intervals"];
 
   if (DefaultIntervals.size() != (unsigned int)(Parms.GroupSize * 2)) {
-    throw std::runtime_error(fmt::format("Interval array error: expected {} entries, got {}",
-                 Parms.GroupSize * 2, DefaultIntervals.size()));
+    auto msg = fmt::format("Interval array error: expected {} entries, got {}",
+                 Parms.GroupSize * 2, DefaultIntervals.size());
+    throw std::runtime_error(msg);
   }
 
   auto ParameterVector = Calibration["Parameters"];
@@ -72,6 +73,61 @@ void CDCalibration::consistencyCheck() {
     throw std::runtime_error(fmt::format("Calibration table error: expected {} entries, got {}",
            Parms.Groups, ParameterVector.size()));
   }
+
+  int Index{0};
+  for (auto & Parm : ParameterVector) {
+    int GroupIndex = Parm["groupindex"];
+    if (GroupIndex != Index) {
+      auto msg = fmt::format("Index error: expected {}, got {}", Index, GroupIndex);
+      throw std::runtime_error(msg);
+    }
+    validateIntervals(Index, Parm);
+    validatePolynomials(Index, Parm);
+    Index++;
+  }
+}
+
+
+void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
+  std::vector<float> Intervals = Parameter["intervals"];
+  if (Intervals.size() != (unsigned int)(Parms.GroupSize * 2)) {
+    auto msg = fmt::format("Groupindex {} - interval array error: expected {} entries, got {}",
+                 Index, Parms.GroupSize * 2, Intervals.size());
+    throw std::runtime_error(msg);
+  }
+  float PreviousPos{-1.0};
+  int IntervalIndex{0};
+  for (auto & Pos : Intervals) {
+    if( (Pos < 0.0) or (Pos > 1.0)) {
+      auto msg = fmt::format("Groupindex {}, Intervalpos {} - bad value {}",
+                   Index, IntervalIndex, Pos);
+      throw std::runtime_error(msg);
+    }
+    if(Pos <= PreviousPos) {
+      auto msg = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
+                   Index, IntervalIndex, Pos, PreviousPos);
+      throw std::runtime_error(msg);
+    }
+    PreviousPos = Pos;
+    IntervalIndex++;
+  }
+}
+
+void CDCalibration::validatePolynomials(int Index, nlohmann::json Parameter) {
+  std::vector<std::vector<float>> Polynomials = Parameter["polynomials"];
+  if (Polynomials.size() != (unsigned int)Parms.GroupSize) {
+    auto msg = fmt::format("Groupindex {} bad groupsize: expected {}, got {}",
+           Index, Parms.GroupSize, Polynomials.size());
+    throw std::runtime_error(msg);
+  }
+  for (auto & Coefficients : Polynomials) {
+    if (Coefficients.size() != 4) {
+      auto msg = fmt::format("Groupindex {} coefficient error: expected 4, got {}",
+        Index, Coefficients.size());
+      throw std::runtime_error(msg);
+    }
+  }
+
 }
 
 } // namespace Caen
