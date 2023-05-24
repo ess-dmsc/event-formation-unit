@@ -165,7 +165,7 @@ TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
 TEST_F(CalibrationTest, ErrPosUnordered) {
   // fake misordered interval values for group 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.5;
-  calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.4;
+  calib.root["Calibration"]["Parameters"][0]["intervals"][1] = 0.4;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
