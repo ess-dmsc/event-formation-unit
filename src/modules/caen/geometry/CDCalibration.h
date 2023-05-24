@@ -11,7 +11,6 @@
 
 #include <common/JsonFile.h>
 #include <string>
-#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -65,6 +64,9 @@ public:
   nlohmann::json root;
 
 private:
+
+  ///\brief log and trace then throw runtime exception
+  void throwException(std::string Message);
 
   ///\brief Do an initial sanity check of the provided json file
   /// called from parseCaibration()

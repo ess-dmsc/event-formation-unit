@@ -4,6 +4,7 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
+// clang-format off
 ///
 auto LokiExample = R"(
   {
@@ -49,54 +50,75 @@ auto ErrorDefInterval = R"(
   }
 )"_json;
 
+auto ErrorMissingCalibration = R"(
+  {
+    "Ca li bra tion":
+    {
+      "instrument" : "loki",
+      "groups" : 1, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
+      "default intervals" : [0.000, 0.142, 0.500],
+
+      "Parameters" : [
+        { "groupindex" : 0, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
+        { "groupindex" : 1, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
+      ]
+    }
+  }
+)"_json;
+// clang-format on
+
 using namespace Caen;
 
 class CalibrationTest : public TestBase {
 protected:
-  void SetUp() override {}
+  CDCalibration calib{"loki"};
+
+  void SetUp() override {
+      calib.root = LokiExample;
+  }
   void TearDown() override {}
 };
 
 
 TEST_F(CalibrationTest, Constructor) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   calib.parseCalibration();
 }
 
 TEST_F(CalibrationTest, BadName) {
-  CDCalibration calib("wotan");
-  calib.root = LokiExample;
+  calib = CDCalibration("wotan");
+  ASSERT_ANY_THROW(calib.parseCalibration());
+}
+
+TEST_F(CalibrationTest, MissingCalibrationEntry) {
+  calib.root = ErrorMissingCalibration;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 TEST_F(CalibrationTest, BadNumberOfGroups) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   // fake invalid number of groups from otherwise valid file
   calib.root["Calibration"]["groups"] = 5;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   // fake invalid number of intervals for group 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["intervals"].push_back(0.1);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
-  // fake invalid interval value for group 0 from otherwise valid file
-  calib.root["Calibration"]["Parameters"][0]["intervals"][0] = -0.0001;
+  // set valid outer ranges for group 0
+  calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.000;
+  calib.root["Calibration"]["Parameters"][0]["intervals"][1] = 1.000;
+
+  // fake invalid interval value for group 1 from otherwise valid file
+  calib.root["Calibration"]["Parameters"][1]["intervals"][0] = -0.0001;
   ASSERT_ANY_THROW(calib.parseCalibration());
 
   calib.root = LokiExample;
   calib.parseCalibration(); // check that we've copied in a new valid calib
 
-  calib.root["Calibration"]["Parameters"][0]["intervals"][1] = 1.001;
+  calib.root["Calibration"]["Parameters"][1]["intervals"][1] = 1.001;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
@@ -110,16 +132,12 @@ TEST_F(CalibrationTest, ErrPosUnordered) {
 }
 
 TEST_F(CalibrationTest, ErrPolynomialVectorSize) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   // fake bad size of polynomial vector for group 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["polynomials"].push_back(0.1);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 TEST_F(CalibrationTest, ErrCoefficientVectorSize) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   // fake bad size of coefficient vector for group 0/groupindex 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["polynomials"][0].push_back(0.1);
   ASSERT_ANY_THROW(calib.parseCalibration());
