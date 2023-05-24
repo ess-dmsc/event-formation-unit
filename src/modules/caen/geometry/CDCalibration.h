@@ -38,8 +38,11 @@ public:
   //uint32_t strawCorrection(uint32_t StrawId, double Pos);
 
 
-  /// \brief vector of (vector of) polynomial coefficients
-  //std::vector<std::vector<double>> StrawCalibration;
+  /// \brief intervals are vectors of vectors
+  std::vector<std::vector<float>> Intervals;
+
+  /// \brief coefficients are vectors of vectors of vectors
+  std::vector<std::vector<std::vector<float>>> Calibration;
 
   // Grafana Counters
   // struct {
@@ -71,6 +74,9 @@ private:
   ///\brief Do an initial sanity check of the provided json file
   /// called from parseCaibration()
   void consistencyCheck();
+
+  ///\brief Load the parameters into a suitable structure
+  void loadCalibration();
 
   ///\brief validate that the supplied intervals are consistent
   ///\param Index groupindex used for error messages

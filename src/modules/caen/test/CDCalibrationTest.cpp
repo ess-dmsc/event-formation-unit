@@ -27,12 +27,12 @@ auto LokiExample = R"(
         {
           "groupindex" : 0,
           "intervals"  : [0.0, 0.142, 0.143, 0.285, 0.286, 0.428, 0.429, 0.571, 0.572, 0.714, 0.715, 0.857, 0.858, 1.0],
-          "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
+          "polynomials" : [[0.00, 0.01, 0.02, 0.03], [0.04, 0.05, 0.06, 0.07], [0.08, 0.09, 0.10, 0.11], [0.12, 0.13, 0.14, 0.15], [0.16, 0.17, 0.18, 0.19], [0.20, 0.21, 0.22, 0.23], [0.24, 0.25, 0.26, 0.27]]
         },
         {
           "groupindex" : 1,
           "intervals"  : [0.0, 0.142, 0.143, 0.285, 0.286, 0.428, 0.429, 0.571, 0.572, 0.714, 0.715, 0.857, 0.858, 1.0],
-          "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
+          "polynomials" : [[0.28, 0.29, 0.30, 0.31], [0.32, 0.33, 0.34, 0.35], [0.36, 0.37, 0.38, 0.39], [0.40, 0.41, 0.42, 0.43], [0.44, 0.45, 0.46, 0.47], [0.48, 0.49, 0.50, 0.51], [0.52, 0.53, 0.54, 0.55]]
         }
       ]
     }
@@ -101,11 +101,6 @@ protected:
   }
   void TearDown() override {}
 };
-
-
-TEST_F(CalibrationTest, Constructor) {
-  calib.parseCalibration();
-}
 
 TEST_F(CalibrationTest, NotJsonFile) {
   ASSERT_ANY_THROW(calib = CDCalibration("loki", InvalidJsonName));
@@ -181,6 +176,20 @@ TEST_F(CalibrationTest, ErrCoefficientVectorSize) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
+// Test that after loading we have the correct polynomial values
+TEST_F(CalibrationTest, LokiTest) {
+  calib.parseCalibration();
+  int Entries{0};
+  for (int i = 0; i < calib.Parms.Groups; i++) {
+    for (int j = 0; j < calib.Parms.GroupSize; j++) {
+      for (int k = 0; k < 4; k++) {
+        EXPECT_NEAR(calib.Calibration[i][j][k], 1.0*Entries/100, 0.0001);
+        Entries++;
+      }
+
+    }
+  }
+}
 
 int main(int argc, char **argv) {
   saveBuffer(InvalidJsonName, (void *)InvalidJson.c_str(), InvalidJson.size());

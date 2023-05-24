@@ -31,8 +31,13 @@ CDCalibration::CDCalibration(std::string Name, std::string CalibrationFile)
 }
 
 
+///\brief Use a two-pass approach. One pass to validate as much as possible,
+/// then a second pass to populate calibration table
 void CDCalibration::parseCalibration() {
-  consistencyCheck();
+  XTRACE(INIT, ALW, "Checking consistency");
+  consistencyCheck(); // first pass for checking
+  XTRACE(INIT, ALW, "Loading calibration");
+  loadCalibration(); // second pass to populate table
 }
 
 
@@ -45,6 +50,20 @@ nlohmann::json CDCalibration::getObjectAndCheck(nlohmann::json JsonObject, std::
   return JsonObj;
 }
 
+
+void CDCalibration::loadCalibration() {
+  int Polynomials{0};
+  auto ParameterVector = root["Calibration"]["Parameters"];
+  for (auto & Group : ParameterVector) {
+    auto GroupIntervals = Group["intervals"].get<std::vector<float>>();
+    Intervals.push_back(GroupIntervals);
+
+    auto GroupPolys = Group["polynomials"].get<std::vector<std::vector<float>>>();
+    Calibration.push_back(GroupPolys);
+    Polynomials += Parms.GroupSize;
+  }
+  XTRACE(INIT, ALW, "Loaded %d polynomials from %d groups", Polynomials, Parms.Groups);
+}
 
 void CDCalibration::consistencyCheck() {
   nlohmann::json Calibration = getObjectAndCheck(root, "Calibration");
