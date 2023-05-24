@@ -102,7 +102,7 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
   int IntervalIndex{0};
   for (auto & Pos : Intervals) {
     if( (Pos < 0.0) or (Pos > 1.0)) {
-      auto Message = fmt::format("Groupindex {}, Intervalpos {} - bad value {}",
+      Message = fmt::format("Groupindex {}, Intervalpos {} - bad value {}",
                    Index, IntervalIndex, Pos);
       throwException(Message);
     }
