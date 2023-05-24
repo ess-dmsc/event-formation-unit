@@ -4,6 +4,12 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
+
+std::string InvalidJsonName{"deleteme_cdcalib.json"};
+std::string InvalidJson = R"(
+  Not good enough for Gudonoff!
+)";
+
 // clang-format off
 ///
 auto LokiExample = R"(
@@ -101,6 +107,10 @@ TEST_F(CalibrationTest, Constructor) {
   calib.parseCalibration();
 }
 
+TEST_F(CalibrationTest, NotJsonFile) {
+  calib = CDCalibration("loki", InvalidJsonName);
+}
+
 TEST_F(CalibrationTest, BadName) {
   calib = CDCalibration("wotan");
   ASSERT_ANY_THROW(calib.parseCalibration());
@@ -172,6 +182,7 @@ TEST_F(CalibrationTest, ErrCoefficientVectorSize) {
 
 
 int main(int argc, char **argv) {
+  saveBuffer(InvalidJsonName, (void *)InvalidJson.c_str(), InvalidJson.size());
   testing::InitGoogleTest(&argc, argv);
   auto retval = RUN_ALL_TESTS();
   return retval;
