@@ -93,5 +93,6 @@ private:
 
   std::string Name{""};   ///< Detector/instrument name prvided in constructor
   uint32_t MaxPixelId{0}; ///< The maximum calculated pixelid in the map
+  std::string Message; /// Used for throwing exceptions.
 };
 } // namespace Caen

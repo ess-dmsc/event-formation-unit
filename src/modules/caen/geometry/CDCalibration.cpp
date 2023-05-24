@@ -24,7 +24,7 @@ CDCalibration::CDCalibration(std::string Name, std::string CalibrationFile)
   try {
     root = from_json_file(CalibrationFile);
   } catch (...) {
-    auto Message = fmt::format("Caen calibration - error: Invalid Json file: {}",
+    Message = fmt::format("Caen calibration - error: Invalid Json file: {}",
         CalibrationFile);
     throwException(Message);
   }
@@ -39,7 +39,7 @@ void CDCalibration::parseCalibration() {
 nlohmann::json CDCalibration::getObjectAndCheck(nlohmann::json JsonObject, std::string Property) {
   nlohmann::json JsonObj = JsonObject[Property];
   if (not JsonObj.is_object()) {
-    auto Message = fmt::format("'{}' does not return a json object", Property);
+    Message = fmt::format("'{}' does not return a json object", Property);
     throwException(Message);
   }
   return JsonObj;
@@ -66,7 +66,7 @@ void CDCalibration::consistencyCheck() {
   auto DefaultIntervals = Calibration["default intervals"];
 
   if (DefaultIntervals.size() != (unsigned int)(Parms.GroupSize * 2)) {
-    auto Message = fmt::format("Interval array error: expected {} entries, got {}",
+    Message = fmt::format("Interval array error: expected {} entries, got {}",
                  Parms.GroupSize * 2, DefaultIntervals.size());
     throwException(Message);
   }
@@ -81,7 +81,7 @@ void CDCalibration::consistencyCheck() {
   for (auto & Parm : ParameterVector) {
     int GroupIndex = Parm["groupindex"];
     if (GroupIndex != Index) {
-      auto Message = fmt::format("Index error: expected {}, got {}", Index, GroupIndex);
+      Message = fmt::format("Index error: expected {}, got {}", Index, GroupIndex);
       throwException(Message);
     }
     validateIntervals(Index, Parm);
@@ -94,7 +94,7 @@ void CDCalibration::consistencyCheck() {
 void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
   std::vector<float> Intervals = Parameter["intervals"];
   if (Intervals.size() != (unsigned int)(Parms.GroupSize * 2)) {
-    auto Message = fmt::format("Groupindex {} - interval array error: expected {} entries, got {}",
+    Message = fmt::format("Groupindex {} - interval array error: expected {} entries, got {}",
                  Index, Parms.GroupSize * 2, Intervals.size());
     throwException(Message);
   }
@@ -107,7 +107,7 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
       throwException(Message);
     }
     if(Pos <= PreviousPos) {
-      auto Message = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
+      Message = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
                    Index, IntervalIndex, Pos, PreviousPos);
       throwException(Message);
     }
@@ -120,13 +120,13 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
 void CDCalibration::validatePolynomials(int Index, nlohmann::json Parameter) {
   std::vector<std::vector<float>> Polynomials = Parameter["polynomials"];
   if (Polynomials.size() != (unsigned int)Parms.GroupSize) {
-    auto Message = fmt::format("Groupindex {} bad groupsize: expected {}, got {}",
+    Message = fmt::format("Groupindex {} bad groupsize: expected {}, got {}",
            Index, Parms.GroupSize, Polynomials.size());
     throwException(Message);
   }
   for (auto & Coefficients : Polynomials) {
     if (Coefficients.size() != 4) {
-      auto Message = fmt::format("Groupindex {} coefficient error: expected 4, got {}",
+      Message = fmt::format("Groupindex {} coefficient error: expected 4, got {}",
         Index, Coefficients.size());
       throwException(Message);
     }
