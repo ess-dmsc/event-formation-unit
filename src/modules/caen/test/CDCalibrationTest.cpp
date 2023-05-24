@@ -39,7 +39,7 @@ auto ErrorDefInterval = R"(
     "Calibration":
     {
       "instrument" : "loki",
-      "groups" : 1, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
+      "groups" : 2, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
       "default intervals" : [0.000, 0.142, 0.500],
 
       "Parameters" : [
@@ -56,11 +56,28 @@ auto ErrorMissingCalibration = R"(
     {
       "instrument" : "loki",
       "groups" : 1, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
-      "default intervals" : [0.000, 0.142, 0.500],
+      "default intervals" : [0.000, 0.142],
 
       "Parameters" : [
         { "groupindex" : 0, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
         { "groupindex" : 1, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
+      ]
+    }
+  }
+)"_json;
+
+
+auto ErrorGroupSizeMismatch = R"(
+  {
+    "Calibration":
+    {
+      "instrument" : "loki",
+      "groups" : 2, "groupsize" : 2, "amplitudes" : 2, "pixellation" : 512,
+      "default intervals" : [0.000, 0.100, 0.200, 0.300],
+
+      "Parameters" : [
+        { "groupindex" : 0, "intervals"  : [0.000, 0.100, 0.200, 0.300], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] },
+        { "groupindex" : 1, "intervals"  : [0.000, 0.100, 0.200, 0.300], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] }
       ]
     }
   }
@@ -100,6 +117,19 @@ TEST_F(CalibrationTest, BadNumberOfGroups) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
+TEST_F(CalibrationTest, BadGroupIndex) {
+  // fake unordered groups from otherwise valid file
+  calib.root["Calibration"]["Parameters"][1]["groupindex"] = 2;
+  ASSERT_ANY_THROW(calib.parseCalibration());
+}
+
+
+TEST_F(CalibrationTest, BadNumberOfDefaultIntervals) {
+  // fake invalid number of groups from otherwise valid file
+  calib.root["Calibration"]["default intervals"].push_back(42.0);
+  ASSERT_ANY_THROW(calib.parseCalibration());
+}
+
 TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
   // fake invalid number of intervals for group 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["intervals"].push_back(0.1);
@@ -123,8 +153,6 @@ TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
 }
 
 TEST_F(CalibrationTest, ErrPosUnordered) {
-  CDCalibration calib("loki");
-  calib.root = LokiExample;
   // fake misordered interval values for group 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.5;
   calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.4;
@@ -132,8 +160,7 @@ TEST_F(CalibrationTest, ErrPosUnordered) {
 }
 
 TEST_F(CalibrationTest, ErrPolynomialVectorSize) {
-  // fake bad size of polynomial vector for group 0 from otherwise valid file
-  calib.root["Calibration"]["Parameters"][0]["polynomials"].push_back(0.1);
+  calib.root = ErrorGroupSizeMismatch;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
