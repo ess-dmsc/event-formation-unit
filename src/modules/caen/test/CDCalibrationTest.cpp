@@ -108,7 +108,7 @@ TEST_F(CalibrationTest, Constructor) {
 }
 
 TEST_F(CalibrationTest, NotJsonFile) {
-  calib = CDCalibration("loki", InvalidJsonName);
+  ASSERT_ANY_THROW(calib = CDCalibration("loki", InvalidJsonName));
 }
 
 TEST_F(CalibrationTest, BadName) {
