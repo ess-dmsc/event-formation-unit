@@ -46,8 +46,8 @@ public:
 
   // Grafana Counters
   struct {
-    int64_t ClampLow;
-    int64_t ClampHigh;
+    int64_t ClampLow{0};
+    int64_t ClampHigh{0};
   } Stats;
 
   struct {
@@ -95,7 +95,7 @@ private:
   /// might be removed in the future if not useful.
   nlohmann::json getObjectAndCheck(nlohmann::json JsonObject, std::string Property);
 
-  std::string Name{""};   ///< Detector/instrument name prvided in constructor
+  std::string Name{""}; ///< Detector/instrument name prvided in constructor
   uint32_t MaxPixelId{0}; ///< The maximum calculated pixelid in the map
   std::string Message; /// Used for throwing exceptions.
 };
