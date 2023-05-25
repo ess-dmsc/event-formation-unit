@@ -21,7 +21,6 @@ auto LokiExample = R"(
       "groupsize" : 7,
       "amplitudes" : 4,
       "pixellation" : 512,
-      "default intervals" : [0.000, 0.142, 0.143, 0.285, 0.286, 0.428, 0.429, 0.571, 0.572, 0.714, 0.715, 0.857, 0.858, 1.0],
 
       "Parameters" : [
         {
@@ -40,29 +39,12 @@ auto LokiExample = R"(
 )"_json;
 
 
-auto ErrorDefInterval = R"(
-  {
-    "Calibration":
-    {
-      "instrument" : "loki",
-      "groups" : 2, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
-      "default intervals" : [0.000, 0.142, 0.500],
-
-      "Parameters" : [
-        { "groupindex" : 0, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
-        { "groupindex" : 1, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
-      ]
-    }
-  }
-)"_json;
-
 auto ErrorMissingCalibration = R"(
   {
     "Ca li bra tion":
     {
       "instrument" : "loki",
       "groups" : 1, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
-      "default intervals" : [0.000, 0.142],
 
       "Parameters" : [
         { "groupindex" : 0, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
@@ -79,7 +61,6 @@ auto ErrorGroupSizeMismatch = R"(
     {
       "instrument" : "loki",
       "groups" : 2, "groupsize" : 2, "amplitudes" : 2, "pixellation" : 512,
-      "default intervals" : [0.000, 0.100, 0.200, 0.300],
 
       "Parameters" : [
         { "groupindex" : 0, "intervals"  : [0.000, 0.100, 0.200, 0.300], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] },
@@ -129,12 +110,6 @@ TEST_F(CalibrationTest, BadGroupIndex) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-
-TEST_F(CalibrationTest, BadNumberOfDefaultIntervals) {
-  // fake invalid number of groups from otherwise valid file
-  calib.root["Calibration"]["default intervals"].push_back(42.0);
-  ASSERT_ANY_THROW(calib.parseCalibration());
-}
 
 TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
   // fake invalid number of intervals for group 0 from otherwise valid file

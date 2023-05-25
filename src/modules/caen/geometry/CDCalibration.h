@@ -28,27 +28,27 @@ public:
   /// \retval True if file is valid, else False.
   void parseCalibration();
 
-  /// \brief Create a null 'Calibration' no pixel mapping is done
-  //void nullCalibration();
-
   /// \brief return the maximum pixel id
   uint32_t getMaxPixel() { return MaxPixelId; }
 
   /// \brief apply the position correction
-  //uint32_t strawCorrection(uint32_t StrawId, double Pos);
-
+  /// \param Pos the uncorrected position along the charge division unit
+  /// \param GroupIndex which group are we in
+  /// \param UnitIndex which polynomial of the N (GroupSize)
+  /// \return the 1D pixel position along the Unit
+  uint32_t strawCorrection(int GroupIndex, int UnitIndex, double Pos);
 
   /// \brief intervals are vectors of vectors
-  std::vector<std::vector<float>> Intervals;
+  std::vector<std::vector<double>> Intervals;
 
   /// \brief coefficients are vectors of vectors of vectors
-  std::vector<std::vector<std::vector<float>>> Calibration;
+  std::vector<std::vector<std::vector<double>>> Calibration;
 
   // Grafana Counters
-  // struct {
-  //   int64_t ClampLow;
-  //   int64_t ClampHigh;
-  // } Stats;
+  struct {
+    int64_t ClampLow;
+    int64_t ClampHigh;
+  } Stats;
 
   struct {
     // New abstraction: Groups is used in stead of Tubes(LOKI), Triplets(BIFROST),
@@ -58,10 +58,8 @@ public:
     int GroupSize{0};
     int Amplitudes{2};
     int Pixellation{0};
-    std::vector<float> DefaultIntervals;
 
   } Parms;
-
 
   std::string ConfigFile{""};
   nlohmann::json root;
