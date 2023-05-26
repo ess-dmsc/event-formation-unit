@@ -70,7 +70,7 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
          Data.SpidrTime);
   // uint64_t ToF = 25 * Data.ToA - 1.5625 * Data.FToA;
   uint64_t ToF =
-      int(409600 * Data.SpidrTime + 25 * Data.ToA + 1.5625 * Data.FToA);
+      int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA);
   XTRACE(DATA, DEB, "%u", ToF);
   return ToF;
 }
@@ -103,8 +103,8 @@ bool compareByTimeOfFlight(const TimepixHit& Hit1, const TimepixHit& Hit2) {
   return Hit1.TimeOfFlight < Hit2.TimeOfFlight;
 }
 
-std::vector<std::vector<TimepixHit>> clusterByCoordinate(std::vector<TimepixHit> EventHits, double distanceThreshold) {
-    std::vector<std::vector<TimepixHit>> clusters;
+void Timepix3Instrument::clusterByCoordinate(std::vector<TimepixHit> EventHits, double distanceThreshold) {
+    ClusteredInSpaceEventHits.clear();
     std::set<int> visited; // keep track of visited points
     XTRACE(DATA, DEB, "%u events in time window", EventHits.size());
     for (uint i = 0; i < EventHits.size(); i++) {
@@ -132,18 +132,14 @@ std::vector<std::vector<TimepixHit>> clusterByCoordinate(std::vector<TimepixHit>
             }
         }
         
-        clusters.push_back(cluster); // add completed cluster to list of clusters
+        ClusteredInSpaceEventHits.push_back(cluster); // add completed cluster to list of clusters
     }
-    
-    return clusters;
 }
 
 void Timepix3Instrument::formEvents(std::vector<TimepixHit> ClusteredInTimeEventHits) {
       // EventHits contains hits in given time window, now need clustering by coordinate
-      std::vector<std::vector<TimepixHit>> ClusteredInSpaceEventHits = clusterByCoordinate(ClusteredInTimeEventHits, 10.0);
+      clusterByCoordinate(ClusteredInTimeEventHits, 10.0);
       XTRACE(DATA, DEB, "Split time window of %u photon events into clusters by coordinate, made %u clusters.", ClusteredInTimeEventHits.size(), ClusteredInSpaceEventHits.size() );
-      
-
       for(std::vector<TimepixHit> EventHits : ClusteredInSpaceEventHits){
         if (EventHits.size() < Timepix3Configuration.MinEventSizeHits) {
           XTRACE(DATA, DEB, "Not enough events in cluster, got %u, minimum %u", EventHits.size(), Timepix3Configuration.MinEventSizeHits);

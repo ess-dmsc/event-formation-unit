@@ -54,6 +54,7 @@ public:
   void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
 
   void formEvents(std::vector<TimepixHit> ClusteredInTimeEventHits);
+  void clusterByCoordinate(std::vector<TimepixHit> EventHits, double distanceThreshold);
 
 public:
   /// \brief Stuff that 'ties' Timepix3 together
@@ -65,6 +66,8 @@ public:
   Geometry *Geom;
   EV44Serializer *Serializer;
   // TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
+
+  std::vector<std::vector<TimepixHit>> ClusteredInSpaceEventHits;
 };
 
 } // namespace Timepix3
