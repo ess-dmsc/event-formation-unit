@@ -8,6 +8,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/reduction/clustering/HierarchicalClusterer.h>
+#include <set>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
