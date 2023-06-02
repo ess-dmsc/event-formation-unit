@@ -206,7 +206,7 @@ inline void sort_chronologically(Hit2DVector &hits) {
 /// \brief convenience function for sorting Hits by increasing coordinate
 inline void sortByIncreasingXCoordinate(Hit2DVector &hits) {
   std::sort(hits.begin(), hits.end(), [](const Hit2D &hit1, const Hit2D &hit2) {
-    return hit1.coordinate < hit2.coordinate;
+    return hit1.x_coordinate < hit2.x_coordinate;
   });
 }
 

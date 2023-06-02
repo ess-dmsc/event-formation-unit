@@ -60,7 +60,7 @@ struct __attribute__((packed)) Hit2D {
 namespace hdf5 {
 
 namespace datatype {
-template <> class TypeTrait<Hit> {
+template <> class TypeTrait<Hit2D> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Hit2D) {
     H5_COMPOUND_INIT;

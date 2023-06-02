@@ -57,8 +57,8 @@ std::string visualize(const Hit2DVector &vec, const std::string &prepend,
   for (const auto &hit : vec) {
     time_min = std::min(time_min, hit.time);
     time_max = std::max(time_max, hit.time);
-    coord_min = std::min(coord_min, hit.coordinate);
-    coord_max = std::max(coord_max, hit.coordinate);
+    coord_min = std::min(coord_min, hit.x_coordinate);
+    coord_max = std::max(coord_max, hit.x_coordinate);
   }
 
   /// Rescale bounds
@@ -84,7 +84,7 @@ std::string visualize(const Hit2DVector &vec, const std::string &prepend,
   matrix.resize(time_bins + 1, std::vector<uint16_t>(coord_bins + 1, 0));
   for (const auto &h : vec) {
     auto t = (h.time - time_min) * time_rescale;
-    auto c = (h.coordinate - coord_min) * coord_rescale;
+    auto c = (h.x_coordinate - coord_min) * coord_rescale;
     matrix[t][c] += h.weight;
     weight_max = std::max(weight_max, matrix[t][c]);
   }
