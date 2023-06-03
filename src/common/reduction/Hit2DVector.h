@@ -11,6 +11,7 @@
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>
+#include <utility>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -109,7 +110,7 @@ public:
 
   void push_back(const value_type &x) {
     XTRACE(DATA, DEB, "pushing back constant value");
-    Vec.push_back(x);
+    Vec.push_back(std::move(x));
   }
 
   void push_back(value_type &&x) { Vec.push_back(std::move(x)); }
@@ -201,6 +202,23 @@ inline void sort_chronologically(Hit2DVector&& hits) {
   std::sort(hits.begin(), hits.end(), [](const Hit2D& hit1, const Hit2D& hit2) {
     return hit1.time < hit2.time;
   });
+}
+
+/// \brief convenience function for sorting Hit2Ds by increasing time
+inline void sort_partial_chronologically(Hit2DVector& hits) {
+  if(hits.size()>20){
+    std::partial_sort(hits.begin(), hits.begin() + 20, hits.end(),
+                    [](const Hit2D& hit1, const Hit2D& hit2) {
+                      return hit1.time < hit2.time;
+                    });
+  }
+  else{
+    std::sort(hits.begin(), hits.end(),
+                    [](const Hit2D& hit1, const Hit2D& hit2) {
+                      return hit1.time < hit2.time;
+                    });
+  }
+  
 }
 
 /// \brief convenience function for sorting Hits by increasing coordinate
