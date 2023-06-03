@@ -27,14 +27,7 @@ public:
   ///        that they would be considered part of the same cluster
   HierarchicalClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
-  /// \param geom sets the ModuleGeometry definition for converting Wires to X
-  /// and Z
-  void set_geometry(const Multigrid::ModuleGeometry &geom);
-
-  /// \returns current ModuleGeometry definition
-  Multigrid::ModuleGeometry geometry() const;
-
-  /// \brief insert new hit and perform clustering
+   /// \brief insert new hit and perform clustering
   /// \param hit to be added to cluster. Hits must be chronological between
   ///         subsequent calls. It may be more efficient to use:
   /// \sa HierarchicalClusterer::cluster
@@ -61,8 +54,6 @@ private:
 
   Hit2DVector
       current_time_cluster_; ///< kept in memory until time gap encountered
-
-  Multigrid::ModuleGeometry geometry_;
 
   /// \brief helper function to clusters hits in current_time_cluster_
   void cluster_by_x();

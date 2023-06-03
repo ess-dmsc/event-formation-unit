@@ -36,6 +36,7 @@ public:
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};
   uint32_t MinimumToTSum{0};
+  uint16_t MaxCoordinateGap{5};
 
 };
 } // namespace Timepix3

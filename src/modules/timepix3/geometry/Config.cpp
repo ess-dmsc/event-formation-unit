@@ -64,6 +64,12 @@ Config::Config(std::string ConfigFile) {
   } catch (...) {
     LOG(INIT, Sev::Warning, "Using default MinimumToTSum");
   }
+
+  try {
+    MaxCoordinateGap = root["MaxCoordinateGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MaxCoordinateGap");
+  }
 }
 
 } // namespace Timepix3

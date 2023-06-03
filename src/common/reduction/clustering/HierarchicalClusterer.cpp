@@ -16,11 +16,6 @@ HierarchicalClusterer::HierarchicalClusterer(uint64_t max_time_gap, uint16_t max
     : Abstract2DClusterer(), max_time_gap_(max_time_gap),
       max_coord_gap_(max_coord_gap) {}
 
-void HierarchicalClusterer::set_geometry(const Multigrid::ModuleGeometry &geom) {
-  geometry_ = geom;
-}
-
-Multigrid::ModuleGeometry HierarchicalClusterer::geometry() const { return geometry_; }
 
 void HierarchicalClusterer::insert(const Hit2D &hit) {
   /// Process time-cluster if time gap to next hit is large enough
@@ -65,7 +60,7 @@ void HierarchicalClusterer::cluster_by_x() {
         continue; // skip points that have already been visited
       }
       double distance = sqrt(pow((double)current_time_cluster_[i].x_coordinate - (double)current_time_cluster_[j].x_coordinate, 2) + pow((double)current_time_cluster_[i].y_coordinate - (double)current_time_cluster_[j].y_coordinate, 2));
-      XTRACE(DATA, DEB, "Determined distance between points is %f, threshold is %f", distance, max_coord_gap_);
+      XTRACE(DATA, DEB, "Determined distance between points is %f, threshold is %u", distance, max_coord_gap_);
       XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u", current_time_cluster_[i].x_coordinate, current_time_cluster_[j].x_coordinate, current_time_cluster_[i].y_coordinate, current_time_cluster_[j].y_coordinate);
       if (distance < max_coord_gap_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
@@ -94,7 +89,6 @@ std::string HierarchicalClusterer::config(const std::string &prepend) const {
   ss << "HierarchicalClusterer:\n";
   ss << prepend << fmt::format("max_time_gap={}\n", max_time_gap_);
   ss << prepend << fmt::format("max_coord_gap={}\n", max_coord_gap_);
-  ss << prepend << geometry_.debug(prepend + "  ");
   return ss.str();
 }
 

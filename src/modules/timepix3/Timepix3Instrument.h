@@ -18,6 +18,10 @@
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
 #include <timepix3/geometry/Config.h>
 #include <timepix3/geometry/Geometry.h>
+#include <common/reduction/Hit2DVector.h>
+#include <common/reduction/clustering/HierarchicalClusterer.h>
+
+
 
 namespace Timepix3 {
 
@@ -53,8 +57,7 @@ public:
   /// \brief writes a single readout to file
   void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
 
-  void formEvents(std::vector<TimepixHit> ClusteredInTimeEventHits);
-  void clusterByCoordinate(std::vector<TimepixHit> EventHits, double distanceThreshold);
+  void generateEvents();
 
 public:
   /// \brief Stuff that 'ties' Timepix3 together
@@ -65,9 +68,9 @@ public:
   DataParser Timepix3Parser{counters};
   Geometry *Geom;
   EV44Serializer *Serializer;
-  // TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
-
-  std::vector<std::vector<TimepixHit>> ClusteredInSpaceEventHits;
+  HierarchicalClusterer *Clusterer;
+  Hit2DVector AllHitsVector;
+  
 };
 
 } // namespace Timepix3
