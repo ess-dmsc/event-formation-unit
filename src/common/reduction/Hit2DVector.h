@@ -197,8 +197,8 @@ bool operator!=(const Hit2DVectorAllocator<T> &, const Hit2DVectorAllocator<U> &
 using Hit2DVector = MyVector<Hit2D, Hit2DVectorAllocator<Hit2D>>;
 
 /// \brief convenience function for sorting Hit2Ds by increasing time
-inline void sort_chronologically(Hit2DVector &hits) {
-  std::sort(hits.begin(), hits.end(), [](const Hit2D &hit1, const Hit2D &hit2) {
+inline void sort_chronologically(Hit2DVector&& hits) {
+  std::sort(hits.begin(), hits.end(), [](const Hit2D& hit1, const Hit2D& hit2) {
     return hit1.time < hit2.time;
   });
 }

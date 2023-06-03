@@ -130,7 +130,7 @@ void Timepix3Instrument::processReadouts() {
   }
 
   // sort hits by time of flight for clustering in time
-  sort_chronologically(AllHitsVector);
+  sort_chronologically(std::move(AllHitsVector)); 
   Clusterer->cluster(AllHitsVector);
   generateEvents();
   AllHitsVector.clear();
