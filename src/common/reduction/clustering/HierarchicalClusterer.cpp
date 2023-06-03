@@ -45,27 +45,31 @@ void HierarchicalClusterer::flush() {
 }
 
 void HierarchicalClusterer::cluster_by_x() {
-  std::set<int> visited; // keep track of visited points
-  XTRACE(DATA, DEB, "%u events in time window", current_time_cluster_.size());
-  for (uint i = 0; i < current_time_cluster_.size(); i++) {
-    if (visited.count(i) > 0) {
+  uint clusterSize = current_time_cluster_.size();
+  std::vector<bool> visited(clusterSize, false); // keep track of visited points
+  
+  XTRACE(DATA, DEB, "%u events in time window", clusterSize);
+  for (uint i = 0; i < clusterSize; i++) {
+    if (visited[i]) {
       continue; // skip points that have already been visited
     }
     XTRACE(DATA, DEB, "Starting new cluster");
     Hit2DVector space_cluster; // initialize a new cluster
     space_cluster.push_back(current_time_cluster_[i]);
-    visited.insert(i);
-    for (uint j = i+1; j < current_time_cluster_.size(); j++) {
-      if (visited.count(j) > 0) {
+    visited[i] = true;
+    for (uint j = i+1; j < clusterSize; j++) {
+      if (visited[j]) {
         continue; // skip points that have already been visited
       }
-      double distance = sqrt(pow((double)current_time_cluster_[i].x_coordinate - (double)current_time_cluster_[j].x_coordinate, 2) + pow((double)current_time_cluster_[i].y_coordinate - (double)current_time_cluster_[j].y_coordinate, 2));
+      double x_distance = (double)current_time_cluster_[i].x_coordinate - (double)current_time_cluster_[j].x_coordinate;
+      double y_distance = (double)current_time_cluster_[i].y_coordinate - (double)current_time_cluster_[j].y_coordinate;
+      double distance = sqrt(pow(x_distance, 2) + pow(y_distance, 2));
       XTRACE(DATA, DEB, "Determined distance between points is %f, threshold is %u", distance, max_coord_gap_);
       XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u", current_time_cluster_[i].x_coordinate, current_time_cluster_[j].x_coordinate, current_time_cluster_[i].y_coordinate, current_time_cluster_[j].y_coordinate);
       if (distance < max_coord_gap_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
         space_cluster.push_back(current_time_cluster_[j]); // add point to current cluster
-        visited.insert(j);
+        visited[j] = true;
       }
       else{
         XTRACE(DATA, DEB, "Too far apart, not including in this cluster");
