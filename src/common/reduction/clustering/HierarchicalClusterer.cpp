@@ -35,18 +35,6 @@ void HierarchicalClusterer::cluster(const Hit2DVector &hits) {
   }
 }
 
-void HierarchicalClusterer::clusterNonConst(Hit2DVector &hits) {
-  /// It is assumed that hits are mostly sorted in time
-  int count = 0;
-  for (const auto &hit : hits) {
-    if (count % 10 == 0) {
-      sort_partial_chronologically(hits);
-    }
-    insert(hit);
-    count++;
-  }
-}
-
 void HierarchicalClusterer::flush() {
   XTRACE(EVENT, DEB, "Flushing clusterer");
   if (current_time_cluster_.empty()) {

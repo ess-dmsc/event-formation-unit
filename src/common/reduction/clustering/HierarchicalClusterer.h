@@ -39,8 +39,6 @@ public:
   ///        sorted within the container and between subsequent calls.
   void cluster(const Hit2DVector &hits) override;
 
-  void clusterNonConst(Hit2DVector &hits);
-
   /// \brief complete clustering for any remaining hits
   void flush() override;
 

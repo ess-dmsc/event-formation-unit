@@ -38,15 +38,6 @@
 #include <limits>
 
 struct __attribute__((packed)) Hit2D {
-  Hit2D& operator=(const Hit2D& other) {
-        if (this != &other) {
-            time = other.time;
-            x_coordinate = other.x_coordinate;
-            y_coordinate = other.y_coordinate;
-            weight = other.weight;
-        }
-        return *this;
-    }
   // \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "efu_hits"; }
   static uint16_t FormatVersion() { return 0; }
