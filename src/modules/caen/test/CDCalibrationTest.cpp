@@ -134,6 +134,12 @@ TEST_F(CDCalibrationTest, ErrPosNotInUnitInterval) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
+TEST_F(CDCalibrationTest, ErrIntervalOverlap) {
+  // fake overlapping intervals
+  calib.root["Calibration"]["Parameters"][1]["intervals"][0][1] = 1.0;
+  ASSERT_ANY_THROW(calib.parseCalibration());
+}
+
 
 TEST_F(CDCalibrationTest, ErrPolynomialVectorSize) {
   calib.root = ErrorGroupSizeMismatch;
