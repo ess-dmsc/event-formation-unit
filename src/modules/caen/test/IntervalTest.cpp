@@ -21,6 +21,28 @@ protected:
 };
 
 
+TEST_F(IntervalTest, NoOverlaps) {
+  Overlaps = Interval::overlaps(StdInterval);
+  EXPECT_FALSE(Overlaps);
+}
+
+
+TEST_F(IntervalTest, SingleInterval) {
+  Overlaps = Interval::overlaps({{0.0, 0.5}});
+  EXPECT_FALSE(Overlaps);
+
+  Overlaps = Interval::overlaps({{0.5, 0.0}});
+  EXPECT_FALSE(Overlaps);
+}
+
+
+TEST_F(IntervalTest, SideEffects) {
+  std::vector<std::pair<double, double>> LargestFirst{{0.5, 0.1}};
+  Interval::overlaps(LargestFirst);
+  ASSERT_TRUE(LargestFirst[0].first > LargestFirst[0].second);
+}
+
+
 TEST_F(IntervalTest, MiscOverlaps) {
   Overlaps = Interval::overlaps({ {0.1, 0.2}, {0.0, 0.2} });
   EXPECT_TRUE(Overlaps);
@@ -28,16 +50,11 @@ TEST_F(IntervalTest, MiscOverlaps) {
   Overlaps = Interval::overlaps({ {0.1, 0.2}, {0.2, 0.3} });
   EXPECT_TRUE(Overlaps);
 
-  Overlaps = Interval::overlaps({ //                  overlaps 1st
-    {0.0, 0.1}, {0.101, 0.2}, {0.201, 0.3}, {0.301, 0.4}, {0.02, 0.03} });
+  Overlaps = Interval::overlaps(//                         overlaps 1st
+    {{0.0, 0.1}, {0.101, 0.2}, {0.201, 0.3}, {0.301, 0.4}, {0.02, 0.03} });
   EXPECT_TRUE(Overlaps);
 }
 
-
-TEST_F(IntervalTest, NoOverlaps) {
-  Overlaps = Interval::overlaps(StdInterval);
-  EXPECT_FALSE(Overlaps);
-}
 
 
 TEST_F(IntervalTest, EpsilonCheck) {

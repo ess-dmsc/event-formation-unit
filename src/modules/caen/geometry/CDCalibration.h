@@ -30,15 +30,12 @@ public:
   /// \retval True if file is valid, else False.
   void parseCalibration();
 
-  /// \brief return the maximum pixel id
-  uint32_t getMaxPixel() { return MaxPixelId; }
-
   /// \brief apply the position correction
   /// \param Pos the uncorrected position along the charge division unit
   /// \param GroupIndex which group are we in
   /// \param UnitIndex which polynomial of the N (GroupSize)
-  /// \return the 1D pixel position along the Unit
-  uint32_t strawCorrection(int GroupIndex, int UnitIndex, double Pos);
+  /// \return the corrected position
+  double posCorrection(int GroupIndex, int UnitIndex, double Pos);
 
   /// \brief intervals are vectors of vectors
   std::vector<std::vector<std::pair<double, double>>> Intervals;
@@ -58,8 +55,6 @@ public:
     int Groups{0};
     // New abstraction: GroupSize is used instead of Straws(LOKI), Tubes(BIFROST)
     int GroupSize{0};
-    int Amplitudes{2};
-    int Pixellation{0};
 
   } Parms;
 
@@ -102,7 +97,7 @@ private:
   nlohmann::json getObjectAndCheck(nlohmann::json JsonObject, std::string Property);
 
   std::string Name{""}; ///< Detector/instrument name prvided in constructor
-  uint32_t MaxPixelId{0}; ///< The maximum calculated pixelid in the map
+
   std::string Message; /// Used for throwing exceptions.
 };
 } // namespace Caen

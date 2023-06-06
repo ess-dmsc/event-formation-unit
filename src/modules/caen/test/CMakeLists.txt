@@ -24,17 +24,24 @@ create_test_executable(CaenCalibrationTest)
 
 # New calibration scheme - validation tests
 set(CaenCDCalibrationTest_INC
-  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h)
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h
+  )
 set(CaenCDCalibrationTest_SRC
   ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
   CDCalibrationTest.cpp)
 create_test_executable(CaenCDCalibrationTest)
 
+
 # New calibration scheme - correction tests
 set(CaenCDCalibrationIITest_INC
-  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h)
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h
+  )
 set(CaenCDCalibrationIITest_SRC
   ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
   CDCalibrationIITest.cpp)
 create_test_executable(CaenCDCalibrationIITest)
 

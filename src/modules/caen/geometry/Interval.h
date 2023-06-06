@@ -26,7 +26,7 @@ class Interval {
 public:
 
   ///\brief compare function implemented for use in sort()
-  bool static Compare(std::pair<double, double> &a, std::pair<double, double> &b) {
+  bool static Compare(const std::pair<double, double> &a, const std::pair<double, double> &b) {
     return abs(a.first - b.first) < EPSILON ? a.second > b.second : a.first < b.first;
   }
 

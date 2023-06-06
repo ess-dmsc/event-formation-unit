@@ -19,8 +19,6 @@ auto LokiExample = R"(
       "instrument" : "loki",
       "groups" : 2,
       "groupsize" : 7,
-      "amplitudes" : 4,
-      "pixellation" : 512,
 
       "Parameters" : [
         {
@@ -44,11 +42,11 @@ auto ErrorMissingCalibration = R"(
     "Ca li bra tion":
     {
       "instrument" : "loki",
-      "groups" : 1, "groupsize" : 1, "amplitudes" : 2, "pixellation" : 512,
+      "groups" : 1, "groupsize" : 1,
 
       "Parameters" : [
-        { "groupindex" : 0, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
-        { "groupindex" : 1, "intervals"  : [0.0, 0.142], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
+        { "groupindex" : 0, "intervals"  : [[0.0, 0.142]], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
+        { "groupindex" : 1, "intervals"  : [[0.0, 0.142]], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
       ]
     }
   }
@@ -60,11 +58,11 @@ auto ErrorGroupSizeMismatch = R"(
     "Calibration":
     {
       "instrument" : "loki",
-      "groups" : 2, "groupsize" : 2, "amplitudes" : 2, "pixellation" : 512,
+      "groups" : 2, "groupsize" : 2,
 
       "Parameters" : [
-        { "groupindex" : 0, "intervals"  : [0.000, 0.100, 0.200, 0.300], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] },
-        { "groupindex" : 1, "intervals"  : [0.000, 0.100, 0.200, 0.300], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] }
+        { "groupindex" : 0, "intervals"  : [[0.000, 0.100], [0.200, 0.300]], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] },
+        { "groupindex" : 1, "intervals"  : [[0.000, 0.100], [0.200, 0.300]], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] }
       ]
     }
   }
@@ -83,7 +81,7 @@ protected:
   void TearDown() override {}
 };
 
-#if 0
+
 
 TEST_F(CalibrationTest, NotJsonFile) {
   ASSERT_ANY_THROW(calib = CDCalibration("loki", InvalidJsonName));
@@ -119,7 +117,6 @@ TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
   calib.root["Calibration"]["Parameters"][0]["intervals"].push_back(NewPair);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
-#endif
 
 
 TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
@@ -145,7 +142,7 @@ TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
 //   calib.root["Calibration"]["Parameters"][0]["intervals"][1] = 0.4;
 //   ASSERT_ANY_THROW(calib.parseCalibration());
 // }
-#if 0
+
 TEST_F(CalibrationTest, ErrPolynomialVectorSize) {
   calib.root = ErrorGroupSizeMismatch;
   ASSERT_ANY_THROW(calib.parseCalibration());
@@ -173,7 +170,6 @@ TEST_F(CalibrationTest, LokiTest) {
     }
   }
 }
-#endif
 
 int main(int argc, char **argv) {
   saveBuffer(InvalidJsonName, (void *)InvalidJson.c_str(), InvalidJson.size());

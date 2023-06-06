@@ -14,9 +14,6 @@ auto SimplePolynomials = R"(
       "instrument" : "dummy",
       "groups" : 4,
       "groupsize" : 1,
-      "amplitudes" : 4,
-      "pixellation" : 512,
-      "default intervals" : [0.000, 1.0],
 
       "Parameters" : [
         {
@@ -64,24 +61,24 @@ protected:
 TEST_F(CalibrationIITest, SelectedValues) {
   calib.parseCalibration();
   // Null calibration
-  ASSERT_NEAR(calib.strawCorrection(0, 0, 0.0),   0, 0.001);
-  ASSERT_NEAR(calib.strawCorrection(0, 0, 0.5), 255, 0.001);
-  ASSERT_NEAR(calib.strawCorrection(0, 0, 1.0), 511, 0.001);
+  ASSERT_NEAR(calib.posCorrection(0, 0, 0.0),   0, 0.001);
+  ASSERT_NEAR(calib.posCorrection(0, 0, 0.5), 0.5, 0.001);
+  ASSERT_NEAR(calib.posCorrection(0, 0, 1.0), 1.0, 0.001);
 
   // Constant subtraction of 1.0
-  ASSERT_NEAR(calib.strawCorrection(1, 0, 0.0), 0, 0.001);
+  ASSERT_NEAR(calib.posCorrection(1, 0, 0.0), 0, 0.001);
   ASSERT_EQ(calib.Stats.ClampLow, 1);
-  ASSERT_NEAR(calib.strawCorrection(1, 0, 1.0), 0, 0.001);
+  ASSERT_NEAR(calib.posCorrection(1, 0, 1.0), 0, 0.001);
 
   // Identity subtraction - all values are zero
   for (int i = 0; i <= 100; i++) {
-    ASSERT_NEAR(calib.strawCorrection(2, 0, i/100.0), 0, 0.001);
+    ASSERT_NEAR(calib.posCorrection(2, 0, i/100.0), 0, 0.001);
   }
 
   // Constant addition of 1.0
-  ASSERT_NEAR(calib.strawCorrection(3, 0, 0.0), 511, 0.001);
+  ASSERT_NEAR(calib.posCorrection(3, 0, 0.0), 1.0, 0.001);
   ASSERT_EQ(calib.Stats.ClampHigh, 0);
-  ASSERT_NEAR(calib.strawCorrection(3, 0, 1.0), 511, 0.001);
+  ASSERT_NEAR(calib.posCorrection(3, 0, 1.0), 1.0, 0.001);
   ASSERT_EQ(calib.Stats.ClampHigh, 1);
 }
 

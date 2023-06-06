@@ -13,6 +13,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <modules/caen/geometry/CDCalibration.h>
+#include <modules/caen/geometry/Interval.h>
 #include <utility>
 #include <vector>
 
@@ -36,7 +37,7 @@ CDCalibration::CDCalibration(std::string Name, std::string CalibrationFile)
 }
 
 
-uint32_t CDCalibration::strawCorrection(int Group, int Unit, double Pos) {
+double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
   std::vector<double> & Pols = Calibration[Group][Unit];
   double a = Pols[0];
   double b = Pols[1];
@@ -60,9 +61,7 @@ uint32_t CDCalibration::strawCorrection(int Group, int Unit, double Pos) {
     CorrectedPos = 1.0;
   }
 
-  uint32_t IntegerPos = CorrectedPos * (Parms.Pixellation - 1);
-  XTRACE(EVENT, DEB, "Integer position %d", IntegerPos);
-  return IntegerPos;
+  return CorrectedPos;
 }
 
 
@@ -84,13 +83,8 @@ void CDCalibration::consistencyCheck() {
 
   Parms.Groups = Calibration["groups"];
   Parms.GroupSize = Calibration["groupsize"];
-  Parms.Amplitudes = Calibration["amplitudes"];
-  Parms.Pixellation = Calibration["pixellation"];
-  XTRACE(INIT, ALW, "Parms: %s, %d, %d, %d, %d", Name.c_str(), Parms.Groups, Parms.GroupSize,
-        Parms.Amplitudes, Parms.Pixellation);
 
-  MaxPixelId = Parms.Groups * Parms.GroupSize * Parms.Pixellation;
-  XTRACE(INIT, ALW, "Calibration - number of pixels: %d", MaxPixelId);
+  XTRACE(INIT, ALW, "Parms: %s, %d, %d", Name.c_str(), Parms.Groups, Parms.GroupSize);
 
   auto ParameterVector = Calibration["Parameters"];
   if (ParameterVector.size() != (unsigned int)(Parms.Groups)) {
@@ -145,7 +139,13 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
     throwException(Message);
   }
 
-  //std::pair<double, double> PrevPair{-1.0, -1.0};
+
+  // check for interval overlaps
+  if (Interval::overlaps(Intervals)) {
+    Message = fmt::format("Groupindex {} has overlapping intervals", Index);
+    throwException(Message);
+  }
+
   int IntervalIndex{0};
 
   for (auto & Interval : Intervals) {
@@ -154,12 +154,6 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
                    Index, IntervalIndex, Interval.first, Interval.second);
       throwException(Message);
     }
-    // if(Pos <= PreviousPos) {
-    //   Message = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
-    //                Index, IntervalIndex, Pos, PreviousPos);
-    //   throwException(Message);
-    // }
-    //PreviousPos = Pos;
     IntervalIndex++;
   }
 }
