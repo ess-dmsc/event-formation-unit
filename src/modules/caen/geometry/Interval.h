@@ -34,7 +34,7 @@ public:
   void static print(std::vector<std::pair<double, double>> Intervals) {
     std::string Msg{""};
     for (auto & Interval : Intervals) {
-      Msg += fmt::format("[{}, {}}] ", Interval.first, Interval.second);
+      Msg += fmt::format("[{}, {}] ", Interval.first, Interval.second);
     }
     XTRACE(INIT, ALW, "%s", Msg.c_str());
   }

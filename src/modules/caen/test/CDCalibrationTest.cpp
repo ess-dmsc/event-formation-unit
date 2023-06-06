@@ -71,7 +71,7 @@ auto ErrorGroupSizeMismatch = R"(
 
 using namespace Caen;
 
-class CalibrationTest : public TestBase {
+class CDCalibrationTest : public TestBase {
 protected:
   CDCalibration calib{"loki"};
 
@@ -82,36 +82,35 @@ protected:
 };
 
 
-
-TEST_F(CalibrationTest, NotJsonFile) {
+TEST_F(CDCalibrationTest, NotJsonFile) {
   ASSERT_ANY_THROW(calib = CDCalibration("loki", InvalidJsonName));
 }
 
-TEST_F(CalibrationTest, BadName) {
+TEST_F(CDCalibrationTest, BadName) {
   calib = CDCalibration("wotan");
   calib.root = LokiExample;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-TEST_F(CalibrationTest, MissingCalibrationEntry) {
+TEST_F(CDCalibrationTest, MissingCalibrationEntry) {
   calib.root = ErrorMissingCalibration;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-TEST_F(CalibrationTest, BadNumberOfGroups) {
+TEST_F(CDCalibrationTest, BadNumberOfGroups) {
   // fake invalid number of groups from otherwise valid file
   calib.root["Calibration"]["groups"] = 5;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-TEST_F(CalibrationTest, BadGroupIndex) {
+TEST_F(CDCalibrationTest, BadGroupIndex) {
   // fake unordered groups from otherwise valid file
   calib.root["Calibration"]["Parameters"][1]["groupindex"] = 2;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 
-TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
+TEST_F(CDCalibrationTest, BadNumberOfGroupIntervals) {
   // fake invalid number of intervals for group 0 from otherwise valid file
   std::pair<double, double> NewPair{0.1, 0.2};
   calib.root["Calibration"]["Parameters"][0]["intervals"].push_back(NewPair);
@@ -119,10 +118,10 @@ TEST_F(CalibrationTest, BadNumberOfGroupIntervals) {
 }
 
 
-TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
+TEST_F(CDCalibrationTest, ErrPosNotInUnitInterval) {
   // set valid outer ranges for group 0
   calib.root["Calibration"]["Parameters"][0]["intervals"][0][0] = 0.000;
-  calib.root["Calibration"]["Parameters"][0]["intervals"][0][1] = 1.000;
+  calib.root["Calibration"]["Parameters"][0]["intervals"][6][1] = 1.000;
 
   // fake invalid interval value for group 1 from otherwise valid file
   calib.root["Calibration"]["Parameters"][1]["intervals"][0][0] = -0.0001;
@@ -131,33 +130,25 @@ TEST_F(CalibrationTest, ErrPosNotInUnitInterval) {
   calib.root = LokiExample;
   calib.parseCalibration(); // check that we've copied in a new valid calib
 
-  calib.root["Calibration"]["Parameters"][1]["intervals"][0][1] = 1.001;
+  calib.root["Calibration"]["Parameters"][1]["intervals"][6][1] = 1.001;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 
-// TEST_F(CalibrationTest, ErrPosUnordered) {
-//   // fake misordered interval values for group 0 from otherwise valid file
-//   calib.root["Calibration"]["Parameters"][0]["intervals"][0] = 0.5;
-//   calib.root["Calibration"]["Parameters"][0]["intervals"][1] = 0.4;
-//   ASSERT_ANY_THROW(calib.parseCalibration());
-// }
-
-TEST_F(CalibrationTest, ErrPolynomialVectorSize) {
+TEST_F(CDCalibrationTest, ErrPolynomialVectorSize) {
   calib.root = ErrorGroupSizeMismatch;
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-TEST_F(CalibrationTest, ErrCoefficientVectorSize) {
+TEST_F(CDCalibrationTest, ErrCoefficientVectorSize) {
   // fake bad size of coefficient vector for group 0/groupindex 0 from otherwise valid file
   calib.root["Calibration"]["Parameters"][0]["polynomials"][0].push_back(0.1);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 
-
 // Test that after loading we have the correct polynomial values
-TEST_F(CalibrationTest, LokiTest) {
+TEST_F(CDCalibrationTest, LokiTest) {
   calib.parseCalibration();
   int Entries{0};
   for (int i = 0; i < calib.Parms.Groups; i++) {
@@ -170,6 +161,7 @@ TEST_F(CalibrationTest, LokiTest) {
     }
   }
 }
+
 
 int main(int argc, char **argv) {
   saveBuffer(InvalidJsonName, (void *)InvalidJson.c_str(), InvalidJson.size());
