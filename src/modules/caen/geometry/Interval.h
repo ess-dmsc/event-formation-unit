@@ -12,7 +12,8 @@
 
 #pragma once
 
-#include <cstdlib>
+#include <common/debug/Trace.h>
+#include <fmt/format.h>
 #include <utility>
 #include <vector>
 
@@ -31,10 +32,11 @@ public:
 
   ///\brief for debugging
   void static print(std::vector<std::pair<double, double>> Intervals) {
+    std::string Msg{""};
     for (auto & Interval : Intervals) {
-      printf("[%g, %g] ", Interval.first, Interval.second);
+      Msg += fmt::format("[{}, {}}] ", Interval.first, Interval.second);
     }
-    printf("\n");
+    XTRACE(INIT, ALW, "%s", Msg.c_str());
   }
 
   ///\brief check if at least one pair of intervals overlap
