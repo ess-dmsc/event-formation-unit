@@ -21,22 +21,22 @@ auto SimplePolynomials = R"(
       "Parameters" : [
         {
           "groupindex" : 0,
-          "intervals"  : [0.0, 1.0],
+          "intervals"  : [[0.0, 1.0]],
           "polynomials" : [[0.00, 0.00, 0.00, 0.00]]
         },
         {
           "groupindex" : 1,
-          "intervals"  : [0.0, 1.0],
+          "intervals"  : [[0.0, 1.0]],
           "polynomials" : [[1.0, 0.0, 0.0, 0.0]]
         },
         {
           "groupindex" : 2,
-          "intervals"  : [0.0, 1.0],
+          "intervals"  : [[0.0, 1.0]],
           "polynomials" : [[0.0, 1.0, 0.0, 0.0]]
         },
         {
           "groupindex" : 3,
-          "intervals"  : [0.0, 1.0],
+          "intervals"  : [[0.0, 1.0]],
           "polynomials" : [[-1.0, 0.0, 0.0, 0.0]]
         }
       ]

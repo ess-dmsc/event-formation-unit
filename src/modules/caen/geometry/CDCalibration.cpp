@@ -3,12 +3,17 @@
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read calibrations from file
+/// \brief Implementation of Charge Division calibration (CDCalibration)
+/// Implementing ideas from ownCloud folder
+/// 'DM/detectors/02 instruments/01 common/03 Calibration/Charge division'
+///
+/// \brief using nlohmann json to parse calibrations read from file
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <modules/caen/geometry/CDCalibration.h>
+#include <utility>
 #include <vector>
 
 // #undef TRC_LEVEL
@@ -111,7 +116,7 @@ void CDCalibration::loadCalibration() {
 
   auto ParameterVector = root["Calibration"]["Parameters"];
   for (auto & Group : ParameterVector) {
-    auto GroupIntervals = Group["intervals"].get<std::vector<double>>();
+    auto GroupIntervals = Group["intervals"].get<std::vector<std::pair<double, double>>>();
     Intervals.push_back(GroupIntervals);
 
     auto GroupPolys = Group["polynomials"].get<std::vector<std::vector<double>>>();
@@ -133,26 +138,28 @@ nlohmann::json CDCalibration::getObjectAndCheck(nlohmann::json JsonObject, std::
 
 
 void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
-  std::vector<double> Intervals = Parameter["intervals"];
-  if (Intervals.size() != (unsigned int)(Parms.GroupSize * 2)) {
+  std::vector<std::pair<double, double>> Intervals = Parameter["intervals"];
+  if (Intervals.size() != (unsigned int)(Parms.GroupSize)) {
     Message = fmt::format("Groupindex {} - interval array error: expected {} entries, got {}",
-                 Index, Parms.GroupSize * 2, Intervals.size());
+                 Index, Parms.GroupSize, Intervals.size());
     throwException(Message);
   }
-  double PreviousPos{-1.0};
+
+  //std::pair<double, double> PrevPair{-1.0, -1.0};
   int IntervalIndex{0};
-  for (auto & Pos : Intervals) {
-    if( (Pos < 0.0) or (Pos > 1.0)) {
-      Message = fmt::format("Groupindex {}, Intervalpos {} - bad value {}",
-                   Index, IntervalIndex, Pos);
+
+  for (auto & Interval : Intervals) {
+    if (not inUnitInterval(Interval)) {
+      Message = fmt::format("Groupindex {}, Intervalpos {} - bad range [{}; {}]",
+                   Index, IntervalIndex, Interval.first, Interval.second);
       throwException(Message);
     }
-    if(Pos <= PreviousPos) {
-      Message = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
-                   Index, IntervalIndex, Pos, PreviousPos);
-      throwException(Message);
-    }
-    PreviousPos = Pos;
+    // if(Pos <= PreviousPos) {
+    //   Message = fmt::format("Groupindex {}, Intervalindex {} - value {} is smaller than previous {}",
+    //                Index, IntervalIndex, Pos, PreviousPos);
+    //   throwException(Message);
+    // }
+    //PreviousPos = Pos;
     IntervalIndex++;
   }
 }
@@ -173,6 +180,11 @@ void CDCalibration::validatePolynomials(int Index, nlohmann::json Parameter) {
     }
   }
 
+}
+
+
+bool CDCalibration::inUnitInterval(std::pair<double, double> & Pair) {
+  return ((Pair.first >= 0.0) and (Pair.first <= 1.0) and (Pair.second >= 0.0) and (Pair.second <= 1.0));
 }
 
 

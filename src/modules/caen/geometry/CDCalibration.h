@@ -3,7 +3,9 @@
 ///
 /// \file
 ///
-/// \brief Common abstraction for Charge Division calibration
+/// \brief Common abstraction for Charge Division calibration (CDCalibration)
+/// Implementing ideas from ownCloud folder
+/// 'DM/detectors/02 instruments/01 common/03 Calibration/Charge division'
 ///
 //===----------------------------------------------------------------------===//
 
@@ -39,7 +41,7 @@ public:
   uint32_t strawCorrection(int GroupIndex, int UnitIndex, double Pos);
 
   /// \brief intervals are vectors of vectors
-  std::vector<std::vector<double>> Intervals;
+  std::vector<std::vector<std::pair<double, double>>> Intervals;
 
   /// \brief coefficients are vectors of vectors of vectors
   std::vector<std::vector<std::vector<double>>> Calibration;
@@ -80,6 +82,10 @@ private:
   ///\param Index groupindex used for error messages
   ///\param Parameter the parameter section object
   void validateIntervals(int Index, nlohmann::json Parameter);
+
+  ///\brief helper function to validate points in an interval are within
+  /// the unit interval.
+  bool inUnitInterval(std::pair<double, double> & Pair);
 
   ///\brief validate that the provided polynomial coefficients have the
   /// expected sizes. More checks can be added for example we could calculate

@@ -39,6 +39,15 @@ set(CaenCDCalibrationIITest_SRC
 create_test_executable(CaenCDCalibrationIITest)
 
 
+# Interval overlap checks
+set(IntervalTest_INC
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h)
+set(IntervalTest_SRC
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+  IntervalTest.cpp)
+create_test_executable(IntervalTest)
+
+
 set(CaenConfigTest_INC
   ${ESS_MODULE_DIR}/caen/geometry/Config.h)
 set(CaenConfigTest_SRC
