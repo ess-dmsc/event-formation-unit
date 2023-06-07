@@ -1,4 +1,11 @@
 // Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit tests for CDCalibration
+///
+//===----------------------------------------------------------------------===//
 
 #include <caen/geometry/CDCalibration.h>
 #include <common/testutils/SaveBuffer.h>

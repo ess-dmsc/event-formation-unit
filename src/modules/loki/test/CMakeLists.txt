@@ -14,17 +14,19 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ##
 ## Analog geometry - amplitude calculations
 ##
-set(LokiGeometryTest_INC 
+set(LokiGeometryTest_INC
     ../geometry/LokiGeometry.h
     ../geometry/PanelGeometry.h
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.h
 )
-set(LokiGeometryTest_SRC 
+set(LokiGeometryTest_SRC
     LokiGeometryTest.cpp
     ../geometry/LokiGeometry.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
 )
 create_test_executable(LokiGeometryTest)
 
@@ -32,22 +34,25 @@ create_test_executable(LokiGeometryTest)
 ##
 ## Panel geometry
 ##
-set(CaenPanelGeometryTest_INC
+set(LokiPanelGeometryTest_INC
   ../geometry/LokiGeometry.h
   ../geometry/PanelGeometry.h)
-set(CaenPanelGeometryTest_SRC PanelGeometryTest.cpp)
-create_test_executable(CaenPanelGeometryTest)
+set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
+create_test_executable(LokiPanelGeometryTest)
 
 ##
 ## Validate LoKI geometry between EFU and Nexus Constructor
 ##
-set(CaenFullGeometryTest_INC
+set(LokiFullGeometryTest_INC
   LokiFullGeometryTestData.h
   ../geometry/LokiGeometry.h
-  ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
   ../geometry/PanelGeometry.h)
-set(LokiFullGeometryTest_SRC 
+set(LokiFullGeometryTest_SRC
   LokiFullGeometryTest.cpp
-  ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp)
-create_test_executable(LokiFullGeometryTest)
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+  )
 
+create_test_executable(LokiFullGeometryTest)

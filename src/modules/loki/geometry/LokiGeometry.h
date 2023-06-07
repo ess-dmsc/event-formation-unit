@@ -14,7 +14,8 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <modules/caen/geometry/Calibration.h>
+#include <modules/caen/geometry/CDCalibration.h>
+#include <modules/caen/geometry/Config.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
 #include <vector>
@@ -37,7 +38,7 @@ public:
   bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
                      std::int16_t AmplitudeC, std::int16_t AmplitudeD);
 
-  void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
+  void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
   uint8_t strawCalc(double straw);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
@@ -48,7 +49,7 @@ public:
   /// holds latest calculated values for straw and position
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
-  double PosVal{512.0};
+  double PosVal{1.0};
   const std::uint8_t NStraws{7}; ///< number of straws per tube
   std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
 };

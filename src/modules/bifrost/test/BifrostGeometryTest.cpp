@@ -22,8 +22,8 @@ protected:
   int64_t AmplitudeZero{0};
   int64_t OutsideTube{0};
   int64_t CalibrationErrors{0};
-  std::vector<float> NullCalib{0.000, 0.333, 0.333, 0.667, 0.667, 1.000};
-  std::vector<float> ManualCalib{0.030, 0.290, 0.363, 0.627, 0.705, 0.97};
+  std::vector<std::pair<double,double>> NullCalib{  {0.000, 0.333}, {0.334, 0.667}, {0.668, 1.000}};
+  std::vector<std::pair<double,double>> ManualCalib{{0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}};
 
   void SetUp() override {
     geom = new BifrostGeometry(CaenConfiguration);
@@ -34,6 +34,12 @@ protected:
     geom->Stats.AmplitudeZero = &AmplitudeZero;
     geom->Stats.OutsideTube = &OutsideTube;
     geom->Stats.CalibrationErrors = &CalibrationErrors;
+
+    // Make nullcalibration
+    for (int i = 0; i < 45; i++) {
+      geom->CaenCDCalibration.Intervals.push_back(NullCalib);
+      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
+    }
   }
   void TearDown() override {}
 };

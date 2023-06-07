@@ -21,6 +21,8 @@ namespace Caen {
 
 class CDCalibration {
 public:
+  CDCalibration() = default;
+
   CDCalibration(std::string Name) : Name(Name) { };
 
   /// \brief load json from file into the jsion root object

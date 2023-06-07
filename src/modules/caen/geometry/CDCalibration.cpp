@@ -25,6 +25,7 @@ namespace Caen {
 /// loads calibration from file
 CDCalibration::CDCalibration(std::string Name, std::string CalibrationFile)
   : Name(Name) {
+
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
 
   try {
@@ -68,14 +69,14 @@ double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
 ///\brief Use a two-pass approach. One pass to validate as much as possible,
 /// then a second pass to populate calibration table
 void CDCalibration::parseCalibration() {
-  XTRACE(INIT, ALW, "Checking consistency");
   consistencyCheck(); // first pass for checking
-  XTRACE(INIT, ALW, "Loading calibration");
   loadCalibration(); // second pass to populate table
 }
 
 void CDCalibration::consistencyCheck() {
+  XTRACE(INIT, DEB, "Get Calibration object");
   nlohmann::json Calibration = getObjectAndCheck(root, "Calibration");
+  XTRACE(INIT, DEB, "Get instrument name");
   std::string Instrument = Calibration["instrument"];
   if (Instrument != Name) {
     throwException("Instrument name error");
@@ -86,6 +87,7 @@ void CDCalibration::consistencyCheck() {
 
   XTRACE(INIT, ALW, "Parms: %s, %d, %d", Name.c_str(), Parms.Groups, Parms.GroupSize);
 
+  XTRACE(INIT, DEB, "Get Parameter object");
   auto ParameterVector = Calibration["Parameters"];
   if (ParameterVector.size() != (unsigned int)(Parms.Groups)) {
     throw std::runtime_error(fmt::format("Calibration table error: expected {} entries, got {}",
@@ -94,6 +96,7 @@ void CDCalibration::consistencyCheck() {
 
   int Index{0};
   for (auto & Parm : ParameterVector) {
+    XTRACE(INIT, DEB, "Get groupindex object %d", Index);
     int GroupIndex = Parm["groupindex"];
     if (GroupIndex != Index) {
       Message = fmt::format("Index error: expected {}, got {}", Index, GroupIndex);

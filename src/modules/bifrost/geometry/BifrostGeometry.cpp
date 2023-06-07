@@ -64,7 +64,7 @@ int BifrostGeometry::yOffset(int TubeId) {
 
 
 std::pair<int, float> BifrostGeometry::calcTubeAndPos(
-  std::vector<float> &Calib,int AmpA, int AmpB) {
+  std::vector<std::pair<double, double>> &Intervals,int AmpA, int AmpB) {
 
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
@@ -77,32 +77,29 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
     return InvalidPos;
   }
-  int i;
-  float Upper, Lower;
-  for (i = 0; i < 6; i+=2) {
-    Lower = Calib[i];
-    Upper = Calib[i+1];
-    if ((GlobalPos >= Lower) and (GlobalPos <= Upper)) {
+  int Unit;
+  for (Unit = 0; Unit < 3; Unit++) {
+    double Min = std::min(Intervals[Unit].first, Intervals[Unit].second);
+    double Max = std::max(Intervals[Unit].first, Intervals[Unit].second);
+    if ((GlobalPos >= Min) and (GlobalPos <= Max)) {
       break;
     }
   }
-  if (i == 6) {
+  if (Unit == 3) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region",
            AmpA, AmpB, GlobalPos);
     (*Stats.OutsideTube)++;
     return InvalidPos;
   }
 
-  ///\brief unit pos will be in the interval [0;1] regardless of the width of
-  /// the interval
-  float UnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  ///\brief raw unit pos will be in the interval [0;1] regardless of the width
+  /// of the interval
+  double Lower = Intervals[Unit].first;
+  double Upper = Intervals[Unit].second;
+  float RawUnitPos = (GlobalPos - Lower)/(Upper - Lower);
 
-  int Tube = i/2;
-  if (Tube == 1) {
-    UnitPos = 1.0 - UnitPos;
-  }
-  XTRACE(DATA, DEB, "interval %d, GlobalPos %f, UnitPos %f", i/2, GlobalPos, UnitPos);
-  return std::make_pair(Tube, UnitPos);
+  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f, RawUnitPos %f", Unit, GlobalPos, RawUnitPos);
+  return std::make_pair(Unit, RawUnitPos);
 }
 
 
@@ -110,9 +107,9 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);
   int yoff = yOffset(Data.TubeId);
 
-  int GlobalTriplet = Data.RingId * TripletsPerRing + Data.TubeId;
-  auto & Calib = CaenCalibration.BifrostCalibration.TripletCalib[GlobalTriplet];
-  std::pair<int, float> TubePos = calcTubeAndPos(Calib, Data.AmpA, Data.AmpB);
+  int Group = Data.RingId * TripletsPerRing + Data.TubeId;
+  auto & Intervals = CaenCDCalibration.Intervals[Group];
+  std::pair<int, float> TubePos = calcTubeAndPos(Intervals, Data.AmpA, Data.AmpB);
 
   if (TubePos.first == -1) {
     return 0;

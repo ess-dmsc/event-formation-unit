@@ -47,35 +47,9 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
         fmt::format("Invalid Detector Name {}", settings.DetectorName));
   }
 
-  if (Settings.CalibFile.empty()) {
-    XTRACE(INIT, ALW, "Using the identity 'calibration'");
-    uint32_t MaxPixels = Geom->ESSGeom->max_pixel();
-    uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
-    XTRACE(INIT, DEB,
-           "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u",
-           MaxPixels, CaenConfiguration.Resolution, Straws);
-
-    XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
-           CaenConfiguration.Resolution);
-    Geom->CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
-  } else {
-    XTRACE(INIT, ALW, "Loading calibration file %s",
-           Settings.CalibFile.c_str());
-    Geom->CaenCalibration = Calibration(Settings.CalibFile);
-    if (settings.DetectorName == "loki") {
-      Geom->CaenCalibration.loadLokiParameters();
-    } else if (settings.DetectorName == "bifrost") {
-      Geom->CaenCalibration.loadBifrostParameters();
-    }
-  }
-
-  if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
-    XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-           Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
-    LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
-    throw std::runtime_error("Pixel mismatch");
-  }
+  XTRACE(INIT, ALW, "Loading calibration file %s", Settings.CalibFile.c_str());
+  Geom->CaenCDCalibration = CDCalibration(settings.DetectorName, Settings.CalibFile);
+  Geom->CaenCDCalibration.parseCalibration();
 
   if (not Settings.DumpFilePrefix.empty()) {
     if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
@@ -92,8 +66,8 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
 
-  Geom->CaenCalibration.Stats.ClampLow = &counters.ReadoutsClampLow;
-  Geom->CaenCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
+  //Geom->CaenCDCalibration.Stats.ClampLow = &counters.ReadoutsClampLow;
+  //Geom->CaenCDCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
   Geom->Stats.FENErrors = &counters.FENErrors;
   Geom->Stats.RingErrors = &counters.RingErrors;
   Geom->Stats.TubeErrors = &counters.TubeErrors;

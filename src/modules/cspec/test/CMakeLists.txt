@@ -14,13 +14,14 @@ get_filename_component(CSPEC_FULL "${ESS_MODULE_DIR}/cspec/configs/cspec.json" A
 set(CspecGeometryTest_INC
     ../geometry/CspecGeometry.h
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.h
 )
 set(CspecGeometryTest_SRC
     CspecGeometryTest.cpp
     ../geometry/CspecGeometry.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
 )
 create_test_executable(CspecGeometryTest)
-

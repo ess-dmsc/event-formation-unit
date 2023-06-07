@@ -14,7 +14,7 @@
 
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <modules/caen/geometry/Calibration.h>
+#include <modules/caen/geometry/Config.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <string>
 #include <utility>
@@ -49,7 +49,7 @@ public:
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, float> calcTubeAndPos(std::vector<float> &Calib,
+  std::pair<int, float> calcTubeAndPos(std::vector<std::pair<double, double>> &Intervals,
     int AmpA, int AmpB);
 
 
