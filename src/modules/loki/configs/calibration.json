@@ -1,6 +1,8 @@
 {
     "LokiCalibration":
     {
+        "date" : "2023 06 07 16:46",
+        "comment" : "this is the old calibration file format - it needs to be converted",
         "ntubes": 128,
         "nstraws": 7,
         "resolution": 512,
