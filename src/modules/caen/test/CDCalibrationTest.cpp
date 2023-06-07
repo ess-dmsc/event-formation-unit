@@ -11,14 +11,11 @@ std::string InvalidJson = R"(
 )";
 
 // clang-format off
-///
 auto LokiExample = R"(
   {
     "Calibration":
     {
-      "instrument" : "loki",
-      "groups" : 2,
-      "groupsize" : 7,
+      "instrument" : "loki", "groups" : 2, "groupsize" : 7,
 
       "Parameters" : [
         {
@@ -47,22 +44,6 @@ auto ErrorMissingCalibration = R"(
       "Parameters" : [
         { "groupindex" : 0, "intervals"  : [[0.0, 0.142]], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] },
         { "groupindex" : 1, "intervals"  : [[0.0, 0.142]], "polynomials" : [[0.0, 0.0, 0.0, 0.0]] }
-      ]
-    }
-  }
-)"_json;
-
-
-auto ErrorGroupSizeMismatch = R"(
-  {
-    "Calibration":
-    {
-      "instrument" : "loki",
-      "groups" : 2, "groupsize" : 2,
-
-      "Parameters" : [
-        { "groupindex" : 0, "intervals"  : [[0.000, 0.100], [0.200, 0.300]], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] },
-        { "groupindex" : 1, "intervals"  : [[0.000, 0.100], [0.200, 0.300]], "polynomials" : [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]] }
       ]
     }
   }
@@ -142,7 +123,7 @@ TEST_F(CDCalibrationTest, ErrIntervalOverlap) {
 
 
 TEST_F(CDCalibrationTest, ErrPolynomialVectorSize) {
-  calib.root = ErrorGroupSizeMismatch;
+  calib.root["Calibration"]["Parameters"][0]["polynomials"].push_back({0.0, 0.0, 0.0, 0.0});
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
