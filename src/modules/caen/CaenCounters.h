@@ -33,6 +33,7 @@ struct CaenCounters {
   int64_t ErrorDataHeaders;
 
   // Logical and Digital geometry incl. Calibration
+  /// \todo replace by struct, atm this causes problems.
   int64_t RingErrors;
   int64_t FENErrors;
   int64_t TubeErrors;
