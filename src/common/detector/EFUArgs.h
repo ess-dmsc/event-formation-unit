@@ -10,7 +10,7 @@
 #pragma once
 
 #include <CLI/CLI.hpp>
-#include <common/detector/Detector.h>
+#include <common/detector/BaseSettings.h>
 #include <cstdint>
 #include <string>
 
