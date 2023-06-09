@@ -13,6 +13,7 @@
 #include <atomic>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
+#include <common/detector/BaseSettings.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
@@ -25,42 +26,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
-// All settings should be initialized.
-// clang-format off
-struct BaseSettings {
-  std::string   ConfigFile           {""};
-  std::string   DetectorName         {""};
-  ///\brief Connection/socket settings
-  std::string   DetectorAddress      {"0.0.0.0"};
-  std::uint16_t DetectorPort         {9000};
-  std::uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
-  std::int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
-  std::int32_t  RxSocketBufferSize   {2000000}; // bytes
-  std::int32_t  TxSocketBufferSize   {2000000}; // bytes
-  ///\brief Kafka settings
-  std::string   KafkaConfigFile      {""}; // use default
-  std::string   KafkaBroker          {"localhost:9092"};
-  std::string   KafkaTopic           {""};
-  ///\brief Graphite setting
-  std::string   GraphitePrefix       {"efu.null"};
-  std::string   GraphiteRegion       {"0"};
-  std::string   GraphiteAddress      {"127.0.0.1"};
-  std::uint16_t GraphitePort         {2003};
-  ///\brief Application behavior
-  std::uint64_t UpdateIntervalSec    {1};
-  std::uint32_t StopAfterSec         {0xffffffffU};
-  bool          NoHwCheck            {false};
-  std::string   CalibFile            {""};
-  std::string   DumpFilePrefix       {""};
-  ///\brief module specific configurations
-  // perfgen
-  bool          TestImage            {false};
-  std::uint32_t TestImageUSleep      {10};
-  // legacy module support
-  bool          MultibladeAlignment{false};
-};
-// clang-format on
 
 struct ThreadInfo {
   std::function<void(void)> func;
