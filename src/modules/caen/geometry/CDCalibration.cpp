@@ -66,6 +66,22 @@ double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
 }
 
 
+///\brief
+int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) {
+  auto & GroupIntervals = Intervals[GroupIndex];
+
+  int Unit;
+  for (Unit = 0; Unit < (int)GroupIntervals.size(); Unit++) {
+    double Min = std::min(GroupIntervals[Unit].first, GroupIntervals[Unit].second);
+    double Max = std::max(GroupIntervals[Unit].first, GroupIntervals[Unit].second);
+    if ((GlobalPos >= Min) and (GlobalPos <= Max)) {
+      return Unit;
+    }
+  }
+  return -1;
+}
+
+
 ///\brief Use a two-pass approach. One pass to validate as much as possible,
 /// then a second pass to populate calibration table
 void CDCalibration::parseCalibration() {

@@ -49,7 +49,7 @@ public:
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, float> calcTubeAndPos(std::vector<std::pair<double, double>> &Intervals,
+  std::pair<int, float> calcUnitAndPos(int Group,
     int AmpA, int AmpB);
 
 

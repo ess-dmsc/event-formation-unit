@@ -23,9 +23,12 @@ class CDCalibration {
 public:
   CDCalibration() = default;
 
+  /// \brief this constructor just saves the detector name, used in
+  /// unit tests.
   CDCalibration(std::string Name) : Name(Name) { };
 
-  /// \brief load json from file into the jsion root object
+  /// \brief load json from file into the jsion root object, used
+  /// in detector plugin.
   CDCalibration(std::string Name, std::string CalibrationFile);
 
   /// \brief parse the calibration and validate internal consistency
@@ -39,6 +42,9 @@ public:
   /// \return the corrected position
   double posCorrection(int GroupIndex, int UnitIndex, double Pos);
 
+  /// \brief return the UnitId provided the Group and the Global position
+  int getUnitId(int GroupIndex, double pos);
+
   /// \brief intervals are vectors of vectors
   std::vector<std::vector<std::pair<double, double>>> Intervals;
 
@@ -46,7 +52,7 @@ public:
   std::vector<std::vector<std::vector<double>>> Calibration;
 
   // Grafana Counters
-  struct {
+  struct Stats {
     int64_t ClampLow{0};
     int64_t ClampHigh{0};
   } Stats;

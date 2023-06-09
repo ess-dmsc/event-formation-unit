@@ -63,8 +63,7 @@ int BifrostGeometry::yOffset(int TubeId) {
 }
 
 
-std::pair<int, float> BifrostGeometry::calcTubeAndPos(
-  std::vector<std::pair<double, double>> &Intervals,int AmpA, int AmpB) {
+std::pair<int, float> BifrostGeometry::calcUnitAndPos(int Group, int AmpA, int AmpB) {
 
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
@@ -77,15 +76,9 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
     return InvalidPos;
   }
-  int Unit;
-  for (Unit = 0; Unit < 3; Unit++) {
-    double Min = std::min(Intervals[Unit].first, Intervals[Unit].second);
-    double Max = std::max(Intervals[Unit].first, Intervals[Unit].second);
-    if ((GlobalPos >= Min) and (GlobalPos <= Max)) {
-      break;
-    }
-  }
-  if (Unit == 3) {
+
+  int Unit = CaenCDCalibration.getUnitId(Group, GlobalPos);
+  if (Unit == -1) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region",
            AmpA, AmpB, GlobalPos);
     (*Stats.OutsideTube)++;
@@ -94,6 +87,7 @@ std::pair<int, float> BifrostGeometry::calcTubeAndPos(
 
   ///\brief raw unit pos will be in the interval [0;1] regardless of the width
   /// of the interval
+  auto & Intervals = CaenCDCalibration.Intervals[Group];
   double Lower = Intervals[Unit].first;
   double Upper = Intervals[Unit].second;
   float RawUnitPos = (GlobalPos - Lower)/(Upper - Lower);
@@ -108,15 +102,14 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int yoff = yOffset(Data.TubeId);
 
   int Group = Data.RingId * TripletsPerRing + Data.TubeId;
-  auto & Intervals = CaenCDCalibration.Intervals[Group];
-  std::pair<int, float> TubePos = calcTubeAndPos(Intervals, Data.AmpA, Data.AmpB);
+  std::pair<int, float> UnitPos = calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
-  if (TubePos.first == -1) {
+  if (UnitPos.first == -1) {
     return 0;
   }
 
-  int ylocal = TubePos.first;
-  int xlocal = TubePos.second * (TubePixellation - 1);
+  int ylocal = UnitPos.first;
+  int xlocal = UnitPos.second * (TubePixellation - 1);
   int X = xoff + xlocal;
   int Y = yoff + ylocal;
 
