@@ -9,6 +9,7 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   CaenBase.h
+  CaenCounters.h
   CaenInstrument.h
   geometry/Config.h
   geometry/CDCalibration.h

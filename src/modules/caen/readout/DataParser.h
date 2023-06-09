@@ -9,7 +9,7 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <modules/caen/Counters.h>
+#include <modules/caen/CaenCounters.h>
 #include <vector>
 
 namespace Caen {

@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <caen/Counters.h>
+#include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
