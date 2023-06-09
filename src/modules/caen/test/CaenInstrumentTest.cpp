@@ -89,7 +89,7 @@ std::string BifrostCalibStr = R"(
 
 class CaenInstrumentTest : public TestBase {
 protected:
-  struct Counters counters;
+  struct CaenCounters counters;
   BaseSettings Settings;
 
   void SetUp() override {

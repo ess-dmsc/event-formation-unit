@@ -24,7 +24,7 @@ public:
   void processingThread();
 
 protected:
-  struct Counters Counters;
+  struct CaenCounters Counters;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
 };

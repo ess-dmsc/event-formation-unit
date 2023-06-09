@@ -15,7 +15,7 @@
 
 namespace Caen {
 
-struct Counters {
+struct CaenCounters {
   // Processing Counters - accessed in processing thread
 
   // System counters

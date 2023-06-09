@@ -23,7 +23,7 @@ namespace Caen {
 ///
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
-CaenInstrument::CaenInstrument(struct Counters &counters,
+CaenInstrument::CaenInstrument(struct CaenCounters &counters,
                                BaseSettings &settings)
     : counters(counters), Settings(settings) {
 
