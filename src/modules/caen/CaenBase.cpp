@@ -71,9 +71,8 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
   Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
   Stats.create("geometry.outside_tube", Counters.OutsideTube);
-  Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
-  Stats.create("geometry.pos_low", Counters.ReadoutsClampLow);
-  Stats.create("geometry.pos_high", Counters.ReadoutsClampHigh);
+  Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
+  Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
 
   // Events
   Stats.create("events.count", Counters.Events);
