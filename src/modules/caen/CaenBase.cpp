@@ -164,7 +164,7 @@ void CaenBase::processingThread() {
       Res = Caen.CaenParser.parse(Caen.ESSReadoutParser.Packet.DataPtr,
                                   Caen.ESSReadoutParser.Packet.DataLength);
 
-      // Process readouts, generate (end produce) events
+      // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
       Counters.TofCount = Caen.ESSReadoutParser.Packet.Time.Stats.TofCount;
@@ -177,6 +177,8 @@ void CaenBase::processingThread() {
       Counters.TofHigh = Caen.ESSReadoutParser.Packet.Time.Stats.TofHigh;
       Counters.PrevTofHigh =
           Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
+
+      Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
