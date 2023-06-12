@@ -364,8 +364,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.RingErrors, 1);
   EXPECT_EQ(Readout.Counters.FENErrors, 1);
-  EXPECT_EQ(Readout.Counters.TofHigh, 1);
-  EXPECT_EQ(Readout.Counters.PrevTofNegative, 1);
+  EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
+  EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
