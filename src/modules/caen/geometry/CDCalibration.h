@@ -25,7 +25,7 @@ public:
 
   /// \brief this constructor just saves the detector name, used in
   /// unit tests.
-  CDCalibration(std::string Name) : Name(Name) { };
+  CDCalibration(std::string Name) : Name(Name){};
 
   /// \brief load json from file into the jsion root object, used
   /// in detector plugin.
@@ -58,10 +58,11 @@ public:
   } Stats;
 
   struct {
-    // New abstraction: Groups is used in stead of Tubes(LOKI), Triplets(BIFROST),
-    // TubePair(MIRACLES) etc.
+    // New abstraction: Groups is used in stead of Tubes(LOKI),
+    // Triplets(BIFROST), TubePair(MIRACLES) etc.
     int Groups{0};
-    // New abstraction: GroupSize is used instead of Straws(LOKI), Tubes(BIFROST)
+    // New abstraction: GroupSize is used instead of Straws(LOKI),
+    // Tubes(BIFROST)
     int GroupSize{0};
 
   } Parms;
@@ -70,7 +71,6 @@ public:
   nlohmann::json root;
 
 private:
-
   ///\brief log and trace then throw runtime exception
   void throwException(std::string Message);
 
@@ -88,21 +88,22 @@ private:
 
   ///\brief helper function to validate points in an interval are within
   /// the unit interval.
-  bool inUnitInterval(std::pair<double, double> & Pair);
+  bool inUnitInterval(std::pair<double, double> &Pair);
 
   ///\brief validate that the provided polynomial coefficients have the
   /// expected sizes. More checks can be added for example we could calculate
   /// how large a fraction of the unit interval would clamp to high or low
   /// values and complain if the fraction is too large.
   ///\param Index groupindex used for error messages
-    ///\param Parameter the parameter section object
+  ///\param Parameter the parameter section object
   void validatePolynomials(int Index, nlohmann::json Parameter);
 
   ///\brief helper function to check that the returned value is an object.
   /// \todo not torally sure when it is expected to be this. For example if
   /// the returned value can be parsed as a string it is not an object.
   /// might be removed in the future if not useful.
-  nlohmann::json getObjectAndCheck(nlohmann::json JsonObject, std::string Property);
+  nlohmann::json getObjectAndCheck(nlohmann::json JsonObject,
+                                   std::string Property);
 
   std::string Name{""}; ///< Detector/instrument name prvided in constructor
 

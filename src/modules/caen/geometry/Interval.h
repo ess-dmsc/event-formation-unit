@@ -24,16 +24,17 @@ namespace Caen {
 
 class Interval {
 public:
-
   ///\brief compare function implemented for use in sort()
-  bool static Compare(const std::pair<double, double> &a, const std::pair<double, double> &b) {
-    return abs(a.first - b.first) < EPSILON ? a.second > b.second : a.first < b.first;
+  bool static Compare(const std::pair<double, double> &a,
+                      const std::pair<double, double> &b) {
+    return abs(a.first - b.first) < EPSILON ? a.second > b.second
+                                            : a.first < b.first;
   }
 
   ///\brief for debugging
   void static print(std::vector<std::pair<double, double>> Intervals) {
     std::string Msg{""};
-    for (auto & Interval : Intervals) {
+    for (auto &Interval : Intervals) {
       Msg += fmt::format("[{}, {}] ", Interval.first, Interval.second);
     }
     XTRACE(INIT, ALW, "%s", Msg.c_str());
@@ -45,6 +46,5 @@ public:
 
   // interval endpoints cannot be closer than this.
   static constexpr double EPSILON{0.00001};
-
 };
 } // namespace Caen
