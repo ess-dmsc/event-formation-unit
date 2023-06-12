@@ -48,7 +48,8 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
   }
 
   XTRACE(INIT, ALW, "Loading calibration file %s", Settings.CalibFile.c_str());
-  Geom->CaenCDCalibration = CDCalibration(settings.DetectorName, Settings.CalibFile);
+  Geom->CaenCDCalibration =
+      CDCalibration(settings.DetectorName, Settings.CalibFile);
   Geom->CaenCDCalibration.parseCalibration();
 
   if (not Settings.DumpFilePrefix.empty()) {
@@ -66,8 +67,6 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
 
-  //Geom->CaenCDCalibration.Stats.ClampLow = &counters.ReadoutsClampLow;
-  //Geom->CaenCDCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
   Geom->Stats.FENErrors = &counters.FENErrors;
   Geom->Stats.RingErrors = &counters.RingErrors;
   Geom->Stats.TubeErrors = &counters.TubeErrors;

@@ -45,12 +45,9 @@ struct CaenCounters {
   int64_t Events;
   int64_t PixelErrors;
   int64_t EventsUdder;
-  int64_t TofCount;
-  int64_t TofNegative;
-  int64_t PrevTofCount;
-  int64_t PrevTofNegative;
-  int64_t TofHigh;
-  int64_t PrevTofHigh;
+
+  // Time
+  struct ESSReadout::ESSTime::Stats_t TimeStats;
 
   int64_t TxBytes;
   // Kafka stats below are common to all detectors

@@ -60,7 +60,6 @@ auto InvalidCoeff = R"(
   }
 )"_json;
 
-
 auto StrawMappingNull = R"(
   {
     "LokiCalibration" : {
@@ -115,7 +114,6 @@ protected:
   void SetUp() override {}
   void TearDown() override {}
 };
-
 
 TEST_F(CalibrationTest, Constructor) {
   Calibration calib;

@@ -60,12 +60,12 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
   Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
-  Stats.create("readouts.tof_count", Counters.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  Stats.create("readouts.tof_high", Counters.TofHigh);
-  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
+  Stats.create("readouts.tof_high", Counters.TimeStats.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.TimeStats.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
@@ -167,17 +167,7 @@ void CaenBase::processingThread() {
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
-      Counters.TofCount = Caen.ESSReadoutParser.Packet.Time.Stats.TofCount;
-      Counters.TofNegative =
-          Caen.ESSReadoutParser.Packet.Time.Stats.TofNegative;
-      Counters.PrevTofCount =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
-      Counters.TofHigh = Caen.ESSReadoutParser.Packet.Time.Stats.TofHigh;
-      Counters.PrevTofHigh =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
-
+      Counters.TimeStats = Caen.ESSReadoutParser.Packet.Time.Stats;
       Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little

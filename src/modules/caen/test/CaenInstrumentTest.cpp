@@ -36,7 +36,6 @@ std::string BifrostConfigStr = R"(
   }
 )";
 
-
 // LOKI minimal valid calib file
 std::string LokiCalibFile{"deleteme_caen_instr_loki_calib.json"};
 std::string LokiCalibStr = R"(
@@ -61,7 +60,6 @@ std::string LokiCalibStr = R"(
   }
 )";
 
-
 // BIFROST minimal valid calib file
 std::string BifrostCalibFile{"deleteme_caen_instr_bifrost_calib.json"};
 std::string BifrostCalibStr = R"(
@@ -85,7 +83,6 @@ std::string BifrostCalibStr = R"(
     }
   }
 )";
-
 
 class CaenInstrumentTest : public TestBase {
 protected:
@@ -112,14 +109,14 @@ TEST_F(CaenInstrumentTest, BifrostConstructor) {
   CaenInstrument Caen(counters, Settings);
 }
 
-
 int main(int argc, char **argv) {
   saveBuffer(LokiConfigFile, (void *)LokiConfigStr.c_str(),
              LokiConfigStr.size());
   saveBuffer(BifrostConfigFile, (void *)BifrostConfigStr.c_str(),
              BifrostConfigStr.size());
   saveBuffer(LokiCalibFile, (void *)LokiCalibStr.c_str(), LokiCalibStr.size());
-  saveBuffer(BifrostCalibFile, (void *)BifrostCalibStr.c_str(), BifrostCalibStr.size());
+  saveBuffer(BifrostCalibFile, (void *)BifrostCalibStr.c_str(),
+             BifrostCalibStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

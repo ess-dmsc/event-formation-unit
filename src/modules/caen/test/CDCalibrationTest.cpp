@@ -11,7 +11,6 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
-
 std::string InvalidJsonName{"deleteme_cdcalib.json"};
 std::string InvalidJson = R"(
   Not good enough for Gudonoff!
@@ -63,12 +62,9 @@ class CDCalibrationTest : public TestBase {
 protected:
   CDCalibration calib{"loki"};
 
-  void SetUp() override {
-      calib.root = LokiExample;
-  }
+  void SetUp() override { calib.root = LokiExample; }
   void TearDown() override {}
 };
-
 
 TEST_F(CDCalibrationTest, NotJsonFile) {
   ASSERT_ANY_THROW(calib = CDCalibration("loki", InvalidJsonName));
@@ -97,14 +93,12 @@ TEST_F(CDCalibrationTest, BadGroupIndex) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-
 TEST_F(CDCalibrationTest, BadNumberOfGroupIntervals) {
   // fake invalid number of intervals for group 0 from otherwise valid file
   std::pair<double, double> NewPair{0.1, 0.2};
   calib.root["Calibration"]["Parameters"][0]["intervals"].push_back(NewPair);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
-
 
 TEST_F(CDCalibrationTest, ErrPosNotInUnitInterval) {
   // set valid outer ranges for group 0
@@ -128,18 +122,18 @@ TEST_F(CDCalibrationTest, ErrIntervalOverlap) {
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
-
 TEST_F(CDCalibrationTest, ErrPolynomialVectorSize) {
-  calib.root["Calibration"]["Parameters"][0]["polynomials"].push_back({0.0, 0.0, 0.0, 0.0});
+  calib.root["Calibration"]["Parameters"][0]["polynomials"].push_back(
+      {0.0, 0.0, 0.0, 0.0});
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
 
 TEST_F(CDCalibrationTest, ErrCoefficientVectorSize) {
-  // fake bad size of coefficient vector for group 0/groupindex 0 from otherwise valid file
+  // fake bad size of coefficient vector for group 0/groupindex 0 from otherwise
+  // valid file
   calib.root["Calibration"]["Parameters"][0]["polynomials"][0].push_back(0.1);
   ASSERT_ANY_THROW(calib.parseCalibration());
 }
-
 
 // Test that after loading we have the correct polynomial values
 TEST_F(CDCalibrationTest, LokiTest) {
@@ -148,14 +142,12 @@ TEST_F(CDCalibrationTest, LokiTest) {
   for (int i = 0; i < calib.Parms.Groups; i++) {
     for (int j = 0; j < calib.Parms.GroupSize; j++) {
       for (int k = 0; k < 4; k++) {
-        EXPECT_NEAR(calib.Calibration[i][j][k], 1.0*Entries/100, 0.0001);
+        EXPECT_NEAR(calib.Calibration[i][j][k], 1.0 * Entries / 100, 0.0001);
         Entries++;
       }
-
     }
   }
 }
-
 
 int main(int argc, char **argv) {
   saveBuffer(InvalidJsonName, (void *)InvalidJson.c_str(), InvalidJson.size());

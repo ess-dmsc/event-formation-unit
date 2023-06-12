@@ -19,7 +19,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
 //----------------------------------------------------------------------------//
 // LOKI
 //----------------------------------------------------------------------------//
@@ -415,12 +414,18 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
 
 int main(int argc, char **argv) {
 
-  saveBuffer(LokiConfigFile, (void *)LokiConfigJson.c_str(), LokiConfigJson.size());
-  saveBuffer(LokiCalibFile, (void *)LokiCalibJson.c_str(), LokiCalibJson.size());
-  saveBuffer(BifrostConfigFile, (void *)BifrostConfigJson.c_str(), BifrostConfigJson.size());
-  saveBuffer(BifrostCalibFile, (void *)BifrostCalibJson.c_str(), BifrostCalibJson.size());
-  saveBuffer(MiraclesConfigFile, (void *)MiraclesConfigJson.c_str(), MiraclesConfigJson.size());
-  saveBuffer(MiraclesCalibFile, (void *)MiraclesCalibJson.c_str(), MiraclesCalibJson.size());
+  saveBuffer(LokiConfigFile, (void *)LokiConfigJson.c_str(),
+             LokiConfigJson.size());
+  saveBuffer(LokiCalibFile, (void *)LokiCalibJson.c_str(),
+             LokiCalibJson.size());
+  saveBuffer(BifrostConfigFile, (void *)BifrostConfigJson.c_str(),
+             BifrostConfigJson.size());
+  saveBuffer(BifrostCalibFile, (void *)BifrostCalibJson.c_str(),
+             BifrostCalibJson.size());
+  saveBuffer(MiraclesConfigFile, (void *)MiraclesConfigJson.c_str(),
+             MiraclesConfigJson.size());
+  saveBuffer(MiraclesCalibFile, (void *)MiraclesCalibJson.c_str(),
+             MiraclesCalibJson.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();

@@ -11,7 +11,6 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
-
 // clang-format off
 ///
 auto SimplePolynomials = R"(
@@ -48,7 +47,6 @@ auto SimplePolynomials = R"(
   }
 )"_json;
 
-
 // clang-format on
 
 using namespace Caen;
@@ -57,18 +55,15 @@ class CalibrationIITest : public TestBase {
 protected:
   CDCalibration calib{"dummy"};
 
-  void SetUp() override {
-      calib.root = SimplePolynomials;
-  }
+  void SetUp() override { calib.root = SimplePolynomials; }
   void TearDown() override {}
 };
-
 
 // Test basic polynomial calibrations
 TEST_F(CalibrationIITest, SelectedValues) {
   calib.parseCalibration();
   // Null calibration
-  ASSERT_NEAR(calib.posCorrection(0, 0, 0.0),   0, 0.001);
+  ASSERT_NEAR(calib.posCorrection(0, 0, 0.0), 0, 0.001);
   ASSERT_NEAR(calib.posCorrection(0, 0, 0.5), 0.5, 0.001);
   ASSERT_NEAR(calib.posCorrection(0, 0, 1.0), 1.0, 0.001);
 
@@ -79,7 +74,7 @@ TEST_F(CalibrationIITest, SelectedValues) {
 
   // Identity subtraction - all values are zero
   for (int i = 0; i <= 100; i++) {
-    ASSERT_NEAR(calib.posCorrection(2, 0, i/100.0), 0, 0.001);
+    ASSERT_NEAR(calib.posCorrection(2, 0, i / 100.0), 0, 0.001);
   }
 
   // Constant addition of 1.0
