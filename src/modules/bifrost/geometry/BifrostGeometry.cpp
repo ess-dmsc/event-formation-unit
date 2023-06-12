@@ -48,7 +48,6 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   return true;
 }
 
-
 int BifrostGeometry::xOffset(int Ring, int TubeId) {
   int RingOffset = Ring * NPos;
   int TubeOffset = (TubeId % 3) * TubePixellation;
@@ -56,14 +55,13 @@ int BifrostGeometry::xOffset(int Ring, int TubeId) {
   return RingOffset + TubeOffset;
 }
 
-
 int BifrostGeometry::yOffset(int TubeId) {
   int Arc = TubeId / 3; // 3 == triplets per arc (for a given ring)
   return Arc * TubesPerTriplet;
 }
 
-
-std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA, int AmpB) {
+std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
+                                                       int AmpB) {
 
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
@@ -79,23 +77,23 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA, int 
 
   int Unit = CaenCDCalibration.getUnitId(Group, GlobalPos);
   if (Unit == -1) {
-    XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region",
-           AmpA, AmpB, GlobalPos);
+    XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
+           AmpB, GlobalPos);
     (*Stats.OutsideTube)++;
     return InvalidPos;
   }
 
   ///\brief raw unit pos will be in the interval [0;1] regardless of the width
   /// of the interval
-  auto & Intervals = CaenCDCalibration.Intervals[Group];
+  auto &Intervals = CaenCDCalibration.Intervals[Group];
   double Lower = Intervals[Unit].first;
   double Upper = Intervals[Unit].second;
-  double RawUnitPos = (GlobalPos - Lower)/(Upper - Lower);
+  double RawUnitPos = (GlobalPos - Lower) / (Upper - Lower);
 
-  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f, RawUnitPos %f", Unit, GlobalPos, RawUnitPos);
+  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f, RawUnitPos %f", Unit, GlobalPos,
+         RawUnitPos);
   return std::make_pair(Unit, RawUnitPos);
 }
-
 
 uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int xoff = xOffset(Data.RingId, Data.TubeId);

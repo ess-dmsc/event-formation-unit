@@ -24,8 +24,10 @@ protected:
 
   int NullCalibGroup{0};
   int ManualCalibGroup{44};
-  std::vector<std::pair<double,double>> NullCalib{  {0.000, 0.333}, {0.334, 0.667}, {0.668, 1.000}};
-  std::vector<std::pair<double,double>> ManualCalib{{0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}};
+  std::vector<std::pair<double, double>> NullCalib{
+      {0.000, 0.333}, {0.334, 0.667}, {0.668, 1.000}};
+  std::vector<std::pair<double, double>> ManualCalib{
+      {0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}};
 
   void SetUp() override {
     geom = new BifrostGeometry(CaenConfiguration);
@@ -39,7 +41,8 @@ protected:
     // Make nullcalibration
     for (int i = 0; i < 45; i++) {
       geom->CaenCDCalibration.Intervals.push_back(NullCalib);
-      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
+      geom->CaenCDCalibration.Calibration.push_back(
+          {{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
     }
     geom->CaenCDCalibration.Intervals[ManualCalibGroup] = ManualCalib;
   }
@@ -86,7 +89,7 @@ TEST_F(BifrostGeometryTest, PosOutsideInterval) {
   // geom->CaenCalibration.BifrostCalibration.Calib =
   //       geom->CaenCalibration.BifrostCalibration.Intervals;
   ASSERT_EQ(OutsideTube, 0);
-  std::pair<int, float> Result = geom->calcUnitAndPos(ManualCalibGroup, 100,0);
+  std::pair<int, float> Result = geom->calcUnitAndPos(ManualCalibGroup, 100, 0);
   ASSERT_EQ(Result.first, -1);
   ASSERT_EQ(OutsideTube, 1);
 }
