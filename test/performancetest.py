@@ -26,7 +26,7 @@ def efu_drop_packets_check(efu, generator, module, throttle):
     run_data_generator_timed(efu, generator, throttle, readouts_per_packet, time_s)
     time.sleep(5)
     new_packets_dropped = get_stat(f"efu.{module}.0.receive.dropped")
-    return new_packets_dropped 
+    return new_packets_dropped
 
 
 def assess_performance(efu, generator, module, throttle):
@@ -74,7 +74,7 @@ def run_performance_test():
         data = json.load(f)
 
     for test in data['Tests']:
-        efu_process = run_efu(efu, test['Module'], test['Config'], test['KafkaTopic'])
+        efu_process = run_efu(efu, test['Module'], test['Config'], test['Calib'], test['KafkaTopic'])
         try:
             best_throttle = bisect_throttle_settings(efu, test['Generator'], test['Module'], test['InitThrottle'])
             assess_performance(efu, test['Generator'], test['Module'], best_throttle)
