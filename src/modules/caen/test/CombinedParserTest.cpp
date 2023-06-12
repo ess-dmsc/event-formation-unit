@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <caen/Counters.h>
+#include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
@@ -51,7 +51,7 @@ using namespace Caen;
 class CombinedParserTest : public TestBase {
 protected:
   // From Counters.h
-  struct Counters Counters;
+  struct CaenCounters Counters;
 
   const int DataType{0x30};
   ESSReadout::Parser CommonReadout;

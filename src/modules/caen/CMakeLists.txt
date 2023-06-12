@@ -9,10 +9,12 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   CaenBase.h
+  CaenCounters.h
   CaenInstrument.h
   geometry/Config.h
-  geometry/Calibration.h
+  geometry/CDCalibration.h
   geometry/Geometry.h
+  geometry/Interval.h
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.h
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
@@ -23,7 +25,8 @@ set(caen_common_src
   CaenBase.cpp
   CaenInstrument.cpp
   geometry/Config.cpp
-  geometry/Calibration.cpp
+  geometry/CDCalibration.cpp
+  geometry/Interval.cpp
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp

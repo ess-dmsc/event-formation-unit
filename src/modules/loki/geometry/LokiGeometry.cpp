@@ -45,8 +45,13 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
     return 0;
   }
 
-  uint16_t CalibratedPos = CaenCalibration.strawCorrection(GlobalStraw, PosVal);
-  XTRACE(EVENT, DEB, "calibrated pos: %u", CalibratedPos);
+  int Group = GlobalStraw / 7;
+  int Unit = StrawId;
+  double CalibratedUnitPos =
+      CaenCDCalibration.posCorrection(Group, Unit, PosVal);
+  uint16_t CalibratedPos = CalibratedUnitPos * (NPos - 1);
+  XTRACE(EVENT, DEB, "Group %d, Unit %d - calibrated unit pos: %g, pos %d",
+         Group, Unit, CalibratedUnitPos, CalibratedPos);
 
   uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalStraw);
 
@@ -102,7 +107,7 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
   }
   double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
   StrawId = strawCalc(dStrawId);
-  PosVal = ((NPos - 1) * PosNum * 1.0) / Denominator;
+  PosVal = (PosNum * 1.0) / Denominator;
   XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f", dStrawId,
          StrawId, PosNum, PosVal);
   return true;

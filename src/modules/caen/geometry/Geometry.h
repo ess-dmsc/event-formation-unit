@@ -11,7 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <modules/caen/geometry/Calibration.h>
+#include <modules/caen/geometry/CDCalibration.h>
 #include <modules/caen/readout/DataParser.h>
 
 #include <string>
@@ -29,7 +29,7 @@ public:
 
   /// \brief sets the calibration parameters for straw stretch corrections
   /// \param Calib Calibration object containing polynomial correction values
-  void setCalibration(Calibration Calib) { CaenCalibration = Calib; }
+  void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
   /// \brief calculates an integer pixel value from a CaenReadout object
   /// \param Data CaenReadout object, containing ADC value information,
@@ -47,12 +47,11 @@ public:
     int64_t *TubeErrors;
     int64_t *AmplitudeZero;
     int64_t *OutsideTube;
-    int64_t *CalibrationErrors;
   } Stats;
 
-  Calibration CaenCalibration;
+  CDCalibration CaenCDCalibration;
   ESSGeometry *ESSGeom;
-  std::uint16_t NPos{512}; ///< resolution of position
+  uint16_t NPos{512}; ///< resolution of position
   uint8_t MaxRing{2};
   uint8_t MaxFEN{0};
   uint8_t MaxTube{14};

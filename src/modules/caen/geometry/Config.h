@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <common/debug/Trace.h>
 #include <common/JsonFile.h>
+#include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/PanelGeometry.h>
 #include <string>

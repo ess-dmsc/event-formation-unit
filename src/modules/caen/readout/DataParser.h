@@ -9,7 +9,7 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <modules/caen/Counters.h>
+#include <modules/caen/CaenCounters.h>
 #include <vector>
 
 namespace Caen {
@@ -37,7 +37,7 @@ public:
 
   static_assert(sizeof(CaenReadout) == 24, "Caen readout header length error");
 
-  DataParser(struct Counters &counters) : Stats(counters) {
+  DataParser(struct CaenCounters &counters) : Stats(counters) {
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
@@ -48,6 +48,6 @@ public:
   // To be iterated over in processing thread
   std::vector<struct CaenReadout> Result;
 
-  struct Counters &Stats;
+  struct CaenCounters &Stats;
 };
 } // namespace Caen

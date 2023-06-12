@@ -11,8 +11,11 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
+#include <modules/caen/geometry/CDCalibration.h>
 
-struct Counters {
+namespace Caen {
+
+struct CaenCounters {
   // Processing Counters - accessed in processing thread
 
   // System counters
@@ -30,25 +33,21 @@ struct Counters {
   int64_t ErrorDataHeaders;
 
   // Logical and Digital geometry incl. Calibration
+  /// \todo replace by struct, atm this causes problems.
   int64_t RingErrors;
   int64_t FENErrors;
   int64_t TubeErrors;
   int64_t AmplitudeZero;
   int64_t OutsideTube;
-  int64_t CalibrationErrors;
-  int64_t ReadoutsClampLow;
-  int64_t ReadoutsClampHigh;
+  struct CDCalibration::Stats Calibration;
 
   // Events
   int64_t Events;
   int64_t PixelErrors;
   int64_t EventsUdder;
-  int64_t TofCount;
-  int64_t TofNegative;
-  int64_t PrevTofCount;
-  int64_t PrevTofNegative;
-  int64_t TofHigh;
-  int64_t PrevTofHigh;
+
+  // Time
+  struct ESSReadout::ESSTime::Stats_t TimeStats;
 
   int64_t TxBytes;
   // Kafka stats below are common to all detectors
@@ -58,3 +57,4 @@ struct Counters {
   int64_t kafka_dr_errors;
   int64_t kafka_dr_noerrors;
 } __attribute__((aligned(64)));
+}; // namespace Caen

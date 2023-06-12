@@ -9,7 +9,7 @@ using namespace Caen;
 class DataParserTest : public TestBase {
 protected:
   // From Counters.h
-  struct Counters Counters;
+  struct CaenCounters Counters;
   DataParser Parser{Counters};
   void SetUp() override { Counters = {}; }
   void TearDown() override {}

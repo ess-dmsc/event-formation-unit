@@ -11,6 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <modules/caen/geometry/Config.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
 #include <string>

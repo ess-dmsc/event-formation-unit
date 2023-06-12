@@ -13,8 +13,7 @@
 
 #include <bifrost/geometry/BifrostGeometry.h>
 #include <caen/CaenBase.h> // to get CaenSettings
-#include <caen/Counters.h>
-#include <caen/geometry/Calibration.h>
+#include <caen/CaenCounters.h>
 #include <caen/geometry/Config.h>
 #include <caen/readout/Readout.h>
 #include <common/readout/ess/ESSTime.h>
@@ -33,7 +32,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  CaenInstrument(Counters &counters, BaseSettings &settings);
+  CaenInstrument(CaenCounters &counters, BaseSettings &settings);
 
   ~CaenInstrument();
 
@@ -56,7 +55,7 @@ public:
 
 public:
   /// \brief Stuff that 'ties' Caen together
-  struct Counters &counters;
+  struct CaenCounters &counters;
 
   Config CaenConfiguration;
   BaseSettings &Settings;
