@@ -67,7 +67,7 @@ bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
   if (Data.RingId >= Panels.size()) {
     XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d", Data.RingId,
            Panels.size());
-    (*Stats.RingErrors)++;
+    Stats.RingErrors++;
     return false;
   }
   XTRACE(DATA, DEB, "Panels size %u", Panels.size());
@@ -77,7 +77,7 @@ bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
   if (Data.FENId >= Panel.getMaxGroup()) {
     XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
            Panel.getMaxGroup() - 1);
-    (*Stats.FENErrors)++;
+    Stats.FENErrors++;
     return false;
   }
   XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId,
@@ -100,7 +100,7 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
            " Denominator: %d,  A %d, B %d, C %d, D %d",
            StrawNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
            AmplitudeD);
-    (*Stats.AmplitudeZero)++;
+    Stats.AmplitudeZero++;
     StrawId = NStraws;
     PosVal = NPos;
     return false;

@@ -50,15 +50,11 @@ using namespace Caen;
 
 class CombinedParserTest : public TestBase {
 protected:
-  // From Counters.h
-  struct CaenCounters Counters;
-
   const int DataType{0x30};
   ESSReadout::Parser CommonReadout;
-  DataParser CaenParser{Counters};
+  DataParser CaenParser;
 
   void SetUp() override {
-    Counters = {};
     CommonReadout.setMaxPulseTimeDiff(4000000000);
   }
   void TearDown() override {}

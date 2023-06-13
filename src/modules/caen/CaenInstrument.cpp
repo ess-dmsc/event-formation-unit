@@ -54,24 +54,16 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
 
   if (not Settings.DumpFilePrefix.empty()) {
     if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
-
-      DumpFile =
-          ReadoutFile::create(boost::filesystem::path(Settings.DumpFilePrefix)
-                                  .replace_extension(""));
+      DumpFile = ReadoutFile::create(
+        boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
     } else {
-      DumpFile =
-          ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
+      DumpFile = ReadoutFile::create(
+        Settings.DumpFilePrefix + "_" + timeString());
     }
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
-
-  Geom->Stats.FENErrors = &counters.FENErrors;
-  Geom->Stats.RingErrors = &counters.RingErrors;
-  Geom->Stats.TubeErrors = &counters.TubeErrors;
-  Geom->Stats.AmplitudeZero = &counters.AmplitudeZero;
-  Geom->Stats.OutsideTube = &counters.OutsideTube;
 }
 
 CaenInstrument::~CaenInstrument() {}
@@ -84,7 +76,8 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
 
   uint32_t pixel = Geom->calcPixel(Data);
-  counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
+  // seems to be wrong
+  //counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }

@@ -40,7 +40,7 @@ bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
 
   if (Data.RingId > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
-    (*Stats.RingErrors)++;
+    Stats.RingErrors++;
     return false;
   }
   return true;

@@ -298,7 +298,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveBifrost) {
@@ -318,7 +318,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveMiracles) {
@@ -338,7 +338,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
@@ -359,11 +359,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-  EXPECT_EQ(Readout.Counters.Readouts, 6);
-  EXPECT_EQ(Readout.Counters.DataHeaders, 6);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
+  EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.RingErrors, 1);
-  EXPECT_EQ(Readout.Counters.FENErrors, 1);
+  EXPECT_EQ(Readout.Counters.Geom.RingErrors, 1);
+  EXPECT_EQ(Readout.Counters.Geom.FENErrors, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
 }

@@ -55,6 +55,7 @@ public:
   struct Stats {
     int64_t ClampLow{0};
     int64_t ClampHigh{0};
+    int64_t OutsideInterval{0};
   } Stats;
 
   struct {

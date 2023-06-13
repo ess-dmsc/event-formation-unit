@@ -60,7 +60,7 @@ public:
   Config CaenConfiguration;
   BaseSettings &Settings;
   ESSReadout::Parser ESSReadoutParser;
-  DataParser CaenParser{counters};
+  DataParser CaenParser;
   Geometry *Geom;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
