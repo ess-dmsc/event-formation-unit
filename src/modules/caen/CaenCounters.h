@@ -12,6 +12,8 @@
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <modules/caen/geometry/CDCalibration.h>
+#include <modules/caen/geometry/Geometry.h>
+#include <modules/caen/readout/DataParser.h>
 
 namespace Caen {
 
@@ -26,20 +28,12 @@ struct CaenCounters {
   struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
 
-  // LoKI DataParser
-  int64_t DataHeaders;
-  int64_t Readouts;
-  int64_t ReadoutsBadAmpl;
-  int64_t ErrorDataHeaders;
+  // Caen DataParser
+  struct DataParser::Stats Parser;
 
   // Logical and Digital geometry incl. Calibration
-  /// \todo replace by struct, atm this causes problems.
-  int64_t RingErrors;
-  int64_t FENErrors;
-  int64_t TubeErrors;
-  int64_t AmplitudeZero;
-  int64_t OutsideTube;
   struct CDCalibration::Stats Calibration;
+  struct Geometry::Stats Geom;
 
   // Events
   int64_t Events;

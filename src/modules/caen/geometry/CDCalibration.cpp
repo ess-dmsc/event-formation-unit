@@ -78,6 +78,7 @@ int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) {
       return Unit;
     }
   }
+  Stats.OutsideInterval++;
   return -1;
 }
 

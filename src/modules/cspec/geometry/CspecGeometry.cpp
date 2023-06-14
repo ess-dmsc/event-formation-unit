@@ -31,19 +31,19 @@ bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
 
   if (Data.RingId > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
-    (*Stats.RingErrors)++;
+    Stats.RingErrors++;
     return false;
   }
 
   if (Data.FENId > MaxFEN) {
     XTRACE(DATA, WAR, "FEN %d is incompatible with config", Data.FENId);
-    (*Stats.FENErrors)++;
+    Stats.FENErrors++;
     return false;
   }
 
   if (Data.TubeId > MaxTube) {
     XTRACE(DATA, WAR, "Tube %d is incompatible with config", Data.TubeId);
-    (*Stats.TubeErrors)++;
+    Stats.GroupErrors++;
     return false;
   }
   return true;
