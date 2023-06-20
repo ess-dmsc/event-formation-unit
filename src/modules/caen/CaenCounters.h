@@ -51,4 +51,4 @@ struct CaenCounters {
   int64_t kafka_dr_errors;
   int64_t kafka_dr_noerrors;
 } __attribute__((aligned(64)));
-}; // namespace Caen
+} // namespace Caen
