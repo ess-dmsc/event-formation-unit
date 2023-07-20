@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -41,7 +41,7 @@ namespace VMM3 {
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "vmm3_readouts"; }
-  static uint16_t FormatVersion() { return 0; }
+  static uint16_t FormatVersion() { return 1; }
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
@@ -60,7 +60,7 @@ struct __attribute__((packed)) Readout {
   uint8_t Channel{0};
 
   uint8_t OutputQueue{0};
-  uint8_t RingId;
+  uint8_t FiberId;
   uint8_t FENId;
 
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
@@ -94,7 +94,7 @@ public:
     H5_COMPOUND_INSERT_MEMBER(Channel);
 
     H5_COMPOUND_INSERT_MEMBER(OutputQueue);
-    H5_COMPOUND_INSERT_MEMBER(RingId);
+    H5_COMPOUND_INSERT_MEMBER(FiberId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
 
     H5_COMPOUND_RETURN;

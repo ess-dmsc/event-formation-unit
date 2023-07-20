@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -56,8 +56,8 @@ void Trex::LETReadoutGenerator::generateData() {
     // as for LET MaxX = 11 and MaxY = 50
     YLocal = 4 * abs(XGlobal - 2);
 
-    // Readout generated for LET test, with Ring 0
-    ReadoutData->RingId = 0;
+    // Readout generated for LET test, with Fiber 0(Ring 0)
+    ReadoutData->FiberId = 0;
 
     // Each column is 6 wires wide
     // Select the FEN based on whether XGlobal is in column 0 or column 1

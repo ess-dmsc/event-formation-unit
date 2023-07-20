@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -105,14 +105,14 @@ void TREXInstrument::processReadouts(void) {
     }
 
     // Convert from physical rings to logical rings
-    uint8_t Ring = readout.RingId / 2;
+    uint8_t Ring = readout.FiberId / 2;
 
     uint8_t HybridId = readout.VMM >> 1;
 
     XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, HybridId %d, VMM %d, Channel "
+           "readout: FiberId %d, RingId %d, FENId %d, HybridId %d, VMM %d, Channel "
            "%d, TimeLow %d",
-           Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
+           readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
     ESSReadout::Hybrid const &Hybrid =

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,8 +30,9 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   uint8_t LocalTube = Data.TubeId;
 
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-  PanelGeometry Panel = Panels[Data.RingId];
-  XTRACE(DATA, DEB, "Ring ID %u", Data.RingId);
+  int Ring = Data.FiberId/2;
+  PanelGeometry Panel = Panels[Ring];
+  XTRACE(DATA, DEB, "Fiber ID %u, RingId %d", Data.FiberId, Ring);
   if (not valid) {
     return 0;
   }
@@ -64,15 +65,16 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
 }
 
 bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
-  if (Data.RingId >= Panels.size()) {
-    XTRACE(DATA, WAR, "RINGId %d is incompatible with #panels: %d", Data.RingId,
+  unsigned int Ring = Data.FiberId / 2;
+  if (Ring >= Panels.size()) {
+    XTRACE(DATA, WAR, "RINGId %u is incompatible with #panels: %u", Ring,
            Panels.size());
     Stats.RingErrors++;
     return false;
   }
   XTRACE(DATA, DEB, "Panels size %u", Panels.size());
 
-  auto Panel = Panels[Data.RingId];
+  auto Panel = Panels[Ring];
 
   if (Data.FENId >= Panel.getMaxGroup()) {
     XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,

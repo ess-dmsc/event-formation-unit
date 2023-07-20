@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -98,7 +98,7 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
   CurrentReadout.AmpD = Data.AmpD;
-  CurrentReadout.RingId = Data.RingId;
+  CurrentReadout.FiberId = Data.FiberId;
   CurrentReadout.FENId = Data.FENId;
   CurrentReadout.TubeId = Data.TubeId;
   DumpFile->push(CurrentReadout);
@@ -113,7 +113,7 @@ void CaenInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
+    XTRACE(DATA, DEB, "Fiber %u, FEN %u", Data.FiberId, Data.FENId);
     bool validData = Geom->validateData(Data);
     if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");

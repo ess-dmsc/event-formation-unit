@@ -26,11 +26,12 @@ CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
 }
 
 bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
-         Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Tube %u", Data.FiberId, Ring,
+      Data.FENId, Data.TubeId);
 
-  if (Data.RingId > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+  if (Ring > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
     Stats.RingErrors++;
     return false;
   }
@@ -70,7 +71,8 @@ int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
 }
 
 uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int xoff = xOffset(Data.RingId, Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  int xoff = xOffset(Ring, Data.TubeId);
   int ylocal = yCoord(Data.AmpA, Data.AmpB);
   uint32_t pixel = ESSGeom->pixel2D(xoff, ylocal);
 

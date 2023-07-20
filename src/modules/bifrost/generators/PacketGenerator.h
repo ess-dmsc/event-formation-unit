@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -45,13 +45,13 @@ public:
   }
 
   /// Add a data segment with one readout (Data Header + Data)
-  void addReadout(void *readout, uint8_t Ring, uint8_t FEN) {
+  void addReadout(void *readout, uint8_t Fiber, uint8_t FEN) {
     // size of 'blue' and 'white' field (readout ICD)
     uint16_t DataBlockSize = DataHeaderSize + DataSize;
     int offset = HeaderSize + Readouts * (DataBlockSize);
 
     struct ESSReadout::Parser::DataHeader datahdr;
-    datahdr.RingId = Ring;
+    datahdr.FiberId = Fiber;
     datahdr.FENId = FEN;
     datahdr.DataLength = DataBlockSize;
 

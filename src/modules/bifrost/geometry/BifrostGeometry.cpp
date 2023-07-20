@@ -25,11 +25,12 @@ BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
 }
 
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
-         Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Tube %u", Data.FiberId, Ring,
+        Data.FENId, Data.TubeId);
 
-  if (Data.RingId > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+  if (Ring > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
     Stats.RingErrors++;
     return false;
   }
@@ -95,10 +96,11 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
 }
 
 uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int xoff = xOffset(Data.RingId, Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  int xoff = xOffset(Ring, Data.TubeId);
   int yoff = yOffset(Data.TubeId);
 
-  int Group = Data.RingId * TripletsPerRing + Data.TubeId;
+  int Group = Ring * TripletsPerRing + Data.TubeId;
   std::pair<int, double> UnitPos = calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {

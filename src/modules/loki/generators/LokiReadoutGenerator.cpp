@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,7 +40,7 @@ void LokiReadoutGenerator::generateData() {
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
 
-    ReadoutData->RingId = (Readout / 10) % Settings.NRings;
+    ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;
     ReadoutData->DataLength = LokiDataSize;
 

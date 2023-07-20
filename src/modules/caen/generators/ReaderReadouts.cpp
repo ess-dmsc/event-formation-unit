@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -61,7 +61,7 @@ size_t ReaderReadouts::read(char *buf) {
             (CurPulseTimeLow != LokiData[i].PulseTimeLow)) {
           break;
         }
-        LRDP[i].RingId = LokiData[i].RingId;
+        LRDP[i].FiberId = LokiData[i].FiberId;
         LRDP[i].FENId = LokiData[i].FENId;
         LRDP[i].DataLength = 24;
         LRDP[i].TimeHigh = LokiData[i].EventTimeHigh;

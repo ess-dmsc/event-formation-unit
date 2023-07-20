@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -72,7 +72,7 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
 
   Stats.create("readouts.error_size", Counters.TTLMonStats.ErrorSize);
-  Stats.create("readouts.error_ring", Counters.TTLMonStats.ErrorRing);
+  Stats.create("readouts.error_fiber", Counters.TTLMonStats.ErrorFiber);
   Stats.create("readouts.error_fen", Counters.TTLMonStats.ErrorFEN);
   Stats.create("readouts.error_adc", Counters.TTLMonStats.ErrorADC);
   Stats.create("readouts.error_datalen", Counters.TTLMonStats.ErrorDataLength);
