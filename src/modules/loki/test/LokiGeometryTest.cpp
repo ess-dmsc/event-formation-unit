@@ -108,12 +108,12 @@ TEST_F(LokiGeometryTest, validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
-  readout.RingId = 10;
+  readout.FiberId = 10;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);
   ASSERT_EQ(geom->Stats.FENErrors, 0);
 
-  readout.RingId = 0;
+  readout.FiberId = 0;
   readout.FENId = 20;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);

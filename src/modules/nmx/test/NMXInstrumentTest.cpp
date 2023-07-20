@@ -472,7 +472,7 @@ TEST_F(NMXInstrumentTest, BadRingAndFENError) {
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 0);
   counters.VMMStats = nmx->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
@@ -481,13 +481,13 @@ TEST_F(NMXInstrumentTest, GoodEvent) {
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = nmx->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
@@ -526,12 +526,12 @@ TEST_F(NMXInstrumentTest, NoEventYOnly) {
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   counters.VMMStats = nmx->VMMParser.Stats;
@@ -552,12 +552,12 @@ TEST_F(NMXInstrumentTest, NoEventXOnly) {
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
@@ -593,12 +593,12 @@ TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
   ASSERT_EQ(Res, 5);
   counters.VMMStats = nmx->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 5);
@@ -617,12 +617,12 @@ TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
   ASSERT_EQ(Res, 3);
   counters.VMMStats = nmx->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
@@ -641,12 +641,12 @@ TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
   ASSERT_EQ(Res, 5);
   counters.VMMStats = nmx->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 5);

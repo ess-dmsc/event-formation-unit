@@ -93,7 +93,7 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
 
   // Just for visual inspection for now
   for (auto const &Data : CaenParser.Result) {
-    printf("Ring %u, FEN %u\n", Data.RingId, Data.FENId);
+    printf("Fiber %u, FEN %u\n", Data.FiberId, Data.FENId);
     printf("time (%u, %u), SeqNum %u, Tube %u, A %u, B %u, C %u, D %u\n",
            Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.TubeId, Data.AmpA,
            Data.AmpB, Data.AmpC, Data.AmpD);
