@@ -117,16 +117,16 @@ TEST_F(CaenConfigTest, ValidConfig) {
 TEST_F(CaenConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);
   config.parseConfig();
-  ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
-  ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);
-  ASSERT_EQ(config.Panels[2].getGlobalStrawId(0, 0, 0), 1568);
-  ASSERT_EQ(config.Panels[3].getGlobalStrawId(0, 0, 0), 2016);
-  ASSERT_EQ(config.Panels[4].getGlobalStrawId(0, 0, 0), 2352);
-  ASSERT_EQ(config.Panels[5].getGlobalStrawId(0, 0, 0), 2800);
-  ASSERT_EQ(config.Panels[6].getGlobalStrawId(0, 0, 0), 3136);
-  ASSERT_EQ(config.Panels[7].getGlobalStrawId(0, 0, 0), 3920);
-  ASSERT_EQ(config.Panels[8].getGlobalStrawId(0, 0, 0), 4816);
-  ASSERT_EQ(config.Panels[9].getGlobalStrawId(0, 0, 0), 5376);
+  ASSERT_EQ(config.Panels[0].getGlobalUnitId(0, 0, 0), 0);
+  ASSERT_EQ(config.Panels[1].getGlobalUnitId(0, 0, 0), 1568 * 32 / 56);
+  ASSERT_EQ(config.Panels[2].getGlobalUnitId(0, 0, 0), 1568);
+  ASSERT_EQ(config.Panels[3].getGlobalUnitId(0, 0, 0), 2016);
+  ASSERT_EQ(config.Panels[4].getGlobalUnitId(0, 0, 0), 2352);
+  ASSERT_EQ(config.Panels[5].getGlobalUnitId(0, 0, 0), 2800);
+  ASSERT_EQ(config.Panels[6].getGlobalUnitId(0, 0, 0), 3136);
+  ASSERT_EQ(config.Panels[7].getGlobalUnitId(0, 0, 0), 3920);
+  ASSERT_EQ(config.Panels[8].getGlobalUnitId(0, 0, 0), 4816);
+  ASSERT_EQ(config.Panels[9].getGlobalUnitId(0, 0, 0), 5376);
 }
 
 int main(int argc, char **argv) {

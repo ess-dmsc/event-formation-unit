@@ -68,7 +68,7 @@ TEST_F(FullGeometryTest, FirstFewLines) {
     uint32_t TubeGroup = (NG.Tube % NBTubes) / 2;
     uint8_t LocalTube = Row * 4 + Column;
     uint32_t GlobalStraw =
-        Banks[NG.Bank]->getGlobalStrawId(TubeGroup, LocalTube, NG.Straw % 7);
+        Banks[NG.Bank]->getGlobalUnitId(TubeGroup, LocalTube, NG.Straw % 7);
     uint32_t Pixel = Geometry.pixel2D(NG.Pos, GlobalStraw);
 
     // printf("tube %u, tubegroup %u, loctube %u, locstraw %u, col %u, row %u,

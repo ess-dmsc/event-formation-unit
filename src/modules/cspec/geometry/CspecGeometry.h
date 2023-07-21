@@ -27,10 +27,7 @@ public:
   bool validateData(DataParser::CaenReadout &Data);
 
   /// \brief return the global x-offset for the given identifiers
-  int xOffset(int Ring, int Tube);
-
-  //  /// \brief return the global y-offset for the given identifiers
-  //  int yOffset(int Tube);
+  int xOffset(int Ring, int Group);
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int AmpA, int AmpB) { return posAlongUnit(AmpA, AmpB); }

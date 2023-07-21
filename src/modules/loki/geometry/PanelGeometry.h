@@ -20,7 +20,7 @@ namespace Caen {
 
 class PanelGeometry {
 public:
-  static const uint8_t NStraws{7};       /// straws per tube
+  static const uint8_t NUnits{7};       /// straws per tube
   const uint32_t StrawError{0xFFFFFFFF}; // return value upon error
 
   /// MaxGroup is equivalient to number of FENs
@@ -32,15 +32,15 @@ public:
   /// does not need to use RingId in its calculations.
   PanelGeometry(uint8_t GroupsZ, uint8_t GroupsN, uint32_t StrawOffset)
       : TZ(GroupsZ), TN(GroupsN), StrawOffset(StrawOffset) {
-    MaxStraw = GroupsZ * GroupsN * NStraws;
+    MaxStraw = GroupsZ * GroupsN * NUnits;
     MaxGroup = GroupsN / 2;
   };
 
   /// \brief
-  uint32_t getGlobalStrawId(uint8_t TubeGroup, uint8_t LocalTube,
+  uint32_t getGlobalUnitId(uint8_t GroupBank, uint8_t LocalTube,
                             uint16_t Straw) {
-    if (TubeGroup >= MaxGroup) {
-      XTRACE(EVENT, WAR, "Invalid TubeGroup %d (max %d)", TubeGroup, MaxGroup);
+    if (GroupBank >= MaxGroup) {
+      XTRACE(EVENT, WAR, "Invalid GroupBank %d (max %d)", GroupBank, MaxGroup);
       return StrawError;
     }
     if (LocalTube >= 8) {
@@ -48,20 +48,20 @@ public:
       return StrawError;
     }
 
-    if (Straw >= NStraws) {
-      XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NStraws);
+    if (Straw >= NUnits) {
+      XTRACE(EVENT, WAR, "Invalid Straw %d (max %d)", Straw, NUnits);
       return StrawError;
     }
-    XTRACE(EVENT, DEB, "LocalTube: %u, TZ: %u, NStraws: %u, TN: %u", LocalTube,
-           TZ, NStraws, TN);
+    XTRACE(EVENT, DEB, "LocalTube: %u, TZ: %u, NUnits: %u, TN: %u", LocalTube,
+           TZ, NUnits, TN);
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)
     auto TubeLayer = LocalTube % TZ; /// 0 - 3
     auto TubeIndex = LocalTube / TZ; /// 0, 1
 
-    auto LayerOffset = NStraws * TN * TubeLayer;
-    auto GroupOffset = TubeGroup * 2 * NStraws;
-    auto TubeOffset = TubeIndex * NStraws;
+    auto LayerOffset = NUnits * TN * TubeLayer;
+    auto GroupOffset = GroupBank * 2 * NUnits;
+    auto TubeOffset = TubeIndex * NUnits;
 
     // Add the contributions to the total straw - this is the y coordinate
     // for the pixelid calculation, x comes from the position along the straw

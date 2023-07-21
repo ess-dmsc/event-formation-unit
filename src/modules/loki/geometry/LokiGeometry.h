@@ -50,7 +50,7 @@ public:
   /// they will hold out-of-range values if calculation fails
   std::uint8_t StrawId{7};
   double PosVal{1.0};
-  const std::uint8_t NStraws{7}; ///< number of straws per tube
+  const std::uint8_t NUnits{7}; ///< number of straws per tube
   std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
 };
 

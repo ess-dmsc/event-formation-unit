@@ -90,7 +90,7 @@ TEST_F(BifrostGeometryTest, BadAmplitudes) {
   ASSERT_EQ(Result.first, -1);
 }
 
-TEST_F(BifrostGeometryTest, MiddleTube) {
+TEST_F(BifrostGeometryTest, MiddleUnit) {
   // 11/(11+9) > 0.5, middle tube swaps so pos should be < 0.5
   std::pair<int, float> Result = geom->calcUnitAndPos(ManualCalibGroup, 11, 9);
   ASSERT_EQ(Result.first, 1);

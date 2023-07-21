@@ -20,13 +20,13 @@ LokiGeometry::LokiGeometry(Config &CaenConfiguration)
     : Panels(CaenConfiguration.Panels) {
   ESSGeom = new ESSGeometry(
       CaenConfiguration.Resolution,
-      CaenConfiguration.NGroupsTotal * PanelGeometry::NStraws, 1, 1);
+      CaenConfiguration.NGroupsTotal * PanelGeometry::NUnits, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
 }
 
 uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  uint8_t TubeGroup = Data.FENId;
+  uint8_t GroupBank = Data.FENId; // one FEN has 8 Groups
 
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   int Ring = Data.FiberId/2;
@@ -36,16 +36,16 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
     return 0;
   }
   XTRACE(DATA, DEB, "Valid pixel id calculated");
-  /// Globalstraw is per its definition == Y
-  uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, Data.Group, StrawId);
+  /// GlobalUnit is per its definition == Y
+  uint32_t GlobalUnit = Panel.getGlobalUnitId(GroupBank, Data.Group, StrawId);
 
-  XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
-  if (GlobalStraw == Panel.StrawError) {
-    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalStraw);
+  XTRACE(EVENT, DEB, "global straw: %u", GlobalUnit);
+  if (GlobalUnit == Panel.StrawError) {
+    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalUnit);
     return 0;
   }
 
-  int Group = GlobalStraw / 7;
+  int Group = GlobalUnit / 7;
   int Unit = StrawId;
   double CalibratedUnitPos =
       CaenCDCalibration.posCorrection(Group, Unit, PosVal);
@@ -53,10 +53,10 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(EVENT, DEB, "Group %d, Unit %d - calibrated unit pos: %g, pos %d",
          Group, Unit, CalibratedUnitPos, CalibratedPos);
 
-  uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalStraw);
+  uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalUnit);
 
   XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
-         CalibratedPos, GlobalStraw,
+         CalibratedPos, GlobalUnit,
          PixelId); ///\todo this print statement prints a random number for
                    /// pixel id
   XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
@@ -102,11 +102,11 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
            StrawNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
            AmplitudeD);
     Stats.AmplitudeZero++;
-    StrawId = NStraws;
+    StrawId = NUnits;
     PosVal = NPos;
     return false;
   }
-  double dStrawId = ((NStraws - 1) * StrawNum * 1.0) / Denominator;
+  double dStrawId = ((NUnits - 1) * StrawNum * 1.0) / Denominator;
   StrawId = strawCalc(dStrawId);
   PosVal = (PosNum * 1.0) / Denominator;
   XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f", dStrawId,

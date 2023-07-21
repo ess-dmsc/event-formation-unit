@@ -50,17 +50,11 @@ bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
   return true;
 }
 
-int CspecGeometry::xOffset(int Ring, int Tube) {
+int CspecGeometry::xOffset(int Ring, int Group) {
   ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He CSPEC
-  return Ring * NPos + (Tube % 24) * (NPos / 24);
+  return Ring * NPos + (Group % 24) * (NPos / 24);
 }
 
-// This is always zero for a cylindrical detector with tubes in a plane, aligned
-// along its axis
-// int CspecGeometry::yOffset(int Tube) {
-//  ///\todo Determine the 'real' y-offset once a new ICD is decided for 3He
-//  CSPEC int Pack = Tube / 24; return Pack * 24;
-//}
 
 int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
