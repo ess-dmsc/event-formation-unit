@@ -62,7 +62,7 @@ int CspecGeometry::xOffset(int Ring, int Tube) {
 //  CSPEC int Pack = Tube / 24; return Pack * 24;
 //}
 
-int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
+int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
     ///\todo add counter
     return -1;

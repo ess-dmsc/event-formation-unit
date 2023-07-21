@@ -22,12 +22,12 @@ protected:
     PanelGeometry Panel(4, 7, 0);
     CaenConfiguration.Panels.push_back(Panel);
     CaenConfiguration.Resolution = 512;
-    CaenConfiguration.NTubesTotal = 28;
+    CaenConfiguration.NGroupsTotal = 28;
     geom = new LokiGeometry(CaenConfiguration);
     geom->setResolution(512);
 
     // Make nullcalibration
-    for (int i = 0; i < CaenConfiguration.NTubesTotal; i++) {
+    for (int i = 0; i < CaenConfiguration.NGroupsTotal; i++) {
       geom->CaenCDCalibration.Intervals.push_back({{0.0,0.143}, {0.144,0.286}, {0.287,0.429}, {0.43,0.571}, {0.572,0.714}, {0.715,0.857}, {0.858,  1.0}});
       geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
     }

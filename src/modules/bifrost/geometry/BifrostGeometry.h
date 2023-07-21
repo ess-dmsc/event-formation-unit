@@ -50,7 +50,7 @@ public:
   /// or (-1, -1.0) if invalid
   std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
 
-  const int TubesPerTriplet{3};
+  const int UnitsPerGroup{3};
   const int TripletsPerRing{15};
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 

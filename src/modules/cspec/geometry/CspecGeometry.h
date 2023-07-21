@@ -33,9 +33,9 @@ public:
   //  int yOffset(int Tube);
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int AmpA, int AmpB) { return posAlongTube(AmpA, AmpB); }
+  int yCoord(int AmpA, int AmpB) { return posAlongUnit(AmpA, AmpB); }
 
-  /// \brief return the position along the tube
-  int posAlongTube(int AmpA, int AmpB);
+  /// \brief return the position along the unit (tube for CSPEC)
+  int posAlongUnit(int AmpA, int AmpB);
 };
 } // namespace Caen

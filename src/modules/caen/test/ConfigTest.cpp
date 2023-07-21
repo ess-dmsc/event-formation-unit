@@ -74,7 +74,7 @@ protected:
 TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.Panels.size(), 0);
   ASSERT_EQ(config.Resolution, 0);
-  ASSERT_EQ(config.NTubesTotal, 0);
+  ASSERT_EQ(config.NGroupsTotal, 0);
 }
 
 TEST_F(CaenConfigTest, NoConfigFile) {
@@ -108,7 +108,7 @@ TEST_F(CaenConfigTest, InvalidConfigII) {
 TEST_F(CaenConfigTest, ValidConfig) {
   config.root = ValidConfig;
   config.parseConfig();
-  ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
+  ASSERT_EQ(config.NGroupsTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
 }
 

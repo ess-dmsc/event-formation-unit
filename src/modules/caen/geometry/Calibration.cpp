@@ -72,10 +72,10 @@ void Calibration::loadLokiParameters() {
   try {
     auto CaenCalibration = root["LokiCalibration"];
 
-    uint32_t NTubes = CaenCalibration["ntubes"].get<uint32_t>();
-    uint32_t NStraws = CaenCalibration["nstraws"].get<uint32_t>();
+    uint32_t NGroups = CaenCalibration["ntubes"].get<uint32_t>();
+    uint32_t NUnits = CaenCalibration["nstraws"].get<uint32_t>();
 
-    NumberOfStraws = NTubes * NStraws;
+    NumberOfStraws = NGroups * NUnits;
     StrawResolution = CaenCalibration["resolution"].get<uint16_t>();
 
     auto Pols = CaenCalibration["polynomials"];
@@ -84,7 +84,7 @@ void Calibration::loadLokiParameters() {
       throw std::runtime_error("Straw number mismatch in calibration file");
     }
 
-    XTRACE(INIT, DEB, "ntubes %u, nstraws %u, tot straws %u", NTubes, NStraws,
+    XTRACE(INIT, DEB, "ngroups %u, nunits %u, tot straws %u", NGroups, NUnits,
            NumberOfStraws);
 
     uint32_t ExpectedStraw{0}; // to check that straws are in ascending order

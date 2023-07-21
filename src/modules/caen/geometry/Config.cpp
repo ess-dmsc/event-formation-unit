@@ -94,25 +94,25 @@ void Config::parseConfig() {
         XTRACE(INIT, DEB, "Loading panel");
         auto Bank = Mapping["Bank"].get<unsigned int>();
         bool Vertical = Mapping["Vertical"].get<bool>();
-        auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
-        auto TubesN = Mapping["TubesN"].get<unsigned int>();
+        auto GroupsZ = Mapping["TubesZ"].get<unsigned int>();
+        auto GroupsN = Mapping["TubesN"].get<unsigned int>();
         auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
 
-        NTubesTotal += TubesZ * TubesN;
-        LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
+        NGroupsTotal += GroupsZ * GroupsN;
+        LOG(INIT, Sev::Info, "NGroupsTotal: {}", NGroupsTotal);
 
         LOG(INIT, Sev::Info,
-            "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, "
-            "TubesN "
+            "JSON config - Detector {}, Bank {}, Vertical {}, GroupsZ {}, "
+            "GroupsN "
             "{}, StrawOffset {}",
-            InstrumentName, Bank, Vertical, TubesZ, TubesN, StrawOffset);
+            InstrumentName, Bank, Vertical, GroupsZ, GroupsN, StrawOffset);
 
         XTRACE(INIT, DEB,
-               "JSON config - TubesZ %u, TubesN %u "
+               "JSON config - GroupsZ %u, GroupsN %u "
                ", StrawOffset %u",
-               TubesZ, TubesN, StrawOffset);
+               GroupsZ, GroupsN, StrawOffset);
 
-        PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
+        PanelGeometry Temp(GroupsZ, GroupsN, StrawOffset);
         Panels.push_back(Temp);
       }
     }

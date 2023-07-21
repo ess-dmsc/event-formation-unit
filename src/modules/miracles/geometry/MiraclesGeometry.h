@@ -36,6 +36,6 @@ public:
   int tubeAorB(int AmpA, int AmpB);
 
   /// \brief return the position along the tube
-  int posAlongTube(int AmpA, int AmpB);
+  int posAlongUnit(int AmpA, int AmpB);
 };
 } // namespace Caen

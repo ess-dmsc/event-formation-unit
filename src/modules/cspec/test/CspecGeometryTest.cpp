@@ -65,9 +65,9 @@ TEST_F(CspecGeometryTest, YCoord) {
 // }
 
 TEST_F(CspecGeometryTest, Position) {
-  ASSERT_EQ(geom->posAlongTube(0, 0), -1);
-  ASSERT_EQ(geom->posAlongTube(0, 1), 0);
-  ASSERT_EQ(geom->posAlongTube(1, 0), geom->NPos - 1);
+  ASSERT_EQ(geom->posAlongUnit(0, 0), -1);
+  ASSERT_EQ(geom->posAlongUnit(0, 1), 0);
+  ASSERT_EQ(geom->posAlongUnit(1, 0), geom->NPos - 1);
 }
 
 TEST_F(CspecGeometryTest, CalcPixel) {

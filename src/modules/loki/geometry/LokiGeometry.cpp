@@ -20,7 +20,7 @@ LokiGeometry::LokiGeometry(Config &CaenConfiguration)
     : Panels(CaenConfiguration.Panels) {
   ESSGeom = new ESSGeometry(
       CaenConfiguration.Resolution,
-      CaenConfiguration.NTubesTotal * PanelGeometry::NStraws, 1, 1);
+      CaenConfiguration.NGroupsTotal * PanelGeometry::NStraws, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
 }

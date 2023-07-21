@@ -30,10 +30,10 @@ public:
   /// one and sometimes more than one for each panel. It is the assumption that
   /// RingId maps directly to a PanelGeometry object. Thus this implementation
   /// does not need to use RingId in its calculations.
-  PanelGeometry(uint8_t TubesZ, uint8_t TubesN, uint32_t StrawOffset)
-      : TZ(TubesZ), TN(TubesN), StrawOffset(StrawOffset) {
-    MaxStraw = TubesZ * TubesN * NStraws;
-    MaxGroup = TubesN / 2;
+  PanelGeometry(uint8_t GroupsZ, uint8_t GroupsN, uint32_t StrawOffset)
+      : TZ(GroupsZ), TN(GroupsN), StrawOffset(StrawOffset) {
+    MaxStraw = GroupsZ * GroupsN * NStraws;
+    MaxGroup = GroupsN / 2;
   };
 
   /// \brief

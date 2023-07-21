@@ -51,14 +51,14 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
 
 int BifrostGeometry::xOffset(int Ring, int Group) {
   int RingOffset = Ring * NPos;
-  int TubeOffset = (Group % 3) * UnitPixellation;
-  XTRACE(DATA, DEB, "RingOffset %d, TubeOffset %d", RingOffset, TubeOffset);
-  return RingOffset + TubeOffset;
+  int GroupOffset = (Group % 3) * UnitPixellation;
+  XTRACE(DATA, DEB, "RingOffset %d, GroupOffset %d", RingOffset, GroupOffset);
+  return RingOffset + GroupOffset;
 }
 
 int BifrostGeometry::yOffset(int Group) {
   int Arc = Group / 3; // 3 == triplets per arc (for a given ring)
-  return Arc * TubesPerTriplet;
+  return Arc * UnitsPerGroup;
 }
 
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
