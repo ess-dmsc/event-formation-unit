@@ -81,12 +81,12 @@ void Config::parseConfig() {
     XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
 
     try {
-      MaxTube = root["MaxTube"].get<unsigned int>();
+      MaxGroup = root["MaxGroup"].get<unsigned int>();
     } catch (...) {
       // Use default value
     }
-    LOG(INIT, Sev::Info, "MaxTube: {}", MaxTube);
-    XTRACE(INIT, DEB, "MaxTube: %u", MaxTube);
+    LOG(INIT, Sev::Info, "MaxGroup: {}", MaxGroup);
+    XTRACE(INIT, DEB, "MaxGroup: %u", MaxGroup);
 
     if (InstrumentName == "loki") {
       auto PanelConfig = root["PanelConfig"];

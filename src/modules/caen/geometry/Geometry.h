@@ -53,6 +53,6 @@ public:
   uint16_t NPos{512}; ///< resolution of position
   uint8_t MaxRing{2};
   uint8_t MaxFEN{0};
-  uint8_t MaxTube{14};
+  uint8_t MaxGroup{14};
 };
 } // namespace Caen

@@ -98,7 +98,7 @@ TEST_F(CspecGeometryTest, Validate) {
 
   readout.FiberId = 0;
   readout.FENId = 0;
-  readout.TubeId = 20;
+  readout.Group = 20;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);
   ASSERT_EQ(geom->Stats.FENErrors, 1);

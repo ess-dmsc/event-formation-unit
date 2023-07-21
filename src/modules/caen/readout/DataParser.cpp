@@ -61,11 +61,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     XTRACE(DATA, DEB,
-           "fiber %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+           "fiber %u, fen %u, t(%11u,%11u) SeqNo %6u Group %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
            Data->FiberId, Data->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB, Data->AmpC,
            Data->AmpD);
 
     ParsedReadouts++;

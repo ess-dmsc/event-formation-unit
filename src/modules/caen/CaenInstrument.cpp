@@ -100,7 +100,7 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   CurrentReadout.AmpD = Data.AmpD;
   CurrentReadout.FiberId = Data.FiberId;
   CurrentReadout.FENId = Data.FENId;
-  CurrentReadout.TubeId = Data.TubeId;
+  CurrentReadout.Group = Data.Group;
   DumpFile->push(CurrentReadout);
 }
 
@@ -141,10 +141,10 @@ void CaenInstrument::processReadouts() {
     }
 
     XTRACE(DATA, DEB,
-           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
+           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %d, B "
            "%d, C %d, D %d",
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
-           Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+           Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Data);

@@ -2,5 +2,5 @@
   "Detector": "bifrost",
   "MaxRing": 4,
   "StrawResolution": 300,
-  "MaxTube": 15
+  "MaxGroup": 15
 }

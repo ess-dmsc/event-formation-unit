@@ -26,7 +26,7 @@ MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration) {
 
 uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  int x = xCoord(Ring, Data.TubeId, Data.AmpA, Data.AmpB);
+  int x = xCoord(Ring, Data.Group, Data.AmpA, Data.AmpB);
   int y = yCoord(Ring, Data.AmpA, Data.AmpB);
   uint32_t pixel = ESSGeom->pixel2D(x, y);
 
@@ -37,8 +37,8 @@ uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
 
 bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Ring, Data.FENId,
-         Data.TubeId);
+  XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId,
+         Data.Group);
 
   if (Ring > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);

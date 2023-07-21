@@ -41,7 +41,7 @@ public:
   uint32_t MaxTOFNS{800000000};
   uint8_t MaxRing{0};
   uint8_t MaxFEN{0};
-  uint8_t MaxTube{14};
+  uint8_t MaxGroup{14};
 
   std::string ConfigFileName{""};
   nlohmann::json root; // configuration (json)

@@ -44,14 +44,14 @@ void LokiReadoutGenerator::generateData() {
     ReadoutData->FENId = Readout % 8;
     ReadoutData->DataLength = LokiDataSize;
 
-    ReadoutData->TubeId = (Readout / 10) % 8;
+    ReadoutData->Group = (Readout / 10) % 8;
     ReadoutData->AmpA = Readout;
     ReadoutData->AmpB = 1;
     ReadoutData->AmpC = 1;
     ReadoutData->AmpD = 100;
-    // printf("Readout %d: Ring %u, FEN %u, Tube %u, A %u\n", Readout,
+    // printf("Readout %d: Ring %u, FEN %u, Group %u, A %u\n", Readout,
     //        ReadoutData->RingId,
-    //        ReadoutData->FENId, ReadoutData->TubeId, ReadoutData->AmpA);
+    //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
     ///
 

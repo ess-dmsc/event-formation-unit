@@ -27,7 +27,6 @@ LokiGeometry::LokiGeometry(Config &CaenConfiguration)
 
 uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   uint8_t TubeGroup = Data.FENId;
-  uint8_t LocalTube = Data.TubeId;
 
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   int Ring = Data.FiberId/2;
@@ -38,7 +37,7 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   }
   XTRACE(DATA, DEB, "Valid pixel id calculated");
   /// Globalstraw is per its definition == Y
-  uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, LocalTube, StrawId);
+  uint32_t GlobalStraw = Panel.getGlobalStrawId(TubeGroup, Data.Group, StrawId);
 
   XTRACE(EVENT, DEB, "global straw: %u", GlobalStraw);
   if (GlobalStraw == Panel.StrawError) {

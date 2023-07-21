@@ -59,7 +59,7 @@ struct __attribute__((packed)) Readout {
   uint8_t OutputQueue{0};
   uint8_t FiberId;
   uint8_t FENId;
-  uint8_t TubeId{0};
+  uint8_t Group{0};
 
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
@@ -91,7 +91,7 @@ public:
     H5_COMPOUND_INSERT_MEMBER(OutputQueue);
     H5_COMPOUND_INSERT_MEMBER(FiberId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(TubeId);
+    H5_COMPOUND_INSERT_MEMBER(Group);
 
     H5_COMPOUND_RETURN;
   }

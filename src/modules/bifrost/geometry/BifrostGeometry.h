@@ -36,12 +36,12 @@ public:
 
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
-  /// \param TubeId - identifies a tube triplet
-  int xOffset(int Ring, int TubeId);
+  /// \param Group - identifies a tube triplet (new chargediv nomenclature)
+  int xOffset(int Ring, int Group);
 
   /// \brief return the global y-offset for the given identifiers
-  /// \param TubeId - identifies a tube triplet
-  int yOffset(int TubeId);
+  /// \param Group - identifies a tube triplet (new chargediv nomenclature)
+  int yOffset(int Group);
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -52,7 +52,7 @@ public:
 
   const int TubesPerTriplet{3};
   const int TripletsPerRing{15};
-  int TubePixellation{100}; ///< Number of pixels along a single He tube.
+  int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
 };

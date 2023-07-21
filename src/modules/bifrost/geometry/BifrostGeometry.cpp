@@ -21,13 +21,13 @@ BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
   MaxFEN = CaenConfiguration.MaxFEN;
-  MaxTube = CaenConfiguration.MaxTube;
+  MaxGroup = CaenConfiguration.MaxGroup;
 }
 
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Tube %u", Data.FiberId, Ring,
-        Data.FENId, Data.TubeId);
+  XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
+        Data.FENId, Data.Group);
 
   if (Ring > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
@@ -41,23 +41,23 @@ bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
     return false;
   }
 
-  if (Data.TubeId > MaxTube) {
-    XTRACE(DATA, WAR, "Tube %d is incompatible with config", Data.TubeId);
+  if (Data.Group > MaxGroup) {
+    XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
     Stats.GroupErrors++;
     return false;
   }
   return true;
 }
 
-int BifrostGeometry::xOffset(int Ring, int TubeId) {
+int BifrostGeometry::xOffset(int Ring, int Group) {
   int RingOffset = Ring * NPos;
-  int TubeOffset = (TubeId % 3) * TubePixellation;
+  int TubeOffset = (Group % 3) * UnitPixellation;
   XTRACE(DATA, DEB, "RingOffset %d, TubeOffset %d", RingOffset, TubeOffset);
   return RingOffset + TubeOffset;
 }
 
-int BifrostGeometry::yOffset(int TubeId) {
-  int Arc = TubeId / 3; // 3 == triplets per arc (for a given ring)
+int BifrostGeometry::yOffset(int Group) {
+  int Arc = Group / 3; // 3 == triplets per arc (for a given ring)
   return Arc * TubesPerTriplet;
 }
 
@@ -97,10 +97,10 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
 
 uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  int xoff = xOffset(Ring, Data.TubeId);
-  int yoff = yOffset(Data.TubeId);
+  int xoff = xOffset(Ring, Data.Group);
+  int yoff = yOffset(Data.Group);
 
-  int Group = Ring * TripletsPerRing + Data.TubeId;
+  int Group = Ring * TripletsPerRing + Data.Group;
   std::pair<int, double> UnitPos = calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {
@@ -108,7 +108,7 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   }
 
   int ylocal = UnitPos.first;
-  int xlocal = UnitPos.second * (TubePixellation - 1);
+  int xlocal = UnitPos.second * (UnitPixellation - 1);
   int X = xoff + xlocal;
   int Y = yoff + ylocal;
 
