@@ -22,7 +22,7 @@ class FullGeometryTest : public TestBase {
 protected:
   const bool Vertical{true};
   const bool Horizontal{false};
-  const uint32_t StrawOffset0{0};
+  const uint32_t UnitOffset0{0};
   const uint16_t TZ4{4}; ///< # tubes in z-direction
   ESSGeometry Geometry{512, 6272, 1, 1};
 
@@ -61,20 +61,16 @@ TEST_F(FullGeometryTest, FirstFewLines) {
 
   for (auto &NG : NGData) {
     // helper values
-    uint8_t NBTubes = Banks[NG.Bank]->getMaxGroup() * 2; // In non-Z direction
-    uint8_t Column = NG.Tube / NBTubes;
-    uint8_t Row = NG.Tube % 2;
+    uint8_t NBGroups = Banks[NG.Bank]->getMaxGroup() * 2; // In non-Z direction
+    uint8_t Column = NG.Group / NBGroups;
+    uint8_t Row = NG.Group % 2;
 
-    uint32_t TubeGroup = (NG.Tube % NBTubes) / 2;
-    uint8_t LocalTube = Row * 4 + Column;
-    uint32_t GlobalStraw =
-        Banks[NG.Bank]->getGlobalUnitId(TubeGroup, LocalTube, NG.Straw % 7);
-    uint32_t Pixel = Geometry.pixel2D(NG.Pos, GlobalStraw);
+    uint32_t GroupBank = (NG.Group % NBGroups) / 2;
+    uint8_t Group = Row * 4 + Column;
+    uint32_t GlobalUnit =
+        Banks[NG.Bank]->getGlobalUnitId(GroupBank, Group, NG.Unit % 7);
+    uint32_t Pixel = Geometry.pixel2D(NG.Pos, GlobalUnit);
 
-    // printf("tube %u, tubegroup %u, loctube %u, locstraw %u, col %u, row %u,
-    // gblstraw %u, pixel %u\n",
-    //   NG.Tube, TubeGroup, LocalTube, NG.Straw % 7, Column, Row, GlobalStraw,
-    //   Pixel);
     ASSERT_EQ(NG.Pixel, Pixel);
   }
 }

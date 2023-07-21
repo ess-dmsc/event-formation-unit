@@ -96,7 +96,7 @@ void Config::parseConfig() {
         bool Vertical = Mapping["Vertical"].get<bool>();
         auto GroupsZ = Mapping["TubesZ"].get<unsigned int>();
         auto GroupsN = Mapping["TubesN"].get<unsigned int>();
-        auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
+        auto UnitOffset = Mapping["StrawOffset"].get<unsigned int>();
 
         NGroupsTotal += GroupsZ * GroupsN;
         LOG(INIT, Sev::Info, "NGroupsTotal: {}", NGroupsTotal);
@@ -104,15 +104,15 @@ void Config::parseConfig() {
         LOG(INIT, Sev::Info,
             "JSON config - Detector {}, Bank {}, Vertical {}, GroupsZ {}, "
             "GroupsN "
-            "{}, StrawOffset {}",
-            InstrumentName, Bank, Vertical, GroupsZ, GroupsN, StrawOffset);
+            "{}, UnitOffset {}",
+            InstrumentName, Bank, Vertical, GroupsZ, GroupsN, UnitOffset);
 
         XTRACE(INIT, DEB,
                "JSON config - GroupsZ %u, GroupsN %u "
-               ", StrawOffset %u",
-               GroupsZ, GroupsN, StrawOffset);
+               ", UnitOffset %u",
+               GroupsZ, GroupsN, UnitOffset);
 
-        PanelGeometry Temp(GroupsZ, GroupsN, StrawOffset);
+        PanelGeometry Temp(GroupsZ, GroupsN, UnitOffset);
         Panels.push_back(Temp);
       }
     }

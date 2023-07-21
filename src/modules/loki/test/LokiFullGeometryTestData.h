@@ -12,8 +12,8 @@
 
 struct NexusGeometry {
   uint16_t Bank;
-  uint16_t Tube;
-  uint16_t Straw;
+  uint16_t Group;
+  uint16_t Unit;
   uint16_t Pos;
   uint32_t Pixel;
 };

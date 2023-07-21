@@ -37,16 +37,16 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   }
   XTRACE(DATA, DEB, "Valid pixel id calculated");
   /// GlobalUnit is per its definition == Y
-  uint32_t GlobalUnit = Panel.getGlobalUnitId(GroupBank, Data.Group, StrawId);
+  uint32_t GlobalUnit = Panel.getGlobalUnitId(GroupBank, Data.Group, UnitId);
 
   XTRACE(EVENT, DEB, "global straw: %u", GlobalUnit);
-  if (GlobalUnit == Panel.StrawError) {
+  if (GlobalUnit == Panel.UnitError) {
     XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalUnit);
     return 0;
   }
 
   int Group = GlobalUnit / 7;
-  int Unit = StrawId;
+  int Unit = UnitId;
   double CalibratedUnitPos =
       CaenCDCalibration.posCorrection(Group, Unit, PosVal);
   uint16_t CalibratedPos = CalibratedUnitPos * (NPos - 1);
@@ -90,43 +90,45 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
                                  std::int16_t AmplitudeB,
                                  std::int16_t AmplitudeC,
                                  std::int16_t AmplitudeD) {
-  std::int32_t StrawNum = AmplitudeB + AmplitudeD;
+  std::int32_t UnitNum = AmplitudeB + AmplitudeD;
   std::int32_t PosNum = AmplitudeA + AmplitudeB;
   std::int32_t Denominator = AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
-  XTRACE(INIT, DEB, "StrawNum: %d, PosNum: %d, Denominator: %d", StrawNum,
+  XTRACE(INIT, DEB, "UnitNum: %d, PosNum: %d, Denominator: %d", UnitNum,
          PosNum, Denominator);
   if (Denominator == 0) {
     XTRACE(INIT, WAR,
-           "Denominator is 0, StrawNum: %d, PosNum: %d, "
+           "Denominator is 0, UnitNum: %d, PosNum: %d, "
            " Denominator: %d,  A %d, B %d, C %d, D %d",
-           StrawNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
+           UnitNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
            AmplitudeD);
     Stats.AmplitudeZero++;
-    StrawId = NUnits;
+    UnitId = NUnits;
     PosVal = NPos;
     return false;
   }
-  double dStrawId = ((NUnits - 1) * StrawNum * 1.0) / Denominator;
-  StrawId = strawCalc(dStrawId);
+  double dUnitId = ((NUnits - 1) * UnitNum * 1.0) / Denominator;
+  UnitId = getUnitId(dUnitId);
   PosVal = (PosNum * 1.0) / Denominator;
-  XTRACE(INIT, DEB, "dStraw %f, StrawId %d, PosNum: %d, PosVal: %f", dStrawId,
-         StrawId, PosNum, PosVal);
+  XTRACE(INIT, DEB, "dUnit %f, UnitId %d, PosNum: %d, PosVal: %f", dUnitId,
+         UnitId, PosNum, PosVal);
   return true;
 }
 
-uint8_t LokiGeometry::strawCalc(double straw) {
+// convert from Unit value [0.0; 1.0] to integer UnitId
+// \todo replace with commom caen code
+uint8_t LokiGeometry::getUnitId(double value) {
   // limits is a vector defined in LokiGeometry.h
-  if (straw <= limits[0])
+  if (value <= limits[0])
     return 0;
-  else if (straw <= limits[1])
+  else if (value <= limits[1])
     return 1;
-  else if (straw <= limits[2])
+  else if (value <= limits[2])
     return 2;
-  else if (straw <= limits[3])
+  else if (value <= limits[3])
     return 3;
-  else if (straw <= limits[4])
+  else if (value <= limits[4])
     return 4;
-  else if (straw <= limits[5])
+  else if (value <= limits[5])
     return 5;
   else
     return 6;

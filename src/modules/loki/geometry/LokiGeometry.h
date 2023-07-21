@@ -32,7 +32,7 @@ public:
   /// Helium tube circuit diagram are used to identify the straw that
   /// detected the neutron and also the position along the straw.
   /// Both of these are calculated at the same time and the result
-  /// is stored in the two member variables (StrawId, PosId) if an
+  /// is stored in the two member variables (UnitId, PosId) if an
   /// invalid input is given the output will be outside the valid
   /// ranges.
   bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
@@ -40,7 +40,7 @@ public:
 
   void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
-  uint8_t strawCalc(double straw);
+  uint8_t getUnitId(double value);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 
@@ -48,7 +48,7 @@ public:
 
   /// holds latest calculated values for straw and position
   /// they will hold out-of-range values if calculation fails
-  std::uint8_t StrawId{7};
+  std::uint8_t UnitId{7};
   double PosVal{1.0};
   const std::uint8_t NUnits{7}; ///< number of straws per tube
   std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
