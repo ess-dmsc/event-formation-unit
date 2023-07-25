@@ -56,13 +56,13 @@ TEST_F(VMM3ParserTest, ErrorAPISize) {
   ASSERT_EQ(VMMParser.Stats.Readouts, 0);
 }
 
-// Invalid RingID
-TEST_F(VMM3ParserTest, ErrorRing) {
-  makeHeader(VMMRingError);
+// Invalid FiberID
+TEST_F(VMM3ParserTest, ErrorFiber) {
+  makeHeader(VMMFiberError);
   auto Res = VMMParser.parse(PacketData);
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(VMMParser.Stats.Readouts, 2);
-  ASSERT_EQ(VMMParser.Stats.ErrorRing, 1);
+  ASSERT_EQ(VMMParser.Stats.ErrorFiber, 1);
 }
 
 // Invalid FENId

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,8 +30,8 @@ void ReadoutGenerator::generateData() {
     // TTLMon (new format) readouts all have DataLength 16
     assert(ReadoutData->DataLength == 16);
 
-    // Monitor is (so far) always on logical ring 11, fen 0
-    ReadoutData->RingId = 22;
+    // Monitor is (so far) always on logical fiber 22 (ring 11), fen 0
+    ReadoutData->FiberId = 22;
     ReadoutData->FENId = 0;
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;

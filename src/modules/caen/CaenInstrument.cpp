@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -98,9 +98,9 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
   CurrentReadout.AmpD = Data.AmpD;
-  CurrentReadout.RingId = Data.RingId;
+  CurrentReadout.FiberId = Data.FiberId;
   CurrentReadout.FENId = Data.FENId;
-  CurrentReadout.TubeId = Data.TubeId;
+  CurrentReadout.Group = Data.Group;
   DumpFile->push(CurrentReadout);
 }
 
@@ -113,7 +113,7 @@ void CaenInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
+    XTRACE(DATA, DEB, "Fiber %u, FEN %u", Data.FiberId, Data.FENId);
     bool validData = Geom->validateData(Data);
     if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
@@ -141,10 +141,10 @@ void CaenInstrument::processReadouts() {
     }
 
     XTRACE(DATA, DEB,
-           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Tube %u, A %d, B "
+           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %d, B "
            "%d, C %d, D %d",
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
-           Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+           Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Data);

@@ -445,7 +445,7 @@ TEST_F(TREXInstrumentTest, BadRingAndFENError) {
   auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 0);
   counters.VMMStats = trex->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 
@@ -454,13 +454,13 @@ TEST_F(TREXInstrumentTest, GoodEvent) {
   auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = trex->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   trex->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
@@ -478,12 +478,12 @@ TEST_F(TREXInstrumentTest, BadMappingError) {
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   trex->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   counters.VMMStats = trex->VMMParser.Stats;
@@ -524,12 +524,12 @@ TEST_F(TREXInstrumentTest, NoEventGridOnly) {
   auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   trex->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   counters.VMMStats = trex->VMMParser.Stats;
@@ -550,12 +550,12 @@ TEST_F(TREXInstrumentTest, NoEventWireOnly) {
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   trex->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 2);
@@ -590,12 +590,12 @@ TEST_F(TREXInstrumentTest, BadEventLargeGridSpan) {
   ASSERT_EQ(Res, 5);
   counters.VMMStats = trex->VMMParser.Stats;
 
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
   trex->processReadouts();
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.VMMStats.Readouts, 5);

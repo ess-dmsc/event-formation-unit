@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2019 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,18 +15,18 @@ namespace Caen {
 
 class DataParser {
 public:
-  const unsigned int MaxRingId{11};
+  const unsigned int MaxFiberId{23};
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
   struct CaenReadout {
-    uint8_t RingId;
+    uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
     uint32_t TimeHigh;
     uint32_t TimeLow;
     uint8_t unused;
-    uint8_t TubeId;
+    uint8_t Group;
     uint16_t DataSeqNum;
     int16_t AmpA;
     int16_t AmpB;

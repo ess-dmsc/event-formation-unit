@@ -19,10 +19,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-/// Test configuration - two rings used (0 and 1)
-/// TubesN = 8 and TubesZ = 4 implies four tube groups and
-/// four FENs per ring. FENs are enumerated 0 - 3 and
-/// Tube groups 0 - 4
 // clang-format off
 std::string configjson = R"(
 {

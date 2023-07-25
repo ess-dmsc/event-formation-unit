@@ -1,4 +1,4 @@
-// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2017-2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -82,7 +82,7 @@ public:
 
   // Header for each data block
   struct DataHeader {
-    uint8_t RingId;
+    uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
   } __attribute__((packed));

@@ -74,11 +74,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     auto Data = (TREXReadout *)((char *)DataHdrPtr + DataHeaderSize);
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u Group %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
            DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB, Data->AmpC,
            Data->AmpD);
 
     CurrentDataSection.Data = *Data;

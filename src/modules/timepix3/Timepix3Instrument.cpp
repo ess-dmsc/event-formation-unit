@@ -128,7 +128,7 @@ void Timepix3Instrument::processReadouts() {
     // }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight = calcTimeOfFlight(Data); 
+    uint64_t TimeOfFlight = calcTimeOfFlight(Data);
     uint32_t X = Geom->calcX(Data);
     uint32_t Y = Geom->calcY(Data);
     uint16_t ToT = Data.ToT;
@@ -142,7 +142,7 @@ void Timepix3Instrument::processReadouts() {
 
   // iterate over sorted hits, clustering into events
   for (TimepixHit hit:all_hits){
-    uint64_t TimeOfFlight = hit.TimeOfFlight; 
+    uint64_t TimeOfFlight = hit.TimeOfFlight;
     uint32_t X = hit.X;
     uint32_t Y = hit.Y;
     uint16_t ToT = hit.ToT;

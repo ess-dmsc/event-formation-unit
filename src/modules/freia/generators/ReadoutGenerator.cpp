@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,7 +29,7 @@ void Freia::ReadoutGenerator::generateData() {
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
-    ReadoutData->RingId = (Readout / 10) % Settings.NRings;
+    ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
@@ -42,7 +42,7 @@ void Freia::ReadoutGenerator::generateData() {
     if ((Readout % 2) == 0) {
       Angle = Fuzzer.random8() * 360.0 / 255;
       XChannel =
-          44.0 - ReadoutData->RingId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
+          44.0 - ReadoutData->FiberId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
       YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
       ReadoutData->Channel = YChannel;
     } else {

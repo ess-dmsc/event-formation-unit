@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -43,10 +43,10 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
   for (unsigned int i = 0; i < Size / DataLength; i++) {
     Stats.Readouts++;
     VMM3Parser::VMM3Data Readout = DataPtr[i];
-    if (Readout.RingId > MaxRingId) {
-      XTRACE(DATA, WAR, "Invalid RingId %d (Max is %d)", Readout.RingId,
-             MaxRingId);
-      Stats.ErrorRing++;
+    if (Readout.FiberId > MaxFiberId) {
+      XTRACE(DATA, WAR, "Invalid FiberId %d (Max is %d)", Readout.FiberId,
+             MaxFiberId);
+      Stats.ErrorFiber++;
       continue;
     }
 
@@ -152,7 +152,7 @@ void VMM3Parser::dumpReadoutToFile(
   CurrentReadout.TDC = Data.TDC;
   CurrentReadout.VMM = Data.VMM;
   CurrentReadout.Channel = Data.Channel;
-  CurrentReadout.RingId = Data.RingId;
+  CurrentReadout.FiberId = Data.FiberId;
   CurrentReadout.FENId = Data.FENId;
 
   DumpFile->push(CurrentReadout);

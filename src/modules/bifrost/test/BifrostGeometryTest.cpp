@@ -90,7 +90,7 @@ TEST_F(BifrostGeometryTest, BadAmplitudes) {
   ASSERT_EQ(Result.first, -1);
 }
 
-TEST_F(BifrostGeometryTest, MiddleTube) {
+TEST_F(BifrostGeometryTest, MiddleUnit) {
   // 11/(11+9) > 0.5, middle tube swaps so pos should be < 0.5
   std::pair<int, float> Result = geom->calcUnitAndPos(ManualCalibGroup, 11, 9);
   ASSERT_EQ(Result.first, 1);
@@ -109,22 +109,22 @@ TEST_F(BifrostGeometryTest, Validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
-  readout.RingId = 10;
+  readout.FiberId = 10;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);
   ASSERT_EQ(geom->Stats.FENErrors, 0);
   ASSERT_EQ(geom->Stats.GroupErrors, 0);
 
-  readout.RingId = 0;
+  readout.FiberId = 0;
   readout.FENId = 20;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);
   ASSERT_EQ(geom->Stats.FENErrors, 1);
   ASSERT_EQ(geom->Stats.GroupErrors, 0);
 
-  readout.RingId = 0;
+  readout.FiberId = 0;
   readout.FENId = 0;
-  readout.TubeId = 20;
+  readout.Group = 20;
   ASSERT_FALSE(geom->validateData(readout));
   ASSERT_EQ(geom->Stats.RingErrors, 1);
   ASSERT_EQ(geom->Stats.FENErrors, 1);

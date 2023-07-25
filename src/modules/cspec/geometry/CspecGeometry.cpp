@@ -22,15 +22,16 @@ CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
   MaxFEN = CaenConfiguration.MaxFEN;
-  MaxTube = CaenConfiguration.MaxTube;
+  MaxGroup = CaenConfiguration.MaxGroup;
 }
 
 bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
-         Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
+      Data.FENId, Data.Group);
 
-  if (Data.RingId > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+  if (Ring > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
     Stats.RingErrors++;
     return false;
   }
@@ -41,27 +42,21 @@ bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
     return false;
   }
 
-  if (Data.TubeId > MaxTube) {
-    XTRACE(DATA, WAR, "Tube %d is incompatible with config", Data.TubeId);
+  if (Data.Group > MaxGroup) {
+    XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
     Stats.GroupErrors++;
     return false;
   }
   return true;
 }
 
-int CspecGeometry::xOffset(int Ring, int Tube) {
+int CspecGeometry::xOffset(int Ring, int Group) {
   ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He CSPEC
-  return Ring * NPos + (Tube % 24) * (NPos / 24);
+  return Ring * NPos + (Group % 24) * (NPos / 24);
 }
 
-// This is always zero for a cylindrical detector with tubes in a plane, aligned
-// along its axis
-// int CspecGeometry::yOffset(int Tube) {
-//  ///\todo Determine the 'real' y-offset once a new ICD is decided for 3He
-//  CSPEC int Pack = Tube / 24; return Pack * 24;
-//}
 
-int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
+int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {
     ///\todo add counter
     return -1;
@@ -70,7 +65,8 @@ int CspecGeometry::posAlongTube(int AmpA, int AmpB) {
 }
 
 uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int xoff = xOffset(Data.RingId, Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  int xoff = xOffset(Ring, Data.Group);
   int ylocal = yCoord(Data.AmpA, Data.AmpB);
   uint32_t pixel = ESSGeom->pixel2D(xoff, ylocal);
 

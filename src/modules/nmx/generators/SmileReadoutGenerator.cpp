@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -47,7 +47,7 @@ void Nmx::SmileReadoutGenerator::generateData() {
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
-    ReadoutData->RingId = 0;
+    ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
     if ((Readout % 2) == 0) {
       Panel = rand() % 4;
@@ -110,9 +110,9 @@ void Nmx::SmileReadoutGenerator::generateData() {
       TimeHigh += 1;
     }
     XTRACE(DATA, DEB,
-           "Generating readout, RingId: %u, FENId:%u, VMM:%u, Channel:%u, "
+           "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "
            "TimeHigh:%u, TimeLow:%u",
-           ReadoutData->RingId, ReadoutData->FENId, ReadoutData->VMM,
+           ReadoutData->FiberId, ReadoutData->FENId, ReadoutData->VMM,
            ReadoutData->Channel, ReadoutData->TimeHigh, ReadoutData->TimeLow);
   }
 }

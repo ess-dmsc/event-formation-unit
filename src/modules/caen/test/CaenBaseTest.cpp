@@ -24,9 +24,6 @@
 //----------------------------------------------------------------------------//
 
 /// Test configuration - two rings used (0 and 1)
-/// TubesN = 8 and TubesZ = 4 implies four tube groups and
-/// four FENs per ring. FENs are enumerated 0 - 3 and
-/// Tube groups 0 - 4
 // clang-format off
 std::string LokiConfigFile{"deleteme_loki_config.json"};
 std::string LokiConfigJson = R"(
@@ -36,8 +33,8 @@ std::string LokiConfigJson = R"(
   "StrawResolution" : 512,
 
   "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :   0 },
-    { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 224 }
+    { "Bank" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" :   0 },
+    { "Bank" : 1, "Vertical" :  false, "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" : 224 }
   ],
   "MaxTOFNS" : 800000000,
   "MaxRing" : 2

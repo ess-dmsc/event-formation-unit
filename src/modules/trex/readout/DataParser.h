@@ -26,7 +26,7 @@ public:
     uint32_t TimeHigh;
     uint32_t TimeLow;
     uint8_t unused;
-    uint8_t TubeId;
+    uint8_t Group;
     uint16_t DataSeqNum;
 
   } __attribute__((__packed__));

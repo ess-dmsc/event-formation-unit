@@ -21,7 +21,7 @@ auto InvalidConfig = R"(
   "NotDetector": "LoKI4x8",
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -32,7 +32,7 @@ auto InvalidConfigII = R"(
   "Detector": "loki",
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -43,7 +43,7 @@ auto BadDetector = R"(
   "Detector": "LoKI4x8",
 
   "NotPanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -56,8 +56,8 @@ auto ValidConfig = R"(
   "StrawResolution" : 256,
 
   "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 32, "StrawOffset" : 0    },
-    { "Bank" : 1, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 24, "StrawOffset" : 896  }
+    { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 32, "StrawOffset" : 0    },
+    { "Bank" : 1, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 24, "StrawOffset" : 896  }
   ]
 }
 )"_json;
@@ -74,7 +74,7 @@ protected:
 TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.Panels.size(), 0);
   ASSERT_EQ(config.Resolution, 0);
-  ASSERT_EQ(config.NTubesTotal, 0);
+  ASSERT_EQ(config.NGroupsTotal, 0);
 }
 
 TEST_F(CaenConfigTest, NoConfigFile) {
@@ -108,7 +108,7 @@ TEST_F(CaenConfigTest, InvalidConfigII) {
 TEST_F(CaenConfigTest, ValidConfig) {
   config.root = ValidConfig;
   config.parseConfig();
-  ASSERT_EQ(config.NTubesTotal, (32 + 24) * 4);
+  ASSERT_EQ(config.NGroupsTotal, (32 + 24) * 4);
   ASSERT_EQ(config.Panels.size(), 2);
 }
 
@@ -117,16 +117,16 @@ TEST_F(CaenConfigTest, ValidConfig) {
 TEST_F(CaenConfigTest, CaenICDGeometryFull) {
   config = Config(CAEN_FULL);
   config.parseConfig();
-  ASSERT_EQ(config.Panels[0].getGlobalStrawId(0, 0, 0), 0);
-  ASSERT_EQ(config.Panels[1].getGlobalStrawId(0, 0, 0), 1568 * 32 / 56);
-  ASSERT_EQ(config.Panels[2].getGlobalStrawId(0, 0, 0), 1568);
-  ASSERT_EQ(config.Panels[3].getGlobalStrawId(0, 0, 0), 2016);
-  ASSERT_EQ(config.Panels[4].getGlobalStrawId(0, 0, 0), 2352);
-  ASSERT_EQ(config.Panels[5].getGlobalStrawId(0, 0, 0), 2800);
-  ASSERT_EQ(config.Panels[6].getGlobalStrawId(0, 0, 0), 3136);
-  ASSERT_EQ(config.Panels[7].getGlobalStrawId(0, 0, 0), 3920);
-  ASSERT_EQ(config.Panels[8].getGlobalStrawId(0, 0, 0), 4816);
-  ASSERT_EQ(config.Panels[9].getGlobalStrawId(0, 0, 0), 5376);
+  ASSERT_EQ(config.Panels[0].getGlobalUnitId(0, 0, 0), 0);
+  ASSERT_EQ(config.Panels[1].getGlobalUnitId(0, 0, 0), 1568 * 32 / 56);
+  ASSERT_EQ(config.Panels[2].getGlobalUnitId(0, 0, 0), 1568);
+  ASSERT_EQ(config.Panels[3].getGlobalUnitId(0, 0, 0), 2016);
+  ASSERT_EQ(config.Panels[4].getGlobalUnitId(0, 0, 0), 2352);
+  ASSERT_EQ(config.Panels[5].getGlobalUnitId(0, 0, 0), 2800);
+  ASSERT_EQ(config.Panels[6].getGlobalUnitId(0, 0, 0), 3136);
+  ASSERT_EQ(config.Panels[7].getGlobalUnitId(0, 0, 0), 3920);
+  ASSERT_EQ(config.Panels[8].getGlobalUnitId(0, 0, 0), 4816);
+  ASSERT_EQ(config.Panels[9].getGlobalUnitId(0, 0, 0), 5376);
 }
 
 int main(int argc, char **argv) {
