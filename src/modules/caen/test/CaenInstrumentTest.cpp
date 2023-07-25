@@ -21,7 +21,7 @@ std::string LokiConfigStr = R"(
     "StrawResolution" : 256,
 
     "PanelConfig" : [
-      { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 1, "TubesN" : 1, "StrawOffset" : 0    }
+      { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 1, "GroupsN" : 1, "StrawOffset" : 0    }
     ]
 
   }

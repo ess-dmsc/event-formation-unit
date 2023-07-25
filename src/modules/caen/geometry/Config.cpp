@@ -94,8 +94,8 @@ void Config::parseConfig() {
         XTRACE(INIT, DEB, "Loading panel");
         auto Bank = Mapping["Bank"].get<unsigned int>();
         bool Vertical = Mapping["Vertical"].get<bool>();
-        auto GroupsZ = Mapping["TubesZ"].get<unsigned int>();
-        auto GroupsN = Mapping["TubesN"].get<unsigned int>();
+        auto GroupsZ = Mapping["GroupsZ"].get<unsigned int>();
+        auto GroupsN = Mapping["GroupsN"].get<unsigned int>();
         auto UnitOffset = Mapping["StrawOffset"].get<unsigned int>();
 
         NGroupsTotal += GroupsZ * GroupsN;

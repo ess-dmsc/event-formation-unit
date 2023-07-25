@@ -21,7 +21,7 @@ auto InvalidConfig = R"(
   "NotDetector": "LoKI4x8",
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -32,7 +32,7 @@ auto InvalidConfigII = R"(
   "Detector": "loki",
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -43,7 +43,7 @@ auto BadDetector = R"(
   "Detector": "LoKI4x8",
 
   "NotPanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
   ]
 }
 )"_json;
@@ -56,8 +56,8 @@ auto ValidConfig = R"(
   "StrawResolution" : 256,
 
   "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 32, "StrawOffset" : 0    },
-    { "Bank" : 1, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 24, "StrawOffset" : 896  }
+    { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 32, "StrawOffset" : 0    },
+    { "Bank" : 1, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 24, "StrawOffset" : 896  }
   ]
 }
 )"_json;

@@ -1,13 +1,15 @@
-// Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Caen Boron Coated Straw Tubesfunctions
+/// \brief Caen Boron Coated Straw Tubes functions
 ///
 /// Ref: Loki TG3.1 Detectors technology "Boron Coated Straw Tubes for LoKI"
 /// Davide Raspino 04/09/2019
 ///
+/// New terminology for charge division: Groups and Units rather than Tubes
+/// and Straws
 //===----------------------------------------------------------------------===//
 
 #pragma once

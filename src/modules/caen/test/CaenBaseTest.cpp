@@ -33,8 +33,8 @@ std::string LokiConfigJson = R"(
   "StrawResolution" : 512,
 
   "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "StrawOffset" :   0 },
-    { "Bank" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "StrawOffset" : 224 }
+    { "Bank" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" :   0 },
+    { "Bank" : 1, "Vertical" :  false, "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" : 224 }
   ],
   "MaxTOFNS" : 800000000,
   "MaxRing" : 2
