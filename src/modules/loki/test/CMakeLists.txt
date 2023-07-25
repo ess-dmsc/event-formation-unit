@@ -32,6 +32,20 @@ create_test_executable(LokiGeometryTest)
 
 
 ##
+## LOKI conifig test
+##
+set(LokiConfigTest_INC
+    ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
+)
+set(LokiConfigTest_SRC
+    LokiConfigTest.cpp
+    ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
+
+)
+create_test_executable(LokiConfigTest)
+
+
+##
 ## Panel geometry
 ##
 set(LokiPanelGeometryTest_INC

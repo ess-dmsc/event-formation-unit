@@ -1,0 +1,33 @@
+
+{
+  "Detector": "loki",
+
+  "Resolution" : 512,
+
+  "GroupsZ" : 4,
+
+  "Banks" [
+     {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0},
+     {"Bank" : 1, "ID" : "bank1", "GroupsN" : 16, "YOffset" : 1568},
+     {"Bank" : 2, "ID" : "bank2", "GroupsN" : 12, "YOffset" : 2016},
+     {"Bank" : 3, "ID" : "bank3", "GroupsN" : 16, "YOffset" : 2352},
+     {"Bank" : 4, "ID" : "bank4", "GroupsN" : 12, "YOffset" : 2800},
+     {"Bank" : 5, "ID" : "bank5", "GroupsN" : 28, "YOffset" : 3136},
+     {"Bank" : 6, "ID" : "bank6", "GroupsN" : 32, "YOffset" : 3920},
+     {"Bank" : 7, "ID" : "bank7", "GroupsN" : 20, "YOffset" : 4816},
+     {"Bank" : 8, "ID" : "bank8", "GroupsN" : 32, "YOffset" : 5376},
+  ],
+
+  "Config" : [
+    { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0},
+    { "Ring" : 1, "Bank" : 0, "FENs" : 12, "FENOffset" : 16},
+    { "Ring" : 2, "Bank" : 1, "FENs" :  8, "FENOffset" :  0},
+    { "Ring" : 3, "Bank" : 2, "FENs" :  6, "FENOffset" :  0},
+    { "Ring" : 4, "Bank" : 3, "FENs" :  8, "FENOffset" :  0},
+    { "Ring" : 5, "Bank" : 4, "FENs" :  6, "FENOffset" :  0},
+    { "Ring" : 6, "Bank" : 5, "FENs" : 14, "FENOffset" :  0},
+    { "Ring" : 7, "Bank" : 6, "FENs" : 16, "FENOffset" :  0},
+    { "Ring" : 8, "Bank" : 7, "FENs" : 10, "FENOffset" :  0},
+    { "Ring" : 9, "Bank" : 8, "FENs" : 16, "FENOffset" :  0}
+  ]
+}
