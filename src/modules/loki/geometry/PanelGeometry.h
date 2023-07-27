@@ -1,4 +1,4 @@
-// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,9 +27,9 @@ public:
   uint32_t getMaxGroup() { return MaxGroup; }
 
   /// It is expected to have multiple instansiations of PanelGeometry, one
-  /// one and sometimes more than one for each panel. It is the assumption that
-  /// RingId maps directly to a PanelGeometry object. Thus this implementation
-  /// does not need to use RingId in its calculations.
+  /// and sometimes more than one for each panel. It is the assumption that
+  /// Ring maps directly to a PanelGeometry object. Thus this implementation
+  /// does not need to use Ring in its calculations.
   PanelGeometry(uint8_t GroupsZ, uint8_t GroupsN, uint32_t UnitOffset)
       : TZ(GroupsZ), TN(GroupsN), UnitOffset(UnitOffset) {
     MaxUnit = GroupsZ * GroupsN * NUnits;

@@ -31,7 +31,7 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   int Ring = Data.FiberId/2;
   PanelGeometry Panel = Panels[Ring];
-  XTRACE(DATA, DEB, "Fiber ID %u, RingId %d", Data.FiberId, Ring);
+  XTRACE(DATA, DEB, "Fiber ID %u, Ring %d", Data.FiberId, Ring);
   if (not valid) {
     return 0;
   }
