@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -71,7 +71,7 @@ public:
     /// \todo below is still wrong as we do not mask out the
     /// instance value and the type field fom 'Unused'
     /// But it is less wrong than before ;-)
-    uint8_t Sumo = Data.Unused;
+    uint8_t Sumo = Data.UnitId;
 
     uint8_t Cassette = getCassette(Sumo, Data.Anode, Data.Cathode);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,46 +29,46 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     // Parse Data Header
     if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
-      Stats.ErrorDataHeaders++;
+      Stats.BufferErrors++;
       return ParsedReadouts;
     }
 
     auto Data = (DreamReadout *)((char *)DataPtr);
 
-    ///\todo clarify distinction between logical and physical rings
-    // for now just divide by two
-    Data->RingId = Data->RingId / 2;
-
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              Data->DataLength, BytesLeft);
-      Stats.ErrorDataHeaders++;
+      Stats.BufferErrors++;
       return ParsedReadouts;
     }
 
-    if (Data->RingId > MaxRingId or Data->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
-             Data->FENId);
-      Stats.ErrorDataHeaders++;
+    if (Data->FiberId > MaxFiberId) {
+      XTRACE(DATA, WAR, "Invalid FiberId (%u)", Data->FiberId);
+      Stats.FiberErrors++;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId, Data->FENId,
+    if (Data->FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "FENId (%u)", Data->FENId);
+      Stats.FENErrors++;
+      return ParsedReadouts;
+    }
+
+    XTRACE(DATA, DEB, "Fiber %u, FEN %u, Length %u", Data->FiberId, Data->FENId,
            Data->DataLength);
     Stats.DataHeaders++;
 
     if (Data->DataLength != DreamReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
              DreamReadoutSize);
-      Stats.ErrorDataHeaders++;
       Stats.DataLenErrors++;
       return ParsedReadouts;
     }
 
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, time: 0x%08x %08x, OM %3u ,"
+           "fiber %u, fen %u, time: 0x%08x %08x, OM %3u ,"
            "Cathode 0x%3u Anode 0x%3u",
-           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow, Data->OM,
+           Data->FiberId, Data->FENId, Data->TimeHigh, Data->TimeLow, Data->OM,
            Data->Cathode, Data->Anode);
 
     ParsedReadouts++;

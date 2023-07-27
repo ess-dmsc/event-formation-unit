@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,18 +16,18 @@ namespace Dream {
 
 class DataParser {
 public:
-  const unsigned int MaxRingId{11};
+  const unsigned int MaxFiberId{23};
   const unsigned int MaxFENId{12};
   const unsigned int MaxReadoutsInPacket{500};
 
   struct DreamReadout {
-    uint8_t RingId;
+    uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
     uint32_t TimeHigh;
     uint32_t TimeLow;
     uint8_t OM;
-    uint8_t Unused;
+    uint8_t UnitId;
     uint8_t Cathode;
     uint8_t Anode;
   } __attribute__((__packed__));
