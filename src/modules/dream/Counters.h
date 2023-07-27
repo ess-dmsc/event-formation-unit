@@ -35,7 +35,6 @@ struct Counters {
   //
   int64_t ProcessingIdle;
   int64_t Events;
-  //int64_t MappingErrors;
   int64_t GeometryErrors;
   int64_t TxBytes;
   // Kafka stats below are common to all detectors
