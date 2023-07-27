@@ -25,7 +25,8 @@ protected:
 TEST_F(DataParserTest, Constructor) {
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.DataHeaders, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
+  ASSERT_EQ(Parser.Stats.BufferErrors, 0);
+  ASSERT_EQ(Parser.Stats.DataLenErrors, 0);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
@@ -34,16 +35,16 @@ TEST_F(DataParserTest, BadSize) {
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.DataHeaders, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.BufferErrors, 1);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
 TEST_F(DataParserTest, HeaderSizeError) {
-  auto Res = Parser.parse((char *)&ErrSizeMismatch[0], ErrSizeMismatch.size());
+  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 3);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.DataHeaders, 1);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.DataHeaders, 0);
+  ASSERT_EQ(Parser.Stats.BufferErrors, 1);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
@@ -51,7 +52,7 @@ TEST_F(DataParserTest, BadRingGoodFEN) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 4);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.FiberErrors, 1);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
@@ -59,7 +60,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
   auto Res = Parser.parse((char *)&ErrGoodRingBadFEN[0], 4);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.FENErrors, 1);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
@@ -67,7 +68,7 @@ TEST_F(DataParserTest, DataSizeMismatch) {
   auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 1);
+  ASSERT_EQ(Parser.Stats.BufferErrors, 1);
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
@@ -77,7 +78,8 @@ TEST_F(DataParserTest, ParseThree) {
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(Parser.Stats.Readouts, 3);
   ASSERT_EQ(Parser.Stats.DataHeaders, 3);
-  ASSERT_EQ(Parser.Stats.ErrorDataHeaders, 0);
+  ASSERT_EQ(Parser.Stats.BufferErrors, 0);
+  ASSERT_EQ(Parser.Stats.DataLenErrors, 0);
   ASSERT_EQ(Parser.Result.size(), 3);
 }
 
