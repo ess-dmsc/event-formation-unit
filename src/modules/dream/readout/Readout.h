@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -45,7 +45,7 @@ namespace Dream {
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "dream_readouts"; }
-  static uint16_t FormatVersion() { return 0; }
+  static uint16_t FormatVersion() { return 1; }
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
@@ -53,14 +53,12 @@ struct __attribute__((packed)) Readout {
   uint32_t PulseTimeLow{0};
   uint32_t EventTimeHigh{0};
   uint32_t EventTimeLow{0};
-  uint8_t RingId;
-  uint8_t FENId;
-  uint8_t Sector;
-  uint8_t Sumo;
-  uint8_t Strip;
-  uint8_t Wire;
-  uint8_t Cassette;
-  uint8_t Counter;
+  uint8_t FiberId{0};
+  uint8_t FENId{0};
+  uint8_t OperatingMode{0};
+  uint8_t UnitId{0};
+  uint8_t Cathode{0};
+  uint8_t Anode{0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   static constexpr uint32_t chopper_sub_id{std::numeric_limits<uint8_t>::max()};
@@ -83,14 +81,12 @@ public:
     H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
     H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
     H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(RingId);
+    H5_COMPOUND_INSERT_MEMBER(FiberId);
     H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(Sector);
-    H5_COMPOUND_INSERT_MEMBER(Sumo);
-    H5_COMPOUND_INSERT_MEMBER(Strip);
-    H5_COMPOUND_INSERT_MEMBER(Wire);
-    H5_COMPOUND_INSERT_MEMBER(Cassette);
-    H5_COMPOUND_INSERT_MEMBER(Counter);
+    H5_COMPOUND_INSERT_MEMBER(OperatingMode);
+    H5_COMPOUND_INSERT_MEMBER(UnitId);
+    H5_COMPOUND_INSERT_MEMBER(Cathode);
+    H5_COMPOUND_INSERT_MEMBER(Anode);
     H5_COMPOUND_RETURN;
   }
 };

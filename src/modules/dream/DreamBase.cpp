@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -58,18 +58,21 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
   Stats.create("readouts.headers", Counters.DataHeaders);
-  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
-  Stats.create("readouts.error_ring", Counters.RingErrors);
-  Stats.create("readouts.error_fen", Counters.FENErrors);
+  Stats.create("readouts.error_buffer", Counters.BufferErrors);
   Stats.create("readouts.error_datalen", Counters.DataLenErrors);
+  Stats.create("readouts.error_fiber", Counters.FiberErrors);
+  Stats.create("readouts.error_fen", Counters.FENErrors);
+
+  // Config related
+  Stats.create("readouts.error_ringmapping", Counters.RingMappingErrors);
+  Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
+  Stats.create("readouts.error_config", Counters.ConfigErrors);
 
   //
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-
-  Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);

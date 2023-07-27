@@ -104,13 +104,13 @@ void TREXInstrument::processReadouts(void) {
       VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
     }
 
-    // Convert from physical rings to logical rings
+    // Convert from physical fiber to rings
     uint8_t Ring = readout.FiberId / 2;
 
     uint8_t HybridId = readout.VMM >> 1;
 
     XTRACE(DATA, DEB,
-           "readout: FiberId %d, RingId %d, FENId %d, HybridId %d, VMM %d, Channel "
+           "readout: FiberId %d, Ring %d, FENId %d, HybridId %d, VMM %d, Channel "
            "%d, TimeLow %d",
            readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
            readout.TimeLow);

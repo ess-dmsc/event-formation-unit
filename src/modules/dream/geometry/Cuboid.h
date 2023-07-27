@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -102,7 +102,7 @@ public:
   uint32_t getPixelId(Config::ModuleParms &Parms,
                       DataParser::DreamReadout &Data) {
     uint8_t Index = Parms.P1.Index;
-    Index += Data.Unused; // used as instance
+    Index += Data.UnitId;
 
     XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
            Data.Cathode);

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,19 +21,21 @@ struct Counters {
   int64_t ErrorESSHeaders;
 
   // DREAM DataParser
-  int64_t Readouts;
-  int64_t DataHeaders;
-  int64_t ErrorDataHeaders;
-  int64_t RingErrors;
-  int64_t FENErrors;
-  int64_t DataLenErrors;
-  int64_t ConfigErrors;
+  int64_t DataHeaders{0};
+  int64_t Readouts{0};
+  int64_t BufferErrors{0};
+  int64_t DataLenErrors{0};
+  int64_t FiberErrors{0};
+  int64_t FENErrors{0};
+
+  int64_t RingMappingErrors{0};
+  int64_t FENMappingErrors{0};
+  int64_t ConfigErrors{0};
 
   //
   int64_t ProcessingIdle;
   int64_t Events;
-  int64_t EventsUdder;
-  int64_t MappingErrors;
+  //int64_t MappingErrors;
   int64_t GeometryErrors;
   int64_t TxBytes;
   // Kafka stats below are common to all detectors

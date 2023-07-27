@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -100,12 +100,11 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
   Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
-  // invalid RingId
+  // invalid FiberId
   Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Dream.counters.RingErrors, 0);
+  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.RingErrors, 1);
+  ASSERT_EQ(Dream.counters.ConfigErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
@@ -118,7 +117,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
   ASSERT_EQ(Dream.counters.FENErrors, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.FENErrors, 1);
+  ASSERT_EQ(Dream.counters.FENMappingErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
@@ -131,8 +130,8 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 1);
-  ASSERT_EQ(Dream.counters.RingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
@@ -144,8 +143,8 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.RingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
   ASSERT_EQ(Dream.counters.GeometryErrors, 1);
   ASSERT_EQ(Dream.counters.Events, 0);
 }
@@ -161,8 +160,8 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
   ASSERT_EQ(Dream.counters.Events, 0);
   Dream.processReadouts();
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.RingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
+  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
   ASSERT_EQ(Dream.counters.GeometryErrors, 0);
   ASSERT_EQ(Dream.counters.Events, 1);
 }
