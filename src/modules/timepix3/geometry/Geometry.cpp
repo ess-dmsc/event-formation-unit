@@ -19,7 +19,8 @@ uint32_t Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   uint16_t X = calcX(Data);
   uint16_t Y = calcY(Data);
 
-  XTRACE(DATA, DEB, "using ESS Geom to calculate pixel id from X %u, Y %u", X, Y);
+  XTRACE(DATA, DEB, "using ESS Geom to calculate pixel id from X %u, Y %u", X,
+         Y);
   return ESSGeom->pixel2D(X, Y);
 }
 

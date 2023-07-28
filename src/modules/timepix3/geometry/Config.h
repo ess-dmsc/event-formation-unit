@@ -27,11 +27,10 @@ public:
   std::string InstrumentName;
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
-  
+
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};
   uint32_t MinimumToTSum{0};
   uint16_t MaxCoordinateGap{5};
-
 };
 } // namespace Timepix3

@@ -11,8 +11,8 @@
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <fmt/format.h>
+#include <math.h>
 #include <timepix3/Timepix3Instrument.h>
-#include <math.h>     
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -29,15 +29,14 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
          Settings.ConfigFile.c_str());
   Timepix3Configuration = Config(Settings.ConfigFile);
 
-  
   Geom = new Geometry();
   Geom->setXResolution(Timepix3Configuration.XResolution);
   Geom->setYResolution(Timepix3Configuration.YResolution);
   Geom->ESSGeom = new ESSGeometry(Timepix3Configuration.XResolution,
                                   Timepix3Configuration.YResolution, 1, 1);
 
-  Clusterer = new HierarchicalClusterer(Timepix3Configuration.MaxTimeGapNS, Timepix3Configuration.MaxCoordinateGap);
-
+  Clusterer = new HierarchicalClusterer(Timepix3Configuration.MaxTimeGapNS,
+                                        Timepix3Configuration.MaxCoordinateGap);
 }
 
 Timepix3Instrument::~Timepix3Instrument() {}
@@ -56,13 +55,13 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating TOF");
   XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA,
          Data.SpidrTime);
-  // this formula is based on the information in the timepix3 manual supplied with the camera
+  // this formula is based on the information in the timepix3 manual supplied
+  // with the camera
   uint64_t ToF =
       int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA);
   XTRACE(DATA, DEB, "ToF: %u", ToF);
   return ToF;
 }
-
 
 void Timepix3Instrument::processReadouts() {
 
@@ -78,34 +77,36 @@ void Timepix3Instrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    uint16_t TimeOfFlight = calcTimeOfFlight(Data); 
+    uint16_t TimeOfFlight = calcTimeOfFlight(Data);
     uint16_t X = Geom->calcX(Data);
     uint16_t Y = Geom->calcY(Data);
     uint16_t ToT = Data.ToT;
 
-    XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u", TimeOfFlight, X, Y, ToT);
+    XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u",
+           TimeOfFlight, X, Y, ToT);
     AllHitsVector.push_back({TimeOfFlight, X, Y, ToT});
-
   }
 
   // sort hits by time of flight for clustering in time
-  sort_chronologically(std::move(AllHitsVector)); 
+  sort_chronologically(std::move(AllHitsVector));
   Clusterer->cluster(AllHitsVector);
   generateEvents();
   AllHitsVector.clear();
 }
 
-void Timepix3Instrument::generateEvents(){
-  for (auto cluster:  Clusterer->clusters){
-    // other options for time are timeEnd, timeCenter, etc. we picked timeStart for this type of 
-    //detector, it is the time the first photon in the cluster hit the detector.
+void Timepix3Instrument::generateEvents() {
+  for (auto cluster : Clusterer->clusters) {
+    // other options for time are timeEnd, timeCenter, etc. we picked timeStart
+    // for this type of
+    // detector, it is the time the first photon in the cluster hit the
+    // detector.
     uint64_t EventTime = cluster.timeStart();
     uint16_t x = cluster.xCoordCenter();
     uint16_t y = cluster.yCoordCenter();
     uint32_t PixelId = Geom->ESSGeom->pixel2D(x, y);
     if (PixelId == 0) {
       XTRACE(EVENT, WAR, "Bad pixel!: Time: %u, x %u, y %u, pixel %u",
-              EventTime, x, y, PixelId);
+             EventTime, x, y, PixelId);
       counters.PixelErrors++;
       continue;
     }

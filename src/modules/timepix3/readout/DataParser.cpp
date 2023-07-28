@@ -8,8 +8,8 @@
 
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <timepix3/readout/DataParser.h>
 #include <iostream>
+#include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -24,24 +24,29 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   unsigned int BytesLeft = Size;
   char *DataPtr = (char *)Buffer;
 
-  //packets in timepix3 datastream are either from the camera or the EVR system
-  //if from the EVR system, they will be 24 bits, and will contain pulse time
-  //information. If they are 24 bits but not type = 1, then it is a camera packet 
-  if(Size == 24){
+  // packets in timepix3 datastream are either from the camera or the EVR system
+  // if from the EVR system, they will be 24 bits, and will contain pulse time
+  // information. If they are 24 bits but not type = 1, then it is a camera
+  // packet
+  if (Size == 24) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-    if (Data->Type == 1){
+    if (Data->Type == 1) {
       XTRACE(DATA, DEB,
-          "Processed readout, packet type = %u, counter = %u, pulsetime seconds = %u, "
-          "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
-          "previous pulsetime nanoseconds = %u",
-          1, Data->Counter, Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds,
-          Data->PrevPulseTimeSeconds, Data->PrevPulseTimeNanoSeconds);
+             "Processed readout, packet type = %u, counter = %u, pulsetime "
+             "seconds = %u, "
+             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
+             "previous pulsetime nanoseconds = %u",
+             1, Data->Counter, Data->PulseTimeSeconds,
+             Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
+             Data->PrevPulseTimeNanoSeconds);
       Stats.EVRTimestampReadouts++;
-      LastEVRTime = Data->PulseTimeSeconds * 1000000000 + Data->PulseTimeNanoSeconds;
+      LastEVRTime =
+          Data->PulseTimeSeconds * 1000000000 + Data->PulseTimeNanoSeconds;
       return 1;
     }
-    XTRACE(DATA, DEB, "Not type = 1, not an EVR timestamp, processing as normal");
+    XTRACE(DATA, DEB,
+           "Not type = 1, not an EVR timestamp, processing as normal");
   }
 
   while (BytesLeft) {
@@ -58,7 +63,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     // regardless of readout type, the type variable is always in the same place
     // we read it here
     uint8_t ReadoutType = (DataBytes & TYPE_MASK) >> TYPE_OFFS;
-    
+
     // pixel readout, identifies where a pixel on the camera was activated
     if (ReadoutType == 11) {
       Timepix3PixelReadout Data;
@@ -77,32 +82,41 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              "%u, SpidrTime = %u, ToA = %u, FToA = %u, ToT = %u",
              ReadoutType, Data.Dcol, Data.Spix, Data.Pix, Data.SpidrTime,
              Data.ToA, Data.FToA, Data.ToT);
-      
-      // toa formula is based on information from the timepix3 manual provided with the camera
-      uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) + 25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
-      XTRACE(DATA, DEB, "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: %u, difference: %u", toa , LastTDCTime, int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA) - LastTDCTime);
+
+      // toa formula is based on information from the timepix3 manual provided
+      // with the camera
+      uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
+                              25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
+      XTRACE(DATA, DEB,
+             "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: "
+             "%u, difference: %u",
+             toa, LastTDCTime,
+             int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA) -
+                 LastTDCTime);
       ParsedReadouts++;
       Stats.PixelReadouts++;
-      
-      //LastTDCTime is the latest seen time from a TDC readout, and this counter is used to
-      //see how strictly in order the pixel readouts are in relation to this. Pixel readouts
-      //from before the last TDC time belong to the previous pulse, and may need to be treated 
-      //differently
-      if(toa < LastTDCTime){
+
+      // LastTDCTime is the latest seen time from a TDC readout, and this
+      // counter is used to see how strictly in order the pixel readouts are in
+      // relation to this. Pixel readouts from before the last TDC time belong
+      // to the previous pulse, and may need to be treated differently
+      if (toa < LastTDCTime) {
         XTRACE(DATA, DEB, "Pixel readout from before TDC");
         Stats.PixelReadoutFromBeforeTDC++;
       }
 
       PixelResult.push_back(Data);
 
-    // TDC readout type, indicating when the camera received a TDC pulse. In the ESS setup, this should
-    // correspond to an EVR pulse, indicating the start of a new pulse.
+      // TDC readout type, indicating when the camera received a TDC pulse. In
+      // the ESS setup, this should correspond to an EVR pulse, indicating the
+      // start of a new pulse.
     } else if (ReadoutType == 6) {
       Timepix3TDCReadout Data;
 
       // mask and offset values are defined in DataParser.h
       Data.Type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
-      Data.TriggerCounter = (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET;
+      Data.TriggerCounter =
+          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET;
       Data.Timestamp = (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET;
       Data.Stamp = (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET;
 
@@ -116,9 +130,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // Time calculations based on information from the timepix manual
       LastTDCTime = 3.125 * Data.Timestamp + 0.26 * Data.Stamp;
 
-      // TDC readouts can belong to one of two channels, and can either indicate the rising
-      // or the falling edge of the signal. The camera setup will determine which of these
-      // are sent.
+      // TDC readouts can belong to one of two channels, and can either indicate
+      // the rising or the falling edge of the signal. The camera setup will
+      // determine which of these are sent.
       if (Data.Type == 15) {
         Stats.TDC1RisingReadouts++;
       } else if (Data.Type == 10) {
@@ -127,19 +141,21 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
         Stats.TDC2RisingReadouts++;
       } else if (Data.Type == 11) {
         Stats.TDC2FallingReadouts++;
-      }
-      else {
-        // this should never happen - if it does something has gone wrong with the data format or parsing
+      } else {
+        // this should never happen - if it does something has gone wrong with
+        // the data format or parsing
         Stats.UnknownTDCReadouts++;
       }
 
-    // global timestamps are a readout allowing for longer periods of time to be recorded before "overflowing"
-    // to 0. This readout type isn't expected to be used in production, currently.
+      // global timestamps are a readout allowing for longer periods of time to
+      // be recorded before "overflowing" to 0. This readout type isn't expected
+      // to be used in production, currently.
     } else if (ReadoutType == 4) {
       Timepix3GlobalTimeReadout Data;
 
       // mask and offset values are defined in DataParser.h
-      Data.Timestamp = (DataBytes & GLOBAL_TIMESTAMP_MASK) >> GLOBAL_TIMESTAMP_OFFSET;
+      Data.Timestamp =
+          (DataBytes & GLOBAL_TIMESTAMP_MASK) >> GLOBAL_TIMESTAMP_OFFSET;
       Data.Stamp = (DataBytes & GLOBAL_STAMP_MASK) >> GLOBAL_STAMP_OFFSET;
 
       XTRACE(DATA, DEB,
@@ -149,7 +165,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       Stats.GlobalTimestampReadouts++;
 
     } else {
-      // we sometimes see packet type 7 here, which accompanies a lot of control signals
+      // we sometimes see packet type 7 here, which accompanies a lot of control
+      // signals
       XTRACE(DATA, WAR, "Unknown packet type: %u", ReadoutType);
       Stats.UndefinedReadouts++;
     }

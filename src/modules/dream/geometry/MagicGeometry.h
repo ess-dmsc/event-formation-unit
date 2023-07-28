@@ -29,7 +29,7 @@ public:
   /// \brief return pixel id from the digital identifiers
   int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
 
-  SUMO magicb{128,512};
+  SUMO magicb{128, 512};
   Mantle mantle{128};
 };
 } // namespace Dream

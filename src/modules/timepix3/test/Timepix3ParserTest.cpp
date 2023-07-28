@@ -10,7 +10,7 @@
 
 using namespace Timepix3;
 
-
+// clang-format off
 std::vector<uint8_t> SinglePixelReadout{
     // Single readout
     0x91, 0xc6, 0x30, 0x80,
@@ -35,6 +35,7 @@ std::vector<uint8_t> SingleEVRReadout{
   0xcb, 0xa1, 0x3f, 0x64,
   0xdd, 0xc9, 0x9a, 0x3b
 };
+// clang-format on
 
 class Timepix3ParserTest : public TestBase {
 protected:
@@ -42,34 +43,33 @@ protected:
 
   DataParser *Timepix3Parser;
 
-  void SetUp() override {
-     Timepix3Parser = new DataParser(counters);
-   }
+  void SetUp() override { Timepix3Parser = new DataParser(counters); }
   void TearDown() override {}
 };
 
 // Test cases below
-TEST_F(Timepix3ParserTest, Constructor) {
-  DataParser Timepix3Parser(counters);
-}
+TEST_F(Timepix3ParserTest, Constructor) { DataParser Timepix3Parser(counters); }
 
-TEST_F(Timepix3ParserTest, SinglePixelReadout){
-  auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(), SinglePixelReadout.size());
+TEST_F(Timepix3ParserTest, SinglePixelReadout) {
+  auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(),
+                                   SinglePixelReadout.size());
   EXPECT_EQ(Res, 1);
 }
 
-TEST_F(Timepix3ParserTest, SingleTDCReadout){
-  auto Res = Timepix3Parser->parse((char *)SingleTDCReadout.data(), SingleTDCReadout.size());
+TEST_F(Timepix3ParserTest, SingleTDCReadout) {
+  auto Res = Timepix3Parser->parse((char *)SingleTDCReadout.data(),
+                                   SingleTDCReadout.size());
   EXPECT_EQ(Res, 1);
 }
 
-TEST_F(Timepix3ParserTest, TooShort){
+TEST_F(Timepix3ParserTest, TooShort) {
   auto Res = Timepix3Parser->parse((char *)TooShort.data(), TooShort.size());
   EXPECT_EQ(Res, 0);
 }
 
-TEST_F(Timepix3ParserTest, SingleEVRReadout){
-  auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(), SingleEVRReadout.size());
+TEST_F(Timepix3ParserTest, SingleEVRReadout) {
+  auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
+                                   SingleEVRReadout.size());
   EXPECT_EQ(Res, 1);
 }
 

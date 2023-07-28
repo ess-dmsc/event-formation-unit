@@ -6,12 +6,9 @@
 
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <timepix3/geometry/Geometry.h>
-#include <modules/timepix3/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
-
-
-
+#include <modules/timepix3/readout/DataParser.h>
+#include <timepix3/geometry/Geometry.h>
 
 using namespace Timepix3;
 
@@ -22,9 +19,9 @@ protected:
   Geometry *timepix3geom;
 
   void SetUp() override {
-     timepix3geom = new Geometry();
-     timepix3geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
-   }
+    timepix3geom = new Geometry();
+    timepix3geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
+  }
   void TearDown() override {}
 };
 
@@ -33,8 +30,6 @@ TEST_F(Timepix3GeometryTest, DefaultTimepix3) {
   DataParser::Timepix3PixelReadout Data = {0, 0, 0, 0, 0, 0, 0};
   EXPECT_EQ(timepix3geom->calcPixel(Data), 1);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -12,10 +12,10 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-HierarchicalClusterer::HierarchicalClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
+HierarchicalClusterer::HierarchicalClusterer(uint64_t max_time_gap,
+                                             uint16_t max_coord_gap)
     : Abstract2DClusterer(), max_time_gap_(max_time_gap),
       max_coord_gap_(max_coord_gap) {}
-
 
 void HierarchicalClusterer::insert(const Hit2D &hit) {
   /// Process time-cluster if time gap to next hit is large enough
@@ -47,7 +47,7 @@ void HierarchicalClusterer::flush() {
 void HierarchicalClusterer::cluster_by_x() {
   uint clusterSize = current_time_cluster_.size();
   std::vector<bool> visited(clusterSize, false); // keep track of visited points
-  
+
   XTRACE(DATA, DEB, "%u events in time window", clusterSize);
   for (uint i = 0; i < clusterSize; i++) {
     if (visited[i]) {
@@ -57,28 +57,35 @@ void HierarchicalClusterer::cluster_by_x() {
     Hit2DVector space_cluster; // initialize a new cluster
     space_cluster.push_back(current_time_cluster_[i]);
     visited[i] = true;
-    for (uint j = i+1; j < clusterSize; j++) {
+    for (uint j = i + 1; j < clusterSize; j++) {
       if (visited[j]) {
         continue; // skip points that have already been visited
       }
-      double x_distance = (double)current_time_cluster_[i].x_coordinate - (double)current_time_cluster_[j].x_coordinate;
-      double y_distance = (double)current_time_cluster_[i].y_coordinate - (double)current_time_cluster_[j].y_coordinate;
+      double x_distance = (double)current_time_cluster_[i].x_coordinate -
+                          (double)current_time_cluster_[j].x_coordinate;
+      double y_distance = (double)current_time_cluster_[i].y_coordinate -
+                          (double)current_time_cluster_[j].y_coordinate;
       double distance = sqrt(pow(x_distance, 2) + pow(y_distance, 2));
-      XTRACE(DATA, DEB, "Determined distance between points is %f, threshold is %u", distance, max_coord_gap_);
-      XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u", current_time_cluster_[i].x_coordinate, current_time_cluster_[j].x_coordinate, current_time_cluster_[i].y_coordinate, current_time_cluster_[j].y_coordinate);
+      XTRACE(DATA, DEB,
+             "Determined distance between points is %f, threshold is %u",
+             distance, max_coord_gap_);
+      XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u",
+             current_time_cluster_[i].x_coordinate,
+             current_time_cluster_[j].x_coordinate,
+             current_time_cluster_[i].y_coordinate,
+             current_time_cluster_[j].y_coordinate);
       if (distance < max_coord_gap_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
-        space_cluster.push_back(current_time_cluster_[j]); // add point to current cluster
+        space_cluster.push_back(
+            current_time_cluster_[j]); // add point to current cluster
         visited[j] = true;
-      }
-      else{
+      } else {
         XTRACE(DATA, DEB, "Too far apart, not including in this cluster");
       }
     }
     stash_cluster(space_cluster); // add completed cluster to list of clusters
   }
 }
-
 
 void HierarchicalClusterer::stash_cluster(Hit2DVector &xz_cluster) {
   Cluster2D cluster;
@@ -97,7 +104,7 @@ std::string HierarchicalClusterer::config(const std::string &prepend) const {
 }
 
 std::string HierarchicalClusterer::status(const std::string &prepend,
-                                   bool verbose) const {
+                                          bool verbose) const {
   std::stringstream ss;
   ss << Abstract2DClusterer::status(prepend, verbose);
   if (!current_time_cluster_.empty())

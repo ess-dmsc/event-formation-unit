@@ -10,9 +10,9 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
+#include <bifrost/generators/DatReader.h>
 #include <common/system/Socket.h>
 #include <generators/PacketGenerator.h>
-#include <bifrost/generators/DatReader.h>
 
 const uint16_t UdpMaxSizeBytes{8800};
 
@@ -69,8 +69,8 @@ int main(int argc, char *argv[]) {
     uint8_t Ring = DatReadout.fiber;
     uint8_t FEN = 0;
     memset(&UdpReadout, 0, sizeof(UdpReadout));
-    //UdpReadout.timehi = DatReadout.timehi;
-    //UdpReadout.timelow = DatReadout.timelow;
+    // UdpReadout.timehi = DatReadout.timehi;
+    // UdpReadout.timelow = DatReadout.timelow;
     UdpReadout.OM = 0;
     UdpReadout.tube = DatReadout.tube;
     UdpReadout.ampl_a = DatReadout.ampl_a;

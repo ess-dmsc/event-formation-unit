@@ -38,8 +38,10 @@ void Cluster2D::insert(const Hit2D &e) {
 
   if (hits.empty()) {
     time_start_ = time_end_ = e.time;
-    x_coord_start_ = x_coord_end_ = x_coord_earliest_ = x_coord_latest_ = e.x_coordinate;
-    y_coord_start_ = y_coord_end_ = y_coord_earliest_ = y_coord_latest_ = e.y_coordinate;
+    x_coord_start_ = x_coord_end_ = x_coord_earliest_ = x_coord_latest_ =
+        e.x_coordinate;
+    y_coord_start_ = y_coord_end_ = y_coord_earliest_ = y_coord_latest_ =
+        e.y_coordinate;
     utpc_idx_min_ = 0;
     utpc_idx_max_ = 0;
   }
@@ -154,9 +156,7 @@ void Cluster2D::clear() {
 
 bool Cluster2D::empty() const { return hits.empty(); }
 
-bool Cluster2D::valid() const {
-  return !hits.empty();
-}
+bool Cluster2D::valid() const { return !hits.empty(); }
 
 bool Cluster2D::hasGap(uint8_t MaxAllowedGap) const {
   return hits.size() + MaxAllowedGap < xCoordSpan();
@@ -221,7 +221,9 @@ double Cluster2D::timeCenter() const { return time_mass_ / weight_sum_; }
 
 double Cluster2D::xCoordMass2() const { return x_coord_mass2_; }
 
-double Cluster2D::xCoordCenter2() const { return x_coord_mass2_ / weight2_sum_; }
+double Cluster2D::xCoordCenter2() const {
+  return x_coord_mass2_ / weight2_sum_;
+}
 
 double Cluster2D::timeMass2() const { return time_mass2_; }
 
@@ -253,12 +255,14 @@ uint64_t Cluster2D::timeGap(const Cluster2D &other) const {
   return (latest_start - earliest_end);
 }
 
-std::string Cluster2D::to_string(const std::string &prepend, bool verbose) const {
+std::string Cluster2D::to_string(const std::string &prepend,
+                                 bool verbose) const {
   std::stringstream ss;
-  ss << fmt::format(
-      "time=({},{})={} xspace=({},{})={} yspace=({},{})={} weight={} entries[{}]",
-      time_start_, time_end_, timeSpan(), x_coord_start_, x_coord_end_, xCoordSpan(), y_coord_start_, y_coord_end_, yCoordSpan(),
-      weight_sum_, hits.size());
+  ss << fmt::format("time=({},{})={} xspace=({},{})={} yspace=({},{})={} "
+                    "weight={} entries[{}]",
+                    time_start_, time_end_, timeSpan(), x_coord_start_,
+                    x_coord_end_, xCoordSpan(), y_coord_start_, y_coord_end_,
+                    yCoordSpan(), weight_sum_, hits.size());
   if (verbose && !hits.empty()) {
     ss << "\n";
     for (const auto &h : hits) {

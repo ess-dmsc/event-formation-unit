@@ -24,7 +24,7 @@ public:
 
   ///\brief change default number of strips per cassette to differentiate
   /// between DREAM (256) and MAGIC (128)
-  explicit Mantle(uint16_t Strips) : StripsPerCass(Strips) {};
+  explicit Mantle(uint16_t Strips) : StripsPerCass(Strips){};
 
   int getX(int Strip) { return Strip; }
 

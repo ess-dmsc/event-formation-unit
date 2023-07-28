@@ -13,15 +13,13 @@
 
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <common/reduction/Hit2DVector.h>
+#include <common/reduction/clustering/HierarchicalClusterer.h>
 #include <readout/DataParser.h>
 #include <timepix3/Counters.h>
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
 #include <timepix3/geometry/Config.h>
 #include <timepix3/geometry/Geometry.h>
-#include <common/reduction/Hit2DVector.h>
-#include <common/reduction/clustering/HierarchicalClusterer.h>
-
-
 
 namespace Timepix3 {
 
@@ -51,12 +49,12 @@ public:
   /// \brief calculate pixel ID from a Timepix3PixelReadout
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
-  /// \brief calculate the ToF (difference between pulse time and time of arrival)
-  /// from a single Timepix3PixelReadout
+  /// \brief calculate the ToF (difference between pulse time and time of
+  /// arrival) from a single Timepix3PixelReadout
   uint64_t calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data);
 
-  /// \brief from the clusters in Clusterer, check if they meet requirements to be an event,
-  /// and if so serialize them
+  /// \brief from the clusters in Clusterer, check if they meet requirements to
+  /// be an event, and if so serialize them
   void generateEvents();
 
 public:
@@ -70,7 +68,6 @@ public:
   EV44Serializer *Serializer;
   HierarchicalClusterer *Clusterer;
   Hit2DVector AllHitsVector;
-  
 };
 
 } // namespace Timepix3

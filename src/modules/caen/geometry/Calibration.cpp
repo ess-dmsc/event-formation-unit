@@ -37,7 +37,7 @@ void Calibration::loadBifrostParameters() {
     auto BifrostCalibJson = root["BifrostCalibration"];
 
     auto Intervals = BifrostCalibJson["Intervals"];
-    for (auto & Triplet : Intervals) {
+    for (auto &Triplet : Intervals) {
       uint32_t TripletId = Triplet[0].get<uint32_t>();
       if (TripletId > 44) {
         XTRACE(INIT, ERR, "Invalid TripletId %u (Max is 44)", TripletId);
@@ -53,13 +53,12 @@ void Calibration::loadBifrostParameters() {
       BifrostCalibration.TripletCalib[TripletId] = Calib;
     }
 
-  }  catch (...) {
-      throw std::runtime_error("Invalid BIFROST calibration");
+  } catch (...) {
+    throw std::runtime_error("Invalid BIFROST calibration");
   }
 
   MaxPixelId = 45 * 3 * 100; ///\todo I know
 }
-
 
 void Calibration::loadLokiParameters() {
   try {

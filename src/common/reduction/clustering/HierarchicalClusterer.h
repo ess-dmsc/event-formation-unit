@@ -14,9 +14,10 @@
 /// \todo update documentation for 2D version
 
 /// \class HierarchicalClusterer HierarchicalClusterer.h
-/// \brief Clusterer for 2D hits in time, and then space using a euclidian distance measure
-///         2D hits differ from standard hits in that we already know both the x and y location
-///         of the hit
+/// \brief Clusterer for 2D hits in time, and then space using a euclidian
+/// distance measure
+///         2D hits differ from standard hits in that we already know both the x
+///         and y location of the hit
 
 class HierarchicalClusterer : public Abstract2DClusterer {
 public:
@@ -27,7 +28,7 @@ public:
   ///        that they would be considered part of the same cluster
   HierarchicalClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
-   /// \brief insert new hit and perform clustering
+  /// \brief insert new hit and perform clustering
   /// \param hit to be added to cluster. Hits must be chronological between
   ///         subsequent calls. It may be more efficient to use:
   /// \sa HierarchicalClusterer::cluster
@@ -59,5 +60,4 @@ private:
   void cluster_by_x();
 
   void stash_cluster(Hit2DVector &xz_cluster);
-
 };

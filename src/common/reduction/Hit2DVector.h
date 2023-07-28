@@ -41,11 +41,13 @@ template <class T> struct GreedyHit2DAllocator {
 };
 
 template <class T, class U>
-bool operator==(const GreedyHit2DAllocator<T> &, const GreedyHit2DAllocator<U> &) {
+bool operator==(const GreedyHit2DAllocator<T> &,
+                const GreedyHit2DAllocator<U> &) {
   return true;
 }
 template <class T, class U>
-bool operator!=(const GreedyHit2DAllocator<T> &, const GreedyHit2DAllocator<U> &) {
+bool operator!=(const GreedyHit2DAllocator<T> &,
+                const GreedyHit2DAllocator<U> &) {
   return false;
 }
 
@@ -143,8 +145,8 @@ public:
 struct Hit2DVectorStorage {
   enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
   using AllocConfig =
-      PoolAllocatorConfig<Hit2D, Bytes_1GB, MyVector<Hit2D>::MinReserveCount, false,
-                          true>;
+      PoolAllocatorConfig<Hit2D, Bytes_1GB, MyVector<Hit2D>::MinReserveCount,
+                          false, true>;
   static AllocConfig::PoolType *Pool;
   static PoolAllocator<AllocConfig> Alloc;
   static std::size_t MaxAllocCount;
@@ -180,7 +182,8 @@ template <class T> struct Hit2DVectorAllocator {
 
 /// \todo Does not seem to be required
 template <class T, class U>
-bool operator==(const Hit2DVectorAllocator<T> &, const Hit2DVectorAllocator<U> &) {
+bool operator==(const Hit2DVectorAllocator<T> &,
+                const Hit2DVectorAllocator<U> &) {
   return true;
 }
 
@@ -188,7 +191,8 @@ bool operator==(const Hit2DVectorAllocator<T> &, const Hit2DVectorAllocator<U> &
 /// the project to compile, yet is not used or at least does not have
 /// any test coverage
 template <class T, class U>
-bool operator!=(const Hit2DVectorAllocator<T> &, const Hit2DVectorAllocator<U> &) {
+bool operator!=(const Hit2DVectorAllocator<T> &,
+                const Hit2DVectorAllocator<U> &) {
   return false;
 }
 
@@ -197,8 +201,8 @@ bool operator!=(const Hit2DVectorAllocator<T> &, const Hit2DVectorAllocator<U> &
 using Hit2DVector = MyVector<Hit2D, Hit2DVectorAllocator<Hit2D>>;
 
 /// \brief convenience function for sorting Hit2Ds by increasing time
-inline void sort_chronologically(Hit2DVector&& hits) {
-  std::sort(hits.begin(), hits.end(), [](const Hit2D& hit1, const Hit2D& hit2) {
+inline void sort_chronologically(Hit2DVector &&hits) {
+  std::sort(hits.begin(), hits.end(), [](const Hit2D &hit1, const Hit2D &hit2) {
     return hit1.time < hit2.time;
   });
 }

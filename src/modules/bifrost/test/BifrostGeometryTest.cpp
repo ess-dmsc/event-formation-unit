@@ -76,7 +76,7 @@ TEST_F(BifrostGeometryTest, PosOutsideInterval) {
   // geom->CaenCalibration.BifrostCalibration.Calib =
   //       geom->CaenCalibration.BifrostCalibration.Intervals;
   ASSERT_EQ(OutsideTube, 0);
-  std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, 100,0);
+  std::pair<int, float> Result = geom->calcTubeAndPos(ManualCalib, 100, 0);
   ASSERT_EQ(Result.first, -1);
   ASSERT_EQ(OutsideTube, 1);
 }

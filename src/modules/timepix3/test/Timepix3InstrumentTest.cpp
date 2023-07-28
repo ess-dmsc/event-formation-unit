@@ -6,9 +6,8 @@
 
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <timepix3/Timepix3Instrument.h>
 #include <logical_geometry/ESSGeometry.h>
-
+#include <timepix3/Timepix3Instrument.h>
 
 using namespace Timepix3;
 
@@ -37,12 +36,9 @@ std::string BadNameConfigStr = R"(
   }
 )";
 
-
-std::vector<uint8_t> SingleGoodReadout{
-    // Single readout
-    0x91, 0xc6, 0x30, 0x80,
-    0x8b, 0xa8, 0x3a, 0xbf
-};
+std::vector<uint8_t> SingleGoodReadout{// Single readout
+                                       0x91, 0xc6, 0x30, 0x80,
+                                       0x8b, 0xa8, 0x3a, 0xbf};
 
 class Timepix3InstrumentTest : public TestBase {
 protected:
@@ -52,10 +48,10 @@ protected:
   Timepix3Instrument *timepix3;
 
   void SetUp() override {
-     Settings.ConfigFile = ConfigFile;
-     timepix3 = new Timepix3Instrument(counters, Settings);
-     timepix3->Serializer = new EV44Serializer(115000, "timepix3");
-   }
+    Settings.ConfigFile = ConfigFile;
+    timepix3 = new Timepix3Instrument(counters, Settings);
+    timepix3->Serializer = new EV44Serializer(115000, "timepix3");
+  }
   void TearDown() override {}
 };
 
@@ -75,7 +71,8 @@ TEST_F(Timepix3InstrumentTest, BadNameSettings) {
 }
 
 // TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-//   auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(), SingleGoodReadout.size());
+//   auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(),
+//   SingleGoodReadout.size());
 
 //   ASSERT_EQ(Res, 1);
 //   ASSERT_EQ(counters.PixelReadouts, 1);
@@ -86,12 +83,12 @@ TEST_F(Timepix3InstrumentTest, BadNameSettings) {
 //   ASSERT_EQ(counters.Events, 1);
 // }
 
-
-
 int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
-  saveBuffer(BadJsonConfigFile, (void *)BadJsonConfigStr.c_str(), BadJsonConfigStr.size());
-  saveBuffer(BadNameConfigFile, (void *)BadNameConfigStr.c_str(), BadNameConfigStr.size());
+  saveBuffer(BadJsonConfigFile, (void *)BadJsonConfigStr.c_str(),
+             BadJsonConfigStr.size());
+  saveBuffer(BadNameConfigFile, (void *)BadNameConfigStr.c_str(),
+             BadNameConfigStr.size());
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 

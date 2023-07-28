@@ -26,7 +26,6 @@
 namespace Caen {
 class BifrostGeometry : public Geometry {
 public:
-
   BifrostGeometry(Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
@@ -49,9 +48,8 @@ public:
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, float> calcTubeAndPos(std::vector<float> &Calib,
-    int AmpA, int AmpB);
-
+  std::pair<int, float> calcTubeAndPos(std::vector<float> &Calib, int AmpA,
+                                       int AmpB);
 
   const int TubesPerTriplet{3};
   const int TripletsPerRing{15};

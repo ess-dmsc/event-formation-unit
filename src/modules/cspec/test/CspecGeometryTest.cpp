@@ -30,7 +30,7 @@ protected:
 };
 
 ///\todo Replace CSPEC geometry YOffset tests once a new ICD is decided for 3He
-///CSPEC
+/// CSPEC
 // TEST_F(CspecGeometryTest, YOffset) {
 //   ASSERT_EQ(geom->yOffset(0), 0);
 //   ASSERT_EQ(geom->yOffset(1), 0);
@@ -56,7 +56,7 @@ TEST_F(CspecGeometryTest, YCoord) {
 }
 
 ///\todo Replace CSPEC geometry XOffset tests once a new ICD is decided for 3He
-///CSPEC
+/// CSPEC
 // TEST_F(CspecGeometryTest, XOffset) {
 //   ASSERT_EQ(geom->xOffset(0, 0), 0);
 //   ASSERT_EQ(geom->xOffset(0, 1), 100);

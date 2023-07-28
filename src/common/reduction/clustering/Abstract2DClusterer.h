@@ -2,7 +2,10 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file Abstract2DClusterer.h
-/// \brief Abstract2DClusterer class definition
+/// \brief Abstract2DClusterer class definition. This differs from the standard
+/// AbstractClusterer in that it uses 2D hits where both the X and Y coordinates
+/// of each hit to be clustered are known, X and Y plane signals aren't separate
+/// and in need of clustering and then matching.
 ///
 //===----------------------------------------------------------------------===//
 
@@ -23,8 +26,8 @@ template <class T> struct GreedyCluster2DAllocator {
 
   GreedyCluster2DAllocator() = default;
   template <class U>
-  constexpr GreedyCluster2DAllocator(const GreedyCluster2DAllocator<U> &) noexcept {
-  }
+  constexpr GreedyCluster2DAllocator(
+      const GreedyCluster2DAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
     RelAssertMsg(ENABLE_GREEDY_CLUSTER_ALLOCATOR, "Remember to enable");
@@ -81,7 +84,8 @@ template <class T> struct Cluster2DPoolAllocator {
 
   // needed to convert from internal node alloc to cluster alloc.
   template <class U>
-  constexpr Cluster2DPoolAllocator(const Cluster2DPoolAllocator<U> &) noexcept {}
+  constexpr Cluster2DPoolAllocator(const Cluster2DPoolAllocator<U> &) noexcept {
+  }
 
   T *allocate(std::size_t n) {
     RelAssertMsg(n == 1, "not expecting bulk allocation from std::list");
@@ -90,8 +94,8 @@ template <class T> struct Cluster2DPoolAllocator {
   }
 
   void deallocate(T *p, std::size_t n) noexcept {
-    Cluster2DPoolStorage::Alloc.deallocate((Cluster2DPoolStorage::StorageGuess *)p,
-                                         n);
+    Cluster2DPoolStorage::Alloc.deallocate(
+        (Cluster2DPoolStorage::StorageGuess *)p, n);
   }
 };
 
@@ -115,7 +119,8 @@ bool operator!=(const Cluster2DPoolAllocator<T> &,
 // using Cluster2DContainer = std::list<Cluster2D,
 // Cluster2DContainerAllocator<Cluster2D>>;
 // using Cluster2DContainer = std::list<Cluster2D>;
-using Cluster2DContainer = std::list<Cluster2D, Cluster2DPoolAllocator<Cluster2D>>;
+using Cluster2DContainer =
+    std::list<Cluster2D, Cluster2DPoolAllocator<Cluster2D>>;
 
 /// \brief convenience function for printing a Cluster2DContainer
 std::string to_string(const Cluster2DContainer &container,

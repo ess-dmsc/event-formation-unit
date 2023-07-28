@@ -59,7 +59,6 @@ public:
   /// \returns true if a gap is detected
   bool hasGap(uint8_t MaxAllowedGap) const;
 
-
   /// \returns number of hits in cluster
   size_t hitCount() const;
 
@@ -76,7 +75,7 @@ public:
   /// \returns coordinate span, 0 in case of empty cluster
   uint16_t xCoordSpan() const;
   /// \returns lowest coordinate, undefined in case of empty cluster
-  
+
   uint16_t yCoordStart() const;
   /// \returns highest coordinate, undefined in case of empty cluster
   uint16_t yCoordEnd() const;
@@ -126,7 +125,7 @@ public:
   ///          can be NaN if weight sum is zero
   double xCoordCenter2() const;
 
-    /// \returns pre-calculated sum of each hit's weight*weigtht*coord
+  /// \returns pre-calculated sum of each hit's weight*weigtht*coord
   double yCoordMass2() const;
   /// \returns center of masss quared in the coordinate dimension
   ///          can be NaN if weight sum is zero
@@ -152,7 +151,6 @@ public:
   /// \param verbose also print hits
   std::string to_string(const std::string &prepend, bool verbose) const;
 
-
 private:
   /// \todo uint8 might not be enough, if detectors have more independent
   /// modules/segments
@@ -170,15 +168,15 @@ private:
   uint64_t time_start_{0xFFFFFFFFFFFFFFFFULL};
   uint64_t time_end_{0};
 
-  double weight_sum_{0.0}; ///< sum of weight
+  double weight_sum_{0.0};   ///< sum of weight
   double x_coord_mass_{0.0}; ///< sum of coord*weight
   double y_coord_mass_{0.0}; ///< sum of coord*weight
-  double time_mass_{0.0};  ///< sum of time*weight
+  double time_mass_{0.0};    ///< sum of time*weight
 
   double weight2_sum_{0.0};
   double x_coord_mass2_{0.0}; ///< sum of coord*weight*weight
   double y_coord_mass2_{0.0}; ///< sum of coord*weight*weight
-  double time_mass2_{0.0};  ///< sum of time*weight*weight
+  double time_mass2_{0.0};    ///< sum of time*weight*weight
 
   int utpc_idx_min_{0};
   int utpc_idx_max_{0};

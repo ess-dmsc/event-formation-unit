@@ -43,7 +43,7 @@ std::string to_string(const Cluster2DContainer &container,
 }
 
 std::string Abstract2DClusterer::status(const std::string &prepend,
-                                      bool verbose) const {
+                                        bool verbose) const {
   std::stringstream ss;
   ss << prepend
      << fmt::format("total_cluster_count: {}\n", stats_cluster_count);
