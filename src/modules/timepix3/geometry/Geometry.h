@@ -22,20 +22,22 @@
 namespace Timepix3 {
 class Geometry {
 public:
-  /// \brief sets the pixel resolution of a straw
-  /// \param Resolution integer value to set straw resolution to
+  /// \brief sets the pixel resolution of the camera in x plane
+  /// \param Resolution integer value to set camera resolution to
   void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
+
+  /// \brief sets the pixel resolution of the camera in y plane
+  /// \param Resolution integer value to set camera resolution to
   void setYResolution(uint16_t Resolution) { YResolution = Resolution; }
 
   /// \brief calculates an integer pixel value from a Timepix3PixelReadout
-  /// object \param Data Timepix3PixelReadout object, containing ADC value
-  /// information,
-  ///         TubeID, and other information needed to determine pixel of
-  ///         event. If a Calibration has been set, it will be applied here.
+  /// object \param Data Timepix3PixelReadout object
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
+  /// \brief calculated the X coordinate from a Timepix3PixelReadout
   uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
 
+  /// \brief calculated the Y coordinate from a Timepix3PixelReadout
   uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief returns true if Data is a valid readout with the given config
