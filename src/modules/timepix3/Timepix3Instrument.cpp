@@ -91,8 +91,8 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
 //   CurrentReadout.OutputQueue =
 //   ESSReadoutParser.Packet.HeaderPtr->OutputQueue; CurrentReadout.AmpA =
 //   Data.AmpA; CurrentReadout.AmpB = Data.AmpB; CurrentReadout.AmpC =
-//   Data.AmpC; CurrentReadout.AmpD = Data.AmpD; CurrentReadout.RingId =
-//   Data.RingId; CurrentReadout.FENId = Data.FENId; CurrentReadout.TubeId =
+//   Data.AmpC; CurrentReadout.AmpD = Data.AmpD; CurrentReadout.FiberId =
+//   Data.FiberId; CurrentReadout.FENId = Data.FENId; CurrentReadout.TubeId =
 //   Data.TubeId; DumpFile->push(CurrentReadout);
 // }
 

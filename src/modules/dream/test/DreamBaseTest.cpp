@@ -119,7 +119,8 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
-  EXPECT_EQ(Readout.Counters.MappingErrors, 0);
+  EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
+  EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
 }
 
 TEST_F(DreamBaseTest, DataReceiveBad) {
@@ -139,7 +140,8 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
-  EXPECT_EQ(Readout.Counters.MappingErrors, 0);
+  EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
+  EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
 }
 

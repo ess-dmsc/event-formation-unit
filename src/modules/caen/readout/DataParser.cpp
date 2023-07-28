@@ -43,7 +43,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     if (Data->FiberId > MaxFiberId or Data->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->FiberId,
+      XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)", Data->FiberId,
              Data->FENId);
       Stats.ErrorDataHeaders++;
       return ParsedReadouts;

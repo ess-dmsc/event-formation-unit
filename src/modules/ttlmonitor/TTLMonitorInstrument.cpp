@@ -134,7 +134,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 //   CurrentReadout.TDC = Data.TDC;
 //   CurrentReadout.VMM = Data.VMM;
 //   CurrentReadout.Channel = Data.Channel;
-//   CurrentReadout.PRingId = Data.PRingId;
+//   CurrentReadout.FiberId = Data.FiberId;
 //   CurrentReadout.FENId = Data.FENId;
 //
 //   DumpFile->push(CurrentReadout);

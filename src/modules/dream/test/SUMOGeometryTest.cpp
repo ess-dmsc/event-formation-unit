@@ -38,7 +38,7 @@ TEST_F(DreamGeometryTest, InvalidSector) {
 }
 
 TEST_F(DreamGeometryTest, ValidSector) {
-  Data.Unused = 6;
+  Data.UnitId = 6;
   for (uint8_t Sector = 0; Sector < 11; Sector++) {
     Parms.P1.Sector = Sector;
     ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
@@ -48,7 +48,7 @@ TEST_F(DreamGeometryTest, ValidSector) {
 TEST_F(DreamGeometryTest, InvalidSumo) {
   std::vector<int> SumoIDs{0, 1, 2, 7, 8};
   for (auto const &ID : SumoIDs) {
-    Data.Unused = ID;
+    Data.UnitId = ID;
     ASSERT_EQ(endcap.getPixelId(Parms, Data), 0);
   }
 }
@@ -56,7 +56,7 @@ TEST_F(DreamGeometryTest, InvalidSumo) {
 TEST_F(DreamGeometryTest, ValidSumo) {
   std::vector<int> SumoIDs{3, 4, 5, 6};
   for (auto const &ID : SumoIDs) {
-    Data.Unused = ID;
+    Data.UnitId = ID;
     ASSERT_NE(endcap.getPixelId(Parms, Data), 0);
   }
 }
