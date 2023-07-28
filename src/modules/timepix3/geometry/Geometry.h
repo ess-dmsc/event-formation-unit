@@ -43,7 +43,7 @@ public:
   bool validateData(DataParser::Timepix3PixelReadout &Data);
 
   ESSGeometry *ESSGeom;
-  std::uint16_t XResolution{512}; ///< resolution of X axis
-  std::uint16_t YResolution{512}; ///< resolution of Y axis
+  std::uint16_t XResolution; ///< resolution of X axis
+  std::uint16_t YResolution; ///< resolution of Y axis
 };
 } // namespace Timepix3
