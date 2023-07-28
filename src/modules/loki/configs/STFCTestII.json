@@ -4,8 +4,6 @@
 
   "StrawResolution" : 512,
 
-  "ReadoutConstDelayNS" : 0,
-
   "MaxPulseTimeNS" : 357142857,
 
   "PanelConfig" : [

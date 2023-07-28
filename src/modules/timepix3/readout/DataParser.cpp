@@ -56,12 +56,12 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (PacketType == 11) {
       Timepix3PixelReadout Data;
 
-      Data.Dcol = (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFS;
-      Data.Spix = (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFS;
-      Data.Pix = (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFS;
-      Data.ToA = (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFS;
-      Data.ToT = ((DataBytes & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFS) * 25;
-      Data.FToA = (DataBytes & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFS;
+      Data.Dcol = (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET;
+      Data.Spix = (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET;
+      Data.Pix = (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET;
+      Data.ToA = (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET;
+      Data.ToT = ((DataBytes & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET) * 25;
+      Data.FToA = (DataBytes & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET;
       Data.SpidrTime = DataBytes & PIXEL_SPTIME_MASK;
 
       XTRACE(DATA, DEB,
@@ -81,10 +81,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       PixelResult.push_back(Data);
     } else if (PacketType == 6) {
       Timepix3TDCReadout Data;
-      Data.Type = (DataBytes & 0x0F00000000000000) >> 56;
-      Data.TriggerCounter = (DataBytes & 0x00FFF00000000000) >> 44;
-      Data.Timestamp = (DataBytes & 0x00000FFFFFFFFE00) >> 9;
-      Data.Stamp = (DataBytes & 0x00000000000001E0) >> 5;
+      Data.Type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
+      Data.TriggerCounter = (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET;
+      Data.Timestamp = (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET;
+      Data.Stamp = (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET;
 
       XTRACE(DATA, DEB,
              "Processed readout, PacketType = %u, trigger_counter = %u, "
@@ -103,14 +103,15 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       } else if (Data.Type == 11) {
         Stats.TDC2FallingReadouts++;
       }
-      // else {
-      //   Stats.UnknownTDC++;
-      // }
+      else {
+        // this should never happen - if it does something has gone wrong with the data format or parsing
+        Stats.UnknownTDCReadouts++;
+      }
     } else if (PacketType == 4) {
       Timepix3GlobalTimeReadout Data;
 
-      Data.Timestamp = (DataBytes & 0x00FFFFFFFFFFFF00) >> 8;
-      Data.Stamp = (DataBytes & 0x00000000000000F0) >> 4;
+      Data.Timestamp = (DataBytes & GLOBAL_TIMESTAMP_MASK) >> GLOBAL_TIMESTAMP_OFFSET;
+      Data.Stamp = (DataBytes & GLOBAL_STAMP_MASK) >> GLOBAL_STAMP_OFFSET;
 
       XTRACE(DATA, DEB,
              "Processed readout, PacketType = %u, Timestamp = %u, Stamp = %u",

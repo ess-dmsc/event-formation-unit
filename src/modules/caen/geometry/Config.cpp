@@ -43,13 +43,6 @@ Config::Config(std::string ConfigFile) {
     Resolution = root["StrawResolution"].get<unsigned int>();
 
     try {
-      ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", ReadoutConstDelayNS);
-
-    try {
       MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
     } catch (...) {
       // Use default value
