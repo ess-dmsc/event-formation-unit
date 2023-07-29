@@ -27,18 +27,24 @@
 // clang-format off
 std::string LokiConfigFile{"deleteme_loki_config.json"};
 std::string LokiConfigJson = R"(
-{
-  "Detector" : "loki",
+  {
+    "Detector" : "loki",
 
-  "StrawResolution" : 512,
+    "Resolution" : 512,
+    "GroupsZ" : 4,
 
-  "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" :   0 },
-    { "Bank" : 1, "Vertical" :  false, "GroupsZ" : 4, "GroupsN" : 8, "StrawOffset" : 224 }
-  ],
-  "MaxTOFNS" : 800000000,
-  "MaxRing" : 2
-}
+    "ReadoutConstDelayNS" : 0,
+    "MaxPulseTimeNS" : 357142855,
+    "MaxTOFNS" : 1000000000,
+
+    "Banks" : [
+       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
+    ],
+
+    "Config" : [
+      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+    ]
+  }
 )";
 
 std::string LokiCalibFile{"deleteme_loki_calib.json"};
@@ -358,9 +364,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.Geom.RingErrors, 1);
-  EXPECT_EQ(Readout.Counters.Geom.FENErrors, 1);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 2);
+  EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
 }

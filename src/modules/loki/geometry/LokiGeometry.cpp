@@ -17,121 +17,117 @@
 namespace Caen {
 
 LokiGeometry::LokiGeometry(Config &CaenConfiguration)
-    : Panels(CaenConfiguration.Panels) {
+  : Conf(CaenConfiguration) {
+  XTRACE(INIT, ALW, "Logical geometry: %u x %u", Conf.LokiConf.Parms.Resolution,
+    Conf.LokiConf.Parms.TotalGroups * 7);
   ESSGeom = new ESSGeometry(
-      CaenConfiguration.Resolution,
-      CaenConfiguration.NGroupsTotal * PanelGeometry::NUnits, 1, 1);
-  setResolution(CaenConfiguration.Resolution);
-  MaxRing = CaenConfiguration.MaxRing;
+      Conf.LokiConf.Parms.Resolution,
+      Conf.LokiConf.Parms.TotalGroups * 7, 1, 1);
+  setResolution(Conf.LokiConf.Parms.Resolution);
 }
 
+
+std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
+    int AmpB, int AmpC, int AmpD) {
+
+  int Denominator = AmpA + AmpB + AmpC + AmpD;
+
+  if ( Denominator == 0) {
+    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+    Stats.AmplitudeZero++;
+    return InvalidPos;
+  }
+
+  double GlobalPos = 1.0 * (AmpA + AmpB )/ Denominator; // [0.0 ; 1.0]
+  if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
+    XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    return InvalidPos;
+  }
+
+  int Unit = CaenCDCalibration.getUnitId(GlobalGroup, GlobalPos);
+  if (Unit == -1) {
+    XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
+           AmpB, GlobalPos);
+    return InvalidPos;
+  }
+
+  ///\brief raw unit pos will be in the interval [0;1] regardless of the width
+  /// of the interval
+  auto &Intervals = CaenCDCalibration.Intervals[GlobalGroup];
+  double Lower = Intervals[Unit].first;
+  double Upper = Intervals[Unit].second;
+  double RawUnitPos = (GlobalPos - Lower) / (Upper - Lower);
+
+  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f, RawUnitPos %f", Unit, GlobalPos,
+         RawUnitPos);
+  return std::make_pair(Unit, RawUnitPos);
+}
+
+
 uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  uint8_t GroupBank = Data.FENId; // one FEN has 8 Groups
-
-  bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   int Ring = Data.FiberId/2;
-  PanelGeometry Panel = Panels[Ring];
+  int FEN = Data.FENId;
+  int Group = Data.Group; // local group for a FEN
+
   XTRACE(DATA, DEB, "Fiber ID %u, Ring %d", Data.FiberId, Ring);
-  if (not valid) {
+
+  uint32_t GlobalGroup = Conf.LokiConf.getGlobalGroup(Ring, FEN, Group);
+  XTRACE(DATA, DEB, "FEN %d, LocalGroup %d, GlobalGroup %d", FEN, Group,
+    GlobalGroup);
+
+  std::pair<int, double> UnitPos = calcUnitAndPos(GlobalGroup, Data.AmpA,
+    Data.AmpB, Data.AmpC, Data.AmpD);
+    XTRACE(DATA, DEB, "Unit %d, GlobalPos %f", UnitPos.first, UnitPos.second);
+
+  if (UnitPos.first == -1) {
     return 0;
   }
-  XTRACE(DATA, DEB, "Valid pixel id calculated");
-  /// GlobalUnit is per its definition == Y
-  uint32_t GlobalUnit = Panel.getGlobalUnitId(GroupBank, Data.Group, UnitId);
 
-  XTRACE(EVENT, DEB, "global straw: %u", GlobalUnit);
-  if (GlobalUnit == Panel.UnitError) {
-    XTRACE(EVENT, WAR, "Invalid straw id: %d", GlobalUnit);
-    return 0;
-  }
+  uint32_t GlobalUnit = Conf.LokiConf.getY(Ring, FEN, Data.Group, UnitPos.first);
 
-  int Group = GlobalUnit / 7;
-  int Unit = UnitId;
   double CalibratedUnitPos =
-      CaenCDCalibration.posCorrection(Group, Unit, PosVal);
+      CaenCDCalibration.posCorrection(GlobalGroup, UnitPos.first, UnitPos.second);
   uint16_t CalibratedPos = CalibratedUnitPos * (NPos - 1);
   XTRACE(EVENT, DEB, "Group %d, Unit %d - calibrated unit pos: %g, pos %d",
-         Group, Unit, CalibratedUnitPos, CalibratedPos);
+         GlobalGroup, UnitPos.first, CalibratedUnitPos, CalibratedPos);
 
   uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalUnit);
 
-  XTRACE(EVENT, DEB, "xpos %u (calibrated: %u), ypos %u, pixel: %u", PosVal,
-         CalibratedPos, GlobalUnit,
-         PixelId); ///\todo this print statement prints a random number for
-                   /// pixel id
+  ///\todo this print statement prints a random number for pixel id
+  XTRACE(EVENT, DEB, "xpos %f (calibrated: %u), ypos %u, pixel: %u", UnitPos.second,
+         CalibratedPos, GlobalUnit, PixelId);
+
   XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
   return PixelId;
 }
 
 bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
   unsigned int Ring = Data.FiberId / 2;
-  if (Ring >= Panels.size()) {
-    XTRACE(DATA, WAR, "RINGId %u is incompatible with #panels: %u", Ring,
-           Panels.size());
+
+  auto & Cfg = Conf.LokiConf.Parms;
+
+  if (Ring >= Cfg.NumRings) {
+    XTRACE(DATA, WAR, "RINGId %u is >= %u", Ring, Cfg.NumRings);
     Stats.RingErrors++;
     return false;
   }
-  XTRACE(DATA, DEB, "Panels size %u", Panels.size());
 
-  auto Panel = Panels[Ring];
-
-  if (Data.FENId >= Panel.getMaxGroup()) {
-    XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
-           Panel.getMaxGroup() - 1);
-    Stats.FENErrors++;
+  int Bank = Cfg.Rings[Ring].Bank;
+  if (Bank == -1) {
+    XTRACE(DATA, WAR, "RINGId %u is uninitialised", Ring);
+    Stats.RingMappingErrors++;
     return false;
   }
-  XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId,
-         Panel.getMaxGroup() - 1);
+
+  int FENs = Cfg.Rings[Ring].FENs;
+  if (Data.FENId >= FENs) {
+    XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId, FENs);
+    Stats.FENMappingErrors++;
+    return false;
+  }
+  XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId, FENs - 1);
   return true;
 }
 
-bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
-                                 std::int16_t AmplitudeB,
-                                 std::int16_t AmplitudeC,
-                                 std::int16_t AmplitudeD) {
-  std::int32_t UnitNum = AmplitudeB + AmplitudeD;
-  std::int32_t PosNum = AmplitudeA + AmplitudeB;
-  std::int32_t Denominator = AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
-  XTRACE(INIT, DEB, "UnitNum: %d, PosNum: %d, Denominator: %d", UnitNum,
-         PosNum, Denominator);
-  if (Denominator == 0) {
-    XTRACE(INIT, WAR,
-           "Denominator is 0, UnitNum: %d, PosNum: %d, "
-           " Denominator: %d,  A %d, B %d, C %d, D %d",
-           UnitNum, PosNum, Denominator, AmplitudeA, AmplitudeB, AmplitudeC,
-           AmplitudeD);
-    Stats.AmplitudeZero++;
-    UnitId = NUnits;
-    PosVal = NPos;
-    return false;
-  }
-  double dUnitId = ((NUnits - 1) * UnitNum * 1.0) / Denominator;
-  UnitId = getUnitId(dUnitId);
-  PosVal = (PosNum * 1.0) / Denominator;
-  XTRACE(INIT, DEB, "dUnit %f, UnitId %d, PosNum: %d, PosVal: %f", dUnitId,
-         UnitId, PosNum, PosVal);
-  return true;
-}
-
-// convert from Unit value [0.0; 1.0] to integer UnitId
-// \todo replace with commom caen code
-uint8_t LokiGeometry::getUnitId(double value) {
-  // limits is a vector defined in LokiGeometry.h
-  if (value <= limits[0])
-    return 0;
-  else if (value <= limits[1])
-    return 1;
-  else if (value <= limits[2])
-    return 2;
-  else if (value <= limits[3])
-    return 3;
-  else if (value <= limits[4])
-    return 4;
-  else if (value <= limits[5])
-    return 5;
-  else
-    return 6;
-}
 
 } // namespace Caen

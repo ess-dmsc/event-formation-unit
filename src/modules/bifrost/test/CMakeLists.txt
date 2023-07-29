@@ -16,6 +16,7 @@ set(BifrostGeometryTest_INC
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
     ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
     ${ESS_MODULE_DIR}/caen/geometry/Interval.h
+    ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
 )
 set(BifrostGeometryTest_SRC
     BifrostGeometryTest.cpp
@@ -23,5 +24,6 @@ set(BifrostGeometryTest_SRC
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
     ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+    ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
 )
 create_test_executable(BifrostGeometryTest)

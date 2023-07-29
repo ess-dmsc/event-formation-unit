@@ -16,6 +16,7 @@ set(caen_common_inc
   geometry/Geometry.h
   geometry/Interval.h
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.h
+  ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
   ${ESS_MODULE_DIR}/cspec/geometry/CspecGeometry.h
@@ -28,6 +29,7 @@ set(caen_common_src
   geometry/CDCalibration.cpp
   geometry/Interval.cpp
   ${ESS_MODULE_DIR}/bifrost/geometry/BifrostGeometry.cpp
+  ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp
   ${ESS_MODULE_DIR}/cspec/geometry/CspecGeometry.cpp

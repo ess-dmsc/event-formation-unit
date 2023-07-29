@@ -43,7 +43,9 @@ public:
 
   struct Stats {
     int64_t RingErrors{0};
+    int64_t RingMappingErrors{0};
     int64_t FENErrors{0};
+    int64_t FENMappingErrors{0};
     int64_t GroupErrors{0};
     int64_t AmplitudeZero{0};
   } Stats;

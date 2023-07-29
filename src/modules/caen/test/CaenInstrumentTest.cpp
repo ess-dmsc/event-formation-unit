@@ -16,14 +16,22 @@ using namespace Caen;
 std::string LokiConfigFile{"deleteme_loki_instr_config.json"};
 std::string LokiConfigStr = R"(
   {
-    "Detector": "loki",
+    "Detector" : "loki",
 
-    "StrawResolution" : 256,
+    "Resolution" : 512,
+    "GroupsZ" : 4,
 
-    "PanelConfig" : [
-      { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 1, "GroupsN" : 1, "StrawOffset" : 0    }
+    "ReadoutConstDelayNS" : 0,
+    "MaxPulseTimeNS" : 357142855,
+    "MaxTOFNS" : 1000000000,
+
+    "Banks" : [
+       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
+    ],
+
+    "Config" : [
+      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
     ]
-
   }
 )";
 

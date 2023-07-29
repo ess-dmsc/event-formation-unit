@@ -1,12 +1,15 @@
 
 {
-  "Detector": "loki",
+  "Detector" : "loki",
 
   "Resolution" : 512,
-
   "GroupsZ" : 4,
 
-  "Banks" [
+  "ReadoutConstDelayNS" : 0,
+  "MaxPulseTimeNS" : 357142855,
+  "MaxTOFNS" : 1000000000,
+
+  "Banks" : [
      {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0},
      {"Bank" : 1, "ID" : "bank1", "GroupsN" : 16, "YOffset" : 1568},
      {"Bank" : 2, "ID" : "bank2", "GroupsN" : 12, "YOffset" : 2016},
@@ -15,7 +18,7 @@
      {"Bank" : 5, "ID" : "bank5", "GroupsN" : 28, "YOffset" : 3136},
      {"Bank" : 6, "ID" : "bank6", "GroupsN" : 32, "YOffset" : 3920},
      {"Bank" : 7, "ID" : "bank7", "GroupsN" : 20, "YOffset" : 4816},
-     {"Bank" : 8, "ID" : "bank8", "GroupsN" : 32, "YOffset" : 5376},
+     {"Bank" : 8, "ID" : "bank8", "GroupsN" : 32, "YOffset" : 5376}
   ],
 
   "Config" : [

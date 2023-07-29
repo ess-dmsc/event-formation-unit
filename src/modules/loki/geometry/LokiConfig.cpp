@@ -41,54 +41,67 @@ void LokiConfig::parseConfig() {
     // Assumed the same for all straws in all banks
     Parms.Resolution = root["Resolution"].get<unsigned int>();
 
-    try {
-      Parms.ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
+    Parms.ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
     LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", Parms.ReadoutConstDelayNS);
 
-    try {
-      Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
+    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
     LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", Parms.MaxPulseTimeNS);
 
-    try {
-      Parms.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
+    Parms.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
     LOG(INIT, Sev::Info, "MaxTOFNS: {}", Parms.MaxTOFNS);
 
+    Parms.GroupsZ = root["GroupsZ"].get<unsigned int>();
+    LOG(INIT, Sev::Info, "GroupsZ: {}", Parms.GroupsZ);
 
-    // auto PanelConfig = root["PanelConfig"];
-    // for (auto &Mapping : PanelConfig) {
-    //   XTRACE(INIT, DEB, "Loading panel");
-    //   auto Bank = Mapping["Bank"].get<unsigned int>();
-    //   bool Vertical = Mapping["Vertical"].get<bool>();
-    //   auto GroupsZ = Mapping["GroupsZ"].get<unsigned int>();
-    //   auto GroupsN = Mapping["GroupsN"].get<unsigned int>();
-    //   auto UnitOffset = Mapping["StrawOffset"].get<unsigned int>();
-    //
-    //   NGroupsTotal += GroupsZ * GroupsN;
-    //   LOG(INIT, Sev::Info, "NGroupsTotal: {}", NGroupsTotal);
-    //
-    //   LOG(INIT, Sev::Info,
-    //       "JSON config - Detector {}, Bank {}, Vertical {}, GroupsZ {}, "
-    //       "GroupsN "
-    //       "{}, UnitOffset {}",
-    //       InstrumentName, Bank, Vertical, GroupsZ, GroupsN, UnitOffset);
-    //
-    //   XTRACE(INIT, DEB,
-    //          "JSON config - GroupsZ %u, GroupsN %u "
-    //          ", UnitOffset %u",
-    //          GroupsZ, GroupsN, UnitOffset);
-    //
-    //   PanelGeometry Temp(GroupsZ, GroupsN, UnitOffset);
-    //   Panels.push_back(Temp);
-    // }
+    // First run through the Banks section
+    auto Banks = root["Banks"];
+    int ConfiguredBanks{0};
+    for (auto & elt : Banks) {
+      int Bank = elt["Bank"].get<int>();
+      if ((Bank <0) or (Bank >= Parms.NumBanks)) {
+        XTRACE(INIT, WAR, "Invalid bank: %d", Bank);
+        continue;
+      }
+      Parms.Banks[Bank].BankName = elt["ID"];
+      Parms.Banks[Bank].GroupsN = elt["GroupsN"].get<int>();
+      Parms.Banks[Bank].YOffset = elt["YOffset"].get<int>();
+      Parms.TotalGroups += Parms.Banks[Bank].GroupsN * Parms.GroupsZ;
+      ConfiguredBanks++;
+    }
+    XTRACE(INIT, ALW, "Banks configured: %d", ConfiguredBanks);
+
+
+    // Then run through the Config section
+    auto Configs = root["Config"];
+    int ConfiguredRings{0};
+    for (auto & elt : Configs) {
+      int Ring = elt["Ring"].get<int>();
+      if ((Ring <0) or (Ring >= Parms.NumRings)) {
+        XTRACE(INIT, WAR, "Invalid ring: %d", Ring);
+        continue;
+      }
+      int Bank = elt["Bank"].get<unsigned int>();
+      int FENs = elt["FENs"].get<unsigned int>();
+      int FENOffset = elt["FENOffset"].get<unsigned int>();
+      XTRACE(INIT, ALW, "Ring %2d, Bank %2d, FENs %2d, FENOffset %2d",
+          Ring, Bank, FENs, FENOffset);
+      Parms.Rings[Ring].Bank = Bank;
+      Parms.Rings[Ring].FENs = FENs;
+      Parms.Rings[Ring].FENOffset = FENOffset;
+      //
+
+      for (int Layer = 0; Layer < 4; Layer ++) {
+        int YOffset = Parms.Banks[Bank].YOffset;
+        int YMin = YOffset + getY(Ring, 0, Layer, 0);
+        int YMax = YOffset + getY(Ring, FENs-1, Layer + 4, 6);
+        XTRACE(INIT, ALW, "  Layer %d - YMin: %d, YMax %d", Layer, YMin, YMax);
+      }
+      ConfiguredRings++;
+    }
+    XTRACE(INIT, ALW, "Rings configured: %d", ConfiguredRings);
+
+
+
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
