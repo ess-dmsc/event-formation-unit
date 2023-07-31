@@ -6,6 +6,8 @@
 /// AbstractClusterer in that it uses 2D hits where both the X and Y coordinates
 /// of each hit to be clustered are known, X and Y plane signals aren't separate
 /// and in need of clustering and then matching.
+/// Memory allocation is based on original AbstractClusterer code written by
+/// Martin.
 ///
 //===----------------------------------------------------------------------===//
 

@@ -2,7 +2,8 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file HierarchicalClusterer.h
-/// \brief HierarchicalClusterer class definition
+/// \brief HierarchicalClusterer class definition. Clusters 2D hits in time and
+/// then in space.
 ///
 //===----------------------------------------------------------------------===//
 
@@ -55,6 +56,8 @@ private:
 
   Hit2DVector
       current_time_cluster_; ///< kept in memory until time gap encountered
+
+  // current_space_cluster_ todo, add here
 
   /// \brief helper function to clusters hits in current_time_cluster_
   void cluster_by_x();
