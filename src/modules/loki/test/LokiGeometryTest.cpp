@@ -1,4 +1,11 @@
-// Copyright (C) 2019-2022 European Spallation Source ERIC
+// Copyright (C) 2019 - 2023 European Spallation Source, see LICENSE file, ERIC
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for LokiGeometry class
+///
+//===----------------------------------------------------------------------===//
 
 #include <algorithm>
 #include <common/testutils/TestBase.h>
@@ -9,9 +16,6 @@ using namespace Caen;
 
 class LokiGeometryTest : public TestBase {
 protected:
-  int64_t RingErrors{0};
-  int64_t FENErrors{0};
-  int64_t AmplitudeZero{0};
   LokiGeometry *geom;
   Config CaenConfiguration;
   void SetUp() override {
@@ -21,10 +25,12 @@ protected:
     CaenConfiguration.NTubesTotal = 28;
     geom = new LokiGeometry(CaenConfiguration);
     geom->setResolution(512);
-    geom->Stats.RingErrors = &RingErrors;
-    geom->Stats.FENErrors = &FENErrors;
-    geom->Stats.AmplitudeZero = &AmplitudeZero;
-    geom->CaenCalibration.nullCalibration(28, 512);
+
+    // Make nullcalibration
+    for (int i = 0; i < CaenConfiguration.NTubesTotal; i++) {
+      geom->CaenCDCalibration.Intervals.push_back({{0.0,0.143}, {0.144,0.286}, {0.287,0.429}, {0.43,0.571}, {0.572,0.714}, {0.715,0.857}, {0.858,  1.0}});
+      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
+    }
   }
   void TearDown() override {}
 };
@@ -33,16 +39,15 @@ protected:
 TEST_F(LokiGeometryTest, Constructor) {
   geom->setResolution(512);
   ASSERT_EQ(geom->StrawId, 7);  // valid: 0 - 6
-  ASSERT_EQ(geom->PosVal, 512); // valid: 0 - 511
+  ASSERT_EQ(geom->PosVal, 1); // valid: 0.0 - 1.0
 }
 
 TEST_F(LokiGeometryTest, AllZeroes) {
-  AmplitudeZero = 0;
   geom->setResolution(512);
   geom->calcPositions(0, 0, 0, 0);
   ASSERT_EQ(geom->StrawId, 7);  // valid: 0 - 6
   ASSERT_EQ(geom->PosVal, 512); // valid: 0 - 511
-  ASSERT_EQ(AmplitudeZero, 1);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
 }
 
 TEST_F(LokiGeometryTest, StrawLimits) {
@@ -95,7 +100,7 @@ TEST_F(LokiGeometryTest, MinMaxPos) {
     ASSERT_EQ(geom->PosVal, 0);
 
     geom->calcPositions(i, i, 0, 0);
-    ASSERT_EQ(geom->PosVal, 511);
+    ASSERT_EQ(geom->PosVal, 1.0);
   }
 }
 
@@ -105,14 +110,14 @@ TEST_F(LokiGeometryTest, validate) {
 
   readout.RingId = 10;
   ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(RingErrors, 1);
-  ASSERT_EQ(FENErrors, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
 
   readout.RingId = 0;
   readout.FENId = 20;
   ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(RingErrors, 1);
-  ASSERT_EQ(FENErrors, 1);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 1);
 }
 
 TEST_F(LokiGeometryTest, calcPixel) {

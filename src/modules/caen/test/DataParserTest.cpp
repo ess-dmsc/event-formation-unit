@@ -8,10 +8,8 @@ using namespace Caen;
 
 class DataParserTest : public TestBase {
 protected:
-  // From Counters.h
-  struct Counters Counters;
-  DataParser Parser{Counters};
-  void SetUp() override { Counters = {}; }
+  DataParser Parser;
+  void SetUp() override {}
   void TearDown() override {}
 };
 

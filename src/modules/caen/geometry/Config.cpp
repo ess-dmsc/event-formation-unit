@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <caen/geometry/Config.h>
-#include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 
@@ -19,11 +18,13 @@ namespace Caen {
 ///
 Config::Config() {}
 
-Config::Config(std::string ConfigFile) {
+Config::Config(std::string ConfigFile) : ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
-  nlohmann::json root = from_json_file(ConfigFile);
+  root = from_json_file(ConfigFile);
   XTRACE(INIT, DEB, "Loaded json file");
+}
 
+void Config::parseConfig() {
   try {
     InstrumentName = root["Detector"].get<std::string>();
   } catch (...) {
@@ -110,7 +111,7 @@ Config::Config(std::string ConfigFile) {
     }
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
-        ConfigFile);
+        ConfigFileName);
     throw std::runtime_error("Invalid Json file");
   }
 }

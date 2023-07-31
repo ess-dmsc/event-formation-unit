@@ -1,0 +1,49 @@
+// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief EFU BaseSettings
+///
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+// All settings should be initialized.
+// clang-format off
+struct BaseSettings {
+  std::string   ConfigFile           {""};
+  std::string   DetectorName         {""};
+  ///\brief Connection/socket settings
+  std::string   DetectorAddress      {"0.0.0.0"};
+  uint16_t DetectorPort         {9000};
+  uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
+  int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
+  int32_t  RxSocketBufferSize   {2000000}; // bytes
+  int32_t  TxSocketBufferSize   {2000000}; // bytes
+  ///\brief Kafka settings
+  std::string   KafkaConfigFile      {""}; // use default
+  std::string   KafkaBroker          {"localhost:9092"};
+  std::string   KafkaTopic           {""};
+  ///\brief Graphite setting
+  std::string   GraphitePrefix       {"efu.null"};
+  std::string   GraphiteRegion       {"0"};
+  std::string   GraphiteAddress      {"127.0.0.1"};
+  uint16_t GraphitePort         {2003};
+  ///\brief Application behavior
+  uint64_t UpdateIntervalSec    {1};
+  uint32_t StopAfterSec         {0xffffffffU};
+  bool          NoHwCheck            {false};
+  std::string   CalibFile            {""};
+  std::string   DumpFilePrefix       {""};
+  ///\brief module specific configurations
+  // perfgen
+  bool          TestImage            {false};
+  uint32_t TestImageUSleep      {10};
+  // legacy module support
+  bool          MultibladeAlignment{false};
+};
+// clang-format on

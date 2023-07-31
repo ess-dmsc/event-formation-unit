@@ -11,15 +11,17 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ## Pure unit tests
 ##
 
-set(MiraclesGeometryTest_INC 
+set(MiraclesGeometryTest_INC
     ../geometry/MiraclesGeometry.h
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.h
 )
-set(MiraclesGeometryTest_SRC 
+set(MiraclesGeometryTest_SRC
     MiraclesGeometryTest.cpp
     ../geometry/MiraclesGeometry.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
 )
 create_test_executable(MiraclesGeometryTest)

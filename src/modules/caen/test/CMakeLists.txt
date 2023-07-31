@@ -12,14 +12,37 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ##
 
 
-set(CaenCalibrationTest_INC
-  ${ESS_MODULE_DIR}/caen/geometry/Config.h
-  ${ESS_MODULE_DIR}/caen/geometry/Calibration.h)
-set(CaenCalibrationTest_SRC
-  ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
-  ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
-  CalibrationTest.cpp)
-create_test_executable(CaenCalibrationTest)
+# New calibration scheme - validation tests
+set(CaenCDCalibrationTest_INC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h
+  )
+set(CaenCDCalibrationTest_SRC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+  CDCalibrationTest.cpp)
+create_test_executable(CaenCDCalibrationTest)
+
+
+# New calibration scheme - correction tests
+set(CaenCDCalibrationIITest_INC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h
+  )
+set(CaenCDCalibrationIITest_SRC
+  ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+  CDCalibrationIITest.cpp)
+create_test_executable(CaenCDCalibrationIITest)
+
+
+# Interval overlap checks
+set(IntervalTest_INC
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.h)
+set(IntervalTest_SRC
+  ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
+  IntervalTest.cpp)
+create_test_executable(IntervalTest)
 
 
 set(CaenConfigTest_INC

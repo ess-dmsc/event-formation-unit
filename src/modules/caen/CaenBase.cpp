@@ -56,24 +56,26 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
 
   // LoKI Readout Data
-  Stats.create("readouts.headers", Counters.DataHeaders);
-  Stats.create("readouts.count", Counters.Readouts);
-  Stats.create("readouts.error_amplitude", Counters.ReadoutsBadAmpl);
-  Stats.create("readouts.error_header", Counters.ErrorDataHeaders);
-  Stats.create("readouts.tof_count", Counters.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  Stats.create("readouts.tof_high", Counters.TofHigh);
-  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+  Stats.create("readouts.headers", Counters.Parser.DataHeaders);
+  Stats.create("readouts.count", Counters.Parser.Readouts);
+  Stats.create("readouts.error_amplitude", Counters.Parser.ReadoutsBadAmpl);
+  Stats.create("readouts.error_header", Counters.Parser.ErrorDataHeaders);
+
+  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
+  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
+  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
+  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
+  Stats.create("readouts.tof_high", Counters.TimeStats.TofHigh);
+  Stats.create("readouts.prevtof_high", Counters.TimeStats.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
-  Stats.create("geometry.ring_mapping_errors", Counters.RingErrors);
-  Stats.create("geometry.fen_mapping_errors", Counters.FENErrors);
-  Stats.create("geometry.outside_tube", Counters.OutsideTube);
-  Stats.create("geometry.calib_errors", Counters.CalibrationErrors);
-  Stats.create("geometry.pos_low", Counters.ReadoutsClampLow);
-  Stats.create("geometry.pos_high", Counters.ReadoutsClampHigh);
+  Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingErrors);
+  Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENErrors);
+  Stats.create("geometry.unit_errors", Counters.Geom.GroupErrors);
+  Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
+  Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
+  Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
+  Stats.create("geometry.outside_tube", Counters.Calibration.OutsideInterval);
 
   // Events
   Stats.create("events.count", Counters.Events);
@@ -153,6 +155,8 @@ void CaenBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
       auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, type);
+
+      /// \todo could be moved
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;
 
       if (Res != ESSReadout::Parser::OK) {
@@ -165,19 +169,14 @@ void CaenBase::processingThread() {
       Res = Caen.CaenParser.parse(Caen.ESSReadoutParser.Packet.DataPtr,
                                   Caen.ESSReadoutParser.Packet.DataLength);
 
-      // Process readouts, generate (end produce) events
+      // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
-      Counters.TofCount = Caen.ESSReadoutParser.Packet.Time.Stats.TofCount;
-      Counters.TofNegative =
-          Caen.ESSReadoutParser.Packet.Time.Stats.TofNegative;
-      Counters.PrevTofCount =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofCount;
-      Counters.PrevTofNegative =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofNegative;
-      Counters.TofHigh = Caen.ESSReadoutParser.Packet.Time.Stats.TofHigh;
-      Counters.PrevTofHigh =
-          Caen.ESSReadoutParser.Packet.Time.Stats.PrevTofHigh;
+      /// \todo This could be moved and done less frequently
+      Counters.Parser = Caen.CaenParser.Stats;
+      Counters.TimeStats = Caen.ESSReadoutParser.Packet.Time.Stats;
+      Counters.Geom = Caen.Geom->Stats;
+      Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

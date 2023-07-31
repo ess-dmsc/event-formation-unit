@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <caen/Counters.h>
+#include <caen/CaenCounters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
 
@@ -24,7 +24,7 @@ public:
   void processingThread();
 
 protected:
-  struct Counters Counters;
+  struct CaenCounters Counters;
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
 };

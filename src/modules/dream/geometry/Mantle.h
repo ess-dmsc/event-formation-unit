@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,6 +14,9 @@
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
 
@@ -41,6 +44,9 @@ public:
     uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
+
+    XTRACE(DATA, DEB, "M.U. %u, Cassette %u, Counter %u, WIre %u, Strip %u",
+           MountingUnit, Cassette, Counter, Wire, Strip);
 
     int x = getX(Strip);
     int y = getY(MountingUnit, Cassette, Counter, Wire);

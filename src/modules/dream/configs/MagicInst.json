@@ -5,8 +5,25 @@
   "MaxPulseTimeDiffNS" : 5000000000,
 
   "Config" : [
-  { "Ring" :  0, "FEN":  0, "Type": "Mantle", "Index" : 0, "Index2" : 0},
-  { "Ring" :  0, "FEN":  1, "Type": "MagicB", "Index" : 0, "Index2" : 0}
-]
+    { "Ring" :  0, "FEN":  0, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  0, "FEN":  1, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  1, "FEN":  0, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  1, "FEN":  1, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  2, "FEN":  0, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  2, "FEN":  1, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  3, "FEN":  0, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  3, "FEN":  1, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  4, "FEN":  0, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  4, "FEN":  1, "Type": "FRDetector", "Index" : 0, "Index2" : 0},
+
+    { "Ring" :  5, "FEN":  0, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  5, "FEN":  1, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  6, "FEN":  0, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  6, "FEN":  1, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  7, "FEN":  0, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  7, "FEN":  1, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  8, "FEN":  0, "Type": "PADetector", "Index" : 0, "Index2" : 0},
+    { "Ring" :  8, "FEN":  1, "Type": "PADetector", "Index" : 0, "Index2" : 0}
+  ]
 
 }

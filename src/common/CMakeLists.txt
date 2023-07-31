@@ -37,6 +37,7 @@ set(efu_common_INC
   debug/Log.h
   debug/Trace.h
   debug/TraceGroups.h
+  detector/BaseSettings.h
   detector/Detector.h
   detector/EFUArgs.h
   kafka/EV44Serializer.h

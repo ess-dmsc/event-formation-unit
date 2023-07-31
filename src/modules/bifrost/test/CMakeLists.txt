@@ -11,16 +11,17 @@ get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSO
 ## Pure unit tests
 ##
 
-set(BifrostGeometryTest_INC 
+set(BifrostGeometryTest_INC
     ../geometry/BifrostGeometry.h
     ${ESS_MODULE_DIR}/caen/geometry/Config.h
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.h
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.h
 )
-set(BifrostGeometryTest_SRC 
+set(BifrostGeometryTest_SRC
     BifrostGeometryTest.cpp
     ../geometry/BifrostGeometry.cpp
     ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
-    ${ESS_MODULE_DIR}/caen/geometry/Calibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/CDCalibration.cpp
+    ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
 )
 create_test_executable(BifrostGeometryTest)
-

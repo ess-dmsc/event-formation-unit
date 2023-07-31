@@ -23,13 +23,14 @@ namespace Caen {
 ///
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
-CaenInstrument::CaenInstrument(struct Counters &counters,
+CaenInstrument::CaenInstrument(struct CaenCounters &counters,
                                BaseSettings &settings)
     : counters(counters), Settings(settings) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
   CaenConfiguration = Config(Settings.ConfigFile);
+  CaenConfiguration.parseConfig();
 
   if (settings.DetectorName == "loki") {
     Geom = new LokiGeometry(CaenConfiguration);
@@ -46,59 +47,23 @@ CaenInstrument::CaenInstrument(struct Counters &counters,
         fmt::format("Invalid Detector Name {}", settings.DetectorName));
   }
 
-  if (Settings.CalibFile.empty()) {
-    XTRACE(INIT, ALW, "Using the identity 'calibration'");
-    uint32_t MaxPixels = Geom->ESSGeom->max_pixel();
-    uint32_t Straws = MaxPixels / CaenConfiguration.Resolution;
-    XTRACE(INIT, DEB,
-           "Calculating Straws, MaxPixels: %u, Resolution: %u, Straws: %u",
-           MaxPixels, CaenConfiguration.Resolution, Straws);
-
-    XTRACE(INIT, ALW, "Inst: Straws: %u, Resolution: %u", Straws,
-           CaenConfiguration.Resolution);
-    Geom->CaenCalibration.nullCalibration(Straws, CaenConfiguration.Resolution);
-  } else {
-    XTRACE(INIT, ALW, "Loading calibration file %s",
-           Settings.CalibFile.c_str());
-    Geom->CaenCalibration = Calibration(Settings.CalibFile);
-    if (settings.DetectorName == "loki") {
-      Geom->CaenCalibration.loadLokiParameters();
-    } else if (settings.DetectorName == "bifrost") {
-      Geom->CaenCalibration.loadBifrostParameters();
-    }
-  }
-
-  if (Geom->CaenCalibration.getMaxPixel() != Geom->ESSGeom->max_pixel()) {
-    XTRACE(INIT, ALW, "Config pixels: %u, calib pixels: %u",
-           Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
-    LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
-        Geom->ESSGeom->max_pixel(), Geom->CaenCalibration.getMaxPixel());
-    throw std::runtime_error("Pixel mismatch");
-  }
+  XTRACE(INIT, ALW, "Loading calibration file %s", Settings.CalibFile.c_str());
+  Geom->CaenCDCalibration =
+      CDCalibration(settings.DetectorName, Settings.CalibFile);
+  Geom->CaenCDCalibration.parseCalibration();
 
   if (not Settings.DumpFilePrefix.empty()) {
     if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
-
-      DumpFile =
-          ReadoutFile::create(boost::filesystem::path(Settings.DumpFilePrefix)
-                                  .replace_extension(""));
+      DumpFile = ReadoutFile::create(
+        boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
     } else {
-      DumpFile =
-          ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
+      DumpFile = ReadoutFile::create(
+        Settings.DumpFilePrefix + "_" + timeString());
     }
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
-
-  Geom->CaenCalibration.Stats.ClampLow = &counters.ReadoutsClampLow;
-  Geom->CaenCalibration.Stats.ClampHigh = &counters.ReadoutsClampHigh;
-  Geom->Stats.FENErrors = &counters.FENErrors;
-  Geom->Stats.RingErrors = &counters.RingErrors;
-  Geom->Stats.TubeErrors = &counters.TubeErrors;
-  Geom->Stats.AmplitudeZero = &counters.AmplitudeZero;
-  Geom->Stats.OutsideTube = &counters.OutsideTube;
-  Geom->Stats.CalibrationErrors = &counters.CalibrationErrors;
 }
 
 CaenInstrument::~CaenInstrument() {}
@@ -111,7 +76,8 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
 
   uint32_t pixel = Geom->calcPixel(Data);
-  counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
+  // seems to be wrong
+  //counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }

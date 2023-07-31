@@ -46,7 +46,8 @@ public:
     NMX = 0x44,
     FREIA = 0x48,
     TREX = 0x50,
-    DREAM = 0x60
+    DREAM = 0x60,
+    MAGIC = 0x64
   };
 
   uint64_t NextSeqNum[MaxOutputQueues];

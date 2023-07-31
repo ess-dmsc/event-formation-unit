@@ -27,6 +27,10 @@ TEST_F(DreamGeometryTest, PixelOffsets) {
   ASSERT_EQ(geometry.getPixelOffset(Config::HR), 1122304);
 }
 
+TEST_F(DreamGeometryTest, PixelOffsetsError) {
+  ASSERT_EQ(geometry.getPixelOffset(Config::PA), -1);
+}
+
 TEST_F(DreamGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::BwEndCap;
   Readout.Unused = 6;
@@ -39,6 +43,12 @@ TEST_F(DreamGeometryTest, GetPixel) {
   Parms.Type = Config::ModuleType::HR;
   Parms.P2.Rotate = 0;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
+}
+
+TEST_F(DreamGeometryTest, GetPixelError) {
+  Parms.Type = Config::ModuleType::PA;
+  Readout.Unused = 6;
+  ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
 }
 
 int main(int argc, char **argv) {

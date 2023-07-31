@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/detector/EFUArgs.h>
+#include <common/detector/Detector.h>
 #include <map>
 #include <string>
 #include <vector>

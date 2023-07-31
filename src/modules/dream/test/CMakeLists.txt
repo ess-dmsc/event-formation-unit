@@ -13,6 +13,12 @@ set(SUMOGeometryTest_SRC
   SUMOGeometryTest.cpp)
 create_test_executable(SUMOGeometryTest)
 
+set(PADetectorTest_INC
+  ${DREAM_BASE_DIR}/geometry/PADetector.h)
+set(PADetectorTest_SRC
+  PADetectorTest.cpp)
+create_test_executable(PADetectorTest)
+
 
 set(DreamGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.h

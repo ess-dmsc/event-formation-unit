@@ -9,7 +9,6 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <modules/caen/Counters.h>
 #include <vector>
 
 namespace Caen {
@@ -35,9 +34,17 @@ public:
     int16_t AmpD;
   } __attribute__((__packed__));
 
+
+  struct Stats {
+    int64_t DataHeaders{0};
+    int64_t Readouts{0};
+    int64_t ReadoutsBadAmpl{0};
+    int64_t ErrorDataHeaders{0};
+  };
+
   static_assert(sizeof(CaenReadout) == 24, "Caen readout header length error");
 
-  DataParser(struct Counters &counters) : Stats(counters) {
+  DataParser() {
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
@@ -48,6 +55,6 @@ public:
   // To be iterated over in processing thread
   std::vector<struct CaenReadout> Result;
 
-  struct Counters &Stats;
+  struct Stats Stats;
 };
 } // namespace Caen

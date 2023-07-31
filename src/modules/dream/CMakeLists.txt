@@ -15,6 +15,7 @@ set(dream_common_inc
   geometry/MagicGeometry.h
   geometry/Cuboid.h
   geometry/Mantle.h
+  geometry/PADetector.h
   geometry/SUMO.h
   readout/DataParser.h
   readout/Readout.h

@@ -23,6 +23,9 @@ MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
   Args.printSettings();
   DetectorSettings = Args.getBaseSettings();
   DetectorSettings.DetectorName = instrument;
+  if (DetectorSettings.KafkaTopic.empty()) {
+    DetectorSettings.KafkaTopic = instrument + "_detector";
+  }
 
   graylog.AddLoghandlerForNetwork(
       instrument, Args.getLogFileName(), Args.getLogLevel(),

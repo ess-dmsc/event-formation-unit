@@ -16,15 +16,10 @@ class CspecGeometryTest : public TestBase {
 protected:
   Config CaenConfiguration;
   CspecGeometry *geom;
-  int64_t RingErrors{0};
-  int64_t FENErrors{0};
-  int64_t TubeErrors{0};
+
   void SetUp() override {
     geom = new CspecGeometry(CaenConfiguration);
     geom->NPos = 300;
-    geom->Stats.RingErrors = &RingErrors;
-    geom->Stats.FENErrors = &FENErrors;
-    geom->Stats.TubeErrors = &TubeErrors;
   }
   void TearDown() override {}
 };
@@ -90,24 +85,24 @@ TEST_F(CspecGeometryTest, Validate) {
 
   readout.RingId = 10;
   ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(RingErrors, 1);
-  ASSERT_EQ(FENErrors, 0);
-  ASSERT_EQ(TubeErrors, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
 
   readout.RingId = 0;
   readout.FENId = 20;
   ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(RingErrors, 1);
-  ASSERT_EQ(FENErrors, 1);
-  ASSERT_EQ(TubeErrors, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 1);
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
 
   readout.RingId = 0;
   readout.FENId = 0;
   readout.TubeId = 20;
   ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(RingErrors, 1);
-  ASSERT_EQ(FENErrors, 1);
-  ASSERT_EQ(TubeErrors, 1);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 1);
+  ASSERT_EQ(geom->Stats.GroupErrors, 1);
 }
 
 int main(int argc, char **argv) {

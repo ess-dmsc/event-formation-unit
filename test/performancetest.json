@@ -11,6 +11,7 @@
     {
       "Module": "freia",
       "Config": "./src/modules/freia/configs/freia.json",
+      "Calib": "",
       "Generator": "freia_udp_generated",
       "InitThrottle": 10,
       "KafkaTopic": "freia_detector"
@@ -18,6 +19,7 @@
     {
       "Module": "loki",
       "Config": "./src/modules/loki/configs/STFCTestII.json",
+      "Calib": "./src/modules/loki/configs/lokinullcalib.json",
       "Generator": "loki_udp_generated",
       "InitThrottle": 10,
       "KafkaTopic": "loki_detector"
@@ -25,6 +27,7 @@
     {
       "Module": "nmx",
       "Config": "./src/modules/nmx/configs/nmx.json",
+      "Calib": "",
       "Generator": "nmx_udp_generated",
       "InitThrottle": 10,
       "KafkaTopic": "nmx_detector"
@@ -32,6 +35,7 @@
     {
       "Module": "nmx",
       "Config": "./src/modules/nmx/configs/nmx_split.json",
+      "Calib": "",
       "Generator": "nmx_udp_generated_multihit",
       "InitThrottle": 10,
       "KafkaTopic": "nmx_detector"

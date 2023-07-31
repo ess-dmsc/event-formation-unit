@@ -25,12 +25,12 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
-  case Config::MagicB:
-    Pixel = magicb.getPixelId(Parms, Data);
+  case Config::PA:
+    Pixel = padetector.getPixelId(Parms, Data);
     break;
 
-  case Config::Mantle:
-    Pixel = mantle.getPixelId(Parms, Data);
+  case Config::FR:
+    Pixel = frdetector.getPixelId(Parms, Data);
     break;
 
   default:
@@ -52,18 +52,17 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
 int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
   int RetVal{-1};
   switch (Type) {
-  case Config::MagicB:
-    RetVal = 245760;
-    break;
-  case Config::Mantle:
+  case Config::FR:
     RetVal = 0;
+    break;
+  case Config::PA:
+    RetVal = 245760;
     break;
   default:
     XTRACE(DATA, WAR, "Module type not valid for MAGIC");
     break;
   }
   return RetVal;
-  ;
 }
 
 } // namespace Dream
