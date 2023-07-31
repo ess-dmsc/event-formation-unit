@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,8 +25,9 @@ MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration) {
 }
 
 uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int x = xCoord(Data.RingId, Data.TubeId, Data.AmpA, Data.AmpB);
-  int y = yCoord(Data.RingId, Data.AmpA, Data.AmpB);
+  int Ring = Data.FiberId / 2;
+  int x = xCoord(Ring, Data.Group, Data.AmpA, Data.AmpB);
+  int y = yCoord(Ring, Data.AmpA, Data.AmpB);
   uint32_t pixel = ESSGeom->pixel2D(x, y);
 
   XTRACE(DATA, DEB, "xcoord %d, ycoord %d, pixel %hu", x, y, pixel);
@@ -35,11 +36,12 @@ uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
 }
 
 bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Tube %u", Data.RingId, Data.FENId,
-         Data.TubeId);
+  int Ring = Data.FiberId / 2;
+  XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId,
+         Data.Group);
 
-  if (Data.RingId > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Data.RingId);
+  if (Ring > MaxRing) {
+    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
     Stats.RingErrors++;
     return false;
   }
@@ -61,7 +63,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
   if ((Ring == 2) or (Ring == 3)) {
     offset += NPos / 2;
   }
-  return offset + posAlongTube(AmpA, AmpB);
+  return offset + posAlongUnit(AmpA, AmpB);
 }
 
 // 0 is A, 1 is B
@@ -76,7 +78,7 @@ int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
   }
 }
 
-int MiraclesGeometry::posAlongTube(int AmpA, int AmpB) {
+int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
   int tubepos;
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");

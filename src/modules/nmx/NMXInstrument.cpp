@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -91,30 +91,30 @@ void NMXInstrument::processReadouts(void) {
     }
 
     XTRACE(DATA, DEB,
-           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.VMM, readout.Channel,
+           "readout: FiberId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    // Convert from physical rings to logical rings
-    int LRingId = readout.RingId / 2;
+    // Convert from fiberid to ringid
+    int Ring = readout.FiberId / 2;
     uint8_t HybridId = readout.VMM >> 1;
     ESSReadout::Hybrid &Hybrid =
-        Conf.getHybrid(LRingId, readout.FENId, HybridId);
+        Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, ALW,
-             "Hybrid for LRing %d, FEN %d, VMM %d not defined in config file",
-             LRingId, readout.FENId, HybridId);
+             "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
+             Ring, readout.FENId, HybridId);
       counters.HybridMappingErrors++;
       continue;
     }
 
     uint8_t AsicId = readout.VMM & 0x1;
-    uint16_t Offset = Conf.Offset[LRingId][readout.FENId][HybridId];
-    uint8_t Plane = Conf.Plane[LRingId][readout.FENId][HybridId];
-    uint8_t Panel = Conf.Panel[LRingId][readout.FENId][HybridId];
+    uint16_t Offset = Conf.Offset[Ring][readout.FENId][HybridId];
+    uint8_t Plane = Conf.Plane[Ring][readout.FENId][HybridId];
+    uint8_t Panel = Conf.Panel[Ring][readout.FENId][HybridId];
     bool ReversedChannels =
-        Conf.ReversedChannels[LRingId][readout.FENId][HybridId];
+        Conf.ReversedChannels[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
@@ -180,21 +180,21 @@ void NMXInstrument::checkConfigAndGeometry() {
   std::set<int> Coords[4][2];
   std::set<int> *CurrentCoordSet;
 
-  for (int RingId = 0; RingId <= Conf.MaxRing; RingId++) {
+  for (int Ring = 0; Ring <= Conf.MaxRing; Ring++) {
     for (int FENId = 0; FENId <= Conf.MaxFEN; FENId++) {
       for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++) {
-        ESSReadout::Hybrid h = Conf.getHybrid(RingId, FENId, HybridId);
+        ESSReadout::Hybrid h = Conf.getHybrid(Ring, FENId, HybridId);
         if (h.Initialised) {
-          int Panel = Conf.Panel[RingId][FENId][HybridId];
-          int Plane = Conf.Plane[RingId][FENId][HybridId];
+          int Panel = Conf.Panel[Ring][FENId][HybridId];
+          int Plane = Conf.Plane[Ring][FENId][HybridId];
           CurrentCoordSet = &Coords[Panel][Plane];
           for (int Asic = 0; Asic < 2; Asic++) {
-            XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", RingId, FENId,
+            XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", Ring, FENId,
                    HybridId);
             for (int channel = 0; channel < 64; channel++) {
-              int Offset = Conf.Offset[RingId][FENId][HybridId];
+              int Offset = Conf.Offset[Ring][FENId][HybridId];
               int ReversedChannels =
-                  Conf.ReversedChannels[RingId][FENId][HybridId];
+                  Conf.ReversedChannels[Ring][FENId][HybridId];
               int coord = NMXGeometryInstance.coord(channel, Asic, Offset,
                                                     ReversedChannels);
               if (CurrentCoordSet->count(coord)) {

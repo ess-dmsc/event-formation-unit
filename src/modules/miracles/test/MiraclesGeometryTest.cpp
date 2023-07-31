@@ -38,16 +38,16 @@ TEST_F(MiraclesGeometryTest, Corner) {
 TEST_F(MiraclesGeometryTest, PosAlongTube) {
   printf("A top\n");
   ASSERT_EQ(geom->tubeAorB(0, 1), TubeA); // 0 ia A
-  ASSERT_EQ(geom->posAlongTube(0, 1), 0); // tube A - top 'pixel'
+  ASSERT_EQ(geom->posAlongUnit(0, 1), 0); // tube A - top 'pixel'
   printf("A bottom\n");
   ASSERT_EQ(geom->tubeAorB(1, 1), TubeA);  // 0 ia A
-  ASSERT_EQ(geom->posAlongTube(1, 1), 63); // tube A - bottom 'pixel'
+  ASSERT_EQ(geom->posAlongUnit(1, 1), 63); // tube A - bottom 'pixel'
   printf("B bottom\n");
   EXPECT_EQ(geom->tubeAorB(101, 100), TubeB);  // 1 ia B
-  EXPECT_EQ(geom->posAlongTube(101, 100), 63); // tube B - bottom 'pixel'
+  EXPECT_EQ(geom->posAlongUnit(101, 100), 63); // tube B - bottom 'pixel'
   printf("B top\n");
   EXPECT_EQ(geom->tubeAorB(800, 1), TubeB); // 1 ia B
-  EXPECT_EQ(geom->posAlongTube(800, 1), 0); // tube B - top 'pixel'
+  EXPECT_EQ(geom->posAlongUnit(800, 1), 0); // tube B - top 'pixel'
 }
 
 TEST_F(MiraclesGeometryTest, ValidateData) {

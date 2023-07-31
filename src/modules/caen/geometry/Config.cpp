@@ -74,12 +74,12 @@ void Config::parseConfig() {
     XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
 
     try {
-      MaxTube = root["MaxTube"].get<unsigned int>();
+      MaxGroup = root["MaxGroup"].get<unsigned int>();
     } catch (...) {
       // Use default value
     }
-    LOG(INIT, Sev::Info, "MaxTube: {}", MaxTube);
-    XTRACE(INIT, DEB, "MaxTube: %u", MaxTube);
+    LOG(INIT, Sev::Info, "MaxGroup: {}", MaxGroup);
+    XTRACE(INIT, DEB, "MaxGroup: %u", MaxGroup);
 
     if (InstrumentName == "loki") {
       auto PanelConfig = root["PanelConfig"];
@@ -87,25 +87,25 @@ void Config::parseConfig() {
         XTRACE(INIT, DEB, "Loading panel");
         auto Bank = Mapping["Bank"].get<unsigned int>();
         bool Vertical = Mapping["Vertical"].get<bool>();
-        auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
-        auto TubesN = Mapping["TubesN"].get<unsigned int>();
-        auto StrawOffset = Mapping["StrawOffset"].get<unsigned int>();
+        auto GroupsZ = Mapping["GroupsZ"].get<unsigned int>();
+        auto GroupsN = Mapping["GroupsN"].get<unsigned int>();
+        auto UnitOffset = Mapping["StrawOffset"].get<unsigned int>();
 
-        NTubesTotal += TubesZ * TubesN;
-        LOG(INIT, Sev::Info, "NTubesTotal: {}", NTubesTotal);
+        NGroupsTotal += GroupsZ * GroupsN;
+        LOG(INIT, Sev::Info, "NGroupsTotal: {}", NGroupsTotal);
 
         LOG(INIT, Sev::Info,
-            "JSON config - Detector {}, Bank {}, Vertical {}, TubesZ {}, "
-            "TubesN "
-            "{}, StrawOffset {}",
-            InstrumentName, Bank, Vertical, TubesZ, TubesN, StrawOffset);
+            "JSON config - Detector {}, Bank {}, Vertical {}, GroupsZ {}, "
+            "GroupsN "
+            "{}, UnitOffset {}",
+            InstrumentName, Bank, Vertical, GroupsZ, GroupsN, UnitOffset);
 
         XTRACE(INIT, DEB,
-               "JSON config - TubesZ %u, TubesN %u "
-               ", StrawOffset %u",
-               TubesZ, TubesN, StrawOffset);
+               "JSON config - GroupsZ %u, GroupsN %u "
+               ", UnitOffset %u",
+               GroupsZ, GroupsN, UnitOffset);
 
-        PanelGeometry Temp(TubesZ, TubesN, StrawOffset);
+        PanelGeometry Temp(GroupsZ, GroupsN, UnitOffset);
         Panels.push_back(Temp);
       }
     }

@@ -142,7 +142,7 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
 
   ASSERT_EQ(counters.TTLMonStats.Readouts, 7);
-  ASSERT_EQ(counters.TTLMonStats.ErrorRing, 1);
+  ASSERT_EQ(counters.TTLMonStats.ErrorFiber, 1);
   ASSERT_EQ(counters.TTLMonStats.ErrorFEN, 1);
   ASSERT_EQ(counters.TTLMonStats.ErrorADC, 1);
 

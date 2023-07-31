@@ -27,15 +27,12 @@ public:
   bool validateData(DataParser::CaenReadout &Data);
 
   /// \brief return the global x-offset for the given identifiers
-  int xOffset(int Ring, int Tube);
-
-  //  /// \brief return the global y-offset for the given identifiers
-  //  int yOffset(int Tube);
+  int xOffset(int Ring, int Group);
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int AmpA, int AmpB) { return posAlongTube(AmpA, AmpB); }
+  int yCoord(int AmpA, int AmpB) { return posAlongUnit(AmpA, AmpB); }
 
-  /// \brief return the position along the tube
-  int posAlongTube(int AmpA, int AmpB);
+  /// \brief return the position along the unit (tube for CSPEC)
+  int posAlongUnit(int AmpA, int AmpB);
 };
 } // namespace Caen

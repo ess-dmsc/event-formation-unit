@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,7 +17,7 @@ namespace Trex {
 
 class DataParser {
 public:
-  const unsigned int MaxRingId{11};
+  const unsigned int MaxFiberId{23};
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
@@ -26,7 +26,7 @@ public:
     uint32_t TimeHigh;
     uint32_t TimeLow;
     uint8_t unused;
-    uint8_t TubeId;
+    uint8_t Group;
     uint16_t DataSeqNum;
 
   } __attribute__((__packed__));
@@ -43,7 +43,7 @@ public:
 
   //
   struct ParsedData {
-    uint8_t RingId;
+    uint8_t FiberId;
     uint8_t FENId;
     TREXReadout Data;
   };

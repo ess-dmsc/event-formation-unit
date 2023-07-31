@@ -81,8 +81,10 @@ int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-  app.add_option("-r, --rings", Settings.NRings,
-                 "Number of Rings used in data header");
+  app.add_option("-r, --rings", Settings.NFibers,
+                 "Number of Fibers used in data header (obsolete)");
+  app.add_option("-f, --fibers", Settings.NFibers,
+                "Number of Fibers used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
                  "Delay (ticks) between events");
   app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,

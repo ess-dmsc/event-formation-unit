@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -64,7 +64,7 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   // VMM3Parser stats
   Stats.create("readouts.count", Counters.VMMStats.Readouts);
-  Stats.create("readouts.error_ring", Counters.VMMStats.ErrorRing);
+  Stats.create("readouts.error_fiber", Counters.VMMStats.ErrorFiber);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
   Stats.create("readouts.error_datalen", Counters.VMMStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.VMMStats.ErrorTimeFrac);

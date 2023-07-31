@@ -193,7 +193,7 @@ TEST_F(FreiaInstrumentTest, Constructor) {
   Settings.CalibFile = CalibFile;
   FreiaInstrument Freia(counters, Settings, serializer);
   counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
 }
 
 /// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
@@ -216,7 +216,7 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
   ASSERT_EQ(counters.RingMappingErrors, 0);
@@ -227,7 +227,7 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   ASSERT_EQ(counters.RingMappingErrors, 1);
   ASSERT_EQ(counters.FENMappingErrors, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 0);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
 }
 
 TEST_F(FreiaInstrumentTest, MaxRingMaxFENErrors) {
@@ -235,7 +235,7 @@ TEST_F(FreiaInstrumentTest, MaxRingMaxFENErrors) {
   auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
   ASSERT_EQ(Res, 0);
   counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorRing, 1);
+  ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
 }
 

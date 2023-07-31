@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -63,14 +63,14 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 
     XTRACE(
         DATA, DEB,
-        "readout: PRingId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
-        readout.RingId, readout.FENId, readout.Pos, readout.Channel,
+        "readout: FiberId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
+        readout.FiberId, readout.FENId, readout.Pos, readout.Channel,
         readout.ADC, readout.TimeLow);
 
-    int LRingId = readout.RingId / 2;
-    if (LRingId != Conf.Parms.MonitorRing) {
+    int Ring = readout.FiberId / 2;
+    if (Ring != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid lring %u (expect %u) for monitor readout",
-             LRingId, Conf.Parms.MonitorRing);
+             Ring, Conf.Parms.MonitorRing);
       counters.RingCfgErrors++;
       continue;
     }
@@ -134,7 +134,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
 //   CurrentReadout.TDC = Data.TDC;
 //   CurrentReadout.VMM = Data.VMM;
 //   CurrentReadout.Channel = Data.Channel;
-//   CurrentReadout.PRingId = Data.PRingId;
+//   CurrentReadout.FiberId = Data.FiberId;
 //   CurrentReadout.FENId = Data.FENId;
 //
 //   DumpFile->push(CurrentReadout);

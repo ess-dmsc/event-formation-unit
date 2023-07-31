@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,9 +36,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
 
-    ///\todo clarify distinction between logical and physical rings
-    // for now just divide by two
-    DataHdrPtr->RingId = DataHdrPtr->RingId / 2;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -47,17 +44,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    ///\todo remove ad hoc conters sometime
-    HeaderCounters[DataHdrPtr->RingId & 0xf][DataHdrPtr->FENId & 0xf]++;
-
-    if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", DataHdrPtr->RingId,
+    if (DataHdrPtr->FiberId > MaxFiberId or DataHdrPtr->FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)", DataHdrPtr->FiberId,
              DataHdrPtr->FENId);
       Stats.ErrorDataHeaders++;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", DataHdrPtr->RingId,
+    XTRACE(DATA, DEB, "Fiber %u, FEN %u, Length %u", DataHdrPtr->FiberId,
            DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.DataHeaders++;
 
@@ -69,16 +63,16 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     ParsedData CurrentDataSection;
-    CurrentDataSection.RingId = DataHdrPtr->RingId;
+    CurrentDataSection.FiberId = DataHdrPtr->FiberId;
     CurrentDataSection.FENId = DataHdrPtr->FENId;
 
     auto Data = (TREXReadout *)((char *)DataHdrPtr + DataHeaderSize);
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+           "fiber %u, fen %u, t(%11u,%11u) SeqNo %6u Group %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           DataHdrPtr->RingId, DataHdrPtr->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           DataHdrPtr->FiberId, DataHdrPtr->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB, Data->AmpC,
            Data->AmpD);
 
     CurrentDataSection.Data = *Data;

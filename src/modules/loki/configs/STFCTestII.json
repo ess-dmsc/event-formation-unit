@@ -7,9 +7,9 @@
   "MaxPulseTimeNS" : 357142857,
 
   "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :    0 },
-    { "Bank" : 1, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :  448 },
-    { "Bank" : 2, "Vertical" :  false,  "TubesZ" : 4, "TubesN" : 16, "StrawOffset" :  896 }
+    { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 16, "StrawOffset" :    0 },
+    { "Bank" : 1, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 16, "StrawOffset" :  448 },
+    { "Bank" : 2, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 16, "StrawOffset" :  896 }
   ]
 
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,18 +40,18 @@ void LokiReadoutGenerator::generateData() {
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
 
-    ReadoutData->RingId = (Readout / 10) % Settings.NRings;
+    ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;
     ReadoutData->DataLength = LokiDataSize;
 
-    ReadoutData->TubeId = (Readout / 10) % 8;
+    ReadoutData->Group = (Readout / 10) % 8;
     ReadoutData->AmpA = Readout;
     ReadoutData->AmpB = 1;
     ReadoutData->AmpC = 1;
     ReadoutData->AmpD = 100;
-    // printf("Readout %d: Ring %u, FEN %u, Tube %u, A %u\n", Readout,
-    //        ReadoutData->RingId,
-    //        ReadoutData->FENId, ReadoutData->TubeId, ReadoutData->AmpA);
+    // printf("Readout %d: Fiber %u, FEN %u, Group %u, A %u\n", Readout,
+    //        ReadoutData->FiberId,
+    //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
     ///
 

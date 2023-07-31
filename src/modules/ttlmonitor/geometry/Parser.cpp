@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -47,10 +47,10 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   for (unsigned int i = 0; i < Size / DataLength; i++) {
     Stats.Readouts++;
     Parser::Data Readout = DataPtr[i];
-    if (Readout.RingId > MaxRingId) {
-      XTRACE(DATA, WAR, "Invalid RingId %d (Max is %d)", Readout.RingId,
-             MaxRingId);
-      Stats.ErrorRing++;
+    if (Readout.FiberId > MaxFiberId) {
+      XTRACE(DATA, WAR, "Invalid FiberId %d (Max is %d)", Readout.FiberId,
+             MaxFiberId);
+      Stats.ErrorFiber++;
       continue;
     }
 

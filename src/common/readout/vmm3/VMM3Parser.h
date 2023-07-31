@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ namespace ESSReadout {
 
 struct VMM3ParserStats {
   int64_t ErrorSize{0};
-  int64_t ErrorRing{0};
+  int64_t ErrorFiber{0};
   int64_t ErrorFEN{0};
   int64_t ErrorDataLength{0};
   int64_t ErrorTimeFrac{0};
@@ -35,7 +35,7 @@ struct VMM3ParserStats {
 
 class VMM3Parser {
 public:
-  const unsigned int MaxRingId{23}; // Physical rings
+  const unsigned int MaxFiberId{23};
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
@@ -45,7 +45,7 @@ public:
 // the two fields into one.
 #define VMM3DATASIZE 20
   struct VMM3Data {
-    uint8_t RingId;
+    uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
     uint32_t TimeHigh;

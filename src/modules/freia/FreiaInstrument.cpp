@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -100,14 +100,12 @@ void FreiaInstrument::processReadouts(void) {
     }
 
     XTRACE(DATA, INF,
-           "readout: Phys RingId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
-           readout.RingId, readout.FENId, readout.VMM, readout.Channel,
+           "readout: FiberId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
+           readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    // counters.RingRx[readout.RingId]++;
-
     // Convert from physical rings to logical rings
-    uint8_t Ring = readout.RingId / 2;
+    uint8_t Ring = readout.FiberId / 2;
 
     // Check for configuration mismatch
     if (Ring > VMM3Config::MaxRing) {

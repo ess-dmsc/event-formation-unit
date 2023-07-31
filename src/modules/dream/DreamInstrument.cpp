@@ -74,26 +74,27 @@ void DreamInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : DreamParser.Result) {
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.RingId, Data.FENId);
+    int Ring = Data.FiberId / 2;
+    XTRACE(DATA, DEB, "Ring %u, FEN %u", Ring, Data.FENId);
 
-    if (Data.RingId > DreamConfiguration.MaxRing) {
-      XTRACE(DATA, WAR, "Invalid RING: %u", Data.RingId);
-      counters.RingErrors++;
+    if (Ring > DreamConfiguration.MaxRing) {
+      XTRACE(DATA, WAR, "Invalid RING: %u", Ring);
+      counters.RingMappingErrors++;
       continue;
     }
 
     if (Data.FENId > DreamConfiguration.MaxFEN) {
       XTRACE(DATA, WAR, "Invalid FEN: %u", Data.FENId);
-      counters.FENErrors++;
+      counters.FENMappingErrors++;
       continue;
     }
 
     Config::ModuleParms &Parms =
-        DreamConfiguration.RMConfig[Data.RingId][Data.FENId];
+        DreamConfiguration.RMConfig[Ring][Data.FENId];
 
     if (not Parms.Initialised) {
       XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
-             Data.RingId, Data.FENId);
+             Ring, Data.FENId);
       counters.ConfigErrors++;
       continue;
     }

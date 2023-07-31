@@ -1,4 +1,4 @@
-// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -35,10 +35,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     auto Data = (CaenReadout *)((char *)DataPtr);
 
-    ///\todo clarify distinction between logical and physical rings
-    // for now just divide by two
-    Data->RingId = Data->RingId / 2;
-
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              Data->DataLength, BytesLeft);
@@ -46,14 +42,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    if (Data->RingId > MaxRingId or Data->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)", Data->RingId,
+    if (Data->FiberId > MaxFiberId or Data->FENId > MaxFENId) {
+      XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)", Data->FiberId,
              Data->FENId);
       Stats.ErrorDataHeaders++;
       return ParsedReadouts;
     }
 
-    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u", Data->RingId, Data->FENId,
+    XTRACE(DATA, DEB, "Fiber %u, FEN %u, Length %u", Data->FiberId, Data->FENId,
            Data->DataLength);
     Stats.DataHeaders++;
 
@@ -65,11 +61,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     XTRACE(DATA, DEB,
-           "ring %u, fen %u, t(%11u,%11u) SeqNo %6u TubeId %3u , A "
+           "fiber %u, fen %u, t(%11u,%11u) SeqNo %6u Group %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           Data->RingId, Data->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->DataSeqNum, Data->TubeId, Data->AmpA, Data->AmpB, Data->AmpC,
+           Data->FiberId, Data->FENId, Data->TimeHigh, Data->TimeLow,
+           Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB, Data->AmpC,
            Data->AmpD);
 
     ParsedReadouts++;

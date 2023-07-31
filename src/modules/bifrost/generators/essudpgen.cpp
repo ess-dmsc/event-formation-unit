@@ -65,8 +65,7 @@ int main(int argc, char *argv[]) {
          (SentReadouts < Config.TxReadouts)) {
 
     // FEN is always 0
-    // Ring is fiber
-    uint8_t Ring = DatReadout.fiber;
+    uint8_t Fiber = DatReadout.fiber;
     uint8_t FEN = 0;
     memset(&UdpReadout, 0, sizeof(UdpReadout));
     // UdpReadout.timehi = DatReadout.timehi;
@@ -77,7 +76,7 @@ int main(int argc, char *argv[]) {
     UdpReadout.ampl_b = DatReadout.ampl_b;
     // add the readout data (skip first four bytes of struct)
     if (SentReadouts >= Config.SkipReadouts) {
-      gen.addReadout((uint8_t *)&UdpReadout, Ring, FEN);
+      gen.addReadout((uint8_t *)&UdpReadout, Fiber, FEN);
     }
     SentReadouts++;
 
