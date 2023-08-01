@@ -33,6 +33,7 @@ protected:
 
 
 
+    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.LokiConf.Parms.TotalGroups;
     // Make nullcalibration
     for (int i = 0; i < geom->Conf.LokiConf.Parms.TotalGroups; i++) {
       geom->CaenCDCalibration.Intervals.push_back({{0.0,0.143}, {0.144,0.286},

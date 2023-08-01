@@ -42,7 +42,7 @@ std::string LokiConfigJson = R"(
     ],
 
     "Config" : [
-      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+      { "Ring" : 0, "Bank" : 0, "FENs" : 4, "FENOffset" :  0}
     ]
   }
 )";
@@ -203,7 +203,6 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
-
 std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
 
 /// | ESS Header    |
@@ -245,7 +244,6 @@ std::vector<uint8_t> TestPacket2{
     0x01, 0x01, 0x02, 0x01,
     0x03, 0x01, 0x04, 0x01,
 
-
     // Data Header 3
     // FEN 4 is invalid -> FENErrors++ (for loki only so far)
     0x01, 0x04, 0x18, 0x00, // ring 1, fen 4, size 24 bytes
@@ -255,7 +253,6 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x00, 0x00, 0x00,
     0x01, 0x02, 0x02, 0x02,
     0x03, 0x02, 0x04, 0x02,
-
 
     // Data Header 4 
     0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
@@ -364,7 +361,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 2);
+  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);

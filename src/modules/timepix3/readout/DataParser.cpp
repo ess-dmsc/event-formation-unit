@@ -11,8 +11,8 @@
 #include <timepix3/readout/DataParser.h>
 #include <iostream>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
