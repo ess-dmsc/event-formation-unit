@@ -11,8 +11,8 @@
 #include <common/reduction/Hit2DVector.h>
 
 /// \class Cluster2D Cluster2D.h
-/// \brief A container of hits, aware of its plane, bounds and weight.
-///        Hits can be added, but not removed. Coordinates and timestamps
+/// \brief A container of 2D hits, bounds and weight.
+///        Hit2Ds can be added, but not removed. Coordinates and timestamps
 ///        are treated as having an uncertainty of 1 when evaluating dimensions,
 ///        thus including the endpoints.
 ///
