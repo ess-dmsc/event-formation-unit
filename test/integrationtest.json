@@ -3,7 +3,7 @@
   [
     {
       "Module": "loki",
-      "Config": "./src/modules/loki/configs/STFCTestII.json",
+      "Config": "./src/modules/loki/configs/LokiFull.json",
       "Calib": "./src/modules/loki/configs/lokinullcalib.json",
       "KafkaTopic": "loki_detector",
       "Generator": "loki_udp_generated",

@@ -2,6 +2,8 @@
 
 # pixel value generator based on masks for forwardandbackward endcaps
 
+debug = False
+
 ncass = {6:10, 5:8, 4:6, 3:4}
 sumo_offsets = {6:0, 5:20, 4:36, 3:48}
 allwires = list(range(16))
@@ -36,6 +38,9 @@ def endcap(sector, sumo, cassette, counter,  wire, strip, nsectors, width, pixel
     msk_wir = set(wire)
     msk_str = set(strip)
 
+    if debug:
+        print('sector sumo cassette counter wire strip pixel')
+
     i = pixel_offset
     mask = []
     for strp in range(16):
@@ -48,12 +53,14 @@ def endcap(sector, sumo, cassette, counter,  wire, strip, nsectors, width, pixel
                             pixel = endcap_pixel(sec, sum, cas, ctr, wir, strp, width, pixel_offset)
                             assert pixel == i
                             if filter(msk_sec, msk_sum, msk_cas, msk_ctr, msk_wir, msk_str, sec, sum, cas, ctr, wir, strp, pixel):
+                                if debug:
+                                    print(f'{sec:6}{sum:5}{cas:8}{ctr:8}{wir:5}{strp:6}{pixel:7}')
                                 mask.append(pixel)
     return mask
 
 
 def test(det, sec, sum, cas, ctr, w, s):
-    print(f'{"-"*60}\n{det}\nsector {sec}, sumo {sum}, cassette {cas} counter {ctr}, strip {s}, wires {w}\n{"-"*60}')
+    print(f'{"-"*60}\n{det}\nsector {sec}, sumo {sum}, cassette {cas} counter {ctr}\nstrips {s}, wires {w}\n{"-"*60}')
     if det == 'fwendcap':
         res = endcap(sec, sum, cas, ctr, w, s, 5, 280, 0)
     elif det == 'bwendcap':
@@ -63,6 +70,7 @@ def test(det, sec, sum, cas, ctr, w, s):
     print(f'pixels in mask {len(res)}')
     print(res[:5], '...', res[-5:])
 
-
+debug = True
 test('bwendcap', [0], [6], [4], [1], allwires, [5])
 test('fwendcap', [0], [6], [0], [0], allwires, [0])
+test('fwendcap', [0], [6], [0], [0], allwires, [0,1,2])
