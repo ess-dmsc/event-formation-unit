@@ -1,23 +1,23 @@
 // Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
-/// \file HierarchicalClusterer.cpp
-/// \brief HierarchicalClusterer class implementation
+/// \file Hierarchical2DClusterer.cpp
+/// \brief Hierarchical2DClusterer class implementation
 ///
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/reduction/clustering/HierarchicalClusterer.h>
+#include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <set>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-HierarchicalClusterer::HierarchicalClusterer(uint64_t max_time_gap,
+Hierarchical2DClusterer::Hierarchical2DClusterer(uint64_t max_time_gap,
                                              uint16_t max_coord_gap)
     : Abstract2DClusterer(), max_time_gap_(max_time_gap),
       max_coord_gap_(max_coord_gap) {}
 
-void HierarchicalClusterer::insert(const Hit2D &hit) {
+void Hierarchical2DClusterer::insert(const Hit2D &hit) {
   /// Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
@@ -28,14 +28,14 @@ void HierarchicalClusterer::insert(const Hit2D &hit) {
   current_time_cluster_.emplace_back(hit);
 }
 
-void HierarchicalClusterer::cluster(const Hit2DVector &hits) {
+void Hierarchical2DClusterer::cluster(const Hit2DVector &hits) {
   /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
     insert(hit);
   }
 }
 
-void HierarchicalClusterer::flush() {
+void Hierarchical2DClusterer::flush() {
   XTRACE(EVENT, DEB, "Flushing clusterer");
   if (current_time_cluster_.empty()) {
     return;
@@ -44,7 +44,7 @@ void HierarchicalClusterer::flush() {
   current_time_cluster_.clear();
 }
 
-void HierarchicalClusterer::cluster_by_x() {
+void Hierarchical2DClusterer::cluster_by_x() {
   uint clusterSize = current_time_cluster_.size();
   std::vector<bool> visited(clusterSize, false); // keep track of visited points
 
@@ -87,7 +87,7 @@ void HierarchicalClusterer::cluster_by_x() {
   }
 }
 
-void HierarchicalClusterer::stash_cluster(Hit2DVector &xz_cluster) {
+void Hierarchical2DClusterer::stash_cluster(Hit2DVector &xz_cluster) {
   Cluster2D cluster;
   for (const auto &hit : xz_cluster) {
     cluster.insert(hit);
@@ -95,15 +95,15 @@ void HierarchicalClusterer::stash_cluster(Hit2DVector &xz_cluster) {
   Abstract2DClusterer::stash_cluster(cluster);
 }
 
-std::string HierarchicalClusterer::config(const std::string &prepend) const {
+std::string Hierarchical2DClusterer::config(const std::string &prepend) const {
   std::stringstream ss;
-  ss << "HierarchicalClusterer:\n";
+  ss << "Hierarchical2DClusterer:\n";
   ss << prepend << fmt::format("max_time_gap={}\n", max_time_gap_);
   ss << prepend << fmt::format("max_coord_gap={}\n", max_coord_gap_);
   return ss.str();
 }
 
-std::string HierarchicalClusterer::status(const std::string &prepend,
+std::string Hierarchical2DClusterer::status(const std::string &prepend,
                                           bool verbose) const {
   std::stringstream ss;
   ss << Abstract2DClusterer::status(prepend, verbose);
