@@ -13,6 +13,8 @@ Running the EFU
 ## Event formation processing primitives
 [Definitions and assumptions](../src/common/reduction/primitives.md)
 
+[Reduction](../src/common/reduction/reduction.md)
+
 [Clustering](../src/common/reduction/clustering/clusterer.md)
 
 [Matching](../src/common/reduction/matching/matcher.md)

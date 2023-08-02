@@ -77,7 +77,13 @@ The equivalent of AbstractClusterer for systems with joint X and Y readouts, suc
 
 The Hierarchical2DClusterer inherits from Abstract2DClusterer, so it applicable to `Hit2D` objects. The hierarchical aspect is that it clusters first in time and then in space. This is only possible with the `Hit2D` objects where coincidence matching isn't an issue, and we know the location of each hit in both planes.
 
-### Assumptions
+## Parameters
+  - uint64_t max_time_gap
+  - uint16_t max_coord_gap
+
+  Both the maximum time gap and maximum coordinate gap are passed into the constructor for the Hierarchical2DClusterer. max_time_gap defines the maximum time between the latest Hit2D in the current time cluster and the next to be added, any greater a gap than this finalises the current time cluster and starts a new one. The max_coord_gap similarly determines the maximum distance between two Hit2D objects in euclidian distance to be included in the same space cluster.
+
+## Assumptions
 * Events, whether inserted individually or in bulk, must come in chronological order. The calling pipeline can ensure this by observing maximum latency guarantees and only feeding `Hit2D` objects into the clusterer for which we can be sure to have all antecedent events accounted for. If this guarantee is not upheld, then the following behavior cannot be relied on. In the case of readouts at the end of a packet where readouts at the start of the next packet may belong in the same `Event`, this assumption is not upheld, and we lose some events this way or count some events twice. This number is low enough to be in acceptable bounds.
 * Hits are accumulated into a tentative cluster until such a cluster is finally processed and released onto the "out" queue.
 * Hit insertion can trigger clustering. Since the chronological guarantee is assumed, any hit that has a sufficient time-gap from the previous hit will cause the tentative cluster to be
