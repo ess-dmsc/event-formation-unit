@@ -14,7 +14,7 @@
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Hit2DVector.h>
-#include <common/reduction/clustering/HierarchicalClusterer.h>
+#include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <readout/DataParser.h>
 #include <timepix3/Counters.h>
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
@@ -66,7 +66,7 @@ public:
   DataParser Timepix3Parser{counters};
   Geometry *Geom;
   EV44Serializer *Serializer;
-  HierarchicalClusterer *Clusterer;
+  Hierarchical2DClusterer *Clusterer;
   Hit2DVector AllHitsVector;
 };
 

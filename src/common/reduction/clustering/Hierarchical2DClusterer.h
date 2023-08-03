@@ -1,8 +1,8 @@
 // Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
-/// \file HierarchicalClusterer.h
-/// \brief HierarchicalClusterer class definition. Clusters 2D hits in time and
+/// \file Hierarchical2DClusterer.h
+/// \brief Hierarchical2DClusterer class definition. Clusters 2D hits in time and
 /// then in space.
 ///
 //===----------------------------------------------------------------------===//
@@ -14,25 +14,25 @@
 
 /// \todo update documentation for 2D version
 
-/// \class HierarchicalClusterer HierarchicalClusterer.h
+/// \class Hierarchical2DClusterer Hierarchical2DClusterer.h
 /// \brief Clusterer for 2D hits in time, and then space using a euclidian
 /// distance measure
 ///         2D hits differ from standard hits in that we already know both the x
 ///         and y location of the hit
 
-class HierarchicalClusterer : public Abstract2DClusterer {
+class Hierarchical2DClusterer : public Abstract2DClusterer {
 public:
-  /// \brief HierarchicalClusterer constructor
+  /// \brief Hierarchical2DClusterer constructor
   /// \param max_time_gap maximum difference in time between hits such that
   ///        they would be considered part of the same cluster
   /// \param max_coord_gap maximum difference in coordinates between hits such
   ///        that they would be considered part of the same cluster
-  HierarchicalClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
+  Hierarchical2DClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
   /// \brief insert new hit and perform clustering
   /// \param hit to be added to cluster. Hits must be chronological between
   ///         subsequent calls. It may be more efficient to use:
-  /// \sa HierarchicalClusterer::cluster
+  /// \sa Hierarchical2DClusterer::cluster
   void insert(const Hit2D &hit) override;
 
   /// \brief insert new hits and perform clustering
@@ -44,10 +44,10 @@ public:
   /// \brief complete clustering for any remaining hits
   void flush() override;
 
-  /// \brief print configuration of HierarchicalClusterer
+  /// \brief print configuration of Hierarchical2DClusterer
   std::string config(const std::string &prepend) const override;
 
-  /// \brief print current status of HierarchicalClusterer
+  /// \brief print current status of Hierarchical2DClusterer
   std::string status(const std::string &prepend, bool verbose) const override;
 
 private:

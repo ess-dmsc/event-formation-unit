@@ -8,7 +8,7 @@ include_directories(${ESS_MODULE_DIR})
 set(clustering_obj_SRC
 AbstractClusterer.cpp
 Abstract2DClusterer.cpp
-HierarchicalClusterer.cpp
+Hierarchical2DClusterer.cpp
   GapClusterer.cpp
   GapClusterer2D.cpp
 )
@@ -16,7 +16,7 @@ HierarchicalClusterer.cpp
 set(clustering_obj_INC
 AbstractClusterer.h
 Abstract2DClusterer.h
-HierarchicalClusterer.h
+Hierarchical2DClusterer.h
   GapClusterer.h
   GapClusterer2D.h
 )
