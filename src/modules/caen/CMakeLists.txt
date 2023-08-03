@@ -1,8 +1,15 @@
-# Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
 add_subdirectory(generators)
 include_directories(.)
+
+get_filename_component(LOKI_CONFIG "${ESS_MODULE_DIR}/loki/configs/LokiFull.json" ABSOLUTE)
+get_filename_component(LOKI_CALIB "${ESS_MODULE_DIR}/loki/configs/lokinullcalib.json" ABSOLUTE)
+get_filename_component(BIFROST_CONFIG "${ESS_MODULE_DIR}/bifrost/configs/bifrost.json" ABSOLUTE)
+get_filename_component(BIFROST_CALIB "${ESS_MODULE_DIR}/bifrost/configs/bifrostnullcalib.json" ABSOLUTE)
+get_filename_component(MIRACLES_CONFIG "${ESS_MODULE_DIR}/miracles/configs/miracles.json" ABSOLUTE)
+get_filename_component(MIRACLES_CALIB "${ESS_MODULE_DIR}/miracles/configs/miraclesnullcalib.json" ABSOLUTE)
 
 #=============================================================================
 # caen detector module and base test
@@ -56,6 +63,10 @@ set(CaenInstrumentTest_SRC
   test/CaenInstrumentTest.cpp
 )
 create_test_executable(CaenInstrumentTest)
+target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG}")
+target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CALIB="${LOKI_CALIB}")
+target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CONFIG="${BIFROST_CONFIG}")
+target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CALIB="${BIFROST_CALIB}")
 
 set(CaenBaseTest_INC
   ${caen_common_inc}
@@ -65,3 +76,9 @@ set(CaenBaseTest_SRC
   test/CaenBaseTest.cpp
 )
 create_test_executable(CaenBaseTest)
+target_compile_definitions(CaenBaseTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG}")
+target_compile_definitions(CaenBaseTest PRIVATE LOKI_CALIB="${LOKI_CALIB}")
+target_compile_definitions(CaenBaseTest PRIVATE BIFROST_CONFIG="${BIFROST_CONFIG}")
+target_compile_definitions(CaenBaseTest PRIVATE BIFROST_CALIB="${BIFROST_CALIB}")
+target_compile_definitions(CaenBaseTest PRIVATE MIRACLES_CONFIG="${MIRACLES_CONFIG}")
+target_compile_definitions(CaenBaseTest PRIVATE MIRACLES_CALIB="${MIRACLES_CALIB}")
