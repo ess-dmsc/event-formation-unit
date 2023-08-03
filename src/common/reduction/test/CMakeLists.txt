@@ -8,6 +8,11 @@ set(HitVectorTest_SRC
   )
 create_test_executable(HitVectorTest)
 
+set(Hit2DVectorTest_SRC
+  Hit2DVectorTest.cpp
+  )
+create_test_executable(Hit2DVectorTest)
+
 set(ClusterTest_SRC
   ClusterTest.cpp
   )
