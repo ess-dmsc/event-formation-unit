@@ -81,6 +81,8 @@ public:
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
     uint32_t MaxTOFNS{800000000};
 
+    int ConfiguredBanks{0};
+    int ConfiguredRings{0};
     int GroupsZ{0};
     int TotalGroups{0};
     static constexpr int NumBanks{9};

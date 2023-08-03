@@ -8,54 +8,48 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
-
-// Good configuration file
-auto ValidConfig = R"(
-  {
-    "Detector": "loki",
-
-    "Resolution" : 512,
-    "GroupsZ" : 4,
-
-    "ReadoutConstDelayNS" : 0,
-    "MaxPulseTimeNS" : 357142855,
-    "MaxTOFNS" : 1000000000,
-
-    "Banks" : [
-       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0},
-       {"Bank" : 1, "ID" : "bank1", "GroupsN" : 16, "YOffset" : 1568},
-       {"Bank" : 2, "ID" : "bank2", "GroupsN" : 12, "YOffset" : 2016},
-       {"Bank" : 3, "ID" : "bank3", "GroupsN" : 16, "YOffset" : 2352},
-       {"Bank" : 4, "ID" : "bank4", "GroupsN" : 12, "YOffset" : 2800},
-       {"Bank" : 5, "ID" : "bank5", "GroupsN" : 28, "YOffset" : 3136},
-       {"Bank" : 6, "ID" : "bank6", "GroupsN" : 32, "YOffset" : 3920},
-       {"Bank" : 7, "ID" : "bank7", "GroupsN" : 20, "YOffset" : 4816},
-       {"Bank" : 8, "ID" : "bank8", "GroupsN" : 32, "YOffset" : 5376}
-    ],
-
-    "Config" : [
-      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0},
-      { "Ring" : 1, "Bank" : 0, "FENs" : 12, "FENOffset" : 16},
-      { "Ring" : 2, "Bank" : 1, "FENs" :  8, "FENOffset" :  0},
-      { "Ring" : 3, "Bank" : 2, "FENs" :  6, "FENOffset" :  0},
-      { "Ring" : 4, "Bank" : 3, "FENs" :  8, "FENOffset" :  0},
-      { "Ring" : 5, "Bank" : 4, "FENs" :  6, "FENOffset" :  0},
-      { "Ring" : 6, "Bank" : 5, "FENs" : 14, "FENOffset" :  0},
-      { "Ring" : 7, "Bank" : 6, "FENs" : 16, "FENOffset" :  0},
-      { "Ring" : 8, "Bank" : 7, "FENs" : 10, "FENOffset" :  0},
-      { "Ring" : 9, "Bank" : 8, "FENs" : 16, "FENOffset" :  0}
-    ]
-  }
-)"_json;
-
 using namespace Caen;
+
 
 class LokiConfigTest : public TestBase {
 protected:
-  LokiConfig config;
-  void SetUp() override {}
+  LokiConfig config{LOKI_CONFIG};
+  void SetUp() override {
+    ASSERT_EQ(config.Parms.Resolution, 0); // check one var is uninitialised
+  }
   void TearDown() override {}
 };
+
+
+TEST_F(LokiConfigTest, ParseConfig) {
+  ASSERT_NO_THROW(config.parseConfig());
+  ASSERT_EQ(config.Parms.Resolution, 512);
+  ASSERT_EQ(config.Parms.ConfiguredBanks, 9);
+  ASSERT_EQ(config.Parms.ConfiguredRings, 10);
+}
+
+TEST_F(LokiConfigTest, NoDetectorKey) {
+  json_change_key(config.root, "Detector", "InvalidDetector");
+  ASSERT_ANY_THROW(config.parseConfig());
+}
+
+TEST_F(LokiConfigTest, BadDetectorName) {
+  config.root["Detector"] = "nosuchdetector";
+  ASSERT_ANY_THROW(config.parseConfig());
+}
+
+
+TEST_F(LokiConfigTest, BadBank) {
+  config.root["Banks"][0]["Bank"] = 200;
+  ASSERT_NO_THROW(config.parseConfig());
+  ASSERT_EQ(config.Parms.ConfiguredBanks, 8);
+}
+
+TEST_F(LokiConfigTest, BadRing) {
+  config.root["Config"][0]["Ring"] = 200;
+  ASSERT_NO_THROW(config.parseConfig());
+  ASSERT_EQ(config.Parms.ConfiguredRings, 9);
+}
 
 
 TEST_F(LokiConfigTest, Constructor) {
@@ -71,16 +65,8 @@ TEST_F(LokiConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.Resolution, 0);
 }
 
-TEST_F(LokiConfigTest, ValidConfig) {
-  config.root = ValidConfig;
-  config.parseConfig();
-  ASSERT_EQ(config.Parms.Resolution, 512);
-}
-
-
 
 TEST_F(LokiConfigTest, GetGlobalGroup) {
-  config.root = ValidConfig;
   config.parseConfig();
   //  Ring, FEN, (Local)Group     R   F  LG
   // Validating partitioned bank0
@@ -105,7 +91,6 @@ TEST_F(LokiConfigTest, GetGlobalGroup) {
   ASSERT_EQ(config.getGlobalGroup(9, 15, 7), 895);
 
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

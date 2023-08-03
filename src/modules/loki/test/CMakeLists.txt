@@ -5,7 +5,7 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
+get_filename_component(LOKI_CONFIG "${ESS_MODULE_DIR}/loki/configs/LokiFull.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
@@ -33,7 +33,7 @@ create_test_executable(LokiGeometryTest)
 
 
 ##
-## LOKI conifig test
+## LOKI config test
 ##
 set(LokiConfigTest_INC
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
@@ -44,3 +44,4 @@ set(LokiConfigTest_SRC
 
 )
 create_test_executable(LokiConfigTest)
+target_compile_definitions(LokiConfigTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG}")

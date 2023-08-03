@@ -5,8 +5,6 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(CAEN_FULL "${ESS_MODULE_DIR}/loki/configs/Loki.json" ABSOLUTE)
-
 ##
 ## Pure unit tests
 ##
@@ -53,7 +51,6 @@ set(CaenConfigTest_SRC
   ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
   ConfigTest.cpp)
 create_test_executable(CaenConfigTest)
-target_compile_definitions(CaenConfigTest PRIVATE CAEN_FULL="${CAEN_FULL}")
 
 ##
 ## readout/

@@ -21,7 +21,6 @@ LokiConfig::LokiConfig() {}
 LokiConfig::LokiConfig(std::string ConfigFile) : ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
-  XTRACE(INIT, DEB, "Loaded json file");
 }
 
 void LokiConfig::parseConfig() {
@@ -39,7 +38,8 @@ void LokiConfig::parseConfig() {
 
   try {
     // Assumed the same for all straws in all banks
-    Parms.Resolution = root["Resolution"].get<unsigned int>();
+    Parms.Resolution = root["Resolution"].get<int>();
+    XTRACE(INIT, DEB, "Resolution %d", Parms.Resolution);
 
     Parms.ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
     LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", Parms.ReadoutConstDelayNS);
@@ -55,7 +55,6 @@ void LokiConfig::parseConfig() {
 
     // First run through the Banks section
     auto Banks = root["Banks"];
-    int ConfiguredBanks{0};
     for (auto & elt : Banks) {
       int Bank = elt["Bank"].get<int>();
       if ((Bank <0) or (Bank >= Parms.NumBanks)) {
@@ -66,14 +65,13 @@ void LokiConfig::parseConfig() {
       Parms.Banks[Bank].GroupsN = elt["GroupsN"].get<int>();
       Parms.Banks[Bank].YOffset = elt["YOffset"].get<int>();
       Parms.TotalGroups += Parms.Banks[Bank].GroupsN * Parms.GroupsZ;
-      ConfiguredBanks++;
+      Parms.ConfiguredBanks++;
     }
-    XTRACE(INIT, ALW, "Banks configured: %d", ConfiguredBanks);
+    XTRACE(INIT, ALW, "Banks configured: %d", Parms.ConfiguredBanks);
 
 
     // Then run through the Config section
     auto Configs = root["Config"];
-    int ConfiguredRings{0};
     for (auto & elt : Configs) {
       int Ring = elt["Ring"].get<int>();
       if ((Ring <0) or (Ring >= Parms.NumRings)) {
@@ -96,9 +94,9 @@ void LokiConfig::parseConfig() {
         int YMax = YOffset + getY(Ring, FENs-1, Layer + 4, 6);
         XTRACE(INIT, ALW, "  Layer %d - YMin: %d, YMax %d", Layer, YMin, YMax);
       }
-      ConfiguredRings++;
+      Parms.ConfiguredRings++;
     }
-    XTRACE(INIT, ALW, "Rings configured: %d", ConfiguredRings);
+    XTRACE(INIT, ALW, "Rings configured: %d", Parms.ConfiguredRings);
 
 
 
