@@ -5,6 +5,14 @@ set(GapClustererTest_SRC
   )
 create_test_executable(GapClustererTest)
 
+
+
+set(Hierarchical2DClustererTest_SRC
+  Hierarchical2DClustererTest.cpp
+  )
+create_test_executable(Hierarchical2DClustererTest)
+
+
 #todo make abstract geometry class, non MG-specific?
 set(GapClusterer2DTest_INC
   ${ESS_COMMON_DIR}/reduction/multigrid/ModuleGeometry.h
