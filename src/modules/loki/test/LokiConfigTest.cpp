@@ -5,7 +5,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <loki/geometry/LokiConfig.h>
-#include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 
 using namespace Caen;

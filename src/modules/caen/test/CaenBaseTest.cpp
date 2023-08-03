@@ -12,7 +12,6 @@
 #include <caen/CaenBase.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <common/testutils/TestUDPServer.h>
 
