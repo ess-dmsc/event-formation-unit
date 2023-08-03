@@ -2,9 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapClusterer2D.h
-/// \brief GapClusterer2D class definition. Like GapClusterer, but for 2D Hit
-/// Vectors. Hits are grouped into different clusters based on the timegap
-/// between the last hit in a cluster and the next hit chronologically.
+/// \brief GapClusterer2D class definition.
 ///
 //===----------------------------------------------------------------------===//
 
