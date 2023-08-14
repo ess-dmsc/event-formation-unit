@@ -2,17 +2,67 @@
 
 #include <common/system/Socket.h>
 #include <common/testutils/TestBase.h>
+#include <common/debug/Trace.h>
+#include <stdio.h>
 
 std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1",
                                  "224.1.2.3", "255.255.255.255"};
-std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3",       "1.2",
-                                    "",        "127.0.0.256", "metrics"};
+std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3", "1.2",
+                                    "", "127.0.0.256", "metrics"};
 
-class SocketTest : public ::testing::Test {
+class SocketTest : public ::testing::Test
+{
+
+private:
+  void error(const char *msg)
+  {
+    perror(msg);
+    exit(1);
+  }
+
 protected:
+  const int TEST_PORT_NUMBER = 8922;
+
+  int socketFileDescriptor;
+
+  // SetUp function, executed before the test cases.
+  // If there is no service listening on port,
+  // TEST_PORT_NUMBER we setup one.
+  void SetUp() override
+  {
+    struct sockaddr_in serv_addr;
+    socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+
+    ASSERT_GT(socketFileDescriptor, 0);
+
+    if (socketFileDescriptor < 0)
+      error("Socket creation for port binding failed during test SetUp()");
+
+    // Setup local address and port for start listening server
+    bzero((char *)&serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(TEST_PORT_NUMBER);
+
+    // Try to bind to the socket on local address on port
+    // TEST_PORT_NUMBER to create a listening server and block other
+    // services to bind to that port. This technique useful
+    // in case of containerized test runs. If there is already a
+    // process on this port the test not star server.
+    if (bind(socketFileDescriptor, (struct sockaddr *)&serv_addr,
+             sizeof(serv_addr)) >= 0)
+      listen(socketFileDescriptor, 5);
+  }
+
+  // Function execured after test cases to eg. close resources
+  void TearDown() override
+  {
+    close(socketFileDescriptor);
+  }
 };
 
-TEST_F(SocketTest, ConstructorValid) {
+TEST_F(SocketTest, ConstructorValid)
+{
   Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
 
@@ -20,7 +70,8 @@ TEST_F(SocketTest, ConstructorValid) {
   ASSERT_TRUE(tcpsocket.isValidSocket());
 }
 
-TEST_F(SocketTest, SendUninitialized) {
+TEST_F(SocketTest, SendUninitialized)
+{
   char buffer[100];
   Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
@@ -35,42 +86,50 @@ TEST_F(SocketTest, SendUninitialized) {
   ASSERT_FALSE(tcpsocket.isValidSocket());
 }
 
-TEST_F(SocketTest, ValidInvalidIp) {
-  for (auto ipaddr : ipOk) {
+TEST_F(SocketTest, ValidInvalidIp)
+{
+  for (auto ipaddr : ipOk)
+  {
     ASSERT_TRUE(Socket::isValidIp(ipaddr));
     auto res = Socket::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
-  for (auto ipaddr : ipNotOk) {
+  for (auto ipaddr : ipNotOk)
+  {
     ASSERT_FALSE(Socket::isValidIp(ipaddr));
   }
 }
 
-TEST_F(SocketTest, InetAtonInvalidIP) {
+TEST_F(SocketTest, InetAtonInvalidIP)
+{
   Socket tcpsocket(Socket::SocketType::TCP);
   ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000),
                std::runtime_error);
-  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
+  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
   ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000),
                std::runtime_error);
 }
 
-TEST_F(SocketTest, PortInUse) {
+TEST_F(SocketTest, PortInUse)
+{
   Socket tcpsocket(Socket::SocketType::TCP);
-  // ssh port is already in use on all platforms
-  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
+ 
+  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
 }
 
-TEST_F(SocketTest, IsMulticast) {
+TEST_F(SocketTest, IsMulticast)
+{
   ASSERT_TRUE(Socket::isMulticast("224.1.2.3"));
   ASSERT_FALSE(Socket::isMulticast("240.1.2.3"));
 }
 
 // Create tcp transmitter and send 0 and !=0 number of bytes
-// to localhost port 22 (ssh) which should always be active
-TEST_F(SocketTest, TCPTransmitter) {
+// to localhost port TEST_PORT_NUMBER where we set or listening 
+// service during the setup phase.
+TEST_F(SocketTest, TCPTransmitter)
+{
   char DummyData[]{0x01, 0x02, 0x03, 0x04};
-  TCPTransmitter Xmitter("127.0.0.1", 22);
+  TCPTransmitter Xmitter("127.0.0.1", TEST_PORT_NUMBER);
   auto res = Xmitter.senddata(DummyData, 0);
   ASSERT_EQ(res, 0);
 
@@ -78,7 +137,8 @@ TEST_F(SocketTest, TCPTransmitter) {
   ASSERT_EQ(res, sizeof(DummyData));
 }
 
-TEST_F(SocketTest, UDPTransmitter) {
+TEST_F(SocketTest, UDPTransmitter)
+{
   Socket::Endpoint local("127.0.0.1", 13241);
   Socket::Endpoint remote("127.0.0.1", 13241);
   UDPTransmitter UDPXmitter(local, remote);
@@ -86,11 +146,13 @@ TEST_F(SocketTest, UDPTransmitter) {
   ASSERT_EQ(UDPXmitter.isValidSocket(), true);
 }
 
-TEST_F(SocketTest, GetHostByName) {
+TEST_F(SocketTest, GetHostByName)
+{
   std::string name{"localhost"};
   auto res = Socket::getHostByName(name);
   ASSERT_TRUE(res == "127.0.0.1");
-  for (auto ipaddr : ipOk) {
+  for (auto ipaddr : ipOk)
+  {
     res = Socket::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
@@ -101,25 +163,29 @@ TEST_F(SocketTest, GetHostByName) {
   ASSERT_TRUE(res == "8.8.0.8");
 }
 
-TEST_F(SocketTest, GetHostByNameInvalid) {
+TEST_F(SocketTest, GetHostByNameInvalid)
+{
   Socket tcpsocket(Socket::SocketType::TCP);
   std::string InvalidHostName("#$%@^");
   ASSERT_THROW(tcpsocket.getHostByName(InvalidHostName), std::runtime_error);
 }
 
-TEST_F(SocketTest, MultiCastSetTTL) {
+TEST_F(SocketTest, MultiCastSetTTL)
+{
   Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   udpsocket.setMulticastTTL();
 }
 
-TEST_F(SocketTest, MultiCastSetReceive) {
+TEST_F(SocketTest, MultiCastSetReceive)
+{
   Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   ASSERT_NO_THROW(udpsocket.setLocalSocket("224.1.2.1", 9729));
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
