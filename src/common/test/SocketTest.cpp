@@ -2,7 +2,6 @@
 
 #include <common/system/Socket.h>
 #include <common/testutils/TestBase.h>
-#include <common/debug/Trace.h>
 #include <stdio.h>
 
 std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1",
