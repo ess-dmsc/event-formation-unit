@@ -12,17 +12,10 @@ std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3", "1.2",
 class SocketTest : public ::testing::Test
 {
 
-private:
-  void error(const char *msg)
-  {
-    perror(msg);
-    exit(1);
-  }
-
 protected:
   const int TEST_PORT_NUMBER = 8922;
 
-  int socketFileDescriptor;
+  int socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 
   // SetUp function, executed before the test cases.
   // If there is no service listening on port,
@@ -30,12 +23,8 @@ protected:
   void SetUp() override
   {
     struct sockaddr_in serv_addr;
-    socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 
-    ASSERT_GT(socketFileDescriptor, 0);
-
-    if (socketFileDescriptor < 0)
-      error("Socket creation for port binding failed during test SetUp()");
+    ASSERT_GE(socketFileDescriptor, 0) << "Cannot create test socket during the SetUp() phase of the tests.";
 
     // Setup local address and port for start listening server
     bzero((char *)&serv_addr, sizeof(serv_addr));
@@ -112,7 +101,7 @@ TEST_F(SocketTest, InetAtonInvalidIP)
 TEST_F(SocketTest, PortInUse)
 {
   Socket tcpsocket(Socket::SocketType::TCP);
- 
+
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
 }
 
@@ -123,7 +112,7 @@ TEST_F(SocketTest, IsMulticast)
 }
 
 // Create tcp transmitter and send 0 and !=0 number of bytes
-// to localhost port TEST_PORT_NUMBER where we set or listening 
+// to localhost port TEST_PORT_NUMBER where we set or listening
 // service during the setup phase.
 TEST_F(SocketTest, TCPTransmitter)
 {
