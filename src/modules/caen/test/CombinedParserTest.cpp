@@ -54,9 +54,7 @@ protected:
   ESSReadout::Parser CommonReadout;
   DataParser CaenParser;
 
-  void SetUp() override {
-    CommonReadout.setMaxPulseTimeDiff(4000000000);
-  }
+  void SetUp() override { CommonReadout.setMaxPulseTimeDiff(4000000000); }
   void TearDown() override {}
 };
 

@@ -51,8 +51,8 @@ public:
       XTRACE(EVENT, WAR, "Invalid Unit %d (max %d)", Unit, NUnits);
       return UnitError;
     }
-    XTRACE(EVENT, DEB, "Group: %u, TZ: %u, NUnits: %u, TN: %u", Group,
-           TZ, NUnits, TN);
+    XTRACE(EVENT, DEB, "Group: %u, TZ: %u, NUnits: %u, TN: %u", Group, TZ,
+           NUnits, TN);
     /// (0) (1) (2) (3)
     /// (4) (5) (6) (7)
     auto GroupLayer = Group % TZ; /// 0 - 3

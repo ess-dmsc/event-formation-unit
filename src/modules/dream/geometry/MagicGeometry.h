@@ -13,8 +13,8 @@
 #pragma once
 
 #include <dream/geometry/Config.h>
-#include <dream/geometry/PADetector.h>
 #include <dream/geometry/Mantle.h>
+#include <dream/geometry/PADetector.h>
 #include <dream/readout/DataParser.h>
 
 namespace Dream {

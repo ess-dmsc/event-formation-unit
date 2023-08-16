@@ -54,11 +54,12 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
 
   if (not Settings.DumpFilePrefix.empty()) {
     if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
-      DumpFile = ReadoutFile::create(
-        boost::filesystem::path(Settings.DumpFilePrefix).replace_extension(""));
+      DumpFile =
+          ReadoutFile::create(boost::filesystem::path(Settings.DumpFilePrefix)
+                                  .replace_extension(""));
     } else {
-      DumpFile = ReadoutFile::create(
-        Settings.DumpFilePrefix + "_" + timeString());
+      DumpFile =
+          ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
     }
   }
 
@@ -77,7 +78,7 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
 
   uint32_t pixel = Geom->calcPixel(Data);
   // seems to be wrong
-  //counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
+  // counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }

@@ -33,7 +33,7 @@ void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
     DR.FENId = BWES6FENId[Sector];
     DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
     DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-    DR.UnitId = 6; // SUMO6
+    DR.UnitId = 6;                                        // SUMO6
   } break;
 
   case 1: { // FW EndCap
@@ -42,7 +42,7 @@ void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
     DR.FENId = FWES6FENId[Sector];
     DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
     DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-    DR.UnitId = 6; // SUMO6
+    DR.UnitId = 6;                                        // SUMO6
   } break;
 
   case 2: { // Mantle

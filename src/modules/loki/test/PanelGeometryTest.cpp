@@ -13,7 +13,7 @@ protected:
   const bool Horizontal{false};
   const uint32_t UnitOffset0{0};
   const uint16_t GroupssXY8{8}; ///< # tubes in x or y direction
-  const uint16_t TZ4{4};      ///< # tubes in z-direction
+  const uint16_t TZ4{4};        ///< # tubes in z-direction
   void SetUp() override {}
   void TearDown() override {}
 };

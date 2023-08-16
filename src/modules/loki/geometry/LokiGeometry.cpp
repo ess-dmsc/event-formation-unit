@@ -29,7 +29,7 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
   uint8_t GroupBank = Data.FENId; // one FEN has 8 Groups
 
   bool valid = calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-  int Ring = Data.FiberId/2;
+  int Ring = Data.FiberId / 2;
   PanelGeometry Panel = Panels[Ring];
   XTRACE(DATA, DEB, "Fiber ID %u, Ring %d", Data.FiberId, Ring);
   if (not valid) {
@@ -93,8 +93,8 @@ bool LokiGeometry::calcPositions(std::int16_t AmplitudeA,
   std::int32_t UnitNum = AmplitudeB + AmplitudeD;
   std::int32_t PosNum = AmplitudeA + AmplitudeB;
   std::int32_t Denominator = AmplitudeA + AmplitudeB + AmplitudeC + AmplitudeD;
-  XTRACE(INIT, DEB, "UnitNum: %d, PosNum: %d, Denominator: %d", UnitNum,
-         PosNum, Denominator);
+  XTRACE(INIT, DEB, "UnitNum: %d, PosNum: %d, Denominator: %d", UnitNum, PosNum,
+         Denominator);
   if (Denominator == 0) {
     XTRACE(INIT, WAR,
            "Denominator is 0, UnitNum: %d, PosNum: %d, "

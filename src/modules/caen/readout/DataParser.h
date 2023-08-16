@@ -34,7 +34,6 @@ public:
     int16_t AmpD;
   } __attribute__((__packed__));
 
-
   struct Stats {
     int64_t DataHeaders{0};
     int64_t Readouts{0};
@@ -44,9 +43,7 @@ public:
 
   static_assert(sizeof(CaenReadout) == 24, "Caen readout header length error");
 
-  DataParser() {
-    Result.reserve(MaxReadoutsInPacket);
-  };
+  DataParser() { Result.reserve(MaxReadoutsInPacket); };
   ~DataParser(){};
 
   //

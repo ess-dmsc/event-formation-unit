@@ -28,8 +28,20 @@ protected:
 
     // Make nullcalibration
     for (int i = 0; i < CaenConfiguration.NGroupsTotal; i++) {
-      geom->CaenCDCalibration.Intervals.push_back({{0.0,0.143}, {0.144,0.286}, {0.287,0.429}, {0.43,0.571}, {0.572,0.714}, {0.715,0.857}, {0.858,  1.0}});
-      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
+      geom->CaenCDCalibration.Intervals.push_back({{0.0, 0.143},
+                                                   {0.144, 0.286},
+                                                   {0.287, 0.429},
+                                                   {0.43, 0.571},
+                                                   {0.572, 0.714},
+                                                   {0.715, 0.857},
+                                                   {0.858, 1.0}});
+      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0}});
     }
   }
   void TearDown() override {}
@@ -38,14 +50,14 @@ protected:
 // Test cases below
 TEST_F(LokiGeometryTest, Constructor) {
   geom->setResolution(512);
-  ASSERT_EQ(geom->UnitId, 7);  // valid: 0 - 6
+  ASSERT_EQ(geom->UnitId, 7); // valid: 0 - 6
   ASSERT_EQ(geom->PosVal, 1); // valid: 0.0 - 1.0
 }
 
 TEST_F(LokiGeometryTest, AllZeroes) {
   geom->setResolution(512);
   geom->calcPositions(0, 0, 0, 0);
-  ASSERT_EQ(geom->UnitId, 7);  // valid: 0 - 6
+  ASSERT_EQ(geom->UnitId, 7);   // valid: 0 - 6
   ASSERT_EQ(geom->PosVal, 512); // valid: 0 - 511
   ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
 }

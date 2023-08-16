@@ -35,8 +35,9 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
   Geom->ESSGeom = new ESSGeometry(Timepix3Configuration.XResolution,
                                   Timepix3Configuration.YResolution, 1, 1);
 
-  Clusterer = new Hierarchical2DClusterer(Timepix3Configuration.MaxTimeGapNS,
-                                        Timepix3Configuration.MaxCoordinateGap);
+  Clusterer =
+      new Hierarchical2DClusterer(Timepix3Configuration.MaxTimeGapNS,
+                                  Timepix3Configuration.MaxCoordinateGap);
 }
 
 Timepix3Instrument::~Timepix3Instrument() {}

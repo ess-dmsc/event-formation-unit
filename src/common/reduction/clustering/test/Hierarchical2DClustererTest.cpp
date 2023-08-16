@@ -14,15 +14,14 @@ protected:
     e.weight = 1;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
       for (e.x_coordinate = x_start; e.x_coordinate <= x_end;
-           e.x_coordinate += x_step){
+           e.x_coordinate += x_step) {
         for (e.y_coordinate = y_start; e.y_coordinate <= y_end;
-           e.y_coordinate += y_step){
-              ret.push_back(e);
-           }
+             e.y_coordinate += y_step) {
+          ret.push_back(e);
+        }
       }
   }
 };
-
 
 TEST_F(Hierarchical2DClustererTest, ZeroTimeGap) {
   Hit2DVector hc;

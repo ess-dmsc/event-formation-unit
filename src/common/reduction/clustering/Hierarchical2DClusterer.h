@@ -2,8 +2,8 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file Hierarchical2DClusterer.h
-/// \brief Hierarchical2DClusterer class definition. Clusters 2D hits in time and
-/// then in space.
+/// \brief Hierarchical2DClusterer class definition. Clusters 2D hits in time
+/// and then in space.
 ///
 //===----------------------------------------------------------------------===//
 

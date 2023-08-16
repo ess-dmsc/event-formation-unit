@@ -27,8 +27,8 @@ CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
 
 bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
-      Data.FENId, Data.Group);
+  XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Group %u", Data.FiberId,
+         Ring, Data.FENId, Data.Group);
 
   if (Ring > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
@@ -54,7 +54,6 @@ int CspecGeometry::xOffset(int Ring, int Group) {
   ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He CSPEC
   return Ring * NPos + (Group % 24) * (NPos / 24);
 }
-
 
 int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   if (AmpA + AmpB == 0) {

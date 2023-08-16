@@ -13,7 +13,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 Hierarchical2DClusterer::Hierarchical2DClusterer(uint64_t max_time_gap,
-                                             uint16_t max_coord_gap)
+                                                 uint16_t max_coord_gap)
     : Abstract2DClusterer(), max_time_gap_(max_time_gap),
       max_coord_gap_(max_coord_gap) {}
 
@@ -104,7 +104,7 @@ std::string Hierarchical2DClusterer::config(const std::string &prepend) const {
 }
 
 std::string Hierarchical2DClusterer::status(const std::string &prepend,
-                                          bool verbose) const {
+                                            bool verbose) const {
   std::stringstream ss;
   ss << Abstract2DClusterer::status(prepend, verbose);
   if (!current_time_cluster_.empty())

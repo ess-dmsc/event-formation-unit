@@ -36,7 +36,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
 
-
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              DataHdrPtr->DataLength, BytesLeft);
@@ -45,8 +44,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     }
 
     if (DataHdrPtr->FiberId > MaxFiberId or DataHdrPtr->FENId > MaxFENId) {
-      XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)", DataHdrPtr->FiberId,
-             DataHdrPtr->FENId);
+      XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)",
+             DataHdrPtr->FiberId, DataHdrPtr->FENId);
       Stats.ErrorDataHeaders++;
       return ParsedReadouts;
     }
@@ -71,9 +70,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            "fiber %u, fen %u, t(%11u,%11u) SeqNo %6u Group %3u , A "
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
-           DataHdrPtr->FiberId, DataHdrPtr->FENId, Data->TimeHigh, Data->TimeLow,
-           Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB, Data->AmpC,
-           Data->AmpD);
+           DataHdrPtr->FiberId, DataHdrPtr->FENId, Data->TimeHigh,
+           Data->TimeLow, Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB,
+           Data->AmpC, Data->AmpD);
 
     CurrentDataSection.Data = *Data;
     ParsedReadouts++;

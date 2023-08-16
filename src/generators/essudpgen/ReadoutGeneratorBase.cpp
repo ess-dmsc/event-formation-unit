@@ -84,7 +84,7 @@ int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
   app.add_option("-r, --rings", Settings.NFibers,
                  "Number of Fibers used in data header (obsolete)");
   app.add_option("-f, --fibers", Settings.NFibers,
-                "Number of Fibers used in data header");
+                 "Number of Fibers used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
                  "Delay (ticks) between events");
   app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,

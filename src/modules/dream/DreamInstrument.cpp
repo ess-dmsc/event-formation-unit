@@ -34,7 +34,8 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
     Type = ESSReadout::Parser::MAGIC;
   } else {
-    throw std::runtime_error("Unsupported instrument instance (not DREAM/MAGIC)");
+    throw std::runtime_error(
+        "Unsupported instrument instance (not DREAM/MAGIC)");
   }
 }
 
@@ -89,8 +90,7 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    Config::ModuleParms &Parms =
-        DreamConfiguration.RMConfig[Ring][Data.FENId];
+    Config::ModuleParms &Parms = DreamConfiguration.RMConfig[Ring][Data.FENId];
 
     if (not Parms.Initialised) {
       XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
