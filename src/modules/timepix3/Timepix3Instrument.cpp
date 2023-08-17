@@ -51,6 +51,11 @@ uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   return pixel;
 }
 
+// ToDo: This calculates time of flight according to internal clock status
+// which may not relates to the EVR pulse time. This later drives to a wrong 
+// pairing in the KAFKA event (see generateEvent(). We should reset this value when
+// the TDC packet arrived like:
+// TOF - TDC time.
 uint64_t
 Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating TOF");
