@@ -51,7 +51,7 @@ get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.jso
 get_filename_component(TREX_CFG_FILE "${ESS_MODULE_DIR}/trex/configs/trex.json" ABSOLUTE)
 get_filename_component(TTLMON_CFG_FILE "${ESS_MODULE_DIR}/ttlmonitor/configs/freiamon.json" ABSOLUTE)
 get_filename_component(NMX_CFG_FILE "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUTE)
-get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/STFCTestII.json" ABSOLUTE)
+get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/LokiFull.json" ABSOLUTE)
 get_filename_component(LOKI_CAL_FILE "${ESS_MODULE_DIR}/loki/configs/lokinullcalib.json" ABSOLUTE)
 get_filename_component(BIFROST_CFG_FILE "${ESS_MODULE_DIR}/bifrost/configs/bifrost.json" ABSOLUTE)
 get_filename_component(BIFROST_CAL_FILE "${ESS_MODULE_DIR}/bifrost/configs/bifrostnullcalib.json" ABSOLUTE)
@@ -83,7 +83,7 @@ add_custom_target(copycfgs
 )
 
 add_custom_target(runefu
-    COMMAND loki     "-f" "../configs/STFCTestII.json" "--calibration" "../configs/lokinullcalib.json"     "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
+    COMMAND loki     "-f" "../configs/LokiFull.json" "--calibration" "../configs/lokinullcalib.json"     "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND bifrost  "-f" "../configs/bifrost.json"    "--calibration" "../configs/bifrostnullcalib.json"  "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_user.h5"
     COMMAND miracles "-f" "../configs/miracles.json"   "--calibration" "../configs/miraclesnullcalib.json" "-s" "2" "--nohwcheck"
     COMMAND cspec    "-f" "../configs/cspec.json"      "--calibration" "../configs/cspecnullcalib.json"    "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"

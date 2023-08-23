@@ -1,8 +1,10 @@
-# Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
 add_subdirectory(generators)
 include_directories(.)
+
+get_filename_component(TTLMON_CONFIG "${ESS_MODULE_DIR}/ttlmonitor/configs/lokimon.json" ABSOLUTE)
 
 #=============================================================================
 # ttlmonitor detector module and base test
@@ -41,7 +43,7 @@ set(TTLMonitorBaseTest_SRC
   ${ttlmonitor_common_src}
 )
 create_test_executable(TTLMonitorBaseTest)
-
+target_compile_definitions(TTLMonitorBaseTest PRIVATE TTLMON_CONFIG="${TTLMON_CONFIG}")
 
 #
 # TTLMonitoriInstrumentTest Module integration test
@@ -54,3 +56,4 @@ set(TTLMonitorInstrumentTest_SRC
   test/TTLMonitorInstrumentTest.cpp
 )
 create_test_executable(TTLMonitorInstrumentTest)
+target_compile_definitions(TTLMonitorInstrumentTest PRIVATE TTLMON_CONFIG="${TTLMON_CONFIG}")

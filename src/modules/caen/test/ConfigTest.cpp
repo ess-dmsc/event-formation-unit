@@ -28,38 +28,67 @@ auto InvalidConfig = R"(
 
 // Invalid config file: StrawResolution missing
 auto InvalidConfigII = R"(
-{
-  "Detector": "loki",
+  {
+    "Detector" : "loki",
 
-  "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
-  ]
-}
+    "GroupsZ" : 4,
+
+    "ReadoutConstDelayNS" : 0,
+    "MaxPulseTimeNS" : 357142855,
+    "MaxTOFNS" : 1000000000,
+
+    "Banks" : [
+       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
+    ],
+
+    "Config" : [
+      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+    ]
+  }
 )"_json;
 
 // Invalid config file: Detector name is not LoKI
 auto BadDetector = R"(
-{
-  "Detector": "LoKI4x8",
+  {
+    "Detector" : "lokixx",
 
-  "NotPanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
-  ]
-}
+    "Resolution" : 512,
+    "GroupsZ" : 4,
+
+    "ReadoutConstDelayNS" : 0,
+    "MaxPulseTimeNS" : 357142855,
+    "MaxTOFNS" : 1000000000,
+
+    "Banks" : [
+       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
+    ],
+
+    "Config" : [
+      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+    ]
+  }
 )"_json;
 
 // Good configuration file
 auto ValidConfig = R"(
-{
-  "Detector" : "loki",
+  {
+    "Detector" : "loki",
 
-  "StrawResolution" : 256,
+    "Resolution" : 512,
+    "GroupsZ" : 4,
 
-  "PanelConfig" : [
-    { "Bank" : 0, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 32, "StrawOffset" : 0    },
-    { "Bank" : 1, "Vertical" :  false,  "GroupsZ" : 4, "GroupsN" : 24, "StrawOffset" : 896  }
-  ]
-}
+    "ReadoutConstDelayNS" : 0,
+    "MaxPulseTimeNS" : 357142855,
+    "MaxTOFNS" : 1000000000,
+
+    "Banks" : [
+       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
+    ],
+
+    "Config" : [
+      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+    ]
+  }
 )"_json;
 
 using namespace Caen;
@@ -72,7 +101,6 @@ protected:
 };
 
 TEST_F(CaenConfigTest, Constructor) {
-  ASSERT_EQ(config.Panels.size(), 0);
   ASSERT_EQ(config.Resolution, 0);
   ASSERT_EQ(config.NGroupsTotal, 0);
 }
@@ -108,25 +136,7 @@ TEST_F(CaenConfigTest, InvalidConfigII) {
 TEST_F(CaenConfigTest, ValidConfig) {
   config.root = ValidConfig;
   config.parseConfig();
-  ASSERT_EQ(config.NGroupsTotal, (32 + 24) * 4);
-  ASSERT_EQ(config.Panels.size(), 2);
-}
-
-// Validate full Loki instrument configuration (Loki.json)
-// should match the definitions in the ICD
-TEST_F(CaenConfigTest, CaenICDGeometryFull) {
-  config = Config(CAEN_FULL);
-  config.parseConfig();
-  ASSERT_EQ(config.Panels[0].getGlobalUnitId(0, 0, 0), 0);
-  ASSERT_EQ(config.Panels[1].getGlobalUnitId(0, 0, 0), 1568 * 32 / 56);
-  ASSERT_EQ(config.Panels[2].getGlobalUnitId(0, 0, 0), 1568);
-  ASSERT_EQ(config.Panels[3].getGlobalUnitId(0, 0, 0), 2016);
-  ASSERT_EQ(config.Panels[4].getGlobalUnitId(0, 0, 0), 2352);
-  ASSERT_EQ(config.Panels[5].getGlobalUnitId(0, 0, 0), 2800);
-  ASSERT_EQ(config.Panels[6].getGlobalUnitId(0, 0, 0), 3136);
-  ASSERT_EQ(config.Panels[7].getGlobalUnitId(0, 0, 0), 3920);
-  ASSERT_EQ(config.Panels[8].getGlobalUnitId(0, 0, 0), 4816);
-  ASSERT_EQ(config.Panels[9].getGlobalUnitId(0, 0, 0), 5376);
+  ASSERT_EQ(config.LokiConf.Parms.TotalGroups, (32 + 24) * 4);
 }
 
 int main(int argc, char **argv) {

@@ -32,3 +32,13 @@ inline nlohmann::json from_json_file(const std::string &fname) {
 inline void to_json_file(const nlohmann::json &j, const std::string &fname) {
   std::ofstream(fname, std::ofstream::trunc) << j.dump(1);
 }
+
+
+inline void json_change_key(nlohmann::json &object, const std::string& old_key, const std::string& new_key) {
+    // get iterator to old key; TODO: error handling if key is not present
+    nlohmann::json::iterator it = object.find(old_key);
+    // create null value for new key and swap value from old key
+    std::swap(object[new_key], it.value());
+    // delete value at old key (cheap, because the value is null after swap)
+    object.erase(it);
+}

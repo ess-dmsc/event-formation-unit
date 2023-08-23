@@ -71,10 +71,11 @@ CaenBase::CaenBase(BaseSettings const &settings,
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingErrors);
   Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENErrors);
-  Stats.create("geometry.unit_errors", Counters.Geom.GroupErrors);
+  Stats.create("geometry.group_errors", Counters.Geom.GroupErrors);
   Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
   Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
   Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
+  Stats.create("geometry.calib_group_errors", Counters.Calibration.GroupErrors);
   Stats.create("geometry.outside_tube", Counters.Calibration.OutsideInterval);
 
   // Events

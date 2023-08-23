@@ -55,6 +55,7 @@ public:
   struct Stats {
     int64_t ClampLow{0};
     int64_t ClampHigh{0};
+    int64_t GroupErrors{0};
     int64_t OutsideInterval{0};
   } Stats;
 
@@ -62,6 +63,7 @@ public:
     // New abstraction: Groups is used in stead of Tubes(LOKI),
     // Triplets(BIFROST), TubePair(MIRACLES) etc.
     int Groups{0};
+    int LoadedGroups{0};
     // New abstraction: GroupSize is used instead of Straws(LOKI),
     // Tubes(BIFROST)
     int GroupSize{0};
