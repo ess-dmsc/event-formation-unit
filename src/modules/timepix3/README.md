@@ -88,70 +88,7 @@ namespace DataParser_h {
         uint32_t PulseTimeNanoSeconds
         uint32_t PrevPulseTimeSeconds
         uint32_t PrevPulseTimeNanoSeconds
-    }
+    } 
 }
-
-  class TimepixHit {
-    +uint32_t X
-    +uint32_t Y
-    +uint64_t TimeOfFlight
-    +uint16_t ToT
-  }
-
-  class Timepix3Instrument {
-    -Counters &counters
-    -Config Timepix3Configuration
-    -BaseSettings &Settings
-    -DataParser Timepix3Parser
-    -Geometry *Geom
-    -EV44Serializer *Serializer
-    -Hierarchical2DClusterer *Clusterer
-    -Hit2DVector AllHitsVector
-    +Timepix3Instrument(Counters &counters, BaseSettings &settings)
-    +~Timepix3Instrument()
-    +processReadouts()
-    +setSerializer(serializer: EV44Serializer)
-    +calcPixel(Data: Timepix3PixelReadout)
-    +calcTimeOfFlight(Data: Timepix3PixelReadout)
-    +generateEvents()
-  }
-
-  class Counters {
-    // Counters class members
-  }
-
-  class BaseSettings {
-    // BaseSettings class members
-  }
-
-  class DataParser {
-    // DataParser class members
-  }
-
-  class Geometry {
-    // Geometry class members
-  }
-
-  class EV44Serializer {
-    // EV44Serializer class members
-  }
-
-  class Hierarchical2DClusterer {
-    // Hierarchical2DClusterer class members
-  }
-
-  class Hit2DVector {
-    // Hit2DVector class members
-  }
-
-  Timepix3Hit --> Timepix3Instrument
-  Timepix3Instrument --> Counters
-  Timepix3Instrument --> Config
-  Timepix3Instrument --> BaseSettings
-  Timepix3Instrument --> DataParser
-  Timepix3Instrument --> Geometry
-  Timepix3Instrument --> EV44Serializer
-  Timepix3Instrument --> Hierarchical2DClusterer
-  Timepix3Instrument --> Hit2DVector
 
 ```
