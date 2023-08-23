@@ -20,7 +20,7 @@ classDiagram
     class Timepix3Base {
         #Counters Counters
         #EV44Serializer Serializer
-        + processingThread()
+        +processingThread() void
     }
     class Timepix3Instrument {
         +DataParser Timepix3Parser
@@ -35,53 +35,48 @@ classDiagram
         +generateEvents()
     }
     class EV44Serializer {
-        TSCTimer ProduceTimer
-        TSCTimer DebugTimer
-        int64_t TxBytes
-        setProducerCallback(ProducerCallback) void
-        setReferenceTime(int64_t) void
-        checkAndSetReferenceTime(int64_t Time) uint32_t
-        referenceTime() const int64_t
-        addEvent(int32_t, int32_t) size_t
-        currentMessageId() const uint64_t
-        eventCount() const size_t
-        produce() size_t
-        serialize() span~uint8_t~
+        +TSCTimer ProduceTimer
+        +TSCTimer DebugTimer
+        +int64_t TxBytes
+        +setProducerCallback(ProducerCallback) void
+        +setReferenceTime(int64_t) void
+        +checkAndSetReferenceTime(int64_t Time) uint32_t
+        +referenceTime() const int64_t
+        +addEvent(int32_t, int32_t) size_t
+        +currentMessageId() const uint64_t
+        +eventCount() const size_t
+        +produce() size_t
+        +serialize() span~uint8_t~
     }
-    namespace DataParser_h {
-        class DataParser {
-            +vector~Timepix3PixelReadout~ PixelResult
-            +uint64_t LastEVRTime
-            +uint64_t LastTDCTime
-            +parse(const char, unsigned int) int
-        }
-        class Timepix3PixelReadout {
-            <<struct>>
-            uint16_t Dcol
-            uint16_t Spix
-            uint8_t Pix
-            uint16_t ToA
-            uint16_t ToT
-            uint8_t FToA
-            uint16_t SpidrTime
-        }
-        class Timepix3TDCReadout {
-            <<struct>>
-            uint8_t Type
-            uint16_t TriggerCounter
-            uint64_t Timestamp
-            uint8_t Stamp
-        }
-        class EVRTimeReadout {
-            <<struct>>
-            uint8_t Type
-            uint8_t Unused
-            uint16_t Unused2
-            uint32_t Counter
-            uint32_t PulseTimeSeconds
-            uint32_t PulseTimeNanoSeconds
-            uint32_t PrevPulseTimeSeconds
-            uint32_t PrevPulseTimeNanoSeconds
-        } 
+    class DataParser {
+        +vector~Timepix3PixelReadout~ PixelResult
+        +uint64_t LastEVRTime
+        +uint64_t LastTDCTime
+        +parse(const char, unsigned int) int
     }
+    class Timepix3PixelReadout {
+        uint16_t Dcol
+        uint16_t Spix
+        uint8_t Pix
+        uint16_t ToA
+        uint16_t ToT
+        uint8_t FToA
+        uint16_t SpidrTime
+    }
+    class Timepix3TDCReadout {
+        uint8_t Type
+        uint16_t TriggerCounter
+        uint64_t Timestamp
+        uint8_t Stamp
+    }
+    class EVRTimeReadout {
+        uint8_t Type
+        uint8_t Unused
+        uint16_t Unused2
+        uint32_t Counter
+        uint32_t PulseTimeSeconds
+        uint32_t PulseTimeNanoSeconds
+        uint32_t PrevPulseTimeSeconds
+        uint32_t PrevPulseTimeNanoSeconds
+    } 
 ```
