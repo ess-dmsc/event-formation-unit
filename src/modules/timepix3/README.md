@@ -27,8 +27,8 @@ classDiagram
     Timepix3Instrument<--EV44Serializer : mutiple calls
     Timepix3Instrument*--DataParser : creates
     Timepix3Instrument<..DataParser : access PixelResult
-    Timepix3Instrument*--Geometry : creates
-    Geometry*--ESSGeometry : creates
+    Timepix3Instrument*--Timepix3Geometry : creates
+    Timepix3Geometry<|--ESSGeometry
 
     DataParser "1" *-- "n" Timepix3PixelReadout : creates multiple
     DataParser "1" <-- "1" Timepix3TDCReadout : local use
@@ -66,10 +66,9 @@ classDiagram
         +serialize() span~uint8_t~
     }
 
-    class Geometry {
-        ESSGeometry *ESSGeom
-        std::uint16_t XResolution
-        std::uint16_t YResolution
+    class Timepix3Geometry {
+        -std::uint16_t XResolution
+        -std::uint16_t YResolution
         +validateData(Timepix3PixelReadout): bool
         +calcPixel(Timepix3PixelReadout): uint32_t
         +calcX(Timepix3PixelReadout): uint16_t
