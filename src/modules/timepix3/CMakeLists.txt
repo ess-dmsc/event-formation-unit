@@ -9,14 +9,14 @@ set(timepix3_common_inc
   Timepix3Base.h
   Timepix3Instrument.h
   geometry/Config.h
-  geometry/Geometry.h
+  geometry/Timepix3Geometry.h
   readout/DataParser.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp
-  geometry/Geometry.cpp
+  geometry/Timepix3Geometry.cpp
   readout/DataParser.cpp
   )
 
