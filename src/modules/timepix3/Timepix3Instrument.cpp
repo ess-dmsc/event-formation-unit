@@ -94,6 +94,9 @@ void Timepix3Instrument::processReadouts() {
   // sort hits by time of flight for clustering in time
   sort_chronologically(std::move(AllHitsVector));
   Clusterer->cluster(AllHitsVector);
+
+  ///\todo Decide if flushing per packet is wanted behaviour, or should be configurable
+  Clusterer->flush();
   generateEvents();
   AllHitsVector.clear();
 }
