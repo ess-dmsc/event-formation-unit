@@ -19,7 +19,7 @@
 #include <timepix3/Counters.h>
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
 #include <timepix3/geometry/Config.h>
-#include <timepix3/geometry/Geometry.h>
+#include <timepix3/geometry/Timepix3Geometry.h>
 
 namespace Timepix3 {
 
@@ -64,7 +64,7 @@ public:
   Config Timepix3Configuration;
   BaseSettings &Settings;
   DataParser Timepix3Parser{counters};
-  Geometry *Geom;
+  Timepix3Geometry *Geom;
   EV44Serializer *Serializer;
   Hierarchical2DClusterer *Clusterer;
   Hit2DVector AllHitsVector;

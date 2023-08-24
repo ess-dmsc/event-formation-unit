@@ -8,7 +8,7 @@
 #include <common/testutils/TestBase.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/timepix3/readout/DataParser.h>
-#include <timepix3/geometry/Geometry.h>
+#include <timepix3/geometry/Timepix3Geometry.h>
 
 using namespace Timepix3;
 
@@ -16,12 +16,9 @@ class Timepix3GeometryTest : public TestBase {
 protected:
   struct Counters counters;
 
-  Geometry *timepix3geom;
+  Timepix3Geometry *timepix3geom;
 
-  void SetUp() override {
-    timepix3geom = new Geometry();
-    timepix3geom->ESSGeom = new ESSGeometry(256, 256, 1, 1);
-  }
+  void SetUp() override { timepix3geom = new Timepix3Geometry(256, 256, 1, 1); }
   void TearDown() override {}
 };
 
