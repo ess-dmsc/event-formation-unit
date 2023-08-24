@@ -29,11 +29,10 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
          Settings.ConfigFile.c_str());
   Timepix3Configuration = Config(Settings.ConfigFile);
 
-  Geom = new Geometry();
+  Geom = new Timepix3Geometry(Timepix3Configuration.XResolution,
+                      Timepix3Configuration.YResolution, 1, 1);
   Geom->setXResolution(Timepix3Configuration.XResolution);
   Geom->setYResolution(Timepix3Configuration.YResolution);
-  Geom->ESSGeom = new ESSGeometry(Timepix3Configuration.XResolution,
-                                  Timepix3Configuration.YResolution, 1, 1);
 
   Clusterer =
       new Hierarchical2DClusterer(Timepix3Configuration.MaxTimeGapNS,
@@ -108,7 +107,7 @@ void Timepix3Instrument::generateEvents() {
     uint64_t EventTime = cluster.timeStart();
     uint16_t x = cluster.xCoordCenter();
     uint16_t y = cluster.yCoordCenter();
-    uint32_t PixelId = Geom->ESSGeom->pixel2D(x, y);
+    uint32_t PixelId = Geom->pixel2D(x, y);
     if (PixelId == 0) {
       XTRACE(EVENT, WAR, "Bad pixel!: Time: %u, x %u, y %u, pixel %u",
              EventTime, x, y, PixelId);

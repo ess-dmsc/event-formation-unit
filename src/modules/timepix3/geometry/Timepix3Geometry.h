@@ -20,8 +20,11 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
-class Geometry {
+class Timepix3Geometry : public ESSGeometry {
+
 public:
+  Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t nz, uint32_t np);
+
   /// \brief sets the pixel resolution of the camera in x plane
   /// \param Resolution integer value to set camera resolution to
   void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
@@ -34,17 +37,17 @@ public:
   /// object \param Data Timepix3PixelReadout object
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
+  /// \brief returns true if Data is a valid readout with the given config
+  /// \param Data Timepix3PixelReadout to check validity of.
+  bool validateData(DataParser::Timepix3PixelReadout &Data);
+  
   /// \brief calculated the X coordinate from a Timepix3PixelReadout
   uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief calculated the Y coordinate from a Timepix3PixelReadout
   uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
 
-  /// \brief returns true if Data is a valid readout with the given config
-  /// \param Data Timepix3PixelReadout to check validity of.
-  bool validateData(DataParser::Timepix3PixelReadout &Data);
-
-  ESSGeometry *ESSGeom;
+private:
   std::uint16_t XResolution; ///< resolution of X axis
   std::uint16_t YResolution; ///< resolution of Y axis
 };
