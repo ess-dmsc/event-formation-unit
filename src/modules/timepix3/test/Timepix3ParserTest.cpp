@@ -21,10 +21,28 @@ std::vector<uint8_t> TooShort{
     0x00, 0x01
 };
 
-std::vector<uint8_t> SingleTDCReadout{
-    // Single readout
+std::vector<uint8_t> TDC1RisingReadout{
+    // TDC1 rising readout
     0xc0, 0x42, 0x9f, 0xdd,
     0xa4, 0x7e, 0x8b, 0x6f
+};
+
+std::vector<uint8_t> TDC1FallingReadout{
+     // TDC1 falling readout
+    0xc0, 0x42, 0x9f, 0xdd,
+    0xa4, 0x7e, 0x8b, 0x6a
+};
+
+std::vector<uint8_t> TDC2RisingReadout{
+    // TDC2 rising readout
+    0xc0, 0x42, 0x9f, 0xdd,
+    0xa4, 0x7e, 0x8b, 0x6e
+};
+
+std::vector<uint8_t> TDC2FallingReadout{
+     // TDC2 falling
+    0xc0, 0x42, 0x9f, 0xdd,
+    0xa4, 0x7e, 0x8b, 0x6b
 };
 
 std::vector<uint8_t> SingleEVRReadout{
@@ -34,6 +52,15 @@ std::vector<uint8_t> SingleEVRReadout{
   0xdd, 0xc9, 0x9a, 0x3b,
   0xcb, 0xa1, 0x3f, 0x64,
   0xdd, 0xc9, 0x9a, 0x3b
+};
+
+std::vector<uint8_t> TDCAndPixelReadout{
+  // Single TDC readout
+  0xc0, 0x42, 0x9f, 0xdd,
+  0xa4, 0x7e, 0x8b, 0x6f,
+  // Single pixel readout
+  0x91, 0xc6, 0x30, 0x80,
+  0x8b, 0xa8, 0x3a, 0xbf
 };
 // clang-format on
 
@@ -54,12 +81,45 @@ TEST_F(Timepix3ParserTest, SinglePixelReadout) {
   auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(),
                                    SinglePixelReadout.size());
   EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.PixelReadouts, 1);
 }
 
-TEST_F(Timepix3ParserTest, SingleTDCReadout) {
-  auto Res = Timepix3Parser->parse((char *)SingleTDCReadout.data(),
-                                   SingleTDCReadout.size());
+TEST_F(Timepix3ParserTest, TDCReadouts) {
+  auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
+                                   TDC1RisingReadout.size());
   EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.TDCReadouts, 1);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+ 
+  Res = Timepix3Parser->parse((char *)TDC1FallingReadout.data(),
+                                   TDC1FallingReadout.size());
+  EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.TDCReadouts, 2);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+
+  Res = Timepix3Parser->parse((char *)TDC2RisingReadout.data(),
+                                   TDC2RisingReadout.size());
+  EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.TDCReadouts, 3);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+
+  Res = Timepix3Parser->parse((char *)TDC2FallingReadout.data(),
+                                   TDC2FallingReadout.size());
+  EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.TDCReadouts, 4);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
@@ -71,6 +131,16 @@ TEST_F(Timepix3ParserTest, SingleEVRReadout) {
   auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
                                    SingleEVRReadout.size());
   EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.EVRTimestampReadouts, 1);
+}
+
+TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
+  auto Res = Timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
+                                   TDCAndPixelReadout.size());
+  EXPECT_EQ(Res, 2);
+  EXPECT_EQ(counters.TDCReadouts, 1);
+  EXPECT_EQ(counters.PixelReadouts, 1);
+  EXPECT_EQ(counters.PixelReadoutFromBeforeTDC, 1);
 }
 
 int main(int argc, char **argv) {
