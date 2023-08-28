@@ -64,62 +64,62 @@ std::vector<uint8_t> TDCAndPixelReadout{
 };
 // clang-format on
 
+
 class Timepix3ParserTest : public TestBase {
 protected:
-  struct Counters counters;
-
+  struct Counters *counters;
   DataParser *Timepix3Parser;
-
-  void SetUp() override { Timepix3Parser = new DataParser(counters); }
+  void SetUp() override { 
+    counters = new Counters;
+    Timepix3Parser = new DataParser(*counters); }
   void TearDown() override {}
 };
 
 // Test cases below
-TEST_F(Timepix3ParserTest, Constructor) { DataParser Timepix3Parser(counters); }
 
 TEST_F(Timepix3ParserTest, SinglePixelReadout) {
   auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(),
                                    SinglePixelReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.PixelReadouts, 1);
+  EXPECT_EQ(counters->PixelReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCReadouts) {
   auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
                                    TDC1RisingReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.TDCReadouts, 1);
-  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
-  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters->TDCReadouts, 1);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
  
   Res = Timepix3Parser->parse((char *)TDC1FallingReadout.data(),
                                    TDC1FallingReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.TDCReadouts, 2);
-  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
-  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters->TDCReadouts, 2);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
 
   Res = Timepix3Parser->parse((char *)TDC2RisingReadout.data(),
                                    TDC2RisingReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.TDCReadouts, 3);
-  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
-  EXPECT_EQ(counters.TDC2RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters->TDCReadouts, 3);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters->TDC2RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
 
   Res = Timepix3Parser->parse((char *)TDC2FallingReadout.data(),
                                    TDC2FallingReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.TDCReadouts, 4);
-  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
-  EXPECT_EQ(counters.TDC2RisingReadouts, 1);
-  EXPECT_EQ(counters.TDC2FallingReadouts, 1);
+  EXPECT_EQ(counters->TDCReadouts, 4);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters->TDC2RisingReadouts, 1);
+  EXPECT_EQ(counters->TDC2FallingReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
@@ -131,16 +131,16 @@ TEST_F(Timepix3ParserTest, SingleEVRReadout) {
   auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
                                    SingleEVRReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters.EVRTimestampReadouts, 1);
+  EXPECT_EQ(counters->EVRTimestampReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
   auto Res = Timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
                                    TDCAndPixelReadout.size());
   EXPECT_EQ(Res, 2);
-  EXPECT_EQ(counters.TDCReadouts, 1);
-  EXPECT_EQ(counters.PixelReadouts, 1);
-  EXPECT_EQ(counters.PixelReadoutFromBeforeTDC, 1);
+  EXPECT_EQ(counters->TDCReadouts, 1);
+  EXPECT_EQ(counters->PixelReadouts, 1);
+  EXPECT_EQ(counters->PixelReadoutFromBeforeTDC, 1);
 }
 
 int main(int argc, char **argv) {
