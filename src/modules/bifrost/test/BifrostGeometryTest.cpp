@@ -19,6 +19,7 @@ protected:
 
   int NullCalibGroup{0};
   int ManualCalibGroup{44};
+
   std::vector<std::pair<double, double>> NullCalib{
       {0.000, 0.333}, {0.334, 0.667}, {0.668, 1.000}};
   std::vector<std::pair<double, double>> ManualCalib{
@@ -28,6 +29,8 @@ protected:
     geom = new BifrostGeometry(CaenConfiguration);
     geom->NPos = 300;
 
+    CaenConfiguration.NGroupsTotal=45;
+    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.NGroupsTotal;
     // Make nullcalibration
     for (int i = 0; i < 45; i++) {
       geom->CaenCDCalibration.Intervals.push_back(NullCalib);

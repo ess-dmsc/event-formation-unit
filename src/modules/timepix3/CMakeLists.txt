@@ -2,6 +2,8 @@
 
 include_directories(.)
 
+get_filename_component(TIMEPIX_CONFIG "${ESS_MODULE_DIR}/timepix3/configs/timepix3.json" ABSOLUTE)
+
 #=============================================================================
 # timepix3 detector module and base test
 #=============================================================================
@@ -49,6 +51,7 @@ set(Timepix3InstrumentTest_SRC
   test/Timepix3InstrumentTest.cpp
 )
 create_test_executable(Timepix3InstrumentTest)
+target_compile_definitions(Timepix3InstrumentTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
 
 set(Timepix3BaseTest_INC
   ${timepix3_common_inc}
@@ -58,6 +61,7 @@ set(Timepix3BaseTest_SRC
   test/Timepix3BaseTest.cpp
 )
 create_test_executable(Timepix3BaseTest)
+target_compile_definitions(Timepix3BaseTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
 
 set(Timepix3ParserTest_INC
   ${timepix3_common_inc}

@@ -7,7 +7,6 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
-#include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,20 +15,6 @@
 using namespace TTLMonitor;
 
 // clang-format off
-std::string ConfigFile{"deleteme_ttlmonitor_instr_config.json"};
-std::string ConfigStr = R"(
-  {
-    "Detector" : "TTLMonitor",
-
-    "TypeSubType" : 72,
-
-    "MaxPulseTimeDiffNS" : 1000000000,
-
-    "MaxTOFNS" : 1000000000,
-
-    "NumberOfMonitors" : 3
-  }
-)";
 
 std::vector<uint8_t> MonitorReadout {
   // Errors caught when parsing readouts
@@ -107,7 +92,7 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    Settings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = TTLMON_CONFIG;
     serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
     counters = {};
 
@@ -166,11 +151,6 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
 }
 
 int main(int argc, char **argv) {
-  saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
-
   testing::InitGoogleTest(&argc, argv);
-  auto RetVal = RUN_ALL_TESTS();
-
-  deleteFile(ConfigFile);
-  return RetVal;
+  return RUN_ALL_TESTS();
 }

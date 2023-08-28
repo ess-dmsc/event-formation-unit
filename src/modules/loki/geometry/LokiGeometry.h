@@ -30,6 +30,18 @@ namespace Caen {
 class LokiGeometry : public Geometry {
 public:
   LokiGeometry(Config &CaenConfiguration);
+
+  /// \brief return the position along the tube
+  /// \param AmpA amplitude A from readout data
+  /// \param AmpB amplitude B from readout data
+  /// \param AmpC amplitude C from readout data
+  /// \param AmpD amplitude D from readout data
+  /// \return tube index (0, 1, 2, .. 6) and normalised position [0.0 ; 1.0]
+  /// or (-1, -1.0) if invalid
+  std::pair<int, double> calcUnitAndPos(int Group,
+    int AmpA, int AmpB, int AmpC, int AmpD);
+
+
   /// \brief The four amplitudes measured at certain points in the
   /// Helium tube circuit diagram are used to identify the straw that
   /// detected the neutron and also the position along the straw.
@@ -37,23 +49,18 @@ public:
   /// is stored in the two member variables (UnitId, PosId) if an
   /// invalid input is given the output will be outside the valid
   /// ranges.
-  bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
-                     std::int16_t AmplitudeC, std::int16_t AmplitudeD);
+  // bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
+  //                    std::int16_t AmplitudeC, std::int16_t AmplitudeD);
 
   void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
-  uint8_t getUnitId(double value);
   uint32_t calcPixel(DataParser::CaenReadout &Data);
   bool validateData(DataParser::CaenReadout &Data);
 
-  std::vector<PanelGeometry> &Panels;
+  // Holds the parsed configuration
+  Config Conf;
 
-  /// holds latest calculated values for straw and position
-  /// they will hold out-of-range values if calculation fails
-  std::uint8_t UnitId{7};
-  double PosVal{1.0};
-  const std::uint8_t NUnits{7}; ///< number of straws per tube
-  std::vector<double> limits = {0.7, 1.56, 2.52, 3.54, 4.44, 5.3};
+  const std::pair<int, float> InvalidPos{-1, -1.0};
 };
 
 } // namespace Caen

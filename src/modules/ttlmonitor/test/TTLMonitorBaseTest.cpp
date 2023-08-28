@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/testutils/TestBase.h>
+#include <common/testutils/TestUDPServer.h>
+#include <ttlmonitor/TTLMonitorBase.h>
 #include <cinttypes>
 #include <string>
 #include <vector>
@@ -35,23 +38,10 @@ std::vector<uint8_t> dummyreadout {
   0x00, 0x00, 0x01, 0x00,  // Pos 0, Ch 0, ADC 1
 };
 
-std::string ttlmonjson = R"(
-  {
-   "Detector" : "TTLMonitor",
 
-   "TypeSubType" : 16,
-
-   "MaxPulseTimeDiffNS" : 1000000000,
-
-   "MaxTOFNS" : 1000000000
-  }
-)";
 // clang-format on
 
-#include <common/testutils/SaveBuffer.h>
-#include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
-#include <ttlmonitor/TTLMonitorBase.h>
+
 
 class TTLMonitorBaseStandIn : public TTLMonitor::TTLMonitorBase {
 public:
@@ -65,7 +55,7 @@ public:
 class TTLMonitorBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    Settings.ConfigFile = "TTLMonitor.json";
+    Settings.ConfigFile = TTLMON_CONFIG;
     Settings.KafkaTopic = "freia_beam_monitor";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
@@ -118,9 +108,6 @@ TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
 }
 
 int main(int argc, char **argv) {
-  std::string filename{"TTLMonitor.json"};
-  saveBuffer(filename, (void *)ttlmonjson.c_str(), ttlmonjson.size());
-
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

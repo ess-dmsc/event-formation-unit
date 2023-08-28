@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,7 +20,6 @@
 #include <common/readout/ess/Parser.h>
 #include <cspec/geometry/CspecGeometry.h>
 #include <loki/geometry/LokiGeometry.h>
-#include <loki/geometry/PanelGeometry.h>
 #include <miracles/geometry/MiraclesGeometry.h>
 #include <readout/DataParser.h>
 
@@ -58,6 +57,7 @@ public:
   struct CaenCounters &counters;
 
   Config CaenConfiguration;
+  LokiConfig config;
   BaseSettings &Settings;
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser;

@@ -66,6 +66,11 @@ double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
 
 ///\brief
 int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) {
+  if (GroupIndex >= Parms.Groups) {
+    XTRACE(EVENT, WAR, "Provided GroupIndex %d > config (%d)", GroupIndex, Parms.Groups);
+    Stats.GroupErrors++;
+    return -1;
+  }
   auto &GroupIntervals = Intervals[GroupIndex];
 
   int Unit;
@@ -131,6 +136,11 @@ void CDCalibration::loadCalibration() {
   int Polynomials{0};
 
   auto ParameterVector = root["Calibration"]["Parameters"];
+  if ((int)ParameterVector.size() != Parms.Groups) {
+    Message = fmt::format("Groupsize mismatch: {} specified, {} received",
+      Parms.Groups, ParameterVector.size());
+    throwException(Message);
+  }
   for (auto &Group : ParameterVector) {
     auto GroupIntervals =
         Group["intervals"].get<std::vector<std::pair<double, double>>>();
@@ -143,6 +153,8 @@ void CDCalibration::loadCalibration() {
   }
   XTRACE(INIT, ALW, "Loaded %d polynomials from %d groups", Polynomials,
          Parms.Groups);
+
+
 }
 
 nlohmann::json CDCalibration::getObjectAndCheck(nlohmann::json JsonObject,

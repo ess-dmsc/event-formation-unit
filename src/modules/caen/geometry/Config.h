@@ -12,7 +12,7 @@
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <loki/geometry/PanelGeometry.h>
+#include <loki/geometry/LokiConfig.h>
 #include <string>
 #include <vector>
 
@@ -31,7 +31,7 @@ public:
   ///\brief parse the loaded json object
   void parseConfig();
 
-  std::vector<PanelGeometry> Panels;
+  // Should be moved to BIFROST config
   std::string InstrumentName;
   uint8_t NPanels{0};              // Caen panels, not logical geometry panels
   uint16_t NGroupsTotal{0};        // total number of groups in instrument
@@ -42,6 +42,9 @@ public:
   uint8_t MaxRing{0};
   uint8_t MaxFEN{0};
   uint8_t MaxGroup{14};
+
+  LokiConfig LokiConf;
+
 
   std::string ConfigFileName{""};
   nlohmann::json root; // configuration (json)

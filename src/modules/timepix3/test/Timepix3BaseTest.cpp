@@ -20,13 +20,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
-std::string configjson = R"(
-{
-  "Detector" : "timepix3",
-  "XResolution" : 256,
-  "YResolution" : 256
-}
-)";
 
 class Timepix3BaseStandIn : public Timepix3::Timepix3Base {
 public:
@@ -42,7 +35,7 @@ public:
   void SetUp() override {
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
-    Settings.ConfigFile = "deleteme_timepix.json";
+    Settings.ConfigFile = TIMEPIX_CONFIG;
   }
   void TearDown() override {}
 
@@ -178,12 +171,7 @@ TEST_F(Timepix3BaseTest, DataReceiveGood) {
 }
 
 int main(int argc, char **argv) {
-  std::string configfilename{"deleteme_timepix.json"};
-  saveBuffer(configfilename, (void *)configjson.c_str(), configjson.size());
-
   testing::InitGoogleTest(&argc, argv);
-  auto RetVal = RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 
-  deleteFile(configfilename);
-  return RetVal;
 }

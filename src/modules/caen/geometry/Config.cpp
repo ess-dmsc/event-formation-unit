@@ -39,80 +39,59 @@ void Config::parseConfig() {
                              "loki, bifrost, miracles, or cspec");
   }
 
-  try {
-    // Assumed the same for all straws in all banks
-    Resolution = root["StrawResolution"].get<unsigned int>();
+  if (InstrumentName == "loki") {
+    LokiConf.root = root;
+    LokiConf.parseConfig();
+  }
 
+  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles")) {
     try {
-      MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
+      // Assumed the same for all straws in all banks
+      Resolution = root["StrawResolution"].get<unsigned int>();
 
-    try {
-      MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "MaxTOFNS: {}", MaxTOFNS);
-
-    try {
-      MaxRing = root["MaxRing"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
-    XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
-
-    try {
-      MaxFEN = root["MaxFEN"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "MaxFEN: {}", MaxFEN);
-    XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
-
-    try {
-      MaxGroup = root["MaxGroup"].get<unsigned int>();
-    } catch (...) {
-      // Use default value
-    }
-    LOG(INIT, Sev::Info, "MaxGroup: {}", MaxGroup);
-    XTRACE(INIT, DEB, "MaxGroup: %u", MaxGroup);
-
-    if (InstrumentName == "loki") {
-      auto PanelConfig = root["PanelConfig"];
-      for (auto &Mapping : PanelConfig) {
-        XTRACE(INIT, DEB, "Loading panel");
-        auto Bank = Mapping["Bank"].get<unsigned int>();
-        bool Vertical = Mapping["Vertical"].get<bool>();
-        auto GroupsZ = Mapping["GroupsZ"].get<unsigned int>();
-        auto GroupsN = Mapping["GroupsN"].get<unsigned int>();
-        auto UnitOffset = Mapping["StrawOffset"].get<unsigned int>();
-
-        NGroupsTotal += GroupsZ * GroupsN;
-        LOG(INIT, Sev::Info, "NGroupsTotal: {}", NGroupsTotal);
-
-        LOG(INIT, Sev::Info,
-            "JSON config - Detector {}, Bank {}, Vertical {}, GroupsZ {}, "
-            "GroupsN "
-            "{}, UnitOffset {}",
-            InstrumentName, Bank, Vertical, GroupsZ, GroupsN, UnitOffset);
-
-        XTRACE(INIT, DEB,
-               "JSON config - GroupsZ %u, GroupsN %u "
-               ", UnitOffset %u",
-               GroupsZ, GroupsN, UnitOffset);
-
-        PanelGeometry Temp(GroupsZ, GroupsN, UnitOffset);
-        Panels.push_back(Temp);
+      try {
+        MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
       }
+      LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
+
+      try {
+        MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
+      }
+      LOG(INIT, Sev::Info, "MaxTOFNS: {}", MaxTOFNS);
+
+      try {
+        MaxRing = root["MaxRing"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
+      }
+      LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
+      XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
+
+      try {
+        MaxFEN = root["MaxFEN"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
+      }
+      LOG(INIT, Sev::Info, "MaxFEN: {}", MaxFEN);
+      XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
+
+      try {
+        MaxGroup = root["MaxGroup"].get<unsigned int>();
+      } catch (...) {
+        // Use default value
+      }
+      LOG(INIT, Sev::Info, "MaxGroup: {}", MaxGroup);
+      XTRACE(INIT, DEB, "MaxGroup: %u", MaxGroup);
+
+    } catch (...) {
+      LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
+          ConfigFileName);
+      throw std::runtime_error("Invalid Json file");
     }
-  } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
-        ConfigFileName);
-    throw std::runtime_error("Invalid Json file");
   }
 }
 
