@@ -71,6 +71,7 @@ protected:
   DataParser *Timepix3Parser;
   void SetUp() override { 
     counters = new Counters;
+    memset(counters, 0, sizeof(Counters));
     Timepix3Parser = new DataParser(*counters); }
   void TearDown() override {}
 };
