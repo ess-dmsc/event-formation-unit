@@ -85,6 +85,13 @@ TEST_F(Timepix3ParserTest, SinglePixelReadout) {
 }
 
 TEST_F(Timepix3ParserTest, TDCReadouts) {
+
+  EXPECT_EQ(counters->TDCReadouts, 0);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+
   auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
                                    TDC1RisingReadout.size());
   EXPECT_EQ(Res, 1);
