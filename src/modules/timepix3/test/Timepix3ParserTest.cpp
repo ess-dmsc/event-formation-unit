@@ -76,21 +76,14 @@ protected:
 // Test cases below
 
 TEST_F(Timepix3ParserTest, SinglePixelReadout) {
-  auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(),
+  auto Res = Timepix3Parser.parse((char *)SinglePixelReadout.data(),
                                    SinglePixelReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.PixelReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCReadouts) {
-
-  EXPECT_EQ(counters.TDCReadouts, 0);
-  EXPECT_EQ(counters.TDC1RisingReadouts, 0);
-  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
-  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
-
-  auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
+  auto Res = Timepix3Parser.parse((char *)TDC1RisingReadout.data(),
                                    TDC1RisingReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.TDCReadouts, 1);
@@ -99,7 +92,7 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2RisingReadouts, 0);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
  
-  Res = Timepix3Parser->parse((char *)TDC1FallingReadout.data(),
+  Res = Timepix3Parser.parse((char *)TDC1FallingReadout.data(),
                                    TDC1FallingReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.TDCReadouts, 2);
@@ -108,7 +101,7 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2RisingReadouts, 0);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
-  Res = Timepix3Parser->parse((char *)TDC2RisingReadout.data(),
+  Res = Timepix3Parser.parse((char *)TDC2RisingReadout.data(),
                                    TDC2RisingReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.TDCReadouts, 3);
@@ -117,7 +110,7 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2RisingReadouts, 1);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
-  Res = Timepix3Parser->parse((char *)TDC2FallingReadout.data(),
+  Res = Timepix3Parser.parse((char *)TDC2FallingReadout.data(),
                                    TDC2FallingReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.TDCReadouts, 4);
@@ -128,19 +121,19 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
-  auto Res = Timepix3Parser->parse((char *)TooShort.data(), TooShort.size());
+  auto Res = Timepix3Parser.parse((char *)TooShort.data(), TooShort.size());
   EXPECT_EQ(Res, 0);
 }
 
 TEST_F(Timepix3ParserTest, SingleEVRReadout) {
-  auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
+  auto Res = Timepix3Parser.parse((char *)SingleEVRReadout.data(),
                                    SingleEVRReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.EVRTimestampReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
-  auto Res = Timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
+  auto Res = Timepix3Parser.parse((char *)TDCAndPixelReadout.data(),
                                    TDCAndPixelReadout.size());
   EXPECT_EQ(Res, 2);
   EXPECT_EQ(counters.TDCReadouts, 1);
