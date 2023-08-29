@@ -65,6 +65,7 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
+    counters = {};
     timepix3 = new Timepix3Instrument(counters, Settings);
     timepix3->Serializer = new EV44Serializer(115000, "timepix3");
   }
