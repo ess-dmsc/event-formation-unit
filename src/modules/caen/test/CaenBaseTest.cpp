@@ -37,7 +37,6 @@ public:
     Settings.CalibFile = LOKI_CALIB;
   }
   void TearDown() override {}
-
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
 };
@@ -45,6 +44,7 @@ public:
 TEST_F(CaenBaseTest, LokiConstructor) {
   Settings.DetectorName = "loki";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -53,6 +53,7 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.CalibFile = BIFROST_CALIB;
   Settings.DetectorName = "bifrost";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -61,6 +62,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.CalibFile = MIRACLES_CALIB;
   Settings.DetectorName = "miracles";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -143,6 +145,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
   Settings.DetectorPort = 9000;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -163,6 +166,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
 
   Settings.DetectorPort = 9000;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -183,6 +187,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 
   Settings.DetectorPort = 9000;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -204,6 +209,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -232,6 +238,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -254,6 +261,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
