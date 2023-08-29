@@ -67,12 +67,9 @@ std::vector<uint8_t> TDCAndPixelReadout{
 
 class Timepix3ParserTest : public TestBase {
 protected:
-  struct Counters *counters;
-  DataParser *Timepix3Parser;
-  void SetUp() override { 
-    counters = new Counters;
-    memset(counters, 0, sizeof(Counters));
-    Timepix3Parser = new DataParser(*counters); }
+  struct Counters counters;
+  DataParser Timepix3Parser{counters};
+  void SetUp() override {counters = {}; }
   void TearDown() override {}
 };
 
