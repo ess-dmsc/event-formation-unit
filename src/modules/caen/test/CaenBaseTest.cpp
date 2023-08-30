@@ -18,16 +18,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
-class CaenBaseStandIn : public Caen::CaenBase {
-public:
-  CaenBaseStandIn(BaseSettings Settings, ESSReadout::Parser::DetectorType type)
-      : Caen::CaenBase(Settings, type){};
-  ~CaenBaseStandIn() = default;
-  using Detector::Threads;
-  using Caen::CaenBase::Counters;
-};
-
 class CaenBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
@@ -43,8 +33,7 @@ public:
 
 TEST_F(CaenBaseTest, LokiConstructor) {
   Settings.DetectorName = "loki";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
-  Readout.Counters = {};
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -52,7 +41,7 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
   Settings.DetectorName = "bifrost";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
@@ -61,7 +50,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
   Settings.DetectorName = "miracles";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
@@ -144,7 +133,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorName = "loki";
 
   Settings.DetectorPort = 9000;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.Counters = {};
   Readout.startThreads();
 
@@ -165,7 +154,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.CalibFile = BIFROST_CALIB;
 
   Settings.DetectorPort = 9000;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.Counters = {};
   Readout.startThreads();
 
@@ -186,7 +175,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.CalibFile = MIRACLES_CALIB;
 
   Settings.DetectorPort = 9000;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.Counters = {};
   Readout.startThreads();
 
@@ -208,7 +197,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.Counters = {};
   Readout.startThreads();
 
@@ -237,7 +226,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.Counters = {};
   Readout.startThreads();
 
@@ -260,7 +249,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Settings.DetectorPort = 9000;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.Counters = {};
   Readout.startThreads();
 
