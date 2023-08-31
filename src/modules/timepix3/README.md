@@ -1,5 +1,5 @@
 ## Brief description
-This module responsible to initialize an EFU capable to process raw UDP stearm form timepix3 camera and EVR. The EFU responsible to
+This module responsible to initialize an EFU which capable to process raw UDP stearm comming form timepix3 camera and EVR. The EFU responsible to
 1. check validity for each data packet.
 1. match the proper pulse time to TDC time from camera
 1. calculate the TOF of each pixel according to pulse time
@@ -13,7 +13,7 @@ This module responsible to initialize an EFU capable to process raw UDP stearm f
 * Geometry object could inherit from ESS geam to prevent uncessary object composition
 * DataPArser is accessed from different location which may not necessary
 
-Please see below the simiplifed class chart for short review.
+Please see below the manullay made and simiplifed class chart about the most important classes in the module for a short review.
 ## Class diagram of the detector module
 
 ```mermaid
