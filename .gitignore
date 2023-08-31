@@ -24,7 +24,7 @@ CMakeLists.txt.user
 .idea/
 .atom*
 *.code-workspace
-.cache/*
+.cache
 .vscode
 .devcontainer
 resources
