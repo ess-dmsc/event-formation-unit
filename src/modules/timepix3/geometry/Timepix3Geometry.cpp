@@ -15,7 +15,7 @@
 namespace Timepix3 {
 
 Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t nz, uint32_t np)
-    : ESSGeometry(nx, ny, nz, np){};
+    : ESSGeometry(nx, ny, nz, np){}
 
 uint32_t Timepix3Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "calculating pixel");
