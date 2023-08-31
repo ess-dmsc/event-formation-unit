@@ -1,0 +1,61 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.128.0/containers/cpp
+{
+    "name": "C++",
+    "dockerFile": "Dockerfile",
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined",
+        "--memory=8gb"
+    ],
+    "customizations": {
+        "vscode": {
+            // Set *default* container specific settings.json values on container create.
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "/bin/bash"
+                    }
+                }
+            },
+            // Extensions you want installed when the container is created.
+            "extensions": [
+                "ms-vscode.cpptools-extension-pack", // C++, CMake, CMake Tools
+                "matepek.vscode-catch2-test-adapter", // Test explorer
+                "ms-python.python",
+                "eamodio.gitlens",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-azuretools.vscode-docker",
+                "cmake.cmakePath"
+            ]
+        }
+    },
+
+    "features": {
+        // "ghcr.io/devcontainers/features/docker-in-docker:2": {
+        //     "dockerDashComposeVersion": "v2"
+        // }
+    },
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    "forwardPorts": [],
+
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": {
+        "conanProfile": "conan profile new default --detect",
+        "conanConfigInstall": "conan config install https://github.com/ess-dmsc/conan-configuration/archive/97569ca8ba0bfdc073f8ffb6f821ce3e7e644c61.zip",
+        "conanSetting": "conan config set general.revisions_enabled=True"
+    },
+
+    "postStartCommand": {
+        "conanLibcxx": "conan profile update settings.compiler.libcxx=libstdc++11 default"
+    },
+
+    "postAttachCommand": {
+    },
+
+    // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode"
+}
