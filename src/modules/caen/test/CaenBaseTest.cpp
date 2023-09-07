@@ -141,7 +141,7 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorName = "loki";
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9210;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.startThreads();
 
@@ -161,7 +161,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9211;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.startThreads();
 
@@ -181,7 +181,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9212;
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.startThreads();
 
@@ -200,7 +200,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorName = "loki";
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9213;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
@@ -228,7 +228,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9214;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
@@ -250,7 +250,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
 
-  Settings.DetectorPort = 9000;
+  Settings.DetectorPort = 9215;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);

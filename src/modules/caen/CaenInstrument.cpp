@@ -47,6 +47,10 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
         fmt::format("Invalid Detector Name {}", settings.DetectorName));
   }
 
+  if (Settings.CalibFile.empty()) {
+    throw std::runtime_error("Calibration file is required, none supplied");
+  }
+
   XTRACE(INIT, ALW, "Loading calibration file %s", Settings.CalibFile.c_str());
   Geom->CaenCDCalibration =
       CDCalibration(settings.DetectorName, Settings.CalibFile);
