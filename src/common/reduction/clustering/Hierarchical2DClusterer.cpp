@@ -68,7 +68,7 @@ void Hierarchical2DClusterer::cluster_by_x() {
                           (double)current_time_cluster_[j].y_coordinate;
 
       // Calculate distance according to d2 = dx2 + dy2 to remove sqrt calculation
-      double distance_sqr = sqrt(x_distance) + sqrt(y_distance);
+      double distance_sqr = sqr(x_distance) + sqr(y_distance);
       XTRACE(DATA, DEB,
              "Determined squere of the distance between points is %f, the squere of threshold is %u",
              distance_sqr, max_coord_gap_sqr_);
