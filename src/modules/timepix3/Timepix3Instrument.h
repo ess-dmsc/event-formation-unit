@@ -23,13 +23,6 @@
 
 namespace Timepix3 {
 
-struct TimepixHit {
-  uint32_t X;
-  uint32_t Y;
-  uint64_t TimeOfFlight;
-  uint16_t ToT;
-};
-
 class Timepix3Instrument {
 public:
   /// \brief 'create' the Timepix3 instruments
