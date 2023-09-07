@@ -14,8 +14,9 @@
 
 Hierarchical2DClusterer::Hierarchical2DClusterer(uint64_t max_time_gap,
                                                  uint16_t max_coord_gap)
-    : Abstract2DClusterer(), max_time_gap_(max_time_gap),
-      max_coord_gap_(max_coord_gap) {}
+    : Abstract2DClusterer(), max_time_gap_(max_time_gap), 
+    // Store the sqr of the max coord gap to reduce computation during clustering
+    max_coord_gap_(max_coord_gap), max_coord_gap_sqr_(sqr(max_coord_gap)) {}
 
 void Hierarchical2DClusterer::insert(const Hit2D &hit) {
   /// Process time-cluster if time gap to next hit is large enough
@@ -65,16 +66,18 @@ void Hierarchical2DClusterer::cluster_by_x() {
                           (double)current_time_cluster_[j].x_coordinate;
       double y_distance = (double)current_time_cluster_[i].y_coordinate -
                           (double)current_time_cluster_[j].y_coordinate;
-      double distance = sqrt(pow(x_distance, 2) + pow(y_distance, 2));
+
+      // Calculate distance according to d2 = dx2 + dy2 to remove sqrt calculation
+      double distance_sqr = sqrt(x_distance) + sqrt(y_distance);
       XTRACE(DATA, DEB,
-             "Determined distance between points is %f, threshold is %u",
-             distance, max_coord_gap_);
+             "Determined squere of the distance between points is %f, the squere of threshold is %u",
+             distance_sqr, max_coord_gap_sqr_);
       XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u",
              current_time_cluster_[i].x_coordinate,
              current_time_cluster_[j].x_coordinate,
              current_time_cluster_[i].y_coordinate,
              current_time_cluster_[j].y_coordinate);
-      if (distance < max_coord_gap_) {
+      if (distance_sqr < max_coord_gap_sqr_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
         space_cluster.push_back(
             current_time_cluster_[j]); // add point to current cluster

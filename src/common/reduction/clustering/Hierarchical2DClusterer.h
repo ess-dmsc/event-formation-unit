@@ -11,6 +11,7 @@
 
 #include <common/reduction/clustering/Abstract2DClusterer.h>
 #include <common/reduction/multigrid/ModuleGeometry.h>
+#include <cstdint>
 
 /// \todo update documentation for 2D version
 
@@ -50,12 +51,18 @@ public:
   /// \brief print current status of Hierarchical2DClusterer
   std::string status(const std::string &prepend, bool verbose) const override;
 
+
 private:
-  uint64_t max_time_gap_;
-  uint16_t max_coord_gap_;
+  uint64_t const max_time_gap_;
+
+  uint16_t const max_coord_gap_, max_coord_gap_sqr_;
 
   Hit2DVector
       current_time_cluster_; ///< kept in memory until time gap encountered
+
+  inline double sqr(double number) {
+    return number * number;
+  };
 
   // current_space_cluster_ todo, add here
 
