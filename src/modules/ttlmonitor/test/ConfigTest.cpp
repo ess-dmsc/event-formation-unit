@@ -80,7 +80,7 @@ TEST_F(TTLMonitorConfigTest, RingAndFENConfig) {
 TEST_F(TTLMonitorConfigTest, FullInstrument) {
   config = Config(TTLMON_FULL);
   config.loadAndApply();
-  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::FREIA);
+  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::TTLMonitor);
   ASSERT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   ASSERT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
 }
