@@ -250,7 +250,6 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
-  Readout.Counters = {};
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
