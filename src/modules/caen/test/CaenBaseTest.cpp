@@ -133,7 +133,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorName = "loki";
 
   Settings.DetectorPort = 9210;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -153,7 +153,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.CalibFile = BIFROST_CALIB;
 
   Settings.DetectorPort = 9211;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -173,7 +173,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.CalibFile = MIRACLES_CALIB;
 
   Settings.DetectorPort = 9212;
-  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
