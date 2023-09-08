@@ -133,8 +133,7 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
   Settings.DetectorName = "loki";
 
   Settings.DetectorPort = 9210;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
-  Readout.Counters = {};
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::LOKI);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -154,8 +153,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.CalibFile = BIFROST_CALIB;
 
   Settings.DetectorPort = 9211;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
-  Readout.Counters = {};
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::BIFROST);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -174,9 +172,8 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
 
-  Settings.DetectorPort = 9213;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
-  Readout.Counters = {};
+  Settings.DetectorPort = 9212;
+  CaenBaseStandIn Readout(Settings, ESSReadout::Parser::MIRACLES);
   Readout.startThreads();
 
   std::this_thread::sleep_for(SleepTime);
@@ -193,8 +190,8 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   XTRACE(DATA, DEB, "Running DataReceiveGood test");
   Settings.DetectorName = "loki";
-
-  Settings.DetectorPort = 9214;
+  
+  Settings.DetectorPort = 9213;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
@@ -223,7 +220,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
 
-  Settings.DetectorPort = 9215;
+  Settings.DetectorPort = 9214;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
@@ -246,7 +243,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
 
-  Settings.DetectorPort = 9216;
+  Settings.DetectorPort = 9215;
   Settings.UpdateIntervalSec = 0;
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
