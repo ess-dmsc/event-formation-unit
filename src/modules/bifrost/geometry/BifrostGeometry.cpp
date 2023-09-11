@@ -27,7 +27,7 @@ BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
-        Data.FENId, Data.Group);
+         Data.FENId, Data.Group);
 
   if (Ring > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);

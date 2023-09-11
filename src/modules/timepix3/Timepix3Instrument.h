@@ -13,11 +13,13 @@
 
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
+#include <common/reduction/Hit2DVector.h>
+#include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <readout/DataParser.h>
 #include <timepix3/Counters.h>
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
 #include <timepix3/geometry/Config.h>
-#include <timepix3/geometry/Geometry.h>
+#include <timepix3/geometry/Timepix3Geometry.h>
 
 namespace Timepix3 {
 
@@ -37,14 +39,16 @@ public:
   /// \brief Sets the serializer to send events to
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
-  /// \brief Timepix3 pixel calculations
+  /// \brief calculate pixel ID from a Timepix3PixelReadout
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
 
-  /// \brief Timepix3 tof calculations
+  /// \brief calculate the ToF (difference between pulse time and time of
+  /// arrival) from a single Timepix3PixelReadout
   uint64_t calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data);
 
-  /// \brief writes a single readout to file
-  void dumpReadoutToFile(DataParser::Timepix3PixelReadout &Data);
+  /// \brief from the clusters in Clusterer, check if they meet requirements to
+  /// be an event, and if so serialize them
+  void generateEvents();
 
 public:
   /// \brief Stuff that 'ties' Timepix3 together
@@ -53,12 +57,10 @@ public:
   Config Timepix3Configuration;
   BaseSettings &Settings;
   DataParser Timepix3Parser{counters};
-  Geometry *Geom;
+  Timepix3Geometry *Geom;
   EV44Serializer *Serializer;
-  uint32_t MaxTimeGapNS{10};
-  uint32_t MinEventSizeHits{1};
-  uint32_t MinimumToTSum{500};
-  // TODO, fix this std::shared_ptr<ReadoutFile> DumpFile;
+  Hierarchical2DClusterer *Clusterer;
+  Hit2DVector AllHitsVector;
 };
 
 } // namespace Timepix3

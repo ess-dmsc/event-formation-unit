@@ -1,5 +1,6 @@
 {
   "Detector": "timepix3",
-  "XResolution" : 256,
-  "YResolution" : 256
+  "XResolution": 256,
+  "YResolution": 256,
+  "MaxTimeGapNS": 500
 }

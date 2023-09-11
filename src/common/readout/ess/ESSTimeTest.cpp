@@ -126,7 +126,6 @@ TEST_F(ESSTimeTest, Issue2021_11_08) {
 
 } // namespace ESSReadout
 
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

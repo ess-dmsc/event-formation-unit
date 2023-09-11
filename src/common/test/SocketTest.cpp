@@ -11,7 +11,6 @@ std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3", "1.2",
 
 class SocketTest : public ::testing::Test
 {
-
 protected:
   const int TEST_PORT_NUMBER = 8922;
 
@@ -25,6 +24,7 @@ protected:
     struct sockaddr_in serv_addr;
 
     ASSERT_GE(socketFileDescriptor, 0) << "Cannot create test socket during the SetUp() phase of the tests.";
+
 
     // Setup local address and port for start listening server
     bzero((char *)&serv_addr, sizeof(serv_addr));
@@ -94,6 +94,7 @@ TEST_F(SocketTest, InetAtonInvalidIP)
   ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000),
                std::runtime_error);
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
+
   ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000),
                std::runtime_error);
 }
@@ -116,6 +117,7 @@ TEST_F(SocketTest, IsMulticast)
 // service during the setup phase.
 TEST_F(SocketTest, TCPTransmitter)
 {
+
   char DummyData[]{0x01, 0x02, 0x03, 0x04};
   TCPTransmitter Xmitter("127.0.0.1", TEST_PORT_NUMBER);
   auto res = Xmitter.senddata(DummyData, 0);

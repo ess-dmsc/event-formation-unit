@@ -20,30 +20,35 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
-class Geometry {
+class Timepix3Geometry : public ESSGeometry {
+
 public:
-  /// \brief sets the pixel resolution of a straw
-  /// \param Resolution integer value to set straw resolution to
+  Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t nz, uint32_t np);
+
+  /// \brief sets the pixel resolution of the camera in x plane
+  /// \param Resolution integer value to set camera resolution to
   void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
+
+  /// \brief sets the pixel resolution of the camera in y plane
+  /// \param Resolution integer value to set camera resolution to
   void setYResolution(uint16_t Resolution) { YResolution = Resolution; }
 
   /// \brief calculates an integer pixel value from a Timepix3PixelReadout
-  /// object \param Data Timepix3PixelReadout object, containing ADC value
-  /// information,
-  ///         TubeID, and other information needed to determine pixel of
-  ///         event. If a Calibration has been set, it will be applied here.
+  /// object \param Data Timepix3PixelReadout object
   uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
-
-  uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
-
-  uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data Timepix3PixelReadout to check validity of.
   bool validateData(DataParser::Timepix3PixelReadout &Data);
+  
+  /// \brief calculated the X coordinate from a Timepix3PixelReadout
+  uint32_t calcX(DataParser::Timepix3PixelReadout &Data);
 
-  ESSGeometry *ESSGeom;
-  std::uint16_t XResolution{512}; ///< resolution of X axis
-  std::uint16_t YResolution{512}; ///< resolution of Y axis
+  /// \brief calculated the Y coordinate from a Timepix3PixelReadout
+  uint32_t calcY(DataParser::Timepix3PixelReadout &Data);
+
+private:
+  std::uint16_t XResolution; ///< resolution of X axis
+  std::uint16_t YResolution; ///< resolution of Y axis
 };
 } // namespace Timepix3

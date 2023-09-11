@@ -93,8 +93,7 @@ add_custom_target(runefu
     COMMAND freia    "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND trex     "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
     COMMAND ttlmonitor "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
-    COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
-
-    COMMAND odin "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
-    DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx cspec odin
+    COMMAND nmx "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
+    COMMAND timepix3 "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
+    DEPENDS copycfgs dream loki bifrost miracles freia trex ttlmonitor nmx cspec timepix3
     )

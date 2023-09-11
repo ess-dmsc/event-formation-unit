@@ -25,12 +25,12 @@ public:
   Config(std::string ConfigFile);
 
   std::string InstrumentName;
-  uint8_t NPanels{0};      // Timepix3 panels, not logical geometry panels
-  uint16_t NGroupsTotal{0}; // total number of groups in instrument
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
-  uint32_t ReadoutConstDelayNS{0};         /// added to readout data timestamp
-  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
-  uint32_t MaxTOFNS{800000000};
+
+  uint32_t MaxTimeGapNS{1};
+  uint32_t MinEventSizeHits{1};
+  uint32_t MinimumToTSum{0};
+  uint16_t MaxCoordinateGap{5};
 };
 } // namespace Timepix3

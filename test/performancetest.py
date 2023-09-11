@@ -44,11 +44,16 @@ def assess_performance(efu, generator, module, throttle):
 
 
 def bisect_throttle_settings(efu, generator, module, throttle):
+    stat_name_list = [f"efu.{module}.0.receive.packets", f"efu.{module}.0.readouts.count", f"efu.{module}.0.events.count"]
+
     packets_dropped = 0
     min_throttle = 0
     max_throttle = 1000
     for x in range(10):
         new_packets_dropped = efu_drop_packets_check(efu, generator, module, throttle)
+        stats = get_stats(stat_name_list)
+        print(stats)
+        print(new_packets_dropped)
         if new_packets_dropped == packets_dropped:
             print(f"Passed at throttle: {throttle}")
             max_throttle = throttle

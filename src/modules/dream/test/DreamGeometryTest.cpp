@@ -47,7 +47,7 @@ TEST_F(DreamGeometryTest, GetPixel) {
 
 TEST_F(DreamGeometryTest, GetPixelError) {
   Parms.Type = Config::ModuleType::PA;
-  Readout.UnitId= 6;
+  Readout.UnitId = 6;
   ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
 }
 

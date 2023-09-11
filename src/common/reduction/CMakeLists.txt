@@ -10,7 +10,10 @@ add_subdirectory(multigrid)
 set(reduction_obj_SRC
   Hit.cpp
   HitVector.cpp
+  Hit2D.cpp
+  Hit2DVector.cpp
   Cluster.cpp
+  Cluster2D.cpp
   Event.cpp
   EventBuilder2D.cpp
   ReducedEvent.cpp
@@ -20,8 +23,11 @@ set(reduction_obj_SRC
 
 set(reduction_obj_INC
   Hit.h
-  HitVector.h
+  HitVector.h 
+  Hit2D.h
+  Hit2DVector.h
   Cluster.h
+  Cluster2D.h
   Event.h
   EventBuilder2D.h
   ReducedEvent.h

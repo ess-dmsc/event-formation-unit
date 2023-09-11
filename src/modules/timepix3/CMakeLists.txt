@@ -11,14 +11,14 @@ set(timepix3_common_inc
   Timepix3Base.h
   Timepix3Instrument.h
   geometry/Config.h
-  geometry/Geometry.h
+  geometry/Timepix3Geometry.h
   readout/DataParser.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp
-  geometry/Geometry.cpp
+  geometry/Timepix3Geometry.cpp
   readout/DataParser.cpp
   )
 
@@ -31,13 +31,13 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(timepix3_common "-Wl,--no-as-needed")
 endif()
 
-set(odin_INC ${timepix3_common_inc})
-set(odin_SRC
+set(timepix3_INC ${timepix3_common_inc})
+set(timepix3_SRC
   ${timepix3_common_src}
   main.cpp
   )
-set(odin_LIB efu_reduction efu_essreadout)
-create_executable(odin)
+set(timepix3_LIB efu_reduction efu_essreadout)
+create_executable(timepix3)
 
 
 ##
@@ -62,3 +62,23 @@ set(Timepix3BaseTest_SRC
 )
 create_test_executable(Timepix3BaseTest)
 target_compile_definitions(Timepix3BaseTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
+
+set(Timepix3ParserTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3ParserTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3ParserTest.cpp
+)
+create_test_executable(Timepix3ParserTest)
+
+set(Timepix3GeometryTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3GeometryTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3GeometryTest.cpp
+)
+create_test_executable(Timepix3GeometryTest)
+
+

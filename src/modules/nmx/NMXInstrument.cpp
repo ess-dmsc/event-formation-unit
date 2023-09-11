@@ -98,8 +98,7 @@ void NMXInstrument::processReadouts(void) {
     // Convert from fiberid to ringid
     int Ring = readout.FiberId / 2;
     uint8_t HybridId = readout.VMM >> 1;
-    ESSReadout::Hybrid &Hybrid =
-        Conf.getHybrid(Ring, readout.FENId, HybridId);
+    ESSReadout::Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, ALW,

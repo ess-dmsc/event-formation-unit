@@ -35,8 +35,11 @@ def run_efu(efu, module, config, calib, topic="default_topic"):
 
 def run_data_generator(efu, generator, packets, throttle):
     print("Running Data Generator")
+    packet_options = ""
+    if (generator[:11] != "udpgen_pcap"):
+        packet_options = f"-a {packets} -o 50"
     generator_process = subprocess.Popen(
-        f"{efu}/generators/{generator} -a {packets} -o 50 -t {int(throttle)}",
+        f"{efu}/generators/{generator} {packet_options} -t {int(throttle)}",
         shell=True,
     )
     exit_code = generator_process.wait()
@@ -46,8 +49,12 @@ def run_data_generator(efu, generator, packets, throttle):
 
 def run_data_generator_timed(efu, generator, throttle, readouts_per_packet, time_s):
     print("Running Data Generator")
+    packet_options = ""
+    if (generator[:11] != "udpgen_pcap"):
+        packet_options = f"-o {readouts_per_packet}"
+    print(f"{efu}/generators/{generator} -l {packet_options} -t {int(throttle)}")
     generator_process = subprocess.Popen(
-        f"{efu}/generators/{generator} -l -o {readouts_per_packet} -t {int(throttle)}",
+        f"{efu}/generators/{generator} -l {packet_options}  -t {int(throttle)}",
         shell=True,
     )
     time.sleep(time_s)

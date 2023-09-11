@@ -46,6 +46,30 @@ Config::Config(std::string ConfigFile) {
         ConfigFile);
     throw std::runtime_error("Invalid Json file");
   }
+
+  try {
+    MaxTimeGapNS = root["MaxTimeGapNS"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MaxTimeGapNS");
+  }
+
+  try {
+    MinEventSizeHits = root["MinEventSizeHits"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MinEventSizeHits");
+  }
+
+  try {
+    MinimumToTSum = root["MinimumToTSum"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MinimumToTSum");
+  }
+
+  try {
+    MaxCoordinateGap = root["MaxCoordinateGap"].get<uint16_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default MaxCoordinateGap");
+  }
 }
 
 } // namespace Timepix3

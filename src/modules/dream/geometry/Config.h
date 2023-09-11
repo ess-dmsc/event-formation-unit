@@ -24,8 +24,8 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum DetectorInstance { NONE, DREAM, MAGIC};
-  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, FR, PA};
+  enum DetectorInstance { NONE, DREAM, MAGIC };
+  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, FR, PA };
   // clang-format off
   std::map<std::string, ModuleType> ModuleTypeMap = {
       // DREAM Detectors

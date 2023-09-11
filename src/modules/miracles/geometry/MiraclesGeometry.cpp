@@ -37,8 +37,7 @@ uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
 
 bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
-  XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId,
-         Data.Group);
+  XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId, Data.Group);
 
   if (Ring > MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);

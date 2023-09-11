@@ -109,11 +109,12 @@ void TREXInstrument::processReadouts(void) {
 
     uint8_t HybridId = readout.VMM >> 1;
 
-    XTRACE(DATA, DEB,
-           "readout: FiberId %d, Ring %d, FENId %d, HybridId %d, VMM %d, Channel "
-           "%d, TimeLow %d",
-           readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM, readout.Channel,
-           readout.TimeLow);
+    XTRACE(
+        DATA, DEB,
+        "readout: FiberId %d, Ring %d, FENId %d, HybridId %d, VMM %d, Channel "
+        "%d, TimeLow %d",
+        readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM,
+        readout.Channel, readout.TimeLow);
 
     ESSReadout::Hybrid const &Hybrid =
         Conf.getHybrid(Ring, readout.FENId, HybridId);
