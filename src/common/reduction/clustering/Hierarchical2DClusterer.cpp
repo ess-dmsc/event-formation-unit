@@ -67,7 +67,7 @@ void Hierarchical2DClusterer::cluster_by_x() {
       double y_distance = (double)current_time_cluster_[i].y_coordinate -
                           (double)current_time_cluster_[j].y_coordinate;
 
-      // Calculate distance according to d2 = dx2 + dy2 to remove sqrt calculation
+      // Calculate distance according to d^2 = dx^2 + dy^2 to remove sqrt calculation
       double distance_sqr = sqr(x_distance) + sqr(y_distance);
       XTRACE(DATA, DEB,
              "Determined squere of the distance between points is %f, the squere of threshold is %u",
@@ -77,6 +77,8 @@ void Hierarchical2DClusterer::cluster_by_x() {
              current_time_cluster_[j].x_coordinate,
              current_time_cluster_[i].y_coordinate,
              current_time_cluster_[j].y_coordinate);
+      
+      // Compare with the squere of the max_coord_gap to save computation time on sqrt above
       if (distance_sqr < max_coord_gap_sqr_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
         space_cluster.push_back(
