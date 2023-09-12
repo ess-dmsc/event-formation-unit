@@ -75,6 +75,13 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for NumberOfMonitors");
   }
   LOG(INIT, Sev::Info, "NumberOfMonitors {}", Parms.NumberOfMonitors);
+
+  try {
+    Parms.MonitorOffset = root["MonitorOffset"].get<int>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default value for MonitorOffset");
+  }
+  LOG(INIT, Sev::Info, "MonitorOffset {}", Parms.MonitorOffset);
 }
 
 } // namespace TTLMonitor
