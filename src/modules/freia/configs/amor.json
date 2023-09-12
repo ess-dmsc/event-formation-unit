@@ -2,27 +2,27 @@
 {
   "Detector" : "Freia",
 
-  "Comment" : "Updated after mail exchange with F. Piscitelli in August 2023",
+  "Comment" : "Updated after Zoom mtd. with Piscitelli & Farnaz, September 2023",
 
   "InstrumentGeometry" : "AMOR",
 
   "WireChOffset" : 16,
 
   "Config" : [
-    { "CassetteNumber":  0, "Ring" :  2, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "CassetteNumber":  1, "Ring" :  2, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "CassetteNumber":  2, "Ring" :  2, "FEN": 0, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000002"},
-    { "CassetteNumber":  3, "Ring" :  2, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000003"},
-    { "CassetteNumber":  4, "Ring" :  1, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
-    { "CassetteNumber":  5, "Ring" :  1, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"},
+    { "CassetteNumber":  0, "Ring" :  2, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000000"},
+    { "CassetteNumber":  1, "Ring" :  2, "FEN": 0, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000001"},
+    { "CassetteNumber":  2, "Ring" :  2, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000002"},
+    { "CassetteNumber":  3, "Ring" :  2, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000003"},
+    { "CassetteNumber":  4, "Ring" :  1, "FEN": 0, "Hybrid" :  4, "HybridId" : "E5533333222222221111111100000004"},
+    { "CassetteNumber":  5, "Ring" :  1, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000005"},
     { "CassetteNumber":  6, "Ring" :  1, "FEN": 0, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000006"},
-    { "CassetteNumber":  7, "Ring" :  1, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000007"},
-    { "CassetteNumber":  8, "Ring" :  1, "FEN": 0, "Hybrid" :  4, "HybridId" : "E5533333222222221111111100000008"},
-    { "CassetteNumber":  9, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000009"},
-    { "CassetteNumber": 10, "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000010"},
+    { "CassetteNumber":  7, "Ring" :  1, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
+    { "CassetteNumber":  8, "Ring" :  1, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000008"},
+    { "CassetteNumber":  9, "Ring" :  0, "FEN": 0, "Hybrid" :  4, "HybridId" : "E5533333222222221111111100000009"},
+    { "CassetteNumber": 10, "Ring" :  0, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000010"},
     { "CassetteNumber": 11, "Ring" :  0, "FEN": 0, "Hybrid" :  2, "HybridId" : "E5533333222222221111111100000011"},
-    { "CassetteNumber": 12, "Ring" :  0, "FEN": 0, "Hybrid" :  3, "HybridId" : "E5533333222222221111111100000012"},
-    { "CassetteNumber": 13, "Ring" :  0, "FEN": 0, "Hybrid" :  4, "HybridId" : "E5533333222222221111111100000013"}
+    { "CassetteNumber": 12, "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000012"},
+    { "CassetteNumber": 13, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000013"}
   ],
 
   "MaxPulseTimeNS" : 2071428570,
