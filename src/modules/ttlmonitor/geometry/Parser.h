@@ -64,6 +64,6 @@ public:
   struct ParserStats Stats;
 
 private:
-  const uint16_t DataLength{16};
+  const uint16_t DataLength{20};
 };
 } // namespace TTLMonitor
