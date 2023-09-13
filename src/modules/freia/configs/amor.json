@@ -26,6 +26,6 @@
   ],
 
   "MaxPulseTimeNS" : 2071428570,
-  "MaxGapWire"  : 0,
-  "MaxGapStrip" : 0
+  "MaxGapWire"  : 1,
+  "MaxGapStrip" : 1
 }
