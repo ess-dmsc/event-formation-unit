@@ -69,11 +69,11 @@ void NMXInstrument::loadConfigAndCalib() {
           Conf.NMXFileParameters.SplitMultiEventsCoefficientHigh);
     }
   }
-  /// \todo Add calibration processing
-  // if (Settings.CalibFile != "") {
-  //   XTRACE(INIT, ALW, "Loading and applying calibration file");
-  //   Conf.loadAndApplyCalibration(Settings.CalibFile);
-  // }
+
+  if (Settings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file %s", Settings.CalibFile.c_str());
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
+  }
 }
 
 void NMXInstrument::processReadouts(void) {

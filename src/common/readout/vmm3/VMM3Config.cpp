@@ -125,17 +125,18 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   auto Calibrations = calib_root["Calibrations"];
 
   if (Name != ExpectedName) {
-    throw std::runtime_error("Calibration file is for incorrect detector");
+    throw std::runtime_error(fmt::format("Bad name {}, expected {}", Name, ExpectedName));
   }
 
   if (Version != 1) {
-    throw std::runtime_error("Unsupported calibration file version");
+    throw std::runtime_error(fmt::format("Unsupported calibration file version {}, expected 1", Version));
   }
 
   for (auto &Calibration : Calibrations) {
+    int HybridIndex = Calibration["VMMHybridCalibration"]["HybridIndex"];
     std::string HybridId = Calibration["VMMHybridCalibration"]["HybridId"];
     if (!validHybridId(HybridId)) {
-      throw std::runtime_error("Invalid HybridID in Calibration file");
+      throw std::runtime_error(fmt::format("Invalid HybridID {} for Index {} in Calibration file", HybridId, HybridIndex));
     }
     applyCalibration(HybridId, Calibration);
   }
