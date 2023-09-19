@@ -84,15 +84,18 @@ void FreiaInstrument::loadConfigAndCalib() {
 }
 
 void FreiaInstrument::processReadouts(void) {
+  //printf("====================================================\n");
+  //printf("=================== NEW PACKET =====================\n");
+  //printf("====================================================\n");
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
   Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time
-          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+      /// \todo sometimes PrevPulseTime maybe?
+      ESSReadoutParser.Packet.Time.TimeInNS);
 
-  XTRACE(DATA, DEB, "processReadouts()");
+  //XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
 
     if (DumpFile) {
@@ -159,7 +162,7 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      XTRACE(DATA, DEB,
+      XTRACE(DATA, INF,
              "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
              TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel),
              readout.Channel, ADC);
@@ -170,7 +173,7 @@ void FreiaInstrument::processReadouts(void) {
       ADCHist.bin_x(GlobalXChannel, ADC);
 
     } else { // implicit isYCoord
-      XTRACE(DATA, DEB,
+      XTRACE(DATA, INF,
              "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
              TimeNS, PlaneY,
              Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
@@ -191,7 +194,7 @@ void FreiaInstrument::processReadouts(void) {
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
-  XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
+  //XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &e : Events) {
     if (e.empty()) {
       XTRACE(EVENT, DEB, "Empty event");
@@ -230,7 +233,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     counters.EventsMatchedClusters++;
-    XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
+    XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
     uint64_t EventTime = e.timeStart();
