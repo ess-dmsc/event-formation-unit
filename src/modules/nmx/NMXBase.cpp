@@ -91,10 +91,10 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
   Stats.create("cluster.matched_x_only", Counters.ClustersMatchedXOnly);
   Stats.create("cluster.matched_y_only", Counters.ClustersMatchedYOnly);
-  Stats.create("cluster.span.x_too_large", Counters.ClustersTooLargeXSpan);
-  Stats.create("cluster.span.y_too_large", Counters.ClustersTooLargeYSpan);
-  Stats.create("cluster.span.x_too_small", Counters.ClustersTooSmallXSpan);
-  Stats.create("cluster.span.y_too_small", Counters.ClustersTooSmallYSpan);
+  Stats.create("cluster.span.x_too_large", Counters.ClustersTooLargeSpanX);
+  Stats.create("cluster.span.y_too_large", Counters.ClustersTooLargeSpanY);
+  Stats.create("cluster.span.x_too_small", Counters.ClustersTooSmallSpanX);
+  Stats.create("cluster.span.y_too_small", Counters.ClustersTooSmallSpanY);
   Stats.create("cluster.matcherstats.span_too_large", Counters.MatcherStats.SpanTooLarge);
   Stats.create("cluster.matcherstats.discared_span_too_large", Counters.MatcherStats.DiscardedSpanTooLarge);
   Stats.create("cluster.matcherstats.split_span_too_large", Counters.MatcherStats.SplitSpanTooLarge);

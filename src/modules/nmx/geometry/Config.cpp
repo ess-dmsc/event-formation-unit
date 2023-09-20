@@ -40,46 +40,46 @@ void Config::applyConfig() {
   LOG(INIT, Sev::Info, "Size Y {}", NMXFileParameters.SizeY);
 
   try {
-    NMXFileParameters.MaxXSpan = root["MaxXSpan"].get<uint16_t>();
+    NMXFileParameters.MaxSpanX = root["MaxSpanX"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxXSpan");
+    LOG(INIT, Sev::Info, "Using default value for MaxSpanX");
   }
-  LOG(INIT, Sev::Info, "MaxXSpan {}", NMXFileParameters.MaxXSpan);
+  LOG(INIT, Sev::Info, "MaxSpanX {}", NMXFileParameters.MaxSpanX);
 
   try {
-    NMXFileParameters.MaxYSpan = root["MaxYSpan"].get<uint16_t>();
+    NMXFileParameters.MaxSpanY = root["MaxSpanY"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxYSpan");
+    LOG(INIT, Sev::Info, "Using default value for MaxSpanY");
   }
-  LOG(INIT, Sev::Info, "MaxYSpan {}", NMXFileParameters.MaxYSpan);
+  LOG(INIT, Sev::Info, "MaxSpanY {}", NMXFileParameters.MaxSpanY);
 
   try {
-    NMXFileParameters.MinXSpan = root["MinXSpan"].get<uint16_t>();
+    NMXFileParameters.MinSpanX = root["MinSpanX"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MinXSpan");
+    LOG(INIT, Sev::Info, "Using default value for MinSpanX");
   }
-  LOG(INIT, Sev::Info, "MinXSpan {}", NMXFileParameters.MinXSpan);
+  LOG(INIT, Sev::Info, "MinSpanX {}", NMXFileParameters.MinSpanX);
 
   try {
-    NMXFileParameters.MinYSpan = root["MinYSpan"].get<uint16_t>();
+    NMXFileParameters.MinSpanY = root["MinSpanY"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MinYSpan");
+    LOG(INIT, Sev::Info, "Using default value for MinSpanY");
   }
-  LOG(INIT, Sev::Info, "MinYSpan {}", NMXFileParameters.MinYSpan);
+  LOG(INIT, Sev::Info, "MinSpanY {}", NMXFileParameters.MinSpanY);
 
   try {
-    NMXFileParameters.MaxXGap = root["MaxXGap"].get<uint16_t>();
+    NMXFileParameters.MaxGapX = root["MaxGapX"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxXGap");
+    LOG(INIT, Sev::Info, "Using default value for MaxGapX");
   }
-  LOG(INIT, Sev::Info, "MaxXGap {}", NMXFileParameters.MaxXGap);
+  LOG(INIT, Sev::Info, "MaxGapX {}", NMXFileParameters.MaxGapX);
 
   try {
-    NMXFileParameters.MaxYGap = root["MaxYGap"].get<uint16_t>();
+    NMXFileParameters.MaxGapY = root["MaxGapY"].get<uint16_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxYGap");
   }
-  LOG(INIT, Sev::Info, "MaxYGap {}", NMXFileParameters.MaxYGap);
+  LOG(INIT, Sev::Info, "MaxGapY {}", NMXFileParameters.MaxGapY);
 
   try {
     NMXFileParameters.MaxMatchingTimeGap =
