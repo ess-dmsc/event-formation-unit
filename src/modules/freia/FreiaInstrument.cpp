@@ -16,7 +16,7 @@
 #include <freia/FreiaInstrument.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+// #define TRC_LEVEL TRC_L_INF
 
 namespace Freia {
 
@@ -84,9 +84,7 @@ void FreiaInstrument::loadConfigAndCalib() {
 }
 
 void FreiaInstrument::processReadouts(void) {
-  //printf("====================================================\n");
-  //printf("=================== NEW PACKET =====================\n");
-  //printf("====================================================\n");
+  XTRACE(DATA, DEB,"\n================== NEW PACKET =====================\n\n");
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
@@ -202,7 +200,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (!e.both_planes()) {
-      XTRACE(EVENT, DEB, "Event has no coincidence");
+      XTRACE(EVENT, DEB,"\n================== NO COINCIDENCE =====================\n\n");
+      XTRACE(EVENT, DEB, "Event has no coincidence\n %s\n", e.to_string({}, true).c_str());
       counters.EventsNoCoincidence++;
 
       if (not e.ClusterB.empty()) {
