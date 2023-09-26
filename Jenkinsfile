@@ -328,7 +328,7 @@ if (env.CHANGE_ID) {
             """
         }  // stage
     }  // node
-    node('inttest'){
+    node('perftest'){
         stage('Performance Test'){
             sh "rm -rf build"
             checkout scm
