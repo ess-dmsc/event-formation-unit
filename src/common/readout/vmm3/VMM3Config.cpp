@@ -108,10 +108,10 @@ void VMM3Config::applyVMM3Config() {
         "JSON config - Detector has {} cassettes/hybrids and {} pixels",
         NumHybrids, NumPixels);
   } catch (...) {
-    auto Message = fmt::format("JSON config - error: Invalid Config file: {}",FileName);
+    auto Message = fmt::format("JSON config - error: Invalid Config file: {}", FileName);
     XTRACE(INIT, ERR, "%s", Message.c_str());
     LOG(INIT, Sev::Error, Message);
-    throw std::runtime_error("Message");
+    throw std::runtime_error(Message);
   }
 }
 
@@ -120,7 +120,7 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   try {
     calib_root = from_json_file(CalibFile);
   } catch (...) {
-    std::string Message = "Error loading json calibration file";
+    auto Message = fmt::format("Error loading json calibration file {}", CalibFile);
     LOG(INIT, Sev::Error, Message.c_str());
     throw std::runtime_error(Message);
   }
