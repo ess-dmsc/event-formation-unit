@@ -69,11 +69,11 @@ void NMXInstrument::loadConfigAndCalib() {
           Conf.NMXFileParameters.SplitMultiEventsCoefficientHigh);
     }
   }
-  /// \todo Add calibration processing
-  // if (Settings.CalibFile != "") {
-  //   XTRACE(INIT, ALW, "Loading and applying calibration file");
-  //   Conf.loadAndApplyCalibration(Settings.CalibFile);
-  // }
+
+  if (Settings.CalibFile != "") {
+    XTRACE(INIT, ALW, "Loading and applying calibration file %s", Settings.CalibFile.c_str());
+    Conf.loadAndApplyCalibration(Settings.CalibFile);
+  }
 }
 
 void NMXInstrument::processReadouts(void) {
@@ -81,9 +81,8 @@ void NMXInstrument::processReadouts(void) {
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
   assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time
-          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+  /// \todo sometimes PrevPulseTime maybe?
+  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
     if (DumpFile) {
@@ -116,7 +115,7 @@ void NMXInstrument::processReadouts(void) {
         Conf.ReversedChannels[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
-    //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
+    //VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS =
         ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -133,16 +132,15 @@ void NMXInstrument::processReadouts(void) {
     uint16_t ADC = readout.OTADC & 0x3FF;
 
     if (ADC < MinADC) {
-      XTRACE(DATA, ERR, "Under MinADC value, got %u, minimum is %u", ADC,
-             MinADC);
+      XTRACE(DATA, INF, "Under MinADC value, got %u, minimum is %u", ADC, MinADC);
       counters.MinADC++;
       continue;
     } else {
-      XTRACE(DATA, DEB, "Valid ADC %u, min is %u", ADC, MinADC);
+      //XTRACE(DATA, DEB, "Valid ADC %u, min is %u", ADC, MinADC);
     }
 
-    //   XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC &
-    //   0x3FF, ADC);
+      // XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC &
+      // 0x3FF, ADC);
 
     // If the corrected ADC reaches maximum value we count the occurance but
     // use the new value anyway
@@ -167,7 +165,6 @@ void NMXInstrument::processReadouts(void) {
     XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Panel %u", Plane, Coord,
            readout.Channel, Panel);
     builders[Panel].insert({TimeNS, Coord, ADC, Plane});
-    XTRACE(DATA, DEB, "inserted to builder");
   }
 
   for (auto &builder : builders) {
@@ -235,17 +232,17 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxXSpan < e.ClusterA.coordSpan()) {
+    if (Conf.NMXFileParameters.MaxSpanX < e.ClusterA.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too far in X direction, %u",
              e.ClusterA.coordSpan());
-      counters.ClustersTooLargeXSpan++;
+      counters.ClustersTooLargeSpanX++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MinXSpan > e.ClusterA.coordSpan()) {
+    if (Conf.NMXFileParameters.MinSpanX > e.ClusterA.coordSpan()) {
       XTRACE(EVENT, DEB, "Event doesn't span far enough in X direction, %u",
              e.ClusterA.coordSpan());
-      counters.ClustersTooSmallXSpan++;
+      counters.ClustersTooSmallSpanX++;
       continue;
     }
 
@@ -256,17 +253,17 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxYSpan < e.ClusterB.coordSpan()) {
+    if (Conf.NMXFileParameters.MaxSpanY < e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
              e.ClusterB.coordSpan());
-      counters.ClustersTooLargeYSpan++;
+      counters.ClustersTooLargeSpanY++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MinYSpan > e.ClusterB.coordSpan()) {
+    if (Conf.NMXFileParameters.MinSpanY > e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event doesn't span far enough in Y direction, %u",
              e.ClusterB.coordSpan());
-      counters.ClustersTooSmallYSpan++;
+      counters.ClustersTooSmallSpanY++;
       continue;
     }
 

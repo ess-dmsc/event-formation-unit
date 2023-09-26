@@ -42,12 +42,12 @@ public:
     uint16_t SizeX{1280};
     uint16_t SizeY{1280};
     uint16_t NumPanels{4};
-    uint16_t MaxXSpan{10};
-    uint16_t MaxYSpan{10};
-    uint16_t MinXSpan{1};
-    uint16_t MinYSpan{1};
-    uint16_t MaxXGap{10};
-    uint16_t MaxYGap{10};
+    uint16_t MaxSpanX{10};
+    uint16_t MaxSpanY{10};
+    uint16_t MinSpanX{1}; //< \todo should be larger?
+    uint16_t MinSpanY{1}; //< \todo should be larger?
+    uint16_t MaxGapX{10}; //< \todo unused?
+    uint16_t MaxGapY{10}; //< \todo unused?
     uint16_t DefaultMinADC{50};
     bool SplitMultiEvents{false};
     float SplitMultiEventsCoefficientLow{0.8};

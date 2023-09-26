@@ -63,34 +63,25 @@ std::string ConfigStr = R"(
 {
   "Detector" : "NMX",
   "InstrumentGeometry" : "NMX",
-  "MaxXSpan" : 3,
-  "MaxYSpan" : 3,
-  "MinXSpan" : 2,
-  "MaxXGap" : 2,
-  "MaxYGap" : 2,
+  "MaxSpanX" : 3,
+  "MinSpanX" : 2,
+  "MaxSpanY" : 3,
+  "MinSpanY" : 1,
+  "MaxGapX" : 2,
+  "MaxGapY" : 2,
   "DefaultMinADC":50,
   "Config" : [
-        {
-          "Ring" :  0,
-          "FEN": 0,
-          "Hybrid" :  0,
-          "Plane" : 0,
-          "Offset" : 0,
-          "ReversedChannels" : false,
-          "Panel" : 0,
-          "HybridId" : "E5533333222222221111111100000000"
-        },
-        {
-          "Ring" :  0,
-          "FEN": 0,
-          "Hybrid" :  1,
-          "Plane" : 1,
-          "Offset" : 0,
-          "ReversedChannels" : false,
-          "Panel" : 0,
-          "HybridId" : "E5533333222222221111111100000001"
-        }
-]
+    {
+      "Ring" : 0, "FEN": 0, "Hybrid" : 0, "Plane" : 0, "Offset" : 0,
+      "ReversedChannels" : false, "Panel" : 0,
+      "HybridId" : "E5533333222222221111111100000000"
+    },
+    {
+      "Ring" : 0, "FEN": 0, "Hybrid" : 1, "Plane" : 1, "Offset" : 0,
+      "ReversedChannels" : false, "Panel" : 0,
+      "HybridId" : "E5533333222222221111111100000001"
+    }
+  ]
 }
 )";
 
@@ -608,7 +599,7 @@ TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
     nmx->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.ClustersTooLargeYSpan, 1);
+  ASSERT_EQ(counters.ClustersTooLargeSpanY, 1);
 }
 
 TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
@@ -632,7 +623,7 @@ TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
     nmx->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.ClustersTooSmallXSpan, 1);
+  ASSERT_EQ(counters.ClustersTooSmallSpanX, 1);
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
@@ -656,7 +647,7 @@ TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
     nmx->generateEvents(builder.Events);
   }
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.ClustersTooLargeXSpan, 1);
+  ASSERT_EQ(counters.ClustersTooLargeSpanX, 1);
 }
 
 TEST_F(NMXInstrumentTest, NegativeTOF) {

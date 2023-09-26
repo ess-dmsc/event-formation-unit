@@ -41,10 +41,10 @@ struct Counters {
   int64_t ClustersNoCoincidence;
   int64_t ClustersMatchedXOnly;
   int64_t ClustersMatchedYOnly;
-  int64_t ClustersTooLargeXSpan;
-  int64_t ClustersTooLargeYSpan;
-  int64_t ClustersTooSmallXSpan;
-  int64_t ClustersTooSmallYSpan;
+  int64_t ClustersTooLargeSpanX;
+  int64_t ClustersTooLargeSpanY;
+  int64_t ClustersTooSmallSpanX;
+  int64_t ClustersTooSmallSpanY;
   int64_t ClustersTooLargeTimeSpan;
   int64_t EventsMatchedClusters;
   int64_t PixelErrors;
