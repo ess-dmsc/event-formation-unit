@@ -93,7 +93,6 @@ void FreiaInstrument::processReadouts(void) {
       /// \todo sometimes PrevPulseTime maybe?
       ESSReadoutParser.Packet.Time.TimeInNS);
 
-  //XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
 
     if (DumpFile) {
