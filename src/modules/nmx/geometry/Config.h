@@ -44,10 +44,10 @@ public:
     uint16_t NumPanels{4};
     uint16_t MaxSpanX{10};
     uint16_t MaxSpanY{10};
-    uint16_t MinSpanX{1}; // should be larger?
-    uint16_t MinSpanY{1}; // should be larger?
-    uint16_t MaxGapX{10}; // unused?
-    uint16_t MaxGapY{10}; // unused?
+    uint16_t MinSpanX{1}; //< \todo should be larger?
+    uint16_t MinSpanY{1}; //< \todo should be larger?
+    uint16_t MaxGapX{10}; //< \todo unused?
+    uint16_t MaxGapY{10}; //< \todo unused?
     uint16_t DefaultMinADC{50};
     bool SplitMultiEvents{false};
     float SplitMultiEventsCoefficientLow{0.8};
