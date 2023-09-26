@@ -63,51 +63,55 @@ void VMM3Config::applyVMM3Config() {
       XTRACE(INIT, DEB, "Ring %d, FEN %d, Hybrid %d", Ring, FEN, LocalHybrid);
 
       if ((Ring > MaxRing) or (FEN > MaxFEN) or (LocalHybrid > MaxHybrid)) {
-        XTRACE(INIT, ERR, "Illegal Ring/FEN/VMM values");
-        throw std::runtime_error("Illegal Ring/FEN/VMM values");
+        auto Message = fmt::format("Invalid Ring/FEN/VMM config: {}/{}/{}", Ring, FEN, LocalHybrid);
+        XTRACE(INIT, ERR, "%s", Message.c_str());
+        throw std::runtime_error(Message);
       }
 
+      // so far only check for correct length
       if (!validHybridId(IDString)) {
-        XTRACE(INIT, ERR, "Invalid HybridId in config file: %s",
-               IDString.c_str());
-        throw std::runtime_error("Invalid HybridId in config file");
+        auto Message = fmt::format("Invalid HybridId {}", IDString);
+        XTRACE(INIT, ERR, "%s", Message.c_str());
+        throw std::runtime_error(Message);
+      }
+
+      // has it been added before?
+      if (lookupHybrid(IDString)) {
+        auto Message = fmt::format("Duplicate HybridID {}", IDString);
+        XTRACE(INIT, ERR, "%s", Message.c_str());
+        throw std::runtime_error(Message);
       }
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
       if (Hybrid.Initialised) {
-        XTRACE(INIT, ERR, "Duplicate Hybrid in config file");
-        throw std::runtime_error("Duplicate Hybrid in config file");
+        auto Message = fmt::format("Hybrid {} on Ring/FEN {}/{} is already initialised",
+          LocalHybrid, Ring, FEN);
+        XTRACE(INIT, ERR, "%s", Message.c_str());
+        throw std::runtime_error(Message);
       }
 
       Hybrid.Initialised = true;
       Hybrid.HybridId = IDString;
 
-      XTRACE(
-          INIT, DEB,
-          "JSON config - Detector %s, Hybrid %u, Ring %u, FEN %u, LocalHybrid "
-          "%u",
-          Name.c_str(), NumHybrids, Ring, FEN, LocalHybrid);
-      LOG(INIT, Sev::Info,
-          "JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
-          "{}",
-          Name, NumHybrids, Ring, FEN, LocalHybrid);
+      auto Message = fmt::format("JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
+      "{}", Name, NumHybrids, Ring, FEN, LocalHybrid);
+      XTRACE(INIT, DEB, Message.c_str());
+      LOG(INIT, Sev::Info, Message);
 
       Hybrid.HybridNumber = NumHybrids;
       NumHybrids++;
     }
 
     LOG(INIT, Sev::Info,
-        "JSON config - Detector has {} cassettes/hybrids and "
-        "{} pixels",
+        "JSON config - Detector has {} cassettes/hybrids and {} pixels",
         NumHybrids, NumPixels);
   } catch (...) {
-    XTRACE(INIT, ERR, "JSON config - error: Invalid Config file: %s",
-           FileName.c_str());
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
-    throw std::runtime_error("Invalid Json file");
+    auto Message = fmt::format("JSON config - error: Invalid Config file: {}", FileName);
+    XTRACE(INIT, ERR, "%s", Message.c_str());
+    LOG(INIT, Sev::Error, Message);
+    throw std::runtime_error(Message);
   }
 }
 
@@ -116,8 +120,9 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   try {
     calib_root = from_json_file(CalibFile);
   } catch (...) {
-    LOG(INIT, Sev::Error, "Error loading json calibration file");
-    throw std::runtime_error("Error loading json calibration file");
+    auto Message = fmt::format("Error loading json calibration file {}", CalibFile);
+    LOG(INIT, Sev::Error, Message.c_str());
+    throw std::runtime_error(Message);
   }
 
   std::string Name = calib_root["Detector"];
@@ -141,6 +146,8 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   }
 }
 
+/// \brief validate the hybrid id string
+/// \todo too simplistic?
 bool VMM3Config::validHybridId(std::string HybridID) {
   return (HybridID.length() == 32);
 }

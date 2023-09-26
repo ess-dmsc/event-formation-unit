@@ -57,6 +57,23 @@ public:
     return Hybrids[Ring][FEN][VMM];
   }
 
+
+  /// \brief Get Hybrid from the string Hybrid ID
+  /// \todo candidate to refactor as it is nearly the same as getHybrid()
+  /// check if HybridId is already configured.
+  bool lookupHybrid(std::string HybridID) {
+    for (int RingID = 0; RingID <= MaxRing; RingID++) {
+      for (int FENID = 0; FENID <= MaxFEN; FENID++) {
+        for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
+          if (Hybrids[RingID][FENID][HybridNum].HybridId == HybridID) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   /// \brief Get Hybrid from the string Hybrid ID
   // Slow string comparison method, only to be used on EFU config initialisation
   ESSReadout::Hybrid &getHybrid(std::string HybridID) {
