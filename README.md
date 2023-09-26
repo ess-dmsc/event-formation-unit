@@ -18,7 +18,7 @@ formation unit software follow.
 
 To build and run this software the following dependencies are required.
 
-* [**Conan**](https://conan.io) The conan script has to be available in the current ``$PATH``.
+* [**Conan**](https://conan.io) The conan script has to be available in the current ``$PATH``. Use the latest version smaller than 2.
 * [**CMake**](https://cmake.org) At least CMake version 2.8.12 is required. Some packages that requires more recent versions of CMake will download this as a dependency.
 * [**bash**](https://www.gnu.org/software/bash/) For properly setting paths to the conan provided dependencies.
 * A recent C/C++ compiler with support for C++14.

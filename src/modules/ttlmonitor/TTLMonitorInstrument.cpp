@@ -81,9 +81,18 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    if (readout.Channel >= Conf.Parms.NumberOfMonitors) {
+
+    int Channel = readout.Channel - Conf.Parms.MonitorOffset;
+
+    if (Channel < Conf.Parms.MonitorOffset) {
+      XTRACE(DATA, WAR, "Invalid Channel %d", Channel);
+      counters.ChannelCfgErrors++;
+      continue;
+    }
+
+    if (Channel >= Conf.Parms.NumberOfMonitors) {
       XTRACE(DATA, WAR, "Invalid Channel %d (max is %d)", readout.Channel,
-             Conf.Parms.NumberOfMonitors - 1);
+             Conf.Parms.NumberOfMonitors - 1 + Conf.Parms.MonitorOffset);
       counters.ChannelCfgErrors++;
       continue;
     }
@@ -110,7 +119,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
     counters.TxBytes +=
-        Serializers[readout.Channel]->addEvent(TimeOfFlight, PixelId);
+        Serializers[Channel]->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;
   }
 }

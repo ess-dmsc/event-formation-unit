@@ -32,9 +32,9 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{600};
 
-// From TTLMon ICD
-// TBD
-#define DATASIZE 16
+// From TTLMon ICD version 1 draft 2
+// Preliminary agreed 2023 09 12 (Francesco, Farnaz, Fabio)
+#define DATASIZE 20
   struct Data {
     uint8_t FiberId;
     uint8_t FENId;
@@ -44,6 +44,8 @@ public:
     uint8_t Pos;
     uint8_t Channel;
     uint16_t ADC;
+    uint16_t XPos;
+    uint16_t YPos;
   } __attribute__((packed));
 
   static_assert(sizeof(Parser::Data) == (DATASIZE),
@@ -62,6 +64,6 @@ public:
   struct ParserStats Stats;
 
 private:
-  const uint16_t DataLength{16};
+  const uint16_t DataLength{DATASIZE};
 };
 } // namespace TTLMonitor

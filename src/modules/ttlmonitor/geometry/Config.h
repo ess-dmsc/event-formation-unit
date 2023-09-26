@@ -39,6 +39,7 @@ public:
     uint8_t MonitorRing{11};
     uint8_t MonitorFEN{0};
     uint8_t NumberOfMonitors{1};
+    int MonitorOffset{0};
   } Parms;
 
   std::string FileName{""};

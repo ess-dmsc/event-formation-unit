@@ -63,13 +63,14 @@ public:
   void event_cb(RdKafka::Event &event) override;
 
   struct ProducerStats {
-    int64_t produce_calls;
+    int64_t config_errors;
     int64_t ev_errors;
     int64_t ev_others;
     int64_t dr_errors;
     int64_t dr_noerrors;
+    int64_t produce_calls;
     int64_t produce_fails;
-    int64_t config_errors;
+    int64_t produce_no_errors;
   } stats = {};
 
 protected:
