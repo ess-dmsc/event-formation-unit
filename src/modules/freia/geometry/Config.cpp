@@ -88,6 +88,7 @@ void Config::applyConfig() {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
+      uint8_t CassetteId{0};
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
@@ -95,14 +96,13 @@ void Config::applyConfig() {
       Hybrid.XOffset = 0;
 
       try {
-        Hybrid.YOffset =
-            (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
-            NumWiresPerCassette;
+        CassetteId = (uint8_t)Mapping["CassetteNumber"];
+        Hybrid.YOffset = CassetteId * NumWiresPerCassette;
       } catch (...) {
         Hybrid.YOffset = 0;
       }
-      XTRACE(INIT, DEB, "MaxCass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
-             MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
+      XTRACE(INIT, DEB, "Cass %u (Max cassette %u), Ring %u, FEN %u, Hybrid %u, Yoffset %u",
+             CassetteId, MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
     }
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
