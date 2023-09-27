@@ -148,6 +148,7 @@ void CaenBase::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
+        XTRACE(DATA, ERR, "Data length in FIFO is zero");
         Counters.FifoSeqErrors++;
         continue;
       }
