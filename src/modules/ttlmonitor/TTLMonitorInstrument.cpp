@@ -82,14 +82,15 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     }
 
 
-    int Channel = readout.Channel - Conf.Parms.MonitorOffset;
 
-    if (Channel < Conf.Parms.MonitorOffset) {
-      XTRACE(DATA, WAR, "Invalid Channel %d", Channel);
+    if (readout.Channel < Conf.Parms.MonitorOffset) {
+      XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
       counters.ChannelCfgErrors++;
       continue;
     }
 
+    // channel corrected for configurable channel offset
+    int Channel = readout.Channel - Conf.Parms.MonitorOffset;
     if (Channel >= Conf.Parms.NumberOfMonitors) {
       XTRACE(DATA, WAR, "Invalid Channel %d (max is %d)", readout.Channel,
              Conf.Parms.NumberOfMonitors - 1 + Conf.Parms.MonitorOffset);
