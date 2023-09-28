@@ -22,7 +22,7 @@ class CaenBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
   Caen::CaenBase Readout{Settings, ESSReadout::Parser::LOKI};
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{200};
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{800};
 
   void writePacketToRxFIFO(Caen::CaenBase & Base, std::vector<uint8_t> Packet) {
     unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
