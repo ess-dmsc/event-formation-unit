@@ -13,7 +13,6 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
