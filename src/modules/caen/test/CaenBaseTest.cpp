@@ -185,7 +185,6 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Settings.DetectorName = "loki";
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
-  Readout.Counters = {};
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
