@@ -37,7 +37,6 @@ public:
 
     Base.startThreads();
     std::this_thread::sleep_for(SleepTime);
-    Base.stopThreads();
   }
 
   void SetUp() override {
