@@ -153,6 +153,9 @@ void CaenBase::processingThread() {
         continue;
       }
 
+      XTRACE(DATA, DEB, "Ringbuffer index %d has data of length %d",
+             DataIndex, DataLen);
+
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);

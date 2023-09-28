@@ -21,10 +21,13 @@
 class CaenBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  Caen::CaenBase Readout{Settings, ESSReadout::Parser::LOKI};
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{800};
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{100};
 
+  /// \brief utility function to emulate reception of an UDP packet into
+  /// the ringbuffer (to avoid using socket calls)
   void writePacketToRxFIFO(Caen::CaenBase & Base, std::vector<uint8_t> Packet) {
+    Base.startThreads();
+
     unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
     ASSERT_EQ(rxBufferIndex, 0);
     auto PacketSize = Packet.size();
@@ -32,14 +35,16 @@ public:
     Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
     auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
     memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
+
     ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
     Base.RxRingbuffer.getNextBuffer();
 
-    Base.startThreads();
     std::this_thread::sleep_for(SleepTime);
+    Base.stopThreads();
   }
 
   void SetUp() override {
+    Settings.DetectorName = "loki";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile =  LOKI_CONFIG;
@@ -139,7 +144,6 @@ std::vector<uint8_t> TestPacket2{
 
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
-  Settings.DetectorName = "loki";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket);
@@ -161,28 +165,18 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
 }
 
-// TEST_F(CaenBaseTest, DataReceiveMiracles) {
-//   Settings.DetectorName = "miracles";
-//   Settings.ConfigFile = MIRACLES_CONFIG;
-//   Settings.CalibFile = MIRACLES_CALIB;
-//
-//   Settings.DetectorPort = 9212;
-//   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
-//   Readout.startThreads();
-//
-//   std::this_thread::sleep_for(SleepTime);
-//   TestUDPServer Server(43126, Settings.DetectorPort,
-//                        (unsigned char *)&TestPacket[0], TestPacket.size());
-//   Server.startPacketTransmission(1, 100);
-//   std::this_thread::sleep_for(SleepTime);
-//   Readout.stopThreads();
-//   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-//   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
-//   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
-// }
+TEST_F(CaenBaseTest, DataReceiveMiracles) {
+  Settings.DetectorName = "miracles";
+  Settings.ConfigFile = MIRACLES_CONFIG;
+  Settings.CalibFile = MIRACLES_CALIB;
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
+
+  writePacketToRxFIFO(Readout, TestPacket2);
+
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+}
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
-  Settings.DetectorName = "loki";
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
@@ -196,50 +190,57 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
 }
 
-// TEST_F(CaenBaseTest, DataReceiveGoodBifrost) {
-//   XTRACE(DATA, DEB, "Running DataReceiveGood test");
-//   Settings.DetectorName = "bifrost";
-//   Settings.ConfigFile = BIFROST_CONFIG;
-//   Settings.CalibFile = BIFROST_CALIB;
-//
-//   Settings.DetectorPort = 9214;
-//   Settings.UpdateIntervalSec = 0;
-//   Settings.DumpFilePrefix = "deleteme_";
-//   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
-//   Readout.Counters = {};
-//   Readout.startThreads();
-//
-//   std::this_thread::sleep_for(SleepTime);
-//   TestUDPServer Server(43127, Settings.DetectorPort,
-//                        (unsigned char *)&TestPacket2[0], TestPacket2.size());
-//   Server.startPacketTransmission(1, 100);
-//   std::this_thread::sleep_for(SleepTime);
-//   Readout.stopThreads();
-//   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-//   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-// }
-//
-// TEST_F(CaenBaseTest, DataReceiveGoodMiracles) {
-//   XTRACE(DATA, DEB, "Running DataReceiveGood test");
-//   Settings.DetectorName = "miracles";
-//   Settings.ConfigFile = MIRACLES_CONFIG;
-//   Settings.CalibFile = MIRACLES_CALIB;
-//
-//   Settings.DetectorPort = 9215;
-//   Settings.UpdateIntervalSec = 0;
-//   Settings.DumpFilePrefix = "deleteme_";
-//   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
-//   Readout.startThreads();
-//
-//   std::this_thread::sleep_for(SleepTime);
-//   TestUDPServer Server(43127, Settings.DetectorPort,
-//                        (unsigned char *)&TestPacket2[0], TestPacket2.size());
-//   Server.startPacketTransmission(1, 100);
-//   std::this_thread::sleep_for(SleepTime);
-//   Readout.stopThreads();
-//   EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-//   EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-// }
+TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
+  XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  Settings.DetectorName = "bifrost";
+  Settings.ConfigFile = BIFROST_CONFIG;
+  Settings.CalibFile = BIFROST_CALIB;
+  Settings.UpdateIntervalSec = 0;
+  Settings.DumpFilePrefix = "deleteme_";
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
+
+  writePacketToRxFIFO(Readout, TestPacket2);
+
+  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+}
+
+TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
+  XTRACE(DATA, DEB, "Running DataReceiveGood test");
+  Settings.DetectorName = "miracles";
+  Settings.ConfigFile = MIRACLES_CONFIG;
+  Settings.CalibFile = MIRACLES_CALIB;
+  Settings.UpdateIntervalSec = 0;
+  Settings.DumpFilePrefix = "deleteme_";
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
+
+  writePacketToRxFIFO(Readout, TestPacket2);
+
+  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
+  EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+}
+
+
+TEST_F(CaenBaseTest, EmulateFIFOError) {
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
+  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+
+  Readout.startThreads();
+
+  unsigned int rxBufferIndex = Readout.RxRingbuffer.getDataIndex();
+  ASSERT_EQ(rxBufferIndex, 0);
+
+  Readout.RxRingbuffer.setDataLength(rxBufferIndex, 0); ///< invalid size
+
+  ASSERT_TRUE(Readout.InputFifo.push(rxBufferIndex));
+  Readout.RxRingbuffer.getNextBuffer();
+
+  std::this_thread::sleep_for(SleepTime);
+  Readout.stopThreads();
+
+  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
