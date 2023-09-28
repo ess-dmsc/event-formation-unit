@@ -21,7 +21,7 @@
 class CaenBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{1000};
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{500};
 
   /// \brief utility function to emulate reception of an UDP packet into
   /// the ringbuffer (to avoid using socket calls)
