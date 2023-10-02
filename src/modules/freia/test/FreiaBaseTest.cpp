@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 // clang-format off
-std::vector<uint8_t> dummyreadout{
+std::vector<uint8_t> TestPacket{
                 0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x48, // 'E', 'S', 'S', type 0x48
     0x46, 0x00, 0x17, 0x00, // len(0x005e), OQ23, TSrc0
@@ -92,6 +92,30 @@ std::string freiajson = R"(
 
 class FreiaBaseTest : public ::testing::Test {
 public:
+
+  ///\brief test thread sleeps for a while to allow other threads to run
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{750};
+
+  /// \brief utility function to emulate reception of an UDP packet into
+  /// the ringbuffer (to avoid using socket calls)
+  void writePacketToRxFIFO(Freia::FreiaBase & Base, std::vector<uint8_t> Packet) {
+    Base.startThreads();
+
+    unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
+    ASSERT_EQ(rxBufferIndex, 0);
+    auto PacketSize = Packet.size();
+
+    Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
+    auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
+    memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
+
+    ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
+    Base.RxRingbuffer.getNextBuffer();
+
+    std::this_thread::sleep_for(SleepTime);
+    Base.stopThreads();
+  }
+
   void SetUp() override {
     Settings.ConfigFile = "Freia.json";
     Settings.RxSocketBufferSize = 100000;
@@ -102,6 +126,7 @@ public:
   BaseSettings Settings;
 };
 
+
 TEST_F(FreiaBaseTest, Constructor) {
   Freia::FreiaBase Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
@@ -109,43 +134,26 @@ TEST_F(FreiaBaseTest, Constructor) {
 }
 
 TEST_F(FreiaBaseTest, DataReceive) {
-  Settings.DetectorPort = 9003;
   Freia::FreiaBase Readout(Settings);
-  Readout.startThreads();
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43129, Settings.DetectorPort,
-                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
-  Server.startPacketTransmission(2, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 2);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, 2 * dummyreadout.size());
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            4); // number of readouts dummyreadout
-  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 4);
+
+  writePacketToRxFIFO(Readout, TestPacket);
+
+  // number of readouts in TestPacket
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2);
+  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
   // Freia has 32 cassettes, and 32 event builders, so match attempt
   // count increases by 32 for each packet received
-  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 64);
+  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 32);
 }
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
-  Settings.DetectorPort = 9003;
   Freia::FreiaBase Readout(Settings);
-  Readout.startThreads();
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  std::this_thread::sleep_for(SleepTime);
-  dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43129, Settings.DetectorPort,
-                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, dummyreadout.size());
+
+  TestPacket[0] = 0xff; // pad should be 0
+  writePacketToRxFIFO(Readout, TestPacket);
+
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            0); // no readouts as header is bad
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
 }
 
