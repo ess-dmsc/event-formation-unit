@@ -24,6 +24,7 @@ struct BaseSettings {
   int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
   int32_t  RxSocketBufferSize   {2000000}; // bytes
   int32_t  TxSocketBufferSize   {2000000}; // bytes
+  int32_t  SocketRxTimeoutUS    {100000}; // 100000us = 0.1s
   ///\brief Kafka settings
   std::string   KafkaConfigFile      {""}; // use default
   std::string   KafkaBroker          {"localhost:9092"};

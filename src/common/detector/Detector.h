@@ -57,7 +57,7 @@ public:
     dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
                                 EFUSettings.RxSocketBufferSize);
     dataReceiver.printBufferSizes();
-    dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+    dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
 
     while (runThreads) {
       int readSize;

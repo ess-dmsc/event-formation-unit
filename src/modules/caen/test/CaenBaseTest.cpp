@@ -44,7 +44,7 @@ public:
 
   void SetUp() override {
     Settings.DetectorName = "loki";
-    Settings.RxSocketBufferSize = 100000;
+    Settings.SocketRxTimeoutUS = 1000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile =  LOKI_CONFIG;
     Settings.CalibFile = LOKI_CALIB;
@@ -54,7 +54,6 @@ public:
 };
 
 TEST_F(CaenBaseTest, LokiConstructor) {
-  Settings.DetectorName = "loki";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
