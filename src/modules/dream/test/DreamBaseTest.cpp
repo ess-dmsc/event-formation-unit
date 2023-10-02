@@ -14,6 +14,7 @@
 #include <common/testutils/TestBase.h>
 #include <dream/DreamBase.h>
 
+
 std::string dreamjson = R"(
   {
     "Detector" : "DREAM",
@@ -29,26 +30,6 @@ std::string dreamjson = R"(
 
 class DreamBaseTest : public ::testing::Test {
 public:
-  /// \brief utility function to emulate reception of an UDP packet into
-  /// the ringbuffer (to avoid using socket calls)
-  void writePacketToRxFIFO(Dream::DreamBase & Base, std::vector<uint8_t> Packet) {
-    Base.startThreads();
-
-    unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
-    ASSERT_EQ(rxBufferIndex, 0);
-    auto PacketSize = Packet.size();
-
-    Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
-    auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
-    memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
-
-    ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
-    Base.RxRingbuffer.getNextBuffer();
-
-    std::this_thread::sleep_for(SleepTime);
-    Base.stopThreads();
-  }
-
   void SetUp() override {
     Settings.UpdateIntervalSec = 0;
     Settings.RxSocketBufferSize = 100000;
@@ -118,7 +99,7 @@ std::vector<uint8_t> TestPacket3{
 TEST_F(DreamBaseTest, DataReceiveGood) {
   Dream::DreamBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
@@ -130,7 +111,7 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
 TEST_F(DreamBaseTest, DataReceiveBad) {
   Dream::DreamBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket3);
+  writePacketToRxFIFO(Readout, TestPacket3, SleepTime);
 
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);

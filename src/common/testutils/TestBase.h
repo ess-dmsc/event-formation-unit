@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <thread>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wsign-compare"
@@ -15,6 +16,27 @@
 #endif
 #include <gtest/gtest.h>
 #pragma GCC diagnostic pop
+
+// For use i xxBaseTest
+template <typename T>
+void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet,
+  std::chrono::duration<std::int64_t, std::milli> SleepTime) {
+  value.startThreads();
+
+  unsigned int rxBufferIndex = value.RxRingbuffer.getDataIndex();
+  ASSERT_EQ(rxBufferIndex, 0);
+  auto PacketSize = Packet.size();
+
+  value.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
+  auto DataPtr = value.RxRingbuffer.getDataBuffer(rxBufferIndex);
+  memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
+
+  ASSERT_TRUE(value.InputFifo.push(rxBufferIndex));
+  value.RxRingbuffer.getNextBuffer();
+
+  std::this_thread::sleep_for(SleepTime);
+  value.stopThreads();
+}
 
 namespace testing {
 namespace internal {

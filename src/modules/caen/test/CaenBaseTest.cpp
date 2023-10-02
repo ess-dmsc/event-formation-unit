@@ -16,26 +16,6 @@ public:
   BaseSettings Settings;
   std::chrono::duration<std::int64_t, std::milli> SleepTime{1000};
 
-  /// \brief utility function to emulate reception of an UDP packet into
-  /// the ringbuffer (to avoid using socket calls)
-  void writePacketToRxFIFO(Caen::CaenBase & Base, std::vector<uint8_t> Packet) {
-    Base.startThreads();
-
-    unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
-    ASSERT_EQ(rxBufferIndex, 0);
-    auto PacketSize = Packet.size();
-
-    Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
-    auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
-    memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
-
-    ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
-    Base.RxRingbuffer.getNextBuffer();
-
-    std::this_thread::sleep_for(SleepTime);
-    Base.stopThreads();
-  }
-
   void SetUp() override {
     Settings.DetectorName = "loki";
     Settings.SocketRxTimeoutUS = 1000;
@@ -135,10 +115,12 @@ std::vector<uint8_t> TestPacket2{
 // clang-format on
 
 
+
+
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorSize, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
@@ -153,7 +135,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.CalibFile = BIFROST_CALIB;
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
@@ -165,7 +147,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.CalibFile = MIRACLES_CALIB;
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
 }
@@ -174,7 +156,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
@@ -196,7 +178,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
@@ -211,7 +193,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
   Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);

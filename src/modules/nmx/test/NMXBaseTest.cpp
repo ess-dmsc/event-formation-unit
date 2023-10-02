@@ -92,26 +92,6 @@ public:
   BaseSettings Settings;
   std::chrono::duration<std::int64_t, std::milli> SleepTime{750};
 
-  /// \brief utility function to emulate reception of an UDP packet into
-  /// the ringbuffer (to avoid using socket calls)
-  void writePacketToRxFIFO(Nmx::NmxBase & Base, std::vector<uint8_t> Packet) {
-    Base.startThreads();
-
-    unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
-    ASSERT_EQ(rxBufferIndex, 0);
-    auto PacketSize = Packet.size();
-
-    Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
-    auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
-    memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
-
-    ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
-    Base.RxRingbuffer.getNextBuffer();
-
-    std::this_thread::sleep_for(SleepTime);
-    Base.stopThreads();
-  }
-
   void SetUp() override {
     Settings.ConfigFile = "nmx.json";
     Settings.NoHwCheck = true;
@@ -128,7 +108,7 @@ TEST_F(NMXBaseTest, Constructor) {
 TEST_F(NMXBaseTest, DataReceive) {
   Nmx::NmxBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
 
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2); // # readouts in TestPacket
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
@@ -141,7 +121,7 @@ TEST_F(NMXBaseTest, DataReceiveBadHeader) {
   Nmx::NmxBase Readout(Settings);
 
   TestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
 
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header
