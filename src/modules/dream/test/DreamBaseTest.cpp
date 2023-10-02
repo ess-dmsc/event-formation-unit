@@ -27,17 +27,31 @@ std::string dreamjson = R"(
   ]
 )";
 
-class DreamBaseStandIn : public Dream::DreamBase {
-public:
-  DreamBaseStandIn(BaseSettings Settings) : Dream::DreamBase(Settings){};
-  ~DreamBaseStandIn() = default;
-  using Detector::Threads;
-  using Dream::DreamBase::Counters;
-};
 
 class DreamBaseTest : public ::testing::Test {
 public:
+  /// \brief utility function to emulate reception of an UDP packet into
+  /// the ringbuffer (to avoid using socket calls)
+  void writePacketToRxFIFO(Dream::DreamBase & Base, std::vector<uint8_t> Packet) {
+    Base.startThreads();
+
+    unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
+    ASSERT_EQ(rxBufferIndex, 0);
+    auto PacketSize = Packet.size();
+
+    Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
+    auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
+    memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
+
+    ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
+    Base.RxRingbuffer.getNextBuffer();
+
+    std::this_thread::sleep_for(SleepTime);
+    Base.stopThreads();
+  }
+
   void SetUp() override {
+    Settings.UpdateIntervalSec = 0;
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile = "deleteme_dream.json";
@@ -49,7 +63,7 @@ public:
 };
 
 TEST_F(DreamBaseTest, Constructor) {
-  DreamBaseStandIn Readout(Settings);
+  Dream::DreamBase Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -103,19 +117,10 @@ std::vector<uint8_t> TestPacket3{
 // clang-format off
 
 TEST_F(DreamBaseTest, DataReceiveGood) {
-  Settings.DetectorPort = 9001;
-  Settings.UpdateIntervalSec = 0;
-  DreamBaseStandIn Readout(Settings);
-  Readout.startThreads();
+  Dream::DreamBase Readout(Settings);
 
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43128, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
+  writePacketToRxFIFO(Readout, TestPacket2);
+
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
@@ -124,19 +129,10 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
 }
 
 TEST_F(DreamBaseTest, DataReceiveBad) {
-  Settings.DetectorPort = 9001;
-  Settings.UpdateIntervalSec = 0;
-  DreamBaseStandIn Readout(Settings);
-  Readout.startThreads();
+  Dream::DreamBase Readout(Settings);
 
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43128, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket3[0], TestPacket3.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket3.size());
+  writePacketToRxFIFO(Readout, TestPacket3);
+
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
