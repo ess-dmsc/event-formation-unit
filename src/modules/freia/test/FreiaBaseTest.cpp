@@ -90,15 +90,6 @@ std::string freiajson = R"(
 #include <common/testutils/TestUDPServer.h>
 #include <freia/FreiaBase.h>
 
-class FreiaBaseStandIn : public Freia::FreiaBase {
-public:
-  FreiaBaseStandIn(BaseSettings Settings)
-      : Freia::FreiaBase(Settings){};
-  ~FreiaBaseStandIn() = default;
-  using Detector::Threads;
-  using Freia::FreiaBase::Counters;
-};
-
 class FreiaBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
@@ -112,14 +103,14 @@ public:
 };
 
 TEST_F(FreiaBaseTest, Constructor) {
-  FreiaBaseStandIn Readout(Settings);
+  Freia::FreiaBase Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(FreiaBaseTest, DataReceive) {
   Settings.DetectorPort = 9003;
-  FreiaBaseStandIn Readout(Settings);
+  Freia::FreiaBase Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
@@ -140,7 +131,7 @@ TEST_F(FreiaBaseTest, DataReceive) {
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
   Settings.DetectorPort = 9003;
-  FreiaBaseStandIn Readout(Settings);
+  Freia::FreiaBase Readout(Settings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

@@ -20,11 +20,11 @@ public:
   FreiaBase(BaseSettings const &settings);
   ~FreiaBase() = default;
 
-  void input_thread();
   void processing_thread();
 
-protected:
   struct Counters Counters {};
+
+protected:
   EV44Serializer *Serializer;
 };
 
