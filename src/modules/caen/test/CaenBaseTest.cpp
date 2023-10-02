@@ -8,19 +8,13 @@
 //===----------------------------------------------------------------------===//
 
 #include <string>
-
 #include <caen/CaenBase.h>
-#include <common/debug/Trace.h>
-#include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
 
 class CaenBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{750};
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{1000};
 
   /// \brief utility function to emulate reception of an UDP packet into
   /// the ringbuffer (to avoid using socket calls)
@@ -148,6 +142,8 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorSize, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+  EXPECT_NE(Readout.ITCounters.RxIdle, 0);
+  EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
 }
 
 
@@ -186,6 +182,9 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
   EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
+
+  EXPECT_NE(Readout.ITCounters.RxIdle, 0);
+  EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
