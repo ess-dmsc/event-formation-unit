@@ -12,7 +12,6 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
 #include <dream/DreamBase.h>
 
 std::string dreamjson = R"(

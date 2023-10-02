@@ -8,8 +8,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <freia/FreiaBase.h>
 #include <string>
 #include <vector>
+
 // clang-format off
 std::vector<uint8_t> TestPacket{
                 0x00, 0x00, // pad, v0
@@ -84,11 +88,6 @@ std::string freiajson = R"(
 )";
 
 //clang-format on
-
-#include <common/testutils/SaveBuffer.h>
-#include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
-#include <freia/FreiaBase.h>
 
 class FreiaBaseTest : public ::testing::Test {
 public:
