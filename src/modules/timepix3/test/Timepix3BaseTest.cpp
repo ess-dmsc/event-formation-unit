@@ -13,7 +13,6 @@
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
 #include <timepix3/Timepix3Base.h>
 
 // #undef TRC_LEVEL
@@ -21,33 +20,25 @@
 
 // clang-format off
 
-class Timepix3BaseStandIn : public Timepix3::Timepix3Base {
-public:
-  Timepix3BaseStandIn(BaseSettings Settings)
-      : Timepix3::Timepix3Base(Settings){};
-  ~Timepix3BaseStandIn() = default;
-  using Detector::Threads;
-  using Timepix3::Timepix3Base::Counters;
-};
-
 class Timepix3BaseTest : public ::testing::Test {
 public:
+  BaseSettings Settings;
+
   void SetUp() override {
-    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile = TIMEPIX_CONFIG;
+    Settings.DetectorName = "timepix3";
+    Settings.UpdateIntervalSec = 0;
+    Settings.DumpFilePrefix = "deleteme_";
   }
-  void TearDown() override {}
 
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  BaseSettings Settings;
+  void TearDown() override {}
 };
 
 TEST_F(Timepix3BaseTest, Constructor) {
-  Timepix3BaseStandIn Readout(Settings);
+  Timepix3::Timepix3Base Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
-
 
 
 std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
@@ -133,41 +124,22 @@ std::vector<uint8_t> TestPacket2{
 // clang-format on
 
 TEST_F(Timepix3BaseTest, DataReceive) {
-  Settings.DetectorPort = 9002;
-  Settings.DetectorName = "timepix3";
-  Timepix3BaseStandIn Readout(Settings);
-  Readout.startThreads();
+  Timepix3::Timepix3Base Readout(Settings);
 
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43131, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket[0], TestPacket.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket.size());
+  writePacketToRxFIFO(Readout, TestPacket);
+
   EXPECT_EQ(Readout.Counters.PixelReadouts, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
-  XTRACE(DATA, DEB, "Running DataReceiveGood test");
-  Settings.DetectorName = "timepix3";
-  Settings.DetectorPort = 9002;
-  Settings.UpdateIntervalSec = 0;
-  Settings.DumpFilePrefix = "deleteme_";
-  Timepix3BaseStandIn Readout(Settings);
-  Readout.startThreads();
+  Timepix3::Timepix3Base Readout(Settings);
 
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43131, Settings.DetectorPort,
-                       (unsigned char *)&TestPacket2[0], TestPacket2.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, TestPacket2.size());
-  // todo, write correct pixel readout packet format
+  writePacketToRxFIFO(Readout, TestPacket2);
+
+  /// \todo not a test yet, write correct pixel readout packet format
   // EXPECT_EQ(Readout.Counters.PixelReadouts, 6);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {

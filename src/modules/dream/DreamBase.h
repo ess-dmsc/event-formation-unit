@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,8 +21,9 @@ public:
 
   void processingThread();
 
-protected:
   struct Counters Counters;
+
+protected:
   EV44Serializer *Serializer;
 };
 

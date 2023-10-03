@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,11 +20,11 @@ public:
   FreiaBase(BaseSettings const &settings);
   ~FreiaBase() = default;
 
-  void input_thread();
   void processing_thread();
 
-protected:
   struct Counters Counters {};
+
+protected:
   EV44Serializer *Serializer;
 };
 
