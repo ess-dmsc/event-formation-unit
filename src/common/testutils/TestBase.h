@@ -35,7 +35,6 @@ void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet,
   value.RxRingbuffer.getNextBuffer();
 
   std::this_thread::sleep_for(SleepTime);
-  value.stopThreads();
 }
 
 namespace testing {
