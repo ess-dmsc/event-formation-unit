@@ -45,7 +45,6 @@ std::vector<uint8_t> TestPacket {
 class TTLMonitorBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
 
   void SetUp() override {
     Settings.ConfigFile = TTLMON_CONFIG;
@@ -65,21 +64,23 @@ TEST_F(TTLMonitorBaseTest, Constructor) {
 TEST_F(TTLMonitorBaseTest, DataReceive) {
   TTLMonitor::TTLMonitorBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 2);
+  Readout.stopThreads();
 }
 
 TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
   TTLMonitor::TTLMonitorBase Readout(Settings);
 
   TestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
 
   // no readouts as header is bad
   EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 0);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {

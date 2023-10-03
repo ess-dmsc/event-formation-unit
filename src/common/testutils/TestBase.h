@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <thread>
+#include <unistd.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wsign-compare"
@@ -19,8 +19,7 @@
 
 // For use i xxBaseTest
 template <typename T>
-void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet,
-  std::chrono::duration<std::int64_t, std::milli> SleepTime) {
+void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet) {
   value.startThreads();
 
   unsigned int rxBufferIndex = value.RxRingbuffer.getDataIndex();
@@ -34,7 +33,12 @@ void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet,
   ASSERT_TRUE(value.InputFifo.push(rxBufferIndex));
   value.RxRingbuffer.getNextBuffer();
 
-  std::this_thread::sleep_for(SleepTime);
+  while (value.ITCounters.RxIdle == 0){
+    usleep(100);
+  }
+  while (value.Counters.ProcessingIdle == 0) {
+    usleep(100);
+  }
 }
 
 namespace testing {

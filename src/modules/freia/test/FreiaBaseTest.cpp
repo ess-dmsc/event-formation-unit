@@ -91,8 +91,7 @@ std::string freiajson = R"(
 
 class FreiaBaseTest : public ::testing::Test {
 public:
-  ///\brief test thread sleeps for a while to allow other threads to run
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{750};
+  BaseSettings Settings;
 
   void SetUp() override {
     Settings.ConfigFile = "Freia.json";
@@ -100,8 +99,6 @@ public:
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}
-
-  BaseSettings Settings;
 };
 
 
@@ -114,7 +111,7 @@ TEST_F(FreiaBaseTest, Constructor) {
 TEST_F(FreiaBaseTest, DataReceive) {
   Freia::FreiaBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   // number of readouts in TestPacket
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2);
@@ -122,17 +119,19 @@ TEST_F(FreiaBaseTest, DataReceive) {
   // Freia has 32 cassettes, and 32 event builders, so match attempt
   // count increases by 32 for each packet received
   EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 32);
+  Readout.stopThreads();
 }
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
   Freia::FreiaBase Readout(Settings);
 
   TestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {

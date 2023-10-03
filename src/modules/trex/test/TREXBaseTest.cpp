@@ -93,8 +93,6 @@ std::vector<uint8_t> TestPacket {
 
 class TREXBaseTest : public ::testing::Test {
 public:
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-
   void SetUp() override {
     Settings.ConfigFile = "trex.json";
     Settings.NoHwCheck = true;
@@ -113,21 +111,23 @@ TEST_F(TREXBaseTest, Constructor) {
 TEST_F(TREXBaseTest, DataReceive) {
   Trex::TrexBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2); // #readouts in TestPacket
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
+  Readout.stopThreads();
 }
 
 TEST_F(TREXBaseTest, DataReceiveBadHeader) {
   Trex::TrexBase Readout(Settings);
 
   TestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {

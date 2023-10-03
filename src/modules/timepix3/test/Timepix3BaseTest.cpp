@@ -22,7 +22,6 @@
 
 class Timepix3BaseTest : public ::testing::Test {
 public:
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   BaseSettings Settings;
 
   void SetUp() override {
@@ -127,18 +126,20 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(Timepix3BaseTest, DataReceive) {
   Timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket);
 
   EXPECT_EQ(Readout.Counters.PixelReadouts, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
   Timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket2);
 
   /// \todo not a test yet, write correct pixel readout packet format
   // EXPECT_EQ(Readout.Counters.PixelReadouts, 6);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {

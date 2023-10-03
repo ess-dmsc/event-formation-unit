@@ -30,16 +30,16 @@ std::string dreamjson = R"(
 
 class DreamBaseTest : public ::testing::Test {
 public:
+  BaseSettings Settings;
+
   void SetUp() override {
     Settings.UpdateIntervalSec = 0;
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile = "deleteme_dream.json";
   }
-  void TearDown() override {}
 
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  BaseSettings Settings;
+  void TearDown() override {}
 };
 
 TEST_F(DreamBaseTest, Constructor) {
@@ -99,19 +99,20 @@ std::vector<uint8_t> TestPacket3{
 TEST_F(DreamBaseTest, DataReceiveGood) {
   Dream::DreamBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket2);
 
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
   EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
   EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(DreamBaseTest, DataReceiveBad) {
   Dream::DreamBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket3, SleepTime);
+  writePacketToRxFIFO(Readout, TestPacket3);
 
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
@@ -119,6 +120,7 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
   EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {
