@@ -153,7 +153,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
-  Settings.DumpFilePrefix = "deleteme_";
+  //Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
