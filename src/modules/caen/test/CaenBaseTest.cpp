@@ -114,18 +114,27 @@ std::vector<uint8_t> TestPacket2{
 };
 // clang-format on
 
-
+void waitForProcessing(Caen::CaenBase & Readout) {
+  while (Readout.ITCounters.RxIdle == 0){
+    usleep(100);
+  }
+  while (Readout.Counters.ProcessingIdle == 0) {
+    usleep(100);
+  }
+}
 
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorSize, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   EXPECT_NE(Readout.ITCounters.RxIdle, 0);
   EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
+  Readout.stopThreads();
 }
 
 
@@ -136,9 +145,11 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(CaenBaseTest, DataReceiveMiracles) {
@@ -148,15 +159,18 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
-  //Settings.DumpFilePrefix = "deleteme_";
+  Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
@@ -167,6 +181,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
 
   EXPECT_NE(Readout.ITCounters.RxIdle, 0);
   EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
@@ -179,9 +194,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+  Readout.stopThreads();
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
@@ -194,9 +211,11 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
 
   writePacketToRxFIFO(Readout, TestPacket2, SleepTime);
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
+  Readout.stopThreads();
 }
 
 
@@ -214,10 +233,10 @@ TEST_F(CaenBaseTest, EmulateFIFOError) {
   ASSERT_TRUE(Readout.InputFifo.push(rxBufferIndex));
   Readout.RxRingbuffer.getNextBuffer();
 
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
+  waitForProcessing(Readout);
 
   EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  Readout.stopThreads();
 }
 
 
