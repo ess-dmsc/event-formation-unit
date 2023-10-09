@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,11 +20,11 @@ public:
   TrexBase(BaseSettings const &settings);
   ~TrexBase() = default;
 
-  void input_thread();
   void processing_thread();
 
-protected:
   struct Counters Counters {};
+
+protected:
   EV44Serializer *Serializer;
 };
 

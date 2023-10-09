@@ -57,7 +57,7 @@ public:
     dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
                                 EFUSettings.RxSocketBufferSize);
     dataReceiver.printBufferSizes();
-    dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+    dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
 
     while (runThreads) {
       int readSize;
@@ -130,7 +130,7 @@ public:
   BaseSettings EFUSettings;
   Statistics Stats;
 
-protected:
+public:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static const int EthernetBufferMaxEntries{2000};
   static const int EthernetBufferSize{9000}; /// bytes

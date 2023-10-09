@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,10 +8,14 @@
 //===----------------------------------------------------------------------===//
 
 #include <cinttypes>
+#include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
+#include <freia/FreiaBase.h>
 #include <string>
 #include <vector>
+
 // clang-format off
-std::vector<uint8_t> dummyreadout{
+std::vector<uint8_t> TestPacket{
                 0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x48, // 'E', 'S', 'S', type 0x48
     0x46, 0x00, 0x17, 0x00, // len(0x005e), OQ23, TSrc0
@@ -85,77 +89,49 @@ std::string freiajson = R"(
 
 //clang-format on
 
-#include <common/testutils/SaveBuffer.h>
-#include <common/testutils/TestBase.h>
-#include <common/testutils/TestUDPServer.h>
-#include <freia/FreiaBase.h>
-
-class FreiaBaseStandIn : public Freia::FreiaBase {
-public:
-  FreiaBaseStandIn(BaseSettings Settings)
-      : Freia::FreiaBase(Settings){};
-  ~FreiaBaseStandIn() = default;
-  using Detector::Threads;
-  using Freia::FreiaBase::Counters;
-};
-
 class FreiaBaseTest : public ::testing::Test {
 public:
+  BaseSettings Settings;
+
   void SetUp() override {
     Settings.ConfigFile = "Freia.json";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}
-
-  BaseSettings Settings;
 };
 
+
 TEST_F(FreiaBaseTest, Constructor) {
-  FreiaBaseStandIn Readout(Settings);
+  Freia::FreiaBase Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(FreiaBaseTest, DataReceive) {
-  Settings.DetectorPort = 9003;
-  FreiaBaseStandIn Readout(Settings);
-  Readout.startThreads();
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43129, Settings.DetectorPort,
-                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
-  Server.startPacketTransmission(2, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 2);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, 2 * dummyreadout.size());
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            4); // number of readouts dummyreadout
-  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 4);
+  Freia::FreiaBase Readout(Settings);
+
+  writePacketToRxFIFO(Readout, TestPacket);
+
+  // number of readouts in TestPacket
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2);
+  EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
   // Freia has 32 cassettes, and 32 event builders, so match attempt
   // count increases by 32 for each packet received
-  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 64);
+  EXPECT_EQ(Readout.Counters.MatcherStats.MatchAttemptCount, 32);
+  Readout.stopThreads();
 }
 
 TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
-  Settings.DetectorPort = 9003;
-  FreiaBaseStandIn Readout(Settings);
-  Readout.startThreads();
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
-  std::this_thread::sleep_for(SleepTime);
-  dummyreadout[0] = 0xff; // pad should be 0
-  TestUDPServer Server(43129, Settings.DetectorPort,
-                       (unsigned char *)&dummyreadout[0], dummyreadout.size());
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 1);
-  EXPECT_EQ(Readout.ITCounters.RxBytes, dummyreadout.size());
+  Freia::FreiaBase Readout(Settings);
+
+  TestPacket[0] = 0xff; // pad should be 0
+  writePacketToRxFIFO(Readout, TestPacket);
+
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
-  EXPECT_EQ(Readout.Counters.VMMStats.Readouts,
-            0); // no readouts as header is bad
+  EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 0);
+  Readout.stopThreads();
 }
 
 int main(int argc, char **argv) {
