@@ -9,6 +9,7 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <freia/geometry/Config.h>
+#include <iostream>
 
 namespace Freia {
 
@@ -16,6 +17,21 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
+
+  try {
+    FreiaFileParameters.Version = root["Version"].get<int>();
+  } catch (...) {
+    throw std::runtime_error("Invalid Json file - missing Version");
+  }
+
+  if (FreiaFileParameters.Version != 1) {
+    auto ErrMsg = fmt::format("Invalid config version {} - expected 1", FreiaFileParameters.Version);
+    LOG(INIT, Sev::Error, ErrMsg.c_str());
+    throw std::runtime_error(ErrMsg);
+  }
+  LOG(INIT, Sev::Info, "Config file version {}", FreiaFileParameters.Version);
+
+
   try {
     FreiaFileParameters.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
   } catch (...) {
@@ -91,6 +107,23 @@ void Config::applyConfig() {
 
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
+      /// Thresholds
+      XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d", LocalHybrid, Ring, FEN);
+      auto & Thresholds = Mapping["Thresholds"];
+
+      /// Version 1: one threshold for asic and asic1 at index, 0 and 1
+      if (FreiaFileParameters.Version == 1) {
+        if ((Thresholds[0].size()) != 1 or (Thresholds[1].size() != 1)) {
+          auto ErrMsg = fmt::format("version 1 - invalid threshold array size ({}, {})",
+              Thresholds[0].size(), Thresholds[1].size());
+          LOG(INIT, Sev::Error, ErrMsg.c_str());
+          throw std::runtime_error(ErrMsg);
+        }
+        Hybrid.ADCThresholds[0].push_back(Thresholds[0][0].get<int>());
+        Hybrid.ADCThresholds[1].push_back(Thresholds[1][0].get<int>());
+      }
+      /// End Thresholds
+
       /// \todo implement extra rows?
       Hybrid.XOffset = 0;
 
@@ -106,7 +139,13 @@ void Config::applyConfig() {
     }
 
     NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
-  } catch (...) {
+  }
+  catch(const std::runtime_error& re) {
+    //std::cerr << "Runtime error: " << re.what() << std::endl;
+    auto ErrMsg = fmt::format("Config error: {}", re.what());
+    throw std::runtime_error(ErrMsg);
+  }
+  catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
         FileName);
     throw std::runtime_error("Invalid Json file");

@@ -14,53 +14,6 @@
 
 using namespace Freia;
 // clang-format off
-std::string ConfigFile{"deleteme_freia_instr_config.json"};
-std::string ConfigStr = R"(
-  {
-    "Detector": "Freia",
-
-    "WireChOffset" : 16,
-
-    "Config" : [
-    { "CassetteNumber":  0, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000000"},
-    { "CassetteNumber":  1, "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000001"},
-    { "CassetteNumber":  2, "Ring" :  0, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000002"},
-    { "CassetteNumber":  3, "Ring" :  0, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000003"},
-    { "CassetteNumber":  4, "Ring" :  1, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000004"},
-    { "CassetteNumber":  5, "Ring" :  1, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000005"},
-    { "CassetteNumber":  6, "Ring" :  1, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000006"},
-    { "CassetteNumber":  7, "Ring" :  1, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000007"},
-    { "CassetteNumber":  8, "Ring" :  2, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000008"},
-    { "CassetteNumber":  9, "Ring" :  2, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000009"},
-    { "CassetteNumber": 10, "Ring" :  2, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000010"},
-    { "CassetteNumber": 11, "Ring" :  2, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000011"},
-    { "CassetteNumber": 12, "Ring" :  3, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000012"},
-    { "CassetteNumber": 13, "Ring" :  3, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000013"},
-    { "CassetteNumber": 14, "Ring" :  4, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000014"},
-    { "CassetteNumber": 15, "Ring" :  4, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000015"},
-    { "CassetteNumber": 16, "Ring" :  5, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000016"},
-    { "CassetteNumber": 17, "Ring" :  5, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000017"},
-    { "CassetteNumber": 18, "Ring" :  6, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000018"},
-    { "CassetteNumber": 19, "Ring" :  6, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000019"},
-    { "CassetteNumber": 20, "Ring" :  7, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000020"},
-    { "CassetteNumber": 21, "Ring" :  7, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000021"},
-    { "CassetteNumber": 22, "Ring" :  8, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000022"},
-    { "CassetteNumber": 23, "Ring" :  8, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000023"},
-    { "CassetteNumber": 24, "Ring" :  9, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000024"},
-    { "CassetteNumber": 25, "Ring" :  9, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000025"},
-    { "CassetteNumber": 26, "Ring" :  9, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000026"},
-    { "CassetteNumber": 27, "Ring" :  9, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000027"},
-    { "CassetteNumber": 28, "Ring" : 10, "FEN": 0, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000028"},
-    { "CassetteNumber": 29, "Ring" : 10, "FEN": 0, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000029"},
-    { "CassetteNumber": 30, "Ring" : 10, "FEN": 1, "Hybrid" :  0, "HybridId" : "E5533333222222221111111100000030"},
-    { "CassetteNumber": 31, "Ring" : 10, "FEN": 1, "Hybrid" :  1, "HybridId" : "E5533333222222221111111100000031"}
-  ],
-
-    "MaxPulseTimeNS" : 71428570,
-    "MaxGapWire"  : 0,
-    "MaxGapStrip" : 0
-  }
-)";
 
 std::string CalibFile{"deleteme_freia_instr_calib.json"};
 std::string CalibStr = R"(
@@ -166,7 +119,7 @@ protected:
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    Settings.ConfigFile = ConfigFile;
+    Settings.ConfigFile = FREIA_FULL;
     serializer = new EV44Serializer(115000, "freia");
     counters = {};
 
@@ -327,13 +280,11 @@ TEST_F(FreiaInstrumentTest, NoEvents) {
 }
 
 int main(int argc, char **argv) {
-  saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(CalibFile, (void *)CalibStr.c_str(), CalibStr.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
-  deleteFile(ConfigFile);
   deleteFile(CalibFile);
   return RetVal;
 }

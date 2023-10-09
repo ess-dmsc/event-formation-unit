@@ -33,6 +33,14 @@ TEST_F(HybridTest, IsAvailable) {
   ASSERT_FALSE(res);
 }
 
+TEST_F(HybridTest, ADCThresholds) {
+  std::vector<Hybrid> Hybrids;
+  Hybrid tmp;
+  EXPECT_EQ(tmp.ADCThresholds.size(), 2);
+  EXPECT_EQ(tmp.ADCThresholds[0].size(), 0);
+  EXPECT_EQ(tmp.ADCThresholds[1].size(), 0);
+}
+
 } // namespace ESSReadout
 
 int main(int argc, char **argv) {

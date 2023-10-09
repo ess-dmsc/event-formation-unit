@@ -42,6 +42,9 @@ public:
   // holds calibration info for each VMM ASIC on hybrid
   std::vector<VMM3Calibration> VMMs{NumVMMs};
 
+  /// \brief array of thresholds per asic.
+  std::vector<std::vector<int>> ADCThresholds{2};
+
   // defines offset of hybrid in logical geometry
   uint16_t XOffset{0};
   uint16_t YOffset{0};
