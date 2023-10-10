@@ -136,6 +136,12 @@ void FreiaInstrument::processReadouts(void) {
     XTRACE(DATA, DEB, "Hybrid at: %p", &Hybrid);
     XTRACE(DATA, DEB, "Calibration at: %p", &Hybrid.VMMs[Asic]);
 
+    // apply adc thresholds
+    if (readout.OTADC < Hybrid.ADCThresholds[Asic][0]) {
+      counters.ADCBelowThreshold++;
+      continue;
+    }
+
     uint64_t TimeNS =
         ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
