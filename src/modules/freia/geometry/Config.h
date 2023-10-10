@@ -37,7 +37,6 @@ public:
 
 public:
   // Parameters obtained from JSON config file
-
   bool StripGapCheck{true};
   bool WireGapCheck{true};
   struct {
@@ -49,7 +48,14 @@ public:
     float SplitMultiEventsCoefficientHigh{1.2};
     uint16_t MaxMatchingTimeGap{500};
     uint16_t MaxClusteringTimeGap{500};
-  } FreiaFileParameters;
+  } CfgParms;
 };
+
+const std::vector<std::string> RootFields{
+    "Detector", "InstrumentGeometry", "Version", "Comment", "Date", "Info",
+    "Config"};
+
+const std::vector<std::string> MappingFields{
+    "CassetteNumber", "Ring", "FEN", "Hybrid", "HybridId", "Thresholds"};
 
 } // namespace Freia

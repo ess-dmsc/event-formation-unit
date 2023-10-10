@@ -42,3 +42,23 @@ inline void json_change_key(nlohmann::json &object, const std::string& old_key, 
     // delete value at old key (cheap, because the value is null after swap)
     object.erase(it);
 }
+
+/// \brief Given a nlohmann json object and a list of known required fields
+/// return a string with the missing fields.
+inline void json_check_keys(std::string Prefix, nlohmann::json &object,
+  std::vector<std::string> RequiredFields) {
+  std::string Missing{""};
+
+  for (const auto & Field : RequiredFields) {
+    if (not object.contains(Field)) {
+      if (Missing.size() != 0) {
+        Missing += " ";
+      }
+      Missing += Field;
+    }
+  }
+  if (Missing.size() != 0) {
+    std::string ErrMsg = fmt::format("{}: missing mandatory keys - {}", Prefix, Missing);
+    throw std::runtime_error(ErrMsg);
+  }
+}
