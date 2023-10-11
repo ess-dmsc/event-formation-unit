@@ -31,7 +31,6 @@ set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
 
 
-
 ##
 ## FreiaiBaseTest Module integration test
 ##
