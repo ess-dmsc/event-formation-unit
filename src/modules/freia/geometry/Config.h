@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -41,6 +41,7 @@ public:
   bool StripGapCheck{true};
   bool WireGapCheck{true};
   struct {
+    int Version{0};
     uint16_t MaxGapWire{0};
     uint16_t MaxGapStrip{0};
     bool SplitMultiEvents{false};

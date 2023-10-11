@@ -4,6 +4,8 @@ add_subdirectory(test)
 add_subdirectory(generators)
 include_directories(.)
 
+get_filename_component(FREIA_FULL "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
+
 #=============================================================================
 # freia detector module and base test
 #=============================================================================
@@ -28,7 +30,10 @@ set(freia_SRC
 set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
 
-#
+
+##
+## FreiaiBaseTest Module integration test
+##
 set(FreiaBaseTest_INC
   ${freia_common_inc}
 )
@@ -37,6 +42,7 @@ set(FreiaBaseTest_SRC
   ${freia_common_src}
 )
 create_test_executable(FreiaBaseTest)
+target_compile_definitions(FreiaBaseTest PRIVATE FREIA_FULL="${FREIA_FULL}")
 
 
 ##
@@ -50,3 +56,4 @@ set(FreiaInstrumentTest_SRC
   test/FreiaInstrumentTest.cpp
 )
 create_test_executable(FreiaInstrumentTest)
+target_compile_definitions(FreiaInstrumentTest PRIVATE FREIA_FULL="${FREIA_FULL}")
