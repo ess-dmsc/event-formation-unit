@@ -16,7 +16,6 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-
   json_check_keys("Config error", root, RootFields);
 
   CfgParms.Version = root["Version"].get<int>();
@@ -84,53 +83,46 @@ void Config::applyConfig() {
   }
   LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", CfgParms.MaxClusteringTimeGap);
 
+  /// RING/FEN/Hybrid
   auto PanelConfig = root["Config"];
-  uint8_t MaxCassetteNumber = 0;
 
   for (auto &Mapping : PanelConfig) {
     json_check_keys("Config error", Mapping, MappingFields);
 
-    if ((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber) {
-      MaxCassetteNumber = (uint8_t)Mapping["CassetteNumber"];
-    }
-  }
-
-  for (auto &Mapping : PanelConfig) {
     uint8_t Ring = Mapping["Ring"].get<uint8_t>();
     uint8_t FEN = Mapping["FEN"].get<uint8_t>();
     uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
 
     ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
-    /// Thresholds
-    /// Version 1: one threshold for asic and asic1 at index, 0 and 1
-    if (CfgParms.Version == 1) {
-      XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d",
-             LocalHybrid, Ring, FEN);
-      auto &Thresholds = Mapping["Thresholds"];
+    uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
+    Hybrid.XOffset = 0;
+    Hybrid.YOffset = CassetteId * NumWiresPerCassette;
+    XTRACE(INIT, DEB, "Cass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
+           CassetteId, Ring, FEN, LocalHybrid, Hybrid.YOffset);
 
-      if ((Thresholds[0].size()) != 1 or (Thresholds[1].size() != 1)) {
-        auto ErrMsg =
-            fmt::format("version 1 - invalid threshold array size ({}, {})",
-                        Thresholds[0].size(), Thresholds[1].size());
-        LOG(INIT, Sev::Error, ErrMsg.c_str());
-        throw std::runtime_error(ErrMsg);
-      }
-      Hybrid.ADCThresholds[0].push_back(Thresholds[0][0].get<int>());
-      Hybrid.ADCThresholds[1].push_back(Thresholds[1][0].get<int>());
+    /// Thresholds
+    /// Version 1: one threshold for asic0 and asic1 at index, 0 and 1
+    if (CfgParms.Version == 1) {
+     XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d",
+            LocalHybrid, Ring, FEN);
+     auto &Thresholds = Mapping["Thresholds"];
+
+     if ((Thresholds[0].size()) != 1 or (Thresholds[1].size() != 1)) {
+       auto ErrMsg =
+           fmt::format("version 1 - invalid threshold array size ({}, {})",
+                       Thresholds[0].size(), Thresholds[1].size());
+       LOG(INIT, Sev::Error, ErrMsg.c_str());
+       throw std::runtime_error(ErrMsg);
+     }
+     Hybrid.ADCThresholds[0].push_back(Thresholds[0][0].get<int>());
+     Hybrid.ADCThresholds[1].push_back(Thresholds[1][0].get<int>());
     }
     /// End Thresholds
-
-    /// \todo implement extra rows?
-    Hybrid.XOffset = 0;
-    Hybrid.YOffset = (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
-          NumWiresPerCassette;
-
-    XTRACE(INIT, DEB, "MaxCass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
-           MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
   }
 
   NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
+
   XTRACE(INIT, ALW, "Configuration file loaded successfully");
 }
 
