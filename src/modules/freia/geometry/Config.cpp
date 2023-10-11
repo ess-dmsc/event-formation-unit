@@ -82,8 +82,7 @@ void Config::applyConfig() {
   } else {
     LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
   }
-  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}",
-      CfgParms.MaxClusteringTimeGap);
+  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", CfgParms.MaxClusteringTimeGap);
 
   auto PanelConfig = root["Config"];
   uint8_t MaxCassetteNumber = 0;
@@ -124,14 +123,9 @@ void Config::applyConfig() {
 
     /// \todo implement extra rows?
     Hybrid.XOffset = 0;
-
-    if (Mapping.contains("CassetteNumber")) {
-      Hybrid.YOffset =
-          (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
+    Hybrid.YOffset = (MaxCassetteNumber - (uint8_t)Mapping["CassetteNumber"]) *
           NumWiresPerCassette;
-    } else {
-      Hybrid.YOffset = 0;
-    }
+
     XTRACE(INIT, DEB, "MaxCass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
            MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
   }
