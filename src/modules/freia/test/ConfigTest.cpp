@@ -9,15 +9,8 @@
 #include <freia/geometry/Config.h>
 
 
-auto NoDetector = R"(
-{
-  "WireChOffset" : 16
-}
-)"_json;
-
-
-
 using namespace Freia;
+
 
 class FreiaConfigTest : public TestBase {
 protected:
@@ -30,41 +23,60 @@ protected:
   void TearDown() override {}
 };
 
+
 TEST_F(FreiaConfigTest, Constructor) {
   ASSERT_EQ(config.NumPixels, 0);
   ASSERT_EQ(config.NumHybrids, 0);
 }
+
 
 TEST_F(FreiaConfigTest, UninitialisedHybrids) {
   ASSERT_EQ(config.getHybrid(1, 0, 0).Initialised, false);
   ASSERT_ANY_THROW(config.getHybrid("not a hybrid ID"));
 }
 
+
 TEST_F(FreiaConfigTest, NoDetector) {
   json_change_key(config.root, "Detector", "NoMoreDetector");
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
+
 
 TEST_F(FreiaConfigTest, InvalidDetector) {
   config.root["Detector"] = "Frigg";
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
+
 TEST_F(FreiaConfigTest, InvalidRing) {
   config.root["Config"][4]["Ring"] = 12;
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
+
 
 TEST_F(FreiaConfigTest, InvalidConfig) {
   json_change_key(config.root["Config"][4], "Ring", "Ringo");
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
+
 TEST_F(FreiaConfigTest, Duplicate) {
   config.root["Config"][3]["Ring"] = config.root["Config"][0]["Ring"];
   config.root["Config"][3]["FEN"] = config.root["Config"][0]["FEN"];
   config.root["Config"][3]["Hybrid"] = config.root["Config"][0]["Hybrid"];
   ASSERT_ANY_THROW(config.applyVMM3Config());
+}
+
+
+TEST_F(FreiaConfigTest, BadVersion) {
+  config.root["Version"] = 2;
+  ASSERT_ANY_THROW(config.applyConfig());
+}
+
+
+TEST_F(FreiaConfigTest, BadThresholdArraySize) {
+  config.root["Config"][0]["Thresholds"][0].push_back(42);
+  ASSERT_ANY_THROW(config.applyConfig());
 }
 
 // Compare calculated maxpixels and number of fens against
@@ -86,15 +98,6 @@ std::vector<RingCfg> ReferenceConfig{
     {10, 1, 0}, {10, 1, 1},
 };
 
-TEST_F(FreiaConfigTest, BadVersion) {
-  config.root["Version"] = 2;
-  ASSERT_ANY_THROW(config.applyConfig());
-}
-
-TEST_F(FreiaConfigTest, BadThresholdArraySize) {
-  config.root["Config"][0]["Thresholds"][0].push_back(42);
-  ASSERT_ANY_THROW(config.applyConfig());
-}
 
 TEST_F(FreiaConfigTest, FullInstrument) {
   config = Config("Freia", FREIA_FULL);
@@ -108,8 +111,8 @@ TEST_F(FreiaConfigTest, FullInstrument) {
   }
 }
 
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
-  auto RetVal = RUN_ALL_TESTS();
-  return RetVal;
+  return RUN_ALL_TESTS();
 }
