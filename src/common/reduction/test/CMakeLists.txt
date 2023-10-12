@@ -24,6 +24,7 @@ set(EventTest_SRC
   )
 create_test_executable(EventTest)
 
+
 set(Cluster2DTest_INC
   ${ESS_COMMON_DIR}/reduction/Cluster2D.h
   )
@@ -32,6 +33,7 @@ set(Cluster2DTest_SRC
   ${ESS_COMMON_DIR}/reduction/Cluster2D.cpp
   )
 create_test_executable(Cluster2DTest)
+
 
 set(ReducedEventTest_SRC
   ReducedEventTest.cpp

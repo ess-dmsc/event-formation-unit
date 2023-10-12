@@ -11,7 +11,7 @@
 
 class Cluster2DTest : public TestBase {
 protected:
-  Cluster2D TestCluster;
+  Cluster2D TestCluster, OtherCluster;
   double FPEquality{0.000001};
 
   void SetUp() override {}
@@ -25,11 +25,65 @@ TEST_F(Cluster2DTest, Constructor) {
 }
 
 
-TEST_F(Cluster2DTest, GetterFunctionsConstructor) {
-  // Division by zero for some functions if weights are 0, hence the insert
+TEST_F(Cluster2DTest, IsValidIsEmpty) {
+  ASSERT_FALSE(TestCluster.valid());
+  ASSERT_TRUE(TestCluster.empty());
+
+  Hit2D Zero2DHit{0,0,0,1};
+  TestCluster.insert(Zero2DHit);
+  ASSERT_TRUE(TestCluster.valid());
+  ASSERT_FALSE(TestCluster.empty());
+}
+
+
+TEST_F(Cluster2DTest, MergeClusters) {
+  EXPECT_NEAR(TestCluster.weightSum(), 0, FPEquality);
+
+  OtherCluster.insert({0, 3, 0, 1});
+
+  TestCluster.merge(OtherCluster);
+  EXPECT_NEAR(TestCluster.weightSum(), 1, FPEquality);
+}
+
+
+TEST_F(Cluster2DTest, TimeOverlap) {
+  EXPECT_EQ(TestCluster.timeOverlap(OtherCluster), 0);
+
+  TestCluster.insert({0, 0, 0, 1});
+  OtherCluster.insert({0, 7, 7, 1});
+
+  EXPECT_EQ(TestCluster.timeOverlap(OtherCluster), 1);
+}
+
+
+TEST_F(Cluster2DTest, TimeGap) {
+
+  TestCluster.insert({1, 0, 0, 1});
+  OtherCluster.insert({0, 7, 7, 1});
+
+  EXPECT_EQ(TestCluster.timeGap(OtherCluster), 1);
+
+  TestCluster.insert({0, 0, 0, 1});
+  EXPECT_EQ(TestCluster.timeGap(OtherCluster), 0);
+}
+
+
+TEST_F(Cluster2DTest, Clear) {
+  Hit2D Zero2DHit{0,0,0,1};
+  TestCluster.insert(Zero2DHit);
+  EXPECT_NEAR(TestCluster.weightSum(), 1, FPEquality);
+  TestCluster.clear();
+  EXPECT_NEAR(TestCluster.weightSum(), 0, FPEquality);
+}
+
+
+TEST_F(Cluster2DTest, GetterFunctionsZero2DHit) {
+  EXPECT_EQ(TestCluster.hitCount(), 0);
+
   Hit2D Zero2DHit{0,0,0,1};
   TestCluster.insert(Zero2DHit);
 
+  EXPECT_EQ(TestCluster.hitCount(), 1);
   EXPECT_NEAR(TestCluster.timeEnd(), 0, FPEquality);
   EXPECT_NEAR(TestCluster.weightSum(), 1, FPEquality);
   EXPECT_NEAR(TestCluster.xCoordMass(), 0, FPEquality);

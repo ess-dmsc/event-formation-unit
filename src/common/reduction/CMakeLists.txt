@@ -23,7 +23,7 @@ set(reduction_obj_SRC
 
 set(reduction_obj_INC
   Hit.h
-  HitVector.h 
+  HitVector.h
   Hit2D.h
   Hit2DVector.h
   Cluster.h
