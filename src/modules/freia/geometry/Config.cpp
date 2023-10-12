@@ -16,139 +16,114 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
+  json_check_keys("Config error", root, RootFields);
 
-  try {
-    FreiaFileParameters.Version = root["Version"].get<int>();
-  } catch (...) {
-    throw std::runtime_error("Invalid Json file - missing Version");
+  CfgParms.Version = root["Version"].get<int>();
+
+  if (CfgParms.Version != 1) {
+    auto Msg =
+        fmt::format("Invalid config version {} - expected 1", CfgParms.Version);
+    LOG(INIT, Sev::Error, Msg.c_str());
+    throw std::runtime_error(Msg);
   }
+  LOG(INIT, Sev::Info, "Config file version {}", CfgParms.Version);
 
-  if (FreiaFileParameters.Version != 1) {
-    auto ErrMsg = fmt::format("Invalid config version {} - expected 1", FreiaFileParameters.Version);
-    LOG(INIT, Sev::Error, ErrMsg.c_str());
-    throw std::runtime_error(ErrMsg);
-  }
-  LOG(INIT, Sev::Info, "Config file version {}", FreiaFileParameters.Version);
-
-
-  try {
-    FreiaFileParameters.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
-  } catch (...) {
+  if (root.contains("MaxGapWire")) {
+    CfgParms.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
+  } else {
     LOG(INIT, Sev::Info, "Using default value for MaxGapWire");
   }
-  LOG(INIT, Sev::Info, "MaxGapWire {}", FreiaFileParameters.MaxGapWire);
+  LOG(INIT, Sev::Info, "MaxGapWire {}", CfgParms.MaxGapWire);
 
-  try {
-    FreiaFileParameters.MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
-  } catch (...) {
+  if (root.contains("MaxGapStrip")) {
+    CfgParms.MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
+  } else {
     LOG(INIT, Sev::Info, "Using default value for MaxGapStrip");
   }
-  LOG(INIT, Sev::Info, "MaxGapStrip {}", FreiaFileParameters.MaxGapStrip);
+  LOG(INIT, Sev::Info, "MaxGapStrip {}", CfgParms.MaxGapStrip);
 
-  try {
-    FreiaFileParameters.SplitMultiEvents = root["SplitMultiEvents"].get<bool>();
-  } catch (...) {
+  if (root.contains("SplitMultiEvents")) {
+    CfgParms.SplitMultiEvents = root["SplitMultiEvents"].get<bool>();
+  } else {
     LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
   }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}",
-      FreiaFileParameters.SplitMultiEvents);
+  LOG(INIT, Sev::Info, "SplitMultiEvents {}", CfgParms.SplitMultiEvents);
 
-  try {
-    FreiaFileParameters.SplitMultiEventsCoefficientLow =
+  if (root.contains("SplitMultiEventsCoefficientLow")) {
+    CfgParms.SplitMultiEventsCoefficientLow =
         root["SplitMultiEventsCoefficientLow"].get<float>();
-  } catch (...) {
+  } else {
     LOG(INIT, Sev::Info,
         "Using default value for SplitMultiEventsCoefficientLow");
   }
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
-      FreiaFileParameters.SplitMultiEventsCoefficientLow);
+      CfgParms.SplitMultiEventsCoefficientLow);
 
-  try {
-    FreiaFileParameters.SplitMultiEventsCoefficientHigh =
+  if (root.contains("SplitMultiEventsCoefficientHigh")) {
+    CfgParms.SplitMultiEventsCoefficientHigh =
         root["SplitMultiEventsCoefficientHigh"].get<float>();
-  } catch (...) {
+  } else {
     LOG(INIT, Sev::Info,
         "Using default value for SplitMultiEventsCoefficientHigh");
   }
   LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
-      FreiaFileParameters.SplitMultiEventsCoefficientHigh);
+      CfgParms.SplitMultiEventsCoefficientHigh);
 
-  try {
-    FreiaFileParameters.MaxMatchingTimeGap =
-        root["MaxMatchingTimeGap"].get<float>();
-  } catch (...) {
+  if (root.contains("MaxMatchingTimeGap")) {
+    CfgParms.MaxMatchingTimeGap = root["MaxMatchingTimeGap"].get<float>();
+  } else {
     LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
   }
-  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}",
-      FreiaFileParameters.MaxMatchingTimeGap);
+  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}", CfgParms.MaxMatchingTimeGap);
 
-  try {
-    FreiaFileParameters.MaxClusteringTimeGap =
-        root["MaxClusteringTimeGap"].get<float>();
-  } catch (...) {
+  if (root.contains("MaxClusteringTimeGap")) {
+    CfgParms.MaxClusteringTimeGap = root["MaxClusteringTimeGap"].get<float>();
+  } else {
     LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
   }
-  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}",
-      FreiaFileParameters.MaxClusteringTimeGap);
+  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", CfgParms.MaxClusteringTimeGap);
 
-  try {
-    auto PanelConfig = root["Config"];
-    uint8_t MaxCassetteNumber = 0;
-    for (auto &Mapping : PanelConfig) {
-      if ((uint8_t)Mapping["CassetteNumber"] > MaxCassetteNumber) {
-        MaxCassetteNumber = (uint8_t)Mapping["CassetteNumber"];
-      }
+  /// RING/FEN/Hybrid
+  auto PanelConfig = root["Config"];
+
+  for (auto &Mapping : PanelConfig) {
+    json_check_keys("Config error", Mapping, MappingFields);
+
+    uint8_t Ring = Mapping["Ring"].get<uint8_t>();
+    uint8_t FEN = Mapping["FEN"].get<uint8_t>();
+    uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
+
+    ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+
+    uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
+    Hybrid.XOffset = 0;
+    Hybrid.YOffset = CassetteId * NumWiresPerCassette;
+    XTRACE(INIT, DEB, "Cass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
+           CassetteId, Ring, FEN, LocalHybrid, Hybrid.YOffset);
+
+    /// Thresholds
+    /// Version 1: one threshold for asic0 and asic1 at index, 0 and 1
+    if (CfgParms.Version == 1) {
+     XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d",
+            LocalHybrid, Ring, FEN);
+     auto &Thresholds = Mapping["Thresholds"];
+
+     if ((Thresholds[0].size()) != 1 or (Thresholds[1].size() != 1)) {
+       auto ErrMsg =
+           fmt::format("version 1 - invalid threshold array size ({}, {})",
+                       Thresholds[0].size(), Thresholds[1].size());
+       LOG(INIT, Sev::Error, ErrMsg.c_str());
+       throw std::runtime_error(ErrMsg);
+     }
+     Hybrid.ADCThresholds[0].push_back(Thresholds[0][0].get<int>());
+     Hybrid.ADCThresholds[1].push_back(Thresholds[1][0].get<int>());
     }
-    for (auto &Mapping : PanelConfig) {
-      uint8_t Ring = Mapping["Ring"].get<uint8_t>();
-      uint8_t FEN = Mapping["FEN"].get<uint8_t>();
-      uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
-      uint8_t CassetteId{0};
-
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
-
-      /// Thresholds
-      XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d", LocalHybrid, Ring, FEN);
-      auto & Thresholds = Mapping["Thresholds"];
-
-      /// Version 1: one threshold for asic and asic1 at index, 0 and 1
-      if (FreiaFileParameters.Version == 1) {
-        if ((Thresholds[0].size()) != 1 or (Thresholds[1].size() != 1)) {
-          auto ErrMsg = fmt::format("version 1 - invalid threshold array size ({}, {})",
-              Thresholds[0].size(), Thresholds[1].size());
-          LOG(INIT, Sev::Error, ErrMsg.c_str());
-          throw std::runtime_error(ErrMsg);
-        }
-        Hybrid.ADCThresholds[0].push_back(Thresholds[0][0].get<int>());
-        Hybrid.ADCThresholds[1].push_back(Thresholds[1][0].get<int>());
-      }
-      /// End Thresholds
-
-      /// \todo implement extra rows?
-      Hybrid.XOffset = 0;
-
-      try {
-        CassetteId = (uint8_t)Mapping["CassetteNumber"];
-        Hybrid.YOffset = CassetteId * NumWiresPerCassette;
-      } catch (...) {
-        Hybrid.YOffset = 0;
-      }
-      XTRACE(INIT, DEB, "Cass %u (Max cassette %u), Ring %u, FEN %u, Hybrid %u, Yoffset %u",
-             CassetteId, MaxCassetteNumber, Ring, FEN, LocalHybrid, Hybrid.YOffset);
-    }
-
-    NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
+    /// End Thresholds
   }
-  catch(const std::runtime_error& re) {
-    //std::cerr << "Runtime error: " << re.what() << std::endl;
-    auto ErrMsg = fmt::format("Config error: {}", re.what());
-    throw std::runtime_error(ErrMsg);
-  }
-  catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
-    throw std::runtime_error("Invalid Json file");
-  }
+
+  NumPixels = NumHybrids * NumWiresPerCassette * NumStripsPerCassette;
+
+  XTRACE(INIT, ALW, "Configuration file loaded successfully");
 }
 
 } // namespace Freia

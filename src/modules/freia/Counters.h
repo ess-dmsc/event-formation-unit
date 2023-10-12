@@ -32,6 +32,7 @@ struct Counters {
   int64_t HybridMappingErrors;
   int64_t MaxTOFErrors;
   int64_t MaxADC;
+  int64_t ADCBelowThreshold;
 
   //
   int64_t ProcessingIdle;

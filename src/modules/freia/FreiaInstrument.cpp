@@ -64,16 +64,16 @@ void FreiaInstrument::loadConfigAndCalib() {
 
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(
-        Conf.FreiaFileParameters.MaxMatchingTimeGap);
+        Conf.CfgParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
-        Conf.FreiaFileParameters.MaxClusteringTimeGap);
+        Conf.CfgParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
-        Conf.FreiaFileParameters.MaxClusteringTimeGap);
-    if (Conf.FreiaFileParameters.SplitMultiEvents) {
+        Conf.CfgParms.MaxClusteringTimeGap);
+    if (Conf.CfgParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
-          Conf.FreiaFileParameters.SplitMultiEvents,
-          Conf.FreiaFileParameters.SplitMultiEventsCoefficientLow,
-          Conf.FreiaFileParameters.SplitMultiEventsCoefficientHigh);
+          Conf.CfgParms.SplitMultiEvents,
+          Conf.CfgParms.SplitMultiEventsCoefficientLow,
+          Conf.CfgParms.SplitMultiEventsCoefficientHigh);
     }
   }
 
@@ -135,6 +135,12 @@ void FreiaInstrument::processReadouts(void) {
     VMM3Calibration &Calib = Hybrid.VMMs[Asic];
     XTRACE(DATA, DEB, "Hybrid at: %p", &Hybrid);
     XTRACE(DATA, DEB, "Calibration at: %p", &Hybrid.VMMs[Asic]);
+
+    // apply adc thresholds
+    if (readout.OTADC < Hybrid.ADCThresholds[Asic][0]) {
+      counters.ADCBelowThreshold++;
+      continue;
+    }
 
     uint64_t TimeNS =
         ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
@@ -215,7 +221,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.FreiaFileParameters.MaxGapWire)) {
+      if (e.ClusterB.hasGap(Conf.CfgParms.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -223,7 +229,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.FreiaFileParameters.MaxGapStrip)) {
+      if (e.ClusterA.hasGap(Conf.CfgParms.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;

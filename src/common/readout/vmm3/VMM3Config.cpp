@@ -125,6 +125,8 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
     throw std::runtime_error(Message);
   }
 
+  json_check_keys("Calibration error", calib_root, {"Detector", "Version", "Comment", "Date", "Info", "Calibrations"});
+
   std::string Name = calib_root["Detector"];
   unsigned Version = calib_root["Version"].get<unsigned int>();
   auto Calibrations = calib_root["Calibrations"];
@@ -138,10 +140,9 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
   }
 
   for (auto &Calibration : Calibrations) {
-    int HybridIndex = Calibration["VMMHybridCalibration"]["HybridIndex"];
     std::string HybridId = Calibration["VMMHybridCalibration"]["HybridId"];
     if (!validHybridId(HybridId)) {
-      throw std::runtime_error(fmt::format("Invalid HybridID {} for Index {} in Calibration file", HybridId, HybridIndex));
+      throw std::runtime_error(fmt::format("Invalid HybridID {} in Calibration file", HybridId));
     }
     applyCalibration(HybridId, Calibration);
   }
@@ -156,16 +157,26 @@ bool VMM3Config::validHybridId(std::string HybridID) {
 void VMM3Config::applyCalibration(std::string HybridID,
                                   nlohmann::json Calibration) {
 
+  json_check_keys("Calibration error", Calibration, {"VMMHybridCalibration"});
+
   ESSReadout::Hybrid &CurrentHybrid = getHybrid(HybridID);
 
-  std::string Date = Calibration["VMMHybridCalibration"]["CalibrationDate"];
+  auto & CalibEntry = Calibration["VMMHybridCalibration"];
+
+  json_check_keys("Calibration error", CalibEntry, {"CalibrationDate", "HybridId", "vmm0", "vmm1"});
+
+
+  std::string Date = CalibEntry["CalibrationDate"];
 
   // Apply calibration below
   XTRACE(INIT, ALW, "Hybrid ID %s, Date %s", HybridID.c_str(), Date.c_str());
 
-  auto &vmm0cal = Calibration["VMMHybridCalibration"]["vmm0"];
+  auto &vmm0cal = CalibEntry["vmm0"];
+  json_check_keys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
   applyVMM3Calibration(CurrentHybrid, 0, vmm0cal);
-  auto &vmm1cal = Calibration["VMMHybridCalibration"]["vmm1"];
+
+  auto &vmm1cal = CalibEntry["vmm1"];
+  json_check_keys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
   applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
 }
 

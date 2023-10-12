@@ -16,8 +16,8 @@ bool VMM3Calibration::setCalibration(int Channel, double TDCOffset,
                                      double TDCSlope, double ADCOffset,
                                      double ADCSlope) {
   XTRACE(INIT, DEB,
-         "Setting calibration for Channel %u, tdc_offset %d, tdc_slope %d "
-         "adc_offset %d, adc_slope %d",
+         "Setting calibration for Channel %u, tdc_offset %f, tdc_slope %f "
+         "adc_offset %f, adc_slope %f",
          Channel, TDCOffset, TDCSlope, ADCOffset, ADCSlope);
   if (Channel >= CHANNELS) {
     return false;

@@ -1,4 +1,4 @@
-# Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
 add_subdirectory(generators)
