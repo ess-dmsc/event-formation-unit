@@ -1,3 +1,4 @@
+
 set(HitTest_SRC
   HitTest.cpp
   )
@@ -23,6 +24,15 @@ set(EventTest_SRC
   )
 create_test_executable(EventTest)
 
+set(Cluster2DTest_INC
+  ${ESS_COMMON_DIR}/reduction/Cluster2D.h
+  )
+set(Cluster2DTest_SRC
+  Cluster2DTest.cpp
+  ${ESS_COMMON_DIR}/reduction/Cluster2D.cpp
+  )
+create_test_executable(Cluster2DTest)
+
 set(ReducedEventTest_SRC
   ReducedEventTest.cpp
   )
@@ -34,6 +44,6 @@ set(ChronoMergerTest_SRC
 create_test_executable(ChronoMergerTest)
 
 set(HitVectorBenchmark_SRC
-   HitVectorBenchmark.cpp
-    )
+  HitVectorBenchmark.cpp
+  )
  create_benchmark_executable(HitVectorBenchmark)
