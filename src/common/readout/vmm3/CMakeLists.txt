@@ -23,6 +23,16 @@ set(VMM3CalibrationTest_SRC
 create_test_executable(VMM3CalibrationTest)
 
 
+set(VMM3ConfigTest_INC
+  VMM3Config.h
+)
+set(VMM3ConfigTest_SRC
+  test/VMM3ConfigTest.cpp
+  VMM3Config.cpp
+)
+create_test_executable(VMM3ConfigTest)
+
+
 
 set(HybridTest_INC
   Hybrid.h
