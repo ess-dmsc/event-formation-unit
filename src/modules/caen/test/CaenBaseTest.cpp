@@ -40,6 +40,16 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
+
+TEST_F(CaenBaseTest, CspecConstructor) {
+  Settings.ConfigFile = CSPEC_CONFIG;
+  Settings.CalibFile = CSPEC_CALIB;
+  Settings.DetectorName = "cspec";
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::CSPEC);
+  Readout.Counters = {};
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+}
+
 TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
