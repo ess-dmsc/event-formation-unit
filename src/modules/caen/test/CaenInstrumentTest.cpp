@@ -46,9 +46,7 @@ TEST_F(CaenInstrumentTest, CspecConstructor) {
   Settings.ConfigFile = CSPEC_CONFIG;
   Settings.CalibFile = CSPEC_CALIB;
   Settings.DetectorName = "cspec";
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::CSPEC);
-  Readout.Counters = {};
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  CaenInstrument Caen(counters, Settings);
 }
 
 int main(int argc, char **argv) {
