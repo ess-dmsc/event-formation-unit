@@ -45,6 +45,20 @@ TEST_F(Cluster2DTest, MergeClusters) {
   EXPECT_NEAR(TestCluster.weightSum(), 1, FPEquality);
 }
 
+TEST_F(Cluster2DTest, MergeClustersII) {
+  TestCluster.insert({0, 4, 0, 1});
+  double WeightSum = TestCluster.weightSum();
+  OtherCluster.insert({0, 3, 0, 1});
+
+  TestCluster.merge(OtherCluster);
+  ASSERT_TRUE(TestCluster.weightSum() > WeightSum);
+}
+
+TEST_F(Cluster2DTest, MergeClustersOtherEmpty) {
+  TestCluster.merge(OtherCluster);
+  ASSERT_TRUE(TestCluster.empty());
+}
+
 
 TEST_F(Cluster2DTest, TimeOverlap) {
   EXPECT_EQ(TestCluster.timeOverlap(OtherCluster), 0);
