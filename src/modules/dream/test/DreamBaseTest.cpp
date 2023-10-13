@@ -123,6 +123,27 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
   Readout.stopThreads();
 }
 
+
+TEST_F(DreamBaseTest, EmulateFIFOError) {
+  Dream::DreamBase Readout(Settings);
+  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+
+  Readout.startThreads();
+
+  unsigned int rxBufferIndex = Readout.RxRingbuffer.getDataIndex();
+  ASSERT_EQ(rxBufferIndex, 0);
+
+  Readout.RxRingbuffer.setDataLength(rxBufferIndex, 0); ///< invalid size
+
+  ASSERT_TRUE(Readout.InputFifo.push(rxBufferIndex));
+  Readout.RxRingbuffer.getNextBuffer();
+
+  waitForProcessing(Readout);
+
+  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  Readout.stopThreads();
+}
+
 int main(int argc, char **argv) {
   std::string filename{"deleteme_dream.json"};
   saveBuffer(filename, (void *)dreamjson.c_str(), dreamjson.size());

@@ -123,16 +123,6 @@ std::vector<uint8_t> TestPacket2{
 };
 // clang-format on
 
-void waitForProcessing(Caen::CaenBase & Readout) {
-  while (Readout.ITCounters.RxIdle == 0){
-    usleep(100);
-  }
-  while (Readout.Counters.ProcessingIdle == 0) {
-    usleep(100);
-  }
-}
-
-
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
