@@ -1,3 +1,10 @@
+# Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+
+
+get_filename_component(
+  VMM_CONFIG_FILE "${ESS_COMMON_DIR}/readout/vmm3/test/vmmconfig.json" ABSOLUTE
+ )
+
 #=============================================================================
 # ESS VMM3 Parser Tests
 #=============================================================================
@@ -31,7 +38,7 @@ set(VMM3ConfigTest_SRC
   VMM3Config.cpp
 )
 create_test_executable(VMM3ConfigTest)
-
+target_compile_definitions(VMM3ConfigTest PRIVATE VMM_CONFIG_FILE="${VMM_CONFIG_FILE}")
 
 
 set(HybridTest_INC

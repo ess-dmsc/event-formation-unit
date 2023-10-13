@@ -1,0 +1,24 @@
+
+{
+  "Detector" : "Freia",
+  "InstrumentGeometry" : "AMOR",
+
+  "Config" : [
+    { "Ring" :  2, "FEN": 0, "Hybrid" :  3, "HybridId" : "a08000e4fccca0803410082006704410"},
+    { "Ring" :  2, "FEN": 0, "Hybrid" :  2, "HybridId" : "a08000753877a0803410082006704410"},
+    { "Ring" :  2, "FEN": 0, "Hybrid" :  1, "HybridId" : "a0800084049ca0803410082106704410"},
+    { "Ring" :  2, "FEN": 0, "Hybrid" :  0, "HybridId" : "a08000e3b432a0803410082006704410"},
+    { "Ring" :  1, "FEN": 0, "Hybrid" :  4, "HybridId" : "a080003b54b4a0803410082006704410"},
+    { "Ring" :  1, "FEN": 0, "Hybrid" :  3, "HybridId" : "a08000e0103ea0803410082106704410"},
+    { "Ring" :  1, "FEN": 0, "Hybrid" :  2, "HybridId" : "a0800004349aa0803410082006704410"},
+    { "Ring" :  1, "FEN": 0, "Hybrid" :  1, "HybridId" : "a0800075c091a0803410082006704410"},
+    { "Ring" :  1, "FEN": 0, "Hybrid" :  0, "HybridId" : "a08000d1448ba0803410082006704410"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  4, "HybridId" : "a0800073b01ea0803410082006704410"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  3, "HybridId" : "a08000a3385da0803410082006704410"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  2, "HybridId" : "a08000f3bcb9a0803410082006704410"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  1, "HybridId" : "a0800040c8cfa0803410082006704410"},
+    { "Ring" :  0, "FEN": 0, "Hybrid" :  0, "HybridId" : "a0800006b882a0803410082006704410"}
+  ],
+
+  "MaxPulseTimeNS" : 2071428570
+}
