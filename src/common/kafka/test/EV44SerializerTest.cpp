@@ -10,7 +10,7 @@
 #define ARRAYLENGTH 10
 
 struct MockProducer {
-  inline void produce(nonstd::span<const uint8_t>, int64_t) { NumberOfCalls++; }
+  inline void produce(std::span<const uint8_t>, int64_t) { NumberOfCalls++; }
 
   size_t NumberOfCalls{0};
 };

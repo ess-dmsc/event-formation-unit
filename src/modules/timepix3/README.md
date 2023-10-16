@@ -44,7 +44,7 @@ classDiagram
         +Geometry *Geom
         +Hierarchical2DClusterer *Clusterer
         +Hit2DVector AllHitsVector
-        +EV44Serializer *Serializernonstd::span<const uint8_t>
+        +EV44Serializer *Serializerstd::span<const uint8_t>
         +processReadouts() void
         +setSerializer(EV44Serializer *) void
         +calcPixel(Timepix3PixelReadout &) uint32_t

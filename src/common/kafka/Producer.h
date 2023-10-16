@@ -15,9 +15,9 @@
 #pragma GCC diagnostic pop
 
 #include <common/memory/Buffer.h>
-#include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -34,7 +34,7 @@ public:
   /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX
   /// epoch
   /// \return Returns 0 on success, another value on failure.
-  virtual int produce(nonstd::span<const std::uint8_t> Buffer,
+  virtual int produce(std::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) = 0;
 };
 
@@ -53,7 +53,7 @@ public:
 
   ///\brief Produce kafka messages and send to cluster
   ///\return int, 0 if successful
-  int produce(nonstd::span<const std::uint8_t> Buffer,
+  int produce(std::span<const std::uint8_t> Buffer,
               std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
@@ -83,4 +83,4 @@ protected:
 };
 
 using ProducerCallback =
-    std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;
+    std::function<void(std::span<const std::uint8_t>, std::int64_t)>;

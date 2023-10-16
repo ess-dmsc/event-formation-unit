@@ -17,7 +17,7 @@ protected:
   char flatbuffer[1024 * 1024 * 5];
 
 public:
-  void copy_buffer(nonstd::span<const uint8_t> b) {
+  void copy_buffer(std::span<const uint8_t> b) {
     memcpy(flatbuffer, b.data(), b.size_bytes());
   }
 };

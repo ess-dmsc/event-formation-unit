@@ -51,7 +51,7 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       ReferenceTimeIndexOffset, OffsetTimeOffset, PixelOffset);
   FinishEvent44MessageBuffer(Builder_, HeaderOffset);
 
-  Buffer_ = nonstd::span<const uint8_t>(Builder_.GetBufferPointer(),
+  Buffer_ = std::span<const uint8_t>(Builder_.GetBufferPointer(),
                                         Builder_.GetSize());
 
   Event44Message_ = const_cast<Event44Message *>(
@@ -72,7 +72,7 @@ void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
   ProduceFunctor = Callback;
 }
 
-nonstd::span<const uint8_t> EV44Serializer::serialize() {
+std::span<const uint8_t> EV44Serializer::serialize() {
   if (EventCount > MaxEvents) {
     /// \todo this should probably throw instead?
     return {};

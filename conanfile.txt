@@ -12,7 +12,7 @@ librdkafka/2.0.2#47048b3f05407bab726e359b27740c46
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 concurrentqueue/1.0.3
-streaming-data-types/5b537f9@ess-dmsc/stable
+streaming-data-types/13dc9c0@ess-dmsc/testing
 trompeloeil/40
 
 [generators]

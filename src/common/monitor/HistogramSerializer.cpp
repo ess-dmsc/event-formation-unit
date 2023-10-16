@@ -51,7 +51,7 @@ size_t HistogramSerializer::produce(const Hists &hists) {
 
   FinishMonitorMessageBuffer(builder, msg);
 
-  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(),
+  std::span<const uint8_t> buffer(builder.GetBufferPointer(),
                                      builder.GetSize());
 
   if (producer_callback) {
