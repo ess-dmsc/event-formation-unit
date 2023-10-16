@@ -9,8 +9,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/memory/span.hpp>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <span>
 
 namespace ESSReadout {
 
