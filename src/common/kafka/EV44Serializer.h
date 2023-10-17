@@ -57,7 +57,7 @@ public:
   // \todo make private?
   /// \brief serializes buffer
   /// \returns reference to internally stor0ed buffer
-  std::span<const uint8_t> serialize();
+  nonstd::span<const uint8_t> serialize();
 
   TSCTimer ProduceTimer, DebugTimer;
   int64_t TxBytes;
@@ -80,7 +80,7 @@ private:
 
   Event44Message *Event44Message_;
 
-  std::span<const uint8_t> Buffer_;
+  nonstd::span<const uint8_t> Buffer_;
   flatbuffers::uoffset_t *TimeLengthPtr;
   flatbuffers::uoffset_t *PixelLengthPtr;
 };

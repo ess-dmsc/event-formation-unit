@@ -25,7 +25,7 @@ AR52Serializer::AR52Serializer(
 }
 
 
-std::span<const uint8_t> AR52Serializer::serialize(uint8_t * Data, int DataLength) {
+nonstd::span<const uint8_t> & AR52Serializer::serialize(uint8_t * Data, int DataLength) {
   FBBuilder.Reset();
   auto DataBuffer = FBBuilder.CreateVector(Data, DataLength);
 
@@ -37,7 +37,7 @@ std::span<const uint8_t> AR52Serializer::serialize(uint8_t * Data, int DataLengt
 
   FinishRawReadoutMessageBuffer(FBBuilder, HeaderOffset);
 
-  FBuffer = std::span<const uint8_t>(FBBuilder.GetBufferPointer(),
+  FBuffer = nonstd::span<const uint8_t>(FBBuilder.GetBufferPointer(),
                                         FBBuilder.GetSize());
   return FBuffer;
 }

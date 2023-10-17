@@ -10,7 +10,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <span>
+#include <common/memory/span.hpp>
 
 namespace ESSReadout {
 

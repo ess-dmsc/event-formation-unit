@@ -15,7 +15,7 @@
 
 
 struct MockProducer {
-  inline void produce(std::span<const uint8_t>, int64_t) { NumberOfCalls++; }
+  inline void produce(nonstd::span<const uint8_t>, int64_t) { NumberOfCalls++; }
 
   size_t NumberOfCalls{0};
 };
@@ -34,19 +34,16 @@ protected:
   AR52Serializer ar52{"nameless"};
 };
 
+
 TEST_F(AR52SerializerTest, Serialize) {
+  ASSERT_TRUE(ar52.FBuffer.empty());
 
-  for (int i = 1; i < 10; i++) {
+  for (unsigned int i = 1; i <= 9000; i++) {
     auto buffer = ar52.serialize(RawData, i);
-    hexDump(buffer.data(), buffer.size_bytes());
-    printf("\n");
+    ASSERT_TRUE(not ar52.FBuffer.empty());
+    ASSERT_TRUE(buffer.size_bytes() > i + 54); // imperical value
+    ASSERT_TRUE(buffer.size_bytes() < i + 68); // imperical value
   }
-
-  //EXPECT_GE(buffer.size_bytes(), ARRAYLENGTH * 8);
-  //EXPECT_LE(buffer.size_bytes(), ARRAYLENGTH * 8 + 128);
-  //ASSERT_TRUE(not buffer.empty());
-
-  //EXPECT_EQ(std::string(reinterpret_cast<const char *>(&buffer[4]), 4), "ar52");
 }
 
 int main(int argc, char **argv) {

@@ -2,7 +2,7 @@
 benchmark/1.7.0
 boost/1.81.0  # override version
 cli11/1.9.1
-fmt/8.1.1
+fmt/10.1.1
 graylog-logger/2.1.4-2@ess-dmsc/stable
 gtest/1.11.0
 h5cpp/0.5.2@ess-dmsc/stable

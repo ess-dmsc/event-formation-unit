@@ -35,13 +35,13 @@ public:
   // \todo make private?
   /// \brief serializes buffer
   /// \returns reference to internally stor0ed buffer
-  std::span<const uint8_t> serialize(uint8_t * Data, int DataLength);
+  nonstd::span<const uint8_t> & serialize(uint8_t * Data, int DataLength);
 
 public:
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder FBBuilder;
 
-  std::span<const uint8_t> FBuffer;
+  nonstd::span<const uint8_t> FBuffer;
   std::string Source{""};
   ProducerCallback ProduceFunctor;
   int64_t SeqNum{0};

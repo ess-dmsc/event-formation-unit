@@ -40,7 +40,7 @@ size_t HitSerializer::produce() {
                                   dataoff.Union());
   FinishMonitorMessageBuffer(builder, msg);
 
-  std::span<const uint8_t> buffer(builder.GetBufferPointer(),
+  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(),
                                      builder.GetSize());
   if (producer_callback) {
 #pragma message(                                                               \
