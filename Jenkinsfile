@@ -1,4 +1,4 @@
-@Library('ecdc-pipeline')
+@Library('ecdc-pipeline-test')
 import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
@@ -21,11 +21,11 @@ archive_what = "centos7-release"
  ]]);
 
 container_build_nodes = [
-  'almalinux8': ContainerBuildNode.getDefaultContainerBuildNode('almalinux8-gcc12'),
+  //'almalinux8': ContainerBuildNode.getDefaultContainerBuildNode('almalinux8-gcc12'),
   'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
-  'debian11': ContainerBuildNode.getDefaultContainerBuildNode('debian11'),
-  'ubuntu2204': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2204')
+  //'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
+  //'debian11': ContainerBuildNode.getDefaultContainerBuildNode('debian11'),
+  //'ubuntu2204': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2204')
 ]
 
 def error_messages = []
