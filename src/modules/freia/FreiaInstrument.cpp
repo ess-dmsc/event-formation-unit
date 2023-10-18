@@ -162,8 +162,6 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid.HybridNumber].insert(
           {TimeNS, Geom.xCoord(readout.VMM, readout.Channel), ADC, PlaneX});
 
-      uint32_t GlobalXChannel = Hybrid.XOffset + readout.Channel;
-
     } else { // implicit isYCoord
       XTRACE(DATA, INF,
              "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
@@ -173,8 +171,6 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid.HybridNumber].insert(
           {TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
            ADC, PlaneY});
-
-      uint32_t GlobalYChannel = Hybrid.YOffset + readout.Channel;
     }
   }
 
