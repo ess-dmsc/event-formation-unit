@@ -11,6 +11,7 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/AR52Serializer.h>
 #include <freia/Counters.h>
 
 namespace Freia {
@@ -26,6 +27,7 @@ public:
 
 protected:
   EV44Serializer *Serializer;
+  AR52Serializer *MonitorSerializer;
 };
 
 } // namespace Freia
