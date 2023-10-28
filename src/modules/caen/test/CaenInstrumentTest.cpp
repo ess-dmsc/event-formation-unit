@@ -35,6 +35,20 @@ TEST_F(CaenInstrumentTest, BifrostConstructor) {
   CaenInstrument Caen(counters, Settings);
 }
 
+TEST_F(CaenInstrumentTest, BifrostConstructorNoCalib) {
+  Settings.ConfigFile = BIFROST_CONFIG;
+  Settings.CalibFile = "";
+  Settings.DetectorName = "bifrost";
+  ASSERT_ANY_THROW(CaenInstrument Caen(counters, Settings));
+}
+
+TEST_F(CaenInstrumentTest, CspecConstructor) {
+  Settings.ConfigFile = CSPEC_CONFIG;
+  Settings.CalibFile = CSPEC_CALIB;
+  Settings.DetectorName = "cspec";
+  CaenInstrument Caen(counters, Settings);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

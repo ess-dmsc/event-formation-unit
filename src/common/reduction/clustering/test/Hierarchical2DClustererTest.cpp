@@ -38,6 +38,15 @@ TEST_F(Hierarchical2DClustererTest, ZeroTimeGap) {
   EXPECT_EQ(clusterer.clusters.size(), 10);
 }
 
+/// Only a test in the broadest sense, mainly calling a string formatting fct.
+TEST_F(Hierarchical2DClustererTest, DebugString) {
+  Hierarchical2DClusterer clusterer(0, 0);
+  std::string DebugString = clusterer.config("");
+  size_t OldLen = DebugString.size();
+  DebugString = clusterer.config("prefix_");
+  ASSERT_TRUE(DebugString.size() > OldLen);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -10,6 +10,8 @@ get_filename_component(BIFROST_CONFIG "${ESS_MODULE_DIR}/bifrost/configs/bifrost
 get_filename_component(BIFROST_CALIB "${ESS_MODULE_DIR}/bifrost/configs/bifrostnullcalib.json" ABSOLUTE)
 get_filename_component(MIRACLES_CONFIG "${ESS_MODULE_DIR}/miracles/configs/miracles.json" ABSOLUTE)
 get_filename_component(MIRACLES_CALIB "${ESS_MODULE_DIR}/miracles/configs/miraclesnullcalib.json" ABSOLUTE)
+get_filename_component(CSPEC_CONFIG "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
+get_filename_component(CSPEC_CALIB "${ESS_MODULE_DIR}/cspec/configs/cspecnullcalib.json" ABSOLUTE)
 
 #=============================================================================
 # caen detector module and base test
@@ -67,6 +69,8 @@ target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG
 target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CALIB="${LOKI_CALIB}")
 target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CONFIG="${BIFROST_CONFIG}")
 target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CALIB="${BIFROST_CALIB}")
+target_compile_definitions(CaenInstrumentTest PRIVATE CSPEC_CONFIG="${CSPEC_CONFIG}")
+target_compile_definitions(CaenInstrumentTest PRIVATE CSPEC_CALIB="${CSPEC_CALIB}")
 
 set(CaenBaseTest_INC
   ${caen_common_inc}
@@ -82,3 +86,5 @@ target_compile_definitions(CaenBaseTest PRIVATE BIFROST_CONFIG="${BIFROST_CONFIG
 target_compile_definitions(CaenBaseTest PRIVATE BIFROST_CALIB="${BIFROST_CALIB}")
 target_compile_definitions(CaenBaseTest PRIVATE MIRACLES_CONFIG="${MIRACLES_CONFIG}")
 target_compile_definitions(CaenBaseTest PRIVATE MIRACLES_CALIB="${MIRACLES_CALIB}")
+target_compile_definitions(CaenBaseTest PRIVATE CSPEC_CONFIG="${CSPEC_CONFIG}")
+target_compile_definitions(CaenBaseTest PRIVATE CSPEC_CALIB="${CSPEC_CALIB}")

@@ -19,24 +19,35 @@
 
 // For use i xxBaseTest
 template <typename T>
-void writePacketToRxFIFO(T & value, std::vector<uint8_t> Packet) {
-  value.startThreads();
+void writePacketToRxFIFO(T & Base, std::vector<uint8_t> Packet) {
+  Base.startThreads();
 
-  unsigned int rxBufferIndex = value.RxRingbuffer.getDataIndex();
+  unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
   ASSERT_EQ(rxBufferIndex, 0);
   auto PacketSize = Packet.size();
 
-  value.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
-  auto DataPtr = value.RxRingbuffer.getDataBuffer(rxBufferIndex);
+  Base.RxRingbuffer.setDataLength(rxBufferIndex, PacketSize);
+  auto DataPtr = Base.RxRingbuffer.getDataBuffer(rxBufferIndex);
   memcpy(DataPtr, (unsigned char *)&Packet[0], PacketSize);
 
-  ASSERT_TRUE(value.InputFifo.push(rxBufferIndex));
-  value.RxRingbuffer.getNextBuffer();
+  ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
+  Base.RxRingbuffer.getNextBuffer();
 
-  while (value.ITCounters.RxIdle == 0){
+  while (Base.ITCounters.RxIdle == 0){
     usleep(100);
   }
-  while (value.Counters.ProcessingIdle == 0) {
+  while (Base.Counters.ProcessingIdle == 0) {
+    usleep(100);
+  }
+}
+
+//
+template <typename T>
+void waitForProcessing(T & Base) {
+  while (Base.ITCounters.RxIdle == 0){
+    usleep(100);
+  }
+  while (Base.Counters.ProcessingIdle == 0) {
     usleep(100);
   }
 }

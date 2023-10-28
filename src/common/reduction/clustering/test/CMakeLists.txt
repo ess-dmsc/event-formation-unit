@@ -22,3 +22,13 @@ set(GapClusterer2DTest_SRC
   ${ESS_COMMON_DIR}/reduction/multigrid/ModuleGeometry.cpp
   )
 create_test_executable(GapClusterer2DTest)
+
+
+set(Abstract2DClustererTest_INC
+  ${ESS_COMMON_DIR}/reduction/clustering/Abstract2DClusterer.h
+  )
+set(Abstract2DClustererTest_SRC
+  Abstract2DClustererTest.cpp
+  ${ESS_COMMON_DIR}/reduction/clustering/Abstract2DClusterer.cpp
+  )
+create_test_executable(Abstract2DClustererTest)

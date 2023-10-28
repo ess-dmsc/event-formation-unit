@@ -13,6 +13,11 @@ protected:
   void TearDown() override {}
 };
 
+
+TEST_F(MgAnalyzerTest, DebugStr) {
+  ASSERT_TRUE(analyzer.debug("prepend_").size() > analyzer.debug("").size());
+}
+
 TEST_F(MgAnalyzerTest, AnalyzeInvalid) {
   auto result = analyzer.analyze(event);
   EXPECT_FALSE(result.good);
@@ -34,6 +39,7 @@ TEST_F(MgAnalyzerTest, AnalyzeBadX) {
 }
 
 TEST_F(MgAnalyzerTest, AnalyzeGood) {
+  analyzer.weighted(false);
   hit.weight = 1;
   event.insert(hit);
   hit.plane = 1;

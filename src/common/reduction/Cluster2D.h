@@ -57,7 +57,7 @@ public:
   /// \brief check if cluster span exceeds the maximum allowed gap
   /// \param MaxAllowedGap the maximum gap allowed
   /// \returns true if a gap is detected
-  bool hasGap(uint8_t MaxAllowedGap) const;
+  //bool hasGap(uint8_t MaxAllowedGap) const;
 
   /// \returns number of hits in cluster
   size_t hitCount() const;

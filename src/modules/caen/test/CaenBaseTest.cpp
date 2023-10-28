@@ -40,6 +40,16 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
+
+TEST_F(CaenBaseTest, CspecConstructor) {
+  Settings.ConfigFile = CSPEC_CONFIG;
+  Settings.CalibFile = CSPEC_CALIB;
+  Settings.DetectorName = "cspec";
+  Caen::CaenBase Readout(Settings, ESSReadout::Parser::CSPEC);
+  Readout.Counters = {};
+  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+}
+
 TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
@@ -112,16 +122,6 @@ std::vector<uint8_t> TestPacket2{
     0x03, 0x01, 0x04, 0x01, // amp c, amp d
 };
 // clang-format on
-
-void waitForProcessing(Caen::CaenBase & Readout) {
-  while (Readout.ITCounters.RxIdle == 0){
-    usleep(100);
-  }
-  while (Readout.Counters.ProcessingIdle == 0) {
-    usleep(100);
-  }
-}
-
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
