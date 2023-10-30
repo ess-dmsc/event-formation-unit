@@ -158,6 +158,17 @@ TEST_F(GapClusterer2DTest, PrintStatus) {
   GTEST_COUT << "VERBOSE:\n" << gc.status("  ", true);
 }
 
+TEST_F(GapClusterer2DTest, Empty) {
+  GapClusterer2D gc(0, 5);
+  ASSERT_TRUE(gc.empty());
+
+  HitVector hc;
+  mock_cluster(hc, 0, 0, 1, 1, 10, 1);
+  gc.cluster(hc);
+
+  ASSERT_FALSE(gc.empty());
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

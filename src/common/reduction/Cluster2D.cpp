@@ -158,9 +158,10 @@ bool Cluster2D::empty() const { return hits.empty(); }
 
 bool Cluster2D::valid() const { return !hits.empty(); }
 
-bool Cluster2D::hasGap(uint8_t MaxAllowedGap) const {
-  return hits.size() + MaxAllowedGap < xCoordSpan();
-}
+/// \todo BUG uses only xCoord but is 2D
+// bool Cluster2D::hasGap(uint8_t MaxAllowedGap) const {
+//   return hits.size() + MaxAllowedGap < xCoordSpan();
+// }
 
 size_t Cluster2D::hitCount() const { return hits.size(); }
 

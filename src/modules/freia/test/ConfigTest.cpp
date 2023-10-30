@@ -14,6 +14,8 @@ using namespace Freia;
 
 class FreiaConfigTest : public TestBase {
 protected:
+  const double FPEquality{0.000001};
+
   Config config{"Freia", "config.json"};
 
   void SetUp() override {
@@ -77,6 +79,64 @@ TEST_F(FreiaConfigTest, BadVersion) {
 TEST_F(FreiaConfigTest, BadThresholdArraySize) {
   config.root["Config"][0]["Thresholds"][0].push_back(42);
   ASSERT_ANY_THROW(config.applyConfig());
+}
+
+
+/// Test optional parameters
+TEST_F(FreiaConfigTest, ParmMaxGapWire) {
+  EXPECT_EQ(config.CfgParms.MaxGapWire, 0);
+
+  config.root["MaxGapWire"] = 129;
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxGapWire, 129);
+}
+
+TEST_F(FreiaConfigTest, ParmMaxGapStrip) {
+  EXPECT_EQ(config.CfgParms.MaxGapStrip, 0);
+
+  config.root["MaxGapStrip"] = 129;
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxGapStrip, 129);
+}
+
+TEST_F(FreiaConfigTest, ParmSplitMultiEvents) {
+  EXPECT_EQ(config.CfgParms.SplitMultiEvents, false);
+
+  config.root["SplitMultiEvents"] = true;
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.SplitMultiEvents, true);
+}
+
+TEST_F(FreiaConfigTest, ParmMultiEventsCoefficientLow) {
+  EXPECT_NEAR(config.CfgParms.SplitMultiEventsCoefficientLow, 0.8, FPEquality);
+
+  config.root["SplitMultiEventsCoefficientLow"] = 0.42;
+  config.applyConfig();
+  EXPECT_NEAR(config.CfgParms.SplitMultiEventsCoefficientLow, 0.42, FPEquality);
+}
+
+TEST_F(FreiaConfigTest, ParmMultiEventsCoefficientHigh) {
+  EXPECT_NEAR(config.CfgParms.SplitMultiEventsCoefficientHigh, 1.2, FPEquality);
+
+  config.root["SplitMultiEventsCoefficientHigh"] = 0.42;
+  config.applyConfig();
+  EXPECT_NEAR(config.CfgParms.SplitMultiEventsCoefficientHigh, 0.42, FPEquality);
+}
+
+TEST_F(FreiaConfigTest, ParmMaxMatchingTimeGap) {
+  EXPECT_EQ(config.CfgParms.MaxMatchingTimeGap, 500);
+
+  config.root["MaxMatchingTimeGap"] = 42;
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxMatchingTimeGap, 42);
+}
+
+TEST_F(FreiaConfigTest, ParmMaxClusteringTimeGap) {
+  EXPECT_EQ(config.CfgParms.MaxClusteringTimeGap, 500);
+
+  config.root["MaxClusteringTimeGap"] = 42;
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxClusteringTimeGap, 42);
 }
 
 // Compare calculated maxpixels and number of fens against
