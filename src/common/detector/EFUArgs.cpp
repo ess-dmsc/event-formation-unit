@@ -105,6 +105,16 @@ EFUArgs::EFUArgs() {
                   "dump to specified file")
       ->group("EFU Options")->default_str("");
 
+
+// MONITORING
+  CLIParser.add_option("--monitor_every", EFUSettings.MonitorPeriod,
+                  "sample raw data every N packets")
+      ->group("EFU Options")->default_str("1000");
+
+  CLIParser.add_option("--monitor_consecutive", EFUSettings.MonitorSamples,
+                  "take M consecutive samples")
+      ->group("EFU Options")->default_str("2");
+
   // DETECTOR SPECIFIC PERFGEN
   CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
       ->group("EFU Options");

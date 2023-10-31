@@ -40,16 +40,6 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
-
-  // Reinit histogram size (was set to 1 in class definition)
-  // ADC is 10 bit 2^10 = 1024
-  // Each plane (x,y) has a maximum of NumCassettes * 64 channels
-  // eventhough there are only 32 wires so some bins will be empty
-  // Hists will automatically allocate space for both x and y planes
-  uint32_t MaxADC = 1024;
-  uint32_t MaxChannels = Conf.NumHybrids * std::max(GeometryBase::NumWires,
-                                                    GeometryBase::NumStrips);
-  ADCHist = Hists(MaxChannels, MaxADC);
 }
 
 void FreiaInstrument::loadConfigAndCalib() {
@@ -172,9 +162,6 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid.HybridNumber].insert(
           {TimeNS, Geom.xCoord(readout.VMM, readout.Channel), ADC, PlaneX});
 
-      uint32_t GlobalXChannel = Hybrid.XOffset + readout.Channel;
-      ADCHist.bin_x(GlobalXChannel, ADC);
-
     } else { // implicit isYCoord
       XTRACE(DATA, INF,
              "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
@@ -184,9 +171,6 @@ void FreiaInstrument::processReadouts(void) {
       builders[Hybrid.HybridNumber].insert(
           {TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
            ADC, PlaneY});
-
-      uint32_t GlobalYChannel = Hybrid.YOffset + readout.Channel;
-      ADCHist.bin_y(GlobalYChannel, ADC);
     }
   }
 

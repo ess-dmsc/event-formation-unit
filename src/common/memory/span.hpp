@@ -198,10 +198,10 @@
 #define span_FEATURE(        feature )  ( span_FEATURE_##feature )
 #define span_FEATURE_TO_STD( feature )  ( span_IN_STD( span_FEATURE( feature##_TO_STD ) ) )
 
-// Use C++20 std::span if available and requested:
+// Use C++20 nonstd::span if available and requested:
 
 #if span_CPP20_OR_GREATER && defined(__has_include )
-# if __has_include( <span> )
+# if __has_include( <common/memory/span.hpp> )
 #  define span_HAVE_STD_SPAN  1
 # else
 #  define span_HAVE_STD_SPAN  0
@@ -213,16 +213,16 @@
 #define  span_USES_STD_SPAN  ( (span_CONFIG_SELECT_SPAN == span_SPAN_STD) || ((span_CONFIG_SELECT_SPAN == span_SPAN_DEFAULT) && span_HAVE_STD_SPAN) )
 
 //
-// Use C++20 std::span:
+// Use C++20 nonstd::span:
 //
 
 #if span_USES_STD_SPAN
 
-#include <span>
+#include <common/memory/span.hpp>
 
 namespace nonstd {
 
-using std::span;
+using nonstd::span;
 
 // Note: C++20 does not provide comparison
 // using std::operator==;

@@ -15,9 +15,9 @@
 #pragma GCC diagnostic pop
 
 #include <common/memory/Buffer.h>
-#include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
+#include <common/memory/span.hpp>
 #include <utility>
 #include <vector>
 

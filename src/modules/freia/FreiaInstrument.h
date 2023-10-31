@@ -11,7 +11,6 @@
 #pragma once
 
 #include <common/kafka/EV44Serializer.h>
-#include <common/monitor/Histogram.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
@@ -64,9 +63,6 @@ public:
 
   /// \brief serialiser (and producer) for events
   EV44Serializer *Serializer{nullptr};
-
-  /// ADC value histograms for all channels
-  Hists ADCHist{1, 1}; // reinit in ctor
 
   /// \brief One builder per cassette, rezise in constructor when we have
   /// parsed the configuration file and know the number of cassettes

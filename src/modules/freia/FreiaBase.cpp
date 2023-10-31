@@ -10,9 +10,7 @@
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
 #include <unistd.h>
@@ -47,6 +45,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
+  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -143,6 +142,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
 void FreiaBase::processing_thread() {
 
+
   // Event producer
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ALW, "Setting default Kafka topic to freia_detector");
@@ -163,11 +163,9 @@ void FreiaBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
-  FreiaInstrument Freia(Counters, EFUSettings, Serializer);
+  MonitorSerializer = new AR52Serializer("freia", ProduceMonitor);
 
-  HistogramSerializer ADCHistSerializer(Freia.ADCHist.needed_buffer_size(),
-                                        "Freia");
-  ADCHistSerializer.set_callback(ProduceMonitor);
+  FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -216,6 +214,14 @@ void FreiaBase::processing_thread() {
         Counters.MatcherStats.addAndClear(builder.matcher.Stats);
       }
       // done processing data
+
+      // send monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxMonitorData++;
+      }
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a
       // little
@@ -230,19 +236,6 @@ void FreiaBase::processing_thread() {
 
       Counters.TxBytes += Serializer->produce();
       Counters.KafkaStats = eventprod.stats;
-
-      if (!Freia.ADCHist.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               Freia.ADCHist.hitCount());
-        ADCHistSerializer.produce(Freia.ADCHist);
-        Freia.ADCHist.clear();
-      }
-      // if (!Freia.TDCHist.isEmpty()) {
-      //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      Freia.TDCHist.hitCount());
-      //   TDCHistSerializer.produce(Freia.TDCHist);
-      //   Freia.TDCHist.clear();
-      // }
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

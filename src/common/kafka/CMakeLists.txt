@@ -1,5 +1,7 @@
+# Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+
 #=============================================================================
-# Kafka related classesand tests
+# Kafka related classes and tests
 #=============================================================================
 
 include_directories(.)
@@ -16,6 +18,12 @@ set(EV44SerializerTest_SRC
   test/EV44SerializerTest.cpp
   )
 create_test_executable(EV44SerializerTest)
+
+
+set(AR52SerializerTest_SRC
+  test/AR52SerializerTest.cpp
+  )
+create_test_executable(AR52SerializerTest)
 
 
 get_filename_component(KAFKACONFIG_FILE "${ESS_COMMON_DIR}/kafka/kafka.json" ABSOLUTE)
