@@ -11,7 +11,7 @@ set(efu_common_SRC
   debug/Hexdump.cpp
   detector/EFUArgs.cpp
   kafka/EV44Serializer.cpp
-  kafka/AR52Serializer.cpp
+  kafka/AR51Serializer.cpp
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
   system/Socket.cpp
@@ -42,7 +42,7 @@ set(efu_common_INC
   detector/Detector.h
   detector/EFUArgs.h
   kafka/EV44Serializer.h
-  kafka/AR52Serializer.h
+  kafka/AR51Serializer.h
   kafka/KafkaConfig.h
   kafka/Producer.h
   memory/Buffer.h

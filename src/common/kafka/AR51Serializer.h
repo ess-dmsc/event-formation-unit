@@ -11,15 +11,15 @@
 #pragma once
 
 #include "Producer.h"
-#include "ar52_readout_data_generated.h"
+#include "ar51_readout_data_generated.h"
 
 
-class AR52Serializer {
+class AR51Serializer {
 public:
   /// \brief creates ar52 flat buffer serializer
   /// \param source_name value for source_name field
   /// \param Callback
-  AR52Serializer(std::string SourceName, ProducerCallback Callback = {});
+  AR51Serializer(std::string SourceName, ProducerCallback Callback = {});
 
   /// \brief adds event, if maximum count is exceeded, sends data using the
   /// producer callback \param time time of event in relation to pulse time

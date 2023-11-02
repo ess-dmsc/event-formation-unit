@@ -3,12 +3,12 @@
 ///
 /// \file
 ///
-/// \brief Unit test of AR52Serializer class
+/// \brief Unit test of AR51Serializer class
 ///
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Hexdump.h>
-#include <common/kafka/AR52Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 #include <common/kafka/Producer.h>
 #include <common/testutils/TestBase.h>
 #include <cstring>
@@ -20,7 +20,7 @@ struct MockProducer {
   size_t NumberOfCalls{0};
 };
 
-class AR52SerializerTest : public TestBase {
+class AR51SerializerTest : public TestBase {
   void SetUp() override {
     for (int i = 0; i < 9000; i++) {
       RawData[i] = i % 27 + 64;
@@ -31,11 +31,11 @@ class AR52SerializerTest : public TestBase {
 
 protected:
   uint8_t RawData[9000];
-  AR52Serializer ar52{"nameless"};
+  AR51Serializer ar52{"nameless"};
 };
 
 
-TEST_F(AR52SerializerTest, Serialize) {
+TEST_F(AR51SerializerTest, Serialize) {
   ASSERT_TRUE(ar52.FBuffer.empty());
 
   for (unsigned int i = 1; i <= 9000; i++) {

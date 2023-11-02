@@ -163,7 +163,7 @@ void FreiaBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
-  MonitorSerializer = new AR52Serializer("freia", ProduceMonitor);
+  MonitorSerializer = new AR51Serializer("freia", ProduceMonitor);
 
   FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
