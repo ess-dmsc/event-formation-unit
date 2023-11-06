@@ -20,10 +20,10 @@ set(EV44SerializerTest_SRC
 create_test_executable(EV44SerializerTest)
 
 
-set(AR52SerializerTest_SRC
-  test/AR52SerializerTest.cpp
+set(AR51SerializerTest_SRC
+  test/AR51SerializerTest.cpp
   )
-create_test_executable(AR52SerializerTest)
+create_test_executable(AR51SerializerTest)
 
 
 get_filename_component(KAFKACONFIG_FILE "${ESS_COMMON_DIR}/kafka/kafka.json" ABSOLUTE)

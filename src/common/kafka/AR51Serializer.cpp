@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/kafka/AR52Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -19,13 +19,13 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
 
-AR52Serializer::AR52Serializer(
+AR51Serializer::AR51Serializer(
     std::string SourceName, ProducerCallback Callback) :
     Source(SourceName), ProduceFunctor(Callback) {
 }
 
 
-nonstd::span<const uint8_t> & AR52Serializer::serialize(uint8_t * Data, int DataLength) {
+nonstd::span<const uint8_t> & AR51Serializer::serialize(uint8_t * Data, int DataLength) {
   FBBuilder.Reset();
   auto DataBuffer = FBBuilder.CreateVector(Data, DataLength);
 
@@ -42,7 +42,7 @@ nonstd::span<const uint8_t> & AR52Serializer::serialize(uint8_t * Data, int Data
   return FBuffer;
 }
 
-size_t AR52Serializer::produce() {
+size_t AR51Serializer::produce() {
   if (FBuffer.size_bytes() != 0) {
     XTRACE(OUTPUT, DEB, "produce %zu bytes", FBuffer.size_bytes());
 
