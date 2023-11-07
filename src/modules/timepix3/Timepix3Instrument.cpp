@@ -7,12 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Log.h>
+#include "readout/DataEventManager.h"
+#include "readout/DataParser.h"
+#include <timepix3/Timepix3Instrument.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <fmt/format.h>
 #include <math.h>
-#include <timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -23,8 +24,9 @@ namespace Timepix3 {
 /// if these have errors or are inconsistent
 Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
                                        BaseSettings &settings)
-    : counters(counters), Settings(settings) {
-
+    : counters(counters), Settings(settings), 
+    TimingEventManager(), Timepix3Parser(counters,TimingEventManager) {
+      
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
   Timepix3Configuration = Config(Settings.ConfigFile);

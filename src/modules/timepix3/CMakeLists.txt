@@ -9,17 +9,21 @@ get_filename_component(TIMEPIX_CONFIG "${ESS_MODULE_DIR}/timepix3/configs/timepi
 #=============================================================================
 set(timepix3_common_inc
   Timepix3Base.h
-  Timepix3Instrument.h
   geometry/Config.h
   geometry/Timepix3Geometry.h
+  readout/DataEventTypes.h
+  readout/DataEventListener.h
+  readout/DataEventManager.h
   readout/DataParser.h
+  Timepix3Instrument.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
+  readout/DataEventManager.cpp
+  readout/DataParser.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp
   geometry/Timepix3Geometry.cpp
-  readout/DataParser.cpp
   )
 
 add_library(timepix3_common STATIC

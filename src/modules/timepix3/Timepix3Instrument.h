@@ -56,7 +56,8 @@ public:
 
   Config Timepix3Configuration;
   BaseSettings &Settings;
-  DataParser Timepix3Parser{counters};
+  DataEventManager<TDCDataEvent> TimingEventManager;
+  DataParser Timepix3Parser;
   Timepix3Geometry *Geom;
   EV44Serializer *Serializer;
   Hierarchical2DClusterer *Clusterer;

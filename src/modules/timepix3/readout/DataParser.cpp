@@ -16,6 +16,10 @@
 
 namespace Timepix3 {
 
+DataParser::DataParser(struct Counters &counters, DataEventManager<TDCDataEvent> &manager) : Stats(counters), TdcDataManager(manager) {
+    PixelResult.reserve(MaxReadoutsInPacket);
+  };
+
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
   PixelResult.clear();
@@ -91,12 +95,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
                               25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
       XTRACE(DATA, DEB,
-             "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: "
-             "%u, difference: %u",
-             toa, LastTDCTime,
-             //  These are converion according to the Timepix manual
-             int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA) -
-                 LastTDCTime);
+             "ToA in nanoseconds: %u",
+             toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
@@ -104,10 +104,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // counter is used to see how strictly in order the pixel readouts are in
       // relation to this. Pixel readouts from before the last TDC time belong
       // to the previous pulse, and may need to be treated differently
-      if (toa < LastTDCTime) {
-        XTRACE(DATA, DEB, "Pixel readout from before TDC");
-        Stats.PixelReadoutFromBeforeTDC++;
-      }
+
+      // if (toa < LastTDCTime) {
+      //   XTRACE(DATA, DEB, "Pixel readout from before TDC");
+      //   Stats.PixelReadoutFromBeforeTDC++;
+      // }
 
       PixelResult.push_back(Data);
 
@@ -115,24 +116,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // the ESS setup, this should correspond to an EVR pulse, indicating the
       // start of a new pulse.
     } else if (ReadoutType == 6) {
-      Timepix3TDCReadout Data;
 
       // mask and offset values are defined in DataParser.h
-      Data.Type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
-      Data.TriggerCounter =
-          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET;
-      Data.Timestamp = (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET;
-      Data.Stamp = (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET;
+      TDCDataEvent Data = TDCDataEvent((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+      (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+      (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+      (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      XTRACE(DATA, DEB,
-             "Processed readout, ReadoutType = %u, trigger_counter = %u, "
-             "timestamp = %u, stamp = %u",
-             ReadoutType, Data.TriggerCounter, Data.Timestamp, Data.Stamp);
+      TdcDataManager.notifyListeners(Data);
+      
       ParsedReadouts++;
       Stats.TDCReadouts++;
-
-      // Time calculations based on information from the timepix manual
-      LastTDCTime = 3.125 * Data.Timestamp + 0.26 * Data.Stamp;
 
       // TDC readouts can belong to one of two channels, and can either indicate
       // the rising or the falling edge of the signal. The camera setup will
