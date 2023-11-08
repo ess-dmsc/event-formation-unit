@@ -6,10 +6,14 @@
 /// \brief Listener interface for data events
 //===----------------------------------------------------------------------===//
 
-#include "readout/DataEventManager.h"
-#include <vector>
+#include "DataEventManager.h"
+#include <cstdint>
+
 
 namespace Timepix3 {
+
+// Explicit instantiation for templates in use
+template class DataEventManager<TDCDataEvent>;
 
 template<typename DataEvent>
 void DataEventManager<DataEvent>::addListener(DataEventListener<DataEvent> *listener) {
@@ -17,10 +21,10 @@ void DataEventManager<DataEvent>::addListener(DataEventListener<DataEvent> *list
 }
 
 template<typename DataEvent>
-void DataEventManager<DataEvent>::notifyListeners(const DataEvent &event) {
-   for(const auto& listener : dataEventListeners) {
-    listener->notify(event);
-   }
+void DataEventManager<DataEvent>::notifyListeners(const DataEvent &event) const {
+            for(const auto& listener : dataEventListeners) {
+                listener->notify(event);
+                }
 }
 
 }

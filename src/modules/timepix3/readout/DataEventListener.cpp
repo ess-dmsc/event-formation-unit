@@ -6,25 +6,12 @@
 /// \brief Listener interface for data events
 //===----------------------------------------------------------------------===//
 
-#pragma once
-
 #include "DataEventListener.h"
-#include <locale>
 #include <vector>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
-
-template<typename DataEvent>
-class DataEventManager {
-    private:
-        std::vector<DataEventListener<DataEvent>* > dataEventListeners;
-
-    public:
-        DataEventManager<DataEvent>() {};
-        void addListener(DataEventListener<DataEvent> *listener);
-
-        void notifyListeners(const DataEvent &event) const;
-};
 
 }

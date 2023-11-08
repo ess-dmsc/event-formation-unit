@@ -19,7 +19,9 @@ set(timepix3_common_inc
   )
 set(timepix3_common_src
   Timepix3Base.cpp
+  readout/DataEventListener.cpp
   readout/DataEventManager.cpp
+  readout/DataEventTypes.cpp
   readout/DataParser.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp

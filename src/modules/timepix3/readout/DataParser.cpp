@@ -6,6 +6,7 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
+#include "readout/DataEventListener.h"
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <iostream>
@@ -13,6 +14,7 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
 
 namespace Timepix3 {
 
@@ -173,4 +175,5 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
+
 } // namespace Timepix3

@@ -7,7 +7,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "readout/DataEventManager.h"
 #include "readout/DataParser.h"
 #include <timepix3/Timepix3Instrument.h>
 #include <common/debug/Trace.h>

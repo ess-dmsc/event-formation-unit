@@ -20,4 +20,5 @@ struct TDCDataEvent {
     TDCDataEvent(uint8_t type, uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp) :
     Type(type), TriggerCounter(triggerCounter), Timestamp(timestamp), Stamp(stamp), TdcTimeStamp(3.125 * timestamp + 0.26 * stamp) {}
 };
+
 }
