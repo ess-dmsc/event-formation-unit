@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include <readout/DataEventTypes.h>
+#include "DataEventTypes.h"
 #include <locale>
+#include <vector>
 #include <memory>
 
 namespace Timepix3 {
