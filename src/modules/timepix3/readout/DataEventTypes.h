@@ -6,6 +6,8 @@
 /// \brief container file for all data event structs
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
 #include <cstdint>
 
 namespace Timepix3 {

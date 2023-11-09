@@ -6,15 +6,10 @@
 /// \brief Listener interface for data events
 //===----------------------------------------------------------------------===//
 
-#include "DataEventListener.h"
+#include <readout/TimingEventHandler.h>
 #include <common/debug/Trace.h>
 #include <cstdint>
-#include <sys/types.h>
-#include <vector>
-#include <cmath>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
@@ -48,4 +43,5 @@ uint64_t TimingEventHandler::getLastTDCTimestamp() {
 uint32_t TimingEventHandler::getTDCFrequency() const {
     return frequency;
 }
+
 }

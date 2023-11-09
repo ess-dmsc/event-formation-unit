@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "readout/DataEventListener.h"
+#include <readout/TimingEventHandler.h>
+#include <common/dataflow/DataObserver.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Hit2DVector.h>
@@ -57,7 +58,7 @@ public:
 
   Config Timepix3Configuration;
   BaseSettings &Settings;
-  DataEventManager<TDCData> TimingEventManager;
+  Observer::DataEventManager<TDCData> TimingEventManager;
   Timepix3::TimingEventHandler TimingEventHandler;
   DataParser Timepix3Parser;
   Timepix3Geometry *Geom;
