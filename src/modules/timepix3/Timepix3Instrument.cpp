@@ -30,7 +30,7 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
          Settings.ConfigFile.c_str());
   Timepix3Configuration = Config(Settings.ConfigFile);
 
-  TimingEventManager.addListener(&TimingEventHandler);
+  TimingEventManager.subscribe(&TimingEventHandler);
 
   Geom = new Timepix3Geometry(Timepix3Configuration.XResolution,
                       Timepix3Configuration.YResolution, 1, 1);

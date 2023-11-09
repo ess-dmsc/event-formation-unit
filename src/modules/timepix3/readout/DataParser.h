@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "common/dataflow/DataObserver.h"
+#include "common/dataflow/DataObserverTemplate.h"
 #include <readout/DataEventTypes.h>
 #include <ctime>
 #include <common/readout/ess/Parser.h>
@@ -79,7 +79,7 @@ public:
     uint8_t Stamp;
   }; // as above, the readouts aren't packed this way
 
-  DataParser(struct Counters &counters, Observer::DataEventManager<TDCData> &manager);
+  DataParser(struct Counters &counters, Observer::DataEventPublisher<TDCData> &manager);
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
@@ -90,7 +90,7 @@ public:
   uint64_t LastEVRTime;
 
   struct Counters &Stats;
-  Observer::DataEventManager<TDCData> &TdcDataManager;
+  Observer::DataEventPublisher<TDCData> &TdcDataManager;
   
 };
 

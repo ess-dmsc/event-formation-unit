@@ -13,7 +13,7 @@
 
 namespace Timepix3 {
 
-void TimingEventHandler::notify(const TDCData& newData) {
+void TimingEventHandler::applyData(const TDCData& newData) {
 
     int64_t provision_missmatch = nextTDCTimeStamp - newData.TdcTimeStamp;
     if(llabs(provision_missmatch) >= 15) {

@@ -6,7 +6,7 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
-#include "common/dataflow/DataObserver.h"
+#include "common/dataflow/DataObserverTemplate.h"
 #include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
@@ -18,7 +18,7 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, DataEventManager<TDCData> &manager) : Stats(counters), TdcDataManager(manager) {
+DataParser::DataParser(struct Counters &counters, DataEventPublisher<TDCData> &manager) : Stats(counters), TdcDataManager(manager) {
     PixelResult.reserve(MaxReadoutsInPacket);
   };
 
@@ -125,7 +125,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
       (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      TdcDataManager.notifyListeners(Data);
+      TdcDataManager.publishData(Data);
       
       ParsedReadouts++;
       Stats.TDCReadouts++;

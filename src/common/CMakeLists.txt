@@ -31,7 +31,7 @@ set(efu_common_SRC
 set(efu_common_INC
   ${VERSION_INCLUDE_DIR}/common/version_num.h
   ${VERSION_INCLUDE_DIR}/common/Version.h
-  dataflow/DataObserver.h
+  dataflow/DataObserverTemplate.h
   debug/Assert.h
   debug/Expect.h
   debug/Hexdump.h
