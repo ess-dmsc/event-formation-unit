@@ -1,7 +1,7 @@
 
 
 
-#include <common/dataflow/DataObserver.h>
+#include <common/dataflow/DataObserverTemplate.h>
 #include <readout/DataEventTypes.h>
 #include <vector>
 #include <memory>
@@ -19,7 +19,7 @@ class TimingEventHandler : public DataEventListener<TDCData> {
         uint32_t frequency;
 
     public:
-        void notify(const TDCData& newData) override;
+        void applyData(const TDCData& newData) override;
 
         uint64_t getLastTDCTimestamp();
 
