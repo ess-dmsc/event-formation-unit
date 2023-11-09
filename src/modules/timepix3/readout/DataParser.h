@@ -8,9 +8,13 @@
 
 #pragma once
 
+#include <readout/DataEventManager.h>
+#include <ctime>
 #include <common/readout/ess/Parser.h>
+#include <cstdlib>
 #include <modules/timepix3/Counters.h>
 #include <vector>
+#include <memory>
 
 namespace Timepix3 {
 
@@ -69,13 +73,6 @@ public:
      // each variable has an odd number of bits, and need to be extracted
      // with bitwise operations, this isn't like other detectors
 
-  struct Timepix3TDCReadout {
-    uint8_t Type;
-    uint16_t TriggerCounter;
-    uint64_t Timestamp;
-    uint8_t Stamp;
-  }; // as above, the readouts aren't packed this way
-
   struct Timepix3GlobalTimeReadout {
     uint64_t Timestamp;
     uint8_t Stamp;
@@ -94,20 +91,19 @@ public:
   // not like above, the EVR readouts are structured like this so can be packed
   // and parsed this way
 
-  DataParser(struct Counters &counters) : Stats(counters) {
-    PixelResult.reserve(MaxReadoutsInPacket);
-  };
+  DataParser(struct Counters &counters, DataEventManager<TDCDataEvent> &manager);
   ~DataParser(){};
 
-  //
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
 
   uint64_t LastEVRTime;
-  uint64_t LastTDCTime;
 
   struct Counters &Stats;
+  DataEventManager<TDCDataEvent> &TdcDataManager;
+  
 };
+
 } // namespace Timepix3
