@@ -13,7 +13,7 @@
 
 namespace Timepix3 {
 
-void TimingEventHandler::applyData(const TDCData& newData) {
+void TimingEventHandler::applyData(const TDCDataEvent& newData) {
 
     int64_t provision_missmatch = nextTDCTimeStamp - newData.TdcTimeStamp;
     if(llabs(provision_missmatch) >= 15) {
@@ -25,7 +25,7 @@ void TimingEventHandler::applyData(const TDCData& newData) {
     frequency = lastTdcFrame != NULL? newData.TdcTimeStamp - lastTdcFrame->TdcTimeStamp : 0;
     nextTDCTimeStamp = newData.TdcTimeStamp + frequency;
     
-    lastTdcFrame = std::make_unique<TDCData>(newData);
+    lastTdcFrame = std::make_unique<TDCDataEvent>(newData);
     
     XTRACE(EVENT, DEB, "New TDC Data with Timestamp: %u, Frequency: %u",
         lastTdcFrame->TdcTimeStamp, frequency);

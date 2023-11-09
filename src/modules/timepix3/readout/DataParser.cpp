@@ -18,7 +18,7 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, DataEventPublisher<TDCData> &manager) : Stats(counters), TdcDataManager(manager) {
+DataParser::DataParser(struct Counters &counters, DataEventPublisher<TDCDataEvent> &manager) : Stats(counters), TdcDataManager(manager) {
     PixelResult.reserve(MaxReadoutsInPacket);
   };
 
@@ -36,7 +36,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   // packet
   if (Size == 24) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
-    EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
+    EVRDataEvent *Data = (EVRDataEvent *)((char *)DataPtr);
     if (Data->Type == 1) {
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
@@ -120,7 +120,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      TDCData Data = TDCData((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+      TDCDataEvent Data = TDCDataEvent((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
       (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
       (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
       (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
