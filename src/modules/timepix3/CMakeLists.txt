@@ -12,15 +12,13 @@ set(timepix3_common_inc
   geometry/Config.h
   geometry/Timepix3Geometry.h
   readout/DataEventTypes.h
-  readout/DataEventListener.h
-  readout/DataEventManager.h
+  readout/TimingEventHandler.h
   readout/DataParser.h
   Timepix3Instrument.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
-  readout/DataEventListener.cpp
-  readout/DataEventManager.cpp
+  readout/TimingEventHandler.cpp
   readout/DataEventTypes.cpp
   readout/DataParser.cpp
   Timepix3Instrument.cpp

@@ -6,7 +6,8 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
-#include "readout/DataEventListener.h"
+#include "common/dataflow/DataObserver.h"
+#include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <iostream>
@@ -14,7 +15,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
 
 namespace Timepix3 {
 
