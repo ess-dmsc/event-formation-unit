@@ -14,7 +14,7 @@ using namespace Observer;
 
 class TimingEventHandler : public DataEventListener<TDCDataEvent> {
     private:
-        std::unique_ptr<TDCDataEvent> lastTdcFrame;
+        std::shared_ptr<TDCDataEvent> lastTdcFrame;
         uint64_t nextTDCTimeStamp;
         uint32_t frequency;
 
@@ -24,5 +24,7 @@ class TimingEventHandler : public DataEventListener<TDCDataEvent> {
         uint64_t getLastTDCTimestamp();
 
         uint32_t getTDCFrequency() const;
+
+        const std::shared_ptr<TDCDataEvent> getLastTdcEvent() const;
 };
 }

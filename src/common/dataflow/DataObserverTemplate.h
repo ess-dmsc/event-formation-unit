@@ -32,7 +32,7 @@ class DataEventPublisher {
         }
 
         void publishData(const DataEvent &event) const {
-            for(const auto& listener : dataEventListeners) {
+            for(const auto &listener : dataEventListeners) {
                 listener->applyData(event);
             }
         }

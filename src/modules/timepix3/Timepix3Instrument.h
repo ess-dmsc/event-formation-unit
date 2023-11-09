@@ -58,7 +58,6 @@ public:
 
   Config Timepix3Configuration;
   BaseSettings &Settings;
-  Observer::DataEventPublisher<TDCDataEvent> TimingEventManager;
   Timepix3::TimingEventHandler TimingEventHandler;
   DataParser Timepix3Parser;
   Timepix3Geometry *Geom;

@@ -10,6 +10,7 @@
 
 #include "common/dataflow/DataObserverTemplate.h"
 #include <readout/DataEventTypes.h>
+#include <readout/TimingEventHandler.h>
 #include <ctime>
 #include <common/readout/ess/Parser.h>
 #include <cstdlib>
@@ -79,7 +80,7 @@ public:
     uint8_t Stamp;
   }; // as above, the readouts aren't packed this way
 
-  DataParser(struct Counters &counters, Observer::DataEventPublisher<TDCDataEvent> &manager);
+  DataParser(struct Counters &counters, TimingEventHandler &TimingEventObservable);
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
@@ -90,7 +91,7 @@ public:
   uint64_t LastEVRTime;
 
   struct Counters &Stats;
-  Observer::DataEventPublisher<TDCDataEvent> &TdcDataManager;
+  Observer::DataEventPublisher<TDCDataEvent> TdcDataManager;
   
 };
 

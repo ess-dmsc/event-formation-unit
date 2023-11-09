@@ -6,6 +6,7 @@
 /// \brief Listener interface for data events
 //===----------------------------------------------------------------------===//
 
+#include "readout/DataEventTypes.h"
 #include <readout/TimingEventHandler.h>
 #include <common/debug/Trace.h>
 #include <cstdint>
@@ -42,6 +43,10 @@ uint64_t TimingEventHandler::getLastTDCTimestamp() {
 
 uint32_t TimingEventHandler::getTDCFrequency() const {
     return frequency;
+}
+
+const std::shared_ptr<TDCDataEvent> TimingEventHandler::getLastTdcEvent() const {
+    return lastTdcFrame;
 }
 
 }

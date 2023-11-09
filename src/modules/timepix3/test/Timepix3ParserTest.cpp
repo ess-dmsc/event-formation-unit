@@ -4,6 +4,11 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/dataflow/DataObserverTemplate.h"
+#include "readout/DataEventTypes.h"
+#include "readout/TimingEventHandler.h"
+#include "gtest/gtest-death-test.h"
+#include "gtest/gtest.h"
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <timepix3/readout/DataParser.h>
@@ -68,7 +73,9 @@ std::vector<uint8_t> TDCAndPixelReadout{
 class Timepix3ParserTest : public TestBase {
 protected:
   struct Counters counters;
-  DataParser Timepix3Parser{counters};
+  TimingEventHandler testEventHandler;
+  DataParser Timepix3Parser{counters, testEventHandler};
+
   void SetUp() override {counters = {}; }
   void TearDown() override {}
 };
@@ -91,6 +98,8 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC1FallingReadouts, 0);
   EXPECT_EQ(counters.TDC2RisingReadouts, 0);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
  
   Res = Timepix3Parser.parse((char *)TDC1FallingReadout.data(),
                                    TDC1FallingReadout.size());
@@ -101,6 +110,8 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2RisingReadouts, 0);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+
   Res = Timepix3Parser.parse((char *)TDC2RisingReadout.data(),
                                    TDC2RisingReadout.size());
   EXPECT_EQ(Res, 1);
@@ -110,6 +121,8 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2RisingReadouts, 1);
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+
   Res = Timepix3Parser.parse((char *)TDC2FallingReadout.data(),
                                    TDC2FallingReadout.size());
   EXPECT_EQ(Res, 1);
@@ -118,6 +131,8 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC1FallingReadouts, 1);
   EXPECT_EQ(counters.TDC2RisingReadouts, 1);
   EXPECT_EQ(counters.TDC2FallingReadouts, 1);
+
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {

@@ -18,8 +18,9 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, DataEventPublisher<TDCDataEvent> &manager) : Stats(counters), TdcDataManager(manager) {
+DataParser::DataParser(struct Counters &counters, TimingEventHandler &TimingEventObservable) : Stats(counters), TdcDataManager() {
     PixelResult.reserve(MaxReadoutsInPacket);
+    TdcDataManager.subscribe(&TimingEventObservable);
   };
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
