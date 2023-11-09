@@ -8,6 +8,7 @@
 
 #include "common/dataflow/DataObserverTemplate.h"
 #include "readout/DataEventTypes.h"
+#include "readout/TimingEventHandler.h"
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <iostream>
@@ -18,9 +19,10 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, TimingEventHandler &TimingEventObservable) : Stats(counters), TdcDataManager() {
+DataParser::DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler) : Stats(counters),
+TimingSyncHandler(timingEventHandler), TdcDataObservable() {
     PixelResult.reserve(MaxReadoutsInPacket);
-    TdcDataManager.subscribe(&TimingEventObservable);
+    TdcDataObservable.subscribe(&TimingSyncHandler);
   };
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -108,10 +110,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // relation to this. Pixel readouts from before the last TDC time belong
       // to the previous pulse, and may need to be treated differently
 
-      // if (toa < LastTDCTime) {
-      //   XTRACE(DATA, DEB, "Pixel readout from before TDC");
-      //   Stats.PixelReadoutFromBeforeTDC++;
-      // }
+      if (toa < TimingSyncHandler.getLastTDCTimestamp()) {
+        XTRACE(DATA, DEB, "Pixel readout from before TDC");
+        Stats.PixelReadoutFromBeforeTDC++;
+      }
 
       PixelResult.push_back(Data);
 
@@ -126,7 +128,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
       (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      TdcDataManager.publishData(Data);
+      TdcDataObservable.publishData(Data);
       
       ParsedReadouts++;
       Stats.TDCReadouts++;

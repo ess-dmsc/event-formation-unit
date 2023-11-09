@@ -15,19 +15,19 @@
 
 namespace Observer {
 
-template <typename DataEvent> class DataEventListener {
+template <typename DataEvent> class DataEventObserver {
 public:
   virtual void applyData(const DataEvent &event) = 0;
 };
 
 template<typename DataEvent>
-class DataEventPublisher {
+class DataEventObservable {
     private:
-        std::vector<DataEventListener<DataEvent>* > dataEventListeners;
+        std::vector<DataEventObserver<DataEvent>* > dataEventListeners;
 
     public:
-        DataEventPublisher<DataEvent>() {};
-        void subscribe(DataEventListener<DataEvent> *listener) {
+        DataEventObservable<DataEvent>() {};
+        void subscribe(DataEventObserver<DataEvent> *listener) {
             dataEventListeners.push_back(listener);
         }
 

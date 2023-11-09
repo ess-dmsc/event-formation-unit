@@ -80,7 +80,7 @@ public:
     uint8_t Stamp;
   }; // as above, the readouts aren't packed this way
 
-  DataParser(struct Counters &counters, TimingEventHandler &TimingEventObservable);
+  DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler);
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
@@ -91,7 +91,9 @@ public:
   uint64_t LastEVRTime;
 
   struct Counters &Stats;
-  Observer::DataEventPublisher<TDCDataEvent> TdcDataManager;
+  TimingEventHandler &TimingSyncHandler;
+
+  Observer::DataEventObservable<TDCDataEvent> TdcDataObservable;
   
 };
 
