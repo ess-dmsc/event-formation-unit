@@ -28,14 +28,14 @@ class DataEventPublisher {
     public:
         DataEventPublisher<DataEvent>() {};
         void subscribe(DataEventListener<DataEvent> *listener) {
-    dataEventListeners.push_back(listener);
-}
+            dataEventListeners.push_back(listener);
+        }
 
         void publishData(const DataEvent &event) const {
             for(const auto& listener : dataEventListeners) {
                 listener->applyData(event);
-                }
-}
+            }
+        }
 };
 
 }

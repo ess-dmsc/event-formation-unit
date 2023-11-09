@@ -12,7 +12,7 @@ namespace Timepix3 {
 
 using namespace Observer;
 
-class TimingEventHandler : public DataEventListener<TDCDataEvent>, public DataEventListener<EVRDataEvent>{
+class TimingEventHandler : public DataEventListener<TDCDataEvent> {
     private:
         std::unique_ptr<TDCDataEvent> lastTdcFrame;
         uint64_t nextTDCTimeStamp;
@@ -20,7 +20,6 @@ class TimingEventHandler : public DataEventListener<TDCDataEvent>, public DataEv
 
     public:
         void applyData(const TDCDataEvent& newData) override;
-        void applyData(const EVRDataEvent& newData) override;
 
         uint64_t getLastTDCTimestamp();
 
