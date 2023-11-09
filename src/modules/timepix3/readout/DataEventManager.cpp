@@ -13,7 +13,7 @@
 namespace Timepix3 {
 
 // Explicit instantiation for templates in use
-template class DataEventManager<TDCDataEvent>;
+template class DataEventManager<TDCData>;
 
 template<typename DataEvent>
 void DataEventManager<DataEvent>::addListener(DataEventListener<DataEvent> *listener) {
