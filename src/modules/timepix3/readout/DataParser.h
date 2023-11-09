@@ -78,20 +78,7 @@ public:
     uint8_t Stamp;
   }; // as above, the readouts aren't packed this way
 
-  struct EVRTimeReadout {
-    uint8_t Type;
-    uint8_t Unused;
-    uint16_t Unused2;
-    uint32_t Counter;
-    uint32_t PulseTimeSeconds;
-    uint32_t PulseTimeNanoSeconds;
-    uint32_t PrevPulseTimeSeconds;
-    uint32_t PrevPulseTimeNanoSeconds;
-  } __attribute__((__packed__));
-  // not like above, the EVR readouts are structured like this so can be packed
-  // and parsed this way
-
-  DataParser(struct Counters &counters, DataEventManager<TDCDataEvent> &manager);
+  DataParser(struct Counters &counters, DataEventManager<TDCData> &manager);
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
@@ -102,7 +89,7 @@ public:
   uint64_t LastEVRTime;
 
   struct Counters &Stats;
-  DataEventManager<TDCDataEvent> &TdcDataManager;
+  DataEventManager<TDCData> &TdcDataManager;
   
 };
 

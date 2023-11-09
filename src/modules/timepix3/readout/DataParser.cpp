@@ -18,7 +18,7 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, DataEventManager<TDCDataEvent> &manager) : Stats(counters), TdcDataManager(manager) {
+DataParser::DataParser(struct Counters &counters, DataEventManager<TDCData> &manager) : Stats(counters), TdcDataManager(manager) {
     PixelResult.reserve(MaxReadoutsInPacket);
   };
 
@@ -120,7 +120,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      TDCDataEvent Data = TDCDataEvent((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+      TDCData Data = TDCData((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
       (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
       (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
       (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);

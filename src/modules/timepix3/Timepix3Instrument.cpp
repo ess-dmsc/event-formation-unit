@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "readout/DataEventListener.h"
 #include "readout/DataParser.h"
 #include <timepix3/Timepix3Instrument.h>
 #include <common/debug/Trace.h>
@@ -24,11 +25,13 @@ namespace Timepix3 {
 Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
                                        BaseSettings &settings)
     : counters(counters), Settings(settings), 
-    TimingEventManager(), Timepix3Parser(counters,TimingEventManager) {
+    TimingEventManager(), TimingEventHandler(), Timepix3Parser(counters,TimingEventManager) {
       
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
   Timepix3Configuration = Config(Settings.ConfigFile);
+
+  TimingEventManager.addListener(&TimingEventHandler);
 
   Geom = new Timepix3Geometry(Timepix3Configuration.XResolution,
                       Timepix3Configuration.YResolution, 1, 1);

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "DataEventTypes.h"
+#include <cstdint>
 #include <locale>
 #include <vector>
 #include <memory>
@@ -21,14 +22,18 @@ class DataEventListener {
         virtual void notify(const DataEvent& event) = 0;
 };
 
-class TimingEventHandler : public DataEventListener<TDCDataEvent> {
+class TimingEventHandler : public DataEventListener<TDCData> {
     private:
-        std::unique_ptr<TDCDataEvent> lastTdcFrame;
+        std::unique_ptr<TDCData> lastTdcFrame;
+        uint64_t nextTDCTimeStamp;
+        uint32_t frequency;
 
     public:
-        void notify(const TDCDataEvent& newData) override {
-            lastTdcFrame = std::make_unique<TDCDataEvent>(newData);
-        }
+        void notify(const TDCData& newData) override;
+
+        uint64_t getLastTDCTimestamp();
+
+        uint32_t getTDCFrequency() const;
 };
 
 }
