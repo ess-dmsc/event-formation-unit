@@ -19,11 +19,13 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler) : Stats(counters),
-TimingSyncHandler(timingEventHandler), TdcDataObservable() {
-    PixelResult.reserve(MaxReadoutsInPacket);
-    TdcDataObservable.subscribe(&TimingSyncHandler);
-  };
+DataParser::DataParser(struct Counters &counters,
+                       TimingEventHandler &timingEventHandler)
+    : Stats(counters), TimingSyncHandler(timingEventHandler),
+      TdcDataObservable() {
+  PixelResult.reserve(MaxReadoutsInPacket);
+  TdcDataObservable.subscribe(&TimingSyncHandler);
+};
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
@@ -37,10 +39,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   // if from the EVR system, they will be 24 bits, and will contain pulse time
   // information. If they are 24 bits but not type = 1, then it is a camera
   // packet
-  if (Size == 24) {
+  if (Size == sizeof(EVRReadout)) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
-    EVRDataEvent *Data = (EVRDataEvent *)((char *)DataPtr);
-    if (Data->Type == 1) {
+    EVRReadout *Data = (EVRReadout *)((char *)DataPtr);
+    if (Data->Type == EVR_READOUT_TYPE) {
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
              "seconds = %u, "
@@ -99,9 +101,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // with the camera
       uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
                               25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
-      XTRACE(DATA, DEB,
-             "ToA in nanoseconds: %u",
-             toa);
+      XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
@@ -123,27 +123,32 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      TDCDataEvent Data = TDCDataEvent((DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
-      (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
-      (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-      (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
+      TDCDataEvent *Data = new TDCDataEvent(
+          (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+          (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      TdcDataObservable.publishData(Data);
-      
       ParsedReadouts++;
       Stats.TDCReadouts++;
 
       // TDC readouts can belong to one of two channels, and can either indicate
       // the rising or the falling edge of the signal. The camera setup will
       // determine which of these are sent.
-      if (Data.Type == 15) {
+      /// \todo: Review that it's necessary monitor which type of TDC we
+      /// received. Probably this is not important.
+      if (Data->Type == 15) {
         Stats.TDC1RisingReadouts++;
-      } else if (Data.Type == 10) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 10) {
         Stats.TDC1FallingReadouts++;
-      } else if (Data.Type == 14) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 14) {
         Stats.TDC2RisingReadouts++;
-      } else if (Data.Type == 11) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 11) {
         Stats.TDC2FallingReadouts++;
+        TdcDataObservable.publishData(*Data);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing

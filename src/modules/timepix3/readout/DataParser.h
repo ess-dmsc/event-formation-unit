@@ -9,14 +9,14 @@
 #pragma once
 
 #include "common/dataflow/DataObserverTemplate.h"
-#include <readout/DataEventTypes.h>
-#include <readout/TimingEventHandler.h>
-#include <ctime>
 #include <common/readout/ess/Parser.h>
 #include <cstdlib>
-#include <modules/timepix3/Counters.h>
-#include <vector>
+#include <ctime>
 #include <memory>
+#include <modules/timepix3/Counters.h>
+#include <readout/DataEventTypes.h>
+#include <readout/TimingEventHandler.h>
+#include <vector>
 
 namespace Timepix3 {
 
@@ -57,11 +57,24 @@ namespace Timepix3 {
 #define GLOBAL_STAMP_MASK         0x00000000000000F0
 #define GLOBAL_TIMESTAMP_OFFSET   8
 #define GLOBAL_STAMP_OFFSET       4
+
+#define EVR_READOUT_TYPE          1
 // clang-format on
 
 class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
+
+  struct EVRReadout {
+    const uint8_t Type;
+    const uint8_t Unused;
+    const uint16_t Unused2;
+    const uint32_t Counter;
+    const uint32_t PulseTimeSeconds;
+    const uint32_t PulseTimeNanoSeconds;
+    const uint32_t PrevPulseTimeSeconds;
+    const uint32_t PrevPulseTimeNanoSeconds;
+  } __attribute__((__packed__));
 
   struct Timepix3PixelReadout {
     uint16_t Dcol;
@@ -94,7 +107,6 @@ public:
   TimingEventHandler &TimingSyncHandler;
 
   Observer::DataEventObservable<TDCDataEvent> TdcDataObservable;
-  
 };
 
 } // namespace Timepix3
