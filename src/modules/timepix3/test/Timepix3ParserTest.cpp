@@ -11,6 +11,8 @@
 #include "gtest/gtest.h"
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <cstdint>
+#include <cstdio>
 #include <timepix3/readout/DataParser.h>
 
 using namespace Timepix3;
@@ -100,7 +102,11 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
   EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
- 
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 15);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
+
   Res = Timepix3Parser.parse((char *)TDC1FallingReadout.data(),
                                    TDC1FallingReadout.size());
   EXPECT_EQ(Res, 1);
@@ -111,6 +117,10 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
   EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 10);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
 
   Res = Timepix3Parser.parse((char *)TDC2RisingReadout.data(),
                                    TDC2RisingReadout.size());
@@ -122,6 +132,10 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 
   EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 14);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
 
   Res = Timepix3Parser.parse((char *)TDC2FallingReadout.data(),
                                    TDC2FallingReadout.size());
@@ -133,6 +147,10 @@ TEST_F(Timepix3ParserTest, TDCReadouts) {
   EXPECT_EQ(counters.TDC2FallingReadouts, 1);
 
   EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 11);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
@@ -154,6 +172,13 @@ TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
   EXPECT_EQ(counters.TDCReadouts, 1);
   EXPECT_EQ(counters.PixelReadouts, 1);
   EXPECT_EQ(counters.PixelReadoutFromBeforeTDC, 1);
+
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 10);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
+  
 }
 
 int main(int argc, char **argv) {
