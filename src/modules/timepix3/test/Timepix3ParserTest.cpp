@@ -174,7 +174,7 @@ TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
   EXPECT_EQ(counters.PixelReadoutFromBeforeTDC, 1);
 
   EXPECT_TRUE(testEventHandler.getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 10);
+  EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Type == 15);
   EXPECT_TRUE(testEventHandler.getLastTdcEvent()->TriggerCounter == 2231);
   EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Timestamp == 31447764897);
   EXPECT_TRUE(testEventHandler.getLastTdcEvent()->Stamp == 6);
