@@ -11,13 +11,12 @@
 
 #pragma once
 
-#include <readout/TimingEventHandler.h>
-#include <common/dataflow/DataObserverTemplate.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Hit2DVector.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <readout/DataParser.h>
+#include <readout/TimingEventHandler.h>
 #include <timepix3/Counters.h>
 #include <timepix3/Timepix3Base.h> // to get Timepix3Settings
 #include <timepix3/geometry/Config.h>

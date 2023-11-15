@@ -5,14 +5,15 @@
 ///
 /// \brief Separating Timepix3 processing from pipeline main loop
 ///
+/// Holds efu stats, instrument readout mappings, logical geometry, pixel
+/// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
-#include "readout/DataParser.h"
-#include <timepix3/Timepix3Instrument.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
 #include <fmt/format.h>
 #include <math.h>
+#include <timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -23,16 +24,16 @@ namespace Timepix3 {
 /// if these have errors or are inconsistent
 Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
                                        BaseSettings &settings)
-    : counters(counters), Settings(settings), TimingEventHandler(), 
-    Timepix3Parser(counters, TimingEventHandler) {
-      
+    : counters(counters), Settings(settings), TimingEventHandler(),
+      Timepix3Parser(counters, TimingEventHandler) {
+
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
 
   Timepix3Configuration = Config(Settings.ConfigFile);
 
   Geom = new Timepix3Geometry(Timepix3Configuration.XResolution,
-                      Timepix3Configuration.YResolution, 1, 1);
+                              Timepix3Configuration.YResolution, 1, 1);
   Geom->setXResolution(Timepix3Configuration.XResolution);
   Geom->setYResolution(Timepix3Configuration.YResolution);
 
@@ -97,7 +98,8 @@ void Timepix3Instrument::processReadouts() {
   sort_chronologically(std::move(AllHitsVector));
   Clusterer->cluster(AllHitsVector);
 
-  ///\todo Decide if flushing per packet is wanted behaviour, or should be configurable
+  ///\todo Decide if flushing per packet is wanted behaviour, or should be
+  ///configurable
   Clusterer->flush();
   generateEvents();
   AllHitsVector.clear();

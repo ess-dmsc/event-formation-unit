@@ -8,13 +8,12 @@
 
 #pragma once
 
-#include "common/dataflow/DataObserverTemplate.h"
 #include <common/readout/ess/Parser.h>
 #include <cstdlib>
 #include <ctime>
+#include <dataflow/DataObserverTemplate.h>
 #include <memory>
 #include <modules/timepix3/Counters.h>
-#include <readout/DataEventTypes.h>
 #include <readout/TimingEventHandler.h>
 #include <vector>
 

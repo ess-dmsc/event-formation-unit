@@ -6,11 +6,7 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
-#include "common/dataflow/DataObserverTemplate.h"
-#include "readout/DataEventTypes.h"
-#include "readout/TimingEventHandler.h"
 #include <common/debug/Trace.h>
-#include <common/readout/ess/Parser.h>
 #include <iostream>
 #include <timepix3/readout/DataParser.h>
 

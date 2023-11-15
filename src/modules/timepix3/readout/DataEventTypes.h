@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief container file for all data event structs
+/// \brief container file to define main data transfer objects DTO's used for
+//         timepix
 //===----------------------------------------------------------------------===//
 
 #pragma once
