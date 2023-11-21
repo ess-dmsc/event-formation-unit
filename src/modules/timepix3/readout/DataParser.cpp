@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/readout/ess/Parser.h>
 #include <iostream>
 #include <timepix3/readout/DataParser.h>
 
@@ -15,6 +14,14 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
+
+DataParser::DataParser(struct Counters &counters,
+                       TimingEventHandler &timingEventHandler)
+    : Stats(counters), TimingSyncHandler(timingEventHandler),
+      TdcDataObservable() {
+  PixelResult.reserve(MaxReadoutsInPacket);
+  TdcDataObservable.subscribe(&TimingSyncHandler);
+};
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
@@ -28,10 +35,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   // if from the EVR system, they will be 24 bits, and will contain pulse time
   // information. If they are 24 bits but not type = 1, then it is a camera
   // packet
-  if (Size == 24) {
+  if (Size == sizeof(EVRReadout)) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
-    EVRTimeReadout *Data = (EVRTimeReadout *)((char *)DataPtr);
-    if (Data->Type == 1) {
+    EVRReadout *Data = (EVRReadout *)((char *)DataPtr);
+    if (Data->Type == EVR_READOUT_TYPE) {
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
              "seconds = %u, "
@@ -90,13 +97,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // with the camera
       uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
                               25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
-      XTRACE(DATA, DEB,
-             "ToA in nanoseconds: %u, previous TDC timestamp in nanoseconds: "
-             "%u, difference: %u",
-             toa, LastTDCTime,
-             //  These are converion according to the Timepix manual
-             int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA) -
-                 LastTDCTime);
+      XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
@@ -104,7 +105,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // counter is used to see how strictly in order the pixel readouts are in
       // relation to this. Pixel readouts from before the last TDC time belong
       // to the previous pulse, and may need to be treated differently
-      if (toa < LastTDCTime) {
+
+      if (toa < TimingSyncHandler.getLastTDCTimestamp()) {
         XTRACE(DATA, DEB, "Pixel readout from before TDC");
         Stats.PixelReadoutFromBeforeTDC++;
       }
@@ -115,36 +117,34 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // the ESS setup, this should correspond to an EVR pulse, indicating the
       // start of a new pulse.
     } else if (ReadoutType == 6) {
-      Timepix3TDCReadout Data;
 
       // mask and offset values are defined in DataParser.h
-      Data.Type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
-      Data.TriggerCounter =
-          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET;
-      Data.Timestamp = (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET;
-      Data.Stamp = (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET;
+      TDCDataEvent *Data = new TDCDataEvent(
+          (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+          (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      XTRACE(DATA, DEB,
-             "Processed readout, ReadoutType = %u, trigger_counter = %u, "
-             "timestamp = %u, stamp = %u",
-             ReadoutType, Data.TriggerCounter, Data.Timestamp, Data.Stamp);
       ParsedReadouts++;
       Stats.TDCReadouts++;
-
-      // Time calculations based on information from the timepix manual
-      LastTDCTime = 3.125 * Data.Timestamp + 0.26 * Data.Stamp;
 
       // TDC readouts can belong to one of two channels, and can either indicate
       // the rising or the falling edge of the signal. The camera setup will
       // determine which of these are sent.
-      if (Data.Type == 15) {
+      /// \todo: Review that it's necessary monitor which type of TDC we
+      /// received. Probably this is not important.
+      if (Data->Type == 15) {
         Stats.TDC1RisingReadouts++;
-      } else if (Data.Type == 10) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 10) {
         Stats.TDC1FallingReadouts++;
-      } else if (Data.Type == 14) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 14) {
         Stats.TDC2RisingReadouts++;
-      } else if (Data.Type == 11) {
+        TdcDataObservable.publishData(*Data);
+      } else if (Data->Type == 11) {
         Stats.TDC2FallingReadouts++;
+        TdcDataObservable.publishData(*Data);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing
@@ -179,4 +179,5 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
+
 } // namespace Timepix3

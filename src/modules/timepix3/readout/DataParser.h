@@ -9,7 +9,12 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
+#include <cstdlib>
+#include <ctime>
+#include <dataflow/DataObserverTemplate.h>
+#include <memory>
 #include <modules/timepix3/Counters.h>
+#include <readout/TimingEventHandler.h>
 #include <vector>
 
 namespace Timepix3 {
@@ -51,11 +56,24 @@ namespace Timepix3 {
 #define GLOBAL_STAMP_MASK         0x00000000000000F0
 #define GLOBAL_TIMESTAMP_OFFSET   8
 #define GLOBAL_STAMP_OFFSET       4
+
+#define EVR_READOUT_TYPE          1
 // clang-format on
 
 class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
+
+  struct EVRReadout {
+    const uint8_t Type;
+    const uint8_t Unused;
+    const uint16_t Unused2;
+    const uint32_t Counter;
+    const uint32_t PulseTimeSeconds;
+    const uint32_t PulseTimeNanoSeconds;
+    const uint32_t PrevPulseTimeSeconds;
+    const uint32_t PrevPulseTimeNanoSeconds;
+  } __attribute__((__packed__));
 
   struct Timepix3PixelReadout {
     uint16_t Dcol;
@@ -69,45 +87,25 @@ public:
      // each variable has an odd number of bits, and need to be extracted
      // with bitwise operations, this isn't like other detectors
 
-  struct Timepix3TDCReadout {
-    uint8_t Type;
-    uint16_t TriggerCounter;
-    uint64_t Timestamp;
-    uint8_t Stamp;
-  }; // as above, the readouts aren't packed this way
-
   struct Timepix3GlobalTimeReadout {
     uint64_t Timestamp;
     uint8_t Stamp;
   }; // as above, the readouts aren't packed this way
 
-  struct EVRTimeReadout {
-    uint8_t Type;
-    uint8_t Unused;
-    uint16_t Unused2;
-    uint32_t Counter;
-    uint32_t PulseTimeSeconds;
-    uint32_t PulseTimeNanoSeconds;
-    uint32_t PrevPulseTimeSeconds;
-    uint32_t PrevPulseTimeNanoSeconds;
-  } __attribute__((__packed__));
-  // not like above, the EVR readouts are structured like this so can be packed
-  // and parsed this way
-
-  DataParser(struct Counters &counters) : Stats(counters) {
-    PixelResult.reserve(MaxReadoutsInPacket);
-  };
+  DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler);
   ~DataParser(){};
 
-  //
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
 
   uint64_t LastEVRTime;
-  uint64_t LastTDCTime;
 
   struct Counters &Stats;
+  TimingEventHandler &TimingSyncHandler;
+
+  Observer::DataEventObservable<TDCDataEvent> TdcDataObservable;
 };
+
 } // namespace Timepix3
