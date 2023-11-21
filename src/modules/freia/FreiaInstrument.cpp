@@ -73,7 +73,7 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-void FreiaInstrument::processReadouts(void) {
+void FreiaInstrument::processReadouts(ESSReadout::VMM3Parser::VMM3Data *DataPtr, int Elements) {
   XTRACE(DATA, DEB,"\n================== NEW PACKET =====================\n\n");
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
@@ -83,16 +83,23 @@ void FreiaInstrument::processReadouts(void) {
       /// \todo sometimes PrevPulseTime maybe?
       ESSReadoutParser.Packet.Time.TimeInNS);
 
-  for (const auto &readout : VMMParser.Result) {
+  for (int i = 0; i < Elements; i++) {
 
-    if (DumpFile) {
-      VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
-    }
+    //ESSReadout::VMM3Parser::VMM3Data & readout = DataPtr[i];
+    ESSReadout::VMM3Parser::VMM3Data & readout = DataPtr[i];
+
+    // if (DumpFile) {
+    //   VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
+    // }
 
     XTRACE(DATA, INF,
            "readout: FiberId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
+
+    if (not VMMParser.isReadoutValid(&DataPtr[i])) {
+      continue;
+    }
 
     // Convert from physical rings to logical rings
     uint8_t Ring = readout.FiberId / 2;

@@ -9,6 +9,7 @@
 
 #include <cinttypes>
 #include <common/debug/Trace.h>
+#include <common/debug/Hexdump.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/time/TimeString.h>
@@ -162,6 +163,9 @@ void FreiaBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
+  /// \todo for AMOR source_name should be multiblade
+  /// But instrument geometry will not be determined until after
+  /// FreiaInstrument constructor!!
   Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
   MonitorSerializer = new AR51Serializer("freia", ProduceMonitor);
 
@@ -172,6 +176,9 @@ void FreiaBase::processing_thread() {
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+
+  XTRACE(INIT, ALW, "Raw data sampling of %d packets every %d packets",
+        EFUSettings.MonitorSamples, EFUSettings.MonitorPeriod);
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -203,11 +210,31 @@ void FreiaBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
+      //Res = Freia.VMMParser.parse(Freia.ESSReadoutParser.Packet);
+      char *Buffer = (char *)Freia.ESSReadoutParser.Packet.DataPtr;
+      unsigned int Size = Freia.ESSReadoutParser.Packet.DataLength;
+      //hexDump(Buffer, Size);
+      Freia.VMMParser.TimeRef.TimeInNS = Freia.ESSReadoutParser.Packet.Time.TimeInNS;
+      Freia.VMMParser.TimeRef.PrevTimeInNS = Freia.ESSReadoutParser.Packet.Time.PrevTimeInNS;
+
+      if (Buffer == nullptr) {
+        Freia.VMMParser.Stats.ErrorSize++;
+        XTRACE(DATA, WAR, "Invalid data pointer");
+        return false;
+      }
+
+      if (Size % Freia.VMMParser.DataLength != 0) {
+          Freia.VMMParser.Stats.ErrorSize++;
+        XTRACE(DATA, WAR, "Invalid data length - %d should be multiple of %d", Size,
+               Freia.VMMParser.DataLength);
+        return false;
+      }
+
       Counters.TimeStats = Freia.ESSReadoutParser.Packet.Time.Stats;
       Counters.VMMStats = Freia.VMMParser.Stats;
 
-      Freia.processReadouts();
+      Freia.processReadouts(
+        (ESSReadout::VMM3Parser::VMM3Data *)Buffer, Size/Freia.VMMParser.DataLength);
 
       for (auto &builder : Freia.builders) {
         Freia.generateEvents(builder.Events);

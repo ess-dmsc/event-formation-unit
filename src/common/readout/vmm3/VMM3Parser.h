@@ -11,6 +11,7 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/Readout.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 
 #include <cinttypes>
 #include <vector>
@@ -74,6 +75,9 @@ public:
   //
   int parse(Parser::PacketDataV0 &PacketData);
 
+  ///\brief Candidate to replace parse()
+  bool isReadoutValid(VMM3Parser::VMM3Data * Readout);
+
   ///\brief Dumps VMM3 readouts to file
   void dumpReadoutToFile(const VMM3Data &Data,
                          const ESSReadout::Parser ESSReadoutParser,
@@ -84,8 +88,12 @@ public:
 
   struct VMM3ParserStats Stats;
 
-private:
+  ///// =========================================================================
+  ESSTime TimeRef;
+  ///// =========================================================================
+
   const uint16_t DataLength{20};
+private:
   const uint16_t MaxBCValue{4095};
   const uint16_t MaxADCValue{1023};
   const uint16_t MaxVMMValue{15};

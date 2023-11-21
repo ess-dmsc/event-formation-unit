@@ -44,7 +44,8 @@ public:
   void setHybridIds(std::vector<std::string> Ids);
 
   /// \brief process parsed vmm data into clusters
-  void processReadouts(void);
+  //void processReadouts(void);
+  void processReadouts(ESSReadout::VMM3Parser::VMM3Data *DataPtr, int Elements);
 
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> &Events);

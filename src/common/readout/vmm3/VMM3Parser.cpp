@@ -12,6 +12,8 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/memory/span.hpp>
 
+//#define EFU_PARANOIA
+
 namespace ESSReadout {
 
 // #undef TRC_LEVEL
@@ -132,6 +134,114 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
 
   return GoodReadouts;
 }
+
+
+///// =========================================================================
+///// =========================================================================
+bool VMM3Parser::isReadoutValid(VMM3Parser::VMM3Data * Readout) {
+  Stats.Readouts++;
+#ifdef EFU_PARANOIA
+  if (Readout->FiberId > MaxFiberId) {
+    XTRACE(DATA, WAR, "Invalid FiberId %d (Max is %d)", Readout->FiberId,
+           MaxFiberId);
+    Stats.ErrorFiber++;
+    return false;
+  }
+#endif
+
+#ifdef EFU_PARANOIA
+  if (Readout->FENId > MaxFENId) {
+    XTRACE(DATA, WAR, "Invalid FENId %d (valid: 0 - %d)", Readout->FENId,
+           MaxFENId);
+    Stats.ErrorFEN++;
+    return false;
+  }
+#endif
+
+  if (Readout->DataLength != DataLength) {
+    XTRACE(DATA, WAR, "Invalid header length %d - must be %d bytes",
+           Readout->DataLength, DataLength);
+    Stats.ErrorDataLength++;
+    return false;
+  }
+
+#ifdef EFU_PARANOIA
+  if (Readout->TimeLow > MaxFracTimeCount) {
+    XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout->TimeLow,
+           MaxFracTimeCount);
+    Stats.ErrorTimeFrac++;
+    return false;
+  }
+#endif
+
+  // Check for negative TOFs
+  ///\todo Missing TDC correction
+  auto TimeOfFlight = TimeRef.getTOF(Readout->TimeHigh, Readout->TimeLow);
+  XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+         TimeRef.TimeInNS, TimeOfFlight);
+
+  if (TimeOfFlight == TimeRef.InvalidTOF) {
+    XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+    return false;
+  }
+
+#ifdef EFU_PARANOIA
+  if (Readout->BC > MaxBCValue) {
+    XTRACE(DATA, WAR, "Invalid BC %u (max is %u)", Readout->BC, MaxBCValue);
+    Stats.ErrorBC++;
+    return false;
+  }
+#endif
+
+  // If monitor there are no invalid ADC values
+  #ifdef EFU_PARANOIA
+  if (not IsMonitor) {
+    if ((Readout->OTADC & ADCMask) > MaxADCValue) {
+      XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout->OTADC & 0x7fff,
+             MaxADCValue);
+      Stats.ErrorADC++;
+      return false;
+    }
+  }
+  XTRACE(DATA, DEB, "Valid OTADC %u", Readout->OTADC);
+#endif
+
+  // So far no checks for GEO and TDC
+#ifdef EFU_PARANOIA
+  if (Readout->VMM > MaxVMMValue) {
+    XTRACE(DATA, WAR, "Invalid VMM %u (max is %u)", Readout->VMM, MaxVMMValue);
+    Stats.ErrorVMM++;
+    return false;
+  }
+#endif
+
+#ifdef EFU_PARANOIA
+  if (Readout->Channel > MaxChannelValue) {
+    XTRACE(DATA, WAR, "Invalid Channel %u (max is %u)", Readout->Channel,
+           MaxChannelValue);
+    Stats.ErrorChannel++;
+    return false;
+  }
+#endif
+
+  // Validation done, increment stats for decoded parameters
+#ifdef EFU_PARANOIA
+  if (Readout->OTADC & OverThresholdMask) {
+    Stats.OverThreshold++;
+  }
+#endif
+
+  if ((Readout->GEO & 0x80) == 0) {
+    Stats.DataReadouts++;
+  } else {
+    Stats.CalibReadouts++;
+  }
+
+  return true;
+}
+///// =========================================================================
+///// =========================================================================
+
 
 void VMM3Parser::dumpReadoutToFile(
     const VMM3Data &Data, const ESSReadout::Parser ESSReadoutParser,
