@@ -110,6 +110,9 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
+  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);

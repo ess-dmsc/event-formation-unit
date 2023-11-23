@@ -116,6 +116,14 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
 
   KafkaProducer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {
+    if (resp == RdKafka::ERR__UNKNOWN_TOPIC) {
+      stats.err_unknown_topic++;
+    } else if (resp == RdKafka::ERR__QUEUE_FULL) {
+      stats.err_queue_full++;
+    } else {
+      stats.err_other++;
+    }
+
     XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
     stats.produce_fails++;
     return resp;
