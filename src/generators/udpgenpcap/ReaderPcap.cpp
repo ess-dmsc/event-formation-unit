@@ -33,8 +33,14 @@ ReaderPcap::ReaderPcap(std::string FileName) : FileName(FileName) {
 }
 
 ReaderPcap::~ReaderPcap() {
+  close();
+}
+
+
+void ReaderPcap::close() {
   if (PcapHandle != NULL) {
     pcap_close(PcapHandle);
+    PcapHandle = nullptr;
   }
 }
 
