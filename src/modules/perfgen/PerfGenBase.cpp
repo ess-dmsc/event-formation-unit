@@ -105,6 +105,7 @@ void PerfGenBase::processingThread() {
 
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
+    mystats.kafka_produce_calls = EventProducer.stats.produce_calls;
     mystats.kafka_produce_fails = EventProducer.stats.produce_fails;
     mystats.kafka_ev_errors = EventProducer.stats.ev_errors;
     mystats.kafka_ev_others = EventProducer.stats.ev_others;
