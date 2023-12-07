@@ -12,40 +12,51 @@ To syncronize data according to the EVR system we synconize EVR and TDC times by
 flowchart TD
 
 Parsing{What type of packet?}
-PairingTDC{Is pairing true?}
-PairingEVR{Is pairing true?}
-FindPairPreviousTDC{Is previous TDC and EVR\nTimDiff <= Threshold ?}
-FindPairTimeDiff{Is TDC and EVR \nTimeDiff <= Threshold ?}
+IsPixelNextTDC{Check if \npixel timestamp > nextTDCTimeStamp}
+IsTDCCurrent{Check if \nTDC < current TDC + frequency/2}
+IsNextTDCExists{Check if\n nextTDCTimeStamp != nullptr}
+CheckCurrentBuffer{Check if not\n currentBuffer.empty}
+CheckEVRCounter{Check if\n EVRCounter == currentEVRCounter + 1}
+CheckTDCCounter{Check if\n TDCCounter == currentTDCCounter + 1}
 
-SetPairingTrue[Set pairing true]
-SetPairingFalse[Set pairing false]
-StoreEVRData[Store EVR as last EVR]
-StoreTDCData1[Store TDC as last TDC]
-StoreTDCData2[Store TDC as last TDC]
-StoreTDCPair[Store TDC as last TDC pair]
-MissingTDCPair[Increment missing\nTDC pair counter]
-MissingEVRPair[Increment missing\nEVR pair counter]
+UpdateCurrentTDCTimeStamp[Update timestamp calculated for current TDC]
+UpdateNextTDCTimeStamp[Update timestamp calculated for next TDC]
+PublishCurrentPixels[Publish to Kafka all Pixels\n in current buffer]
+CopyNextBufferToCurrent[Copy next buffer into current buffer]
+UpdateTimings[Copy next TDC and EVR timestamps to current]
+CalculateNext[Calculate next TDC and EVR timesamps]
+SetSerialiserReferenceTime[Set current EVR time as reference time]
+StorePixelDataNext[Store pixel into next buffer]
+StorePixelDataCurrent[Store pixel data into current buffer]
+UpdateEVRCounter[Update currentCounter with EVRCounter]
+EmptyBuffers[Empty current and next buffers\n Drop all pixels]
+IncreaseMissEVR[Increase MissEVRCounter]
+IncreaseMissTDC[Increase MissTDCCounter]
 
 NextPacket(Next Data packet)
 NewPacket(New Data packet)
 
 NewPacket --> Parsing
-Parsing -->|EVR| StoreEVRData --> PairingEVR
-Parsing -->|TDC| PairingTDC
 
-PairingTDC -->|YES| StoreTDCData1 --> FindPairTimeDiff
-PairingTDC -->|NO| MissingEVRPair --> StoreTDCData2
-StoreTDCData2 --> NextPacket
+Parsing -->|PIXEL| IsNextTDCExists
+IsNextTDCExists -->|NO| NextPacket
+IsNextTDCExists -->|YES| IsPixelNextTDC
+IsPixelNextTDC -->|YES| StorePixelDataNext --> NextPacket
+IsPixelNextTDC -->|NO| StorePixelDataCurrent --> NextPacket
 
+Parsing -->|EVR| CheckEVRCounter 
+CheckEVRCounter -->|NO| IncreaseMissEVR
+IncreaseMissEVR--> EmptyBuffers --> SetSerialiserReferenceTime
+CheckEVRCounter -->|YES| CheckCurrentBuffer
+CheckCurrentBuffer -->|NO| SetSerialiserReferenceTime
+CheckCurrentBuffer -->|YES| PublishCurrentPixels --> CopyNextBufferToCurrent
+CopyNextBufferToCurrent --> UpdateTimings --> CalculateNext
+CalculateNext --> SetSerialiserReferenceTime
+SetSerialiserReferenceTime --> UpdateEVRCounter --> NextPacket
 
-PairingEVR -->|NO| SetPairingTrue --> FindPairPreviousTDC
-PairingEVR -->|YES| MissingTDCPair --> SetPairingTrue
-
-FindPairTimeDiff -->|YES| StoreTDCPair --> SetPairingFalse
-FindPairTimeDiff -->|No| NextPacket
-
-FindPairPreviousTDC -->|NO| NextPacket
-FindPairPreviousTDC -->|YES| StoreTDCPair
-
-SetPairingFalse --> NextPacket
+Parsing -->|TDC| CheckTDCCounter
+CheckTDCCounter -->|NO| IncreaseMissTDC --> IsTDCCurrent
+CheckTDCCounter -->|YES| IsTDCCurrent
+IsTDCCurrent -->|YES| UpdateCurrentTDCTimeStamp --> NextPacket
+IsTDCCurrent -->|NO| UpdateNextTDCTimeStamp --> NextPacket
 ```
