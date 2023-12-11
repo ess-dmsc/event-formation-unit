@@ -12,51 +12,41 @@ To syncronize data according to the EVR system we synconize EVR and TDC times by
 flowchart TD
 
 Parsing{What type of packet?}
-IsPixelNextTDC{Check if \npixel timestamp > nextTDCTimeStamp}
-IsTDCCurrent{Check if \nTDC < current TDC + frequency/2}
-IsNextTDCExists{Check if\n nextTDCTimeStamp != nullptr}
-CheckCurrentBuffer{Check if not\n currentBuffer.empty}
+IsLastEVRPair{Check if\n lastEVRArrival - currentTDCArrival\n < frequency/2}
+IsLastTDCPair{Check if\n lastTDCArrival - currentEVRArrival\n < frequency/2}
+IsGlobalTimestampExists{Check if\n globalTimeStamp != nullptr}
 CheckEVRCounter{Check if\n EVRCounter == currentEVRCounter + 1}
 CheckTDCCounter{Check if\n TDCCounter == currentTDCCounter + 1}
 
-UpdateCurrentTDCTimeStamp[Update timestamp calculated for current TDC]
-UpdateNextTDCTimeStamp[Update timestamp calculated for next TDC]
-PublishCurrentPixels[Publish to Kafka all Pixels\n in current buffer]
-CopyNextBufferToCurrent[Copy next buffer into current buffer]
-UpdateTimings[Copy next TDC and EVR timestamps to current]
-CalculateNext[Calculate next TDC and EVR timesamps]
-SetSerialiserReferenceTime[Set current EVR time as reference time]
-StorePixelDataNext[Store pixel into next buffer]
-StorePixelDataCurrent[Store pixel data into current buffer]
-UpdateEVRCounter[Update currentCounter with EVRCounter]
-EmptyBuffers[Empty current and next buffers\n Drop all pixels]
-IncreaseMissEVR[Increase MissEVRCounter]
+UpdateCurrentGlobalTimeStamp[Update current global timestamp]
+StoreLastTDC[Store TDC as lastTDC]
+StoreLastEVR[Store EVR as lastEVR]
+IncredaseMissEVR[Increase MissEVRCounter]
 IncreaseMissTDC[Increase MissTDCCounter]
+CalculatePixelGlobalTimestamp[Calculate the global timestamp of a pixel]
+StorePixelInBuffer[Store pixel in buffer]
 
 NextPacket(Next Data packet)
 NewPacket(New Data packet)
 
 NewPacket --> Parsing
 
-Parsing -->|PIXEL| IsNextTDCExists
-IsNextTDCExists -->|NO| NextPacket
-IsNextTDCExists -->|YES| IsPixelNextTDC
-IsPixelNextTDC -->|YES| StorePixelDataNext --> NextPacket
-IsPixelNextTDC -->|NO| StorePixelDataCurrent --> NextPacket
+Parsing -->|PIXEL| IsGlobalTimestampExists
+IsGlobalTimestampExists -->|NO| NextPacket
+IsGlobalTimestampExists -->|YES| CalculatePixelGlobalTimestamp
+CalculatePixelGlobalTimestamp --> StorePixelInBuffer --> NextPacket
 
 Parsing -->|EVR| CheckEVRCounter 
-CheckEVRCounter -->|NO| IncreaseMissEVR
-IncreaseMissEVR--> EmptyBuffers --> SetSerialiserReferenceTime
-CheckEVRCounter -->|YES| CheckCurrentBuffer
-CheckCurrentBuffer -->|NO| SetSerialiserReferenceTime
-CheckCurrentBuffer -->|YES| PublishCurrentPixels --> CopyNextBufferToCurrent
-CopyNextBufferToCurrent --> UpdateTimings --> CalculateNext
-CalculateNext --> SetSerialiserReferenceTime
-SetSerialiserReferenceTime --> UpdateEVRCounter --> NextPacket
+CheckEVRCounter -->|NO| IncredaseMissEVR
+IncredaseMissEVR --> IsLastTDCPair
+CheckEVRCounter -->|YES| IsLastTDCPair
+IsLastTDCPair --> |NO| StoreLastEVR --> NewPacket
+IsLastTDCPair --> |YES| UpdateCurrentGlobalTimeStamp --> NewPacket
+
 
 Parsing -->|TDC| CheckTDCCounter
-CheckTDCCounter -->|NO| IncreaseMissTDC --> IsTDCCurrent
-CheckTDCCounter -->|YES| IsTDCCurrent
-IsTDCCurrent -->|YES| UpdateCurrentTDCTimeStamp --> NextPacket
-IsTDCCurrent -->|NO| UpdateNextTDCTimeStamp --> NextPacket
+CheckTDCCounter -->|NO| IncreaseMissTDC --> IsLastEVRPair
+CheckTDCCounter -->|YES| IsLastEVRPair
+IsLastEVRPair -->|YES| UpdateCurrentGlobalTimeStamp --> NextPacket
+IsLastEVRPair -->|NO| StoreLastTDC --> NextPacket
 ```
