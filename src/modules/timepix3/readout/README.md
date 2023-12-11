@@ -98,3 +98,30 @@ IsLastEVRPair -->|NO| StoreLastTDC --> NextPacket
 ```
 
 ### Pixel Time calculation
+The following chart shows the steps of the processing of individual pixel. Since Pixel clock resets 4 times during one TDC clock period therefore we have to identify which quarter we processing pixels. If we know the quarter then we can calculate TDC clock in pixel time for that case. We use the following mathematical formula to convert TDC clock into pixel time domain:
+```c++
+pixelClockBin = 26.8435456 * 1e9;
+quarter = int(TDCTimeSamp / pixelClockBin);
+TDCinPixelTime = TDCTimeSamp - (pixelClockBin * quarter)
+```
+
+```mermaid
+flowchart TD
+
+NewPixel[New Pixel Packet]
+NextPixel[Next Packet]
+
+CalculatePixelGlobalTimestamp[Calculate Pixel Global TimeStamp]
+DelayedPixelCounter[Increase delayed pixel counter]
+StorePixel[Store pixel in buffer]
+
+IsPixelBeforeLastTDC{Check if pixel is smaller \nthen the TDC timestamp\n of the last global time\n in pixel time domain}
+CheckPixelIsAfterReset{Check pixel timestamp\n is smaller then frequency\n in NS}
+
+NewPixel --> IsPixelBeforeLastTDC
+IsPixelBeforeLastTDC -->|YES| CheckPixelIsAfterReset
+IsPixelBeforeLastTDC --> |NO| CalculatePixelGlobalTimestamp
+CheckPixelIsAfterReset -->|YES| CalculatePixelGlobalTimestamp
+CalculatePixelGlobalTimestamp --> StorePixel --> NextPixel
+CheckPixelIsAfterReset --> |NO| DelayedPixelCounter -->NextPixel
+```
