@@ -52,7 +52,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
              Data->PrevPulseTimeNanoSeconds);
 
-      EvrDataObservable.publishData(*new EVRDataEvent(
+      EvrDataObservable.publishData(EVRDataEvent(
           Data->Type, Data->Unused, Data->Unused2, Data->Counter,
           Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds,
           Data->PrevPulseTimeSeconds, Data->PrevPulseTimeNanoSeconds));
@@ -105,7 +105,6 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
                               25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
       XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
-      XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
@@ -127,7 +126,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      TDCDataEvent *Data = new TDCDataEvent(
+      TDCDataEvent Data = TDCDataEvent(
           (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
           (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
           (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
@@ -142,19 +141,18 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // setup will determine which of these are sent.
       /// \todo: Review that it's necessary monitor which type of TDC we
       /// received. Probably this is not important.
-      if (Data->type == 15) {
+      if (Data.type == 15) {
         Stats.TDC1RisingReadouts++;
-        TdcDataObservable.publishData(*Data);
-      } else if (Data->type == 10) {
+        TdcDataObservable.publishData(Data);
+      } else if (Data.type == 10) {
         Stats.TDC1FallingReadouts++;
-        TdcDataObservable.publishData(*Data);
-      } else if (Data->type == 14) {
+        TdcDataObservable.publishData(Data);
+      } else if (Data.type == 14) {
         Stats.TDC2RisingReadouts++;
-        TdcDataObservable.publishData(*Data);
-      } else if (Data->type == 11) {
+        TdcDataObservable.publishData(Data);
+      } else if (Data.type == 11) {
         Stats.TDC2FallingReadouts++;
-        TdcDataObservable.publishData(*Data);
-        TdcDataObservable.publishData(*Data);
+        TdcDataObservable.publishData(Data);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing

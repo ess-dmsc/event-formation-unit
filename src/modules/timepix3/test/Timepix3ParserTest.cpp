@@ -199,7 +199,7 @@ TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
               testTdcTimeStamp + testEventHandler->getTDCFrequency());
 }
 
-TEST_F(Timepix3ParserTest, FinindEVRandTDCPairs) {
+TEST_F(Timepix3ParserTest, FindEVRandTDCPairs) {
   auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
                                    TDC1RisingReadout.size());
 
