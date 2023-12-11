@@ -34,6 +34,8 @@ NextUDPPacket[Get Next UDP Packet]
 CalculateSize[Calculate UDP packet size]
 ProcessPacketContent[Process the data]
 GetNext8Byte[Read out next 8 bytes]
+CalculateClusters[Execute clustering\n identify neutron events]
+PublishtoKafKa[Publish neutron events to Kafka]
 
 Is8BytesLeft{Is not readed packet\n size is >= 8byte}
 ISEVRPacket{Is PacketSize == 24 byte}
@@ -41,12 +43,13 @@ ISEVRPacket{Is PacketSize == 24 byte}
 UDPPacket --> CalculateSize
 CalculateSize --> ISEVRPacket
 ISEVRPacket -->|YES| ProcessPacketContent
-ProcessPacketContent --> NextUDPPacket
+ProcessPacketContent -->|EVR| NextUDPPacket
 ISEVRPacket -->|NO| Is8BytesLeft
 Is8BytesLeft -->|YES| GetNext8Byte
 GetNext8Byte --> ProcessPacketContent
 ProcessPacketContent --> Is8BytesLeft
-Is8BytesLeft --> |NO| NextUDPPacket
+Is8BytesLeft --> |NO| CalculateClusters --> PublishtoKafKa
+PublishtoKafKa --> NextUDPPacket
 ```
 The following charts introduce how we process each data segment of the UDP.
 
