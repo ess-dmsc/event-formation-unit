@@ -9,13 +9,8 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <cstdlib>
-#include <ctime>
 #include <dataflow/DataObserverTemplate.h>
-#include <memory>
-#include <modules/timepix3/Counters.h>
 #include <readout/TimingEventHandler.h>
-#include <vector>
 
 namespace Timepix3 {
 
@@ -58,39 +53,48 @@ namespace Timepix3 {
 #define GLOBAL_STAMP_OFFSET       4
 
 #define EVR_READOUT_TYPE          1
+
+#define EVR_READOUT_TYPE          1
 // clang-format on
+
+struct EVRReadout {
+  const uint8_t Type;
+  const uint8_t Unused;
+  const uint16_t Unused2;
+  const uint32_t Counter;
+  const uint32_t PulseTimeSeconds;
+  const uint32_t PulseTimeNanoSeconds;
+  const uint32_t PrevPulseTimeSeconds;
+  const uint32_t PrevPulseTimeNanoSeconds;
+} __attribute__((__packed__));
+
+struct Timepix3TDCReadout {
+  uint8_t type;
+  uint16_t trigger_counter;
+  uint64_t timestamp;
+  uint8_t stamp;
+} __attribute__((__packed__));
+
+struct Timepix3PixelReadout {
+  uint16_t Dcol;
+  uint16_t Spix;
+  uint8_t Pix;
+  uint16_t ToA;
+  uint16_t ToT;
+  uint8_t FToA;
+  uint16_t SpidrTime;
+}; // WARNING timepix3 readouts aren't packed like other detector readouts
+   // each variable has an odd number of bits, and need to be extracted
+   // with bitwise operations, this isn't like other detectors
+
+struct Timepix3GlobalTimeReadout {
+  uint64_t Timestamp;
+  uint8_t Stamp;
+}; // as above, the readouts aren't packed this way
 
 class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
-
-  struct EVRReadout {
-    const uint8_t Type;
-    const uint8_t Unused;
-    const uint16_t Unused2;
-    const uint32_t Counter;
-    const uint32_t PulseTimeSeconds;
-    const uint32_t PulseTimeNanoSeconds;
-    const uint32_t PrevPulseTimeSeconds;
-    const uint32_t PrevPulseTimeNanoSeconds;
-  } __attribute__((__packed__));
-
-  struct Timepix3PixelReadout {
-    uint16_t Dcol;
-    uint16_t Spix;
-    uint8_t Pix;
-    uint16_t ToA;
-    uint16_t ToT;
-    uint8_t FToA;
-    uint16_t SpidrTime;
-  }; // WARNING timepix3 readouts aren't packed like other detector readouts
-     // each variable has an odd number of bits, and need to be extracted
-     // with bitwise operations, this isn't like other detectors
-
-  struct Timepix3GlobalTimeReadout {
-    uint64_t Timestamp;
-    uint8_t Stamp;
-  }; // as above, the readouts aren't packed this way
 
   DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler);
   ~DataParser(){};
@@ -100,12 +104,11 @@ public:
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
 
-  uint64_t LastEVRTime;
-
   struct Counters &Stats;
   TimingEventHandler &TimingSyncHandler;
 
   Observer::DataEventObservable<TDCDataEvent> TdcDataObservable;
+  Observer::DataEventObservable<EVRDataEvent> EvrDataObservable;
 };
 
 } // namespace Timepix3

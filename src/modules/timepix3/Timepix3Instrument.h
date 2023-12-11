@@ -41,11 +41,11 @@ public:
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
 
   /// \brief calculate pixel ID from a Timepix3PixelReadout
-  uint32_t calcPixel(DataParser::Timepix3PixelReadout &Data);
+  uint32_t calcPixel(Timepix3PixelReadout &Data);
 
   /// \brief calculate the ToF (difference between pulse time and time of
   /// arrival) from a single Timepix3PixelReadout
-  uint64_t calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data);
+  uint64_t calcTimeOfFlight(Timepix3PixelReadout &Data);
 
   /// \brief from the clusters in Clusterer, check if they meet requirements to
   /// be an event, and if so serialize them

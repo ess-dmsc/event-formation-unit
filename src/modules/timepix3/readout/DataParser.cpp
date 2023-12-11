@@ -6,8 +6,9 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
+#include "dataflow/DataObserverTemplate.h"
+#include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
-#include <iostream>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -18,9 +19,10 @@ namespace Timepix3 {
 DataParser::DataParser(struct Counters &counters,
                        TimingEventHandler &timingEventHandler)
     : Stats(counters), TimingSyncHandler(timingEventHandler),
-      TdcDataObservable() {
+      TdcDataObservable(), EvrDataObservable() {
   PixelResult.reserve(MaxReadoutsInPacket);
   TdcDataObservable.subscribe(&TimingSyncHandler);
+  EvrDataObservable.subscribe(&TimingSyncHandler);
 };
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -35,9 +37,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   // if from the EVR system, they will be 24 bits, and will contain pulse time
   // information. If they are 24 bits but not type = 1, then it is a camera
   // packet
-  if (Size == sizeof(EVRReadout)) {
+
+  if (Size == sizeof(struct EVRReadout)) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     EVRReadout *Data = (EVRReadout *)((char *)DataPtr);
+
     if (Data->Type == EVR_READOUT_TYPE) {
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
@@ -47,9 +51,12 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              1, Data->Counter, Data->PulseTimeSeconds,
              Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
              Data->PrevPulseTimeNanoSeconds);
+
+      EvrDataObservable.publishData(*new EVRDataEvent(
+          Data->Type, Data->Unused, Data->Unused2, Data->Counter,
+          Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds,
+          Data->PrevPulseTimeSeconds, Data->PrevPulseTimeNanoSeconds));
       Stats.EVRTimestampReadouts++;
-      LastEVRTime =
-          Data->PulseTimeSeconds * 1000000000 + Data->PulseTimeNanoSeconds;
       return 1;
     }
     XTRACE(DATA, DEB,
@@ -98,6 +105,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
                               25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
       XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
+      XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
 
@@ -123,27 +131,29 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
           (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
           (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
+          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET,
+          TimingSyncHandler.getTDCFrequency());
 
       ParsedReadouts++;
       Stats.TDCReadouts++;
 
-      // TDC readouts can belong to one of two channels, and can either indicate
-      // the rising or the falling edge of the signal. The camera setup will
-      // determine which of these are sent.
+      // TDC readouts can belong to one of two channels, and can either
+      // indicate the rising or the falling edge of the signal. The camera
+      // setup will determine which of these are sent.
       /// \todo: Review that it's necessary monitor which type of TDC we
       /// received. Probably this is not important.
-      if (Data->Type == 15) {
+      if (Data->type == 15) {
         Stats.TDC1RisingReadouts++;
         TdcDataObservable.publishData(*Data);
-      } else if (Data->Type == 10) {
+      } else if (Data->type == 10) {
         Stats.TDC1FallingReadouts++;
         TdcDataObservable.publishData(*Data);
-      } else if (Data->Type == 14) {
+      } else if (Data->type == 14) {
         Stats.TDC2RisingReadouts++;
         TdcDataObservable.publishData(*Data);
-      } else if (Data->Type == 11) {
+      } else if (Data->type == 11) {
         Stats.TDC2FallingReadouts++;
+        TdcDataObservable.publishData(*Data);
         TdcDataObservable.publishData(*Data);
       } else {
         // this should never happen - if it does something has gone wrong with
@@ -151,9 +161,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
         Stats.UnknownTDCReadouts++;
       }
 
-      // global timestamps are a readout allowing for longer periods of time to
-      // be recorded before "overflowing" to 0. This readout type isn't expected
-      // to be used in production, currently.
+      // global timestamps are a readout allowing for longer periods of time
+      // to be recorded before "overflowing" to 0. This readout type isn't
+      // expected to be used in production, currently.
     } else if (ReadoutType == 4) {
       Timepix3GlobalTimeReadout Data;
 
@@ -168,15 +178,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       ParsedReadouts++;
       Stats.GlobalTimestampReadouts++;
     } else {
-      // we sometimes see packet type 7 here, which accompanies a lot of control
-      // signals
+      // we sometimes see packet type 7 here, which accompanies a lot of
+      // control signals
       XTRACE(DATA, WAR, "Unknown packet type: %u", ReadoutType);
       Stats.UndefinedReadouts++;
     }
     BytesLeft -= sizeof(DataBytes);
     DataPtr += sizeof(DataBytes);
   }
-
   return ParsedReadouts;
 }
 

@@ -27,6 +27,8 @@ private:
 
 public:
   DataEventObservable<DataEvent>(){};
+  virtual ~DataEventObservable<DataEvent>() = default;
+
   void subscribe(DataEventObserver<DataEvent> *listener) {
     dataEventListeners.push_back(listener);
   }

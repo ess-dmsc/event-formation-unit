@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
+#include <cstdint>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -39,6 +40,9 @@ struct Counters {
   int64_t TDC1FallingReadouts;
   int64_t TDC2RisingReadouts;
   int64_t TDC2FallingReadouts;
+  int64_t MissTDCPair;
+  int64_t MissEVRPair;
+  int64_t FoundEVRandTDCPairs;
   int64_t UnknownTDCReadouts;
   int64_t GlobalTimestampReadouts;
   int64_t EVRTimestampReadouts;

@@ -76,6 +76,15 @@ set(Timepix3ParserTest_SRC
 )
 create_test_executable(Timepix3ParserTest)
 
+set(Timepix3TimingEventHandlerTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3TimingEventHandlerTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3TimingEventHandlerTest.cpp
+)
+create_test_executable(Timepix3TimingEventHandlerTest)
+
 set(Timepix3GeometryTest_INC
   ${timepix3_common_inc}
 )

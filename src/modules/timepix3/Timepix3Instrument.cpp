@@ -22,9 +22,9 @@ namespace Timepix3 {
 
 /// \brief load configuration and calibration files, throw exceptions
 /// if these have errors or are inconsistent
-Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
+Timepix3Instrument::Timepix3Instrument(Counters &counters,
                                        BaseSettings &settings)
-    : counters(counters), Settings(settings), TimingEventHandler(),
+    : counters(counters), Settings(settings), TimingEventHandler(counters),
       Timepix3Parser(counters, TimingEventHandler) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -45,7 +45,7 @@ Timepix3Instrument::Timepix3Instrument(struct Counters &counters,
 Timepix3Instrument::~Timepix3Instrument() {}
 
 /// \brief helper function to calculate pixels from timepix3 data
-uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
+uint32_t Timepix3Instrument::calcPixel(Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating pixel");
 
   uint32_t pixel = Geom->calcPixel(Data);
@@ -58,7 +58,7 @@ uint32_t Timepix3Instrument::calcPixel(DataParser::Timepix3PixelReadout &Data) {
 // pairing in the KAFKA event (see generateEvent(). We should reset this value
 // when the TDC packet arrived like: TOF - TDC time.
 uint64_t
-Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
+Timepix3Instrument::calcTimeOfFlight(Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating TOF");
   XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA,
          Data.SpidrTime);
@@ -73,7 +73,11 @@ Timepix3Instrument::calcTimeOfFlight(DataParser::Timepix3PixelReadout &Data) {
 void Timepix3Instrument::processReadouts() {
 
   // TODO - handle changing reference time mid-packet
-  Serializer->setReferenceTime(Timepix3Parser.LastEVRTime);
+  if (TimingEventHandler.getLastEvrEvent() != nullptr) {
+    Serializer->setReferenceTime(
+        TimingEventHandler.getLastEvrEvent()->PulseTimeSeconds * 1000000000 +
+        TimingEventHandler.getLastEvrEvent()->PulseTimeNanoSeconds);
+  }
 
   /// Traverse readouts, push back to AllHits
   for (auto &Data : Timepix3Parser.PixelResult) {
