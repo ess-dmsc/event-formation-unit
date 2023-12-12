@@ -121,14 +121,14 @@ TEST_F(Timepix3TimingEventHandlerTest, DelayedTDCTest) {
   EXPECT_EQ(counters->FoundEVRandTDCPairs, 2);
   EXPECT_EQ(counters->MissTDCPair, 1);
   EXPECT_EQ(counters->MissEVRPair, 0);
-  EXPECT_EQ(testEventHandler->getLastEvrEvent()->Counter,
+  EXPECT_EQ(testEventHandler->getLastEvrEvent()->counter,
             testEventHandler->getLastTDCPair()->counter);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, MissingTDCTest) {
   testEventHandler->applyData(tdcFactory->getNextTDC());
   testEventHandler->applyData(evrFactory->getNextEVR());
-  EXPECT_EQ(testEventHandler->getLastEvrEvent()->Counter,
+  EXPECT_EQ(testEventHandler->getLastEvrEvent()->counter,
             testEventHandler->getLastTDCPair()->counter);
 
   // TDC produced but not received
@@ -140,7 +140,7 @@ TEST_F(Timepix3TimingEventHandlerTest, MissingTDCTest) {
 
   testEventHandler->applyData(tdcFactory->getNextTDC());
   testEventHandler->applyData(evrFactory->getNextEVR());
-  EXPECT_EQ(testEventHandler->getLastEvrEvent()->Counter,
+  EXPECT_EQ(testEventHandler->getLastEvrEvent()->counter,
             testEventHandler->getLastTDCPair()->counter);
 
   EXPECT_EQ(counters->FoundEVRandTDCPairs, 2);

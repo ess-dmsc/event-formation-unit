@@ -9,6 +9,8 @@
 #include "dataflow/DataObserverTemplate.h"
 #include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
+#include <cstdint>
+#include <memory>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -52,10 +54,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
              Data->PrevPulseTimeNanoSeconds);
 
-      EvrDataObservable.publishData(EVRDataEvent(
-          Data->Type, Data->Unused, Data->Unused2, Data->Counter,
-          Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds,
-          Data->PrevPulseTimeSeconds, Data->PrevPulseTimeNanoSeconds));
+      EvrDataObservable.publishData(shared_ptr<EVRDataEvent>(new EVRDataEvent(
+          Data->Counter,
+          Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds)));
       Stats.EVRTimestampReadouts++;
       return 1;
     }
@@ -126,12 +127,12 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      TDCDataEvent Data = TDCDataEvent(
-          (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+      shared_ptr<TDCDataEvent> dataPtr = shared_ptr<TDCDataEvent>(new TDCDataEvent(
           (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
           (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET,
-          TimingSyncHandler.getTDCFrequency());
+          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET));
+
+      int8_t type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
 
       ParsedReadouts++;
       Stats.TDCReadouts++;
@@ -141,18 +142,18 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // setup will determine which of these are sent.
       /// \todo: Review that it's necessary monitor which type of TDC we
       /// received. Probably this is not important.
-      if (Data.type == 15) {
+      if (type == 15) {
         Stats.TDC1RisingReadouts++;
-        TdcDataObservable.publishData(Data);
-      } else if (Data.type == 10) {
+        TdcDataObservable.publishData(dataPtr);
+      } else if (type == 10) {
         Stats.TDC1FallingReadouts++;
-        TdcDataObservable.publishData(Data);
-      } else if (Data.type == 14) {
+        TdcDataObservable.publishData(dataPtr);
+      } else if (type == 14) {
         Stats.TDC2RisingReadouts++;
-        TdcDataObservable.publishData(Data);
-      } else if (Data.type == 11) {
+        TdcDataObservable.publishData(dataPtr);
+      } else if (type == 11) {
         Stats.TDC2FallingReadouts++;
-        TdcDataObservable.publishData(Data);
+        TdcDataObservable.publishData(dataPtr);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing

@@ -25,25 +25,29 @@ using namespace std;
 using namespace efutils;
 using namespace chrono;
 
-class TimingEventHandler : public DataEventObserver<TDCDataEvent>,
-                           public DataEventObserver<EVRDataEvent> {
+class TimingEventHandler : public DataEventObserver<shared_ptr<TDCDataEvent>>,
+                           public DataEventObserver<shared_ptr<EVRDataEvent>> {
 
 private:
-  const milliseconds THRESHOLD_MS = nsToMilliseconds(DEFAULT_FREQUENCY_NS/2);
+  const milliseconds THRESHOLD_MS = nsToMilliseconds(DEFAULT_FREQUENCY_NS / 2);
 
   Counters &statCounters;
   // ToDo verify that all the data has to be stored or only some processed data
-  unique_ptr<TDCDataEvent> lastTDCData;
-  unique_ptr<EVRDataEvent> lastEVRData;
+  shared_ptr<TDCDataEvent> lastTDCData;
+  shared_ptr<EVRDataEvent> lastEVRData;
 
   shared_ptr<GlobalTime> globalTime;
 
   uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
 
   inline bool isLastTimingDiffLowerThenThreshold() {
+    if (lastEVRData == nullptr || lastTDCData == nullptr) {
+      return false;
+    }
+
     auto arrivalDiff =
-        abs(duration_cast<milliseconds>(lastTDCData.arrivalTimestamp -
-                                        lastEVRData.arrivalTimestamp)
+        abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
+                                        lastEVRData->arrivalTimestamp)
                 .count());
 
     return arrivalDiff <= THRESHOLD_MS.count();
@@ -57,12 +61,11 @@ public:
   TimingEventHandler(Counters &statCounters) : statCounters(statCounters) {}
   virtual ~TimingEventHandler(){};
 
-  void applyData(const TDCDataEvent &newData) override;
-  void applyData(const EVRDataEvent &newData) override;
+  void applyData(const shared_ptr<TDCDataEvent> &newData) override;
+  void applyData(const shared_ptr<EVRDataEvent> &newData) override;
 
   uint64_t getLastTDCTimestamp() const;
   uint32_t getTDCFrequency() const;
-  const shared_ptr<TDCDataEvent> getLastTDCPair() const;
   const shared_ptr<TDCDataEvent> getLastTdcEvent() const;
   const shared_ptr<EVRDataEvent> getLastEvrEvent() const;
 };

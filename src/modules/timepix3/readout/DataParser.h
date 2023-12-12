@@ -10,6 +10,7 @@
 
 #include <common/readout/ess/Parser.h>
 #include <dataflow/DataObserverTemplate.h>
+#include <memory>
 #include <readout/TimingEventHandler.h>
 
 namespace Timepix3 {
@@ -104,11 +105,11 @@ public:
   // To be iterated over in processing thread
   std::vector<struct Timepix3PixelReadout> PixelResult;
 
-  struct Counters &Stats;
-  TimingEventHandler &TimingSyncHandler;
+  struct Counters& Stats;
+  TimingEventHandler& TimingSyncHandler;
 
-  Observer::DataEventObservable<TDCDataEvent> TdcDataObservable;
-  Observer::DataEventObservable<EVRDataEvent> EvrDataObservable;
+  Observer::DataEventObservable<shared_ptr<TDCDataEvent>> TdcDataObservable;
+  Observer::DataEventObservable<shared_ptr<EVRDataEvent>> EvrDataObservable;
 };
 
 } // namespace Timepix3

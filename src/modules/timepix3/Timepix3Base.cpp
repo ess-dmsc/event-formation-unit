@@ -47,8 +47,8 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
   Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
   Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
-  Stats.create("readouts.miss_tdc_pair", Counters.MissTDCPair);
-  Stats.create("readouts.miss_evr_pair", Counters.MissEVRPair);
+  Stats.create("readouts.miss_tdc_count", Counters.MissTDCCounter);
+  Stats.create("readouts.miss_evr_count", Counters.MissEVRCounter);
   Stats.create("readouts.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
   Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
   Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimestampReadouts);

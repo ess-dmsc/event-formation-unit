@@ -56,31 +56,31 @@ struct TDCDataEvent {
 
 
 struct EVRDataEvent {
-  const uint32_t Counter;
-  const uint32_t PulseTimeSeconds;
-  const uint32_t PulseTimeNanoSeconds;
+  const uint32_t counter;
+  const uint32_t pulseTimeSeconds;
+  const uint32_t pulseTimeNanoSeconds;
   const high_resolution_clock::time_point arrivalTimestamp;
 
   EVRDataEvent(uint32_t counter,
                uint32_t pulseTimeSeconds, uint32_t pulseTimeNanoSeconds)
-      : Counter(counter),
-        PulseTimeSeconds(pulseTimeSeconds),
-        PulseTimeNanoSeconds(pulseTimeNanoSeconds),
+      : counter(counter),
+        pulseTimeSeconds(pulseTimeSeconds),
+        pulseTimeNanoSeconds(pulseTimeNanoSeconds),
         arrivalTimestamp(high_resolution_clock::now()) {}
 
   EVRDataEvent(uint32_t counter,
                uint32_t pulseTimeSeconds, uint32_t pulseTimeNanoSeconds,
                time_point<system_clock> arrivalTimestamp)
-      : Counter(counter),
-        PulseTimeSeconds(pulseTimeSeconds),
-        PulseTimeNanoSeconds(pulseTimeNanoSeconds),
+      : counter(counter),
+        pulseTimeSeconds(pulseTimeSeconds),
+        pulseTimeNanoSeconds(pulseTimeNanoSeconds),
         arrivalTimestamp(arrivalTimestamp) {}
 
   // Equality comparison operator
   bool operator==(const EVRDataEvent &other) const {
-    return Counter == other.Counter &&
-           PulseTimeSeconds == other.PulseTimeSeconds &&
-           PulseTimeNanoSeconds == other.PulseTimeNanoSeconds &&
+    return counter == other.counter &&
+           pulseTimeSeconds == other.pulseTimeSeconds &&
+           pulseTimeNanoSeconds == other.pulseTimeNanoSeconds &&
            arrivalTimestamp == other.arrivalTimestamp;
   }
 };
@@ -89,7 +89,7 @@ struct GlobalTime {
   const uint64_t globalTimeStamp;
   const TDCDataEvent tdcTimeStamp;
 
-  GlobalTime(uint64_t pulseTimeSeconds, uint64_t pulseTimeNanoSeconds, TDCDataEvent tdcTimeStamp):
+  GlobalTime(uint64_t pulseTimeSeconds, uint64_t pulseTimeNanoSeconds, TDCDataEvent &tdcTimeStamp):
   globalTimeStamp(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds), tdcTimeStamp(tdcTimeStamp) {}
 };
 

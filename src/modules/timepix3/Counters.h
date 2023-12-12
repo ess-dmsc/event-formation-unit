@@ -36,12 +36,12 @@ struct Counters {
   int64_t TxBytes;
   int64_t PixelReadouts;
   int64_t TDCReadouts;
+  int64_t MissTDCCounter;
+  int64_t MissEVRCounter;
   int64_t TDC1RisingReadouts;
   int64_t TDC1FallingReadouts;
   int64_t TDC2RisingReadouts;
   int64_t TDC2FallingReadouts;
-  int64_t MissTDCPair;
-  int64_t MissEVRPair;
   int64_t FoundEVRandTDCPairs;
   int64_t UnknownTDCReadouts;
   int64_t GlobalTimestampReadouts;

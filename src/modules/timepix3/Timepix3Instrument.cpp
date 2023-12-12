@@ -75,8 +75,8 @@ void Timepix3Instrument::processReadouts() {
   // TODO - handle changing reference time mid-packet
   if (TimingEventHandler.getLastEvrEvent() != nullptr) {
     Serializer->setReferenceTime(
-        TimingEventHandler.getLastEvrEvent()->PulseTimeSeconds * 1000000000 +
-        TimingEventHandler.getLastEvrEvent()->PulseTimeNanoSeconds);
+        TimingEventHandler.getLastEvrEvent()->pulseTimeSeconds * 1000000000 +
+        TimingEventHandler.getLastEvrEvent()->pulseTimeNanoSeconds);
   }
 
   /// Traverse readouts, push back to AllHits
