@@ -33,19 +33,17 @@ private:
 
   Counters &statCounters;
   // ToDo verify that all the data has to be stored or only some processed data
-  shared_ptr<TDCDataEvent> lastTdcData;
-  shared_ptr<EVRDataEvent> lastEVRData;
-  uint64_t nextTDCTimeStamp;
-  shared_ptr<TDCDataEvent> lastTDCPair;
+  unique_ptr<TDCDataEvent> lastTDCData;
+  unique_ptr<EVRDataEvent> lastEVRData;
+
+  shared_ptr<GlobalTime> globalTime;
 
   uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
 
-  bool lookingForNextTDC{false};
-
   inline bool isLastTimingDiffLowerThenThreshold() {
     auto arrivalDiff =
-        abs(duration_cast<milliseconds>(lastTdcData->arrivalTimestamp -
-                                        lastEVRData->arrivalTimestamp)
+        abs(duration_cast<milliseconds>(lastTDCData.arrivalTimestamp -
+                                        lastEVRData.arrivalTimestamp)
                 .count());
 
     return arrivalDiff <= THRESHOLD_MS.count();

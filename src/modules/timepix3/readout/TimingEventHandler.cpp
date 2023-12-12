@@ -26,38 +26,22 @@ using namespace efutils;
 const uint32_t TimingEventHandler::DEFAULT_FREQUENCY_NS =
     hzToNanoseconds(14).count();
 
-void TimingEventHandler::applyData(const TDCDataEvent &newTdcData) {
-
-  /// \todo review this is required or beter to go with fixed frequency from
-  /// config file. Test required on camera data
-  updateTDCFrequency(newTdcData);
-
-  // Calculate the next TDC according to requency or if the calculated value
-  // higher then max TDC_MAX_TIMESTAMP_NS clock, then calculate it according to
-  // clock reset.
-  nextTDCTimeStamp =
-      newTdcData.tdcTimeStamp + tdcRepetitionFrequency > TDC_MAX_TIMESTAMP_NS
-          ? newTdcData.tdcTimeStamp + tdcRepetitionFrequency -
-                TDC_MAX_TIMESTAMP_NS
-          : newTdcData.tdcTimeStamp + tdcRepetitionFrequency;
+void TimingEventHandler::applyData(const shared_ptr<TDCDataEvent> &newTdcData) {
 
   XTRACE(EVENT, DEB,
          "New TDC Data with Timestamp: %u, Frequency: %u, arrival: %u",
-         lastTdcData->tdcTimeStamp, tdcRepetitionFrequency,
-         lastTdcData->arrivalTimestamp.time_since_epoch());
-
-  if (lookingForNextTDC) {
-    lastTdcData = std::make_unique<TDCDataEvent>(newTdcData);
+         lastTDCData->tdcTimeStamp, tdcRepetitionFrequency,
+         lastTDCData->arrivalTimestamp.time_since_epoch());
 
     if (isLastTimingDiffLowerThenThreshold()) {
-      lastTDCPair = lastTdcData;
+      lastTDCPair = lastTDCData;
       statCounters.FoundEVRandTDCPairs++;
 
       XTRACE(EVENT, DEB,
              "I found EVR pair with previous EVR. TDC counter: %u, EVR "
              "counter: %u ArrivalDiff: %u",
-             lastTdcData->counter, lastEVRData->Counter,
-             abs(duration_cast<milliseconds>(lastTdcData->arrivalTimestamp -
+             lastTDCData->counter, lastEVRData->Counter,
+             abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
                                              lastEVRData->arrivalTimestamp)
 
                      .count()));
@@ -66,15 +50,15 @@ void TimingEventHandler::applyData(const TDCDataEvent &newTdcData) {
       XTRACE(EVENT, DEB, "No TDC pair found for EVR: %u", lastEVRData->Counter);
     }
   } else {
-    if (lastTdcData != NULL && lastTDCPair != lastTdcData) {
+    if (lastTDCData != NULL && lastTDCPair != lastTDCData) {
       XTRACE(EVENT, DEB, "Miss EVR pair for TDC arrived: %u, with counter: %u",
-             lastTdcData->arrivalTimestamp.time_since_epoch(),
-             lastTdcData->counter);
+             lastTDCData->arrivalTimestamp.time_since_epoch(),
+             lastTDCData->counter);
 
       statCounters.MissEVRPair++;
     }
 
-    lastTdcData = std::make_unique<TDCDataEvent>(newTdcData);
+    lastTDCData = std::make_unique<TDCDataEvent>(newTdcData);
   }
 }
 
@@ -96,19 +80,19 @@ void TimingEventHandler::applyData(const EVRDataEvent &newData) {
          lastEVRData->PulseTimeSeconds, lastEVRData->PulseTimeNanoSeconds,
          lastEVRData->arrivalTimestamp.time_since_epoch());
 
-  if (lastTdcData != nullptr) {
+  if (lastTDCData != nullptr) {
 
     if (isLastTimingDiffLowerThenThreshold()) {
 
-      lastTDCPair = lastTdcData;
+      lastTDCPair = lastTDCData;
       lookingForNextTDC = false;
       statCounters.FoundEVRandTDCPairs++;
 
       XTRACE(EVENT, DEB,
              "I found TDC pair with previous TDC. TDC counter: %u, EVR "
              "counter: %u ArrivalDiff: %u",
-             lastTdcData->counter, lastEVRData->Counter,
-             abs(duration_cast<milliseconds>(lastTdcData->arrivalTimestamp -
+             lastTDCData->counter, lastEVRData->Counter,
+             abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
                                              lastEVRData->arrivalTimestamp)
                      .count()));
     }
@@ -116,8 +100,8 @@ void TimingEventHandler::applyData(const EVRDataEvent &newData) {
 }
 
 uint64_t TimingEventHandler::getLastTDCTimestamp() const {
-  if (lastTdcData != NULL) {
-    return lastTdcData->tdcTimeStamp;
+  if (lastTDCData != NULL) {
+    return lastTDCData->tdcTimeStamp;
   } else {
     return 0;
   }
@@ -129,7 +113,7 @@ uint32_t TimingEventHandler::getTDCFrequency() const {
 
 const std::shared_ptr<TDCDataEvent>
 TimingEventHandler::getLastTdcEvent() const {
-  return lastTdcData;
+  return lastTDCData;
 }
 
 const std::shared_ptr<EVRDataEvent>
@@ -139,25 +123,6 @@ TimingEventHandler::getLastEvrEvent() const {
 
 const shared_ptr<TDCDataEvent> TimingEventHandler::getLastTDCPair() const {
   return lastTDCPair;
-}
-
-void TimingEventHandler::updateTDCFrequency(const TDCDataEvent &newTdcData) {
-  int64_t provision_missmatch = nextTDCTimeStamp - newTdcData.tdcTimeStamp;
-  if (llabs(provision_missmatch) >= 15) {
-    XTRACE(EVENT, DEB,
-           "TDC provision miss! Current timestamp: %u, Expected timestamp: %u \
-        Difference: %u",
-           newTdcData.tdcTimeStamp, nextTDCTimeStamp,
-           nextTDCTimeStamp - newTdcData.tdcTimeStamp);
-  }
-
-  uint32_t calcFrequency =
-      lastTdcData != NULL ? newTdcData.tdcTimeStamp - lastTdcData->tdcTimeStamp
-                          : DEFAULT_FREQUENCY_NS;
-
-  if (calcFrequency != 0) {
-    tdcRepetitionFrequency = calcFrequency;
-  }
 }
 
 } // namespace Timepix3
