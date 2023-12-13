@@ -11,6 +11,7 @@
 #pragma once
 
 #include <common/detector/Detector.h>
+#include <common/kafka/Producer.h>
 
 namespace PerfGen {
 
@@ -29,12 +30,7 @@ protected:
     int64_t events_udder;
     int64_t tx_bytes;
     // Kafka stats below are common to all detectors
-    int64_t kafka_produce_calls;
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
+    struct Producer::ProducerStats KafkaStats;
   } __attribute__((aligned(64))) mystats;
 };
 
