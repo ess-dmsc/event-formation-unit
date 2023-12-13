@@ -23,7 +23,7 @@ class KafkaConfigTest : public TestBase {};
 
 TEST_F(KafkaConfigTest, Default) {
   KafkaConfig KafkaCfg("");
-  ASSERT_EQ(KafkaCfg.CfgParms.size(), 5);
+  ASSERT_EQ(KafkaCfg.CfgParms.size(), 4);
 }
 
 TEST_F(KafkaConfigTest, LoadFileError) {
