@@ -54,6 +54,8 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.ev_others", mystats.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", mystats.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", mystats.KafkaStats.dr_noerrors);
+  Stats.create("kafka.librdkafka_msg_cnt", mystats.KafkaStats.librdkafka_msg_cnt);
+  Stats.create("kafka.librdkafka_msg_size", mystats.KafkaStats.librdkafka_msg_size);
   // clang-format on
 
   std::function<void()> processingFunc = [this]() {

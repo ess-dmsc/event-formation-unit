@@ -42,9 +42,9 @@ void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
   switch (event.type()) {
   case RdKafka::Event::EVENT_STATS:
-      //printf("%s", event.str().c_str());
-      res = nlohmann::json::parse(event.str());
-      printf("%d\n", res["msg_cnt"].get<int>());
+    res = nlohmann::json::parse(event.str());
+    stats.librdkafka_msg_cnt = res["msg_cnt"].get<int>();
+    stats.librdkafka_msg_size = res["msg_size"].get<int>();
     break;
   case RdKafka::Event::EVENT_ERROR:
     LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}",

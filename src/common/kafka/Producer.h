@@ -74,6 +74,8 @@ public:
     int64_t err_unknown_topic;
     int64_t err_queue_full;
     int64_t err_other;
+    int64_t librdkafka_msg_cnt;
+    int64_t librdkafka_msg_size;
   } stats = {};
 
 protected:
