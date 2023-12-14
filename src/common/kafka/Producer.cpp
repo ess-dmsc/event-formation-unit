@@ -115,6 +115,10 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
   stats.produce_calls++;
 
   KafkaProducer->poll(0);
+  if (resp == RdKafka::Event::EVENT_STATS) {
+    printf("%s", event.str().c_str());
+    printf("*******************************************************");
+  }
   if (resp != RdKafka::ERR_NO_ERROR) {
     if (resp == RdKafka::ERR__UNKNOWN_TOPIC) {
       stats.err_unknown_topic++;

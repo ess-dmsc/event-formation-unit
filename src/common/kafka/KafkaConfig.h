@@ -27,5 +27,6 @@ public:
       {"message.max.bytes", "10000000"},
       {"message.copy.max.bytes", "10000000"},
       {"queue.buffering.max.ms", "100"},
+      {"statistics.interval.ms", "1000"},
       {"api.version.request", "true"}};
 };
