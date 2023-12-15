@@ -21,7 +21,7 @@ DataParser::DataParser(struct Counters &counters,
       TdcDataObservable() {
   PixelResult.reserve(MaxReadoutsInPacket);
   TdcDataObservable.subscribe(&TimingSyncHandler);
-};
+}
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
