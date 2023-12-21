@@ -11,17 +11,18 @@
 
 #pragma once
 
+#include "Counters.h"
+#include "common/detector/BaseSettings.h"
 #include "common/kafka/EV44Serializer.h"
-#include <common/readout/ess/ESSTime.h>
-#include <common/readout/ess/Parser.h>
-#include <common/reduction/Hit2DVector.h>
-#include <common/reduction/clustering/Hierarchical2DClusterer.h>
-#include <readout/DataParser.h>
-#include <readout/TimingEventHandler.h>
-#include <timepix3/Counters.h>
-#include <timepix3/Timepix3Base.h> // to get Timepix3Settings
-#include <timepix3/geometry/Config.h>
-#include <timepix3/geometry/Timepix3Geometry.h>
+#include "common/reduction/clustering/Hierarchical2DClusterer.h"
+#include "dataflow/DataObserverTemplate.h"
+#include "geometry/Config.h"
+#include "readout/DataEventTypes.h"
+#include "readout/DataParser.h"
+#include "readout/PixelDataEvent.h"
+#include "readout/PixelEventHandler.h"
+#include "readout/TimingEventHandler.h"
+#include <memory>
 
 namespace Timepix3 {
 
@@ -31,42 +32,35 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  Timepix3Instrument(Counters &counters, BaseSettings &settings, EV44Serializer& serializer);
-
-  ~Timepix3Instrument();
 
   /// \brief Generates Hits from Readouts, and adds them to event builder
   void processReadouts();
 
-  /// \brief Sets the serializer to send events to
-  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-
   /// \brief calculate pixel ID from a Timepix3PixelReadout
-  uint32_t calcPixel(Timepix3PixelReadout &Data);
+  uint32_t calcPixel(PixelDataEvent &Data);
 
-  /// \brief calculate the ToF (difference between pulse time and time of
-  /// arrival) from a single Timepix3PixelReadout
-  uint64_t calcTimeOfFlight(Timepix3PixelReadout &Data);
+  DataEventObservable<shared_ptr<TDCDataEvent>> tdcDataObservable;
+  DataEventObservable<shared_ptr<EVRDataEvent>> evrDataObservable;
+  DataEventObservable<EpochESSPulseTime> epochESSPulseTimeObservable;
+  DataEventObservable<PixelDataEvent> pixelDataObservable;
 
   /// \brief from the clusters in Clusterer, check if they meet requirements to
   /// be an event, and if so serialize them
-  void generateEvents();
-
-public:
-  /// \brief Stuff that 'ties' Timepix3 together
   struct Counters &counters;
-
-  DataEventObservable<EpochESSPulseTime> epochESSPulseTimeObservable;
-
-  Config Timepix3Configuration;
-  BaseSettings &Settings;
   EV44Serializer &serializer;
-  Timepix3::TimingEventHandler TimingEventHandler;
-  DataParser Timepix3Parser;
-  Timepix3Geometry *Geom;
-  EV44Serializer *Serializer;
-  Hierarchical2DClusterer *Clusterer;
-  Hit2DVector AllHitsVector;
+  Config timepix3Configuration;
+  Hierarchical2DClusterer clusterer;
+  shared_ptr<Timepix3Geometry> geomPtr;
+  TimingEventHandler timingEventHandler;
+  PixelEventHandler pixelEventHandler;
+  DataParser timepix3Parser;
+
+  Timepix3Instrument(Counters &counters, BaseSettings &settings,
+                     EV44Serializer &serializer);
+
+  ~Timepix3Instrument();
+  // Load configuration and calibration files, calculate and generate the
+  // logical geometry, and initialize the amplitude to position calculations
 };
 
 } // namespace Timepix3

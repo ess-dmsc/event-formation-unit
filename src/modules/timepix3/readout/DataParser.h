@@ -8,10 +8,9 @@
 
 #pragma once
 
-#include <common/readout/ess/Parser.h>
-#include <dataflow/DataObserverTemplate.h>
-#include <memory>
-#include <readout/TimingEventHandler.h>
+#include "readout/PixelEventHandler.h"
+#include "readout/TimingEventHandler.h"
+#include <cstdint>
 
 namespace Timepix3 {
 
@@ -76,18 +75,6 @@ struct Timepix3TDCReadout {
   uint8_t stamp;
 } __attribute__((__packed__));
 
-struct Timepix3PixelReadout {
-  uint16_t Dcol;
-  uint16_t Spix;
-  uint8_t Pix;
-  uint16_t ToA;
-  uint16_t ToT;
-  uint8_t FToA;
-  uint16_t SpidrTime;
-}; // WARNING timepix3 readouts aren't packed like other detector readouts
-   // each variable has an odd number of bits, and need to be extracted
-   // with bitwise operations, this isn't like other detectors
-
 struct Timepix3GlobalTimeReadout {
   uint64_t Timestamp;
   uint8_t Stamp;
@@ -97,19 +84,22 @@ class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  DataParser(struct Counters &counters, TimingEventHandler &timingEventHandler);
+  DataParser(Counters &counters,
+             Observer::DataEventObservable<shared_ptr<TDCDataEvent>>
+                 &tdcDataObservable,
+             Observer::DataEventObservable<shared_ptr<EVRDataEvent>>
+                 &evrDataObservable,
+             Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable);
+
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
 
-  // To be iterated over in processing thread
-  std::vector<struct Timepix3PixelReadout> PixelResult;
+  struct Counters &Stats;
 
-  struct Counters& Stats;
-  TimingEventHandler& TimingSyncHandler;
-
-  Observer::DataEventObservable<shared_ptr<TDCDataEvent>> TdcDataObservable;
-  Observer::DataEventObservable<shared_ptr<EVRDataEvent>> EvrDataObservable;
+  Observer::DataEventObservable<shared_ptr<TDCDataEvent>> &tdcDataObservable;
+  Observer::DataEventObservable<shared_ptr<EVRDataEvent>> &evrDataObservable;
+  Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable;
 };
 
 } // namespace Timepix3

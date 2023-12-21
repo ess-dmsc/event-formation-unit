@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "timepix3/Timepix3Base.h"
-
-#include <cinttypes>
+#include "common/kafka/EV44Serializer.h"
+#include "readout/PixelEventHandler.h"
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
@@ -16,8 +16,7 @@
 #include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
+#include <memory>
 #include <stdio.h>
 #include <timepix3/Timepix3Instrument.h>
 #include <unistd.h>
@@ -46,8 +45,11 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
   Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
   Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
+  Stats.create("readouts.no_global_time_error", Counters.NoGlobalTime);
   Stats.create("readouts.miss_tdc_count", Counters.MissTDCCounter);
   Stats.create("readouts.miss_evr_count", Counters.MissEVRCounter);
+  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
+  Stats.create("readouts.tdctimestamp_readout_count", Counters.TDCTimeStampReadout);
   Stats.create("readouts.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
   Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
   Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
@@ -111,8 +113,6 @@ void Timepix3Base::processingThread() {
 
   Serializer = new EV44Serializer(KafkaBufferSize, "timepix3", Produce);
   Timepix3Instrument Timepix3(Counters, EFUSettings, *Serializer);
-  Timepix3.setSerializer(
-      Serializer); // would rather have this in Timepix3Instrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -133,7 +133,7 @@ void Timepix3Base::processingThread() {
 
       XTRACE(DATA, DEB, "parsing data");
       // parse readout data
-      Timepix3.Timepix3Parser.parse(DataPtr, DataLen);
+      Timepix3.timepix3Parser.parse(DataPtr, DataLen);
 
       XTRACE(DATA, DEB, "processing data");
 
@@ -149,7 +149,6 @@ void Timepix3Base::processingThread() {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
-
       Serializer->produce();
     }
     /// Kafka stats update - common to all detectors

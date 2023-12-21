@@ -179,7 +179,7 @@ TEST_F(Timepix3ParserTest, SingleEVRReadout) {
   auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
                                    SingleEVRReadout.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->EVRTimestampReadouts, 1);
+  EXPECT_EQ(counters->EVRTimeStampReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
@@ -207,7 +207,7 @@ TEST_F(Timepix3ParserTest, FindEVRandTDCPairs) {
                                SingleEVRReadout.size());
   EXPECT_EQ(Res, 2);
   EXPECT_EQ(counters->TDCReadouts, 1);
-  EXPECT_EQ(counters->EVRTimestampReadouts, 1);
+  EXPECT_EQ(counters->EVRTimeStampReadouts, 1);
   EXPECT_EQ(counters->PixelReadouts, 0);
   EXPECT_EQ(counters->FoundEVRandTDCPairs, 1);
   EXPECT_EQ(counters->MissTDCPair, 0);

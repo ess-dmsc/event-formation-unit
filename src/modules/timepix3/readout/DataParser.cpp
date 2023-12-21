@@ -6,11 +6,7 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
-#include "dataflow/DataObserverTemplate.h"
-#include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
-#include <cstdint>
-#include <memory>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -19,17 +15,16 @@
 namespace Timepix3 {
 
 DataParser::DataParser(struct Counters &counters,
-                       TimingEventHandler &timingEventHandler)
-    : Stats(counters), TimingSyncHandler(timingEventHandler),
-      TdcDataObservable(), EvrDataObservable() {
-  PixelResult.reserve(MaxReadoutsInPacket);
-  TdcDataObservable.subscribe(&TimingSyncHandler);
-  EvrDataObservable.subscribe(&TimingSyncHandler);
-};
+                       Observer::DataEventObservable<shared_ptr<TDCDataEvent>> &tdcDataObservable,
+                       Observer::DataEventObservable<shared_ptr<EVRDataEvent>> &evrDataObservable,
+                       Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable)
+    : Stats(counters), tdcDataObservable(tdcDataObservable),
+      evrDataObservable(evrDataObservable),
+      pixelDataObservable(pixelDataObservable) {}
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
-  PixelResult.clear();
+
   unsigned int ParsedReadouts = 0;
 
   unsigned int BytesLeft = Size;
@@ -54,7 +49,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
              Data->PrevPulseTimeNanoSeconds);
 
-      EvrDataObservable.publishData(shared_ptr<EVRDataEvent>(new EVRDataEvent(
+      evrDataObservable.publishData(shared_ptr<EVRDataEvent>(new EVRDataEvent(
           Data->Counter,
           Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds)));
       Stats.EVRTimeStampReadouts++;
@@ -82,44 +77,20 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
     // pixel readout, identifies where a pixel on the camera was activated
     if (ReadoutType == 11) {
-      Timepix3PixelReadout Data;
 
-      // mask and offset values are defined in DataParser.h
-      Data.Dcol = (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET;
-      Data.Spix = (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET;
-      Data.Pix = (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET;
-      Data.ToA = (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET;
+      PixelDataEvent pixelDataEvent(
+          (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
+          (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
+          (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
+          (DataBytes & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
+          (DataBytes & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
+          (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
+          DataBytes & PIXEL_SPTIME_MASK);
 
-      // TOT has a unit of 25ns and we convert according to that.
-      Data.ToT = ((DataBytes & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET) * 25;
-      Data.FToA = (DataBytes & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET;
-      Data.SpidrTime = DataBytes & PIXEL_SPTIME_MASK;
+      pixelDataObservable.publishData(pixelDataEvent);
 
-      XTRACE(DATA, DEB,
-             "Processed readout, ReadoutType = %u, Dcol = %u, Spix = %u, Pix = "
-             "%u, SpidrTime = %u, ToA = %u, FToA = %u, ToT = %u",
-             ReadoutType, Data.Dcol, Data.Spix, Data.Pix, Data.SpidrTime,
-             Data.ToA, Data.FToA, Data.ToT);
-
-      // toa formula is based on information from the timepix3 manual provided
-      // with the camera
-      uint64_t toa = uint64_t(409600 * uint64_t(Data.SpidrTime) +
-                              25 * uint64_t(Data.ToA) - 1.5625 * Data.FToA);
-      XTRACE(DATA, DEB, "ToA in nanoseconds: %u", toa);
       ParsedReadouts++;
       Stats.PixelReadouts++;
-
-      // LastTDCTime is the latest seen time from a TDC readout, and this
-      // counter is used to see how strictly in order the pixel readouts are in
-      // relation to this. Pixel readouts from before the last TDC time belong
-      // to the previous pulse, and may need to be treated differently
-
-      if (toa < TimingSyncHandler.getLastTDCData()->tdcTimeStamp) {
-        XTRACE(DATA, DEB, "Pixel readout from before TDC");
-        Stats.PixelReadoutFromBeforeTDC++;
-      }
-
-      PixelResult.push_back(Data);
 
       // TDC readout type, indicating when the camera received a TDC pulse. In
       // the ESS setup, this should correspond to an EVR pulse, indicating the
@@ -127,10 +98,12 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      shared_ptr<TDCDataEvent> dataPtr = shared_ptr<TDCDataEvent>(new TDCDataEvent(
-          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
-          (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET));
+      shared_ptr<TDCDataEvent> dataPtr =
+          shared_ptr<TDCDataEvent>(new TDCDataEvent(
+              (DataBytes & TDC_TRIGGERCOUNTER_MASK) >>
+                  TDC_TRIGGERCOUNTER_OFFSET,
+              (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+              (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET));
 
       int8_t type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
 
@@ -144,16 +117,16 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       /// received. Probably this is not important.
       if (type == 15) {
         Stats.TDC1RisingReadouts++;
-        TdcDataObservable.publishData(dataPtr);
+        tdcDataObservable.publishData(dataPtr);
       } else if (type == 10) {
         Stats.TDC1FallingReadouts++;
-        TdcDataObservable.publishData(dataPtr);
+        tdcDataObservable.publishData(dataPtr);
       } else if (type == 14) {
         Stats.TDC2RisingReadouts++;
-        TdcDataObservable.publishData(dataPtr);
+        tdcDataObservable.publishData(dataPtr);
       } else if (type == 11) {
         Stats.TDC2FallingReadouts++;
-        TdcDataObservable.publishData(dataPtr);
+        tdcDataObservable.publishData(dataPtr);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing

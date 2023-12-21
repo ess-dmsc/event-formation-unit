@@ -98,7 +98,7 @@ TEST_F(Timepix3InstrumentTest, BadJsonNoXResSettings) {
 }
 
 TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  auto Res = timepix3->Timepix3Parser.parse((char *)SingleGoodReadout.data(),
+  auto Res = timepix3->timepix3Parser.parse((char *)SingleGoodReadout.data(),
   SingleGoodReadout.size());
   ASSERT_EQ(Res, 1);
   ASSERT_EQ(counters.PixelReadouts, 1);

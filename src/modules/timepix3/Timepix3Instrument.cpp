@@ -9,10 +9,9 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
+#include "dataflow/DataObserverTemplate.h"
+#include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
-#include <common/time/TimeString.h>
-#include <fmt/format.h>
-#include <math.h>
 #include <timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
@@ -20,116 +19,53 @@
 
 namespace Timepix3 {
 
-/// \brief load configuration and calibration files, throw exceptions
-/// if these have errors or are inconsistent
+/**
+ * @brief Constructs a Timepix3Instrument object.
+ *
+ * This constructor initializes a Timepix3Instrument object with the provided
+ * counters, settings, and serializer. It also sets up observable subscriptions
+ * for timing events, pixel events, and epoch ESS pulse time events.
+ *
+ * @param counters The Counters object used for counting events.
+ * @param settings The BaseSettings object containing configuration settings.
+ * @param serializer The EV44Serializer object used for serialization.
+ */
 Timepix3Instrument::Timepix3Instrument(Counters &counters,
                                        BaseSettings &settings,
                                        EV44Serializer &serializer)
-    : counters(counters), Settings(settings), serializer(serializer),
-      TimingEventHandler(counters, serializer, epochESSPulseTimeObservable),
-      Timepix3Parser(counters, TimingEventHandler) {
+    : counters(counters), serializer(serializer),
+      timepix3Configuration(Config(settings.ConfigFile)),
+      clusterer(timepix3Configuration.MaxTimeGapNS,
+                timepix3Configuration.MaxCoordinateGap),
+      geomPtr(std::make_shared<Timepix3Geometry>(
+          timepix3Configuration.XResolution, timepix3Configuration.YResolution,
+          1, 1)),
+      timingEventHandler(counters, serializer, epochESSPulseTimeObservable),
+      pixelEventHandler(counters, geomPtr, clusterer, serializer),
+      timepix3Parser(counters, tdcDataObservable, evrDataObservable,
+                     pixelDataObservable) {
 
-  XTRACE(INIT, ALW, "Loading configuration file %s",
-         Settings.ConfigFile.c_str());
+  // Setup observable subscriptions
+  tdcDataObservable.subscribe(&timingEventHandler);
+  evrDataObservable.subscribe(&timingEventHandler);
 
-  Timepix3Configuration = Config(Settings.ConfigFile);
-
-  Geom = new Timepix3Geometry(Timepix3Configuration.XResolution,
-                              Timepix3Configuration.YResolution, 1, 1);
-  Geom->setXResolution(Timepix3Configuration.XResolution);
-  Geom->setYResolution(Timepix3Configuration.YResolution);
-
-  Clusterer =
-      new Hierarchical2DClusterer(Timepix3Configuration.MaxTimeGapNS,
-                                  Timepix3Configuration.MaxCoordinateGap);
+  pixelDataObservable.subscribe(&pixelEventHandler);
+  epochESSPulseTimeObservable.subscribe(&pixelEventHandler);
 }
 
 Timepix3Instrument::~Timepix3Instrument() {}
 
-/// \brief helper function to calculate pixels from timepix3 data
-uint32_t Timepix3Instrument::calcPixel(Timepix3PixelReadout &Data) {
-  XTRACE(DATA, DEB, "Calculating pixel");
-
-  uint32_t pixel = Geom->calcPixel(Data);
-  XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
-  return pixel;
-}
-
-// ToDo: This calculates time of flight according to internal clock status
-// which may not relates to the EVR pulse time. This later drives to a wrong
-// pairing in the KAFKA event (see generateEvent(). We should reset this value
-// when the TDC packet arrived like: TOF - TDC time.
-uint64_t Timepix3Instrument::calcTimeOfFlight(Timepix3PixelReadout &Data) {
-  XTRACE(DATA, DEB, "Calculating TOF");
-  XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA,
-         Data.SpidrTime);
-  // this formula is based on the information in the timepix3 manual supplied
-  // with the camera
-  uint64_t ToF =
-      int(409600 * Data.SpidrTime + 25 * Data.ToA - 1.5625 * Data.FToA);
-  XTRACE(DATA, DEB, "ToF: %u", ToF);
-  return ToF;
-}
-
 void Timepix3Instrument::processReadouts() {
-
-  // TODO - handle changing reference time mid-packet
-  if (TimingEventHandler.getLastEVRData() != nullptr) {
-    Serializer->setReferenceTime(
-        TimingEventHandler.getLastEVRData()->pulseTimeSeconds * 1000000000 +
-        TimingEventHandler.getLastEVRData()->pulseTimeNanoSeconds);
-  }
-
-  /// Traverse readouts, push back to AllHits
-  for (auto &Data : Timepix3Parser.PixelResult) {
-    bool ValidData = Geom->validateData(Data);
-    if (not ValidData) {
-      XTRACE(DATA, WAR, "Invalid Data, skipping readout");
-      continue;
-    }
-
-    // Calculate TOF in ns
-    uint16_t TimeOfFlight = calcTimeOfFlight(Data);
-    uint16_t X = Geom->calcX(Data);
-    uint16_t Y = Geom->calcY(Data);
-    uint16_t ToT = Data.ToT;
-
-    XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u",
-           TimeOfFlight, X, Y, ToT);
-    AllHitsVector.push_back({TimeOfFlight, X, Y, ToT});
-  }
-
-  // sort hits by time of flight for clustering in time
-  sort_chronologically(std::move(AllHitsVector));
-  Clusterer->cluster(AllHitsVector);
-
-  ///\todo Decide if flushing per packet is wanted behaviour, or should be
-  /// configurable
-  Clusterer->flush();
-  generateEvents();
-  AllHitsVector.clear();
+  XTRACE(DATA, DEB, "Processing readouts");
+  pixelEventHandler.pushDataToKafka();
 }
 
-void Timepix3Instrument::generateEvents() {
-  for (auto cluster : Clusterer->clusters) {
-    // other options for time are timeEnd, timeCenter, etc. we picked timeStart
-    // for this type of
-    // detector, it is the time the first photon in the cluster hit the
-    // detector.
-    uint64_t EventTime = cluster.timeStart();
-    uint16_t x = cluster.xCoordCenter();
-    uint16_t y = cluster.yCoordCenter();
-    uint32_t PixelId = Geom->pixel2D(x, y);
-    if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u, x %u, y %u, pixel %u",
-             EventTime, x, y, PixelId);
-      counters.PixelErrors++;
-      continue;
-    }
-    XTRACE(EVENT, DEB, "New event, Time: %u, PixelId: %u", EventTime, PixelId);
-    counters.TxBytes += Serializer->addEvent(EventTime, PixelId);
-    counters.Events++;
-  }
-  Clusterer->clusters.clear();
-}
+// /// \brief helper function to calculate pixels from timepix3 data
+// uint32_t Timepix3Instrument::calcPixel(PixelDataEvent &Data) {
+//   XTRACE(DATA, DEB, "Calculating pixel");
+
+//   uint32_t pixel = geomPtr->calcPixel(Data);
+//   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
+//   return pixel;
+// }
 } // namespace Timepix3

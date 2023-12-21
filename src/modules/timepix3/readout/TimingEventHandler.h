@@ -38,7 +38,7 @@ private:
   shared_ptr<TDCDataEvent> lastTDCData;
   shared_ptr<EVRDataEvent> lastEVRData;
 
-    DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable;
+  DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable;
 
     uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
 
@@ -55,27 +55,19 @@ private:
       return arrivalDiff <= THRESHOLD_MS.count();
     }
 
-  public:
-    static const uint32_t DEFAULT_FREQUENCY_NS;
+public:
+  static const uint32_t DEFAULT_FREQUENCY_NS;
 
-    TimingEventHandler(
-        Counters &statCounters, EV44Serializer &serializer,
-        DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable)
-        : statCounters(statCounters), serializer(serializer),
-          epochESSPulseTimeObservable(epochESSPulseTimeObservable) {}
+  TimingEventHandler(
+      Counters &statCounters, EV44Serializer &serializer,
+      DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable)
+      : statCounters(statCounters), serializer(serializer),
+        epochESSPulseTimeObservable(epochESSPulseTimeObservable) {}
 
-    virtual ~TimingEventHandler(){};
+  virtual ~TimingEventHandler(){};
 
-    void applyData(const shared_ptr<TDCDataEvent> &newData) override;
-    void applyData(const shared_ptr<EVRDataEvent> &newData) override;
+  void applyData(const shared_ptr<TDCDataEvent> &newData) override;
+  void applyData(const shared_ptr<EVRDataEvent> &newData) override;
+};
 
-    shared_ptr<TDCDataEvent> getLastTDCData() const {
-      return lastTDCData;
-    }
-
-    shared_ptr<EVRDataEvent> getLastEVRData() const {
-      return lastEVRData;
-    }
-  };
-
-  } // namespace Timepix3
+} // namespace Timepix3
