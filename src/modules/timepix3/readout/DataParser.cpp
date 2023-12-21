@@ -57,7 +57,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       EvrDataObservable.publishData(shared_ptr<EVRDataEvent>(new EVRDataEvent(
           Data->Counter,
           Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds)));
-      Stats.EVRTimestampReadouts++;
+      Stats.EVRTimeStampReadouts++;
       return 1;
     }
     XTRACE(DATA, DEB,
@@ -114,7 +114,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // relation to this. Pixel readouts from before the last TDC time belong
       // to the previous pulse, and may need to be treated differently
 
-      if (toa < TimingSyncHandler.getLastTDCTimestamp()) {
+      if (toa < TimingSyncHandler.getLastTDCData()->tdcTimeStamp) {
         XTRACE(DATA, DEB, "Pixel readout from before TDC");
         Stats.PixelReadoutFromBeforeTDC++;
       }
@@ -135,7 +135,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       int8_t type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
 
       ParsedReadouts++;
-      Stats.TDCReadouts++;
+      Stats.TDCTimeStampReadout++;
 
       // TDC readouts can belong to one of two channels, and can either
       // indicate the rising or the falling edge of the signal. The camera

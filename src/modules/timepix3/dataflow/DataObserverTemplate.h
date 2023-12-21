@@ -29,11 +29,11 @@ public:
   DataEventObservable<DataEvent>(){};
   virtual ~DataEventObservable<DataEvent>() = default;
 
-  void subscribe(DataEventObserver<DataEvent> *listener) {
+  inline void subscribe(DataEventObserver<DataEvent> *listener) {
     dataEventListeners.push_back(listener);
   }
 
-  void publishData(const DataEvent &event) const {
+  inline void publishData(const DataEvent &event) const {
     for (const auto &listener : dataEventListeners) {
       listener->applyData(event);
     }
@@ -41,9 +41,3 @@ public:
 };
 
 } // namespace Observer
-
-namespace Timepix3 {
-
-using namespace Observer;
-
-}

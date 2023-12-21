@@ -23,8 +23,10 @@ namespace Timepix3 {
 /// \brief load configuration and calibration files, throw exceptions
 /// if these have errors or are inconsistent
 Timepix3Instrument::Timepix3Instrument(Counters &counters,
-                                       BaseSettings &settings)
-    : counters(counters), Settings(settings), TimingEventHandler(counters),
+                                       BaseSettings &settings,
+                                       EV44Serializer &serializer)
+    : counters(counters), Settings(settings), serializer(serializer),
+      TimingEventHandler(counters, serializer, epochESSPulseTimeObservable),
       Timepix3Parser(counters, TimingEventHandler) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -57,8 +59,7 @@ uint32_t Timepix3Instrument::calcPixel(Timepix3PixelReadout &Data) {
 // which may not relates to the EVR pulse time. This later drives to a wrong
 // pairing in the KAFKA event (see generateEvent(). We should reset this value
 // when the TDC packet arrived like: TOF - TDC time.
-uint64_t
-Timepix3Instrument::calcTimeOfFlight(Timepix3PixelReadout &Data) {
+uint64_t Timepix3Instrument::calcTimeOfFlight(Timepix3PixelReadout &Data) {
   XTRACE(DATA, DEB, "Calculating TOF");
   XTRACE(DATA, DEB, "ToA: %u, FToA: %u, Spidr_time: %u", Data.ToA, Data.FToA,
          Data.SpidrTime);
@@ -73,10 +74,10 @@ Timepix3Instrument::calcTimeOfFlight(Timepix3PixelReadout &Data) {
 void Timepix3Instrument::processReadouts() {
 
   // TODO - handle changing reference time mid-packet
-  if (TimingEventHandler.getLastEvrEvent() != nullptr) {
+  if (TimingEventHandler.getLastEVRData() != nullptr) {
     Serializer->setReferenceTime(
-        TimingEventHandler.getLastEvrEvent()->pulseTimeSeconds * 1000000000 +
-        TimingEventHandler.getLastEvrEvent()->pulseTimeNanoSeconds);
+        TimingEventHandler.getLastEVRData()->pulseTimeSeconds * 1000000000 +
+        TimingEventHandler.getLastEVRData()->pulseTimeNanoSeconds);
   }
 
   /// Traverse readouts, push back to AllHits
@@ -103,7 +104,7 @@ void Timepix3Instrument::processReadouts() {
   Clusterer->cluster(AllHitsVector);
 
   ///\todo Decide if flushing per packet is wanted behaviour, or should be
-  ///configurable
+  /// configurable
   Clusterer->flush();
   generateEvents();
   AllHitsVector.clear();

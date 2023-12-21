@@ -42,7 +42,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
  
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.pixel_before_tdc_count", Counters.PixelReadoutFromBeforeTDC);
-  Stats.create("readouts.tdc_readout_count", Counters.TDCReadouts);
   Stats.create("readouts.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
   Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
   Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
@@ -51,9 +50,12 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.miss_evr_count", Counters.MissEVRCounter);
   Stats.create("readouts.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
   Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
-  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimestampReadouts);
+  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
+  Stats.create("readouts.tdctimestamp_readout_count", Counters.TDCTimeStampReadout);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
-  Stats.create("readouts.evr_and_tdc_pairs_count", Counters.FoundEVRandTDCPairs);
+  Stats.create("readouts.evr_pair_count", Counters.EVRPairFound);
+  Stats.create("readouts.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
+  Stats.create("readouts.tdc_pair_count", Counters.TDCPairFound);
   Stats.create("readouts.tof_count", Counters.TofCount);
   Stats.create("readouts.tof_neg", Counters.TofNegative);
   Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
@@ -108,7 +110,7 @@ void Timepix3Base::processingThread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "timepix3", Produce);
-  Timepix3Instrument Timepix3(Counters, EFUSettings);
+  Timepix3Instrument Timepix3(Counters, EFUSettings, *Serializer);
   Timepix3.setSerializer(
       Serializer); // would rather have this in Timepix3Instrument
 

@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "common/kafka/EV44Serializer.h"
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Hit2DVector.h>
@@ -30,7 +31,7 @@ public:
   ///
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  Timepix3Instrument(Counters &counters, BaseSettings &settings);
+  Timepix3Instrument(Counters &counters, BaseSettings &settings, EV44Serializer& serializer);
 
   ~Timepix3Instrument();
 
@@ -55,8 +56,11 @@ public:
   /// \brief Stuff that 'ties' Timepix3 together
   struct Counters &counters;
 
+  DataEventObservable<EpochESSPulseTime> epochESSPulseTimeObservable;
+
   Config Timepix3Configuration;
   BaseSettings &Settings;
+  EV44Serializer &serializer;
   Timepix3::TimingEventHandler TimingEventHandler;
   DataParser Timepix3Parser;
   Timepix3Geometry *Geom;
