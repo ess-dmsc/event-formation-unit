@@ -22,6 +22,9 @@ struct Counters {
   // System counters
   int64_t FifoSeqErrors;
   int64_t ProcessingIdle;
+  int64_t ParsingTimeUs;
+  int64_t ClusterProcessingTimeUs;
+  int64_t PublishingTimeUs;
 
   // Events
   int64_t Events;

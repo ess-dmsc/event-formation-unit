@@ -36,6 +36,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.packets", ITCounters.RxPackets);
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
+  Stats.create("receive.input_processing_time_us", ITCounters.InputrProcessingTime);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
  
@@ -72,7 +73,9 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   // System counters
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-
+  Stats.create("parsing_time_us", Counters.ParsingTimeUs);
+  Stats.create("clustering_time_us", Counters.ClusterProcessingTimeUs);
+  Stats.create("publishing_time_us", Counters.PublishingTimeUs );
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -95,7 +98,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-///
+///Counters
 /// \brief Normal processing thread
 void Timepix3Base::processingThread() {
   if (EFUSettings.KafkaTopic == "") {
@@ -133,7 +136,15 @@ void Timepix3Base::processingThread() {
 
       XTRACE(DATA, DEB, "parsing data");
       // parse readout data
+      
+      auto startTime = std::chrono::high_resolution_clock::now();
+
       Timepix3.timepix3Parser.parse(DataPtr, DataLen);
+
+      auto endTime = std::chrono::high_resolution_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+
+      Counters.ParsingTimeUs = duration;
 
       XTRACE(DATA, DEB, "processing data");
 

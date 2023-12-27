@@ -11,6 +11,7 @@
 
 #include <CLI/CLI.hpp>
 #include <atomic>
+#include <chrono>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <common/detector/BaseSettings.h>
@@ -40,6 +41,7 @@ public:
     int64_t RxBytes{0};
     int64_t FifoPushErrors{0};
     int64_t RxIdle{0};
+    int64_t InputrProcessingTime{0};
   } ITCounters; // Input Thread Counters
 
   using CommandFunction =
@@ -67,6 +69,8 @@ public:
       if ((readSize =
                dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
                                     RxRingbuffer.getMaxBufSize())) > 0) {
+        std::chrono::high_resolution_clock::time_point startTime =
+            std::chrono::high_resolution_clock::now();
         RxRingbuffer.setDataLength(rxBufferIndex, readSize);
         XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
                readSize);
@@ -78,6 +82,13 @@ public:
         } else {
           RxRingbuffer.getNextBuffer();
         }
+        std::chrono::high_resolution_clock::time_point endTime =
+            std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                            endTime - startTime)
+                            .count();
+        ITCounters.InputrProcessingTime = duration;
+
       } else {
         ITCounters.RxIdle++;
       }

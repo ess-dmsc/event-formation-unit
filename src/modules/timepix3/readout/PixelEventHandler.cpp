@@ -52,13 +52,30 @@ void PixelEventHandler::applyData(const PixelDataEvent &pixelDataEvent) {
 
 void PixelEventHandler::pushDataToKafka() {
   // sort hits by time of flight for clustering in time
+  #include <chrono>
+
+  auto startTime = std::chrono::high_resolution_clock::now();
+
   sort_chronologically(std::move(allHitsVector));
   clusterer.cluster(allHitsVector);
 
   ///\todo Decide if flushing per packet is wanted behaviour, or should be
   /// configurable
   clusterer.flush();
+
+  auto endTime = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+
+  statCounters.ClusterProcessingTimeUs = duration;
+
+  startTime = std::chrono::high_resolution_clock::now();
+
   generateEvents();
+
+  endTime = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+
+  statCounters.PublishingTimeUs = duration;
   allHitsVector.clear();
 }
 
