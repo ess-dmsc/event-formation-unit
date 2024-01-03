@@ -160,7 +160,11 @@ TEST_F(FreiaInstrumentTest, DumpTofile) {
 
   makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
   auto Res = FreiaDump.VMMParser.parse(FreiaDump.ESSReadoutParser.Packet);
-  FreiaDump.processReadouts();
+
+  char *Buffer = (char *)FreiaDump.ESSReadoutParser.Packet.DataPtr;
+  unsigned int Size = FreiaDump.ESSReadoutParser.Packet.DataLength;
+  FreiaDump.processReadouts(
+    (ESSReadout::VMM3Parser::VMM3Data *)Buffer, Size/FreiaDump.VMMParser.DataLength);
 
   counters.VMMStats = FreiaDump.VMMParser.Stats;
   ASSERT_EQ(Res, 2);
@@ -178,7 +182,11 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   ASSERT_EQ(counters.RingMappingErrors, 0);
   ASSERT_EQ(counters.FENMappingErrors, 0);
 
-  freia->processReadouts();
+  char *Buffer = (char *)freia->ESSReadoutParser.Packet.DataPtr;
+  unsigned int Size = freia->ESSReadoutParser.Packet.DataLength;
+  freia->processReadouts(
+    (ESSReadout::VMM3Parser::VMM3Data *)Buffer, Size/freia->VMMParser.DataLength);
+
   ASSERT_EQ(counters.HybridMappingErrors, 1);
   ASSERT_EQ(counters.RingMappingErrors, 1);
   ASSERT_EQ(counters.FENMappingErrors, 1);
@@ -248,7 +256,11 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
   auto Res = freia->VMMParser.parse(Packet);
   counters.VMMStats = freia->VMMParser.Stats;
 
-  freia->processReadouts();
+  char *Buffer = (char *)freia->ESSReadoutParser.Packet.DataPtr;
+  unsigned int Size = freia->ESSReadoutParser.Packet.DataLength;
+  freia->processReadouts(
+    (ESSReadout::VMM3Parser::VMM3Data *)Buffer, Size/freia->VMMParser.DataLength);
+
   for (auto &builder : freia->builders) {
     builder.flush(true);
     freia->generateEvents(builder.Events);
