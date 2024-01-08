@@ -9,8 +9,6 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
-#include "dataflow/DataObserverTemplate.h"
-#include "readout/DataEventTypes.h"
 #include <common/debug/Trace.h>
 #include <timepix3/Timepix3Instrument.h>
 
@@ -31,17 +29,16 @@ namespace Timepix3 {
  * @param serializer The EV44Serializer object used for serialization.
  */
 Timepix3Instrument::Timepix3Instrument(Counters &counters,
-                                       BaseSettings &settings,
+                                       Config timepix3Configuration,
                                        EV44Serializer &serializer)
     : counters(counters), serializer(serializer),
-      timepix3Configuration(Config(settings.ConfigFile)),
       clusterer(timepix3Configuration.MaxTimeGapNS,
                 timepix3Configuration.MaxCoordinateGap),
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
-          1, 1)),
+          timepix3Configuration.NumberOfChunks)),
       timingEventHandler(counters, serializer, epochESSPulseTimeObservable),
-      pixelEventHandler(counters, geomPtr, clusterer, serializer),
+      pixelEventHandler(counters, geomPtr, serializer),
       timepix3Parser(counters, tdcDataObservable, evrDataObservable,
                      pixelDataObservable) {
 
@@ -53,19 +50,11 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
   epochESSPulseTimeObservable.subscribe(&pixelEventHandler);
 }
 
-Timepix3Instrument::~Timepix3Instrument() {}
-
 void Timepix3Instrument::processReadouts() {
   XTRACE(DATA, DEB, "Processing readouts");
   pixelEventHandler.pushDataToKafka();
 }
 
-// /// \brief helper function to calculate pixels from timepix3 data
-// uint32_t Timepix3Instrument::calcPixel(PixelDataEvent &Data) {
-//   XTRACE(DATA, DEB, "Calculating pixel");
+Timepix3Instrument::~Timepix3Instrument() {}
 
-//   uint32_t pixel = geomPtr->calcPixel(Data);
-//   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
-//   return pixel;
-// }
 } // namespace Timepix3

@@ -22,8 +22,12 @@ struct Counters {
   // System counters
   int64_t FifoSeqErrors;
   int64_t ProcessingIdle;
+
+  // Performance counters
   int64_t ParsingTimeUs;
   int64_t ClusterProcessingTimeUs;
+  int64_t SortingProcessTimeUs;
+  int64_t* ClusteringThreadTimeUs;
   int64_t PublishingTimeUs;
 
   // Events
@@ -59,4 +63,9 @@ struct Counters {
   int64_t kafka_ev_others;
   int64_t kafka_dr_errors;
   int64_t kafka_dr_noerrors;
+
+  Counters(int MaxThreads) {
+    ClusteringThreadTimeUs = new int64_t[MaxThreads];
+  };
+
 } __attribute__((aligned(64)));

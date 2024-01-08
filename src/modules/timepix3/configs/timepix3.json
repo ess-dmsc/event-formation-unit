@@ -2,5 +2,6 @@
   "Detector": "timepix3",
   "XResolution": 256,
   "YResolution": 256,
+  "NumberOfChunks": 1,
   "MaxTimeGapNS": 500
 }

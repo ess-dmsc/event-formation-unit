@@ -10,21 +10,46 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <memory>
 #include <readout/TimingEventHandler.h>
+#include <utility>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace timepixDTO {
+
+TDCDataEvent::TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp,
+                           uint8_t stamp)
+    : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
+                                            TDC_FINE_CLOCK_BIN_NS * stamp),
+      pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
+      tdcTimeInPixelClock(tdcTimeStamp -
+                          (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
+      arrivalTimestamp(high_resolution_clock::now()) {}
+
+TDCDataEvent::TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp,
+                           uint8_t stamp,
+                           time_point<system_clock> arrivalTimestamp)
+    : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
+                                            TDC_FINE_CLOCK_BIN_NS * stamp),
+      pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
+      tdcTimeInPixelClock(tdcTimeStamp -
+                          (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
+      arrivalTimestamp(arrivalTimestamp) {}
+
+} // namespace timepixDTO
+
 namespace Timepix3 {
 
-using namespace chrono;
-using namespace efutils;
+using namespace timepixDTO;
+using namespace timepixReadout;
 
 ///\todo: This should come from configuration file
-const  uint32_t TimingEventHandler::DEFAULT_FREQUENCY_NS =
-    hzToNanoseconds(14).count();
+const uint32_t TimingEventHandler::DEFAULT_FREQUENCY_NS =
+    efutils::hzToNanoseconds(14).count();
 
-void TimingEventHandler::applyData(const shared_ptr<TDCDataEvent> &newTdcData) {
+void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
 
   XTRACE(EVENT, DEB,
          "New TDC Data with Timestamp: %u, Frequency: %u, arrival: %u",
@@ -32,40 +57,45 @@ void TimingEventHandler::applyData(const shared_ptr<TDCDataEvent> &newTdcData) {
          lastTDCData->arrivalTimestamp.time_since_epoch());
 
   if (lastTDCData != nullptr &&
-      newTdcData->counter != lastTDCData->counter + 1) {
-    statCounters.MissTDCCounter += newTdcData->counter - lastTDCData->counter + 1;
+      tdcReadout.counter != lastTDCData->counter + 1) {
+    statCounters.MissTDCCounter +=
+        tdcReadout.counter - lastTDCData->counter + 1;
   }
 
-  lastTDCData = newTdcData;
+  lastTDCData = std::make_unique<TDCDataEvent>(
+      tdcReadout.counter, tdcReadout.timestamp, tdcReadout.stamp);
 
   statCounters.TDCTimeStampReadout++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
-    epochESSPulseTimeObservable.publishData(EpochESSPulseTime(lastEVRData->pulseTimeSeconds,
-                              lastEVRData->pulseTimeNanoSeconds, *lastTDCData));
+    epochESSPulseTimeObservable.publishData(ESSGlobalTimeStamp(
+        lastEVRData->pulseTimeInEpochNs, lastTDCData->tdcTimeInPixelClock));
 
     statCounters.EVRPairFound++;
   }
 }
 
-void TimingEventHandler::applyData(const shared_ptr<EVRDataEvent> &newEVRData) {
+void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
 
   XTRACE(EVENT, DEB, "New EVR Data with PulseTime, s: %u, ns: %u, arrival: %u",
-         lastEVRData->pulseTimeSeconds, lastEVRData->pulseTimeNanoSeconds,
+         lastEVRData->pulseTimeInEpochNs,
          lastEVRData->arrivalTimestamp.time_since_epoch());
 
   if (lastEVRData != nullptr &&
-      newEVRData->counter != lastEVRData->counter + 1) {
-    statCounters.MissEVRCounter += newEVRData->counter - lastEVRData->counter +1;
+      evrReadout.counter != lastEVRData->counter + 1) {
+    statCounters.MissEVRCounter +=
+        evrReadout.counter - lastEVRData->counter + 1;
   }
 
-  lastEVRData = newEVRData;
+  lastEVRData = std::make_unique<EVRDataEvent>(evrReadout.counter,
+                                               evrReadout.pulseTimeSeconds,
+                                               evrReadout.pulseTimeNanoSeconds);
 
   statCounters.EVRTimeStampReadouts++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
-    epochESSPulseTimeObservable.publishData(EpochESSPulseTime(lastEVRData->pulseTimeSeconds,
-                              lastEVRData->pulseTimeNanoSeconds, *lastTDCData));
+    epochESSPulseTimeObservable.publishData(ESSGlobalTimeStamp(
+        lastEVRData->pulseTimeInEpochNs, lastTDCData->tdcTimeInPixelClock));
 
     statCounters.TDCPairFound++;
   }

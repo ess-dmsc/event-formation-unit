@@ -14,10 +14,14 @@
 
 namespace Timepix3 {
 
-DataParser::DataParser(struct Counters &counters,
-                       Observer::DataEventObservable<shared_ptr<TDCDataEvent>> &tdcDataObservable,
-                       Observer::DataEventObservable<shared_ptr<EVRDataEvent>> &evrDataObservable,
-                       Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable)
+using namespace timepixDTO;
+using namespace timepixReadout;
+
+DataParser::DataParser(
+    struct Counters &counters,
+    Observer::DataEventObservable<TDCReadout> &tdcDataObservable,
+    Observer::DataEventObservable<EVRReadout> &evrDataObservable,
+    Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable)
     : Stats(counters), tdcDataObservable(tdcDataObservable),
       evrDataObservable(evrDataObservable),
       pixelDataObservable(pixelDataObservable) {}
@@ -39,19 +43,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
     EVRReadout *Data = (EVRReadout *)((char *)DataPtr);
 
-    if (Data->Type == EVR_READOUT_TYPE) {
+    if (Data->type == EVR_READOUT_TYPE) {
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
              "seconds = %u, "
              "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
              "previous pulsetime nanoseconds = %u",
-             1, Data->Counter, Data->PulseTimeSeconds,
-             Data->PulseTimeNanoSeconds, Data->PrevPulseTimeSeconds,
-             Data->PrevPulseTimeNanoSeconds);
+             1, Data->counter, Data->pulseTimeSeconds,
+             Data->pulseTimeNanoSeconds, Data->prevPulseTimeSeconds,
+             Data->prevPulseTimeNanoSeconds);
 
-      evrDataObservable.publishData(shared_ptr<EVRDataEvent>(new EVRDataEvent(
-          Data->Counter,
-          Data->PulseTimeSeconds, Data->PulseTimeNanoSeconds)));
+      evrDataObservable.publishData(*Data);
       Stats.EVRTimeStampReadouts++;
       return 1;
     }
@@ -98,14 +100,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     } else if (ReadoutType == 6) {
 
       // mask and offset values are defined in DataParser.h
-      shared_ptr<TDCDataEvent> dataPtr =
-          shared_ptr<TDCDataEvent>(new TDCDataEvent(
-              (DataBytes & TDC_TRIGGERCOUNTER_MASK) >>
-                  TDC_TRIGGERCOUNTER_OFFSET,
-              (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-              (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET));
-
-      int8_t type = (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET;
+      TDCReadout tdcReadout(
+          (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+          (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
       ParsedReadouts++;
       Stats.TDCTimeStampReadout++;
@@ -115,18 +114,18 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // setup will determine which of these are sent.
       /// \todo: Review that it's necessary monitor which type of TDC we
       /// received. Probably this is not important.
-      if (type == 15) {
+      if (tdcReadout.type == 15) {
         Stats.TDC1RisingReadouts++;
-        tdcDataObservable.publishData(dataPtr);
-      } else if (type == 10) {
+        tdcDataObservable.publishData(tdcReadout);
+      } else if (tdcReadout.type == 10) {
         Stats.TDC1FallingReadouts++;
-        tdcDataObservable.publishData(dataPtr);
-      } else if (type == 14) {
+        tdcDataObservable.publishData(tdcReadout);
+      } else if (tdcReadout.type == 14) {
         Stats.TDC2RisingReadouts++;
-        tdcDataObservable.publishData(dataPtr);
-      } else if (type == 11) {
+        tdcDataObservable.publishData(tdcReadout);
+      } else if (tdcReadout.type == 11) {
         Stats.TDC2FallingReadouts++;
-        tdcDataObservable.publishData(dataPtr);
+        tdcDataObservable.publishData(tdcReadout);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing

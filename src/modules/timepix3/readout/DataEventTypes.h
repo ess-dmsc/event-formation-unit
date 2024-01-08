@@ -12,18 +12,66 @@
 #include <chrono>
 #include <cstdint>
 
-namespace Timepix3 {
-
-#define TDC_CLOCK_BIN_NS 3.125
-#define TDC_FINE_CLOCK_BIN_NS 0.26
-#define TDC_MAX_TIMESTAMP_NS 107.3741824 * 1e9
 #define PIXEL_MAX_TIMESTAMP_NS 26.8435456 * 1e9
 
-using namespace std::chrono;
+namespace timepixDTO {
 
-struct EVRDataEvent;
-struct TDCDataEvent;
-struct EpochESSPulseTime;
+struct PixelDataEvent {
+  const uint16_t dCol;
+  const uint16_t sPix;
+  const uint8_t pix;
+  const uint16_t ToT;
+  const uint8_t fToA;
+  const uint16_t toa;
+  const uint32_t spidrTime;
+
+  PixelDataEvent(uint16_t dCol, uint16_t sPix, uint8_t pix, uint16_t ToT,
+                 uint8_t fToA, uint16_t toa, uint32_t spidrTime)
+      : dCol(dCol), sPix(sPix), pix(pix), ToT(ToT), fToA(fToA), toa(toa),
+        spidrTime(spidrTime) {}
+};
+
+struct ESSGlobalTimeStamp {
+  const uint64_t pulseTimeInEpochNs;
+  const uint32_t tdcClockInPixelTime;
+
+  ESSGlobalTimeStamp(const uint64_t &pulseTimeInEpochNs,
+                     const uint32_t &tdcClockInPixelTime)
+      : pulseTimeInEpochNs(pulseTimeInEpochNs),
+        tdcClockInPixelTime(tdcClockInPixelTime) {}
+
+  bool operator==(const ESSGlobalTimeStamp &other) const {
+    return pulseTimeInEpochNs == other.pulseTimeInEpochNs &&
+           tdcClockInPixelTime == other.tdcClockInPixelTime;
+  }
+};
+
+struct EVRDataEvent {
+  const uint32_t counter;
+  const uint64_t pulseTimeInEpochNs;
+  const std::chrono::high_resolution_clock::time_point arrivalTimestamp;
+
+  EVRDataEvent(const uint32_t counter, const uint32_t pulseTimeSeconds,
+               const uint32_t pulseTimeNanoSeconds)
+      : counter(counter),
+        pulseTimeInEpochNs(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds),
+        arrivalTimestamp(std::chrono::high_resolution_clock::now()) {}
+
+  EVRDataEvent(
+      uint32_t counter, uint32_t pulseTimeSeconds,
+      uint32_t pulseTimeNanoSeconds,
+      std::chrono::time_point<std::chrono::system_clock> arrivalTimestamp)
+      : counter(counter),
+        pulseTimeInEpochNs(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds),
+        arrivalTimestamp(arrivalTimestamp) {}
+
+  // Equality comparison operator
+  bool operator==(const EVRDataEvent &other) const {
+    return counter == other.counter &&
+           pulseTimeInEpochNs == other.pulseTimeInEpochNs &&
+           arrivalTimestamp == other.arrivalTimestamp;
+  }
+};
 
 struct TDCDataEvent {
   const uint16_t counter;
@@ -31,26 +79,13 @@ struct TDCDataEvent {
   const uint8_t pixelClockQuarter;
   const uint32_t tdcTimeInPixelClock;
 
-  const high_resolution_clock::time_point arrivalTimestamp;
+  const std::chrono::high_resolution_clock::time_point arrivalTimestamp;
 
-  /// \todo reate copy constructor
-  TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp)
-      : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
-                                              TDC_FINE_CLOCK_BIN_NS * stamp),
-        pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
-        tdcTimeInPixelClock(tdcTimeStamp -
-                            (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
-        arrivalTimestamp(high_resolution_clock::now()) {}
+  TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp);
 
-  TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp,
-               time_point<system_clock> arrivalTimestamp)
-      : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
-                                              TDC_FINE_CLOCK_BIN_NS * stamp),
-
-        pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
-        tdcTimeInPixelClock(tdcTimeStamp -
-                            (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
-        arrivalTimestamp(arrivalTimestamp) {}
+  TDCDataEvent(
+      uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp,
+      std::chrono::time_point<std::chrono::system_clock> arrivalTimestamp);
 
   // Equality comparison operator
   bool operator==(const TDCDataEvent &other) const {
@@ -69,47 +104,33 @@ private:
   }
 };
 
-struct EVRDataEvent {
+} // namespace timepixDTO
+
+namespace timepixReadout {
+struct EVRReadout {
+  const uint8_t type;
+  const uint8_t unused;
+  const uint16_t unused2;
   const uint32_t counter;
   const uint32_t pulseTimeSeconds;
   const uint32_t pulseTimeNanoSeconds;
-  const high_resolution_clock::time_point arrivalTimestamp;
+  const uint32_t prevPulseTimeSeconds;
+  const uint32_t prevPulseTimeNanoSeconds;
+} __attribute__((__packed__));
 
-  EVRDataEvent(uint32_t counter, uint32_t pulseTimeSeconds,
-               uint32_t pulseTimeNanoSeconds)
-      : counter(counter), pulseTimeSeconds(pulseTimeSeconds),
-        pulseTimeNanoSeconds(pulseTimeNanoSeconds),
-        arrivalTimestamp(high_resolution_clock::now()) {}
+struct TDCReadout {
+  const uint8_t type;
+  const uint16_t counter;
+  const uint64_t timestamp;
+  const uint8_t stamp;
 
-  EVRDataEvent(uint32_t counter, uint32_t pulseTimeSeconds,
-               uint32_t pulseTimeNanoSeconds,
-               time_point<system_clock> arrivalTimestamp)
-      : counter(counter), pulseTimeSeconds(pulseTimeSeconds),
-        pulseTimeNanoSeconds(pulseTimeNanoSeconds),
-        arrivalTimestamp(arrivalTimestamp) {}
-
-  // Equality comparison operator
-  bool operator==(const EVRDataEvent &other) const {
-    return counter == other.counter &&
-           pulseTimeSeconds == other.pulseTimeSeconds &&
-           pulseTimeNanoSeconds == other.pulseTimeNanoSeconds &&
-           arrivalTimestamp == other.arrivalTimestamp;
-  }
+  TDCReadout(uint8_t t, uint16_t tc, uint64_t ts, uint8_t s)
+      : type(t), counter(tc), timestamp(ts), stamp(s) {}
 };
 
-struct EpochESSPulseTime {
-  const uint64_t pulseTimeInEpochNs;
-  const TDCDataEvent pairedTDCDataEvent;
-
-  EpochESSPulseTime(uint64_t pulseTimeSeconds, uint64_t pulseTimeNanoSeconds,
-                    TDCDataEvent &tdcTimeStamp)
-      : pulseTimeInEpochNs(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds),
-        pairedTDCDataEvent(tdcTimeStamp) {}
-
-  bool operator==(const EpochESSPulseTime &other) const {
-    return pulseTimeInEpochNs == other.pulseTimeInEpochNs &&
-           pairedTDCDataEvent == other.pairedTDCDataEvent;
-  }
+struct Timepix3GlobalTimeReadout {
+  uint64_t Timestamp;
+  uint8_t Stamp;
 };
 
-} // namespace Timepix3
+} // namespace timepixReadout

@@ -7,8 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "timepix3/Timepix3Base.h"
+#include "Counters.h"
+#include "Timepix3Instrument.h"
 #include "common/kafka/EV44Serializer.h"
-#include "readout/PixelEventHandler.h"
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
@@ -18,7 +19,6 @@
 #include <common/time/TSCTimer.h>
 #include <memory>
 #include <stdio.h>
-#include <timepix3/Timepix3Instrument.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -28,7 +28,10 @@ namespace Timepix3 {
 
 const char *classname = "Timepix3 detector with ESS readout";
 
-Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
+Timepix3Base::Timepix3Base(BaseSettings const &settings)
+    : Detector(settings), timepix3Configuration(settings.ConfigFile),
+      Counters(timepix3Configuration.NumberOfChunks) {
+
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -75,6 +78,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
   Stats.create("parsing_time_us", Counters.ParsingTimeUs);
   Stats.create("clustering_time_us", Counters.ClusterProcessingTimeUs);
+  Stats.create("sorting_time_us", Counters.SortingProcessTimeUs);
   Stats.create("publishing_time_us", Counters.PublishingTimeUs );
 
   Stats.create("transmit.bytes", Counters.TxBytes);
@@ -92,14 +96,15 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   std::function<void()> processingFunc = [this]() {
     Timepix3Base::processingThread();
   };
+
   Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d Timepix3 Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-///Counters
-/// \brief Normal processing thread
+/// Counters
+///  \brief Normal processing thread
 void Timepix3Base::processingThread() {
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ERR, "No kafka topic set, using DetectorName + _detector");
@@ -114,8 +119,17 @@ void Timepix3Base::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "timepix3", Produce);
-  Timepix3Instrument Timepix3(Counters, EFUSettings, *Serializer);
+  int chunkSize = timepix3Configuration.NumberOfChunks;
+
+  for (int i = 0; i < chunkSize; i++) {
+    std::string statName =
+        "clustering_thread_" + std::to_string(i) + "_time_us";
+    Stats.create(statName.c_str(), Counters.ClusteringThreadTimeUs[i]);
+  }
+
+  Serializer = std::make_unique<EV44Serializer>(
+      EV44Serializer(KafkaBufferSize, "timepix3", Produce));
+  Timepix3Instrument Timepix3(Counters, timepix3Configuration, *Serializer);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -136,20 +150,13 @@ void Timepix3Base::processingThread() {
 
       XTRACE(DATA, DEB, "parsing data");
       // parse readout data
-      
-      auto startTime = std::chrono::high_resolution_clock::now();
+      Counters.ParsingTimeUs = efutils::measureRuntime([&] {
+        Timepix3.timepix3Parser.parse(DataPtr, DataLen);
+      });
 
-      Timepix3.timepix3Parser.parse(DataPtr, DataLen);
+      // // Timepix3.processReadouts();
 
-      auto endTime = std::chrono::high_resolution_clock::now();
-      auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
-
-      Counters.ParsingTimeUs = duration;
-
-      XTRACE(DATA, DEB, "processing data");
-
-      // Process readouts, generate (end produce) events
-      Timepix3.processReadouts();
+      // XTRACE(DATA, DEB, "processing data");
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

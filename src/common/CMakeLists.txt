@@ -49,7 +49,7 @@ set(efu_common_INC
   memory/FixedSizePool.h
   memory/PoolAllocator.h
   memory/RingBuffer.h
-  utils/UnitConverter.h
+  utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
   time/Timer.h

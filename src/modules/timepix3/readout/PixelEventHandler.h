@@ -13,45 +13,46 @@
 
 #include "Counters.h"
 #include "common/kafka/EV44Serializer.h"
+#include "common/reduction/Hit2DVector.h"
 #include "common/reduction/clustering/Hierarchical2DClusterer.h"
+#include "common/utils/EfuUtils.h"
 #include "dataflow/DataObserverTemplate.h"
 #include "geometry/Timepix3Geometry.h"
-#include "readout/PixelDataEvent.h"
+#include "readout/DataEventTypes.h"
+#include <future>
+#include <memory>
+#include <vector>
 
 namespace Timepix3 {
 
-using namespace Observer;
-using namespace std;
-using namespace chrono;
-
-class PixelEventHandler : public DataEventObserver<PixelDataEvent>,
-                          public DataEventObserver<EpochESSPulseTime> {
+class PixelEventHandler
+    : public Observer::DataEventObserver<timepixDTO::PixelDataEvent>,
+      public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
   Counters &statCounters;
-  shared_ptr<Timepix3Geometry> geometry;
-  Hierarchical2DClusterer &clusterer;
+  std::shared_ptr<Timepix3Geometry> geometry;
   EV44Serializer &serializer;
-  unique_ptr<EpochESSPulseTime> lastEpochESSPulseTime = nullptr;
+  std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
+      nullptr;
 
-  Hit2DVector allHitsVector;
+  std::vector<std::unique_ptr<Hierarchical2DClusterer>> clusterers;
+  std::vector<Hit2DVector> windows;
 
-  void generateEvents();
+  void publishEvents(Cluster2DContainer &clusters);
   uint64_t calculateGlobalTime(const uint16_t &toa, const uint8_t &fToA,
                                const uint32_t &spidrTime);
 
-public:
-  PixelEventHandler(Counters &statCounters,
-                    shared_ptr<Timepix3Geometry> geometry,
-                    Hierarchical2DClusterer &clusterer,
-                    EV44Serializer &serializer)
-      : statCounters(statCounters), geometry(geometry), clusterer(clusterer),
-        serializer(serializer), allHitsVector(Hit2DVector()){};
+  void clusterHits(int, Hierarchical2DClusterer &, Hit2DVector &hitsVector);
 
+public:
+  PixelEventHandler(Counters &, std::shared_ptr<Timepix3Geometry>,
+                    EV44Serializer &);
   virtual ~PixelEventHandler(){};
 
-  void applyData(const PixelDataEvent &pixelDataEvent) override;
-  void applyData(const EpochESSPulseTime &epochEssPulseTime) override;
+  void applyData(const timepixDTO::PixelDataEvent &pixelDataEvent) override;
+  void
+  applyData(const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) override;
 
   void pushDataToKafka();
 };

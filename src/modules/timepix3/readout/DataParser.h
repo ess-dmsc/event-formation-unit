@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include "readout/PixelEventHandler.h"
-#include "readout/TimingEventHandler.h"
+#include "Counters.h"
+#include "dataflow/DataObserverTemplate.h"
+#include "readout/DataEventTypes.h"
 #include <cstdint>
 
 namespace Timepix3 {
@@ -57,39 +58,15 @@ namespace Timepix3 {
 #define EVR_READOUT_TYPE          1
 // clang-format on
 
-struct EVRReadout {
-  const uint8_t Type;
-  const uint8_t Unused;
-  const uint16_t Unused2;
-  const uint32_t Counter;
-  const uint32_t PulseTimeSeconds;
-  const uint32_t PulseTimeNanoSeconds;
-  const uint32_t PrevPulseTimeSeconds;
-  const uint32_t PrevPulseTimeNanoSeconds;
-} __attribute__((__packed__));
-
-struct Timepix3TDCReadout {
-  uint8_t type;
-  uint16_t trigger_counter;
-  uint64_t timestamp;
-  uint8_t stamp;
-} __attribute__((__packed__));
-
-struct Timepix3GlobalTimeReadout {
-  uint64_t Timestamp;
-  uint8_t Stamp;
-}; // as above, the readouts aren't packed this way
-
 class DataParser {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  DataParser(Counters &counters,
-             Observer::DataEventObservable<shared_ptr<TDCDataEvent>>
-                 &tdcDataObservable,
-             Observer::DataEventObservable<shared_ptr<EVRDataEvent>>
-                 &evrDataObservable,
-             Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable);
+  DataParser(
+      Counters &counters,
+      Observer::DataEventObservable<timepixReadout::TDCReadout> &tdcDataObservable,
+      Observer::DataEventObservable<timepixReadout::EVRReadout> &evrDataObservable,
+      Observer::DataEventObservable<timepixDTO::PixelDataEvent> &pixelDataObservable);
 
   ~DataParser(){};
 
@@ -97,9 +74,9 @@ public:
 
   struct Counters &Stats;
 
-  Observer::DataEventObservable<shared_ptr<TDCDataEvent>> &tdcDataObservable;
-  Observer::DataEventObservable<shared_ptr<EVRDataEvent>> &evrDataObservable;
-  Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable;
+  Observer::DataEventObservable<timepixReadout::TDCReadout> &tdcDataObservable;
+  Observer::DataEventObservable<timepixReadout::EVRReadout> &evrDataObservable;
+  Observer::DataEventObservable<timepixDTO::PixelDataEvent> &pixelDataObservable;
 };
 
 } // namespace Timepix3

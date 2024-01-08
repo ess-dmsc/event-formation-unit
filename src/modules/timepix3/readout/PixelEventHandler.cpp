@@ -6,10 +6,12 @@
 /// \brief Implementation of Pixel observer
 //===----------------------------------------------------------------------===//
 
-#include "readout/TimingEventHandler.h"
+#include "common/reduction/Hit2DVector.h"
+#include "common/reduction/clustering/Abstract2DClusterer.h"
+#include "common/reduction/clustering/Hierarchical2DClusterer.h"
 #include <common/debug/Trace.h>
-#include <cstdint>
 #include <readout/PixelEventHandler.h>
+#include <readout/TimingEventHandler.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -17,9 +19,28 @@
 namespace Timepix3 {
 
 using namespace std;
+using namespace timepixDTO;
+using namespace efutils;
 
-void PixelEventHandler::applyData(const EpochESSPulseTime &epochEssPulseTime) {
-  lastEpochESSPulseTime = make_unique<EpochESSPulseTime>(epochEssPulseTime);
+PixelEventHandler::PixelEventHandler(Counters &statCounters,
+                                     shared_ptr<Timepix3Geometry> geometry,
+                                     EV44Serializer &serializer)
+    : statCounters(statCounters), geometry(geometry), serializer(serializer) {
+
+  clusterers.resize(geometry->getChunkNumber());
+  windows.resize(geometry->getChunkNumber());
+
+  for (int i = 0; i < geometry->getChunkNumber(); i++) {
+    clusterers[i] = std::make_unique<Hierarchical2DClusterer>(
+        Hierarchical2DClusterer(1, 5));
+    windows[i] = Hit2DVector();
+  }
+}
+
+void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
+  pushDataToKafka();
+
+  lastEpochESSPulseTime = make_unique<ESSGlobalTimeStamp>(epochEssPulseTime);
   serializer.setReferenceTime(lastEpochESSPulseTime->pulseTimeInEpochNs);
 }
 
@@ -41,46 +62,82 @@ void PixelEventHandler::applyData(const PixelDataEvent &pixelDataEvent) {
   uint16_t X = geometry->calcX(pixelDataEvent);
   uint16_t Y = geometry->calcY(pixelDataEvent);
 
+// Bad pixel identified on the current camera. Masking it for now.
+///\todo Setup a proper masking procedure for BAD pixels thourgh a config file
+#ifndef NDEBUG
+  if ((X == 186 && Y == 123) || (X == 116 && Y == 158)) {
+    XTRACE(DATA, WAR, "Bad pixel!: Time: %u, x %u, y %u", pixelDataEvent.toa, X,
+           Y);
+    statCounters.PixelErrors++;
+    return;
+  }
+#endif
+
   XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u",
          pixelDataEvent.fToA, X, Y, pixelDataEvent.ToT);
 
   uint64_t pixelGlobalTimeStamp = calculateGlobalTime(
       pixelDataEvent.toa, pixelDataEvent.fToA, pixelDataEvent.spidrTime);
 
-  allHitsVector.push_back({pixelGlobalTimeStamp, X, Y, pixelDataEvent.ToT});
+  int windowIndex = geometry->getChunkWindowIndex(X, Y);
+  // Add the hit to the corresponding window vector
+
+  windows[windowIndex].push_back(
+      {pixelGlobalTimeStamp, X, Y, pixelDataEvent.ToT});
+}
+
+void PixelEventHandler::clusterHits(int thread,
+                                    Hierarchical2DClusterer &clusterer,
+                                    Hit2DVector &hitsVector) {
+
+  statCounters.ClusteringThreadTimeUs[thread] = measureRuntime([&] {
+    // sort hits by time of flight for clustering in time
+    sort_chronologically(std::move(hitsVector));
+    clusterer.cluster(hitsVector);
+    clusterer.flush();
+  });
 }
 
 void PixelEventHandler::pushDataToKafka() {
-  // sort hits by time of flight for clustering in time
-  #include <chrono>
 
-  auto startTime = std::chrono::high_resolution_clock::now();
+  std::vector<std::future<void>> futures;
 
-  sort_chronologically(std::move(allHitsVector));
-  clusterer.cluster(allHitsVector);
+  statCounters.ClusterProcessingTimeUs = measureRuntime([&] {
+    int windowsLength = windows.size();
 
-  ///\todo Decide if flushing per packet is wanted behaviour, or should be
-  /// configurable
-  clusterer.flush();
+    if (windowsLength == 1) {
+      clusterHits(0, *clusterers[0], windows[0]);
+    } else {
+      for (int i = 0; i < windowsLength; i++) {
+        auto &window = windows[i];
+        if (window.size() > 0) {
+          futures.push_back(
+              std::async(std::launch::async, &PixelEventHandler::clusterHits,
+                         this, i, std::ref(*clusterers[i]), std::ref(window)));
+        }
+      }
 
-  auto endTime = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+      if (!futures.empty()) {
+        for (auto &future : futures) {
+          future.wait();
+        }
+      }
+    }
 
-  statCounters.ClusterProcessingTimeUs = duration;
+    for (auto &window : windows) {
+      window.clear();
+    }
+  });
 
-  startTime = std::chrono::high_resolution_clock::now();
-
-  generateEvents();
-
-  endTime = std::chrono::high_resolution_clock::now();
-  duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
-
-  statCounters.PublishingTimeUs = duration;
-  allHitsVector.clear();
+  statCounters.PublishingTimeUs = measureRuntime([&] {
+    for (auto &cluster : clusterers) {
+      publishEvents(cluster->clusters);
+    }
+  });
 }
 
-void PixelEventHandler::generateEvents() {
-  for (auto cluster : clusterer.clusters) {
+void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
+  for (auto cluster : clusters) {
 
     // other options for time are timeEnd, timeCenter, etc. we picked timeStart
     // for this type of
@@ -95,7 +152,7 @@ void PixelEventHandler::generateEvents() {
              "pulse time: %u, Difference: %u",
              eventTime, lastEpochESSPulseTime->pulseTimeInEpochNs, eventTof);
       statCounters.EventTimeForNextPulse++;
-      // continue;
+      continue;
     }
     uint16_t x = cluster.xCoordCenter();
     uint16_t y = cluster.yCoordCenter();
@@ -111,7 +168,7 @@ void PixelEventHandler::generateEvents() {
     statCounters.TxBytes += serializer.addEvent(eventTof, PixelId);
     statCounters.Events++;
   }
-  clusterer.clusters.clear();
+  clusters.clear();
 }
 
 uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
@@ -121,19 +178,16 @@ uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
   uint64_t pixelClockTime =
       uint64_t(409600 * spidrTime + 25 * toa - 1.5625 * fToA);
 
-  if (lastEpochESSPulseTime->pairedTDCDataEvent.tdcTimeInPixelClock >
-      pixelClockTime) {
+  if (lastEpochESSPulseTime->tdcClockInPixelTime > pixelClockTime) {
 
     uint64_t timeUntilReset =
-        PIXEL_MAX_TIMESTAMP_NS -
-        lastEpochESSPulseTime->pairedTDCDataEvent.tdcTimeInPixelClock;
+        PIXEL_MAX_TIMESTAMP_NS - lastEpochESSPulseTime->tdcClockInPixelTime;
 
     return lastEpochESSPulseTime->pulseTimeInEpochNs + timeUntilReset +
            pixelClockTime;
   } else {
     return lastEpochESSPulseTime->pulseTimeInEpochNs + pixelClockTime -
-           lastEpochESSPulseTime->pairedTDCDataEvent.tdcTimeInPixelClock;
+           lastEpochESSPulseTime->tdcClockInPixelTime;
   }
 }
-
 } // namespace Timepix3

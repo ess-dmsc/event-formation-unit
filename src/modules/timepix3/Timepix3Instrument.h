@@ -17,9 +17,7 @@
 #include "common/reduction/clustering/Hierarchical2DClusterer.h"
 #include "dataflow/DataObserverTemplate.h"
 #include "geometry/Config.h"
-#include "readout/DataEventTypes.h"
 #include "readout/DataParser.h"
-#include "readout/PixelDataEvent.h"
 #include "readout/PixelEventHandler.h"
 #include "readout/TimingEventHandler.h"
 #include <memory>
@@ -37,25 +35,25 @@ public:
   void processReadouts();
 
   /// \brief calculate pixel ID from a Timepix3PixelReadout
-  uint32_t calcPixel(PixelDataEvent &Data);
+  uint32_t calcPixel(timepixDTO::PixelDataEvent &Data);
 
-  DataEventObservable<shared_ptr<TDCDataEvent>> tdcDataObservable;
-  DataEventObservable<shared_ptr<EVRDataEvent>> evrDataObservable;
-  DataEventObservable<EpochESSPulseTime> epochESSPulseTimeObservable;
-  DataEventObservable<PixelDataEvent> pixelDataObservable;
+  Observer::DataEventObservable<timepixReadout::TDCReadout> tdcDataObservable;
+  Observer::DataEventObservable<timepixReadout::EVRReadout> evrDataObservable;
+  Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
+      epochESSPulseTimeObservable;
+  Observer::DataEventObservable<timepixDTO::PixelDataEvent> pixelDataObservable;
 
   /// \brief from the clusters in Clusterer, check if they meet requirements to
   /// be an event, and if so serialize them
   struct Counters &counters;
   EV44Serializer &serializer;
-  Config timepix3Configuration;
   Hierarchical2DClusterer clusterer;
   shared_ptr<Timepix3Geometry> geomPtr;
   TimingEventHandler timingEventHandler;
   PixelEventHandler pixelEventHandler;
   DataParser timepix3Parser;
 
-  Timepix3Instrument(Counters &counters, BaseSettings &settings,
+  Timepix3Instrument(Counters &counters, Config timepix3Configuration,
                      EV44Serializer &serializer);
 
   ~Timepix3Instrument();

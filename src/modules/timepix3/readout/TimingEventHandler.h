@@ -13,61 +13,66 @@
 
 #include "Counters.h"
 #include "common/kafka/EV44Serializer.h"
-#include "common/utils/UnitConverter.h"
+#include "common/utils/EfuUtils.h"
 #include "dataflow/DataObserverTemplate.h"
 #include "readout/DataEventTypes.h"
 #include <memory>
 
+#define TDC_CLOCK_BIN_NS 3.125
+#define TDC_FINE_CLOCK_BIN_NS 0.26
+#define TDC_MAX_TIMESTAMP_NS 107.3741824 * 1e9
+
+using namespace std;
+
 namespace Timepix3 {
 
-using namespace Observer;
-using namespace std;
-using namespace efutils;
-using namespace chrono;
-
-class TimingEventHandler : public DataEventObserver<shared_ptr<TDCDataEvent>>,
-                           public DataEventObserver<shared_ptr<EVRDataEvent>>,
-                           public DataEventObservable<uint64_t> {
+class TimingEventHandler
+    : public Observer::DataEventObserver<timepixReadout::TDCReadout>,
+      public Observer::DataEventObserver<timepixReadout::EVRReadout>,
+      public Observer::DataEventObservable<uint64_t> {
 
 private:
-  const milliseconds THRESHOLD_MS = nsToMilliseconds(DEFAULT_FREQUENCY_NS / 2);
+  const milliseconds THRESHOLD_MS =
+      efutils::nsToMilliseconds(DEFAULT_FREQUENCY_NS / 2);
 
   Counters &statCounters;
   const EV44Serializer &serializer;
-  // ToDo verify that all the data has to be stored or only some processed data
-  shared_ptr<TDCDataEvent> lastTDCData;
-  shared_ptr<EVRDataEvent> lastEVRData;
 
-  DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable;
+  unique_ptr<timepixDTO::TDCDataEvent> lastTDCData;
+  unique_ptr<timepixDTO::EVRDataEvent> lastEVRData;
 
-    uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
+  Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
+      &epochESSPulseTimeObservable;
 
-    inline bool isLastTimingDiffLowerThenThreshold() {
-      if (lastEVRData == nullptr || lastTDCData == nullptr) {
-        return false;
-      }
+  uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
 
-      auto arrivalDiff =
-          abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
-                                          lastEVRData->arrivalTimestamp)
-                  .count());
-
-      return arrivalDiff <= THRESHOLD_MS.count();
+  inline bool isLastTimingDiffLowerThenThreshold() {
+    if (lastEVRData == nullptr || lastTDCData == nullptr) {
+      return false;
     }
+
+    auto arrivalDiff =
+        abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
+                                        lastEVRData->arrivalTimestamp)
+                .count());
+
+    return arrivalDiff <= THRESHOLD_MS.count();
+  }
 
 public:
   static const uint32_t DEFAULT_FREQUENCY_NS;
 
   TimingEventHandler(
       Counters &statCounters, EV44Serializer &serializer,
-      DataEventObservable<EpochESSPulseTime>& epochESSPulseTimeObservable)
+      Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
+          &epochESSPulseTimeObservable)
       : statCounters(statCounters), serializer(serializer),
         epochESSPulseTimeObservable(epochESSPulseTimeObservable) {}
 
   virtual ~TimingEventHandler(){};
 
-  void applyData(const shared_ptr<TDCDataEvent> &newData) override;
-  void applyData(const shared_ptr<EVRDataEvent> &newData) override;
+  void applyData(const timepixReadout::TDCReadout &newData) override;
+  void applyData(const timepixReadout::EVRReadout &evrReadout) override;
 };
 
 } // namespace Timepix3
