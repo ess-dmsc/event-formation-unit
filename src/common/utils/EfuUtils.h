@@ -13,32 +13,32 @@
 #include <ratio>
 #include <chrono>
 
-#ifndef NDEBUG
+// #ifndef NDEBUG
 #include <future>
 #include <functional>
-#endif
+// #endif
 
 using namespace std::chrono;
 
 namespace efutils {
 
 template <typename Func, typename... Args>
-auto inline measureRuntime(Func &&func, Args &&...args) {
+int inline measureRuntime(Func &&func, Args &&...args) {
 
-#ifndef NDEBUG
+// #ifndef NDEBUG
   auto startTime = std::chrono::high_resolution_clock::now();
-#endif
+// #endif
   std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
-#ifndef NDEBUG
+// #ifndef NDEBUG
   auto endTime = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime)
           .count();
 
   return duration;
-#else
-  return;
-#endif
+// #else
+//   return 0;
+// #endif
 }
 
 inline nanoseconds hzToNanoseconds(const int &frequencyHz) {

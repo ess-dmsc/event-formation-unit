@@ -14,7 +14,7 @@
 
 #include "h5cpp/property/dataset_access.hpp"
 #include "logical_geometry/ESSGeometry.h"
-#include "readout/DataEventTypes.h"
+#include "readout/TimepixDataTypes.h"
 #include <cmath>
 #include <cstdint>
 #include <math.h>
@@ -42,17 +42,17 @@ public:
 
   /// \brief calculates an integer pixel value from a Timepix3PixelReadout
   /// object \param Data Timepix3PixelReadout object
-  uint32_t calcPixel(const timepixDTO::PixelDataEvent &Data) const;
+  uint32_t calcPixel(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data PixelDataEvent to check validity of.
-  bool validateData(const timepixDTO::PixelDataEvent &Data) const;
+  bool validateData(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief calculated the X coordinate from a const PixelDataEvent
-  uint32_t calcX(const timepixDTO::PixelDataEvent &Data) const;
+  uint32_t calcX(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief calculated the Y coordinate from a const PixelDataEvent
-  uint32_t calcY(const timepixDTO::PixelDataEvent &Data) const;
+  uint32_t calcY(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief returns the total number of chunks
   int getChunkNumber() const { return totalNumberOfChunks; }

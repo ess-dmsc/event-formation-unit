@@ -1,62 +1,70 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/utils/UnitConverter.h"
-#include "readout/TimingEventHandler.h"
-#include "gtest/gtest-death-test.h"
-#include "gtest/gtest.h"
-#include "gtest/internal/gtest-port.h"
-#include <algorithm>
-#include <cmath>
-#include <common/testutils/SaveBuffer.h>
+#include "TimepixTestHelper.h"
+#include "common/kafka/EV44Serializer.h"
+#include "readout/TimepixDataTypes.h"
 #include <common/testutils/TestBase.h>
-#include <cstdint>
-#include <cstdio>
-#include <memory>
 #include <timepix3/readout/DataParser.h>
 
 using namespace Timepix3;
-using namespace efutils;
+using namespace timepixReadout;
+using namespace Observer;
 
 // clang-format off
-std::vector<uint8_t> SinglePixelReadout{
+std::vector<uint8_t> singlePixelReadoutData{
     // Single readout
     0x91, 0xc6, 0x30, 0x80,
     0x8b, 0xa8, 0x3a, 0xbf
 };
 
+PixelReadout singlePixelReadout{15, 2231, 30,
+                                                  6, 45, 454, 33};
+
 std::vector<uint8_t> TooShort{
     0x00, 0x01
 };
 
-std::vector<uint8_t> TDC1RisingReadout{
+std::vector<uint8_t> tdc1RisingReadoutData{
      // TDC1 rising readout
     0xc0, 0x42, 0x9f, 0xdd,
     0xa4, 0x7e, 0x8b, 0x6f
 };
 
-std::vector<uint8_t> TDC1FallingReadout{
+TDCReadout tdc1RisingReadout{15, 2231, 31447764897,
+                                                  6};
+
+std::vector<uint8_t> tdc1FallingReadoutData{
      // TDC1 falling readout
     0xc0, 0x42, 0x9f, 0xdd,
     0xa4, 0x7e, 0x8b, 0x6a
 };
 
-std::vector<uint8_t> TDC2RisingReadout{
+TDCReadout tdc1FallingReadout{10, 2231, 31447764897,
+                                                  6};
+
+std::vector<uint8_t> tdc2RisingReadoutData{
     // TDC2 rising readout
     0xc0, 0x42, 0x9f, 0xdd,
     0xa4, 0x7e, 0x8b, 0x6e
 };
 
-std::vector<uint8_t> TDC2FallingReadout{
+TDCReadout tdc2RisingReadout{14, 2231, 31447764897,
+                                                  6};
+
+std::vector<uint8_t> tdc2FallingReadoutData{
      // TDC2 falling
     0xc0, 0x42, 0x9f, 0xdd,
     0xa4, 0x7e, 0x8b, 0x6b
 };
 
-std::vector<uint8_t> SingleEVRReadout{
+TDCReadout tdc2FallingReadout{11, 2231, 31447764897,
+                                                  6};
+
+std::vector<uint8_t> SingleEVRReadoutData{
   0x01, 0x45, 0x53, 0x53,
   0x2a, 0xc0, 0x08, 0x00,
   0xcc, 0xa1, 0x3f, 0x64,
@@ -64,6 +72,15 @@ std::vector<uint8_t> SingleEVRReadout{
   0xcb, 0xa1, 0x3f, 0x64,
   0xdd, 0xc9, 0x9a, 0x3b
 };
+
+EVRReadout singleEVRReadout{1,
+ 69,
+  21331,
+   573482,
+    static_cast<uint32_t>(1681891788),
+     static_cast<uint32_t>(999999965),
+      1681891787,
+       999999965};
 
 std::vector<uint8_t> TDCAndPixelReadout{
   // Single TDC readout
@@ -75,148 +92,120 @@ std::vector<uint8_t> TDCAndPixelReadout{
 };
 // clang-format on
 
+class TDCReadoutHandler : public Timpix3OberverTestHelper<TDCReadout> {};
+class EVRReadoutHandler : public Timpix3OberverTestHelper<EVRReadout> {};
+class PixelReadoutHandler : public Timpix3OberverTestHelper<PixelReadout> {};
+
 class Timepix3ParserTest : public TestBase {
 protected:
-  unique_ptr<Counters> counters;
-  unique_ptr<DataParser> Timepix3Parser;
-  unique_ptr<TimingEventHandler> testEventHandler;
-  const uint64_t testTdcTimeStamp =
-      TDC_CLOCK_BIN_NS * 31447764897 + TDC_FINE_CLOCK_BIN_NS * 6;
+  std::unique_ptr<Counters> counters;
+  std::unique_ptr<DataParser> timepix3Parser;
+  TDCReadoutHandler tdcTestHandler;
+  EVRReadoutHandler evrTestHandler;
+  PixelReadoutHandler pixelTestHandler;
+
+  EV44Serializer serializer{115000, "timepix3"};
 
   void SetUp() override {
-    counters.reset(new Counters());
-    testEventHandler.reset(new TimingEventHandler(*counters));
-    Timepix3Parser.reset(new DataParser(*counters, *testEventHandler));
+    counters.reset(new Counters(1));
+    timepix3Parser.reset(new DataParser(*counters));
+
+    timepix3Parser->DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
+    timepix3Parser->DataEventObservable<EVRReadout>::subscribe(&evrTestHandler);
   }
+
   void TearDown() override {}
 };
 
 // Test cases below
 
 TEST_F(Timepix3ParserTest, SinglePixelReadout) {
-  auto Res = Timepix3Parser->parse((char *)SinglePixelReadout.data(),
-                                   SinglePixelReadout.size());
+  pixelTestHandler.setData(singlePixelReadout);
+  auto Res = timepix3Parser->parse((char *)singlePixelReadoutData.data(),
+                                   singlePixelReadoutData.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters->PixelReadouts, 1);
 }
 
-TEST_F(Timepix3ParserTest, TDCReadouts) {
-  auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
-                                   TDC1RisingReadout.size());
+TEST_F(Timepix3ParserTest, TDC1RisingReadouts) {
+
+  tdcTestHandler.setData(tdc1RisingReadout);
+
+  auto Res = timepix3Parser->parse((char *)tdc1RisingReadoutData.data(),
+                                   tdc1RisingReadoutData.size());
+
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDCReadouts, 1);
   EXPECT_EQ(counters->TDC1RisingReadouts, 1);
   EXPECT_EQ(counters->TDC1FallingReadouts, 0);
   EXPECT_EQ(counters->TDC2RisingReadouts, 0);
   EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+}
 
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->type == 15);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->counter == 2231);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->tdcTimeStamp ==
-              testTdcTimeStamp);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->nextTdcStimeStamp ==
-              testTdcTimeStamp + testEventHandler->getTDCFrequency());
+TEST_F(Timepix3ParserTest, TDC1FallingReadouts) {
 
-  Res = Timepix3Parser->parse((char *)TDC1FallingReadout.data(),
-                              TDC1FallingReadout.size());
+  tdcTestHandler.setData(tdc1FallingReadout);
+
+  auto Res = timepix3Parser->parse((char *)tdc1FallingReadoutData.data(),
+                                   tdc1FallingReadoutData.size());
+
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDCReadouts, 2);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
   EXPECT_EQ(counters->TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
   EXPECT_EQ(counters->TDC2RisingReadouts, 0);
   EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+}
 
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->type == 10);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->counter == 2231);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->tdcTimeStamp ==
-              testTdcTimeStamp);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->nextTdcStimeStamp ==
-              testTdcTimeStamp + testEventHandler->getTDCFrequency());
+TEST_F(Timepix3ParserTest, TDC2RisingReadouts) {
 
-  Res = Timepix3Parser->parse((char *)TDC2RisingReadout.data(),
-                              TDC2RisingReadout.size());
+  tdcTestHandler.setData(tdc2RisingReadout);
+
+  auto Res = timepix3Parser->parse((char *)tdc2RisingReadoutData.data(),
+                                   tdc2RisingReadoutData.size());
+
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDCReadouts, 3);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
   EXPECT_EQ(counters->TDC2RisingReadouts, 1);
   EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
+}
 
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->type == 14);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->counter == 2231);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->tdcTimeStamp ==
-              testTdcTimeStamp);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->nextTdcStimeStamp ==
-              testTdcTimeStamp + testEventHandler->getTDCFrequency());
+TEST_F(Timepix3ParserTest, TDC2FallingReadouts) {
 
-  Res = Timepix3Parser->parse((char *)TDC2FallingReadout.data(),
-                              TDC2FallingReadout.size());
+  tdcTestHandler.setData(tdc2FallingReadout);
+
+  auto Res = timepix3Parser->parse((char *)tdc2FallingReadoutData.data(),
+                                   tdc2FallingReadoutData.size());
+
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDCReadouts, 4);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
-  EXPECT_EQ(counters->TDC2RisingReadouts, 1);
   EXPECT_EQ(counters->TDC2FallingReadouts, 1);
-
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->type == 11);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->counter == 2231);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->tdcTimeStamp ==
-              testTdcTimeStamp);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->nextTdcStimeStamp ==
-              testTdcTimeStamp + testEventHandler->getTDCFrequency());
+  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
-  auto Res = Timepix3Parser->parse((char *)TooShort.data(), TooShort.size());
+  auto Res = timepix3Parser->parse((char *)TooShort.data(), TooShort.size());
   EXPECT_EQ(Res, 0);
 }
 
 TEST_F(Timepix3ParserTest, SingleEVRReadout) {
-  auto Res = Timepix3Parser->parse((char *)SingleEVRReadout.data(),
-                                   SingleEVRReadout.size());
+  evrTestHandler.setData(singleEVRReadout);
+  auto Res = timepix3Parser->parse((char *)SingleEVRReadoutData.data(),
+                                   SingleEVRReadoutData.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters->EVRTimeStampReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
-  auto Res = Timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
+  tdcTestHandler.setData(tdc1RisingReadout);
+  pixelTestHandler.setData(singlePixelReadout);
+
+  auto Res = timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
                                    TDCAndPixelReadout.size());
   EXPECT_EQ(Res, 2);
-  EXPECT_EQ(counters->TDCReadouts, 1);
+  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters->TDCTimeStampReadout, 1);
   EXPECT_EQ(counters->PixelReadouts, 1);
-  EXPECT_EQ(counters->PixelReadoutFromBeforeTDC, 1);
-
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->type == 15);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->counter == 2231);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->tdcTimeStamp ==
-              testTdcTimeStamp);
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent()->nextTdcStimeStamp ==
-              testTdcTimeStamp + testEventHandler->getTDCFrequency());
-}
-
-TEST_F(Timepix3ParserTest, FindEVRandTDCPairs) {
-  auto Res = Timepix3Parser->parse((char *)TDC1RisingReadout.data(),
-                                   TDC1RisingReadout.size());
-
-  Res += Timepix3Parser->parse((char *)SingleEVRReadout.data(),
-                               SingleEVRReadout.size());
-  EXPECT_EQ(Res, 2);
-  EXPECT_EQ(counters->TDCReadouts, 1);
-  EXPECT_EQ(counters->EVRTimeStampReadouts, 1);
-  EXPECT_EQ(counters->PixelReadouts, 0);
-  EXPECT_EQ(counters->FoundEVRandTDCPairs, 1);
-  EXPECT_EQ(counters->MissTDCPair, 0);
-  EXPECT_EQ(counters->MissEVRPair, 0);
-
-  EXPECT_TRUE(testEventHandler->getLastTdcEvent() != nullptr);
-  EXPECT_TRUE(testEventHandler->getLastTDCPair() != nullptr);
-  EXPECT_EQ(testEventHandler->getLastTDCPair(),
-            testEventHandler->getLastTdcEvent());
 }
 
 int main(int argc, char **argv) {

@@ -18,7 +18,7 @@
 #include "common/utils/EfuUtils.h"
 #include "dataflow/DataObserverTemplate.h"
 #include "geometry/Timepix3Geometry.h"
-#include "readout/DataEventTypes.h"
+#include "readout/TimepixDataTypes.h"
 #include <future>
 #include <memory>
 #include <vector>
@@ -26,7 +26,7 @@
 namespace Timepix3 {
 
 class PixelEventHandler
-    : public Observer::DataEventObserver<timepixDTO::PixelDataEvent>,
+    : public Observer::DataEventObserver<timepixReadout::PixelReadout>,
       public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
@@ -50,7 +50,7 @@ public:
                     EV44Serializer &);
   virtual ~PixelEventHandler(){};
 
-  void applyData(const timepixDTO::PixelDataEvent &pixelDataEvent) override;
+  void applyData(const timepixReadout::PixelReadout &pixelDataEvent) override;
   void
   applyData(const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) override;
 

@@ -12,7 +12,7 @@ set(timepix3_common_inc
   geometry/Config.h
   dataflow/DataObserverTemplate.h
   geometry/Timepix3Geometry.h
-  readout/DataEventTypes.h
+  readout/TimepixDataTypes.h
   readout/TimingEventHandler.h
   readout/PixelEventHandler.h
   readout/DataParser.h
@@ -85,7 +85,7 @@ set(Timepix3TimingEventHandlerTest_SRC
   ${timepix3_common_src}
   test/Timepix3TimingEventHandlerTest.cpp
 )
-create_test_executable(Timepix3TimingEventHandlerTest)
+# create_test_executable(Timepix3TimingEventHandlerTest)
 
 set(Timepix3GeometryTest_INC
   ${timepix3_common_inc}

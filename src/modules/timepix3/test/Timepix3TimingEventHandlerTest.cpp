@@ -1,13 +1,13 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "readout/TimingEventHandler.h"
 #include "Counters.h"
-#include "common/utils/UnitConverter.h"
+#include "common/utils/EfuUtils.h"
 #include "readout/DataEventTypes.h"
+#include "readout/TimingEventHandler.h"
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
@@ -86,7 +86,7 @@ protected:
       TDC_CLOCK_BIN_NS * 31447764897 + TDC_FINE_CLOCK_BIN_NS * 6;
 
   void SetUp() override {
-    counters.reset(new Counters());   
+    counters.reset(new Counters());
     testEventHandler.reset(new TimingEventHandler(*counters));
     evrFactory.reset(new EVRDataFactory());
     tdcFactory.reset(new TDCDataFactory());

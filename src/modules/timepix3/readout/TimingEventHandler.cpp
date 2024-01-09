@@ -68,8 +68,8 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
   statCounters.TDCTimeStampReadout++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
-    epochESSPulseTimeObservable.publishData(ESSGlobalTimeStamp(
-        lastEVRData->pulseTimeInEpochNs, lastTDCData->tdcTimeInPixelClock));
+    publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
+                                   lastTDCData->tdcTimeInPixelClock));
 
     statCounters.EVRPairFound++;
   }
@@ -94,8 +94,8 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
   statCounters.EVRTimeStampReadouts++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
-    epochESSPulseTimeObservable.publishData(ESSGlobalTimeStamp(
-        lastEVRData->pulseTimeInEpochNs, lastTDCData->tdcTimeInPixelClock));
+    publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
+                                   lastTDCData->tdcTimeInPixelClock));
 
     statCounters.TDCPairFound++;
   }

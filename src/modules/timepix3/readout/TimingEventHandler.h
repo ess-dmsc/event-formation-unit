@@ -15,7 +15,7 @@
 #include "common/kafka/EV44Serializer.h"
 #include "common/utils/EfuUtils.h"
 #include "dataflow/DataObserverTemplate.h"
-#include "readout/DataEventTypes.h"
+#include "readout/TimepixDataTypes.h"
 #include <memory>
 
 #define TDC_CLOCK_BIN_NS 3.125
@@ -29,7 +29,7 @@ namespace Timepix3 {
 class TimingEventHandler
     : public Observer::DataEventObserver<timepixReadout::TDCReadout>,
       public Observer::DataEventObserver<timepixReadout::EVRReadout>,
-      public Observer::DataEventObservable<uint64_t> {
+      public Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
   const milliseconds THRESHOLD_MS =
@@ -40,9 +40,6 @@ private:
 
   unique_ptr<timepixDTO::TDCDataEvent> lastTDCData;
   unique_ptr<timepixDTO::EVRDataEvent> lastEVRData;
-
-  Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
-      &epochESSPulseTimeObservable;
 
   uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
 
@@ -63,11 +60,8 @@ public:
   static const uint32_t DEFAULT_FREQUENCY_NS;
 
   TimingEventHandler(
-      Counters &statCounters, EV44Serializer &serializer,
-      Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
-          &epochESSPulseTimeObservable)
-      : statCounters(statCounters), serializer(serializer),
-        epochESSPulseTimeObservable(epochESSPulseTimeObservable) {}
+      Counters &statCounters, EV44Serializer &serializer)
+      : statCounters(statCounters), serializer(serializer) {}
 
   virtual ~TimingEventHandler(){};
 

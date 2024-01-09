@@ -19,6 +19,7 @@
 namespace Timepix3 {
 
 using namespace std;
+using namespace timepixReadout;
 using namespace timepixDTO;
 using namespace efutils;
 
@@ -44,7 +45,7 @@ void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
   serializer.setReferenceTime(lastEpochESSPulseTime->pulseTimeInEpochNs);
 }
 
-void PixelEventHandler::applyData(const PixelDataEvent &pixelDataEvent) {
+void PixelEventHandler::applyData(const PixelReadout &pixelDataEvent) {
 
   bool ValidData = geometry->validateData(pixelDataEvent);
   if (not ValidData) {
@@ -61,17 +62,6 @@ void PixelEventHandler::applyData(const PixelDataEvent &pixelDataEvent) {
   // Calculate TOF in ns
   uint16_t X = geometry->calcX(pixelDataEvent);
   uint16_t Y = geometry->calcY(pixelDataEvent);
-
-// Bad pixel identified on the current camera. Masking it for now.
-///\todo Setup a proper masking procedure for BAD pixels thourgh a config file
-#ifndef NDEBUG
-  if ((X == 186 && Y == 123) || (X == 116 && Y == 158)) {
-    XTRACE(DATA, WAR, "Bad pixel!: Time: %u, x %u, y %u", pixelDataEvent.toa, X,
-           Y);
-    statCounters.PixelErrors++;
-    return;
-  }
-#endif
 
   XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u",
          pixelDataEvent.fToA, X, Y, pixelDataEvent.ToT);

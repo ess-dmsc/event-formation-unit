@@ -14,17 +14,9 @@
 
 namespace Timepix3 {
 
-using namespace timepixDTO;
 using namespace timepixReadout;
 
-DataParser::DataParser(
-    struct Counters &counters,
-    Observer::DataEventObservable<TDCReadout> &tdcDataObservable,
-    Observer::DataEventObservable<EVRReadout> &evrDataObservable,
-    Observer::DataEventObservable<PixelDataEvent> &pixelDataObservable)
-    : Stats(counters), tdcDataObservable(tdcDataObservable),
-      evrDataObservable(evrDataObservable),
-      pixelDataObservable(pixelDataObservable) {}
+DataParser::DataParser(struct Counters &counters) : Stats(counters) {}
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
@@ -53,7 +45,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              Data->pulseTimeNanoSeconds, Data->prevPulseTimeSeconds,
              Data->prevPulseTimeNanoSeconds);
 
-      evrDataObservable.publishData(*Data);
+      DataEventObservable<EVRReadout>::publishData(*Data);
       Stats.EVRTimeStampReadouts++;
       return 1;
     }
@@ -80,7 +72,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     // pixel readout, identifies where a pixel on the camera was activated
     if (ReadoutType == 11) {
 
-      PixelDataEvent pixelDataEvent(
+      PixelReadout pixelDataEvent(
           (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
           (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
           (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
@@ -89,7 +81,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
           DataBytes & PIXEL_SPTIME_MASK);
 
-      pixelDataObservable.publishData(pixelDataEvent);
+      DataEventObservable<PixelReadout>::publishData(pixelDataEvent);
 
       ParsedReadouts++;
       Stats.PixelReadouts++;
@@ -116,38 +108,22 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       /// received. Probably this is not important.
       if (tdcReadout.type == 15) {
         Stats.TDC1RisingReadouts++;
-        tdcDataObservable.publishData(tdcReadout);
+        DataEventObservable<TDCReadout>::publishData(tdcReadout);
       } else if (tdcReadout.type == 10) {
         Stats.TDC1FallingReadouts++;
-        tdcDataObservable.publishData(tdcReadout);
+        DataEventObservable<TDCReadout>::publishData(tdcReadout);
       } else if (tdcReadout.type == 14) {
         Stats.TDC2RisingReadouts++;
-        tdcDataObservable.publishData(tdcReadout);
+        DataEventObservable<TDCReadout>::publishData(tdcReadout);
       } else if (tdcReadout.type == 11) {
         Stats.TDC2FallingReadouts++;
-        tdcDataObservable.publishData(tdcReadout);
+        DataEventObservable<TDCReadout>::publishData(tdcReadout);
       } else {
         // this should never happen - if it does something has gone wrong with
         // the data format or parsing
         Stats.UnknownTDCReadouts++;
       }
 
-      // global timestamps are a readout allowing for longer periods of time
-      // to be recorded before "overflowing" to 0. This readout type isn't
-      // expected to be used in production, currently.
-    } else if (ReadoutType == 4) {
-      Timepix3GlobalTimeReadout Data;
-
-      // mask and offset values are defined in DataParser.h
-      Data.Timestamp =
-          (DataBytes & GLOBAL_TIMESTAMP_MASK) >> GLOBAL_TIMESTAMP_OFFSET;
-      Data.Stamp = (DataBytes & GLOBAL_STAMP_MASK) >> GLOBAL_STAMP_OFFSET;
-
-      XTRACE(DATA, DEB,
-             "Processed readout, ReadoutType = %u, Timestamp = %u, Stamp = %u",
-             ReadoutType, Data.Timestamp, Data.Stamp);
-      ParsedReadouts++;
-      Stats.GlobalTimestampReadouts++;
     } else {
       // we sometimes see packet type 7 here, which accompanies a lot of
       // control signals

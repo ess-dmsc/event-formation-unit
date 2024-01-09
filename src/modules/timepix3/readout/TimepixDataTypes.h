@@ -16,21 +16,6 @@
 
 namespace timepixDTO {
 
-struct PixelDataEvent {
-  const uint16_t dCol;
-  const uint16_t sPix;
-  const uint8_t pix;
-  const uint16_t ToT;
-  const uint8_t fToA;
-  const uint16_t toa;
-  const uint32_t spidrTime;
-
-  PixelDataEvent(uint16_t dCol, uint16_t sPix, uint8_t pix, uint16_t ToT,
-                 uint8_t fToA, uint16_t toa, uint32_t spidrTime)
-      : dCol(dCol), sPix(sPix), pix(pix), ToT(ToT), fToA(fToA), toa(toa),
-        spidrTime(spidrTime) {}
-};
-
 struct ESSGlobalTimeStamp {
   const uint64_t pulseTimeInEpochNs;
   const uint32_t tdcClockInPixelTime;
@@ -107,6 +92,7 @@ private:
 } // namespace timepixDTO
 
 namespace timepixReadout {
+
 struct EVRReadout {
   const uint8_t type;
   const uint8_t unused;
@@ -116,6 +102,15 @@ struct EVRReadout {
   const uint32_t pulseTimeNanoSeconds;
   const uint32_t prevPulseTimeSeconds;
   const uint32_t prevPulseTimeNanoSeconds;
+
+  bool operator==(const EVRReadout &other) const {
+    return type == other.type && unused == other.unused &&
+           unused2 == other.unused2 && counter == other.counter &&
+           pulseTimeSeconds == other.pulseTimeSeconds &&
+           pulseTimeNanoSeconds == other.pulseTimeNanoSeconds &&
+           prevPulseTimeSeconds == other.prevPulseTimeSeconds &&
+           prevPulseTimeNanoSeconds == other.prevPulseTimeNanoSeconds;
+  }
 } __attribute__((__packed__));
 
 struct TDCReadout {
@@ -126,11 +121,41 @@ struct TDCReadout {
 
   TDCReadout(uint8_t t, uint16_t tc, uint64_t ts, uint8_t s)
       : type(t), counter(tc), timestamp(ts), stamp(s) {}
+
+  bool operator==(const TDCReadout &other) const {
+    return type == other.type && counter == other.counter &&
+           timestamp == other.timestamp && stamp == other.stamp;
+  }
+};
+
+struct PixelReadout {
+  const uint16_t dCol;
+  const uint16_t sPix;
+  const uint8_t pix;
+  const uint16_t ToT;
+  const uint8_t fToA;
+  const uint16_t toa;
+  const uint32_t spidrTime;
+
+  PixelReadout(uint16_t dCol, uint16_t sPix, uint8_t pix, uint16_t ToT,
+               uint8_t fToA, uint16_t toa, uint32_t spidrTime)
+      : dCol(dCol), sPix(sPix), pix(pix), ToT(ToT), fToA(fToA), toa(toa),
+        spidrTime(spidrTime) {}
+
+  bool operator==(const PixelReadout &other) const {
+    return dCol == other.dCol && sPix == other.sPix && pix == other.pix &&
+           ToT == other.ToT && fToA == other.fToA && toa == other.toa &&
+           spidrTime == other.spidrTime;
+  }
 };
 
 struct Timepix3GlobalTimeReadout {
   uint64_t Timestamp;
   uint8_t Stamp;
+
+  bool operator==(const Timepix3GlobalTimeReadout &other) const {
+    return Timestamp == other.Timestamp && Stamp == other.Stamp;
+  }
 };
 
 } // namespace timepixReadout

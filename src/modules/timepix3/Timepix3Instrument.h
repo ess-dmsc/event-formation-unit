@@ -35,13 +35,10 @@ public:
   void processReadouts();
 
   /// \brief calculate pixel ID from a Timepix3PixelReadout
-  uint32_t calcPixel(timepixDTO::PixelDataEvent &Data);
+  uint32_t calcPixel(timepixReadout::PixelReadout &Data);
 
-  Observer::DataEventObservable<timepixReadout::TDCReadout> tdcDataObservable;
-  Observer::DataEventObservable<timepixReadout::EVRReadout> evrDataObservable;
   Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
       epochESSPulseTimeObservable;
-  Observer::DataEventObservable<timepixDTO::PixelDataEvent> pixelDataObservable;
 
   /// \brief from the clusters in Clusterer, check if they meet requirements to
   /// be an event, and if so serialize them

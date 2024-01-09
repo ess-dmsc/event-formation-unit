@@ -137,7 +137,7 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
 
 template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
-  std::lock_guard<std::mutex> lock(allocationMutex);
+  // std::lock_guard<std::mutex> lock(allocationMutex);
   if (UNLIKELY(NumSlotsUsed == NumSlots)) {
     return nullptr;
   }
@@ -172,7 +172,7 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
 
 template <typename FixedSizePoolParamsT>
 void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
-  std::lock_guard<std::mutex> lock(allocationMutex);
+  // std::lock_guard<std::mutex> lock(allocationMutex);
   size_t slotIndex = ((unsigned char *)p - PoolBytes) / SlotBytes;
   PoolAssertMsg(UseAsserts, slotIndex < NumSlots,
                 "Dealloc pointer is not from pool");

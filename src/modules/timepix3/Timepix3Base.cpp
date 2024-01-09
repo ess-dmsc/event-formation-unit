@@ -154,9 +154,7 @@ void Timepix3Base::processingThread() {
         Timepix3.timepix3Parser.parse(DataPtr, DataLen);
       });
 
-      // // Timepix3.processReadouts();
-
-      // XTRACE(DATA, DEB, "processing data");
+      // Timepix3.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

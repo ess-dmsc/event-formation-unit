@@ -15,7 +15,7 @@
 
 namespace Timepix3 {
 
-using namespace timepixDTO;
+using namespace timepixReadout;
 
 Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
                                    uint32_t numberOfChunks)
@@ -24,7 +24,7 @@ Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
       chunksPerDimension(static_cast<int>(sqrt(totalNumberOfChunks))),
       chunkSize(nx / chunksPerDimension) {}
 
-uint32_t Timepix3Geometry::calcPixel(const PixelDataEvent &Data) const {
+uint32_t Timepix3Geometry::calcPixel(const PixelReadout &Data) const {
   XTRACE(DATA, DEB, "calculating pixel");
   uint16_t X = calcX(Data);
   uint16_t Y = calcY(Data);
@@ -34,6 +34,10 @@ uint32_t Timepix3Geometry::calcPixel(const PixelDataEvent &Data) const {
   return pixel2D(X, Y);
 }
 
+/// \brief Calculates the chunk window index based on the X and Y coordinates
+/// \param X is the X coordinate
+/// \param Y is the Y coordinate
+/// \return the chunk window index
 int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
                                           const uint16_t Y) const {
   // If there is only one chunk, return 0 index position
@@ -47,21 +51,33 @@ int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
 
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcX(const PixelDataEvent &Data) const {
+uint32_t Timepix3Geometry::calcX(const PixelReadout &Data) const {
   uint32_t Col = Data.dCol + Data.pix / 4;
   return Col;
 }
 
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcY(const PixelDataEvent &Data) const {
+uint32_t Timepix3Geometry::calcY(const PixelReadout &Data) const {
   uint32_t Row = Data.sPix + (Data.pix & 0x3);
   return Row;
 }
 
-///\todo implement this
-bool Timepix3Geometry::validateData(const PixelDataEvent &Data) const {
-  XTRACE(DATA, DEB, "validate data, dcol = %u", Data.dCol);
+/// \brief Calculates that the received data is fir to the geometry
+/// \param Data is the pixel data event
+/// \return true if the data is valid
+bool Timepix3Geometry::validateData(const PixelReadout &Data) const {
+
+  if (calcX(Data) >= nx()) {
+    XTRACE(DATA, WAR, "X value %u is larger than nx limit %u", calcX(Data),
+           nx());
+    return false;
+  } else if (calcY(Data) >= ny()) {
+    XTRACE(DATA, WAR, "Y value %u is larger than ny limit %u", calcY(Data),
+           ny());
+    return false;
+  }
+
   return true;
 }
 

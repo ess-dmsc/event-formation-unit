@@ -10,7 +10,7 @@
 
 #include "Counters.h"
 #include "dataflow/DataObserverTemplate.h"
-#include "readout/DataEventTypes.h"
+#include "readout/TimepixDataTypes.h"
 #include <cstdint>
 
 namespace Timepix3 {
@@ -58,25 +58,20 @@ namespace Timepix3 {
 #define EVR_READOUT_TYPE          1
 // clang-format on
 
-class DataParser {
+class DataParser
+    : public Observer::DataEventObservable<timepixReadout::TDCReadout>,
+      public Observer::DataEventObservable<timepixReadout::EVRReadout>,
+      public Observer::DataEventObservable<timepixReadout::PixelReadout> {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  DataParser(
-      Counters &counters,
-      Observer::DataEventObservable<timepixReadout::TDCReadout> &tdcDataObservable,
-      Observer::DataEventObservable<timepixReadout::EVRReadout> &evrDataObservable,
-      Observer::DataEventObservable<timepixDTO::PixelDataEvent> &pixelDataObservable);
+  DataParser(Counters &counters);
 
   ~DataParser(){};
 
   int parse(const char *buffer, unsigned int size);
 
   struct Counters &Stats;
-
-  Observer::DataEventObservable<timepixReadout::TDCReadout> &tdcDataObservable;
-  Observer::DataEventObservable<timepixReadout::EVRReadout> &evrDataObservable;
-  Observer::DataEventObservable<timepixDTO::PixelDataEvent> &pixelDataObservable;
 };
 
 } // namespace Timepix3

@@ -9,6 +9,8 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
+#include "readout/TimepixDataTypes.h"
+#include "readout/DataParser.h"
 #include <common/debug/Trace.h>
 #include <timepix3/Timepix3Instrument.h>
 
@@ -16,6 +18,10 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
+
+using namespace Observer;
+using namespace timepixDTO;
+using namespace timepixReadout;
 
 /**
  * @brief Constructs a Timepix3Instrument object.
@@ -37,17 +43,18 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
           timepix3Configuration.NumberOfChunks)),
-      timingEventHandler(counters, serializer, epochESSPulseTimeObservable),
+      timingEventHandler(counters, serializer),
       pixelEventHandler(counters, geomPtr, serializer),
-      timepix3Parser(counters, tdcDataObservable, evrDataObservable,
-                     pixelDataObservable) {
+      timepix3Parser(counters) {
 
   // Setup observable subscriptions
-  tdcDataObservable.subscribe(&timingEventHandler);
-  evrDataObservable.subscribe(&timingEventHandler);
+  timepix3Parser.DataEventObservable<TDCReadout>::subscribe(&timingEventHandler);
+  timepix3Parser.DataEventObservable<EVRReadout>::subscribe(&timingEventHandler);
 
-  pixelDataObservable.subscribe(&pixelEventHandler);
-  epochESSPulseTimeObservable.subscribe(&pixelEventHandler);
+  timepix3Parser.DataEventObservable<PixelReadout>::subscribe(
+      &pixelEventHandler);
+  timingEventHandler.DataEventObservable<ESSGlobalTimeStamp>::subscribe(
+      &pixelEventHandler);
 }
 
 void Timepix3Instrument::processReadouts() {
