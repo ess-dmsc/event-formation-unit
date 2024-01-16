@@ -32,6 +32,7 @@ struct BaseSettings {
   std::string   KafkaConfigFile      {""}; // use default
   std::string   KafkaBroker          {"localhost:9092"};
   std::string   KafkaTopic           {""};
+  std::string   KafkaDebugTopic      {""};
   ///\brief Graphite setting
   std::string   GraphitePrefix       {"efu.null"};
   std::string   GraphiteRegion       {"0"};
