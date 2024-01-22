@@ -122,6 +122,9 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
       ->group("EFU Options")->default_str("10");
 
+  CLIParser.add_option("--udder_events_per_pulse", EFUSettings.TestImageEventsPerPulse, "Events per pulse/message")
+      ->group("EFU Options")->default_str("500");
+
   // EFU LEGACY MODULE
   CLIParser.add_flag("--multiblade-alignment", EFUSettings.MultibladeAlignment,
           "Enter alignment mode (2D)")
