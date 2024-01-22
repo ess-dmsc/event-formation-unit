@@ -47,7 +47,8 @@ struct BaseSettings {
   ///\brief module specific configurations
   // perfgen
   bool          TestImage            {false};
-  uint32_t TestImageUSleep      {10};
+  uint32_t TestImageUSleep         {10};
+  uint32_t TestImageEventsPerPulse {500};
   // legacy module support
   bool          MultibladeAlignment{false};
 };
