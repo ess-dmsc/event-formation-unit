@@ -94,7 +94,7 @@ void PerfGenBase::processingThread() {
     XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
     Serializer.checkAndSetReferenceTime(EfuTime);
 
-    for (int i = 0; i < EventsPerPulse; i++) {
+    for (uint32_t i = 0; i < EventsPerPulse; i++) {
       auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
       Serializer.addEvent(TimeOfFlight, PixelId);
       mystats.events_udder++;
