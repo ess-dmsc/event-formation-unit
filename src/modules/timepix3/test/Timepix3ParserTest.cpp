@@ -4,10 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "Counters.h"
 #include "TimepixTestHelper.h"
 #include "common/kafka/EV44Serializer.h"
 #include "readout/TimepixDataTypes.h"
 #include <common/testutils/TestBase.h>
+#include <memory>
 #include <timepix3/readout/DataParser.h>
 
 using namespace Timepix3;
@@ -107,7 +109,7 @@ protected:
   EV44Serializer serializer{115000, "timepix3"};
 
   void SetUp() override {
-    counters.reset(new Counters(1));
+    counters = std::make_unique<Counters>(Counters(1));
     timepix3Parser.reset(new DataParser(*counters));
 
     timepix3Parser->DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
