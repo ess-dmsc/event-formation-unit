@@ -6,7 +6,7 @@
 
 #include "Counters.h"
 #include "common/utils/EfuUtils.h"
-#include "readout/DataEventTypes.h"
+#include "readout/TimepixDataTypes.h"
 #include "readout/TimingEventHandler.h"
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest.h"
@@ -20,6 +20,7 @@
 using namespace Timepix3;
 using namespace efutils;
 using namespace chrono;
+using namespace timepixReadout;
 
 auto baseTime = high_resolution_clock::now();
 auto frequencyPeriodNs = hzToNanoseconds(14).count();
@@ -27,12 +28,12 @@ auto frequencyPeriodNs = hzToNanoseconds(14).count();
 class TDCDataFactory {
 private:
   int publishedEventCounter = 0;
-  std::vector<std::unique_ptr<TDCDataEvent>> factoryStorage;
+  std::vector<std::unique_ptr<TDCReadout>> factoryStorage;
 
 public:
-  TDCDataEvent &getNextTDC(int delayInMs = 0) {
+  TDCReadout &getNextTDC(int delayInMs = 0) {
     // clang-format off
-    std::unique_ptr<TDCDataEvent> newDataEvent = std::make_unique<TDCDataEvent>(
+    std::unique_ptr<TDCReadout> newDataEvent = std::make_unique<TDCReadout>(
         15, publishedEventCounter,
         1000 + publishedEventCounter * frequencyPeriodNs,
         6,
@@ -52,12 +53,12 @@ public:
 class EVRDataFactory {
 private:
   int publishedEventCounter = 0;
-  std::vector<std::unique_ptr<EVRDataEvent>> factoryStorage;
+  std::vector<std::unique_ptr<EVRReadout>> factoryStorage;
 
 public:
-  EVRDataEvent &getNextEVR(int delayInMs = 0) {
+  EVRReadout &getNextEVR(int delayInMs = 0) {
     // clang-format off
-   std::unique_ptr<EVRDataEvent> newDataEvent = std::make_unique<EVRDataEvent>(
+   std::unique_ptr<EVRReadout> newDataEvent = std::make_unique<EVRReadout>(
         1, 0, 0,
         publishedEventCounter, 
         50000, 50000, 
@@ -74,6 +75,8 @@ public:
   }
 };
 
+class MockSerializer : public EV44Serializer {};
+
 class Timepix3TimingEventHandlerTest : public TestBase {
 protected:
   unique_ptr<Counters> counters;
@@ -86,10 +89,10 @@ protected:
       TDC_CLOCK_BIN_NS * 31447764897 + TDC_FINE_CLOCK_BIN_NS * 6;
 
   void SetUp() override {
-    counters.reset(new Counters());
-    testEventHandler.reset(new TimingEventHandler(*counters));
-    evrFactory.reset(new EVRDataFactory());
-    tdcFactory.reset(new TDCDataFactory());
+    counters = make_unique<Counters>(1);
+    testEventHandler = make_unique<TimingEventHandler>(*counters);
+    evrFactory = std::make_unique<EVRDataFactory>();
+    tdcFactory = std::make_unique<TDCDataFactory>();
   }
   void TearDown() override {}
 };
@@ -101,9 +104,9 @@ TEST_F(Timepix3TimingEventHandlerTest, FindTDCPair) {
   testEventHandler->applyData(evrFactory->getNextEVR());
   testEventHandler->applyData(tdcFactory->getNextTDC(10));
 
-  EXPECT_EQ(counters->FoundEVRandTDCPairs, 1);
-  EXPECT_EQ(counters->MissEVRPair, 0);
-  EXPECT_EQ(counters->MissTDCPair, 0);
+  EXPECT_EQ(counters->TDCPairFound, 1);
+  EXPECT_EQ(counters->MissEVRCounter, 0);
+  EXPECT_EQ(counters->MissTDCCounter, 0);
 
   EXPECT_EQ(testEventHandler->getLastTDCPair(),
             testEventHandler->getLastTdcEvent());

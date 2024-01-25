@@ -43,7 +43,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
           timepix3Configuration.NumberOfChunks)),
-      timingEventHandler(counters, serializer),
+      timingEventHandler(counters),
       pixelEventHandler(counters, geomPtr, serializer),
       timepix3Parser(counters) {
 

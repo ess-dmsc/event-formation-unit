@@ -36,8 +36,7 @@ private:
       efutils::nsToMilliseconds(DEFAULT_FREQUENCY_NS / 2);
 
   Counters &statCounters;
-  const EV44Serializer &serializer;
-
+  
   unique_ptr<timepixDTO::TDCDataEvent> lastTDCData;
   unique_ptr<timepixDTO::EVRDataEvent> lastEVRData;
 
@@ -60,8 +59,8 @@ public:
   static const uint32_t DEFAULT_FREQUENCY_NS;
 
   TimingEventHandler(
-      Counters &statCounters, EV44Serializer &serializer)
-      : statCounters(statCounters), serializer(serializer) {}
+      Counters &statCounters)
+      : statCounters(statCounters) {}
 
   virtual ~TimingEventHandler(){};
 

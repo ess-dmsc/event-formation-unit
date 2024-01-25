@@ -109,7 +109,7 @@ protected:
   EV44Serializer serializer{115000, "timepix3"};
 
   void SetUp() override {
-    counters = std::make_unique<Counters>(Counters(1));
+    counters = std::make_unique<Counters>(1);
     timepix3Parser.reset(new DataParser(*counters));
 
     timepix3Parser->DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
