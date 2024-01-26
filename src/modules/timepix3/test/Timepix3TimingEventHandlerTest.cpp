@@ -8,6 +8,7 @@
 #include "common/utils/EfuUtils.h"
 #include "readout/TimepixDataTypes.h"
 #include "readout/TimingEventHandler.h"
+#include "test/TimepixTestHelper.h"
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
@@ -18,6 +19,7 @@
 #include <timepix3/readout/DataParser.h>
 
 using namespace Timepix3;
+using namespace timepixDTO;
 using namespace efutils;
 using namespace chrono;
 using namespace timepixReadout;
@@ -75,7 +77,7 @@ public:
   }
 };
 
-class MockSerializer : public EV44Serializer {};
+DataEventTestHandler<timepixDTO::ESSGlobalTimeStamp> essGlobalTimeStampHandler;
 
 class Timepix3TimingEventHandlerTest : public TestBase {
 protected:
@@ -101,15 +103,15 @@ protected:
 
 TEST_F(Timepix3TimingEventHandlerTest, FindTDCPair) {
 
+  essGlobalTimeStampHandler.setData(
+      ESSGlobalTimeStamp(0, 0));
+
   testEventHandler->applyData(evrFactory->getNextEVR());
   testEventHandler->applyData(tdcFactory->getNextTDC(10));
 
   EXPECT_EQ(counters->TDCPairFound, 1);
   EXPECT_EQ(counters->MissEVRCounter, 0);
   EXPECT_EQ(counters->MissTDCCounter, 0);
-
-  EXPECT_EQ(testEventHandler->getLastTDCPair(),
-            testEventHandler->getLastTdcEvent());
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, DelayedTDCTest) {

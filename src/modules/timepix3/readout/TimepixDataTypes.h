@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief container file to define main data transfer objects DTO's used for
+/// \brief Holder for readout data (DTO) objects used for
 //         timepix
 //===----------------------------------------------------------------------===//
 
@@ -146,15 +146,6 @@ struct PixelReadout {
     return dCol == other.dCol && sPix == other.sPix && pix == other.pix &&
            ToT == other.ToT && fToA == other.fToA && toa == other.toa &&
            spidrTime == other.spidrTime;
-  }
-};
-
-struct Timepix3GlobalTimeReadout {
-  uint64_t Timestamp;
-  uint8_t Stamp;
-
-  bool operator==(const Timepix3GlobalTimeReadout &other) const {
-    return Timestamp == other.Timestamp && Stamp == other.Stamp;
   }
 };
 

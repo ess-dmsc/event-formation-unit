@@ -11,7 +11,7 @@
 #pragma once
 
 template <typename DataEvent>
-class Timpix3OberverTestHelper
+class DataEventTestHandler
     : public Observer::DataEventObserver<DataEvent> {
 private:
   std::unique_ptr<DataEvent> testData;

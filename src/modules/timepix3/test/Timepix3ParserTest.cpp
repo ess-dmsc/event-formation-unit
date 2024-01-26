@@ -94,9 +94,9 @@ std::vector<uint8_t> TDCAndPixelReadout{
 };
 // clang-format on
 
-class TDCReadoutHandler : public Timpix3OberverTestHelper<TDCReadout> {};
-class EVRReadoutHandler : public Timpix3OberverTestHelper<EVRReadout> {};
-class PixelReadoutHandler : public Timpix3OberverTestHelper<PixelReadout> {};
+class TDCReadoutHandler : public DataEventTestHandler<TDCReadout> {};
+class EVRReadoutHandler : public DataEventTestHandler<EVRReadout> {};
+class PixelReadoutHandler : public DataEventTestHandler<PixelReadout> {};
 
 class Timepix3ParserTest : public TestBase {
 protected:

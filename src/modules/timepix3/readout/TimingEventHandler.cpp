@@ -1,12 +1,10 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief Implementation for TDC and EVR timing event observers. Responsible
-//         to follow up different timing events and syncronize the two timing
-//         (ESS time and camera time) domains. Also this class provides timing
-//         information for other timing interested objects.
+//         to follow up different timing events and calculate the global time
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>

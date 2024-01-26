@@ -1,9 +1,10 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Implementation of Pixel observer
+/// \brief Implementation for Timepix3 pixel global time calculation and 
+///        clustering.
 //===----------------------------------------------------------------------===//
 
 #include "common/reduction/Hit2DVector.h"
