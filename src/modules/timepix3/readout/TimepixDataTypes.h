@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,10 @@
 #include <chrono>
 #include <cstdint>
 
-#define PIXEL_MAX_TIMESTAMP_NS 26.8435456 * 1e9
+#define PIXEL_MAX_TIMESTAMP_NS 26843545600
+
+#define TDC_CLOCK_BIN_NS 3.125
+#define TDC_FINE_CLOCK_BIN_NS 0.26
 
 namespace timepixDTO {
 
@@ -42,14 +45,6 @@ struct EVRDataEvent {
         pulseTimeInEpochNs(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds),
         arrivalTimestamp(std::chrono::high_resolution_clock::now()) {}
 
-  EVRDataEvent(
-      uint32_t counter, uint32_t pulseTimeSeconds,
-      uint32_t pulseTimeNanoSeconds,
-      std::chrono::time_point<std::chrono::system_clock> arrivalTimestamp)
-      : counter(counter),
-        pulseTimeInEpochNs(pulseTimeSeconds * 1e9 + pulseTimeNanoSeconds),
-        arrivalTimestamp(arrivalTimestamp) {}
-
   // Equality comparison operator
   bool operator==(const EVRDataEvent &other) const {
     return counter == other.counter &&
@@ -66,11 +61,13 @@ struct TDCDataEvent {
 
   const std::chrono::high_resolution_clock::time_point arrivalTimestamp;
 
-  TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp);
-
-  TDCDataEvent(
-      uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp,
-      std::chrono::time_point<std::chrono::system_clock> arrivalTimestamp);
+  TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp, uint8_t stamp)
+      : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
+                                              TDC_FINE_CLOCK_BIN_NS * stamp),
+        pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
+        tdcTimeInPixelClock(tdcTimeStamp -
+                            (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
+        arrivalTimestamp(std::chrono::high_resolution_clock::now()) {}
 
   // Equality comparison operator
   bool operator==(const TDCDataEvent &other) const {
@@ -103,6 +100,16 @@ struct EVRReadout {
   const uint32_t prevPulseTimeSeconds;
   const uint32_t prevPulseTimeNanoSeconds;
 
+  EVRReadout(uint8_t type, uint8_t unused, uint16_t unused2, uint32_t counter,
+             uint32_t pulseTimeSeconds, uint32_t pulseTimeNanoSeconds,
+             uint32_t prevPulseTimeSeconds, uint32_t prevPulseTimeNanoSeconds)
+      : type(type), unused(unused), unused2(unused2), counter(counter),
+        pulseTimeSeconds(pulseTimeSeconds),
+        pulseTimeNanoSeconds(pulseTimeNanoSeconds),
+        prevPulseTimeSeconds(prevPulseTimeSeconds),
+        prevPulseTimeNanoSeconds(prevPulseTimeNanoSeconds) {}
+
+  // Equality comparison operator
   bool operator==(const EVRReadout &other) const {
     return type == other.type && unused == other.unused &&
            unused2 == other.unused2 && counter == other.counter &&
@@ -119,8 +126,8 @@ struct TDCReadout {
   const uint64_t timestamp;
   const uint8_t stamp;
 
-  TDCReadout(uint8_t t, uint16_t tc, uint64_t ts, uint8_t s)
-      : type(t), counter(tc), timestamp(ts), stamp(s) {}
+  TDCReadout(uint8_t type, uint16_t counter, uint64_t timestamp, uint8_t stamp)
+      : type(type), counter(counter), timestamp(timestamp), stamp(stamp) {}
 
   bool operator==(const TDCReadout &other) const {
     return type == other.type && counter == other.counter &&

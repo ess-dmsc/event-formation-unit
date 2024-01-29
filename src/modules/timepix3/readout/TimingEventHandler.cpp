@@ -15,29 +15,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace timepixDTO {
-
-TDCDataEvent::TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp,
-                           uint8_t stamp)
-    : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
-                                            TDC_FINE_CLOCK_BIN_NS * stamp),
-      pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
-      tdcTimeInPixelClock(tdcTimeStamp -
-                          (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
-      arrivalTimestamp(high_resolution_clock::now()) {}
-
-TDCDataEvent::TDCDataEvent(uint16_t triggerCounter, uint64_t timestamp,
-                           uint8_t stamp,
-                           time_point<system_clock> arrivalTimestamp)
-    : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
-                                            TDC_FINE_CLOCK_BIN_NS * stamp),
-      pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
-      tdcTimeInPixelClock(tdcTimeStamp -
-                          (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
-      arrivalTimestamp(arrivalTimestamp) {}
-
-} // namespace timepixDTO
-
 namespace Timepix3 {
 
 using namespace timepixDTO;

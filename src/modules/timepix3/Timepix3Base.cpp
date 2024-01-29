@@ -39,9 +39,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.packets", ITCounters.RxPackets);
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
-  Stats.create("receive.input_processing_time_us", ITCounters.InputrProcessingTime);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-
  
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.pixel_before_tdc_count", Counters.PixelReadoutFromBeforeTDC);
@@ -150,9 +148,8 @@ void Timepix3Base::processingThread() {
 
       XTRACE(DATA, DEB, "parsing data");
       // parse readout data
-      Counters.ParsingTimeUs = efutils::measureRuntime([&] {
-        Timepix3.timepix3Parser.parse(DataPtr, DataLen);
-      });
+      Counters.ParsingTimeUs = efutils::measureRuntime(
+          [&] { Timepix3.timepix3Parser.parse(DataPtr, DataLen); });
 
       // Timepix3.processReadouts();
 
