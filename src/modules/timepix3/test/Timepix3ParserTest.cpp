@@ -76,13 +76,13 @@ std::vector<uint8_t> SingleEVRReadoutData{
 };
 
 EVRReadout singleEVRReadout{1,
- 69,
-  21331,
-   573482,
-    static_cast<uint32_t>(1681891788),
-     static_cast<uint32_t>(999999965),
-      1681891787,
-       999999965};
+69,
+21331,
+573482,
+static_cast<uint32_t>(1681891788),
+static_cast<uint32_t>(999999965),
+1681891787,
+999999965};
 
 std::vector<uint8_t> TDCAndPixelReadout{
   // Single TDC readout

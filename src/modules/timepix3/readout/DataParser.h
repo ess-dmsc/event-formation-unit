@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "Counters.h"
-#include "dataflow/DataObserverTemplate.h"
-#include "readout/TimepixDataTypes.h"
+#include <modules/timepix3/Counters.h>
+#include <dataflow/DataObserverTemplate.h>
+#include <readout/TimepixDataTypes.h>
 #include <cstdint>
 
 namespace Timepix3 {
