@@ -4,12 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "Counters.h"
-#include "TimepixTestHelper.h"
-#include "common/kafka/EV44Serializer.h"
-#include "readout/TimepixDataTypes.h"
+#include <common/kafka/EV44Serializer.h>
 #include <common/testutils/TestBase.h>
+#include <dto/TimepixDataTypes.h>
 #include <memory>
+#include <modules/timepix3/Counters.h>
+#include <modules/timepix3/test/TimepixTestHelper.h>
 #include <timepix3/readout/DataParser.h>
 
 using namespace Timepix3;
@@ -100,8 +100,8 @@ class PixelReadoutHandler : public DataEventTestHandler<PixelReadout> {};
 
 class Timepix3ParserTest : public TestBase {
 protected:
-  std::unique_ptr<Counters> counters;
-  std::unique_ptr<DataParser> timepix3Parser;
+  Counters counters;
+  DataParser timepix3Parser{counters};
   TDCReadoutHandler tdcTestHandler;
   EVRReadoutHandler evrTestHandler;
   PixelReadoutHandler pixelTestHandler;
@@ -109,11 +109,11 @@ protected:
   EV44Serializer serializer{115000, "timepix3"};
 
   void SetUp() override {
-    counters = std::make_unique<Counters>(1);
-    timepix3Parser.reset(new DataParser(*counters));
+    new (&counters) Counters();
+    new (&timepix3Parser) DataParser(counters);
 
-    timepix3Parser->DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
-    timepix3Parser->DataEventObservable<EVRReadout>::subscribe(&evrTestHandler);
+    timepix3Parser.DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
+    timepix3Parser.DataEventObservable<EVRReadout>::subscribe(&evrTestHandler);
   }
 
   void TearDown() override {}
@@ -123,91 +123,91 @@ protected:
 
 TEST_F(Timepix3ParserTest, SinglePixelReadout) {
   pixelTestHandler.setData(singlePixelReadout);
-  auto Res = timepix3Parser->parse((char *)singlePixelReadoutData.data(),
-                                   singlePixelReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)singlePixelReadoutData.data(),
+                                  singlePixelReadoutData.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->PixelReadouts, 1);
+  EXPECT_EQ(counters.PixelReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDC1RisingReadouts) {
 
   tdcTestHandler.setData(tdc1RisingReadout);
 
-  auto Res = timepix3Parser->parse((char *)tdc1RisingReadoutData.data(),
-                                   tdc1RisingReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)tdc1RisingReadoutData.data(),
+                                  tdc1RisingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
-  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 }
 
 TEST_F(Timepix3ParserTest, TDC1FallingReadouts) {
 
   tdcTestHandler.setData(tdc1FallingReadout);
 
-  auto Res = timepix3Parser->parse((char *)tdc1FallingReadoutData.data(),
-                                   tdc1FallingReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)tdc1FallingReadoutData.data(),
+                                  tdc1FallingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 1);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 1);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
 }
 
 TEST_F(Timepix3ParserTest, TDC2RisingReadouts) {
 
   tdcTestHandler.setData(tdc2RisingReadout);
 
-  auto Res = timepix3Parser->parse((char *)tdc2RisingReadoutData.data(),
-                                   tdc2RisingReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)tdc2RisingReadoutData.data(),
+                                  tdc2RisingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDC2RisingReadouts, 1);
-  EXPECT_EQ(counters->TDC2FallingReadouts, 0);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 1);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
 }
 
 TEST_F(Timepix3ParserTest, TDC2FallingReadouts) {
 
   tdcTestHandler.setData(tdc2FallingReadout);
 
-  auto Res = timepix3Parser->parse((char *)tdc2FallingReadoutData.data(),
-                                   tdc2FallingReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)tdc2FallingReadoutData.data(),
+                                  tdc2FallingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->TDC2FallingReadouts, 1);
-  EXPECT_EQ(counters->TDC2RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 0);
-  EXPECT_EQ(counters->TDC1FallingReadouts, 0);
+  EXPECT_EQ(counters.TDC2FallingReadouts, 1);
+  EXPECT_EQ(counters.TDC2RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 0);
+  EXPECT_EQ(counters.TDC1FallingReadouts, 0);
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
-  auto Res = timepix3Parser->parse((char *)TooShort.data(), TooShort.size());
+  auto Res = timepix3Parser.parse((char *)TooShort.data(), TooShort.size());
   EXPECT_EQ(Res, 0);
 }
 
 TEST_F(Timepix3ParserTest, SingleEVRReadout) {
   evrTestHandler.setData(singleEVRReadout);
-  auto Res = timepix3Parser->parse((char *)SingleEVRReadoutData.data(),
-                                   SingleEVRReadoutData.size());
+  auto Res = timepix3Parser.parse((char *)SingleEVRReadoutData.data(),
+                                  SingleEVRReadoutData.size());
   EXPECT_EQ(Res, 1);
-  EXPECT_EQ(counters->EVRTimeStampReadouts, 1);
+  EXPECT_EQ(counters.EVRTimeStampReadouts, 1);
 }
 
 TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
   tdcTestHandler.setData(tdc1RisingReadout);
   pixelTestHandler.setData(singlePixelReadout);
 
-  auto Res = timepix3Parser->parse((char *)TDCAndPixelReadout.data(),
-                                   TDCAndPixelReadout.size());
+  auto Res = timepix3Parser.parse((char *)TDCAndPixelReadout.data(),
+                                  TDCAndPixelReadout.size());
   EXPECT_EQ(Res, 2);
-  EXPECT_EQ(counters->TDC1RisingReadouts, 1);
-  EXPECT_EQ(counters->TDCTimeStampReadout, 1);
-  EXPECT_EQ(counters->PixelReadouts, 1);
+  EXPECT_EQ(counters.TDC1RisingReadouts, 1);
+  EXPECT_EQ(counters.TDCTimeStampReadout, 1);
+  EXPECT_EQ(counters.PixelReadouts, 1);
 }
 
 int main(int argc, char **argv) {

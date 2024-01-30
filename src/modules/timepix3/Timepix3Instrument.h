@@ -11,16 +11,16 @@
 
 #pragma once
 
-#include "Counters.h"
-#include "common/detector/BaseSettings.h"
-#include "common/kafka/EV44Serializer.h"
-#include "common/reduction/clustering/Hierarchical2DClusterer.h"
-#include "dataflow/DataObserverTemplate.h"
-#include "geometry/Config.h"
-#include "readout/DataParser.h"
-#include "readout/PixelEventHandler.h"
-#include "readout/TimingEventHandler.h"
+#include <common/detector/BaseSettings.h>
+#include <common/kafka/EV44Serializer.h>
+#include <common/reduction/clustering/Hierarchical2DClusterer.h>
+#include <dataflow/DataObserverTemplate.h>
+#include <geometry/Config.h>
+#include <handlers/PixelEventHandler.h>
+#include <handlers/TimingEventHandler.h>
 #include <memory>
+#include <modules/timepix3/Counters.h>
+#include <readout/DataParser.h>
 
 namespace Timepix3 {
 

@@ -12,17 +12,17 @@ set(timepix3_common_inc
   geometry/Config.h
   dataflow/DataObserverTemplate.h
   geometry/Timepix3Geometry.h
-  readout/TimepixDataTypes.h
-  readout/TimingEventHandler.h
-  readout/PixelEventHandler.h
+  dto/TimepixDataTypes.h
+  handlers/TimingEventHandler.h
+  handlers/PixelEventHandler.h
   readout/DataParser.h
   Timepix3Instrument.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
   readout/DataParser.cpp
-  readout/TimingEventHandler.cpp
-  readout/PixelEventHandler.cpp
+  handlers/TimingEventHandler.cpp
+  handlers/PixelEventHandler.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp
   geometry/Timepix3Geometry.cpp

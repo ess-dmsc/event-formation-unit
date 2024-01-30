@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "Counters.h"
-#include "common/kafka/EV44Serializer.h"
-#include "common/reduction/Hit2DVector.h"
-#include "common/reduction/clustering/Hierarchical2DClusterer.h"
-#include "common/utils/EfuUtils.h"
-#include "dataflow/DataObserverTemplate.h"
-#include "geometry/Timepix3Geometry.h"
-#include "readout/TimepixDataTypes.h"
+#include <modules/timepix3/Counters.h>
+#include <common/kafka/EV44Serializer.h>
+#include <common/reduction/Hit2DVector.h>
+#include <common/reduction/clustering/Hierarchical2DClusterer.h>
+#include <common/utils/EfuUtils.h>
+#include <dataflow/DataObserverTemplate.h>
+#include <geometry/Timepix3Geometry.h>
+#include <dto/TimepixDataTypes.h>
 #include <future>
 #include <memory>
 #include <vector>

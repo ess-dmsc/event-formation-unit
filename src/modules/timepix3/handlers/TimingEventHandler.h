@@ -13,7 +13,7 @@
 #include <common/utils/EfuUtils.h>
 #include <dataflow/DataObserverTemplate.h>
 #include <memory>
-#include <readout/TimepixDataTypes.h>
+#include <dto/TimepixDataTypes.h>
 #include <timepix3/Counters.h>
 
 #define TDC_MAX_TIMESTAMP_NS 107374182400

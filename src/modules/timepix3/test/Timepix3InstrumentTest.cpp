@@ -4,8 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/kafka/EV44Serializer.h"
-#include "geometry/Config.h"
+#include "gtest/gtest.h"
+#include <common/kafka/EV44Serializer.h>
+#include <geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <logical_geometry/ESSGeometry.h>
@@ -18,7 +19,7 @@ std::string ConfigFile{"deleteme_instr_config.json"};
 std::string ConfigStr = R"(
   {
     "Detector": "timepix3",
-    "NumberOfChunks": 1,
+    "ParallelThreads": 1,
     "XResolution": 256,
     "YResolution": 256
   }
@@ -35,7 +36,7 @@ std::string BadNameConfigFile{"deleteme_bad_name_config.json"};
 std::string BadNameConfigStr = R"(
   {
     "Detector": "invalid name",
-    "NumberOfChunks": 1,
+    "ParallelThreads": 1,
     "XResolution": 256,
     "YResolution": 256
   }
@@ -44,7 +45,7 @@ std::string BadNameConfigStr = R"(
 std::string NoDetectorConfigFile{"deleteme_no_detector_config.json"};
 std::string NoDetectorConfigStr = R"(
   {
-    "NumberOfChunks": 1,
+    "ParallelThreads": 1,
     "XResolution": 256,
     "YResolution": 256
   }
@@ -54,7 +55,7 @@ std::string NoXResConfigFile{"deleteme_no_xres_config.json"};
 std::string NoXResConfigStr = R"(
   {
     "Detector": "timepix3",
-    "NumberOfChunks": 1,
+    "ParallelThreads": 1,
     "YResolution": 256
   }
 )";
@@ -74,9 +75,7 @@ std::vector<uint8_t> SingleGoodReadout{// Single readout
 
 class Timepix3InstrumentTest : public TestBase {
 protected:
-  struct Counters counters {
-    1
-  };
+  struct Counters counters {};
 
   std::unique_ptr<EV44Serializer> serializer;
 
@@ -122,8 +121,8 @@ TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
   Timepix3Instrument Timepix3(counters, Config(ConfigFile), *serializer);
   auto Res = Timepix3.timepix3Parser.parse((char *)SingleGoodReadout.data(),
                                            SingleGoodReadout.size());
-  ASSERT_EQ(Res, 1);
-  ASSERT_EQ(counters.PixelReadouts, 1);
+  EXPECT_EQ(Res, 1);
+  EXPECT_EQ(counters.PixelReadouts, 1);
 }
 
 int main(int argc, char **argv) {

@@ -9,8 +9,8 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
-#include "readout/TimepixDataTypes.h"
-#include "readout/DataParser.h"
+#include <dto/TimepixDataTypes.h>
+#include <readout/DataParser.h>
 #include <common/debug/Trace.h>
 #include <timepix3/Timepix3Instrument.h>
 
@@ -48,8 +48,10 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       timepix3Parser(counters) {
 
   // Setup observable subscriptions
-  timepix3Parser.DataEventObservable<TDCReadout>::subscribe(&timingEventHandler);
-  timepix3Parser.DataEventObservable<EVRReadout>::subscribe(&timingEventHandler);
+  timepix3Parser.DataEventObservable<TDCReadout>::subscribe(
+      &timingEventHandler);
+  timepix3Parser.DataEventObservable<EVRReadout>::subscribe(
+      &timingEventHandler);
 
   timepix3Parser.DataEventObservable<PixelReadout>::subscribe(
       &pixelEventHandler);

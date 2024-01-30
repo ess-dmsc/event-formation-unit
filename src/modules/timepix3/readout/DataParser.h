@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <dataflow/DataObserverTemplate.h>
 #include <modules/timepix3/Counters.h>
-#include <readout/TimepixDataTypes.h>
+#include <dto/TimepixDataTypes.h>
 
 namespace Timepix3 {
 

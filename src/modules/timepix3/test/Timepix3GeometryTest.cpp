@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "readout/TimepixDataTypes.h"
-#include "readout/PixelEventHandler.h"
-#include "gtest/gtest.h"
+#include <dto/TimepixDataTypes.h>
+#include <handlers/PixelEventHandler.h>
+#include <gtest/gtest.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <cstdint>

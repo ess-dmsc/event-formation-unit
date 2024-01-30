@@ -4,14 +4,14 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "Counters.h"
-#include "common/utils/EfuUtils.h"
-#include "readout/TimepixDataTypes.h"
-#include "readout/TimingEventHandler.h"
-#include "test/TimepixTestHelper.h"
-#include "gtest/gtest-death-test.h"
-#include "gtest/gtest.h"
-#include "gtest/internal/gtest-port.h"
+#include <Counters.h>
+#include <common/utils/EfuUtils.h>
+#include <dto/TimepixDataTypes.h>
+#include <handlers/TimingEventHandler.h>
+#include <test/TimepixTestHelper.h>
+#include <gtest/gtest-death-test.h>
+#include <gtest/gtest.h>
+#include <gtest/internal/gtest-port.h>
 #include <chrono>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -65,7 +65,7 @@ protected:
 
   void SetUp() override {
     // Recreate initialize test objects to reset their memory
-    new (&counters) Counters(1);
+    new (&counters) Counters();
     new (&testEventHandler) TimingEventHandler(counters);
 
     new (&timingEventPublishTester)

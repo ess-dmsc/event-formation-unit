@@ -9,7 +9,7 @@
 
 #include <common/debug/Trace.h>
 #include <memory>
-#include <readout/TimingEventHandler.h>
+#include <handlers/TimingEventHandler.h>
 #include <utility>
 
 // #undef TRC_LEVEL

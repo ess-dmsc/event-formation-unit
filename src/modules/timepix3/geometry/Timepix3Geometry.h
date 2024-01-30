@@ -12,9 +12,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include "h5cpp/property/dataset_access.hpp"
-#include "logical_geometry/ESSGeometry.h"
-#include "readout/TimepixDataTypes.h"
+#include <h5cpp/property/dataset_access.hpp>
+#include <logical_geometry/ESSGeometry.h>
+#include <dto/TimepixDataTypes.h>
 #include <cmath>
 #include <cstdint>
 #include <math.h>
