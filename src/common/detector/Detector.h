@@ -11,7 +11,6 @@
 
 #include <CLI/CLI.hpp>
 #include <atomic>
-#include <chrono>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <common/detector/BaseSettings.h>
@@ -79,7 +78,6 @@ public:
         } else {
           RxRingbuffer.getNextBuffer();
         }
-
       } else {
         ITCounters.RxIdle++;
       }
