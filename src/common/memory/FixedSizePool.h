@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <bitset>
 #include <cstdint>
-#include <mutex>
 
 #define PoolAssertMsg(kEnable, ...)                                            \
   do {                                                                         \
@@ -67,9 +66,6 @@ struct FixedSizePoolParams {
 ///        use-after-free. It also checks on destruction that all indices in the
 ///        stack are unique, meaning no double-free.
 template <typename FixedSizePoolParamsT> struct FixedSizePool {
-
-  std::mutex allocationMutex;
-
   enum : size_t {
     SlotBytes = FixedSizePoolParamsT::SlotBytes,
     NumSlots = FixedSizePoolParamsT::NumSlots,
@@ -137,7 +133,6 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
 
 template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
-  // std::lock_guard<std::mutex> lock(allocationMutex);
   if (UNLIKELY(NumSlotsUsed == NumSlots)) {
     return nullptr;
   }
@@ -172,7 +167,6 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
 
 template <typename FixedSizePoolParamsT>
 void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
-  // std::lock_guard<std::mutex> lock(allocationMutex);
   size_t slotIndex = ((unsigned char *)p - PoolBytes) / SlotBytes;
   PoolAssertMsg(UseAsserts, slotIndex < NumSlots,
                 "Dealloc pointer is not from pool");
