@@ -126,7 +126,7 @@ TEST_F(ProducerTest, ProducerSuccess) {
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
   KafkaConfig KafkaCfg2("");
-  ASSERT_EQ(KafkaCfg2.CfgParms.size(), 4);
+  ASSERT_EQ(KafkaCfg2.CfgParms.size(), 5);
   Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
