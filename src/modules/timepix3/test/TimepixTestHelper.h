@@ -11,10 +11,10 @@
 #pragma once
 
 template <typename DataEvent>
-class DataEventTestHandler
-    : public Observer::DataEventObserver<DataEvent> {
+class DataEventTestHandler : public Observer::DataEventObserver<DataEvent> {
 private:
   std::unique_ptr<DataEvent> testData;
+  int applyDataCalls{0};
 
 public:
   void setData(const DataEvent &appliedData) {
@@ -22,6 +22,9 @@ public:
   }
 
   void applyData(const DataEvent &appliedData) override {
+    applyDataCalls++;
     EXPECT_EQ(appliedData, *testData);
   };
+
+  int getApplyDataCalls() const { return applyDataCalls; }
 };

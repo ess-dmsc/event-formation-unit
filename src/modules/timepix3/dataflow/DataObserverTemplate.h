@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <locale>
 #include <memory>
@@ -27,10 +28,16 @@ private:
 
 public:
   DataEventObservable<DataEvent>(){};
+
   virtual ~DataEventObservable<DataEvent>() = default;
 
   inline void subscribe(DataEventObserver<DataEvent> *listener) {
-    dataEventListeners.push_back(listener);
+
+    // Only add listener if it is not already subscribed
+    if (std::find(dataEventListeners.begin(), dataEventListeners.end(),
+                  listener) == dataEventListeners.end()) {
+      dataEventListeners.push_back(listener);
+    }
   }
 
   inline void publishData(const DataEvent &event) const {

@@ -28,8 +28,8 @@ class TimingEventHandler
       public Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
-  const milliseconds THRESHOLD_MS =
-      efutils::nsToMilliseconds(DEFAULT_FREQUENCY_NS / 2);
+/// \todo move this into configuration file
+  const milliseconds THRESHOLD_MS = milliseconds(20);
 
   Counters &statCounters;
 
@@ -58,7 +58,7 @@ public:
 
   virtual ~TimingEventHandler(){};
 
-  void applyData(const timepixReadout::TDCReadout &newData) override;
+  void applyData(const timepixReadout::TDCReadout &tdcReadout) override;
   void applyData(const timepixReadout::EVRReadout &evrReadout) override;
 };
 

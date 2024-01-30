@@ -34,7 +34,7 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
   if (lastTDCData != nullptr &&
       tdcReadout.counter != lastTDCData->counter + 1) {
     statCounters.MissTDCCounter +=
-        tdcReadout.counter - lastTDCData->counter + 1;
+        tdcReadout.counter - (lastTDCData->counter + 1);
   }
 
   lastTDCData = std::make_unique<TDCDataEvent>(
@@ -59,7 +59,7 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
   if (lastEVRData != nullptr &&
       evrReadout.counter != lastEVRData->counter + 1) {
     statCounters.MissEVRCounter +=
-        evrReadout.counter - lastEVRData->counter + 1;
+        evrReadout.counter - (lastEVRData->counter + 1);
   }
 
   lastEVRData = std::make_unique<EVRDataEvent>(evrReadout.counter,
