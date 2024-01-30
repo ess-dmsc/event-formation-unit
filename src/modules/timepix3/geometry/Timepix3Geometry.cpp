@@ -18,10 +18,10 @@ namespace Timepix3 {
 using namespace timepixReadout;
 
 Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
-                                   uint32_t numberOfChunks)
+                                   uint32_t numChunkWindows)
     : ESSGeometry(nx, ny, 1, 1),
-      totalNumberOfChunks(numberOfChunks <= 0 ? 1 : numberOfChunks),
-      chunksPerDimension(static_cast<int>(sqrt(totalNumberOfChunks))),
+      totalNumChunkWindows(numChunkWindows <= 0 ? 1 : numChunkWindows),
+      chunksPerDimension(static_cast<int>(sqrt(totalNumChunkWindows))),
       chunkSize(nx / chunksPerDimension) {}
 
 uint32_t Timepix3Geometry::calcPixel(const PixelReadout &Data) const {
@@ -41,7 +41,7 @@ uint32_t Timepix3Geometry::calcPixel(const PixelReadout &Data) const {
 int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
                                           const uint16_t Y) const {
   // If there is only one chunk, return 0 index position
-  if (totalNumberOfChunks == 1) {
+  if (totalNumChunkWindows == 1) {
     return 0;
   }
 

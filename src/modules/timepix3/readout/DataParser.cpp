@@ -70,7 +70,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     uint8_t ReadoutType = (DataBytes & TYPE_MASK) >> TYPE_OFFS;
 
     // pixel readout, identifies where a pixel on the camera was activated
-    if (ReadoutType == 11) {
+    if (ReadoutType == PIXEL_READOUT_TYPE_CONST) {
 
       PixelReadout pixelDataEvent(
           (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
@@ -106,16 +106,16 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // setup will determine which of these are sent.
       /// \todo: Review that it's necessary monitor which type of TDC we
       /// received. Probably this is not important.
-      if (tdcReadout.type == 15) {
+      if (tdcReadout.type == TDC1_RISING_CONST) {
         Stats.TDC1RisingReadouts++;
         DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == 10) {
+      } else if (tdcReadout.type == TDC1_FALLING_CONST) {
         Stats.TDC1FallingReadouts++;
         DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == 14) {
+      } else if (tdcReadout.type == TDC2_RISING_CONST) {
         Stats.TDC2RisingReadouts++;
         DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == 11) {
+      } else if (tdcReadout.type == TDC2_FALLING_CONST) {
         Stats.TDC2FallingReadouts++;
         DataEventObservable<TDCReadout>::publishData(tdcReadout);
       } else {

@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Implementation for Timepix3 pixel global time calculation and 
+/// \brief Implementation for Timepix3 pixel global time calculation and
 ///        clustering.
 //===----------------------------------------------------------------------===//
 
@@ -38,14 +38,15 @@ private:
   std::vector<Hit2DVector> windows;
 
   void publishEvents(Cluster2DContainer &clusters);
+  void clusterHits(Hierarchical2DClusterer &, Hit2DVector &hitsVector);
+
   uint64_t calculateGlobalTime(const uint16_t &toa, const uint8_t &fToA,
                                const uint32_t &spidrTime);
-
-  void clusterHits(int, Hierarchical2DClusterer &, Hit2DVector &hitsVector);
 
 public:
   PixelEventHandler(Counters &, std::shared_ptr<Timepix3Geometry>,
                     EV44Serializer &);
+
   virtual ~PixelEventHandler(){};
 
   void applyData(const timepixReadout::PixelReadout &pixelDataEvent) override;

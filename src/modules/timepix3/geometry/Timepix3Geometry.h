@@ -24,7 +24,7 @@ namespace Timepix3 {
 class Timepix3Geometry : public ESSGeometry {
 
 public:
-  Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t numberOfChunks);
+  Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t numChunkWindows);
 
   /// \brief sets the pixel resolution of the camera in x plane
   /// \param Resolution integer value to set camera resolution to
@@ -55,12 +55,12 @@ public:
   uint32_t calcY(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief returns the total number of chunks
-  int getChunkNumber() const { return totalNumberOfChunks; }
+  int getChunkNumber() const { return totalNumChunkWindows; }
 
 private:
   std::uint16_t XResolution; ///< resolution of X axis
   std::uint16_t YResolution; ///< resolution of Y axis
-  int totalNumberOfChunks;   ///< number of chunks windows in total
+  int totalNumChunkWindows;   ///< number of chunks windows in total
   int chunksPerDimension;    ///< number of chunks per dimension
   int chunkSize;             ///< size of each chunk
 };

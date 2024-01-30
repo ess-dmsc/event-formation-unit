@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <modules/timepix3/Counters.h>
-#include <dataflow/DataObserverTemplate.h>
-#include <readout/TimepixDataTypes.h>
 #include <cstdint>
+#include <dataflow/DataObserverTemplate.h>
+#include <modules/timepix3/Counters.h>
+#include <readout/TimepixDataTypes.h>
 
 namespace Timepix3 {
 
@@ -72,6 +72,15 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   struct Counters &Stats;
+
+private:
+  // Const expression
+  static constexpr uint8_t PIXEL_READOUT_TYPE_CONST = 11;
+
+  static constexpr uint8_t TDC1_RISING_CONST = 15;
+  static constexpr uint8_t TDC1_FALLING_CONST = 10;
+  static constexpr uint8_t TDC2_RISING_CONST = 14;
+  static constexpr uint8_t TDC2_FALLING_CONST = 11;
 };
 
 } // namespace Timepix3

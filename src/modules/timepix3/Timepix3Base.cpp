@@ -29,8 +29,7 @@ namespace Timepix3 {
 const char *classname = "Timepix3 detector with ESS readout";
 
 Timepix3Base::Timepix3Base(BaseSettings const &settings)
-    : Detector(settings), timepix3Configuration(settings.ConfigFile),
-      Counters(timepix3Configuration.NumberOfChunks) {
+    : Detector(settings), timepix3Configuration(settings.ConfigFile) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -57,7 +56,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
   Stats.create("readouts.tdctimestamp_readout_count", Counters.TDCTimeStampReadout);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
-  Stats.create("readouts.evr_pair_count", Counters.EVRPairFound);
+  Stats.create("readouts.e public TimeTimepix3Basevr_pair_count", Counters.EVRPairFound);
   Stats.create("readouts.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
   Stats.create("readouts.tdc_pair_count", Counters.TDCPairFound);
   Stats.create("readouts.tof_count", Counters.TofCount);
@@ -74,10 +73,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   // System counters
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-  Stats.create("parsing_time_us", Counters.ParsingTimeUs);
-  Stats.create("clustering_time_us", Counters.ClusterProcessingTimeUs);
-  Stats.create("sorting_time_us", Counters.SortingProcessTimeUs);
-  Stats.create("publishing_time_us", Counters.PublishingTimeUs );
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -117,14 +112,6 @@ void Timepix3Base::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  int chunkSize = timepix3Configuration.NumberOfChunks;
-
-  for (int i = 0; i < chunkSize; i++) {
-    std::string statName =
-        "clustering_thread_" + std::to_string(i) + "_time_us";
-    Stats.create(statName.c_str(), Counters.ClusteringThreadTimeUs[i]);
-  }
-
   Serializer = std::make_unique<EV44Serializer>(
       EV44Serializer(KafkaBufferSize, "timepix3", Produce));
   Timepix3Instrument Timepix3(Counters, timepix3Configuration, *Serializer);
@@ -147,11 +134,10 @@ void Timepix3Base::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       XTRACE(DATA, DEB, "parsing data");
-      // parse readout data
-      Counters.ParsingTimeUs = efutils::measureRuntime(
-          [&] { Timepix3.timepix3Parser.parse(DataPtr, DataLen); });
+      Timepix3.timepix3Parser.parse(DataPtr, DataLen);
 
-      // Timepix3.processReadouts();
+      XTRACE(DATA, DEB, "processing data");
+      Timepix3.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

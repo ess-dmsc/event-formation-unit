@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Implementation for Timepix3 pixel global time calculation and 
+/// \brief Implementation for Timepix3 pixel global time calculation and
 ///        clustering.
 //===----------------------------------------------------------------------===//
 
@@ -40,7 +40,6 @@ PixelEventHandler::PixelEventHandler(Counters &statCounters,
 }
 
 void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
-  pushDataToKafka();
 
   lastEpochESSPulseTime = make_unique<ESSGlobalTimeStamp>(epochEssPulseTime);
   serializer.setReferenceTime(lastEpochESSPulseTime->pulseTimeInEpochNs);
@@ -77,54 +76,47 @@ void PixelEventHandler::applyData(const PixelReadout &pixelDataEvent) {
       {pixelGlobalTimeStamp, X, Y, pixelDataEvent.ToT});
 }
 
-void PixelEventHandler::clusterHits(int thread,
-                                    Hierarchical2DClusterer &clusterer,
+void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
                                     Hit2DVector &hitsVector) {
 
-  statCounters.ClusteringThreadTimeUs[thread] = measureRuntime([&] {
-    // sort hits by time of flight for clustering in time
-    sort_chronologically(std::move(hitsVector));
-    clusterer.cluster(hitsVector);
-    clusterer.flush();
-  });
+  // sort hits by time of flight for clustering in time
+  sort_chronologically(std::move(hitsVector));
+  clusterer.cluster(hitsVector);
+  clusterer.flush();
 }
 
 void PixelEventHandler::pushDataToKafka() {
 
   std::vector<std::future<void>> futures;
 
-  statCounters.ClusterProcessingTimeUs = measureRuntime([&] {
-    int windowsLength = windows.size();
+  int windowsLength = windows.size();
 
-    if (windowsLength == 1) {
-      clusterHits(0, *clusterers[0], windows[0]);
-    } else {
-      for (int i = 0; i < windowsLength; i++) {
-        auto &window = windows[i];
-        if (window.size() > 0) {
-          futures.push_back(
-              std::async(std::launch::async, &PixelEventHandler::clusterHits,
-                         this, i, std::ref(*clusterers[i]), std::ref(window)));
-        }
-      }
-
-      if (!futures.empty()) {
-        for (auto &future : futures) {
-          future.wait();
-        }
+  if (windowsLength == 1) {
+    clusterHits(*clusterers[0], windows[0]);
+  } else {
+    for (int i = 0; i < windowsLength; i++) {
+      auto &window = windows[i];
+      if (window.size() > 0) {
+        futures.push_back(
+            std::async(std::launch::async, &PixelEventHandler::clusterHits,
+                       this, std::ref(*clusterers[i]), std::ref(window)));
       }
     }
 
-    for (auto &window : windows) {
-      window.clear();
+    if (!futures.empty()) {
+      for (auto &future : futures) {
+        future.wait();
+      }
     }
-  });
+  }
 
-  statCounters.PublishingTimeUs = measureRuntime([&] {
-    for (auto &cluster : clusterers) {
-      publishEvents(cluster->clusters);
-    }
-  });
+  for (auto &window : windows) {
+    window.clear();
+  }
+
+  for (auto &cluster : clusterers) {
+    publishEvents(cluster->clusters);
+  }
 }
 
 void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {

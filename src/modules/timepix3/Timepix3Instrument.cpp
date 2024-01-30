@@ -42,7 +42,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                 timepix3Configuration.MaxCoordinateGap),
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
-          timepix3Configuration.NumberOfChunks)),
+          timepix3Configuration.parallelThreads)),
       timingEventHandler(counters),
       pixelEventHandler(counters, geomPtr, serializer),
       timepix3Parser(counters) {
@@ -58,7 +58,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
 }
 
 void Timepix3Instrument::processReadouts() {
-  XTRACE(DATA, DEB, "Processing readouts");
+  XTRACE(DATA, DEB, "Processing readouts and publishing data");
   pixelEventHandler.pushDataToKafka();
 }
 

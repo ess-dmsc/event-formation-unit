@@ -7,13 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "Counters.h"
 #include <memory>
+#include <modules/timepix3/Counters.h>
 #include <string>
 
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
+#include <common/testutils/TestBase.h>
 #include <timepix3/Timepix3Base.h>
 
 // #undef TRC_LEVEL

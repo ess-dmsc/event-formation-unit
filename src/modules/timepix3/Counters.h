@@ -22,13 +22,6 @@ struct Counters {
   int64_t FifoSeqErrors{0};
   int64_t ProcessingIdle{0};
 
-  // Performance counters
-  int64_t ParsingTimeUs{0};
-  int64_t ClusterProcessingTimeUs{0};
-  int64_t SortingProcessTimeUs{0};
-  int64_t *ClusteringThreadTimeUs{nullptr};
-  int64_t PublishingTimeUs{0};
-
   // Events
   int64_t Events{0};
   int64_t PixelErrors{0};
@@ -62,9 +55,5 @@ struct Counters {
   int64_t kafka_ev_others{0};
   int64_t kafka_dr_errors{0};
   int64_t kafka_dr_noerrors{0};
-
-  Counters(int MaxThreads) {
-    ClusteringThreadTimeUs = new int64_t[MaxThreads]{0};
-  };
 
 } __attribute__((aligned(64)));

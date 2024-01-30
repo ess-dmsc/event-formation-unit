@@ -40,7 +40,7 @@ Config::Config(std::string ConfigFile) {
   try {
     XResolution = root["XResolution"].get<uint16_t>();
     YResolution = root["YResolution"].get<uint16_t>();
-    NumberOfChunks = root["NumberOfChunks"].get<uint16_t>();
+    parallelThreads = root["ParallelThreads"].get<uint16_t>();
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",

@@ -10,7 +10,6 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <cstdint>
 #include <logical_geometry/ESSGeometry.h>
 #include <string>
 #include <vector>
@@ -28,7 +27,7 @@ public:
   std::string InstrumentName;
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
-  uint16_t NumberOfChunks{1};
+  uint16_t parallelThreads{1};
 
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};
