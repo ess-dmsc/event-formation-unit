@@ -23,8 +23,15 @@ MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
   Args.printSettings();
   DetectorSettings = Args.getBaseSettings();
   DetectorSettings.DetectorName = instrument;
+
+  // If KafkaTopic is set via CLI use that topic and generate the _samples
+  // topic for the raw readout samples. Else use the default value
+
   if (DetectorSettings.KafkaTopic.empty()) {
     DetectorSettings.KafkaTopic = instrument + "_detector";
+    DetectorSettings.KafkaDebugTopic = instrument + "_detector_samples";
+  } else {
+    DetectorSettings.KafkaDebugTopic = DetectorSettings.KafkaTopic + "_samples";
   }
 
   graylog.AddLoghandlerForNetwork(

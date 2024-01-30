@@ -48,6 +48,7 @@ public:
 
   void SetUp() override {
     Settings.ConfigFile = FREIA_FULL;
+    Settings.KafkaTopic = "freia_detector";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }

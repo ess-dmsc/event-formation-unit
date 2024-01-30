@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
       }
     }
     if (Settings.Loop) {
+      Pcap.close();
       Pcap.open();
     } else {
       Pcap.printStats();

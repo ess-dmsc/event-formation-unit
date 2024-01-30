@@ -147,10 +147,7 @@ void FreiaBase::processing_thread() {
 
 
   // Event producer
-  if (EFUSettings.KafkaTopic == "") {
-    XTRACE(INIT, ALW, "Setting default Kafka topic to freia_detector");
-    EFUSettings.KafkaTopic = "freia_detector";
-  }
+  assert(EFUSettings.KafkaTopic != "");
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,

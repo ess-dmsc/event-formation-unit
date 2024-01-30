@@ -27,6 +27,9 @@ public:
   /// \return 0 for OK, -1 for error
   int open();
 
+  /// \brief close pcap file and release handle
+  void close();
+
   /// \brief read data from a packet into user specified buffer
   /// \param buffer user allocated buffer, must be at least bufferlen bytes
   /// \param bufferlen length in bytes
