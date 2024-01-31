@@ -60,7 +60,7 @@ protected:
 
   DataEventTestHandler<timepixDTO::ESSGlobalTimeStamp> timingEventPublishTester;
 
-  Counters counters{1};
+  Counters counters{};
   TimingEventHandler testEventHandler{counters};
 
   void SetUp() override {

@@ -45,9 +45,9 @@ void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
   serializer.setReferenceTime(lastEpochESSPulseTime->pulseTimeInEpochNs);
 }
 
-void PixelEventHandler::applyData(const PixelReadout &pixelDataEvent) {
+void PixelEventHandler::applyData(const PixelReadout &pixelReadout) {
 
-  bool ValidData = geometry->validateData(pixelDataEvent);
+  bool ValidData = geometry->validateData(pixelReadout);
   if (not ValidData) {
     XTRACE(DATA, WAR, "Invalid Data, skipping readout");
     return;
@@ -60,20 +60,20 @@ void PixelEventHandler::applyData(const PixelReadout &pixelDataEvent) {
   }
 
   // Calculate TOF in ns
-  uint16_t X = geometry->calcX(pixelDataEvent);
-  uint16_t Y = geometry->calcY(pixelDataEvent);
+  uint16_t X = geometry->calcX(pixelReadout);
+  uint16_t Y = geometry->calcY(pixelReadout);
 
   XTRACE(DATA, DEB, "Parsed new hit, ToF: %u, X: %u, Y: %u, ToT: %u",
-         pixelDataEvent.fToA, X, Y, pixelDataEvent.ToT);
+         pixelReadout.fToA, X, Y, pixelReadout.ToT);
 
   uint64_t pixelGlobalTimeStamp = calculateGlobalTime(
-      pixelDataEvent.toa, pixelDataEvent.fToA, pixelDataEvent.spidrTime);
+      pixelReadout.toa, pixelReadout.fToA, pixelReadout.spidrTime);
 
   int windowIndex = geometry->getChunkWindowIndex(X, Y);
   // Add the hit to the corresponding window vector
 
   windows[windowIndex].push_back(
-      {pixelGlobalTimeStamp, X, Y, pixelDataEvent.ToT});
+      {pixelGlobalTimeStamp, X, Y, pixelReadout.ToT});
 }
 
 void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
@@ -127,7 +127,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // detector, it is the time the first photon in the cluster hit the
     // detector.
     uint64_t eventTime = cluster.timeStart();
-    uint64_t eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
+    long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;
 
     if (eventTof < 0) {
