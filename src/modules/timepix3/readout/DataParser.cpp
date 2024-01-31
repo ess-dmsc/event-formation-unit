@@ -46,7 +46,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
              Data->prevPulseTimeNanoSeconds);
 
       DataEventObservable<EVRReadout>::publishData(*Data);
-      Stats.EVRTimeStampReadouts++;
+      Stats.EVRReadoutCounter++;
       return 1;
     }
     XTRACE(DATA, DEB,
@@ -99,7 +99,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
       ParsedReadouts++;
-      Stats.TDCTimeStampReadout++;
+      Stats.TDCReadoutCounter++;
 
       // TDC readouts can belong to one of two channels, and can either
       // indicate the rising or the falling edge of the signal. The camera
@@ -128,7 +128,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // we sometimes see packet type 7 here, which accompanies a lot of
       // control signals
       XTRACE(DATA, WAR, "Unknown packet type: %u", ReadoutType);
-      Stats.UndefinedReadouts++;
+      Stats.UndefinedReadoutCounter++;
     }
     BytesLeft -= sizeof(DataBytes);
     DataPtr += sizeof(DataBytes);

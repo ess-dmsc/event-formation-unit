@@ -40,31 +40,29 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
  
+  // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
-  Stats.create("readouts.pixel_before_tdc_count", Counters.PixelReadoutFromBeforeTDC);
-  Stats.create("readouts.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
-  Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
-  Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
-  Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
-  Stats.create("readouts.no_global_time_error", Counters.NoGlobalTime);
-  Stats.create("readouts.miss_tdc_count", Counters.MissTDCCounter);
-  Stats.create("readouts.miss_evr_count", Counters.MissEVRCounter);
-  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
-  Stats.create("readouts.tdctimestamp_readout_count", Counters.TDCTimeStampReadout);
-  Stats.create("readouts.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
-  Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
-  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimeStampReadouts);
-  Stats.create("readouts.tdctimestamp_readout_count", Counters.TDCTimeStampReadout);
-  Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
-  Stats.create("readouts.e public TimeTimepix3Basevr_pair_count", Counters.EVRPairFound);
-  Stats.create("readouts.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
-  Stats.create("readouts.tdc_pair_count", Counters.TDCPairFound);
-  Stats.create("readouts.tof_count", Counters.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  Stats.create("readouts.tof_high", Counters.TofHigh);
-  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+  Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
+  Stats.create("readouts.tdc.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
+  Stats.create("readouts.tdc.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
+  Stats.create("readouts.tdc.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
+  Stats.create("readouts.tdc.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
+  Stats.create("readouts.evr.evr_readout_count", Counters.EVRReadoutCounter);
+  Stats.create("readouts.tdc.tdc_readout_count", Counters.TDCReadoutCounter);
+  Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
+
+  // Counters related to timing event handling and time syncronization
+  Stats.create("handlers.pixelevent.no_global_time_error", Counters.NoGlobalTime);
+  Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
+  Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
+  Stats.create("handlers.timingevent.evr_pair_count", Counters.EVRPairFound);
+  Stats.create("handlers.timingevent.tdc_pair_count", Counters.TDCPairFound);
+
+  // Counters related to pixel event handling and event calculation
+  Stats.create("handlers.pixelevent.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
+  Stats.create("handlers.pixelevent.tof_count", Counters.TofCount);
+  Stats.create("handlers.pixelevent.tof_neg", Counters.TofNegative);
+  Stats.create("handlers.pixelevent.prevtof_count", Counters.PrevTofCount);
 
   // Events
   Stats.create("events.count", Counters.Events);

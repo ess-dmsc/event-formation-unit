@@ -17,7 +17,7 @@ struct Counters {
   // Processing Counters - accessed in processing thread
 
   // Temporary timepix characterising counters
-  int64_t PixelReadoutFromBeforeTDC{0};
+
   // System counters
   int64_t FifoSeqErrors{0};
   int64_t ProcessingIdle{0};
@@ -28,9 +28,6 @@ struct Counters {
   int64_t TofCount{0};
   int64_t TofNegative{0};
   int64_t PrevTofCount{0};
-  int64_t PrevTofNegative{0};
-  int64_t TofHigh{0};
-  int64_t PrevTofHigh{0};
 
   int64_t TxBytes{0};
   int64_t PixelReadouts{0};
@@ -45,10 +42,9 @@ struct Counters {
   int64_t EVRPairFound{0};
   int64_t TDCPairFound{0};
   int64_t UnknownTDCReadouts{0};
-  int64_t GlobalTimestampReadouts{0};
-  int64_t EVRTimeStampReadouts{0};
-  int64_t TDCTimeStampReadout{0};
-  int64_t UndefinedReadouts{0};
+  int64_t EVRReadoutCounter{0};
+  int64_t TDCReadoutCounter{0};
+  int64_t UndefinedReadoutCounter{0};
   // Kafka stats below are common to all detectors
   int64_t kafka_produce_fails{0};
   int64_t kafka_ev_errors{0};

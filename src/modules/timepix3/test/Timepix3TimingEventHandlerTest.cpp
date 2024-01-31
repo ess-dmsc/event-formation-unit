@@ -92,8 +92,8 @@ TEST_F(Timepix3TimingEventHandlerTest, FindEVRPair) {
   testEventHandler.applyData(tdcReadout);
 
   EXPECT_EQ(timingEventPublishTester.getApplyDataCalls(), 1);
-  EXPECT_EQ(counters.EVRTimeStampReadouts, 1);
-  EXPECT_EQ(counters.TDCTimeStampReadout, 1);
+  EXPECT_EQ(counters.EVRReadoutCounter, 1);
+  EXPECT_EQ(counters.TDCReadoutCounter, 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
   EXPECT_EQ(counters.MissEVRCounter, 0);

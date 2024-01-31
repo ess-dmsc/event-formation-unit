@@ -7,10 +7,10 @@
 ///        clustering.
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Trace.h>
 #include <common/reduction/Hit2DVector.h>
 #include <common/reduction/clustering/Abstract2DClusterer.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
-#include <common/debug/Trace.h>
 #include <handlers/PixelEventHandler.h>
 #include <handlers/TimingEventHandler.h>
 
@@ -128,6 +128,12 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // detector.
     uint64_t eventTime = cluster.timeStart();
     uint64_t eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
+    statCounters.TofCount++;
+
+    if (eventTof < 0) {
+      statCounters.TofNegative++;
+      continue;
+    }
 
     if (eventTof > TimingEventHandler::DEFAULT_FREQUENCY_NS) {
       XTRACE(EVENT, WAR,

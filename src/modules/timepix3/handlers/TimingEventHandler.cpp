@@ -40,7 +40,7 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
   lastTDCData = std::make_unique<TDCDataEvent>(
       tdcReadout.counter, tdcReadout.timestamp, tdcReadout.stamp);
 
-  statCounters.TDCTimeStampReadout++;
+  statCounters.TDCReadoutCounter++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
     publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
@@ -66,7 +66,7 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
                                                evrReadout.pulseTimeSeconds,
                                                evrReadout.pulseTimeNanoSeconds);
 
-  statCounters.EVRTimeStampReadouts++;
+  statCounters.EVRReadoutCounter++;
 
   if (isLastTimingDiffLowerThenThreshold()) {
     publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
