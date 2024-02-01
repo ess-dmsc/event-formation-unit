@@ -50,6 +50,7 @@ void PixelEventHandler::applyData(const PixelReadout &pixelReadout) {
   bool ValidData = geometry->validateData(pixelReadout);
   if (not ValidData) {
     XTRACE(DATA, WAR, "Invalid Data, skipping readout");
+    statCounters.InvalidPixelReadout++;
     return;
   }
 
@@ -126,7 +127,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // for this type of
     // detector, it is the time the first photon in the cluster hit the
     // detector.
-    uint64_t eventTime = cluster.timeStart();
+    uint64_t  eventTime = cluster.timeStart();
     long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;
 

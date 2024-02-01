@@ -31,6 +31,7 @@ struct Counters {
 
   int64_t TxBytes{0};
   int64_t PixelReadouts{0};
+  int64_t InvalidPixelReadout{0};
   int64_t MissTDCCounter{0};
   int64_t MissEVRCounter{0};
   int64_t TDC1RisingReadouts{0};

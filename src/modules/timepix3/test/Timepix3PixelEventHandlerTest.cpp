@@ -27,9 +27,12 @@ class MockEV44Serializer : public EV44Serializer {
 public:
   MockEV44Serializer() : EV44Serializer(0, "dummy", {}) {}
 
-  int32_t pulseTimeToCompare;
-  int64_t eventTimeToCompare;
+  int64_t pulseTimeToCompare;
+  int32_t eventTimeToCompare;
   int32_t pixelIdToCompare;
+
+  int setReferenceTimeCallCounter{0};
+  int addEventCallCounter{0};
 
   MOCK_METHOD(void, setReferenceTime, (int64_t referenceTime), (override));
   MOCK_METHOD(size_t, addEvent, (int32_t time, int32_t pixelId), (override));
@@ -42,19 +45,26 @@ protected:
   MockEV44Serializer serializer;
   PixelEventHandler testEventHandler{counters, geometry, serializer};
 
+  static constexpr int64_t TEST_PULSE_TIME_NS = 1706778348000000240;
+  static constexpr int64_t TEST_TDC_TIMESTAMP_NS = 54000000000;
+  static constexpr int64_t TEST_PIXEL_TIMESTAMP_NS = 17000000000;
+
   void SetUp() override {
     // Recreate initialize test objects to reset their memory
     new (&counters) Counters();
+    new (&serializer) MockEV44Serializer();
     new (&testEventHandler) PixelEventHandler(counters, geometry, serializer);
 
     ON_CALL(serializer, setReferenceTime(testing::_))
         .WillByDefault([this](int64_t referenceTime) {
+          serializer.setReferenceTimeCallCounter++;
           EXPECT_EQ(referenceTime, serializer.pulseTimeToCompare);
         });
 
     ON_CALL(serializer, addEvent(testing::_, testing::_))
         .WillByDefault([this](int32_t pulseTime, int32_t pixelId) -> size_t {
-          EXPECT_EQ(pulseTime, serializer.pulseTimeToCompare);
+          serializer.addEventCallCounter++;
+          EXPECT_EQ(pulseTime, serializer.eventTimeToCompare);
           EXPECT_EQ(pixelId, serializer.pixelIdToCompare);
 
           return 1;
@@ -68,17 +78,29 @@ protected:
 
 TEST_F(Timepix3PixelEventHandlerTest, SerializerReferenceTimeUpdated) {
 
-  serializer.pulseTimeToCompare = 100000;
-  testEventHandler.applyData({100000, 23});
+  serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
+  testEventHandler.applyData({TEST_PULSE_TIME_NS, 10});
 }
 
-TEST_F(Timepix3PixelEventHandlerTest, TestPixelDataProcessing) {
+TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
+  
+  testEventHandler.applyData(PixelReadout{15, 2231, 30,
+                                                  6, 45, 100, 41503});
+
+  EXPECT_EQ(counters.InvalidPixelReadout, 1);
+}
+
+
+TEST_F(Timepix3PixelEventHandlerTest, TestTofBiggerThenFrequency) {
 
   serializer.pulseTimeToCompare = 100000;
-  testEventHandler.applyData(PixelReadout{15, 2231, 30,
-                                                  6, 45, 454, 33});
+  testEventHandler.applyData({100000, 23});
+  testEventHandler.applyData(PixelReadout{15, 10, 30,
+                                                  6, 45, 100, 41503});
 
   testEventHandler.pushDataToKafka();
+  EXPECT_EQ(counters.EventTimeForNextPulse, 1);
+  EXPECT_EQ(serializer.addEventCallCounter, 0);
 }
 
 int main(int argc, char **argv) {

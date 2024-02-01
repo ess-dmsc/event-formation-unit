@@ -53,6 +53,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   // Counters related to timing event handling and time syncronization
   Stats.create("handlers.pixelevent.no_global_time_error", Counters.NoGlobalTime);
+  Stats.create("handlers.pixelevent.invalid_pixel_readout", Counters.InvalidPixelReadout);
   Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
   Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
   Stats.create("handlers.timingevent.evr_pair_count", Counters.EVRPairFound);
