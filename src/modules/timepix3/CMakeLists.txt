@@ -90,6 +90,7 @@ create_test_executable(Timepix3TimingEventHandlerTest)
 set(Timepix3PixelEventHandlerTest_INC
   ${timepix3_common_inc}
 )
+add_compile_options(-Wno-maybe-uninitialized)
 set(Timepix3PixelEventHandlerTest_SRC
   ${timepix3_common_src}
   test/Timepix3PixelEventHandlerTest.cpp
