@@ -11,6 +11,7 @@
 #include <common/reduction/Hit2DVector.h>
 #include <common/reduction/clustering/Abstract2DClusterer.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
+#include <cstdint>
 #include <handlers/PixelEventHandler.h>
 #include <handlers/TimingEventHandler.h>
 
@@ -127,7 +128,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // for this type of
     // detector, it is the time the first photon in the cluster hit the
     // detector.
-    uint64_t  eventTime = cluster.timeStart();
+    uint64_t eventTime = cluster.timeStart();
     long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;
 
@@ -161,12 +162,24 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
   clusters.clear();
 }
 
+/**
+ * Calculates the global time for a pixel event based on the Time over Threshold
+ * (ToA), the fine Time over Threshold (fToA), and the SPIDR time.
+ *
+ * @param toa The Time over Threshold value.
+ * @param fToA The fine Time over Threshold value.
+ * @param spidrTime The SPIDR time.
+ * @return The calculated global time for the pixel event.
+ */
 uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
                                                 const uint8_t &fToA,
                                                 const uint32_t &spidrTime) {
 
-  uint64_t pixelClockTime =
-      uint64_t(409600 * spidrTime + 25 * toa - 1.5625 * fToA);
+  // Calculate pixel clock time according to timepix documentation. Use static
+  // cast to ensure all result is 64 bit
+  uint64_t pixelClockTime = 409600 * static_cast<uint64_t>(spidrTime) +
+                            25 * static_cast<uint64_t>(toa) -
+                            1.5625 * static_cast<uint64_t>(fToA);
 
   if (lastEpochESSPulseTime->tdcClockInPixelTime > pixelClockTime) {
 
@@ -175,9 +188,9 @@ uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
 
     return lastEpochESSPulseTime->pulseTimeInEpochNs + timeUntilReset +
            pixelClockTime;
-  } else {
-    return lastEpochESSPulseTime->pulseTimeInEpochNs + pixelClockTime -
-           lastEpochESSPulseTime->tdcClockInPixelTime;
+  } else { 
+           uint64_t tofInPixelTime = pixelClockTime - lastEpochESSPulseTime->tdcClockInPixelTime;
+    return lastEpochESSPulseTime->pulseTimeInEpochNs + tofInPixelTime;
   }
 }
 } // namespace Timepix3

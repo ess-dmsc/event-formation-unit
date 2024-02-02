@@ -11,7 +11,7 @@
 #pragma once
 
 template <typename DataEvent>
-class DataEventTestHandler : public Observer::DataEventObserver<DataEvent> {
+class MockupDataEventReceiver : public Observer::DataEventObserver<DataEvent> {
 private:
   std::unique_ptr<DataEvent> testData;
   int applyDataCalls{0};

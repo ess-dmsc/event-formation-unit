@@ -46,8 +46,21 @@ protected:
   PixelEventHandler testEventHandler{counters, geometry, serializer};
 
   static constexpr int64_t TEST_PULSE_TIME_NS = 1706778348000000240;
-  static constexpr int64_t TEST_TDC_TIMESTAMP_NS = 54000000000;
-  static constexpr int64_t TEST_PIXEL_TIMESTAMP_NS = 17000000000;
+
+  // TDC clock information to calculate TDC pxel time for
+  // quarter: 2
+  // pixel time: 17s
+  static constexpr uint64_t TEST_TDC_TIMESTAMP = 14029934583;
+  static constexpr uint64_t TEST_TDC_FINE_CLOCK = 100;
+  static constexpr uint64_t TEST_TDC_TIMESTAMP_NS =
+      TEST_TDC_TIMESTAMP * TDC_CLOCK_BIN_NS +
+      TEST_TDC_FINE_CLOCK * TDC_FINE_CLOCK_BIN_NS;
+
+  static constexpr uint8_t TEST_TDC_QUARTER =
+      uint8_t(TEST_TDC_TIMESTAMP_NS / PIXEL_MAX_TIMESTAMP_NS);
+
+  static constexpr uint64_t TEST_TDC_PIXEL_TIME_IN_NS =
+      TEST_TDC_TIMESTAMP_NS - (PIXEL_MAX_TIMESTAMP_NS * TEST_TDC_QUARTER);
 
   void SetUp() override {
     // Recreate initialize test objects to reset their memory
@@ -79,7 +92,7 @@ protected:
 TEST_F(Timepix3PixelEventHandlerTest, SerializerReferenceTimeUpdated) {
 
   serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
-  testEventHandler.applyData({TEST_PULSE_TIME_NS, 10});
+  testEventHandler.applyData({TEST_PULSE_TIME_NS, TEST_TDC_PIXEL_TIME_IN_NS});
 }
 
 TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
@@ -91,16 +104,28 @@ TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
 }
 
 
-TEST_F(Timepix3PixelEventHandlerTest, TestTofBiggerThenFrequency) {
+TEST_F(Timepix3PixelEventHandlerTest, TestIfTofIsBiggerThenFrequency) {
 
   serializer.pulseTimeToCompare = 100000;
   testEventHandler.applyData({100000, 23});
   testEventHandler.applyData(PixelReadout{15, 10, 30,
-                                                  6, 45, 100, 41503});
+                                                  6, 10, 100, 41503});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 1);
   EXPECT_EQ(serializer.addEventCallCounter, 0);
+}
+
+TEST_F(Timepix3PixelEventHandlerTest, TestEventProccesedAndPublished) {
+
+  serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
+  testEventHandler.applyData({TEST_PULSE_TIME_NS, TEST_TDC_PIXEL_TIME_IN_NS});
+  testEventHandler.applyData(PixelReadout{15, 10, 30,
+                                                  6, 10, 20000, 41503});
+
+  testEventHandler.pushDataToKafka();
+  EXPECT_EQ(counters.EventTimeForNextPulse, 0);
+  EXPECT_EQ(serializer.addEventCallCounter, 1);
 }
 
 int main(int argc, char **argv) {

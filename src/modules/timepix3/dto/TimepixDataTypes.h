@@ -21,10 +21,10 @@ namespace timepixDTO {
 
 struct ESSGlobalTimeStamp {
   const uint64_t pulseTimeInEpochNs;
-  const uint32_t tdcClockInPixelTime;
+  const uint64_t tdcClockInPixelTime;
 
   ESSGlobalTimeStamp(const uint64_t &pulseTimeInEpochNs,
-                     const uint32_t &tdcClockInPixelTime)
+                     const uint64_t &tdcClockInPixelTime)
       : pulseTimeInEpochNs(pulseTimeInEpochNs),
         tdcClockInPixelTime(tdcClockInPixelTime) {}
 
