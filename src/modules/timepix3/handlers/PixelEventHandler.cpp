@@ -31,12 +31,12 @@ PixelEventHandler::PixelEventHandler(Counters &statCounters,
     : statCounters(statCounters), geometry(geometry), serializer(serializer) {
 
   clusterers.resize(geometry->getChunkNumber());
-  windows.resize(geometry->getChunkNumber());
+  sub2DFrames.resize(geometry->getChunkNumber());
 
   for (int i = 0; i < geometry->getChunkNumber(); i++) {
     clusterers[i] = std::make_unique<Hierarchical2DClusterer>(
         Hierarchical2DClusterer(1, 5));
-    windows[i] = Hit2DVector();
+    sub2DFrames[i] = Hit2DVector();
   }
 }
 
@@ -74,7 +74,7 @@ void PixelEventHandler::applyData(const PixelReadout &pixelReadout) {
   int windowIndex = geometry->getChunkWindowIndex(X, Y);
   // Add the hit to the corresponding window vector
 
-  windows[windowIndex].push_back(
+  sub2DFrames[windowIndex].push_back(
       {pixelGlobalTimeStamp, X, Y, pixelReadout.ToT});
 }
 
@@ -91,13 +91,13 @@ void PixelEventHandler::pushDataToKafka() {
 
   std::vector<std::future<void>> futures;
 
-  int windowsLength = windows.size();
+  int windowsLength = sub2DFrames.size();
 
   if (windowsLength == 1) {
-    clusterHits(*clusterers[0], windows[0]);
+    clusterHits(*clusterers[0], sub2DFrames[0]);
   } else {
     for (int i = 0; i < windowsLength; i++) {
-      auto &window = windows[i];
+      auto &window = sub2DFrames[i];
       if (window.size() > 0) {
         futures.push_back(
             std::async(std::launch::async, &PixelEventHandler::clusterHits,
@@ -112,7 +112,7 @@ void PixelEventHandler::pushDataToKafka() {
     }
   }
 
-  for (auto &window : windows) {
+  for (auto &window : sub2DFrames) {
     window.clear();
   }
 
