@@ -82,7 +82,7 @@ void PerfGenBase::processingThread() {
   UdderImage.cachePixels(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
 
   int TimeOfFlight{0};
-  int EventsPerPulse{500};
+  uint32_t EventsPerPulse{EFUSettings.TestImageEventsPerPulse};
 
   // ns since 1970 - but with a resolution of one second
   uint64_t EfuTimeRef = 1000000000LU * (uint64_t)time(NULL);
@@ -94,7 +94,7 @@ void PerfGenBase::processingThread() {
     XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
     Serializer.checkAndSetReferenceTime(EfuTime);
 
-    for (int i = 0; i < EventsPerPulse; i++) {
+    for (uint32_t i = 0; i < EventsPerPulse; i++) {
       auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
       Serializer.addEvent(TimeOfFlight, PixelId);
       mystats.events_udder++;
