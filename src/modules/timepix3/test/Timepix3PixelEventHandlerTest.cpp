@@ -5,6 +5,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common/kafka/EV44Serializer.h"
+#include "common/kafka/Producer.h"
 #include "geometry/Timepix3Geometry.h"
 #include "gtest/gtest.h"
 #include <common/testutils/TestBase.h>
@@ -43,21 +44,47 @@ public:
 // pixel time and the spidr time is close as possible to this event.
 //
 // Manipulate ToA and FToA to test different situations
-struct PixelTimeTestHelper {
+class PixelTimeTestHelper {
+public:
   const uint16_t ToA;
   const uint8_t fToA;
-  const uint16_t ToT{200};
-  const uint32_t spidrTime{41503};
-  const uint64_t tdcClockInPixelTime{16999999997};
+
+  const uint16_t ToT;
+  const uint32_t spidrTime;
+  const uint64_t tdcClockInPixelTime;
+
   const uint64_t pixelClockTime;
 
   PixelTimeTestHelper(int16_t ToA, uint8_t fToA)
-      : ToA(ToA), fToA(fToA),
-        pixelClockTime(409600 * static_cast<uint64_t>(spidrTime) +
-                       25 * static_cast<uint64_t>(ToA) -
-                       1.5625 * static_cast<uint64_t>(fToA)) {}
+      : ToA(ToA), fToA(fToA), ToT(200), spidrTime(41503),
+        tdcClockInPixelTime(16999999997),
+        pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
 
-  uint32_t getEventTof() const { return pixelClockTime - tdcClockInPixelTime; }
+  PixelTimeTestHelper(int16_t ToA, uint8_t fToA, uint32_t spidrTime,
+                      uint64_t tdcClockInPixelTime)
+      : ToA(ToA), fToA(fToA), ToT(200), spidrTime(spidrTime),
+        tdcClockInPixelTime(tdcClockInPixelTime),
+        pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
+
+  uint32_t getEventTof() const {
+
+    if (pixelClockTime < tdcClockInPixelTime) {
+      // Expected behaviour if the pixel clock resets that we calculate the time
+      // between the last TDC clock and the max pixel clock value and then add
+      // the pixel clock time (time clock counted after the reset)
+      return PIXEL_MAX_TIMESTAMP_NS - tdcClockInPixelTime + pixelClockTime;
+    }
+
+    return pixelClockTime - tdcClockInPixelTime;
+  }
+
+private:
+  uint64_t calculatePixelClockTime(uint32_t spidrTime, int16_t ToA,
+                                   uint8_t fToA) {
+    return 409600 * static_cast<uint64_t>(spidrTime) +
+           25 * static_cast<uint64_t>(ToA) -
+           1.5625 * static_cast<uint64_t>(fToA);
+  }
 };
 
 // Default pixel time 1ns after the tdc clock
@@ -124,7 +151,7 @@ TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
   EXPECT_EQ(counters.InvalidPixelReadout, 1);
 }
 
-TEST_F(Timepix3PixelEventHandlerTest, TestIfTofIsBiggerThenFrequency) {
+TEST_F(Timepix3PixelEventHandlerTest, TestIfEventIsLaterThenNextTdc) {
 
   // This value ensures that the pixel time is later then the tdc clock
   uint32_t spidrLateArrival = 55000;
@@ -144,7 +171,7 @@ TEST_F(Timepix3PixelEventHandlerTest, TestIfTofIsBiggerThenFrequency) {
   EXPECT_EQ(serializer.addEventCallCounter, 0);
 }
 
-TEST_F(Timepix3PixelEventHandlerTest, TestEventProccesedAndPublished) {
+TEST_F(Timepix3PixelEventHandlerTest, TestEventTimeShortlyAfterTdcPublished) {
 
   serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
   serializer.pixelIdToCompare = TEST_PIXEL_ID;
@@ -156,6 +183,29 @@ TEST_F(Timepix3PixelEventHandlerTest, TestEventProccesedAndPublished) {
       PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
                    TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
                    TEST_DEFAULT_PIXEL_TIME.spidrTime});
+
+  testEventHandler.pushDataToKafka();
+  EXPECT_EQ(counters.EventTimeForNextPulse, 0);
+  EXPECT_EQ(counters.TofCount, 1);
+  EXPECT_EQ(counters.PixelErrors, 0);
+  EXPECT_EQ(counters.Events, 1);
+  EXPECT_EQ(serializer.addEventCallCounter, 1);
+}
+
+TEST_F(Timepix3PixelEventHandlerTest, TestPixelIsAfterReset) {
+
+  PixelTimeTestHelper pixelAfterReset =
+      PixelTimeTestHelper(80, 0, 0, PIXEL_MAX_TIMESTAMP_NS - 2000);
+
+  serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
+  serializer.pixelIdToCompare = TEST_PIXEL_ID;
+  serializer.eventTimeToCompare = pixelAfterReset.getEventTof();
+
+  testEventHandler.applyData(
+      {TEST_PULSE_TIME_NS, pixelAfterReset.tdcClockInPixelTime});
+  testEventHandler.applyData(PixelReadout{
+      TEST_DCOL, TEST_SPIX, TEST_PIX, pixelAfterReset.ToT, pixelAfterReset.fToA,
+      pixelAfterReset.ToA, pixelAfterReset.spidrTime});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 0);

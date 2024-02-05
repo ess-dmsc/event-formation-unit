@@ -162,15 +162,6 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
   clusters.clear();
 }
 
-/**
- * Calculates the global time for a pixel event based on the Time over Threshold
- * (ToA), the fine Time over Threshold (fToA), and the SPIDR time.
- *
- * @param toa The Time over Threshold value.
- * @param fToA The fine Time over Threshold value.
- * @param spidrTime The SPIDR time.
- * @return The calculated global time for the pixel event.
- */
 uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
                                                 const uint8_t &fToA,
                                                 const uint32_t &spidrTime) {
@@ -181,15 +172,19 @@ uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
                             25 * static_cast<uint64_t>(toa) -
                             1.5625 * static_cast<uint64_t>(fToA);
 
+  // Handle the case if pixel clock is smaller then the tdc clock
+  // happens in case of pixel clock reset between two tdc
   if (lastEpochESSPulseTime->tdcClockInPixelTime > pixelClockTime) {
 
+    // Calculate time until reset from the last tdc time
     uint64_t timeUntilReset =
         PIXEL_MAX_TIMESTAMP_NS - lastEpochESSPulseTime->tdcClockInPixelTime;
 
     return lastEpochESSPulseTime->pulseTimeInEpochNs + timeUntilReset +
            pixelClockTime;
-  } else { 
-           uint64_t tofInPixelTime = pixelClockTime - lastEpochESSPulseTime->tdcClockInPixelTime;
+  } else {
+    uint64_t tofInPixelTime =
+        pixelClockTime - lastEpochESSPulseTime->tdcClockInPixelTime;
     return lastEpochESSPulseTime->pulseTimeInEpochNs + tofInPixelTime;
   }
 }
