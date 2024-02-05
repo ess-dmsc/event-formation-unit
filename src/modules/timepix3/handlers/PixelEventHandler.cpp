@@ -91,17 +91,19 @@ void PixelEventHandler::pushDataToKafka() {
 
   std::vector<std::future<void>> futures;
 
-  int windowsLength = sub2DFrames.size();
+  int sub2DFramesNumber = sub2DFrames.size();
 
-  if (windowsLength == 1) {
+  if (sub2DFramesNumber == 1) {
     clusterHits(*clusterers[0], sub2DFrames[0]);
   } else {
-    for (int i = 0; i < windowsLength; i++) {
-      auto &window = sub2DFrames[i];
-      if (window.size() > 0) {
+    /// \todo parrallel processing of the subFrames not yet finalized and this
+    /// part not tested. Finish the implementation for parrallel processing.
+    for (int i = 0; i < sub2DFramesNumber; i++) {
+      auto &subFrame = sub2DFrames[i];
+      if (subFrame.size() > 0) {
         futures.push_back(
             std::async(std::launch::async, &PixelEventHandler::clusterHits,
-                       this, std::ref(*clusterers[i]), std::ref(window)));
+                       this, std::ref(*clusterers[i]), std::ref(subFrame)));
       }
     }
 
