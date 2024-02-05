@@ -38,35 +38,52 @@ public:
   MOCK_METHOD(size_t, addEvent, (int32_t time, int32_t pixelId), (override));
 };
 
+// Helper class to calculate pixel time and event time of flight for testing
+// By default values are represent a situation where tdc arrives at ~17s in
+// pixel time and the spidr time is close as possible to this event.
+//
+// Manipulate ToA and FToA to test different situations
+struct PixelTimeTestHelper {
+  const uint16_t ToA;
+  const uint8_t fToA;
+  const uint16_t ToT{200};
+  const uint32_t spidrTime{41503};
+  const uint64_t tdcClockInPixelTime{16999999997};
+  const uint64_t pixelClockTime;
+
+  PixelTimeTestHelper(int16_t ToA, uint8_t fToA)
+      : ToA(ToA), fToA(fToA),
+        pixelClockTime(409600 * static_cast<uint64_t>(spidrTime) +
+                       25 * static_cast<uint64_t>(ToA) -
+                       1.5625 * static_cast<uint64_t>(fToA)) {}
+
+  uint32_t getEventTof() const { return pixelClockTime - tdcClockInPixelTime; }
+};
+
+// Default pixel time 1ns after the tdc clock
+static const PixelTimeTestHelper TEST_DEFAULT_PIXEL_TIME{14848, 1};
+
 class Timepix3PixelEventHandlerTest : public TestBase {
 protected:
+  static constexpr int64_t TEST_PULSE_TIME_NS = 1706778348000000000;
+  static constexpr uint64_t TEST_X_COORD = 35;
+  static constexpr uint64_t TEST_Y_COORD = 115;
+  static constexpr uint8_t TEST_PIX = 8;
+
   Counters counters{};
   shared_ptr<Timepix3Geometry> geometry{new Timepix3Geometry(256, 256, 1)};
   MockEV44Serializer serializer;
   PixelEventHandler testEventHandler{counters, geometry, serializer};
 
-  static constexpr int64_t TEST_PULSE_TIME_NS = 1706778348000000240;
-
-  // TDC clock information to calculate TDC pxel time for
-  // quarter: 2
-  // pixel time: 17s
-  static constexpr uint64_t TEST_TDC_TIMESTAMP = 14029934583;
-  static constexpr uint64_t TEST_TDC_FINE_CLOCK = 100;
-  static constexpr uint64_t TEST_TDC_TIMESTAMP_NS =
-      TEST_TDC_TIMESTAMP * TDC_CLOCK_BIN_NS +
-      TEST_TDC_FINE_CLOCK * TDC_FINE_CLOCK_BIN_NS;
-
-  static constexpr uint8_t TEST_TDC_QUARTER =
-      uint8_t(TEST_TDC_TIMESTAMP_NS / PIXEL_MAX_TIMESTAMP_NS);
-
-  static constexpr uint64_t TEST_TDC_PIXEL_TIME_IN_NS =
-      TEST_TDC_TIMESTAMP_NS - (PIXEL_MAX_TIMESTAMP_NS * TEST_TDC_QUARTER);
+  // Setup test pixel information, use geometry to calculate pixel id. Geometry
+  // separately tested.
+  const uint32_t TEST_PIXEL_ID = geometry->pixel2D(TEST_X_COORD, TEST_Y_COORD);
+  const uint16_t TEST_DCOL = TEST_X_COORD - (TEST_PIX / 4);
+  const uint16_t TEST_SPIX = TEST_Y_COORD - (TEST_PIX & 0x3);
 
   void SetUp() override {
-    // Recreate initialize test objects to reset their memory
-    new (&counters) Counters();
-    new (&serializer) MockEV44Serializer();
-    new (&testEventHandler) PixelEventHandler(counters, geometry, serializer);
+    // Recreate initialize test objects to reset their
+    // memoryTEST_TDC_PIXEL_TIME_IN_NSy, serializer);
 
     ON_CALL(serializer, setReferenceTime(testing::_))
         .WillByDefault([this](int64_t referenceTime) {
@@ -92,24 +109,35 @@ protected:
 TEST_F(Timepix3PixelEventHandlerTest, SerializerReferenceTimeUpdated) {
 
   serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
-  testEventHandler.applyData({TEST_PULSE_TIME_NS, TEST_TDC_PIXEL_TIME_IN_NS});
+  testEventHandler.applyData(
+      {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
 }
 
 TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
-  
-  testEventHandler.applyData(PixelReadout{15, 2231, 30,
-                                                  6, 45, 100, 41503});
+
+  uint16_t INVALID_SPIX = 500;
+  testEventHandler.applyData(PixelReadout{
+      TEST_DCOL, INVALID_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
+      TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+      TEST_DEFAULT_PIXEL_TIME.spidrTime});
 
   EXPECT_EQ(counters.InvalidPixelReadout, 1);
 }
 
-
 TEST_F(Timepix3PixelEventHandlerTest, TestIfTofIsBiggerThenFrequency) {
 
-  serializer.pulseTimeToCompare = 100000;
-  testEventHandler.applyData({100000, 23});
-  testEventHandler.applyData(PixelReadout{15, 10, 30,
-                                                  6, 10, 100, 41503});
+  // This value ensures that the pixel time is later then the tdc clock
+  uint32_t spidrLateArrival = 55000;
+
+  serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
+
+  testEventHandler.applyData(
+      {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
+
+  testEventHandler.applyData(
+      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
+                   TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+                   spidrLateArrival});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 1);
@@ -119,12 +147,21 @@ TEST_F(Timepix3PixelEventHandlerTest, TestIfTofIsBiggerThenFrequency) {
 TEST_F(Timepix3PixelEventHandlerTest, TestEventProccesedAndPublished) {
 
   serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
-  testEventHandler.applyData({TEST_PULSE_TIME_NS, TEST_TDC_PIXEL_TIME_IN_NS});
-  testEventHandler.applyData(PixelReadout{15, 10, 30,
-                                                  6, 10, 20000, 41503});
+  serializer.pixelIdToCompare = TEST_PIXEL_ID;
+  serializer.eventTimeToCompare = TEST_DEFAULT_PIXEL_TIME.getEventTof();
+
+  testEventHandler.applyData(
+      {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
+  testEventHandler.applyData(
+      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
+                   TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+                   TEST_DEFAULT_PIXEL_TIME.spidrTime});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 0);
+  EXPECT_EQ(counters.TofCount, 1);
+  EXPECT_EQ(counters.PixelErrors, 0);
+  EXPECT_EQ(counters.Events, 1);
   EXPECT_EQ(serializer.addEventCallCounter, 1);
 }
 

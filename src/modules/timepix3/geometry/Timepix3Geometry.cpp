@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <geometry/Timepix3Geometry.h>
 
 // #undef TRC_LEVEL
@@ -52,14 +53,14 @@ int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
 uint32_t Timepix3Geometry::calcX(const PixelReadout &Data) const {
-  uint32_t Col = Data.dCol + Data.pix / 4;
+  uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
   return Col;
 }
 
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
 uint32_t Timepix3Geometry::calcY(const PixelReadout &Data) const {
-  uint32_t Row = Data.sPix + (Data.pix & 0x3);
+  uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
   return Row;
 }
 
