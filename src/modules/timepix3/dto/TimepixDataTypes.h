@@ -57,7 +57,7 @@ struct TDCDataEvent {
   const uint16_t counter;
   const uint64_t tdcTimeStamp;
   const uint8_t pixelClockQuarter;
-  const uint32_t tdcTimeInPixelClock;
+  const uint64_t tdcTimeInPixelClock;
 
   const std::chrono::high_resolution_clock::time_point arrivalTimestamp;
 
@@ -65,8 +65,7 @@ struct TDCDataEvent {
       : counter(triggerCounter), tdcTimeStamp(TDC_CLOCK_BIN_NS * timestamp +
                                               TDC_FINE_CLOCK_BIN_NS * stamp),
         pixelClockQuarter(uint8_t(tdcTimeStamp / PIXEL_MAX_TIMESTAMP_NS)),
-        tdcTimeInPixelClock(tdcTimeStamp -
-                            (PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter)),
+        tdcTimeInPixelClock(tdcTimeStamp - PIXEL_MAX_TIMESTAMP_NS * pixelClockQuarter),
         arrivalTimestamp(std::chrono::high_resolution_clock::now()) {}
 
   // Equality comparison operator
