@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -32,17 +32,19 @@ public:
   /// produced
   uint32_t checkAndSetReferenceTime(int64_t Time);
 
-  /// \brief changes reference time
-  void setReferenceTime(int64_t Time);
+  /// \brief changes reference time. 
+  /// Function is virtual to allow mocking
+  virtual void setReferenceTime(int64_t Time);
 
   /// \returns the currently set reference time
   int64_t referenceTime() const;
 
   /// \brief adds event, if maximum count is exceeded, sends data using the
   /// producer callback \param time time of event in relation to pulse time
+  /// Function is virtual to allow mocking
   /// \param pixl id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
-  size_t addEvent(int32_t Time, int32_t Pixel);
+  virtual size_t addEvent(int32_t Time, int32_t Pixel);
 
   /// \returns current message counter
   uint64_t currentMessageId() const;

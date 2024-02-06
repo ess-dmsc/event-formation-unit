@@ -12,15 +12,17 @@ set(timepix3_common_inc
   geometry/Config.h
   dataflow/DataObserverTemplate.h
   geometry/Timepix3Geometry.h
-  readout/DataEventTypes.h
-  readout/TimingEventHandler.h
+  dto/TimepixDataTypes.h
+  handlers/TimingEventHandler.h
+  handlers/PixelEventHandler.h
   readout/DataParser.h
   Timepix3Instrument.h
   )
 set(timepix3_common_src
   Timepix3Base.cpp
-  readout/TimingEventHandler.cpp
   readout/DataParser.cpp
+  handlers/TimingEventHandler.cpp
+  handlers/PixelEventHandler.cpp
   Timepix3Instrument.cpp
   geometry/Config.cpp
   geometry/Timepix3Geometry.cpp
@@ -75,6 +77,25 @@ set(Timepix3ParserTest_SRC
   test/Timepix3ParserTest.cpp
 )
 create_test_executable(Timepix3ParserTest)
+
+set(Timepix3TimingEventHandlerTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3TimingEventHandlerTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3TimingEventHandlerTest.cpp
+)
+create_test_executable(Timepix3TimingEventHandlerTest)
+
+set(Timepix3PixelEventHandlerTest_INC
+  ${timepix3_common_inc}
+)
+add_compile_options(-Wno-maybe-uninitialized)
+set(Timepix3PixelEventHandlerTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3PixelEventHandlerTest.cpp
+)
+create_test_executable(Timepix3PixelEventHandlerTest)
 
 set(Timepix3GeometryTest_INC
   ${timepix3_common_inc}

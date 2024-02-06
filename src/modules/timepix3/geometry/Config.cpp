@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,6 +40,7 @@ Config::Config(std::string ConfigFile) {
   try {
     XResolution = root["XResolution"].get<uint16_t>();
     YResolution = root["YResolution"].get<uint16_t>();
+    parallelThreads = root["ParallelThreads"].get<uint16_t>();
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",

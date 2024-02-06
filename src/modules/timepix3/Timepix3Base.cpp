@@ -7,8 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "timepix3/Timepix3Base.h"
-
-#include <cinttypes>
+#include "Counters.h"
+#include "Timepix3Instrument.h"
+#include "common/kafka/EV44Serializer.h"
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
@@ -16,10 +17,8 @@
 #include <common/kafka/KafkaConfig.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
+#include <memory>
 #include <stdio.h>
-#include <timepix3/Timepix3Instrument.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -29,7 +28,9 @@ namespace Timepix3 {
 
 const char *classname = "Timepix3 detector with ESS readout";
 
-Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
+Timepix3Base::Timepix3Base(BaseSettings const &settings)
+    : Detector(settings), timepix3Configuration(settings.ConfigFile) {
+
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -38,25 +39,31 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-
  
+  // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
-  Stats.create("readouts.pixel_before_tdc_count", Counters.PixelReadoutFromBeforeTDC);
-  Stats.create("readouts.tdc_readout_count", Counters.TDCReadouts);
-  Stats.create("readouts.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
-  Stats.create("readouts.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
-  Stats.create("readouts.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
-  Stats.create("readouts.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
-  Stats.create("readouts.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
-  Stats.create("readouts.globaltimestamp_readout_count", Counters.GlobalTimestampReadouts);
-  Stats.create("readouts.evrtimestamp_readout_count", Counters.EVRTimestampReadouts);
-  Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadouts);
-  Stats.create("readouts.tof_count", Counters.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.PrevTofNegative);
-  Stats.create("readouts.tof_high", Counters.TofHigh);
-  Stats.create("readouts.prevtof_high", Counters.PrevTofHigh);
+  Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
+  Stats.create("readouts.tdc.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
+  Stats.create("readouts.tdc.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
+  Stats.create("readouts.tdc.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
+  Stats.create("readouts.tdc.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
+  Stats.create("readouts.evr.evr_readout_count", Counters.EVRReadoutCounter);
+  Stats.create("readouts.tdc.tdc_readout_count", Counters.TDCReadoutCounter);
+  Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
+
+  // Counters related to timing event handling and time syncronization
+  Stats.create("handlers.pixelevent.no_global_time_error", Counters.NoGlobalTime);
+  Stats.create("handlers.pixelevent.invalid_pixel_readout", Counters.InvalidPixelReadout);
+  Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
+  Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
+  Stats.create("handlers.timingevent.evr_pair_count", Counters.EVRPairFound);
+  Stats.create("handlers.timingevent.tdc_pair_count", Counters.TDCPairFound);
+
+  // Counters related to pixel event handling and event calculation
+  Stats.create("handlers.pixelevent.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
+  Stats.create("handlers.pixelevent.tof_count", Counters.TofCount);
+  Stats.create("handlers.pixelevent.tof_neg", Counters.TofNegative);
+  Stats.create("handlers.pixelevent.prevtof_count", Counters.PrevTofCount);
 
   // Events
   Stats.create("events.count", Counters.Events);
@@ -65,7 +72,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   // System counters
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
@@ -82,14 +88,15 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   std::function<void()> processingFunc = [this]() {
     Timepix3Base::processingThread();
   };
+
   Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d Timepix3 Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-///
-/// \brief Normal processing thread
+/// Counters
+///  \brief Normal processing thread
 void Timepix3Base::processingThread() {
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INIT, ERR, "No kafka topic set, using DetectorName + _detector");
@@ -104,10 +111,9 @@ void Timepix3Base::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "timepix3", Produce);
-  Timepix3Instrument Timepix3(Counters, EFUSettings);
-  Timepix3.setSerializer(
-      Serializer); // would rather have this in Timepix3Instrument
+  Serializer = std::make_unique<EV44Serializer>(
+      EV44Serializer(KafkaBufferSize, "timepix3", Produce));
+  Timepix3Instrument Timepix3(Counters, timepix3Configuration, *Serializer);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -127,12 +133,9 @@ void Timepix3Base::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       XTRACE(DATA, DEB, "parsing data");
-      // parse readout data
-      Timepix3.Timepix3Parser.parse(DataPtr, DataLen);
+      Timepix3.timepix3Parser.parse(DataPtr, DataLen);
 
       XTRACE(DATA, DEB, "processing data");
-
-      // Process readouts, generate (end produce) events
       Timepix3.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
@@ -144,7 +147,6 @@ void Timepix3Base::processingThread() {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
-
       Serializer->produce();
     }
     /// Kafka stats update - common to all detectors
