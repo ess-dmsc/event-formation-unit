@@ -28,6 +28,10 @@ TEST_F(ReadoutTest, Constructor) {
   ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 0);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
   ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorTimeHigh, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorTimeFrac, 0);
+  ASSERT_EQ(RdOut.Stats.Version0Header, 0);
+  ASSERT_EQ(RdOut.Stats.Version1Header, 0);
 }
 
 // nullptr as buffer
@@ -68,11 +72,23 @@ TEST_F(ReadoutTest, ErrorCookie) {
   ASSERT_EQ(RdOut.Stats.ErrorCookie, 1);
 }
 
-TEST_F(ReadoutTest, ErrorVersion) {
+TEST_F(ReadoutTest, ErrVersion) {
   auto Res =
       RdOut.validate((char *)&ErrVersion[0], ErrVersion.size(), DataType);
   ASSERT_EQ(Res, -Parser::EHEADER);
   ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
+}
+
+TEST_F(ReadoutTest, V0HeaderCount) {
+  auto Res = RdOut.validate((char *)&OkVersionV0[0], OkVersionV0.size() + 8, DataType);
+  ASSERT_EQ(Res, -Parser::OK);
+  ASSERT_EQ(RdOut.Stats.Version0Header, 1);
+}
+
+TEST_F(ReadoutTest, V1HeaderCount) {
+  auto Res = RdOut.validate((char *)&OkVersionV1[0], OkVersionV1.size() + 8, DataType);
+  ASSERT_EQ(Res, -Parser::OK);
+  ASSERT_EQ(RdOut.Stats.Version1Header, 1);
 }
 
 TEST_F(ReadoutTest, ErrMaxOutputQueue) {
@@ -82,20 +98,38 @@ TEST_F(ReadoutTest, ErrMaxOutputQueue) {
   ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 1);
 }
 
-TEST_F(ReadoutTest, OkVersion) {
+TEST_F(ReadoutTest, OkV0Version) {
   unsigned int Errors{0};
   unsigned int MinSize{7};
-  for (unsigned int Size = MinSize; Size < OkVersion.size(); Size++) {
+  for (unsigned int Size = MinSize; Size < OkVersionV0.size(); Size++) {
     Errors++;
-    auto Res = RdOut.validate((char *)&OkVersion[0], Size, DataType);
+    auto Res = RdOut.validate((char *)&OkVersionV0[0], Size, DataType);
     ASSERT_EQ(Res, -Parser::ESIZE);
     ASSERT_EQ(RdOut.Stats.ErrorSize, Errors);
     ASSERT_EQ(RdOut.Packet.DataPtr, nullptr);
   }
-  auto Res = RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
+  auto Res = RdOut.validate((char *)&OkVersionV0[0], OkVersionV0.size(), DataType);
   ASSERT_EQ(Res, Parser::OK);
   ASSERT_EQ(RdOut.Packet.DataPtr,
-            (char *)(&OkVersion[0] + sizeof(Parser::PacketHeaderV0)));
+            (char *)(&OkVersionV0[0] + sizeof(Parser::PacketHeaderV0)));
+  ASSERT_EQ(RdOut.Packet.DataLength, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
+}
+
+TEST_F(ReadoutTest, OkV1Version) {
+  unsigned int Errors{0};
+  unsigned int MinSize{7};
+  for (unsigned int Size = MinSize; Size < OkVersionV1.size(); Size++) {
+    Errors++;
+    auto Res = RdOut.validate((char *)&OkVersionV1[0], Size, DataType);
+    ASSERT_EQ(Res, -Parser::ESIZE);
+    ASSERT_EQ(RdOut.Stats.ErrorSize, Errors);
+    ASSERT_EQ(RdOut.Packet.DataPtr, nullptr);
+  }
+  auto Res = RdOut.validate((char *)&OkVersionV1[0], OkVersionV1.size(), DataType);
+  ASSERT_EQ(Res, Parser::OK);
+  ASSERT_EQ(RdOut.Packet.DataPtr,
+            (char *)(&OkVersionV1[0] + sizeof(Parser::PacketHeaderV1)));
   ASSERT_EQ(RdOut.Packet.DataLength, 0);
   ASSERT_EQ(RdOut.Stats.ErrorOutputQueue, 0);
 }
@@ -103,7 +137,7 @@ TEST_F(ReadoutTest, OkVersion) {
 TEST_F(ReadoutTest, SeqNumbers) {
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
 
-  RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
+  RdOut.validate((char *)&OkVersionV0[0], OkVersionV0.size(), DataType);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 1);
 
   RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(),

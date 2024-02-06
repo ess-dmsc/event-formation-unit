@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/ESSTime.h>
+#include <cstdint>
 
 namespace ESSReadout {
 
@@ -25,6 +26,8 @@ struct ESSHeaderStats {
   int64_t ErrorSeqNum{0};
   int64_t ErrorTimeHigh{0};
   int64_t ErrorTimeFrac{0};
+  int64_t Version0Header{0};
+  int64_t Version1Header{0};
   int64_t HeartBeats{0};
 };
 
@@ -35,6 +38,7 @@ const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 class Parser {
 public:
+  enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType {
     Reserved = 0x00,
@@ -52,10 +56,26 @@ public:
 
   uint64_t NextSeqNum[MaxOutputQueues];
 
+  class PacketHeader {
+  public:
+    virtual ~PacketHeader() {}
+
+    virtual uint8_t getVersion() const = 0;
+    virtual uint32_t getCookieAndType() const = 0;
+    virtual uint16_t getTotalLength() const = 0;
+    virtual uint8_t getOutputQueue() const = 0;
+    virtual uint8_t getTimeSource() const = 0;
+    virtual uint32_t getPulseHigh() const = 0;
+    virtual uint32_t getPulseLow() const = 0;
+    virtual uint32_t getPrevPulseHigh() const = 0;
+    virtual uint32_t getPrevPulseLow() const = 0;
+    virtual uint32_t getSeqNum() const = 0;
+  } __attribute__((packed));
+
   // Header common to all ESS readout data
   // Reviewed ICD (version 2) packet header version 0
-  // ownCloud: https://project.esss.dk/owncloud/index.php/s/DWNer23727TiI1x
-  struct PacketHeaderV0 {
+  // ownCloud: https://project.esss.dk/nextcloud/index.php/s/DWNer23727TiI1x
+  struct PacketHeaderV0 : public PacketHeader {
     uint8_t Padding0;
     uint8_t Version;
     uint32_t CookieAndType;
@@ -67,14 +87,77 @@ public:
     uint32_t PrevPulseHigh;
     uint32_t PrevPulseLow;
     uint32_t SeqNum;
+
+    virtual ~PacketHeaderV0() {}
+
+    virtual uint8_t getVersion() const override { return Version; }
+
+    virtual uint32_t getCookieAndType() const override { return CookieAndType; }
+
+    virtual uint16_t getTotalLength() const override { return TotalLength; }
+
+    virtual uint8_t getOutputQueue() const override { return OutputQueue; }
+
+    virtual uint8_t getTimeSource() const override { return TimeSource; }
+
+    virtual uint32_t getPulseHigh() const override { return PulseHigh; }
+
+    virtual uint32_t getPulseLow() const override { return PulseLow; }
+
+    virtual uint32_t getPrevPulseHigh() const override { return PrevPulseHigh; }
+
+    virtual uint32_t getPrevPulseLow() const override { return PrevPulseLow; }
+
+    virtual uint32_t getSeqNum() const override { return SeqNum; }
   } __attribute__((packed));
 
-  static_assert(sizeof(Parser::PacketHeaderV0) == (30),
+  // Header common to all ESS readout data
+  // Reviewed ICD (version 2) packet header version 0
+  // ownCloud: https://project.esss.dk/nextcloud/index.php/s/DWNer23727TiI1x
+  struct PacketHeaderV1 : public PacketHeader {
+    uint8_t Padding0;
+    uint8_t Version;
+    uint32_t CookieAndType;
+    uint16_t TotalLength;
+    uint8_t OutputQueue;
+    uint8_t TimeSource;
+    uint32_t PulseHigh;
+    uint32_t PulseLow;
+    uint32_t PrevPulseHigh;
+    uint32_t PrevPulseLow;
+    uint32_t SeqNum;
+    uint16_t CMACPadd;
+
+    virtual uint8_t getVersion() const override { return Version; }
+
+    virtual uint32_t getCookieAndType() const override { return CookieAndType; }
+
+    virtual uint16_t getTotalLength() const override { return TotalLength; }
+
+    virtual uint8_t getOutputQueue() const override { return OutputQueue; }
+
+    virtual uint8_t getTimeSource() const override { return TimeSource; }
+
+    virtual uint32_t getPulseHigh() const override { return PulseHigh; }
+
+    virtual uint32_t getPulseLow() const override { return PulseLow; }
+
+    virtual uint32_t getPrevPulseHigh() const override { return PrevPulseHigh; }
+
+    virtual uint32_t getPrevPulseLow() const override { return PrevPulseLow; }
+
+    virtual uint32_t getSeqNum() const override { return SeqNum; }
+  } __attribute__((packed));
+
+  static_assert(sizeof(Parser::PacketHeaderV0) == (38),
+                "Wrong header size (update assert or check packing)");
+
+  static_assert(sizeof(Parser::PacketHeaderV1) == (40),
                 "Wrong header size (update assert or check packing)");
 
   // Holds data relevant for processing of the current packet
   struct PacketDataV0 {
-    PacketHeaderV0 *HeaderPtr{nullptr};
+    PacketHeader *HeaderPtr{nullptr};
     uint16_t DataLength{0};
     char *DataPtr{nullptr};
     ESSTime Time;

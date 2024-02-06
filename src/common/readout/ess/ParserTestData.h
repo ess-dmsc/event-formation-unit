@@ -25,7 +25,7 @@ std::vector<uint8_t> ErrCookie
 // wrong version, good cookie
 std::vector<uint8_t> ErrVersion
 {
-    0x00, 0x01,             // pad, v1
+    0x00, 0x12,             // pad, v10
     0x45, 0x53, 0x53        // 'E', 'S', 'S'
 };
 
@@ -51,9 +51,10 @@ std::vector<uint8_t> ErrMaxOutputQueue
 };
 
 // An OK packet must be at least sizeof(Readout::PacketHeaderV0)
+// or sizeof(Readout::PacketHeaderV1)
 // Next two packets must belong to same output queue because we're
 // also testing sequence numbers
-std::vector<uint8_t> OkVersion
+std::vector<uint8_t> OkVersionV0
 {
                 0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x30, // 'E', 'S', 'S', type 0x30
@@ -63,6 +64,22 @@ std::vector<uint8_t> OkVersion
     0x00, 0x00, 0x00, 0x00, // PPT HI
     0x00, 0x00, 0x00, 0x00, // PPT Lo
     0x07, 0x00, 0x00, 0x00  // Seq number 7
+};
+
+// An OK packet must be at least sizeof(Readout::PacketHeaderV0)
+// or sizeof(Readout::PacketHeaderV1)
+// Next two packets must belong to same output queue because we're
+// also testing sequence numbers
+std::vector<uint8_t> OkVersionV1
+{
+    0x00, 0x01, 0x45, 0x53, // Padding, V1, 'E', 'S'
+    0x53, 0x30, 0x20, 0x00, // 'S', 'S', type 0x30, len(0x001e)
+    0x17, 0x00, 0x00, 0x00, // OQ23, TSrc0, PT HI,
+    0x00, 0x00, 0x00, 0x00, // PT HI, PT Lo
+    0x00, 0x00, 0x00, 0x00, // PT Lo, PPT HI
+    0x00, 0x00, 0x00, 0x00, // PPT HI, PPT Lo
+    0x00, 0x00, 0x07, 0x00, // PPT Lo, Seq number 7
+    0x00, 0x00, 0x00, 0x00  // Seq number 7, CMAC Padding
 };
 
 // must be at least sizeof(Readout::PacketHeaderV0)
