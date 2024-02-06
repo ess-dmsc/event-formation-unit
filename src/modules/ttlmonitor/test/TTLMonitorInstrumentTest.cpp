@@ -4,6 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/testutils/HeaderFactory.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
@@ -96,7 +97,7 @@ protected:
   BaseSettings Settings;
   std::vector<EV44Serializer> serializers;
   TTLMonitorInstrument *ttlmonitor;
-  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
+  std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
@@ -105,17 +106,16 @@ protected:
     serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
     counters = {};
 
-    memset(&PacketHeader, 0, sizeof(PacketHeader));
-
+    headerFactory = std::make_unique<TestHeaderFactory>();
     ttlmonitor = new TTLMonitorInstrument(counters, Settings);
     ttlmonitor->Serializers.push_back(&serializers[0]);
-    ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = &PacketHeader;
+    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);

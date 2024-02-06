@@ -51,11 +51,13 @@ uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
 }
 
 void DreamInstrument::processReadouts() {
+  /// \todo We have a design issue here. Check is it a good approach to share
+  /// the ownership of the buffer between the parser and the instrument.
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime =
-      Time.setReference(PacketHeader->PulseHigh, PacketHeader->PulseLow);
-  uint64_t PrevPulseTime = Time.setPrevReference(PacketHeader->PrevPulseHigh,
-                                                 PacketHeader->PrevPulseLow);
+  uint64_t PulseTime = Time.setReference(PacketHeader.getPulseHigh(),
+                                         PacketHeader.getPulseLow());
+  uint64_t PrevPulseTime = Time.setPrevReference(
+      PacketHeader.getPrevPulseHigh(), PacketHeader.getPrevPulseLow());
 
   if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
@@ -67,10 +69,10 @@ void DreamInstrument::processReadouts() {
 
   Serializer->checkAndSetReferenceTime(
       PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader->PulseHigh,
-         PacketHeader->PulseLow);
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader->PrevPulseHigh,
-         PacketHeader->PrevPulseLow);
+  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader.getPulseHigh(),
+         PacketHeader.getPulseLow());
+  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader.getPrevPulseHigh(),
+         PacketHeader.getPrevPulseLow());
   //
 
   /// Traverse readouts, calculate pixels
