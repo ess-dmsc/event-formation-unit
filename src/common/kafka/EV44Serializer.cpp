@@ -66,6 +66,9 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       1;
 
   Event44Message_->mutate_message_id(0);
+
+  ProduceCausePulseChange = 0;
+  ProduceCauseMaxEventsReached = 0;
 }
 
 void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
@@ -98,6 +101,7 @@ size_t EV44Serializer::produce() {
       ProduceFunctor(Buffer_,
                      Event44Message_->reference_time()->data()[0] / 1000000);
     }
+    // \todo should this be inside the previous for?
     TxBytes += Buffer_.size_bytes();
     return Buffer_.size_bytes();
   }
@@ -111,6 +115,7 @@ uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time) {
   if (Time != referenceTime()) {
     XTRACE(OUTPUT, DEB, "Reference time is new: %" PRIi64 "\n", Time);
     bytesProduced = produce();
+    ProduceCausePulseChange++;
     setReferenceTime(Time);
   }
   return bytesProduced;
@@ -135,6 +140,7 @@ size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
 
   if (EventCount >= MaxEvents) {
     XTRACE(DATA, DEB, "Serializer reached max events, producing message now");
+    ProduceCauseMaxEventsReached++;
     return produce();
   }
   return 0;
