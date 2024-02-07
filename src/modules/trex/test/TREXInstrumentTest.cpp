@@ -4,10 +4,13 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/testutils/HeaderFactory.h"
+#include "common/utils/EfuUtils.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 #include <trex/TREXInstrument.h>
@@ -380,6 +383,8 @@ std::vector<uint8_t> NoEventWireOnly {
 
 // clang-format on
 
+using namespace efutils;
+
 class TREXInstrumentTest : public TestBase {
 public:
 protected:
@@ -387,7 +392,7 @@ protected:
   BaseSettings Settings;
   EV44Serializer *serializer;
   TREXInstrument *trex;
-  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
+  std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
@@ -396,17 +401,15 @@ protected:
     serializer = new EV44Serializer(115000, "trex");
     counters = {};
 
-    memset(&PacketHeader, 0, sizeof(PacketHeader));
-
     trex = new TREXInstrument(counters, Settings, serializer);
     trex->setSerializer(serializer);
-    trex->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    trex->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = &PacketHeader;
+    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);

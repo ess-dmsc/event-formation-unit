@@ -89,16 +89,16 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
 
 void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->getPulseHigh();
+  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->getPulseLow();
   CurrentReadout.PrevPulseTimeHigh =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+      ESSReadoutParser.Packet.HeaderPtr->getPrevPulseHigh();
   CurrentReadout.PrevPulseTimeLow =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+      ESSReadoutParser.Packet.HeaderPtr->getPrevPulseLow();
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.DataSeqNum = Data.DataSeqNum;
-  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
+  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->getOutputQueue();
   CurrentReadout.AmpA = Data.AmpA;
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;

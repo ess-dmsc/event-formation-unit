@@ -11,6 +11,7 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <cstring>
+#include <memory>
 
 namespace ESSReadout {
 
@@ -44,10 +45,8 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
   if ((VersionAndPad & 0xff) == HeaderVersion::V0) {
     hVersion = HeaderVersion::V0;
-    Stats.Version0Header++;
   } else if ((VersionAndPad & 0xff) == HeaderVersion::V1) {
     hVersion = HeaderVersion::V1;
-    Stats.Version1Header++;
   } else {
     XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d",
            VersionAndPad & 0xff);
@@ -78,14 +77,21 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     return -Parser::ESIZE;
   }
 
-  if (hVersion == HeaderVersion::V0) {
-    Packet.HeaderPtr = (PacketHeaderV0 *)(Buffer);
-  } else {
-    Packet.HeaderPtr = (PacketHeaderV1 *)(Buffer);
+  switch (hVersion) {
+  case HeaderVersion::V0:
+    delete (Packet.HeaderPtr);
+    Packet.HeaderPtr = new PacketHeader((PacketHeaderV0 *)(Buffer));
+    Stats.Version0Header++;
+    break;
+  default:
+    delete (Packet.HeaderPtr);
+    Packet.HeaderPtr = new PacketHeader((PacketHeaderV1 *)(Buffer));
+    Stats.Version1Header++;
+    break;
   }
 
   if (Size != Packet.HeaderPtr->getTotalLength() or
-      Packet.HeaderPtr->getTotalLength() < sizeof(PacketHeaderV0)) {
+      Packet.HeaderPtr->getTotalLength() < Packet.HeaderPtr->getSize()) {
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
            Packet.HeaderPtr->getTotalLength(), Size);
     Stats.ErrorSize++;
@@ -108,21 +114,26 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   }
 
   // Check per OutputQueue packet sequence number
-  if (NextSeqNum[Packet.HeaderPtr->getOutputQueue()] != Packet.HeaderPtr->getSeqNum()) {
+  if (NextSeqNum[Packet.HeaderPtr->getOutputQueue()] !=
+      Packet.HeaderPtr->getSeqNum()) {
     XTRACE(PROCESS, WAR, "Bad sequence number for OQ %u (expected %u, got %u)",
            Packet.HeaderPtr->getOutputQueue(),
-           NextSeqNum[Packet.HeaderPtr->getOutputQueue()], Packet.HeaderPtr->getSeqNum());
+           NextSeqNum[Packet.HeaderPtr->getOutputQueue()],
+           Packet.HeaderPtr->getSeqNum());
     Stats.ErrorSeqNum++;
-    NextSeqNum[Packet.HeaderPtr->getOutputQueue()] = Packet.HeaderPtr->getSeqNum();
+    NextSeqNum[Packet.HeaderPtr->getOutputQueue()] =
+        Packet.HeaderPtr->getSeqNum();
   }
 
   NextSeqNum[Packet.HeaderPtr->getOutputQueue()]++;
   if (hVersion == HeaderVersion::V1) {
     Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV1));
-    Packet.DataLength = Packet.HeaderPtr->getTotalLength() - sizeof(PacketHeaderV1);
+    Packet.DataLength =
+        Packet.HeaderPtr->getTotalLength() - sizeof(PacketHeaderV1);
   } else {
     Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
-    Packet.DataLength = Packet.HeaderPtr->getTotalLength() - sizeof(PacketHeaderV0);
+    Packet.DataLength =
+        Packet.HeaderPtr->getTotalLength() - sizeof(PacketHeaderV0);
   }
 
   //
@@ -150,7 +161,8 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   XTRACE(DATA, DEB, "PulseTime     (0x%08x,0x%08x)",
          Packet.HeaderPtr->getPulseHigh(), Packet.HeaderPtr->getPulseLow());
   XTRACE(DATA, DEB, "PrevPulseTime (0x%08x,0x%08x)",
-         Packet.HeaderPtr->getPrevPulseHigh(), Packet.HeaderPtr->getPrevPulseLow());
+         Packet.HeaderPtr->getPrevPulseHigh(),
+         Packet.HeaderPtr->getPrevPulseLow());
 
   if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR,
@@ -158,8 +170,10 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
            ". Max allowed %u",
            (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS),
            MaxPulseTimeDiffNS);
-    XTRACE(DATA, WAR, "PulseTimeHi      0x%08x", Packet.HeaderPtr->getPulseHigh());
-    XTRACE(DATA, WAR, "PulseTimeLow     0x%08x", Packet.HeaderPtr->getPulseLow());
+    XTRACE(DATA, WAR, "PulseTimeHi      0x%08x",
+           Packet.HeaderPtr->getPulseHigh());
+    XTRACE(DATA, WAR, "PulseTimeLow     0x%08x",
+           Packet.HeaderPtr->getPulseLow());
     XTRACE(DATA, WAR, "PulseTime (ns)   %" PRIu64 "", Packet.Time.TimeInNS);
     XTRACE(DATA, WAR, "PrevPulseTimeHi  0x%08x",
            Packet.HeaderPtr->getPrevPulseHigh());
