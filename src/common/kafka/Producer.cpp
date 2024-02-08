@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Kafka producer - werapper for librdkafka
+/// \brief Kafka producer - wrapper for librdkafka
 ///
 /// See https://github.com/edenhill/librdkafka
 //===----------------------------------------------------------------------===//
