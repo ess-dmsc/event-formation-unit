@@ -38,4 +38,9 @@ public:
       return nullptr;
     }
   }
+
+  Parser::PacketHeader *createHeader(Parser::PacketHeaderV0 &header) {
+    myHeader = Parser::PacketHeader(&header);
+    return &myHeader;
+  }
 };
