@@ -11,28 +11,31 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
+#include <memory>
 
 using namespace ESSReadout;
 
 class TestHeaderFactory {
 
-  Parser::PacketHeader myHeader;
+  std::unique_ptr<Parser::PacketHeader> myHeaderPtr;
 
 public:
   Parser::PacketHeader *createHeader(const Parser::HeaderVersion &version) {
     if (version == Parser::HeaderVersion::V0) {
-      Parser::PacketHeaderV0 *header{nullptr};
+      Parser::PacketHeaderV0 *header = new Parser::PacketHeaderV0();
       memset(header, 0, sizeof(Parser::PacketHeaderV0));
 
-      myHeader = Parser::PacketHeader(header);
-      return &myHeader;
+      myHeaderPtr =
+          std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(header));
+      return myHeaderPtr.get();
 
     } else if (version == Parser::HeaderVersion::V1) {
-      Parser::PacketHeaderV0 *header{nullptr};
+      Parser::PacketHeaderV1 *header = new Parser::PacketHeaderV1();
       memset(header, 0, sizeof(Parser::PacketHeaderV1));
 
-      myHeader = Parser::PacketHeader(header);
-      return &myHeader;
+      myHeaderPtr =
+          std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(header));
+      return myHeaderPtr.get();
 
     } else {
       return nullptr;
@@ -40,7 +43,8 @@ public:
   }
 
   Parser::PacketHeader *createHeader(Parser::PacketHeaderV0 &header) {
-    myHeader = Parser::PacketHeader(&header);
-    return &myHeader;
+    myHeaderPtr =
+        std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(&header));
+    return myHeaderPtr.get();
   }
 };

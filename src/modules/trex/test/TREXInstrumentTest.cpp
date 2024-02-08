@@ -403,13 +403,13 @@ protected:
 
     trex = new TREXInstrument(counters, Settings, serializer);
     trex->setSerializer(serializer);
-    trex->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
+    trex->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
+    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);
