@@ -92,7 +92,7 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   /// \todo below stats are common to all detectors
-  Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);

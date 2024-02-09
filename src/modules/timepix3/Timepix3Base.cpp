@@ -70,7 +70,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings) : Detector(settings) {
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
+  Stats.create("kafka.produce_errors", Counters.kafka_produce_fails);
   Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
   Stats.create("kafka.ev_others", Counters.kafka_ev_others);
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
@@ -149,7 +149,7 @@ void Timepix3Base::processingThread() {
     }
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
-    Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+    Counters.kafka_produce_fails = EventProducer.stats.produce_errors;
     Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
     Counters.kafka_ev_others = EventProducer.stats.ev_others;
     Counters.kafka_dr_errors = EventProducer.stats.dr_errors;

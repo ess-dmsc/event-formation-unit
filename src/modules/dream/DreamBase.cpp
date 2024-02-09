@@ -79,7 +79,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
+  Stats.create("kafka.produce_errors", Counters.kafka_produce_fails);
   Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
   Stats.create("kafka.ev_others", Counters.kafka_ev_others);
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
@@ -180,7 +180,7 @@ void DreamBase::processingThread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+      Counters.kafka_produce_fails = EventProducer.stats.produce_errors;
       Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;

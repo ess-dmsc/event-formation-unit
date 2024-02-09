@@ -134,7 +134,7 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
     }
 
     XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
-    stats.produce_fails++;
+    stats.produce_errors++;
     return resp;
   } else {
     stats.produce_no_errors++;

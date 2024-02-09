@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -45,7 +45,7 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_calls", mystats.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", mystats.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", mystats.KafkaStats.produce_fails);
+  Stats.create("kafka.produce_errors", mystats.KafkaStats.produce_errors);
   Stats.create("kafka.err_unknown_topic", mystats.KafkaStats.err_unknown_topic);
   Stats.create("kafka.err_queue_full", mystats.KafkaStats.err_queue_full);
   Stats.create("kafka.err_other", mystats.KafkaStats.err_other);
