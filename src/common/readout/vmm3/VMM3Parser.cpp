@@ -137,15 +137,15 @@ void VMM3Parser::dumpReadoutToFile(
     const VMM3Data &Data, const ESSReadout::Parser ESSReadoutParser,
     std::shared_ptr<VMM3::ReadoutFile> DumpFile) {
   VMM3::Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
-  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
+  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->getPulseHigh();
+  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->getPulseLow();
   CurrentReadout.PrevPulseTimeHigh =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
+      ESSReadoutParser.Packet.HeaderPtr->getPrevPulseHigh();
   CurrentReadout.PrevPulseTimeLow =
-      ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
+      ESSReadoutParser.Packet.HeaderPtr->getPrevPulseLow();
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
-  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->OutputQueue;
+  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr->getOutputQueue();
   CurrentReadout.BC = Data.BC;
   CurrentReadout.OTADC = Data.OTADC;
   CurrentReadout.GEO = Data.GEO;

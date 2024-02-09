@@ -9,6 +9,7 @@
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <freia/FreiaInstrument.h>
+#include <common/testutils/HeaderFactory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -117,7 +118,7 @@ protected:
   BaseSettings Settings;
   EV44Serializer *serializer;
   FreiaInstrument *freia;
-  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
+  std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
@@ -126,17 +127,17 @@ protected:
     serializer = new EV44Serializer(115000, "freia");
     counters = {};
 
-    memset(&PacketHeader, 0, sizeof(PacketHeader));
-
+    headerFactory = std::make_unique<TestHeaderFactory>();
     freia = new FreiaInstrument(counters, Settings, serializer);
     freia->setSerializer(serializer);
-    freia->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    freia->ESSReadoutParser.Packet.HeaderPtr =
+        headerFactory->createHeader(ESSReadout::Parser::V1);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = &PacketHeader;
+    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);

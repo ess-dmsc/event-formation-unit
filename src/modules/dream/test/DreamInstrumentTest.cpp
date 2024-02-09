@@ -4,9 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/readout/ess/Parser.h"
+#include "common/testutils/HeaderFactory.h"
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <dream/DreamInstrument.h>
+#include <memory>
 #include <string.h>
 
 using namespace Dream;
@@ -42,12 +45,12 @@ class DreamInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  char Header[sizeof(HeaderV0)];
+  std::unique_ptr<TestHeaderFactory> headerFactory;
 
   void SetUp() override {
-    memset(Header, 0, sizeof(Header));
     Settings.ConfigFile = ConfigFile;
     counters = {};
+    headerFactory = std::make_unique<TestHeaderFactory>();
   }
   void TearDown() override {}
 };
@@ -81,13 +84,15 @@ TEST_F(DreamInstrumentTest, CalcPixelMagic) {
 TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
   DreamInstrument Dream(counters, Settings);
 
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  ESSReadout::Parser::PacketHeaderV0 headerv0;
+  headerv0.PulseLow = 2; // 88MHz ticks
+  headerv0.PrevPulseLow = 0;
+
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(headerv0);
 
   ASSERT_EQ(Dream.counters.ReadoutStats.ErrorTimeHigh, 0);
   ASSERT_EQ(Dream.counters.ErrorESSHeaders, 0);
 
-  Dream.ESSReadoutParser.Packet.HeaderPtr->PulseLow = 2; // 88MHz ticks
-  Dream.ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow = 0;
   Dream.processReadouts();
 
   ASSERT_EQ(Dream.counters.ConfigErrors, 0);
@@ -97,7 +102,7 @@ TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
   DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid FiberId
@@ -109,7 +114,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
   DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // invalid FENId
@@ -122,7 +127,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
   DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // unconfigured ring,fen combination
@@ -136,7 +141,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
   DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // geometry error (no sumo defined)
@@ -152,7 +157,7 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
 TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
   DreamInstrument Dream(counters, Settings);
   Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
-  Dream.ESSReadoutParser.Packet.HeaderPtr = (HeaderV0 *)&Header[0];
+  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;I
   Dream.Serializer = new EV44Serializer(115000, "dream");
 
   // finally an event

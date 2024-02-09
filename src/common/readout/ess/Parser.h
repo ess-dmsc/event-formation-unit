@@ -11,6 +11,9 @@
 
 #include <cinttypes>
 #include <common/readout/ess/ESSTime.h>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 
 namespace ESSReadout {
 
@@ -25,6 +28,8 @@ struct ESSHeaderStats {
   int64_t ErrorSeqNum{0};
   int64_t ErrorTimeHigh{0};
   int64_t ErrorTimeFrac{0};
+  int64_t Version0Header{0};
+  int64_t Version1Header{0};
   int64_t HeartBeats{0};
 };
 
@@ -35,6 +40,7 @@ const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 class Parser {
 public:
+  enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType {
     Reserved = 0x00,
@@ -54,7 +60,7 @@ public:
 
   // Header common to all ESS readout data
   // Reviewed ICD (version 2) packet header version 0
-  // ownCloud: https://project.esss.dk/owncloud/index.php/s/DWNer23727TiI1x
+  // ownCloud: https://project.esss.dk/nextcloud/index.php/s/DWNer23727TiI1x
   struct PacketHeaderV0 {
     uint8_t Padding0;
     uint8_t Version;
@@ -69,12 +75,59 @@ public:
     uint32_t SeqNum;
   } __attribute__((packed));
 
+  // Header common to all ESS readout data
+  // Reviewed ICD (version 2) packet header version 0
+  // ownCloud: https://project.esss.dk/nextcloud/index.php/s/DWNer23727TiI1x
+  struct PacketHeaderV1 {
+    uint8_t Padding0;
+    uint8_t Version;
+    uint32_t CookieAndType;
+    uint16_t TotalLength;
+    uint8_t OutputQueue;
+    uint8_t TimeSource;
+    uint32_t PulseHigh;
+    uint32_t PulseLow;
+    uint32_t PrevPulseHigh;
+    uint32_t PrevPulseLow;
+    uint32_t SeqNum;
+    uint16_t CMACPadd;
+  } __attribute__((packed));
+
+  class PacketHeader {
+      union {
+        PacketHeaderV0 *headerVersion0;
+        PacketHeaderV1 *headerVersion1;
+      };
+
+      size_t size;
+
+    public:
+      PacketHeader(PacketHeaderV0 *newHeader) : headerVersion0(newHeader), size(sizeof(*newHeader)){};
+      PacketHeader(PacketHeaderV1 *newHeader) : headerVersion1(newHeader), size(sizeof(*newHeader)){};
+
+      // Getters for PacketHeaderV0 members
+      uint8_t getVersion() const { return headerVersion0->Version; }
+      uint32_t getCookieAndType() const { return headerVersion0->CookieAndType; }
+      uint16_t getTotalLength() const { return headerVersion0->TotalLength; }
+      uint8_t getOutputQueue() const { return headerVersion0->OutputQueue; }
+      uint8_t getTimeSource() const { return headerVersion0->TimeSource; }
+      uint32_t getPulseHigh() const { return headerVersion0->PulseHigh; }
+      uint32_t getPulseLow() const { return headerVersion0->PulseLow; }
+      uint32_t getPrevPulseHigh() const { return headerVersion0->PrevPulseHigh; }
+      uint32_t getPrevPulseLow() const { return headerVersion0->PrevPulseLow; }
+      uint32_t getSeqNum() const { return headerVersion0->SeqNum; }
+      size_t getSize() const { return size; }
+  };
+
   static_assert(sizeof(Parser::PacketHeaderV0) == (30),
+                "Wrong header size (update assert or check packing)");
+
+  static_assert(sizeof(Parser::PacketHeaderV1) == (32),
                 "Wrong header size (update assert or check packing)");
 
   // Holds data relevant for processing of the current packet
   struct PacketDataV0 {
-    PacketHeaderV0 *HeaderPtr{nullptr};
+    PacketHeader *HeaderPtr{nullptr};
     uint16_t DataLength{0};
     char *DataPtr{nullptr};
     ESSTime Time;
