@@ -127,6 +127,7 @@ protected:
     serializer = new EV44Serializer(115000, "freia");
     counters = {};
 
+    headerFactory = std::make_unique<TestHeaderFactory>();
     freia = new FreiaInstrument(counters, Settings, serializer);
     freia->setSerializer(serializer);
     freia->ESSReadoutParser.Packet.HeaderPtr =

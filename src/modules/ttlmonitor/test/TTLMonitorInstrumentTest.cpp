@@ -106,6 +106,7 @@ protected:
     serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
     counters = {};
 
+    headerFactory = std::make_unique<TestHeaderFactory>();
     ttlmonitor = new TTLMonitorInstrument(counters, Settings);
     ttlmonitor->Serializers.push_back(&serializers[0]);
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);

@@ -50,6 +50,7 @@ protected:
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
     counters = {};
+    headerFactory = std::make_unique<TestHeaderFactory>();
   }
   void TearDown() override {}
 };

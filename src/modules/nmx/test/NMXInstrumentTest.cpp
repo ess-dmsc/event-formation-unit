@@ -410,6 +410,7 @@ protected:
     serializer = new EV44Serializer(115000, "nmx");
     counters = {};
 
+    headerFactory = std::make_unique<TestHeaderFactory>();
     nmx = new NMXInstrument(counters, Settings, serializer);
     nmx->setSerializer(serializer);
     nmx->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);

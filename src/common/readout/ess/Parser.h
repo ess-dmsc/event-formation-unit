@@ -95,8 +95,8 @@ public:
 
   class PacketHeader {
       union {
-        PacketHeaderV0* headerVersion0;
-        PacketHeaderV1* headerVersion1;
+        PacketHeaderV0 *headerVersion0;
+        PacketHeaderV1 *headerVersion1;
       };
 
       size_t size;

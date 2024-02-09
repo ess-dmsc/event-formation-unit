@@ -401,6 +401,7 @@ protected:
     serializer = new EV44Serializer(115000, "trex");
     counters = {};
 
+    headerFactory = std::make_unique<TestHeaderFactory>();
     trex = new TREXInstrument(counters, Settings, serializer);
     trex->setSerializer(serializer);
     trex->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
