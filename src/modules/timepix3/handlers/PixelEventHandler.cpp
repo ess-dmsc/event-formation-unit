@@ -85,6 +85,7 @@ void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
   sort_chronologically(std::move(hitsVector));
   clusterer.cluster(hitsVector);
   clusterer.flush();
+  
 }
 
 void PixelEventHandler::pushDataToKafka() {
