@@ -24,6 +24,11 @@ public:
   EV44Serializer(size_t MaxArrayLength, std::string SourceName,
                  ProducerCallback Callback = {});
 
+  virtual ~EV44Serializer() = default;
+
+  /// \brief Explicitly disallow copy constructor
+  EV44Serializer(const EV44Serializer &other) = delete;
+
   /// \brief sets producer callback
   /// \param cb function to be called to send buffer to Kafka
   void setProducerCallback(ProducerCallback Callback);
@@ -32,7 +37,7 @@ public:
   /// produced
   uint32_t checkAndSetReferenceTime(int64_t Time);
 
-  /// \brief changes reference time. 
+  /// \brief changes reference time.
   /// Function is virtual to allow mocking
   virtual void setReferenceTime(int64_t Time);
 
