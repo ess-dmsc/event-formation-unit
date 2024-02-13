@@ -19,7 +19,6 @@ protected:
   Parser::PacketDataV0 PacketData;
   VMM3Parser VMMParser;
   void SetUp() override {
-    PacketData.HeaderPtr = nullptr;
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
     PacketData.Time.setReference(0, 0);

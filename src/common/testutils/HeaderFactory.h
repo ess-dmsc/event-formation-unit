@@ -22,31 +22,26 @@ class TestHeaderFactory {
   std::unique_ptr<Parser::PacketHeaderV1> headerV1;
 
 public:
-  Parser::PacketHeader *createHeader(const Parser::HeaderVersion &version) {
-    if (version == Parser::HeaderVersion::V0) {
-      headerV0 = std::make_unique<Parser::PacketHeaderV0>(Parser::PacketHeaderV0());
-      // memset(header, 0, sizeof(Parser::PacketHeaderV0));
-
-      myHeaderPtr =
-          std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(headerV0.get()));
-      return myHeaderPtr.get();
-
-    } else if (version == Parser::HeaderVersion::V1) {
+  Parser::PacketHeader &createHeader(const Parser::HeaderVersion &version) {
+    if (version == Parser::HeaderVersion::V1) {
       headerV1 = std::make_unique<Parser::PacketHeaderV1>(Parser::PacketHeaderV1());
-      // memset(header, 0, sizeof(Parser::PacketHeaderV1));
 
       myHeaderPtr =
           std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(headerV1.get()));
-      return myHeaderPtr.get();
+      return *myHeaderPtr;
 
     } else {
-      return nullptr;
+      headerV0 = std::make_unique<Parser::PacketHeaderV0>(Parser::PacketHeaderV0());
+
+      myHeaderPtr =
+          std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(headerV0.get()));
+      return *myHeaderPtr;
     }
   }
 
-  Parser::PacketHeader *createHeader(Parser::PacketHeaderV0 &header) {
+  Parser::PacketHeader &createHeader(Parser::PacketHeaderV0 &header) {
     myHeaderPtr =
         std::make_unique<Parser::PacketHeader>(Parser::PacketHeader(&header));
-    return myHeaderPtr.get();
+    return *myHeaderPtr;
   }
 };
