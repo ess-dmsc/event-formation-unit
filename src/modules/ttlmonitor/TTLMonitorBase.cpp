@@ -133,13 +133,8 @@ void TTLMonitorBase::processing_thread() {
   for (int i = 0; i < TTLMonitor.Conf.Parms.NumberOfMonitors; ++i) {
     // Create a serializer for each monitor
 
-    // KafkaBufferSize is not yet initialized before the unique_ptr, so I
-    // enforce to have it locally.
-    /// \todo This is a bit of a hack, we should find a nice way to enforce the
-    /// initialization of KafkaBufferSize before the unique_ptr
-    int kafkaBufferSize = KafkaBufferSize;
     SerializersPtr.push_back(std::make_unique<EV44Serializer>(
-        kafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+        KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
   for (auto &serializerPtr : SerializersPtr) {
