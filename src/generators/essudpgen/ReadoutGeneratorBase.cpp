@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,14 +8,8 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
-#include <cassert>
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <iostream>
-#include <iterator>
-#include <math.h>
-#include <stdexcept>
-#include <time.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
