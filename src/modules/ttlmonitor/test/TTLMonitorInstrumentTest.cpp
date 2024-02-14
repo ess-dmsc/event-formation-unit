@@ -9,6 +9,7 @@
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
 #include <common/testutils/TestBase.h>
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 #include <ttlmonitor/TTLMonitorInstrument.h>
@@ -95,7 +96,7 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  std::vector<EV44Serializer> serializers;
+  std::vector<std::unique_ptr<EV44Serializer>> serializers;
   TTLMonitorInstrument *ttlmonitor;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
@@ -103,12 +104,12 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = TTLMON_CONFIG;
-    serializers.push_back(EV44Serializer(115000, "ttlmonitor"));
+    serializers.push_back(std::make_unique<EV44Serializer>(115000, "ttlmonitor"));
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
     ttlmonitor = new TTLMonitorInstrument(counters, Settings);
-    ttlmonitor->Serializers.push_back(&serializers[0]);
+    ttlmonitor->SerializersPtr.push_back(serializers[0].get());
     ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}

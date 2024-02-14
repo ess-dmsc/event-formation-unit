@@ -44,7 +44,7 @@ public:
   Config Conf;
 
   /// \brief serialiser (and producer) for events
-  std::vector<EV44Serializer *> Serializers;
+  std::vector<EV44Serializer *> SerializersPtr;
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;

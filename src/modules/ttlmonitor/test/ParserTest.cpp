@@ -69,7 +69,6 @@ protected:
   ESSReadout::Parser::PacketDataV0 PacketData;
   Parser parser;
   void SetUp() override {
-    PacketData.HeaderPtr = nullptr;
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
     PacketData.Time.setReference(0, 0);

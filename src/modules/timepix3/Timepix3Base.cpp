@@ -111,9 +111,8 @@ void Timepix3Base::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = std::make_unique<EV44Serializer>(
-      EV44Serializer(KafkaBufferSize, "timepix3", Produce));
-  Timepix3Instrument Timepix3(Counters, timepix3Configuration, *Serializer);
+  EV44Serializer Serializer(KafkaBufferSize, "timepix3", Produce);
+  Timepix3Instrument Timepix3(Counters, timepix3Configuration, Serializer);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -147,7 +146,7 @@ void Timepix3Base::processingThread() {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
-      Serializer->produce();
+      Serializer.produce();
     }
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
@@ -156,7 +155,7 @@ void Timepix3Base::processingThread() {
     Counters.kafka_ev_others = EventProducer.stats.ev_others;
     Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
     Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
-    Counters.TxBytes = Serializer->TxBytes;
+    Counters.TxBytes = Serializer.TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

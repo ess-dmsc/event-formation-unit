@@ -29,7 +29,6 @@ public:
   void processingThread();
 
 private:
-  std::unique_ptr<EV44Serializer> Serializer;
   Config timepix3Configuration;
 };
 } // namespace Timepix3

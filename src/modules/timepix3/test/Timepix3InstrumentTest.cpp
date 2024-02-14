@@ -6,9 +6,9 @@
 
 #include "gtest/gtest.h"
 #include <common/kafka/EV44Serializer.h>
-#include <geometry/Config.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <geometry/Config.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <memory>
 #include <timepix3/Timepix3Instrument.h>
@@ -77,48 +77,46 @@ class Timepix3InstrumentTest : public TestBase {
 protected:
   struct Counters counters {};
 
-  std::unique_ptr<EV44Serializer> serializer;
+  EV44Serializer serializer;
 
-  Timepix3InstrumentTest()
-      : serializer(std::make_unique<EV44Serializer>(
-            EV44Serializer(115000, "timepix3"))) {}
+  Timepix3InstrumentTest() : serializer(115000, "timepix3") {}
 
   void TearDown() override {}
 };
 
 // Test cases below
 TEST_F(Timepix3InstrumentTest, Constructor) {
-  Timepix3Instrument Timepix3(counters, Config(ConfigFile), *serializer);
+  Timepix3Instrument Timepix3(counters, Config(ConfigFile), serializer);
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
-      counters, Config(BadJsonConfigFile), *serializer));
+      counters, Config(BadJsonConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadNameSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
-      counters, Config(BadNameConfigFile), *serializer));
+      counters, Config(BadNameConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoDetectorSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
-      counters, Config(NoDetectorConfigFile), *serializer));
+      counters, Config(NoDetectorConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoXResSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
-      counters, Config(NoXResConfigFile), *serializer));
+      counters, Config(NoXResConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoChunkSettings) {
   EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
-      counters, Config(BadJsonNoChunkFile), *serializer));
+      counters, Config(BadJsonNoChunkFile), serializer));
 }
 
 /// \todo: review this test. What is the main goal.
 TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
-  Timepix3Instrument Timepix3(counters, Config(ConfigFile), *serializer);
+  Timepix3Instrument Timepix3(counters, Config(ConfigFile), serializer);
   auto Res = Timepix3.timepix3Parser.parse((char *)SingleGoodReadout.data(),
                                            SingleGoodReadout.size());
   EXPECT_EQ(Res, 1);

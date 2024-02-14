@@ -11,6 +11,7 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <memory>
 #include <ttlmonitor/Counters.h>
 
 namespace TTLMonitor {
@@ -25,7 +26,7 @@ public:
   struct Counters Counters {};
 
 protected:
-  std::vector<EV44Serializer> Serializers;
+  std::vector<std::unique_ptr<EV44Serializer>> SerializersPtr;
 };
 
 } // namespace TTLMonitor
