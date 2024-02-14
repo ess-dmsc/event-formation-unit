@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/detector/Detector.h"
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
@@ -15,6 +16,7 @@
 #include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
+#include <memory>
 #include <unistd.h>
 
 #include <common/RuntimeStat.h>
@@ -129,12 +131,14 @@ void TTLMonitorBase::processing_thread() {
   TTLMonitorInstrument TTLMonitor(Counters, EFUSettings);
 
   for (int i = 0; i < TTLMonitor.Conf.Parms.NumberOfMonitors; ++i) {
-    Serializers.push_back(
-        EV44Serializer(KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+    // Create a serializer for each monitor
+
+    SerializersPtr.push_back(std::make_unique<EV44Serializer>(
+        KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
   }
 
-  for (auto &s : Serializers) {
-    TTLMonitor.Serializers.push_back(&s);
+  for (auto &serializerPtr : SerializersPtr) {
+    TTLMonitor.SerializersPtr.push_back(serializerPtr.get());
   }
 
   unsigned int DataIndex;
@@ -192,9 +196,9 @@ void TTLMonitorBase::processing_thread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
 
-      for (auto &serializer : Serializers) {
+      for (auto &serializer : SerializersPtr) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        Counters.TxBytes += serializer.produce();
+        Counters.TxBytes += serializer->produce();
       }
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer

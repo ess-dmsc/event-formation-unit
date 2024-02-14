@@ -47,7 +47,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
-  for (EV44Serializer *Serializer : Serializers) {
+  for (EV44Serializer *Serializer : SerializersPtr) {
     counters.TxBytes += Serializer->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.TimeInNS);
     /// \todo sometimes PrevPulseTime maybe?
@@ -120,7 +120,7 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
     uint32_t PixelId = 1;
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
     counters.TxBytes +=
-        Serializers[Channel]->addEvent(TimeOfFlight, PixelId);
+        SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;
   }
 }

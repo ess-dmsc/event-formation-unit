@@ -132,9 +132,9 @@ public:
 
 public:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
-  static const int EthernetBufferMaxEntries{2000};
-  static const int EthernetBufferSize{9000}; /// bytes
-  static const int KafkaBufferSize{124000};  /// entries ~ 1MB
+  static constexpr int EthernetBufferMaxEntries{2000};
+  static constexpr int EthernetBufferSize{9000}; /// bytes
+  static constexpr int KafkaBufferSize{124000};  /// entries ~ 1MB
 
   /// Shared between input_thread and processing_thread
   memory_sequential_consistent::CircularFifo<unsigned int,
