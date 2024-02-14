@@ -59,7 +59,30 @@ protected:
 };
 
 // Cycle through all section values with equal number of readouts
-TEST_F(CombinedParserTest, DataGen) {
+TEST_F(CombinedParserTest, DataGenV0) {
+
+  for (unsigned int Sections = 1; Sections < 372; Sections++) {
+
+    Caen::LokiReadoutGenerator gen;
+    gen.Settings.headerVersion = 0;
+    gen.Settings.NumReadouts = Sections;
+    gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+    gen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
+
+    uint16_t DataSize = gen.makePacket();
+    ASSERT_EQ(DataSize,
+              sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
+
+    auto Res =
+        CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
+    ASSERT_EQ(Res, ESSReadout::Parser::OK);
+    Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
+                           CommonReadout.Packet.DataLength);
+    ASSERT_EQ(Res, Sections);
+  }
+}
+
+TEST_F(CombinedParserTest, DataGenDefault) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
@@ -70,7 +93,7 @@ TEST_F(CombinedParserTest, DataGen) {
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,
-              sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
+              sizeof(ESSReadout::Parser::PacketHeaderV1) + Sections * (4 + 20));
 
     auto Res =
         CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
