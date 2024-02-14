@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,6 +28,7 @@ public:
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
+    uint8_t headerVersion{1};        // v1 header by default
     bool Loop{false};                // Keep looping the same file forever
 
     bool Randomise{false}; // Randomise header and data
@@ -73,8 +74,6 @@ protected:
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();
 
-  const uint16_t HeaderSize = sizeof(ESSReadout::Parser::PacketHeaderV0);
-
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks
   const uint32_t PrevTimeLowOffset{10000}; // ticks
@@ -87,9 +86,14 @@ protected:
   uint32_t TimeHigh{0};
   uint32_t TimeLow{0};
   uint16_t DataSize{0}; // Number of data bytes in packet
+  uint8_t HeaderSize{0};
 
   DataFuzzer Fuzzer;
 
   UDPTransmitter *DataSource{nullptr};
+
+private:
+  ESSReadout::Parser::HeaderVersion headerVersion{
+      ESSReadout::Parser::HeaderVersion::V0};
 };
 // GCOVR_EXCL_STOP

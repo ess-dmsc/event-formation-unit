@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,16 +8,13 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
-#include <cassert>
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <math.h>
-#include <stdexcept>
-#include <time.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
+using namespace ESSReadout;
 ///\brief No work to do for constructor
 ReadoutGeneratorBase::ReadoutGeneratorBase() {}
 
@@ -31,20 +28,48 @@ uint16_t ReadoutGeneratorBase::makePacket() {
 }
 
 void ReadoutGeneratorBase::generateHeader() {
-  assert(HeaderSize == 30);
+  // Parse the header version
+  switch (Settings.headerVersion) {
+  case Parser::HeaderVersion::V0:
+    headerVersion = Parser::HeaderVersion::V0;
+    HeaderSize = sizeof(Parser::PacketHeaderV0);
+    break;
+  case Parser::HeaderVersion::V1:
+    headerVersion = Parser::HeaderVersion::V1;
+    HeaderSize = sizeof(Parser::PacketHeaderV1);
+    break;
+  default:
+    throw std::runtime_error("Incorrect header version");
+  }
+
+  if (headerVersion == Parser::HeaderVersion::V0) {
+    assert(HeaderSize == 30);
+  } else {
+    assert(HeaderSize == 32);
+  }
+
   DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
   if (DataSize >= BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
   memset(Buffer, 0, BufferSize);
-  auto Header = (ESSReadout::Parser::PacketHeaderV0 *)Buffer;
+  auto Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
+
+  if (headerVersion == Parser::HeaderVersion::V1) {
+    Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
+  }
 
   Header->CookieAndType = (Settings.Type << 24) + 0x535345;
   Header->Padding0 = 0;
-  Header->Version = 0;
-  // Header->OutputQueue = 0x00;
 
+  if (headerVersion == Parser::HeaderVersion::V0) {
+    Header->Version = 0;
+  } else {
+    Header->Version = 1;
+  }
+
+  // Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
@@ -54,6 +79,10 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PulseLow = TimeLowOffset;
   Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
+  
+  if (headerVersion == Parser::HeaderVersion::V1) {
+    Header->CMACPadd = 0;
+  }
 
   XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh,
          TimeLowOffset);
@@ -91,6 +120,8 @@ int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
                  "Delay (ticks) between coincident readouts");
   app.add_option("-o, --readouts", Settings.NumReadouts,
                  "Number of readouts per packet");
+  app.add_option("-v, --header_version", Settings.headerVersion,
+                 "Header version, v1 by default");
   app.add_flag("-m, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
