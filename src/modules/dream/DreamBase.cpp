@@ -54,6 +54,8 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
   Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
+  Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
+  Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
