@@ -44,6 +44,7 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
+  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -166,6 +167,7 @@ void NmxBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
+  MonitorSerializer = new AR51Serializer("nmx", ProduceMonitor);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(NMX.ADCHist.needed_buffer_size(),
@@ -220,6 +222,14 @@ void NmxBase::processing_thread() {
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
         Counters.MatcherStats.addAndClear(builder.matcher.Stats);
+      }
+
+      // send monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxMonitorData++;
       }
 
     } else {
