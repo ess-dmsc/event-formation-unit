@@ -10,6 +10,7 @@
 #include "Counters.h"
 #include "Timepix3Instrument.h"
 #include "common/kafka/EV44Serializer.h"
+#include "common/kafka/Producer.h"
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
@@ -76,11 +77,15 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
-  Stats.create("kafka.ev_others", Counters.kafka_ev_others);
-  Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
-  Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
+  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
+  Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.produce_config_errors", Counters.KafkaStats.config_errors);
+  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
+  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
+  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
+  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
+  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
+  
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -147,14 +152,9 @@ void Timepix3Base::processingThread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
       Serializer.produce();
+      Counters.KafkaStats = EventProducer.stats;
     }
-    /// Kafka stats update - common to all detectors
-    /// don't increment as Producer & Serializer keep absolute count
-    Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
-    Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
-    Counters.kafka_ev_others = EventProducer.stats.ev_others;
-    Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
-    Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    
     Counters.TxBytes = Serializer.TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
