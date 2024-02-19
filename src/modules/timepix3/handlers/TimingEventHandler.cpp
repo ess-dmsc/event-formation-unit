@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <memory>
 #include <handlers/TimingEventHandler.h>
+#include <memory>
 #include <utility>
 
 // #undef TRC_LEVEL
@@ -31,10 +31,16 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
          lastTDCData->tdcTimeStamp, tdcRepetitionFrequency,
          lastTDCData->arrivalTimestamp.time_since_epoch());
 
-  if (lastTDCData != nullptr &&
-      tdcReadout.counter != lastTDCData->counter + 1) {
-    statCounters.MissTDCCounter +=
-        tdcReadout.counter - (lastTDCData->counter + 1);
+  if (lastTDCData != nullptr) {
+    if (tdcReadout.counter > lastTDCData->counter + 1) {
+      statCounters.MissTDCCounter +=
+          tdcReadout.counter - (lastTDCData->counter + 1);
+    } else if (tdcReadout.counter < lastTDCData->counter &&
+               tdcReadout.counter != 1) {
+      return;
+    } else if (tdcReadout.counter == lastTDCData->counter) {
+      return;
+    }
   }
 
   lastTDCData = std::make_unique<TDCDataEvent>(
@@ -56,10 +62,16 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
          lastEVRData->pulseTimeInEpochNs,
          lastEVRData->arrivalTimestamp.time_since_epoch());
 
-  if (lastEVRData != nullptr &&
-      evrReadout.counter != lastEVRData->counter + 1) {
-    statCounters.MissEVRCounter +=
-        evrReadout.counter - (lastEVRData->counter + 1);
+  if (lastEVRData != nullptr) {
+    if (evrReadout.counter > lastEVRData->counter + 1) {
+      statCounters.MissEVRCounter +=
+          evrReadout.counter - (lastEVRData->counter + 1);
+    } else if (evrReadout.counter < lastEVRData->counter &&
+               evrReadout.counter != 1) {
+      return;
+    } else if (evrReadout.counter == lastEVRData->counter) {
+      return;
+    }
   }
 
   lastEVRData = std::make_unique<EVRDataEvent>(evrReadout.counter,

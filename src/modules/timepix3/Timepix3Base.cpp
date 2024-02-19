@@ -53,14 +53,14 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
 
   // Counters related to timing event handling and time syncronization
-  Stats.create("handlers.pixelevent.no_global_time_error", Counters.NoGlobalTime);
-  Stats.create("handlers.pixelevent.invalid_pixel_readout", Counters.InvalidPixelReadout);
   Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
   Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
-  Stats.create("handlers.timingevent.evr_pair_count", Counters.EVRPairFound);
-  Stats.create("handlers.timingevent.tdc_pair_count", Counters.TDCPairFound);
+  Stats.create("handlers.timeingevent.evr_pair_count", Counters.EVRPairFound);
+  Stats.create("handlers.timeingevent.tdc_pair_count", Counters.TDCPairFound);
 
   // Counters related to pixel event handling and event calculation
+  Stats.create("handlers.pixelevent.no_global_time_error", Counters.NoGlobalTime);
+  Stats.create("handlers.pixelevent.invalid_pixel_readout", Counters.InvalidPixelReadout);
   Stats.create("handlers.pixelevent.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
   Stats.create("handlers.pixelevent.tof_count", Counters.TofCount);
   Stats.create("handlers.pixelevent.tof_neg", Counters.TofNegative);
@@ -154,7 +154,7 @@ void Timepix3Base::processingThread() {
       Serializer.produce();
       Counters.KafkaStats = EventProducer.stats;
     }
-    
+
     Counters.TxBytes = Serializer.TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
