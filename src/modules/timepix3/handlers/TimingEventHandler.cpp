@@ -36,7 +36,8 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
       statCounters.MissTDCCounter +=
           tdcReadout.counter - (lastTDCData->counter + 1);
     } else if (tdcReadout.counter < lastTDCData->counter &&
-               tdcReadout.counter != 1) {
+                // Handle the case when the counter is reset
+               tdcReadout.counter != 0) {
       return;
     } else if (tdcReadout.counter == lastTDCData->counter) {
       return;
@@ -65,7 +66,8 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
       statCounters.MissEVRCounter +=
           evrReadout.counter - (lastEVRData->counter + 1);
     } else if (evrReadout.counter < lastEVRData->counter &&
-               evrReadout.counter != 1) {
+               // Handle the case when the counter is reset
+               evrReadout.counter != 0) {
       return;
     } else if (evrReadout.counter == lastEVRData->counter) {
       return;

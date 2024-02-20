@@ -262,12 +262,12 @@ TEST_F(Timepix3TimingEventHandlerTest, TestCounterReset) {
   testEventHandler.applyData(buildEVRReadout(4096));
 
   // Reset TDC counter
-  testEventHandler.applyData(buildTDCReadout(1));
+  testEventHandler.applyData(buildTDCReadout(0));
   std::this_thread::sleep_for(std::chrono::milliseconds(70));
 
   // Reset EVR counter
-  testEventHandler.applyData(buildEVRReadout(1));
-  testEventHandler.applyData(buildTDCReadout(2));
+  testEventHandler.applyData(buildEVRReadout(0));
+  testEventHandler.applyData(buildTDCReadout(1));
   std::this_thread::sleep_for(std::chrono::milliseconds(70));
 
   EXPECT_EQ(counters.MissEVRCounter, 0);
