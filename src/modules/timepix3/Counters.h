@@ -39,6 +39,7 @@ struct Counters {
   int64_t TDC1FallingReadouts{0};
   int64_t TDC2RisingReadouts{0};
   int64_t TDC2FallingReadouts{0};
+  int64_t ESSGlobalTimeCounter{0};
   int64_t EventTimeForNextPulse{0};
   int64_t NoGlobalTime{0};
   int64_t EVRPairFound{0};
