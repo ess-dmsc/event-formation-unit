@@ -54,32 +54,35 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   }
 
   while (BytesLeft) {
-    uint64_t DataBytes;
+    uint64_t *DataBytesPtr;
 
-    if (BytesLeft < sizeof(DataBytes)) {
+    if (BytesLeft < sizeof(DataBytesPtr)) {
       // TODO add some error handling here
       // Maybe add a counter about demaged chunks
       XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
       break;
     }
-    // Copy 8 bytes into DataBytes variable
-    memcpy(&DataBytes, DataPtr, sizeof(DataBytes));
+    
+    // we read the data as 64 bit integers, and then use bitmasks to extract the
+    // relevant information. This is done to avoid alignment issues, as the data
+    // is not guaranteed to be aligned to 64 bits
+    DataBytesPtr = reinterpret_cast<uint64_t*>(DataPtr);
 
     // regardless of readout type, the type variable is always in the same place
     // we read it here
-    uint8_t ReadoutType = (DataBytes & TYPE_MASK) >> TYPE_OFFS;
+    uint8_t ReadoutType = (*DataBytesPtr & TYPE_MASK) >> TYPE_OFFS;
 
     // pixel readout, identifies where a pixel on the camera was activated
     if (ReadoutType == PIXEL_READOUT_TYPE_CONST) {
 
       PixelReadout pixelDataEvent(
-          (DataBytes & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
-          (DataBytes & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
-          (DataBytes & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
-          (DataBytes & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
-          (DataBytes & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
-          (DataBytes & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
-          DataBytes & PIXEL_SPTIME_MASK);
+          (*DataBytesPtr & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
+          (*DataBytesPtr & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
+          (*DataBytesPtr & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
+          (*DataBytesPtr & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
+          (*DataBytesPtr & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
+          (*DataBytesPtr & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
+          *DataBytesPtr & PIXEL_SPTIME_MASK);
 
       DataEventObservable<PixelReadout>::publishData(pixelDataEvent);
 
@@ -89,14 +92,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // TDC readout type, indicating when the camera received a TDC pulse. In
       // the ESS setup, this should correspond to an EVR pulse, indicating the
       // start of a new pulse.
-    } else if (ReadoutType == 6) {
+    } else if (ReadoutType == TDC_READOUT_TYPE_CONST) {
 
       // mask and offset values are defined in DataParser.h
       TDCReadout tdcReadout(
-          (DataBytes & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
-          (DataBytes & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
-          (DataBytes & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-          (DataBytes & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
+          (*DataBytesPtr & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+          (*DataBytesPtr & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+          (*DataBytesPtr & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+          (*DataBytesPtr & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
       ParsedReadouts++;
       Stats.TDCReadoutCounter++;
@@ -130,8 +133,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, WAR, "Unknown packet type: %u", ReadoutType);
       Stats.UndefinedReadoutCounter++;
     }
-    BytesLeft -= sizeof(DataBytes);
-    DataPtr += sizeof(DataBytes);
+    BytesLeft -= sizeof(*DataBytesPtr);
+    DataPtr += sizeof(*DataBytesPtr);
   }
   return ParsedReadouts;
 }

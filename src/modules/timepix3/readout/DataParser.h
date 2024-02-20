@@ -10,8 +10,8 @@
 
 #include <cstdint>
 #include <dataflow/DataObserverTemplate.h>
-#include <modules/timepix3/Counters.h>
 #include <dto/TimepixDataTypes.h>
+#include <modules/timepix3/Counters.h>
 
 namespace Timepix3 {
 
@@ -76,6 +76,7 @@ public:
 private:
   // Const expression
   static constexpr uint8_t PIXEL_READOUT_TYPE_CONST = 11;
+  static constexpr uint8_t TDC_READOUT_TYPE_CONST = 6;
 
   static constexpr uint8_t TDC1_RISING_CONST = 15;
   static constexpr uint8_t TDC1_FALLING_CONST = 10;
