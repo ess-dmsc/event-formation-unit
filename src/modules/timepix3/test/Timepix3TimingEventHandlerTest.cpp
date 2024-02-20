@@ -11,6 +11,7 @@
 #include <common/utils/EfuUtils.h>
 #include <cstdint>
 #include <dto/TimepixDataTypes.h>
+#include <exception>
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest.h>
 #include <gtest/internal/gtest-port.h>
@@ -19,6 +20,7 @@
 #include <test/TimepixTestHelper.h>
 #include <thread>
 #include <timepix3/readout/DataParser.h>
+#include <vector>
 
 using namespace Timepix3;
 using namespace timepixDTO;
@@ -50,20 +52,25 @@ protected:
   static constexpr uint64_t TEST_TDC_PIXEL_TIME_IN_NS =
       TEST_TDC_TIMESTAMP_NS - (PIXEL_MAX_TIMESTAMP_NS * TEST_TDC_QUARTER);
 
-  // clang-format off
-  EVRReadout evrReadout = EVRReadout(1,
-                                     0,
-                                     0,
-                                     10,
-                                     TEST_PULSE_TIME,
-                                     TEST_PULSE_TIME_NS,
-                                     0,
-                                     0);
+  EVRReadout buildEVRReadout(uint16_t counter) {
+    // clang-format off
+    return EVRReadout(1, 
+                      0,
+                      0,
+                      counter,
+                      TEST_PULSE_TIME,
+                      TEST_PULSE_TIME_NS,
+                      0,
+                      0);
+    // clang-format on
+  }
 
-  TDCReadout tdcReadout = TDCReadout(15, 10, TEST_TDC_TIMESTAMP, TEST_TDC_FINE_CLOCK);
-  // clang-format on
+  TDCReadout buildTDCReadout(uint16_t counter) {
+    return TDCReadout(15, counter, TEST_TDC_TIMESTAMP, TEST_TDC_FINE_CLOCK);
+  }
 
-  MockupDataEventReceiver<timepixDTO::ESSGlobalTimeStamp> globalTimingEventReceiver;
+  MockupDataEventReceiver<timepixDTO::ESSGlobalTimeStamp>
+      globalTimingEventReceiver;
 
   Counters counters{};
   TimingEventHandler testEventHandler{counters};
@@ -91,84 +98,95 @@ protected:
 
 // Test cases below
 
-TEST_F(Timepix3TimingEventHandlerTest, FindEVRPair) {
+TEST_F(Timepix3TimingEventHandlerTest, FindEVRPairAndNotCountReadouts) {
 
-  testEventHandler.applyData(evrReadout);
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildEVRReadout(1));
+  testEventHandler.applyData(buildTDCReadout(1));
 
   // Check we called global timing receiver function
   // Data is validated in the mockup receiver
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
-  EXPECT_EQ(counters.EVRReadoutCounter, 1);
-  EXPECT_EQ(counters.TDCReadoutCounter, 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
   EXPECT_EQ(counters.MissEVRCounter, 0);
   EXPECT_EQ(counters.MissTDCCounter, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
+
+  // Readouts should be not counted, thats the domain of the parser.
+  EXPECT_EQ(counters.EVRReadoutCounter, 0);
+  EXPECT_EQ(counters.TDCReadoutCounter, 0);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, TestDelayedTDCEvent) {
 
   // First enent pair no delay, global time published
-  testEventHandler.applyData(evrReadout);
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildEVRReadout(1));
+  testEventHandler.applyData(buildTDCReadout(1));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   std::this_thread::sleep_for(std::chrono::milliseconds(71));
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // Second event pair TDC delayed, no global time published
-  testEventHandler.applyData(evrReadout);
+  testEventHandler.applyData(buildEVRReadout(2));
   std::this_thread::sleep_for(std::chrono::milliseconds(40));
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildTDCReadout(2));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // EVR after the delayed TDC no global time published
   std::this_thread::sleep_for(std::chrono::milliseconds(71 - 40));
-  testEventHandler.applyData(evrReadout);
+  testEventHandler.applyData(buildEVRReadout(3));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // new TDC pair arrives for the previous EVR
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildTDCReadout(3));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 2);
   EXPECT_EQ(counters.EVRPairFound, 2);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 2);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, TestDelayedEVR) {
 
   // First event pair no delay, global time published
-  testEventHandler.applyData(evrReadout);
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildEVRReadout(10));
+  testEventHandler.applyData(buildTDCReadout(10));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   std::this_thread::sleep_for(std::chrono::milliseconds(71));
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // Second event pair EVR delayed, no global time published
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildTDCReadout(11));
   std::this_thread::sleep_for(std::chrono::milliseconds(40));
-  testEventHandler.applyData(evrReadout);
+  testEventHandler.applyData(buildEVRReadout(11));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // TDC after the delayed EVR, no global time published
   std::this_thread::sleep_for(std::chrono::milliseconds(71 - 40));
-  testEventHandler.applyData(tdcReadout);
+  testEventHandler.applyData(buildTDCReadout(12));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 1);
 
   // new TDC pair arrives for the previous EVR
-  testEventHandler.applyData(evrReadout);
+  testEventHandler.applyData(buildEVRReadout(12));
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 2);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 1);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 2);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, OnlyEVREventsReceived) {
@@ -183,6 +201,7 @@ TEST_F(Timepix3TimingEventHandlerTest, OnlyEVREventsReceived) {
   EXPECT_EQ(counters.TDCPairFound, 0);
   EXPECT_EQ(counters.MissEVRCounter, 0);
   EXPECT_EQ(counters.MissTDCCounter, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 0);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, OnlyTDCEventsReceived) {
@@ -198,6 +217,7 @@ TEST_F(Timepix3TimingEventHandlerTest, OnlyTDCEventsReceived) {
   EXPECT_EQ(counters.TDCPairFound, 0);
   EXPECT_EQ(counters.MissEVRCounter, 0);
   EXPECT_EQ(counters.MissTDCCounter, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 0);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, MissingTDCEventsCounted) {
@@ -227,6 +247,95 @@ TEST_F(Timepix3TimingEventHandlerTest, MissingEVREventsCounted) {
   testEventHandler.applyData(EVRReadout(1, 0, 0, 15, 0, 0, 0, 0));
   EXPECT_EQ(counters.MissEVRCounter, 4);
   EXPECT_EQ(counters.MissTDCCounter, 0);
+}
+
+TEST_F(Timepix3TimingEventHandlerTest, TestCounterReset) {
+
+  testEventHandler.applyData(buildEVRReadout(4094));
+  testEventHandler.applyData(buildTDCReadout(4094));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  testEventHandler.applyData(buildEVRReadout(4095));
+  testEventHandler.applyData(buildTDCReadout(4095));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  testEventHandler.applyData(buildEVRReadout(4096));
+
+  // Reset TDC counter
+  testEventHandler.applyData(buildTDCReadout(0));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  // Reset EVR counter
+  testEventHandler.applyData(buildEVRReadout(0));
+  testEventHandler.applyData(buildTDCReadout(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  EXPECT_EQ(counters.MissEVRCounter, 0);
+  EXPECT_EQ(counters.EVRPairFound, 4);
+  EXPECT_EQ(counters.MissTDCCounter, 0);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 4);
+  EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 4);
+}
+
+TEST_F(Timepix3TimingEventHandlerTest, TestLateReadoutsDropped) {
+
+  testEventHandler.applyData(buildEVRReadout(1));
+  testEventHandler.applyData(buildTDCReadout(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  testEventHandler.applyData(buildEVRReadout(3));
+  testEventHandler.applyData(buildTDCReadout(3));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  // Late EVR readout, should be dropped
+  testEventHandler.applyData(buildEVRReadout(2));
+  testEventHandler.applyData(buildTDCReadout(4));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  // Late TDC readout, should be dropped
+  testEventHandler.applyData(buildEVRReadout(4));
+  testEventHandler.applyData(buildTDCReadout(2));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  testEventHandler.applyData(buildEVRReadout(5));
+  testEventHandler.applyData(buildTDCReadout(5));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  EXPECT_EQ(counters.MissEVRCounter, 1);
+  EXPECT_EQ(counters.MissTDCCounter, 1);
+  EXPECT_EQ(counters.EVRPairFound, 3);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 3);
+  EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 3);
+}
+
+TEST_F(Timepix3TimingEventHandlerTest, TestRepeatedReadoutsDropped) {
+
+  testEventHandler.applyData(buildEVRReadout(1));
+  testEventHandler.applyData(buildTDCReadout(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  // Repeated TDC readout with incorrect data, should be dropped
+  testEventHandler.applyData(buildTDCReadout(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  testEventHandler.applyData(buildEVRReadout(2));
+  testEventHandler.applyData(buildTDCReadout(2));
+  std::this_thread::sleep_for(std::chrono::milliseconds(70));
+
+  // Repeated EVR readout with incorrect data, should be dropped
+  testEventHandler.applyData(buildEVRReadout(2));
+
+  testEventHandler.applyData(buildTDCReadout(3));
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+  testEventHandler.applyData(buildEVRReadout(3));
+
+  EXPECT_EQ(counters.MissEVRCounter, 0);
+  EXPECT_EQ(counters.MissTDCCounter, 0);
+  EXPECT_EQ(counters.EVRPairFound, 2);
+  EXPECT_EQ(counters.TDCPairFound, 1);
+  EXPECT_EQ(counters.ESSGlobalTimeCounter, 3);
+  EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 3);
 }
 
 int main(int argc, char **argv) {

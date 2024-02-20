@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
+#include <common/kafka/Producer.h>
 #include <cstdint>
 
 struct Counters {
@@ -38,6 +39,7 @@ struct Counters {
   int64_t TDC1FallingReadouts{0};
   int64_t TDC2RisingReadouts{0};
   int64_t TDC2FallingReadouts{0};
+  int64_t ESSGlobalTimeCounter{0};
   int64_t EventTimeForNextPulse{0};
   int64_t NoGlobalTime{0};
   int64_t EVRPairFound{0};
@@ -47,10 +49,8 @@ struct Counters {
   int64_t TDCReadoutCounter{0};
   int64_t UndefinedReadoutCounter{0};
   // Kafka stats below are common to all detectors
-  int64_t kafka_produce_fails{0};
-  int64_t kafka_ev_errors{0};
-  int64_t kafka_ev_others{0};
-  int64_t kafka_dr_errors{0};
-  int64_t kafka_dr_noerrors{0};
+
+  // Kafka stats below are common to all detectors
+  struct Producer::ProducerStats KafkaStats;
 
 } __attribute__((aligned(64)));
