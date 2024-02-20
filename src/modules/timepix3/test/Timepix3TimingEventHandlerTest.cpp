@@ -98,7 +98,7 @@ protected:
 
 // Test cases below
 
-TEST_F(Timepix3TimingEventHandlerTest, FindEVRPair) {
+TEST_F(Timepix3TimingEventHandlerTest, FindEVRPairAndNotCountReadouts) {
 
   testEventHandler.applyData(buildEVRReadout(1));
   testEventHandler.applyData(buildTDCReadout(1));
@@ -106,12 +106,14 @@ TEST_F(Timepix3TimingEventHandlerTest, FindEVRPair) {
   // Check we called global timing receiver function
   // Data is validated in the mockup receiver
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 1);
-  EXPECT_EQ(counters.EVRReadoutCounter, 1);
-  EXPECT_EQ(counters.TDCReadoutCounter, 1);
   EXPECT_EQ(counters.EVRPairFound, 1);
   EXPECT_EQ(counters.TDCPairFound, 0);
   EXPECT_EQ(counters.MissEVRCounter, 0);
   EXPECT_EQ(counters.MissTDCCounter, 0);
+
+  // Readouts should be not counted, thats the domain of the parser.
+  EXPECT_EQ(counters.EVRReadoutCounter, 0);
+  EXPECT_EQ(counters.TDCReadoutCounter, 0);
 }
 
 TEST_F(Timepix3TimingEventHandlerTest, TestDelayedTDCEvent) {
