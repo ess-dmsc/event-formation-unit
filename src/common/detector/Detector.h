@@ -18,6 +18,7 @@
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
 #include <functional>
+#include <common/debug/Log.h>
 #include <map>
 #include <memory>
 #include <stdio.h>
@@ -58,6 +59,9 @@ public:
                                 EFUSettings.RxSocketBufferSize);
     dataReceiver.printBufferSizes();
     dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
+
+    LOG(INIT, Sev::Info, "Detector input thread started on {}:{}", local.IpAddress,
+        local.Port);
 
     while (runThreads) {
       int readSize;
