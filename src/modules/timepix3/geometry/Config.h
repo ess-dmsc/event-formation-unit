@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,6 +27,7 @@ public:
   std::string InstrumentName;
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
+  uint16_t parallelThreads{1};
 
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};

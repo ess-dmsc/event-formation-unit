@@ -11,42 +11,46 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
+#include <common/kafka/Producer.h>
+#include <cstdint>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
 
   // Temporary timepix characterising counters
-  int64_t PixelReadoutFromBeforeTDC;
 
   // System counters
-  int64_t FifoSeqErrors;
-  int64_t ProcessingIdle;
+  int64_t FifoSeqErrors{0};
+  int64_t ProcessingIdle{0};
 
   // Events
-  int64_t Events;
-  int64_t PixelErrors;
-  int64_t TofCount;
-  int64_t TofNegative;
-  int64_t PrevTofCount;
-  int64_t PrevTofNegative;
-  int64_t TofHigh;
-  int64_t PrevTofHigh;
+  int64_t Events{0};
+  int64_t PixelErrors{0};
+  int64_t TofCount{0};
+  int64_t TofNegative{0};
+  int64_t PrevTofCount{0};
 
-  int64_t TxBytes;
-  int64_t PixelReadouts;
-  int64_t TDCReadouts;
-  int64_t TDC1RisingReadouts;
-  int64_t TDC1FallingReadouts;
-  int64_t TDC2RisingReadouts;
-  int64_t TDC2FallingReadouts;
-  int64_t UnknownTDCReadouts;
-  int64_t GlobalTimestampReadouts;
-  int64_t EVRTimestampReadouts;
-  int64_t UndefinedReadouts;
+  int64_t TxBytes{0};
+  int64_t PixelReadouts{0};
+  int64_t InvalidPixelReadout{0};
+  int64_t MissTDCCounter{0};
+  int64_t MissEVRCounter{0};
+  int64_t TDC1RisingReadouts{0};
+  int64_t TDC1FallingReadouts{0};
+  int64_t TDC2RisingReadouts{0};
+  int64_t TDC2FallingReadouts{0};
+  int64_t ESSGlobalTimeCounter{0};
+  int64_t EventTimeForNextPulse{0};
+  int64_t NoGlobalTime{0};
+  int64_t EVRPairFound{0};
+  int64_t TDCPairFound{0};
+  int64_t UnknownTDCReadouts{0};
+  int64_t EVRReadoutCounter{0};
+  int64_t TDCReadoutCounter{0};
+  int64_t UndefinedReadoutCounter{0};
   // Kafka stats below are common to all detectors
-  int64_t kafka_produce_fails;
-  int64_t kafka_ev_errors;
-  int64_t kafka_ev_others;
-  int64_t kafka_dr_errors;
-  int64_t kafka_dr_noerrors;
+
+  // Kafka stats below are common to all detectors
+  struct Producer::ProducerStats KafkaStats;
+
 } __attribute__((aligned(64)));

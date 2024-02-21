@@ -4,10 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/testutils/HeaderFactory.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <memory>
 #include <nmx/NMXInstrument.h>
 #include <stdio.h>
 #include <string.h>
@@ -399,7 +401,7 @@ protected:
   BaseSettings Settings;
   EV44Serializer *serializer;
   NMXInstrument *nmx;
-  ESSReadout::Parser::PacketHeaderV0 PacketHeader;
+  std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
@@ -408,17 +410,16 @@ protected:
     serializer = new EV44Serializer(115000, "nmx");
     counters = {};
 
-    memset(&PacketHeader, 0, sizeof(PacketHeader));
-
+    headerFactory = std::make_unique<TestHeaderFactory>();
     nmx = new NMXInstrument(counters, Settings, serializer);
     nmx->setSerializer(serializer);
-    nmx->ESSReadoutParser.Packet.HeaderPtr = &PacketHeader;
+    nmx->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = &PacketHeader;
+    Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);

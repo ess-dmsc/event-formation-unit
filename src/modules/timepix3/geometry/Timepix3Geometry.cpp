@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,18 +6,26 @@
 /// \brief Calculate pixelid from timepix readouts
 ///
 //===----------------------------------------------------------------------===//
+
 #include <common/debug/Trace.h>
-#include <modules/timepix3/geometry/Timepix3Geometry.h>
+#include <cstdint>
+#include <geometry/Timepix3Geometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Timepix3 {
 
-Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t nz, uint32_t np)
-    : ESSGeometry(nx, ny, nz, np){}
+using namespace timepixReadout;
 
-uint32_t Timepix3Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data) {
+Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
+                                   uint32_t numChunkWindows)
+    : ESSGeometry(nx, ny, 1, 1),
+      totalNumChunkWindows(numChunkWindows <= 0 ? 1 : numChunkWindows),
+      chunksPerDimension(static_cast<int>(sqrt(totalNumChunkWindows))),
+      chunkSize(nx / chunksPerDimension) {}
+
+uint32_t Timepix3Geometry::calcPixel(const PixelReadout &Data) const {
   XTRACE(DATA, DEB, "calculating pixel");
   uint16_t X = calcX(Data);
   uint16_t Y = calcY(Data);
@@ -27,23 +35,50 @@ uint32_t Timepix3Geometry::calcPixel(DataParser::Timepix3PixelReadout &Data) {
   return pixel2D(X, Y);
 }
 
+/// \brief Calculates the chunk window index based on the X and Y coordinates
+/// \param X is the X coordinate
+/// \param Y is the Y coordinate
+/// \return the chunk window index
+int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
+                                          const uint16_t Y) const {
+  // If there is only one chunk, return 0 index position
+  if (totalNumChunkWindows == 1) {
+    return 0;
+  }
+
+  // Calculate the window index based on the X and Y coordinates
+  return (X / chunkSize) + (chunksPerDimension * (Y / chunkSize));
+}
+
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcX(DataParser::Timepix3PixelReadout &Data) {
-  uint16_t Col = Data.Dcol + Data.Pix / 4;
+uint32_t Timepix3Geometry::calcX(const PixelReadout &Data) const {
+  uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
   return Col;
 }
 
 // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
 // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcY(DataParser::Timepix3PixelReadout &Data) {
-  uint16_t Row = Data.Spix + (Data.Pix & 0x3);
+uint32_t Timepix3Geometry::calcY(const PixelReadout &Data) const {
+  uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
   return Row;
 }
 
-///\todo implement this
-bool Timepix3Geometry::validateData(DataParser::Timepix3PixelReadout &Data) {
-  XTRACE(DATA, DEB, "validate data, dcol = %u", Data.Dcol);
+/// \brief Calculates that the received data is fir to the geometry
+/// \param Data is the pixel data event
+/// \return true if the data is valid
+bool Timepix3Geometry::validateData(const PixelReadout &Data) const {
+
+  if (calcX(Data) >= nx()) {
+    XTRACE(DATA, WAR, "X value %u is larger than nx limit %u", calcX(Data),
+           nx());
+    return false;
+  } else if (calcY(Data) >= ny()) {
+    XTRACE(DATA, WAR, "Y value %u is larger than ny limit %u", calcY(Data),
+           ny());
+    return false;
+  }
+
   return true;
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <memory>
+#include <modules/timepix3/Counters.h>
 #include <string>
 
 #include <common/debug/Trace.h>
@@ -23,6 +25,8 @@
 class Timepix3BaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
+  std::unique_ptr<Timepix3::Timepix3Base> Readout;
+  Counters* testCounters;
 
   void SetUp() override {
     Settings.NoHwCheck = true;
@@ -30,6 +34,9 @@ public:
     Settings.DetectorName = "timepix3";
     Settings.UpdateIntervalSec = 0;
     Settings.DumpFilePrefix = "deleteme_";
+
+    Readout = std::make_unique<Timepix3::Timepix3Base>(Settings);
+    testCounters = &Readout->Counters;
   }
 
   void TearDown() override {}
@@ -39,7 +46,6 @@ TEST_F(Timepix3BaseTest, Constructor) {
   Timepix3::Timepix3Base Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
-
 
 std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
 
@@ -123,19 +129,20 @@ std::vector<uint8_t> TestPacket2{
 };
 // clang-format on
 
+/// \todo not a test yet, write correct pixel readout packet format
 TEST_F(Timepix3BaseTest, DataReceive) {
   Timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, TestPacket);
 
-  EXPECT_EQ(Readout.Counters.PixelReadouts, 0);
+  EXPECT_EQ(testCounters->PixelReadouts, 0);
   Readout.stopThreads();
 }
 
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
   Timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket2);
+  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, TestPacket2);
 
   /// \todo not a test yet, write correct pixel readout packet format
   // EXPECT_EQ(Readout.Counters.PixelReadouts, 6);
@@ -145,5 +152,4 @@ TEST_F(Timepix3BaseTest, DataReceiveGood) {
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-
 }

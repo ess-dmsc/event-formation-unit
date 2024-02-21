@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,6 +24,11 @@ public:
   EV44Serializer(size_t MaxArrayLength, std::string SourceName,
                  ProducerCallback Callback = {});
 
+  virtual ~EV44Serializer() = default;
+
+  /// \brief Explicitly disallow copy constructor
+  EV44Serializer(const EV44Serializer &other) = delete;
+
   /// \brief sets producer callback
   /// \param cb function to be called to send buffer to Kafka
   void setProducerCallback(ProducerCallback Callback);
@@ -32,17 +37,19 @@ public:
   /// produced
   uint32_t checkAndSetReferenceTime(int64_t Time);
 
-  /// \brief changes reference time
-  void setReferenceTime(int64_t Time);
+  /// \brief changes reference time.
+  /// Function is virtual to allow mocking
+  virtual void setReferenceTime(int64_t Time);
 
   /// \returns the currently set reference time
   int64_t referenceTime() const;
 
   /// \brief adds event, if maximum count is exceeded, sends data using the
   /// producer callback \param time time of event in relation to pulse time
+  /// Function is virtual to allow mocking
   /// \param pixl id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
-  size_t addEvent(int32_t Time, int32_t Pixel);
+  virtual size_t addEvent(int32_t Time, int32_t Pixel);
 
   /// \returns current message counter
   uint64_t currentMessageId() const;
