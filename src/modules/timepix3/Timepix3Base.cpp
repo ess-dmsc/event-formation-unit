@@ -79,7 +79,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_fails", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
   Stats.create("kafka.produce_config_errors", Counters.KafkaStats.config_errors);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
