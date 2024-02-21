@@ -56,7 +56,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   while (BytesLeft) {
     uint64_t *DataBytesPtr;
 
-    if (BytesLeft < sizeof(DataBytesPtr)) {
+    if (BytesLeft < sizeof(*DataBytesPtr)) {
       // TODO add some error handling here
       // Maybe add a counter about demaged chunks
       XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
