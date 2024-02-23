@@ -136,7 +136,6 @@ public:
 
 public:
   /// \todo figure out the right size  of EthernetBufferMaxEntries
-
   static constexpr int EthernetBufferMaxEntries{2000};
   static constexpr int EthernetBufferSize{9000}; /// bytes
   static constexpr int KafkaBufferSize{12'400};  /// entries ~ 100kB

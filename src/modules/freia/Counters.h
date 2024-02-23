@@ -50,6 +50,12 @@ struct Counters {
   struct ESSReadout::ESSTime::Stats_t TimeStats;
   int64_t TxBytes;
   int64_t TxMonitorData;
+
+  // Causes of calls to produce()
+  int64_t ProduceCauseTimeout;
+  int64_t ProduceCausePulseChange;
+  int64_t ProduceCauseMaxEventsReached;
+
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 

@@ -107,11 +107,18 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_fails);
+  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
+  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
+  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
@@ -233,7 +240,11 @@ void FreiaBase::processing_thread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
-      Counters.TxBytes += Serializer->produce();
+      Serializer->produce();
+      Counters.ProduceCauseTimeout++;
+      Counters.TxBytes = Serializer->TxBytes;
+      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
     }
   }

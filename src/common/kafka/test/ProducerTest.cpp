@@ -61,7 +61,7 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_EQ(prod.stats.dr_noerrors, 0);
   ASSERT_EQ(prod.stats.ev_errors, 0);
   // ASSERT_EQ(prod.stats.ev_others, 0);
-  ASSERT_EQ(prod.stats.produce_fails, 0);
+  ASSERT_EQ(prod.stats.produce_errors, 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
@@ -101,10 +101,10 @@ TEST_F(ProducerTest, ProducerFail) {
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
   std::uint8_t SomeData[20];
-  ASSERT_EQ(prod.stats.produce_fails, 0);
+  ASSERT_EQ(prod.stats.produce_errors, 0);
   int ret = prod.produce(SomeData, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.stats.produce_fails, 1);
+  ASSERT_EQ(prod.stats.produce_errors, 1);
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
@@ -118,10 +118,10 @@ TEST_F(ProducerTest, ProducerSuccess) {
   prod.KafkaProducer.reset(TempProducer);
   unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
-  ASSERT_EQ(prod.stats.produce_fails, 0);
+  ASSERT_EQ(prod.stats.produce_errors, 0);
   int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.stats.produce_fails, 0);
+  ASSERT_EQ(prod.stats.produce_errors, 0);
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {

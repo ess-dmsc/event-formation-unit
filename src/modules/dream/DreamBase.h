@@ -10,6 +10,7 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 #include <dream/Counters.h>
 
 namespace Dream {
@@ -25,6 +26,7 @@ public:
 
 protected:
   EV44Serializer *Serializer;
+  AR51Serializer *MonitorSerializer;
 };
 
 } // namespace Dream

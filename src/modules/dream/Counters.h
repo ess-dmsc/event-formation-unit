@@ -37,8 +37,9 @@ struct Counters {
   int64_t Events;
   int64_t GeometryErrors;
   int64_t TxBytes;
+  int64_t TxMonitorData;
   // Kafka stats below are common to all detectors
-  int64_t kafka_produce_fails;
+  int64_t kafka_produce_errors;
   int64_t kafka_ev_errors;
   int64_t kafka_ev_others;
   int64_t kafka_dr_errors;
