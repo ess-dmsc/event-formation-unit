@@ -68,6 +68,8 @@ public:
     int64_t ev_others;
     int64_t dr_errors;
     int64_t dr_noerrors;
+    int64_t produce_bytes_ok;
+    int64_t produce_bytes_error;
     int64_t produce_calls;
     int64_t produce_errors;
     int64_t produce_no_errors;

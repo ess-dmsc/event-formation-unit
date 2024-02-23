@@ -101,7 +101,7 @@ size_t EV44Serializer::produce() {
       ProduceFunctor(Buffer_,
                      Event44Message_->reference_time()->data()[0] / 1000000);
     }
-    // \todo should this be inside the previous for?
+    // \todo change to new producer metrics and remove
     TxBytes += Buffer_.size_bytes();
     return Buffer_.size_bytes();
   }

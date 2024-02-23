@@ -27,7 +27,6 @@ protected:
   struct {
     // Processing Counters
     int64_t events_udder;
-    int64_t tx_bytes;
     // Kafka stats below are common to all detectors
     struct Producer::ProducerStats KafkaStats;
   } __attribute__((aligned(64))) mystats;
