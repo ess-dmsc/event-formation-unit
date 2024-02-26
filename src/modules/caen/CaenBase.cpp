@@ -91,6 +91,11 @@ CaenBase::CaenBase(BaseSettings const &settings,
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
+
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
   Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
@@ -206,6 +211,9 @@ void CaenBase::processingThread() {
 
       Serializer->produce();
       SerializerII->produce();
+      Counters.ProduceCauseTimeout++;
+      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
     }
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
