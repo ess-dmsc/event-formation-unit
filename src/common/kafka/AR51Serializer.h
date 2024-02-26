@@ -16,7 +16,7 @@
 
 class AR51Serializer {
 public:
-  /// \brief creates ar52 flat buffer serializer
+  /// \brief creates ar51 flat buffer serializer
   /// \param source_name value for source_name field
   /// \param Callback
   AR51Serializer(std::string SourceName, ProducerCallback Callback = {});
