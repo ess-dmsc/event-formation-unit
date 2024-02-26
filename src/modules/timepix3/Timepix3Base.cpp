@@ -77,6 +77,11 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   Stats.create("transmit.bytes", Counters.TxBytes);
 
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
+
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
@@ -153,6 +158,9 @@ void Timepix3Base::processingThread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
       Serializer.produce();
+      Counters.ProduceCauseTimeout++;
+      Counters.ProduceCausePulseChange = Serializer.ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer.ProduceCauseMaxEventsReached;
       Counters.KafkaStats = EventProducer.stats;
     }
 
