@@ -234,6 +234,10 @@ void NmxBase::processing_thread() {
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      Counters.ProduceCauseTimeout++;
+      
+      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
 
       if (!NMX.ADCHist.isEmpty()) {
