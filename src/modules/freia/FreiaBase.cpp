@@ -112,7 +112,9 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
   Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
-  /// \todo below stats are common to all detectors
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
+  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
@@ -123,6 +125,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
+  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
+  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
 
   Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
