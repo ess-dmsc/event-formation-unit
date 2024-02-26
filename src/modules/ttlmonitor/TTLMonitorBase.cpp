@@ -95,6 +95,11 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
+
   /// \todo below stats are common to all detectors
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
@@ -201,6 +206,10 @@ void TTLMonitorBase::processing_thread() {
       for (auto &serializer : SerializersPtr) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer->produce();
+        Counters.ProduceCauseTimeout++;
+
+        Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
+        Counters.ProduceCauseMaxEventsReached = serializer->ProduceCauseMaxEventsReached;
       }
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
