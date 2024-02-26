@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <common/kafka/Producer.h>
 #include <common/readout/ess/Parser.h>
 
 struct Counters {
@@ -39,9 +40,5 @@ struct Counters {
   int64_t TxBytes;
   int64_t TxMonitorData;
   // Kafka stats below are common to all detectors
-  int64_t kafka_produce_errors;
-  int64_t kafka_ev_errors;
-  int64_t kafka_ev_others;
-  int64_t kafka_dr_errors;
-  int64_t kafka_dr_noerrors;
+  struct Producer::ProducerStats KafkaStats;
 } __attribute__((aligned(64)));
