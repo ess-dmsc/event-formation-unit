@@ -104,6 +104,10 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
@@ -223,6 +227,10 @@ void TrexBase::processing_thread() {
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      Counters.ProduceCauseTimeout++;
+
+      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
 
       if (!TREX.ADCHist.isEmpty()) {
