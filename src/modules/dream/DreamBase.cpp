@@ -188,6 +188,9 @@ void DreamBase::processingThread() {
           {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
 
       Counters.TxBytes += Serializer->produce();
+      Counters.ProduceCauseTimeout++;
+      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
+      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
