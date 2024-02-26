@@ -235,7 +235,7 @@ void NmxBase::processing_thread() {
 
       Counters.TxBytes += Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      
+
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
       Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
