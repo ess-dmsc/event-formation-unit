@@ -51,7 +51,7 @@ struct Counters {
   int64_t TxBytes;
   int64_t TxMonitorData;
 
-  // Causes of calls to produce()
+  // Causes of produce
   int64_t ProduceCauseTimeout;
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
