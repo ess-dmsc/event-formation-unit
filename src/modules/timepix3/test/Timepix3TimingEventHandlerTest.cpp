@@ -308,8 +308,7 @@ TEST_F(Timepix3TimingEventHandlerTest, TestLateReadoutsDropped) {
   EXPECT_EQ(globalTimingEventReceiver.getApplyDataCalls(), 3);
 }
 
-/// \todo disabled test temporarily
-TEST_F(Timepix3TimingEventHandlerTest, DISABLED_TestRepeatedReadoutsDropped) {
+TEST_F(Timepix3TimingEventHandlerTest, TestRepeatedReadoutsDropped) {
 
   testEventHandler.applyData(buildEVRReadout(1));
   testEventHandler.applyData(buildTDCReadout(1));
