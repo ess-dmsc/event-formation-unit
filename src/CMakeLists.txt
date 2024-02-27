@@ -36,6 +36,28 @@ set(EFU_COMMON_LIBS
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 
+#=============================================================================
+# Identify the Linux distribution
+#=============================================================================
+
+# Add CentOS-specific configuration here
+set(REDHAT_RELEASE_FILE "/etc/redhat-release")
+set(UBUNTU_RELEASE_FILE "/etc/lsb-release")
+set(ALMA_LINUX_RELEASE_FILE "/etc/alma-release")
+
+if(EXISTS ${REDHAT_RELEASE_FILE})
+  execute_process(COMMAND cat ${REDHAT_RELEASE_FILE}
+          OUTPUT_VARIABLE LINUX_DISTRIBUTION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+elseif(EXISTS ${UBUNTU_RELEASE_FILE})
+  execute_process(COMMAND cat ${UBUNTU_RELEASE_FILE}
+          OUTPUT_VARIABLE LINUX_DISTRIBUTION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+elseif(EXISTS ${ALMA_LINUX_RELEASE_FILE})
+  execute_process(COMMAND cat ${ALMA_LINUX_RELEASE_FILE}
+          OUTPUT_VARIABLE LINUX_DISTRIBUTION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
 #=============================================================================
 # Include subdirs, do not change order
