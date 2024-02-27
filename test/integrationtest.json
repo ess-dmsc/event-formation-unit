@@ -18,6 +18,11 @@
             0
         ],
         [
+          "receive.dropped",
+          "==",
+          0
+        ],
+        [
             "transmit.bytes",
             ">=",
             500000
