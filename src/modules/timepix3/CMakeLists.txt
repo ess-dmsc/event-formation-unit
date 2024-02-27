@@ -90,7 +90,23 @@ create_test_executable(Timepix3TimingEventHandlerTest)
 set(Timepix3PixelEventHandlerTest_INC
   ${timepix3_common_inc}
 )
-add_compile_options(-Wno-maybe-uninitialized)
+
+# Add CentOS-specific configuration here
+set(RELEASE_FILE "/etc/redhat-release")
+
+if(EXISTS ${RELEASE_FILE})
+    execute_process(COMMAND cat ${RELEASE_FILE}
+                    OUTPUT_VARIABLE LINUX_DISTRIBUTION
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # Workaround for CentOS 7 gcc for mockups in tests
+    if (LINUX_DISTRIBUTION MATCHES "CentOS")
+        message(STATUS "CentOS detected enable -Wno-maybe-uninitialized 
+        for Timepix3PixelEventHandlerTest")
+        add_compile_options(-Wno-maybe-uninitialized)
+    endif()
+endif()
+
 set(Timepix3PixelEventHandlerTest_SRC
   ${timepix3_common_src}
   test/Timepix3PixelEventHandlerTest.cpp
