@@ -113,6 +113,7 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
   Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
   Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);

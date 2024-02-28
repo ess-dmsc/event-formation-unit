@@ -42,6 +42,7 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.udder", mystats.events_udder);
 
   /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.config_errors", mystats.KafkaStats.config_errors);
   Stats.create("kafka.produce_bytes_ok", mystats.KafkaStats.produce_bytes_ok);
   Stats.create("kafka.produce_bytes_error", mystats.KafkaStats.produce_bytes_error);
   Stats.create("kafka.produce_calls", mystats.KafkaStats.produce_calls);
