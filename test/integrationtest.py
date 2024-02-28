@@ -21,6 +21,7 @@ def check_stats(test):
     print("Getting EFU Stats")
     metrics = get_metrics()
 # not important change
+# another line
     for stats_test in test['StatsTestList']:
         actual_stat = metrics.return_metric(f"efu.{test['Module']}.0.{stats_test[0]}")
         operator = stats_test[1]
