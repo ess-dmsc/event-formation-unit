@@ -9,12 +9,17 @@
 //===----------------------------------------------------------------------===//
 
 #include "ev44_events_generated.h"
+#include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/system/gccintel.h>
 
 #include <common/debug/Trace.h>
+#include <cstdint>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+using namespace std::chrono;
 
 // defining the lengths of elements of the flatbuffer schema
 //  eg. ReferenceTimeSize is 64 bits, the size of the reference_time elements
@@ -97,9 +102,13 @@ size_t EV44Serializer::produce() {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
     if (ProduceFunctor) {
-      // pulse_time is currently ns since 1970, produce time should be ms.
-      ProduceFunctor(Buffer_,
-                     Event44Message_->reference_time()->data()[0] / 1000000);
+      
+      // produce kafka message timestamp with current timestamp from harware
+      // clock
+      uint64_t currentHwClock =
+          duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+              .count();
+      ProduceFunctor(Buffer_, currentHwClock);
     }
     // \todo should this be inside the previous for?
     TxBytes += Buffer_.size_bytes();
