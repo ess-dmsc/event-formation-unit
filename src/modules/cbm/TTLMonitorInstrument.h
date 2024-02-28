@@ -14,10 +14,10 @@
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
-#include <ttlmonitor/Counters.h>
-#include <ttlmonitor/TTLMonitorBase.h>
-#include <ttlmonitor/geometry/Config.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/Counters.h>
+#include <cbm/TTLMonitorBase.h>
+#include <cbm/geometry/Config.h>
+#include <cbm/geometry/Parser.h>
 
 namespace TTLMonitor {
 

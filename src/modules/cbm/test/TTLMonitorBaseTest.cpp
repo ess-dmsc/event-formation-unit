@@ -10,7 +10,7 @@
 #include <common/testutils/TestBase.h>
 #include <cinttypes>
 #include <string>
-#include <ttlmonitor/TTLMonitorBase.h>
+#include <cbm/TTLMonitorBase.h>
 #include <vector>
 
 // clang-format off

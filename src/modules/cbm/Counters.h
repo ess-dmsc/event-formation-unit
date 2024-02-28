@@ -11,7 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/geometry/Parser.h>
 
 struct Counters {
   // Processing Counters - accessed in processing thread

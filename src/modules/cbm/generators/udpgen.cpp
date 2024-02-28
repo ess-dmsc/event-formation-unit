@@ -6,8 +6,8 @@
 /// \brief Generate artificial TTLMON readouts
 //===----------------------------------------------------------------------===//
 
-#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
+#include <modules/cbm/generators/ReadoutGenerator.h>
+#include <modules/cbm/geometry/Parser.h>
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {

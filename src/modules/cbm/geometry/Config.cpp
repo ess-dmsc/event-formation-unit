@@ -8,7 +8,7 @@
 
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <ttlmonitor/geometry/Config.h>
+#include <cbm/geometry/Config.h>
 
 namespace TTLMonitor {
 

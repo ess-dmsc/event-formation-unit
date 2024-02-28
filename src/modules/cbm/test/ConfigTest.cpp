@@ -5,7 +5,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
-#include <ttlmonitor/geometry/Config.h>
+#include <cbm/geometry/Config.h>
 
 // clang-format off
 auto MissingDetector = R"(

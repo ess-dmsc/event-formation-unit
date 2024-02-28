@@ -25,8 +25,8 @@
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
-#include <ttlmonitor/TTLMonitorBase.h>
-#include <ttlmonitor/TTLMonitorInstrument.h>
+#include <cbm/TTLMonitorBase.h>
+#include <cbm/TTLMonitorInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

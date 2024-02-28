@@ -12,7 +12,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
-#include <ttlmonitor/TTLMonitorInstrument.h>
+#include <cbm/TTLMonitorInstrument.h>
 
 using namespace TTLMonitor;
 

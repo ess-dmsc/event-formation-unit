@@ -9,7 +9,7 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
+#include <modules/cbm/geometry/Parser.h>
 
 namespace TTLMonitor {
 

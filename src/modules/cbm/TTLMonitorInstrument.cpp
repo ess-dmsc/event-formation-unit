@@ -12,8 +12,8 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
-#include <ttlmonitor/TTLMonitorInstrument.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/TTLMonitorInstrument.h>
+#include <cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

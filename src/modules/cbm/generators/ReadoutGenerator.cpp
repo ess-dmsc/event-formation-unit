@@ -10,8 +10,8 @@
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
-#include <modules/ttlmonitor/generators/ReadoutGenerator.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
+#include <modules/cbm/generators/ReadoutGenerator.h>
+#include <modules/cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
