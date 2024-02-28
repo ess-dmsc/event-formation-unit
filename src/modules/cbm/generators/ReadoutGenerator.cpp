@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace TTLMonitor {
+namespace cbm {
 
 void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -44,5 +44,5 @@ void ReadoutGenerator::generateData() {
     TimeLow += Settings.TicksBtwEvents;
   }
 }
-} // namespace TTLMonitor
+} // namespace cbm
 // GCOVR_EXCL_STOP

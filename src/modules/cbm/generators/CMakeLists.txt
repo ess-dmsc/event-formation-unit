@@ -1,7 +1,7 @@
 # Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
 
 #=============================================================================
-# Generate artificial TTLMonitor readouts - using the new data format
+# Generate artificial CBM readouts - using the new data format
 #=============================================================================
 
 set(ttlmon_udp_generated_INC

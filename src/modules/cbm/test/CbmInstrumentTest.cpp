@@ -12,9 +12,9 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
-#include <cbm/TTLMonitorInstrument.h>
+#include <cbm/CbmInstrument.h>
 
-using namespace TTLMonitor;
+using namespace cbm;
 
 // clang-format off
 
@@ -91,26 +91,26 @@ std::vector<uint8_t> MonitorReadoutTOF {
 };
 // clang-format on
 
-class TTLMonitorInstrumentTest : public TestBase {
+class CbmInstrumentTest : public TestBase {
 public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
   std::vector<std::unique_ptr<EV44Serializer>> serializers;
-  TTLMonitorInstrument *ttlmonitor;
+  CbmInstrument *cbm;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
-    Settings.ConfigFile = TTLMON_CONFIG;
-    serializers.push_back(std::make_unique<EV44Serializer>(115000, "ttlmonitor"));
+    Settings.ConfigFile = CBM_CONFIG;
+    serializers.push_back(std::make_unique<EV44Serializer>(115000, "cbm"));
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    ttlmonitor = new TTLMonitorInstrument(counters, Settings);
-    ttlmonitor->SerializersPtr.push_back(serializers[0].get());
-    ttlmonitor->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
+    cbm = new CbmInstrument(counters, Settings);
+    cbm->SerializersPtr.push_back(serializers[0].get());
+    cbm->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}
 
@@ -125,23 +125,23 @@ protected:
 };
 
 // Test cases below
-TEST_F(TTLMonitorInstrumentTest, Constructor) {
+TEST_F(CbmInstrumentTest, Constructor) {
   ASSERT_EQ(counters.RingCfgErrors, 0);
   ASSERT_EQ(counters.FENCfgErrors, 0);
 }
 
-TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
-  makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadout);
+TEST_F(CbmInstrumentTest, BeamMonitor) {
+  makeHeader(cbm->ESSReadoutParser.Packet, MonitorReadout);
 
-  ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
-  counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
+  cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
+  counters.CbmStats = cbm->CbmParser.Stats;
 
-  ASSERT_EQ(counters.TTLMonStats.Readouts, 7);
-  ASSERT_EQ(counters.TTLMonStats.ErrorFiber, 1);
-  ASSERT_EQ(counters.TTLMonStats.ErrorFEN, 1);
-  ASSERT_EQ(counters.TTLMonStats.ErrorADC, 1);
+  ASSERT_EQ(counters.CbmStats.Readouts, 7);
+  ASSERT_EQ(counters.CbmStats.ErrorFiber, 1);
+  ASSERT_EQ(counters.CbmStats.ErrorFEN, 1);
+  ASSERT_EQ(counters.CbmStats.ErrorADC, 1);
 
-  ttlmonitor->processMonitorReadouts();
+  cbm->processMonitorReadouts();
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.FENCfgErrors, 1);
   ASSERT_EQ(counters.MonitorCounts, 2);
@@ -149,15 +149,15 @@ TEST_F(TTLMonitorInstrumentTest, BeamMonitor) {
   ASSERT_EQ(counters.FENCfgErrors, 1);
 }
 
-TEST_F(TTLMonitorInstrumentTest, BeamMonitorTOF) {
-  makeHeader(ttlmonitor->ESSReadoutParser.Packet, MonitorReadoutTOF);
-  ttlmonitor->ESSReadoutParser.Packet.Time.setReference(1, 100000);
-  ttlmonitor->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
+TEST_F(CbmInstrumentTest, BeamMonitorTOF) {
+  makeHeader(cbm->ESSReadoutParser.Packet, MonitorReadoutTOF);
+  cbm->ESSReadoutParser.Packet.Time.setReference(1, 100000);
+  cbm->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
 
-  ttlmonitor->TTLMonParser.parse(ttlmonitor->ESSReadoutParser.Packet);
-  counters.TTLMonStats = ttlmonitor->TTLMonParser.Stats;
+  cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
+  counters.CbmStats = cbm->CbmParser.Stats;
 
-  ttlmonitor->processMonitorReadouts();
+  cbm->processMonitorReadouts();
 }
 
 int main(int argc, char **argv) {

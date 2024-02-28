@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief TTLMonitor detector base plugin interface definition
+/// \brief CBM detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 
@@ -14,12 +14,12 @@
 #include <memory>
 #include <cbm/Counters.h>
 
-namespace TTLMonitor {
+namespace cbm {
 
-class TTLMonitorBase : public Detector {
+class CbmBase : public Detector {
 public:
-  TTLMonitorBase(BaseSettings const &settings);
-  ~TTLMonitorBase() = default;
+  CbmBase(BaseSettings const &settings);
+  ~CbmBase() = default;
 
   void processing_thread();
 
@@ -29,4 +29,4 @@ protected:
   std::vector<std::unique_ptr<EV44Serializer>> SerializersPtr;
 };
 
-} // namespace TTLMonitor
+} // namespace cbm

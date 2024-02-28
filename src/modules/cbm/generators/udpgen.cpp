@@ -12,14 +12,14 @@
 
 int main(int argc, char *argv[]) {
 
-  TTLMonitor::ReadoutGenerator TTLMonGen;
-  uint8_t TTLMonDataSize = sizeof(TTLMonitor::Parser::Data);
+  cbm::ReadoutGenerator TTLMonGen;
+  uint8_t TTLMonDataSize = sizeof(cbm::Parser::Data);
   TTLMonGen.setReadoutDataSize(TTLMonDataSize);
 
   TTLMonGen.argParse(argc, argv);
   TTLMonGen.main();
 
-  TTLMonGen.Settings.Type = ESSReadout::Parser::DetectorType::TTLMonitor;
+  TTLMonGen.Settings.Type = ESSReadout::Parser::DetectorType::CBM;
 
   TTLMonGen.transmitLoop();
 

@@ -6,12 +6,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <modules/cbm/TTLMonitorBase.h>
+#include <modules/cbm/CbmBase.h>
 
 int main(int argc, char *argv[]) {
-  MainProg Main("ttlmonitor", argc, argv);
+  MainProg Main("cbm", argc, argv);
 
-  auto Detector = new TTLMonitor::TTLMonitorBase(Main.DetectorSettings);
+  auto Detector = new cbm::CbmBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

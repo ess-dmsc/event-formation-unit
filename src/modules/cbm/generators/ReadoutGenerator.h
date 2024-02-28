@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial TTLMONITOR readouts with variable number
+/// \brief Generator of artificial CBM readouts with variable number
 /// of readouts
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
@@ -13,7 +13,7 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace TTLMonitor {
+namespace cbm {
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
@@ -22,5 +22,5 @@ protected:
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
 };
-} // namespace TTLMonitor
+} // namespace cbm
 // GCOVR_EXCL_STOP

@@ -10,7 +10,7 @@
 #include <common/debug/Trace.h>
 #include <cbm/geometry/Config.h>
 
-namespace TTLMonitor {
+namespace cbm {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -29,9 +29,9 @@ void Config::apply() {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (DetectorName != "TTLMonitor") {
-    LOG(INIT, Sev::Error, "Detector name mismatch, expected TTLMonitor");
-    throw std::runtime_error("Detector name mismatch, expected TTLMonitor");
+  if (DetectorName != "cbm") {
+    LOG(INIT, Sev::Error, "Detector name mismatch, expected CBM");
+    throw std::runtime_error("Detector name mismatch, expected CBM");
   }
 
   try {
@@ -84,4 +84,4 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "MonitorOffset {}", Parms.MonitorOffset);
 }
 
-} // namespace TTLMonitor
+} // namespace cbm

@@ -3,11 +3,11 @@
 ///
 /// \file
 ///
-/// \brief TTLMonitor instrument base plugin
+/// \brief CBM instrument base plugin
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/detector/Detector.h"
+#include <common/detector/Detector.h>
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
@@ -25,17 +25,17 @@
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
-#include <cbm/TTLMonitorBase.h>
-#include <cbm/TTLMonitorInstrument.h>
+#include <cbm/CbmBase.h>
+#include <cbm/CbmInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace TTLMonitor {
+namespace cbm {
 
-const char *classname = "TTLMonitor detector with ESS readout";
+const char *classname = "CBM detector with ESS readout";
 
-TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
+CbmBase::CbmBase(BaseSettings const &settings)
     : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
@@ -75,14 +75,14 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
   Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
 
-  Stats.create("readouts.error_size", Counters.TTLMonStats.ErrorSize);
-  Stats.create("readouts.error_fiber", Counters.TTLMonStats.ErrorFiber);
-  Stats.create("readouts.error_fen", Counters.TTLMonStats.ErrorFEN);
-  Stats.create("readouts.error_adc", Counters.TTLMonStats.ErrorADC);
-  Stats.create("readouts.error_datalen", Counters.TTLMonStats.ErrorDataLength);
-  Stats.create("readouts.error_timefrac", Counters.TTLMonStats.ErrorTimeFrac);
-  Stats.create("readouts.count", Counters.TTLMonStats.Readouts);
-  Stats.create("readouts.empty", Counters.TTLMonStats.NoData);
+  Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
+  Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
+  Stats.create("readouts.error_fen", Counters.CbmStats.ErrorFEN);
+  Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
+  Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
+  Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);
+  Stats.create("readouts.count", Counters.CbmStats.Readouts);
+  Stats.create("readouts.empty", Counters.CbmStats.NoData);
 
 
   // Time stats
@@ -106,15 +106,15 @@ TTLMonitorBase::TTLMonitorBase(BaseSettings const &settings)
   AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    TTLMonitorBase::processing_thread();
+    CbmBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d TTLMonitor Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d CBM Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void TTLMonitorBase::processing_thread() {
+void CbmBase::processing_thread() {
 
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INPUT, ALW, "Missing topic - mandatory for ttl monitor");
@@ -130,9 +130,9 @@ void TTLMonitorBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  TTLMonitorInstrument TTLMonitor(Counters, EFUSettings);
+  CbmInstrument cbmInstrument(Counters, EFUSettings);
 
-  for (int i = 0; i < TTLMonitor.Conf.Parms.NumberOfMonitors; ++i) {
+  for (int i = 0; i < cbmInstrument.Conf.Parms.NumberOfMonitors; ++i) {
     // Create a serializer for each monitor
 
     SerializersPtr.push_back(std::make_unique<EV44Serializer>(
@@ -140,7 +140,7 @@ void TTLMonitorBase::processing_thread() {
   }
 
   for (auto &serializerPtr : SerializersPtr) {
-    TTLMonitor.SerializersPtr.push_back(serializerPtr.get());
+    cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
   }
 
   unsigned int DataIndex;
@@ -161,9 +161,9 @@ void TTLMonitorBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = TTLMonitor.ESSReadoutParser.validate(
-          DataPtr, DataLen, TTLMonitor.Conf.Parms.TypeSubType);
-      Counters.ReadoutStats = TTLMonitor.ESSReadoutParser.Stats;
+      auto Res = cbmInstrument.ESSReadoutParser.validate(
+          DataPtr, DataLen, cbmInstrument.Conf.Parms.TypeSubType);
+      Counters.ReadoutStats = cbmInstrument.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
@@ -180,11 +180,11 @@ void TTLMonitorBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      TTLMonitor.TTLMonParser.parse(TTLMonitor.ESSReadoutParser.Packet);
-      Counters.TTLMonStats = TTLMonitor.TTLMonParser.Stats;
-      Counters.TimeStats = TTLMonitor.ESSReadoutParser.Packet.Time.Stats;
+      cbmInstrument.CbmParser.parse(cbmInstrument.ESSReadoutParser.Packet);
+      Counters.CbmStats = cbmInstrument.CbmParser.Stats;
+      Counters.TimeStats = cbmInstrument.ESSReadoutParser.Packet.Time.Stats;
 
-      TTLMonitor.processMonitorReadouts();
+      cbmInstrument.processMonitorReadouts();
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a
@@ -209,4 +209,4 @@ void TTLMonitorBase::processing_thread() {
   return;
 }
 
-} // namespace TTLMonitor
+} // namespace cbm

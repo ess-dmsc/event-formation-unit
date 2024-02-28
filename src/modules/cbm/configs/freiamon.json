@@ -1,6 +1,6 @@
 
 {
-  "Detector" : "TTLMonitor",
+  "Detector" : "Cbm",
 
   "TypeSubType" : 16,
 

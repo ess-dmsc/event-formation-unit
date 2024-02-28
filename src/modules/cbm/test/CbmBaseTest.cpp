@@ -3,14 +3,14 @@
 ///
 /// \file
 ///
-/// \brief Unit tests for TTLMonitorBase
+/// \brief Unit tests for CbmBase
 ///
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
 #include <cinttypes>
 #include <string>
-#include <cbm/TTLMonitorBase.h>
+#include <cbm/CbmBase.h>
 #include <vector>
 
 // clang-format off
@@ -42,12 +42,14 @@ std::vector<uint8_t> TestPacket {
 
 // clang-format on
 
-class TTLMonitorBaseTest : public ::testing::Test {
+using namespace cbm;
+
+class CbmBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
 
   void SetUp() override {
-    Settings.ConfigFile = TTLMON_CONFIG;
+    Settings.ConfigFile = CBM_CONFIG;
     Settings.KafkaTopic = "freia_beam_monitor";
     Settings.NoHwCheck = true;
   }
@@ -55,23 +57,23 @@ public:
   void TearDown() override {}
 };
 
-TEST_F(TTLMonitorBaseTest, Constructor) {
-  TTLMonitor::TTLMonitorBase Readout(Settings);
+TEST_F(CbmBaseTest, Constructor) {
+  CbmBase Readout(Settings);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
-  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 0);
 }
 
-TEST_F(TTLMonitorBaseTest, DataReceive) {
-  TTLMonitor::TTLMonitorBase Readout(Settings);
+TEST_F(CbmBaseTest, DataReceive) {
+  CbmBase Readout(Settings);
 
   writePacketToRxFIFO(Readout, TestPacket);
 
-  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 2);
+  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 2);
   Readout.stopThreads();
 }
 
-TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
-  TTLMonitor::TTLMonitorBase Readout(Settings);
+TEST_F(CbmBaseTest, DataReceiveBadHeader) {
+  CbmBase Readout(Settings);
 
   TestPacket[0] = 0xff; // pad should be 0
   writePacketToRxFIFO(Readout, TestPacket);
@@ -79,13 +81,13 @@ TEST_F(TTLMonitorBaseTest, DataReceiveBadHeader) {
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
 
   // no readouts as header is bad
-  EXPECT_EQ(Readout.Counters.TTLMonStats.Readouts, 0);
+  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 0);
   Readout.stopThreads();
 }
 
 
-TEST_F(TTLMonitorBaseTest, EmulateFIFOError) {
-  TTLMonitor::TTLMonitorBase Readout(Settings);
+TEST_F(CbmBaseTest, EmulateFIFOError) {
+  CbmBase Readout(Settings);
   EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
 
   Readout.startThreads();
