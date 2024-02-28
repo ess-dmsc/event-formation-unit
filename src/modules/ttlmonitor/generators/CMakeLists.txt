@@ -1,29 +1,6 @@
 # Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
 
 #=============================================================================
-# Generate artificial TTLMonitor readouts - legacy VMM3 format
-#=============================================================================
-
-set(ttlmon_vmm_udp_generated_INC
-  ReadoutGeneratorVMM.h
-  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
-  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
-  )
-set(ttlmon_vmm_udp_generated_SRC
-  ReadoutGeneratorVMM.cpp
-  udpgen_vmm3.cpp
-  ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
-  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
-  )
-create_executable(ttlmon_vmm_udp_generated)
-
-set_target_properties(ttlmon_vmm_udp_generated
-  PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
-  )
-
-
-#=============================================================================
 # Generate artificial TTLMonitor readouts - using the new data format
 #=============================================================================
 
