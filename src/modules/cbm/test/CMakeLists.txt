@@ -5,7 +5,7 @@
 include_directories(.)
 include_directories(..)
 
-get_filename_component(TTLMON_FULL "${ESS_MODULE_DIR}/cbm/configs/freiamon.json" ABSOLUTE)
+get_filename_component(CBM_FULL "${ESS_MODULE_DIR}/cbm/configs/freiamon.json" ABSOLUTE)
 
 ##
 ## Pure unit tests
