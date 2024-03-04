@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <assert.h>
-#include <bifrost/generators/DatReader.h>
+#include <bifrost/generators/ReadoutGenerator.h>
 #include <caen/readout/Readout.h>
 #include <fcntl.h>
 #include <string>
@@ -16,12 +16,12 @@
 
 // GCOVR_EXCL_START
 
-BifrostDatReader::BifrostDatReader(std::string file, bool Verbose)
+ReadoutGenerator::ReadoutGenerator(std::string file, bool Verbose)
     : filename(file), Verbose(Verbose) {
   FileDescriptor = open(file.c_str(), O_RDONLY);
 }
 
-int BifrostDatReader::readReadout(struct dat_data_t &Readout) {
+int ReadoutGenerator::readReadout(struct dat_data_t &Readout) {
 
   while (read(FileDescriptor, (void *)&Readout, sizeof(struct dat_data_t)) >
          0) {
@@ -39,6 +39,29 @@ int BifrostDatReader::readReadout(struct dat_data_t &Readout) {
   }
   printf("EOF\n");
   return -1;
+}
+
+void ReadoutGenerator::generateData() {
+  uint64_t SentPackets = 0;
+  uint64_t SentReadouts = 0;
+
+  struct dat_data_t DatReadout;
+  struct udp_data_t UdpReadout;
+  int res = 0;
+
+  while (((res = readReadout(DatReadout)) > 0) and
+         (SentPackets < Settings.NumberOfPackets) and
+         (SentReadouts < Settings.NumReadouts)) {
+
+    memset(&UdpReadout, 0, sizeof(UdpReadout));
+    
+    UdpReadout.timehi = ;
+    UdpReadout.timelow = DatReadout.timelow;
+    UdpReadout.flagsAndOM = 0;
+    UdpReadout.group = DatReadout.tube;
+    UdpReadout.ampl_a = DatReadout.ampl_a;
+    UdpReadout.ampl_b = DatReadout.ampl_b;
+  }
 }
 
 // GCOVR_EXCL_STOP

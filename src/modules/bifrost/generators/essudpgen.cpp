@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
     memset(&UdpReadout, 0, sizeof(UdpReadout));
     // UdpReadout.timehi = DatReadout.timehi;
     // UdpReadout.timelow = DatReadout.timelow;
-    UdpReadout.OM = 0;
-    UdpReadout.tube = DatReadout.tube;
+    UdpReadout.flagsAndOM = 0;
+    UdpReadout.group = DatReadout.tube;
     UdpReadout.ampl_a = DatReadout.ampl_a;
     UdpReadout.ampl_b = DatReadout.ampl_b;
     // add the readout data (skip first four bytes of struct)
