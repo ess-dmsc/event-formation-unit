@@ -116,6 +116,9 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
   Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
+  // clang-format on
+  std::function<void()> inputFunc = [this]() { inputThread(); };
+  AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
     CbmBase::processing_thread();
