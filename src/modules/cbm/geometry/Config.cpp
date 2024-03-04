@@ -29,7 +29,7 @@ void Config::apply() {
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if (DetectorName != "cbm") {
+  if (DetectorName != "CBM") {
     LOG(INIT, Sev::Error, "Detector name mismatch, expected CBM");
     throw std::runtime_error("Detector name mismatch, expected CBM");
   }

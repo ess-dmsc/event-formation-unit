@@ -117,7 +117,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
 void CbmBase::processing_thread() {
 
   if (EFUSettings.KafkaTopic == "") {
-    XTRACE(INPUT, ALW, "Missing topic - mandatory for ttl monitor");
+    XTRACE(INPUT, ALW, "Missing topic - mandatory for beam monitor");
     stopThreads();
   }
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
@@ -136,7 +136,7 @@ void CbmBase::processing_thread() {
     // Create a serializer for each monitor
 
     SerializersPtr.push_back(std::make_unique<EV44Serializer>(
-        KafkaBufferSize, "ttlmon" + std::to_string(i), Produce));
+        KafkaBufferSize, "cbm" + std::to_string(i), Produce));
   }
 
   for (auto &serializerPtr : SerializersPtr) {

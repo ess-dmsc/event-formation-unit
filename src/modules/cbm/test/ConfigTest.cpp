@@ -22,13 +22,13 @@ auto InvalidDetector = R"(
 
 auto DefaultValuesOnly = R"(
   {
-    "Detector" : "Cbm"
+    "Detector" : "CBM"
   }
 )"_json;
 
 auto RingAndFEN = R"(
   {
-    "Detector" : "Cbm",
+    "Detector" : "CBM",
     "MonitorRing" : 88,
     "MonitorFEN" : 77
   }

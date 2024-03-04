@@ -4,7 +4,7 @@ add_subdirectory(test)
 add_subdirectory(generators)
 include_directories(.)
 
-get_filename_component(TTLMON_CONFIG "${ESS_MODULE_DIR}/cbm/configs/lokimon.json" ABSOLUTE)
+get_filename_component(CBM_CONFIG "${ESS_MODULE_DIR}/cbm/configs/lokimon.json" ABSOLUTE)
 
 #=============================================================================
 # cbm detector module and base test
