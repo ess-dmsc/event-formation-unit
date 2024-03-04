@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief TTLMonitor is a dedicated module for TTL triggered beam monitor
+/// \brief CBM is a dedicated module for TTL triggered beam monitor
 ///
 //===----------------------------------------------------------------------===//
 
@@ -12,16 +12,16 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
-#include <ttlmonitor/TTLMonitorInstrument.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/CbmInstrument.h>
+#include <cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace TTLMonitor {
+namespace cbm {
 
 /// \brief load configuration and calibration files
-TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
+CbmInstrument::CbmInstrument(struct Counters &counters,
                                            BaseSettings &settings)
 
     : counters(counters), Settings(settings) {
@@ -41,7 +41,7 @@ TTLMonitorInstrument::TTLMonitorInstrument(struct Counters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
 }
 
-void TTLMonitorInstrument::processMonitorReadouts(void) {
+void CbmInstrument::processMonitorReadouts(void) {
   ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
   // All readouts are now potentially valid, negative TOF is not
   // possible, or 0 ADC values, but rings and fens could still be outside the
@@ -54,8 +54,8 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts() - has %zu entries",
-         TTLMonParser.Result.size());
-  for (const auto &readout : TTLMonParser.Result) {
+         CbmParser.Result.size());
+  for (const auto &readout : CbmParser.Result) {
 
     // if (DumpFile) {
     //   dumpReadoutToFile(readout);
@@ -125,29 +125,4 @@ void TTLMonitorInstrument::processMonitorReadouts(void) {
   }
 }
 
-// /// \todo move into readout/vmm3 instead as this will be common
-// void TTLMonitorInstrument::dumpReadoutToFile(
-//     const ESSReadout::VMM3Parser::VMM3Data &Data) {
-//   VMM3::Readout CurrentReadout;
-//   CurrentReadout.PulseTimeHigh =
-//   ESSReadoutParser.Packet.HeaderPtr->PulseHigh; CurrentReadout.PulseTimeLow =
-//   ESSReadoutParser.Packet.HeaderPtr->PulseLow;
-//   CurrentReadout.PrevPulseTimeHigh =
-//       ESSReadoutParser.Packet.HeaderPtr->PrevPulseHigh;
-//   CurrentReadout.PrevPulseTimeLow =
-//       ESSReadoutParser.Packet.HeaderPtr->PrevPulseLow;
-//   CurrentReadout.EventTimeHigh = Data.TimeHigh;
-//   CurrentReadout.EventTimeLow = Data.TimeLow;
-//   CurrentReadout.OutputQueue =
-//   ESSReadoutParser.Packet.HeaderPtr->OutputQueue; CurrentReadout.BC =
-//   Data.BC; CurrentReadout.OTADC = Data.OTADC; CurrentReadout.GEO = Data.GEO;
-//   CurrentReadout.TDC = Data.TDC;
-//   CurrentReadout.VMM = Data.VMM;
-//   CurrentReadout.Channel = Data.Channel;
-//   CurrentReadout.FiberId = Data.FiberId;
-//   CurrentReadout.FENId = Data.FENId;
-//
-//   DumpFile->push(CurrentReadout);
-// }
-
-} // namespace TTLMonitor
+} // namespace cbm

@@ -3,44 +3,46 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial VMM3 readouts
-///
+/// \brief Generator of artificial TTLMon readout
+/// based on TTLMon ICD
+/// \todo add link
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/readout/vmm3/VMM3Parser.h>
-#include <modules/ttlmonitor/generators/ReadoutGeneratorVMM.h>
+#include <common/debug/Trace.h>
+#include <modules/cbm/generators/ReadoutGenerator.h>
+#include <modules/cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace TTLMonitor {
+namespace cbm {
 
-void ReadoutGeneratorVMM::generateData() {
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
   uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
-    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
+    auto ReadoutData = (Parser::Data *)DP;
 
-    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
-    // CSPEC VMM readouts all have DataLength 20
-    assert(ReadoutData->DataLength == 20);
+    ReadoutData->DataLength = sizeof(Parser::Data);
+    // TTLMon (new format) readouts all have DataLength 16
+    assert(ReadoutData->DataLength == 16);
 
     // Monitor is (so far) always on logical fiber 22 (ring 11), fen 0
     ReadoutData->FiberId = 22;
     ReadoutData->FENId = 0;
     ReadoutData->TimeHigh = TimeHigh;
     ReadoutData->TimeLow = TimeLow;
-    ReadoutData->OTADC = 0;
-    ReadoutData->VMM = 0;
+    ReadoutData->Pos = 0;
+    ReadoutData->ADC = 12345;
     ReadoutData->Channel = (Readout % 3) & 0x01; // 0 0 1, 0 0 1, ...
 
-    DP += ReadoutDataSize;
+    DP += sizeof(Parser::Data);
 
     TimeLow += Settings.TicksBtwEvents;
   }
 }
-} // namespace TTLMonitor
+} // namespace cbm
 // GCOVR_EXCL_STOP

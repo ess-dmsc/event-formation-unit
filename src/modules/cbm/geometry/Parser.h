@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief ESS TTLMonitor readout parser
+/// \brief ESS CBM readout parser
 ///
 //===----------------------------------------------------------------------===//
 
@@ -13,7 +13,7 @@
 #include <common/readout/ess/Parser.h>
 #include <vector>
 
-namespace TTLMonitor {
+namespace cbm {
 
 struct ParserStats {
   int64_t ErrorSize{0};
@@ -66,4 +66,4 @@ public:
 private:
   const uint16_t DataLength{DATASIZE};
 };
-} // namespace TTLMonitor
+} // namespace cbm

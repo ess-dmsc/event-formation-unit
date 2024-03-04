@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief TTLMonitor application counters (for Grafana and low level debug)
+/// \brief CBM application counters (for Grafana and low level debug)
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,7 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/geometry/Parser.h>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -22,7 +22,7 @@ struct Counters {
   int64_t ErrorESSHeaders;
 
   // VMM3a Readouts
-  struct TTLMonitor::ParserStats TTLMonStats;
+  struct cbm::ParserStats CbmStats;
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgErrors;
