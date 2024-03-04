@@ -3,9 +3,9 @@
 ///
 /// \file
 ///
-/// \brief TTLMonitorInstrument is responsible for readout validation and
-/// TTL monitor 'event formation'
-/// Its functions are called from the main prcessing loop in TTLMonitorBase
+/// \brief Cbm is responsible for readout validation and
+/// common beam monitor 'event formation'
+/// Its functions are called from the main prcessing loop in CbmBase
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -14,20 +14,20 @@
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
-#include <ttlmonitor/Counters.h>
-#include <ttlmonitor/TTLMonitorBase.h>
-#include <ttlmonitor/geometry/Config.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/Counters.h>
+#include <cbm/CbmBase.h>
+#include <cbm/geometry/Config.h>
+#include <cbm/geometry/Parser.h>
 
-namespace TTLMonitor {
+namespace cbm {
 
-class TTLMonitorInstrument {
+class CbmInstrument {
 public:
-  /// \brief 'create' the TTLMonitor instrument
+  /// \brief 'create' the CBM instrument
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  TTLMonitorInstrument(Counters &counters, BaseSettings &settings);
+  CbmInstrument(Counters &counters, BaseSettings &settings);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
@@ -36,7 +36,7 @@ public:
   // void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
 public:
-  /// \brief Stuff that 'ties' TTLMonitor together
+  /// \brief Stuff that 'ties' CBM together
   struct Counters &counters;
   BaseSettings &Settings;
 
@@ -50,10 +50,10 @@ public:
   ESSReadout::Parser ESSReadoutParser;
 
   /// \brief parser for TTLMon readout data
-  Parser TTLMonParser;
+  Parser CbmParser;
 
   /// \brief for dumping raw VMM3 readouts to HDF5 files
   // std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
-} // namespace TTLMonitor
+} // namespace cbm

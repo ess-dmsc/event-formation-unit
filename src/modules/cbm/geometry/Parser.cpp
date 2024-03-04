@@ -9,9 +9,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <ttlmonitor/geometry/Parser.h>
+#include <cbm/geometry/Parser.h>
 
-namespace TTLMonitor {
+namespace cbm {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -97,4 +97,4 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   return;
 }
 
-} // namespace TTLMonitor
+} // namespace cbm

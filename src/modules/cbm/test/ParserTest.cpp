@@ -9,9 +9,9 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-#include <modules/ttlmonitor/geometry/Parser.h>
+#include <modules/cbm/geometry/Parser.h>
 
-namespace TTLMonitor {
+using namespace cbm;
 
 /// \brief
 std::vector<uint8_t> DataBadFracTime{
@@ -64,7 +64,7 @@ std::vector<uint8_t> DataGood{
     0x00, 0x00, 0x00, 0x00
 };
 
-class TTLMonitorParserTest : public TestBase {
+class CbmParserTest : public TestBase {
 protected:
   ESSReadout::Parser::PacketDataV0 PacketData;
   Parser parser;
@@ -82,12 +82,12 @@ protected:
   }
 };
 
-TEST_F(TTLMonitorParserTest, Constructor) {
+TEST_F(CbmParserTest, Constructor) {
   ASSERT_EQ(parser.Stats.Readouts, 0);
 }
 
 // nullptr as buffer
-TEST_F(TTLMonitorParserTest, ErrorBufferPtr) {
+TEST_F(CbmParserTest, ErrorBufferPtr) {
   PacketData.DataPtr = 0;
   PacketData.DataLength = 100;
   parser.parse(PacketData);
@@ -96,7 +96,7 @@ TEST_F(TTLMonitorParserTest, ErrorBufferPtr) {
 }
 
 // no data in buffer
-TEST_F(TTLMonitorParserTest, NoData) {
+TEST_F(CbmParserTest, NoData) {
   makeHeader(DataGood);
   PacketData.DataLength = 0;
   parser.parse(PacketData);
@@ -104,7 +104,7 @@ TEST_F(TTLMonitorParserTest, NoData) {
 }
 
 // invalid data size provided in call
-TEST_F(TTLMonitorParserTest, ErrorHdrDataSize) {
+TEST_F(CbmParserTest, ErrorHdrDataSize) {
   makeHeader(DataGood);
   PacketData.DataLength = 19;
 
@@ -114,7 +114,7 @@ TEST_F(TTLMonitorParserTest, ErrorHdrDataSize) {
 }
 
 // invalid data length in readout
-TEST_F(TTLMonitorParserTest, ErrorDataSize) {
+TEST_F(CbmParserTest, ErrorDataSize) {
   makeHeader(DataBadSize);
 
   parser.parse(PacketData);
@@ -123,7 +123,7 @@ TEST_F(TTLMonitorParserTest, ErrorDataSize) {
 }
 
 // invalid fractional time
-TEST_F(TTLMonitorParserTest, ErrorDataTime) {
+TEST_F(CbmParserTest, ErrorDataTime) {
   makeHeader(DataBadFracTime);
 
   parser.parse(PacketData);
@@ -131,14 +131,13 @@ TEST_F(TTLMonitorParserTest, ErrorDataTime) {
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
 
-TEST_F(TTLMonitorParserTest, DataGood) {
+TEST_F(CbmParserTest, DataGood) {
   makeHeader(DataGood);
 
   parser.parse(PacketData);
   ASSERT_EQ(parser.Stats.ErrorSize, 0);
   ASSERT_EQ(parser.Stats.Readouts, 2);
 }
-} // namespace TTLMonitor
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
