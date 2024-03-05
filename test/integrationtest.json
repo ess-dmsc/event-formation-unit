@@ -18,9 +18,9 @@
             0
         ],
         [
-            "transmit.bytes",
-            ">=",
-            500000
+          "receive.dropped",
+          "==",
+          0
         ],
         [
             "receive.packets",
