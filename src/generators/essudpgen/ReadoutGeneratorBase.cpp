@@ -9,6 +9,7 @@
 
 #include <CLI/CLI.hpp>
 #include <common/debug/Trace.h>
+#include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
@@ -102,6 +103,7 @@ int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
   CLI::App app{"UDP data generator for ESS readout data"};
 
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
+  app.add_option("-n, --data", Settings.FilePath, "Record data file to read from");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
                  "Number of packets to send");
@@ -150,12 +152,12 @@ void ReadoutGeneratorBase::transmitLoop() {
       }
     }
     if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      printf("Sent %" PRIu64 " packets\n", Packets);
       break;
     }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
+  printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
 void ReadoutGeneratorBase::main() {

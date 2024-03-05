@@ -12,6 +12,7 @@
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
+#include <string>
 
 class ReadoutGeneratorBase {
 public:
@@ -29,6 +30,7 @@ public:
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
     uint8_t headerVersion{1};        // v1 header by default
+    std::string FilePath{"none"};            // Record data file to read from
     bool Loop{false};                // Keep looping the same file forever
 
     bool Randomise{false}; // Randomise header and data
