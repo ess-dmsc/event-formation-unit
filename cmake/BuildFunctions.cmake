@@ -103,8 +103,8 @@ function(create_test_executable)
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
 
   add_test(NAME regular_${exec_name}
-    COMMAND ${exec_name}
-    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml --rerun-failed --output-on-failure")
+    COMMAND ${exec_name} "--rerun-failed --output-on-failure"
+    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
 
   set(unit_test_targets
     ${unit_test_targets} ${exec_name}
