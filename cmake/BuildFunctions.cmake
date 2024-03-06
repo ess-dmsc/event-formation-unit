@@ -104,7 +104,7 @@ function(create_test_executable)
 
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
-    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml --rerun-failed --output-on-failure")
 
   set(unit_test_targets
     ${unit_test_targets} ${exec_name}
