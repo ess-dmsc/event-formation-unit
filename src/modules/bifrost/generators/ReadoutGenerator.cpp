@@ -3,17 +3,16 @@
 ///
 /// \file
 ///
-/// \brief reader for Bifrost data
+/// \brief Implementation of the ReadoutGenerator class
 ///
 //===----------------------------------------------------------------------===//
 
 #include <bifrost/generators/ReadoutGenerator.h>
-#include <bits/types/FILE.h>
 #include <common/debug/Trace.h>
-#include <cstdint>
+#include <fcntl.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <stdexcept>
-#include <string>
+
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

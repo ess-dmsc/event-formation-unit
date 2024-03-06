@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generate artificial DREAM readouts
+/// \brief Generate Bifrost udp stream from a dat file
 //===----------------------------------------------------------------------===//
 
 #include <modules/bifrost/generators/ReadoutGenerator.h>

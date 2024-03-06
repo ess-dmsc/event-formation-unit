@@ -3,13 +3,12 @@
 ///
 /// \file
 ///
-/// \brief reader for Bifrost data
+/// \brief Readout generator for Bifrost data
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
-#include <fcntl.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <modules/caen/readout/DataParser.h>
 
