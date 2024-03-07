@@ -7,8 +7,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "Error.hpp"
-#include <CLI/CLI.hpp>
 #include <common/debug/Trace.h>
 #include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>

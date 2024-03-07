@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "App.hpp"
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
+#include <CLI/CLI.hpp>
 #include <string>
 
 class ReadoutGeneratorBase {
