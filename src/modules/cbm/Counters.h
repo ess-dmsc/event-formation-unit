@@ -39,7 +39,7 @@ struct Counters {
   struct ESSReadout::ESSTime::Stats_t TimeStats;
   int64_t TxBytes;
 
-  // Causes of produce
+  // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
