@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "Error.hpp"
 #include <CLI/CLI.hpp>
 #include <common/debug/Trace.h>
 #include <cstdio>
@@ -106,7 +107,7 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PulseLow = TimeLowOffset;
   Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
-  
+
   if (headerVersion == Parser::HeaderVersion::V1) {
     Header->CMACPadd = 0;
   }
@@ -127,6 +128,12 @@ void ReadoutGeneratorBase::finishPacket() {
 
 int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
   CLI11_PARSE(app, argc, argv);
+
+  // if help was requested, return -1
+  if (app.get_help_ptr()) {
+    return -1;
+  }
+
   return 0;
 }
 
