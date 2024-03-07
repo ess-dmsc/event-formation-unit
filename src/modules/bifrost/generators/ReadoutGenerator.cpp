@@ -17,15 +17,19 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+ReadoutGenerator::ReadoutGenerator(): ReadoutGeneratorBase() {
+  app.add_option("-n, --data", bifrostSettings.FilePath, "Record data file to read from");
+}
+
 int ReadoutGenerator::readReadout(struct dat_data_t &Readout) {
 
   if (FileDescriptor == -1) {
-    FileDescriptor = open(Settings.FilePath.c_str(), O_RDONLY);
+    FileDescriptor = open(bifrostSettings.FilePath.c_str(), O_RDONLY);
   }
 
   if (FileDescriptor == -1) {
     throw std::runtime_error(
-        "Failed to open the file: " + Settings.FilePath +
+        "Failed to open the file: " + bifrostSettings.FilePath +
         ". Biforst gen requires dat file with sample data");
   }
 

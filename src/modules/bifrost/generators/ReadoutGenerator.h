@@ -11,6 +11,7 @@
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <modules/caen/readout/DataParser.h>
+#include <string>
 
 /**
  * @brief The BifrostDatReader class is responsible for reading data from a DAT
@@ -18,9 +19,14 @@
  */
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  ReadoutGenerator() = default;
+  ReadoutGenerator();
 
 private:
+
+struct BiforstGeneratorSettings {
+  std::string FilePath{"none"}; ///< The path to the DAT file
+} bifrostSettings;
+
   /**
    * @brief The dat_data_t struct represents the data structure for DAT records.
    */

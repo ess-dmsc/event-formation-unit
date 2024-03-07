@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "App.hpp"
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
@@ -30,7 +31,6 @@ public:
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
     uint8_t headerVersion{1};        // v1 header by default
-    std::string FilePath{"none"};            // Record data file to read from
     bool Loop{false};                // Keep looping the same file forever
 
     bool Randomise{false}; // Randomise header and data
@@ -65,6 +65,8 @@ public:
   uint8_t Buffer[BufferSize];
 
 protected:
+  CLI::App app{"UDP data generator for ESS readout data"};
+
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
   /// \param NumReadouts number of readouts in the UDP packet
