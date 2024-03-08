@@ -14,7 +14,11 @@ int main(int argc, char *argv[]) {
   uint8_t BifrostDataSize = sizeof(Caen::DataParser::CaenReadout);
   BifrostGen.setReadoutDataSize(BifrostDataSize);
 
-  BifrostGen.argParse(argc, argv);
+  // If parse come back with -1 (help), the program will exit
+  if (!BifrostGen.argParse(argc, argv)) {
+    return 0;
+  }
+
   BifrostGen.Settings.Type = ESSReadout::Parser::DetectorType::BIFROST;
 
   BifrostGen.main();
