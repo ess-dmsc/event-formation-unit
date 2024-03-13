@@ -31,6 +31,11 @@
             "receive.packets",
             "==",
             100
+        ],
+        [
+            "receive.dropped",
+            "==",
+            0
         ]
       ]
     }
