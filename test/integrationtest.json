@@ -19,8 +19,8 @@
         ],
         [
             "kafka.produce_bytes_ok",
-            ">",
-            0
+            ">=",
+            1
         ],
         [
             "kafka.produce_bytes_error",
