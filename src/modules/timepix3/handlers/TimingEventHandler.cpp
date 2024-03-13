@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <memory>
 #include <handlers/TimingEventHandler.h>
+#include <memory>
 #include <utility>
 
 // #undef TRC_LEVEL
@@ -31,22 +31,27 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
          lastTDCData->tdcTimeStamp, tdcRepetitionFrequency,
          lastTDCData->arrivalTimestamp.time_since_epoch());
 
-  if (lastTDCData != nullptr &&
-      tdcReadout.counter != lastTDCData->counter + 1) {
-    statCounters.MissTDCCounter +=
-        tdcReadout.counter - (lastTDCData->counter + 1);
+  if (lastTDCData != nullptr) {
+    if (tdcReadout.counter > lastTDCData->counter + 1) {
+      statCounters.MissTDCCounter +=
+          tdcReadout.counter - (lastTDCData->counter + 1);
+    } else if (tdcReadout.counter < lastTDCData->counter &&
+                // Handle the case when the counter is reset
+               tdcReadout.counter != 0) {
+      return;
+    } else if (tdcReadout.counter == lastTDCData->counter) {
+      return;
+    }
   }
 
   lastTDCData = std::make_unique<TDCDataEvent>(
       tdcReadout.counter, tdcReadout.timestamp, tdcReadout.stamp);
 
-  statCounters.TDCReadoutCounter++;
-
   if (isLastTimingDiffLowerThenThreshold()) {
+    statCounters.EVRPairFound++;
+    statCounters.ESSGlobalTimeCounter++;
     publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
                                    lastTDCData->tdcTimeInPixelClock));
-
-    statCounters.EVRPairFound++;
   }
 }
 
@@ -56,23 +61,28 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
          lastEVRData->pulseTimeInEpochNs,
          lastEVRData->arrivalTimestamp.time_since_epoch());
 
-  if (lastEVRData != nullptr &&
-      evrReadout.counter != lastEVRData->counter + 1) {
-    statCounters.MissEVRCounter +=
-        evrReadout.counter - (lastEVRData->counter + 1);
+  if (lastEVRData != nullptr) {
+    if (evrReadout.counter > lastEVRData->counter + 1) {
+      statCounters.MissEVRCounter +=
+          evrReadout.counter - (lastEVRData->counter + 1);
+    } else if (evrReadout.counter < lastEVRData->counter &&
+               // Handle the case when the counter is reset
+               evrReadout.counter != 0) {
+      return;
+    } else if (evrReadout.counter == lastEVRData->counter) {
+      return;
+    }
   }
 
   lastEVRData = std::make_unique<EVRDataEvent>(evrReadout.counter,
                                                evrReadout.pulseTimeSeconds,
                                                evrReadout.pulseTimeNanoSeconds);
 
-  statCounters.EVRReadoutCounter++;
-
   if (isLastTimingDiffLowerThenThreshold()) {
+    statCounters.TDCPairFound++;
+    statCounters.ESSGlobalTimeCounter++;
     publishData(ESSGlobalTimeStamp(lastEVRData->pulseTimeInEpochNs,
                                    lastTDCData->tdcTimeInPixelClock));
-
-    statCounters.TDCPairFound++;
   }
 }
 

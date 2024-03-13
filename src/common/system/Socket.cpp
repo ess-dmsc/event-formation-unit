@@ -177,6 +177,8 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
   }
+
+  LOG(IPC, Sev::Info, "Socket succesfuly bound to {}:{}", ipaddr, port);
 }
 
 void Socket::setRemoteSocket(const std::string ipaddr, int port) {

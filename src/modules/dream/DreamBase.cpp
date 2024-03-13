@@ -78,9 +78,10 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
+  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
+  Stats.create("kafka.produce_errors", Counters.kafka_produce_errors);
   Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
   Stats.create("kafka.ev_others", Counters.kafka_ev_others);
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
@@ -112,6 +113,14 @@ void DreamBase::processingThread() {
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
+
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "dream_debug",
+                           KafkaCfg.CfgParms);
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
+  };
+
+  MonitorSerializer = new AR51Serializer("dream", ProduceMonitor);
 
   Serializer =
       new EV44Serializer(KafkaBufferSize, EFUSettings.DetectorName, Produce);
@@ -150,6 +159,14 @@ void DreamBase::processingThread() {
       // Process readouts, generate (end produce) events
       Dream.processReadouts();
 
+      // send monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxMonitorData++;
+      }
+
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
       usleep(10);
@@ -165,7 +182,7 @@ void DreamBase::processingThread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+      Counters.kafka_produce_errors = EventProducer.stats.produce_errors;
       Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
       Counters.kafka_ev_others = EventProducer.stats.ev_others;
       Counters.kafka_dr_errors = EventProducer.stats.dr_errors;

@@ -1,10 +1,9 @@
-// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief A pixel generator for performance testing (delete?)
-/// \todo delete?
+/// \brief A pixel generator for performance testing
 ///
 //===----------------------------------------------------------------------===//
 
@@ -16,7 +15,6 @@
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/kafka/Producer.h>
 #include <common/time/TimeString.h>
 
 #include <unistd.h>
@@ -45,12 +43,18 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("transmit.bytes", mystats.tx_bytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_calls", mystats.kafka_produce_calls);
-  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_calls", mystats.KafkaStats.produce_calls);
+  Stats.create("kafka.produce_no_errors", mystats.KafkaStats.produce_no_errors);
+  Stats.create("kafka.produce_errors", mystats.KafkaStats.produce_errors);
+  Stats.create("kafka.err_unknown_topic", mystats.KafkaStats.err_unknown_topic);
+  Stats.create("kafka.err_queue_full", mystats.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_other", mystats.KafkaStats.err_other);
+  Stats.create("kafka.ev_errors", mystats.KafkaStats.ev_errors);
+  Stats.create("kafka.ev_others", mystats.KafkaStats.ev_others);
+  Stats.create("kafka.dr_errors", mystats.KafkaStats.dr_errors);
+  Stats.create("kafka.dr_others", mystats.KafkaStats.dr_noerrors);
+  Stats.create("kafka.librdkafka_msg_cnt", mystats.KafkaStats.librdkafka_msg_cnt);
+  Stats.create("kafka.librdkafka_msg_size", mystats.KafkaStats.librdkafka_msg_size);
   // clang-format on
 
   std::function<void()> processingFunc = [this]() {
@@ -105,12 +109,7 @@ void PerfGenBase::processingThread() {
 
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
-    mystats.kafka_produce_calls = EventProducer.stats.produce_calls;
-    mystats.kafka_produce_fails = EventProducer.stats.produce_fails;
-    mystats.kafka_ev_errors = EventProducer.stats.ev_errors;
-    mystats.kafka_ev_others = EventProducer.stats.ev_others;
-    mystats.kafka_dr_errors = EventProducer.stats.dr_errors;
-    mystats.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
+    mystats.KafkaStats = EventProducer.stats;
     mystats.tx_bytes = Serializer.TxBytes;
     TimeOfFlight = 0;
   }

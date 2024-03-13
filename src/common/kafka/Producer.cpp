@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Kafka producer - werapper for librdkafka
+/// \brief Kafka producer - wrapper for librdkafka
 ///
 /// See https://github.com/edenhill/librdkafka
 //===----------------------------------------------------------------------===//
@@ -12,6 +12,7 @@
 #include <common/debug/Trace.h>
 #include <common/kafka/Producer.h>
 #include <common/system/gccintel.h>
+#include <nlohmann/json.hpp>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -38,7 +39,13 @@ RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
 
 ///
 void Producer::event_cb(RdKafka::Event &event) {
+  nlohmann::json res;
   switch (event.type()) {
+  case RdKafka::Event::EVENT_STATS:
+    res = nlohmann::json::parse(event.str());
+    stats.librdkafka_msg_cnt = res["msg_cnt"].get<int64_t>();
+    stats.librdkafka_msg_size = res["msg_size"].get<int64_t>();
+    break;
   case RdKafka::Event::EVENT_ERROR:
     LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}",
         RdKafka::err2str(event.err()).c_str());
@@ -53,6 +60,7 @@ void Producer::event_cb(RdKafka::Event &event) {
     break;
   }
 }
+
 
 ///
 Producer::Producer(std::string Broker, std::string Topic,
@@ -115,9 +123,18 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
   stats.produce_calls++;
 
   KafkaProducer->poll(0);
+
   if (resp != RdKafka::ERR_NO_ERROR) {
+    if (resp == RdKafka::ERR__UNKNOWN_TOPIC) {
+      stats.err_unknown_topic++;
+    } else if (resp == RdKafka::ERR__QUEUE_FULL) {
+      stats.err_queue_full++;
+    } else {
+      stats.err_other++;
+    }
+
     XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
-    stats.produce_fails++;
+    stats.produce_errors++;
     return resp;
   } else {
     stats.produce_no_errors++;
