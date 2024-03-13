@@ -7,16 +7,42 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <CLI/CLI.hpp>
 #include <common/debug/Trace.h>
+#include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
-///\brief No work to do for constructor
-ReadoutGeneratorBase::ReadoutGeneratorBase() {}
+
+///\brief Constructor initialize the generator app
+ReadoutGeneratorBase::ReadoutGeneratorBase() {
+  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
+  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
+  app.add_option("-a, --packets", Settings.NumberOfPackets,
+                 "Number of packets to send");
+  app.add_option("-t, --throttle", Settings.SpeedThrottle,
+                 "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
+                 "Extra usleep() after n packets");
+  app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
+  app.add_option("-r, --rings", Settings.NFibers,
+                 "Number of Fibers used in data header (obsolete)");
+  app.add_option("-f, --fibers", Settings.NFibers,
+                 "Number of Fibers used in data header");
+  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
+                 "Delay (ticks) between events");
+  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
+                 "Delay (ticks) between coincident readouts");
+  app.add_option("-o, --readouts", Settings.NumReadouts,
+                 "Number of readouts per packet");
+  app.add_option("-v, --header_version", Settings.headerVersion,
+                 "Header version, v1 by default");
+  app.add_flag("-m, --random", Settings.Randomise,
+               "Randomise header and data fields");
+  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+}
 
 ///\brief
 uint16_t ReadoutGeneratorBase::makePacket() {
@@ -79,7 +105,7 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PulseLow = TimeLowOffset;
   Header->PrevPulseHigh = TimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
-  
+
   if (headerVersion == Parser::HeaderVersion::V1) {
     Header->CMACPadd = 0;
   }
@@ -99,34 +125,13 @@ void ReadoutGeneratorBase::finishPacket() {
 }
 
 int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
-  CLI::App app{"UDP data generator for ESS readout data"};
-
-  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
-  app.add_option("-a, --packets", Settings.NumberOfPackets,
-                 "Number of packets to send");
-  app.add_option("-t, --throttle", Settings.SpeedThrottle,
-                 "Speed throttle (0 is fastest, larger is slower)");
-  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
-                 "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-  app.add_option("-r, --rings", Settings.NFibers,
-                 "Number of Fibers used in data header (obsolete)");
-  app.add_option("-f, --fibers", Settings.NFibers,
-                 "Number of Fibers used in data header");
-  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
-                 "Delay (ticks) between events");
-  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
-                 "Delay (ticks) between coincident readouts");
-  app.add_option("-o, --readouts", Settings.NumReadouts,
-                 "Number of readouts per packet");
-  app.add_option("-v, --header_version", Settings.headerVersion,
-                 "Header version, v1 by default");
-  app.add_flag("-m, --random", Settings.Randomise,
-               "Randomise header and data fields");
-  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
-
   CLI11_PARSE(app, argc, argv);
+
+  // if help was requested, return -1
+  if (app.get_help_ptr()) {
+    return -1;
+  }
+
   return 0;
 }
 
@@ -150,12 +155,12 @@ void ReadoutGeneratorBase::transmitLoop() {
       }
     }
     if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      printf("Sent %" PRIu64 " packets\n", Packets);
       break;
     }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
+  printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
 void ReadoutGeneratorBase::main() {

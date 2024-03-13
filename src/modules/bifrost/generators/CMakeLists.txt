@@ -9,17 +9,20 @@ include_directories(..)
 # Generate BIFROST readouts from (.dat) file
 #=============================================================================
 
-set(bifrost_udp_from_dat_SRC
-  DatReader.cpp
-  essudpgen.cpp
+set(bifrost_udp_generated_INC
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_MODULE_DIR}/bifrost/generators/ReadoutGenerator.h
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   )
-set(bifrost_udp_from_dat_INC
-  DatReader.h
-  ${ESS_MODULE_DIR}/caen/readout/Readout.h
-  PacketGenerator.h
+set(bifrost_udp_generated_SRC
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_MODULE_DIR}/bifrost/generators/ReadoutGenerator.cpp
+  ${ESS_MODULE_DIR}/bifrost/generators/udpgen.cpp
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   )
-create_executable(bifrost_udp_from_dat)
-set_target_properties(bifrost_udp_from_dat
+create_executable(bifrost_udp_generated)
+
+set_target_properties(bifrost_udp_generated
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
   )
