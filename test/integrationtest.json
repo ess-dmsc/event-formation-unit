@@ -18,9 +18,14 @@
             0
         ],
         [
-            "transmit.bytes",
-            ">=",
-            500000
+            "kafka.produce_bytes_ok",
+            ">",
+            0
+        ],
+        [
+            "kafka.produce_bytes_error",
+            "==",
+            0
         ],
         [
             "receive.packets",
