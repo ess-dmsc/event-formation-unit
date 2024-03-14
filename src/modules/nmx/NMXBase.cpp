@@ -44,7 +44,7 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
   Stats.create("transmit.bytes", Counters.TxBytes);
-  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -229,7 +229,7 @@ void NmxBase::processing_thread() {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
-        Counters.TxMonitorData++;
+        Counters.TxRawReadoutPackets++;
       }
 
     } else {
