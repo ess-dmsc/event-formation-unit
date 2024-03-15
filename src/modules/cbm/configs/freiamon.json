@@ -1,0 +1,13 @@
+
+{
+  "Detector" : "CBM",
+
+  "TypeSubType" : 16,
+
+  "NumberOfMonitors" : 1,
+  "MonitorOffset" : 1,
+
+  "MaxPulseTimeDiffNS" : 1000000000,
+
+  "MaxTOFNS" : 1000000000
+}

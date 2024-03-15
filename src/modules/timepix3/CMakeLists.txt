@@ -90,7 +90,14 @@ create_test_executable(Timepix3TimingEventHandlerTest)
 set(Timepix3PixelEventHandlerTest_INC
   ${timepix3_common_inc}
 )
-add_compile_options(-Wno-maybe-uninitialized)
+
+# Workaround for old gcc in CentOS 7 for mockups in tests
+if (LINUX_DISTRIBUTION MATCHES "CentOS")
+    message(STATUS "CentOS detected enable -Wno-maybe-uninitialized 
+    for Timepix3PixelEventHandlerTest")
+    add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 set(Timepix3PixelEventHandlerTest_SRC
   ${timepix3_common_src}
   test/Timepix3PixelEventHandlerTest.cpp

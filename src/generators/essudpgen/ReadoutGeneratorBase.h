@@ -12,6 +12,8 @@
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
+#include <CLI/CLI.hpp>
+#include <string>
 
 class ReadoutGeneratorBase {
 public:
@@ -63,6 +65,8 @@ public:
   uint8_t Buffer[BufferSize];
 
 protected:
+  CLI::App app{"UDP data generator for ESS readout data"};
+
   /// \brief Generate common readout header
   /// \param Type Data type as specified in the ESS Readout ICD
   /// \param NumReadouts number of readouts in the UDP packet

@@ -44,7 +44,7 @@ public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType {
     Reserved = 0x00,
-    TTLMonitor = 0x10,
+    CBM = 0x10,
     LOKI = 0x30,
     BIFROST = 0x34,
     MIRACLES = 0x38,
