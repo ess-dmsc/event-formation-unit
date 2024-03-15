@@ -11,6 +11,7 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 #include <nmx/Counters.h>
 
 namespace Nmx {
@@ -26,6 +27,7 @@ public:
 
 protected:
   EV44Serializer *Serializer;
+  AR51Serializer *MonitorSerializer;
 };
 
 } // namespace Nmx

@@ -78,7 +78,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
-  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_errors", Counters.kafka_produce_errors);
@@ -164,7 +164,7 @@ void DreamBase::processingThread() {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
-        Counters.TxMonitorData++;
+        Counters.TxRawReadoutPackets++;
       }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
