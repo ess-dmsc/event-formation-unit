@@ -49,7 +49,7 @@ struct Counters {
   int64_t TimeErrors;
   struct ESSReadout::ESSTime::Stats_t TimeStats;
   int64_t TxBytes;
-  int64_t TxMonitorData;
+  int64_t TxRawReadoutPackets;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;

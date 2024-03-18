@@ -57,6 +57,8 @@ struct Counters {
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
 
+  int64_t TxRawReadoutPackets;
+  
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 

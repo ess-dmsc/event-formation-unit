@@ -78,7 +78,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
-  Stats.create("transmit.monitor_packets", Counters.TxMonitorData);
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
@@ -179,7 +179,7 @@ void DreamBase::processingThread() {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
-        Counters.TxMonitorData++;
+        Counters.TxRawReadoutPackets++;
       }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little

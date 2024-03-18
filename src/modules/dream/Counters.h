@@ -38,12 +38,13 @@ struct Counters {
   int64_t Events;
   int64_t GeometryErrors;
   int64_t TxBytes;
-  int64_t TxMonitorData;
   
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
+
+  int64_t TxRawReadoutPackets;
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
