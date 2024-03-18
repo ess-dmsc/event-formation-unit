@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <common/kafka/Producer.h>
 #include <common/readout/ess/Parser.h>
 #include <modules/caen/geometry/CDCalibration.h>
 #include <modules/caen/geometry/Geometry.h>
@@ -43,12 +44,13 @@ struct CaenCounters {
   // Time
   struct ESSReadout::ESSTime::Stats_t TimeStats;
 
+  // Identification of the cause of produce calls
+  int64_t ProduceCauseTimeout;
+  int64_t ProduceCausePulseChange;
+  int64_t ProduceCauseMaxEventsReached;
+
   int64_t TxBytes;
   // Kafka stats below are common to all detectors
-  int64_t kafka_produce_errors;
-  int64_t kafka_ev_errors;
-  int64_t kafka_ev_others;
-  int64_t kafka_dr_errors;
-  int64_t kafka_dr_noerrors;
+  struct Producer::ProducerStats KafkaStats;
 } __attribute__((aligned(64)));
 } // namespace Caen

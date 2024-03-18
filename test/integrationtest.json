@@ -18,14 +18,24 @@
             0
         ],
         [
-          "receive.dropped",
-          "==",
-          0
+            "kafka.produce_bytes_ok",
+            ">=",
+            1
+        ],
+        [
+            "kafka.produce_bytes_error",
+            "==",
+            0
         ],
         [
             "receive.packets",
             "==",
             100
+        ],
+        [
+            "receive.dropped",
+            "==",
+            0
         ]
       ]
     }

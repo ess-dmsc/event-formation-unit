@@ -95,12 +95,27 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
-  /// \todo below stats are common to all detectors
+  // Produce cause call stats
+  Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
+  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
+  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
+
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
+  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
+  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
+  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
+  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
+  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
+  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
+  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
+  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -201,6 +216,10 @@ void CbmBase::processing_thread() {
       for (auto &serializer : SerializersPtr) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.TxBytes += serializer->produce();
+        Counters.ProduceCauseTimeout++;
+
+        Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
+        Counters.ProduceCauseMaxEventsReached = serializer->ProduceCauseMaxEventsReached;
       }
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer

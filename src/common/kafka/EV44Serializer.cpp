@@ -110,7 +110,7 @@ size_t EV44Serializer::produce() {
               .count();
       ProduceFunctor(Buffer_, currentHwClock);
     }
-    // \todo should this be inside the previous for?
+    // \todo change to new producer metrics and remove
     TxBytes += Buffer_.size_bytes();
     return Buffer_.size_bytes();
   }

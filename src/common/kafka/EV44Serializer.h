@@ -69,6 +69,7 @@ public:
   TSCTimer ProduceTimer, DebugTimer;
   int64_t TxBytes;
 
+  // Counters for causes of calls to produce()
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
 

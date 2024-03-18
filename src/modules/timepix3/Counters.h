@@ -50,6 +50,11 @@ struct Counters {
   int64_t UndefinedReadoutCounter{0};
   // Kafka stats below are common to all detectors
 
+  // Identification of the cause of produce calls
+  int64_t ProduceCauseTimeout;
+  int64_t ProduceCausePulseChange;
+  int64_t ProduceCauseMaxEventsReached;
+
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 

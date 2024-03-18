@@ -40,9 +40,11 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("events.udder", mystats.events_udder);
-  Stats.create("transmit.bytes", mystats.tx_bytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.config_errors", mystats.KafkaStats.config_errors);
+  Stats.create("kafka.produce_bytes_ok", mystats.KafkaStats.produce_bytes_ok);
+  Stats.create("kafka.produce_bytes_error", mystats.KafkaStats.produce_bytes_error);
   Stats.create("kafka.produce_calls", mystats.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", mystats.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", mystats.KafkaStats.produce_errors);
@@ -110,7 +112,6 @@ void PerfGenBase::processingThread() {
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
     mystats.KafkaStats = EventProducer.stats;
-    mystats.tx_bytes = Serializer.TxBytes;
     TimeOfFlight = 0;
   }
   /// \todo flush everything here
