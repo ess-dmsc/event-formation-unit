@@ -43,10 +43,10 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
     return;
   }
 
-  Parser::Data *DataPtr = (struct Data *)Buffer;
+  Parser::CbmReadout *DataPtr = (struct CbmReadout *)Buffer;
   for (unsigned int i = 0; i < Size / DataLength; i++) {
     Stats.Readouts++;
-    Parser::Data Readout = DataPtr[i];
+    Parser::CbmReadout Readout = DataPtr[i];
     if (Readout.FiberId > MaxFiberId) {
       XTRACE(DATA, WAR, "Invalid FiberId %d (Max is %d)", Readout.FiberId,
              MaxFiberId);

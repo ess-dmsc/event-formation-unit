@@ -6,6 +6,8 @@
 /// \brief Generate Bifrost udp stream from a dat file
 //===----------------------------------------------------------------------===//
 
+// GCOVR_EXCL_START
+
 #include <modules/bifrost/generators/ReadoutGenerator.h>
 
 int main(int argc, char *argv[]) {
@@ -26,3 +28,5 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+// GCOVR_EXCL_STOP

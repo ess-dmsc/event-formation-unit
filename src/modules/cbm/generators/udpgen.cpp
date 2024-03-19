@@ -6,14 +6,15 @@
 /// \brief Generate artificial TTLMON readouts
 //===----------------------------------------------------------------------===//
 
+// GCOVR_EXCL_START
+
 #include <modules/cbm/generators/ReadoutGenerator.h>
 #include <modules/cbm/geometry/Parser.h>
-// GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
 
   cbm::ReadoutGenerator TTLMonGen;
-  uint8_t TTLMonDataSize = sizeof(cbm::Parser::Data);
+  uint8_t TTLMonDataSize = sizeof(cbm::Parser::CbmReadout);
   TTLMonGen.setReadoutDataSize(TTLMonDataSize);
 
   TTLMonGen.argParse(argc, argv);
