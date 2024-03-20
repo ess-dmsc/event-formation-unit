@@ -57,6 +57,11 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
   Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
+  for (int i = 0; i < 24; i++) {
+    std::string statname = fmt::format("essheader.oq{}_packets", i);
+    Stats.create(statname, Counters.ReadoutStats.OQRxPackets[i]);
+  }
+
   // LoKI Readout Data
   Stats.create("readouts.headers", Counters.Parser.DataHeaders);
   Stats.create("readouts.count", Counters.Parser.Readouts);

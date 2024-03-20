@@ -111,6 +111,8 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     return -Parser::EHEADER;
   }
 
+  Stats.OQRxPackets[Packet.HeaderPtr.getOutputQueue()]++;
+
   // Check per OutputQueue packet sequence number
   if (NextSeqNum[Packet.HeaderPtr.getOutputQueue()] !=
       Packet.HeaderPtr.getSeqNum()) {

@@ -31,6 +31,7 @@ struct ESSHeaderStats {
   int64_t Version0Header{0};
   int64_t Version1Header{0};
   int64_t HeartBeats{0};
+  int64_t OQRxPackets[24]{0};
 };
 
 const uint32_t MaxFracTimeCount{88'052'499};
