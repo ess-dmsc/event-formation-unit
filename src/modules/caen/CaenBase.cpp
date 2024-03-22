@@ -88,7 +88,6 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
-
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   // Produce cause call stats
@@ -219,7 +218,6 @@ void CaenBase::processingThread() {
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
     Counters.KafkaStats = EventProducer.stats;
-    Counters.TxBytes = Serializer->TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
