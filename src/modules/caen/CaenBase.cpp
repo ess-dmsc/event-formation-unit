@@ -57,8 +57,8 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
   Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
-  for (int i = 0; i < 24; i++) {
-    std::string statname = fmt::format("essheader.oq{}_packets", i);
+  for (int i = 0; i < 12; i++) {
+    std::string statname = fmt::format("essheader.OQ.{:02}.packets", i);
     Stats.create(statname, Counters.ReadoutStats.OQRxPackets[i]);
   }
 
