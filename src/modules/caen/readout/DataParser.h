@@ -38,7 +38,10 @@ public:
     int64_t DataHeaders{0};
     int64_t Readouts{0};
     int64_t ReadoutsBadAmpl{0};
-    int64_t ErrorDataHeaders{0};
+    int64_t RingFenErrors{0};
+    int64_t DataLenMismatch{0};
+    int64_t DataLenInvalid{0};
+    int64_t DataHeaderSizeErrors{0};
   };
 
   static_assert(sizeof(CaenReadout) == 24, "Caen readout header length error");
