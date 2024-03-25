@@ -34,7 +34,7 @@ void Freia::ReadoutGenerator::generateData() {
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = TimeHigh;
+    ReadoutData->TimeHigh = PulseTimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;

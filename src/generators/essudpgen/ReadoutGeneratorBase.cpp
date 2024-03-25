@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial ESS readouts
+/// \brief Generator base class of artificial ESS readouts
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
@@ -80,11 +80,7 @@ void ReadoutGeneratorBase::generateHeader() {
   }
 
   memset(Buffer, 0, BufferSize);
-  auto Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
-
-  if (headerVersion == Parser::HeaderVersion::V1) {
-    Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
-  }
+  auto Header = reinterpret_cast<Parser::PacketHeaderV0 *>(Buffer);
 
   Header->CookieAndType = (Settings.Type << 24) + 0x535345;
   Header->Padding0 = 0;
@@ -99,18 +95,20 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
-  TimeHigh = time(NULL);
+  // time current time for pulse time high
+  PulseTimeHigh = time(NULL);
 
-  Header->PulseHigh = TimeHigh;
+  Header->PulseHigh = PulseTimeHigh;
   Header->PulseLow = TimeLowOffset;
-  Header->PrevPulseHigh = TimeHigh;
+  Header->PrevPulseHigh = PulseTimeHigh;
   Header->PrevPulseLow = PrevTimeLowOffset;
 
   if (headerVersion == Parser::HeaderVersion::V1) {
-    Header->CMACPadd = 0;
+    auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
+    HeaderV1->CMACPadd = 0;
   }
 
-  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh,
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", PulseTimeHigh,
          TimeLowOffset);
 }
 

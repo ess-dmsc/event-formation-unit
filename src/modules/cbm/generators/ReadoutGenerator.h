@@ -1,16 +1,17 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Generator of artificial CBM readouts with variable number
-/// of readouts
+/// \brief Generator of artificial readout data for CBM beam monitor types
+///        based on TTLMon ICD
+///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
 #pragma once
 
-#include "cbm/CbmTypes.h"
+#include <cbm/CbmTypes.h>
 #include <common/testutils/DataFuzzer.h>
 #include <cstdint>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -19,21 +20,23 @@ namespace cbm {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 
-struct BmGeneratorSettings {
-  uint8_t beamMonitortype{0};
-} bmSettings;
-
 public:
   ReadoutGenerator();
 
 private:
+  // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
+  static constexpr uint8_t CBM_FIBER_ID = 22;
+  static constexpr uint8_t CBM_FEN_ID = 0;
 
-struct CbmGeneratorSettings {
-  CbmType monitorType{CbmType::TTL};
-} cbmSettings;
+  struct CbmGeneratorSettings {
+    CbmType monitorType{CbmType::TTL};
+  } cbmSettings;
 
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
+
+  void generateIBMData(uint8_t *dataPtr);
+  void generateTTLData(uint8_t *dataPtr);
 };
 } // namespace cbm
 // GCOVR_EXCL_STOP

@@ -37,8 +37,8 @@ void LokiReadoutGenerator::generateData() {
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
 
-    ReadoutData->TimeHigh = TimeHigh;
-    ReadoutData->TimeLow = TimeLow;
+    ReadoutData->TimeHigh = PulseTimeHigh;
+    ReadoutData->TimeLow = PulseTimeLow;
 
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;
@@ -56,11 +56,11 @@ void LokiReadoutGenerator::generateData() {
     ///
 
     // All readouts are events for loki
-    TimeLow += Settings.TicksBtwEvents;
+    PulseTimeLow += Settings.TicksBtwEvents;
 
-    if (TimeLow >= 88052499) {
-      TimeLow -= 88052499;
-      TimeHigh += 1;
+    if (PulseTimeLow >= 88052499) {
+      PulseTimeLow -= 88052499;
+      PulseTimeHigh += 1;
     }
   }
 }

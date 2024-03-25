@@ -1,9 +1,9 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2024 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Generate artificial TTLMON readouts
+/// \brief Generate artificial CBM readouts
 //===----------------------------------------------------------------------===//
 
 // GCOVR_EXCL_START
@@ -13,16 +13,16 @@
 
 int main(int argc, char *argv[]) {
 
-  cbm::ReadoutGenerator TTLMonGen;
-  uint8_t TTLMonDataSize = sizeof(cbm::Parser::CbmReadout);
-  TTLMonGen.setReadoutDataSize(TTLMonDataSize);
+  cbm::ReadoutGenerator CbmGen;
+  uint8_t cbmReadoutDataSize = sizeof(cbm::Parser::CbmReadout);
+  CbmGen.setReadoutDataSize(cbmReadoutDataSize);
 
-  TTLMonGen.argParse(argc, argv);
-  TTLMonGen.main();
+  CbmGen.argParse(argc, argv);
+  CbmGen.main();
 
-  TTLMonGen.Settings.Type = ESSReadout::Parser::DetectorType::CBM;
+  CbmGen.Settings.Type = ESSReadout::Parser::DetectorType::CBM;
 
-  TTLMonGen.transmitLoop();
+  CbmGen.transmitLoop();
 
   return 0;
 }

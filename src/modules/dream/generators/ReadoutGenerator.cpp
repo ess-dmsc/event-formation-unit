@@ -19,8 +19,8 @@ namespace Dream {
 void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
 
   DR.DataLength = ReadoutDataSize;
-  DR.TimeHigh = TimeHigh;
-  DR.TimeLow = TimeLow;
+  DR.TimeHigh = PulseTimeHigh;
+  DR.TimeLow = PulseTimeLow;
   DR.OM = 0;
   DR.UnitId = 0;
 
@@ -93,11 +93,11 @@ void DreamReadoutGenerator::generateData() {
     DP += ReadoutDataSize;
 
     // All readouts are events for DREAM
-    TimeLow += Settings.TicksBtwEvents;
+    PulseTimeLow += Settings.TicksBtwEvents;
 
-    if (TimeLow >= 88052499) {
-      TimeLow -= 88052499;
-      TimeHigh += 1;
+    if (PulseTimeLow >= 88052499) {
+      PulseTimeLow -= 88052499;
+      PulseTimeHigh += 1;
     }
     Readouts++;
   }

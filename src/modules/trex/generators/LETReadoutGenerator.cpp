@@ -35,15 +35,15 @@ void Trex::LETReadoutGenerator::generateData() {
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", TimeLow, TimeHigh);
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", PulseTimeLow, PulseTimeHigh);
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     // TREX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = TimeHigh;
-    ReadoutData->TimeLow = TimeLow;
+    ReadoutData->TimeHigh = PulseTimeHigh;
+    ReadoutData->TimeLow = PulseTimeLow;
     ReadoutData->OTADC = 1000;
 
     // TREX is 16 wires deep in Z direction
@@ -100,20 +100,20 @@ void Trex::LETReadoutGenerator::generateData() {
            XLocal, YLocal);
 
     if ((GlobalReadout % 2) == 0) {
-      TimeLow += Settings.TicksBtwReadouts;
+      PulseTimeLow += Settings.TicksBtwReadouts;
       XTRACE(DATA, DEB,
-             "Ticking between readouts for same event, Time Low = %u", TimeLow);
+             "Ticking between readouts for same event, Time Low = %u", PulseTimeLow);
     } else {
-      TimeLow += Settings.TicksBtwEvents;
+      PulseTimeLow += Settings.TicksBtwEvents;
       XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u",
-             TimeLow);
+             PulseTimeLow);
     }
-    if (TimeLow >= 88052499) {
-      TimeLow -= 88052499;
-      TimeHigh += 1;
+    if (PulseTimeLow >= 88052499) {
+      PulseTimeLow -= 88052499;
+      PulseTimeHigh += 1;
     }
     GlobalReadout++;
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", TimeLow, TimeHigh);
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", PulseTimeLow, PulseTimeHigh);
   }
 }
 

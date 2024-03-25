@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generator of artificial ESS readouts
+/// \brief Generator base class of artificial ESS readouts
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
@@ -87,8 +87,8 @@ protected:
 
   uint64_t Packets{0};
   uint32_t SeqNum{0};
-  uint32_t TimeHigh{0};
-  uint32_t TimeLow{0};
+  uint32_t PulseTimeHigh{0};
+  uint32_t PulseTimeLow{0};
   uint16_t DataSize{0}; // Number of data bytes in packet
   uint8_t HeaderSize{0};
 

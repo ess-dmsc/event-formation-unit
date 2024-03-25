@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -110,13 +110,13 @@ protected:
     headerFactory = std::make_unique<TestHeaderFactory>();
     cbm = new CbmInstrument(counters, Settings);
     cbm->SerializersPtr.push_back(serializers[0].get());
-    cbm->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
+    cbm->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
+    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(0, 0);

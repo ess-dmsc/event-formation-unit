@@ -47,7 +47,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = TimeHigh;
+    ReadoutData->TimeHigh = PulseTimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
@@ -102,7 +102,7 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     }
     if (TimeLow >= 88052499) {
       TimeLow -= 88052499;
-      TimeHigh += 1;
+      PulseTimeHigh += 1;
     }
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "

@@ -109,8 +109,7 @@ protected:
   const uint16_t TEST_SPIX = TEST_Y_COORD - (TEST_PIX & 0x3);
 
   void SetUp() override {
-    // Recreate initialize test objects to reset their
-    // memoryTEST_TDC_PIXEL_TIME_IN_NSy, serializer);
+    // Set up mock serializer
 
     ON_CALL(serializer, setReferenceTime(testing::_))
         .WillByDefault([this](int64_t referenceTime) {
