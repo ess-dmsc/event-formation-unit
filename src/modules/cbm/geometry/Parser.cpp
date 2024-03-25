@@ -8,8 +8,9 @@
 /// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Trace.h>
+#include "CbmTypes.h"
 #include <cbm/geometry/Parser.h>
+#include <common/debug/Trace.h>
 
 namespace cbm {
 
@@ -58,6 +59,13 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       XTRACE(DATA, WAR, "Invalid FENId %d (valid: 0 - %d)", Readout.FENId,
              MaxFENId);
       Stats.ErrorFEN++;
+      continue;
+    }
+
+    if (Readout.Type > CbmType::MAX || Readout.Type < CbmType::MIN) {
+      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", Readout.Type,
+             CbmType::MIN, CbmType::MAX);
+      Stats.ErrorType++;
       continue;
     }
 

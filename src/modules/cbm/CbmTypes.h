@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <concurrentqueue.h>
 #include <stdexcept>
 #include <string>
 #include <sys/types.h>
@@ -29,6 +30,9 @@ public:
     FC = 0x05,
     MM = 0x06
   };
+
+  static constexpr int MAX = CbmTypes::MM;
+  static constexpr int MIN = CbmTypes::TTL;
 
   CbmType(const std::string &typeStr) {
     if (typeStr == "TTL") {
@@ -62,7 +66,8 @@ public:
     } else if (type_int == 0x06) {
       beamMonitorType = CbmTypes::MM;
     } else {
-      throw std::invalid_argument("Invalid CBM type integer: " + std::to_string(type_int));
+      throw std::invalid_argument("Invalid CBM type integer: " +
+                                  std::to_string(type_int));
     }
   }
 
@@ -70,17 +75,11 @@ private:
   CbmTypes beamMonitorType;
 
 public:
-    operator int() const {
-        return static_cast<int>(beamMonitorType);
-    }
+  operator int() const { return static_cast<int>(beamMonitorType); }
 
-    operator CbmTypes() const {
-        return beamMonitorType;
-    }
+  operator CbmTypes() const { return beamMonitorType; }
 
-    operator uint8_t() const {
-        return static_cast<uint8_t>(beamMonitorType);
-    }
+  operator uint8_t() const { return static_cast<uint8_t>(beamMonitorType); }
 };
 
 } // namespace cbm

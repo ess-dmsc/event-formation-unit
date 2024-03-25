@@ -7,13 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "CbmTypes.h"
 #include <assert.h>
+#include <cbm/CbmInstrument.h>
+#include <cbm/geometry/Parser.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
-#include <cbm/CbmInstrument.h>
-#include <cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,8 +22,7 @@
 namespace cbm {
 
 /// \brief load configuration and calibration files
-CbmInstrument::CbmInstrument(struct Counters &counters,
-                                           BaseSettings &settings)
+CbmInstrument::CbmInstrument(struct Counters &counters, BaseSettings &settings)
 
     : counters(counters), Settings(settings) {
 
@@ -57,15 +57,11 @@ void CbmInstrument::processMonitorReadouts(void) {
          CbmParser.Result.size());
   for (const auto &readout : CbmParser.Result) {
 
-    // if (DumpFile) {
-    //   dumpReadoutToFile(readout);
-    // }
-
-    XTRACE(
-        DATA, DEB,
-        "readout: FiberId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
-        readout.FiberId, readout.FENId, readout.Pos, readout.Channel,
-        readout.ADC, readout.TimeLow);
+    XTRACE(DATA, DEB,
+           "readout: FiberId %d, FENId %d, POS %d, Type %d, Channel %d, ADC "
+           "%d, TimeLow %d",
+           readout.FiberId, readout.FENId, readout.Pos, readout.Type,
+           readout.Channel, readout.ADC, readout.TimeLow);
 
     int Ring = readout.FiberId / 2;
     if (Ring != Conf.Parms.MonitorRing) {
@@ -81,13 +77,13 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-
-
     if (readout.Channel < Conf.Parms.MonitorOffset) {
       XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
       counters.ChannelCfgErrors++;
       continue;
     }
+
+    CbmType type = static_cast<CbmType>(readout.Type);
 
     // channel corrected for configurable channel offset
     int Channel = readout.Channel - Conf.Parms.MonitorOffset;
@@ -118,6 +114,9 @@ void CbmInstrument::processMonitorReadouts(void) {
     }
 
     uint32_t PixelId = 1;
+    if (type == CbmType::IBM) {
+      PixelId = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+    }
     XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
     counters.TxBytes +=
         SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
