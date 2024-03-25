@@ -10,19 +10,22 @@
 
 #pragma once
 
+#include "common/readout/ess/ESSTime.h"
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Trex {
+  
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 };
+
 } // namespace Trex
 
 // GCOVR_EXCL_STOP

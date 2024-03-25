@@ -64,10 +64,6 @@ void ReadoutGenerator::generateData() {
 
   memset(&dataPkt, 0, sizeof(dataPkt));
 
-  // Initialize data time high and low from header
-  dataPkt.TimeHigh = PulseTimeHigh;
-  dataPkt.TimeLow = PulseTimeLow;
-
   int res = 0;
 
   auto dataPtr = (uint8_t *)Buffer;
@@ -79,23 +75,23 @@ void ReadoutGenerator::generateData() {
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = 0;
     dataPkt.DataLength = ReadoutDataSize;
-
+    dataPkt.TimeHigh = getReadoutTimeHigh();
+    dataPkt.TimeLow = getReadoutTimeLow();
     dataPkt.Group = DatReadout.tube;
     dataPkt.AmpA = DatReadout.ampl_a;
     dataPkt.AmpB = DatReadout.ampl_b;
 
-    dataPkt.TimeLow += Settings.TicksBtwReadouts;
-
-    if (dataPkt.TimeLow >= 88052499) {
-      dataPkt.TimeLow -= 88052499;
-      dataPkt.TimeHigh += 1;
-    }
-
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
+
+    // Increment time for the next readout
+    nextReadoutTime();
 
     SentReadouts++;
   }
 }
 
+ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
+  return ESSReadout::ESSTime::PulseTime(time(NULL));
+}
 // GCOVR_EXCL_STOP

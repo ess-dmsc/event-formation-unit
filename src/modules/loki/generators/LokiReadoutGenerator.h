@@ -21,7 +21,8 @@ public:
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 };
+
 } // namespace Caen
 // GCOVR_EXCL_STOP

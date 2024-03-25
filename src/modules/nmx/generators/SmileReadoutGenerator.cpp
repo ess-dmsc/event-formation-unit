@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <math.h>
 #include <modules/nmx/generators/SmileReadoutGenerator.h>
@@ -23,7 +24,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Nmx::SmileReadoutGenerator::generateData() {
+namespace Nmx {
+
+void SmileReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -36,7 +39,6 @@ void Nmx::SmileReadoutGenerator::generateData() {
   std::map<uint8_t, uint8_t> XPanelToFEN{{0, 0}, {1, 1}, {2, 5}, {3, 4}};
   std::map<uint8_t, uint8_t> YPanelToFEN{{0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
-  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
@@ -44,8 +46,8 @@ void Nmx::SmileReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = PulseTimeHigh;
-    ReadoutData->TimeLow = TimeLow;
+    ReadoutData->TimeHigh = getReadoutTimeHigh();
+    ReadoutData->TimeLow = getReadoutTimeLow();
     ReadoutData->OTADC = 1000;
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
@@ -101,14 +103,11 @@ void Nmx::SmileReadoutGenerator::generateData() {
     /// \todo work out why updating TimeLow is done this way, and if it applies
     /// to NMX
     if ((Readout % 2) == 0) {
-      TimeLow += Settings.TicksBtwReadouts;
+      nextReadoutTime();
     } else {
-      TimeLow += Settings.TicksBtwEvents;
+      nextEventTime();
     }
-    if (TimeLow >= 88052499) {
-      TimeLow -= 88052499;
-      PulseTimeHigh += 1;
-    }
+
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "
            "TimeHigh:%u, TimeLow:%u",
@@ -116,5 +115,11 @@ void Nmx::SmileReadoutGenerator::generateData() {
            ReadoutData->Channel, ReadoutData->TimeHigh, ReadoutData->TimeLow);
   }
 }
+
+ESSReadout::ESSTime::PulseTime SmileReadoutGenerator::generatePulseTime() {
+  return ESSReadout::ESSTime::PulseTime(time(NULL));
+}
+
+} // namespace Nmx
 
 // GCOVR_EXCL_STOP

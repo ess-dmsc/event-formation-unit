@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "common/readout/ess/ESSTime.h"
 #include <cbm/CbmTypes.h>
 #include <common/testutils/DataFuzzer.h>
 #include <cstdint>
@@ -33,7 +34,7 @@ private:
   } cbmSettings;
 
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 
   void generateIBMData(uint8_t *dataPtr);
   void generateTTLData(uint8_t *dataPtr);

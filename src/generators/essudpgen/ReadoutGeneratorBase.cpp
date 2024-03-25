@@ -8,6 +8,7 @@
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
+#include <common/readout/ess/ESSTime.h>
 #include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
@@ -27,8 +28,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-  app.add_option("-r, --rings", Settings.NFibers,
-                 "Number of Fibers used in data header (obsolete)");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
@@ -39,7 +38,10 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
                  "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
-  app.add_flag("-m, --random", Settings.Randomise,
+  app.add_option("-h, --header_refresh", Settings.HeaderRefresh,
+                 "Header pulsetime refresh rate in Hz. (default: refreshed for "
+                 "each packet)");
+  app.add_flag("-m, -r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 }
@@ -95,21 +97,27 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
-  // time current time for pulse time high
-  PulseTimeHigh = time(NULL);
+  prevPulseTime = pulseTime;
+  pulseTime = generatePulseTime();
 
-  Header->PulseHigh = PulseTimeHigh;
-  Header->PulseLow = TimeLowOffset;
-  Header->PrevPulseHigh = PulseTimeHigh;
-  Header->PrevPulseLow = PrevTimeLowOffset;
+  // After a new header is generated, the readout time is updated accordingly
+  if (readoutTimeHigh < pulseTime.TimeHigh) {
+    readoutTimeHigh = pulseTime.TimeHigh;
+    readoutTimeLow = pulseTime.TimeLow + TimeLowOffset;
+  }
+
+  Header->PulseHigh = pulseTime.TimeHigh;
+  Header->PulseLow = pulseTime.TimeLow;
+  Header->PrevPulseHigh = pulseTime.TimeHigh;
+  Header->PrevPulseLow = pulseTime.TimeLow;
 
   if (headerVersion == Parser::HeaderVersion::V1) {
     auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
     HeaderV1->CMACPadd = 0;
   }
 
-  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", PulseTimeHigh,
-         TimeLowOffset);
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u",
+         Header->PulseHigh, Header->PulseLow);
 }
 
 void ReadoutGeneratorBase::finishPacket() {

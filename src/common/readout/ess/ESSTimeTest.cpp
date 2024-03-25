@@ -124,6 +124,19 @@ TEST_F(ESSTimeTest, Issue2021_11_08) {
   ASSERT_EQ(Time.TimeInNS - Time.PrevTimeInNS, 71428579);
 }
 
+// Test time conversion back to 32bit high and low
+TEST_F(ESSTimeTest, TestPulseTimeConversion) {
+  uint32_t High = 0x6188e7a9;
+  uint32_t Low = 0x00070ff6;
+  Time.setReference(High, Low);
+
+  ASSERT_EQ(Time.TimeInNS, 1636362153005256386);
+
+  ESSTime::PulseTime pulseTime = Time.getPulseTime();
+  ASSERT_EQ(pulseTime.TimeHigh, High);
+  ASSERT_EQ(pulseTime.TimeLow, Low);
+}
+
 } // namespace ESSReadout
 
 int main(int argc, char **argv) {

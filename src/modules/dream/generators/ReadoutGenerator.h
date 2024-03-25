@@ -9,8 +9,9 @@
 
 #pragma once
 
+#include "common/readout/ess/ESSTime.h"
 #include <dream/readout/DataParser.h>
-//#include <common/testutils/DataFuzzer.h>
+// #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Dream {
@@ -43,10 +44,16 @@ public:
 
 protected:
   void generateData() override;
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
+
   const uint32_t TimeToFirstReadout{1000};
 
   ///\brief
   void getRandomReadout(DataParser::DreamReadout &DR);
+
+private:
+  uint32_t readoutTimeHigh{0};
+  uint32_t readoutTimeLow{0};
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP

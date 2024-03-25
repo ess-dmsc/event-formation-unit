@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <common/debug/Trace.h>
+#include <cstdint>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -19,6 +20,7 @@
 namespace ESSReadout {
 
 class ESSTime {
+
 public:
   struct Stats_t {
     int64_t TofCount;
@@ -29,9 +31,18 @@ public:
     int64_t PrevTofHigh;
   };
 
+  struct PulseTime {
+    uint32_t TimeHigh;
+    uint32_t TimeLow;
+
+    PulseTime(uint64_t timeInNs)
+        : TimeHigh(static_cast<uint32_t>(timeInNs / OneBillion)),
+          TimeLow(round((timeInNs - (TimeHigh * OneBillion)) / NsPerTick)) {}
+  };
+
   // ESS clock is 88052500 Hz
-  const double NsPerTick{11.356860963629653};
-  const uint64_t OneBillion{1000000000LU};
+  static constexpr double NsPerTick{11.356860963629653};
+  static constexpr uint64_t OneBillion{1000000000LU};
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
   /// \brief save reference (pulse) time
@@ -44,6 +55,10 @@ public:
     PrevTimeInNS = toNS(PrevHigh, PrevLow);
     return PrevTimeInNS;
   }
+
+  inline PulseTime getPulseTime() { return PulseTime(TimeInNS); }
+
+  inline PulseTime getPrevPulseTime() { return PulseTime(PrevTimeInNS); }
 
   void setMaxTOF(uint64_t NewMaxTOF) { MaxTOF = NewMaxTOF; }
 
@@ -94,7 +109,6 @@ public:
     return High * OneBillion + (uint64_t)(Low * NsPerTick);
   }
 
-public:
   struct Stats_t Stats = {};
   uint64_t TimeInNS{0};
   uint64_t PrevTimeInNS{0};

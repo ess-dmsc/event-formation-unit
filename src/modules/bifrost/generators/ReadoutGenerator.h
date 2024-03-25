@@ -58,6 +58,8 @@ struct BiforstGeneratorSettings {
    */
   void generateData() override;
 
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
+
   int FileDescriptor{-1}; ///< The file descriptor of the DAT file.
 };
 

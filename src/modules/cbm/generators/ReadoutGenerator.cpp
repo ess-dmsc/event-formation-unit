@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <cstring>
@@ -41,8 +42,8 @@ void ReadoutGenerator::generateData() {
 
 // Generate data for TTL monitor
 void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
-  uint32_t dataTimeHigh = PulseTimeHigh;
-  uint32_t dataTimeLow = PulseTimeLow;
+  uint32_t dataTimeHigh = getReadoutTimeHigh();
+  uint32_t dataTimeLow = getReadoutTimeLow();
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
@@ -76,23 +77,20 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
 // Generate data for IBM type beam monitors
 void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
-  uint32_t dataTimeHigh = PulseTimeHigh;
-  uint32_t dataTimeLow = PulseTimeLow;
-
   uint32_t dataValue = 100000;
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
-        
+
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
     memset(dataPkt, 0, sizeof(Parser::CbmReadout));
 
     // write data packet to the buffer
-    dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = CBM_FEN_ID;
-    dataPkt->TimeHigh = dataTimeHigh;
-    dataPkt->TimeLow = dataTimeLow;
+    dataPkt->DataLength = sizeof(Parser::CbmReadout);
+    dataPkt->TimeHigh = getReadoutTimeHigh();
+    dataPkt->TimeLow = getReadoutTimeLow();
     dataPkt->Type = CbmType::IBM;
 
     // Currently we generating for 1 beam monitor only
@@ -107,16 +105,17 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
       dataValue = 0;
     }
 
-    // Increment time for next readout and adjust high time if needed
-    dataTimeLow += Settings.TicksBtwReadouts;
-    if (dataTimeLow >= 88052499) {
-      dataTimeLow -= 88052499;
-      dataTimeHigh += 1;
-    }
+    // Increment time for next readout
+    nextReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
   }
 }
+
+ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
+  return ESSReadout::ESSTime::PulseTime(time(NULL));
+}
+
 } // namespace cbm
 // GCOVR_EXCL_STOP

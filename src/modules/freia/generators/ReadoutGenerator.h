@@ -15,14 +15,18 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Freia {
+
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
 protected:
   void generateData() override;
+  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
+  
   const uint32_t TimeToFirstReadout{1000};
 };
+
 } // namespace Freia
 
 // GCOVR_EXCL_STOP

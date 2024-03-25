@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <concurrentqueue.h>
 #include <stdexcept>
 #include <string>
 #include <sys/types.h>
