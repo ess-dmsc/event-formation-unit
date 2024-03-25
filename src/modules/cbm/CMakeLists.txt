@@ -12,6 +12,7 @@ get_filename_component(CBM_CONFIG "${ESS_MODULE_DIR}/cbm/configs/lokimon.json" A
 set(cbm_common_inc
   CbmBase.h
   CbmInstrument.h
+  CbmTypes.h
   geometry/Config.h
   geometry/Parser.h
   )

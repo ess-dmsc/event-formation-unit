@@ -7,18 +7,20 @@
 ///
 //===----------------------------------------------------------------------===//
 
+// GCOVR_EXCL_START
+
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <fcntl.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <stdexcept>
 
-
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-ReadoutGenerator::ReadoutGenerator(): ReadoutGeneratorBase() {
-  app.add_option("-n, --data", bifrostSettings.FilePath, "Record data file to read from");
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
+  app.add_option("-n, --data", bifrostSettings.FilePath,
+                 "Record data file to read from");
 }
 
 int ReadoutGenerator::readReadout(struct dat_data_t &Readout) {
@@ -56,6 +58,8 @@ void ReadoutGenerator::generateData() {
   uint32_t SentReadouts = 0;
 
   struct dat_data_t DatReadout;
+  /// \todo: instead setting dataPkt in memory and copying it to the buffer, set
+  /// it directly in the buffer
   struct Caen::DataParser::CaenReadout dataPkt;
 
   memset(&dataPkt, 0, sizeof(dataPkt));
@@ -108,3 +112,5 @@ void ReadoutGenerator::generateData() {
     SentReadouts++;
   }
 }
+
+// GCOVR_EXCL_STOP

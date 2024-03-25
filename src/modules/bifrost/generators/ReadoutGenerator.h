@@ -7,6 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+// GCOVR_EXCL_START
+
 #pragma once
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -58,3 +60,5 @@ struct BiforstGeneratorSettings {
 
   int FileDescriptor{-1}; ///< The file descriptor of the DAT file.
 };
+
+// GCOVR_EXCL_STOP

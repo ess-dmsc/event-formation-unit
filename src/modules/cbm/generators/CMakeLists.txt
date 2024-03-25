@@ -4,20 +4,20 @@
 # Generate artificial CBM readouts - using the new data format
 #=============================================================================
 
-set(ttlmon_udp_generated_INC
+set(cbm_udp_generated_INC
   ReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   )
-set(ttlmon_udp_generated_SRC
+set(cbm_udp_generated_SRC
   ReadoutGenerator.cpp
   udpgen.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   )
-create_executable(ttlmon_udp_generated)
+create_executable(cbm_udp_generated)
 
-set_target_properties(ttlmon_udp_generated
+set_target_properties(cbm_udp_generated
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/generators"
   )

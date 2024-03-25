@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
+#include <cstdint>
 #include <vector>
 
 namespace cbm {
@@ -32,23 +33,31 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{600};
 
-// From TTLMon ICD version 1 draft 2
+// From TTLMon ICD (CBM ICD) version 1 draft 2 - 4
 // Preliminary agreed 2023 09 12 (Francesco, Farnaz, Fabio)
 #define DATASIZE 20
-  struct Data {
+
+  struct Position {
+    uint16_t XPos;
+    uint16_t YPos;
+  } __attribute__((packed));
+
+  struct CbmReadout {
     uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
     uint32_t TimeHigh;
     uint32_t TimeLow;
-    uint8_t Pos;
+    uint8_t Type;
     uint8_t Channel;
     uint16_t ADC;
-    uint16_t XPos;
-    uint16_t YPos;
+    union {
+      Position Pos;
+      uint32_t NPos;
+    };
   } __attribute__((packed));
 
-  static_assert(sizeof(Parser::Data) == (DATASIZE),
+  static_assert(sizeof(Parser::CbmReadout) == (DATASIZE),
                 "Wrong header size (update assert or check packing)");
 
   Parser() { Result.reserve(MaxReadoutsInPacket); };
@@ -59,7 +68,7 @@ public:
   void parse(ESSReadout::Parser::PacketDataV0 &PacketData);
 
   // To be iterated over in processing thread
-  std::vector<struct Data> Result;
+  std::vector<struct CbmReadout> Result;
 
   struct ParserStats Stats;
 

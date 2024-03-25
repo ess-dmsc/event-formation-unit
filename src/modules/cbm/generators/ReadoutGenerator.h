@@ -10,15 +10,28 @@
 
 #pragma once
 
+#include "cbm/CbmTypes.h"
 #include <common/testutils/DataFuzzer.h>
+#include <cstdint>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace cbm {
-class ReadoutGenerator : public ReadoutGeneratorBase {
-public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
 
-protected:
+class ReadoutGenerator : public ReadoutGeneratorBase {
+
+struct BmGeneratorSettings {
+  uint8_t beamMonitortype{0};
+} bmSettings;
+
+public:
+  ReadoutGenerator();
+
+private:
+
+struct CbmGeneratorSettings {
+  CbmType monitorType{CbmType::TTL};
+} cbmSettings;
+
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
 };
