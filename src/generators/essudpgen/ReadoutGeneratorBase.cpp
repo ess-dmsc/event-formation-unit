@@ -80,11 +80,7 @@ void ReadoutGeneratorBase::generateHeader() {
   }
 
   memset(Buffer, 0, BufferSize);
-  auto Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
-
-  if (headerVersion == Parser::HeaderVersion::V1) {
-    Header = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
-  }
+  auto Header = reinterpret_cast<Parser::PacketHeaderV0 *>(Buffer);
 
   Header->CookieAndType = (Settings.Type << 24) + 0x535345;
   Header->Padding0 = 0;
@@ -99,6 +95,7 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
+  // time current time for pulse time high
   TimeHigh = time(NULL);
 
   Header->PulseHigh = TimeHigh;
@@ -107,7 +104,8 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PrevPulseLow = PrevTimeLowOffset;
 
   if (headerVersion == Parser::HeaderVersion::V1) {
-    Header->CMACPadd = 0;
+    auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
+    HeaderV1->CMACPadd = 0;
   }
 
   XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", TimeHigh,

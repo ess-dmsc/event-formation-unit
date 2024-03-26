@@ -19,21 +19,23 @@ namespace cbm {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 
-struct BmGeneratorSettings {
-  uint8_t beamMonitortype{0};
-} bmSettings;
-
 public:
   ReadoutGenerator();
 
 private:
+  // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
+  static constexpr uint8_t CBM_FIBER_ID = 22;
+  static constexpr uint8_t CBM_FEN_ID = 0;
 
-struct CbmGeneratorSettings {
-  CbmType monitorType{CbmType::TTL};
-} cbmSettings;
+  struct CbmGeneratorSettings {
+    CbmType monitorType{CbmType::TTL};
+  } cbmSettings;
 
   void generateData() override;
   const uint32_t TimeToFirstReadout{1000};
+
+  void generateIBMData(uint8_t *dataPtr);
+  void generateTTLData(uint8_t *dataPtr);
 };
 } // namespace cbm
 // GCOVR_EXCL_STOP

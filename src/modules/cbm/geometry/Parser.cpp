@@ -76,9 +76,14 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout.ADC == 0) {
+    // Check for invalid ADC values only for TTL readouts
+    if (Readout.Type == CbmType::TTL && Readout.ADC == 0) {
       XTRACE(DATA, WAR, "Invalid ADC (0)");
       Stats.ErrorADC++;
+    } else if (Readout.Type != CbmType::TTL && Readout.ADC != 0) {
+      XTRACE(DATA, WAR, "Invalid ADC unsued for this type should be 0");
+      Stats.ErrorADC++;
+      continue;
     }
 
     if (Readout.TimeLow > ESSReadout::MaxFracTimeCount) {
@@ -90,7 +95,7 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
     // Check for negative TOFs
     auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
-    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeOfFlight %" PRIu64 " ",
            TimeRef.TimeInNS, TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {

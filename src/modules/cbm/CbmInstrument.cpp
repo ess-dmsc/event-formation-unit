@@ -16,8 +16,8 @@
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace cbm {
 
@@ -65,8 +65,8 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     int Ring = readout.FiberId / 2;
     if (Ring != Conf.Parms.MonitorRing) {
-      XTRACE(DATA, WAR, "Invalid lring %u (expect %u) for monitor readout",
-             Ring, Conf.Parms.MonitorRing);
+      XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
+             Conf.Parms.MonitorRing);
       counters.RingCfgErrors++;
       continue;
     }
@@ -82,8 +82,6 @@ void CbmInstrument::processMonitorReadouts(void) {
       counters.ChannelCfgErrors++;
       continue;
     }
-
-    CbmType type = static_cast<CbmType>(readout.Type);
 
     // channel corrected for configurable channel offset
     int Channel = readout.Channel - Conf.Parms.MonitorOffset;
@@ -113,11 +111,15 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
+    CbmType type = static_cast<CbmType>(readout.Type);
+
     uint32_t PixelId = 1;
     if (type == CbmType::IBM) {
       PixelId = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
     }
-    XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
+
+    XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+           type.to_string(), PixelId, TimeOfFlight);
     counters.TxBytes +=
         SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;

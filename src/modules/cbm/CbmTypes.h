@@ -71,6 +71,25 @@ public:
     }
   }
 
+  const char* to_string() const {
+    switch (beamMonitorType) {
+      case CbmTypes::TTL:
+        return "TTL";
+      case CbmTypes::N2GEM:
+        return "N2GEM";
+      case CbmTypes::IBM:
+        return "IBM";
+      case CbmTypes::GEM:
+        return "GEM";
+      case CbmTypes::FC:
+        return "FC";
+      case CbmTypes::MM:
+        return "MM";
+      default:
+        return "Unknown";
+    }
+  }
+
 private:
   CbmTypes beamMonitorType;
 
