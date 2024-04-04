@@ -1,15 +1,16 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Parser for ESS readout of TTL monitor
+/// \brief Parser for ESS readout of CBM devices
 ///
 /// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Trace.h>
+#include <CbmTypes.h>
 #include <cbm/geometry/Parser.h>
+#include <common/debug/Trace.h>
 
 namespace cbm {
 
@@ -61,6 +62,13 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
+    if (Readout.Type > CbmType::MAX || Readout.Type < CbmType::MIN) {
+      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", Readout.Type,
+             CbmType::MIN, CbmType::MAX);
+      Stats.ErrorType++;
+      continue;
+    }
+
     if (Readout.DataLength != DataLength) {
       XTRACE(DATA, WAR, "Invalid header length %d - must be %d bytes",
              Readout.DataLength, DataLength);
@@ -68,9 +76,14 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout.ADC == 0) {
+    // Check for invalid ADC values only for TTL readouts
+    if (Readout.Type == CbmType::TTL && Readout.ADC == 0) {
       XTRACE(DATA, WAR, "Invalid ADC (0)");
       Stats.ErrorADC++;
+    } else if (Readout.Type != CbmType::TTL && Readout.ADC != 0) {
+      XTRACE(DATA, WAR, "Invalid ADC unsued for this type should be 0");
+      Stats.ErrorADC++;
+      continue;
     }
 
     if (Readout.TimeLow > ESSReadout::MaxFracTimeCount) {
@@ -82,7 +95,7 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
     // Check for negative TOFs
     auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
-    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeOfFlight %" PRIu64 " ",
            TimeRef.TimeInNS, TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {

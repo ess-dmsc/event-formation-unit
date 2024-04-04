@@ -64,24 +64,9 @@ void ReadoutGenerator::generateData() {
 
   memset(&dataPkt, 0, sizeof(dataPkt));
 
-  // initialize time low and high for data packets from the header
-  if (Settings.headerVersion == ESSReadout::Parser::HeaderVersion::V0) {
-    dataPkt.TimeHigh =
-        reinterpret_cast<ESSReadout::Parser::PacketHeaderV0 *>(&Buffer)
-            ->PulseHigh;
-    dataPkt.TimeLow =
-        reinterpret_cast<ESSReadout::Parser::PacketHeaderV0 *>(&Buffer)
-            ->PulseLow;
-  } else if (Settings.headerVersion == ESSReadout::Parser::HeaderVersion::V1) {
-    dataPkt.TimeHigh =
-        reinterpret_cast<ESSReadout::Parser::PacketHeaderV1 *>(&Buffer)
-            ->PulseHigh;
-    dataPkt.TimeLow =
-        reinterpret_cast<ESSReadout::Parser::PacketHeaderV1 *>(&Buffer)
-            ->PulseLow;
-  } else {
-    throw std::runtime_error("Incorrect header version");
-  }
+  // Initialize data time high and low from header
+  dataPkt.TimeHigh = PulseTimeHigh;
+  dataPkt.TimeLow = PulseTimeLow;
 
   int res = 0;
 

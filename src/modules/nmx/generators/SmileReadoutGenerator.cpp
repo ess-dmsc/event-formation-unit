@@ -44,7 +44,7 @@ void Nmx::SmileReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = TimeHigh;
+    ReadoutData->TimeHigh = PulseTimeHigh;
     ReadoutData->TimeLow = TimeLow;
     ReadoutData->OTADC = 1000;
     ReadoutData->FiberId = 0;
@@ -107,7 +107,7 @@ void Nmx::SmileReadoutGenerator::generateData() {
     }
     if (TimeLow >= 88052499) {
       TimeLow -= 88052499;
-      TimeHigh += 1;
+      PulseTimeHigh += 1;
     }
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "

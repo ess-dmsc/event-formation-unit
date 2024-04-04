@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,13 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <CbmTypes.h>
 #include <assert.h>
+#include <cbm/CbmInstrument.h>
+#include <cbm/geometry/Parser.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <common/time/TimeString.h>
-#include <cbm/CbmInstrument.h>
-#include <cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,8 +22,7 @@
 namespace cbm {
 
 /// \brief load configuration and calibration files
-CbmInstrument::CbmInstrument(struct Counters &counters,
-                                           BaseSettings &settings)
+CbmInstrument::CbmInstrument(struct Counters &counters, BaseSettings &settings)
 
     : counters(counters), Settings(settings) {
 
@@ -30,13 +30,6 @@ CbmInstrument::CbmInstrument(struct Counters &counters,
          Settings.ConfigFile.c_str());
   Conf = Config(Settings.ConfigFile);
   Conf.loadAndApply();
-
-  // if (!Settings.DumpFilePrefix.empty()) {
-  //   std::string DumpFileName =
-  //       Settings.DumpFilePrefix + "ttlmon_" + timeString();
-  //   XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
-  //   DumpFile = VMM3::ReadoutFile::create(DumpFileName);
-  // }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
 }
@@ -57,20 +50,16 @@ void CbmInstrument::processMonitorReadouts(void) {
          CbmParser.Result.size());
   for (const auto &readout : CbmParser.Result) {
 
-    // if (DumpFile) {
-    //   dumpReadoutToFile(readout);
-    // }
-
-    XTRACE(
-        DATA, DEB,
-        "readout: FiberId %d, FENId %d, POS %d, Channel %d, ADC %d, TimeLow %d",
-        readout.FiberId, readout.FENId, readout.Pos, readout.Channel,
-        readout.ADC, readout.TimeLow);
+    XTRACE(DATA, DEB,
+           "readout: FiberId %d, FENId %d, POS %d, Type %d, Channel %d, ADC "
+           "%d, TimeLow %d",
+           readout.FiberId, readout.FENId, readout.Pos, readout.Type,
+           readout.Channel, readout.ADC, readout.TimeLow);
 
     int Ring = readout.FiberId / 2;
     if (Ring != Conf.Parms.MonitorRing) {
-      XTRACE(DATA, WAR, "Invalid lring %u (expect %u) for monitor readout",
-             Ring, Conf.Parms.MonitorRing);
+      XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
+             Conf.Parms.MonitorRing);
       counters.RingCfgErrors++;
       continue;
     }
@@ -80,8 +69,6 @@ void CbmInstrument::processMonitorReadouts(void) {
       counters.FENCfgErrors++;
       continue;
     }
-
-
 
     if (readout.Channel < Conf.Parms.MonitorOffset) {
       XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
@@ -117,8 +104,15 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
+    CbmType type = static_cast<CbmType>(readout.Type);
+
     uint32_t PixelId = 1;
-    XTRACE(DATA, DEB, "Pixel: %u TOF %" PRIu64 "ns", PixelId, TimeOfFlight);
+    if (type == CbmType::IBM) {
+      PixelId = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+    }
+
+    XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+           type.to_string(), PixelId, TimeOfFlight);
     counters.TxBytes +=
         SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;

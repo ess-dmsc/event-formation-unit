@@ -1,10 +1,10 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief CBM instrument base plugin
-///
+/// \brief CBM instrument base class which define the detector and required data
+///        processing
 //===----------------------------------------------------------------------===//
 
 #include <common/detector/Detector.h>
@@ -78,6 +78,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
   Stats.create("readouts.error_fen", Counters.CbmStats.ErrorFEN);
+  Stats.create("readouts.error_type", Counters.CbmStats.ErrorType);
   Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
   Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);

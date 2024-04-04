@@ -1,9 +1,9 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief ESS CBM readout parser
+/// \brief ESS readout parser for CBM devices
 ///
 //===----------------------------------------------------------------------===//
 
@@ -23,6 +23,7 @@ struct ParserStats {
   int64_t ErrorDataLength{0};
   int64_t ErrorTimeFrac{0};
   int64_t ErrorADC{0};
+  int64_t ErrorType{0};
   int64_t Readouts{0};
   int64_t NoData{0};
 };
