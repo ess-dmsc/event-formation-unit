@@ -33,8 +33,6 @@ private:
   } cbmSettings;
 
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
-
   void generateIBMData(uint8_t *dataPtr);
   void generateTTLData(uint8_t *dataPtr);
 };
