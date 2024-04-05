@@ -61,7 +61,7 @@ void ReadoutGenerator::generateData() {
 }
 
 ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return pulseTime = ESSReadout::ESSTime::PulseTime(time(NULL));
+  return pulseTimeNs = ESSReadout::ESSTime::PulseTime(time(NULL));
 }
 
 } // namespace Freia

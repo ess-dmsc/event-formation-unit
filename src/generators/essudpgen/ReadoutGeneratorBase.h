@@ -33,7 +33,7 @@ public:
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
-    uint64_t HeaderRefresh{0};       // 0 is refreshed for each packet
+    uint16_t Frequency{0};           // 0 is time updates for each packet
     uint8_t headerVersion{1};        // v1 header by default
     bool Loop{false};                // Keep looping the same file forever
 
@@ -128,6 +128,7 @@ private:
 
   uint32_t readoutTimeHigh{0};
   uint32_t readoutTimeLow{0};
+  uint32_t pulseFrequencyNs{0};
 
   inline void calculateTimeHighAndLow() {
     if (readoutTimeLow >= 88052499) {

@@ -60,7 +60,7 @@ void LokiReadoutGenerator::generateData() {
 }
 
 ESSReadout::ESSTime::PulseTime LokiReadoutGenerator::generatePulseTime() {
-  return pulseTime = ESSReadout::ESSTime::PulseTime(time(NULL));
+  return pulseTimeNs = ESSReadout::ESSTime::PulseTime(time(NULL));
 }
 
 } // namespace Caen

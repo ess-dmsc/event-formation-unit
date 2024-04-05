@@ -9,11 +9,13 @@
 
 #include <common/debug/Trace.h>
 #include <common/readout/ess/ESSTime.h>
+#include <cstdint>
 #include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <sys/types.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
 
@@ -30,6 +32,9 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
+  app.add_option("-q, --frequency", Settings.Frequency,
+                 "Pulse frequency in Hz. (default 0: refreshed for "
+                 "each packet)");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
                  "Delay (ticks) between events");
   app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
@@ -38,9 +43,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
                  "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
-  app.add_option("-h, --header_refresh", Settings.HeaderRefresh,
-                 "Header pulsetime refresh rate in Hz. (default: refreshed for "
-                 "each packet)");
   app.add_flag("-m, -r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
@@ -97,13 +99,33 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
-  prevPulseTime = pulseTime;
-  pulseTime = generatePulseTime();
-
-  // After a new header is generated, the readout time is updated accordingly
-  if (readoutTimeHigh < pulseTime.TimeHigh) {
+  if (pulseTime.TimeHigh == 0 && pulseTime.TimeLow == 0) {
+    pulseTime = ESSTime::PulseTime(time(NULL) * 1e9);
     readoutTimeHigh = pulseTime.TimeHigh;
-    readoutTimeLow = pulseTime.TimeLow + TimeLowOffset;
+    readoutTimeLow = pulseTime.TimeLow;
+    XTRACE(DATA, INF,
+           "First pulseTime generated, High: %u, Low: %u, periodNs: %u",
+           pulseTime.TimeHigh, pulseTime.TimeLow, pulseFrequencyNs);
+  }
+
+  if (pulseFrequencyNs != 0) {
+    // if the readout time is greater than the pulse time, update generate new
+    // pulse time for the header
+    if (ESSTime::toNS(readoutTimeHigh, readoutTimeLow) >=
+        ESSTime::toNS(pulseTime) + pulseFrequencyNs) {
+      prevPulseTime = pulseTime;
+      uint64_t newPulseTime = ESSTime::toNS(pulseTime) + pulseFrequencyNs;
+      pulseTime = ESSTime::PulseTime(newPulseTime);
+      XTRACE(DATA, INF,
+             "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
+             pulseTime.TimeHigh, pulseTime.TimeLow, pulseFrequencyNs);
+    }
+  } else {
+    prevPulseTime = pulseTime;
+    pulseTime = ESSTime::PulseTime(time(NULL) * 1e9);
+    XTRACE(DATA, INF,
+           "New pulseTime generated for this packet, High: %u, Low: %u",
+           pulseTime.TimeHigh, pulseTime.TimeLow);
   }
 
   Header->PulseHigh = pulseTime.TimeHigh;
@@ -176,6 +198,11 @@ void ReadoutGeneratorBase::main() {
   DataSource = new UDPTransmitter(local, remote);
   DataSource->setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource->printBufferSizes();
+
+  if (Settings.Frequency != 0) {
+    pulseFrequencyNs = static_cast<uint64_t>(1e9 / Settings.Frequency);
+    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
+  }
 }
 
 // GCOVR_EXCL_STOP

@@ -40,6 +40,13 @@ public:
           TimeLow(round((timeInNs - (TimeHigh * OneBillion)) / NsPerTick)) {}
   };
 
+  ESSTime() = default;
+
+  ESSTime(PulseTime pulseTime)
+      : TimeInNS(toNS(pulseTime.TimeHigh, pulseTime.TimeLow)){};
+
+  ESSTime(uint32_t High, uint32_t Low) : TimeInNS(toNS(High, Low)){};
+
   // ESS clock is 88052500 Hz
   static constexpr double NsPerTick{11.356860963629653};
   static constexpr uint64_t OneBillion{1000000000LU};
@@ -104,8 +111,11 @@ public:
     return timeval - PrevTimeInNS;
   }
 
+  static uint64_t toNS(const PulseTime &pulseTime) {
+    return toNS(pulseTime.TimeHigh, pulseTime.TimeLow);
+  }
   /// \brief convert ess High/Low time to NS
-  uint64_t toNS(uint32_t High, uint32_t Low) {
+  static uint64_t toNS(const uint32_t High, const uint32_t Low) {
     return High * OneBillion + (uint64_t)(Low * NsPerTick);
   }
 

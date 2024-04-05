@@ -42,8 +42,6 @@ void ReadoutGenerator::generateData() {
 
 // Generate data for TTL monitor
 void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
-  uint32_t dataTimeHigh = getReadoutTimeHigh();
-  uint32_t dataTimeLow = getReadoutTimeLow();
 
   for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
 
@@ -55,19 +53,15 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = CBM_FEN_ID;
-    dataPkt->TimeHigh = dataTimeHigh;
-    dataPkt->TimeLow = dataTimeLow;
+    dataPkt->TimeHigh = getReadoutTimeHigh();
+    dataPkt->TimeLow = getReadoutTimeLow();
     dataPkt->Type = cbmSettings.monitorType;
     dataPkt->Channel = (Readout % 3) & 0x01; // 0 0 1, 0 0 1, ...
     dataPkt->ADC = 12345;
     dataPkt->NPos = 0;
 
     // Increment time for next readout and adjust high time if needed
-    dataTimeLow += Settings.TicksBtwReadouts;
-    if (dataTimeLow >= 88052499) {
-      dataTimeLow -= 88052499;
-      dataTimeHigh += 1;
-    }
+    nextReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
