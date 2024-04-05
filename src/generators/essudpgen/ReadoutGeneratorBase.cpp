@@ -46,18 +46,7 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_flag("-m, -r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
-}
 
-///\brief
-uint16_t ReadoutGeneratorBase::makePacket() {
-  assert(ReadoutDataSize != 0); // must be set in generator application
-  generateHeader();
-  generateData();
-  finishPacket();
-  return DataSize;
-}
-
-void ReadoutGeneratorBase::generateHeader() {
   // Parse the header version
   switch (Settings.headerVersion) {
   case Parser::HeaderVersion::V0:
@@ -77,9 +66,21 @@ void ReadoutGeneratorBase::generateHeader() {
   } else {
     assert(HeaderSize == 32);
   }
+}
 
-  DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
-  if (DataSize >= BufferSize) {
+///\brief
+uint16_t ReadoutGeneratorBase::makePacket() {
+  assert(ReadoutDataSize != 0); // must be set in generator application
+  generateHeader();
+  generateData();
+  finishPacket();
+  return DataSize;
+}
+
+void ReadoutGeneratorBase::generateHeader() {
+
+  DataSize = HeaderSize + numberOfReadouts * ReadoutDataSize;
+  if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
@@ -202,6 +203,12 @@ void ReadoutGeneratorBase::main() {
   if (Settings.Frequency != 0) {
     pulseFrequencyNs = static_cast<uint64_t>(1e9 / Settings.Frequency);
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
+  }
+
+  if (Settings.NumReadouts == 0) {
+    numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
+  } else {
+    numberOfReadouts = Settings.NumReadouts;
   }
 }
 

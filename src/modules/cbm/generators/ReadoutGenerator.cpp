@@ -43,7 +43,7 @@ void ReadoutGenerator::generateData() {
 // Generate data for TTL monitor
 void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -73,7 +73,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   uint32_t dataValue = 100000;
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout <= Settings.NumReadouts; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;

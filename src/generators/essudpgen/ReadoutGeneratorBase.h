@@ -28,7 +28,7 @@ public:
     std::string IpAddress{"127.0.0.1"};
     uint16_t UDPPort{9000};
     uint64_t NumberOfPackets{0};     // 0 == all packets
-    uint32_t NumReadouts{370};       // # readouts in packet
+    uint32_t NumReadouts{0};       // # readouts in packet
     uint32_t TicksBtwReadouts{10};   // 88 ticks ~ 1us
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
@@ -110,6 +110,7 @@ protected:
   // const uint32_t TimeToFirstReadout{1000}; // ticks
 
   uint8_t ReadoutDataSize{0};
+  uint16_t numberOfReadouts{0};
 
   uint64_t Packets{0};
   uint32_t SeqNum{0};
@@ -125,6 +126,7 @@ protected:
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0};
+      
 
   uint32_t readoutTimeHigh{0};
   uint32_t readoutTimeLow{0};
