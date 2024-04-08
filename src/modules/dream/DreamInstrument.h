@@ -49,7 +49,7 @@ public:
   Config DreamConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
-  ESSReadout::ESSTime Time;
+  ESSReadout::ESSReferenceTime Time;
   ESSReadout::Parser::DetectorType Type;
   EV44Serializer *Serializer;
   DreamGeometry DreamGeom;

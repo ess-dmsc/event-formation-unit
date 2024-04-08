@@ -119,10 +119,6 @@ void TrackReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime TrackReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

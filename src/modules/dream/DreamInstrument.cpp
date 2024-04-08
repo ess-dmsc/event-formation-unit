@@ -17,6 +17,8 @@
 
 namespace Dream {
 
+using namespace ESSReadout;
+
 DreamInstrument::DreamInstrument(struct Counters &counters,
                                  BaseSettings &settings)
     : counters(counters), Settings(settings) {
@@ -54,10 +56,10 @@ void DreamInstrument::processReadouts() {
   /// \todo We have a design issue here. Check is it a good approach to share
   /// the ownership of the buffer between the parser and the instrument.
   auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime = Time.setReference(PacketHeader.getPulseHigh(),
-                                         PacketHeader.getPulseLow());
-  uint64_t PrevPulseTime = Time.setPrevReference(
-      PacketHeader.getPrevPulseHigh(), PacketHeader.getPrevPulseLow());
+  uint64_t PulseTime = Time.setReference(ESSReadout::ESSTime(
+      PacketHeader.getPulseHigh(), PacketHeader.getPulseLow()));
+  uint64_t PrevPulseTime = Time.setPrevReference(ESSTime(
+      PacketHeader.getPrevPulseHigh(), PacketHeader.getPrevPulseLow()));
 
   if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
@@ -101,8 +103,8 @@ void DreamInstrument::processReadouts() {
       continue;
     }
 
-    auto TimeOfFlight =
-        ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow);
+    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+        ESSTime(Data.TimeHigh, Data.TimeLow));
 
     // Calculate pixelid and apply calibration
     uint32_t PixelId = calcPixel(Parms, Data);

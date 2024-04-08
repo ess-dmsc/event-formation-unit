@@ -404,7 +404,8 @@ protected:
     headerFactory = std::make_unique<TestHeaderFactory>();
     trex = new TREXInstrument(counters, Settings, serializer);
     trex->setSerializer(serializer);
-    trex->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
+    trex->ESSReadoutParser.Packet.HeaderPtr =
+        headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}
 
@@ -413,8 +414,8 @@ protected:
     Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0, 0);
-    Packet.Time.setPrevReference(0, 0);
+    Packet.Time.setReference(ESSTime(0, 0));
+    Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
 
@@ -615,7 +616,7 @@ TEST_F(TREXInstrumentTest, BadEventLargeGridSpan) {
 TEST_F(TREXInstrumentTest, NegativeTOF) {
   auto &Packet = trex->ESSReadoutParser.Packet;
   makeHeader(trex->ESSReadoutParser.Packet, GoodEvent);
-  Packet.Time.setReference(200, 0);
+  Packet.Time.setReference(ESSTime(200, 0));
 
   auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;

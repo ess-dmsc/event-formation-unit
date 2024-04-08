@@ -103,10 +103,6 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

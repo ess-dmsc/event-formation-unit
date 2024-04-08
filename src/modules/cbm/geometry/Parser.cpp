@@ -14,6 +14,8 @@
 
 namespace cbm {
 
+using namespace ESSReadout;
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -23,7 +25,7 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
   char *Buffer = (char *)PacketData.DataPtr;
   unsigned int Size = PacketData.DataLength;
-  ESSReadout::ESSTime &TimeRef = PacketData.Time;
+  ESSReferenceTime &TimeRef = PacketData.Time;
 
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
@@ -86,17 +88,18 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout.TimeLow > ESSReadout::MaxFracTimeCount) {
+    if (Readout.TimeLow > MaxFracTimeCount) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow,
-             ESSReadout::MaxFracTimeCount);
+             MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
       continue;
     }
 
     // Check for negative TOFs
-    auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
+    auto TimeOfFlight =
+        TimeRef.getTOF(ESSTime(Readout.TimeHigh, Readout.TimeLow));
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeOfFlight %" PRIu64 " ",
-           TimeRef.TimeInNS, TimeOfFlight);
+           TimeRef.getRefTimeUInt64(), TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");

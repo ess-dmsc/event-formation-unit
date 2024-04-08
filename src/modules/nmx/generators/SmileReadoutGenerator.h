@@ -23,7 +23,6 @@ public:
 
 protected:
   void generateData() override;
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 
   int64_t Number{0};
 };

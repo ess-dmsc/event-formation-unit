@@ -110,10 +110,6 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime MultiHitReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "ess/ESSTime.h"
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/test/VMM3ParserTestData.h>
@@ -21,8 +22,8 @@ protected:
   void SetUp() override {
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
-    PacketData.Time.setReference(0, 0);
-    PacketData.Time.setPrevReference(0, 0);
+    PacketData.Time.setReference(ESSTime(0, 0));
+    PacketData.Time.setPrevReference(ESSTime(0, 0));
   }
   void TearDown() override {}
 
@@ -131,8 +132,8 @@ TEST_F(VMM3ParserTest, ErrorChannel) {
 // Testing invalid TOF
 TEST_F(VMM3ParserTest, ErrorTOF) {
   makeHeader(TOFError);
-  PacketData.Time.setReference(1, 0);
-  PacketData.Time.setPrevReference(1, 0);
+  PacketData.Time.setReference(ESSTime(1, 0));
+  PacketData.Time.setPrevReference(ESSTime(1, 0));
   ASSERT_EQ(VMMParser.Stats.Readouts, 0);
   ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 0);
 

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "common/time/TimeNano.h"
 #include <CLI/CLI.hpp>
 #include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
@@ -79,30 +80,26 @@ protected:
   /// \brief Fill out specified buffer with readouts
   virtual void generateData() = 0;
 
-  virtual ESSReadout::ESSTime::PulseTime generatePulseTime() = 0;
-
   /// \brief Increment sequence number and do fuzzing
   void finishPacket();
 
   /// \brief Increment the readout time with ticks btw. readouts according to
   /// settings
   inline void nextReadoutTime() {
-    readoutTimeLow += Settings.TicksBtwReadouts;
-    calculateTimeHighAndLow();
+    readoutTime += Settings.TicksBtwReadouts;
   }
 
   /// \brief Increment the readout time with btw. events acording to
   /// settings
   inline void nextEventTime() {
-    pulseTime.TimeLow += Settings.TicksBtwEvents;
-    calculateTimeHighAndLow();
+    readoutTime += Settings.TicksBtwEvents;
   }
 
   // Get the value of readoutTimeHigh
-  uint32_t getReadoutTimeHigh() const { return readoutTimeHigh; }
+  uint32_t getReadoutTimeHigh() const { return readoutTime.getTimeHigh(); }
 
   // Get the value of readoutTimeLow
-  uint32_t getReadoutTimeLow() const { return readoutTimeLow; }
+  uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
 
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks
@@ -114,8 +111,8 @@ protected:
 
   uint64_t Packets{0};
   uint32_t SeqNum{0};
-  ESSReadout::ESSTime::PulseTime pulseTime{0};
-  ESSReadout::ESSTime::PulseTime prevPulseTime{0};
+  ESSReadout::ESSTime pulseTime;
+  ESSReadout::ESSTime prevPulseTime;
   uint16_t DataSize{0}; // Number of data bytes in packet
   uint8_t HeaderSize{0};
 
@@ -128,15 +125,8 @@ private:
       ESSReadout::Parser::HeaderVersion::V0};
       
 
-  uint32_t readoutTimeHigh{0};
-  uint32_t readoutTimeLow{0};
-  uint32_t pulseFrequencyNs{0};
+  ESSReadout::ESSTime readoutTime;
 
-  inline void calculateTimeHighAndLow() {
-    if (readoutTimeLow >= 88052499) {
-      readoutTimeLow -= 88052499;
-      readoutTimeHigh += 1;
-    }
-  }
+  TimeDurationNano pulseFrequencyNs{0};
 };
 // GCOVR_EXCL_STOP

@@ -116,10 +116,6 @@ void SmileReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime SmileReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

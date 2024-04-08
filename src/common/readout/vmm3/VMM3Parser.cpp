@@ -9,8 +9,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/readout/vmm3/VMM3Parser.h>
 #include <common/memory/span.hpp>
+#include <common/readout/vmm3/VMM3Parser.h>
 
 namespace ESSReadout {
 
@@ -24,7 +24,7 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
 
   char *Buffer = (char *)PacketData.DataPtr;
   unsigned int Size = PacketData.DataLength;
-  ESSTime &TimeRef = PacketData.Time;
+  ESSReferenceTime &TimeRef = PacketData.Time;
 
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
@@ -73,9 +73,10 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
 
     // Check for negative TOFs
     ///\todo Missing TDC correction
-    auto TimeOfFlight = TimeRef.getTOF(Readout.TimeHigh, Readout.TimeLow);
+    auto TimeOfFlight =
+        TimeRef.getTOF(ESSTime(Readout.TimeHigh, Readout.TimeLow));
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           TimeRef.TimeInNS, TimeOfFlight);
+           TimeRef.getRefTimeUInt64(), TimeOfFlight);
 
     if (TimeOfFlight == TimeRef.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
@@ -137,7 +138,8 @@ void VMM3Parser::dumpReadoutToFile(
     const VMM3Data &Data, const ESSReadout::Parser ESSReadoutParser,
     std::shared_ptr<VMM3::ReadoutFile> DumpFile) {
   VMM3::Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr.getPulseHigh();
+  CurrentReadout.PulseTimeHigh =
+      ESSReadoutParser.Packet.HeaderPtr.getPulseHigh();
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr.getPulseLow();
   CurrentReadout.PrevPulseTimeHigh =
       ESSReadoutParser.Packet.HeaderPtr.getPrevPulseHigh();
@@ -145,7 +147,8 @@ void VMM3Parser::dumpReadoutToFile(
       ESSReadoutParser.Packet.HeaderPtr.getPrevPulseLow();
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
-  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
+  CurrentReadout.OutputQueue =
+      ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
   CurrentReadout.BC = Data.BC;
   CurrentReadout.OTADC = Data.OTADC;
   CurrentReadout.GEO = Data.GEO;

@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/testutils/HeaderFactory.h"
+#include <common/testutils/HeaderFactory.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
@@ -15,6 +15,7 @@
 #include <cbm/CbmInstrument.h>
 
 using namespace cbm;
+using namespace ESSReadout;
 
 // clang-format off
 
@@ -119,8 +120,8 @@ protected:
     Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0, 0);
-    Packet.Time.setPrevReference(0, 0);
+    Packet.Time.setReference(ESSTime(0, 0));
+    Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
 
@@ -151,8 +152,8 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
 
 TEST_F(CbmInstrumentTest, BeamMonitorTOF) {
   makeHeader(cbm->ESSReadoutParser.Packet, MonitorReadoutTOF);
-  cbm->ESSReadoutParser.Packet.Time.setReference(1, 100000);
-  cbm->ESSReadoutParser.Packet.Time.setPrevReference(1, 0);
+  cbm->ESSReadoutParser.Packet.Time.setReference(ESSTime(1, 100000));
+  cbm->ESSReadoutParser.Packet.Time.setPrevReference(ESSTime(1, 0));
 
   cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
   counters.CbmStats = cbm->CbmParser.Stats;

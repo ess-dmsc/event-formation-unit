@@ -69,6 +69,8 @@ TEST_F(CombinedParserTest, DataGenV0) {
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
 
+    gen.main();
+
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,
               sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
@@ -90,6 +92,8 @@ TEST_F(CombinedParserTest, DataGenDefault) {
     gen.Settings.NumReadouts = Sections;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
+
+    gen.main();
 
     uint16_t DataSize = gen.makePacket();
     ASSERT_EQ(DataSize,

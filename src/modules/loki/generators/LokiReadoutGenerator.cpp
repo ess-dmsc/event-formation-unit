@@ -59,9 +59,5 @@ void LokiReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime LokiReadoutGenerator::generatePulseTime() {
-  return pulseTimeNs = ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Caen
 // GCOVR_EXCL_STOP

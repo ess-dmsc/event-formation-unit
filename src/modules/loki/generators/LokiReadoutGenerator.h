@@ -21,7 +21,6 @@ public:
 
 protected:
   void generateData() override;
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 };
 
 } // namespace Caen

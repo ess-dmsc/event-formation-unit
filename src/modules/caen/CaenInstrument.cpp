@@ -18,6 +18,8 @@
 
 namespace Caen {
 
+using namespace ESSReadout;
+
 /// \brief load configuration and calibration files, throw exceptions
 /// if these have errors or are inconsistent
 ///
@@ -89,7 +91,8 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
 
 void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr.getPulseHigh();
+  CurrentReadout.PulseTimeHigh =
+      ESSReadoutParser.Packet.HeaderPtr.getPulseHigh();
   CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr.getPulseLow();
   CurrentReadout.PrevPulseTimeHigh =
       ESSReadoutParser.Packet.HeaderPtr.getPrevPulseHigh();
@@ -98,7 +101,8 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
   CurrentReadout.DataSeqNum = Data.DataSeqNum;
-  CurrentReadout.OutputQueue = ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
+  CurrentReadout.OutputQueue =
+      ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
   CurrentReadout.AmpA = Data.AmpA;
   CurrentReadout.AmpB = Data.AmpB;
   CurrentReadout.AmpC = Data.AmpC;
@@ -111,10 +115,12 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
 
 void CaenInstrument::processReadouts() {
   XTRACE(DATA, DEB, "Reference time is %" PRIi64,
-         ESSReadoutParser.Packet.Time.TimeInNS);
+         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
   /// \todo sometimes PrevPulseTime maybe?
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
-  SerializerII->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.TimeInNS);
+  Serializer->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+  SerializerII->checkAndSetReferenceTime(
+      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
@@ -130,15 +136,15 @@ void CaenInstrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight =
-        ESSReadoutParser.Packet.Time.getTOF(Data.TimeHigh, Data.TimeLow);
+    uint64_t TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+        ESSTime(Data.TimeHigh, Data.TimeLow));
 
     XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           ESSReadoutParser.Packet.Time.TimeInNS,
-           ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
+           ESSReadoutParser.Packet.Time.getRefTimeUInt64(),
+           ESSReadoutParser.Packet.Time.getRefTimeNS().count());
     XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           ESSReadoutParser.Packet.Time.PrevTimeInNS,
-           ESSReadoutParser.Packet.Time.toNS(Data.TimeHigh, Data.TimeLow));
+           ESSReadoutParser.Packet.Time.getPrevRefTimeUInt64(),
+           ESSReadoutParser.Packet.Time.getPrevRefTimeNS().count());
 
     if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");

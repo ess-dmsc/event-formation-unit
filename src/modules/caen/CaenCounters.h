@@ -42,7 +42,7 @@ struct CaenCounters {
   int64_t EventsUdder;
 
   // Time
-  struct ESSReadout::ESSTime::Stats_t TimeStats;
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;

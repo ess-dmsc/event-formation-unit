@@ -7,8 +7,10 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/utils/EfuUtils.h"
 #include <common/debug/Trace.h>
 #include <common/readout/ess/ESSTime.h>
+#include <common/time/TimeNano.h>
 #include <cstdint>
 #include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -18,6 +20,7 @@
 #define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
+using namespace efutils;
 
 ///\brief Constructor initialize the generator app
 ReadoutGeneratorBase::ReadoutGeneratorBase() {
@@ -46,26 +49,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_flag("-m, -r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
-
-  // Parse the header version
-  switch (Settings.headerVersion) {
-  case Parser::HeaderVersion::V0:
-    headerVersion = Parser::HeaderVersion::V0;
-    HeaderSize = sizeof(Parser::PacketHeaderV0);
-    break;
-  case Parser::HeaderVersion::V1:
-    headerVersion = Parser::HeaderVersion::V1;
-    HeaderSize = sizeof(Parser::PacketHeaderV1);
-    break;
-  default:
-    throw std::runtime_error("Incorrect header version");
-  }
-
-  if (headerVersion == Parser::HeaderVersion::V0) {
-    assert(HeaderSize == 30);
-  } else {
-    assert(HeaderSize == 32);
-  }
 }
 
 ///\brief
@@ -100,39 +83,37 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
-  if (pulseTime.TimeHigh == 0 && pulseTime.TimeLow == 0) {
-    pulseTime = ESSTime::PulseTime(time(NULL) * 1e9);
-    readoutTimeHigh = pulseTime.TimeHigh;
-    readoutTimeLow = pulseTime.TimeLow;
+  if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
+    pulseTime = ESSTime(time(NULL), 0);
+
     XTRACE(DATA, INF,
            "First pulseTime generated, High: %u, Low: %u, periodNs: %u",
-           pulseTime.TimeHigh, pulseTime.TimeLow, pulseFrequencyNs);
+           pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
   }
 
-  if (pulseFrequencyNs != 0) {
+  if (pulseFrequencyNs != TimeDurationNano(0)) {
     // if the readout time is greater than the pulse time, update generate new
     // pulse time for the header
-    if (ESSTime::toNS(readoutTimeHigh, readoutTimeLow) >=
-        ESSTime::toNS(pulseTime) + pulseFrequencyNs) {
+    if (readoutTime.toNS() >= pulseTime.toNS() + pulseFrequencyNs) {
       prevPulseTime = pulseTime;
-      uint64_t newPulseTime = ESSTime::toNS(pulseTime) + pulseFrequencyNs;
-      pulseTime = ESSTime::PulseTime(newPulseTime);
+      pulseTime += pulseFrequencyNs;
       XTRACE(DATA, INF,
              "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
-             pulseTime.TimeHigh, pulseTime.TimeLow, pulseFrequencyNs);
+             pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
+             pulseFrequencyNs.count());
     }
   } else {
     prevPulseTime = pulseTime;
-    pulseTime = ESSTime::PulseTime(time(NULL) * 1e9);
+    pulseTime = ESSTime(time(NULL), 0);
     XTRACE(DATA, INF,
            "New pulseTime generated for this packet, High: %u, Low: %u",
-           pulseTime.TimeHigh, pulseTime.TimeLow);
+           pulseTime.getTimeHigh(), pulseTime.getTimeLow());
   }
 
-  Header->PulseHigh = pulseTime.TimeHigh;
-  Header->PulseLow = pulseTime.TimeLow;
-  Header->PrevPulseHigh = pulseTime.TimeHigh;
-  Header->PrevPulseLow = pulseTime.TimeLow;
+  Header->PulseHigh = pulseTime.getTimeHigh();
+  Header->PulseLow = pulseTime.getTimeLow();
+  Header->PrevPulseHigh = prevPulseTime.getTimeHigh();
+  Header->PrevPulseLow = prevPulseTime.getTimeLow();
 
   if (headerVersion == Parser::HeaderVersion::V1) {
     auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
@@ -200,8 +181,28 @@ void ReadoutGeneratorBase::main() {
   DataSource->setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource->printBufferSizes();
 
+  // Parse the header version
+  switch (Settings.headerVersion) {
+  case Parser::HeaderVersion::V0:
+    headerVersion = Parser::HeaderVersion::V0;
+    HeaderSize = sizeof(Parser::PacketHeaderV0);
+    break;
+  case Parser::HeaderVersion::V1:
+    headerVersion = Parser::HeaderVersion::V1;
+    HeaderSize = sizeof(Parser::PacketHeaderV1);
+    break;
+  default:
+    throw std::runtime_error("Incorrect header version");
+  }
+
+  if (headerVersion == Parser::HeaderVersion::V0) {
+    assert(HeaderSize == 30);
+  } else {
+    assert(HeaderSize == 32);
+  }
+
   if (Settings.Frequency != 0) {
-    pulseFrequencyNs = static_cast<uint64_t>(1e9 / Settings.Frequency);
+    pulseFrequencyNs = efutils::hzToNanoseconds(Settings.Frequency);
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
   }
 
