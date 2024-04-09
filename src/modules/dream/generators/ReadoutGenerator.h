@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "common/readout/ess/ESSTime.h"
 #include <dream/readout/DataParser.h>
 // #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -44,7 +43,6 @@ public:
 
 protected:
   void generateData() override;
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 
   const uint32_t TimeToFirstReadout{1000};
 

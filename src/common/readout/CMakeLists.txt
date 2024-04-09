@@ -17,7 +17,6 @@ set(essreadout_obj_SRC
 )
 
 set(essreadout_obj_INC
-  ess/ESSTime.h
   ess/Parser.h
   vmm3/Hybrid.h
   vmm3/Readout.h

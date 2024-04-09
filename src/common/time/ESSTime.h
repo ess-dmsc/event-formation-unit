@@ -1,26 +1,27 @@
-// Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief ESS HighTime/LowTime handler class
+/// \brief Implementation of ESS time related methoods and classes
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
-#include "common/time/TimeNano.h"
 #include <cassert>
 #include <chrono>
 #include <cinttypes>
 #include <common/debug/Trace.h>
 #include <cstdint>
-#include <gtest/internal/gtest-internal.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace ESSReadout {
+namespace esstime {
+
+using TimePointNano = std::chrono::high_resolution_clock::time_point;
+using TimeDurationNano = std::chrono::duration<size_t, std::nano>;
 
 class ESSTime {
 
@@ -104,15 +105,11 @@ public:
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
   /// \brief save reference (pulse) time
-  uint64_t setReference(const ESSTime &refESSTime) {
-    TimeInNS = refESSTime.toNS();
-    return TimeInNS.count();
-  }
+  uint64_t setReference(const ESSTime &refESSTime);
 
-  uint64_t setPrevReference(const ESSTime &refPrevESSTime) {
-    PrevTimeInNS = refPrevESSTime.toNS();
-    return PrevTimeInNS.count();
-  }
+  uint64_t setPrevReference(const ESSTime &refPrevESSTime);
+
+  void setMaxTOF(uint64_t NewMaxTOF);
 
   inline ESSTime getRefESSTime() const { return ESSTime(TimeInNS); }
 
@@ -126,52 +123,12 @@ public:
 
   inline uint64_t getPrevRefTimeUInt64() const { return PrevTimeInNS.count(); }
 
-  void setMaxTOF(uint64_t NewMaxTOF) { MaxTOF = TimeDurationNano(NewMaxTOF); }
   /// \brief calculate TOF from saved reference and current event time
-  uint64_t getTOF(ESSTime eventEssTime, uint32_t DelayNS = 0) {
-    TimeDurationNano timeval = eventEssTime.toNS() + TimeDurationNano(DelayNS);
-    if (timeval < TimeInNS) {
-      XTRACE(EVENT, WAR,
-             "TOF negative: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
-             ", PrevPTns: %" PRIu64, eventEssTime.getTimeHigh(),
-             eventEssTime.getTimeLow(), timeval, TimeInNS);
-      Stats.TofNegative++;
-      return getPrevTOF(eventEssTime, DelayNS);
-    }
-    if ((timeval - TimeInNS) > MaxTOF) {
-      XTRACE(EVENT, WAR, "High TOF: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
-             ", PrevPTns: %" PRIu64, eventEssTime.getTimeHigh(),
-             eventEssTime.getTimeLow(), timeval, TimeInNS);
-      Stats.TofHigh++;
-      return InvalidTOF;
-    }
-    Stats.TofCount++;
-    return (timeval - TimeInNS).count();
-  }
+  uint64_t getTOF(ESSTime eventEssTime, uint32_t DelayNS = 0);
 
   /// \brief calculate TOF from saved reference and current event time
   /// \todo a valid value of TOF = 0 is in
-  uint64_t getPrevTOF(ESSTime eventEssTime, uint32_t DelayNS = 0) {
-    TimeDurationNano timeval = eventEssTime.toNS() + TimeDurationNano(DelayNS);
-    if (timeval < PrevTimeInNS) {
-      XTRACE(EVENT, WAR,
-             "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
-             ", PrevPTns: %" PRIu64, eventEssTime.getTimeHigh(),
-             eventEssTime.getTimeLow(), timeval, PrevTimeInNS);
-      Stats.PrevTofNegative++;
-      return InvalidTOF;
-    }
-    if ((timeval - PrevTimeInNS) > MaxTOF) {
-      XTRACE(EVENT, WAR,
-             "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
-             ", PrevPTns: %" PRIu64, eventEssTime.getTimeHigh(),
-             eventEssTime.getTimeLow(), timeval, PrevTimeInNS);
-      Stats.PrevTofHigh++;
-      return InvalidTOF;
-    }
-    Stats.PrevTofCount++;
-    return (timeval - PrevTimeInNS).count();
-  }
+  uint64_t getPrevTOF(ESSTime eventEssTime, uint32_t DelayNS = 0);
 
   struct Stats_t Stats = {};
 
@@ -181,4 +138,5 @@ private:
   TimeDurationNano MaxTOF{
       2147483647}; // max 32 bit integer, larger TOFs cause errors downstream
 };
-} // namespace ESSReadout
+
+} // namespace esstime

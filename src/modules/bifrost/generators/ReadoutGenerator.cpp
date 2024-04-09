@@ -12,8 +12,6 @@
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <fcntl.h>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <stdexcept>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -91,7 +89,4 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
 // GCOVR_EXCL_STOP

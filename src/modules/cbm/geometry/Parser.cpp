@@ -14,7 +14,7 @@
 
 namespace cbm {
 
-using namespace ESSReadout;
+using namespace esstime;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -88,9 +88,9 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout.TimeLow > MaxFracTimeCount) {
+    if (Readout.TimeLow > ESSReadout::MaxFracTimeCount) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow,
-             MaxFracTimeCount);
+             ESSReadout::MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
       continue;
     }

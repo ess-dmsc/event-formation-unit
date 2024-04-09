@@ -9,13 +9,8 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/ESSTime.h"
 #include <common/debug/Trace.h>
-#include <cstdint>
-#include <cstring>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
-#include <modules/cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -105,10 +100,6 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
   }
-}
-
-ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
 }
 
 } // namespace cbm

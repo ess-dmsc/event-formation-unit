@@ -13,7 +13,6 @@
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <modules/caen/readout/DataParser.h>
-#include <string>
 
 /**
  * @brief The BifrostDatReader class is responsible for reading data from a DAT
@@ -57,8 +56,6 @@ struct BiforstGeneratorSettings {
    * Generates data using the BifrostDatReader to read the DAT file.
    */
   void generateData() override;
-
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 
   int FileDescriptor{-1}; ///< The file descriptor of the DAT file.
 };

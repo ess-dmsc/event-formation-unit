@@ -15,6 +15,8 @@
 
 namespace ESSReadout {
 
+  using namespace esstime;
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 

@@ -11,11 +11,10 @@
 
 #pragma once
 
-#include "common/readout/ess/ESSTime.h"
 #include <cbm/CbmTypes.h>
 #include <common/testutils/DataFuzzer.h>
-#include <cstdint>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <cbm/geometry/Parser.h>
 
 namespace cbm {
 
@@ -34,10 +33,11 @@ private:
   } cbmSettings;
 
   void generateData() override;
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
 
   void generateIBMData(uint8_t *dataPtr);
   void generateTTLData(uint8_t *dataPtr);
 };
+
 } // namespace cbm
+
 // GCOVR_EXCL_STOP

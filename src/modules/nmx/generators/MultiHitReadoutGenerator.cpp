@@ -9,17 +9,8 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/ESSTime.h"
 #include <common/debug/Trace.h>
-#include <math.h>
 #include <modules/nmx/generators/MultiHitReadoutGenerator.h>
-#include <time.h>
-
-#include <cassert>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <stdexcept>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

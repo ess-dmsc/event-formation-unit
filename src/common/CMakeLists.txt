@@ -3,9 +3,10 @@
 #=============================================================================
 
 add_subdirectory(monitor)
-add_subdirectory(reduction)
-add_subdirectory(readout)
 add_subdirectory(kafka)
+add_subdirectory(reduction)
+add_subdirectory(time)
+add_subdirectory(readout)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
@@ -15,9 +16,6 @@ set(efu_common_SRC
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
   system/Socket.cpp
-  time/Timer.cpp
-  time/TimeString.cpp
-  time/TSCTimer.cpp
   Statistics.cpp
   StatPublisher.cpp
   ${ESS_SOURCE_DIR}/efu/ExitHandler.cpp
@@ -52,9 +50,6 @@ set(efu_common_INC
   utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
-  time/Timer.h
-  time/TimeString.h
-  time/TSCTimer.h
   BitMath.h
   DumpFile.h
   JsonFile.h
@@ -75,7 +70,11 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
-  )
+  # Add required object libraries
+  $<TARGET_OBJECTS:EssTimingLib>
+)
+
+
 
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_reduction STATIC
@@ -89,6 +88,7 @@ add_library(efu_reduction STATIC
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_essreadout STATIC
   $<TARGET_OBJECTS:EssReadoutLib>
+  $<TARGET_OBJECTS:EssTimingLib>
 )
 
 

@@ -9,7 +9,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/ESSTime.h"
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
@@ -58,10 +57,6 @@ void ReadoutGenerator::generateData() {
       nextEventTime();
     }
   }
-}
-
-ESSReadout::ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return pulseTimeNs = ESSReadout::ESSTime::PulseTime(time(NULL));
 }
 
 } // namespace Freia

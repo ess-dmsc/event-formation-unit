@@ -11,7 +11,6 @@
 #pragma once
 
 #include <common/kafka/EV44Serializer.h>
-#include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
 #include <common/readout/vmm3/Readout.h>

@@ -9,7 +9,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <math.h>
 #include <modules/trex/generators/LETReadoutGenerator.h>
@@ -118,10 +117,6 @@ void LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", getReadoutTimeLow(),
            getReadoutTimeHigh());
   }
-}
-
-ESSReadout::ESSTime::PulseTime LETReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
 }
 
 } // namespace Trex

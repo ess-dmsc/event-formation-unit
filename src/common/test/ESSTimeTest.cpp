@@ -7,13 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/time/TimeNano.h"
 #include <cmath>
-#include <common/readout/ess/ESSTime.h>
+#include <common/time/ESSTime.h>
 #include <common/testutils/TestBase.h>
 #include <cstdint>
 
-namespace ESSReadout {
+using namespace esstime;
 
 class ESSTimeTest : public TestBase {
 protected:
@@ -148,8 +147,6 @@ TEST_F(ESSTimeTest, TestUnitConversion) {
   ASSERT_EQ(prevPulseTime.getTimeHigh(), High);
   ASSERT_EQ(prevPulseTime.getTimeLow(), Low);
 }
-
-} // namespace ESSReadout
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

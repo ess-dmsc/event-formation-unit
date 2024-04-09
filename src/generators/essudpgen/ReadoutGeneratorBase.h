@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "common/time/TimeNano.h"
 #include <CLI/CLI.hpp>
-#include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
+#include <common/time/ESSTime.h>
 #include <cstdint>
 #include <h5cpp/property/virtual_data_map.hpp>
 #include <string>
@@ -29,7 +28,7 @@ public:
     std::string IpAddress{"127.0.0.1"};
     uint16_t UDPPort{9000};
     uint64_t NumberOfPackets{0};     // 0 == all packets
-    uint32_t NumReadouts{0};       // # readouts in packet
+    uint32_t NumReadouts{0};         // # readouts in packet
     uint32_t TicksBtwReadouts{10};   // 88 ticks ~ 1us
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
@@ -85,15 +84,11 @@ protected:
 
   /// \brief Increment the readout time with ticks btw. readouts according to
   /// settings
-  inline void nextReadoutTime() {
-    readoutTime += Settings.TicksBtwReadouts;
-  }
+  inline void nextReadoutTime() { readoutTime += Settings.TicksBtwReadouts; }
 
   /// \brief Increment the readout time with btw. events acording to
   /// settings
-  inline void nextEventTime() {
-    readoutTime += Settings.TicksBtwEvents;
-  }
+  inline void nextEventTime() { readoutTime += Settings.TicksBtwEvents; }
 
   // Get the value of readoutTimeHigh
   uint32_t getReadoutTimeHigh() const { return readoutTime.getTimeHigh(); }
@@ -123,10 +118,9 @@ protected:
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0};
-      
 
   ESSReadout::ESSTime readoutTime;
 
-  TimeDurationNano pulseFrequencyNs{0};
+  esstime::TimeDurationNano pulseFrequencyNs{0};
 };
 // GCOVR_EXCL_STOP

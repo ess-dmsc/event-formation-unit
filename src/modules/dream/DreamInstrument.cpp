@@ -17,6 +17,7 @@
 
 namespace Dream {
 
+using namespace esstime;
 using namespace ESSReadout;
 
 DreamInstrument::DreamInstrument(struct Counters &counters,
@@ -32,9 +33,9 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 
   if (DreamConfiguration.Instance == Config::DREAM) {
-    Type = ESSReadout::Parser::DREAM;
+    Type = Parser::DREAM;
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
-    Type = ESSReadout::Parser::MAGIC;
+    Type = Parser::MAGIC;
   } else {
     throw std::runtime_error(
         "Unsupported instrument instance (not DREAM/MAGIC)");

@@ -22,7 +22,6 @@ public:
 
 protected:
   void generateData() override;
-  ESSReadout::ESSTime::PulseTime generatePulseTime() override;
   
   const uint32_t TimeToFirstReadout{1000};
 };

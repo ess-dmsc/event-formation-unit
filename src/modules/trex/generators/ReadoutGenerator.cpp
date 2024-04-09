@@ -114,10 +114,6 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-ESSTime::PulseTime ReadoutGenerator::generatePulseTime() {
-  return ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Trex
 
 // GCOVR_EXCL_STOP

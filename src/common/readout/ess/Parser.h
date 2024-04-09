@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "common/time/TimeNano.h"
 #include <cinttypes>
-#include <common/readout/ess/ESSTime.h>
+#include <common/time/ESSTime.h>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 
 namespace ESSReadout {
+
+using namespace esstime;
 
 struct ESSHeaderStats {
   int64_t ErrorBuffer{0};

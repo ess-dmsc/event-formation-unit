@@ -100,9 +100,5 @@ void DreamReadoutGenerator::generateData() {
   }
 }
 
-ESSReadout::ESSTime::PulseTime DreamReadoutGenerator::generatePulseTime() {
-  return ESSReadout::ESSTime::PulseTime(time(NULL));
-}
-
 } // namespace Dream
 // GCOVR_EXCL_STOP
