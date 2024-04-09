@@ -9,9 +9,6 @@
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
 #include <common/testutils/TestBase.h>
-#include <memory>
-#include <stdio.h>
-#include <string.h>
 #include <cbm/CbmInstrument.h>
 
 using namespace cbm;

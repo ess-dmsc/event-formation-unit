@@ -9,14 +9,8 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <cassert>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <math.h>
+
 #include <modules/freia/generators/ReadoutGenerator.h>
-#include <stdexcept>
-#include <time.h>
 
 namespace Freia {
 

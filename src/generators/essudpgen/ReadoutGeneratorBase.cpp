@@ -7,12 +7,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/utils/EfuUtils.h"
+#include <common/utils/EfuUtils.h>
 #include <common/debug/Trace.h>
-#include <cstdint>
-#include <cstdio>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <sys/types.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB

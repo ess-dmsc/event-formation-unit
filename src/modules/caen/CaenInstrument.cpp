@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,7 +11,6 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
-#include <fmt/format.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

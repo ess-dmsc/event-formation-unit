@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/matching/GapMatcher.h>

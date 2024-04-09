@@ -8,8 +8,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <algorithm>
-#include <cstdint>
 #include <modules/dream/generators/ReadoutGenerator.h>
 
 namespace Dream {

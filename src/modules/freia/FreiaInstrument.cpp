@@ -8,7 +8,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Readout.h>

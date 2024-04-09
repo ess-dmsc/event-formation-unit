@@ -10,8 +10,6 @@
 #include <common/testutils/TestBase.h>
 #include <freia/FreiaInstrument.h>
 #include <common/testutils/HeaderFactory.h>
-#include <stdio.h>
-#include <string.h>
 
 using namespace Freia;
 using namespace ESSReadout;

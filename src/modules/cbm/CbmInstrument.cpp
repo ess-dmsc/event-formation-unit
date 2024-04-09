@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <CbmTypes.h>
-#include <assert.h>
 #include <cbm/CbmInstrument.h>
 #include <cbm/geometry/Parser.h>
 #include <common/debug/Log.h>

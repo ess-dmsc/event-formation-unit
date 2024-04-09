@@ -9,14 +9,11 @@
 
 #pragma once
 
+#include <common/system/Socket.h>
 #include <CLI/CLI.hpp>
 #include <common/readout/ess/Parser.h>
-#include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
 #include <common/time/ESSTime.h>
-#include <cstdint>
-#include <h5cpp/property/virtual_data_map.hpp>
-#include <string>
 
 class ReadoutGeneratorBase {
 public:
