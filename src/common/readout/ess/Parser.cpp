@@ -113,6 +113,8 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     return -Parser::EHEADER;
   }
 
+  Stats.OQRxPackets[Packet.HeaderPtr.getOutputQueue()]++;
+
   // Check per OutputQueue packet sequence number
   if (NextSeqNum[Packet.HeaderPtr.getOutputQueue()] !=
       Packet.HeaderPtr.getSeqNum()) {
@@ -189,8 +191,13 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   }
 
   //
-  if (Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV0)) {
-    XTRACE(PROCESS, DEB, "Heartbeat packet (pulse time only)");
+  if (hVersion == HeaderVersion::V0 && Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV0)) {
+    XTRACE(PROCESS, DEB, "Heartbeat packet v0 (pulse time only)");
+    Stats.HeartBeats++;
+  }
+
+  if (hVersion == HeaderVersion::V1 && Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV1)) {
+    XTRACE(PROCESS, DEB, "Heartbeat packet v1 (pulse time only)");
     Stats.HeartBeats++;
   }
 

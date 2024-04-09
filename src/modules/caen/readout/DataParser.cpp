@@ -29,7 +29,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     // Parse Data Header
     if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
-      Stats.ErrorDataHeaders++;
+      Stats.DataHeaderSizeErrors++;
       return ParsedReadouts;
     }
 
@@ -38,14 +38,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
              Data->DataLength, BytesLeft);
-      Stats.ErrorDataHeaders++;
+      Stats.DataLenMismatch++;
       return ParsedReadouts;
     }
 
     if (Data->FiberId > MaxFiberId or Data->FENId > MaxFENId) {
       XTRACE(DATA, WAR, "Invalid FiberId (%u) or FENId (%u)", Data->FiberId,
              Data->FENId);
-      Stats.ErrorDataHeaders++;
+      Stats.RingFenErrors++;
       return ParsedReadouts;
     }
 
@@ -56,7 +56,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     if (Data->DataLength != CaenReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
              CaenReadoutSize);
-      Stats.ErrorDataHeaders++;
+      Stats.DataLenInvalid++;
       return ParsedReadouts;
     }
 

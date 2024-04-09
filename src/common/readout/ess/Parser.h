@@ -19,6 +19,11 @@ namespace ESSReadout {
 
 using namespace esstime;
 
+const uint32_t MaxFracTimeCount{88'052'499};
+const uint8_t MaxOutputQueues{12};
+const unsigned int MaxUdpDataSize{8972};
+const unsigned int MinDataSize{5}; // just pad, cookie and version
+
 struct ESSHeaderStats {
   int64_t ErrorBuffer{0};
   int64_t ErrorSize{0};
@@ -33,12 +38,9 @@ struct ESSHeaderStats {
   int64_t Version0Header{0};
   int64_t Version1Header{0};
   int64_t HeartBeats{0};
+  int64_t OQRxPackets[MaxOutputQueues]{0};
 };
 
-const uint32_t MaxFracTimeCount{88'052'499};
-const uint8_t MaxOutputQueues{24};
-const unsigned int MaxUdpDataSize{8972};
-const unsigned int MinDataSize{5}; // just pad, cookie and version
 
 class Parser {
 public:
