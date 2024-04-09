@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <common/debug/Trace.h>
+#include <cstdint>
 
 namespace esstime {
 
@@ -65,7 +66,8 @@ public:
   ///
   /// \param nanoseconds The duration in nanoseconds to add.
   inline void operator+=(const TimeDurationNano &nanoseconds) {
-    uint32_t ticksToAdd = nanoseconds.count() / ESSClockTick;
+    uint32_t ticksToAdd =
+        static_cast<uint32_t>(nanoseconds.count() / ESSClockTick);
     this->operator+=(ticksToAdd);
   }
 
@@ -73,14 +75,20 @@ public:
   ///
   /// \param ticks The number of ticks to add.
   inline void operator+=(uint32_t &ticks) {
-    uint32_t newTimeLow = TimeLow + ticks;
-
-    if (newTimeLow > ESSClockFreqHz) {
-      newTimeLow -= ESSClockFreqHz;
-      TimeHigh += 1;
+    uint32_t ticksToAdd = 0;
+    if (ticks > ESSClockFreqHz) {
+      TimeHigh += static_cast<uint32_t>(ticks / ESSClockFreqHz);
+      ticksToAdd += static_cast<uint32_t>(std::fmod(ticks, ESSClockFreqHz));
+    } else {
+      ticksToAdd += ticks;
     }
 
-    TimeLow = newTimeLow;
+    if (TimeLow + ticksToAdd > ESSClockFreqHz) {
+      TimeHigh++;
+      TimeLow = TimeLow + ticksToAdd - ESSClockFreqHz;
+    } else {
+      TimeLow += ticksToAdd;
+    }
   }
 
   /// \brief Assignment operator.

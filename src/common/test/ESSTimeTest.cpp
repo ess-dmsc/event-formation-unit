@@ -7,9 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <cmath>
-#include <common/time/ESSTime.h>
 #include <common/testutils/TestBase.h>
+#include <common/time/ESSTime.h>
 #include <cstdint>
 
 using namespace esstime;
@@ -146,6 +145,42 @@ TEST_F(ESSTimeTest, TestUnitConversion) {
   ESSTime prevPulseTime = Time.getPrevRefESSTime();
   ASSERT_EQ(prevPulseTime.getTimeHigh(), High);
   ASSERT_EQ(prevPulseTime.getTimeLow(), Low);
+}
+
+TEST_F(ESSTimeTest, TestIncreaseOperators) {
+  uint32_t high = 1000000000;
+  uint32_t increase1000 = 1000;
+  uint32_t lowZero = 0;
+  uint32_t multipleFreqBin = ESSTime::ESSClockFreqHz * 3 + increase1000;
+
+  // We can increase with a value less than the frequency
+  ESSTime testTime = ESSTime(high, lowZero);
+  testTime += increase1000;
+  EXPECT_EQ(testTime.getTimeHigh(), high);
+  EXPECT_EQ(testTime.getTimeLow(), increase1000);
+
+  // We can increase with a multiple of the frequency
+  testTime = ESSTime(high, lowZero);
+  testTime += multipleFreqBin;
+  EXPECT_EQ(testTime.getTimeHigh(), high + 3);
+  EXPECT_EQ(testTime.getTimeLow(), 1000);
+
+  // We can increase with frequency multiplyed by the clock tick and not
+  // overflow
+  testTime = ESSTime(high, lowZero);
+  testTime += TimeDurationNano(
+      static_cast<uint64_t>(ESSTime::ESSClockFreqHz * ESSTime::ESSClockTick));
+  EXPECT_EQ(testTime.getTimeHigh(), high);
+  EXPECT_EQ(testTime.getTimeLow(), ESSTime::ESSClockFreqHz);
+
+  // We can increase with frequency multiplyed by the clock tick plus the 1 ns
+  // plus the clock tick and it will overflow
+  testTime = ESSTime(high, lowZero);
+  testTime += TimeDurationNano(
+      static_cast<uint64_t>(ESSTime::ESSClockFreqHz * ESSTime::ESSClockTick) +
+      12);
+  EXPECT_EQ(testTime.getTimeHigh(), high + 1);
+  EXPECT_EQ(testTime.getTimeLow(), 1);
 }
 
 int main(int argc, char **argv) {
