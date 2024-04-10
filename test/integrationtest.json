@@ -18,62 +18,62 @@
             0
         ],
         [
-            "efu.loki.0.receive.fifo_seq_errors",
+            "receive.fifo_seq_errors",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_header ",
+            "essheader.error_header ",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_buffer",
+            "essheader.error_buffer",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_cookie",
+            "essheader.error_cookie",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_pad",
+            "essheader.error_pad",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_size",
+            "essheader.error_size",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_version",
+            "essheader.error_version",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_output_queue",
+            "essheader.error_output_queue",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_type",
+            "essheader.error_type",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_seqno",
+            "essheader.error_seqno",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_timehigh",
+            "essheader.error_timehigh",
             "==",
             0
         ],
         [
-            "efu.loki.0.essheader.error_timefrac",
+            "essheader.error_timefrac",
             "==",
             0
         ],
