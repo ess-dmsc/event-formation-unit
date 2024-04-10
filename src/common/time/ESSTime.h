@@ -223,7 +223,7 @@ public:
   /// \param eventEssTime The current event time.
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated previous TOF value.
-  uint64_t getPrevTOF(const ESSTime eventTime,const uint32_t DelayNS = 0);
+  uint64_t getPrevTOF(const ESSTime eventTime, const uint32_t DelayNS = 0);
 
   struct Stats_t Stats = {};
 

@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/utils/EfuUtils.h>
 #include <common/debug/Trace.h>
+#include <common/utils/EfuUtils.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
@@ -98,9 +98,11 @@ void ReadoutGeneratorBase::generateHeader() {
              pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
              pulseFrequencyNs.count());
     }
+    // if the requested frequency is 0, generate a new pulse time for each
+    // packet and we use fake offset btw. pulse and prevPulse
   } else {
-    prevPulseTime = pulseTime;
-    pulseTime = ESSTime(time(NULL), 0);
+    prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
+    pulseTime = ESSTime(time(NULL), TimeLowOffset);
     XTRACE(DATA, INF,
            "New pulseTime generated for this packet, High: %u, Low: %u",
            pulseTime.getTimeHigh(), pulseTime.getTimeLow());
@@ -199,11 +201,8 @@ void ReadoutGeneratorBase::main() {
 
   if (Settings.Frequency != 0) {
     pulseFrequencyNs = efutils::hzToNanoseconds(Settings.Frequency);
-    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
-  }
-
-  if (Settings.NumReadouts == 0) {
     numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
+    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
   } else {
     numberOfReadouts = Settings.NumReadouts;
   }
