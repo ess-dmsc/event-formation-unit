@@ -78,11 +78,12 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
+  // Generate pulse time first time
   if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
     pulseTime = ESSTime(time(NULL), 0);
 
     XTRACE(DATA, INF,
-           "First pulseTime generated, High: %u, Low: %u, periodNs: %u",
+           "First pulse time generated, High: %u, Low: %u, periodNs: %u",
            pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
   }
 
