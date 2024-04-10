@@ -20,7 +20,17 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(ESSTimeTest, Constructor) { ASSERT_EQ(Time.getTOF(ESSTime(0, 0)), 0); }
+//---------------------------------------------------------------------
+// Test ESSReferenceTime class
+//---------------------------------------------------------------------
+
+TEST_F(ESSTimeTest, Constructors) {
+  ESSReferenceTime testTime1 = ESSReferenceTime();
+  ESSReferenceTime testTime2 = ESSReferenceTime(ESSTime(0, 1));
+  ASSERT_EQ(testTime1.getTOF(ESSTime(0, 0)), 0);
+  ASSERT_EQ(testTime2.getTOF(ESSTime(0, 2)), 11);
+  }
+
 
 TEST_F(ESSTimeTest, SetRef) {
   Time.setReference(ESSTime(100, 0));
@@ -127,7 +137,7 @@ TEST_F(ESSTimeTest, Issue2021_11_08) {
 }
 
 // Test time conversion back to 32bit high and low
-TEST_F(ESSTimeTest, TestUnitConversion) {
+TEST_F(ESSTimeTest, RefTimeUnitConversion) {
   uint32_t High = 0x6188e7a9;
   uint32_t Low = 0x00070ff6;
   uint64_t timeNs = 1636362153005256386;
@@ -147,35 +157,70 @@ TEST_F(ESSTimeTest, TestUnitConversion) {
   ASSERT_EQ(prevPulseTime.getTimeLow(), Low);
 }
 
-TEST_F(ESSTimeTest, TestIncreaseOperators) {
+//---------------------------------------------------------------------
+// Test ESSTime class
+//---------------------------------------------------------------------
+
+TEST_F(ESSTimeTest, ESSTimeIncreasedNumberOfTicks) {
   uint32_t high = 1000000000;
   uint32_t increase1000 = 1000;
-  uint32_t lowZero = 0;
+  uint32_t low = 0;
   uint32_t multipleFreqBin = ESSTime::ESSClockFreqHz * 3 + increase1000;
 
   // We can increase with a value less than the frequency
-  ESSTime testTime = ESSTime(high, lowZero);
+  ESSTime testTime = ESSTime(high, low);
   testTime += increase1000;
   EXPECT_EQ(testTime.getTimeHigh(), high);
   EXPECT_EQ(testTime.getTimeLow(), increase1000);
 
+  // EDGE TEST: test increase with the frequency should overflow
+  testTime = ESSTime(high, ESSTime::ESSClockFreqHz - 100);
+  testTime += 110;
+  EXPECT_EQ(testTime.getTimeHigh(), high + 1);
+  EXPECT_EQ(testTime.getTimeLow(), 10);
+
+  // EDGE TEST: test increase with the frequency should overflow
+  testTime = ESSTime(high, low);
+  testTime += static_cast<uint32_t>(ESSTime::ESSClockFreqHz);
+  EXPECT_EQ(testTime.getTimeHigh(), high + 1);
+  EXPECT_EQ(testTime.getTimeLow(), 0);
+
   // We can increase with a multiple of the frequency
-  testTime = ESSTime(high, lowZero);
+  testTime = ESSTime(high, low);
   testTime += multipleFreqBin;
   EXPECT_EQ(testTime.getTimeHigh(), high + 3);
   EXPECT_EQ(testTime.getTimeLow(), 1000);
+}
 
-  // We can increase with frequency multiplyed by the clock tick and not
+TEST_F(ESSTimeTest, ESSTimeIncreasedNanosecDuration) {
+  uint32_t high = 1000000000;
+  uint32_t low = 0;
+
+  // We can increase with 1000 nonsec which will increase only time low
+  // with uint(1000 / clock tick)
+  ESSTime testTime = ESSTime(high, low);
+  testTime += TimeDurationNano(1000);
+  EXPECT_EQ(testTime.getTimeHigh(), high);
+  EXPECT_EQ(testTime.getTimeLow(),
+            static_cast<uint32_t>(1000 / ESSTime::ESSClockTick));
+
+  // EDGE TEST: We can increase with 1s and time low should overflow
+  testTime = ESSTime(high, low); // reset
+  testTime += TimeDurationNano(ESSTime::SecInNs);
+  EXPECT_EQ(testTime.getTimeHigh(), high + 1);
+  EXPECT_EQ(testTime.getTimeLow(), 0);
+
+  // EDGE TEST: We can increase with frequency multiplyed by the clock tick and
   // overflow
-  testTime = ESSTime(high, lowZero);
+  testTime = ESSTime(high, low); // reset
   testTime += TimeDurationNano(
       static_cast<uint64_t>(ESSTime::ESSClockFreqHz * ESSTime::ESSClockTick));
-  EXPECT_EQ(testTime.getTimeHigh(), high);
-  EXPECT_EQ(testTime.getTimeLow(), ESSTime::ESSClockFreqHz);
+  EXPECT_EQ(testTime.getTimeHigh(), high + 1);
+  EXPECT_EQ(testTime.getTimeLow(), 0);
 
-  // We can increase with frequency multiplyed by the clock tick plus the 1 ns
-  // plus the clock tick and it will overflow
-  testTime = ESSTime(high, lowZero);
+  // We can increase with frequency multiplied by the clock tick plus the
+  // tick/ns = 12ns plus the clock tick and it will overflow
+  testTime = ESSTime(high, low); // reset
   testTime += TimeDurationNano(
       static_cast<uint64_t>(ESSTime::ESSClockFreqHz * ESSTime::ESSClockTick) +
       12);

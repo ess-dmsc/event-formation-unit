@@ -29,7 +29,7 @@ void ESSReferenceTime::setMaxTOF(uint64_t NewMaxTOF) {
   MaxTOF = TimeDurationNano(NewMaxTOF);
 }
 
-uint64_t ESSReferenceTime::getTOF(ESSTime eventTime, uint32_t DelayNS) {
+uint64_t ESSReferenceTime::getTOF(const ESSTime eventTime, const uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < TimeInNS) {
     XTRACE(EVENT, WAR,
@@ -46,12 +46,12 @@ uint64_t ESSReferenceTime::getTOF(ESSTime eventTime, uint32_t DelayNS) {
     Stats.TofHigh++;
     return InvalidTOF;
   }
+
   Stats.TofCount++;
   return (timeval - TimeInNS).count();
 }
 
-/// \todo a valid value of TOF = 0 is in
-uint64_t ESSReferenceTime::getPrevTOF(ESSTime eventTime, uint32_t DelayNS) {
+uint64_t ESSReferenceTime::getPrevTOF(const ESSTime eventTime,const uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < PrevTimeInNS) {
     XTRACE(EVENT, WAR,
@@ -72,4 +72,5 @@ uint64_t ESSReferenceTime::getPrevTOF(ESSTime eventTime, uint32_t DelayNS) {
   Stats.PrevTofCount++;
   return (timeval - PrevTimeInNS).count();
 }
+
 } // namespace esstime

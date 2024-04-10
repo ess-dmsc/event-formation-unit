@@ -74,16 +74,16 @@ public:
   /// \brief Adds the given number of ESS clock ticks to the ESSTime object.
   ///
   /// \param ticks The number of ticks to add.
-  inline void operator+=(uint32_t &ticks) {
+  inline void operator+=(const uint32_t &ticks) {
     uint32_t ticksToAdd = 0;
-    if (ticks > ESSClockFreqHz) {
+    if (ticks >= ESSClockFreqHz) {
       TimeHigh += static_cast<uint32_t>(ticks / ESSClockFreqHz);
       ticksToAdd += static_cast<uint32_t>(std::fmod(ticks, ESSClockFreqHz));
     } else {
       ticksToAdd += ticks;
     }
 
-    if (TimeLow + ticksToAdd > ESSClockFreqHz) {
+    if (TimeLow + ticksToAdd >= ESSClockFreqHz) {
       TimeHigh++;
       TimeLow = TimeLow + ticksToAdd - ESSClockFreqHz;
     } else {
@@ -177,7 +177,7 @@ public:
   /// \brief Sets the maximum TOF value.
   ///
   /// \param NewMaxTOF The maximum TOF value to set.
-  void setMaxTOF(uint64_t NewMaxTOF);
+  void setMaxTOF(const uint64_t NewMaxTOF);
 
   /// \brief Returns the reference time as an ESSTime object.
   ///
@@ -215,7 +215,7 @@ public:
   /// \param eventEssTime The current event time.
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated TOF value.
-  uint64_t getTOF(ESSTime eventEssTime, uint32_t DelayNS = 0);
+  uint64_t getTOF(const ESSTime eventEssTime, const uint32_t DelayNS = 0);
 
   /// \brief Calculates the previous time-of-flight (TOF) value based on the
   /// saved reference time and the current event time.
@@ -223,7 +223,7 @@ public:
   /// \param eventEssTime The current event time.
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated previous TOF value.
-  uint64_t getPrevTOF(ESSTime eventTime, uint32_t DelayNS = 0);
+  uint64_t getPrevTOF(const ESSTime eventTime,const uint32_t DelayNS = 0);
 
   struct Stats_t Stats = {};
 
