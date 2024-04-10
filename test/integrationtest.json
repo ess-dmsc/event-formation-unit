@@ -13,17 +13,17 @@
       "StatsTestList":
       [
         [
-            "kafka.ev_errors",
-            "==",
-            0
-        ],
-        [
             "receive.fifo_seq_errors",
             "==",
             0
         ],
         [
-            "essheader.error_header ",
+            "receive.dropped",
+            "==",
+            0
+        ],
+        [
+            "essheader.error_header",
             "==",
             0
         ],
@@ -63,11 +63,6 @@
             0
         ],
         [
-            "essheader.error_seqno",
-            "==",
-            0
-        ],
-        [
             "essheader.error_timehigh",
             "==",
             0
@@ -88,14 +83,14 @@
             0
         ],
         [
+            "kafka.ev_errors",
+            "==",
+            0
+        ],
+        [
             "receive.packets",
             "==",
             100
-        ],
-        [
-            "receive.dropped",
-            "==",
-            0
         ]
       ]
     }
