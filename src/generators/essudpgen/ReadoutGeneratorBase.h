@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <common/system/Socket.h>
 #include <CLI/CLI.hpp>
 #include <common/readout/ess/Parser.h>
+#include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
 #include <common/time/ESSTime.h>
 
@@ -30,9 +30,10 @@ public:
     uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
     uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
     uint64_t PktThrottle{0};         // 0 is fastest
-    uint16_t Frequency{0};           // 0 is time updates for each packet
-    uint8_t headerVersion{1};        // v1 header by default
-    bool Loop{false};                // Keep looping the same file forever
+    /// \todo This should be the default mode and obsoete pe packet generation
+    uint16_t Frequency{0};    // 0 is time updates for each packet
+    uint8_t headerVersion{1}; // v1 header by default
+    bool Loop{false};         // Keep looping the same file forever
 
     bool Randomise{false}; // Randomise header and data
     // Not yet CLI settings

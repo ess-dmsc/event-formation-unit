@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/time/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -81,6 +82,7 @@ void ReadoutGeneratorBase::generateHeader() {
   // Generate pulse time first time
   if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
     pulseTime = ESSTime(time(NULL), 0);
+    readoutTime = pulseTime;
 
     XTRACE(DATA, INF,
            "First pulse time generated, High: %u, Low: %u, periodNs: %u",
@@ -100,9 +102,12 @@ void ReadoutGeneratorBase::generateHeader() {
     }
     // if the requested frequency is 0, generate a new pulse time for each
     // packet and we use fake offset btw. pulse and prevPulse
+    /// \todo This operation mode should be made obsolete as soon as
+    /// infrastructure updated ti use freq mode
   } else {
     prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
     pulseTime = ESSTime(time(NULL), TimeLowOffset);
+    readoutTime = pulseTime + Settings.TicksBtwReadouts;
     XTRACE(DATA, INF,
            "New pulseTime generated for this packet, High: %u, Low: %u",
            pulseTime.getTimeHigh(), pulseTime.getTimeLow());

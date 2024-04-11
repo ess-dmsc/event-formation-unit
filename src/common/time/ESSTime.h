@@ -71,6 +71,17 @@ public:
     this->operator+=(ticksToAdd);
   }
 
+  /// \brief Overloads the '+' operator to add a specified number of ticks to an
+  /// ESSTime object.
+  ///
+  /// \param ticks The number of ticks to add.
+  /// \return A new ESSTime object that represents the result of the addition.
+  inline ESSTime operator+(const uint32_t &ticks) {
+    ESSTime result = *this;
+    result += ticks;
+    return result;
+  }
+
   /// \brief Adds the given number of ESS clock ticks to the ESSTime object.
   ///
   /// \param ticks The number of ticks to add.
