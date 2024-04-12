@@ -15,7 +15,7 @@
 namespace Dream {
 class DreamReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  DreamReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {}
 
   // Physical Ring and FEN ids for detector elements
   // Should match the json config file

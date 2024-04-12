@@ -18,8 +18,6 @@ int main(int argc, char *argv[]) {
   LokiGen.argParse(argc, argv);
   LokiGen.main();
 
-  LokiGen.Settings.Type = ESSReadout::Parser::DetectorType::LOKI;
-
   LokiGen.transmitLoop();
 
   return 0;

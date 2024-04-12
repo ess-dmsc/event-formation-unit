@@ -18,7 +18,7 @@ namespace Trex {
   
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::TREX) {}
 
 protected:
   void generateData() override;

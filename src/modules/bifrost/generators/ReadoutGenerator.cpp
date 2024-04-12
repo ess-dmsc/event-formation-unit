@@ -9,6 +9,7 @@
 
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/Parser.h"
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <fcntl.h>
@@ -16,7 +17,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
+ReadoutGenerator::ReadoutGenerator()
+    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::BIFROST) {
   app.add_option("-n, --data", bifrostSettings.FilePath,
                  "Record data file to read from");
 }
@@ -68,7 +70,7 @@ void ReadoutGenerator::generateData() {
   dataPtr += HeaderSize;
 
   while (((res = readReadout(DatReadout)) > 0) &&
-         (SentReadouts < Settings.NumReadouts)) {
+         (SentReadouts < numberOfReadouts)) {
 
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = 0;
@@ -83,7 +85,7 @@ void ReadoutGenerator::generateData() {
     dataPtr += ReadoutDataSize;
 
     // Increment time for the next readout
-    nextReadoutTime();
+    addTicksBtwReadoutsToReadoutTime();
 
     SentReadouts++;
   }

@@ -35,7 +35,7 @@ void LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", getReadoutTimeLow(),
            getReadoutTimeHigh());
@@ -103,12 +103,12 @@ void LETReadoutGenerator::generateData() {
            XLocal, YLocal);
 
     if ((GlobalReadout % 2) == 0) {
-      nextReadoutTime();
+      addTicksBtwReadoutsToReadoutTime();
       XTRACE(DATA, DEB,
              "Ticking between readouts for same event, Time Low = %u",
              getReadoutTimeLow());
     } else {
-      nextEventTime();
+      addTickBtwEventsToReadoutTime();
       XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u",
              getReadoutTimeLow());
     }

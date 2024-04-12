@@ -17,7 +17,7 @@ namespace Freia {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {}
 
 protected:
   void generateData() override;

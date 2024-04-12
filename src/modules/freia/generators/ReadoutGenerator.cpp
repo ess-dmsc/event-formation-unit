@@ -22,7 +22,7 @@ void ReadoutGenerator::generateData() {
   double XChannel{32};
   double YChannel{32};
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
@@ -46,9 +46,9 @@ void ReadoutGenerator::generateData() {
 
     DP += ReadoutDataSize;
     if ((Readout % 2) == 0) {
-      nextReadoutTime();
+      addTicksBtwReadoutsToReadoutTime();
     } else {
-      nextEventTime();
+      addTickBtwEventsToReadoutTime();
     }
   }
 }

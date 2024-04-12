@@ -12,9 +12,9 @@
 #pragma once
 
 #include <cbm/CbmTypes.h>
+#include <cbm/geometry/Parser.h>
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <cbm/geometry/Parser.h>
 
 namespace cbm {
 

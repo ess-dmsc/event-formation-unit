@@ -18,7 +18,8 @@ namespace Nmx {
 
 class SmileReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  SmileReadoutGenerator()
+      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
 
 protected:
   void generateData() override;

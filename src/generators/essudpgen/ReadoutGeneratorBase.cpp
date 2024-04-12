@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/Parser.h"
 #include "common/time/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
@@ -19,7 +20,7 @@ using namespace ESSReadout;
 using namespace efutils;
 
 ///\brief Constructor initialize the generator app
-ReadoutGeneratorBase::ReadoutGeneratorBase() {
+ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
@@ -45,6 +46,8 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_flag("-m, -r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+
+  Settings.Type = Type;
 }
 
 ///\brief
@@ -82,7 +85,7 @@ void ReadoutGeneratorBase::generateHeader() {
   // Generate pulse time first time
   if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
     pulseTime = ESSTime(time(NULL), 0);
-    readoutTime = pulseTime;
+    readoutTime = pulseTime + Settings.TicksBtwReadouts;
 
     XTRACE(DATA, INF,
            "First pulse time generated, High: %u, Low: %u, periodNs: %u",

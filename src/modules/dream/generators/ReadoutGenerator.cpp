@@ -86,13 +86,13 @@ void DreamReadoutGenerator::generateData() {
   uint32_t Readouts{0};
   DataParser::DreamReadout DR;
 
-  while (Readouts < Settings.NumReadouts) {
+  while (Readouts < numberOfReadouts) {
     getRandomReadout(DR);
     memcpy(DP, &DR, ReadoutDataSize);
     DP += ReadoutDataSize;
 
     // Increment the time for next readout
-    nextReadoutTime();
+    addTickBtwEventsToReadoutTime();
 
     Readouts++;
   }

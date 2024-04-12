@@ -30,7 +30,7 @@ void SmileReadoutGenerator::generateData() {
   std::map<uint8_t, uint8_t> XPanelToFEN{{0, 0}, {1, 1}, {2, 5}, {3, 4}};
   std::map<uint8_t, uint8_t> YPanelToFEN{{0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
@@ -94,9 +94,9 @@ void SmileReadoutGenerator::generateData() {
     /// \todo work out why updating TimeLow is done this way, and if it applies
     /// to NMX
     if ((Readout % 2) == 0) {
-      nextReadoutTime();
+      addTicksBtwReadoutsToReadoutTime();
     } else {
-      nextEventTime();
+      addTickBtwEventsToReadoutTime();
     }
 
     XTRACE(DATA, DEB,

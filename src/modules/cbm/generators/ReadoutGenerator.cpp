@@ -17,7 +17,7 @@
 
 namespace cbm {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
   app.add_option("--monitor_type", cbmSettings.monitorType,
                  "Beam monitor type (TTL, N2GEM, IBM, etc)");
 }
@@ -56,7 +56,7 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
     dataPkt->NPos = 0;
 
     // Increment time for next readout and adjust high time if needed
-    nextReadoutTime();
+    addTicksBtwReadoutsToReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
@@ -68,7 +68,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   uint32_t dataValue = 100000;
 
-  for (uint32_t Readout = 0; Readout <= Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout <= numberOfReadouts; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -87,15 +87,15 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->ADC = 0;
     dataPkt->NPos = Fuzzer.randomInterval(1, 1000) + dataValue;
 
-    if (Readout > Settings.NumReadouts / 4 &&
-        Readout < 3 * Settings.NumReadouts / 4) {
+    if (Readout > numberOfReadouts / 4 &&
+        Readout < 3 * numberOfReadouts / 4) {
       dataValue += 10000;
     } else {
       dataValue = 0;
     }
 
     // Increment time for next readout
-    nextReadoutTime();
+    addTicksBtwReadoutsToReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);

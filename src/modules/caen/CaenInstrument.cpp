@@ -138,12 +138,11 @@ void CaenInstrument::processReadouts() {
     uint64_t TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
-    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
+    XTRACE(DATA, DEB,
+           "PulseTime     %" PRIu64 ", Previous PulseTime: %" PRIu64
+           ", Calculated ToF %" PRIu64 " ",
            ESSReadoutParser.Packet.Time.getRefTimeUInt64(),
-           ESSReadoutParser.Packet.Time.getRefTimeNS().count());
-    XTRACE(DATA, DEB, "PrevPulseTime %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           ESSReadoutParser.Packet.Time.getPrevRefTimeUInt64(),
-           ESSReadoutParser.Packet.Time.getPrevRefTimeNS().count());
+           ESSReadoutParser.Packet.Time.getPrevRefTimeUInt64(), TimeOfFlight);
 
     if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");

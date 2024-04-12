@@ -41,7 +41,7 @@ public:
   } Settings;
 
   /// \brief
-  ReadoutGeneratorBase();
+  ReadoutGeneratorBase(ESSReadout::Parser::DetectorType);
 
   /// \brief create a packet ready for UDP transmission, calls private methods
   /// \param Type Data type as specified in the ESS Readout ICD
@@ -82,11 +82,11 @@ protected:
 
   /// \brief Increment the readout time with ticks btw. readouts according to
   /// settings
-  inline void nextReadoutTime() { readoutTime += Settings.TicksBtwReadouts; }
+  inline void addTicksBtwReadoutsToReadoutTime() { readoutTime += Settings.TicksBtwReadouts; }
 
   /// \brief Increment the readout time with btw. events acording to
   /// settings
-  inline void nextEventTime() { readoutTime += Settings.TicksBtwEvents; }
+  inline void addTickBtwEventsToReadoutTime() { readoutTime += Settings.TicksBtwEvents; }
 
   // Get the value of readoutTimeHigh
   uint32_t getReadoutTimeHigh() const { return readoutTime.getTimeHigh(); }

@@ -30,7 +30,7 @@ void LokiReadoutGenerator::generateData() {
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     auto ReadoutData = (DataParser::CaenReadout *)DP;
 
@@ -55,7 +55,7 @@ void LokiReadoutGenerator::generateData() {
     DP += LokiDataSize;
 
     // increment redout time for next redout
-    nextReadoutTime();
+    addTicksBtwReadoutsToReadoutTime();
   }
 }
 

@@ -18,11 +18,10 @@ namespace Nmx {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
 
 protected:
   void generateData() override;
-
   int64_t Number{0};
 };
 

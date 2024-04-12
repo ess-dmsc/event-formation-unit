@@ -15,10 +15,11 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Nmx {
-  
+
 class MultiHitReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  MultiHitReadoutGenerator()
+      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
 
 protected:
   void generateData() override;
