@@ -34,6 +34,9 @@ public:
     bool Loop{false};                // Keep looping the same file forever
 
     bool Randomise{false}; // Randomise header and data
+    // free to use parameters for individual generators
+    int FreeParam1{-1};
+    int FreeParam2{-1};
     // Not yet CLI settings
     uint32_t KernelTxBufferSize{1000000};
   } Settings;
