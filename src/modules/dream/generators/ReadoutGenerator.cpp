@@ -13,27 +13,34 @@
 
 namespace Dream {
 
-///\brief until ICD is reviewed this should be
-/// considered completely wrong
-/// Note to self RING is PHYSICAL RING!!!
+///\brief ICD has been reviewed, but it would be surprising
+// if this was 100% correct
 void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
-
   DR.DataLength = ReadoutDataSize;
   DR.TimeHigh = PulseTimeHigh;
   DR.TimeLow = PulseTimeLow;
   DR.OM = 0;
   DR.UnitId = 0;
 
+
   uint8_t DetectorSegment = Fuzzer.random8() % 5;
-  // DetectorSegment = 3;
+
   switch (DetectorSegment) {
   case 0: { // BW EndCap
     uint8_t Sector = Fuzzer.random8() % 11;
+    DR.UnitId = 6;                                        // SUMO6
+    if (Settings.FreeParam1 != -1) {
+        Sector = Settings.FreeParam1;
+    }
+    if (Settings.FreeParam2 != -1) {
+        DR.UnitId = Settings.FreeParam2;
+    }
+
     DR.FiberId = BWES6FiberId[Sector];
     DR.FENId = BWES6FENId[Sector];
     DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
     DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-    DR.UnitId = 6;                                        // SUMO6
+
   } break;
 
   case 1: { // FW EndCap
@@ -46,19 +53,20 @@ void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
   } break;
 
   case 2: { // Mantle
-    uint8_t Sector = Fuzzer.random8() % 30;
+    uint8_t Sector = Fuzzer.random8() % 10;
     DR.FiberId = MNTLFiberId[Sector];
     DR.FENId = MNTLFENId[Sector];
-    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)127);
+    DR.Anode = Fuzzer.random8() & 0x7f;
     DR.Cathode = Fuzzer.random8();
   } break;
 
   case 3: { // HR
+    //uint8_t Sector = Fuzzer.random8() % 17;
     uint8_t Sector = Fuzzer.random8() % 17;
     uint8_t Instance = Fuzzer.random8() % 2;
     DR.FiberId = HRFiberId[Sector];
     DR.FENId = HRFENId[Sector];
-    DR.Anode = (Fuzzer.random8() & 0x7) * 32;
+    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
     DR.Cathode = Fuzzer.random8() & 0x3f;
     DR.UnitId = Instance;
   } break;
@@ -68,7 +76,7 @@ void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
     uint8_t Instance = Fuzzer.random8() % 2;
     DR.FiberId = SANSFiberId[Sector];
     DR.FENId = SANSFENId[Sector];
-    DR.Anode = Fuzzer.random8();
+    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
     DR.Cathode = Fuzzer.random8() & 0x3f;
     DR.UnitId = Instance;
   } break;
