@@ -44,6 +44,10 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
   app.add_flag("-m, -r, --random", Settings.Randomise,
+  app.add_option("--p1", Settings.FreeParam1,
+                "Free parameter for custom purposes");
+  app.add_option("--p2", Settings.FreeParam2,
+                "Free parameter for custom purposes");
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
