@@ -46,7 +46,7 @@ protected:
   const uint32_t TimeToFirstReadout{1000};
 
   ///\brief
-  void getRandomReadout(DataParser::DreamReadout &DR);
+  bool getRandomReadout(DataParser::DreamReadout &DR);
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP

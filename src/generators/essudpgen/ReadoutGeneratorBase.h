@@ -37,6 +37,7 @@ public:
     // free to use parameters for individual generators
     int FreeParam1{-1};
     int FreeParam2{-1};
+    int FreeParam3{-1};
     // Not yet CLI settings
     uint32_t KernelTxBufferSize{1000000};
   } Settings;

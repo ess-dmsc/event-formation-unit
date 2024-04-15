@@ -43,6 +43,8 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
                 "Free parameter for custom purposes");
   app.add_option("--p2", Settings.FreeParam2,
                 "Free parameter for custom purposes");
+  app.add_option("--p3", Settings.FreeParam3,
+                "Free parameter for custom purposes");
   app.add_flag("-m, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
