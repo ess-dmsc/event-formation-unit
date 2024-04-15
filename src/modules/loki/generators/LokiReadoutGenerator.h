@@ -17,11 +17,11 @@
 namespace Caen {
 class LokiReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  LokiReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::LOKI) {}
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
 };
+
 } // namespace Caen
 // GCOVR_EXCL_STOP

@@ -18,8 +18,6 @@ int main(int argc, char *argv[]) {
   FreiaGen.argParse(argc, argv);
   FreiaGen.main();
 
-  FreiaGen.Settings.Type = ESSReadout::Parser::DetectorType::FREIA;
-
   FreiaGen.transmitLoop();
 
   return 0;

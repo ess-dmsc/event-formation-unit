@@ -8,7 +8,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Readout.h>
@@ -81,7 +80,7 @@ void FreiaInstrument::processReadouts(void) {
   assert(Serializer != nullptr);
   Serializer->checkAndSetReferenceTime(
       /// \todo sometimes PrevPulseTime maybe?
-      ESSReadoutParser.Packet.Time.TimeInNS);
+      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
 
   for (const auto &readout : VMMParser.Result) {
 
@@ -132,8 +131,7 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-    uint64_t TimeNS =
-        ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+    uint64_t TimeNS = ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS,
            TDCCorr);
@@ -180,7 +178,7 @@ void FreiaInstrument::processReadouts(void) {
 }
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
   //XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -227,15 +225,15 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
-           TimeRef.TimeInNS);
+           TimeRef.getRefTimeUInt64());
 
-    if (TimeRef.TimeInNS > EventTime) {
+    if (TimeRef.getRefTimeUInt64() > EventTime) {
       XTRACE(EVENT, WAR, "Negative TOF!");
       counters.TimeErrors++;
       continue;
     }
 
-    uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
+    uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
     if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
       XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);

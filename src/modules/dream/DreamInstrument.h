@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
@@ -49,7 +48,7 @@ public:
   Config DreamConfiguration;
   ESSReadout::Parser ESSReadoutParser;
   DataParser DreamParser{counters};
-  ESSReadout::ESSTime Time;
+  ESSReadout::ESSReferenceTime Time;
   ESSReadout::Parser::DetectorType Type;
   EV44Serializer *Serializer;
   DreamGeometry DreamGeom;

@@ -7,17 +7,20 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/Parser.h"
+#include "common/time/ESSTime.h"
 #include <common/debug/Trace.h>
-#include <cstdio>
+#include <common/utils/EfuUtils.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
+using namespace efutils;
 
 ///\brief Constructor initialize the generator app
-ReadoutGeneratorBase::ReadoutGeneratorBase() {
+ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
@@ -27,10 +30,11 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-  app.add_option("-r, --rings", Settings.NFibers,
-                 "Number of Fibers used in data header (obsolete)");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
+  app.add_option("-q, --frequency", Settings.Frequency,
+                 "Pulse frequency in Hz. (default 0: refreshed for "
+                 "each packet)");
   app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
                  "Delay (ticks) between events");
   app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
@@ -39,13 +43,15 @@ ReadoutGeneratorBase::ReadoutGeneratorBase() {
                  "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
-  app.add_option("--p1", Settings.FreeParam1,
-                "Free parameter for custom purposes");
-  app.add_option("--p2", Settings.FreeParam2,
-                "Free parameter for custom purposes");
-  app.add_flag("-m, --random", Settings.Randomise,
+  app.add_flag("-r, --random", Settings.Randomise,
                "Randomise header and data fields");
+  app.add_option("--p1", Settings.FreeParam1,
+                 "Free parameter for custom purposes");
+  app.add_option("--p2", Settings.FreeParam2,
+                 "Free parameter for custom purposes");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+
+  Settings.Type = Type;
 }
 
 ///\brief
@@ -58,28 +64,9 @@ uint16_t ReadoutGeneratorBase::makePacket() {
 }
 
 void ReadoutGeneratorBase::generateHeader() {
-  // Parse the header version
-  switch (Settings.headerVersion) {
-  case Parser::HeaderVersion::V0:
-    headerVersion = Parser::HeaderVersion::V0;
-    HeaderSize = sizeof(Parser::PacketHeaderV0);
-    break;
-  case Parser::HeaderVersion::V1:
-    headerVersion = Parser::HeaderVersion::V1;
-    HeaderSize = sizeof(Parser::PacketHeaderV1);
-    break;
-  default:
-    throw std::runtime_error("Incorrect header version");
-  }
 
-  if (headerVersion == Parser::HeaderVersion::V0) {
-    assert(HeaderSize == 30);
-  } else {
-    assert(HeaderSize == 32);
-  }
-
-  DataSize = HeaderSize + Settings.NumReadouts * ReadoutDataSize;
-  if (DataSize >= BufferSize) {
+  DataSize = HeaderSize + numberOfReadouts * ReadoutDataSize;
+  if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
 
@@ -99,21 +86,52 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
 
-  // time current time for pulse time high
-  PulseTimeHigh = time(NULL);
+  // Generate pulse time first time
+  if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
+    pulseTime = ESSTime(time(NULL), 0);
+    readoutTime = pulseTime + Settings.TicksBtwReadouts;
 
-  Header->PulseHigh = PulseTimeHigh;
-  Header->PulseLow = TimeLowOffset;
-  Header->PrevPulseHigh = PulseTimeHigh;
-  Header->PrevPulseLow = PrevTimeLowOffset;
+    XTRACE(DATA, INF,
+           "First pulse time generated, High: %u, Low: %u, periodNs: %u",
+           pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
+  }
+
+  if (pulseFrequencyNs != TimeDurationNano(0)) {
+    // if the readout time is greater than the pulse time, update generate new
+    // pulse time for the header
+    if (readoutTime.toNS() >= pulseTime.toNS() + pulseFrequencyNs) {
+      prevPulseTime = pulseTime;
+      pulseTime += pulseFrequencyNs;
+      XTRACE(DATA, INF,
+             "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
+             pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
+             pulseFrequencyNs.count());
+    }
+    // if the requested frequency is 0, generate a new pulse time for each
+    // packet and we use fake offset btw. pulse and prevPulse
+    /// \todo This operation mode should be made obsolete as soon as
+    /// infrastructure updated ti use freq mode
+  } else {
+    prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
+    pulseTime = ESSTime(time(NULL), TimeLowOffset);
+    readoutTime = pulseTime + Settings.TicksBtwReadouts;
+    XTRACE(DATA, INF,
+           "New pulseTime generated for this packet, High: %u, Low: %u",
+           pulseTime.getTimeHigh(), pulseTime.getTimeLow());
+  }
+
+  Header->PulseHigh = pulseTime.getTimeHigh();
+  Header->PulseLow = pulseTime.getTimeLow();
+  Header->PrevPulseHigh = prevPulseTime.getTimeHigh();
+  Header->PrevPulseLow = prevPulseTime.getTimeLow();
 
   if (headerVersion == Parser::HeaderVersion::V1) {
     auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
     HeaderV1->CMACPadd = 0;
   }
 
-  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u", PulseTimeHigh,
-         TimeLowOffset);
+  XTRACE(DATA, DEB, "new packet header, time high %u, time low %u",
+         Header->PulseHigh, Header->PulseLow);
 }
 
 void ReadoutGeneratorBase::finishPacket() {
@@ -172,6 +190,34 @@ void ReadoutGeneratorBase::main() {
   DataSource = new UDPTransmitter(local, remote);
   DataSource->setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource->printBufferSizes();
+
+  // Parse the header version
+  switch (Settings.headerVersion) {
+  case Parser::HeaderVersion::V0:
+    headerVersion = Parser::HeaderVersion::V0;
+    HeaderSize = sizeof(Parser::PacketHeaderV0);
+    break;
+  case Parser::HeaderVersion::V1:
+    headerVersion = Parser::HeaderVersion::V1;
+    HeaderSize = sizeof(Parser::PacketHeaderV1);
+    break;
+  default:
+    throw std::runtime_error("Incorrect header version");
+  }
+
+  if (headerVersion == Parser::HeaderVersion::V0) {
+    assert(HeaderSize == 30);
+  } else {
+    assert(HeaderSize == 32);
+  }
+
+  if (Settings.Frequency != 0) {
+    pulseFrequencyNs = efutils::hzToNanoseconds(Settings.Frequency);
+    numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
+    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
+  } else {
+    numberOfReadouts = Settings.NumReadouts;
+  }
 }
 
 // GCOVR_EXCL_STOP

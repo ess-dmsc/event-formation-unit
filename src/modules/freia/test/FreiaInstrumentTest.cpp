@@ -10,10 +10,9 @@
 #include <common/testutils/TestBase.h>
 #include <freia/FreiaInstrument.h>
 #include <common/testutils/HeaderFactory.h>
-#include <stdio.h>
-#include <string.h>
 
 using namespace Freia;
+using namespace ESSReadout;
 // clang-format off
 
 std::string CalibFile{"deleteme_freia_instr_calib.json"};
@@ -140,8 +139,8 @@ protected:
     Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0, 0);
-    Packet.Time.setPrevReference(0, 0);
+    Packet.Time.setReference(ESSTime(0, 0));
+    Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
 
@@ -245,7 +244,7 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
   auto &Packet = freia->ESSReadoutParser.Packet;
   makeHeader(Packet, GoodEvent);
 
-  Packet.Time.setReference(200, 0);
+  Packet.Time.setReference(ESSTime(200, 0));
   auto Res = freia->VMMParser.parse(Packet);
   counters.VMMStats = freia->VMMParser.Stats;
 

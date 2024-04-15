@@ -18,8 +18,6 @@ int main(int argc, char *argv[]) {
   NmxGen.argParse(argc, argv);
   NmxGen.main();
 
-  NmxGen.Settings.Type = ESSReadout::Parser::DetectorType::NMX;
-
   NmxGen.transmitLoop();
 
   return 0;

@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <CbmTypes.h>
-#include <assert.h>
 #include <cbm/CbmInstrument.h>
 #include <cbm/geometry/Parser.h>
 #include <common/debug/Log.h>
@@ -35,14 +34,14 @@ CbmInstrument::CbmInstrument(struct Counters &counters, BaseSettings &settings)
 }
 
 void CbmInstrument::processMonitorReadouts(void) {
-  ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
   // All readouts are now potentially valid, negative TOF is not
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
   for (EV44Serializer *Serializer : SerializersPtr) {
     counters.TxBytes += Serializer->checkAndSetReferenceTime(
-        ESSReadoutParser.Packet.Time.TimeInNS);
+        ESSReadoutParser.Packet.Time.getRefTimeUInt64());
     /// \todo sometimes PrevPulseTime maybe?
   }
 
@@ -86,16 +85,16 @@ void CbmInstrument::processMonitorReadouts(void) {
     }
 
     uint64_t TimeNS =
-        ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
-    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "", TimeRef.PrevTimeInNS);
-    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "", TimeRef.TimeInNS);
+        ESSReadoutParser.Packet.Time.getRefTimeUInt64();
+    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "", TimeRef.getPrevRefTimeUInt64());
+    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "", TimeRef.getRefTimeUInt64());
     XTRACE(DATA, DEB, "Time of readout  %" PRIi64 "", TimeNS);
 
     uint64_t TimeOfFlight = 0;
-    if (TimeRef.TimeInNS > TimeNS) {
-      TimeOfFlight = TimeNS - TimeRef.PrevTimeInNS;
+    if (TimeRef.getRefTimeUInt64() > TimeNS) {
+      TimeOfFlight = TimeNS - TimeRef.getPrevRefTimeUInt64();
     } else {
-      TimeOfFlight = TimeNS - TimeRef.TimeInNS;
+      TimeOfFlight = TimeNS - TimeRef.getRefTimeUInt64();
     }
 
     if (TimeOfFlight > Conf.Parms.MaxTOFNS) {

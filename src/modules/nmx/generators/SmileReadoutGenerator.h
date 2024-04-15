@@ -15,15 +15,18 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Nmx {
+
 class SmileReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  SmileReadoutGenerator()
+      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+
   int64_t Number{0};
 };
+
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

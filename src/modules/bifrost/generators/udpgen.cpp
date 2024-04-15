@@ -21,8 +21,6 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  BifrostGen.Settings.Type = ESSReadout::Parser::DetectorType::BIFROST;
-
   BifrostGen.main();
   BifrostGen.transmitLoop();
 

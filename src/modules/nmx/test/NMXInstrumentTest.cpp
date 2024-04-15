@@ -15,7 +15,7 @@
 #include <string.h>
 
 using namespace Nmx;
-
+using namespace ESSReadout;
 // clang-format off
 std::string BadConfigFile{"deleteme_nmx_instr_config_bad.json"};
 std::string BadConfigStr = R"(
@@ -417,13 +417,13 @@ protected:
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+  void makeHeader(Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
     Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
-    Packet.Time.setReference(0, 0);
-    Packet.Time.setPrevReference(0, 0);
+    Packet.Time.setReference(ESSTime(0, 0));
+    Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
 
@@ -654,7 +654,7 @@ TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
 TEST_F(NMXInstrumentTest, NegativeTOF) {
   auto &Packet = nmx->ESSReadoutParser.Packet;
   makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
-  Packet.Time.setReference(200, 0);
+  Packet.Time.setReference(ESSTime(200, 0));
 
   auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
   counters.VMMStats = nmx->VMMParser.Stats;

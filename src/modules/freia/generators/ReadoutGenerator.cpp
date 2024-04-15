@@ -9,16 +9,12 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <cassert>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <math.h>
-#include <modules/freia/generators/ReadoutGenerator.h>
-#include <stdexcept>
-#include <time.h>
 
-void Freia::ReadoutGenerator::generateData() {
+#include <modules/freia/generators/ReadoutGenerator.h>
+
+namespace Freia {
+
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -26,16 +22,15 @@ void Freia::ReadoutGenerator::generateData() {
   double XChannel{32};
   double YChannel{32};
 
-  uint32_t TimeLow = TimeLowOffset + TimeToFirstReadout;
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = PulseTimeHigh;
-    ReadoutData->TimeLow = TimeLow;
+    ReadoutData->TimeHigh = getReadoutTimeHigh();
+    ReadoutData->TimeLow = getReadoutTimeLow();
     ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;
 
@@ -51,11 +46,13 @@ void Freia::ReadoutGenerator::generateData() {
 
     DP += ReadoutDataSize;
     if ((Readout % 2) == 0) {
-      TimeLow += Settings.TicksBtwReadouts;
+      addTicksBtwReadoutsToReadoutTime();
     } else {
-      TimeLow += Settings.TicksBtwEvents;
+      addTickBtwEventsToReadoutTime();
     }
   }
 }
+
+} // namespace Freia
 
 // GCOVR_EXCL_STOP

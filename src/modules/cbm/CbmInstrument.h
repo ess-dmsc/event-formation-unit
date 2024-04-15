@@ -12,7 +12,6 @@
 
 #include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
-#include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <cbm/Counters.h>
 #include <cbm/CbmBase.h>

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2019-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,7 +11,6 @@
 
 #include <cinttypes>
 #include <common/kafka/Producer.h>
-#include <common/readout/ess/Parser.h>
 #include <modules/caen/geometry/CDCalibration.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
@@ -42,7 +41,7 @@ struct CaenCounters {
   int64_t EventsUdder;
 
   // Time
-  struct ESSReadout::ESSTime::Stats_t TimeStats;
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;

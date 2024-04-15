@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,7 +8,7 @@
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
-#include "ev44_events_generated.h"
+#include <ev44_events_generated.h>
 #include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/system/gccintel.h>

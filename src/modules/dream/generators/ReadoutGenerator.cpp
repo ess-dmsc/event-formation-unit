@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <algorithm>
 #include <modules/dream/generators/ReadoutGenerator.h>
 
 namespace Dream {
@@ -17,8 +16,8 @@ namespace Dream {
 // if this was 100% correct
 void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
   DR.DataLength = ReadoutDataSize;
-  DR.TimeHigh = PulseTimeHigh;
-  DR.TimeLow = PulseTimeLow;
+  DR.TimeHigh = getReadoutTimeHigh();
+  DR.TimeLow = getReadoutTimeLow();
   DR.OM = 0;
   DR.UnitId = 0;
 
@@ -95,20 +94,17 @@ void DreamReadoutGenerator::generateData() {
   uint32_t Readouts{0};
   DataParser::DreamReadout DR;
 
-  while (Readouts < Settings.NumReadouts) {
+  while (Readouts < numberOfReadouts) {
     getRandomReadout(DR);
     memcpy(DP, &DR, ReadoutDataSize);
     DP += ReadoutDataSize;
 
-    // All readouts are events for DREAM
-    PulseTimeLow += Settings.TicksBtwEvents;
+    // Increment the time for next readout
+    addTickBtwEventsToReadoutTime();
 
-    if (PulseTimeLow >= 88052499) {
-      PulseTimeLow -= 88052499;
-      PulseTimeHigh += 1;
-    }
     Readouts++;
   }
 }
+
 } // namespace Dream
 // GCOVR_EXCL_STOP

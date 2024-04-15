@@ -23,7 +23,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Trex::LETReadoutGenerator::generateData() {
+namespace Trex {
+
+void LETReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -33,17 +35,18 @@ void Trex::LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", PulseTimeLow, PulseTimeHigh);
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", getReadoutTimeLow(),
+           getReadoutTimeHigh());
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     // TREX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = PulseTimeHigh;
-    ReadoutData->TimeLow = PulseTimeLow;
+    ReadoutData->TimeHigh = getReadoutTimeHigh();
+    ReadoutData->TimeLow = getReadoutTimeLow();
     ReadoutData->OTADC = 1000;
 
     // TREX is 16 wires deep in Z direction
@@ -100,21 +103,22 @@ void Trex::LETReadoutGenerator::generateData() {
            XLocal, YLocal);
 
     if ((GlobalReadout % 2) == 0) {
-      PulseTimeLow += Settings.TicksBtwReadouts;
+      addTicksBtwReadoutsToReadoutTime();
       XTRACE(DATA, DEB,
-             "Ticking between readouts for same event, Time Low = %u", PulseTimeLow);
+             "Ticking between readouts for same event, Time Low = %u",
+             getReadoutTimeLow());
     } else {
-      PulseTimeLow += Settings.TicksBtwEvents;
+      addTickBtwEventsToReadoutTime();
       XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u",
-             PulseTimeLow);
+             getReadoutTimeLow());
     }
-    if (PulseTimeLow >= 88052499) {
-      PulseTimeLow -= 88052499;
-      PulseTimeHigh += 1;
-    }
+
     GlobalReadout++;
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", PulseTimeLow, PulseTimeHigh);
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", getReadoutTimeLow(),
+           getReadoutTimeHigh());
   }
 }
+
+} // namespace Trex
 
 // GCOVR_EXCL_STOP

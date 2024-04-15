@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/matching/GapMatcher.h>
@@ -47,7 +46,7 @@ struct Counters {
 
   int64_t PixelErrors;
   int64_t TimeErrors;
-  struct ESSReadout::ESSTime::Stats_t TimeStats;
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
   int64_t TxBytes;
   int64_t TxRawReadoutPackets;
 

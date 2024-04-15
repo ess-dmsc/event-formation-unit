@@ -1,4 +1,4 @@
-// Copyright (C) 2017-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2017-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,8 +21,8 @@ protected:
   void SetUp() override {
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
-    PacketData.Time.setReference(0, 0);
-    PacketData.Time.setPrevReference(0, 0);
+    PacketData.Time.setReference(ESSTime(0, 0));
+    PacketData.Time.setPrevReference(ESSTime(0, 0));
   }
   void TearDown() override {}
 
@@ -131,8 +131,8 @@ TEST_F(VMM3ParserTest, ErrorChannel) {
 // Testing invalid TOF
 TEST_F(VMM3ParserTest, ErrorTOF) {
   makeHeader(TOFError);
-  PacketData.Time.setReference(1, 0);
-  PacketData.Time.setPrevReference(1, 0);
+  PacketData.Time.setReference(ESSTime(1, 0));
+  PacketData.Time.setPrevReference(ESSTime(1, 0));
   ASSERT_EQ(VMMParser.Stats.Readouts, 0);
   ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 0);
 

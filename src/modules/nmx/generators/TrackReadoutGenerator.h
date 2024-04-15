@@ -15,16 +15,19 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Nmx {
+
 class TrackReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  TrackReadoutGenerator()
+      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+
   uint8_t ReadoutsPerEvent{8};
   int64_t Number{0};
 };
+
 } // namespace Nmx
 
 // GCOVR_EXCL_STOP

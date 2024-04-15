@@ -30,15 +30,15 @@ void LokiReadoutGenerator::generateData() {
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);
 
-  for (uint32_t Readout = 0; Readout < Settings.NumReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     auto ReadoutData = (DataParser::CaenReadout *)DP;
 
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
 
-    ReadoutData->TimeHigh = PulseTimeHigh;
-    ReadoutData->TimeLow = PulseTimeLow;
+    ReadoutData->TimeHigh = getReadoutTimeHigh();
+    ReadoutData->TimeLow = getReadoutTimeLow();
 
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;
@@ -53,16 +53,11 @@ void LokiReadoutGenerator::generateData() {
     //        ReadoutData->FiberId,
     //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
-    ///
 
-    // All readouts are events for loki
-    PulseTimeLow += Settings.TicksBtwEvents;
-
-    if (PulseTimeLow >= 88052499) {
-      PulseTimeLow -= 88052499;
-      PulseTimeHigh += 1;
-    }
+    // increment redout time for next redout
+    addTicksBtwReadoutsToReadoutTime();
   }
 }
+
 } // namespace Caen
 // GCOVR_EXCL_STOP

@@ -20,8 +20,6 @@ int main(int argc, char *argv[]) {
   CbmGen.argParse(argc, argv);
   CbmGen.main();
 
-  CbmGen.Settings.Type = ESSReadout::Parser::DetectorType::CBM;
-
   CbmGen.transmitLoop();
 
   return 0;
