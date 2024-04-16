@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,16 +9,16 @@
 
 // GCOVR_EXCL_START
 
+#include "common/readout/ess/Parser.h"
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <fcntl.h>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <stdexcept>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
+ReadoutGenerator::ReadoutGenerator()
+    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::BIFROST) {
   app.add_option("-n, --data", bifrostSettings.FilePath,
                  "Record data file to read from");
 }
@@ -64,35 +64,28 @@ void ReadoutGenerator::generateData() {
 
   memset(&dataPkt, 0, sizeof(dataPkt));
 
-  // Initialize data time high and low from header
-  dataPkt.TimeHigh = PulseTimeHigh;
-  dataPkt.TimeLow = PulseTimeLow;
-
   int res = 0;
 
   auto dataPtr = (uint8_t *)Buffer;
   dataPtr += HeaderSize;
 
   while (((res = readReadout(DatReadout)) > 0) &&
-         (SentReadouts < Settings.NumReadouts)) {
+         (SentReadouts < numberOfReadouts)) {
 
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = 0;
     dataPkt.DataLength = ReadoutDataSize;
-
+    dataPkt.TimeHigh = getReadoutTimeHigh();
+    dataPkt.TimeLow = getReadoutTimeLow();
     dataPkt.Group = DatReadout.tube;
     dataPkt.AmpA = DatReadout.ampl_a;
     dataPkt.AmpB = DatReadout.ampl_b;
 
-    dataPkt.TimeLow += Settings.TicksBtwReadouts;
-
-    if (dataPkt.TimeLow >= 88052499) {
-      dataPkt.TimeLow -= 88052499;
-      dataPkt.TimeHigh += 1;
-    }
-
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
+
+    // Increment time for the next readout
+    addTicksBtwReadoutsToReadoutTime();
 
     SentReadouts++;
   }

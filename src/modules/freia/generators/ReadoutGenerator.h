@@ -11,18 +11,20 @@
 #pragma once
 
 #include <common/readout/vmm3/VMM3Parser.h>
-#include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Freia {
+
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {}
 
 protected:
   void generateData() override;
+  
   const uint32_t TimeToFirstReadout{1000};
 };
+
 } // namespace Freia
 
 // GCOVR_EXCL_STOP

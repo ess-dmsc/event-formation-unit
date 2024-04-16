@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,7 +16,6 @@
 #include <caen/CaenCounters.h>
 #include <caen/geometry/Config.h>
 #include <caen/readout/Readout.h>
-#include <common/readout/ess/ESSTime.h>
 #include <common/readout/ess/Parser.h>
 #include <cspec/geometry/CspecGeometry.h>
 #include <loki/geometry/LokiGeometry.h>

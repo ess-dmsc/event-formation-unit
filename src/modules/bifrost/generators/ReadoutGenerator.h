@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,7 +13,6 @@
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <modules/caen/readout/DataParser.h>
-#include <string>
 
 /**
  * @brief The BifrostDatReader class is responsible for reading data from a DAT

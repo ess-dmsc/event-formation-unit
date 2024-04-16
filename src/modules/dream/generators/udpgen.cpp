@@ -11,12 +11,11 @@
 
 int main(int argc, char *argv[]) {
 
-  Dream::DreamReadoutGenerator DreamGen;
+  Dream::ReadoutGenerator DreamGen;
   uint8_t DreamDataSize = sizeof(Dream::DataParser::DreamReadout);
   DreamGen.setReadoutDataSize(DreamDataSize);
 
   DreamGen.argParse(argc, argv);
-  DreamGen.Settings.Type = ESSReadout::Parser::DetectorType::DREAM;
 
   DreamGen.main();
   DreamGen.transmitLoop();

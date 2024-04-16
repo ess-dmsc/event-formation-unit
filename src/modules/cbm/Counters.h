@@ -36,7 +36,7 @@ struct Counters {
   //
   int64_t ProcessingIdle;
   int64_t TimeErrors;
-  struct ESSReadout::ESSTime::Stats_t TimeStats;
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
   int64_t TxBytes;
 
   // Identification of the cause of produce calls

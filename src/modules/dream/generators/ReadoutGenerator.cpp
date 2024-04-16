@@ -8,34 +8,48 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <algorithm>
 #include <modules/dream/generators/ReadoutGenerator.h>
 
 namespace Dream {
 
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
+  app.add_option("--p1", DreamSettings.DetectorMask,
+                "Detector element mask");
+  app.add_option("--p2", DreamSettings.Param2,
+                "Free parameter for DREAM datagenerator");
+  app.add_option("--p3", DreamSettings.Param3,
+                "Free parameter for DREAM datagenerator");
+}
+
+enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
+
 ///\brief ICD has been reviewed, but it would be surprising
 // if this was 100% correct
-bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
+bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
   DR.DataLength = ReadoutDataSize;
-  DR.TimeHigh = PulseTimeHigh;
-  DR.TimeLow = PulseTimeLow;
+  DR.TimeHigh = getReadoutTimeHigh();
+  DR.TimeLow = getReadoutTimeLow();
   DR.OM = 0;
   DR.UnitId = 0; //will be determined later
 
-  uint8_t DetectorMask = 1 << (Fuzzer.random8() % 5);
+  // Each of the five detector elements has its own 'bit'
+  // this is used for masking. If the selected value is
+  // not in the mask we do not generate anything and return false
+  uint8_t DetectorValue = 1 << (Fuzzer.random8() % 5);
+  if (not (DetectorValue & DreamSettings.DetectorMask)){
+    return false;
+  }
 
-  switch (DetectorMask) {
-    case 1: { // BW EndCap
-      if (not (DetectorMask & Settings.FreeParam1)){
-        return false;
-      }
+  switch (DetectorValue) {
+    case BwEndCap: {
       uint8_t Sector = Fuzzer.random8() % 11;
-      DR.UnitId = 6;                                        // SUMO6
-      if (Settings.FreeParam2 != -1) {
-          Sector = Settings.FreeParam2;
+
+      if (DreamSettings.Param2 != -1) {
+          Sector = DreamSettings.Param2;
       }
-      if (Settings.FreeParam3 != -1) {
-          DR.UnitId = Settings.FreeParam3;
+      DR.UnitId = 6; // SUMO6
+      if (DreamSettings.Param3 != -1) {
+          DR.UnitId = DreamSettings.Param3;
       }
 
       DR.FiberId = BWES6FiberId[Sector];
@@ -45,17 +59,14 @@ bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
 
     } break;
 
-    case 2: { // FW EndCap
-      if (not (DetectorMask & Settings.FreeParam1)){
-        return false;
-      }
+    case FwEndCap: { // FW EndCap
       uint8_t Sector = Fuzzer.random8() % 5;
       DR.UnitId = 6;
-      if (Settings.FreeParam2 != -1) {
-          Sector = Settings.FreeParam2 %5;
+      if (DreamSettings.Param2 != -1) {
+          Sector = DreamSettings.Param2 %5;
       }
-      if (Settings.FreeParam3 != -1) {
-          DR.UnitId = Settings.FreeParam3;
+      if (DreamSettings.Param3 != -1) {
+          DR.UnitId = DreamSettings.Param3;
       }
       DR.FiberId = FWES6FiberId[Sector];
       DR.FENId = FWES6FENId[Sector];
@@ -63,10 +74,7 @@ bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
       DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
     } break;
 
-    case 4: { // Mantle
-      if (not (DetectorMask & Settings.FreeParam1)){
-        return false;
-      }
+    case Mantle: { // Mantle
       uint8_t Sector = Fuzzer.random8() % 30;
       DR.FiberId = MNTLFiberId[Sector];
       DR.FENId = MNTLFENId[Sector];
@@ -74,10 +82,7 @@ bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
       DR.Cathode = Fuzzer.random8();
     } break;
 
-    case 8: { // HR
-      if (not (DetectorMask & Settings.FreeParam1)){
-        return false;
-      }
+    case HR: { // HR
       //uint8_t Sector = Fuzzer.random8() % 17;
       uint8_t Sector = Fuzzer.random8() % 17;
       uint8_t Instance = Fuzzer.random8() % 2;
@@ -88,10 +93,7 @@ bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
       DR.UnitId = Instance;
     } break;
 
-    case 16: { // SANS
-      if (not (DetectorMask & Settings.FreeParam1)){
-        return false;
-      }
+    case SANS: { // SANS
       uint8_t Sector = Fuzzer.random8() % 18;
       uint8_t Instance = Fuzzer.random8() % 2;
       DR.FiberId = SANSFiberId[Sector];
@@ -105,7 +107,7 @@ bool DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
 }
 
 /// \brief implementation of virtual functio from base class
-void DreamReadoutGenerator::generateData() {
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -120,15 +122,12 @@ void DreamReadoutGenerator::generateData() {
     memcpy(DP, &DR, ReadoutDataSize);
     DP += ReadoutDataSize;
 
-    // All readouts are events for DREAM
-    PulseTimeLow += Settings.TicksBtwEvents;
+    // Increment the time for next readout
+    addTickBtwEventsToReadoutTime();
 
-    if (PulseTimeLow >= 88052499) {
-      PulseTimeLow -= 88052499;
-      PulseTimeHigh += 1;
-    }
     Readouts++;
   }
 }
+
 } // namespace Dream
 // GCOVR_EXCL_STOP

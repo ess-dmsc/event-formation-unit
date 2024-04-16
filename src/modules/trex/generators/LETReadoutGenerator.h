@@ -15,14 +15,16 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Trex {
+  
 class LETReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  using ReadoutGeneratorBase::ReadoutGeneratorBase;
+  LETReadoutGenerator(): ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::TREX) {}
 
 protected:
   void generateData() override;
-  const uint32_t TimeToFirstReadout{1000};
+
   uint64_t GlobalReadout{0};
 };
+
 } // namespace Trex
 // GCOVR_EXCL_STOP

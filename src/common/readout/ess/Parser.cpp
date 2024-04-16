@@ -1,4 +1,4 @@
-// Copyright (C) 2017 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2017 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,6 +14,8 @@
 #include <memory>
 
 namespace ESSReadout {
+
+  using namespace esstime;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -153,10 +155,10 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     return -Parser::EHEADER;
   }
 
-  Packet.Time.setReference(Packet.HeaderPtr.getPulseHigh(),
-                           Packet.HeaderPtr.getPulseLow());
-  Packet.Time.setPrevReference(Packet.HeaderPtr.getPrevPulseHigh(),
-                               Packet.HeaderPtr.getPrevPulseLow());
+  Packet.Time.setReference(
+      ESSTime(Packet.HeaderPtr.getPulseHigh(), Packet.HeaderPtr.getPulseLow()));
+  Packet.Time.setPrevReference(ESSTime(Packet.HeaderPtr.getPrevPulseHigh(),
+                                       Packet.HeaderPtr.getPrevPulseLow()));
 
   XTRACE(DATA, DEB, "PulseTime     (0x%08x,0x%08x)",
          Packet.HeaderPtr.getPulseHigh(), Packet.HeaderPtr.getPulseLow());
@@ -164,23 +166,25 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
          Packet.HeaderPtr.getPrevPulseHigh(),
          Packet.HeaderPtr.getPrevPulseLow());
 
-  if (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS > MaxPulseTimeDiffNS) {
+  if (Packet.Time.getRefTimeNS() - Packet.Time.getPrevRefTimeNS() >
+      MaxPulseTimeDiffNS) {
     XTRACE(DATA, WAR,
            "PulseTime and PrevPulseTime too far apart: %" PRIu64
            ". Max allowed %u",
-           (Packet.Time.TimeInNS - Packet.Time.PrevTimeInNS),
+           (Packet.Time.getRefTimeNS() - Packet.Time.getPrevRefTimeNS()),
            MaxPulseTimeDiffNS);
     XTRACE(DATA, WAR, "PulseTimeHi      0x%08x",
            Packet.HeaderPtr.getPulseHigh());
     XTRACE(DATA, WAR, "PulseTimeLow     0x%08x",
            Packet.HeaderPtr.getPulseLow());
-    XTRACE(DATA, WAR, "PulseTime (ns)   %" PRIu64 "", Packet.Time.TimeInNS);
+    XTRACE(DATA, WAR, "PulseTime (ns)   %" PRIu64 "",
+           Packet.Time.getRefTimeUInt64());
     XTRACE(DATA, WAR, "PrevPulseTimeHi  0x%08x",
            Packet.HeaderPtr.getPrevPulseHigh());
     XTRACE(DATA, WAR, "PrevPulseTimeLow 0x%08x",
            Packet.HeaderPtr.getPrevPulseLow());
     XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "",
-           Packet.Time.PrevTimeInNS);
+           Packet.Time.getPrevRefTimeUInt64());
     Stats.ErrorTimeHigh++;
 
     return -Parser::EHEADER;

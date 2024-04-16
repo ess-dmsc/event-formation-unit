@@ -18,8 +18,6 @@ int main(int argc, char *argv[]) {
   TrexGen.argParse(argc, argv);
   TrexGen.main();
 
-  TrexGen.Settings.Type = ESSReadout::Parser::DetectorType::TREX;
-
   TrexGen.transmitLoop();
 
   return 0;

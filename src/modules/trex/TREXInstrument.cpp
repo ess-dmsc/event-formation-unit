@@ -13,6 +13,7 @@
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
+#include <cstdint>
 #include <math.h>
 #include <trex/TREXInstrument.h>
 #include <trex/geometry/LETGeometry.h>
@@ -96,7 +97,7 @@ void TREXInstrument::processReadouts(void) {
   assert(Serializer != nullptr);
   Serializer->checkAndSetReferenceTime(
       ESSReadoutParser.Packet.Time
-          .TimeInNS); /// \todo sometimes PrevPulseTime maybe?
+          .getRefTimeUInt64()); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
@@ -137,7 +138,7 @@ void TREXInstrument::processReadouts(void) {
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS =
-        ESSReadoutParser.Packet.Time.toNS(readout.TimeHigh, readout.TimeLow);
+        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     //   int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     //   XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64,
     //   TimeNS, TDCCorr);
@@ -222,7 +223,7 @@ void TREXInstrument::processReadouts(void) {
 }
 
 void TREXInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
 
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -260,16 +261,16 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
     uint64_t EventTime = e.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
-           TimeRef.TimeInNS);
+           TimeRef.getRefTimeUInt64());
 
-    if (TimeRef.TimeInNS > EventTime) {
+    if (TimeRef.getRefTimeUInt64() > EventTime) {
       XTRACE(EVENT, WAR, "Negative TOF, pulse = %u, event time = %u",
-             TimeRef.TimeInNS, EventTime);
+             TimeRef.getRefTimeUInt64(), EventTime);
       counters.TimeErrors++;
       continue;
     }
 
-    uint64_t TimeOfFlight = EventTime - TimeRef.TimeInNS;
+    uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
     if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
       XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);

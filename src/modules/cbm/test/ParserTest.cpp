@@ -122,8 +122,8 @@ protected:
   void SetUp() override {
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
-    PacketData.Time.setReference(0, 0);
-    PacketData.Time.setPrevReference(0, 0);
+    PacketData.Time.setReference(ESSReadout::ESSTime(0, 0));
+    PacketData.Time.setPrevReference(ESSReadout::ESSTime(0, 0));
   }
   void TearDown() override {}
 
