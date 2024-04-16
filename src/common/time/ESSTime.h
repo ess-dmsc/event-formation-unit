@@ -10,6 +10,7 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <common/debug/Trace.h>
 #include <cstdint>
 
