@@ -47,10 +47,6 @@ protected:
 
   ///\brief
   void getRandomReadout(DataParser::DreamReadout &DR);
-
-private:
-  uint32_t readoutTimeHigh{0};
-  uint32_t readoutTimeLow{0};
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP
