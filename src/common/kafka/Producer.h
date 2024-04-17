@@ -15,9 +15,9 @@
 #pragma GCC diagnostic pop
 
 #include <common/memory/Buffer.h>
+#include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
-#include <common/memory/span.hpp>
 #include <utility>
 #include <vector>
 
@@ -38,30 +38,63 @@ public:
                       std::int64_t MessageTimestampMS) = 0;
 };
 
+/**
+ * @brief The Producer class is responsible for producing Kafka messages and
+ * sending them to the cluster.
+ *
+ * It inherits from ProducerBase and RdKafka::EventCb.
+ */
 class Producer : public ProducerBase, public RdKafka::EventCb {
 public:
-  /// \brief Construct a producer object.
-  /// \param Broker 'URL' specifying host and port, example "127.0.0.1:9009"
-  /// \param Topic Name of Kafka topic according to agreement, example
-  /// "trex_detector"
-  /// \param Configs vector of configuration <type,value> pairs
+  /**
+   * @brief Constructs a Producer object.
+   *
+   * @param Broker The 'URL' specifying the host and port, for example,
+   * "127.0.0.1:9009".
+   * @param Topic The name of the Kafka topic according to the agreement, for
+   * example, "trex_detector".
+   * @param Configs A vector of configuration <type,value> pairs.
+   */
   Producer(std::string Broker, std::string Topic,
            std::vector<std::pair<std::string, std::string>> &Configs);
 
-  /// \brief cleans up by deleting allocated structures
+  /**
+   * @brief Cleans up by deleting allocated structures.
+   */
   ~Producer() = default;
 
-  ///\brief Produce kafka messages and send to cluster
-  ///\return int, 0 if successful
+  /**
+   * @brief Produces Kafka messages and sends them to the cluster and increment
+   * internal counters. This function is non-blocking, returns immediately after
+   * the message is enqueueed for transmission.
+   *
+   * @param Buffer The buffer containing the message data.
+   * @param MessageTimestampMS The timestamp of the message in milliseconds.
+   * @return int Returns 0 if the operation is successful or an error code
+   */
   int produce(nonstd::span<const std::uint8_t> Buffer,
               std::int64_t MessageTimestampMS) override;
 
-  /// \brief set kafka configuration and check result
+  /**
+   * @brief Sets a Kafka configuration and checks the result.
+   *
+   * @param Key The configuration key.
+   * @param Value The configuration value.
+   * @return RdKafka::Conf::ConfResult The result of setting the configuration.
+   */
   RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
 
-  /// \brief Kafka callback function for events
+  /**
+   * @brief Callback function for Kafka to handle events like errors,
+   * statistics.
+   *
+   * @param event The Kafka event to be handled
+   */
   void event_cb(RdKafka::Event &event) override;
 
+  /**
+   * @brief Structure to hold producer statistics.
+   */
   struct ProducerStats {
     int64_t config_errors;
     int64_t ev_errors;

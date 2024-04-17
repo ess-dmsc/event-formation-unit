@@ -7,6 +7,7 @@ add_subdirectory(kafka)
 add_subdirectory(reduction)
 add_subdirectory(time)
 add_subdirectory(readout)
+add_subdirectory(kafka/serializer)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
@@ -73,8 +74,6 @@ add_library(efu_common STATIC
   # Add required object libraries
   $<TARGET_OBJECTS:EssTimingLib>
 )
-
-
 
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_reduction STATIC
