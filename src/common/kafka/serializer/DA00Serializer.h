@@ -20,7 +20,17 @@ namespace Serializer {
 using data_t = uint32_t;
 using time_t = uint32_t;
 
+using BinningFunction =
+    std::function<void(time_t, std::int64_t)>;
+
 template <typename T> class DA00Serializer : public AbstractSerializer {
+
+  da00_faltbuffers::Frame1DHistogramBuilder<T> &builder;
+
+  
+
+  int64_t SeqNum{0};
+  int64_t TxBytes{0};
 
 public:
   DA00Serializer(ProducerCallback);
@@ -28,12 +38,6 @@ public:
   size_t addEvent(const int32_t &rToA, const T &data);
 
   size_t produce() override;
-
-public:
-  da00_faltbuffers::Frame1DHistogramBuilder<T> &builder;
-
-  int64_t SeqNum{0};
-  int64_t TxBytes{0};
 };
 
 } // namespace Serializer
