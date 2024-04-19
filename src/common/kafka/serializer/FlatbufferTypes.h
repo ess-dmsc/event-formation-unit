@@ -5,7 +5,7 @@
 ///
 /// \brief Serialization objects for DA00 schema da00_DataArray and
 /// da00_Variable tables
-/// 
+///
 /// \author Gregory Tucker \date 2024-03-01
 /// \link https://github.com/g5t/flatbuffer-histogram-generator
 ///
@@ -16,15 +16,13 @@
 #pragma once
 
 #include <chrono>
-#include <map>
+#include <da00_dataarray_generated.h>
 #include <numeric>
 #include <optional>
 #include <sstream>
-#include <string>
-#include <da00_dataarray_generated.h>
 
 namespace da00_faltbuffers {
-  
+
 template <class> struct data_type_trait {
   static constexpr da00_dtype type = da00_dtype::none;
 };
@@ -267,4 +265,4 @@ public:
   }
 };
 
-}; // namespace da00_serializer
+}; // namespace da00_faltbuffers

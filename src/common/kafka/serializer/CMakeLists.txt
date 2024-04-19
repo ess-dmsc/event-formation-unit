@@ -5,24 +5,20 @@
 #=============================================================================
 include_directories(.)
 
-set(Serializer_SRC
-  DA00Serializer.cpp)
+# set(Serializer_SRC
+#   DA00Tables.h
+#   BinAggregation.h
+#   AbstractSerializer.h
+#   Frame1DHistogramSerializer.h)
 
-set(Serializer_INC
-  builders/DA00Tables.h
-  builders/DA00FlatbufferBuilders.h
-  AbstractSerializer.h
-  DA00Serializer.h)
+# add_library(Serializer OBJECT
+#   ${Serializer_SRC}
+#   )
 
-add_library(Serializer OBJECT
-  ${Serializer_SRC}
-  ${Serializer_INC}
-  )
+# enable_coverage_flags(EssReadoutLib)
 
-enable_coverage_flags(EssReadoutLib)
-
-set(DA00Test_SRC
-  test/DA00SerializerTest.cpp
+set(Frame1DHistogramSerializerTest_SRC
+  test/Frame1DHistogramSerializerTest.cpp
   )
   
-create_test_executable(DA00Test)
+create_test_executable(Frame1DHistogramSerializerTest)

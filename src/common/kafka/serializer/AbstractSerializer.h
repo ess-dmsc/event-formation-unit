@@ -14,15 +14,29 @@
 //===----------------------------------------------------------------------===//
 
 #include "common/kafka/Producer.h"
+#include <chrono>
 #include <cstddef>
+
+namespace serializer {
+using namespace std::chrono;
 
 class AbstractSerializer {
 
-  ProducerCallback ProduceFunctor;
+  ProducerCallback _produceCallback;
 
 protected:
-  AbstractSerializer(ProducerCallback callback) : ProduceFunctor(callback){};
+  AbstractSerializer(ProducerCallback callback) : _produceCallback(callback){};
 
 public:
-  virtual size_t produce() = 0;
+  virtual ~AbstractSerializer() = default;
+
+  virtual nonstd::span<const uint8_t> serialize() const = 0;
+
+  virtual void produce() {
+    uint64_t currentHwClock =
+        duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+            .count();
+    _produceCallback(serialize(), currentHwClock);
+  };
 };
+} // namespace serializer
