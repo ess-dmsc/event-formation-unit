@@ -103,7 +103,7 @@ size_t EV44Serializer::produce() {
     serialize();
     if (ProduceFunctor) {
       
-      // produce kafka message timestamp with current timestamp from harware
+      // produce kafka message timestamp with current timestamp from hardware
       // clock
       uint64_t currentHwClock =
           duration_cast<milliseconds>(system_clock::now().time_since_epoch())
