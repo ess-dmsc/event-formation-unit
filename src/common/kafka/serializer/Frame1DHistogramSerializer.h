@@ -17,6 +17,8 @@
 #include <common/math/NumericalMath.h>
 #include <common/memory/span.hpp>
 #include <flatbuffers/flatbuffers.h>
+#include <sstream>
+#include <stdexcept>
 
 namespace serializer {
 
@@ -69,7 +71,7 @@ template <> struct data_type_trait<double> {
 /// frame for serialization. It provides methods to add data to the histogram,
 /// serialize the data, and initialize the X-axis values.
 template <class T, class R = T>
-class Frame1DHistogramBuilder : public AbstractSerializer {
+class Frame1DHistogramSerializer : public AbstractSerializer {
   using data_t = std::vector<std::vector<T>>;
   using time_t = int32_t;
 
@@ -79,9 +81,11 @@ class Frame1DHistogramBuilder : public AbstractSerializer {
   std::string _name;
   std::string _unit;
   std::string _timeUnit;
-  std::vector<R> _xAxis;
-  data_t _data;
   VectorAggregationFunc<T> aggregateFunction;
+
+protected:
+  data_t _data;
+  std::vector<R> _xAxis;
 
 public:
   /// \brief Constructor for the Frame1DHistogramBuilder class.
@@ -96,7 +100,7 @@ public:
   /// \param aggFunc is the aggregation function used to aggregate the data
   /// inide the bins
   ///
-  Frame1DHistogramBuilder(
+  Frame1DHistogramSerializer(
       std::string topic, const time_t period, const time_t binCount,
       std::string name, std::string unit,
       std::string timeUnit =
@@ -114,15 +118,30 @@ public:
   inline void addData(const R rToA, const T data) {
     static_assert(data_type_trait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
+
+    if (static_cast<time_t>(rToA) > _period) {
+      std::stringstream ss;
+      ss << "rToA: " << rToA << " > period: " << _period
+         << "! Cannot serialize data with relative time of arrival greater "
+            "than period.";
+      throw std::domain_error(ss.str());
+    }
+
     // requires that initXaxis create an ascending sorted vector
     R minValue = _xAxis.front();                          // minimum value
     R maxValue = _xAxis.back();                           // maximum value
     R step = (maxValue - minValue) / (_xAxis.size() - 1); // step size
 
-    int binIndex = static_cast<int>((rToA - minValue) / step);
+    size_t binIndex = static_cast<size_t>((rToA - minValue) / step);
 
-    // Reserve space for the data for optimize on performance
+    // Check if the binIndex is out of bounds and put edge values in the last
+    // bin
+    if (binIndex >= _data.size()) {
+      binIndex = _data.size() - 1;
+    }
+
     if (_data[binIndex].empty())
+      // Reserve space for the data for optimize on performance
       _data[binIndex].reserve(50);
 
     _data[binIndex].push_back(data);
@@ -195,8 +214,10 @@ private:
     _xAxis.reserve(_binCount);
     auto dt = static_cast<R>(_period) / static_cast<R>(_binCount);
     if (dt < 0) {
-      throw std::runtime_error(
-          "Cannot serialize negative time intervals for X axis.");
+      std::stringstream ss;
+      ss << "dt: " << dt
+         << "! Cannot serialize negative time intervals for X axis.";
+      throw std::runtime_error(ss.str());
     }
     _xAxis.push_back(0);
     for (auto i = 1; i < _binCount; ++i)
