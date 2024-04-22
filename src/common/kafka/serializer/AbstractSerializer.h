@@ -14,6 +14,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common/kafka/Producer.h"
+#include "flatbuffers/flatbuffers.h"
 #include <chrono>
 #include <cstddef>
 
@@ -26,17 +27,23 @@ class AbstractSerializer {
 
 protected:
   AbstractSerializer(ProducerCallback callback) : _produceCallback(callback){};
+  flatbuffers::DetachedBuffer _buffer;
+
+  virtual void serialize() = 0;
 
 public:
   virtual ~AbstractSerializer() = default;
-
-  virtual nonstd::span<const uint8_t> serialize() const = 0;
 
   virtual void produce() {
     uint64_t currentHwClock =
         duration_cast<milliseconds>(system_clock::now().time_since_epoch())
             .count();
-    _produceCallback(serialize(), currentHwClock);
+
+    serialize();
+
+    _produceCallback(
+        nonstd::span<const uint8_t>(_buffer.data(), _buffer.size()),
+        currentHwClock);
   };
 };
 } // namespace serializer

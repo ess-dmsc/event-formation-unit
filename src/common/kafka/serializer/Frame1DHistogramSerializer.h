@@ -10,15 +10,16 @@
 
 #pragma once
 
-#include "AbstractSerializer.h"
+#include <AbstractSerializer.h>
 #include "BinAggregation.h"
 #include "FlatbufferTypes.h"
 #include "common/kafka/Producer.h"
 #include "common/memory/span.hpp"
+#include "flatbuffers/flatbuffers.h"
 
 namespace serializer {
 
-using namespace da00_faltbuffers;
+using namespace da00_flatbuffers;
 
 // type trait for type supported as R parameter in the template
 template <class> struct data_type_trait {
@@ -70,10 +71,10 @@ class Frame1DHistogramBuilder : public AbstractSerializer {
   std::string _timeUnit;
   std::vector<R> _xAxis;
   data_t _data;
-  AggreggeFunc<T> aggBinData;
+  AggreggeFunc<T> aggregateFunction;
 
 public:
-  /// \brief Construct a Frame1DHistogramSender
+  /// \brief 
   Frame1DHistogramBuilder(
       std::string topic, //!< Kafka stream topic destination
       const time_t
@@ -87,13 +88,13 @@ public:
       const AggreggeFunc<T> &aggFunc = SUM_AGG_FUNC<T>)
       : AbstractSerializer(callback), _topic(std::move(topic)), _period(period),
         _binCount(binCount), _name(std::move(name)), _unit(std::move(unit)),
-        _timeUnit(std::move(timeUnit)), aggBinData(aggFunc) {
+        _timeUnit(std::move(timeUnit)), aggregateFunction(aggFunc) {
 
     initAxis();
     _data = data_t(_xAxis.size());
   }
 
-  inline void addData(const time_t rToA, const T data) {
+  inline void addData(const R rToA, const T data) {
     static_assert(data_type_trait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
     // requires that initXaxis create an ascending sorted vector
@@ -111,7 +112,7 @@ public:
   }
 
 private:
-  nonstd::span<const uint8_t> serialize() const {
+  void serialize() {
     if (static_cast<time_t>(_data.size()) != _binCount) {
       std::stringstream ss;
       ss << "Expected data to serialize to have " << _binCount
@@ -122,7 +123,7 @@ private:
     std::vector<T> aggregatedBins;
     aggregatedBins.reserve(_data.size());
     for (auto data : _data) {
-      aggregatedBins.push_back(aggBinData(data));
+      aggregatedBins.push_back(aggregateFunction(data));
     }
 
     auto x = (Variable("t", {"t"}, {static_cast<time_t>(_binCount)})
@@ -136,12 +137,16 @@ private:
                   .source("histogram_sender")
                   .label("Frame 1D Histogram intensity")
                   .data(aggregatedBins));
+
     const auto dataarray = DataArray("histogram_sender", {x, y});
-    flatbuffers::FlatBufferBuilder builder(1024);
+
+    flatbuffers::FlatBufferBuilder builder(_binCount * (sizeof(T) + sizeof(R)) +
+                                           256);
     builder.Finish(dataarray.pack(builder));
 
-    return nonstd::span<const uint8_t>(builder.GetBufferPointer(),
-                                       builder.GetSize());
+    _buffer = builder.Release();
+    _data.clear();
+    _data.reserve(_xAxis.size());
   }
 
   void initAxis() {
