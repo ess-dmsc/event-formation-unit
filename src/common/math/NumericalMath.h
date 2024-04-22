@@ -12,9 +12,9 @@
 #include <numeric>
 #include <stdexcept>
 
-namespace serializer {
+namespace essmath {
 
-template <typename T> using AggreggeFunc = std::function<T(std::vector<T>)>;
+template <typename T> using VectorAggregationFunc = std::function<T(std::vector<T>)>;
 
 // Implementation of average aggregation function
 template <typename T> T average(const std::vector<T> &data) {
@@ -31,7 +31,7 @@ template <typename T> constexpr T sum(const std::vector<T> &data) {
   return std::accumulate(data.begin(), data.end(), T(0));
 }
 
-template <class T> AggreggeFunc<T> SUM_AGG_FUNC = sum<T>;
-template <class T> AggreggeFunc<T> AVERAGE_AGG_FUNC = average<T>;
+template <class T> VectorAggregationFunc<T> SUM_AGG_FUNC = sum<T>;
+template <class T> VectorAggregationFunc<T> AVERAGE_AGG_FUNC = average<T>;
 
 } // namespace serializer

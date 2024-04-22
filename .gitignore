@@ -28,4 +28,5 @@ CMakeLists.txt.user
 .cache
 .vscode
 .devcontainer
+.clang-format
 resources

@@ -11,15 +11,16 @@
 #pragma once
 
 #include <AbstractSerializer.h>
-#include "BinAggregation.h"
-#include "FlatbufferTypes.h"
-#include "common/kafka/Producer.h"
-#include "common/memory/span.hpp"
-#include "flatbuffers/flatbuffers.h"
+#include <FlatbufferTypes.h>
+#include <common/kafka/Producer.h>
+#include <common/math/NumericalMath.h>
+#include <common/memory/span.hpp>
+#include <flatbuffers/flatbuffers.h>
 
 namespace serializer {
 
 using namespace da00_flatbuffers;
+using namespace essmath;
 
 // type trait for type supported as R parameter in the template
 template <class> struct data_type_trait {
@@ -58,6 +59,9 @@ template <> struct data_type_trait<double> {
 
 /// \brief A class to handle sending 1-D data collected over a frame to Kafka
 /// using da00 flatbuffers schema
+/// \param T is the type of the data to be serialized
+/// \param R is the type of the data used for the axis. This can be time with
+/// double precession
 template <class T, class R = T>
 class Frame1DHistogramBuilder : public AbstractSerializer {
   using data_t = std::vector<std::vector<T>>;
@@ -71,10 +75,10 @@ class Frame1DHistogramBuilder : public AbstractSerializer {
   std::string _timeUnit;
   std::vector<R> _xAxis;
   data_t _data;
-  AggreggeFunc<T> aggregateFunction;
+  VectorAggregationFunc<T> aggregateFunction;
 
 public:
-  /// \brief 
+  /// \brief
   Frame1DHistogramBuilder(
       std::string topic, //!< Kafka stream topic destination
       const time_t
@@ -85,7 +89,7 @@ public:
       std::string timeUnit =
           "millisecond", //!< unit of time used for period, and the binned axis
       const ProducerCallback &callback = {},
-      const AggreggeFunc<T> &aggFunc = SUM_AGG_FUNC<T>)
+      const VectorAggregationFunc<T> &aggFunc = SUM_AGG_FUNC<T>)
       : AbstractSerializer(callback), _topic(std::move(topic)), _period(period),
         _binCount(binCount), _name(std::move(name)), _unit(std::move(unit)),
         _timeUnit(std::move(timeUnit)), aggregateFunction(aggFunc) {

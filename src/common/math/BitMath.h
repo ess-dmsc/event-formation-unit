@@ -10,6 +10,8 @@
 
 #include <cstdint>
 
+namespace essmath {
+
 class BitMath {
 public:
   /// \todo this is a hack to allow compilation of code from
@@ -31,3 +33,5 @@ public:
     return n;
   }
 };
+
+} // namespace essmath

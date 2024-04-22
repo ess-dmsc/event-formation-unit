@@ -48,10 +48,11 @@ set(efu_common_INC
   memory/FixedSizePool.h
   memory/PoolAllocator.h
   memory/RingBuffer.h
+  math/BitMath.h
+  math/NumericalMath.h
   utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
-  BitMath.h
   DumpFile.h
   JsonFile.h
   Statistics.h

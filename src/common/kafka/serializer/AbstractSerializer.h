@@ -13,10 +13,12 @@
 /// \link https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
-#include "common/kafka/Producer.h"
-#include "flatbuffers/flatbuffers.h"
+#pragma once
+
 #include <chrono>
+#include <common/kafka/Producer.h>
 #include <cstddef>
+#include <flatbuffers/flatbuffers.h>
 
 namespace serializer {
 using namespace std::chrono;
