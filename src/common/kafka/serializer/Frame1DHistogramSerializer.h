@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief Implementation of Frame1DHistogramSerializer
+/// \brief Implementation of Frame1DHistogramSerializer, based on the da00
+/// schema for serialization
 ///
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
@@ -57,11 +58,16 @@ template <> struct data_type_trait<double> {
   static constexpr da00_dtype type = da00_dtype::float64;
 };
 
-/// \brief A class to handle sending 1-D data collected over a frame to Kafka
-/// using da00 flatbuffers schema
-/// \param T is the type of the data to be serialized
-/// \param R is the type of the data used for the axis. This can be time with
+/// @class Frame1DHistogramBuilder
+/// @brief A class that builds a 1D histogram frame for serialization.
+///
+/// \tparam T is the type of the data to be serialized
+/// \tparam R is the type of the data used for the axis. This can be time with
 /// double precession
+///
+/// The Frame1DHistogramBuilder class is responsible for building a 1D histogram
+/// frame for serialization. It provides methods to add data to the histogram,
+/// serialize the data, and initialize the X-axis values.
 template <class T, class R = T>
 class Frame1DHistogramBuilder : public AbstractSerializer {
   using data_t = std::vector<std::vector<T>>;
@@ -78,14 +84,21 @@ class Frame1DHistogramBuilder : public AbstractSerializer {
   VectorAggregationFunc<T> aggregateFunction;
 
 public:
-  /// \brief
+  /// \brief Constructor for the Frame1DHistogramBuilder class.
+  ///
+  /// \param topic is the Kafka stream topic destination
+  /// \param period is the length of time of one frame in the specified units
+  /// \param binCount is the number of the bins used
+  /// \param name is the name of the binned data
+  /// \param unit is the unit of the binned data
+  /// \param timeUnit is the unit of time used for period, and the binned axis
+  /// \param callback is the producer callback function
+  /// \param aggFunc is the aggregation function used to aggregate the data
+  /// inide the bins
+  ///
   Frame1DHistogramBuilder(
-      std::string topic, //!< Kafka stream topic destination
-      const time_t
-          period, //!< length of time of one frame in the specified units
-      const time_t binCount, //!< number of time bins used
-      std::string name,      //!< name of the binned data
-      std::string unit,      //!< unit of the binned data
+      std::string topic, const time_t period, const time_t binCount,
+      std::string name, std::string unit,
       std::string timeUnit =
           "millisecond", //!< unit of time used for period, and the binned axis
       const ProducerCallback &callback = {},
@@ -116,6 +129,9 @@ public:
   }
 
 private:
+  /// \brief Serialize the data to a flatbuffer.
+  /// \details The data is serialized to a flatbuffer and stored in the buffer
+  /// of the abstract serializer
   void serialize() {
     if (static_cast<time_t>(_data.size()) != _binCount) {
       std::stringstream ss;
@@ -153,11 +169,15 @@ private:
     _data.reserve(_xAxis.size());
   }
 
+  /// \brief Initialize the X-axis values.
+  /// \details The X-axis values are initialized based on the period and number
+  /// of bins. These values are cannot be negative the algorithm expects
+  /// ascending sorted values from the X axis.
   void initAxis() {
     static_assert(data_type_trait<R>::type != da00_dtype::none,
                   "Data type is not supported for serialization!");
     // Check for negative values in the bin count and period
-    // Current time concept not support negative values for bins
+    // Current concept not support negative values for bins
     if (_binCount < 0) {
       std::stringstream ss;
       ss << "binCount: " << _binCount
