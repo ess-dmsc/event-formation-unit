@@ -25,12 +25,12 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 
 ///\brief ICD has been reviewed, but it would be surprising
 // if this was 100% correct
-bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
-  DR.DataLength = ReadoutDataSize;
-  DR.TimeHigh = getReadoutTimeHigh();
-  DR.TimeLow = getReadoutTimeLow();
-  DR.OM = 0;
-  DR.UnitId = 0; //will be determined later
+bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &ReadoutData) {
+  ReadoutData.DataLength = ReadoutDataSize;
+  ReadoutData.TimeHigh = getReadoutTimeHigh();
+  ReadoutData.TimeLow = getReadoutTimeLow();
+  ReadoutData.OM = 0;
+  ReadoutData.UnitId = 0; //will be determined later
 
   // Each of the five detector elements has its own 'bit'
   // this is used for masking. If the selected value is
@@ -47,60 +47,60 @@ bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
       if (DreamSettings.Param2 != -1) {
           Sector = DreamSettings.Param2;
       }
-      DR.UnitId = 6; // SUMO6
+      ReadoutData.UnitId = 6; // SUMO6
       if (DreamSettings.Param3 != -1) {
-          DR.UnitId = DreamSettings.Param3;
+          ReadoutData.UnitId = DreamSettings.Param3;
       }
 
-      DR.FiberId = BWES6FiberId[Sector];
-      DR.FENId = BWES6FENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
-      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      ReadoutData.FiberId = BWES6FiberId[Sector];
+      ReadoutData.FENId = BWES6FENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
+      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
 
     } break;
 
     case FwEndCap: { // FW EndCap
       uint8_t Sector = Fuzzer.random8() % 5;
-      DR.UnitId = 6;
+      ReadoutData.UnitId = 6;
       if (DreamSettings.Param2 != -1) {
           Sector = DreamSettings.Param2 %5;
       }
       if (DreamSettings.Param3 != -1) {
-          DR.UnitId = DreamSettings.Param3;
+          ReadoutData.UnitId = DreamSettings.Param3;
       }
-      DR.FiberId = FWES6FiberId[Sector];
-      DR.FENId = FWES6FENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
-      DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      ReadoutData.FiberId = FWES6FiberId[Sector];
+      ReadoutData.FENId = FWES6FENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
+      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
     } break;
 
     case Mantle: { // Mantle
       uint8_t Sector = Fuzzer.random8() % 30;
-      DR.FiberId = MNTLFiberId[Sector];
-      DR.FENId = MNTLFENId[Sector];
-      DR.Anode = Fuzzer.random8() & 0x7f;
-      DR.Cathode = Fuzzer.random8();
+      ReadoutData.FiberId = MNTLFiberId[Sector];
+      ReadoutData.FENId = MNTLFENId[Sector];
+      ReadoutData.Anode = Fuzzer.random8() & 0x7f;
+      ReadoutData.Cathode = Fuzzer.random8();
     } break;
 
     case HR: { // HR
       //uint8_t Sector = Fuzzer.random8() % 17;
       uint8_t Sector = Fuzzer.random8() % 17;
       uint8_t Instance = Fuzzer.random8() % 2;
-      DR.FiberId = HRFiberId[Sector];
-      DR.FENId = HRFENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
-      DR.Cathode = Fuzzer.random8() & 0x3f;
-      DR.UnitId = Instance;
+      ReadoutData.FiberId = HRFiberId[Sector];
+      ReadoutData.FENId = HRFENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
+      ReadoutData.Cathode = Fuzzer.random8() & 0x3f;
+      ReadoutData.UnitId = Instance;
     } break;
 
     case SANS: { // SANS
       uint8_t Sector = Fuzzer.random8() % 18;
       uint8_t Instance = Fuzzer.random8() % 2;
-      DR.FiberId = SANSFiberId[Sector];
-      DR.FENId = SANSFENId[Sector];
-      DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
-      DR.Cathode = Fuzzer.random8() & 0x3f;
-      DR.UnitId = Instance;
+      ReadoutData.FiberId = SANSFiberId[Sector];
+      ReadoutData.FENId = SANSFENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
+      ReadoutData.Cathode = Fuzzer.random8() & 0x3f;
+      ReadoutData.UnitId = Instance;
     } break;
   }
   return true;
@@ -108,19 +108,19 @@ bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
 
 /// \brief implementation of virtual functio from base class
 void ReadoutGenerator::generateData() {
-  auto DP = (uint8_t *)Buffer;
-  DP += HeaderSize;
+  auto DataPtr = (uint8_t *)Buffer;
+  DataPtr += HeaderSize;
 
   uint32_t Readouts{0};
-  DataParser::DreamReadout DR;
+  DataParser::DreamReadout ReadoutData;
 
   while (Readouts < Settings.NumReadouts) {
-    bool Valid = getRandomReadout(DR);
+    bool Valid = getRandomReadout(ReadoutData);
     if (not Valid) {
       continue;
     }
-    memcpy(DP, &DR, ReadoutDataSize);
-    DP += ReadoutDataSize;
+    memcpy(DataPtr, &ReadoutData, ReadoutDataSize);
+    DataPtr += ReadoutDataSize;
 
     // Increment the time for next readout
     addTickBtwEventsToReadoutTime();
