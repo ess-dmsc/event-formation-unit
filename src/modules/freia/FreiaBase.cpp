@@ -167,7 +167,7 @@ void FreiaBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "freia_debug",
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
                            KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);

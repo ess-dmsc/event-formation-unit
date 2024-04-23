@@ -13,9 +13,17 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Dream {
-class DreamReadoutGenerator : public ReadoutGeneratorBase {
+
+// Settings local to DREAM data generator
+struct {
+  int DetectorMask{-1}; // mask of active detector elements
+  int Param2{-1}; // free parameter to modify data pattern
+  int Param3{-1}; // free parameter to modify data pattern
+} DreamSettings;
+
+class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  DreamReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {}
+  ReadoutGenerator();
 
   // Physical Ring and FEN ids for detector elements
   // Should match the json config file
@@ -43,10 +51,9 @@ public:
 protected:
   void generateData() override;
 
-  const uint32_t TimeToFirstReadout{1000};
-
-  ///\brief
-  void getRandomReadout(DataParser::DreamReadout &DR);
+  ///\brief may or may not generate a readout due to
+  /// the detector mask, hence the bool return value
+  bool getRandomReadout(DataParser::DreamReadout &DR);
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP

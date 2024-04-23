@@ -12,92 +12,115 @@
 
 namespace Dream {
 
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
+  app.add_option("--p1", DreamSettings.DetectorMask,
+                "Detector element mask");
+  app.add_option("--p2", DreamSettings.Param2,
+                "Free parameter for DREAM datagenerator");
+  app.add_option("--p3", DreamSettings.Param3,
+                "Free parameter for DREAM datagenerator");
+}
+
+enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
+
 ///\brief ICD has been reviewed, but it would be surprising
 // if this was 100% correct
-void DreamReadoutGenerator::getRandomReadout(DataParser::DreamReadout &DR) {
-  DR.DataLength = ReadoutDataSize;
-  DR.TimeHigh = getReadoutTimeHigh();
-  DR.TimeLow = getReadoutTimeLow();
-  DR.OM = 0;
-  DR.UnitId = 0;
+bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &ReadoutData) {
+  ReadoutData.DataLength = ReadoutDataSize;
+  ReadoutData.TimeHigh = getReadoutTimeHigh();
+  ReadoutData.TimeLow = getReadoutTimeLow();
+  ReadoutData.OM = 0;
+  ReadoutData.UnitId = 0; //will be determined later
 
-
-  uint8_t DetectorSegment = Fuzzer.random8() % 5;
-
-  switch (DetectorSegment) {
-  case 0: { // BW EndCap
-    uint8_t Sector = Fuzzer.random8() % 11;
-    DR.UnitId = 6;                                        // SUMO6
-    if (Settings.FreeParam1 != -1) {
-        Sector = Settings.FreeParam1;
-    }
-    if (Settings.FreeParam2 != -1) {
-        DR.UnitId = Settings.FreeParam2;
-    }
-
-    DR.FiberId = BWES6FiberId[Sector];
-    DR.FENId = BWES6FENId[Sector];
-    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
-    DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-
-  } break;
-
-  case 1: { // FW EndCap
-    uint8_t Sector = Fuzzer.random8() % 5;
-    DR.FiberId = FWES6FiberId[Sector];
-    DR.FENId = FWES6FENId[Sector];
-    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
-    DR.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
-    DR.UnitId = 6;                                        // SUMO6
-  } break;
-
-  case 2: { // Mantle
-    uint8_t Sector = Fuzzer.random8() % 10;
-    DR.FiberId = MNTLFiberId[Sector];
-    DR.FENId = MNTLFENId[Sector];
-    DR.Anode = Fuzzer.random8() & 0x7f;
-    DR.Cathode = Fuzzer.random8();
-  } break;
-
-  case 3: { // HR
-    //uint8_t Sector = Fuzzer.random8() % 17;
-    uint8_t Sector = Fuzzer.random8() % 17;
-    uint8_t Instance = Fuzzer.random8() % 2;
-    DR.FiberId = HRFiberId[Sector];
-    DR.FENId = HRFENId[Sector];
-    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
-    DR.Cathode = Fuzzer.random8() & 0x3f;
-    DR.UnitId = Instance;
-  } break;
-
-  case 4: { // SANS
-    uint8_t Sector = Fuzzer.random8() % 18;
-    uint8_t Instance = Fuzzer.random8() % 2;
-    DR.FiberId = SANSFiberId[Sector];
-    DR.FENId = SANSFENId[Sector];
-    DR.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
-    DR.Cathode = Fuzzer.random8() & 0x3f;
-    DR.UnitId = Instance;
-  } break;
+  // Each of the five detector elements has its own 'bit'
+  // this is used for masking. If the selected value is
+  // not in the mask we do not generate anything and return false
+  uint8_t DetectorValue = 1 << (Fuzzer.random8() % 5);
+  if (not (DetectorValue & DreamSettings.DetectorMask)){
+    return false;
   }
-  // DR.FiberId = 2; // debug
-  // DR.FENId = 0; // debug
-  // printf("Detector %u, Ring %u, FEN %u\n", DetectorSegment, DR.FiberId,
-  // DR.FENId);
+
+  switch (DetectorValue) {
+    case BwEndCap: {
+      uint8_t Sector = Fuzzer.random8() % 11;
+
+      if (DreamSettings.Param2 != -1) {
+          Sector = DreamSettings.Param2;
+      }
+      ReadoutData.UnitId = 6; // SUMO6
+      if (DreamSettings.Param3 != -1) {
+          ReadoutData.UnitId = DreamSettings.Param3;
+      }
+
+      ReadoutData.FiberId = BWES6FiberId[Sector];
+      ReadoutData.FENId = BWES6FENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
+      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+
+    } break;
+
+    case FwEndCap: { // FW EndCap
+      uint8_t Sector = Fuzzer.random8() % 5;
+      ReadoutData.UnitId = 6;
+      if (DreamSettings.Param2 != -1) {
+          Sector = DreamSettings.Param2 %5;
+      }
+      if (DreamSettings.Param3 != -1) {
+          ReadoutData.UnitId = DreamSettings.Param3;
+      }
+      ReadoutData.FiberId = FWES6FiberId[Sector];
+      ReadoutData.FENId = FWES6FENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
+      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+    } break;
+
+    case Mantle: { // Mantle
+      uint8_t Sector = Fuzzer.random8() % 30;
+      ReadoutData.FiberId = MNTLFiberId[Sector];
+      ReadoutData.FENId = MNTLFENId[Sector];
+      ReadoutData.Anode = Fuzzer.random8() & 0x7f;
+      ReadoutData.Cathode = Fuzzer.random8();
+    } break;
+
+    case HR: { // HR
+      //uint8_t Sector = Fuzzer.random8() % 17;
+      uint8_t Sector = Fuzzer.random8() % 17;
+      uint8_t Instance = Fuzzer.random8() % 2;
+      ReadoutData.FiberId = HRFiberId[Sector];
+      ReadoutData.FENId = HRFENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
+      ReadoutData.Cathode = Fuzzer.random8() & 0x3f;
+      ReadoutData.UnitId = Instance;
+    } break;
+
+    case SANS: { // SANS
+      uint8_t Sector = Fuzzer.random8() % 18;
+      uint8_t Instance = Fuzzer.random8() % 2;
+      ReadoutData.FiberId = SANSFiberId[Sector];
+      ReadoutData.FENId = SANSFENId[Sector];
+      ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)190);
+      ReadoutData.Cathode = Fuzzer.random8() & 0x3f;
+      ReadoutData.UnitId = Instance;
+    } break;
+  }
+  return true;
 }
 
 /// \brief implementation of virtual functio from base class
-void DreamReadoutGenerator::generateData() {
-  auto DP = (uint8_t *)Buffer;
-  DP += HeaderSize;
+void ReadoutGenerator::generateData() {
+  auto DataPtr = (uint8_t *)Buffer;
+  DataPtr += HeaderSize;
 
   uint32_t Readouts{0};
-  DataParser::DreamReadout DR;
+  DataParser::DreamReadout ReadoutData;
 
-  while (Readouts < numberOfReadouts) {
-    getRandomReadout(DR);
-    memcpy(DP, &DR, ReadoutDataSize);
-    DP += ReadoutDataSize;
+  while (Readouts < Settings.NumReadouts) {
+    bool Valid = getRandomReadout(ReadoutData);
+    if (not Valid) {
+      continue;
+    }
+    memcpy(DataPtr, &ReadoutData, ReadoutDataSize);
+    DataPtr += ReadoutDataSize;
 
     // Increment the time for next readout
     addTickBtwEventsToReadoutTime();
