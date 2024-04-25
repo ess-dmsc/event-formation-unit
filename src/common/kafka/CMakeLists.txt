@@ -25,7 +25,6 @@ set(AR51SerializerTest_SRC
   )
 create_test_executable(AR51SerializerTest)
 
-
 get_filename_component(KAFKACONFIG_FILE "${ESS_COMMON_DIR}/kafka/kafka.json" ABSOLUTE)
 
 set(KafkaConfigTest_SRC

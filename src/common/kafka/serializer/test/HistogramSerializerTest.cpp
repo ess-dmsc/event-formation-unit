@@ -8,40 +8,35 @@
 //===----------------------------------------------------------------------===//
 
 #include <cmath>
-#include <common/kafka/serializer/Frame1DHistogramSerializer.h>
+#include <common/kafka/Producer.h>
+#include <common/kafka/serializer/HistogramSerializer.h>
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
-#include <cstdint>
-#include <gtest/gtest.h>
-#include <h5cpp/datatype/float.hpp>
-#include <stdexcept>
-
-struct MockProducer {
-  inline void produce(nonstd::span<const uint8_t>, int64_t) { NumberOfCalls++; }
-
-  size_t NumberOfCalls{0};
-};
 
 using namespace serializer;
 
 template <typename T>
-class Frame1DHistogramBuilderTester : public Frame1DHistogramSerializer<T> {
+class HistogramSerializerTester : public HistogramSerializer<T> {
 
 public:
-  Frame1DHistogramBuilderTester(
-      std::string topic, int32_t period, int32_t binCount, std::string xaxis,
-      std::string yaxis, std::string timeunit,
-      std::function<void(nonstd::span<const uint8_t>, int64_t)> callback)
-      : serializer::Frame1DHistogramSerializer<T>(
-            topic, period, binCount, xaxis, yaxis, timeunit, callback) {}
+  HistogramSerializerTester(const std::string &Topic, const std::string &Source,
+                            int32_t &Period, const int32_t &BinCount,
+                            const std::string Name, const std::string Unit,
+                            HistrogramSerializerStats &Stats,
+                            const ProducerCallback Callback)
+      : HistogramSerializer<T>(Topic, Source, Period, BinCount, Name, Unit,
+                               "millisecond", Stats, Callback) {}
 
-  std::vector<std::vector<T>> &getInternalData() { return this->_data; }
-  std::vector<T> &getInternalXAxis() { return this->_xAxis; }
+  std::vector<std::vector<T>> &getInternalData() { return this->DataBins; }
+  std::vector<T> &getInternalXAxis() { return this->XAxisValues; }
 };
 
-class Frame1DHistogramSerializerTest : public TestBase {
+class HistogramSerializerTest : public TestBase {
 
-  void SetUp() override {}
+protected:
+  HistrogramSerializerStats Stats;
+
+  void SetUp() override { Stats = HistrogramSerializerStats(); }
 
   void TearDown() override {}
 };
@@ -53,12 +48,12 @@ void function(nonstd::span<const uint8_t> data, int64_t timestamp) {
   EXPECT_EQ(data.size(), size);
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestIntConstructor) {
+TEST_F(HistogramSerializerTest, TestIntConstructor) {
   int32_t period = 1000;
   int32_t count = 10;
-  auto serializer = Frame1DHistogramBuilderTester<uint64_t>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<uint64_t>("some topic", "source", period, count,
+                                          "testData", "adc", Stats, function);
 
   EXPECT_EQ(serializer.getInternalData().size(), count);
   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
@@ -68,28 +63,28 @@ TEST_F(Frame1DHistogramSerializerTest, TestIntConstructor) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestIntConstructorNegativeValues) {
+TEST_F(HistogramSerializerTest, TestIntConstructorNegativeValues) {
   int32_t period = -1000;
   int32_t count = 10;
-  EXPECT_THROW(Frame1DHistogramBuilderTester<uint64_t>(
-                   "some topic", period, count, "intensity", "counts",
-                   "millisecond", function),
+  EXPECT_THROW(HistogramSerializerTester<uint64_t>("some topic", "source",
+                                                   period, count, "testData",
+                                                   "adc", Stats, function),
                std::domain_error);
 
   period = 1000;
   count = -10;
-  EXPECT_THROW(Frame1DHistogramBuilderTester<uint64_t>(
-                   "some topic", period, count, "intensity", "counts",
-                   "millisecond", function),
+  EXPECT_THROW(HistogramSerializerTester<uint64_t>("some topic", "source",
+                                                   period, count, "testData",
+                                                   "adc", Stats, function),
                std::domain_error);
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestUint64Uint64Constructor) {
+TEST_F(HistogramSerializerTest, TestUint64Uint64Constructor) {
   int32_t period = 1000000000;
   int32_t count = 400;
-  auto serializer = Frame1DHistogramBuilderTester<uint64_t>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<uint64_t>("some topic", "source", period, count,
+                                          "testData", "adc", Stats, function);
 
   EXPECT_EQ(serializer.getInternalData().size(), count);
   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
@@ -99,12 +94,12 @@ TEST_F(Frame1DHistogramSerializerTest, TestUint64Uint64Constructor) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestFloatConstructor) {
+TEST_F(HistogramSerializerTest, TestFloatConstructor) {
   int32_t period = 100;
   int32_t count = 30;
-  auto serializer = Frame1DHistogramBuilderTester<float>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<float>("some topic", "source", period, count,
+                                       "testData", "adc", Stats, function);
 
   EXPECT_EQ(serializer.getInternalData().size(), count);
   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
@@ -118,12 +113,12 @@ TEST_F(Frame1DHistogramSerializerTest, TestFloatConstructor) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestDoubleConstructor) {
+TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
   int32_t period = 1;
   int32_t count = 30;
-  auto serializer = Frame1DHistogramBuilderTester<double>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<double>("some topic", "source", period, count,
+                                        "testData", "adc", Stats, function);
 
   EXPECT_EQ(serializer.getInternalData().size(), count);
   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
@@ -137,12 +132,12 @@ TEST_F(Frame1DHistogramSerializerTest, TestDoubleConstructor) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, EDGETestIntConstructorWithFractional) {
+TEST_F(HistogramSerializerTest, EDGETestIntConstructorWithFractional) {
   int32_t period = 1;
   int32_t count = 30;
-  auto serializer = Frame1DHistogramBuilderTester<uint>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<uint>("some topic", "source", period, count,
+                                      "testData", "adc", Stats, function);
 
   EXPECT_EQ(serializer.getInternalData().size(), count);
   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
@@ -156,12 +151,12 @@ TEST_F(Frame1DHistogramSerializerTest, EDGETestIntConstructorWithFractional) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestIntegerBinning) {
+TEST_F(HistogramSerializerTest, TestIntegerBinning) {
   int32_t period = 20;
   int32_t count = 2;
-  auto serializer = Frame1DHistogramBuilderTester<int>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<int>("some topic", "source", period, count,
+                                     "testData", "adc", Stats, function);
 
   // std::map<int, int> testData = {{10, 0}, {20, 1}, {30, 1}, {40, 0}, {50, 0},
   //                                {60, 1}, {70, 0}, {80, 0}, {90, 1}, {100,
@@ -179,14 +174,14 @@ TEST_F(Frame1DHistogramSerializerTest, TestIntegerBinning) {
   }
 }
 
-TEST_F(Frame1DHistogramSerializerTest, TestFractionalBinning) {
+TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
   int32_t period = 20;
   int32_t count = 3;
   float step = static_cast<float>(period) / static_cast<float>(count);
 
-  auto serializer = Frame1DHistogramBuilderTester<float>(
-      "some topic", period, count, "intensity", "counts", "millisecond",
-      function);
+  auto serializer =
+      HistogramSerializerTester<float>("some topic", "source", period, count,
+                                       "testData", "adc", Stats, function);
 
   float minFloatStep =
       std::nextafter(step, std::numeric_limits<float>::max()) - step;

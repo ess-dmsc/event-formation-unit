@@ -3,22 +3,11 @@
 #=============================================================================
 # Kafka related classes and tests
 #=============================================================================
+
 include_directories(.)
 
-# set(Serializer_SRC
-#   DA00Tables.h
-#   BinAggregation.h
-#   AbstractSerializer.h
-#   Frame1DHistogramSerializer.h)
-
-# add_library(Serializer OBJECT
-#   ${Serializer_SRC}
-#   )
-
-# enable_coverage_flags(EssReadoutLib)
-
-set(Frame1DHistogramSerializerTest_SRC
-  test/Frame1DHistogramSerializerTest.cpp
+set(HistogramSerializerTest_SRC
+  serializer/test/HistogramSerializerTest.cpp
   )
-  
+
 create_test_executable(Frame1DHistogramSerializerTest)

@@ -44,6 +44,9 @@ set(efu_common_INC
   kafka/AR51Serializer.h
   kafka/KafkaConfig.h
   kafka/Producer.h
+  kafka/serializer/AbstractSerializer.h
+  kafka/serializer/HistogramSerializer.h
+  kafka/serializer/FlatbufferTypes.h
   memory/Buffer.h
   memory/FixedSizePool.h
   memory/PoolAllocator.h

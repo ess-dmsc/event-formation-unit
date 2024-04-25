@@ -24,45 +24,45 @@
 namespace da00_flatbuffers {
 
 template <class> struct data_type_trait {
-  static constexpr da00_dtype type = da00_dtype::none;
+  static constexpr DA00Dtype type = DA00Dtype::none;
 };
 template <> struct data_type_trait<int8_t> {
-  static constexpr da00_dtype type = da00_dtype::int8;
+  static constexpr DA00Dtype type = DA00Dtype::int8;
 };
 template <> struct data_type_trait<int16_t> {
-  static constexpr da00_dtype type = da00_dtype::int16;
+  static constexpr DA00Dtype type = DA00Dtype::int16;
 };
 template <> struct data_type_trait<int32_t> {
-  static constexpr da00_dtype type = da00_dtype::int32;
+  static constexpr DA00Dtype type = DA00Dtype::int32;
 };
 template <> struct data_type_trait<int64_t> {
-  static constexpr da00_dtype type = da00_dtype::int64;
+  static constexpr DA00Dtype type = DA00Dtype::int64;
 };
 template <> struct data_type_trait<uint8_t> {
-  static constexpr da00_dtype type = da00_dtype::uint8;
+  static constexpr DA00Dtype type = DA00Dtype::uint8;
 };
 template <> struct data_type_trait<uint16_t> {
-  static constexpr da00_dtype type = da00_dtype::uint16;
+  static constexpr DA00Dtype type = DA00Dtype::uint16;
 };
 template <> struct data_type_trait<uint32_t> {
-  static constexpr da00_dtype type = da00_dtype::uint32;
+  static constexpr DA00Dtype type = DA00Dtype::uint32;
 };
 template <> struct data_type_trait<uint64_t> {
-  static constexpr da00_dtype type = da00_dtype::uint64;
+  static constexpr DA00Dtype type = DA00Dtype::uint64;
 };
 template <> struct data_type_trait<float> {
-  static constexpr da00_dtype type = da00_dtype::float32;
+  static constexpr DA00Dtype type = DA00Dtype::float32;
 };
 template <> struct data_type_trait<double> {
-  static constexpr da00_dtype type = da00_dtype::float64;
+  static constexpr DA00Dtype type = DA00Dtype::float64;
 };
 template <> struct data_type_trait<char> {
-  static constexpr da00_dtype type = da00_dtype::c_string;
+  static constexpr DA00Dtype type = DA00Dtype::c_string;
 };
 
 class Variable {
   std::string _name;
-  da00_dtype _type = da00_dtype::none;
+  DA00Dtype _type = DA00Dtype::none;
   std::vector<uint8_t> _data = {};
   std::vector<std::string> _axes = {};
   std::vector<int64_t> _shape = {};
@@ -80,7 +80,7 @@ public:
       throw std::runtime_error("Input value shapes inconsistent");
   }
   template <class T> Variable &data(const std::vector<T> &d) {
-    if (da00_dtype::none == data_type_trait<T>::type) {
+    if (DA00Dtype::none == data_type_trait<T>::type) {
       throw std::runtime_error(
           "Unsupported data type in Variable serialization!");
     }
