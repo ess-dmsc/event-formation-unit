@@ -8,23 +8,20 @@
 //===----------------------------------------------------------------------===//
 
 #include <cmath>
-#include <common/kafka/Producer.h>
-#include <common/kafka/serializer/HistogramSerializer.h>
-#include <common/math/NumericalMath.h>
-#include <common/testutils/TestBase.h>
-
-using namespace serializer;
+#include "common/kafka/serializer/DA00HistogramSerializer.h"
+#include "common/math/NumericalMath.h"
+#include "common/testutils/TestBase.h"
 
 template <typename T>
-class HistogramSerializerTester : public HistogramSerializer<T> {
+class HistogramSerializerTester : public fbserializer::HistogramSerializer<T> {
 
 public:
   HistogramSerializerTester(const std::string &Topic, const std::string &Source,
                             int32_t &Period, const int32_t &BinCount,
                             const std::string Name, const std::string Unit,
-                            HistrogramSerializerStats &Stats,
+                            fbserializer::HistrogramSerializerStats &Stats,
                             const ProducerCallback Callback)
-      : HistogramSerializer<T>(Topic, Source, Period, BinCount, Name, Unit,
+      : fbserializer::HistogramSerializer<T>(Topic, Source, Period, BinCount, Name, Unit,
                                "millisecond", Stats, Callback) {}
 
   std::vector<std::vector<T>> &getInternalData() { return this->DataBins; }
@@ -34,9 +31,9 @@ public:
 class HistogramSerializerTest : public TestBase {
 
 protected:
-  HistrogramSerializerStats Stats;
+  fbserializer::HistrogramSerializerStats Stats;
 
-  void SetUp() override { Stats = HistrogramSerializerStats(); }
+  void SetUp() override { Stats = fbserializer::HistrogramSerializerStats(); }
 
   void TearDown() override {}
 };

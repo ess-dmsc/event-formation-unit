@@ -19,7 +19,6 @@ set(EV44SerializerTest_SRC
   )
 create_test_executable(EV44SerializerTest)
 
-
 set(AR51SerializerTest_SRC
   test/AR51SerializerTest.cpp
   )

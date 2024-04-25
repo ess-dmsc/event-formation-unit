@@ -19,7 +19,7 @@
 #include <common/kafka/Producer.h>
 #include <flatbuffers/flatbuffers.h>
 
-namespace serializer {
+namespace fbserializer {
 using namespace std::chrono;
 
 struct SerializerStats {
@@ -53,4 +53,4 @@ public:
                     CurrentHwClock);
   };
 };
-} // namespace serializer
+} // namespace fbserializer

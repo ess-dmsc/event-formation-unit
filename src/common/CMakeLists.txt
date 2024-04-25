@@ -45,7 +45,7 @@ set(efu_common_INC
   kafka/KafkaConfig.h
   kafka/Producer.h
   kafka/serializer/AbstractSerializer.h
-  kafka/serializer/HistogramSerializer.h
+  kafka/serializer/DA00HistogramSerializer.h
   kafka/serializer/FlatbufferTypes.h
   memory/Buffer.h
   memory/FixedSizePool.h

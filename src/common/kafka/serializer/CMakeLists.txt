@@ -6,8 +6,8 @@
 
 include_directories(.)
 
-set(HistogramSerializerTest_SRC
-  serializer/test/HistogramSerializerTest.cpp
+set(DA00HistogramSerializerTest_SRC
+  test/DA00HistogramSerializerTest.cpp
   )
 
-create_test_executable(Frame1DHistogramSerializerTest)
+create_test_executable(DA00HistogramSerializerTest)

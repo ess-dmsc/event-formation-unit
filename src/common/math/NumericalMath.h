@@ -34,4 +34,4 @@ template <typename T> constexpr T sum(const std::vector<T> &data) {
 template <class T> VectorAggregationFunc<T> SUM_AGG_FUNC = sum<T>;
 template <class T> VectorAggregationFunc<T> AVERAGE_AGG_FUNC = average<T>;
 
-} // namespace serializer
+} // namespace essmath

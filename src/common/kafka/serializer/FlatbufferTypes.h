@@ -21,7 +21,7 @@
 #include <optional>
 #include <sstream>
 
-namespace da00_flatbuffers {
+namespace da00flatbuffers {
 
 template <class> struct data_type_trait {
   static constexpr DA00Dtype type = DA00Dtype::none;
@@ -265,4 +265,4 @@ public:
   }
 };
 
-}; // namespace da00_faltbuffers
+}; // namespace da00flatbuffers
