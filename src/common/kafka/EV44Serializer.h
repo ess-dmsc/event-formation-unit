@@ -45,9 +45,9 @@ public:
   int64_t referenceTime() const;
 
   /// \brief adds event, if maximum count is exceeded, sends data using the
-  /// producer callback \param time time of event in relation to pulse time
+  /// producer callback \param Time time of event in relation to pulse time
   /// Function is virtual to allow mocking
-  /// \param pixl id of pixel as defined by logical geometry mapping
+  /// \param Pixel id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
   virtual size_t addEvent(int32_t Time, int32_t Pixel);
 
