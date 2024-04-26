@@ -27,8 +27,9 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 // if this was 100% correct
 bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
-  ReadoutData.TimeHigh = getReadoutTimeHigh();
-  ReadoutData.TimeLow = getReadoutTimeLow();
+  double Tof = TofDist.getRandomTof();
+  ReadoutData.TimeHigh = getReadoutTimeHigh(); ///\todo correctme
+  ReadoutData.TimeLow = Tof*6289464.0/71; ///\todo correctme
   ReadoutData.OM = 0;
   ReadoutData.UnitId = 0; //will be determined later
 
