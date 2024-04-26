@@ -11,11 +11,13 @@
 
 #pragma once
 
-#include "FlatbufferTypes.h"
-#include "common/kafka/serializer/AbstractSerializer.h"
-#include "common/math/NumericalMath.h"
-#include "flatbuffers/base.h"
-#include "fmt/format.h"
+#include <FlatbufferTypes.h>
+#include <common/kafka/serializer/AbstractSerializer.h>
+#include <common/math/NumericalMath.h>
+#include <cstdint>
+#include <flatbuffers/base.h>
+#include <fmt/format.h>
+#include "common/monitor/HistogramSerializer.h"
 
 namespace fbserializer {
 
@@ -127,20 +129,24 @@ public:
     DataBins = data_t(XAxisValues.size());
   }
 
+  HistogramSerializer(const std::string &Topic, const std::string &Source,
+                      const time_t &Period, const time_t &BinCount,
+                      const std::string &Name, const std::string &Unit,
+                      const std::string TimeUnit,
+                      HistrogramSerializerStats &Stats,
+                      const enum BinningStrategy Strategy,
+                      const ProducerCallback Callback = {},
+                      const essmath::VectorAggregationFunc<T> AggFunc =
+                          essmath::SUM_AGG_FUNC<T>)
+      : HistogramSerializer(Topic, Source, Period, BinCount, Name, Unit,
+                            TimeUnit, Stats, Callback, AggFunc, Strategy){};
+
   /// \brief This function finds the bin index for a given time.
   /// \param Time is the time for which used to calculate the correct bin index
   /// \param Value is the value to be added to the bin
   inline void addData(const R Time, const T Value) {
     static_assert(DataTypeTrait<R>::type != DA00Dtype::none,
                   "Data type R not supported for serialization!");
-
-    if (static_cast<time_t>(Time) > Period &&
-        BinningStrategy == BinningStrategy::Drop) {
-      Stats.DataOverPeriodDropped++;
-      return;
-    } else {
-      Stats.DataOverPeriodLastBin++;
-    }
 
     // requires that initXaxis create an ascending sorted vector
     R MinValue = XAxisValues.front();                          // minimum value
@@ -152,7 +158,12 @@ public:
     // Check if the binIndex is out of bounds and put edge values in the last
     // bin
     if (BinIndex >= DataBins.size()) {
+      if (BinningStrategy == BinningStrategy::Drop) {
+        Stats.DataOverPeriodDropped++;
+        return;
+      }
       BinIndex = DataBins.size() - 1;
+      Stats.DataOverPeriodLastBin++;
     }
 
     if (DataBins[BinIndex].empty())
@@ -203,9 +214,9 @@ private:
   }
 
   /// \brief Initialize the X-axis values.
-  /// \details The X-axis values are initialized based on the period and number
-  /// of bins. These values are cannot be negative the algorithm expects
-  /// ascending sorted values from the X axis.
+  /// \details The X-axis values are initialized based on the period and
+  /// number of bins. These values are cannot be negative the algorithm
+  /// expects ascending sorted values from the X axis.
   void initAxis() {
     static_assert(DataTypeTrait<R>::type != DA00Dtype::none,
                   "Data type is not supported for serialization!");

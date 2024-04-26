@@ -8,9 +8,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cmath>
-#include "common/kafka/serializer/DA00HistogramSerializer.h"
-#include "common/math/NumericalMath.h"
-#include "common/testutils/TestBase.h"
+#include <common/kafka/serializer/DA00HistogramSerializer.h>
+#include <common/math/NumericalMath.h>
+#include <common/testutils/TestBase.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class HistogramSerializerTester : public fbserializer::HistogramSerializer<T> {
@@ -20,9 +21,12 @@ public:
                             int32_t &Period, const int32_t &BinCount,
                             const std::string Name, const std::string Unit,
                             fbserializer::HistrogramSerializerStats &Stats,
-                            const ProducerCallback Callback)
-      : fbserializer::HistogramSerializer<T>(Topic, Source, Period, BinCount, Name, Unit,
-                               "millisecond", Stats, Callback) {}
+                            const ProducerCallback Callback,
+                            fbserializer::BinningStrategy Strategy =
+                                fbserializer::BinningStrategy::Drop)
+      : fbserializer::HistogramSerializer<T>(Topic, Source, Period, BinCount,
+                                             Name, Unit, "millisecond", Stats,
+                                             Strategy, Callback) {}
 
   std::vector<std::vector<T>> &getInternalData() { return this->DataBins; }
   std::vector<T> &getInternalXAxis() { return this->XAxisValues; }
@@ -155,10 +159,6 @@ TEST_F(HistogramSerializerTest, TestIntegerBinning) {
       HistogramSerializerTester<int>("some topic", "source", period, count,
                                      "testData", "adc", Stats, function);
 
-  // std::map<int, int> testData = {{10, 0}, {20, 1}, {30, 1}, {40, 0}, {50, 0},
-  //                                {60, 1}, {70, 0}, {80, 0}, {90, 1}, {100,
-  //                                0}};
-
   std::map<int, int> testData = {{3, 0}, {8, 1}, {12, 1}};
 
   for (auto &e : testData) {
@@ -168,6 +168,68 @@ TEST_F(HistogramSerializerTest, TestIntegerBinning) {
   EXPECT_EQ(serializer.getInternalData().size(), count);
   for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
     EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]), 1);
+  }
+}
+
+TEST_F(HistogramSerializerTest, TestNegativeIntegerBinning) {
+  int32_t period = 20;
+  int32_t count = 2;
+  auto serializer =
+      HistogramSerializerTester<int>("some topic", "source", period, count,
+                                     "testData", "adc", Stats, function);
+
+  std::map<int, int> testData = {{-33, 1}, {8, 1}, {-12, 1}, {12, 1}};
+
+  for (auto &e : testData) {
+    serializer.addData(e.first, e.second);
+  }
+
+  EXPECT_EQ(serializer.getInternalData().size(), count);
+  for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
+    EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]), 1);
+  }
+}
+
+TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodDropped) {
+  int32_t period = 20;
+  int32_t count = 2;
+  auto serializer =
+      HistogramSerializerTester<int>("some topic", "source", period, count,
+                                     "testData", "adc", Stats, function);
+
+  std::map<int, int> testData = {{3, 1}, {8, 0}, {12, 1}, {25, 1}, {26, 1}};
+
+  for (auto &e : testData) {
+    serializer.addData(e.first, e.second);
+  }
+
+  EXPECT_EQ(serializer.getInternalData().size(), count);
+  EXPECT_EQ(Stats.DataOverPeriodDropped, 2);
+  EXPECT_EQ(Stats.DataOverPeriodLastBin, 0);
+  for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
+    EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]), 1);
+  }
+}
+
+TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodLastBin) {
+  int32_t period = 20;
+  int32_t count = 2;
+  auto serializer = HistogramSerializerTester<int>(
+      "some topic", "source", period, count, "testData", "adc", Stats, function,
+      fbserializer::BinningStrategy::LastBin);
+
+  std::map<int, int> testData = {{3, 1},  {8, 1},  {12, 0},
+                                 {20, 0}, {25, 1}, {26, 1}};
+
+  for (auto &e : testData) {
+    serializer.addData(e.first, e.second);
+  }
+
+  EXPECT_EQ(serializer.getInternalData().size(), count);
+  EXPECT_EQ(Stats.DataOverPeriodDropped, 0);
+  EXPECT_EQ(Stats.DataOverPeriodLastBin, 3);
+  for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
+    EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]), 2);
   }
 }
 
