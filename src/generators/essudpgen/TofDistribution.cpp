@@ -23,7 +23,7 @@ TofDistribution::TofDistribution() {
 
   for (int i = 0; i < ArraySize; i++) {
     double t = i * MaxTofMs/(ArraySize-1);
-    Dist[i] = gaussianPDF(t, 30.0, 4) + 0.6 * gaussianPDF(t, 42.0, 4);
+    Dist[i] = 0.001 + gaussianPDF(t, 30.0, 4) + 0.6 * gaussianPDF(t, 42.0, 4);
     if (i != 0) {
       CDF[i] = CDF[i-1] + Dist[i];
     }
