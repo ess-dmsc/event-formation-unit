@@ -18,30 +18,30 @@ double gaussianPDF(double x, double mu, double sigma) {
 
 /// \brief generate Dist and CDF for the specified shape
 TofDistribution::TofDistribution() {
-  Dist.reserve(ArraySize);
-  CDF.reserve(ArraySize);
+  Dist.reserve(Bins);
+  CDF.reserve(Bins);
+	BinWidth = MaxTofMs/(Bins - 1);
 
-  for (int i = 0; i < ArraySize; i++) {
-    double t = i * MaxTofMs/(ArraySize-1);
+  for (int i = 0; i < Bins; i++) {
+    double t = i * BinWidth;
     Dist[i] = 0.001 + gaussianPDF(t, 30.0, 4) + 0.6 * gaussianPDF(t, 42.0, 4);
     if (i != 0) {
       CDF[i] = CDF[i-1] + Dist[i];
     }
   }
-  Norm = CDF[ArraySize-1];
+  Norm = CDF[Bins - 1];
 }
 
 /// \brief draw a random TOF according to distribution
 // can also be improved by precalculation of bin width.
 double TofDistribution::getRandomTof() {
   double Value =  dis(gen) * Norm;
-  for (int i = 0; i < ArraySize; i++) {
+  for (int i = 0; i < Bins; i++) {
     if (CDF[i] >= Value) {
-      return i * MaxTofMs/(ArraySize-1);
+      return i * BinWidth;
     }
   }
   return MaxTofMs;
 }
-
 
 // GCOVR_EXCL_STOP

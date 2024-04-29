@@ -21,7 +21,8 @@ public:
   double getRandomTof();
 
   float MaxTofMs = 1000.0/14; // ESS 14Hz -> 71.43 ms
-  int ArraySize{512};
+  int Bins{512};
+  float BinWidth{0.0};
   float Norm{1};
   std::vector<float> Dist;
   std::vector<float> CDF;
