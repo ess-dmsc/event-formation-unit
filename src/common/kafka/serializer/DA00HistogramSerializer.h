@@ -6,7 +6,7 @@
 /// \brief Implementation of Frame1DHistogramSerializer, based on the da00
 /// schema for serialization
 ///
-/// See https://github.com/ess-dmsc/streaming-data-types
+/// See \link https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -17,8 +17,8 @@
 #include <cstdint>
 #include <flatbuffers/base.h>
 #include <fmt/format.h>
-#include "common/monitor/HistogramSerializer.h"
-#include "da00_dataarray_generated.h"
+#include <common/monitor/HistogramSerializer.h>
+#include <da00_dataarray_generated.h>
 
 namespace fbserializer {
 

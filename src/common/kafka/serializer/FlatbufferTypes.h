@@ -1,16 +1,34 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
-//===----------------------------------------------------------------------===//
+/// Copyright (C) 2024 European Spallation Source, see LICENSE file
+///===----------------------------------------------------------------------===//
 ///
-/// \file
+/// This file contains serialization objects for the DA00 schema da00_DataArray
+/// and da00_Variable tables. It provides classes for serializing and
+/// deserializing data using FlatBuffers.
 ///
-/// \brief Serialization objects for DA00 schema da00_DataArray and
-/// da00_Variable tables
+/// The classes in this file include:
+/// - `da00flatbuffers::Variable`: Represents a variable with its name, type,
+/// data, axes, shape, unit, label, and source.
+/// - `da00flatbuffers::DataArray`: Represents a data array with its source
+/// name, timestamp, and a vector of variables.
 ///
-/// \author Gregory Tucker \date 2024-03-01
+/// These classes are used to serialize and deserialize data using the DA00
+/// schema defined in the FlatBuffers format. The serialization and
+/// deserialization functions are provided in the `pack` and constructor methods
+/// of the classes.
+///
+/// For more information about the DA00 schema and FlatBuffers, refer to the
+/// following links:
+/// - DA00 schema: https://github.com/ess-dmsc/streaming-data-types
+/// - FlatBuffers: https://google.github.io/flatbuffers/
+///
+/// This code is part of the ESS EFU (Event Formation Unit) project, developed
+/// by the European Spallation Source. For licensing information, see the
+/// LICENSE file in the repository:
 /// \link https://github.com/g5t/flatbuffer-histogram-generator
 ///
-/// For flatbuffers schema see:
-/// \link https://github.com/ess-dmsc/streaming-data-types
+/// \author: Gregory Tucker
+/// \date: 2024-03-01
+/// \link: https://github.com/g5t/flatbuffer-histogram-generator
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -23,245 +41,281 @@
 
 namespace da00flatbuffers {
 
-template <class> struct data_type_trait {
+template <class> struct DataTypeTrait {
   static constexpr da00_dtype type = da00_dtype::none;
 };
-template <> struct data_type_trait<int8_t> {
+template <> struct DataTypeTrait<int8_t> {
   static constexpr da00_dtype type = da00_dtype::int8;
 };
-template <> struct data_type_trait<int16_t> {
+template <> struct DataTypeTrait<int16_t> {
   static constexpr da00_dtype type = da00_dtype::int16;
 };
-template <> struct data_type_trait<int32_t> {
+template <> struct DataTypeTrait<int32_t> {
   static constexpr da00_dtype type = da00_dtype::int32;
 };
-template <> struct data_type_trait<int64_t> {
+template <> struct DataTypeTrait<int64_t> {
   static constexpr da00_dtype type = da00_dtype::int64;
 };
-template <> struct data_type_trait<uint8_t> {
+template <> struct DataTypeTrait<uint8_t> {
   static constexpr da00_dtype type = da00_dtype::uint8;
 };
-template <> struct data_type_trait<uint16_t> {
+template <> struct DataTypeTrait<uint16_t> {
   static constexpr da00_dtype type = da00_dtype::uint16;
 };
-template <> struct data_type_trait<uint32_t> {
+template <> struct DataTypeTrait<uint32_t> {
   static constexpr da00_dtype type = da00_dtype::uint32;
 };
-template <> struct data_type_trait<uint64_t> {
+template <> struct DataTypeTrait<uint64_t> {
   static constexpr da00_dtype type = da00_dtype::uint64;
 };
-template <> struct data_type_trait<float> {
+template <> struct DataTypeTrait<float> {
   static constexpr da00_dtype type = da00_dtype::float32;
 };
-template <> struct data_type_trait<double> {
+template <> struct DataTypeTrait<double> {
   static constexpr da00_dtype type = da00_dtype::float64;
 };
-template <> struct data_type_trait<char> {
+template <> struct DataTypeTrait<char> {
   static constexpr da00_dtype type = da00_dtype::c_string;
 };
 
+/// \brief Represents a variable can be stored in DA00 DataArray flatbuffer
+/// table.
+/// \details The Variable class is used to serialize and deserialize
+/// variables using the DA00 schema defined in the FlatBuffers format. The class
+/// provides methods for serializing and deserializing variables using the
+/// FlatBuffers library.
 class Variable {
-  std::string _name;
-  da00_dtype _type = da00_dtype::none;
-  std::vector<uint8_t> _data = {};
-  std::vector<std::string> _axes = {};
-  std::vector<int64_t> _shape = {};
-  std::optional<std::string> _unit;
-  std::optional<std::string> _label;
-  std::optional<std::string> _source;
+  std::string Name;
+  da00_dtype Type = da00_dtype::none;
+  std::vector<uint8_t> Data = {};
+  std::vector<std::string> Axes = {};
+  std::vector<int64_t> Shape = {};
+  std::optional<std::string> Unit;
+  std::optional<std::string> Label;
+  std::optional<std::string> Source;
 
 public:
-  explicit Variable(std::string name) : _name(std::move(name)) {}
-  Variable(std::string name, std::vector<std::string> axes,
-           std::vector<int64_t> shape)
-      : _name(std::move(name)), _axes(std::move(axes)),
-        _shape(std::move(shape)) {
-    if (_axes.size() != _shape.size())
+  /// \brief Create a new variable with a name.
+  /// \param Name The name of the variable
+  explicit Variable(std::string Name) : Name(std::move(Name)) {}
+  Variable(std::string Name, std::vector<std::string> Axes,
+           std::vector<int64_t> Shape)
+      : Name(std::move(Name)), Axes(std::move(Axes)), Shape(std::move(Shape)) {
+    if (Axes.size() != Shape.size())
       throw std::runtime_error("Input value shapes inconsistent");
   }
+
+  /// \brief copies data vector to the variable.
+  /// \param d The data vector to copy to the variable
   template <class T> Variable &data(const std::vector<T> &d) {
-    if (da00_dtype::none == data_type_trait<T>::type) {
+    if (da00_dtype::none == DataTypeTrait<T>::type) {
       throw std::runtime_error(
           "Unsupported data type in Variable serialization!");
     }
     // Allow unspecified-shape vector input
-    if (_shape.empty())
-      _shape = {static_cast<int64_t>(d.size())};
+    if (Shape.empty())
+      Shape = {static_cast<int64_t>(d.size())};
     // Check that the provided shape specify the same number of elements
     if (const auto total =
-            std::reduce(_shape.begin(), _shape.end(), 1, std::multiplies());
+            std::reduce(Shape.begin(), Shape.end(), 1, std::multiplies());
         total != static_cast<int64_t>(d.size())) {
       throw std::runtime_error("Inconsistent data and shape arrays");
     }
     // Stash-away the da00_dtype equivalent to T
-    _type = data_type_trait<T>::type;
+    Type = DataTypeTrait<T>::type;
     // Reinterpret the provided data as a series of unsigned 1 byte integers
-    auto bytes = sizeof(T) * d.size() / sizeof(uint8_t);
-    _data.resize(bytes);
-    std::memcpy(_data.data(), d.data(), bytes);
+    auto Bytes = sizeof(T) * d.size() / sizeof(uint8_t);
+    Data.resize(Bytes);
+    std::memcpy(Data.data(), d.data(), Bytes);
 
     return *this;
   }
+
+  /// \brief give back a copy from the data vector of this variable.
+  /// \return The data vector of this variable
   template <class T> std::vector<T> data() const {
-    const auto count = sizeof(uint8_t) * _data.size() / sizeof(T);
+    const auto count = sizeof(uint8_t) * Data.size() / sizeof(T);
     if (const auto total =
-            std::reduce(_shape.begin(), _shape.end(), 1, std::multiplies());
+            std::reduce(Shape.begin(), Shape.end(), 1, std::multiplies());
         total != static_cast<int64_t>(count)) {
       std::stringstream ss;
       ss << "Inconsistent data and shape arrays for specified type because "
          << total << " != " << count;
       throw std::runtime_error(ss.str());
     }
-    std::vector<T> out(count);
-    std::memcpy(out.data(), _data.data(), _data.size());
-    return out;
+    std::vector<T> Out(count);
+    std::memcpy(Out.data(), Data.data(), Data.size());
+    return Out;
   }
   Variable &axes(const std::vector<std::string> &ax) {
-    _axes.clear();
-    _axes.reserve(ax.size());
+    Axes.clear();
+    Axes.reserve(ax.size());
     for (const auto &a : ax)
-      _axes.push_back(a);
+      Axes.push_back(a);
     return *this;
   }
   Variable &axes(std::vector<std::string> &&ax) {
-    _axes = std::move(ax);
+    Axes = std::move(ax);
     return *this;
   }
   template <class T>
   std::enable_if_t<std::is_integral_v<T>, Variable &> &
   shape(const std::vector<T> &sh) {
-    _shape.clear();
-    _shape.reserve(sh.size());
+    Shape.clear();
+    Shape.reserve(sh.size());
     for (const auto &s : sh)
-      _shape.push_back(static_cast<int64_t>(s));
+      Shape.push_back(static_cast<int64_t>(s));
     return *this;
   }
   Variable &shape(std::vector<int64_t> &&sh) {
-    _shape = std::move(sh);
+    Shape = std::move(sh);
     return *this;
   }
   Variable &unit(std::string &&u) {
-    _unit = std::move(u);
+    Unit = std::move(u);
     return *this;
   }
   Variable &label(std::string &&l) {
-    _label = std::move(l);
+    Label = std::move(l);
     return *this;
   }
   Variable &source(std::string &&s) {
-    _source = std::move(s);
+    Source = std::move(s);
     return *this;
   }
   Variable &unit(const std::string &u) {
-    _unit = u;
+    Unit = u;
     return *this;
   }
   Variable &label(const std::string &l) {
-    _label = l;
+    Label = l;
     return *this;
   }
   Variable &source(const std::string &s) {
-    _source = s;
+    Source = s;
     return *this;
   }
 
-  bool operator==(const Variable &other) const {
-    if (_name != other._name || _data != other._data || _axes != other._axes ||
-        _shape != other._shape || _unit != other._unit ||
-        _label != other._label || _source != other._source)
+  bool operator==(const Variable &Other) const {
+    if (Name != Other.Name || Data != Other.Data || Axes != Other.Axes ||
+        Shape != Other.Shape || Unit != Other.Unit || Label != Other.Label ||
+        Source != Other.Source)
       return false;
     return true;
   }
 
-  auto pack(flatbuffers::FlatBufferBuilder &builder) const {
+  /// \brief Serialize the variable to a flatbuffer.
+  /// \details The variable is serialized to a flatbuffer and stored in the
+  /// buffer of the abstract serializer
+  /// \param Builder The flatbuffer builder to use for serialization
+  /// \return The flatbuffer offset of the serialized variable
+  auto pack(flatbuffers::FlatBufferBuilder &Builder) const {
     const auto source =
-        _source.has_value() ? builder.CreateString(_source.value()) : 0;
+        Source.has_value() ? Builder.CreateString(Source.value()) : 0;
     const auto label =
-        _label.has_value() ? builder.CreateString(_label.value()) : 0;
-    const auto unit =
-        _unit.has_value() ? builder.CreateString(_unit.value()) : 0;
-    auto name = builder.CreateString(_name);
-    const auto axes = builder.CreateVectorOfStrings(_axes);
+        Label.has_value() ? Builder.CreateString(Label.value()) : 0;
+    const auto unit = Unit.has_value() ? Builder.CreateString(Unit.value()) : 0;
+    auto name = Builder.CreateString(Name);
+    const auto axes = Builder.CreateVectorOfStrings(Axes);
 
     // shape should be int64_t but is size_t, which is (probably) uint64_t:
     std::vector<int64_t> signed_shape;
-    signed_shape.reserve(_shape.size());
-    std::transform(_shape.begin(), _shape.end(),
-                   std::back_inserter(signed_shape),
+    signed_shape.reserve(Shape.size());
+    std::transform(Shape.begin(), Shape.end(), std::back_inserter(signed_shape),
                    [](const size_t a) { return static_cast<int64_t>(a); });
-    const auto shape = builder.CreateVector<int64_t>(signed_shape);
+    const auto shape = Builder.CreateVector<int64_t>(signed_shape);
 
-    const auto data = builder.CreateVector<uint8_t>(_data);
-    return Createda00_Variable(builder, name, unit, label, source, _type, axes,
+    const auto data = Builder.CreateVector<uint8_t>(Data);
+    return Createda00_Variable(Builder, name, unit, label, source, Type, axes,
                                shape, data);
   }
 
-  explicit Variable(da00_Variable const *buffer)
-      : _name{buffer->name()->str()} {
-    if (buffer->unit())
-      _unit = buffer->unit()->str();
-    if (buffer->label())
-      _label = buffer->label()->str();
-    if (buffer->source())
-      _source = buffer->source()->str();
-    if (buffer->shape()) {
-      _shape = std::vector(buffer->shape()->begin(), buffer->shape()->end());
+  /// \brief Deserialize a variable from a flatbuffer.
+  /// \details The variable is deserialized from a flatbuffer and stored in the
+  /// buffer of the abstract serializer
+  /// \param Buffer The flatbuffer to deserialize
+  explicit Variable(da00_Variable const *Buffer) : Name{Buffer->name()->str()} {
+    if (Buffer->unit())
+      Unit = Buffer->unit()->str();
+    if (Buffer->label())
+      Label = Buffer->label()->str();
+    if (Buffer->source())
+      Source = Buffer->source()->str();
+    if (Buffer->shape()) {
+      Shape = std::vector(Buffer->shape()->begin(), Buffer->shape()->end());
     }
-    if (buffer->axes()) {
+    if (Buffer->axes()) {
       std::vector<std::string> axes;
-      axes.reserve(buffer->axes()->size());
-      for (const auto &axis : *buffer->axes()) {
+      axes.reserve(Buffer->axes()->size());
+      for (const auto &axis : *Buffer->axes()) {
         axes.push_back(axis->str());
       }
       if (!axes.empty())
-        _axes = axes;
+        Axes = axes;
     }
-    if (buffer->data()) {
-      _data = std::vector(buffer->data()->begin(), buffer->data()->end());
+    if (Buffer->data()) {
+      Data = std::vector(Buffer->data()->begin(), Buffer->data()->end());
     }
-    _type = buffer->data_type();
+    Type = Buffer->data_type();
   }
 };
 
+/// \brief Represents a data array with a source name, timestamp, and a vector
+/// of variables.
+/// \details The DataArray class is used to serialize and
+/// deserialize data arrays using the DA00 schema defined in the FlatBuffers
+/// format. The class provides methods for serializing and deserializing data
+/// arrays using the FlatBuffers library.
 class DataArray {
   using time_t = std::chrono::time_point<std::chrono::system_clock>;
-  std::string _source_name;
-  time_t _timestamp;
-  std::vector<Variable> _data;
+  std::string SourceName;
+  time_t TimeStamp;
+  std::vector<Variable> Data;
 
 public:
-  DataArray(std::string source_name, std::vector<Variable> data)
-      : _source_name(std::move(source_name)),
-        _timestamp(std::chrono::system_clock::now()), _data(std::move(data)) {}
+  /// \brief Create a new data array with a source name and a vector of
+  /// variables. \param SourceName The name of the data source \param Data The
+  /// vector of variables to include in the data array
+  DataArray(std::string SourceName, std::vector<Variable> Data)
+      : SourceName(std::move(SourceName)),
+        TimeStamp(std::chrono::system_clock::now()), Data(std::move(Data)) {}
 
-  explicit DataArray(da00_DataArray const *buffer)
-      : _source_name(buffer->source_name()->str()),
-        _timestamp(time_t(std::chrono::nanoseconds(buffer->timestamp()))) {
-    if (buffer->data()) {
-      _data.reserve(buffer->data()->size());
-      for (const auto &variable : *buffer->data()) {
-        _data.emplace_back(variable);
+  /// \brief Create a new data array with a source name and a vector of
+  /// variables.
+  /// \param Buffer The flatbuffer to deserialize
+  explicit DataArray(da00_DataArray const *Buffer)
+      : SourceName(Buffer->source_name()->str()),
+        TimeStamp(time_t(std::chrono::nanoseconds(Buffer->timestamp()))) {
+    if (Buffer->data()) {
+      Data.reserve(Buffer->data()->size());
+      for (const auto &variable : *Buffer->data()) {
+        Data.emplace_back(variable);
       }
     }
   }
 
-  auto pack(flatbuffers::FlatBufferBuilder &builder) const {
-    const auto source_name = builder.CreateString(_source_name);
-    const auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                          _timestamp.time_since_epoch())
+  /// \brief Serialize the data array to a flatbuffer.
+  /// \details The data array is serialized to a flatbuffer and stored in the
+  /// buffer of the abstract serializer
+  /// \param Builder The flatbuffer builder to use for serialization
+  /// \return The flatbuffer offset of the serialized data array
+  auto pack(flatbuffers::FlatBufferBuilder &Builder) const {
+    const auto SourceNameOffset = Builder.CreateString(this->SourceName);
+    const auto Time = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                          TimeStamp.time_since_epoch())
                           .count();
 
-    std::vector<flatbuffers::Offset<da00_Variable>> offsets;
-    offsets.reserve(_data.size());
-    for (const auto &d : _data)
-      offsets.push_back(d.pack(builder));
-    const auto data = builder.CreateVector(offsets);
-    return Createda00_DataArray(builder, source_name, time, data);
+    std::vector<flatbuffers::Offset<da00_Variable>> DA00VariableOffsets;
+    DA00VariableOffsets.reserve(Data.size());
+    for (const auto &d : Data)
+      DA00VariableOffsets.push_back(d.pack(Builder));
+    const auto DataOffsets = Builder.CreateVector(DA00VariableOffsets);
+    return Createda00_DataArray(Builder, SourceNameOffset, Time, DataOffsets);
   }
 
-  bool operator==(const DataArray &other) const {
-    return _source_name == other._source_name &&
-           _timestamp == other._timestamp && _data == other._data;
+  bool operator==(const DataArray &Other) const {
+    return SourceName == Other.SourceName && TimeStamp == Other.TimeStamp &&
+           Data == Other.Data;
   }
 };
 
