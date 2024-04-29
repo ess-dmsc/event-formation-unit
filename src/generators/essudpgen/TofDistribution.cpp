@@ -33,7 +33,6 @@ TofDistribution::TofDistribution() {
 }
 
 /// \brief draw a random TOF according to distribution
-// can also be improved by precalculation of bin width.
 double TofDistribution::getRandomTof() {
   double Value =  dis(gen) * Norm;
   for (int i = 0; i < Bins; i++) {

@@ -33,7 +33,7 @@ bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &ReadoutData) {
   if (DreamSettings.Tof) {
     double Tof = TofDist.getRandomTof();
     ReadoutData.TimeHigh = pulseTime.getTimeHigh();
-    ReadoutData.TimeLow = pulseTime.getTimeLow() + Tof*6289464.0/71;
+    ReadoutData.TimeLow = pulseTime.getTimeLow() + Tof * 88584.0; //6289464.0/71
   } else {
     ReadoutData.TimeHigh = getReadoutTimeHigh();
     ReadoutData.TimeLow = getReadoutTimeLow();
