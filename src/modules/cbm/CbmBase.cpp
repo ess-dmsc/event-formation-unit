@@ -48,7 +48,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.bytes", Counters.TxBytes);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -163,7 +162,7 @@ void CbmBase::processing_thread() {
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   RuntimeStat RtStat(
-      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -212,11 +211,10 @@ void CbmBase::processing_thread() {
     // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
 
       for (auto &serializer : SerializersPtr) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        Counters.TxBytes += serializer->produce();
         Counters.ProduceCauseTimeout++;
 
         Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;

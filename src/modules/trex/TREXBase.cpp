@@ -43,7 +43,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.bytes", Counters.TxBytes);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -182,7 +181,7 @@ void TrexBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -234,9 +233,9 @@ void TrexBase::processing_thread() {
 
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
-      Counters.TxBytes += Serializer->produce();
+      Serializer->produce();
       Counters.ProduceCauseTimeout++;
 
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;

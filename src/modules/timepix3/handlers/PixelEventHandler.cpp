@@ -159,7 +159,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       continue;
     }
     XTRACE(EVENT, DEB, "New event, Time: %u, PixelId: %u", eventTime, PixelId);
-    statCounters.TxBytes += serializer.addEvent(eventTof, PixelId);
+    serializer.addEvent(eventTof, PixelId);
     statCounters.Events++;
   }
   clusters.clear();

@@ -37,8 +37,7 @@ struct Counters {
   int64_t ProcessingIdle;
   int64_t Events;
   int64_t GeometryErrors;
-  int64_t TxBytes;
-  
+
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
   int64_t ProduceCausePulseChange;

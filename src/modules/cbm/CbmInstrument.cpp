@@ -40,7 +40,7 @@ void CbmInstrument::processMonitorReadouts(void) {
   // configured range, also illegal time intervals can be detected here
 
   for (EV44Serializer *Serializer : SerializersPtr) {
-    counters.TxBytes += Serializer->checkAndSetReferenceTime(
+    Serializer->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
     /// \todo sometimes PrevPulseTime maybe?
   }
@@ -112,8 +112,7 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
            type.to_string(), PixelId, TimeOfFlight);
-    counters.TxBytes +=
-        SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
+    SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
     counters.MonitorCounts++;
   }
 }

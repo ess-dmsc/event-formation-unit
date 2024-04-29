@@ -47,7 +47,6 @@ struct Counters {
   int64_t PixelErrors;
   int64_t TimeErrors;
   struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
-  int64_t TxBytes;
   int64_t TxRawReadoutPackets;
 
   // Identification of the cause of produce calls

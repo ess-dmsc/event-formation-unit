@@ -114,7 +114,7 @@ void DreamInstrument::processReadouts() {
     if (PixelId == 0) {
       counters.GeometryErrors++;
     } else {
-      counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+      Serializer->addEvent(TimeOfFlight, PixelId);
       counters.Events++;
     }
   }

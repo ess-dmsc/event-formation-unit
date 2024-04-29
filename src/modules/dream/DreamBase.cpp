@@ -77,7 +77,6 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.count", Counters.Events);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
-  Stats.create("transmit.bytes", Counters.TxBytes);
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // Produce cause call stats
@@ -144,7 +143,7 @@ void DreamBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -191,9 +190,9 @@ void DreamBase::processingThread() {
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
-      Counters.TxBytes += Serializer->produce();
+      Serializer->produce();
       Counters.ProduceCauseTimeout++;
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
       Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;

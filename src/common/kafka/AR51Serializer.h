@@ -34,7 +34,7 @@ public:
 
   // \todo make private?
   /// \brief serializes buffer
-  /// \returns reference to internally stor0ed buffer
+  /// \returns reference to internally stored buffer
   nonstd::span<const uint8_t> & serialize(uint8_t * Data, int DataLength);
 
 public:

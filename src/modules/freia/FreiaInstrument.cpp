@@ -255,7 +255,6 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", time,
            TimeOfFlight, x, y, PixelId);
-    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate

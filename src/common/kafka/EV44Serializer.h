@@ -45,9 +45,9 @@ public:
   int64_t referenceTime() const;
 
   /// \brief adds event, if maximum count is exceeded, sends data using the
-  /// producer callback \param time time of event in relation to pulse time
+  /// producer callback \param Time time of event in relation to pulse time
   /// Function is virtual to allow mocking
-  /// \param pixl id of pixel as defined by logical geometry mapping
+  /// \param Pixel id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
   virtual size_t addEvent(int32_t Time, int32_t Pixel);
 
@@ -63,11 +63,10 @@ public:
 
   // \todo make private?
   /// \brief serializes buffer
-  /// \returns reference to internally stor0ed buffer
+  /// \returns reference to internally stored buffer
   nonstd::span<const uint8_t> serialize();
 
   TSCTimer ProduceTimer, DebugTimer;
-  int64_t TxBytes;
 
   // Counters for causes of calls to produce()
   int64_t ProduceCausePulseChange;

@@ -296,7 +296,7 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
 
     XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, z %u, pixel %u", time,
            TimeOfFlight, x, y, z, PixelId);
-    counters.TxBytes += Serializer->addEvent(TimeOfFlight, PixelId);
+    Serializer->addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate
