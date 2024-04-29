@@ -11,7 +11,7 @@
 
 #include <dream/readout/DataParser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <generators/essudpgen/TofDistribution.h>
+#include <generators/functiongenerators/CustomDistribution.h>
 
 namespace Dream {
 
@@ -57,7 +57,7 @@ protected:
   /// the detector mask, hence the bool return value
   bool getRandomReadout(DataParser::DreamReadout &DR);
 
-  TofDistribution TofDist;
+  CustomDistribution TofDist{1000.0/14};
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP

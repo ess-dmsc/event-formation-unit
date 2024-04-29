@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
-#include <generators/essudpgen/TofDistribution.h>
+#include <generators/functiongenerators/CustomDistribution.h>
 
-class TofDistrubutionTest : public TestBase {
+class CustomDistributionTest : public TestBase {
 protected:
   void SetUp() override {}
   void TearDown() override {}
@@ -20,13 +20,15 @@ protected:
 //
 //---------------------------------------------------------------------
 
-TEST_F(TofDistrubutionTest, Constructors) {
-  TofDistribution MyDist;
-  printf("%.2f\n", MyDist.Norm);
-  for (int i = 0; i < 10; i++) {
-    double val = MyDist.getRandomTof();
-    printf("%.2f\n", val);
-  }
+///\brief not the best of test, just checking end of ranges with current
+// known values
+TEST_F(CustomDistributionTest, Constructors) {
+  CustomDistribution MyDist(1000.0/14);
+  ASSERT_NEAR(MyDist.Dist[0], 0.001, 1e-4);
+  ASSERT_NEAR(MyDist.Dist[MyDist.Bins - 1], 0.001, 1e-4);
+  ASSERT_NEAR(MyDist.CDF[0], 0.000, 1e-4);
+  ASSERT_NEAR(MyDist.CDF[1], 0.001, 1e-4);
+  ASSERT_NEAR(MyDist.CDF[MyDist.Bins - 1], 11.957, 0.005);
 }
 
 

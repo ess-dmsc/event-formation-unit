@@ -11,16 +11,19 @@
 
 #include <random>
 
-class TofDistribution {
+class CustomDistribution {
 public:
 
-  /// \brief
-  TofDistribution();
+  ///\brief
+  CustomDistribution(float MaxX);
 
-  /// \brief
-  double getRandomTof();
+  ///\brief
+  virtual void initialise();
 
-  float MaxTofMs = 1000.0/14; // ESS 14Hz -> 71.43 ms
+  ///\brief
+  virtual double getRandomX();
+
+  float MaxXVal{1000.0/14}; // ESS 14Hz -> 71.43 ms
   int Bins{512};
   float BinWidth{0.0};
   float Norm{1};

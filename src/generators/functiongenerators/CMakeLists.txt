@@ -3,14 +3,14 @@
 
 
 #=============================================================================
-# TofDistributionTest
+# CustomDistributionTest
 #=============================================================================
 
-set(TofDistributionTest_INC
-  TofDistribution.h
+set(CustomDistributionTest_INC
+  CustomDistribution.h
   )
-set(TofDistributionTest_SRC
-  TofDistributionTest.cpp
-  TofDistribution.cpp
+set(CustomDistributionTest_SRC
+  CustomDistributionTest.cpp
+  CustomDistribution.cpp
   )
-create_test_executable(TofDistributionTest)
+create_test_executable(CustomDistributionTest)

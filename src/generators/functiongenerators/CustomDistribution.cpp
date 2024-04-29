@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <generators/essudpgen/TofDistribution.h>
+#include <generators/functiongenerators/CustomDistribution.h>
 
 ///\todo move to math, could be optimised, should not use pow, can
 // precalculate sqrt(2.0 * M_PI).
@@ -17,10 +17,15 @@ double gaussianPDF(double x, double mu, double sigma) {
 
 
 /// \brief generate Dist and CDF for the specified shape
-TofDistribution::TofDistribution() {
-  Dist.reserve(Bins);
+CustomDistribution::CustomDistribution(float MaxX) : MaxXVal(MaxX) {
+	// Nothing to do here at the moment
+	initialise();
+}
+
+void CustomDistribution::initialise() {
+	Dist.reserve(Bins);
   CDF.reserve(Bins);
-	BinWidth = MaxTofMs/(Bins - 1);
+	BinWidth = MaxXVal/(Bins - 1);
 
   for (int i = 0; i < Bins; i++) {
     double t = i * BinWidth;
@@ -32,15 +37,15 @@ TofDistribution::TofDistribution() {
   Norm = CDF[Bins - 1];
 }
 
-/// \brief draw a random TOF according to distribution
-double TofDistribution::getRandomTof() {
+/// \brief draw a random x-value according to distribution
+double CustomDistribution::getRandomX() {
   double Value =  dis(gen) * Norm;
   for (int i = 0; i < Bins; i++) {
     if (CDF[i] >= Value) {
       return i * BinWidth;
     }
   }
-  return MaxTofMs;
+  return MaxXVal;
 }
 
 // GCOVR_EXCL_STOP
