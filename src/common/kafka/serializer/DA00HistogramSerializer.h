@@ -18,6 +18,7 @@
 #include <flatbuffers/base.h>
 #include <fmt/format.h>
 #include "common/monitor/HistogramSerializer.h"
+#include "da00_dataarray_generated.h"
 
 namespace fbserializer {
 
@@ -26,37 +27,37 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 // type trait for type supported as R parameter in the template
 template <class> struct DataTypeTrait {
-  static constexpr DA00Dtype type = DA00Dtype::none;
+  static constexpr da00_dtype type = da00_dtype::none;
 };
 template <> struct DataTypeTrait<int8_t> {
-  static constexpr DA00Dtype type = DA00Dtype::int8;
+  static constexpr da00_dtype type = da00_dtype::int8;
 };
 template <> struct DataTypeTrait<int16_t> {
-  static constexpr DA00Dtype type = DA00Dtype::int16;
+  static constexpr da00_dtype type = da00_dtype::int16;
 };
 template <> struct DataTypeTrait<int32_t> {
-  static constexpr DA00Dtype type = DA00Dtype::int32;
+  static constexpr da00_dtype type = da00_dtype::int32;
 };
 template <> struct DataTypeTrait<int64_t> {
-  static constexpr DA00Dtype type = DA00Dtype::int64;
+  static constexpr da00_dtype type = da00_dtype::int64;
 };
 template <> struct DataTypeTrait<uint8_t> {
-  static constexpr DA00Dtype type = DA00Dtype::uint8;
+  static constexpr da00_dtype type = da00_dtype::uint8;
 };
 template <> struct DataTypeTrait<uint16_t> {
-  static constexpr DA00Dtype type = DA00Dtype::uint16;
+  static constexpr da00_dtype type = da00_dtype::uint16;
 };
 template <> struct DataTypeTrait<uint32_t> {
-  static constexpr DA00Dtype type = DA00Dtype::uint32;
+  static constexpr da00_dtype type = da00_dtype::uint32;
 };
 template <> struct DataTypeTrait<uint64_t> {
-  static constexpr DA00Dtype type = DA00Dtype::uint64;
+  static constexpr da00_dtype type = da00_dtype::uint64;
 };
 template <> struct DataTypeTrait<float> {
-  static constexpr DA00Dtype type = DA00Dtype::float32;
+  static constexpr da00_dtype type = da00_dtype::float32;
 };
 template <> struct DataTypeTrait<double> {
-  static constexpr DA00Dtype type = DA00Dtype::float64;
+  static constexpr da00_dtype type = da00_dtype::float64;
 };
 
 enum class BinningStrategy { Drop, LastBin };
@@ -145,7 +146,7 @@ public:
   /// \param Time is the time for which used to calculate the correct bin index
   /// \param Value is the value to be added to the bin
   inline void addData(const R Time, const T Value) {
-    static_assert(DataTypeTrait<R>::type != DA00Dtype::none,
+    static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
 
     // requires that initXaxis create an ascending sorted vector
@@ -218,7 +219,7 @@ private:
   /// number of bins. These values are cannot be negative the algorithm
   /// expects ascending sorted values from the X axis.
   void initAxis() {
-    static_assert(DataTypeTrait<R>::type != DA00Dtype::none,
+    static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type is not supported for serialization!");
     // Check for negative values in the bin count and period
     // Current concept not support negative values for bins
