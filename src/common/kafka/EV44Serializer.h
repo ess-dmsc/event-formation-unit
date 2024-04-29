@@ -67,7 +67,6 @@ public:
   nonstd::span<const uint8_t> serialize();
 
   TSCTimer ProduceTimer, DebugTimer;
-  int64_t TxBytes;
 
   // Counters for causes of calls to produce()
   int64_t ProduceCausePulseChange;

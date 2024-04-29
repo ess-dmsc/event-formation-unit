@@ -44,7 +44,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.bytes", Counters.TxBytes);
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout header stats
@@ -182,7 +181,7 @@ void FreiaBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -243,11 +242,10 @@ void FreiaBase::processing_thread() {
     if (ProduceTimer.timeout()) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.TxBytes = Serializer->TxBytes;
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
       Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;

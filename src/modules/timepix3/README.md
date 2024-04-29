@@ -54,7 +54,6 @@ classDiagram
     class EV44Serializer {
         +TSCTimer ProduceTimer
         +TSCTimer DebugTimer
-        +int64_t TxBytes
         +setProducerCallback(ProducerCallback) void
         +setReferenceTime(int64_t) void
         +checkAndSetReferenceTime(int64_t Time) uint32_t

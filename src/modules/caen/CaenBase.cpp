@@ -96,9 +96,6 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
-
-  Stats.create("transmit.bytes", Counters.TxBytes);
-
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
   Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
@@ -167,7 +164,7 @@ void CaenBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -216,7 +213,7 @@ void CaenBase::processingThread() {
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.TxBytes});
+          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       SerializerII->produce();
@@ -227,7 +224,6 @@ void CaenBase::processingThread() {
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
     Counters.KafkaStats = EventProducer.stats;
-    Counters.TxBytes = Serializer->TxBytes;
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

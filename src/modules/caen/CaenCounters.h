@@ -48,7 +48,6 @@ struct CaenCounters {
   int64_t ProduceCausePulseChange;
   int64_t ProduceCauseMaxEventsReached;
 
-  int64_t TxBytes;
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 } __attribute__((aligned(64)));
