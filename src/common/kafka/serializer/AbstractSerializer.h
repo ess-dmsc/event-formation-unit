@@ -18,9 +18,12 @@
 #include <chrono>
 #include <common/kafka/Producer.h>
 #include <flatbuffers/flatbuffers.h>
+#include "common/time/ESSTime.h"
 
 namespace fbserializer {
+
 using namespace std::chrono;
+using namespace esstime;
 
 struct SerializerStats {
   int64_t ProduceCalled{0};
@@ -32,6 +35,7 @@ class AbstractSerializer {
   int64_t &ProduceCalled;
 
 protected:
+  esstime::ESSReferenceTime ReferenceTime{esstime::ESSReferenceTime()};
   AbstractSerializer(const ProducerCallback &Callback, SerializerStats &Stats)
       : ProduceCallback(Callback), ProduceCalled(Stats.ProduceCalled){};
   flatbuffers::DetachedBuffer Buffer;
@@ -51,6 +55,10 @@ public:
 
     ProduceCallback(nonstd::span<const uint8_t>(Buffer.data(), Buffer.size()),
                     CurrentHwClock);
+  };
+
+  void setReferenceTime(const ESSTime &Time) {
+    ReferenceTime.setReference(Time);
   };
 };
 } // namespace fbserializer

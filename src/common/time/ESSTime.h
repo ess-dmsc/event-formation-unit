@@ -175,9 +175,15 @@ public:
 
   /// \brief Sets the reference time.
   ///
-  /// \param refESSTime The reference time to set.
+  /// \param refESSTime The reference time to set in ESSTime format.
   /// \return The reference time as a 64-bit unsigned integer.
   uint64_t setReference(const ESSTime &refESSTime);
+
+  /// \brief Sets the reference time.
+  ///
+  /// \param refTime The reference time to set in uint64_t format.
+  /// \return The reference time as a 64-bit unsigned integer.
+  uint64_t setReference(const uint64_t &refTime);
 
   /// \brief Sets the previous reference time.
   ///

@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Implementation of Frame1DHistogramSerializer, based on the da00
+/// \brief Implementation of HistogramSerializer, based on the da00
 /// schema for serialization
 ///
 /// See \link https://github.com/ess-dmsc/streaming-data-types
@@ -14,11 +14,14 @@
 #include <FlatbufferTypes.h>
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/math/NumericalMath.h>
+#include <common/monitor/HistogramSerializer.h>
+#include <cstddef>
 #include <cstdint>
+#include <da00_dataarray_generated.h>
 #include <flatbuffers/base.h>
 #include <fmt/format.h>
-#include <common/monitor/HistogramSerializer.h>
-#include <da00_dataarray_generated.h>
+#include <iostream>
+#include "da00_dataarray_generated.h"
 
 namespace fbserializer {
 
@@ -60,6 +63,11 @@ template <> struct DataTypeTrait<double> {
   static constexpr da00_dtype type = da00_dtype::float64;
 };
 
+/// \brief Enum class to define possible binning strategies
+/// \details The binning strategy defines how to handle data that falls outside
+/// from the period of the histogram. The two possible strategies are:
+/// - Drop: Data that falls outside the period is dropped
+/// - LastBin: Data that falls outside the period is put in the last bin
 enum class BinningStrategy { Drop, LastBin };
 
 struct HistrogramSerializerStats : public SerializerStats {
@@ -67,16 +75,16 @@ struct HistrogramSerializerStats : public SerializerStats {
   int64_t DataOverPeriodLastBin{0};
 };
 
-/// @class Frame1DHistogramBuilder
-/// @brief A class that builds a 1D histogram frame for serialization.
+/// @class HistogramSerializer
+/// @brief A class that builds a 1D histogram frame for serialization
 ///
 /// \tparam T is the type of the data to be serialized
 /// \tparam R is the type of the data used for the axis. This can be time with
 /// double precession
 ///
-/// The Frame1DHistogramBuilder class is responsible for building a 1D histogram
-/// frame for serialization. It provides methods to add data to the histogram,
-/// serialize the data, and initialize the X-axis values.
+/// The HistogramSerializer class is responsible for building a 1D histogram for
+/// a certain time period for serialization. It provides methods to add data to
+/// the histogram, serialize the data, and initialize the time X-axis values.
 template <class T, class R = T>
 class HistogramSerializer : public AbstractSerializer {
   using data_t = std::vector<std::vector<T>>;
@@ -93,19 +101,21 @@ class HistogramSerializer : public AbstractSerializer {
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const enum BinningStrategy BinningStrategy;
 
-protected:
+  size_t initialBinSize{20};
+  std::vector<size_t> binSizes;
+
   data_t DataBins;
   std::vector<R> XAxisValues;
 
 public:
-  /// \brief Constructor for the Frame1DHistogramBuilder class.
+  /// \brief Constructor for the HistogramBuilder class.
   ///
   /// \param Topic is the Kafka stream topic destination
   /// \param Source is the source of the data
   /// \param Period is the length of time of one frame in the specified units
   /// \param BinCount is the number of the bins used
   /// \param Name is the name of the binned data
-  /// \param Unit is the unit of the binned data
+  /// \param DataUnit is the unit of the binned data
   /// \param TimeUnit is the unit of time used for period, and the binned axis
   /// \param Stats is the statistics object for tracking serialization
   /// \param Callback is the producer callback function
@@ -115,21 +125,23 @@ public:
 
   HistogramSerializer(
       const std::string &Topic, const std::string &Source, const time_t &Period,
-      const time_t &BinCount, const std::string &Name, const std::string &Unit,
-      const std::string TimeUnit, HistrogramSerializerStats &Stats,
-      const ProducerCallback Callback = {},
+      const time_t &BinCount, const std::string &Name,
+      const std::string &DataUnit, const std::string TimeUnit,
+      HistrogramSerializerStats &Stats, const ProducerCallback Callback = {},
       const essmath::VectorAggregationFunc<T> AggFunc =
           essmath::SUM_AGG_FUNC<T>,
       const enum BinningStrategy Strategy = BinningStrategy::Drop)
       : AbstractSerializer(Callback, Stats), Topic(Topic), Source(Source),
-        Period(Period), BinCount(BinCount), Name(Name), Unit(Unit),
+        Period(Period), BinCount(BinCount), Name(Name), Unit(DataUnit),
         TimeUnit(TimeUnit), Stats(Stats), AggregateFunction(AggFunc),
-        BinningStrategy(Strategy) {
+        BinningStrategy(Strategy), binSizes(BinCount, initialBinSize) {
 
     initAxis();
     DataBins = data_t(XAxisValues.size());
   }
 
+  /// \brief Constructor for the HistogramBuilder class.
+  /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(const std::string &Topic, const std::string &Source,
                       const time_t &Period, const time_t &BinCount,
                       const std::string &Name, const std::string &Unit,
@@ -145,7 +157,7 @@ public:
   /// \brief This function finds the bin index for a given time.
   /// \param Time is the time for which used to calculate the correct bin index
   /// \param Value is the value to be added to the bin
-  inline void addData(const R Time, const T Value) {
+  inline void addEvent(const R Time, const T Value) {
     static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
 
@@ -168,8 +180,14 @@ public:
     }
 
     if (DataBins[BinIndex].empty())
-      // Reserve space for the data for optimize on performance
-      DataBins[BinIndex].reserve(50);
+      DataBins[BinIndex].reserve(initialBinSize);
+
+    /// Check if the bin is full and resize it with the double of the initial
+    /// size, to avoid multiple reallocations
+    if (DataBins[BinIndex].size() >= binSizes[BinIndex]) {
+      binSizes[BinIndex] += initialBinSize * 2;
+      DataBins[BinIndex].reserve(binSizes[BinIndex]);
+    }
 
     DataBins[BinIndex].push_back(Value);
   }
@@ -202,14 +220,16 @@ private:
                       .unit(Unit)
                       .data(AggregatedBins));
 
-    const auto dataarray =
-        da00flatbuffers::DataArray("histogram_sender", {XAxis, YAxis});
+    const auto dataarray = da00flatbuffers::DataArray(
+        Source, ReferenceTime.getRefTimeNS(),
+        {XAxis, YAxis});
 
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);
-    Builder.Finish(dataarray.pack(Builder));
 
+    Builder.Finish(dataarray.pack(Builder));
     Buffer = Builder.Release();
+
     DataBins.clear();
     DataBins.reserve(XAxisValues.size());
   }

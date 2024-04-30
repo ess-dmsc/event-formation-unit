@@ -38,8 +38,12 @@
 #include <numeric>
 #include <optional>
 #include <sstream>
+#include "common/time/ESSTime.h"
 
 namespace da00flatbuffers {
+
+  using namespace std::chrono;
+  using namespace esstime;
 
 template <class> struct DataTypeTrait {
   static constexpr da00_dtype type = da00_dtype::none;
@@ -147,6 +151,9 @@ public:
     std::memcpy(Out.data(), Data.data(), Data.size());
     return Out;
   }
+
+  /// \brief Copy over axis names from a const vector of strings.
+  /// \param ax const vector of strings to copy to the variable
   Variable &axes(const std::vector<std::string> &ax) {
     Axes.clear();
     Axes.reserve(ax.size());
@@ -154,10 +161,15 @@ public:
       Axes.push_back(a);
     return *this;
   }
+
+  /// \brief Move axis name vector into the Variable object.
+  /// \param ax vector of strings to move to the variable
+  /// Input string will be in unspecified state after this call
   Variable &axes(std::vector<std::string> &&ax) {
     Axes = std::move(ax);
     return *this;
   }
+
   template <class T>
   std::enable_if_t<std::is_integral_v<T>, Variable &> &
   shape(const std::vector<T> &sh) {
@@ -167,35 +179,74 @@ public:
       Shape.push_back(static_cast<int64_t>(s));
     return *this;
   }
+
+  /// \brief Move the a vector of shapes into the object
+  /// \param sh The vector of shapes to move to the variable object
+  /// Input string will be in unspecified state after this call
+  /// \return returns a reference to self
   Variable &shape(std::vector<int64_t> &&sh) {
     Shape = std::move(sh);
     return *this;
   }
+
+  /// \brief Move the unit string into the variable object
+  /// \param u The unit string to move to the variable object
+  /// Input string will be in unspecified state after this call
+  /// \return returns a reference to self
   Variable &unit(std::string &&u) {
     Unit = std::move(u);
     return *this;
   }
+
+  /// \brief Move the label string into the variable object
+  /// \param l The label string to move to the variable object
+  /// Input string will be in unspecified state after this call
+  /// \return returns a reference to self
   Variable &label(std::string &&l) {
     Label = std::move(l);
     return *this;
   }
+
+  /// \brief Move the source string into the variable object
+  /// \param s The source string to move to the variable object
+  /// Input string will be in unspecified state after this call
+  /// \return returns a reference to self
   Variable &source(std::string &&s) {
     Source = std::move(s);
     return *this;
   }
+
+  /// \brief Copy the unit string into the variable object
+  /// \param u The unit string to copy to the variable object
+  /// \return returns a reference to self
   Variable &unit(const std::string &u) {
     Unit = u;
     return *this;
   }
+
+  /// \brief Copy the label string into the variable object
+  /// \param l The label string to copy to the variable object
+  /// \return returns a reference to self
   Variable &label(const std::string &l) {
     Label = l;
     return *this;
   }
+
+  /// \brief Copy the source string into the variable object
+  /// \param s The source string to copy to the variable object
+  /// \return returns a reference to self
   Variable &source(const std::string &s) {
     Source = s;
     return *this;
   }
 
+  /// \brief Get the name of the variable.
+  /// \return The name of the variable
+  std::string getName() const { return Name; }
+
+  /// \brief Check if two variables are equal.
+  /// \param Other The other variable to compare
+  /// \return True if the variables are equal, false otherwise
   bool operator==(const Variable &Other) const {
     if (Name != Other.Name || Data != Other.Data || Axes != Other.Axes ||
         Shape != Other.Shape || Unit != Other.Unit || Label != Other.Label ||
@@ -267,25 +318,26 @@ public:
 /// format. The class provides methods for serializing and deserializing data
 /// arrays using the FlatBuffers library.
 class DataArray {
-  using time_t = std::chrono::time_point<std::chrono::system_clock>;
+
   std::string SourceName;
-  time_t TimeStamp;
+  TimeDurationNano ReferenceTime;
   std::vector<Variable> Data;
 
 public:
-  /// \brief Create a new data array with a source name and a vector of
-  /// variables. \param SourceName The name of the data source \param Data The
-  /// vector of variables to include in the data array
-  DataArray(std::string SourceName, std::vector<Variable> Data)
-      : SourceName(std::move(SourceName)),
-        TimeStamp(std::chrono::system_clock::now()), Data(std::move(Data)) {}
+  /// \brief Deserialize a data array from a flatbuffer.
+  /// \param SourceName The name of the data source
+  /// \param ReferenceTime The reference time for this data array
+  /// \param Data The vector of variables to include in the data array
+  DataArray(std::string SourceName, TimeDurationNano ReferenceTime,
+            std::vector<Variable> Data)
+      : SourceName(std::move(SourceName)), ReferenceTime(ReferenceTime),
+        Data(std::move(Data)) {}
 
-  /// \brief Create a new data array with a source name and a vector of
-  /// variables.
+  /// \brief Create new data with deserialization from a flatbuffer.
   /// \param Buffer The flatbuffer to deserialize
   explicit DataArray(da00_DataArray const *Buffer)
       : SourceName(Buffer->source_name()->str()),
-        TimeStamp(time_t(std::chrono::nanoseconds(Buffer->timestamp()))) {
+        ReferenceTime(TimeDurationNano(Buffer->timestamp())) {
     if (Buffer->data()) {
       Data.reserve(Buffer->data()->size());
       for (const auto &variable : *Buffer->data()) {
@@ -301,9 +353,7 @@ public:
   /// \return The flatbuffer offset of the serialized data array
   auto pack(flatbuffers::FlatBufferBuilder &Builder) const {
     const auto SourceNameOffset = Builder.CreateString(this->SourceName);
-    const auto Time = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                          TimeStamp.time_since_epoch())
-                          .count();
+    const auto Time = ReferenceTime.count();
 
     std::vector<flatbuffers::Offset<da00_Variable>> DA00VariableOffsets;
     DA00VariableOffsets.reserve(Data.size());
@@ -313,10 +363,26 @@ public:
     return Createda00_DataArray(Builder, SourceNameOffset, Time, DataOffsets);
   }
 
+  /// \brief Check if two data arrays are equal.
+  /// \param Other The other data array to compare
+  /// \return True if the data arrays are equal, false otherwise
   bool operator==(const DataArray &Other) const {
-    return SourceName == Other.SourceName && TimeStamp == Other.TimeStamp &&
-           Data == Other.Data;
+    return SourceName == Other.SourceName &&
+           ReferenceTime == Other.ReferenceTime && Data == Other.Data;
   }
+
+  /// \brief Get a const reference to the data vector for read only purposes.
+  /// \return A const reference to the data vector
+  const std::vector<Variable> &getData() const { return Data; }
+
+  /// \brief Get the source name of the data array.
+  /// \return The source name of the data array
+  const std::string &getSourceName() const { return SourceName; }
+
+  /// \brief Get the timestamp of the data array.
+  /// \return The timestamp of the data array
+  const TimeDurationNano &getTimeStamp() const { return ReferenceTime; }
 };
+;
 
 }; // namespace da00flatbuffers
