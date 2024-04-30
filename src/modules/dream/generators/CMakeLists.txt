@@ -11,11 +11,13 @@ include_directories(..)
 
 set(dream_udp_generated_INC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   ${ESS_MODULE_DIR}/dream/generators/ReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   )
 set(dream_udp_generated_SRC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   ${ESS_MODULE_DIR}/dream/generators/ReadoutGenerator.cpp
   ${ESS_MODULE_DIR}/dream/generators/udpgen.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp

@@ -11,11 +11,13 @@
 
 #include <dream/readout/DataParser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <generators/functiongenerators/DistributionGenerator.h>
 
 namespace Dream {
 
 // Settings local to DREAM data generator
 struct {
+  bool Tof{false};
   int DetectorMask{-1}; // mask of active detector elements
   int Param2{-1}; // free parameter to modify data pattern
   int Param3{-1}; // free parameter to modify data pattern
@@ -54,6 +56,11 @@ protected:
   ///\brief may or may not generate a readout due to
   /// the detector mask, hence the bool return value
   bool getRandomReadout(DataParser::DreamReadout &DR);
+
+  ///\brief For TOF distribution calculations
+  DistributionGenerator TofDist{1000.0/14};
+  float TicksPerMs{88552.0};
+
 };
 } // namespace Dream
 // GCOVR_EXCL_STOP
