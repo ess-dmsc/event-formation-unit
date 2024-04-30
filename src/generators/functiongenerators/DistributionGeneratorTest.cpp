@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
-#include <generators/functiongenerators/CustomDistribution.h>
+#include <generators/functiongenerators/DistributionGenerator.h>
 
-class CustomDistributionTest : public TestBase {
+class DistributionGeneratorTest : public TestBase {
 protected:
   void SetUp() override {}
   void TearDown() override {}
@@ -22,8 +22,8 @@ protected:
 
 ///\brief not the best of test, just checking end of ranges with current
 // known values
-TEST_F(CustomDistributionTest, Constructors) {
-  CustomDistribution MyDist(1000.0/14);
+TEST_F(DistributionGeneratorTest, Constructors) {
+  DistributionGenerator MyDist(1000.0/14);
   ASSERT_NEAR(MyDist.Dist[0], 0.001, 1e-4);
   ASSERT_NEAR(MyDist.Dist[MyDist.Bins - 1], 0.001, 1e-4);
   ASSERT_NEAR(MyDist.CDF[0], 0.000, 1e-4);

@@ -3,14 +3,14 @@
 
 
 #=============================================================================
-# CustomDistributionTest
+# DistributionGeneratorTest
 #=============================================================================
 
-set(CustomDistributionTest_INC
-  CustomDistribution.h
+set(DistributionGeneratorTest_INC
+  DistributionGenerator.h
   )
-set(CustomDistributionTest_SRC
-  CustomDistributionTest.cpp
-  CustomDistribution.cpp
+set(DistributionGeneratorTest_SRC
+  DistributionGeneratorTest.cpp
+  DistributionGenerator.cpp
   )
-create_test_executable(CustomDistributionTest)
+create_test_executable(DistributionGeneratorTest)
