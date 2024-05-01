@@ -124,35 +124,43 @@ public:
   /// \param Strategy is the enum like binning strategy we can select
 
   HistogramSerializer(
-      const std::string &Topic, const std::string &Source, const time_t &Period,
-      const time_t &BinCount, const std::string &Name,
-      const std::string &DataUnit, const std::string TimeUnit,
-      HistrogramSerializerStats &Stats, const ProducerCallback Callback = {},
-      const essmath::VectorAggregationFunc<T> AggFunc =
-          essmath::SUM_AGG_FUNC<T>,
-      const enum BinningStrategy Strategy = BinningStrategy::Drop)
-      : AbstractSerializer(Callback, Stats), Topic(Topic), Source(Source),
-        Period(Period), BinCount(BinCount), Name(Name), Unit(DataUnit),
-        TimeUnit(TimeUnit), Stats(Stats), AggregateFunction(AggFunc),
-        BinningStrategy(Strategy), binSizes(BinCount, initialBinSize) {
+      std::string Topic, std::string Source, time_t Period, time_t BinCount,
+      std::string Name, std::string DataUnit, std::string TimeUnit,
+      HistrogramSerializerStats &Stats, ProducerCallback Callback = {},
+      essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
+      enum BinningStrategy Strategy = BinningStrategy::Drop)
+      : AbstractSerializer(Callback, Stats), Topic(std::move(Topic)),
+        Source(std::move(Source)), Period(std::move(Period)),
+        BinCount(std::move(BinCount)), Name(std::move(Name)),
+        Unit(std::move(DataUnit)), TimeUnit(std::move(TimeUnit)), Stats(Stats),
+        AggregateFunction(std::move(AggFunc)),
+        BinningStrategy(std::move(Strategy)) {
 
     initAxis();
     DataBins = data_t(XAxisValues.size());
+    binSizes = std::vector<size_t>(DataBins.size(), initialBinSize);
   }
 
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
-  HistogramSerializer(const std::string &Topic, const std::string &Source,
-                      const time_t &Period, const time_t &BinCount,
-                      const std::string &Name, const std::string &Unit,
-                      const std::string TimeUnit,
-                      HistrogramSerializerStats &Stats,
-                      const enum BinningStrategy Strategy,
-                      const ProducerCallback Callback = {},
-                      const essmath::VectorAggregationFunc<T> AggFunc =
-                          essmath::SUM_AGG_FUNC<T>)
+  HistogramSerializer(
+      std::string Topic, std::string Source, time_t Period, time_t BinCount,
+      std::string Name, std::string Unit, std::string TimeUnit,
+      enum BinningStrategy Strategy, HistrogramSerializerStats &Stats,
+      ProducerCallback Callback = {},
+      essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
       : HistogramSerializer(Topic, Source, Period, BinCount, Name, Unit,
-                            TimeUnit, Stats, Callback, AggFunc, Strategy){};
+                            TimeUnit, Stats, Callback, AggFunc, Strategy) {}
+
+  /// \brief Copy constructor for the HistogramBuilder class.
+  HistogramSerializer(const HistogramSerializer &other)
+      : AbstractSerializer(other), Topic(other.Topic), Source(other.Source),
+        Period(other.Period), BinCount(other.BinCount), Name(other.Name),
+        Unit(other.Unit), TimeUnit(other.TimeUnit), Stats(other.Stats),
+        AggregateFunction(other.AggregateFunction),
+        BinningStrategy(other.BinningStrategy),
+        initialBinSize(other.initialBinSize), binSizes(other.binSizes),
+        DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
   /// \brief This function finds the bin index for a given time.
   /// \param Time is the time for which used to calculate the correct bin index
@@ -221,8 +229,7 @@ private:
                       .data(AggregatedBins));
 
     const auto dataarray = da00flatbuffers::DataArray(
-        Source, ReferenceTime.getRefTimeNS(),
-        {XAxis, YAxis});
+        Source, ReferenceTime.getRefTimeNS(), {XAxis, YAxis});
 
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);

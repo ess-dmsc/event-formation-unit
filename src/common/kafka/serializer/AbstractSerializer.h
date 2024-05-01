@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,40 +25,67 @@ namespace fbserializer {
 using namespace std::chrono;
 using namespace esstime;
 
+/// \struct SerializerStats
+///
+/// \brief Structure to hold statistics related to serialization.
+///
 struct SerializerStats {
-  int64_t ProduceCalled{0};
+  int64_t ProduceCalled{
+      0}; ///< Number of times the produce() function has been called.
 };
 
+/// \class AbstractSerializer
+///
+/// \brief Abstract base class for serializers.
+///
 class AbstractSerializer {
 
-  const ProducerCallback &ProduceCallback;
-  int64_t &ProduceCalled;
+  const ProducerCallback
+      ProduceCallback; ///< Callback function for producing serialized data.
+
+  SerializerStats &Stats; ///< Reference to the ProduceCalled statistic.
 
 protected:
-  esstime::ESSReferenceTime ReferenceTime{esstime::ESSReferenceTime()};
-  AbstractSerializer(const ProducerCallback &Callback, SerializerStats &Stats)
-      : ProduceCallback(Callback), ProduceCalled(Stats.ProduceCalled){};
-  flatbuffers::DetachedBuffer Buffer;
+  esstime::ESSReferenceTime ReferenceTime{
+      esstime::ESSReferenceTime()};   ///< Reference time for serialization.
+  flatbuffers::DetachedBuffer Buffer; ///< Buffer to hold serialized data.
 
+  /// \brief Constructs an AbstractSerializer object with the given callback and
+  /// statistics.
+  ///
+  /// \param Callback The callback function for producing serialized data.
+  /// \param Stats The statistics object to track serialization statistics.
+  ///
+  AbstractSerializer(const ProducerCallback Callback, SerializerStats &Stats);
+
+  /// \brief Copy constructor.
+  ///
+  /// \param other The AbstractSerializer object to copy.
+  ///
+  AbstractSerializer(const AbstractSerializer &other);
+
+  /// \brief Pure virtual function to serialize data.
+  ///
   virtual void serialize() = 0;
 
 public:
+  /// \brief Destructor.
+  ///
   virtual ~AbstractSerializer() = default;
 
-  virtual void produce() {
-    ProduceCalled++;
-    uint64_t CurrentHwClock =
-        duration_cast<milliseconds>(system_clock::now().time_since_epoch())
-            .count();
+  /// \brief Produces serialized data.
+  ///
+  /// This function increments the ProduceCalled statistic, gets the current
+  /// hardware clock, calls the serialize() function, and invokes the
+  /// ProduceCallback with the serialized data and the current hardware clock.
+  ///
+  void produce();
 
-    serialize();
-
-    ProduceCallback(nonstd::span<const uint8_t>(Buffer.data(), Buffer.size()),
-                    CurrentHwClock);
-  };
-
-  void setReferenceTime(const ESSTime &Time) {
-    ReferenceTime.setReference(Time);
-  };
+  /// \brief Sets the reference time for serialization.
+  ///
+  /// \param Time The reference time to set.
+  ///
+  void setReferenceTime(const ESSTime &Time);
 };
+
 } // namespace fbserializer

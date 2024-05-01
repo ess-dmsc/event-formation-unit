@@ -16,6 +16,7 @@ set(efu_common_SRC
   kafka/AR51Serializer.cpp
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
+  kafka/serializer/AbstractSerializer.cpp
   system/Socket.cpp
   Statistics.cpp
   StatPublisher.cpp

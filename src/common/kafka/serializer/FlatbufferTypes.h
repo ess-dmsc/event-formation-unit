@@ -42,8 +42,8 @@
 
 namespace da00flatbuffers {
 
-  using namespace std::chrono;
-  using namespace esstime;
+using namespace std::chrono;
+using namespace esstime;
 
 template <class> struct DataTypeTrait {
   static constexpr da00_dtype type = da00_dtype::none;
@@ -242,7 +242,27 @@ public:
 
   /// \brief Get the name of the variable.
   /// \return The name of the variable
-  std::string getName() const { return Name; }
+  const std::string &getName() const { return Name; }
+
+  /// \brief Get the data vector of the variable.
+  /// \return The data vector of the variable
+  const std::vector<uint8_t> &getData() const { return Data; }
+
+  /// \brief Get the axes vector of the variable.
+  /// \return The axes vector of the variable
+  const std::vector<std::string> &getAxes() const { return Axes; }
+
+  /// \brief Get the unit string of the variable.
+  /// \return The unit string of the variable
+  const std::optional<std::string> &getUnit() const { return Unit; }
+
+  /// \brief Get the label string of the variable.
+  /// \return The label string of the variable
+  const std::optional<std::string> &getLabel() const { return Label; }
+
+  /// \brief Get the source string of the variable.
+  /// \return The source string of the variable
+  const std::optional<std::string> &getSource() const { return Source; }
 
   /// \brief Check if two variables are equal.
   /// \param Other The other variable to compare
@@ -318,7 +338,6 @@ public:
 /// format. The class provides methods for serializing and deserializing data
 /// arrays using the FlatBuffers library.
 class DataArray {
-
   std::string SourceName;
   TimeDurationNano ReferenceTime;
   std::vector<Variable> Data;
@@ -330,7 +349,7 @@ public:
   /// \param Data The vector of variables to include in the data array
   DataArray(std::string SourceName, TimeDurationNano ReferenceTime,
             std::vector<Variable> Data)
-      : SourceName(std::move(SourceName)), ReferenceTime(ReferenceTime),
+      : SourceName(std::move(SourceName)), ReferenceTime(std::move(ReferenceTime)),
         Data(std::move(Data)) {}
 
   /// \brief Create new data with deserialization from a flatbuffer.

@@ -19,91 +19,151 @@
 #include <gtest/gtest.h>
 #include <ratio>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 #include "common/kafka/Producer.h"
 #include "common/time/ESSTime.h"
 
 using namespace std::chrono;
 using namespace esstime;
+using namespace da00flatbuffers;
 
-struct CommonTestData {
+struct CommonFbMemebers {
   std::string Source;
   std::string Name;
-  std::string Unit;
+  std::string DataUnit;
+  std::string TimeUnit;
+  int64_t Period;
   size_t BinSize;
   TimeDurationNano ReferenceTime;
   int64_t ProduceCallTime;
 
-  CommonTestData &setSource(const std::string &source) {
+  CommonFbMemebers &setSource(const std::string &source) {
     Source = source;
     return *this;
   }
 
-  CommonTestData &setName(const std::string &name) {
+  CommonFbMemebers &setName(const std::string &name) {
     Name = name;
     return *this;
   }
 
-  CommonTestData &setUnit(const std::string &unit) {
-    Unit = unit;
+  CommonFbMemebers &setDataUnit(const std::string &dataUnit) {
+    DataUnit = dataUnit;
     return *this;
   }
 
-  CommonTestData &setBinSize(size_t binSize) {
+  CommonFbMemebers &setTimeUnit(const std::string &timeUnit) {
+    TimeUnit = timeUnit;
+    return *this;
+  }
+
+  CommonFbMemebers &setBinSize(size_t binSize) {
     BinSize = binSize;
     return *this;
   }
 
-  CommonTestData &setReferenceTime(TimeDurationNano referenceTime) {
+  CommonFbMemebers &setReferenceTime(TimeDurationNano referenceTime) {
     ReferenceTime = referenceTime;
     return *this;
   }
 
-  CommonTestData &setProduceCallTime(int64_t produceCallTime) {
+  CommonFbMemebers &setProduceCallTime(int64_t produceCallTime) {
     ProduceCallTime = produceCallTime;
+    return *this;
+  }
+
+  CommonFbMemebers &setPeriod(int64_t period) {
+    Period = period;
     return *this;
   }
 };
 
-template <typename T> class TestValidator {
+template <typename T, typename R = T> class TestValidator {
 private:
-  CommonTestData TestData;
+  const CommonFbMemebers &CommonMembers;
+  std::vector<T> ExpectedResults;
 
 public:
-  TestValidator(const CommonTestData &testData) : TestData(testData) {}
+  ProducerCallback MockedProduceFunction;
+
+  TestValidator(const CommonFbMemebers &testData)
+      : CommonMembers(testData),
+        MockedProduceFunction([this](nonstd::span<const uint8_t> TestFlatBuffer,
+                                     int64_t TestProduceCallTime) {
+          this->flatbufferTester(TestFlatBuffer, TestProduceCallTime);
+        }) {}
+
+  TestValidator(const CommonFbMemebers &testData,
+                const std::vector<T> &expectedResults)
+      : TestValidator(testData) {
+    ExpectedResults = expectedResults;
+  }
+
+  TestValidator<T> &setData(const std::vector<T> &data) {
+    ExpectedResults = data;
+    return *this;
+  }
+
+  fbserializer::HistogramSerializer<T, R>
+  createHistogramSerializer(fbserializer::HistrogramSerializerStats Stats) {
+    return fbserializer::HistogramSerializer<T, R>(
+        "Topic", CommonMembers.Source, CommonMembers.Period,
+        CommonMembers.BinSize, CommonMembers.Name, CommonMembers.DataUnit,
+        CommonMembers.TimeUnit, Stats, MockedProduceFunction);
+  }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
                         int64_t TestProduceCallTime) {
     const uint8_t *FbPtr = TestFlatBuffer.data();
 
-    auto DeserializedDataArray = da00flatbuffers::DataArray(
-        flatbuffers::GetRoot<const da00_DataArray>(FbPtr));
+    auto DeserializedDataArray =
+        DataArray(flatbuffers::GetRoot<const da00_DataArray>(FbPtr));
 
-    EXPECT_NEAR(TestProduceCallTime, TestData.ProduceCallTime, 10);
-    EXPECT_EQ(DeserializedDataArray.getSourceName(), TestData.Source);
-    EXPECT_EQ(DeserializedDataArray.getTimeStamp(), TestData.ReferenceTime);
+    EXPECT_NEAR(TestProduceCallTime, CommonMembers.ProduceCallTime, 10);
+    EXPECT_EQ(DeserializedDataArray.getSourceName(), CommonMembers.Source);
+    EXPECT_EQ(DeserializedDataArray.getTimeStamp(),
+              CommonMembers.ReferenceTime);
     EXPECT_EQ(DeserializedDataArray.getData().size(), 2);
+
+    Variable Axis = DeserializedDataArray.getData().at(0);
+    Variable Data = DeserializedDataArray.getData().at(1);
+
+    EXPECT_EQ(Axis.getName(), "time");
+    EXPECT_EQ(Axis.getAxes(), std::vector<std::string>{"t"});
+    EXPECT_EQ(Axis.getUnit(), CommonMembers.TimeUnit);
+    EXPECT_EQ(Axis.getData().size(), CommonMembers.BinSize * sizeof(R));
+
+    EXPECT_EQ(Data.getName(), CommonMembers.Name);
+    EXPECT_EQ(Data.getAxes(), std::vector<std::string>{"a.u."});
+    EXPECT_EQ(Data.getUnit(), CommonMembers.DataUnit);
+    EXPECT_EQ(Data.getData().size(), CommonMembers.BinSize * sizeof(T));
+
+    // Convert Data vector to type T vector
+    std::vector<T> dataVector;
+    for (size_t i = 0; i < Data.getData().size(); i += sizeof(T)) {
+      const T *valuePtr = reinterpret_cast<const T *>(&Data.getData()[i]);
+      dataVector.push_back(*valuePtr);
+    }
+
+    EXPECT_EQ(dataVector, ExpectedResults);
   }
 };
 
 class HistogramSerializerTest : public TestBase {
 
 protected:
-  std::string Topic{"test_topic"};
-  std::string Source{"test_source"};
-  std::string Unit{"millisecond"};
-
-  CommonTestData TestData;
-
+  CommonFbMemebers CommonFbMembers;
   fbserializer::HistrogramSerializerStats Stats;
 
   void SetUp() override {
     Stats = fbserializer::HistrogramSerializerStats();
-    TestData =
-        CommonTestData()
-            .setSource(Source)
-            .setName("testData")
-            .setUnit(Unit)
+    CommonFbMembers =
+        CommonFbMemebers()
+            .setName("TestData")
+            .setSource("TestSource")
+            .setDataUnit("v")
+            .setTimeUnit("millisecounds")
             .setBinSize(10)
             .setProduceCallTime(duration_cast<milliseconds>(
                                     system_clock::now().time_since_epoch())
@@ -114,104 +174,101 @@ protected:
 };
 
 TEST_F(HistogramSerializerTest, TestIntConstructor) {
-  int32_t Period = 1000;
-  int32_t Count = 10;
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
 
-  int64_t ProduceCallTime =
-      duration_cast<milliseconds>(system_clock::now().time_since_epoch())
-          .count();
+  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
 
-  TimeDurationNano TestRefTime{std::chrono::seconds(10)};
+  /// Initialize validator and create serializer
+  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
 
-  std::vector<uint64_t> data{0};
-
-  TestData.setProduceCallTime(ProduceCallTime);
-  TestData.setReferenceTime(TestRefTime);
-
-  TestValidator<uint64_t> TestValidator = ::TestValidator<uint64_t>(TestData);
-
-  ProducerCallback MockProduceFunction =
-      [&TestValidator](nonstd::span<const uint8_t> arg1, int64_t arg2) {
-        return TestValidator.flatbufferTester(arg1, arg2);
-      };
-
-  auto serializer = fbserializer::HistogramSerializer<uint64_t>(
-      Topic, Source, Period, Count, "testData", "adc", "millisecond", Stats,
-      MockProduceFunction);
-
-  serializer.setReferenceTime(ESSTime(TestRefTime));
-
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
   serializer.produce();
 }
 
-// TEST_F(HistogramSerializerTest, TestIntConstructorNegativeValues) {
-//   int32_t period = -1000;
-//   int32_t count = 10;
-//   EXPECT_THROW(HistogramSerializer<uint64_t>("some topic", "source", period,
-//                                              count, "testData", "adc", Stats,
-//                                              function),
-//                std::domain_error);
+TEST_F(HistogramSerializerTest, TestUInt64Constructor) {
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
 
-//   period = 1000;
-//   count = -10;
-//   EXPECT_THROW(HistogramSerializer<uint64_t>("some topic", "source", period,
-//                                              count, "testData", "adc", Stats,
-//                                              function),
-//                std::domain_error);
-// }
+  std::vector<uint64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
 
-// TEST_F(HistogramSerializerTest, TestUint64Uint64Constructor) {
-//   int32_t period = 1000000000;
-//   int32_t count = 400;
-//   auto serializer =
-//       HistogramSerializer<uint64_t>("some topic", "source", period, count,
-//                                     "testData", "adc", Stats, function);
+  /// Initialize validator and create serializer
+  TestValidator<uint64_t> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
 
-//   EXPECT_EQ(serializer.getInternalData().size(), count);
-//   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
-//   for (size_t i = 0; i < serializer.getInternalXAxis().size(); ++i) {
-//     EXPECT_EQ((serializer.getInternalXAxis())[i],
-//               i * static_cast<uint64_t>(period) / count);
-//   }
-// }
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
+  serializer.produce();
+}
 
-// TEST_F(HistogramSerializerTest, TestFloatConstructor) {
-//   int32_t period = 100;
-//   int32_t count = 30;
-//   auto serializer =
-//       HistogramSerializer<float>("some topic", "source", period, count,
-//                                  "testData", "adc", Stats, function);
+TEST_F(HistogramSerializerTest, TestFloatConstructor) {
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
 
-//   EXPECT_EQ(serializer.getInternalData().size(), count);
-//   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
+  std::vector<float> ExpectedResultData(CommonFbMembers.BinSize, 0);
 
-//   float step = static_cast<float>(period) / static_cast<float>(count);
+  /// Initialize validator and create serializer
+  TestValidator<float> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
 
-//   float value = 0;
-//   for (size_t i = 0; i < serializer.getInternalXAxis().size(); i++) {
-//     EXPECT_EQ(serializer.getInternalXAxis()[i], value);
-//     value += step;
-//   }
-// }
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
+  serializer.produce();
+}
 
-// TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
-//   int32_t period = 1;
-//   int32_t count = 30;
-//   auto serializer =
-//       HistogramSerializer<double>("some topic", "source", period, count,
-//                                   "testData", "adc", Stats, function);
+TEST_F(HistogramSerializerTest, TestIntConstructorNegativeValues) {
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(-1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
 
-//   EXPECT_EQ(serializer.getInternalData().size(), count);
-//   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
+  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
 
-//   double step = static_cast<double>(period) / static_cast<double>(count);
+  /// Initialize validator and create serializer
+  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedResultData};
 
-//   double value = 0;
-//   for (size_t i = 0; i < serializer.getInternalXAxis().size(); i++) {
-//     EXPECT_EQ(serializer.getInternalXAxis()[i], value);
-//     value += step;
-//   }
-// }
+  EXPECT_THROW(Validator.createHistogramSerializer(Stats), std::domain_error);
+
+  CommonFbMembers.setPeriod(1000).setBinSize(-10);
+
+  EXPECT_THROW(Validator.createHistogramSerializer(Stats), std::domain_error);
+}
+
+TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
+
+  std::vector<double> ExpectedResultData(CommonFbMembers.BinSize, 0);
+
+  /// Initialize validator and create serializer
+  TestValidator<double> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
+
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
+  serializer.produce();
+}
+
+TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
+  /// Setup test Condition
+  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+      std::chrono::seconds(10));
+
+  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
+
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
+  serializer.produce();
+}
 
 // TEST_F(HistogramSerializerTest, EDGETestIntConstructorWithFractional) {
 //   int32_t period = 1;
@@ -247,7 +304,7 @@ TEST_F(HistogramSerializerTest, TestIntConstructor) {
 
 //   // EXPECT_EQ(serializer.getInternalData().size(), count);
 //   // for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
-//   //   EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]),
+//   // EXPECT_EQ(essmath::SUM_AGG_FUNC<int>(serializer.getInternalData()[i]),
 //   //   1);
 //   // }
 
@@ -281,7 +338,8 @@ TEST_F(HistogramSerializerTest, TestIntConstructor) {
 //       HistogramSerializer<int>("some topic", "source", period, count,
 //                                "testData", "adc", Stats, function);
 
-//   std::map<int, int> testData = {{3, 1}, {8, 0}, {12, 1}, {25, 1}, {26, 1}};
+//   std::map<int, int> testData = {{3, 1}, {8, 0}, {12, 1}, {25, 1}, {26,
+//   1}};
 
 //   for (auto &e : testData) {
 //     serializer.addEvent(e.first, e.second);
