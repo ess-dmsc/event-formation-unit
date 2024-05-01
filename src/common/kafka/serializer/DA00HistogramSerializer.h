@@ -15,13 +15,7 @@
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/math/NumericalMath.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <cstddef>
-#include <cstdint>
-#include <da00_dataarray_generated.h>
-#include <flatbuffers/base.h>
 #include <fmt/format.h>
-#include <iostream>
-#include "da00_dataarray_generated.h"
 
 namespace fbserializer {
 

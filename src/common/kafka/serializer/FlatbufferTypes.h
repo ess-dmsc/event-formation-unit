@@ -33,12 +33,11 @@
 
 #pragma once
 
-#include <chrono>
+#include <common/time/ESSTime.h>
 #include <da00_dataarray_generated.h>
 #include <numeric>
 #include <optional>
 #include <sstream>
-#include "common/time/ESSTime.h"
 
 namespace da00flatbuffers {
 
@@ -349,8 +348,8 @@ public:
   /// \param Data The vector of variables to include in the data array
   DataArray(std::string SourceName, TimeDurationNano ReferenceTime,
             std::vector<Variable> Data)
-      : SourceName(std::move(SourceName)), ReferenceTime(std::move(ReferenceTime)),
-        Data(std::move(Data)) {}
+      : SourceName(std::move(SourceName)),
+        ReferenceTime(std::move(ReferenceTime)), Data(std::move(Data)) {}
 
   /// \brief Create new data with deserialization from a flatbuffer.
   /// \param Buffer The flatbuffer to deserialize

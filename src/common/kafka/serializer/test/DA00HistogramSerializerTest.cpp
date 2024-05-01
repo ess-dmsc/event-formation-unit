@@ -8,21 +8,11 @@
 //===----------------------------------------------------------------------===//
 
 #include <FlatbufferTypes.h>
-#include <bits/types/time_t.h>
-#include <chrono>
-#include <cmath>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
-#include <cstdint>
-#include <exception>
-#include <gtest/gtest.h>
-#include <ratio>
-#include <string>
-#include <sys/types.h>
-#include <vector>
-#include "common/kafka/Producer.h"
-#include "common/time/ESSTime.h"
+#include <common/kafka/Producer.h>
+#include <common/time/ESSTime.h>
 
 using namespace std::chrono;
 using namespace esstime;
@@ -133,6 +123,18 @@ public:
     EXPECT_EQ(Axis.getAxes(), std::vector<std::string>{"t"});
     EXPECT_EQ(Axis.getUnit(), CommonMembers.TimeUnit);
     EXPECT_EQ(Axis.getData().size(), CommonMembers.BinSize * sizeof(R));
+
+    double step = static_cast<double>(CommonMembers.Period) / static_cast<double>(CommonMembers.BinSize);
+
+    std::vector<R> axisVector;
+    for (size_t i = 0; i < Axis.getData().size(); i += sizeof(R)) {
+      const R *valuePtr = reinterpret_cast<const R *>(&Axis.getData()[i]);
+      axisVector.push_back(*valuePtr);
+    }
+
+    for (size_t i = 0; i < axisVector.size(); i++) {
+      EXPECT_NEAR(axisVector[i], i * step, 0.0001);
+    }
 
     EXPECT_EQ(Data.getName(), CommonMembers.Name);
     EXPECT_EQ(Data.getAxes(), std::vector<std::string>{"a.u."});
@@ -256,7 +258,7 @@ TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
 
 TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
   /// Setup test Condition
-  CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
+  CommonFbMembers.setPeriod(100).setBinSize(33).setReferenceTime(
       std::chrono::seconds(10));
 
   std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
@@ -270,37 +272,28 @@ TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
   serializer.produce();
 }
 
-// TEST_F(HistogramSerializerTest, EDGETestIntConstructorWithFractional) {
-//   int32_t period = 1;
-//   int32_t count = 30;
-//   auto serializer =
-//       HistogramSerializer<uint>("some topic", "source", period, count,
-//                                 "testData", "adc", Stats, function);
+TEST_F(HistogramSerializerTest, TestIntegerBinning) {
+  std::map<int, int> testData = {{3, 0}, {8, 1}, {12, 1}};
+  std::vector<int64_t> ExpectedResultData = {1,1};
 
-//   EXPECT_EQ(serializer.getInternalData().size(), count);
-//   EXPECT_EQ(serializer.getInternalXAxis().size(), count);
 
-//   uint step = static_cast<uint>(period) / static_cast<uint>(count);
+    /// Setup test Condition
+  CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
+      std::chrono::seconds(10));
 
-//   uint value = 0;
-//   for (size_t i = 0; i < serializer.getInternalXAxis().size(); i++) {
-//     EXPECT_EQ(serializer.getInternalXAxis()[i], value);
-//     value += step;
-//   }
-// }
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  auto serializer = Validator.createHistogramSerializer(Stats);
 
-// TEST_F(HistogramSerializerTest, TestIntegerBinning) {
-//   int32_t period = 20;
-//   int32_t count = 2;
-//   auto serializer = fbserializer::HistogramSerializer<int>(
-//       "some topic", "source", period, count, "testData", "adc", "milli",
-//       Stats, function);
+  /// Perform test
+  serializer.setReferenceTime(ESSTime(CommonFbMembers.ReferenceTime));
 
-//   std::map<int, int> testData = {{3, 0}, {8, 1}, {12, 1}};
+  for (auto &e : testData) {
+    serializer.addEvent(e.first, e.second);
+  }
 
-//   for (auto &e : testData) {
-//     serializer.addEvent(e.first, e.second);
-//   }
+  serializer.produce();
+}
 
 //   // EXPECT_EQ(serializer.getInternalData().size(), count);
 //   // for (size_t i = 0; i < serializer.getInternalData().size(); i++) {
