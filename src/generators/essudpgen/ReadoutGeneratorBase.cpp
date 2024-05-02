@@ -86,6 +86,7 @@ void ReadoutGeneratorBase::generateHeader() {
   if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
     pulseTime = ESSTime(time(NULL), 0);
     readoutTime = pulseTime + Settings.TicksBtwReadouts;
+    prevPulseTime = pulseTime;
 
     XTRACE(DATA, INF,
            "First pulse time generated, High: %u, Low: %u, periodNs: %u",
