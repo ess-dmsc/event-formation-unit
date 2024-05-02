@@ -95,8 +95,8 @@ class HistogramSerializer : public AbstractSerializer {
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const enum BinningStrategy BinningStrategy;
 
-  size_t initialBinSize{20};
-  std::vector<size_t> binSizes;
+  size_t InitialBinSize{20};
+  std::vector<size_t> BinSizes;
 
   data_t DataBins;
   std::vector<R> XAxisValues;
@@ -132,7 +132,7 @@ public:
 
     initAxis();
     DataBins = data_t(XAxisValues.size());
-    binSizes = std::vector<size_t>(DataBins.size(), initialBinSize);
+    BinSizes = std::vector<size_t>(DataBins.size(), InitialBinSize);
   }
 
   /// \brief Constructor for the HistogramBuilder class.
@@ -153,7 +153,7 @@ public:
         Unit(other.Unit), TimeUnit(other.TimeUnit), Stats(other.Stats),
         AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy),
-        initialBinSize(other.initialBinSize), binSizes(other.binSizes),
+        InitialBinSize(other.InitialBinSize), BinSizes(other.BinSizes),
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
   /// \brief This function finds the bin index for a given time.
@@ -182,13 +182,13 @@ public:
     }
 
     if (DataBins[BinIndex].empty())
-      DataBins[BinIndex].reserve(initialBinSize);
+      DataBins[BinIndex].reserve(InitialBinSize);
 
     /// Check if the bin is full and resize it with the double of the initial
     /// size, to avoid multiple reallocations
-    if (DataBins[BinIndex].size() >= binSizes[BinIndex]) {
-      binSizes[BinIndex] += initialBinSize * 2;
-      DataBins[BinIndex].reserve(binSizes[BinIndex]);
+    if (DataBins[BinIndex].size() >= BinSizes[BinIndex]) {
+      BinSizes[BinIndex] += InitialBinSize * 2;
+      DataBins[BinIndex].reserve(BinSizes[BinIndex]);
     }
 
     DataBins[BinIndex].push_back(Value);
@@ -222,13 +222,13 @@ private:
                       .unit(Unit)
                       .data(AggregatedBins));
 
-    const auto dataarray = da00flatbuffers::DataArray(
+    const auto DataArray = da00flatbuffers::DataArray(
         Source, ReferenceTime.getRefTimeNS(), {XAxis, YAxis});
 
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);
 
-    Builder.Finish(dataarray.pack(Builder));
+    Builder.Finish(DataArray.pack(Builder));
     Buffer = Builder.Release();
 
     DataBins.clear();
