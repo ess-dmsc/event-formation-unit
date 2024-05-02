@@ -60,9 +60,9 @@ protected:
 
   /// \brief Copy constructor.
   ///
-  /// \param other The AbstractSerializer object to copy.
+  /// \param Other The AbstractSerializer object to copy.
   ///
-  AbstractSerializer(const AbstractSerializer &other);
+  AbstractSerializer(const AbstractSerializer &Other);
 
   /// \brief Pure virtual function to serialize data.
   ///
