@@ -137,16 +137,16 @@ public:
   /// \brief give back a copy from the data vector of this variable.
   /// \return The data vector of this variable
   template <class T> std::vector<T> data() const {
-    const auto count = sizeof(uint8_t) * Data.size() / sizeof(T);
+    const auto Count = sizeof(uint8_t) * Data.size() / sizeof(T);
     if (const auto total =
             std::reduce(Shape.begin(), Shape.end(), 1, std::multiplies());
-        total != static_cast<int64_t>(count)) {
+        total != static_cast<int64_t>(Count)) {
       std::stringstream ss;
       ss << "Inconsistent data and shape arrays for specified type because "
-         << total << " != " << count;
+         << total << " != " << Count;
       throw std::runtime_error(ss.str());
     }
-    std::vector<T> Out(count);
+    std::vector<T> Out(Count);
     std::memcpy(Out.data(), Data.data(), Data.size());
     return Out;
   }
