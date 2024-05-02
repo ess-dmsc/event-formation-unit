@@ -11,12 +11,18 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 #include <common/time/ESSTime.h>
+#include <cstdint>
 #include <inttypes.h>
 
 namespace esstime {
 
 uint64_t ESSReferenceTime::setReference(const ESSTime &refESSTime) {
   TimeInNS = refESSTime.toNS();
+  return TimeInNS.count();
+}
+
+uint64_t ESSReferenceTime::setReference(const uint64_t &refTime) {
+  TimeInNS = TimeDurationNano(refTime);
   return TimeInNS.count();
 }
 

@@ -2,6 +2,9 @@
 
 #include <common/memory/FixedSizePool.h>
 #include <common/testutils/TestBase.h>
+#include <common/math/BitMath.h>
+
+using namespace essmath;
 
 class FixedSizePoolTest : public TestBase {
 public:

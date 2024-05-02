@@ -16,6 +16,7 @@ set(efu_common_SRC
   kafka/AR51Serializer.cpp
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
+  kafka/serializer/AbstractSerializer.cpp
   system/Socket.cpp
   Statistics.cpp
   StatPublisher.cpp
@@ -44,14 +45,18 @@ set(efu_common_INC
   kafka/AR51Serializer.h
   kafka/KafkaConfig.h
   kafka/Producer.h
+  kafka/serializer/AbstractSerializer.h
+  kafka/serializer/DA00HistogramSerializer.h
+  kafka/serializer/FlatbufferTypes.h
   memory/Buffer.h
   memory/FixedSizePool.h
   memory/PoolAllocator.h
   memory/RingBuffer.h
+  math/BitMath.h
+  math/NumericalMath.h
   utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
-  BitMath.h
   DumpFile.h
   JsonFile.h
   Statistics.h
