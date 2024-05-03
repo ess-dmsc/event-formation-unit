@@ -150,11 +150,11 @@ void CbmBase::processing_thread() {
   for (int i = 0; i < cbmInstrument.Conf.Parms.NumberOfMonitors; ++i) {
     // Create a serializer for each monitor
 
-    SerializersPtr.push_back(std::make_unique<EV44Serializer>(
+    EV44SerializerPtrs.push_back(std::make_unique<EV44Serializer>(
         KafkaBufferSize, "cbm" + std::to_string(i), Produce));
   }
 
-  for (auto &serializerPtr : SerializersPtr) {
+  for (auto &serializerPtr : EV44SerializerPtrs) {
     cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
   }
 
@@ -213,7 +213,7 @@ void CbmBase::processing_thread() {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
 
-      for (auto &serializer : SerializersPtr) {
+      for (auto &serializer : EV44SerializerPtrs) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
         Counters.ProduceCauseTimeout++;
 

@@ -13,13 +13,31 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <string>
+#include <vector>
+#include "CbmTypes.h"
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace cbm {
 
+struct Topology {
+  CbmType Type{CbmType::TTL};
+  uint8_t TypeIndex{0};
+  bool isConfigured{false};
+
+  Topology() = default;
+};
+
 class Config {
+
+  static constexpr int MaxFEN{11};
+  static constexpr int MaxChannel{11};
+
+  Topology RMConfig[MaxFEN][MaxChannel];
+
+  void errorExit(std::string ErrMsg);
+
 public:
   Config(std::string ConfigFile) : FileName(ConfigFile){};
 

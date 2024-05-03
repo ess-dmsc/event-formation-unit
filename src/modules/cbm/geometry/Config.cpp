@@ -9,11 +9,17 @@
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <cbm/geometry/Config.h>
+#include "CbmTypes.h"
 
 namespace cbm {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+void Config::errorExit(std::string ErrMsg) {
+  LOG(INIT, Sev::Error, ErrMsg);
+  throw std::runtime_error(ErrMsg);
+}
 
 void Config::loadAndApply() {
   root = from_json_file(FileName);
@@ -82,6 +88,44 @@ void Config::apply() {
     LOG(INIT, Sev::Info, "Using default value for MonitorOffset");
   }
   LOG(INIT, Sev::Info, "MonitorOffset {}", Parms.MonitorOffset);
+
+  int Entry{0};
+  nlohmann::json Modules;
+  Modules = root["Topology"];
+  for (auto &Module : Modules) {
+    int FEN{MaxFEN + 1};
+    int Channel{MaxChannel + 1};
+    std::string Type{""};
+    int TypeIndex{0};
+
+    try {
+      FEN = Module["FEN"].get<int>();
+      Type = Module["Type"];
+      Channel = Module["Channel"].get<int>();
+      TypeIndex = Module["TypeIndex"].get<int>(); 
+    } catch (...) {
+      std::runtime_error("Malformed 'Config' section (Need FEN, Type, Channel, TypeIndex)");
+    }
+
+    // Check for array sizes and dupliacte entries
+    if (FEN > MaxFEN) {
+      errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
+                            MaxFEN));
+    }
+    if (RMConfig[FEN][Channel].isConfigured != false) {
+      errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
+                            Entry, FEN, Channel));
+    }
+
+    // Now add the relevant parameters
+    RMConfig[FEN][Channel].Type = CbmType(Type);
+    RMConfig[FEN][Channel].TypeIndex = TypeIndex;
+    XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Type %s", Entry, FEN, Channel, Type.c_str());
+
+    // Final housekeeping
+    RMConfig[FEN][Channel].isConfigured = true;
+    Entry++;
+  }
 }
 
 } // namespace cbm

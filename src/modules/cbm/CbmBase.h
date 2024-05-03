@@ -11,6 +11,8 @@
 
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka//serializer/DA00HistogramSerializer.h>
+#include <cstdint>
 #include <memory>
 #include <cbm/Counters.h>
 
@@ -26,7 +28,8 @@ public:
   struct Counters Counters {};
 
 protected:
-  std::vector<std::unique_ptr<EV44Serializer>> SerializersPtr;
+  std::vector<std::unique_ptr<EV44Serializer>> EV44SerializerPtrs;
+  std::vector<std::unique_ptr<fbserializer::HistogramSerializer<int32_t>>> HistogramSerializerPtrs;
 };
 
 } // namespace cbm

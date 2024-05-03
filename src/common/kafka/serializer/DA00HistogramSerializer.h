@@ -11,10 +11,9 @@
 
 #pragma once
 
-#include <FlatbufferTypes.h>
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/math/NumericalMath.h>
-#include <common/monitor/HistogramSerializer.h>
+#include <common/kafka/serializer/FlatbufferTypes.h>
 #include <fmt/format.h>
 
 namespace fbserializer {
