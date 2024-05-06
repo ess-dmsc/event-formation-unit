@@ -34,7 +34,7 @@ struct BaseSettings {
   std::string   KafkaTopic           {""};
   std::string   KafkaDebugTopic      {""};
   ///\brief Graphite setting
-  std::string   GraphitePrefix       {"efu.null"};
+  std::string   GraphitePrefix       {""};
   std::string   GraphiteRegion       {"0"};
   std::string   GraphiteAddress      {"127.0.0.1"};
   uint16_t GraphitePort         {2003};

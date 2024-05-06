@@ -38,7 +38,10 @@ MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
       instrument, Args.getLogFileName(), Args.getLogLevel(),
       Args.getGraylogSettings().address, Args.getGraylogSettings().port);
 
-  DetectorSettings.GraphitePrefix = std::string("efu.") + instrument;
+  // Allow for customisation
+  if (DetectorSettings.GraphitePrefix.empty()) {
+    DetectorSettings.GraphitePrefix = std::string("efu.") + instrument;
+  }
 }
 
 int MainProg::run(Detector *inst) {
