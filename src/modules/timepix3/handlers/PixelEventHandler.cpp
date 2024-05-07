@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <handlers/PixelEventHandler.h>
 #include <handlers/TimingEventHandler.h>
+#include "common/utils/EfuUtils.h"
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -27,8 +28,10 @@ using namespace efutils;
 
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,
-                                     EV44Serializer &serializer)
-    : statCounters(statCounters), geometry(geometry), serializer(serializer) {
+                                     EV44Serializer &serializer,
+                                     const int &FrequencyHz)
+    : statCounters(statCounters), geometry(geometry), serializer(serializer),
+      FrequencyPeriodNs(hzToNanoseconds(FrequencyHz)) {
 
   clusterers.resize(geometry->getChunkNumber());
   sub2DFrames.resize(geometry->getChunkNumber());
@@ -85,7 +88,6 @@ void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
   sort_chronologically(std::move(hitsVector));
   clusterer.cluster(hitsVector);
   clusterer.flush();
-  
 }
 
 void PixelEventHandler::pushDataToKafka() {
@@ -140,7 +142,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       continue;
     }
 
-    if (eventTof > TimingEventHandler::DEFAULT_FREQUENCY_NS) {
+    if (eventTof > FrequencyPeriodNs.count()) {
       XTRACE(EVENT, WAR,
              "Event is for the next pulse, EventTime: %u, Current "
              "pulse time: %u, Difference: %u",

@@ -9,8 +9,11 @@
 
 #pragma once
 
+#include <atomic>
+#include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/utils/EfuUtils.h>
+#include <cstdint>
 #include <dataflow/DataObserverTemplate.h>
 #include <dto/TimepixDataTypes.h>
 #include <memory>
@@ -57,11 +60,14 @@ private:
   const milliseconds THRESHOLD_MS = milliseconds(20);
 
   Counters &statCounters;
+  
+  const nanoseconds FrequencyPeriodNs;
+
 
   unique_ptr<timepixDTO::TDCDataEvent> lastTDCData;
   unique_ptr<timepixDTO::EVRDataEvent> lastEVRData;
 
-  uint32_t tdcRepetitionFrequency{DEFAULT_FREQUENCY_NS};
+  uint32_t tdcRepetitionFrequency{static_cast<uint32_t>(FrequencyPeriodNs.count())};
 
   /**
    * @brief Checks if the timing difference between the last TDCDataEvent and
@@ -84,15 +90,15 @@ private:
   }
 
 public:
-  static const uint32_t DEFAULT_FREQUENCY_NS;
-
   /**
    * @brief Constructs a TimingEventHandler object.
    *
    * @param statCounters The reference to the Counters object for tracking
    * statistics.
    */
-  TimingEventHandler(Counters &statCounters) : statCounters(statCounters) {}
+  TimingEventHandler(Counters &statCounters, const int &Frequency = 14) :
+      statCounters(statCounters),
+      FrequencyPeriodNs(efutils::hzToNanoseconds(Frequency)) {}
 
   /**
    * @brief Destroys the TimingEventHandler object.

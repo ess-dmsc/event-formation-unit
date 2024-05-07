@@ -9,9 +9,10 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Trace.h>
+#include <ctime>
 #include <dto/TimepixDataTypes.h>
 #include <readout/DataParser.h>
-#include <common/debug/Trace.h>
 #include <timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
@@ -43,8 +44,9 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
           timepix3Configuration.parallelThreads)),
-      timingEventHandler(counters),
-      pixelEventHandler(counters, geomPtr, serializer),
+      timingEventHandler(counters, timepix3Configuration.FrequencyHz),
+      pixelEventHandler(counters, geomPtr, serializer,
+                        timepix3Configuration.FrequencyHz),
       timepix3Parser(counters) {
 
   // Setup observable subscriptions

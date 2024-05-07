@@ -28,6 +28,7 @@ public:
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
   uint16_t parallelThreads{1};
+  int8_t FrequencyHz{14}; /// Frequency of the detector
 
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};

@@ -4,5 +4,6 @@
   "YResolution": 256,
   "ParallelThreads": 1,
   "comment": "ParallelThreads - Is the number of threads used for parallel processing during clustering. Value has to be power of 2",
-  "MaxTimeGapNS": 500
+  "MaxTimeGapNS": 500,
+  "FrequencyHz": 14
 }

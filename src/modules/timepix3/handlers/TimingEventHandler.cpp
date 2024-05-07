@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <handlers/TimingEventHandler.h>
 #include <memory>
 #include <utility>
@@ -20,10 +21,6 @@ namespace Timepix3 {
 using namespace timepixDTO;
 using namespace timepixReadout;
 
-///\todo: This should come from configuration file
-const uint32_t TimingEventHandler::DEFAULT_FREQUENCY_NS =
-    efutils::hzToNanoseconds(14).count();
-
 void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
 
   XTRACE(EVENT, DEB,
@@ -34,9 +31,10 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
   if (lastTDCData != nullptr) {
     if (tdcReadout.counter > lastTDCData->counter + 1) {
       statCounters.MissTDCCounter +=
-          tdcReadout.counter - (lastTDCData->counter + 1);
+          static_cast<uint32_t>(tdcReadout.counter) -
+          (static_cast<uint32_t>(lastTDCData->counter + 1));
     } else if (tdcReadout.counter < lastTDCData->counter &&
-                // Handle the case when the counter is reset
+               // Handle the case when the counter is reset
                tdcReadout.counter != 0) {
       return;
     } else if (tdcReadout.counter == lastTDCData->counter) {
@@ -64,7 +62,8 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
   if (lastEVRData != nullptr) {
     if (evrReadout.counter > lastEVRData->counter + 1) {
       statCounters.MissEVRCounter +=
-          evrReadout.counter - (lastEVRData->counter + 1);
+          static_cast<int32_t>(evrReadout.counter) -
+          (static_cast<int32_t>(lastEVRData->counter + 1));
     } else if (evrReadout.counter < lastEVRData->counter &&
                // Handle the case when the counter is reset
                evrReadout.counter != 0) {

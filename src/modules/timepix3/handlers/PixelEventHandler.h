@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/Hit2DVector.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
@@ -53,6 +54,8 @@ private:
                    information. */
   EV44Serializer &serializer; /**< Reference to the EV44Serializer object for
                                  serialization. */
+  nanoseconds FrequencyPeriodNs; /**< Frequency period in nanoseconds. */
+
   std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
       nullptr; /**< Unique pointer to the last epoch ESS pulse time. */
 
@@ -118,7 +121,7 @@ public:
    */
   PixelEventHandler(Counters &counters,
                     std::shared_ptr<Timepix3Geometry> geometry,
-                    EV44Serializer &serializer);
+                    EV44Serializer &serializer, const int &FrequencyHz = 14);
 
   /**
    * @brief Destroys the PixelEventHandler object.
