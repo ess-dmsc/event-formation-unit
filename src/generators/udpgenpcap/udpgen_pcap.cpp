@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
   uint64_t TotPackets = 0;
   uint64_t PcapPackets = 0;
   char RxBuffer[10000];
+
+  struct timeval last_ts = {0, 0};
+
   do {
     int ReadSize;
     while ((ReadSize = Pcap.read((char *)&RxBuffer, sizeof(RxBuffer))) != -1) {
@@ -95,13 +98,26 @@ int main(int argc, char *argv[]) {
         printf("read non udp data - ignoring\n");
         continue; // non udp data
       }
+
+      timeval ts = Pcap.getLastTimestamp();
+
       PcapPackets++;
 
       if (PcapPackets >= Settings.PcapOffset) {
-        DataSource.send(RxBuffer, ReadSize);
+        
         if (Settings.SpeedThrottle) {
           usleep(Settings.SpeedThrottle);
+        } else {
+          if (last_ts.tv_sec != 0 || last_ts.tv_usec != 0) {
+            struct timeval diff;
+            timersub(&ts, &last_ts, &diff); // Calculate the difference between
+                                            // the current and last timestamp
+            usleep(diff.tv_sec * 1000000 +
+                   diff.tv_usec); // Sleep for the difference in time
+          }
+          last_ts = ts;
         }
+        DataSource.send(RxBuffer, ReadSize);
         Packets++;
         TotPackets++;
         if (Settings.PktThrottle) {
