@@ -17,6 +17,7 @@
 #include <generators/udpgenpcap/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
+#include <pcap/pcap.h>
 
 // GCOVR_EXCL_START
 
@@ -144,6 +145,8 @@ int ReaderPcap::read(char *Buffer, size_t BufferSize) {
   auto DataLength =
       std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), BufferSize);
   std::memcpy(Buffer, &Data[UDP_DATA_OFFSET], DataLength);
+
+  LastTs = Header->ts;
 
   return DataLength;
 }
