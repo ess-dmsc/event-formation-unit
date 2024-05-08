@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <arpa/inet.h>
-#include <bits/types/struct_timeval.h>
 #include <cassert>
 #include <cinttypes>
 #include <cstring>
@@ -18,7 +17,7 @@
 #include <generators/udpgenpcap/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
-#include "pcap/pcap.h"
+#include <pcap/pcap.h>
 
 // GCOVR_EXCL_START
 
