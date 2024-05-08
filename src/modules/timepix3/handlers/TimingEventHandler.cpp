@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <netinet/in.h>
 #include <cstdint>
 #include <handlers/TimingEventHandler.h>
 #include <memory>
@@ -35,9 +36,11 @@ void TimingEventHandler::applyData(const TDCReadout &tdcReadout) {
           (static_cast<uint32_t>(lastTDCData->counter + 1));
     } else if (tdcReadout.counter < lastTDCData->counter &&
                // Handle the case when the counter is reset
-               tdcReadout.counter != 0) {
+               tdcReadout.counter != 1) {
+      statCounters.TDCReadoutDropped += 1;
       return;
     } else if (tdcReadout.counter == lastTDCData->counter) {
+      statCounters.TDCReadoutDropped += 1;
       return;
     }
   }
@@ -66,9 +69,11 @@ void TimingEventHandler::applyData(const EVRReadout &evrReadout) {
           (static_cast<int32_t>(lastEVRData->counter + 1));
     } else if (evrReadout.counter < lastEVRData->counter &&
                // Handle the case when the counter is reset
-               evrReadout.counter != 0) {
+               evrReadout.counter != 1) {
+      statCounters.EVRReadoutDropped += 1;
       return;
     } else if (evrReadout.counter == lastEVRData->counter) {
+      statCounters.EVRReadoutDropped += 1;
       return;
     }
   }

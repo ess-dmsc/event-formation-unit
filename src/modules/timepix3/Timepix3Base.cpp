@@ -49,7 +49,9 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.tdc.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
   Stats.create("readouts.tdc.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
   Stats.create("readouts.evr.evr_readout_count", Counters.EVRReadoutCounter);
+  Stats.create("readouts.evr.evr_readout_dropped", Counters.EVRReadoutDropped);
   Stats.create("readouts.tdc.tdc_readout_count", Counters.TDCReadoutCounter);
+  Stats.create("readouts.tdc.tdc_readout_dropped", Counters.TDCReadoutDropped);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
 
   // Counters related to timing event handling and time syncronization

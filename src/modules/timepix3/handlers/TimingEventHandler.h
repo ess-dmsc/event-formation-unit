@@ -82,11 +82,11 @@ private:
     }
 
     auto arrivalDiff =
-        abs(duration_cast<milliseconds>(lastTDCData->arrivalTimestamp -
-                                        lastEVRData->arrivalTimestamp)
-                .count());
+      abs(duration_cast<nanoseconds>(lastTDCData->arrivalTimestamp -
+                      lastEVRData->arrivalTimestamp)
+          .count());
 
-    return arrivalDiff <= THRESHOLD_MS.count();
+    return arrivalDiff <= duration_cast<nanoseconds>(THRESHOLD_MS).count();
   }
 
 public:
