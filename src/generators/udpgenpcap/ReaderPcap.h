@@ -43,6 +43,12 @@ public:
   /// \brief prints a summary of the collected stats
   void printStats();
 
+  /// \brief Get the last timestamp of the captured packet
+  /// \return The last timestamp as a timeval struct
+  timeval getLastTimestamp() const {
+    return LastTs;
+  }
+
   /// \brief hexdump of packet, for debug
   void printPacket(unsigned char *Data, size_t PayloadLength);
 
@@ -64,6 +70,7 @@ private:
 
   std::string FileName;
   pcap_t *PcapHandle{nullptr};
+  timeval LastTs{0, 0};
   int LinkLayerSize{0};
   int LinkType{0}; // see https://www.tcpdump.org/linktypes.html
 };
