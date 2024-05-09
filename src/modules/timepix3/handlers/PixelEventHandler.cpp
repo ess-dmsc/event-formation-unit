@@ -136,6 +136,12 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // for this type of
     // detector, it is the time the first photon in the cluster hit the
     // detector.
+
+    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits) {
+      statCounters.ClusterSizeTooSmall++;
+      continue;
+    }
+
     uint64_t eventTime = cluster.timeStart();
     long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;

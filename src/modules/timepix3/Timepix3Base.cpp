@@ -67,6 +67,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("handlers.pixelevent.event_time_next_pulse_count", Counters.EventTimeForNextPulse);
   Stats.create("handlers.pixelevent.tof_count", Counters.TofCount);
   Stats.create("handlers.pixelevent.tof_neg", Counters.TofNegative);
+  Stats.create("handlers.pixelevent.cluster_size_to_small", Counters.ClusterSizeTooSmall);
   Stats.create("handlers.pixelevent.prevtof_count", Counters.PrevTofCount);
 
   // Events

@@ -54,7 +54,7 @@ Config::Config(std::string ConfigFile) {
     LOG(INIT, Sev::Warning, "Using default MaxTimeGapNS");
   }
   try {
-    FrequencyHz = root["FrequencyHz"].get<uint16_t>();
+    FrequencyHz = root["FrequencyHz"].get<float>();
   } catch (...) {
     LOG(INIT, Sev::Warning, "Using default Frequency");
   }

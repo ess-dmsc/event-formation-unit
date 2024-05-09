@@ -41,7 +41,7 @@ int inline measureRuntime(Func &&func, Args &&...args) {
 // #endif
 }
 
-inline nanoseconds hzToNanoseconds(const int &frequencyHz) {
+inline nanoseconds hzToNanoseconds(const float &frequencyHz) {
   uint64_t nsPeriod = static_cast<uint64_t>(1e9 / frequencyHz);
   return nanoseconds(nsPeriod);
 }
