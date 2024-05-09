@@ -36,7 +36,7 @@ using namespace timepixReadout;
  * @param serializer The EV44Serializer object used for serialization.
  */
 Timepix3Instrument::Timepix3Instrument(Counters &counters,
-                                       Config timepix3Configuration,
+                                       const Config &timepix3Configuration,
                                        EV44Serializer &serializer)
     : counters(counters), serializer(serializer),
       clusterer(timepix3Configuration.MaxTimeGapNS,
@@ -46,7 +46,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
           timepix3Configuration.parallelThreads)),
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
       pixelEventHandler(counters, geomPtr, serializer,
-                        timepix3Configuration.FrequencyHz),
+                        timepix3Configuration),
       timepix3Parser(counters) {
 
   // Setup observable subscriptions

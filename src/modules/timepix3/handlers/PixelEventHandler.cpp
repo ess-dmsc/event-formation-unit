@@ -15,6 +15,7 @@
 #include <handlers/PixelEventHandler.h>
 #include <handlers/TimingEventHandler.h>
 #include "common/utils/EfuUtils.h"
+#include "geometry/Config.h"
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -29,16 +30,18 @@ using namespace efutils;
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,
                                      EV44Serializer &serializer,
-                                     const int &FrequencyHz)
+                                     const Config &timepix3Configuration)
     : statCounters(statCounters), geometry(geometry), serializer(serializer),
-      FrequencyPeriodNs(hzToNanoseconds(FrequencyHz)) {
+      TimepixConfiguration(timepix3Configuration),
+      FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)) {
 
   clusterers.resize(geometry->getChunkNumber());
   sub2DFrames.resize(geometry->getChunkNumber());
 
   for (int i = 0; i < geometry->getChunkNumber(); i++) {
     clusterers[i] = std::make_unique<Hierarchical2DClusterer>(
-        Hierarchical2DClusterer(1, 5));
+        Hierarchical2DClusterer(TimepixConfiguration.MaxTimeGapNS,
+                                timepix3Configuration.MaxCoordinateGap));
     sub2DFrames[i] = Hit2DVector();
   }
 }

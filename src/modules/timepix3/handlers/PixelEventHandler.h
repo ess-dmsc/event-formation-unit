@@ -21,6 +21,7 @@
 #include <memory>
 #include <modules/timepix3/Counters.h>
 #include <vector>
+#include "geometry/Config.h"
 
 namespace Timepix3 {
 
@@ -54,6 +55,10 @@ private:
                    information. */
   EV44Serializer &serializer; /**< Reference to the EV44Serializer object for
                                  serialization. */
+
+  const Config
+      &TimepixConfiguration; /**< Reference to the Timepix configuration. */
+
   nanoseconds FrequencyPeriodNs; /**< Frequency period in nanoseconds. */
 
   std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
@@ -121,7 +126,7 @@ public:
    */
   PixelEventHandler(Counters &counters,
                     std::shared_ptr<Timepix3Geometry> geometry,
-                    EV44Serializer &serializer, const int &FrequencyHz = 14);
+                    EV44Serializer &serializer, const Config &TimepixConfiguration);
 
   /**
    * @brief Destroys the PixelEventHandler object.

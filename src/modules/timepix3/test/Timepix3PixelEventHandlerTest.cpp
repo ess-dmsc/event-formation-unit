@@ -6,6 +6,7 @@
 
 #include "common/kafka/EV44Serializer.h"
 #include "common/kafka/Producer.h"
+#include "geometry/Config.h"
 #include "geometry/Timepix3Geometry.h"
 #include "gtest/gtest.h"
 #include <common/testutils/TestBase.h>
@@ -100,7 +101,8 @@ protected:
   Counters counters{};
   shared_ptr<Timepix3Geometry> geometry{new Timepix3Geometry(256, 256, 1)};
   MockEV44Serializer serializer;
-  PixelEventHandler testEventHandler{counters, geometry, serializer};
+  Config Timepix3Config{};
+  PixelEventHandler testEventHandler{counters, geometry, serializer, Timepix3Config};
 
   // Setup test pixel information, use geometry to calculate pixel id. Geometry
   // separately tested.
