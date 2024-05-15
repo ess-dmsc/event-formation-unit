@@ -40,6 +40,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -164,7 +165,8 @@ void CaenBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -175,8 +177,8 @@ void CaenBase::processingThread() {
         continue;
       }
 
-      XTRACE(DATA, DEB, "Ringbuffer index %d has data of length %d",
-             DataIndex, DataLen);
+      XTRACE(DATA, DEB, "Ringbuffer index %d has data of length %d", DataIndex,
+             DataLen);
 
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
@@ -191,13 +193,22 @@ void CaenBase::processingThread() {
         Counters.ErrorESSHeaders++;
         continue;
       }
-
+      
       // We have good header information, now parse readout data
       Res = Caen.CaenParser.parse(Caen.ESSReadoutParser.Packet.DataPtr,
                                   Caen.ESSReadoutParser.Packet.DataLength);
 
+
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
+
+      // send monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxRawReadoutPackets++;
+      }
 
       /// \todo This could be moved and done less frequently
       Counters.Parser = Caen.CaenParser.Stats;
@@ -212,14 +223,16 @@ void CaenBase::processingThread() {
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       SerializerII->produce();
       Counters.ProduceCauseTimeout++;
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
+      Counters.ProduceCauseMaxEventsReached =
+          Serializer->ProduceCauseMaxEventsReached;
     }
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count

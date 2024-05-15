@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/kafka/Producer.h>
+#include <cstdint>
 #include <modules/caen/geometry/CDCalibration.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
@@ -39,6 +40,7 @@ struct CaenCounters {
   int64_t Events;
   int64_t PixelErrors;
   int64_t EventsUdder;
+  int64_t TxRawReadoutPackets;
 
   // Time
   struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;

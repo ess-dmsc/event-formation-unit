@@ -11,6 +11,7 @@
 #include <caen/CaenCounters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 
 namespace Caen {
 
@@ -28,6 +29,7 @@ public:
 protected:
   EV44Serializer *Serializer;
   EV44Serializer *SerializerII;
+  AR51Serializer *MonitorSerializer;
 };
 
 } // namespace Caen
