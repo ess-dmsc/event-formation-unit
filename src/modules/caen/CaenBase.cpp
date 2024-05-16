@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "caen/CaenBase.h"
+#include "common/kafka/AR51Serializer.h"
 
 #include <caen/CaenInstrument.h>
 #include <cinttypes>
@@ -158,9 +159,17 @@ void CaenBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
+                           KafkaCfg.CfgParms);
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
+  };
+
   SerializerII = new EV44Serializer(KafkaBufferSize, "caen", ProduceII);
   Caen.setSerializerII(
       SerializerII); // would rather have this in CaenInstrument
+
+  MonitorSerializer = new AR51Serializer("caen", ProduceMonitor);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -193,18 +202,19 @@ void CaenBase::processingThread() {
         Counters.ErrorESSHeaders++;
         continue;
       }
-      
+
       // We have good header information, now parse readout data
       Res = Caen.CaenParser.parse(Caen.ESSReadoutParser.Packet.DataPtr,
                                   Caen.ESSReadoutParser.Packet.DataLength);
-
 
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
       // send monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+          EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
         Counters.TxRawReadoutPackets++;
