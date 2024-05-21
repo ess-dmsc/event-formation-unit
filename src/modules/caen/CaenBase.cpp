@@ -159,7 +159,7 @@ void CaenBase::processingThread() {
     EventProducerII.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
                            KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
@@ -169,7 +169,7 @@ void CaenBase::processingThread() {
   Caen.setSerializerII(
       SerializerII); // would rather have this in CaenInstrument
 
-  MonitorSerializer = new AR51Serializer("caen", ProduceMonitor);
+  MonitorSerializer = new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
