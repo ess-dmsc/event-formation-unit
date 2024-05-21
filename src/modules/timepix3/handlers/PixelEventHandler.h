@@ -21,7 +21,7 @@
 #include <memory>
 #include <modules/timepix3/Counters.h>
 #include <vector>
-#include "geometry/Config.h"
+#include <geometry/Config.h>
 
 namespace Timepix3 {
 

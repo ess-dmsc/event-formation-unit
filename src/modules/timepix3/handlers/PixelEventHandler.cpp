@@ -14,8 +14,8 @@
 #include <cstdint>
 #include <handlers/PixelEventHandler.h>
 #include <handlers/TimingEventHandler.h>
-#include "common/utils/EfuUtils.h"
-#include "geometry/Config.h"
+#include <common/utils/EfuUtils.h>
+#include <geometry/Config.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2016-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,6 +16,7 @@
 #include <string.h>
 #include <string>
 #include <unistd.h>
+
 // GCOVR_EXCL_START
 
 struct {
