@@ -24,17 +24,17 @@ using namespace Observer;
 using namespace timepixDTO;
 using namespace timepixReadout;
 
-/**
- * @brief Constructs a Timepix3Instrument object.
- *
- * This constructor initializes a Timepix3Instrument object with the provided
- * counters, settings, and serializer. It also sets up observable subscriptions
- * for timing events, pixel events, and epoch ESS pulse time events.
- *
- * @param counters The Counters object used for counting events.
- * @param settings The BaseSettings object containing configuration settings.
- * @param serializer The EV44Serializer object used for serialization.
- */
+///
+/// \brief Constructs a Timepix3Instrument object.
+///
+/// This constructor initializes a Timepix3Instrument object with the provided
+/// counters, settings, and serializer. It also sets up observable subscriptions
+/// for timing events, pixel events, and epoch ESS pulse time events.
+///
+/// \param counters The Counters object used for counting events.
+/// \param settings The BaseSettings object containing configuration settings.
+/// \param serializer The EV44Serializer object used for serialization.
+///
 Timepix3Instrument::Timepix3Instrument(Counters &counters,
                                        const Config &timepix3Configuration,
                                        EV44Serializer &serializer)

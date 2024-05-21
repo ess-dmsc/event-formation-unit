@@ -8,14 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/reduction/Hit2DVector.h>
-#include <common/reduction/clustering/Abstract2DClusterer.h>
-#include <common/reduction/clustering/Hierarchical2DClusterer.h>
-#include <cstdint>
-#include <handlers/PixelEventHandler.h>
-#include <handlers/TimingEventHandler.h>
-#include <common/utils/EfuUtils.h>
-#include <geometry/Config.h>
+#include <timepix3/geometry/Config.h>
+#include <timepix3/handlers/PixelEventHandler.h>
+#include <timepix3/handlers/TimingEventHandler.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
