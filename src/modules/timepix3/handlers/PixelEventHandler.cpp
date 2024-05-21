@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <timepix3/geometry/Config.h>
 #include <timepix3/handlers/PixelEventHandler.h>
 #include <timepix3/handlers/TimingEventHandler.h>
 

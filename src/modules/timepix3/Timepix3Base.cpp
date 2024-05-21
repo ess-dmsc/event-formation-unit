@@ -6,21 +6,11 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include "timepix3/Timepix3Base.h"
-#include "Counters.h"
-#include "Timepix3Instrument.h"
-#include "common/kafka/EV44Serializer.h"
-#include "common/kafka/Producer.h"
 #include <common/RuntimeStat.h>
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
+#include <common/detector/BaseSettings.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <memory>
-#include <stdio.h>
-#include <unistd.h>
+#include <modules/timepix3/Timepix3Base.h>
+#include <modules/timepix3/Timepix3Instrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -136,7 +126,8 @@ void Timepix3Base::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -163,12 +154,14 @@ void Timepix3Base::processingThread() {
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
       Serializer.produce();
       Counters.ProduceCauseTimeout++;
       Counters.ProduceCausePulseChange = Serializer.ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer.ProduceCauseMaxEventsReached;
+      Counters.ProduceCauseMaxEventsReached =
+          Serializer.ProduceCauseMaxEventsReached;
       Counters.KafkaStats = EventProducer.stats;
     }
   }

@@ -10,7 +10,6 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <logical_geometry/ESSGeometry.h>
 #include <string>
 
 // #undef TRC_LEVEL
