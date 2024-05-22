@@ -13,7 +13,6 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/system/Socket.h>
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
@@ -132,7 +131,7 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
   Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-  
+
   // Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   // Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   // Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
@@ -182,10 +181,6 @@ void NmxBase::processing_thread() {
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
   MonitorSerializer = new AR51Serializer("nmx", ProduceMonitor);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
-
-  HistogramSerializer ADCHistSerializer(NMX.ADCHist.needed_buffer_size(),
-                                        "NMX");
-  ADCHistSerializer.set_callback(ProduceMonitor);
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
@@ -262,19 +257,6 @@ void NmxBase::processing_thread() {
       Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
       Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
-
-      if (!NMX.ADCHist.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending ADC histogram for %zu readouts",
-               NMX.ADCHist.hitCount());
-        ADCHistSerializer.produce(NMX.ADCHist);
-        NMX.ADCHist.clear();
-      }
-      // if (!NMX.TDCHist.isEmpty()) {
-      //   XTRACE(PROCESS, DEB, "Sending TDC histogram for %zu readouts",
-      //      NMX.TDCHist.hitCount());
-      //   TDCHistSerializer.produce(NMX.TDCHist);
-      //   NMX.TDCHist.clear();
-      // }
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
