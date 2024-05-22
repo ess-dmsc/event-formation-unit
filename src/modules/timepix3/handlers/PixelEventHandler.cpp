@@ -8,12 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <common/reduction/Hit2DVector.h>
-#include <common/reduction/clustering/Abstract2DClusterer.h>
-#include <common/reduction/clustering/Hierarchical2DClusterer.h>
-#include <cstdint>
-#include <handlers/PixelEventHandler.h>
-#include <handlers/TimingEventHandler.h>
+#include <timepix3/handlers/PixelEventHandler.h>
+#include <timepix3/handlers/TimingEventHandler.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -27,15 +23,19 @@ using namespace efutils;
 
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,
-                                     EV44Serializer &serializer)
-    : statCounters(statCounters), geometry(geometry), serializer(serializer) {
+                                     EV44Serializer &serializer,
+                                     const Config &timepix3Configuration)
+    : statCounters(statCounters), geometry(geometry), serializer(serializer),
+      TimepixConfiguration(timepix3Configuration),
+      FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)) {
 
   clusterers.resize(geometry->getChunkNumber());
   sub2DFrames.resize(geometry->getChunkNumber());
 
   for (int i = 0; i < geometry->getChunkNumber(); i++) {
     clusterers[i] = std::make_unique<Hierarchical2DClusterer>(
-        Hierarchical2DClusterer(1, 5));
+        Hierarchical2DClusterer(TimepixConfiguration.MaxTimeGapNS,
+                                timepix3Configuration.MaxCoordinateGap));
     sub2DFrames[i] = Hit2DVector();
   }
 }
@@ -85,7 +85,6 @@ void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
   sort_chronologically(std::move(hitsVector));
   clusterer.cluster(hitsVector);
   clusterer.flush();
-  
 }
 
 void PixelEventHandler::pushDataToKafka() {
@@ -131,6 +130,12 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // for this type of
     // detector, it is the time the first photon in the cluster hit the
     // detector.
+
+    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits) {
+      statCounters.ClusterSizeTooSmall++;
+      continue;
+    }
+
     uint64_t eventTime = cluster.timeStart();
     long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;
@@ -140,7 +145,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       continue;
     }
 
-    if (eventTof > TimingEventHandler::DEFAULT_FREQUENCY_NS) {
+    if (eventTof > FrequencyPeriodNs.count()) {
       XTRACE(EVENT, WAR,
              "Event is for the next pulse, EventTime: %u, Current "
              "pulse time: %u, Difference: %u",

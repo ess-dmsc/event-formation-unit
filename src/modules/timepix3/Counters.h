@@ -29,6 +29,7 @@ struct Counters {
   int64_t TofCount{0};
   int64_t TofNegative{0};
   int64_t PrevTofCount{0};
+  int64_t ClusterSizeTooSmall{0};
 
   int64_t PixelReadouts{0};
   int64_t InvalidPixelReadout{0};
@@ -45,7 +46,9 @@ struct Counters {
   int64_t TDCPairFound{0};
   int64_t UnknownTDCReadouts{0};
   int64_t EVRReadoutCounter{0};
+  int64_t EVRReadoutDropped{0};
   int64_t TDCReadoutCounter{0};
+  int64_t TDCReadoutDropped{0};
   int64_t UndefinedReadoutCounter{0};
   // Kafka stats below are common to all detectors
 
