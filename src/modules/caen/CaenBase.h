@@ -27,9 +27,8 @@ public:
   struct CaenCounters Counters;
 
 protected:
-  EV44Serializer *Serializer;
-  EV44Serializer *SerializerII;
-  AR51Serializer *MonitorSerializer;
+  std::vector<std::shared_ptr<EV44Serializer>> Serializers;
+  std::shared_ptr<AR51Serializer> MonitorSerializer;
 };
 
 } // namespace Caen

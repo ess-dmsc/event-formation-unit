@@ -16,7 +16,7 @@
 
 namespace Caen {
 
-BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
+  BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
   ESSGeom = new ESSGeometry(900, 15, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
@@ -122,6 +122,24 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
   }
 
   return pixel;
+}
+
+size_t BifrostGeometry::numSerializers() const {
+  return TripletsPerRing * (MaxRing + 1); // MaxRing is likely 2 (but [0, 1, 2] are all valid)
+}
+
+size_t BifrostGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
+  // FiberID = _physical_ Ring (logical_ring/2)
+  // Group == triplet number
+  return Data.FiberId * TripletsPerRing + Data.Group;
+}
+
+std::string BifrostGeometry::serializerName(size_t Index) const {
+  auto ring_id = Index / TripletsPerRing;
+  auto tube_id = Index - ring_id * TripletsPerRing;
+  auto arc = tube_id / 3u;
+  auto triplet = (tube_id % 3u) + ring_id * 3u;
+  return fmt::format("arc={};triplet={}", arc, triplet);
 }
 
 } // namespace Caen
