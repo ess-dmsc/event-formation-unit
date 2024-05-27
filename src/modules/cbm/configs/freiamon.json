@@ -9,5 +9,9 @@
 
   "MaxPulseTimeDiffNS" : 1000000000,
 
-  "MaxTOFNS" : 1000000000
+  "MaxTOFNS" : 1000000000,
+
+  "Topology" : [
+    { "FEN":  0, "Channel": 0, "Type": "TTL", "TypeIndex" : 0}
+  ]
 }

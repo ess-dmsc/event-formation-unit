@@ -6,10 +6,11 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
+#include "CbmTypes.h"
+#include "common/readout/ess/Parser.h"
+#include <cbm/geometry/Config.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <cbm/geometry/Config.h>
-#include "CbmTypes.h"
 
 namespace cbm {
 
@@ -54,7 +55,7 @@ void Config::apply() {
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS {}", Parms.MaxPulseTimeDiffNS);
 
-  try {
+  try { 
     Parms.MaxTOFNS = root["MaxTOFNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxTOFNS");
@@ -69,25 +70,17 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
 
   try {
-    Parms.MonitorFEN = root["MonitorFEN"].get<std::uint8_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MonitorFEN");
-  }
-  LOG(INIT, Sev::Info, "MonitorFEN {}", Parms.MonitorFEN);
-
-  try {
-    Parms.NumberOfMonitors = root["NumberOfMonitors"].get<std::uint8_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for NumberOfMonitors");
-  }
-  LOG(INIT, Sev::Info, "NumberOfMonitors {}", Parms.NumberOfMonitors);
-
-  try {
     Parms.MonitorOffset = root["MonitorOffset"].get<int>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MonitorOffset");
   }
   LOG(INIT, Sev::Info, "MonitorOffset {}", Parms.MonitorOffset);
+
+  auto TopologyIt = root.find("Topology");
+  if (TopologyIt == root.end()) {
+    throw std::runtime_error(
+        "No 'Topology' section found in the configuration. Cannot setup Beam Monitors");
+  }
 
   int Entry{0};
   nlohmann::json Modules;
@@ -100,11 +93,12 @@ void Config::apply() {
 
     try {
       FEN = Module["FEN"].get<int>();
-      Type = Module["Type"];
+      Type = Module["Type"].get<std::string>();
       Channel = Module["Channel"].get<int>();
-      TypeIndex = Module["TypeIndex"].get<int>(); 
+      TypeIndex = Module["TypeIndex"].get<int>();
     } catch (...) {
-      std::runtime_error("Malformed 'Config' section (Need FEN, Type, Channel, TypeIndex)");
+      std::runtime_error(
+          "Malformed 'Config' section (Need FEN, Type, Channel, TypeIndex)");
     }
 
     // Check for array sizes and dupliacte entries
@@ -112,20 +106,36 @@ void Config::apply() {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
                             MaxFEN));
     }
-    if (RMConfig[FEN][Channel].isConfigured != false) {
+
+    if (Channel > MaxChannel) {
+      errorExit(fmt::format("Entry: {}, Invalid Channel: {} Max: {}", Entry,
+                            Channel, MaxChannel));
+    }
+
+    if (MonitorTopology[FEN][Channel].isConfigured != false) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
                             Entry, FEN, Channel));
     }
 
     // Now add the relevant parameters
-    RMConfig[FEN][Channel].Type = CbmType(Type);
-    RMConfig[FEN][Channel].TypeIndex = TypeIndex;
-    XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Type %s", Entry, FEN, Channel, Type.c_str());
+    try {
+      MonitorTopology[FEN][Channel].Type = CbmType(Type);
+    } catch (...) {
+      errorExit(fmt::format("Entry: {}, Invalid Type: {} is not a CBM Type",
+                            Entry, Type));
+    }
+
+    MonitorTopology[FEN][Channel].TypeIndex = TypeIndex;
+
+    XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Type %s", Entry, FEN,
+           Channel, Type.c_str());
 
     // Final housekeeping
-    RMConfig[FEN][Channel].isConfigured = true;
+    MonitorTopology[FEN][Channel].isConfigured = true;
     Entry++;
   }
+
+  Parms.NumberOfMonitors = Entry;
 }
 
 } // namespace cbm

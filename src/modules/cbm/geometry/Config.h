@@ -9,12 +9,12 @@
 
 #pragma once
 
+#include "CbmTypes.h"
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <string>
 #include <vector>
-#include "CbmTypes.h"
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -33,8 +33,6 @@ class Config {
 
   static constexpr int MaxFEN{11};
   static constexpr int MaxChannel{11};
-
-  Topology RMConfig[MaxFEN][MaxChannel];
 
   void errorExit(std::string ErrMsg);
 
@@ -55,10 +53,11 @@ public:
     uint32_t MaxTOFNS{20 * 71'428'571};          // Twenty 14Hz pulses
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
     uint8_t MonitorRing{11};
-    uint8_t MonitorFEN{0};
     uint8_t NumberOfMonitors{1};
     int MonitorOffset{0};
   } Parms;
+
+  Topology MonitorTopology[MaxFEN][MaxChannel];
 
   std::string FileName{""};
   nlohmann::json root;

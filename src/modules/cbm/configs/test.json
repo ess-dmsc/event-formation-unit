@@ -12,8 +12,6 @@
 
   "MonitorFEN" : 0,
 
-  "NumberOfMonitors" : 4,
-
   "Topology" : [
     { "FEN":  0, "Channel": 0, "Type": "TTL", "TypeIndex" : 0},
     { "FEN":  0, "Channel": 1, "Type": "TTL", "TypeIndex" : 1},
