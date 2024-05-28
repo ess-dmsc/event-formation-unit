@@ -10,7 +10,6 @@ set(esstime_obj_SRC
   Timer.cpp
   TimeString.cpp
   TSCTimer.cpp
-  CallbackTimer.cpp
   CheckTimer.cpp
 )
 
@@ -19,7 +18,6 @@ ESSTime.h
 Timer.h
 TimeString.h
 TSCTimer.h
-CallbackTimer.h
 CheckTimer.h
 )
 
