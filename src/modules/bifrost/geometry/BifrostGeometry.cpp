@@ -131,7 +131,7 @@ size_t BifrostGeometry::numSerializers() const {
 size_t BifrostGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
   // FiberID = _physical_ Ring (logical_ring/2)
   // Group == triplet number
-  return Data.FiberId * TripletsPerRing + Data.Group;
+  return Data.FiberId / 2 * TripletsPerRing + Data.Group;
 }
 
 std::string BifrostGeometry::serializerName(size_t Index) const {

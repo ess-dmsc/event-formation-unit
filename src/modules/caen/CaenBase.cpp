@@ -14,7 +14,7 @@
 #include <common/kafka/KafkaConfig.h>
 #include <common/time/TimeString.h>
 #include <unistd.h>
-#include <common/time/CallbackTimer.h>
+#include <common/time/CheckTimer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -166,28 +166,8 @@ void CaenBase::processingThread() {
                       Counters.KafkaStats.produce_bytes_ok});
 
   // Create the periodic timer for producing messages, in case of low event rate
-  CallbackTimer ProduceCallbackTimer{};
-  // and its callback method to produce messages and update stats
-  auto timeout_callback = [&](){
-      // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
-
-      for (auto &Serializer : Serializers) Serializer->produce();
-      MonitorSerializer->produce();
-      Counters.ProduceCauseTimeout++;
-      int64_t produce_cause_pulse_change{0};
-      int64_t produce_cause_max_events_reached{0};
-      for (auto & Serializer: Serializers) {
-        produce_cause_pulse_change += Serializer->ProduceCausePulseChange;
-        produce_cause_max_events_reached += Serializer->ProduceCauseMaxEventsReached;
-      }
-      Counters.ProduceCausePulseChange = produce_cause_pulse_change;
-      Counters.ProduceCauseMaxEventsReached = produce_cause_max_events_reached;
-  };
-  if (runThreads)
-    ProduceCallbackTimer.start(EFUSettings.UpdateIntervalSec * 1000, timeout_callback);
+  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ); // x86 specific
+  CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -243,12 +223,34 @@ void CaenBase::processingThread() {
       usleep(10);
     }
 
+    if (ProduceTimer.timeout()){
+      // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
+      // Produce messages if there are events
+      for (auto &Serializer: Serializers) {
+        Serializer->produce();
+      }
+      MonitorSerializer->produce();
+
+      // update counter statistics
+      Counters.ProduceCauseTimeout++;
+      Counters.ProduceCausePulseChange = std::transform_reduce(
+          Serializers.begin(), Serializers.end(), 0, std::plus<>(),
+          [](auto &Serializer) { return Serializer->ProduceCausePulseChange; }
+      );
+      Counters.ProduceCauseMaxEventsReached = std::transform_reduce(
+          Serializers.begin(), Serializers.end(), 0, std::plus<>(),
+          [](auto &Serializer) { return Serializer->ProduceCauseMaxEventsReached; }
+      );
+    }
+
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
     Counters.KafkaStats = EventProducer.stats;
   }
-  if (ProduceCallbackTimer.is_running())
-    ProduceCallbackTimer.stop();
+
   XTRACE(INPUT, ALW, "Stopping processing thread.");
 }
 } // namespace Caen
