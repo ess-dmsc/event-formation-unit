@@ -17,8 +17,10 @@
 
 #include <chrono>
 #include <common/kafka/Producer.h>
-#include <flatbuffers/flatbuffers.h>
 #include <common/time/ESSTime.h>
+#include <cstdint>
+#include <flatbuffers/flatbuffers.h>
+#include <optional>
 
 namespace fbserializer {
 
@@ -32,6 +34,12 @@ using namespace esstime;
 struct SerializerStats {
   int64_t ProduceCalled{
       0}; ///< Number of times the produce() function has been called.
+  int64_t ProduceRefTimeTriggered{
+      0}; ///< Number of times the produce() function has caused a change in
+          ///< pulse time.
+  int64_t ProduceFailedNoReferenceTime{
+      0}; ///< Number of times the produce() function has failed due to no
+          ///< reference time being set.
 };
 
 /// \class AbstractSerializer
@@ -46,8 +54,7 @@ class AbstractSerializer {
   SerializerStats &Stats; ///< Reference to the ProduceCalled statistic.
 
 protected:
-  esstime::ESSReferenceTime ReferenceTime{
-      esstime::ESSReferenceTime()};   ///< Reference time for serialization.
+  std::optional<TimeDurationNano> ReferenceTime;  ///< Reference time for serialization.
   flatbuffers::DetachedBuffer Buffer; ///< Buffer to hold serialized data.
 
   /// \brief Constructs an AbstractSerializer object with the given callback and
@@ -83,9 +90,9 @@ public:
 
   /// \brief Sets the reference time for serialization.
   ///
-  /// \param Time The reference time to set.
+  /// \param Time The reference time in ns precesion
   ///
-  void setReferenceTime(const ESSTime &Time);
+  void setReferenceTime(const TimeDurationNano &Time);
 };
 
 } // namespace fbserializer

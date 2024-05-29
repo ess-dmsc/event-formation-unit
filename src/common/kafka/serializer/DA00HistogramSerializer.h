@@ -12,8 +12,8 @@
 #pragma once
 
 #include <common/kafka/serializer/AbstractSerializer.h>
-#include <common/math/NumericalMath.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
+#include <common/math/NumericalMath.h>
 #include <fmt/format.h>
 
 namespace fbserializer {
@@ -83,14 +83,13 @@ class HistogramSerializer : public AbstractSerializer {
   using data_t = std::vector<std::vector<T>>;
   using time_t = int32_t;
 
-  const std::string Topic;
   const std::string Source;
   const time_t Period;
   const time_t BinCount;
   const std::string Name;
   const std::string Unit;
   const std::string TimeUnit;
-  HistrogramSerializerStats &Stats;
+  HistrogramSerializerStats Stats;
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const enum BinningStrategy BinningStrategy;
 
@@ -103,7 +102,6 @@ class HistogramSerializer : public AbstractSerializer {
 public:
   /// \brief Constructor for the HistogramBuilder class.
   ///
-  /// \param Topic is the Kafka stream topic destination
   /// \param Source is the source of the data
   /// \param Period is the length of time of one frame in the specified units
   /// \param BinCount is the number of the bins used
@@ -117,16 +115,15 @@ public:
   /// \param Strategy is the enum like binning strategy we can select
 
   HistogramSerializer(
-      std::string Topic, std::string Source, time_t Period, time_t BinCount,
-      std::string Name, std::string DataUnit, std::string TimeUnit,
-      HistrogramSerializerStats &Stats, ProducerCallback Callback = {},
+      std::string Source, time_t Period, time_t BinCount, std::string Name,
+      std::string DataUnit, std::string TimeUnit,
+      ProducerCallback Callback = {},
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
-      : AbstractSerializer(Callback, Stats), Topic(std::move(Topic)),
-        Source(std::move(Source)), Period(std::move(Period)),
-        BinCount(std::move(BinCount)), Name(std::move(Name)),
-        Unit(std::move(DataUnit)), TimeUnit(std::move(TimeUnit)), Stats(Stats),
-        AggregateFunction(std::move(AggFunc)),
+      : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
+        Period(std::move(Period)), BinCount(std::move(BinCount)),
+        Name(std::move(Name)), Unit(std::move(DataUnit)),
+        TimeUnit(std::move(TimeUnit)), AggregateFunction(std::move(AggFunc)),
         BinningStrategy(std::move(Strategy)) {
 
     initAxis();
@@ -137,19 +134,18 @@ public:
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
-      std::string Topic, std::string Source, time_t Period, time_t BinCount,
+      std::string Source, time_t Period, time_t BinCount,
       std::string Name, std::string Unit, std::string TimeUnit,
-      enum BinningStrategy Strategy, HistrogramSerializerStats &Stats,
-      ProducerCallback Callback = {},
+      enum BinningStrategy Strategy, ProducerCallback Callback = {},
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Topic, Source, Period, BinCount, Name, Unit,
-                            TimeUnit, Stats, Callback, AggFunc, Strategy) {}
+      : HistogramSerializer(Source, Period, BinCount, Name, Unit,
+                            TimeUnit, Callback, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)
-      : AbstractSerializer(other), Topic(other.Topic), Source(other.Source),
-        Period(other.Period), BinCount(other.BinCount), Name(other.Name),
-        Unit(other.Unit), TimeUnit(other.TimeUnit), Stats(other.Stats),
+      : AbstractSerializer(other), Source(other.Source), Period(other.Period),
+        BinCount(other.BinCount), Name(other.Name), Unit(other.Unit),
+        TimeUnit(other.TimeUnit), Stats(other.Stats),
         AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy),
         InitialBinSize(other.InitialBinSize), BinSizes(other.BinSizes),
@@ -192,6 +188,8 @@ public:
 
     DataBins[BinIndex].push_back(Value);
   }
+  // Getter function for the Stats member
+  HistrogramSerializerStats& getStats() { return Stats; }
 
 private:
   /// \brief Serialize the data to a flatbuffer.
@@ -221,8 +219,8 @@ private:
                       .unit(Unit)
                       .data(AggregatedBins));
 
-    const auto DataArray = da00flatbuffers::DataArray(
-        Source, ReferenceTime.getRefTimeNS(), {XAxis, YAxis});
+    const auto DataArray =
+        da00flatbuffers::DataArray(Source, ReferenceTime.value(), {XAxis, YAxis});
 
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);

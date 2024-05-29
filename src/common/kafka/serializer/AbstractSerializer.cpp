@@ -13,7 +13,8 @@
 /// \link https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
-#include "AbstractSerializer.h"
+#include <common/kafka/serializer/AbstractSerializer.h>
+#include <common/time/ESSTime.h>
 
 namespace fbserializer {
 
@@ -24,6 +25,12 @@ flatbuffers::DetachedBuffer Buffer;
 
 void AbstractSerializer::produce() {
   Stats.ProduceCalled++;
+
+  if (!ReferenceTime.has_value()) {
+    Stats.ProduceFailedNoReferenceTime++;
+    return;
+  }
+
   uint64_t CurrentHwClock =
       duration_cast<milliseconds>(system_clock::now().time_since_epoch())
           .count();
@@ -34,8 +41,16 @@ void AbstractSerializer::produce() {
                   CurrentHwClock);
 };
 
-void AbstractSerializer::setReferenceTime(const ESSTime &Time) {
-  ReferenceTime.setReference(Time);
+void AbstractSerializer::setReferenceTime(const TimeDurationNano &Time) {
+
+  // Produce already collected data before change reference time
+  if (ReferenceTime.has_value()) {
+    produce();
+    Stats.ProduceRefTimeTriggered++;
+  }
+
+  // Update reference time
+  ReferenceTime = Time;
 };
 
 } // namespace fbserializer
