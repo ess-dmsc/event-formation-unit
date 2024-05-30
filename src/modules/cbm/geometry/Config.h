@@ -9,11 +9,14 @@
 
 #pragma once
 
-#include "CbmTypes.h"
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
+#include <cstdint>
+#include <memory>
+#include <modules/cbm/CbmTypes.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // #undef TRC_LEVEL
@@ -22,21 +25,37 @@
 namespace cbm {
 
 struct Topology {
-  CbmType Type{CbmType::TTL};
-  uint8_t TypeIndex{0};
-  bool isConfigured{false};
+  const int FEN{0};
+  const int Channel{0};
+  const std::string Source{"CBM"};
+  const CbmType Type{CbmType::TTL};
+  union {
+    int param1{0};
+    int pixelOffset;
+    int maxTofBin;
+  };
+  union {
+    int param2{0};
+    int pixelRang;
+    int BinCount;
+  };
 
   Topology() = default;
+
+  Topology(const int &FEN, const int &Channel, const std::string &Source,
+           const CbmType &Type, const int &param1, const int &param2)
+      : FEN(FEN), Channel(Channel), Source(Source), Type(Type),
+        pixelOffset(param1), param2(param2){};
 };
 
 class Config {
 
-  static constexpr int MaxFEN{11};
-  static constexpr int MaxChannel{11};
-
   void errorExit(std::string ErrMsg);
 
 public:
+  static constexpr int MaxFEN{11};
+  static constexpr int MaxChannel{11};
+
   Config(std::string ConfigFile) : FileName(ConfigFile){};
 
   Config(){};
@@ -57,10 +76,11 @@ public:
     int MonitorOffset{0};
   } Parms;
 
-  Topology MonitorTopology[MaxFEN][MaxChannel];
+  std::vector<Topology> TopologyList;
 
   std::string FileName{""};
   nlohmann::json root;
 };
+;
 
 } // namespace cbm

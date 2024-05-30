@@ -63,12 +63,6 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    if (readout.FENId != Conf.Parms.MonitorFEN) {
-      XTRACE(DATA, WAR, "Invalid FEN %d for monitor readout", readout.FENId);
-      counters.FENCfgErrors++;
-      continue;
-    }
-
     if (readout.Channel < Conf.Parms.MonitorOffset) {
       XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
       counters.ChannelCfgErrors++;

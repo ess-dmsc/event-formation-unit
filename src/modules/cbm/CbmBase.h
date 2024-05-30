@@ -9,12 +9,13 @@
 
 #pragma once
 
+#include "common/kafka/serializer/DA00HistogramSerializer.h"
+#include <cbm/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
-#include <common/kafka//serializer/DA00HistogramSerializer.h>
 #include <cstdint>
 #include <memory>
-#include <cbm/Counters.h>
+#include <modules/cbm/geometry/Config.h>
 
 namespace cbm {
 
@@ -28,8 +29,10 @@ public:
   struct Counters Counters {};
 
 protected:
-  std::vector<std::unique_ptr<EV44Serializer>> EV44SerializerPtrs;
-  std::vector<std::unique_ptr<fbserializer::HistogramSerializer<int32_t>>> HistogramSerializerPtrs;
+  std::unique_ptr<EV44Serializer> EV44SerializerPtrs[Config::MaxFEN]
+                                                    [Config::MaxChannel];
+  std::unique_ptr<fbserializer::HistogramSerializer<int32_t>>
+      HistogramSerializerPtrs[Config::MaxFEN][Config::MaxChannel];
 };
 
 } // namespace cbm

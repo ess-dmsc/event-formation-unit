@@ -6,11 +6,12 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include "CbmTypes.h"
-#include "common/readout/ess/Parser.h"
 #include <cbm/geometry/Config.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/readout/ess/Parser.h>
+#include <memory>
+#include <modules/cbm/CbmTypes.h>
 
 namespace cbm {
 
@@ -55,7 +56,7 @@ void Config::apply() {
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS {}", Parms.MaxPulseTimeDiffNS);
 
-  try { 
+  try {
     Parms.MaxTOFNS = root["MaxTOFNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxTOFNS");
@@ -78,27 +79,32 @@ void Config::apply() {
 
   auto TopologyIt = root.find("Topology");
   if (TopologyIt == root.end()) {
-    throw std::runtime_error(
-        "No 'Topology' section found in the configuration. Cannot setup Beam Monitors");
+    throw std::runtime_error("No 'Topology' section found in the "
+                             "configuration. Cannot setup Beam Monitors");
   }
 
   int Entry{0};
   nlohmann::json Modules;
   Modules = root["Topology"];
+
+  // temporary map storage to check for duplicates ofthe two unique keys
+  std::unique_ptr<Topology> TopologyMap[MaxFEN][MaxChannel];
+
   for (auto &Module : Modules) {
     int FEN{MaxFEN + 1};
     int Channel{MaxChannel + 1};
+    std::string Source{""};
     std::string Type{""};
-    int TypeIndex{0};
 
     try {
       FEN = Module["FEN"].get<int>();
-      Type = Module["Type"].get<std::string>();
       Channel = Module["Channel"].get<int>();
-      TypeIndex = Module["TypeIndex"].get<int>();
+      Type = Module["Type"].get<std::string>();
+      Source = Module["Source"].get<std::string>();
+
     } catch (...) {
-      std::runtime_error(
-          "Malformed 'Config' section (Need FEN, Type, Channel, TypeIndex)");
+      std::runtime_error("Malformed 'Topology' section (Need FEN, Channel, Type and"
+                         "Source)");
     }
 
     // Check for array sizes and dupliacte entries
@@ -112,27 +118,67 @@ void Config::apply() {
                             Channel, MaxChannel));
     }
 
-    if (MonitorTopology[FEN][Channel].isConfigured != false) {
+    if (TopologyMap[FEN][Channel] != nullptr) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
                             Entry, FEN, Channel));
     }
 
-    // Now add the relevant parameters
+    // Add parameter to the temporary map
+    CbmType MonitorType = CbmType::TTL;
     try {
-      MonitorTopology[FEN][Channel].Type = CbmType(Type);
+      MonitorType = CbmType(Type);
     } catch (...) {
       errorExit(fmt::format("Entry: {}, Invalid Type: {} is not a CBM Type",
                             Entry, Type));
     }
 
-    MonitorTopology[FEN][Channel].TypeIndex = TypeIndex;
+    int param1{0};
+    int param2{0};
 
-    XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Type %s", Entry, FEN,
-           Channel, Type.c_str());
+    if (MonitorType == CbmType::TTL) {
 
-    // Final housekeeping
-    MonitorTopology[FEN][Channel].isConfigured = true;
+      try {
+        param1 = Module["PixelOffset"].get<int>();
+        param2 = Module["PixelRange"].get<int>();
+      } catch (...) {
+        errorExit(fmt::format(
+            "Entry: {}, Malformed 'Topology' section for TTL Type (Need "
+            "PixelOffset, PixelRange)",
+            Entry));
+      }
+    }
+
+    if (MonitorType == CbmType::IBM) {
+
+      try {
+        param1 = Module["MaxTofBin"].get<int>();
+        param2 = Module["BinCount"].get<int>();
+      } catch (...) {
+        errorExit(fmt::format(
+            "Entry: {}, Malformed 'Topology' section for IBM Type (Need "
+            "MaxTofBin, BinCount)",
+            Entry));
+      }
+    }
+
+
+    TopologyMap[FEN][Channel] = std::make_unique<Topology>(
+        FEN, Channel, Source, MonitorType, param1, param2);
+
+    XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",
+           Entry, FEN, Channel, Source.c_str(), Type.c_str());
+
+    // Count the number of valid entries
     Entry++;
+  }
+
+  // Transfer the temporary map to the final list of topologies
+  for (int i = 0; i < MaxFEN; i++) {
+    for (int j = 0; j < MaxChannel; j++) {
+      if (TopologyMap[i][j] != nullptr) {
+        TopologyList.push_back(std::move(*TopologyMap[i][j]));
+      }
+    }
   }
 
   Parms.NumberOfMonitors = Entry;

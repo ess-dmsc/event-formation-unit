@@ -25,7 +25,7 @@ auto DefaultValuesOnly = R"(
     "Detector" : "CBM",
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "TypeIndex" : 0}
+      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -36,7 +36,7 @@ auto IncorrectFEN = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  77, "Channel": 0, "Type": "TTL", "TypeIndex" : 0}
+      { "FEN":  77, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -47,7 +47,7 @@ auto IncorrectChannel = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 66, "Type": "TTL", "TypeIndex" : 0}
+      { "FEN":  0, "Channel": 66, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -58,8 +58,8 @@ auto DuplicateEntry = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  10, "Channel": 10, "Type": "TTL", "TypeIndex" : 0},
-      { "FEN":  10, "Channel": 10, "Type": "IBM", "TypeIndex" : 1}
+      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
+      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -70,7 +70,7 @@ auto IncorrectType = R"(
     "MonitorRing" : 11,
 
     "Topology" : [
-      { "FEN":  10, "Channel": 10, "Type": "ESS", "TypeIndex" : 0}
+      { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -83,10 +83,10 @@ auto ConfigWithTopology = R"(
     "MaxPulseTimeDiffNS" : 1000000000,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "TypeIndex" : 0},
-      { "FEN":  0, "Channel": 1, "Type": "TTL", "TypeIndex" : 1},
-      { "FEN":  1, "Channel": 0, "Type": "IBM", "TypeIndex" : 0},
-      { "FEN":  2, "Channel": 0, "Type": "IBM", "TypeIndex" : 1}
+      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
+      { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0, "PixelRange": 1},
+      { "FEN":  1, "Channel": 0, "Type": "IBM", "Source" : "cbm3", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100}
     ]
   }
 )"_json;
@@ -106,7 +106,7 @@ TEST_F(CbmConfigTest, Constructor) {
   EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
   EXPECT_EQ(config.Parms.MonitorRing, 11);
-  EXPECT_EQ(config.MonitorTopology[0][0].isConfigured, false);
+  EXPECT_TRUE(config.TopologyList.empty());
 }
 
 TEST_F(CbmConfigTest, MissingMandatoryField) {
@@ -192,14 +192,32 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.NumberOfMonitors, 4);
-  EXPECT_EQ(config.MonitorTopology[0][0].Type, CbmType::TTL);
-  EXPECT_EQ(config.MonitorTopology[0][0].TypeIndex, 0);
-  EXPECT_EQ(config.MonitorTopology[0][1].Type, CbmType::TTL);
-  EXPECT_EQ(config.MonitorTopology[0][1].TypeIndex, 1);
-  EXPECT_EQ(config.MonitorTopology[1][0].Type, CbmType::IBM);
-  EXPECT_EQ(config.MonitorTopology[1][0].TypeIndex, 0);
-  EXPECT_EQ(config.MonitorTopology[2][0].Type, CbmType::IBM);
-  EXPECT_EQ(config.MonitorTopology[2][0].TypeIndex, 1);
+
+  // Testing topology
+  // Test first entry
+  EXPECT_EQ(config.TopologyList[0].Type, CbmType::TTL);
+  EXPECT_EQ(config.TopologyList[0].Source, "cbm1");
+  EXPECT_EQ(config.TopologyList[0].FEN, 0);
+  EXPECT_EQ(config.TopologyList[0].Channel, 0);
+
+  // Test second entry
+  EXPECT_EQ(config.TopologyList[1].Type, CbmType::TTL);
+  EXPECT_EQ(config.TopologyList[1].Source, "cbm2");
+  EXPECT_EQ(config.TopologyList[1].FEN, 0);
+  EXPECT_EQ(config.TopologyList[1].Channel, 1);
+
+  // Test third entry
+  EXPECT_EQ(config.TopologyList[2].Type, CbmType::IBM);
+  EXPECT_EQ(config.TopologyList[2].Source, "cbm3");
+  EXPECT_EQ(config.TopologyList[2].FEN, 1);
+  EXPECT_EQ(config.TopologyList[2].Channel, 0);
+
+
+  // Test fourth entry
+  EXPECT_EQ(config.TopologyList[3].Type, CbmType::IBM);
+  EXPECT_EQ(config.TopologyList[3].Source, "cbm4");
+  EXPECT_EQ(config.TopologyList[3].FEN, 2);
+  EXPECT_EQ(config.TopologyList[3].Channel, 0);
 }
 
 int main(int argc, char **argv) {

@@ -7,36 +7,34 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/Detector.h>
 #include <cinttypes>
 #include <common/debug/Trace.h>
+#include <common/detector/Detector.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/monitor/HistogramSerializer.h>
 #include <common/time/TimeString.h>
 
 #include <memory>
 #include <unistd.h>
 
+#include <cbm/CbmBase.h>
+#include <cbm/CbmInstrument.h>
 #include <common/RuntimeStat.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <stdio.h>
-#include <cbm/CbmBase.h>
-#include <cbm/CbmInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace cbm {
 
-const char *classname = "CBM detector with ESS readout";
+using namespace fbserializer;
 
-CbmBase::CbmBase(BaseSettings const &settings)
-    : Detector(settings) {
+CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -141,28 +139,42 @@ void CbmBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                      KafkaCfg.CfgParms);
+
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
   CbmInstrument cbmInstrument(Counters, EFUSettings);
 
-  for (int i = 0; i < cbmInstrument.Conf.Parms.NumberOfMonitors; ++i) {
-    // Create a serializer for each monitor
+  for (const Topology &topo : cbmInstrument.Conf.TopologyList) {
+    if (topo.Type == CbmType::TTL) {
+      EV44SerializerPtrs[topo.FEN][topo.Channel] =
+          std::make_unique<EV44Serializer>(KafkaBufferSize, topo.Source,
+                                           Produce);
+    } else if (topo.Type == CbmType::IBM) {
 
-    EV44SerializerPtrs.push_back(std::make_unique<EV44Serializer>(
-        KafkaBufferSize, "cbm" + std::to_string(i), Produce));
+      std::unique_ptr<HistogramSerializer<int32_t>> serializerPtr =
+          std::make_unique<HistogramSerializer<int32_t>>(
+              topo.Source, topo.maxTofBin, topo.BinCount, "serializer", "A",
+              "ns", Produce);
+
+      Stats.create("serialize." + topo.Source + ".produce_called", serializerPtr->getStats().ProduceCalled);
+      Stats.create("serialize." + topo.Source + ".tof_over_max_drop", serializerPtr->getStats().DataOverPeriodDropped);
+      Stats.create("serialize." + topo.Source + ".tof_over_max_last_bin", serializerPtr->getStats().DataOverPeriodLastBin);
+
+      HistogramSerializerPtrs[topo.FEN][topo.Channel] = std::move(serializerPtr);
+    }
   }
 
-  for (auto &serializerPtr : EV44SerializerPtrs) {
-    cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
-  }
+  // for (auto &serializerPtr : EV44SerializerPtrs) {
+  //   cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
+  // }
 
   unsigned int DataIndex;
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  RuntimeStat RtStat(
-      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.MonitorCounts,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -211,15 +223,17 @@ void CbmBase::processing_thread() {
     // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
+          {ITCounters.RxPackets, Counters.MonitorCounts,
+           Counters.KafkaStats.produce_bytes_ok});
 
-      for (auto &serializer : EV44SerializerPtrs) {
-        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        Counters.ProduceCauseTimeout++;
+      // for (auto &serializer : EV44SerializerPtrs) {
+      //   XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+      //   Counters.ProduceCauseTimeout++;
 
-        Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
-        Counters.ProduceCauseMaxEventsReached = serializer->ProduceCauseMaxEventsReached;
-      }
+      //   Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
+      //   Counters.ProduceCauseMaxEventsReached =
+      //       serializer->ProduceCauseMaxEventsReached;
+      // }
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
   }

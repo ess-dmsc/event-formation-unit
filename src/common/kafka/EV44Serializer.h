@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "Producer.h"
-#include "flatbuffers/flatbuffers.h"
+#include <common/kafka/Producer.h>
+#include <flatbuffers/flatbuffers.h>
 #include <common/time/TSCTimer.h>
 
 struct Event44Message;
