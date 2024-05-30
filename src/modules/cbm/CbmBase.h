@@ -19,6 +19,27 @@
 
 namespace cbm {
 
+  template<typename T> class SerializerMap {
+  public:
+
+
+    SerializerMap() = default;
+
+    void add(int FEN, int Channel, T value) {
+      int index = FEN * MaxFen + Channel;
+      Serializers[index] = value;
+    }
+
+    const T &get(int FEN, int Channel) const {
+      int index = FEN * MaxFen + Channel;
+      return Serializers[index];
+    }
+
+  private:
+    const int MaxFen = Config::MaxFEN;
+    std::map<int, T> Serializers;
+};
+
 class CbmBase : public Detector {
 public:
   CbmBase(BaseSettings const &settings);
