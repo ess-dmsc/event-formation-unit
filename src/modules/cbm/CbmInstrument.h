@@ -10,13 +10,14 @@
 
 #pragma once
 
+#include "common/kafka/serializer/DA00HistogramSerializer.h"
+#include <cbm/CbmBase.h>
+#include <cbm/Counters.h>
+#include <cbm/geometry/Config.h>
+#include <cbm/geometry/Parser.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/Parser.h>
-#include <cbm/Counters.h>
-#include <cbm/CbmBase.h>
-#include <cbm/geometry/Config.h>
-#include <cbm/geometry/Parser.h>
 
 namespace cbm {
 
@@ -26,7 +27,10 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  CbmInstrument(Counters &counters, BaseSettings &settings);
+  CbmInstrument(Counters &counters, BaseSettings &settings,
+                SerializerMap<EV44Serializer> &Ev44SerializerPtrs,
+                SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+                    &HistogramSerializerPtrs);
 
   /// \brief process vmm-formatted monitor readouts
   void processMonitorReadouts(void);
@@ -42,8 +46,10 @@ public:
   /// \brief
   Config Conf;
 
-  /// \brief serialiser (and producer) for events
-  std::vector<EV44Serializer *> SerializersPtr;
+  /// \brief References for the serializers of the supported types
+  SerializerMap<EV44Serializer> &Ev44SerializerMap;
+  SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+      &HistogramSerializerMap;
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;

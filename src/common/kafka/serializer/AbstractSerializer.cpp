@@ -41,15 +41,21 @@ void AbstractSerializer::produce() {
                   CurrentHwClock);
 };
 
-void AbstractSerializer::setReferenceTime(const TimeDurationNano &Time) {
+void AbstractSerializer::checkAndSetReferenceTime(
+    const TimeDurationNano &Time) {
 
   // Produce already collected data before change reference time
-  if (ReferenceTime.has_value()) {
-    produce();
-    Stats.ProduceRefTimeTriggered++;
+  if (!ReferenceTime.has_value()) {
+    ReferenceTime = Time;
+    return;
+
+  } else if (Time == ReferenceTime.value()) {
+    return;
   }
 
   // Update reference time
+  produce();
+  Stats.ProduceRefTimeTriggered++;
   ReferenceTime = Time;
 };
 

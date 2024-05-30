@@ -14,30 +14,32 @@
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <modules/cbm/geometry/Config.h>
+#include <utility>
 
 namespace cbm {
 
-  template<typename T> class SerializerMap {
-  public:
+template <typename T> class SerializerMap {
+public:
+  SerializerMap() = default;
 
+  void add(int FEN, int Channel, std::unique_ptr<T> &value) {
+    int index = FEN * MaxFen + Channel;
+    Serializers[index] = std::move(value);
+  }
 
-    SerializerMap() = default;
+  std::unique_ptr<T> &get(int FEN, int Channel) noexcept(false) {
+    int index = FEN * MaxFen + Channel;
+    return Serializers.at(index);
+  }
 
-    void add(int FEN, int Channel, T value) {
-      int index = FEN * MaxFen + Channel;
-      Serializers[index] = value;
-    }
+  std::map<int, std::unique_ptr<T>> &getAllSerializers() { return Serializers; }
 
-    const T &get(int FEN, int Channel) const {
-      int index = FEN * MaxFen + Channel;
-      return Serializers[index];
-    }
-
-  private:
-    const int MaxFen = Config::MaxFEN;
-    std::map<int, T> Serializers;
+private:
+  const int MaxFen = Config::MaxFEN;
+  std::map<int, std::unique_ptr<T>> Serializers;
 };
 
 class CbmBase : public Detector {
@@ -50,10 +52,9 @@ public:
   struct Counters Counters {};
 
 protected:
-  std::unique_ptr<EV44Serializer> EV44SerializerPtrs[Config::MaxFEN]
-                                                    [Config::MaxChannel];
-  std::unique_ptr<fbserializer::HistogramSerializer<int32_t>>
-      HistogramSerializerPtrs[Config::MaxFEN][Config::MaxChannel];
+  SerializerMap<EV44Serializer> EV44SerializerPtrs;
+  SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+      HistogramSerializerPtrs;
 };
 
 } // namespace cbm

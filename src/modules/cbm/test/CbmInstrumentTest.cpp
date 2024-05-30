@@ -4,12 +4,13 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/testutils/HeaderFactory.h>
+#include <cbm/CbmInstrument.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
+#include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
-#include <cbm/CbmInstrument.h>
+#include <memory>
 
 using namespace cbm;
 using namespace ESSReadout;
@@ -94,7 +95,9 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  std::vector<std::unique_ptr<EV44Serializer>> serializers;
+  SerializerMap<EV44Serializer> EV44SerializerPtrs;
+  SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+      HistogramSerializerPtrs;
   CbmInstrument *cbm;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
@@ -102,13 +105,15 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = CBM_CONFIG;
-    serializers.push_back(std::make_unique<EV44Serializer>(115000, "cbm"));
+    std::unique_ptr<EV44Serializer> ev44Serializer =
+        std::make_unique<EV44Serializer>(115000, "cbm");
+    EV44SerializerPtrs.add(0,0, ev44Serializer);
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    cbm = new CbmInstrument(counters, Settings);
-    cbm->SerializersPtr.push_back(serializers[0].get());
-    cbm->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
+    cbm = new CbmInstrument(counters, Settings, EV44SerializerPtrs, HistogramSerializerPtrs);
+    cbm->ESSReadoutParser.Packet.HeaderPtr =
+        headerFactory->createHeader(ESSReadout::Parser::V1);
   }
   void TearDown() override {}
 
@@ -125,7 +130,6 @@ protected:
 // Test cases below
 TEST_F(CbmInstrumentTest, Constructor) {
   ASSERT_EQ(counters.RingCfgErrors, 0);
-  ASSERT_EQ(counters.FENCfgErrors, 0);
 }
 
 TEST_F(CbmInstrumentTest, BeamMonitor) {
@@ -141,10 +145,8 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
 
   cbm->processMonitorReadouts();
   ASSERT_EQ(counters.RingCfgErrors, 1);
-  ASSERT_EQ(counters.FENCfgErrors, 1);
   ASSERT_EQ(counters.MonitorCounts, 2);
 
-  ASSERT_EQ(counters.FENCfgErrors, 1);
 }
 
 TEST_F(CbmInstrumentTest, BeamMonitorTOF) {

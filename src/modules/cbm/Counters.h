@@ -26,7 +26,6 @@ struct Counters {
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgErrors;
-  int64_t FENCfgErrors;
   int64_t ChannelCfgErrors;
   int64_t TOFErrors;
   int64_t MonitorCounts;

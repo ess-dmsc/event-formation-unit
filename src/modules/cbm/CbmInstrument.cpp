@@ -7,6 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "CbmBase.h"
+#include "common/kafka/EV44Serializer.h"
 #include <CbmTypes.h>
 #include <cbm/CbmInstrument.h>
 #include <cbm/geometry/Parser.h>
@@ -21,9 +23,15 @@
 namespace cbm {
 
 /// \brief load configuration and calibration files
-CbmInstrument::CbmInstrument(struct Counters &counters, BaseSettings &settings)
+CbmInstrument::CbmInstrument(
+    struct Counters &Counters, BaseSettings &Settings,
+    SerializerMap<EV44Serializer> &Ev44serializerMap,
+    SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+        &HistogramSerializerMap)
 
-    : counters(counters), Settings(settings) {
+    : counters(Counters), Settings(Settings),
+      Ev44SerializerMap(Ev44serializerMap),
+      HistogramSerializerMap(HistogramSerializerMap) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
@@ -39,9 +47,15 @@ void CbmInstrument::processMonitorReadouts(void) {
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
-  for (EV44Serializer *Serializer : SerializersPtr) {
-    Serializer->checkAndSetReferenceTime(
+  for (auto &Serializer : Ev44SerializerMap.getAllSerializers()) {
+    Serializer.second->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+    /// \todo sometimes PrevPulseTime maybe?
+  }
+
+  for (auto &Serializer : HistogramSerializerMap.getAllSerializers()) {
+    Serializer.second->checkAndSetReferenceTime(
+        ESSReadoutParser.Packet.Time.getRefTimeNS());
     /// \todo sometimes PrevPulseTime maybe?
   }
 
@@ -63,6 +77,9 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
+    /// \todo: check these tests are still walid since the reorganized topology
+    /// setup
+    ///        some config params still have to cleaned and counters demolished
     if (readout.Channel < Conf.Parms.MonitorOffset) {
       XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
       counters.ChannelCfgErrors++;
@@ -78,10 +95,11 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    uint64_t TimeNS =
-        ESSReadoutParser.Packet.Time.getRefTimeUInt64();
-    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "", TimeRef.getPrevRefTimeUInt64());
-    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "", TimeRef.getRefTimeUInt64());
+    uint64_t TimeNS = ESSReadoutParser.Packet.Time.getRefTimeUInt64();
+    XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "",
+           TimeRef.getPrevRefTimeUInt64());
+    XTRACE(DATA, DEB, "TimeRef CurrTime %" PRIi64 "",
+           TimeRef.getRefTimeUInt64());
     XTRACE(DATA, DEB, "Time of readout  %" PRIi64 "", TimeNS);
 
     uint64_t TimeOfFlight = 0;
@@ -99,14 +117,27 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     CbmType type = static_cast<CbmType>(readout.Type);
 
-    uint32_t PixelId = 1;
     if (type == CbmType::IBM) {
-      PixelId = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+      auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+      HistogramSerializerMap.get(readout.FENId, readout.Channel)
+          ->addEvent(TimeOfFlight, AdcValue);
     }
 
-    XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
-           type.to_string(), PixelId, TimeOfFlight);
-    SerializersPtr[Channel]->addEvent(TimeOfFlight, PixelId);
+    if (type == CbmType::TTL) {
+
+      /// \todo calculate pixel id according to the config offsets
+      uint32_t PixelId = 1;
+      XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+             type.to_string(), PixelId, TimeOfFlight);
+      try {
+        Ev44SerializerMap.get(readout.FENId, readout.Channel)
+            ->addEvent(TimeOfFlight, PixelId);
+      } catch (std::out_of_range &e) {
+        XTRACE(DATA, WAR, "No serializer for FEN %d, Channel %d", readout.FENId,
+               readout.Channel);
+        // counters.SerializerErrors++;
+      }
+    }
     counters.MonitorCounts++;
   }
 }

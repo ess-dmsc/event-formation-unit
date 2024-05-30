@@ -92,7 +92,7 @@ public:
   ///
   /// \param Time The reference time in ns precesion
   ///
-  void setReferenceTime(const TimeDurationNano &Time);
+  void checkAndSetReferenceTime(const TimeDurationNano &Time);
 };
 
 } // namespace fbserializer

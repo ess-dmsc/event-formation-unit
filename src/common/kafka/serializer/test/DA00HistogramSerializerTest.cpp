@@ -192,7 +192,7 @@ TEST_F(HistogramSerializerTest, TestIntConstructor) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
   serializer.produce();
 }
 
@@ -208,7 +208,7 @@ TEST_F(HistogramSerializerTest, TestUInt64Constructor) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
   serializer.produce();
 }
 
@@ -224,7 +224,7 @@ TEST_F(HistogramSerializerTest, TestFloatConstructor) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
   serializer.produce();
 }
 
@@ -257,7 +257,7 @@ TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
   serializer.produce();
 }
 
@@ -273,7 +273,7 @@ TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
   serializer.produce();
 }
 
@@ -307,7 +307,7 @@ TEST_F(HistogramSerializerTest, TestIntegerBinning) {
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
 
   for (auto &e : testData) {
     serializer.addEvent(e.first, e.second);
@@ -329,7 +329,7 @@ TEST_F(HistogramSerializerTest, TestNegativeIntegerBinning) {
   auto serializer = Validator.createHistogramSerializer();
 
   // Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
 
   for (auto &e : testData) {
     serializer.addEvent(e.first, e.second);
@@ -352,7 +352,7 @@ TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodDropped) {
       fbserializer::BinningStrategy::LastBin);
 
   // Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
 
   for (auto &e : testData) {
     serializer.addEvent(e.first, e.second);
@@ -384,7 +384,7 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
   auto serializer = Validator.createHistogramSerializer();
 
   // Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
 
   for (auto &e : testData) {
     serializer.addEvent(e.first, e.second);
@@ -407,7 +407,7 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
   TestValidator<int64_t, double> Validator{CommonFbMembers, {0, 0}};
   auto serializer = Validator.createHistogramSerializer();
 
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
 
   for (auto &e : testData) {
     serializer.addEvent(e.first, e.second);
@@ -415,7 +415,7 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
 
   Validator.setData(ExpectedResultData);
   /// Perform test
-  serializer.setReferenceTime(CommonFbMembers.ReferenceTime);
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime + TimeDurationNano(10));
 
   EXPECT_EQ(serializer.getStats().ProduceRefTimeTriggered, 1);
 }

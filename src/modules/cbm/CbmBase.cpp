@@ -69,7 +69,6 @@ CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
-  Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
   Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
 
   Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
@@ -144,31 +143,34 @@ void CbmBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  CbmInstrument cbmInstrument(Counters, EFUSettings);
+  CbmInstrument cbmInstrument(Counters, EFUSettings, EV44SerializerPtrs,
+                              HistogramSerializerPtrs);
 
   for (const Topology &topo : cbmInstrument.Conf.TopologyList) {
     if (topo.Type == CbmType::TTL) {
-      EV44SerializerPtrs[topo.FEN][topo.Channel] =
+
+      std::unique_ptr<EV44Serializer> serializerPtr =
           std::make_unique<EV44Serializer>(KafkaBufferSize, topo.Source,
                                            Produce);
+
+      EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
     } else if (topo.Type == CbmType::IBM) {
 
       std::unique_ptr<HistogramSerializer<int32_t>> serializerPtr =
-          std::make_unique<HistogramSerializer<int32_t>>(
-              topo.Source, topo.maxTofBin, topo.BinCount, "serializer", "A",
-              "ns", Produce);
+          std::make_unique<HistogramSerializer<int32_t>>(topo.Source, topo.maxTofBin,
+                                           topo.BinCount, "serializer", "A",
+                                           "ns", Produce);
 
-      Stats.create("serialize." + topo.Source + ".produce_called", serializerPtr->getStats().ProduceCalled);
-      Stats.create("serialize." + topo.Source + ".tof_over_max_drop", serializerPtr->getStats().DataOverPeriodDropped);
-      Stats.create("serialize." + topo.Source + ".tof_over_max_last_bin", serializerPtr->getStats().DataOverPeriodLastBin);
+      Stats.create("serialize." + topo.Source + ".produce_called",
+                   serializerPtr->getStats().ProduceCalled);
+      Stats.create("serialize." + topo.Source + "tof_over_max_drop",
+                   serializerPtr->getStats().DataOverPeriodDropped);
+      Stats.create("serialize." + topo.Source + "tof_over_max_last_bin",
+                   serializerPtr->getStats().DataOverPeriodLastBin);
 
-      HistogramSerializerPtrs[topo.FEN][topo.Channel] = std::move(serializerPtr);
+      HistogramSerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
     }
   }
-
-  // for (auto &serializerPtr : EV44SerializerPtrs) {
-  //   cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
-  // }
 
   unsigned int DataIndex;
   // Monitor these counters
@@ -230,7 +232,8 @@ void CbmBase::processing_thread() {
       //   XTRACE(DATA, DEB, "Serializer timed out, producing message now");
       //   Counters.ProduceCauseTimeout++;
 
-      //   Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
+      //   Counters.ProduceCausePulseChange =
+      //   serializer->ProduceCausePulseChange;
       //   Counters.ProduceCauseMaxEventsReached =
       //       serializer->ProduceCauseMaxEventsReached;
       // }
