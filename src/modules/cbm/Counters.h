@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <cbm/geometry/Parser.h>
 #include <cstdint>

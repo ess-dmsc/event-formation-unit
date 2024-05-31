@@ -6,7 +6,6 @@
 
 #include <cbm/CbmInstrument.h>
 #include <common/kafka/EV44Serializer.h>
-#include <common/readout/ess/Parser.h>
 #include <common/reduction/Event.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
@@ -107,11 +106,12 @@ protected:
     Settings.ConfigFile = CBM_CONFIG;
     std::unique_ptr<EV44Serializer> ev44Serializer =
         std::make_unique<EV44Serializer>(115000, "cbm");
-    EV44SerializerPtrs.add(0,0, ev44Serializer);
+    EV44SerializerPtrs.add(0, 0, ev44Serializer);
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    cbm = new CbmInstrument(counters, Settings, EV44SerializerPtrs, HistogramSerializerPtrs);
+    cbm = new CbmInstrument(counters, Settings, EV44SerializerPtrs,
+                            HistogramSerializerPtrs);
     cbm->ESSReadoutParser.Packet.HeaderPtr =
         headerFactory->createHeader(ESSReadout::Parser::V1);
   }
@@ -128,9 +128,7 @@ protected:
 };
 
 // Test cases below
-TEST_F(CbmInstrumentTest, Constructor) {
-  ASSERT_EQ(counters.RingCfgErrors, 0);
-}
+TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgErrors, 0); }
 
 TEST_F(CbmInstrumentTest, BeamMonitor) {
   makeHeader(cbm->ESSReadoutParser.Packet, MonitorReadout);
@@ -147,7 +145,6 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.MonitorCounts, 2);
   ASSERT_EQ(counters.NoSerializerCfgError, 1);
-
 }
 
 TEST_F(CbmInstrumentTest, BeamMonitorTOF) {

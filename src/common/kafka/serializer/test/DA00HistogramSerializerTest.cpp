@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <FlatbufferTypes.h>
+#include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/kafka/Producer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/math/NumericalMath.h>

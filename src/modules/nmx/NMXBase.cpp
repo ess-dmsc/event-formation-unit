@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,23 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/time/Timer.h>
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
 #include <nmx/NMXBase.h>
 #include <nmx/NMXInstrument.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <cinttypes>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

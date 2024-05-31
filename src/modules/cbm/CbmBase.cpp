@@ -7,25 +7,10 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
-#include <common/debug/Trace.h>
-#include <common/detector/Detector.h>
-#include <common/detector/EFUArgs.h>
-#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/time/TimeString.h>
-
-#include <memory>
-#include <unistd.h>
-
-#include <cbm/CbmBase.h>
-#include <cbm/CbmInstrument.h>
+#include <modules/cbm/CbmBase.h>
+#include <modules/cbm/CbmInstrument.h>
 #include <common/RuntimeStat.h>
-#include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
-#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -163,7 +148,6 @@ void CbmBase::processing_thread() {
       Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
                    serializerPtr->stats().ProduceFailedNoReferenceTime);
 
-      
       EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
     } else if (topo.Type == CbmType::IBM) {
 

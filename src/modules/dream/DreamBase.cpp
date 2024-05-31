@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,22 +6,12 @@
 /// \todo unofficial - not reviewed Readout structure
 //===----------------------------------------------------------------------===//
 
-#include "DreamBase.h"
-
-#include <cinttypes>
+#include <common/kafka/KafkaConfig.h>
 #include <common/RuntimeStat.h>
-#include <common/TestImageUdder.h>
-#include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
-#include <dream/DreamInstrument.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <modules/dream/DreamInstrument.h>
+#include <modules/dream/DreamBase.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

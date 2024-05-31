@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,11 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <cbm/geometry/Config.h>
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
-#include <common/readout/ess/Parser.h>
-#include <memory>
-#include <modules/cbm/CbmTypes.h>
 
 namespace cbm {
 
@@ -103,8 +98,9 @@ void Config::apply() {
       Source = Module["Source"].get<std::string>();
 
     } catch (...) {
-      std::runtime_error("Malformed 'Topology' section (Need FEN, Channel, Type and"
-                         "Source)");
+      std::runtime_error(
+          "Malformed 'Topology' section (Need FEN, Channel, Type and"
+          "Source)");
     }
 
     // Check for array sizes and dupliacte entries
@@ -160,7 +156,6 @@ void Config::apply() {
             Entry));
       }
     }
-
 
     TopologyMap[FEN][Channel] = std::make_unique<Topology>(
         FEN, Channel, Source, MonitorType, param1, param2);

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2019-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,9 +6,6 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include "caen/CaenBase.h"
-
-#include <caen/CaenInstrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
@@ -19,6 +16,8 @@
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
 #include <stdio.h>
 #include <unistd.h>
 

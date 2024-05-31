@@ -7,15 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
-#include <common/kafka/EV44Serializer.h>
-#include <common/readout/ess/Parser.h>
-#include <common/time/TimeString.h>
-#include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
-#include <modules/cbm/CbmTypes.h>
-#include <modules/cbm/geometry/Parser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

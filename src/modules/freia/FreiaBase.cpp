@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,23 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
-#include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/time/TimeString.h>
-
-#include <unistd.h>
-
-#include <common/RuntimeStat.h>
-#include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
 #include <common/time/Timer.h>
+#include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
-#include <stdio.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR

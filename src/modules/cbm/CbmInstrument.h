@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,14 +10,12 @@
 
 #pragma once
 
-#include "common/kafka/serializer/DA00HistogramSerializer.h"
 #include <cbm/CbmBase.h>
 #include <cbm/Counters.h>
 #include <cbm/geometry/Config.h>
 #include <cbm/geometry/Parser.h>
 #include <common/kafka/EV44Serializer.h>
-#include <common/monitor/Histogram.h>
-#include <common/readout/ess/Parser.h>
+#include <common/kafka/serializer/DA00HistogramSerializer.h>
 
 namespace cbm {
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,14 +10,11 @@
 #pragma once
 
 #include <common/JsonFile.h>
+#include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <cstdint>
-#include <memory>
 #include <modules/cbm/CbmTypes.h>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
