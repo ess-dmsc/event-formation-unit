@@ -189,7 +189,7 @@ public:
     DataBins[BinIndex].push_back(Value);
   }
   // Getter function for the Stats member
-  HistrogramSerializerStats& getStats() { return Stats; }
+  HistrogramSerializerStats& stats() { return Stats; }
 
 private:
   /// \brief Serialize the data to a flatbuffer.

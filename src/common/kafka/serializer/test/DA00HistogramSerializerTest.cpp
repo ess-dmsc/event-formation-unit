@@ -290,8 +290,8 @@ TEST_F(HistogramSerializerTest, TestProduceFailsIfNoReference) {
 
   serializer.produce();
 
-  EXPECT_EQ(serializer.getStats().ProduceCalled, 1);
-  EXPECT_EQ(serializer.getStats().ProduceFailedNoReferenceTime, 1);
+  EXPECT_EQ(serializer.stats().ProduceCalled, 1);
+  EXPECT_EQ(serializer.stats().ProduceFailedNoReferenceTime, 1);
 }
 
 TEST_F(HistogramSerializerTest, TestIntegerBinning) {
@@ -360,8 +360,8 @@ TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodDropped) {
 
   serializer.produce();
 
-  EXPECT_EQ(serializer.getStats().DataOverPeriodDropped, 0);
-  EXPECT_EQ(serializer.getStats().DataOverPeriodLastBin, 2);
+  EXPECT_EQ(serializer.stats().DataOverPeriodDropped, 0);
+  EXPECT_EQ(serializer.stats().DataOverPeriodLastBin, 2);
 }
 
 TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
@@ -392,8 +392,8 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
 
   serializer.produce();
 
-  EXPECT_EQ(serializer.getStats().DataOverPeriodDropped, 0);
-  EXPECT_EQ(serializer.getStats().DataOverPeriodLastBin, 0);
+  EXPECT_EQ(serializer.stats().DataOverPeriodDropped, 0);
+  EXPECT_EQ(serializer.stats().DataOverPeriodLastBin, 0);
 }
 
 TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
@@ -417,7 +417,7 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
   /// Perform test
   serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime + TimeDurationNano(10));
 
-  EXPECT_EQ(serializer.getStats().ProduceRefTimeTriggered, 1);
+  EXPECT_EQ(serializer.stats().ProduceRefTimeTriggered, 1);
 }
 
 int main(int argc, char **argv) {

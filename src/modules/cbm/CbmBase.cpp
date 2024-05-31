@@ -154,19 +154,31 @@ void CbmBase::processing_thread() {
                                            Produce);
 
       EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
+      Stats.create("serialize." + topo.Source + ".produce_called",
+                   serializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + topo.Source + ".produce_triggered_reftime",
+                   serializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + topo.Source + ".produce_triggered_max_events",
+                   serializerPtr->stats().ProduceTriggeredMaxEvents);
+      Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
+                   serializerPtr->stats().ProduceFailedNoReferenceTime);
     } else if (topo.Type == CbmType::IBM) {
 
       std::unique_ptr<HistogramSerializer<int32_t>> serializerPtr =
-          std::make_unique<HistogramSerializer<int32_t>>(topo.Source, topo.maxTofBin,
-                                           topo.BinCount, "serializer", "A",
-                                           "ns", Produce);
+          std::make_unique<HistogramSerializer<int32_t>>(
+              topo.Source, topo.maxTofBin, topo.BinCount, "serializer", "A",
+              "ns", Produce);
 
       Stats.create("serialize." + topo.Source + ".produce_called",
-                   serializerPtr->getStats().ProduceCalled);
+                   serializerPtr->stats().ProduceCalled);
       Stats.create("serialize." + topo.Source + "tof_over_max_drop",
-                   serializerPtr->getStats().DataOverPeriodDropped);
+                   serializerPtr->stats().DataOverPeriodDropped);
       Stats.create("serialize." + topo.Source + "tof_over_max_last_bin",
-                   serializerPtr->getStats().DataOverPeriodLastBin);
+                   serializerPtr->stats().DataOverPeriodLastBin);
+      Stats.create("serialize." + topo.Source + ".produce_triggered_reftime",
+                   serializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
+                   serializerPtr->stats().ProduceFailedNoReferenceTime);
 
       HistogramSerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
     }

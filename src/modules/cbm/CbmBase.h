@@ -9,15 +9,11 @@
 
 #pragma once
 
-#include "common/kafka/serializer/DA00HistogramSerializer.h"
-#include <cbm/Counters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
-#include <cstdint>
-#include <map>
-#include <memory>
+#include <common/kafka/serializer/DA00HistogramSerializer.h>
+#include <modules/cbm/Counters.h>
 #include <modules/cbm/geometry/Config.h>
-#include <utility>
 
 namespace cbm {
 
