@@ -173,6 +173,10 @@ void FreiaBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
+
+  Stats.create("produce.cause.pulse_change", Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached", Serializer->stats().ProduceTriggeredMaxEvents);
+
   MonitorSerializer = new AR51Serializer("freia", ProduceMonitor);
 
   FreiaInstrument Freia(Counters, EFUSettings, Serializer);
@@ -246,8 +250,6 @@ void FreiaBase::processing_thread() {
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
     }
   }

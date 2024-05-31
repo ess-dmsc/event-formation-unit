@@ -53,8 +53,6 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-  int64_t ProduceCausePulseChange;
-  int64_t ProduceCauseMaxEventsReached;
 
   int64_t TxRawReadoutPackets;
   

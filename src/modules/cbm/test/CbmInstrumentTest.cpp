@@ -146,6 +146,7 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
   cbm->processMonitorReadouts();
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.MonitorCounts, 2);
+  ASSERT_EQ(counters.NoSerializerCfgError, 1);
 
 }
 

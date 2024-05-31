@@ -81,8 +81,6 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -138,12 +136,19 @@ void DreamBase::processingThread() {
 
   Serializer =
       new EV44Serializer(KafkaBufferSize, EFUSettings.DetectorName, Produce);
+
+  Stats.create("produce.cause.pulse_change",
+               Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer->stats().ProduceTriggeredMaxEvents);
+
   Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer;
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -174,8 +179,10 @@ void DreamBase::processingThread() {
       Dream.processReadouts();
 
       // send monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+          EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
         Counters.TxRawReadoutPackets++;
@@ -189,13 +196,12 @@ void DreamBase::processingThread() {
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count

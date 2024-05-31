@@ -94,8 +94,9 @@ CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
+
+  // Serializer stats
+  Stats.create("serializer.no_serializer_configured", Counters.NoSerializerCfgError);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -153,7 +154,6 @@ void CbmBase::processing_thread() {
           std::make_unique<EV44Serializer>(KafkaBufferSize, topo.Source,
                                            Produce);
 
-      EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
       Stats.create("serialize." + topo.Source + ".produce_called",
                    serializerPtr->stats().ProduceCalled);
       Stats.create("serialize." + topo.Source + ".produce_triggered_reftime",
@@ -162,6 +162,9 @@ void CbmBase::processing_thread() {
                    serializerPtr->stats().ProduceTriggeredMaxEvents);
       Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
                    serializerPtr->stats().ProduceFailedNoReferenceTime);
+
+      
+      EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
     } else if (topo.Type == CbmType::IBM) {
 
       std::unique_ptr<HistogramSerializer<int32_t>> serializerPtr =

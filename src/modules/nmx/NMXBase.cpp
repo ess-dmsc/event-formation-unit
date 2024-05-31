@@ -113,8 +113,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -180,6 +178,10 @@ void NmxBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
+
+  Stats.create("produce.cause.pulse_change", Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached", Serializer->stats().ProduceTriggeredMaxEvents);
+
   MonitorSerializer = new AR51Serializer("nmx", ProduceMonitor);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
@@ -258,9 +260,6 @@ void NmxBase::processing_thread() {
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
 
       if (!NMX.ADCHist.isEmpty()) {

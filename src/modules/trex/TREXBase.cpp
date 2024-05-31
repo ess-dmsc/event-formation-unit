@@ -105,8 +105,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -171,6 +169,12 @@ void TrexBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "trex", Produce);
+
+  Stats.create("produce.cause.pulse_change",
+               Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer->stats().ProduceTriggeredMaxEvents);
+
   TREXInstrument TREX(Counters, EFUSettings, Serializer);
 
   HistogramSerializer ADCHistSerializer(TREX.ADCHist.needed_buffer_size(),
@@ -181,7 +185,8 @@ void TrexBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -232,14 +237,13 @@ void TrexBase::processing_thread() {
     }
 
     if (ProduceTimer.timeout()) {
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
 
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
 
       if (!TREX.ADCHist.isEmpty()) {

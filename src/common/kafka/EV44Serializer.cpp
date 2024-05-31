@@ -39,7 +39,7 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
                                ProducerCallback Callback)
     : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256),
-      ProduceFunctor(Callback) {
+      ProduceFunctor(Callback), Stats() {
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
   auto ReferenceTimeOffset = Builder_.CreateUninitializedVector(
@@ -71,9 +71,6 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
       1;
 
   Event44Message_->mutate_message_id(0);
-
-  ProduceCausePulseChange = 0;
-  ProduceCauseMaxEventsReached = 0;
 }
 
 void EV44Serializer::setProducerCallback(ProducerCallback Callback) {
@@ -98,6 +95,7 @@ nonstd::span<const uint8_t> EV44Serializer::serialize() {
 
 size_t EV44Serializer::produce() {
   ProduceTimer.reset();
+  Stats.ProduceCalled++;
   if (EventCount != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
@@ -122,7 +120,7 @@ uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time) {
   if (Time != referenceTime()) {
     XTRACE(OUTPUT, DEB, "Reference time is new: %" PRIi64 "\n", Time);
     bytesProduced = produce();
-    ProduceCausePulseChange++;
+    Stats.ProduceRefTimeTriggered++;
     setReferenceTime(Time);
   }
   return bytesProduced;
@@ -147,7 +145,7 @@ size_t EV44Serializer::addEvent(int32_t Time, int32_t Pixel) {
 
   if (EventCount >= MaxEvents) {
     XTRACE(DATA, DEB, "Serializer reached max events, producing message now");
-    ProduceCauseMaxEventsReached++;
+    Stats.ProduceTriggeredMaxEvents++;
     return produce();
   }
   return 0;

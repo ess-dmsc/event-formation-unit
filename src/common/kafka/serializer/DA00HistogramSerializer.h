@@ -89,9 +89,9 @@ class HistogramSerializer : public AbstractSerializer {
   const std::string Name;
   const std::string Unit;
   const std::string TimeUnit;
-  HistrogramSerializerStats Stats;
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const enum BinningStrategy BinningStrategy;
+  HistrogramSerializerStats Stats;
 
   size_t InitialBinSize{20};
   std::vector<size_t> BinSizes;
@@ -108,7 +108,6 @@ public:
   /// \param Name is the name of the binned data
   /// \param DataUnit is the unit of the binned data
   /// \param TimeUnit is the unit of time used for period, and the binned axis
-  /// \param Stats is the statistics object for tracking serialization
   /// \param Callback is the producer callback function
   /// \param AggFunc is the aggregation function used to aggregate the data
   /// inside the bins
@@ -124,7 +123,7 @@ public:
         Period(std::move(Period)), BinCount(std::move(BinCount)),
         Name(std::move(Name)), Unit(std::move(DataUnit)),
         TimeUnit(std::move(TimeUnit)), AggregateFunction(std::move(AggFunc)),
-        BinningStrategy(std::move(Strategy)) {
+        BinningStrategy(std::move(Strategy)), Stats() {
 
     initAxis();
     DataBins = data_t(XAxisValues.size());

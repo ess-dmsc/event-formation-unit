@@ -12,6 +12,7 @@
 #include <cinttypes>
 #include <common/readout/ess/Parser.h>
 #include <cbm/geometry/Parser.h>
+#include <cstdint>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -39,8 +40,8 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-  int64_t ProduceCausePulseChange;
-  int64_t ProduceCauseMaxEventsReached;
+  
+  int64_t NoSerializerCfgError;
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

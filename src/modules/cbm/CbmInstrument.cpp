@@ -61,6 +61,7 @@ void CbmInstrument::processMonitorReadouts(void) {
 
   XTRACE(DATA, DEB, "processMonitorReadouts() - has %zu entries",
          CbmParser.Result.size());
+
   for (const auto &readout : CbmParser.Result) {
 
     XTRACE(DATA, DEB,
@@ -119,8 +120,16 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     if (type == CbmType::IBM) {
       auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
-      HistogramSerializerMap.get(readout.FENId, readout.Channel)
-          ->addEvent(TimeOfFlight, AdcValue);
+      try {
+        HistogramSerializerMap.get(readout.FENId, readout.Channel)
+            ->addEvent(TimeOfFlight, AdcValue);
+      } catch (std::out_of_range &e) {
+        XTRACE(DATA, WAR, "No serializer for FEN %d, Channel %d", readout.FENId,
+               readout.Channel);
+
+        counters.NoSerializerCfgError++;
+        continue;
+      }
     }
 
     if (type == CbmType::TTL) {
@@ -135,9 +144,12 @@ void CbmInstrument::processMonitorReadouts(void) {
       } catch (std::out_of_range &e) {
         XTRACE(DATA, WAR, "No serializer for FEN %d, Channel %d", readout.FENId,
                readout.Channel);
-        // counters.SerializerErrors++;
+
+        counters.NoSerializerCfgError++;
+        continue;
       }
     }
+
     counters.MonitorCounts++;
   }
 }
