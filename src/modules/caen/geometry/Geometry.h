@@ -41,6 +41,16 @@ public:
   /// \param Data CaenReadout to check validity of.
   virtual bool validateData(DataParser::CaenReadout &Data) = 0;
 
+  /// \brief return the total number of serializers used by the geometry
+  [[nodiscard]] virtual size_t numSerializers() const = 0;
+
+  /// \brief calculate the serializer index for the given readout
+  /// \param Data CaenReadout to calculate serializer index for
+  [[nodiscard]] virtual size_t calcSerializer(DataParser::CaenReadout &Data) const = 0;
+
+  /// \brief return the name of the serializer at the given index
+  [[nodiscard]] virtual std::string serializerName(size_t Index) const = 0;
+
   struct Stats {
     int64_t RingErrors{0};
     int64_t RingMappingErrors{0};

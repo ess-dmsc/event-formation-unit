@@ -29,7 +29,7 @@ namespace Caen {
 
 class LokiGeometry : public Geometry {
 public:
-  LokiGeometry(Config &CaenConfiguration);
+  explicit LokiGeometry(Config &CaenConfiguration);
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -54,13 +54,24 @@ public:
 
   void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
-  uint32_t calcPixel(DataParser::CaenReadout &Data);
-  bool validateData(DataParser::CaenReadout &Data);
+  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
+  bool validateData(DataParser::CaenReadout &Data) override;
 
   // Holds the parsed configuration
   Config Conf;
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
+
+  /// \brief return the total number of serializers used by the geometry
+  [[nodiscard]] inline size_t numSerializers() const override {return 1;}
+
+  /// \brief calculate the serializer index for the given readout
+  /// \param Data CaenReadout to calculate serializer index for
+  [[nodiscard]] inline size_t calcSerializer(DataParser::CaenReadout &) const override {return 0;}
+
+  /// \brief return the name of the serializer at the given index
+  [[nodiscard]] inline std::string serializerName(size_t) const override {return "caen";}
+
 };
 
 } // namespace Caen

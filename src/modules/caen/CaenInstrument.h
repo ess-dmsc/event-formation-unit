@@ -37,12 +37,9 @@ public:
   /// \brief Generates Events from Readouts, and adds them to a serializer
   void processReadouts();
 
-  /// \brief Sets the serializer to send events to
-  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-
-  /// \brief Sets the second serializer to send events to, recording Amp values
-  void setSerializerII(EV44Serializer *serializer) {
-    SerializerII = serializer;
+  /// \brief Set All serializers at once
+  void setSerializers(std::vector<std::shared_ptr<EV44Serializer>> &serializers) {
+    Serializers = serializers;
   }
 
   /// \brief Caen pixel calculations
@@ -61,8 +58,7 @@ public:
   ESSReadout::Parser ESSReadoutParser;
   DataParser CaenParser;
   Geometry *Geom;
-  EV44Serializer *Serializer;
-  EV44Serializer *SerializerII;
+  std::vector<std::shared_ptr<EV44Serializer>> Serializers;
   std::shared_ptr<ReadoutFile> DumpFile;
 };
 
