@@ -104,6 +104,8 @@ add_custom_target(copycfgs
     COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
+add_custom_target(allefus DEPENDS dream loki bifrost miracles freia trex cbm nmx cspec timepix3)
+
 add_custom_target(runefu
     COMMAND loki     "-f" "../configs/LokiFull.json" "--calibration" "../configs/lokinullcalib.json"     "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND bifrost  "-f" "../configs/bifrost.json"    "--calibration" "../configs/bifrostnullcalib.json"  "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_user.h5"
@@ -117,5 +119,5 @@ add_custom_target(runefu
     COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
     COMMAND timepix3 "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
-    DEPENDS copycfgs dream loki bifrost miracles freia trex cbm nmx cspec timepix3
+    DEPENDS copycfgs allefus
     )

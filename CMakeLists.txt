@@ -50,6 +50,9 @@ elseif(NOT ${CONAN} MATCHES "DISABLE")
   MESSAGE(FATAL_ERROR "Unrecognised option for CONAN (${CONAN}), use AUTO, MANUAL or DISABLE")
 endif()
 
+# Copy libraries to build directory
+add_custom_target(copylibs COMMAND conan imports ${CMAKE_SOURCE_DIR}/conanfile.txt -imf ${PROJECT_BINARY_DIR})
+
 #=============================================================================
 # General configuration
 #=============================================================================
