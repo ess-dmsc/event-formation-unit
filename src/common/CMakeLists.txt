@@ -52,6 +52,7 @@ set(efu_common_INC
   memory/FixedSizePool.h
   memory/PoolAllocator.h
   memory/RingBuffer.h
+  memory/HashMap2D.h
   math/BitMath.h
   math/NumericalMath.h
   utils/EfuUtils.h

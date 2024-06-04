@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <modules/cbm/CbmInstrument.h>
+#include <stdexcept>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -17,8 +18,8 @@ namespace cbm {
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
     struct Counters &Counters, BaseSettings &Settings,
-    SerializerMap<EV44Serializer> &Ev44serializerMap,
-    SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+    HashMap2D<EV44Serializer> &Ev44serializerMap,
+    HashMap2D<fbserializer::HistogramSerializer<int32_t>>
         &HistogramSerializerMap)
 
     : counters(Counters), Settings(Settings),
@@ -39,13 +40,13 @@ void CbmInstrument::processMonitorReadouts(void) {
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
-  for (auto &Serializer : Ev44SerializerMap.getAllSerializers()) {
+  for (auto &Serializer : Ev44SerializerMap.getAllValues()) {
     Serializer.second->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
     /// \todo sometimes PrevPulseTime maybe?
   }
 
-  for (auto &Serializer : HistogramSerializerMap.getAllSerializers()) {
+  for (auto &Serializer : HistogramSerializerMap.getAllValues()) {
     Serializer.second->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeNS());
     /// \todo sometimes PrevPulseTime maybe?
@@ -70,24 +71,6 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    /// \todo: check these tests are still walid since the reorganized topology
-    /// setup
-    ///        some config params still have to cleaned and counters demolished
-    if (readout.Channel < Conf.Parms.MonitorOffset) {
-      XTRACE(DATA, WAR, "Invalid Channel %d", readout.Channel);
-      counters.ChannelCfgErrors++;
-      continue;
-    }
-
-    // channel corrected for configurable channel offset
-    int Channel = readout.Channel - Conf.Parms.MonitorOffset;
-    if (Channel >= Conf.Parms.NumberOfMonitors) {
-      XTRACE(DATA, WAR, "Invalid Channel %d (max is %d)", readout.Channel,
-             Conf.Parms.NumberOfMonitors - 1 + Conf.Parms.MonitorOffset);
-      counters.ChannelCfgErrors++;
-      continue;
-    }
-
     uint64_t TimeNS = ESSReadoutParser.Packet.Time.getRefTimeUInt64();
     XTRACE(DATA, DEB, "TimeRef PrevTime %" PRIi64 "",
            TimeRef.getPrevRefTimeUInt64());
@@ -108,7 +91,14 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    CbmType type = static_cast<CbmType>(readout.Type);
+    CbmType type{1};
+    try {
+      type = CbmType(readout.Type);
+    } catch (std::invalid_argument &e) {
+      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", readout.Type,
+             CbmType::MIN, CbmType::MAX);
+      continue;
+    }
 
     if (type == CbmType::IBM) {
       auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
@@ -116,12 +106,14 @@ void CbmInstrument::processMonitorReadouts(void) {
         HistogramSerializerMap.get(readout.FENId, readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
       } catch (std::out_of_range &e) {
-        XTRACE(DATA, WAR, "No serializer for FEN %d, Channel %d", readout.FENId,
-               readout.Channel);
+        LOG(UTILS, Sev::Error, "No serializer configured for FEN %d, Channel %d",
+            readout.FENId, readout.Channel);
 
         counters.NoSerializerCfgError++;
         continue;
       }
+
+      counters.IBMReadouts++;
     }
 
     if (type == CbmType::TTL) {
@@ -134,12 +126,14 @@ void CbmInstrument::processMonitorReadouts(void) {
         Ev44SerializerMap.get(readout.FENId, readout.Channel)
             ->addEvent(TimeOfFlight, PixelId);
       } catch (std::out_of_range &e) {
-        XTRACE(DATA, WAR, "No serializer for FEN %d, Channel %d", readout.FENId,
-               readout.Channel);
+        LOG(UTILS, Sev::Error, "No serializer configured for FEN %d, Channel %d",
+            readout.FENId, readout.Channel);
 
         counters.NoSerializerCfgError++;
         continue;
       }
+
+      counters.TTLReadouts++;
     }
 
     counters.MonitorCounts++;

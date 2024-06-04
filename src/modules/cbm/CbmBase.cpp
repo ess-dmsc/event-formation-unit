@@ -7,10 +7,10 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
+#include <common/RuntimeStat.h>
 #include <common/kafka/KafkaConfig.h>
 #include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
-#include <common/RuntimeStat.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -19,7 +19,7 @@ namespace cbm {
 
 using namespace fbserializer;
 
-CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings) {
+CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings), EV44SerializerPtrs(Config::MaxChannel), HistogramSerializerPtrs(Config::MaxChannel) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -54,7 +54,6 @@ CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
-  Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
 
   Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
@@ -227,15 +226,16 @@ void CbmBase::processing_thread() {
           {ITCounters.RxPackets, Counters.MonitorCounts,
            Counters.KafkaStats.produce_bytes_ok});
 
-      // for (auto &serializer : EV44SerializerPtrs) {
-      //   XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-      //   Counters.ProduceCauseTimeout++;
+      for (auto &serializerMap : EV44SerializerPtrs.getAllValues()) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+        serializerMap.second->produce();
+      }
 
-      //   Counters.ProduceCausePulseChange =
-      //   serializer->ProduceCausePulseChange;
-      //   Counters.ProduceCauseMaxEventsReached =
-      //       serializer->ProduceCauseMaxEventsReached;
-      // }
+      for (auto &serializerMap : HistogramSerializerPtrs.getAllValues()) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+        serializerMap.second->produce();
+      }
+      Counters.ProduceCauseTimeout++;
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
   }

@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <cbm/CbmInstrument.h>
+#include <modules/cbm/CbmInstrument.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/Event.h>
 #include <common/testutils/HeaderFactory.h>
@@ -94,8 +94,8 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  SerializerMap<EV44Serializer> EV44SerializerPtrs;
-  SerializerMap<fbserializer::HistogramSerializer<int32_t>>
+  HashMap2D<EV44Serializer> EV44SerializerPtrs;
+  HashMap2D<fbserializer::HistogramSerializer<int32_t>>
       HistogramSerializerPtrs;
   CbmInstrument *cbm;
   std::unique_ptr<TestHeaderFactory> headerFactory;

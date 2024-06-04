@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <common/readout/ess/Parser.h>
-#include <cbm/geometry/Parser.h>
+#include <common/kafka/Producer.h>
 #include <cstdint>
+#include <modules/cbm/geometry/Parser.h>
 
 struct Counters {
   // Processing Counters - accessed in processing thread
@@ -21,26 +21,29 @@ struct Counters {
   struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
 
-  // VMM3a Readouts
+  // CBM Readouts
   struct cbm::ParserStats CbmStats;
+  int64_t TTLReadouts;
+  int64_t IBMReadouts;
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgErrors;
-  int64_t ChannelCfgErrors;
   int64_t TOFErrors;
   int64_t MonitorCounts;
   int64_t MonitorIgnored;
   int64_t MaxADC;
 
-  //
+  // Configuration errors
+  int64_t NoSerializerCfgError;
+
+  // Processing time counters
   int64_t ProcessingIdle;
   int64_t TimeErrors;
+
   struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-  
-  int64_t NoSerializerCfgError;
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

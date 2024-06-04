@@ -47,7 +47,7 @@ TEST_F(Timepix3BaseTest, Constructor) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
-std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
+std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
 
 /// | ESS Header    |
 /// | Data header 1 | Readout 1 | Readout 2 | Readout 3 |
@@ -133,7 +133,7 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(Timepix3BaseTest, DataReceive) {
   Timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, TestPacket);
+  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, BadTestPacket);
 
   EXPECT_EQ(testCounters->PixelReadouts, 0);
   Readout.stopThreads();
