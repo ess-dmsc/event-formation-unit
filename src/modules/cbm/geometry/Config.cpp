@@ -6,7 +6,7 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <cbm/geometry/Config.h>
+#include <modules/cbm/geometry/Config.h>
 
 namespace cbm {
 
@@ -66,11 +66,14 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
 
   try {
-    Parms.MonitorOffset = root["MonitorOffset"].get<int>();
+    Parms.MaxFENId = root["MaxFENId"].get<int>();
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MonitorOffset");
+    LOG(INIT, Sev::Error, "MaxFENId not specified");
+    throw std::runtime_error("MaxFENId not specified");
   }
-  LOG(INIT, Sev::Info, "MonitorOffset {}", Parms.MonitorOffset);
+  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.MaxFENId);
+
+  TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.MaxFENId));
 
   auto TopologyIt = root.find("Topology");
   if (TopologyIt == root.end()) {
@@ -83,11 +86,10 @@ void Config::apply() {
   Modules = root["Topology"];
 
   // temporary map storage to check for duplicates ofthe two unique keys
-  std::unique_ptr<Topology> TopologyMap[MaxFEN][MaxChannel];
 
   for (auto &Module : Modules) {
-    int FEN{MaxFEN + 1};
-    int Channel{MaxChannel + 1};
+    int FEN;
+    int Channel;
     std::string Source{""};
     std::string Type{""};
 
@@ -104,17 +106,12 @@ void Config::apply() {
     }
 
     // Check for array sizes and dupliacte entries
-    if (FEN > MaxFEN) {
+    if (FEN > Parms.MaxFENId) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
-                            MaxFEN));
+                            Parms.MaxFENId));
     }
 
-    if (Channel > MaxChannel) {
-      errorExit(fmt::format("Entry: {}, Invalid Channel: {} Max: {}", Entry,
-                            Channel, MaxChannel));
-    }
-
-    if (TopologyMap[FEN][Channel] != nullptr) {
+    if (TopologyMapPtr->isValue(Channel, FEN)) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
                             Entry, FEN, Channel));
     }
@@ -157,23 +154,15 @@ void Config::apply() {
       }
     }
 
-    TopologyMap[FEN][Channel] = std::make_unique<Topology>(
-        FEN, Channel, Source, MonitorType, param1, param2);
+    auto topo = std::make_unique<Topology>(FEN, Channel, Source, MonitorType,
+                                           param1, param2);
+    TopologyMapPtr->add(Channel, FEN, topo);
 
     XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",
            Entry, FEN, Channel, Source.c_str(), Type.c_str());
 
     // Count the number of valid entries
     Entry++;
-  }
-
-  // Transfer the temporary map to the final list of topologies
-  for (int i = 0; i < MaxFEN; i++) {
-    for (int j = 0; j < MaxChannel; j++) {
-      if (TopologyMap[i][j] != nullptr) {
-        TopologyList.push_back(std::move(*TopologyMap[i][j]));
-      }
-    }
   }
 
   Parms.NumberOfMonitors = Entry;

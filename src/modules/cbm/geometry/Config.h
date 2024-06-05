@@ -9,10 +9,12 @@
 
 #pragma once
 
+#include <common/memory/HashMap2D.h>
 #include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
+#include <memory>
 #include <modules/cbm/CbmTypes.h>
 #include <string>
 
@@ -50,12 +52,10 @@ class Config {
   void errorExit(std::string ErrMsg);
 
 public:
-  static constexpr int MaxFEN{11};
-  static constexpr int MaxChannel{11};
 
-  Config(std::string ConfigFile) : FileName(ConfigFile){};
+  Config(std::string ConfigFile) : FileName(ConfigFile) {};
 
-  Config(){};
+  Config() {};
 
   // load file into json object and apply
   void loadAndApply();
@@ -70,10 +70,10 @@ public:
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
     uint8_t MonitorRing{11};
     uint8_t NumberOfMonitors{1};
-    int MonitorOffset{0};
+    int MaxFENId{11};
   } Parms;
 
-  std::vector<Topology> TopologyList;
+  std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;
 
   std::string FileName{""};
   nlohmann::json root;

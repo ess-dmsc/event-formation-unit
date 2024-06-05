@@ -17,19 +17,14 @@ namespace cbm {
 
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
-    struct Counters &Counters, BaseSettings &Settings,
-    HashMap2D<EV44Serializer> &Ev44serializerMap,
-    HashMap2D<fbserializer::HistogramSerializer<int32_t>>
+    struct Counters &Counters, Config &Config,
+    const HashMap2D<EV44Serializer> &Ev44serializerMap,
+    const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
         &HistogramSerializerMap)
 
-    : counters(Counters), Settings(Settings),
+    : counters(Counters), Conf(Config),
       Ev44SerializerMap(Ev44serializerMap),
       HistogramSerializerMap(HistogramSerializerMap) {
-
-  XTRACE(INIT, ALW, "Loading configuration file %s",
-         Settings.ConfigFile.c_str());
-  Conf = Config(Settings.ConfigFile);
-  Conf.loadAndApply();
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
 }
@@ -40,14 +35,14 @@ void CbmInstrument::processMonitorReadouts(void) {
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
-  for (auto &Serializer : Ev44SerializerMap.getAllValues()) {
-    Serializer.second->checkAndSetReferenceTime(
+  for (auto &Serializer : Ev44SerializerMap.toValuesList()) {
+    Serializer->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
     /// \todo sometimes PrevPulseTime maybe?
   }
 
-  for (auto &Serializer : HistogramSerializerMap.getAllValues()) {
-    Serializer.second->checkAndSetReferenceTime(
+  for (auto &Serializer : HistogramSerializerMap.toValuesList()) {
+    Serializer->checkAndSetReferenceTime(
         ESSReadoutParser.Packet.Time.getRefTimeNS());
     /// \todo sometimes PrevPulseTime maybe?
   }

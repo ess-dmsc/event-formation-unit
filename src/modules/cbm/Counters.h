@@ -35,6 +35,7 @@ struct Counters {
 
   // Configuration errors
   int64_t NoSerializerCfgError;
+  int64_t FENMappingErrors;
 
   // Processing time counters
   int64_t ProcessingIdle;

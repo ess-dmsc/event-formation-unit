@@ -7,8 +7,11 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
+#include "common/kafka/EV44Serializer.h"
+#include "common/memory/HashMap2D.h"
 #include <common/RuntimeStat.h>
 #include <common/kafka/KafkaConfig.h>
+#include <memory>
 #include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
 
@@ -19,7 +22,8 @@ namespace cbm {
 
 using namespace fbserializer;
 
-CbmBase::CbmBase(BaseSettings const &settings) : Detector(settings), EV44SerializerPtrs(Config::MaxChannel), HistogramSerializerPtrs(Config::MaxChannel) {
+CbmBase::CbmBase(BaseSettings const &settings)
+    : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -128,47 +132,67 @@ void CbmBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  CbmInstrument cbmInstrument(Counters, EFUSettings, EV44SerializerPtrs,
-                              HistogramSerializerPtrs);
+  // Process instrument config file
+  XTRACE(INIT, ALW, "Loading configuration file %s",
+         EFUSettings.ConfigFile.c_str());
 
-  for (const Topology &topo : cbmInstrument.Conf.TopologyList) {
-    if (topo.Type == CbmType::TTL) {
+  CbmConfiguration.loadAndApply();
 
-      std::unique_ptr<EV44Serializer> serializerPtr =
-          std::make_unique<EV44Serializer>(KafkaBufferSize, topo.Source,
+  // Create serializers
+  EV44SerializerMapPtr.reset(
+      new HashMap2D<EV44Serializer>(CbmConfiguration.Parms.MaxFENId));
+  HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer<int32_t>>(
+      CbmConfiguration.Parms.MaxFENId));
+
+  for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
+    if (Topology->Type == CbmType::TTL) {
+
+      std::unique_ptr<EV44Serializer> SerializerPtr =
+          std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,
                                            Produce);
 
-      Stats.create("serialize." + topo.Source + ".produce_called",
-                   serializerPtr->stats().ProduceCalled);
-      Stats.create("serialize." + topo.Source + ".produce_triggered_reftime",
-                   serializerPtr->stats().ProduceRefTimeTriggered);
-      Stats.create("serialize." + topo.Source + ".produce_triggered_max_events",
-                   serializerPtr->stats().ProduceTriggeredMaxEvents);
-      Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
-                   serializerPtr->stats().ProduceFailedNoReferenceTime);
+      Stats.create("serialize." + Topology->Source + ".produce_called",
+                   SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_reftime",
+                   SerializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_max_events",
+                   SerializerPtr->stats().ProduceTriggeredMaxEvents);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_failed_no_reftime",
+                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
 
-      EV44SerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
-    } else if (topo.Type == CbmType::IBM) {
+      EV44SerializerMapPtr->add(Topology->FEN, Topology->Channel,
+                                SerializerPtr);
+    } else if (Topology->Type == CbmType::IBM) {
 
-      std::unique_ptr<HistogramSerializer<int32_t>> serializerPtr =
+      std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
           std::make_unique<HistogramSerializer<int32_t>>(
-              topo.Source, topo.maxTofBin, topo.BinCount, "serializer", "A",
-              "ns", Produce);
+              Topology->Source, Topology->maxTofBin, Topology->BinCount,
+              "serializer", "A", "ns", Produce);
 
-      Stats.create("serialize." + topo.Source + ".produce_called",
-                   serializerPtr->stats().ProduceCalled);
-      Stats.create("serialize." + topo.Source + "tof_over_max_drop",
-                   serializerPtr->stats().DataOverPeriodDropped);
-      Stats.create("serialize." + topo.Source + "tof_over_max_last_bin",
-                   serializerPtr->stats().DataOverPeriodLastBin);
-      Stats.create("serialize." + topo.Source + ".produce_triggered_reftime",
-                   serializerPtr->stats().ProduceRefTimeTriggered);
-      Stats.create("serialize." + topo.Source + ".produce_failed_no_reftime",
-                   serializerPtr->stats().ProduceFailedNoReferenceTime);
+      Stats.create("serialize." + Topology->Source + ".produce_called",
+                   SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source + "tof_over_max_drop",
+                   SerializerPtr->stats().DataOverPeriodDropped);
+      Stats.create("serialize." + Topology->Source + "tof_over_max_last_bin",
+                   SerializerPtr->stats().DataOverPeriodLastBin);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_reftime",
+                   SerializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_failed_no_reftime",
+                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
 
-      HistogramSerializerPtrs.add(topo.FEN, topo.Channel, serializerPtr);
+      HistogramSerializerMapPtr->add(Topology->FEN, Topology->Channel,
+                                     SerializerPtr);
     }
   }
+
+  // Create instrument
+  CbmInstrument cbmInstrument(Counters, CbmConfiguration, *EV44SerializerMapPtr,
+                              *HistogramSerializerMapPtr);
 
   unsigned int DataIndex;
   // Monitor these counters
@@ -226,14 +250,14 @@ void CbmBase::processing_thread() {
           {ITCounters.RxPackets, Counters.MonitorCounts,
            Counters.KafkaStats.produce_bytes_ok});
 
-      for (auto &serializerMap : EV44SerializerPtrs.getAllValues()) {
+      for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        serializerMap.second->produce();
+        serializerMap->produce();
       }
 
-      for (auto &serializerMap : HistogramSerializerPtrs.getAllValues()) {
+      for (auto &serializerMap : HistogramSerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        serializerMap.second->produce();
+        serializerMap->produce();
       }
       Counters.ProduceCauseTimeout++;
       Counters.KafkaStats = eventprod.stats;

@@ -13,6 +13,7 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/memory/HashMap2D.h>
+#include <memory>
 #include <modules/cbm/Counters.h>
 #include <modules/cbm/geometry/Config.h>
 
@@ -46,10 +47,12 @@ public:
   /// detector.
   struct Counters Counters {};
 
-protected:
-  HashMap2D<EV44Serializer> EV44SerializerPtrs;
-  HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-      HistogramSerializerPtrs;
+private:
+  std::unique_ptr<HashMap2D<EV44Serializer>> EV44SerializerMapPtr;
+  std::unique_ptr<HashMap2D<fbserializer::HistogramSerializer<int32_t>>>
+      HistogramSerializerMapPtr;
+
+  Config CbmConfiguration;
 };
 
 } // namespace cbm

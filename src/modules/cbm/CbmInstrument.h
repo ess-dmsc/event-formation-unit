@@ -10,13 +10,13 @@
 
 #pragma once
 
-#include <modules/cbm/Counters.h>
-#include <modules/cbm/geometry/Config.h>
-#include <modules/cbm/geometry/Parser.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/memory/HashMap2D.h>
+#include <modules/cbm/Counters.h>
+#include <modules/cbm/geometry/Config.h>
+#include <modules/cbm/geometry/Parser.h>
 
 namespace cbm {
 
@@ -26,9 +26,9 @@ public:
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
-  CbmInstrument(Counters &counters, BaseSettings &settings,
-                HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
-                HashMap2D<fbserializer::HistogramSerializer<int32_t>>
+  CbmInstrument(Counters &counters, Config &Config,
+                const HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
+                const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
                     &HistogramSerializerPtrs);
 
   /// \brief process vmm-formatted monitor readouts
@@ -40,14 +40,14 @@ public:
 public:
   /// \brief Stuff that 'ties' CBM together
   struct Counters &counters;
-  BaseSettings &Settings;
 
-  /// \brief
-  Config Conf;
+  /// \brief Reference to the configuration data for the CBM instrument
+  Config &Conf;
 
   /// \brief References for the serializers of the supported types
-  HashMap2D<EV44Serializer> &Ev44SerializerMap;
-  HashMap2D<fbserializer::HistogramSerializer<int32_t>> &HistogramSerializerMap;
+  const HashMap2D<EV44Serializer> &Ev44SerializerMap;
+  const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
+      &HistogramSerializerMap;
 
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser ESSReadoutParser;

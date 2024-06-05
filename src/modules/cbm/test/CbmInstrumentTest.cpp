@@ -4,12 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <modules/cbm/CbmInstrument.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/Event.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
+#include <modules/cbm/CbmInstrument.h>
 
 using namespace cbm;
 using namespace ESSReadout;
@@ -17,6 +17,8 @@ using namespace ESSReadout;
 // clang-format off
 
 std::vector<uint8_t> MonitorReadout {
+
+  /// \todo These should be tested with the parser
   // Errors caught when parsing readouts
 
   // First monitor readout - Valid
@@ -94,9 +96,10 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  HashMap2D<EV44Serializer> EV44SerializerPtrs;
-  HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-      HistogramSerializerPtrs;
+  Config Configuration;
+  HashMap2D<EV44Serializer> EV44SerializerPtrs{11};
+  HashMap2D<fbserializer::HistogramSerializer<int32_t>> HistogramSerializerPtrs{
+      11};
   CbmInstrument *cbm;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
@@ -104,13 +107,17 @@ protected:
 
   void SetUp() override {
     Settings.ConfigFile = CBM_CONFIG;
+
+    Configuration = Config(Settings.ConfigFile);
+    Configuration.loadAndApply();
+
     std::unique_ptr<EV44Serializer> ev44Serializer =
         std::make_unique<EV44Serializer>(115000, "cbm");
     EV44SerializerPtrs.add(0, 0, ev44Serializer);
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    cbm = new CbmInstrument(counters, Settings, EV44SerializerPtrs,
+    cbm = new CbmInstrument(counters, Configuration, EV44SerializerPtrs,
                             HistogramSerializerPtrs);
     cbm->ESSReadoutParser.Packet.HeaderPtr =
         headerFactory->createHeader(ESSReadout::Parser::V1);
