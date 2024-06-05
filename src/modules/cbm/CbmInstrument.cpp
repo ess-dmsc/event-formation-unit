@@ -22,8 +22,7 @@ CbmInstrument::CbmInstrument(
     const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
         &HistogramSerializerMap)
 
-    : counters(Counters), Conf(Config),
-      Ev44SerializerMap(Ev44serializerMap),
+    : counters(Counters), Conf(Config), Ev44SerializerMap(Ev44serializerMap),
       HistogramSerializerMap(HistogramSerializerMap) {
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
@@ -95,42 +94,43 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    if (type == CbmType::IBM) {
-      auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
-      try {
+    try {
+      if (type == CbmType::IBM) {
+        auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+
         HistogramSerializerMap.get(readout.FENId, readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
-      } catch (std::out_of_range &e) {
-        LOG(UTILS, Sev::Error, "No serializer configured for FEN %d, Channel %d",
-            readout.FENId, readout.Channel);
 
-        counters.NoSerializerCfgError++;
-        continue;
+        counters.IBMReadouts++;
       }
 
-      counters.IBMReadouts++;
-    }
+      else if (type == CbmType::TTL) {
 
-    if (type == CbmType::TTL) {
+        // Registering Pixels according to the topology map offset and range
+        int PixelOffset =
+            Conf.TopologyMapPtr->get(readout.FENId, readout.Channel)
+                ->pixelOffset;
+        int PixelRange =
+            Conf.TopologyMapPtr->get(readout.FENId, readout.Channel)->pixelRang;
 
-      /// \todo calculate pixel id according to the config offsets
-      uint32_t PixelId = 1;
-      XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
-             type.to_string(), PixelId, TimeOfFlight);
-      try {
-        Ev44SerializerMap.get(readout.FENId, readout.Channel)
-            ->addEvent(TimeOfFlight, PixelId);
-      } catch (std::out_of_range &e) {
-        LOG(UTILS, Sev::Error, "No serializer configured for FEN %d, Channel %d",
-            readout.FENId, readout.Channel);
+        for (int i = 0; i < PixelRange; i++) {
+          int PixelId = PixelOffset + i;
+          XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+                 type.to_string(), PixelId, TimeOfFlight);
 
-        counters.NoSerializerCfgError++;
-        continue;
+          Ev44SerializerMap.get(readout.FENId, readout.Channel)
+              ->addEvent(TimeOfFlight, PixelId);
+
+          counters.TTLReadouts++;
+        }
       }
+    } catch (std::out_of_range &e) {
+      LOG(UTILS, Sev::Warning, "No serializer configured for FEN %d, Channel %d",
+          readout.FENId, readout.Channel);
 
-      counters.TTLReadouts++;
+      counters.NoSerializerCfgError++;
+      continue;
     }
-
     counters.MonitorCounts++;
   }
 }
