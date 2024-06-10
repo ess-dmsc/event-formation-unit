@@ -23,6 +23,7 @@ auto InvalidDetector = R"(
 auto DefaultValuesOnly = R"(
   {
     "Detector" : "CBM",
+    "MaxFENId" : 1,
 
     "Topology" : [
       { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
@@ -34,9 +35,21 @@ auto IncorrectFEN = R"(
   {
     "Detector" : "CBM",
     "MonitorRing" : 88,
+    "MaxFENId" : 11,
 
     "Topology" : [
       { "FEN":  77, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+    ]
+  }
+)"_json;
+
+auto NoMaxFENId = R"(
+  {
+    "Detector" : "CBM",
+    "MonitorRing" : 88,
+
+    "Topology" : [
+      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -45,6 +58,7 @@ auto IncorrectChannel = R"(
   {
     "Detector" : "CBM",
     "MonitorRing" : 88,
+    "MaxFENId" : 11,
 
     "Topology" : [
       { "FEN":  0, "Channel": 66, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
@@ -56,6 +70,7 @@ auto DuplicateEntry = R"(
   {
     "Detector" : "CBM",
     "MonitorRing" : 88,
+    "MaxFENId" : 1,
 
     "Topology" : [
       { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
@@ -68,6 +83,7 @@ auto IncorrectType = R"(
   {
     "Detector" : "CBM",
     "MonitorRing" : 11,
+    "MaxFENId" : 1,
 
     "Topology" : [
       { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
@@ -81,6 +97,7 @@ auto ConfigWithTopology = R"(
     "MonitorRing" : 11,
     "MaxTOFNS" : 1000000000,
     "MaxPulseTimeDiffNS" : 1000000000,
+    "MaxFENId" : 1,
 
     "Topology" : [
       { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
@@ -139,6 +156,18 @@ TEST_F(CbmConfigTest, IncorrectFENConfig) {
   }
 }
 
+TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
+  try {
+    config.root = NoMaxFENId;
+    config.apply();
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &err) {
+    EXPECT_EQ(err.what(), std::string("MaxFENId not specified"));
+  } catch (...) {
+    FAIL() << "Expected std::runtime_error";
+  }
+}
+
 TEST_F(CbmConfigTest, IncorrectChannelConfig) {
   try {
     config.root = IncorrectChannel;
@@ -157,7 +186,8 @@ TEST_F(CbmConfigTest, DuplicateFENChannelEntry) {
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("Entry: 1, Duplicate entry for FEN 10 Channel 10"));
+    EXPECT_EQ(err.what(),
+              std::string("Entry: 1, Duplicate entry for FEN 10 Channel 10"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
@@ -169,7 +199,8 @@ TEST_F(CbmConfigTest, IncorrectCBMType) {
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("Entry: 0, Invalid Type: ESS is not a CBM Type"));
+    EXPECT_EQ(err.what(),
+              std::string("Entry: 0, Invalid Type: ESS is not a CBM Type"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
@@ -211,7 +242,6 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->Source, "cbm3");
   EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->FEN, 1);
   EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->Channel, 0);
-
 
   // Test fourth entry
   EXPECT_EQ(config.TopologyMapPtr->toValuesList()[3]->Type, CbmType::IBM);

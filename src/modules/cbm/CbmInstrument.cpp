@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief CBM is a dedicated module for TTL triggered beam monitor
+/// \brief Cbm is responsible for readout validation and event formation for
+/// the common beam monitor (CBM) instrument
 ///
 //===----------------------------------------------------------------------===//
 
@@ -125,8 +126,9 @@ void CbmInstrument::processMonitorReadouts(void) {
         }
       }
     } catch (std::out_of_range &e) {
-      LOG(UTILS, Sev::Warning, "No serializer configured for FEN %d, Channel %d",
-          readout.FENId, readout.Channel);
+      LOG(UTILS, Sev::Warning,
+          "No serializer configured for FEN %d, Channel %d", readout.FENId,
+          readout.Channel);
 
       counters.NoSerializerCfgError++;
       continue;

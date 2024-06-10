@@ -11,6 +11,8 @@
 
   "MaxTOFNS" : 1000000000,
 
+  "MaxFENId" : 2,
+
   "Topology" : [
     { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
   ]

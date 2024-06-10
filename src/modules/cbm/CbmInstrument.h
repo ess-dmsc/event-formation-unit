@@ -22,41 +22,40 @@ namespace cbm {
 
 class CbmInstrument {
 public:
-  /// \brief 'create' the CBM instrument
-  /// based on settings the constructor loads both configuration
-  /// and calibration data. It then initialises event builders and
-  /// histograms
+  /// \brief Constructor for the CbmInstrument class.
+  /// \details The constructor initializes the instrument and sets the
+  /// references to the counters, configuration data, and serializers.
+  ///
+  /// \param counters Reference to the counters for the CBM instrument.
+  /// \param Config Reference to the configuration data for the CBM instrument.
+  /// \param Ev44SerializerPtrs Reference to the HashMap2D of EV44Serializer
+  /// pointers. \param HistogramSerializerPtrs Reference to the HashMap2D of
+  /// HistogramSerializer pointers.
   CbmInstrument(Counters &counters, Config &Config,
                 const HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
                 const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
                     &HistogramSerializerPtrs);
 
-  /// \brief process vmm-formatted monitor readouts
+  /// \brief Process the beam monitor readouts.
   void processMonitorReadouts(void);
 
-  /// \brief dump readout data to HDF5
-  // void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
-
 public:
-  /// \brief Stuff that 'ties' CBM together
+  /// \brief Reference to the counters for the CBM instrument.
   struct Counters &counters;
 
-  /// \brief Reference to the configuration data for the CBM instrument
+  /// \brief Reference to the configuration data for the CBM instrument.
   Config &Conf;
 
-  /// \brief References for the serializers of the supported types
+  /// \brief References for the serializers of the supported types.
   const HashMap2D<EV44Serializer> &Ev44SerializerMap;
   const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
       &HistogramSerializerMap;
 
-  /// \brief parser for the ESS Readout header
+  /// \brief Parser for the ESS Readout header.
   ESSReadout::Parser ESSReadoutParser;
 
-  /// \brief parser for TTLMon readout data
+  /// \brief Parser for CBM readout data.
   Parser CbmParser;
-
-  /// \brief for dumping raw VMM3 readouts to HDF5 files
-  // std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
 } // namespace cbm
