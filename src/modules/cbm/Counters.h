@@ -15,38 +15,37 @@
 
 struct Counters {
   // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors;
+  int64_t FifoSeqErrors{0};
 
   // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats;
-  int64_t ErrorESSHeaders;
+  struct ESSReadout::ESSHeaderStats ReadoutStats{0};
+  int64_t ErrorESSHeaders{0};
 
   // CBM Readouts
-  struct cbm::ParserStats CbmStats;
-  int64_t TTLReadouts;
-  int64_t IBMReadouts;
+  struct cbm::ParserStats CbmStats{0};
+  int64_t TTLReadouts{0};
+  int64_t IBMReadouts{0};
+  int64_t TypeNotSupported{0};
 
   // Logical and Digital geometry incl. Calibration
-  int64_t RingCfgErrors;
-  int64_t TOFErrors;
-  int64_t MonitorCounts;
-  int64_t MonitorIgnored;
-  int64_t MaxADC;
+  int64_t RingCfgErrors{0};
+  int64_t TOFErrors{0};
+  int64_t CbmCounts{0};
+  int64_t MaxADC{0};
 
   // Configuration errors
-  int64_t NoSerializerCfgError;
-  int64_t FENMappingErrors;
+  int64_t NoSerializerCfgError{0};
 
   // Processing time counters
-  int64_t ProcessingIdle;
-  int64_t TimeErrors;
+  int64_t ProcessingIdle{0};
+  int64_t TimeErrors{0};
 
   struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
-  int64_t ProduceCauseTimeout;
+  int64_t ProduceCauseTimeout{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 
-} __attribute__((aligned(64)));
+} __attribute__((aligned(64)));;

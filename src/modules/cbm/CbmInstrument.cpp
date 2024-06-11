@@ -86,17 +86,8 @@ void CbmInstrument::processMonitorReadouts(void) {
       continue;
     }
 
-    CbmType type{1};
     try {
-      type = CbmType(readout.Type);
-    } catch (std::invalid_argument &e) {
-      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", readout.Type,
-             CbmType::MIN, CbmType::MAX);
-      continue;
-    }
-
-    try {
-      if (type == CbmType::IBM) {
+      if (readout.Type == CbmType::IBM) {
         auto AdcValue = readout.NPos & 0xFFFFFF; // Extract lower 24 bits
 
         HistogramSerializerMap.get(readout.FENId, readout.Channel)
@@ -105,7 +96,7 @@ void CbmInstrument::processMonitorReadouts(void) {
         counters.IBMReadouts++;
       }
 
-      else if (type == CbmType::TTL) {
+      else if (readout.Type == CbmType::TTL) {
 
         // Registering Pixels according to the topology map offset and range
         int PixelOffset =
@@ -116,14 +107,19 @@ void CbmInstrument::processMonitorReadouts(void) {
 
         for (int i = 0; i < PixelRange; i++) {
           int PixelId = PixelOffset + i;
-          XTRACE(DATA, DEB, "CbmType: %s Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
-                 type.to_string(), PixelId, TimeOfFlight);
+          XTRACE(DATA, DEB,
+                 "CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+                 readout.Type, PixelId, TimeOfFlight);
 
           Ev44SerializerMap.get(readout.FENId, readout.Channel)
               ->addEvent(TimeOfFlight, PixelId);
 
           counters.TTLReadouts++;
         }
+      } else {
+        XTRACE(DATA, WAR, "Invalid CbmType %d", readout.Type);
+        counters.TypeNotSupported++;
+        continue;
       }
     } catch (std::out_of_range &e) {
       LOG(UTILS, Sev::Warning,
@@ -133,7 +129,8 @@ void CbmInstrument::processMonitorReadouts(void) {
       counters.NoSerializerCfgError++;
       continue;
     }
-    counters.MonitorCounts++;
+
+    counters.CbmCounts++;
   }
 }
 

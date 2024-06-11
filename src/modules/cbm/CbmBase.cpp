@@ -53,11 +53,14 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
   //
-  Stats.create("monitors.count", Counters.MonitorCounts);
-  Stats.create("monitors.reduced", Counters.MonitorIgnored);
+  Stats.create("monitors.count", Counters.CbmCounts);
+  Stats.create("readouts.count.ttl", Counters.TTLReadouts);
+  Stats.create("readouts.count.ibm", Counters.IBMReadouts);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
+  Stats.create("readouts.count", Counters.CbmStats.Readouts);
+  Stats.create("readouts.empty", Counters.CbmStats.NoData);
 
   Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
@@ -66,8 +69,8 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
   Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);
-  Stats.create("readouts.count", Counters.CbmStats.Readouts);
-  Stats.create("readouts.empty", Counters.CbmStats.NoData);
+  Stats.create("readouts.error_serializer", Counters.NoSerializerCfgError);
+  Stats.create("readouts.type_not_supported", Counters.TypeNotSupported);
 
 
   // Time stats
@@ -197,7 +200,7 @@ void CbmBase::processing_thread() {
   unsigned int DataIndex;
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.MonitorCounts,
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
                       Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
@@ -247,7 +250,7 @@ void CbmBase::processing_thread() {
     // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.MonitorCounts,
+          {ITCounters.RxPackets, Counters.CbmCounts,
            Counters.KafkaStats.produce_bytes_ok});
 
       for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
