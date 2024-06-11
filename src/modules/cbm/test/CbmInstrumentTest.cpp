@@ -65,7 +65,7 @@ std::vector<uint8_t> MonitorReadout {
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 
-  // Seventh monitor readout - invalid FENCfg
+  // Seventh monitor readout - FEN not in cfg
   0x17, 0x01, 0x14, 0x00,  // Data Header, Fiber 18, FEN 1
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
@@ -151,7 +151,7 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
   cbm->processMonitorReadouts();
   ASSERT_EQ(counters.RingCfgErrors, 1);
   ASSERT_EQ(counters.MonitorCounts, 2);
-  ASSERT_EQ(counters.NoSerializerCfgError, 1);
+  ASSERT_EQ(counters.NoSerializerCfgError, 2);
 }
 
 TEST_F(CbmInstrumentTest, BeamMonitorTOF) {

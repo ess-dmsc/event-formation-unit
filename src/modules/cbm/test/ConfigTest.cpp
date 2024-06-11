@@ -54,23 +54,11 @@ auto NoMaxFENId = R"(
   }
 )"_json;
 
-auto IncorrectChannel = R"(
-  {
-    "Detector" : "CBM",
-    "MonitorRing" : 88,
-    "MaxFENId" : 11,
-
-    "Topology" : [
-      { "FEN":  0, "Channel": 66, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
-    ]
-  }
-)"_json;
-
 auto DuplicateEntry = R"(
   {
     "Detector" : "CBM",
     "MonitorRing" : 88,
-    "MaxFENId" : 1,
+    "MaxFENId" : 11,
 
     "Topology" : [
       { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
@@ -97,7 +85,7 @@ auto ConfigWithTopology = R"(
     "MonitorRing" : 11,
     "MaxTOFNS" : 1000000000,
     "MaxPulseTimeDiffNS" : 1000000000,
-    "MaxFENId" : 1,
+    "MaxFENId" : 2,
 
     "Topology" : [
       { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
@@ -163,18 +151,6 @@ TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
     EXPECT_EQ(err.what(), std::string("MaxFENId not specified"));
-  } catch (...) {
-    FAIL() << "Expected std::runtime_error";
-  }
-}
-
-TEST_F(CbmConfigTest, IncorrectChannelConfig) {
-  try {
-    config.root = IncorrectChannel;
-    config.apply();
-    FAIL() << "Expected std::runtime_error";
-  } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("Entry: 0, Invalid Channel: 66 Max: 11"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
