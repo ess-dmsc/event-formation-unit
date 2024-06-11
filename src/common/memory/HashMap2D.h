@@ -23,7 +23,7 @@ template <typename T> class HashMap2D {
 public:
 
   /// Constructor to initialize the number of columns.
-  HashMap2D(int NumColumns) : NumColumns(NumColumns) {}
+  HashMap2D(const int &NumColumns) : NumColumns(NumColumns) {}
 
   /// Copy assignment operator.
   ///

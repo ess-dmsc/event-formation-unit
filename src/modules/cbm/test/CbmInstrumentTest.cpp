@@ -17,50 +17,40 @@ using namespace ESSReadout;
 // clang-format off
 
 std::vector<uint8_t> MonitorReadout {
-
-  /// \todo These should be tested with the parser
-  // Errors caught when parsing readouts
-
-  // First monitor readout - Valid
-  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Length 20
+  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+};
 
-  // Second monitor readout - invalid Ring
-  0x18, 0x00, 0x14, 0x00,  // Fiber 24, FEN 0, Length 20
+/// \brief Monitor readout with invalid RingCfg
+std::vector<uint8_t> RingNotInCfgReadout {
+  0x12, 0x00, 0x14, 0x00,  // Fiber 18, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+};
 
-  // Third monitor readout - invalid RingCfg
-  0x12, 0x00, 0x14, 0x00,  // Data Header, Fiber 18, FEN 0
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
-  0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
-
-  // Fourth monitor readout - FEN not in cfg
-  0x17, 0x01, 0x14, 0x00,  // Data Header, Fiber 18, FEN 1
+  std::vector<uint8_t> FenNotInCfgReadout {
+  0x16, 0x06, 0x14, 0x00,  // Fiber 22, FEN 6, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
-
 std::vector<uint8_t> MonitorReadoutTOF {
   // First monitor readout - Negative PrevTOF - possibly unreachable!
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Fiber 22, FEN 0
+  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 0
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 
   // Second monitor readout - Negative TOF, positive PrevTOF
-  0x16, 0x00, 0x14, 0x00,  // Data Header - Fiber 22, FEN 0
+  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
   0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 0
@@ -120,15 +110,51 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
   cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
   counters.CbmStats = cbm->CbmParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 4);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 1);
+  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(counters.RingCfgErrors, 0);
+  EXPECT_EQ(counters.CbmCounts, 1);
+  EXPECT_EQ(counters.NoSerializerCfgError, 0);
+}
+
+TEST_F(CbmInstrumentTest, RingNotInConfig) {
+  makeHeader(cbm->ESSReadoutParser.Packet, RingNotInCfgReadout);
+
+  cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
+  counters.CbmStats = cbm->CbmParser.Stats;
+
+  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
   EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
   EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
   EXPECT_EQ(counters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
   EXPECT_EQ(counters.RingCfgErrors, 1);
-  EXPECT_EQ(counters.CbmCounts, 1);
+  EXPECT_EQ(counters.CbmCounts, 0);
+  EXPECT_EQ(counters.NoSerializerCfgError, 0);
+}
+
+TEST_F(CbmInstrumentTest, FenNotInConfig) {
+  makeHeader(cbm->ESSReadoutParser.Packet, FenNotInCfgReadout);
+
+  cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
+  counters.CbmStats = cbm->CbmParser.Stats;
+
+  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(counters.RingCfgErrors, 0);
+  EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 1);
 }
 
