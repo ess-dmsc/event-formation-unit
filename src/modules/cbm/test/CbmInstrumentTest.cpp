@@ -16,7 +16,7 @@ using namespace ESSReadout;
 
 // clang-format off
 
-std::vector<uint8_t> MonitorReadout {
+std::vector<uint8_t> ValidMonitorReadouts {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
@@ -24,7 +24,7 @@ std::vector<uint8_t> MonitorReadout {
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 };
 
-/// \brief Monitor readout with invalid RingCfg
+/// \brief Monitor readout with invalid Ring
 std::vector<uint8_t> RingNotInCfgReadout {
   0x12, 0x00, 0x14, 0x00,  // Fiber 18, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
@@ -33,11 +33,27 @@ std::vector<uint8_t> RingNotInCfgReadout {
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 };
 
-  std::vector<uint8_t> FenNotInCfgReadout {
+/// \brief Monitor readout with invalid FEN and Channel
+std::vector<uint8_t> FenAndChannelNotInCfgReadout {
+  // Invalid FEN - not in configuration
   0x16, 0x06, 0x14, 0x00,  // Fiber 22, FEN 6, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
+  0x00, 0x00, 0x00, 0x00,   // XPos 0, YPos 0
+
+  // Invalid Channel - not in configuration
+  0x16, 0x06, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 14, ADC 1
+  0x00, 0x00, 0x00, 0x00,   // XPos 0, YPos 0
+
+  // Invalid Ring and Channel - not in configuration
+  0x16, 0x06, 0x14, 0x00,  // Fiber 22, FEN 6, Data Length 20
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 14, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
@@ -102,10 +118,10 @@ protected:
 };
 
 // Test cases below
-TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgErrors, 0); }
+TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgError, 0); }
 
-TEST_F(CbmInstrumentTest, BeamMonitor) {
-  makeHeader(cbm->ESSReadoutParser.Packet, MonitorReadout);
+TEST_F(CbmInstrumentTest, TestReadoutProcessingType1) {
+  makeHeader(cbm->ESSReadoutParser.Packet, ValidMonitorReadouts);
 
   cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
   counters.CbmStats = cbm->CbmParser.Stats;
@@ -117,12 +133,12 @@ TEST_F(CbmInstrumentTest, BeamMonitor) {
   EXPECT_EQ(counters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgErrors, 0);
+  EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 1);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
 }
 
-TEST_F(CbmInstrumentTest, RingNotInConfig) {
+TEST_F(CbmInstrumentTest, RingConfigurationError) {
   makeHeader(cbm->ESSReadoutParser.Packet, RingNotInCfgReadout);
 
   cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
@@ -135,27 +151,27 @@ TEST_F(CbmInstrumentTest, RingNotInConfig) {
   EXPECT_EQ(counters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgErrors, 1);
+  EXPECT_EQ(counters.RingCfgError, 1);
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
 }
 
-TEST_F(CbmInstrumentTest, FenNotInConfig) {
-  makeHeader(cbm->ESSReadoutParser.Packet, FenNotInCfgReadout);
+TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
+  makeHeader(cbm->ESSReadoutParser.Packet, FenAndChannelNotInCfgReadout);
 
   cbm->CbmParser.parse(cbm->ESSReadoutParser.Packet);
   counters.CbmStats = cbm->CbmParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.Readouts, 3);
   EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
   EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
   EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
   EXPECT_EQ(counters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgErrors, 0);
+  EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 0);
-  EXPECT_EQ(counters.NoSerializerCfgError, 1);
+  EXPECT_EQ(counters.NoSerializerCfgError, 3);
 }
 
 TEST_F(CbmInstrumentTest, BeamMonitorTOF) {

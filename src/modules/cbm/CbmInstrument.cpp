@@ -62,7 +62,7 @@ void CbmInstrument::processMonitorReadouts(void) {
     if (Ring != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
              Conf.Parms.MonitorRing);
-      counters.RingCfgErrors++;
+      counters.RingCfgError++;
       continue;
     }
 

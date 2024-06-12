@@ -58,7 +58,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.count.ibm", Counters.IBMReadouts);
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
-  Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
+  Stats.create("readouts.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.count", Counters.CbmStats.Readouts);
   Stats.create("readouts.empty", Counters.CbmStats.NoData);
 
