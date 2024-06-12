@@ -116,7 +116,7 @@ void DreamBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "dream_debug",
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
                            KafkaCfg.CfgParms);
   auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
