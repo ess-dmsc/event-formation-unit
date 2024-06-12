@@ -143,9 +143,9 @@ void CbmBase::processing_thread() {
 
   // Create serializers
   EV44SerializerMapPtr.reset(
-      new HashMap2D<EV44Serializer>(CbmConfiguration.Parms.MaxFENId));
+      new HashMap2D<EV44Serializer>(CbmConfiguration.Parms.NumOfFENs));
   HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer<int32_t>>(
-      CbmConfiguration.Parms.MaxFENId));
+      CbmConfiguration.Parms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
     if (Topology->Type == CbmType::TTL) {

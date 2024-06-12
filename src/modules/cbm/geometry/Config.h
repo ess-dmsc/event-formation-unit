@@ -35,7 +35,7 @@ struct Topology {
   };
   union {
     int param2{0};
-    int pixelRang;
+    int pixelRange;
     int BinCount;
   };
 
@@ -70,7 +70,7 @@ public:
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
     uint8_t MonitorRing{11};
     uint8_t NumberOfMonitors{1};
-    int MaxFENId{11};
+    int NumOfFENs{11};
   } Parms;
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;

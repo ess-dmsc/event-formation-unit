@@ -90,8 +90,10 @@ auto ConfigWithTopology = R"(
     "Topology" : [
       { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
       { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0, "PixelRange": 1},
-      { "FEN":  1, "Channel": 0, "Type": "IBM", "Source" : "cbm3", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100}
+      { "FEN":  1, "Channel": 0, "Type": "TTL", "Source" : "cbm3", "PixelOffset": 0, "PixelRange": 1},
+      { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  0, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100}
     ]
   }
 )"_json;
@@ -198,32 +200,50 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(config.Parms.MonitorRing, 11);
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 4);
+  EXPECT_EQ(config.Parms.NumberOfMonitors, 6);
 
   // Testing topology
   // Test first entry
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[0]->Type, CbmType::TTL);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[0]->Source, "cbm1");
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[0]->FEN, 0);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[0]->Channel, 0);
+  auto *TopologyEntry = config.TopologyMapPtr->get(0,0);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Source, "cbm1");
+  EXPECT_EQ(TopologyEntry->FEN, 0);
+  EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test second entry
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[1]->Type, CbmType::TTL);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[1]->Source, "cbm2");
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[1]->FEN, 0);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[1]->Channel, 1);
+  TopologyEntry = config.TopologyMapPtr->get(0,1);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Source, "cbm2");
+  EXPECT_EQ(TopologyEntry->FEN, 0);
+  EXPECT_EQ(TopologyEntry->Channel, 1);
 
   // Test third entry
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->Type, CbmType::IBM);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->Source, "cbm3");
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->FEN, 1);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[2]->Channel, 0);
+  TopologyEntry = config.TopologyMapPtr->get(1,0);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Source, "cbm3");
+  EXPECT_EQ(TopologyEntry->FEN, 1);
+  EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test fourth entry
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[3]->Type, CbmType::IBM);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[3]->Source, "cbm4");
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[3]->FEN, 2);
-  EXPECT_EQ(config.TopologyMapPtr->toValuesList()[3]->Channel, 0);
+  TopologyEntry = config.TopologyMapPtr->get(2,0);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
+  EXPECT_EQ(TopologyEntry->Source, "cbm4");
+  EXPECT_EQ(TopologyEntry->FEN, 2);
+  EXPECT_EQ(TopologyEntry->Channel, 0);
+
+  // Test fifth entry
+  TopologyEntry = config.TopologyMapPtr->get(0,2);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
+  EXPECT_EQ(TopologyEntry->Source, "cbm5");
+  EXPECT_EQ(TopologyEntry->FEN, 0);
+  EXPECT_EQ(TopologyEntry->Channel, 2);
+
+  // Test sixth entry
+  TopologyEntry = config.TopologyMapPtr->get(2,1);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
+  EXPECT_EQ(TopologyEntry->Source, "cbm6");
+  EXPECT_EQ(TopologyEntry->FEN, 2);
+  EXPECT_EQ(TopologyEntry->Channel, 1);
 }
 
 int main(int argc, char **argv) {

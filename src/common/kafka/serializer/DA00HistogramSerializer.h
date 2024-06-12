@@ -133,12 +133,12 @@ public:
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount,
-      std::string Name, std::string Unit, std::string TimeUnit,
-      enum BinningStrategy Strategy, ProducerCallback Callback = {},
+      std::string Source, time_t Period, time_t BinCount, std::string Name,
+      std::string Unit, std::string TimeUnit, enum BinningStrategy Strategy,
+      ProducerCallback Callback = {},
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Source, Period, BinCount, Name, Unit,
-                            TimeUnit, Callback, AggFunc, Strategy) {}
+      : HistogramSerializer(Source, Period, BinCount, Name, Unit, TimeUnit,
+                            Callback, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)
@@ -151,9 +151,10 @@ public:
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
   /// \brief This function finds the bin index for a given time.
+  /// \note This function marked virtual for testing purposes.
   /// \param Time is the time for which used to calculate the correct bin index
   /// \param Value is the value to be added to the bin
-  inline void addEvent(const R Time, const T Value) {
+  virtual inline void addEvent(const R Time, const T Value) {
     static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
 
@@ -188,7 +189,7 @@ public:
     DataBins[BinIndex].push_back(Value);
   }
   // Getter function for the Stats member
-  HistrogramSerializerStats& stats() { return Stats; }
+  HistrogramSerializerStats &stats() { return Stats; }
 
 private:
   /// \brief Serialize the data to a flatbuffer.
@@ -218,8 +219,8 @@ private:
                       .unit(Unit)
                       .data(AggregatedBins));
 
-    const auto DataArray =
-        da00flatbuffers::DataArray(Source, ReferenceTime.value(), {XAxis, YAxis});
+    const auto DataArray = da00flatbuffers::DataArray(
+        Source, ReferenceTime.value(), {XAxis, YAxis});
 
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);

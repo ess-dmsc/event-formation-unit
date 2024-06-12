@@ -98,12 +98,13 @@ void CbmInstrument::processMonitorReadouts(void) {
 
       else if (readout.Type == CbmType::TTL) {
 
-        // Registering Pixels according to the topology map offset and range
-        int PixelOffset =
+        // Register pixels according to the topology map offset and range
+        auto &PixelOffset =
             Conf.TopologyMapPtr->get(readout.FENId, readout.Channel)
                 ->pixelOffset;
-        int PixelRange =
-            Conf.TopologyMapPtr->get(readout.FENId, readout.Channel)->pixelRang;
+        auto &PixelRange =
+            Conf.TopologyMapPtr->get(readout.FENId, readout.Channel)
+                ->pixelRange;
 
         for (int i = 0; i < PixelRange; i++) {
           int PixelId = PixelOffset + i;
@@ -113,9 +114,8 @@ void CbmInstrument::processMonitorReadouts(void) {
 
           Ev44SerializerMap.get(readout.FENId, readout.Channel)
               ->addEvent(TimeOfFlight, PixelId);
-
-          counters.TTLReadouts++;
         }
+        counters.TTLReadouts++;
       } else {
         XTRACE(DATA, WAR, "Invalid CbmType %d", readout.Type);
         counters.TypeNotSupported++;

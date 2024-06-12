@@ -66,14 +66,17 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
 
   try {
-    Parms.MaxFENId = root["MaxFENId"].get<int>();
+    Parms.NumOfFENs = root["MaxFENId"].get<int>();
+    
+    // Number of FENs must must be 1 even is FEN id starts from 0
+    Parms.NumOfFENs += 1;
   } catch (...) {
     LOG(INIT, Sev::Error, "MaxFENId not specified");
     throw std::runtime_error("MaxFENId not specified");
   }
-  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.MaxFENId);
+  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.NumOfFENs);
 
-  TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.MaxFENId));
+  TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
   auto TopologyIt = root.find("Topology");
   if (TopologyIt == root.end()) {
@@ -106,12 +109,12 @@ void Config::apply() {
     }
 
     // Check for array sizes and dupliacte entries
-    if (FEN > Parms.MaxFENId) {
+    if (FEN > Parms.NumOfFENs) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
-                            Parms.MaxFENId));
+                            Parms.NumOfFENs));
     }
 
-    if (TopologyMapPtr->isValue(Channel, FEN)) {
+    if (TopologyMapPtr->isValue(FEN, Channel)) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
                             Entry, FEN, Channel));
     }
@@ -156,7 +159,7 @@ void Config::apply() {
 
     auto topo = std::make_unique<Topology>(FEN, Channel, Source, MonitorType,
                                            param1, param2);
-    TopologyMapPtr->add(Channel, FEN, topo);
+    TopologyMapPtr->add(FEN, Channel, topo);
 
     XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",
            Entry, FEN, Channel, Source.c_str(), Type.c_str());
