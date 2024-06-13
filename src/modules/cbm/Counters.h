@@ -29,7 +29,6 @@ struct Counters {
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgError{0};
-  int64_t TOFErrors{0};
   int64_t CbmCounts{0};
   int64_t MaxADC{0};
 

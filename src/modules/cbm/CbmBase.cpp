@@ -57,7 +57,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.count.ttl", Counters.TTLReadouts);
   Stats.create("readouts.count.ibm", Counters.IBMReadouts);
   Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
   Stats.create("readouts.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.count", Counters.CbmStats.Readouts);
   Stats.create("readouts.empty", Counters.CbmStats.NoData);
@@ -212,9 +211,9 @@ void CbmBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = cbmInstrument.ESSReadoutParser.validate(
+      auto Res = cbmInstrument.ESSHeaderParser.validate(
           DataPtr, DataLen, cbmInstrument.Conf.Parms.TypeSubType);
-      Counters.ReadoutStats = cbmInstrument.ESSReadoutParser.Stats;
+      Counters.ReadoutStats = cbmInstrument.ESSHeaderParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
@@ -231,9 +230,9 @@ void CbmBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      cbmInstrument.CbmParser.parse(cbmInstrument.ESSReadoutParser.Packet);
-      Counters.CbmStats = cbmInstrument.CbmParser.Stats;
-      Counters.TimeStats = cbmInstrument.ESSReadoutParser.Packet.Time.Stats;
+      cbmInstrument.CbmReadoutParser.parse(cbmInstrument.ESSHeaderParser.Packet);
+      Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
+      Counters.TimeStats = cbmInstrument.ESSHeaderParser.Packet.Time.Stats;
 
       cbmInstrument.processMonitorReadouts();
 

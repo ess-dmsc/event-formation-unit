@@ -52,10 +52,10 @@ public:
       &HistogramSerializerMap;
 
   /// \brief Parser for the ESS Readout header.
-  ESSReadout::Parser ESSReadoutParser;
+  ESSReadout::Parser ESSHeaderParser;
 
   /// \brief Parser for CBM readout data.
-  Parser CbmParser;
+  Parser CbmReadoutParser;
 };
 
 } // namespace cbm

@@ -11,7 +11,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 #include <common/time/ESSTime.h>
-#include <cstdint>
 #include <inttypes.h>
 
 namespace esstime {
