@@ -37,7 +37,6 @@ function(create_module module_name)
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
 
   enable_coverage(${module_name})
-  install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
 
 #=============================================================================
@@ -61,7 +60,6 @@ function(create_executable exec_name)
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
   enable_coverage(${exec_name})
-  install(TARGETS ${exec_name} DESTINATION bin)
 endfunction(create_executable)
 
 
