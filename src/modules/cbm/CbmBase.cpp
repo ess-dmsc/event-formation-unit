@@ -69,7 +69,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
   Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
   Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);
-  Stats.create("readouts.error_serializer", Counters.NoSerializerCfgError);
+  Stats.create("readouts.error_no_serializer", Counters.NoSerializerCfgError);
   Stats.create("readouts.type_not_supported", Counters.TypeNotSupported);
 
 
@@ -85,9 +85,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-
-  // Serializer stats
-  Stats.create("serializer.no_serializer_configured", Counters.NoSerializerCfgError);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);

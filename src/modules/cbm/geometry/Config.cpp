@@ -66,15 +66,15 @@ void Config::apply() {
   LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
 
   try {
-    Parms.NumOfFENs = root["MaxFENId"].get<int>();
+    Parms.MaxFENId = root["MaxFENId"].get<int>();
     
     // Number of FENs must must be 1 even is FEN id starts from 0
-    Parms.NumOfFENs += 1;
+    Parms.NumOfFENs += Parms.MaxFENId + 1;
   } catch (...) {
     LOG(INIT, Sev::Error, "MaxFENId not specified");
     throw std::runtime_error("MaxFENId not specified");
   }
-  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.NumOfFENs);
+  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.MaxFENId);
 
   TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
@@ -109,9 +109,9 @@ void Config::apply() {
     }
 
     // Check for array sizes and dupliacte entries
-    if (FEN > Parms.NumOfFENs) {
+    if (FEN > Parms.MaxFENId) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
-                            Parms.NumOfFENs));
+                            Parms.MaxFENId));
     }
 
     if (TopologyMapPtr->isValue(FEN, Channel)) {

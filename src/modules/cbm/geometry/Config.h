@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include <common/memory/HashMap2D.h>
 #include <common/JsonFile.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/memory/HashMap2D.h>
 #include <common/readout/ess/Parser.h>
 #include <memory>
 #include <modules/cbm/CbmTypes.h>
@@ -52,10 +52,9 @@ class Config {
   void errorExit(std::string ErrMsg);
 
 public:
+  Config(std::string ConfigFile) : FileName(ConfigFile){};
 
-  Config(std::string ConfigFile) : FileName(ConfigFile) {};
-
-  Config() {};
+  Config(){};
 
   // load file into json object and apply
   void loadAndApply();
@@ -66,11 +65,12 @@ public:
   // Parameters (eventually) obtained from JSON config file
   struct {
     uint8_t TypeSubType{ESSReadout::Parser::CBM};
-    uint32_t MaxTOFNS{20 * 71'428'571};          // Twenty 14Hz pulses
-    uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // Five 14Hz pulses
-    uint8_t MonitorRing{11};
-    uint8_t NumberOfMonitors{1};
-    int NumOfFENs{11};
+    uint32_t MaxTOFNS{20 * 71'428'571};          // < Twenty 14Hz pulses
+    uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // < Five 14Hz pulses
+    uint8_t MonitorRing{11};     // < Ring number for the monitors
+    uint8_t NumberOfMonitors{1}; // < Number of monitor in the config
+    uint8_t MaxFENId{10};        // < Maximum FEN ID
+    uint8_t NumOfFENs{11};       // < Number of FENs, MaxId + 1
   } Parms;
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;

@@ -38,7 +38,19 @@ auto IncorrectFEN = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  77, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  12, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+    ]
+  }
+)"_json;
+
+auto FENIdEdgeCase = R"(
+  {
+    "Detector" : "CBM",
+    "MonitorRing" : 88,
+    "MaxFENId" : 11,
+
+    "Topology" : [
+      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
     ]
   }
 )"_json;
@@ -140,10 +152,15 @@ TEST_F(CbmConfigTest, IncorrectFENConfig) {
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("Entry: 0, Invalid FEN: 77 Max: 11"));
+    EXPECT_EQ(err.what(), std::string("Entry: 0, Invalid FEN: 12 Max: 11"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
+}
+
+TEST_F(CbmConfigTest, FenIdEdgeTestCase) {
+  config.root = FENIdEdgeCase;
+  ASSERT_NO_THROW(config.apply());
 }
 
 TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
@@ -204,42 +221,42 @@ TEST_F(CbmConfigTest, TestTopology) {
 
   // Testing topology
   // Test first entry
-  auto *TopologyEntry = config.TopologyMapPtr->get(0,0);
+  auto *TopologyEntry = config.TopologyMapPtr->get(0, 0);
   EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
   EXPECT_EQ(TopologyEntry->Source, "cbm1");
   EXPECT_EQ(TopologyEntry->FEN, 0);
   EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test second entry
-  TopologyEntry = config.TopologyMapPtr->get(0,1);
+  TopologyEntry = config.TopologyMapPtr->get(0, 1);
   EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
   EXPECT_EQ(TopologyEntry->Source, "cbm2");
   EXPECT_EQ(TopologyEntry->FEN, 0);
   EXPECT_EQ(TopologyEntry->Channel, 1);
 
   // Test third entry
-  TopologyEntry = config.TopologyMapPtr->get(1,0);
+  TopologyEntry = config.TopologyMapPtr->get(1, 0);
   EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
   EXPECT_EQ(TopologyEntry->Source, "cbm3");
   EXPECT_EQ(TopologyEntry->FEN, 1);
   EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test fourth entry
-  TopologyEntry = config.TopologyMapPtr->get(2,0);
+  TopologyEntry = config.TopologyMapPtr->get(2, 0);
   EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
   EXPECT_EQ(TopologyEntry->Source, "cbm4");
   EXPECT_EQ(TopologyEntry->FEN, 2);
   EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test fifth entry
-  TopologyEntry = config.TopologyMapPtr->get(0,2);
+  TopologyEntry = config.TopologyMapPtr->get(0, 2);
   EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
   EXPECT_EQ(TopologyEntry->Source, "cbm5");
   EXPECT_EQ(TopologyEntry->FEN, 0);
   EXPECT_EQ(TopologyEntry->Channel, 2);
 
   // Test sixth entry
-  TopologyEntry = config.TopologyMapPtr->get(2,1);
+  TopologyEntry = config.TopologyMapPtr->get(2, 1);
   EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
   EXPECT_EQ(TopologyEntry->Source, "cbm6");
   EXPECT_EQ(TopologyEntry->FEN, 2);
