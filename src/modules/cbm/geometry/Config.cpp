@@ -68,8 +68,8 @@ void Config::apply() {
   try {
     Parms.MaxFENId = root["MaxFENId"].get<int>();
     
-    // Number of FENs must must be 1 even is FEN id starts from 0
-    Parms.NumOfFENs += Parms.MaxFENId + 1;
+    // Number of FENs must must be 1 even is MaxFENId is 0
+    Parms.NumOfFENs = Parms.MaxFENId + 1;
   } catch (...) {
     LOG(INIT, Sev::Error, "MaxFENId not specified");
     throw std::runtime_error("MaxFENId not specified");
