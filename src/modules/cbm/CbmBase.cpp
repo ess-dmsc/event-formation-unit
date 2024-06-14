@@ -37,40 +37,43 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout header stats
-  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
+  Stats.create("essheader.errors.header", Counters.ErrorESSHeaders);
+  Stats.create("essheader.errors.buffer", Counters.ReadoutStats.ErrorBuffer);
+  Stats.create("essheader.errors.cookie", Counters.ReadoutStats.ErrorCookie);
+  Stats.create("essheader.errors.pad", Counters.ReadoutStats.ErrorPad);
+  Stats.create("essheader.errors.size", Counters.ReadoutStats.ErrorSize);
+  Stats.create("essheader.errors.version", Counters.ReadoutStats.ErrorVersion);
+  Stats.create("essheader.errors.output_queue", Counters.ReadoutStats.ErrorOutputQueue);
+  Stats.create("essheader.errors.type", Counters.ReadoutStats.ErrorTypeSubType);
+  Stats.create("essheader.errors.seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.errors.timehigh", Counters.ReadoutStats.ErrorTimeHigh);
+  Stats.create("essheader.errors.timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
   Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
   Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
-  //
-  Stats.create("monitors.count", Counters.CbmCounts);
-  Stats.create("readouts.count.ttl", Counters.TTLReadouts);
-  Stats.create("readouts.count.ibm", Counters.IBMReadouts);
-  Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.ring_mismatch", Counters.RingCfgError);
-  Stats.create("readouts.count", Counters.CbmStats.Readouts);
-  Stats.create("readouts.empty", Counters.CbmStats.NoData);
+  Stats.create("parsing.readout_parsed", Counters.CbmStats.Readouts);
 
-  Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
-  Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
-  Stats.create("readouts.error_fen", Counters.CbmStats.ErrorFEN);
-  Stats.create("readouts.error_type", Counters.CbmStats.ErrorType);
-  Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
-  Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
-  Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);
-  Stats.create("readouts.error_no_serializer", Counters.NoSerializerCfgError);
-  Stats.create("readouts.type_not_supported", Counters.TypeNotSupported);
+  // Readout parsing errors - readout dropped
+  Stats.create("parsing.errors.size", Counters.CbmStats.ErrorSize);
+  Stats.create("parsing.errors.fiber", Counters.CbmStats.ErrorFiber);
+  Stats.create("parsing.errors.fen", Counters.CbmStats.ErrorFEN);
+  Stats.create("parsing.errors.type", Counters.CbmStats.ErrorType);
+  Stats.create("parsing.errors.adc", Counters.CbmStats.ErrorADC);
+  Stats.create("parsing.errors.datalen", Counters.CbmStats.ErrorDataLength);
+  Stats.create("parsing.errors.timefrac", Counters.CbmStats.ErrorTimeFrac);
+  Stats.create("parsing.errors.no_data", Counters.CbmStats.NoData);
 
+  // Readout processing stats
+  Stats.create("readouts.processed", Counters.CbmCounts);
+  Stats.create("readouts.type.ttl_proccessed", Counters.TTLReadoutsProcessed);
+  Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
+
+  // Readout processing errors - readout dropped
+  Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
+  Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
+  Stats.create("readouts.errors.type", Counters.TypeNotSupported);
+  Stats.create("readouts.errors.time", Counters.TimeError);
 
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
@@ -230,7 +233,8 @@ void CbmBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      cbmInstrument.CbmReadoutParser.parse(cbmInstrument.ESSHeaderParser.Packet);
+      cbmInstrument.CbmReadoutParser.parse(
+          cbmInstrument.ESSHeaderParser.Packet);
       Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
       Counters.TimeStats = cbmInstrument.ESSHeaderParser.Packet.Time.Stats;
 
@@ -245,9 +249,9 @@ void CbmBase::processing_thread() {
 
     // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.CbmCounts,
-           Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.CbmCounts,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");

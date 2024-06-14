@@ -8,7 +8,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/time/ESSTime.h"
 #include <modules/cbm/CbmInstrument.h>
 #include <stdexcept>
 
@@ -34,7 +33,7 @@ CbmInstrument::CbmInstrument(
 }
 
 void CbmInstrument::processMonitorReadouts(void) {
-  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &RefTime = ESSHeaderParser.Packet.Time;
   // All readouts are now potentially valid, negative TOF is not
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
@@ -71,25 +70,35 @@ void CbmInstrument::processMonitorReadouts(void) {
     }
 
     ESSTime ReadoutTime = ESSTime(Readout.TimeHigh, Readout.TimeLow);
-    uint64_t TimeOfFlight = TimeRef.getTOF(ReadoutTime);
 
-    if (TimeOfFlight == TimeRef.InvalidTOF) {
+    /// \todo: This function can come back with a valid TOF based on the
+    /// previous pulse time configured on the RefTime class. This means the
+    /// result looks valid, but for many detectors this TOF will be added to
+    /// the Serializer with the current PulseTime. Handling of this case
+    /// should be reviewed, maybe this will lead to incorrect statistics.
+    /// Currently we just count the event for statistics.
+    uint64_t TimeOfFlight = RefTime.getTOF(ReadoutTime);
+
+    if (TimeOfFlight == RefTime.InvalidTOF) {
       XTRACE(DATA, WAR,
              "No valid TOF from pulse time: %" PRIu32 " and %" PRIu64
              "readout time",
-             TimeRef.getPrevRefTimeUInt64(), ReadoutTime.toNS().count());
-      // counters.InvalidTOF++;
+             RefTime.getPrevRefTimeUInt64(), ReadoutTime.toNS().count());
+      counters.TimeError++;
       continue;
     }
 
+    // Check for out_of_range errors thrown by the HashMap2D, which contains the
+    // serializers
     try {
+
       if (Readout.Type == CbmType::IBM) {
         auto AdcValue = Readout.NPos & 0xFFFFFF; // Extract lower 24 bits
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
 
-        counters.IBMReadouts++;
+        counters.IBMReadoutsProcessed++;
       }
 
       else if (Readout.Type == CbmType::TTL) {
@@ -111,7 +120,7 @@ void CbmInstrument::processMonitorReadouts(void) {
           Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
               ->addEvent(TimeOfFlight, PixelId);
         }
-        counters.TTLReadouts++;
+        counters.TTLReadoutsProcessed++;
       } else {
         XTRACE(DATA, WAR, "Invalid CbmType %d", Readout.Type);
         counters.TypeNotSupported++;
@@ -128,6 +137,9 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     counters.CbmCounts++;
   }
+
+  // Update the time statistics
+  counters.TimeStats = RefTime.Stats;
 }
 
 } // namespace cbm

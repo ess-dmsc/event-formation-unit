@@ -146,8 +146,8 @@ TEST_F(CbmBaseTest, DataReceiveGoodPacket) {
   sleep(2);
 
   EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 3);
-  EXPECT_EQ(Readout.Counters.TTLReadouts, 1);
-  EXPECT_EQ(Readout.Counters.IBMReadouts, 1);
+  EXPECT_EQ(Readout.Counters.TTLReadoutsProcessed, 1);
+  EXPECT_EQ(Readout.Counters.IBMReadoutsProcessed, 1);
   EXPECT_EQ(Readout.Counters.ProduceCauseTimeout, 1);
   Readout.stopThreads();
 }

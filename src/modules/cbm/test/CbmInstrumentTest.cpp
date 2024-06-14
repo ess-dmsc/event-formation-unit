@@ -5,6 +5,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common/time/ESSTime.h"
+#include "gtest/gtest.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/reduction/Event.h>
@@ -95,19 +96,27 @@ std::vector<uint8_t> FenAndChannelNotInCfgReadout {
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
-std::vector<uint8_t> MonitorReadoutTOF {
-  // First monitor readout - Negative PrevTOF - possibly unreachable!
+std::vector<uint8_t> TofToHighReadout {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
-  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 0
-  0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+  0x0A, 0x00, 0x00, 0x00,  // Time HI 10 s
+  0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
+  0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
+};
 
-  // Second monitor readout - Negative TOF, positive PrevTOF
+std::vector<uint8_t> PreviousAndNegativPrevTofReadouts {
+  // First Readout - TOF between PrevPulse and PulseTime
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
-  0x01, 0x00, 0x00, 0x00,  // Time HI 0 s
-  0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 0
+  0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
+  0x09, 0x5F, 0x01, 0x00,  // Time LO 90000 tick
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
+  0x00, 0x00, 0x00, 0x00,   // XPos 0, YPos 0
+
+  // Second Readout - TOF before PrevPulseTime
+  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0x09, 0x5F, 0x01, 0x00,  // Time LO 90000 tick
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 // clang-format on
@@ -244,8 +253,9 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 3);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.TTLReadouts, 3);
-  EXPECT_EQ(counters.IBMReadouts, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
 TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
@@ -302,8 +312,9 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 3);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.TTLReadouts, 0);
-  EXPECT_EQ(counters.IBMReadouts, 3);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 3);
+  EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
 TEST_F(CbmInstrumentTest, RingConfigurationError) {
@@ -322,8 +333,9 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
   EXPECT_EQ(counters.RingCfgError, 1);
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.IBMReadouts, 0);
-  EXPECT_EQ(counters.TTLReadouts, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TimeStats.TofCount, 0);
 }
 
 TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
@@ -342,19 +354,61 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 3);
-  EXPECT_EQ(counters.IBMReadouts, 0);
-  EXPECT_EQ(counters.TTLReadouts, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
-TEST_F(CbmInstrumentTest, BeamMonitorTOF) {
-  makeHeader(cbm->ESSHeaderParser.Packet, MonitorReadoutTOF);
+TEST_F(CbmInstrumentTest, TOFHighError) {
+  makeHeader(cbm->ESSHeaderParser.Packet, TofToHighReadout);
   cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
   cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 0));
 
   cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
   counters.CbmStats = cbm->CbmReadoutParser.Stats;
 
+  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+
   cbm->processMonitorReadouts();
+  EXPECT_EQ(counters.RingCfgError, 0);
+  EXPECT_EQ(counters.CbmCounts, 0);
+  EXPECT_EQ(counters.NoSerializerCfgError, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TimeError, 1);
+  EXPECT_EQ(counters.TimeStats.TofCount, 0);
+  EXPECT_EQ(counters.TimeStats.TofHigh, 1);
+}
+
+TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
+  makeHeader(cbm->ESSHeaderParser.Packet, PreviousAndNegativPrevTofReadouts);
+  cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(2, 100000));
+  cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 100000));
+
+  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
+  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  EXPECT_EQ(counters.CbmStats.Readouts, 2);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(counters.RingCfgError, 0);
+  EXPECT_EQ(counters.CbmCounts, 1);
+  EXPECT_EQ(counters.NoSerializerCfgError, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 1);
+  EXPECT_EQ(counters.TimeError, 1);
+  EXPECT_EQ(counters.TimeStats.TofHigh, 0);
+  EXPECT_EQ(counters.TimeStats.TofCount, 0);
+  EXPECT_EQ(counters.TimeStats.PrevTofCount, 1);
+  EXPECT_EQ(counters.TimeStats.PrevTofNegative, 1);
 }
 
 int main(int argc, char **argv) {
