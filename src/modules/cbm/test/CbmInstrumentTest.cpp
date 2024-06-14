@@ -1,11 +1,9 @@
 // Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
-/// \file
+/// \file Unit test for the CbmInstrument class.
 //===----------------------------------------------------------------------===//
 
-#include "common/time/ESSTime.h"
-#include "gtest/gtest.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/reduction/Event.h>
@@ -20,6 +18,8 @@ using namespace ESSReadout;
 
 // clang-format off
 
+
+/// \brief Monitor readout with valid TTL readouts with time values
 std::vector<uint8_t> ValidTTLReadouts {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
@@ -40,6 +40,7 @@ std::vector<uint8_t> ValidTTLReadouts {
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
+/// \brief Monitor readout with valid IBM readouts with time and NPOS values
 std::vector<uint8_t> ValidIBMReadouts {
   // Test low 8bit NPOS value
   0x16, 0x01, 0x14, 0x00,  // Fiber 22, FEN 1, Data Length 20
@@ -72,6 +73,15 @@ std::vector<uint8_t> RingNotInCfgReadout {
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 };
 
+/// \brief Monitor readout with not supported Type
+std::vector<uint8_t> NotSuppoertedTypeReadout {
+  0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
+  0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
+  0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
+  0x06, 0x00, 0x00, 0x00,  // Type 6, Ch 0, ADC 0
+  0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+};
+
 /// \brief Monitor readout with invalid FEN and Channel
 std::vector<uint8_t> FenAndChannelNotInCfgReadout {
   // Invalid FEN - not in configuration
@@ -96,6 +106,7 @@ std::vector<uint8_t> FenAndChannelNotInCfgReadout {
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
+/// \brief Monitor readout with TOF value higer then MaxTof limit
 std::vector<uint8_t> TofToHighReadout {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x0A, 0x00, 0x00, 0x00,  // Time HI 10 s
@@ -104,6 +115,7 @@ std::vector<uint8_t> TofToHighReadout {
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
+/// \brief Monitor readout to test all negative TOF scenarios
 std::vector<uint8_t> PreviousAndNegativPrevTofReadouts {
   // First Readout - TOF between PrevPulse and PulseTime
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
@@ -200,6 +212,14 @@ private:
 // Test cases below
 TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgError, 0); }
 
+///
+/// \brief Test case for validating TTL type readouts.
+///
+/// This test case sets expectations on the mocked serializer objects and checks
+/// if the monitor readouts are processed correctly. It verifies the parser
+/// counters and the processed readout counts. Also test that the serializer's
+/// addEvent is called with proper arguments.
+///
 TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
 
   // Set expectations on the mocked serializer objects, one for each monitor
@@ -258,6 +278,13 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
+/// \brief Test case for validating IBM type readouts.
+///
+/// This test case sets expectations on the mocked serializer objects and checks
+/// if the monitor readouts are processed correctly. It verifies the parser
+/// counters and the processed readout counts. Also test that the serializer's
+/// addEvent is called with proper arguments.
+///
 TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
 
   // Set expectations on the mocked serializer objects, one for each monitor
@@ -317,6 +344,13 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
+///
+/// \brief Test fixture for the RingConfigurationError test case.
+///
+/// This test case verifies the behavior of the system when a ring configuration
+/// error occurs. It sets up the necessary conditions, triggers the error, and
+/// checks the expected counters and statistics.
+///
 TEST_F(CbmInstrumentTest, RingConfigurationError) {
   makeHeader(cbm->ESSHeaderParser.Packet, RingNotInCfgReadout);
 
@@ -338,6 +372,35 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
 }
 
+/// \brief Test case for monitor readout with Type not supported
+/// \note This test is temorary because since all CBM are supported metric will
+/// be removed
+TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
+  makeHeader(cbm->ESSHeaderParser.Packet, NotSuppoertedTypeReadout);
+
+  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
+  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  EXPECT_EQ(counters.CbmStats.Readouts, 1);
+  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(counters.RingCfgError, 0);
+  EXPECT_EQ(counters.TypeNotSupported, 1);
+  EXPECT_EQ(counters.CbmCounts, 0);
+  EXPECT_EQ(counters.NoSerializerCfgError, 0);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+}
+
+///
+/// \brief Test case for the scenario when there is no serializer defined for a
+/// certain readout. This test verifies the behavior of the CbmInstrument class
+/// when the readout arrives for a monitor which is not configured for the EFU.
+///
 TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   makeHeader(cbm->ESSHeaderParser.Packet, FenAndChannelNotInCfgReadout);
 
@@ -359,6 +422,10 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
+///
+/// \brief Test case for the scenario when the calculated TOF is higher then the
+/// MaxTof limit configured in the configuration file
+///
 TEST_F(CbmInstrumentTest, TOFHighError) {
   makeHeader(cbm->ESSHeaderParser.Packet, TofToHighReadout);
   cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
@@ -384,6 +451,11 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(counters.TimeStats.TofHigh, 1);
 }
 
+///
+/// \brief Test case for the scenario when the readout time is between the
+/// previoius and current pulse time and the case when is before the previous
+/// pulse time
+///
 TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   makeHeader(cbm->ESSHeaderParser.Packet, PreviousAndNegativPrevTofReadouts);
   cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(2, 100000));

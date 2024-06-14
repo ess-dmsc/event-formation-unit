@@ -14,6 +14,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+#define IBM_ADC_MASK 0xFFFFFF
+
 namespace cbm {
 
 using namespace esstime;
@@ -93,7 +95,7 @@ void CbmInstrument::processMonitorReadouts(void) {
     try {
 
       if (Readout.Type == CbmType::IBM) {
-        auto AdcValue = Readout.NPos & 0xFFFFFF; // Extract lower 24 bits
+        auto AdcValue = Readout.NPos & IBM_ADC_MASK; // Extract lower 24 bits
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);

@@ -91,6 +91,14 @@ auto IncorrectType = R"(
   }
 )"_json;
 
+auto NoTopology = R"(
+  {
+    "Detector" : "CBM",
+    "MonitorRing" : 11,
+    "MaxFENId" : 1
+  }
+)"_json;
+
 auto ConfigWithTopology = R"(
   {
     "Detector" : "CBM",
@@ -196,6 +204,20 @@ TEST_F(CbmConfigTest, IncorrectCBMType) {
   } catch (const std::runtime_error &err) {
     EXPECT_EQ(err.what(),
               std::string("Entry: 0, Invalid Type: ESS is not a CBM Type"));
+  } catch (...) {
+    FAIL() << "Expected std::runtime_error";
+  }
+}
+
+TEST_F(CbmConfigTest, NoTopology) {
+  try {
+    config.root = NoTopology;
+    config.apply();
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &err) {
+    EXPECT_EQ(err.what(),
+              std::string("No 'Topology' section found in the "
+                          "configuration. Cannot setup Beam Monitors"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }

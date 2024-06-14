@@ -18,7 +18,6 @@
 #include <common/time/Timer.h>
 #include <modules/caen/CaenBase.h>
 #include <modules/caen/CaenInstrument.h>
-#include <stdio.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL

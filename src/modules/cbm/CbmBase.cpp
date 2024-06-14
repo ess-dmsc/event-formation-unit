@@ -7,8 +7,8 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
-#include "common/kafka/EV44Serializer.h"
-#include "common/memory/HashMap2D.h"
+#include <common/kafka/EV44Serializer.h>
+#include <common/memory/HashMap2D.h>
 #include <common/RuntimeStat.h>
 #include <common/kafka/KafkaConfig.h>
 #include <memory>
