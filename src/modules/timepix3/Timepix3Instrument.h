@@ -50,7 +50,7 @@ public:
   PixelEventHandler pixelEventHandler;
   DataParser timepix3Parser;
 
-  Timepix3Instrument(Counters &counters, Config timepix3Configuration,
+  Timepix3Instrument(Counters &counters, const Config &timepix3Configuration,
                      EV44Serializer &serializer);
 
   ~Timepix3Instrument();

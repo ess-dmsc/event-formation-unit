@@ -53,6 +53,11 @@ Config::Config(std::string ConfigFile) {
   } catch (...) {
     LOG(INIT, Sev::Warning, "Using default MaxTimeGapNS");
   }
+  try {
+    FrequencyHz = root["FrequencyHz"].get<float>();
+  } catch (...) {
+    LOG(INIT, Sev::Warning, "Using default Frequency");
+  }
 
   try {
     MinEventSizeHits = root["MinEventSizeHits"].get<uint32_t>();

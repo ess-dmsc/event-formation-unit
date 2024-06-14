@@ -10,9 +10,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
-#include <logical_geometry/ESSGeometry.h>
 #include <string>
-#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -28,6 +26,7 @@ public:
   uint16_t XResolution{0}; /// Resolution along x axis
   uint16_t YResolution{0}; /// Resolution along y axis
   uint16_t parallelThreads{1};
+  float FrequencyHz{14.0}; /// Frequency of the ESS proton pulse
 
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};
