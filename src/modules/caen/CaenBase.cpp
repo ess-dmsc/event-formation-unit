@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2019-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,9 +6,6 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include "caen/CaenBase.h"
-
-#include <caen/CaenInstrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
 #include <common/debug/Log.h>
@@ -19,7 +16,8 @@
 #include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <stdio.h>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -98,8 +96,6 @@ CaenBase::CaenBase(BaseSettings const &settings,
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -147,6 +143,12 @@ void CaenBase::processingThread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
+
+  Stats.create("produce.cause.pulse_change",
+               Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer->stats().ProduceTriggeredMaxEvents);
+
   CaenInstrument Caen(Counters, EFUSettings);
   Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
 
@@ -164,7 +166,8 @@ void CaenBase::processingThread() {
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -175,8 +178,8 @@ void CaenBase::processingThread() {
         continue;
       }
 
-      XTRACE(DATA, DEB, "Ringbuffer index %d has data of length %d",
-             DataIndex, DataLen);
+      XTRACE(DATA, DEB, "Ringbuffer index %d has data of length %d", DataIndex,
+             DataLen);
 
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
@@ -212,14 +215,13 @@ void CaenBase::processingThread() {
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       SerializerII->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
     }
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count

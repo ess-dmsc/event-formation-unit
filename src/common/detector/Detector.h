@@ -133,8 +133,7 @@ public:
 public:
   BaseSettings EFUSettings;
   Statistics Stats;
-
-public:
+  
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static constexpr int EthernetBufferMaxEntries{2000};
   static constexpr int EthernetBufferSize{9000}; /// bytes

@@ -7,7 +7,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "gtest/gtest.h"
 #include <common/readout/ess/Parser.h>
 #include <common/readout/ess/ParserTestData.h>
 #include <common/testutils/TestBase.h>

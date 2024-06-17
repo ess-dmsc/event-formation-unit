@@ -7,6 +7,7 @@ add_subdirectory(kafka)
 add_subdirectory(reduction)
 add_subdirectory(time)
 add_subdirectory(readout)
+add_subdirectory(kafka/serializer)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
@@ -15,6 +16,7 @@ set(efu_common_SRC
   kafka/AR51Serializer.cpp
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
+  kafka/serializer/AbstractSerializer.cpp
   system/Socket.cpp
   Statistics.cpp
   StatPublisher.cpp
@@ -43,14 +45,19 @@ set(efu_common_INC
   kafka/AR51Serializer.h
   kafka/KafkaConfig.h
   kafka/Producer.h
+  kafka/serializer/AbstractSerializer.h
+  kafka/serializer/DA00HistogramSerializer.h
+  kafka/serializer/FlatbufferTypes.h
   memory/Buffer.h
   memory/FixedSizePool.h
   memory/PoolAllocator.h
   memory/RingBuffer.h
+  memory/HashMap2D.h
+  math/BitMath.h
+  math/NumericalMath.h
   utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
-  BitMath.h
   DumpFile.h
   JsonFile.h
   Statistics.h
@@ -73,8 +80,6 @@ add_library(efu_common STATIC
   # Add required object libraries
   $<TARGET_OBJECTS:EssTimingLib>
 )
-
-
 
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_reduction STATIC

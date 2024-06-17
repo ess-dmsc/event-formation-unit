@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,8 @@
 #pragma once
 
 #include <cstdint>
+
+namespace essmath {
 
 class BitMath {
 public:
@@ -31,3 +33,5 @@ public:
     return n;
   }
 };
+
+} // namespace essmath

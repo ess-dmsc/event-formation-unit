@@ -20,6 +20,11 @@ uint64_t ESSReferenceTime::setReference(const ESSTime &refESSTime) {
   return TimeInNS.count();
 }
 
+uint64_t ESSReferenceTime::setReference(const uint64_t &refTime) {
+  TimeInNS = TimeDurationNano(refTime);
+  return TimeInNS.count();
+}
+
 uint64_t ESSReferenceTime::setPrevReference(const ESSTime &refPrevESSTime) {
   PrevTimeInNS = refPrevESSTime.toNS();
   return PrevTimeInNS.count();

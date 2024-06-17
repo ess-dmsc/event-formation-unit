@@ -7,36 +7,23 @@
 ///        processing
 //===----------------------------------------------------------------------===//
 
-#include <common/detector/Detector.h>
-#include <cinttypes>
-#include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/monitor/HistogramSerializer.h>
-#include <common/time/TimeString.h>
-
-#include <memory>
-#include <unistd.h>
-
+#include <common/memory/HashMap2D.h>
 #include <common/RuntimeStat.h>
-#include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
-#include <stdio.h>
-#include <cbm/CbmBase.h>
-#include <cbm/CbmInstrument.h>
+#include <common/kafka/KafkaConfig.h>
+#include <memory>
+#include <modules/cbm/CbmBase.h>
+#include <modules/cbm/CbmInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace cbm {
 
-const char *classname = "CBM detector with ESS readout";
+using namespace fbserializer;
 
 CbmBase::CbmBase(BaseSettings const &settings)
-    : Detector(settings) {
+    : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -50,40 +37,43 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout header stats
-  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
+  Stats.create("essheader.errors.header", Counters.ErrorESSHeaders);
+  Stats.create("essheader.errors.buffer", Counters.ReadoutStats.ErrorBuffer);
+  Stats.create("essheader.errors.cookie", Counters.ReadoutStats.ErrorCookie);
+  Stats.create("essheader.errors.pad", Counters.ReadoutStats.ErrorPad);
+  Stats.create("essheader.errors.size", Counters.ReadoutStats.ErrorSize);
+  Stats.create("essheader.errors.version", Counters.ReadoutStats.ErrorVersion);
+  Stats.create("essheader.errors.output_queue", Counters.ReadoutStats.ErrorOutputQueue);
+  Stats.create("essheader.errors.type", Counters.ReadoutStats.ErrorTypeSubType);
+  Stats.create("essheader.errors.seqno", Counters.ReadoutStats.ErrorSeqNum);
+  Stats.create("essheader.errors.timehigh", Counters.ReadoutStats.ErrorTimeHigh);
+  Stats.create("essheader.errors.timefrac", Counters.ReadoutStats.ErrorTimeFrac);
   Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
   Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
   Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
-  //
-  Stats.create("monitors.count", Counters.MonitorCounts);
-  Stats.create("monitors.reduced", Counters.MonitorIgnored);
-  Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors);
-  Stats.create("readouts.ring_mismatch", Counters.RingCfgErrors);
-  Stats.create("readouts.fen_mismatch", Counters.FENCfgErrors);
-  Stats.create("readouts.channel_errors", Counters.ChannelCfgErrors);
+  Stats.create("parsing.readout_parsed", Counters.CbmStats.Readouts);
 
-  Stats.create("readouts.error_size", Counters.CbmStats.ErrorSize);
-  Stats.create("readouts.error_fiber", Counters.CbmStats.ErrorFiber);
-  Stats.create("readouts.error_fen", Counters.CbmStats.ErrorFEN);
-  Stats.create("readouts.error_type", Counters.CbmStats.ErrorType);
-  Stats.create("readouts.error_adc", Counters.CbmStats.ErrorADC);
-  Stats.create("readouts.error_datalen", Counters.CbmStats.ErrorDataLength);
-  Stats.create("readouts.error_timefrac", Counters.CbmStats.ErrorTimeFrac);
-  Stats.create("readouts.count", Counters.CbmStats.Readouts);
-  Stats.create("readouts.empty", Counters.CbmStats.NoData);
+  // Readout parsing errors - readout dropped
+  Stats.create("parsing.errors.size", Counters.CbmStats.ErrorSize);
+  Stats.create("parsing.errors.fiber", Counters.CbmStats.ErrorFiber);
+  Stats.create("parsing.errors.fen", Counters.CbmStats.ErrorFEN);
+  Stats.create("parsing.errors.type", Counters.CbmStats.ErrorType);
+  Stats.create("parsing.errors.adc", Counters.CbmStats.ErrorADC);
+  Stats.create("parsing.errors.datalen", Counters.CbmStats.ErrorDataLength);
+  Stats.create("parsing.errors.timefrac", Counters.CbmStats.ErrorTimeFrac);
+  Stats.create("parsing.errors.no_data", Counters.CbmStats.NoData);
 
+  // Readout processing stats
+  Stats.create("readouts.processed", Counters.CbmCounts);
+  Stats.create("readouts.type.ttl_proccessed", Counters.TTLReadoutsProcessed);
+  Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
+
+  // Readout processing errors - readout dropped
+  Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
+  Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
+  Stats.create("readouts.errors.type", Counters.TypeNotSupported);
+  Stats.create("readouts.errors.time", Counters.TimeError);
 
   // Time stats
   Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
@@ -97,8 +87,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -141,28 +129,78 @@ void CbmBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                      KafkaCfg.CfgParms);
+
   auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  CbmInstrument cbmInstrument(Counters, EFUSettings);
+  // Process instrument config file
+  XTRACE(INIT, ALW, "Loading configuration file %s",
+         EFUSettings.ConfigFile.c_str());
 
-  for (int i = 0; i < cbmInstrument.Conf.Parms.NumberOfMonitors; ++i) {
-    // Create a serializer for each monitor
+  CbmConfiguration.loadAndApply();
 
-    SerializersPtr.push_back(std::make_unique<EV44Serializer>(
-        KafkaBufferSize, "cbm" + std::to_string(i), Produce));
+  // Create serializers
+  EV44SerializerMapPtr.reset(
+      new HashMap2D<EV44Serializer>(CbmConfiguration.Parms.NumOfFENs));
+  HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer<int32_t>>(
+      CbmConfiguration.Parms.NumOfFENs));
+
+  for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
+    if (Topology->Type == CbmType::TTL) {
+
+      std::unique_ptr<EV44Serializer> SerializerPtr =
+          std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,
+                                           Produce);
+
+      Stats.create("serialize." + Topology->Source + ".produce_called",
+                   SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_reftime",
+                   SerializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_max_events",
+                   SerializerPtr->stats().ProduceTriggeredMaxEvents);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_failed_no_reftime",
+                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
+
+      EV44SerializerMapPtr->add(Topology->FEN, Topology->Channel,
+                                SerializerPtr);
+    } else if (Topology->Type == CbmType::IBM) {
+
+      std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
+          std::make_unique<HistogramSerializer<int32_t>>(
+              Topology->Source, Topology->maxTofBin, Topology->BinCount,
+              "serializer", "A", "ns", Produce);
+
+      Stats.create("serialize." + Topology->Source + ".produce_called",
+                   SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source + "tof_over_max_drop",
+                   SerializerPtr->stats().DataOverPeriodDropped);
+      Stats.create("serialize." + Topology->Source + "tof_over_max_last_bin",
+                   SerializerPtr->stats().DataOverPeriodLastBin);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_reftime",
+                   SerializerPtr->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_failed_no_reftime",
+                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
+
+      HistogramSerializerMapPtr->add(Topology->FEN, Topology->Channel,
+                                     SerializerPtr);
+    }
   }
 
-  for (auto &serializerPtr : SerializersPtr) {
-    cbmInstrument.SerializersPtr.push_back(serializerPtr.get());
-  }
+  // Create instrument
+  CbmInstrument cbmInstrument(Counters, CbmConfiguration, *EV44SerializerMapPtr,
+                              *HistogramSerializerMapPtr);
 
   unsigned int DataIndex;
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  RuntimeStat RtStat(
-      {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -176,9 +214,9 @@ void CbmBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = cbmInstrument.ESSReadoutParser.validate(
+      auto Res = cbmInstrument.ESSHeaderParser.validate(
           DataPtr, DataLen, cbmInstrument.Conf.Parms.TypeSubType);
-      Counters.ReadoutStats = cbmInstrument.ESSReadoutParser.Stats;
+      Counters.ReadoutStats = cbmInstrument.ESSHeaderParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
         XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
@@ -195,9 +233,10 @@ void CbmBase::processing_thread() {
       }
 
       // We have good header information, now parse readout data
-      cbmInstrument.CbmParser.parse(cbmInstrument.ESSReadoutParser.Packet);
-      Counters.CbmStats = cbmInstrument.CbmParser.Stats;
-      Counters.TimeStats = cbmInstrument.ESSReadoutParser.Packet.Time.Stats;
+      cbmInstrument.CbmReadoutParser.parse(
+          cbmInstrument.ESSHeaderParser.Packet);
+      Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
+      Counters.TimeStats = cbmInstrument.ESSHeaderParser.Packet.Time.Stats;
 
       cbmInstrument.processMonitorReadouts();
 
@@ -210,16 +249,20 @@ void CbmBase::processing_thread() {
 
     // Not only flush serializer data but also update runtime stats
     if (ProduceTimer.timeout()) {
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.MonitorCounts, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.CbmCounts,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
-      for (auto &serializer : SerializersPtr) {
+      for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        Counters.ProduceCauseTimeout++;
-
-        Counters.ProduceCausePulseChange = serializer->ProduceCausePulseChange;
-        Counters.ProduceCauseMaxEventsReached = serializer->ProduceCauseMaxEventsReached;
+        serializerMap->produce();
       }
+
+      for (auto &serializerMap : HistogramSerializerMapPtr->toValuesList()) {
+        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
+        serializerMap->produce();
+      }
+      Counters.ProduceCauseTimeout++;
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
   }
