@@ -16,7 +16,7 @@
 
 // clang-format off
 
-std::vector<uint8_t> TestPacket {
+std::vector<uint8_t> BadTestPacket {
               0x00, 0x00, // pad, v0
   0x45, 0x53, 0x53, 0x44, // 'E', 'S', 'S', type 0x44
   0x46, 0x00, 0x0B, 0x00, // len(0x005e), OQ11, TSrc0
@@ -107,7 +107,7 @@ TEST_F(NMXBaseTest, Constructor) {
 TEST_F(NMXBaseTest, DataReceive) {
   Nmx::NmxBase Readout(Settings);
 
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO(Readout, BadTestPacket);
 
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 2); // # readouts in TestPacket
   EXPECT_EQ(Readout.Counters.VMMStats.DataReadouts, 2);
@@ -120,8 +120,8 @@ TEST_F(NMXBaseTest, DataReceive) {
 TEST_F(NMXBaseTest, DataReceiveBadHeader) {
   Nmx::NmxBase Readout(Settings);
 
-  TestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, TestPacket);
+  BadTestPacket[0] = 0xff; // pad should be 0
+  writePacketToRxFIFO(Readout, BadTestPacket);
 
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0); // no readouts: bad header

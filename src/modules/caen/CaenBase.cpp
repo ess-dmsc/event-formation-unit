@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2019-2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,13 +6,14 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include <caen/CaenBase.h>
-#include <caen/CaenInstrument.h>
 #include <cinttypes>
 #include <common/RuntimeStat.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/time/TimeString.h>
+#include <common/time/Timer.h>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
 #include <unistd.h>
 #include <common/time/CheckTimer.h>
 
@@ -93,8 +94,6 @@ CaenBase::CaenBase(BaseSettings const &settings,
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -164,7 +163,6 @@ void CaenBase::processingThread() {
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       Counters.KafkaStats.produce_bytes_ok});
-
   // Create the periodic timer for producing messages, in case of low event rate
   // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ); // x86 specific
   CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);

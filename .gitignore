@@ -14,7 +14,7 @@ a.out
 *Test$
 
 #directories
-build*/
+build/*
 cmake-build-*/
 doxygen/
 # MacOs folder metadata

@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <common/BitMath.h>
+#include <common/math/BitMath.h>
 #include <common/debug/Assert.h>
 #include <common/debug/Expect.h>
 #include <common/debug/Trace.h>
@@ -42,7 +42,7 @@ template <size_t SlotBytes_, size_t NumSlots_,
           bool Validate_ = true, bool UseAsserts_ = true>
 struct FixedSizePoolParams {
   enum : size_t {
-    SlotBytes = BitMath::NextPowerOfTwo(std::max(SlotBytes_, SlotAlignment_)),
+    SlotBytes = essmath::BitMath::NextPowerOfTwo(std::max(SlotBytes_, SlotAlignment_)),
     NumSlots = NumSlots_,
     SlotAlignment = SlotAlignment_,
     StartAlignment = std::max(SlotAlignment_, StartAlignment_),

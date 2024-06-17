@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -53,8 +53,6 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-  int64_t ProduceCausePulseChange;
-  int64_t ProduceCauseMaxEventsReached;
 
   int64_t TxRawReadoutPackets;
   

@@ -59,7 +59,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
-std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
+std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
 
 ///
 std::vector<uint8_t> TestPacket2{
@@ -126,7 +126,7 @@ std::vector<uint8_t> TestPacket2{
 TEST_F(CaenBaseTest, DataReceiveLoki) {
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
-  writePacketToRxFIFO(Readout, TestPacket);
+  writePacketToRxFIFO(Readout, BadTestPacket);
 
   EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorSize, 1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);

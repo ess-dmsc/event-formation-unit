@@ -70,8 +70,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -121,6 +119,10 @@ void Timepix3Base::processingThread() {
   };
 
   EV44Serializer Serializer(KafkaBufferSize, "timepix3", Produce);
+
+  Stats.create("produce.cause.pulse_change", Serializer.stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached", Serializer.stats().ProduceTriggeredMaxEvents);
+
   Timepix3Instrument Timepix3(Counters, timepix3Configuration, Serializer);
 
   unsigned int DataIndex;
@@ -159,9 +161,6 @@ void Timepix3Base::processingThread() {
                                        Counters.KafkaStats.produce_bytes_ok});
       Serializer.produce();
       Counters.ProduceCauseTimeout++;
-      Counters.ProduceCausePulseChange = Serializer.ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached =
-          Serializer.ProduceCauseMaxEventsReached;
       Counters.KafkaStats = EventProducer.stats;
     }
   }

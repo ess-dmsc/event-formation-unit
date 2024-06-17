@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,22 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/time/Timer.h>
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
-#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
-#include <common/time/TimeString.h>
-#include <common/time/Timer.h>
 #include <nmx/NMXBase.h>
 #include <nmx/NMXInstrument.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <cinttypes>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -112,8 +102,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-  Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
-  Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -179,6 +167,10 @@ void NmxBase::processing_thread() {
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
+
+  Stats.create("produce.cause.pulse_change", Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached", Serializer->stats().ProduceTriggeredMaxEvents);
+
   MonitorSerializer = new AR51Serializer("nmx", ProduceMonitor);
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
@@ -253,9 +245,6 @@ void NmxBase::processing_thread() {
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-
-      Counters.ProduceCausePulseChange = Serializer->ProduceCausePulseChange;
-      Counters.ProduceCauseMaxEventsReached = Serializer->ProduceCauseMaxEventsReached;
       Counters.KafkaStats = eventprod.stats;
     }
   }

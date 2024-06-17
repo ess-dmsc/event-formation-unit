@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -39,9 +39,7 @@ struct Counters {
   int64_t GeometryErrors;
 
   // Identification of the cause of produce calls
-  int64_t ProduceCauseTimeout;
-  int64_t ProduceCausePulseChange;
-  int64_t ProduceCauseMaxEventsReached;
+  int64_t ProduceCauseTimeout{0};
 
   int64_t TxRawReadoutPackets;
 

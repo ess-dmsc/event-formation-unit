@@ -1,7 +1,10 @@
-// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
 
 #include <common/memory/FixedSizePool.h>
 #include <common/testutils/TestBase.h>
+#include <common/math/BitMath.h>
+
+using namespace essmath;
 
 class FixedSizePoolTest : public TestBase {
 public:

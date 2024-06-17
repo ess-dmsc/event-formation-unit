@@ -3,18 +3,30 @@
 ///
 /// \file
 ///
-/// \brief flatbuffer serialization into ev44 schema
+/// \brief Implementation of ev44 flatbuffer schema serialiser. This serializer
+/// is optimized around reduced memory allocation by rewriting the flatbuffer
+/// builder's buffers in place. This should increase the performance and mem
+/// copy.
 ///
 /// See https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
-#include "Producer.h"
-#include "flatbuffers/flatbuffers.h"
+#include <common/kafka/serializer/AbstractSerializer.h>
+#include <common/kafka/Producer.h>
 #include <common/time/TSCTimer.h>
+#include <flatbuffers/flatbuffers.h>
 
 struct Event44Message;
+
+/// \brief Statistics for EV44Serializer
+struct EV44SerializerStats : public fbserializer::SerializerStats {
+  int64_t ProduceTriggeredMaxEvents{0}; ///< Number of times the produce()
+                                           ///< function has been called due to
+                                           ///< the maximum number of events
+                                           ///< being reached.
+};
 
 class EV44Serializer {
 public:
@@ -66,11 +78,11 @@ public:
   /// \returns reference to internally stored buffer
   nonstd::span<const uint8_t> serialize();
 
-  TSCTimer ProduceTimer, DebugTimer;
+  /// \brief returns statistics
+  /// \returns reference to statistics object
+  EV44SerializerStats &stats() { return Stats; }
 
-  // Counters for causes of calls to produce()
-  int64_t ProduceCausePulseChange;
-  int64_t ProduceCauseMaxEventsReached;
+  TSCTimer ProduceTimer, DebugTimer;
 
 private:
   /// \todo should this not be predefined in terms of jumbo frame?
@@ -83,6 +95,8 @@ private:
   flatbuffers::FlatBufferBuilder Builder_;
 
   ProducerCallback ProduceFunctor;
+
+  EV44SerializerStats Stats;
 
   uint8_t *ReferenceTimePtr{nullptr};
   uint8_t *OffsetTimePtr{nullptr};

@@ -10,7 +10,14 @@
 
   "MonitorRing" : 11,
 
-  "MonitorFEN" : 0,
+  "MaxFENId" : 2,
 
-  "NumberOfMonitors" : 1
+  "Topology" : [
+    { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
+    { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 1, "PixelRange": 2},
+    { "FEN":  1, "Channel": 0, "Type": "TTL", "Source" : "cbm3", "PixelOffset": 3, "PixelRange": 1},
+    { "FEN":  1, "Channel": 1, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
+    { "FEN":  1, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
+    { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100}
+  ]
 }

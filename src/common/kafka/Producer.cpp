@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -61,7 +61,6 @@ void Producer::event_cb(RdKafka::Event &event) {
   }
 }
 
-
 ///
 Producer::Producer(std::string Broker, std::string Topic,
                    std::vector<std::pair<std::string, std::string>> &Configs)
@@ -108,13 +107,13 @@ Producer::Producer(std::string Broker, std::string Topic,
   }
 }
 
-// called to actually send data to Kafka cluster
 int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) {
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }
 
+  // non-blocking, copies the buffer to kafka thread for transfer
   RdKafka::ErrorCode resp = KafkaProducer->produce(
       TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
       const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
@@ -122,6 +121,7 @@ int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
 
   stats.produce_calls++;
 
+  // poll for events in the event queue and triggers callbacks on them
   KafkaProducer->poll(0);
 
   if (resp != RdKafka::ERR_NO_ERROR) {
