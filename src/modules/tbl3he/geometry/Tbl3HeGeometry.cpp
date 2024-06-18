@@ -17,7 +17,7 @@
 namespace Caen {
 
 Tbl3HeGeometry::Tbl3HeGeometry(Config &CaenConfiguration) {
-  ESSGeom = new ESSGeometry(900, 15, 1, 1);
+  ESSGeom = new ESSGeometry(100, 8, 1, 1);
   setResolution(CaenConfiguration.Resolution);
   MaxRing = CaenConfiguration.MaxRing;
   MaxFEN = CaenConfiguration.MaxFEN;
