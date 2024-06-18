@@ -68,14 +68,12 @@ endfunction(create_executable)
 # Install a Python file structure under runtime output directory
 #=============================================================================
 function(install_python_executable python_exec_name)
-  # Create an interface target for the Python executable
-  add_library(${python_exec_name} INTERFACE)
 
   # Retrieve the list of Python files
   set(python_files ${${python_exec_name}_PY})
 
   # Create a custom target for installing all Python scripts
-  add_custom_target(install_${python_exec_name} ALL)
+  add_custom_target(${python_exec_name} ALL)
 
   # Iterate over each Python file
   foreach(python_file IN LISTS python_files)
@@ -85,7 +83,7 @@ function(install_python_executable python_exec_name)
     set(output_dir "$<TARGET_PROPERTY:${python_exec_name},RUNTIME_OUTPUT_DIRECTORY>/${file_dir}")
 
     # Add custom command for copying and setting permissions for each file
-    add_custom_command(TARGET install_${python_exec_name} PRE_BUILD
+    add_custom_command(TARGET ${python_exec_name} PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory ${output_dir}
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${CMAKE_CURRENT_SOURCE_DIR}/${python_file} 
@@ -96,9 +94,6 @@ function(install_python_executable python_exec_name)
       COMMENT "Installing Python executable: ${python_file}"
     )
   endforeach()
-
-  # Ensure the custom target has a dependency on the interface library to ensure proper order
-  add_dependencies(install_${python_exec_name} ${python_exec_name})
 endfunction(install_python_executable)
 
 #=============================================================================
