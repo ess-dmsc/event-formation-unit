@@ -230,7 +230,6 @@ void CaenBase::processingThread() {
       for (auto &Serializer: Serializers) {
         Serializer->produce();
       }
-      MonitorSerializer->produce();
 
       // update counter statistics
       Counters.ProduceCauseTimeout++;
