@@ -73,7 +73,11 @@ function(install_python_executable python_exec_name)
 
   # Retrieve the list of Python files
   set(python_files ${${python_exec_name}_PY})
-  file
+
+  # Create a custom target for installing all Python scripts
+  add_custom_target(install_${python_exec_name} ALL)
+
+  # Iterate over each Python file
   foreach(python_file IN LISTS python_files)
     # Calculate the relative directory path for the file
     get_filename_component(file_dir ${python_file} DIRECTORY)
@@ -87,7 +91,7 @@ function(install_python_executable python_exec_name)
         ${CMAKE_CURRENT_SOURCE_DIR}/${python_file} 
         ${output_dir}
       # Use execute_process to call chmod directly
-      COMMAND ${CMAKE_COMMAND} -E env chmod 750 ${output_dir}/${python_file}
+      COMMAND ${CMAKE_COMMAND} -E env chmod 755 ${output_dir}/${python_file}
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${python_file}
       COMMENT "Installing Python executable: ${python_file}"
     )
