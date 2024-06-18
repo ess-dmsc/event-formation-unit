@@ -50,6 +50,7 @@ public:
     Reserved = 0x00,
     CBM = 0x10,
     LOKI = 0x30,
+    TBL3HE = 0x32,
     BIFROST = 0x34,
     MIRACLES = 0x38,
     CSPEC = 0x40,

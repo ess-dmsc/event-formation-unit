@@ -42,7 +42,7 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
   } else if (settings.DetectorName == "cspec") {
     Geom = new CspecGeometry(CaenConfiguration);
   } else if (settings.DetectorName == "tbl3he") {
-    Geom = new BifrostGeometry(CaenConfiguration);
+    Geom = new Tbl3HeGeometry(CaenConfiguration);
   } else {
     XTRACE(INIT, ERR, "Invalid Detector Name %s",
            settings.DetectorName.c_str());

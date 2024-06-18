@@ -21,6 +21,7 @@
 #include <loki/geometry/LokiGeometry.h>
 #include <miracles/geometry/MiraclesGeometry.h>
 #include <readout/DataParser.h>
+#include <tbl3he/geometry/Tbl3HeGeometry.h>
 
 namespace Caen {
 

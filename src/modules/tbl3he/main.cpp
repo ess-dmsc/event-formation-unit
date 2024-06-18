@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("tbl3he", argc, argv);
 
   auto Detector =
-      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::BIFROST);
+      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::TBL3HE);
 
   return Main.run(Detector);
 }
