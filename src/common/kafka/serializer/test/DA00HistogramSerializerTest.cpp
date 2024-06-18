@@ -13,6 +13,7 @@
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
 #include <common/time/ESSTime.h>
+#include <unistd.h>
 
 using namespace std::chrono;
 using namespace esstime;
@@ -394,6 +395,23 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
 
   EXPECT_EQ(serializer.stats().DataOverPeriodDropped, 0);
   EXPECT_EQ(serializer.stats().DataOverPeriodLastBin, 0);
+}
+
+TEST_F(HistogramSerializerTest, TestEmtpyCalls) {
+  
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }};
+  auto serializer = Validator.createHistogramSerializer(
+      fbserializer::BinningStrategy::LastBin);
+
+  // Perform test
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
+
+  EXPECT_NO_THROW(serializer.produce());
+
+  EXPECT_NO_THROW(serializer.produce());
+
+  EXPECT_NO_THROW(serializer.produce());
 }
 
 TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {

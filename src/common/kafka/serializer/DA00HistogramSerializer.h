@@ -9,6 +9,9 @@
 /// See \link https://github.com/ess-dmsc/streaming-data-types
 //===----------------------------------------------------------------------===//
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 #pragma once
 
 #include <common/kafka/serializer/AbstractSerializer.h>
@@ -127,6 +130,7 @@ public:
 
     initAxis();
     DataBins = data_t(XAxisValues.size());
+    XTRACE(INIT, DEB, "Data Bins vector initialized to %zu", DataBins.size());
     BinSizes = std::vector<size_t>(DataBins.size(), InitialBinSize);
   }
 
@@ -164,29 +168,45 @@ public:
     R Step = (MaxValue - MinValue) / (XAxisValues.size() - 1); // step size
 
     size_t BinIndex = static_cast<size_t>((Time - MinValue) / Step);
+    XTRACE(DATA, DEB, "BinIndex %zu calculated from time: %zi.", BinIndex, Time);
 
     // Check if the binIndex is out of bounds and put edge values in the last
     // bin
     if (BinIndex >= DataBins.size()) {
       if (BinningStrategy == BinningStrategy::Drop) {
+        XTRACE(INIT, DEB,
+               "The data index %zu higher then binsize data dropped.",
+               BinIndex);
         Stats.DataOverPeriodDropped++;
         return;
       }
       BinIndex = DataBins.size() - 1;
+      XTRACE(DATA, DEB,
+             "The data index %zu higher then binsize data added to last bin.",
+             BinIndex);
       Stats.DataOverPeriodLastBin++;
     }
 
-    if (DataBins[BinIndex].empty())
+    if (DataBins[BinIndex].empty()) {
       DataBins[BinIndex].reserve(InitialBinSize);
+      XTRACE(INIT, DEB, "Bin %zu not initialized, Initialize with %zu size",
+             BinIndex, InitialBinSize);
+    }
 
     /// Check if the bin is full and resize it with the double of the initial
     /// size, to avoid multiple reallocations
     if (DataBins[BinIndex].size() >= BinSizes[BinIndex]) {
       BinSizes[BinIndex] += InitialBinSize * 2;
       DataBins[BinIndex].reserve(BinSizes[BinIndex]);
+      XTRACE(DATA, DEB,
+             "Data Bin %zu is Full! Reserve new size, new DataBin[%zu] size "
+             "%zu, new BinSizes[%zu] is %zu.",
+             BinIndex, BinIndex, DataBins[BinIndex].size(), BinIndex,
+             BinSizes[BinIndex]);
     }
 
     DataBins[BinIndex].push_back(Value);
+    XTRACE(DATA, DEB, "Value %zu added to DataBin[%zu].", Value, BinIndex);
   }
   // Getter function for the Stats member
   HistrogramSerializerStats &stats() { return Stats; }
@@ -229,7 +249,7 @@ private:
     Buffer = Builder.Release();
 
     DataBins.clear();
-    DataBins.reserve(XAxisValues.size());
+    DataBins.resize(XAxisValues.size());
   }
 
   /// \brief Initialize the X-axis values.
@@ -261,8 +281,14 @@ private:
     }
 
     XAxisValues.push_back(0);
-    for (auto i = 1; i < BinCount; ++i)
+
+    for (auto i = 1; i < BinCount; ++i) {
       XAxisValues.push_back(XAxisValues.back() + BinWidth);
+      XTRACE(INIT, DEB, "X Axis unit added, index: %zu, value: %zu", i,
+             XAxisValues[i]);
+    }
+
+    XTRACE(INIT, DEB, "XAxis initialized with size %zu", XAxisValues.size());
   }
 };
 
