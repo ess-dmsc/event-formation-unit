@@ -1,3 +1,0 @@
-scapy
-numpy
-pandas
