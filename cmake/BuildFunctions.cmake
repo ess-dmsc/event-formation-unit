@@ -62,6 +62,37 @@ function(create_executable exec_name)
   enable_coverage(${exec_name})
 endfunction(create_executable)
 
+#=============================================================================
+# Install a Python file structure under runtime output directory
+#=============================================================================
+function(install_python_executable python_exec_name)
+
+  # Retrieve the list of Python files
+  set(python_files ${${python_exec_name}_PY})
+
+  # Create a custom target for installing all Python scripts
+  add_custom_target(${python_exec_name} ALL)
+
+  # Iterate over each Python file
+  foreach(python_file IN LISTS python_files)
+    # Calculate the relative directory path for the file
+    get_filename_component(file_dir ${python_file} DIRECTORY)
+    # Calculate the output directory path
+    set(output_dir "$<TARGET_PROPERTY:${python_exec_name},RUNTIME_OUTPUT_DIRECTORY>/${file_dir}")
+
+    # Add custom command for copying and setting permissions for each file
+    add_custom_command(TARGET ${python_exec_name} PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${output_dir}
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${CMAKE_CURRENT_SOURCE_DIR}/${python_file} 
+        ${output_dir}
+      # Use execute_process to call chmod directly
+      COMMAND ${CMAKE_COMMAND} -E env chmod 755 ${output_dir}/${python_file}
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${python_file}
+      COMMENT "Installing Python executable: ${python_file}"
+    )
+  endforeach()
+endfunction(install_python_executable)
 
 #=============================================================================
 # Generate unit test targets
