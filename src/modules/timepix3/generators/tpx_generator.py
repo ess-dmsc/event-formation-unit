@@ -8,7 +8,7 @@
 import argparse
 import multiprocessing
 import numpy as np
-from scapy.all import Ether, IP, UDP, sendp
+from scapy.all import Ether, IP, UDP, send
 import time
 import logging
 import os
@@ -177,7 +177,7 @@ class TPXConverter:
                 f"Sending {len(self.packet_buffer)} packets for {filename} file"
             )
             self.send_process = multiprocessing.Process(
-                target=sendp,
+                target=send,
                 args=(self.packet_buffer,),
                 kwargs={"iface": self.interface, "realtime": True, "verbose": False},
             )
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true", help="Turn on debug mode")
     parser.add_argument(
         "--iface",
-        type=int,
+        type=str,
         help="Interface to send the UDP packages",
         default="eth2",
     )
