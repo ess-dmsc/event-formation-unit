@@ -28,6 +28,9 @@ TEST_F(Tbl3HeGeometryTest, Constructor) {
   ASSERT_EQ(geom->MaxFEN, 0);
   ASSERT_EQ(geom->MaxGroup, 7);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
 }
 
 
@@ -38,7 +41,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFiberId) {
   // Check valid FiberIds
   int MaxFiberId = (geom->MaxRing + 1)*2;
   ASSERT_EQ(MaxFiberId, 4);
-  for (int i = 0; i < 23; i++) {
+  for (int i = 0; i <= 23; i++) {
     readout.FiberId = i;
     if (i < MaxFiberId) {
       ASSERT_EQ(geom->validateData(readout), true);
@@ -46,6 +49,9 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFiberId) {
       ASSERT_EQ(geom->validateData(readout), false);
     }
   }
+  ASSERT_EQ(geom->Stats.RingErrors, 20);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
 }
 
 
@@ -54,7 +60,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFENId) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid FENIds
-  for (int i = 0; i < 23; i++) {
+  for (int i = 0; i <= 23; i++) {
     readout.FENId = i;
     if (i <= geom->MaxFEN) {
       ASSERT_EQ(geom->validateData(readout), true);
@@ -62,6 +68,9 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFENId) {
       ASSERT_EQ(geom->validateData(readout), false);
     }
   }
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 23);
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
 }
 
 
@@ -70,7 +79,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid Groups
-  for (int i = 0; i < 23; i++) {
+  for (int i = 0; i <= 23; i++) {
     readout.Group = i;
     if (i <= geom->MaxGroup) {
       ASSERT_EQ(geom->validateData(readout), true);
@@ -78,6 +87,9 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
       ASSERT_EQ(geom->validateData(readout), false);
     }
   }
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.GroupErrors, 16);
 }
 
 
@@ -86,6 +98,13 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
+}
+
+TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
+  geom = new Tbl3HeGeometry(CaenConfiguration);
+  //                              R  F               G     A    B
+  DataParser::CaenReadout readout{3, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout), 0);
 }
 
 
