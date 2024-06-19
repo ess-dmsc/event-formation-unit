@@ -15,6 +15,7 @@ import os
 import struct
 
 # Constants based on the C++ code's definitions
+# fmt: off
 TYPE_MASK         = 0xF000000000000000
 TYPE_OFFSET       = 60
 
@@ -42,8 +43,16 @@ TDC_TYPE_OFFSET         = 56
 TDC_TRIGGERCOUNTER_OFFSET = 44
 TDC_TIMESTAMP_OFFSET    = 9
 TDC_STAMP_OFFSET        = 5
+# fmt: on
 
-def build_evr(counter, pulseTimeSeconds, pulseTimeNanoSeconds, prevPulseTimeSeconds, prevPulseTimeNanoSeconds):
+
+def build_evr(
+    counter,
+    pulseTimeSeconds,
+    pulseTimeNanoSeconds,
+    prevPulseTimeSeconds,
+    prevPulseTimeNanoSeconds,
+):
     """
     Builds an EVR payload using the given parameters.
 
@@ -57,13 +66,24 @@ def build_evr(counter, pulseTimeSeconds, pulseTimeNanoSeconds, prevPulseTimeSeco
     Returns:
         bytes: The EVR payload as a byte string.
     """
-    payload = struct.pack('<BBHIIIII', 0x1, 0, 0, counter, pulseTimeSeconds, pulseTimeNanoSeconds, prevPulseTimeSeconds, prevPulseTimeNanoSeconds)
-    
+    payload = struct.pack(
+        "<BBHIIIII",
+        0x1,
+        0,
+        0,
+        counter,
+        pulseTimeSeconds,
+        pulseTimeNanoSeconds,
+        prevPulseTimeSeconds,
+        prevPulseTimeNanoSeconds,
+    )
+
     return payload
 
-class TPXConverter():
+
+class TPXConverter:
     """
-    Converts a file to TPX format and start a thread to send out sends the 
+    Converts a file to TPX format and start a thread to send out sends the
     packets over UDP.
 
     Args:
@@ -106,7 +126,9 @@ class TPXConverter():
         with open(filename, "rb") as f:
             logger.debug(f"Processing {filename} file")
             while True:
-                chunk = np.frombuffer(f.read(self.chunk_size * self.dtype.itemsize), dtype=self.dtype)
+                chunk = np.frombuffer(
+                    f.read(self.chunk_size * self.dtype.itemsize), dtype=self.dtype
+                )
                 if chunk.size == 0:
                     break  # End of file
 
@@ -114,15 +136,15 @@ class TPXConverter():
                 tdc_mask = types == 0x6
                 tdc_data = chunk[tdc_mask]
 
-                tpx_mask = (types == 0x6) | (types == 0xb)
+                tpx_mask = (types == 0x6) | (types == 0xB)
 
                 data = chunk[tpx_mask]
 
-                packet = Ether()/self.IP_HEADER/self.UDP_HEADER / data.tobytes()
+                packet = Ether() / self.IP_HEADER / self.UDP_HEADER / data.tobytes()
                 self.packet_time += 0.0005
                 packet.time = self.packet_time
                 self.packet_buffer.append(packet)
-                
+
                 if tdc_data.size > 0:
                     self.previous_time_ns = self.current_time_ns
                     self.current_time_ns += self.period_ns
@@ -132,9 +154,15 @@ class TPXConverter():
                     previousPulseTimeSeconds = int(self.previous_time_ns // 10**9)
                     previousPulseTimeNanoSeconds = int(self.previous_time_ns % 10**9)
 
-                    evr_data = build_evr(self.evr_counter, pulseTimeSeconds, pulseTimeNanoSeconds, previousPulseTimeSeconds, previousPulseTimeNanoSeconds)
-                    extra_packet = Ether()/self.IP_HEADER/self.UDP_HEADER / evr_data
-                    self.packet_time += 0.0002 # 200 us
+                    evr_data = build_evr(
+                        self.evr_counter,
+                        pulseTimeSeconds,
+                        pulseTimeNanoSeconds,
+                        previousPulseTimeSeconds,
+                        previousPulseTimeNanoSeconds,
+                    )
+                    extra_packet = Ether() / self.IP_HEADER / self.UDP_HEADER / evr_data
+                    self.packet_time += 0.0002  # 200 us
                     extra_packet.time = self.packet_time
                     self.packet_buffer.append(extra_packet)
 
@@ -145,11 +173,18 @@ class TPXConverter():
                 self.send_process.join()
                 logging.debug(f"Sending finished for {filename} file")
 
-            logger.debug(f"Sending {len(self.packet_buffer)} packets for {filename} file")
-            self.send_process = multiprocessing.Process(target=sendp, args=(self.packet_buffer, ), kwargs={'iface': self.interface, 'realtime': True, 'verbose': False})
+            logger.debug(
+                f"Sending {len(self.packet_buffer)} packets for {filename} file"
+            )
+            self.send_process = multiprocessing.Process(
+                target=sendp,
+                args=(self.packet_buffer,),
+                kwargs={"iface": self.interface, "realtime": True, "verbose": False},
+            )
             self.send_process.start()
             # Clear the packet buffer
             self.packet_buffer = []
+
 
 def main(folder, ip, port, iface, debug=False):
     """
@@ -162,13 +197,15 @@ def main(folder, ip, port, iface, debug=False):
         iface (str): The interface to be used for the conversion.
         debug (bool, optional): Whether to enable debug logging. Defaults to False.
     """
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
     else:
         logging.getLogger().setLevel(logging.INFO)
-    
+
     # Set logging to write to stdout
     # Open the folder
     files = os.listdir(folder)
@@ -184,6 +221,7 @@ def main(folder, ip, port, iface, debug=False):
         print(f"Converting {file}")
         converter.convert_file(file)
 
+
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="TPX Converter")
@@ -192,9 +230,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-f", "--folder", type=str, help="Path to the folder containing TPX files"
     )
-    parser.add_argument(
-        "-d", "--debug", action="store_true", help="Turn on debug mode"
-    )
+    parser.add_argument("-d", "--debug", action="store_true", help="Turn on debug mode")
     parser.add_argument(
         "--iface",
         type=int,
