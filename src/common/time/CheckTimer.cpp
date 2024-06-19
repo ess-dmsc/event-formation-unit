@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief Implementation of the check timer class which uses the standard chrono library to provide a high resolution timer.
+/// \brief Implementation of the check timer class which uses the standard chrono
+/// library to provide a high resolution timer.
 //===----------------------------------------------------------------------===//
 
 #include <common/time/CheckTimer.h>
