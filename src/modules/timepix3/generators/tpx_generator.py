@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
 # ===----------------------------------------------------------------------===#
 #
 # Brief: This script reads TPX files format and adds EVR timestamps next the the
@@ -8,7 +8,6 @@
 import argparse
 import multiprocessing
 import numpy as np
-from scapy.all import IP, UDP
 import socket
 import time
 import logging
@@ -81,7 +80,7 @@ def build_evr(
 
     return payload
 
-def send_packets(packets):
+def send_packets(packet_data_buffer, ip, port):
         """
         Sends a list of packets over UDP using standard Python sockets.
 
@@ -91,17 +90,13 @@ def send_packets(packets):
         # Create a standard UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
-        for packet in packets:
-            # Extract payload to send. Here, we convert the entire Scapy packet to bytes.
-            # If you only need the payload of a specific layer, adjust accordingly.
-            payload = bytes(packet)
-            
-            # Extract destination IP and port from the Scapy packet
-            dest_ip = packet[IP].dst
-            dest_port = packet[UDP].dport
-            
+        for payload in packet_data_buffer:
+ 
             # Send the payload
-            sock.sendto(payload, (dest_ip, dest_port))
+            sock.sendto(payload, (ip, port))
+
+            # Sleep for some us to give some breath to the EFU
+            time.sleep(0.00005) # 50 us
 
         # Close the socket
         sock.close()
@@ -127,11 +122,11 @@ class TPXConverter:
         self.previous_time_ns = self.current_time_ns = time.time_ns()
         self.frequency_hz = 10
         self.period_ns = int(1 / self.frequency_hz * 1e9)
-        self.packet_buffer = []
+        self.packet_data_buffer = []
         self.send_process = None
         self.packet_time = time.time()
-        self.UDP_HEADER = UDP(sport=4096, dport=port)
-        self.IP_HEADER = IP(dst=ip_address)
+        self.ip_address = ip_address
+        self.port = port
 
     def convert_file(self, filename):
         """
@@ -162,11 +157,8 @@ class TPXConverter:
                 tpx_mask = (types == 0x6) | (types == 0xB)
 
                 data = chunk[tpx_mask]
-
-                packet = self.IP_HEADER / self.UDP_HEADER / data.tobytes()
-                self.packet_time += 0.0005
-                packet.time = self.packet_time
-                self.packet_buffer.append(packet)
+                
+                self.packet_data_buffer.append(data.tobytes())
 
                 if tdc_data.size > 0:
                     self.previous_time_ns = self.current_time_ns
@@ -184,10 +176,8 @@ class TPXConverter:
                         previousPulseTimeSeconds,
                         previousPulseTimeNanoSeconds,
                     )
-                    extra_packet = self.IP_HEADER / self.UDP_HEADER / evr_data
-                    self.packet_time += 0.0002  # 200 us
-                    extra_packet.time = self.packet_time
-                    self.packet_buffer.append(extra_packet)
+   
+                    self.packet_data_buffer.append(evr_data)
 
                     self.evr_counter += 1
 
@@ -197,15 +187,15 @@ class TPXConverter:
                 logging.debug(f"Sending finished for {filename} file")
 
             logger.debug(
-                f"Sending {len(self.packet_buffer)} packets for {filename} file"
+                f"Sending {len(self.packet_data_buffer)} packets for {filename} file"
             )
             self.send_process = multiprocessing.Process(
                 target=send_packets,
-                args=(self.packet_buffer,),
+                args=(self.packet_data_buffer, self.ip_address, self.port),
             )
             self.send_process.start()
             # Clear the packet buffer
-            self.packet_buffer = []
+            self.packet_data_buffer = []
 
 
 def main(folder, ip, port, debug=False):
