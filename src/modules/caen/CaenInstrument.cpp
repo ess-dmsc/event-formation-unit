@@ -118,10 +118,8 @@ void CaenInstrument::processReadouts() {
   XTRACE(DATA, DEB, "Reference time is %" PRIi64,
          ESSReadoutParser.Packet.Time.getRefTimeUInt64());
   /// \todo sometimes PrevPulseTime maybe?
-  Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
-  SerializerII->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+  auto packet_ref_time = static_cast<int64_t>(ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+  for (auto & Serializer: Serializers) Serializer->checkAndSetReferenceTime(packet_ref_time);
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
@@ -157,17 +155,22 @@ void CaenInstrument::processReadouts() {
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
            Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
-    // Calculate pixelid and apply calibration
+    // Calculate pixel and apply calibration
     uint32_t PixelId = calcPixel(Data);
+
+    // Determine the correct serializer for this pixel
+    auto SerializerId = Geom->calcSerializer(Data);
 
     if (PixelId == 0) {
       XTRACE(EVENT, WAR, "Pixel error");
       counters.PixelErrors++;
+    } else if (SerializerId >= Serializers.size()) {
+      XTRACE(EVENT, WAR, "Serializer identification error");
+      counters.SerializerErrors++;
     } else {
       XTRACE(EVENT, DEB, "Pixel %u, TOF %u", PixelId, TimeOfFlight);
-      Serializer->addEvent(TimeOfFlight, PixelId);
+      Serializers[SerializerId]->addEvent(static_cast<int32_t>(TimeOfFlight), static_cast<int32_t>(PixelId));
       counters.Events++;
-      SerializerII->addEvent(Data.AmpA + Data.AmpB + Data.AmpC + Data.AmpD, 0);
     }
 
   } // for()

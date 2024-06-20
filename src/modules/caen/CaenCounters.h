@@ -11,6 +11,7 @@
 
 #include <cinttypes>
 #include <common/kafka/Producer.h>
+#include <cstdint>
 #include <modules/caen/geometry/CDCalibration.h>
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
@@ -21,12 +22,12 @@ struct CaenCounters {
   // Processing Counters - accessed in processing thread
 
   // System counters
-  int64_t FifoSeqErrors;
-  int64_t ProcessingIdle;
+  int64_t FifoSeqErrors{0};
+  int64_t ProcessingIdle{0};
 
   // ESSReadout parser
   struct ESSReadout::ESSHeaderStats ReadoutStats;
-  int64_t ErrorESSHeaders;
+  int64_t ErrorESSHeaders{0};
 
   // Caen DataParser
   struct DataParser::Stats Parser;
@@ -36,17 +37,21 @@ struct CaenCounters {
   struct Geometry::Stats Geom;
 
   // Events
-  int64_t Events;
-  int64_t PixelErrors;
-  int64_t EventsUdder;
+  int64_t Events{0};
+  int64_t PixelErrors{0};
+  int64_t EventsUdder{0};
+  int64_t TxRawReadoutPackets{0};
+  int64_t SerializerErrors{0};
 
   // Time
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats{};
 
   // Identification of the cause of produce calls
-  int64_t ProduceCauseTimeout;
+  int64_t ProduceCauseTimeout{0};
+  int64_t ProduceCausePulseChange{0};
+  int64_t ProduceCauseMaxEventsReached{0};
 
   // Kafka stats below are common to all detectors
-  struct Producer::ProducerStats KafkaStats;
+  struct Producer::ProducerStats KafkaStats{};
 } __attribute__((aligned(64)));
 } // namespace Caen
