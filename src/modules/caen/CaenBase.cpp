@@ -8,17 +8,14 @@
 
 #include <cinttypes>
 #include <common/RuntimeStat.h>
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <modules/caen/CaenBase.h>
 #include <modules/caen/CaenInstrument.h>
 #include <unistd.h>
+#include <common/time/CheckTimer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -38,6 +35,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -129,7 +127,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
 ///
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
-  if (EFUSettings.KafkaTopic == "") {
+  if (EFUSettings.KafkaTopic.empty()) {
     XTRACE(INIT, ERR, "No kafka topic set, using DetectorName + _detector");
     EFUSettings.KafkaTopic = EFUSettings.DetectorName + "_detector";
   }
@@ -142,32 +140,32 @@ void CaenBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "caen", Produce);
-
-  Stats.create("produce.cause.pulse_change",
-               Serializer->stats().ProduceRefTimeTriggered);
-  Stats.create("produce.cause.max_events_reached",
-               Serializer->stats().ProduceTriggeredMaxEvents);
-
+  // Create the instrument
   CaenInstrument Caen(Counters, EFUSettings);
-  Caen.setSerializer(Serializer); // would rather have this in CaenInstrument
+  // and its serializers
+  Serializers.reserve(Caen.Geom->numSerializers());
+  for (size_t i=0; i < Caen.Geom->numSerializers(); ++i){
+    Serializers.emplace_back(std::make_shared<EV44Serializer>(KafkaBufferSize, Caen.Geom->serializerName(i), Produce));
+  }
+  // give the instrument shared pointers to the serializers
+  Caen.setSerializers(Serializers);
 
-  Producer EventProducerII(EFUSettings.KafkaBroker, "CAEN_debug",
+  // Create the raw-data monitor producer and serializer
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
                            KafkaCfg.CfgParms);
-
-  auto ProduceII = [&EventProducerII](auto DataBuffer, auto Timestamp) {
-    EventProducerII.produce(DataBuffer, Timestamp);
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  SerializerII = new EV44Serializer(KafkaBufferSize, "caen", ProduceII);
-  Caen.setSerializerII(
-      SerializerII); // would rather have this in CaenInstrument
+  MonitorSerializer = std::make_shared<AR51Serializer>(EFUSettings.DetectorName, ProduceMonitor);
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       Counters.KafkaStats.produce_bytes_ok});
+  // Create the periodic timer for producing messages, in case of low event rate
+  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ); // x86 specific
+  CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -202,6 +200,16 @@ void CaenBase::processingThread() {
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
+      // send monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+          EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               ITCounters.RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxRawReadoutPackets++;
+      }
+
       /// \todo This could be moved and done less frequently
       Counters.Parser = Caen.CaenParser.Stats;
       Counters.TimeStats = Caen.ESSReadoutParser.Packet.Time.Stats;
@@ -213,21 +221,33 @@ void CaenBase::processingThread() {
       usleep(10);
     }
 
-    if (ProduceTimer.timeout()) {
+    if (ProduceTimer.timeout()){
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask =
           RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
                                        Counters.KafkaStats.produce_bytes_ok});
+      // Produce messages if there are events
+      for (auto &Serializer: Serializers) {
+        Serializer->produce();
+      }
 
-      Serializer->produce();
-      SerializerII->produce();
+      // update counter statistics
       Counters.ProduceCauseTimeout++;
+      Counters.ProduceCausePulseChange = std::transform_reduce(
+          Serializers.begin(), Serializers.end(), 0, std::plus<>(),
+          [](auto &Serializer) { return Serializer->ProduceCausePulseChange; }
+      );
+      Counters.ProduceCauseMaxEventsReached = std::transform_reduce(
+          Serializers.begin(), Serializers.end(), 0, std::plus<>(),
+          [](auto &Serializer) { return Serializer->ProduceCauseMaxEventsReached; }
+      );
     }
+
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
     Counters.KafkaStats = EventProducer.stats;
   }
+
   XTRACE(INPUT, ALW, "Stopping processing thread.");
-  return;
 }
 } // namespace Caen

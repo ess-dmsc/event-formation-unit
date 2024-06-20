@@ -84,6 +84,10 @@ public:
 
   TSCTimer ProduceTimer, DebugTimer;
 
+  // Counters for causes of calls to produce()
+  int64_t ProduceCausePulseChange;
+  int64_t ProduceCauseMaxEventsReached;
+
 private:
   /// \todo should this not be predefined in terms of jumbo frame?
   size_t MaxEvents{0};

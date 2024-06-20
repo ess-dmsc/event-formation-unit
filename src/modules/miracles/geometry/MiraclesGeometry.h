@@ -23,9 +23,9 @@
 namespace Caen {
 class MiraclesGeometry : public Geometry {
 public:
-  MiraclesGeometry(Config &CaenConfiguration);
-  uint32_t calcPixel(DataParser::CaenReadout &Data);
-  bool validateData(DataParser::CaenReadout &Data);
+  explicit MiraclesGeometry(Config &CaenConfiguration);
+  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
+  bool validateData(DataParser::CaenReadout &Data) override;
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int Ring, int Tube, int AmpA, int AmpB);
@@ -37,5 +37,16 @@ public:
 
   /// \brief return the position along the tube
   int posAlongUnit(int AmpA, int AmpB);
+
+  /// \brief return the total number of serializers used by the geometry
+  [[nodiscard]] inline size_t numSerializers() const override {return 1;}
+
+  /// \brief calculate the serializer index for the given readout
+  /// \param Data CaenReadout to calculate serializer index for
+  [[nodiscard]] inline size_t calcSerializer(DataParser::CaenReadout &) const override {return 0;}
+
+  /// \brief return the name of the serializer at the given index
+  [[nodiscard]] inline std::string serializerName(size_t) const override {return "caen";}
+
 };
 } // namespace Caen

@@ -2,6 +2,8 @@
 
 include_directories(.)
 
+add_subdirectory(generators)
+
 get_filename_component(TIMEPIX_CONFIG "${ESS_MODULE_DIR}/timepix3/configs/timepix3.json" ABSOLUTE)
 
 #=============================================================================
@@ -112,5 +114,3 @@ set(Timepix3GeometryTest_SRC
   test/Timepix3GeometryTest.cpp
 )
 create_test_executable(Timepix3GeometryTest)
-
-

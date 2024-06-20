@@ -10,6 +10,7 @@ set(esstime_obj_SRC
   Timer.cpp
   TimeString.cpp
   TSCTimer.cpp
+  CheckTimer.cpp
 )
 
 set(esstime_obj_INC
@@ -17,6 +18,7 @@ ESSTime.h
 Timer.h
 TimeString.h
 TSCTimer.h
+CheckTimer.h
 )
 
 add_library(EssTimingLib OBJECT

@@ -25,7 +25,7 @@ AR51Serializer::AR51Serializer(
 }
 
 
-nonstd::span<const uint8_t> & AR51Serializer::serialize(uint8_t * Data, int DataLength) {
+nonstd::span<const uint8_t> & AR51Serializer::serialize(uint8_t *Data, int DataLength) {
   FBBuilder.Reset();
   auto DataBuffer = FBBuilder.CreateVector(Data, DataLength);
 

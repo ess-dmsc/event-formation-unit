@@ -11,6 +11,7 @@
 #include <caen/CaenCounters.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/kafka/AR51Serializer.h>
 
 namespace Caen {
 
@@ -26,8 +27,8 @@ public:
   struct CaenCounters Counters;
 
 protected:
-  EV44Serializer *Serializer;
-  EV44Serializer *SerializerII;
+  std::vector<std::shared_ptr<EV44Serializer>> Serializers;
+  std::shared_ptr<AR51Serializer> MonitorSerializer;
 };
 
 } // namespace Caen

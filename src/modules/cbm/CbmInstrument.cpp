@@ -59,9 +59,9 @@ void CbmInstrument::processMonitorReadouts(void) {
 
     XTRACE(DATA, DEB,
            "readout: FiberId %d, FENId %d, POS %d, Type %d, Channel %d, ADC "
-           "%d, TimeLow %d",
+           "%d, TimeHigh %d, TimeLow %d",
            Readout.FiberId, Readout.FENId, Readout.Pos, Readout.Type,
-           Readout.Channel, Readout.ADC, Readout.TimeLow);
+           Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
     int Ring = Readout.FiberId / 2;
     if (Ring != Conf.Parms.MonitorRing) {
@@ -84,7 +84,7 @@ void CbmInstrument::processMonitorReadouts(void) {
     if (TimeOfFlight == RefTime.InvalidTOF) {
       XTRACE(DATA, WAR,
              "No valid TOF from pulse time: %" PRIu32 " and %" PRIu64
-             "readout time",
+             " readout time",
              RefTime.getPrevRefTimeUInt64(), ReadoutTime.toNS().count());
       counters.TimeError++;
       continue;
@@ -130,7 +130,7 @@ void CbmInstrument::processMonitorReadouts(void) {
       }
     } catch (std::out_of_range &e) {
       LOG(UTILS, Sev::Warning,
-          "No serializer configured for FEN %d, Channel %d", Readout.FENId,
+          "No serializer configured for FEN {}, Channel {}", Readout.FENId,
           Readout.Channel);
 
       counters.NoSerializerCfgError++;

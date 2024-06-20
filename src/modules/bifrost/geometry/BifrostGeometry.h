@@ -26,13 +26,13 @@
 namespace Caen {
 class BifrostGeometry : public Geometry {
 public:
-  BifrostGeometry(Config &CaenConfiguration);
+  explicit BifrostGeometry(Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  uint32_t calcPixel(DataParser::CaenReadout &Data);
+  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
 
   ///\brief virtual method inherited from base class
-  bool validateData(DataParser::CaenReadout &Data);
+  bool validateData(DataParser::CaenReadout &Data) override;
 
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
@@ -49,6 +49,10 @@ public:
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
   std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+
+  [[nodiscard]] size_t numSerializers() const override;
+  [[nodiscard]] size_t calcSerializer(DataParser::CaenReadout &Data) const override;
+  [[nodiscard]] std::string serializerName(size_t Index) const override;
 
   const int UnitsPerGroup{3};
   const int TripletsPerRing{15};
