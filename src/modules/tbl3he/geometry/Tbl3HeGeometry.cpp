@@ -121,4 +121,16 @@ uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout __attribute__((unused
   return pixel;
 }
 
+size_t Tbl3HeGeometry::numSerializers() const {
+  return 2;
+}
+
+size_t Tbl3HeGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
+  return Data.FiberId / 2;
+}
+
+std::string Tbl3HeGeometry::serializerName(size_t Index) const {
+  return fmt::format("bank{}", Index);
+}
+
 } // namespace Caen

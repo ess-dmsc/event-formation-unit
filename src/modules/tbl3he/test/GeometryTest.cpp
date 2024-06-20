@@ -5,8 +5,6 @@
 
 using namespace Caen;
 
-
-
 class Tbl3HeGeometryTest : public TestBase {
 protected:
   Tbl3HeGeometry *geom{nullptr};
@@ -18,6 +16,13 @@ protected:
     CaenConfiguration.MaxFEN = 0;
     CaenConfiguration.MaxGroup = 7;
     geom = new Tbl3HeGeometry(CaenConfiguration);
+
+    geom->CaenCDCalibration.Parms.Groups=8;
+    // Make nullcalibration for the eight groups
+    for (int i = 0; i < 8; i++) {
+      geom->CaenCDCalibration.Intervals.push_back({{0.00, 1.00}});
+      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}});
+    }
   }
   void TearDown() override {}
 };
@@ -35,7 +40,6 @@ TEST_F(Tbl3HeGeometryTest, Constructor) {
 
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFiberId) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid FiberIds
@@ -56,7 +60,6 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFiberId) {
 
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFENId) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid FENIds
@@ -75,7 +78,6 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFENId) {
 
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid Groups
@@ -94,14 +96,12 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
 
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
 }
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   //                              R  F               G     A    B
   DataParser::CaenReadout readout{3, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
@@ -109,7 +109,6 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
 
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
-  geom = new Tbl3HeGeometry(CaenConfiguration);
   //                               R  F              G     A   B  C  D
   DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout1), 1);

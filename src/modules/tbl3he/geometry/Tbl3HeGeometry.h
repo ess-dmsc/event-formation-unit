@@ -29,10 +29,10 @@ public:
   Tbl3HeGeometry(Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  uint32_t calcPixel(DataParser::CaenReadout &Data);
+  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
 
   ///\brief virtual method inherited from base class
-  bool validateData(DataParser::CaenReadout &Data);
+  bool validateData(DataParser::CaenReadout &Data) override;
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -41,6 +41,11 @@ public:
   /// or (-1, -1.0) if invalid
   /// \todo refactoring oportunity: thei code is the same as for bifrost
   std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+
+  /// \todo functions to handle multiple serialisers
+  [[nodiscard]] size_t numSerializers() const override;
+  [[nodiscard]] size_t calcSerializer(DataParser::CaenReadout &Data) const override;
+  [[nodiscard]] std::string serializerName(size_t Index) const override;
 
   const int UnitsPerGroup{1};
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
