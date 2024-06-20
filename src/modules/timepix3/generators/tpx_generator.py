@@ -8,7 +8,8 @@
 import argparse
 import multiprocessing
 import numpy as np
-from scapy.all import Ether, IP, UDP, sendp
+from scapy.all import IP, UDP
+import socket
 import time
 import logging
 import os
@@ -80,6 +81,30 @@ def build_evr(
 
     return payload
 
+def send_packets(packets):
+        """
+        Sends a list of packets over UDP using standard Python sockets.
+
+        Args:
+            packets (list): The list of Scapy packets to be sent.
+        """
+        # Create a standard UDP socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
+        for packet in packets:
+            # Extract payload to send. Here, we convert the entire Scapy packet to bytes.
+            # If you only need the payload of a specific layer, adjust accordingly.
+            payload = bytes(packet)
+            
+            # Extract destination IP and port from the Scapy packet
+            dest_ip = packet[IP].dst
+            dest_port = packet[UDP].dport
+            
+            # Send the payload
+            sock.sendto(payload, (dest_ip, dest_port))
+
+        # Close the socket
+        sock.close()
 
 class TPXConverter:
     """
@@ -89,10 +114,9 @@ class TPXConverter:
     Args:
         ip_address (str): The destination IP address.
         port (int): The destination port number.
-        iface (str): The network interface to use for sending packets.
     """
 
-    def __init__(self, ip_address, port, iface):
+    def __init__(self, ip_address, port):
         self.dtype = np.dtype(np.uint64)
         self.udp_max_size = 8952
         self.chunk_size = self.udp_max_size // self.dtype.itemsize
@@ -106,7 +130,6 @@ class TPXConverter:
         self.packet_buffer = []
         self.send_process = None
         self.packet_time = time.time()
-        self.interface = iface
         self.UDP_HEADER = UDP(sport=4096, dport=port)
         self.IP_HEADER = IP(dst=ip_address)
 
@@ -140,7 +163,7 @@ class TPXConverter:
 
                 data = chunk[tpx_mask]
 
-                packet = Ether() / self.IP_HEADER / self.UDP_HEADER / data.tobytes()
+                packet = self.IP_HEADER / self.UDP_HEADER / data.tobytes()
                 self.packet_time += 0.0005
                 packet.time = self.packet_time
                 self.packet_buffer.append(packet)
@@ -161,7 +184,7 @@ class TPXConverter:
                         previousPulseTimeSeconds,
                         previousPulseTimeNanoSeconds,
                     )
-                    extra_packet = Ether() / self.IP_HEADER / self.UDP_HEADER / evr_data
+                    extra_packet = self.IP_HEADER / self.UDP_HEADER / evr_data
                     self.packet_time += 0.0002  # 200 us
                     extra_packet.time = self.packet_time
                     self.packet_buffer.append(extra_packet)
@@ -177,16 +200,15 @@ class TPXConverter:
                 f"Sending {len(self.packet_buffer)} packets for {filename} file"
             )
             self.send_process = multiprocessing.Process(
-                target=sendp,
+                target=send_packets,
                 args=(self.packet_buffer,),
-                kwargs={"iface": self.interface, "realtime": True, "verbose": False},
             )
             self.send_process.start()
             # Clear the packet buffer
             self.packet_buffer = []
 
 
-def main(folder, ip, port, iface, debug=False):
+def main(folder, ip, port, debug=False):
     """
     Converts files in a folder to a specific format using TPXConverter.
 
@@ -194,7 +216,6 @@ def main(folder, ip, port, iface, debug=False):
         folder (str): The path to the folder containing the files to be converted.
         ip (str): The IP address of the TPXConverter.
         port (int): The port number of the TPXConverter.
-        iface (str): The interface to be used for the conversion.
         debug (bool, optional): Whether to enable debug logging. Defaults to False.
     """
     logging.basicConfig(
@@ -214,7 +235,7 @@ def main(folder, ip, port, iface, debug=False):
     file_paths = [os.path.join(folder, file) for file in files]
 
     # Create an instance of the TPXConverter class
-    converter = TPXConverter(ip, port, iface)
+    converter = TPXConverter(ip, port)
     # Execute convert_file on every file in the folder
 
     for file in file_paths:
@@ -231,12 +252,6 @@ if __name__ == "__main__":
         "-f", "--folder", type=str, help="Path to the folder containing TPX files"
     )
     parser.add_argument("-d", "--debug", action="store_true", help="Turn on debug mode")
-    parser.add_argument(
-        "--iface",
-        type=int,
-        help="Interface to send the UDP packages",
-        default="eth2",
-    )
     parser.add_argument(
         "-p",
         "--port",
@@ -256,4 +271,4 @@ if __name__ == "__main__":
     # Parse the command line arguments
     args = parser.parse_args()
 
-    main(args.folder, args.ip, args.port, args.iface, args.debug)
+    main(args.folder, args.ip, args.port, args.debug)
