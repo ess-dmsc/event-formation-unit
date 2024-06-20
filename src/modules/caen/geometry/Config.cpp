@@ -45,7 +45,7 @@ void Config::parseConfig() {
     LokiConf.parseConfig();
   }
 
-  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles")) {
+  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles") or (InstrumentName == "tbl3he")) {
     try {
       // Assumed the same for all straws in all banks
       Resolution = root["StrawResolution"].get<unsigned int>();

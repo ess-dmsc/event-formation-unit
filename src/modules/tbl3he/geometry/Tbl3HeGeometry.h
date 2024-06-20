@@ -34,6 +34,14 @@ public:
   ///\brief virtual method inherited from base class
   bool validateData(DataParser::CaenReadout &Data);
 
+  /// \brief return the position along the tube
+  /// \param AmpA amplitude A from readout data
+  /// \param AmpB amplitude B from readout data
+  /// \return tube index (0) and normalised position [0.0 ; 1.0]
+  /// or (-1, -1.0) if invalid
+  /// \todo refactoring oportunity: thei code is the same as for bifrost
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+
   const int UnitsPerGroup{1};
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 
