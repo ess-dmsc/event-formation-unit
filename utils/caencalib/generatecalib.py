@@ -79,3 +79,4 @@ if __name__ == '__main__':
     #  --name loki --groups 896 --groupsize 7
     #  --name bifrost --groups 45  --groupsize 3
     #  --name miracles --groups 48  --groupsize 2
+    #  --name tbl3he --groups 8  --groupsize 1

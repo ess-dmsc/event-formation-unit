@@ -82,6 +82,8 @@ get_filename_component(MIRACLES_CAL_FILE "${ESS_MODULE_DIR}/miracles/configs/mir
 get_filename_component(CSPEC_CFG_FILE "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
 get_filename_component(CSPEC_CAL_FILE "${ESS_MODULE_DIR}/cspec/configs/cspecnullcalib.json" ABSOLUTE)
 get_filename_component(ODIN_CFG_FILE "${ESS_MODULE_DIR}/timepix3/configs/timepix3.json" ABSOLUTE)
+get_filename_component(TBL3HE_CFG_FILE "${ESS_MODULE_DIR}/tbl3he/configs/tbl3he.json" ABSOLUTE)
+get_filename_component(TBL3HE_CAL_FILE "${ESS_MODULE_DIR}/tbl3he/configs/tbl3henullcalib.json" ABSOLUTE)
 
 
 add_custom_target(copycfgs
@@ -101,6 +103,8 @@ add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E copy ${CSPEC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${CSPEC_CAL_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${ODIN_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${TBL3HE_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${TBL3HE_CAL_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
@@ -119,5 +123,6 @@ add_custom_target(runefu
     COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
     COMMAND timepix3 "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
+    COMMAND tbl3he   "-f" "../configs/tbl3he.json"    "--calibration" "../configs/tbl3henullcalib.json"  "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_tbl3he.h5"
     DEPENDS copycfgs allefus
     )
