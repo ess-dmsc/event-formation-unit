@@ -123,6 +123,23 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   ASSERT_EQ(geom->calcPixel(readout4), 800);
 }
 
+TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout), 0);
+}
+
+
+TEST_F(Tbl3HeGeometryTest, Serialisers) {
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
+  ASSERT_EQ(geom->calcSerializer(readout), 0);
+  readout.FiberId = 1;
+  ASSERT_EQ(geom->calcSerializer(readout), 0);
+  readout.FiberId = 2;
+  ASSERT_EQ(geom->calcSerializer(readout), 1);
+  readout.FiberId = 3;
+  ASSERT_EQ(geom->calcSerializer(readout), 1);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
