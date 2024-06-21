@@ -26,10 +26,11 @@ public:
 private:
   // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
   static constexpr uint8_t CBM_FIBER_ID = 22;
-  static constexpr uint8_t CBM_FEN_ID = 0;
 
   struct CbmGeneratorSettings {
     CbmType monitorType{CbmType::TTL};
+    uint8_t FenId{0};
+    uint8_t ChannelId{0};
   } cbmSettings;
 
   void generateData() override;

@@ -20,6 +20,10 @@ namespace cbm {
 ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
   app.add_option("--monitor_type", cbmSettings.monitorType,
                  "Beam monitor type (TTL, N2GEM, IBM, etc)");
+  app.add_option("--fen", cbmSettings.FenId,
+                 "Override FEN ID (default 0)");
+  app.add_option("--channel", cbmSettings.ChannelId,
+                 "Override channel ID (default 0)");
 }
 
 void ReadoutGenerator::generateData() {
@@ -47,11 +51,11 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
     // write data packet to the buffer
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->FiberId = CBM_FIBER_ID;
-    dataPkt->FENId = CBM_FEN_ID;
+    dataPkt->FENId = cbmSettings.FenId;
     dataPkt->TimeHigh = getReadoutTimeHigh();
     dataPkt->TimeLow = getReadoutTimeLow();
     dataPkt->Type = cbmSettings.monitorType;
-    dataPkt->Channel = (Readout % 3) & 0x01; // 0 0 1, 0 0 1, ...
+    dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 12345;
     dataPkt->NPos = 0;
 
@@ -76,14 +80,14 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
     // write data packet to the buffer
     dataPkt->FiberId = CBM_FIBER_ID;
-    dataPkt->FENId = CBM_FEN_ID;
+    dataPkt->FENId = cbmSettings.FenId;
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->TimeHigh = getReadoutTimeHigh();
     dataPkt->TimeLow = getReadoutTimeLow();
     dataPkt->Type = CbmType::IBM;
 
     // Currently we generating for 1 beam monitor only
-    dataPkt->Channel = 0;
+    dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 0;
     dataPkt->NPos = Fuzzer.randomInterval(1, 1000) + dataValue;
 
