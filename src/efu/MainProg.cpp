@@ -50,21 +50,23 @@ int MainProg::run(Detector *inst) {
 
   ExitHandler::InitExitHandler();
 
+  std::string Name{DetectorSettings.DetectorName};
+
   int64_t statUpTime{0};
   Statistics mainStats;
   mainStats.setPrefix(DetectorSettings.GraphitePrefix,
                       DetectorSettings.GraphiteRegion);
   mainStats.create("main.uptime", statUpTime);
 
-  LOG(MAIN, Sev::Info, "Starting Event Formation Unit");
-  LOG(MAIN, Sev::Info, "Event Formation Unit version: {}", efu_version());
-  LOG(MAIN, Sev::Info, "Event Formation Unit build: {}", efu_buildstr());
+  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) Starting", Name);
+  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) version: {}", Name, efu_version());
+  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) build: {}", Name, efu_buildstr());
 
   if (DetectorSettings.NoHwCheck) {
-    LOG(MAIN, Sev::Warning, "Skipping HwCheck - performance might suffer");
+    LOG(MAIN, Sev::Warning, "({}) Skipping HwCheck - performance might suffer", Name);
   } else {
     if (hwcheck.checkMTU(hwcheck.IgnoredInterfaces) == false) {
-      LOG(MAIN, Sev::Error, "MTU checks failed, for a quick fix, try");
+      LOG(MAIN, Sev::Error, "({}) MTU checks failed, for a quick fix, try", Name);
       LOG(MAIN, Sev::Error,
           "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
       LOG(MAIN, Sev::Error, "exiting...");
@@ -73,7 +75,7 @@ int MainProg::run(Detector *inst) {
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
-    LOG(MAIN, Sev::Info, "Event Formation Unit Exit (Immediate)");
+    LOG(MAIN, Sev::Info, "Event Formation Unit ({}) Exit (Immediate)", Name);
     return 0;
   }
 
