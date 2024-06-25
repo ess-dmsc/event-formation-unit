@@ -8,7 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "CbmTypes.h"
+#include <CbmTypes.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <stdexcept>
 
