@@ -8,6 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "CbmTypes.h"
 #include <modules/cbm/CbmInstrument.h>
 #include <stdexcept>
 
@@ -89,21 +90,24 @@ void CbmInstrument::processMonitorReadouts(void) {
       counters.TimeError++;
       continue;
     }
-
-    // Check for out_of_range errors thrown by the HashMap2D, which contains the
-    // serializers
+    // Check for out_of_range errors thrown by the HashMap2D, which contains
+    // the serializers
     try {
 
-      if (Readout.Type == CbmType::IBM) {
+      CbmType Type = CbmType(Readout.Type);
+
+      if (Type == CbmType::IBM) {
+        counters.IBMReadoutsProcessed++;
+
         auto AdcValue = Readout.NPos & IBM_ADC_MASK; // Extract lower 24 bits
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
-
-        counters.IBMReadoutsProcessed++;
+        counters.IBMEvents++;
       }
 
-      else if (Readout.Type == CbmType::TTL) {
+      else if (Type == CbmType::TTL) {
+        counters.TTLReadoutsProcessed++;
 
         // Register pixels according to the topology map offset and range
         auto &PixelOffset =
@@ -121,10 +125,11 @@ void CbmInstrument::processMonitorReadouts(void) {
 
           Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
               ->addEvent(TimeOfFlight, PixelId);
+          counters.TTLEvents++;
         }
-        counters.TTLReadoutsProcessed++;
       } else {
-        XTRACE(DATA, WAR, "Invalid CbmType %d", Readout.Type);
+        XTRACE(DATA, WAR, "Type %d currently not supported by EFU",
+               Readout.Type);
         counters.TypeNotSupported++;
         continue;
       }
@@ -134,6 +139,12 @@ void CbmInstrument::processMonitorReadouts(void) {
           Readout.Channel);
 
       counters.NoSerializerCfgError++;
+      continue;
+    } catch (std::invalid_argument &e) {
+      LOG(UTILS, Sev::Warning,
+          "Invalid CbmType: {} for readout {} with time {}", e.what(),
+          counters.CbmCounts, ReadoutTime.toNS().count());
+      counters.TypeNotSupported++;
       continue;
     }
 

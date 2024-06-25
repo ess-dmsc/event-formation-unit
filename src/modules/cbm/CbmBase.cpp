@@ -69,6 +69,10 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.type.ttl_proccessed", Counters.TTLReadoutsProcessed);
   Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
 
+  // Events published
+  Stats.create("events.ibm", Counters.IBMEvents);
+  Stats.create("events.ttl", Counters.TTLEvents);
+
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
