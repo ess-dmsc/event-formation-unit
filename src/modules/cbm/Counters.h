@@ -29,9 +29,15 @@ struct Counters {
   struct cbm::ParserStats CbmStats {
     0
   };
+
+  // Readout processing
   int64_t TTLReadoutsProcessed{0};
   int64_t IBMReadoutsProcessed{0};
   int64_t TypeNotSupported{0};
+
+  // Events
+  int64_t IBMEvents{0};
+  int64_t TTLEvents{0};
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgError{0};

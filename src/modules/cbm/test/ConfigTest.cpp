@@ -26,7 +26,7 @@ auto DefaultValuesOnly = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -38,7 +38,7 @@ auto IncorrectFEN = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  12, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  12, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -50,7 +50,7 @@ auto FENIdEdgeCase = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -61,7 +61,7 @@ auto NoMaxFENId = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -73,8 +73,8 @@ auto DuplicateEntry = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
-      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0},
+      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -86,7 +86,7 @@ auto IncorrectType = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1}
+      { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -108,9 +108,9 @@ auto ConfigWithTopology = R"(
     "MaxFENId" : 2,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0, "PixelRange": 1},
-      { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0, "PixelRange": 1},
-      { "FEN":  1, "Channel": 0, "Type": "TTL", "Source" : "cbm3", "PixelOffset": 0, "PixelRange": 1},
+      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0},
+      { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0},
+      { "FEN":  1, "Channel": 0, "Type": "TTL", "Source" : "cbm3", "PixelOffset": 0},
       { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  0, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100}

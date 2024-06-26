@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <modules/cbm/CbmInstrument.h>
+#include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
 
 // #undef TRC_LEVEL
@@ -89,42 +90,46 @@ void CbmInstrument::processMonitorReadouts(void) {
       counters.TimeError++;
       continue;
     }
-
-    // Check for out_of_range errors thrown by the HashMap2D, which contains the
-    // serializers
+    // Check for out_of_range errors thrown by the HashMap2D, which contains
+    // the serializers
     try {
 
-      if (Readout.Type == CbmType::IBM) {
+      CbmType Type = CbmType(Readout.Type);
+
+      if (Type == CbmType::IBM) {
+        counters.IBMReadoutsProcessed++;
+
         auto AdcValue = Readout.NPos & IBM_ADC_MASK; // Extract lower 24 bits
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
 
-        counters.IBMReadoutsProcessed++;
+        XTRACE(DATA, DEB,
+               "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64 "ns",
+               Readout.Type, AdcValue, TimeOfFlight);
+
+        counters.IBMEvents++;
       }
 
-      else if (Readout.Type == CbmType::TTL) {
-
-        // Register pixels according to the topology map offset and range
-        auto &PixelOffset =
-            Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
-                ->pixelOffset;
-        auto &PixelRange =
-            Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
-                ->pixelRange;
-
-        for (int i = 0; i < PixelRange; i++) {
-          int PixelId = PixelOffset + i;
-          XTRACE(DATA, DEB,
-                 "CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
-                 Readout.Type, PixelId, TimeOfFlight);
-
-          Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
-              ->addEvent(TimeOfFlight, PixelId);
-        }
+      else if (Type == CbmType::TTL) {
         counters.TTLReadoutsProcessed++;
+
+        // Register pixels according to the topology map pixel offset
+        auto &PixelId = Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
+                            ->pixelOffset;
+
+        Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
+            ->addEvent(TimeOfFlight, PixelId);
+
+        XTRACE(DATA, DEB,
+               "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+               Readout.Type, PixelId, TimeOfFlight);
+
+        counters.TTLEvents++;
+
       } else {
-        XTRACE(DATA, WAR, "Invalid CbmType %d", Readout.Type);
+        XTRACE(DATA, WAR, "Type %d currently not supported by EFU",
+               Readout.Type);
         counters.TypeNotSupported++;
         continue;
       }
@@ -134,6 +139,12 @@ void CbmInstrument::processMonitorReadouts(void) {
           Readout.Channel);
 
       counters.NoSerializerCfgError++;
+      continue;
+    } catch (std::invalid_argument &e) {
+      LOG(UTILS, Sev::Warning,
+          "Invalid CbmType: {} for readout {} with time {}", e.what(),
+          counters.CbmCounts, ReadoutTime.toNS().count());
+      counters.TypeNotSupported++;
       continue;
     }
 

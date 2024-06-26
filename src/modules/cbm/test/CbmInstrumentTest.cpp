@@ -240,10 +240,6 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
-  expectedData = 2;
-  EXPECT_CALL(*Serializer2,
-              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 3;
@@ -275,6 +271,8 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(counters.IBMEvents, 0);
+  EXPECT_EQ(counters.TTLEvents, 3);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -341,6 +339,8 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 3);
+  EXPECT_EQ(counters.IBMEvents, 3);
+  EXPECT_EQ(counters.TTLEvents, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -394,6 +394,8 @@ TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.IBMEvents, 0);
+  EXPECT_EQ(counters.TTLEvents, 0);
 }
 
 ///
@@ -418,7 +420,9 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
+  EXPECT_EQ(counters.IBMEvents, 0);
+  EXPECT_EQ(counters.TTLEvents, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -446,6 +450,8 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.IBMEvents, 0);
+  EXPECT_EQ(counters.TTLEvents, 0);
   EXPECT_EQ(counters.TimeError, 1);
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
   EXPECT_EQ(counters.TimeStats.TofHigh, 1);
@@ -476,6 +482,8 @@ TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 1);
+  EXPECT_EQ(counters.IBMEvents, 0);
+  EXPECT_EQ(counters.TTLEvents, 1);
   EXPECT_EQ(counters.TimeError, 1);
   EXPECT_EQ(counters.TimeStats.TofHigh, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
