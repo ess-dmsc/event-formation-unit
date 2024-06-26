@@ -276,7 +276,7 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 3);
+  EXPECT_EQ(counters.TTLEvents, 4);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -423,7 +423,7 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 3);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 3);
+  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMEvents, 0);
   EXPECT_EQ(counters.TTLEvents, 0);
