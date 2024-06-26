@@ -8,8 +8,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <modules/cbm/CbmTypes.h>
 #include <modules/cbm/CbmInstrument.h>
+#include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
 
 // #undef TRC_LEVEL
@@ -103,30 +103,30 @@ void CbmInstrument::processMonitorReadouts(void) {
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, AdcValue);
+
+        XTRACE(DATA, DEB,
+               "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64 "ns",
+               Readout.Type, AdcValue, TimeOfFlight);
+
         counters.IBMEvents++;
       }
 
       else if (Type == CbmType::TTL) {
         counters.TTLReadoutsProcessed++;
 
-        // Register pixels according to the topology map offset and range
-        auto &PixelOffset =
-            Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
-                ->pixelOffset;
-        auto &PixelRange =
-            Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
-                ->pixelRange;
+        // Register pixels according to the topology map pixel offset
+        auto &PixelId = Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
+                            ->pixelOffset;
 
-        for (int i = 0; i < PixelRange; i++) {
-          int PixelId = PixelOffset + i;
-          XTRACE(DATA, DEB,
-                 "CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
-                 Readout.Type, PixelId, TimeOfFlight);
+        Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
+            ->addEvent(TimeOfFlight, PixelId);
 
-          Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
-              ->addEvent(TimeOfFlight, PixelId);
-          counters.TTLEvents++;
-        }
+        XTRACE(DATA, DEB,
+               "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+               Readout.Type, PixelId, TimeOfFlight);
+
+        counters.TTLEvents++;
+
       } else {
         XTRACE(DATA, WAR, "Type %d currently not supported by EFU",
                Readout.Type);

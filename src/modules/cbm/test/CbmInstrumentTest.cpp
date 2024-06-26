@@ -240,10 +240,6 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
-  expectedData = 2;
-  EXPECT_CALL(*Serializer2,
-              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 3;
@@ -276,7 +272,7 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 4);
+  EXPECT_EQ(counters.TTLEvents, 3);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 

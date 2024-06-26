@@ -135,7 +135,6 @@ void Config::apply() {
 
       try {
         param1 = Module["PixelOffset"].get<int>();
-        param2 = Module["PixelRange"].get<int>();
       } catch (...) {
         errorExit(fmt::format(
             "Entry: {}, Malformed 'Topology' section for TTL Type (Need "
