@@ -1,9 +1,11 @@
 {
   "Detector": "timepix3",
-  "XResolution": 2048,
-  "YResolution": 2048,
+  "XResolution": 1024,
+  "YResolution": 1024,
   "ParallelThreads": 1,
   "comment": "ParallelThreads - Is the number of threads used for parallel processing during clustering. Value has to be power of 2",
-  "MaxTimeGapNS": 500,
-  "FrequencyHz": 14
+  "MaxTimeGapNS": 800,
+  "MaxCoordinateGap": 4,
+  "MinEventSizeHits": 9,
+  "FrequencyHz": 10
 }

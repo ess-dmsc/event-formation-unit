@@ -96,7 +96,7 @@ def send_packets(packet_data_buffer, ip, port):
             sock.sendto(payload, (ip, port))
 
             # Sleep for some us to give some breath to the EFU
-            time.sleep(0.00005) # 50 us
+            time.sleep(0.005) # 5000 us
 
         # Close the socket
         sock.close()
