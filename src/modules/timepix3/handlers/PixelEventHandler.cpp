@@ -153,8 +153,8 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       statCounters.EventTimeForNextPulse++;
       continue;
     }
-    uint16_t x = cluster.xCoordCenter();
-    uint16_t y = cluster.yCoordCenter();
+    uint16_t x = 4*cluster.xCoordCenter();
+    uint16_t y = 4*cluster.yCoordCenter();
     uint32_t PixelId = geometry->pixel2D(x, y);
 
     if (PixelId == 0) {
