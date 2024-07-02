@@ -45,28 +45,38 @@ public:
   /// after clustering
   /// \param X is the X coordinate
   /// \param Y is the Y coordinate
-  uint32_t calcPixel(const double &X, const double &Y) const;
+  uint32_t calcPixelId(const double &X, const double &Y) const;
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data PixelDataEvent to check validity of.
   bool validateData(const timepixReadout::PixelReadout &Data) const;
 
   /// \brief calculated the X coordinate from a const PixelDataEvent
-  uint32_t calcX(const timepixReadout::PixelReadout &Data) const;
+  // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
+  // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
+  static inline uint32_t calcX(const timepixReadout::PixelReadout &Data) {
+    uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
+    return Col;
+  }
 
   /// \brief calculated the Y coordinate from a const PixelDataEvent
-  uint32_t calcY(const timepixReadout::PixelReadout &Data) const;
+  // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
+  // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
+  static inline uint32_t calcY(const timepixReadout::PixelReadout &Data) {
+    uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
+    return Row;
+  }
 
   /// \brief returns the total number of chunks
   int getChunkNumber() const { return totalNumChunkWindows; }
 
 private:
-  std::uint16_t XResolution; ///< resolution of X axis
-  std::uint16_t YResolution; ///< resolution of Y axis
-  std::uint8_t scaleUpFactor;  ///< scale up factor for super resolution
-  int totalNumChunkWindows;  ///< number of chunks windows in total
-  int chunksPerDimension;    ///< number of chunks per dimension
-  int chunkSize;             ///< size of each chunk
+  std::uint16_t XResolution;  ///< resolution of X axis
+  std::uint16_t YResolution;  ///< resolution of Y axis
+  std::uint8_t scaleUpFactor; ///< scale up factor for super resolution
+  int totalNumChunkWindows;   ///< number of chunks windows in total
+  int chunksPerDimension;     ///< number of chunks per dimension
+  int chunkSize;              ///< size of each chunk
 };
 
 } // namespace Timepix3

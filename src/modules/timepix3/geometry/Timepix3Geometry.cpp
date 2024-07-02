@@ -10,6 +10,7 @@
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <geometry/Timepix3Geometry.h>
+#include <sys/types.h>
 #include <utility>
 
 // #undef TRC_LEVEL
@@ -29,13 +30,13 @@ Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
       chunkSize(nx / chunksPerDimension) {}
 
 /// \todo: remove this function only used makes uneceassary to have it
-uint32_t Timepix3Geometry::calcPixel(const double &X, const double &Y) const {
+uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
   XTRACE(
       DATA, DEB,
       "calculating scaled up pixel coordinates from X %f, Y %f with factor: %d",
       X, Y, scaleUpFactor);
   uint16_t UpScaledX = static_cast<uint16_t>(X * scaleUpFactor);
-  uint16_t UpScaledY = static_cast<uint16_t>(X * scaleUpFactor);
+  uint16_t UpScaledY = static_cast<uint16_t>(Y * scaleUpFactor);
 
   XTRACE(DATA, DEB, "Calculate pixeId from Scaled X %u, Scaled Y %u", UpScaledX,
          UpScaledY);
@@ -56,20 +57,6 @@ int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
 
   // Calculate the window index based on the X and Y coordinates
   return (X / chunkSize) + (chunksPerDimension * (Y / chunkSize));
-}
-
-// Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
-// https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcX(const PixelReadout &Data) const {
-  uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
-  return Col;
-}
-
-// Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
-// https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcY(const PixelReadout &Data) const {
-  uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
-  return Row;
 }
 
 /// \brief Calculates that the received data is fir to the geometry

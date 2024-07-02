@@ -20,7 +20,7 @@ using namespace timepixReadout;
 using namespace std;
 
 class MockEV44Serializer : public EV44Serializer {
- public:
+public:
   MockEV44Serializer() : EV44Serializer(0, "dummy", {}) {}
 
   int64_t pulseTimeToCompare;
@@ -40,7 +40,7 @@ class MockEV44Serializer : public EV44Serializer {
 //
 // Manipulate ToA and FToA to test different situations
 class PixelTimeTestHelper {
- public:
+public:
   const uint16_t ToA;
   const uint8_t fToA;
 
@@ -51,24 +51,18 @@ class PixelTimeTestHelper {
   const uint64_t pixelClockTime;
 
   PixelTimeTestHelper(int16_t ToA, uint8_t fToA)
-      : ToA(ToA),
-        fToA(fToA),
-        ToT(200),
-        spidrTime(41503),
+      : ToA(ToA), fToA(fToA), ToT(200), spidrTime(41503),
         tdcClockInPixelTime(16999999997),
         pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
 
   PixelTimeTestHelper(int16_t ToA, uint8_t fToA, uint32_t spidrTime,
                       uint64_t tdcClockInPixelTime)
-      : ToA(ToA),
-        fToA(fToA),
-        ToT(200),
-        spidrTime(spidrTime),
+      : ToA(ToA), fToA(fToA), ToT(200), spidrTime(spidrTime),
         tdcClockInPixelTime(tdcClockInPixelTime),
         pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
 
   uint32_t getEventTof() const {
-    if(pixelClockTime < tdcClockInPixelTime) {
+    if (pixelClockTime < tdcClockInPixelTime) {
       // Expected behaviour if the pixel clock resets that we calculate the time
       // between the last TDC clock and the max pixel clock value and then add
       // the pixel clock time (time clock counted after the reset)
@@ -78,7 +72,7 @@ class PixelTimeTestHelper {
     return pixelClockTime - tdcClockInPixelTime;
   }
 
- private:
+private:
   uint64_t calculatePixelClockTime(uint32_t spidrTime, int16_t ToA,
                                    uint8_t fToA) {
     return 409600 * static_cast<uint64_t>(spidrTime) +
@@ -91,14 +85,14 @@ class PixelTimeTestHelper {
 static const PixelTimeTestHelper TEST_DEFAULT_PIXEL_TIME{14848, 1};
 
 class Timepix3PixelEventHandlerTest : public TestBase {
- protected:
+protected:
   static constexpr int64_t TEST_PULSE_TIME_NS = 1706778348000000000;
   static constexpr uint64_t TEST_X_COORD = 35;
   static constexpr uint64_t TEST_Y_COORD = 115;
   static constexpr uint8_t TEST_PIX = 8;
 
   Counters counters{};
-  shared_ptr<Timepix3Geometry> geometry{new Timepix3Geometry(256, 256, 1)};
+  shared_ptr<Timepix3Geometry> geometry{new Timepix3Geometry(256, 256, 1, 1)};
   MockEV44Serializer serializer;
   Config Timepix3Config{};
   PixelEventHandler testEventHandler{counters, geometry, serializer,

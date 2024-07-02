@@ -153,13 +153,13 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       statCounters.EventTimeForNextPulse++;
       continue;
     }
-    uint16_t x = 4*cluster.xCoordCenter();
-    uint16_t y = 4*cluster.yCoordCenter();
-    uint32_t PixelId = geometry->pixel2D(x, y);
+    uint16_t EventCoordX = cluster.xCoordCenter();
+    uint16_t EventCoordY = cluster.yCoordCenter();
+    uint32_t PixelId = geometry->calcPixelId(EventCoordX, EventCoordY);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u, x %u, y %u, pixel %u",
-             eventTime, x, y, PixelId);
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u, x %u, y %u, pixelid %u",
+             eventTime, EventCoordX, EventCoordY, PixelId);
       statCounters.PixelErrors++;
       continue;
     }
