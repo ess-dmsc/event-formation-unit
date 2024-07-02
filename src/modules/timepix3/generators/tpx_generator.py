@@ -80,26 +80,34 @@ def build_evr(
 
     return payload
 
-def send_packets(packet_data_buffer, ip, port):
-        """
-        Sends a list of packets over UDP using standard Python sockets.
 
-        Args:
-            packets (list): The list of Scapy packets to be sent.
-        """
-        # Create a standard UDP socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
-        for payload in packet_data_buffer:
- 
-            # Send the payload
-            sock.sendto(payload, (ip, port))
+def send_packets(packet_data_buffer, ip, port, sleep_time):
+    """
+    Sends a list of packets over UDP using standard Python sockets.
 
-            # Sleep for some us to give some breath to the EFU
-            time.sleep(0.005) # 5000 us
+    Args:
+        packets (list): The list of Scapy packets to be sent.
+    """
+    logger = logging.getLogger()
 
-        # Close the socket
-        sock.close()
+    # Create a standard UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    logger.debug(
+        f"Send packets to {ip}:{port} with size {len(packet_data_buffer)} and interval {sleep_time * 1e6:.2f} us"
+    )
+
+    for payload in packet_data_buffer:
+
+        # Send the payload
+        sock.sendto(payload, (ip, port))
+
+        # Sleep for some us to give some breath to the EFU
+        time.sleep(sleep_time)  # 50 us
+
+    # Close the socket
+    sock.close()
+
 
 class TPXConverter:
     """
@@ -111,7 +119,7 @@ class TPXConverter:
         port (int): The destination port number.
     """
 
-    def __init__(self, ip_address, port):
+    def __init__(self, ip_address, port, throttle):
         self.dtype = np.dtype(np.uint64)
         self.udp_max_size = 8952
         self.chunk_size = self.udp_max_size // self.dtype.itemsize
@@ -125,8 +133,12 @@ class TPXConverter:
         self.packet_data_buffer = []
         self.send_process = None
         self.packet_time = time.time()
+
         self.ip_address = ip_address
         self.port = port
+        self.throttle_in_s = (
+            throttle / 1e6
+        )  # Convert throttle from us to seconds for sleep call
 
     def convert_file(self, filename):
         """
@@ -157,7 +169,7 @@ class TPXConverter:
                 tpx_mask = (types == 0x6) | (types == 0xB)
 
                 data = chunk[tpx_mask]
-                
+
                 self.packet_data_buffer.append(data.tobytes())
 
                 if tdc_data.size > 0:
@@ -176,7 +188,7 @@ class TPXConverter:
                         previousPulseTimeSeconds,
                         previousPulseTimeNanoSeconds,
                     )
-   
+
                     self.packet_data_buffer.append(evr_data)
 
                     self.evr_counter += 1
@@ -191,14 +203,19 @@ class TPXConverter:
             )
             self.send_process = multiprocessing.Process(
                 target=send_packets,
-                args=(self.packet_data_buffer, self.ip_address, self.port),
+                args=(
+                    self.packet_data_buffer,
+                    self.ip_address,
+                    self.port,
+                    self.throttle_in_s,
+                ),
             )
             self.send_process.start()
             # Clear the packet buffer
             self.packet_data_buffer = []
 
 
-def main(folder, ip, port, debug=False):
+def main(folder, ip, port, throttle, debug=False):
     """
     Converts files in a folder to a specific format using TPXConverter.
 
@@ -225,7 +242,7 @@ def main(folder, ip, port, debug=False):
     file_paths = [os.path.join(folder, file) for file in files]
 
     # Create an instance of the TPXConverter class
-    converter = TPXConverter(ip, port)
+    converter = TPXConverter(ip, port, throttle)
     # Execute convert_file on every file in the folder
 
     for file in file_paths:
@@ -257,8 +274,15 @@ if __name__ == "__main__":
         help="Ip address of the destination",
         default="10.103.2.33",
     )
+    parser.add_argument(
+        "-t",
+        "--throttle",
+        type=int,
+        help="Throttle the sending of the packets in us",
+        default="50",
+    )
 
     # Parse the command line arguments
     args = parser.parse_args()
 
-    main(args.folder, args.ip, args.port, args.debug)
+    main(args.folder, args.ip, args.port, args.throttle, args.debug)

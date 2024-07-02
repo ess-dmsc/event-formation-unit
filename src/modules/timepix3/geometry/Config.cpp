@@ -49,32 +49,44 @@ Config::Config(std::string ConfigFile) {
   }
 
   try {
+    ScaleUpFactor = root["ScaleUpFactor"].get<uint8_t>();
+    LOG(INIT, Sev::Info,
+        "Camera image resolution ({}X{}) scaled up with factor {} to super "
+        "resolution of ({}X{})",
+        XResolution, YResolution, ScaleUpFactor, XResolution * ScaleUpFactor,
+        YResolution * ScaleUpFactor);
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default ScaleUpFactor = {}, super resolution not applied", ScaleUpFactor);
+  }
+  try {
     MaxTimeGapNS = root["MaxTimeGapNS"].get<uint32_t>();
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Using default MaxTimeGapNS");
+    LOG(INIT, Sev::Info, "Using default MaxTimeGapNS = {}", MaxTimeGapNS);
   }
   try {
     FrequencyHz = root["FrequencyHz"].get<float>();
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Using default Frequency");
+    LOG(INIT, Sev::Info, "Using default Frequency = {}", FrequencyHz);
   }
 
   try {
     MinEventSizeHits = root["MinEventSizeHits"].get<uint32_t>();
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Using default MinEventSizeHits");
+    LOG(INIT, Sev::Info, "Using default MinEventSizeHits = {}",
+        MinEventSizeHits);
   }
 
   try {
     MinimumToTSum = root["MinimumToTSum"].get<uint32_t>();
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Using default MinimumToTSum");
+    LOG(INIT, Sev::Info, "Using default MinimumToTSum = {}", MinimumToTSum);
   }
 
   try {
     MaxCoordinateGap = root["MaxCoordinateGap"].get<uint16_t>();
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Using default MaxCoordinateGap");
+    LOG(INIT, Sev::Info, "Using default MaxCoordinateGap = {}",
+        MaxCoordinateGap);
   }
 }
 

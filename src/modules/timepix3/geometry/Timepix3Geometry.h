@@ -12,11 +12,11 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#include <h5cpp/property/dataset_access.hpp>
-#include <logical_geometry/ESSGeometry.h>
-#include <dto/TimepixDataTypes.h>
 #include <cmath>
 #include <cstdint>
+#include <dto/TimepixDataTypes.h>
+#include <h5cpp/property/dataset_access.hpp>
+#include <logical_geometry/ESSGeometry.h>
 #include <math.h>
 
 namespace Timepix3 {
@@ -24,7 +24,8 @@ namespace Timepix3 {
 class Timepix3Geometry : public ESSGeometry {
 
 public:
-  Timepix3Geometry(uint32_t nx, uint32_t ny, uint32_t numChunkWindows);
+  Timepix3Geometry(uint32_t nx, uint32_t ny, uint8_t scaleUpFactor,
+                   uint32_t numChunkWindows);
 
   /// \brief sets the pixel resolution of the camera in x plane
   /// \param Resolution integer value to set camera resolution to
@@ -40,9 +41,11 @@ public:
   /// \param X and Y coordinates of the pixel
   int getChunkWindowIndex(const uint16_t X, const uint16_t Y) const;
 
-  /// \brief calculates an integer pixel value from a Timepix3PixelReadout
-  /// object \param Data Timepix3PixelReadout object
-  uint32_t calcPixel(const timepixReadout::PixelReadout &Data) const;
+  /// \brief calculates an integer pixel value from a double X and Y coordinate
+  /// after clustering
+  /// \param X is the X coordinate
+  /// \param Y is the Y coordinate
+  uint32_t calcPixel(const double &X, const double &Y) const;
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data PixelDataEvent to check validity of.
@@ -60,7 +63,8 @@ public:
 private:
   std::uint16_t XResolution; ///< resolution of X axis
   std::uint16_t YResolution; ///< resolution of Y axis
-  int totalNumChunkWindows;   ///< number of chunks windows in total
+  std::uint8_t scaleUpFactor;  ///< scale up factor for super resolution
+  int totalNumChunkWindows;  ///< number of chunks windows in total
   int chunksPerDimension;    ///< number of chunks per dimension
   int chunkSize;             ///< size of each chunk
 };

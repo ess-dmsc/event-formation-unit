@@ -1,7 +1,7 @@
 {
   "Detector": "timepix3",
-  "XResolution": 1024,
-  "YResolution": 1024,
+  "XResolution": 256,
+  "YResolution": 256,
   "ParallelThreads": 1,
   "comment": "ParallelThreads - Is the number of threads used for parallel processing during clustering. Value has to be power of 2",
   "MaxTimeGapNS": 800,
