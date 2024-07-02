@@ -43,10 +43,10 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                 timepix3Configuration.MaxCoordinateGap),
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
+          timepix3Configuration.ScaleUpFactor,
           timepix3Configuration.parallelThreads)),
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
-      pixelEventHandler(counters, geomPtr, serializer,
-                        timepix3Configuration),
+      pixelEventHandler(counters, geomPtr, serializer, timepix3Configuration),
       timepix3Parser(counters) {
 
   // Setup observable subscriptions

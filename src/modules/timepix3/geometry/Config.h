@@ -11,6 +11,7 @@
 
 #include <common/debug/Trace.h>
 #include <string>
+#include <sys/types.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -23,8 +24,9 @@ public:
   Config(std::string ConfigFile);
 
   std::string InstrumentName;
-  uint16_t XResolution{0}; /// Resolution along x axis
-  uint16_t YResolution{0}; /// Resolution along y axis
+  uint16_t XResolution{0};  /// Resolution along x axis
+  uint16_t YResolution{0};  /// Resolution along y axis
+  uint8_t ScaleUpFactor{1}; /// Scale up factor for super resolution
   uint16_t parallelThreads{1};
   float FrequencyHz{14.0}; /// Frequency of the ESS proton pulse
 
