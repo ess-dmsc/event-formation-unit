@@ -8,8 +8,8 @@ protected:
   Hit hit;
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("hit_file_test_00000.h5")) {
-      boost::filesystem::remove("hit_file_test_00000.h5");
+    if (std::filesystem::exists("hit_file_test_00000.h5")) {
+      std::filesystem::remove("hit_file_test_00000.h5");
     }
   }
   void TearDown() override {}
