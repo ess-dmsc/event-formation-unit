@@ -59,12 +59,12 @@ class DumpFileTest : public TestBase {
 protected:
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("dumpfile_test_00000.h5")) {
-      boost::filesystem::remove("dumpfile_test_00000.h5");
+    if (std::filesystem::exists("dumpfile_test_00000.h5")) {
+      std::filesystem::remove("dumpfile_test_00000.h5");
     }
 
-    if (boost::filesystem::exists("dumpfile_test_00001.h5")) {
-      boost::filesystem::remove("dumpfile_test_00001.h5");
+    if (std::filesystem::exists("dumpfile_test_00001.h5")) {
+      std::filesystem::remove("dumpfile_test_00001.h5");
     }
   }
   void TearDown() override {}
@@ -123,7 +123,7 @@ TEST_F(DumpFileTest, PushFileRotation) {
 
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 
-  EXPECT_FALSE(boost::filesystem::exists("dumpfile_test_00001.h5"));
+  EXPECT_FALSE(std::filesystem::exists("dumpfile_test_00001.h5"));
   file->push(std::vector<Hit>(300000, Hit()));
   EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00001.h5"));
 }

@@ -60,9 +60,9 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
   Geom->CaenCDCalibration.parseCalibration();
 
   if (not Settings.DumpFilePrefix.empty()) {
-    if (boost::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
+    if (std::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
       DumpFile =
-          ReadoutFile::create(boost::filesystem::path(Settings.DumpFilePrefix)
+          ReadoutFile::create(std::filesystem::path(Settings.DumpFilePrefix)
                                   .replace_extension(""));
     } else {
       DumpFile =
