@@ -33,7 +33,7 @@ Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
 uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
   XTRACE(
       DATA, DEB,
-      "calculating scaled up pixel coordinates from X %f, Y %f with factor: %d",
+      "Calculating scaled up pixel coordinates from X %f, Y %f with factor: %d",
       X, Y, scaleUpFactor);
   uint16_t UpScaledX = static_cast<uint16_t>(X * scaleUpFactor);
   uint16_t UpScaledY = static_cast<uint16_t>(Y * scaleUpFactor);
