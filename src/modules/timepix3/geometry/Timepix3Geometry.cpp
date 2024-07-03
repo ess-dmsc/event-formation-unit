@@ -10,6 +10,8 @@
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <geometry/Timepix3Geometry.h>
+#include <sys/types.h>
+#include <utility>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -19,20 +21,27 @@ namespace Timepix3 {
 using namespace timepixReadout;
 
 Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
+                                   uint8_t scaleUpFactor,
                                    uint32_t numChunkWindows)
-    : ESSGeometry(nx, ny, 1, 1),
+    : ESSGeometry(scaleUpFactor * nx, scaleUpFactor * ny, 1, 1),
+      scaleUpFactor(scaleUpFactor),
       totalNumChunkWindows(numChunkWindows <= 0 ? 1 : numChunkWindows),
       chunksPerDimension(static_cast<int>(sqrt(totalNumChunkWindows))),
       chunkSize(nx / chunksPerDimension) {}
 
-uint32_t Timepix3Geometry::calcPixel(const PixelReadout &Data) const {
-  XTRACE(DATA, DEB, "calculating pixel");
-  uint16_t X = calcX(Data);
-  uint16_t Y = calcY(Data);
+/// \todo: remove this function only used makes uneceassary to have it
+uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
+  XTRACE(
+      DATA, DEB,
+      "calculating scaled up pixel coordinates from X %f, Y %f with factor: %d",
+      X, Y, scaleUpFactor);
+  uint16_t UpScaledX = static_cast<uint16_t>(X * scaleUpFactor);
+  uint16_t UpScaledY = static_cast<uint16_t>(Y * scaleUpFactor);
 
-  XTRACE(DATA, DEB, "using ESS Geom to calculate pixel id from X %u, Y %u", X,
-         Y);
-  return pixel2D(X, Y);
+  XTRACE(DATA, DEB, "Calculate pixeId from Scaled X %u, Scaled Y %u", UpScaledX,
+         UpScaledY);
+
+  return pixel2D(std::move(UpScaledX), std::move(UpScaledY));
 }
 
 /// \brief Calculates the chunk window index based on the X and Y coordinates
@@ -48,20 +57,6 @@ int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
 
   // Calculate the window index based on the X and Y coordinates
   return (X / chunkSize) + (chunksPerDimension * (Y / chunkSize));
-}
-
-// Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
-// https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcX(const PixelReadout &Data) const {
-  uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
-  return Col;
-}
-
-// Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
-// https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
-uint32_t Timepix3Geometry::calcY(const PixelReadout &Data) const {
-  uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
-  return Row;
 }
 
 /// \brief Calculates that the received data is fir to the geometry
