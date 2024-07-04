@@ -16,6 +16,7 @@
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
 #include <dream/geometry/DreamGeometry.h>
+#include <dream/geometry/HeimdalGeometry.h>
 #include <dream/geometry/MagicGeometry.h>
 #include <dream/readout/DataParser.h>
 
@@ -53,6 +54,7 @@ public:
   EV44Serializer *Serializer;
   DreamGeometry DreamGeom;
   MagicGeometry MagicGeom;
+  HeimdalGeometry HeimdalGeom;
 };
 
 } // namespace Dream

@@ -36,6 +36,8 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
     Type = Parser::DREAM;
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
     Type = Parser::MAGIC;
+  } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
+    Type = Parser::HEIMDAL;
   } else {
     throw std::runtime_error(
         "Unsupported instrument instance (not DREAM/MAGIC)");
@@ -48,6 +50,8 @@ uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
     return DreamGeom.getPixel(Parms, Data);
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
     return MagicGeom.getPixel(Parms, Data);
+  } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
+    return HeimdalGeom.getPixel(Parms, Data);
   } else {
     return 0;
   }
