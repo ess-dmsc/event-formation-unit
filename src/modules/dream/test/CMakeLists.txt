@@ -22,9 +22,11 @@ create_test_executable(PADetectorTest)
 
 set(DreamGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.h
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
 set(DreamGeometryTest_SRC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
   DreamGeometryTest.cpp)
 create_test_executable(DreamGeometryTest)
@@ -61,6 +63,7 @@ set(DreamInstrumentTest_INC
   ${DREAM_BASE_DIR}/DreamInstrument.h
   ${DREAM_BASE_DIR}/geometry/Config.h
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.h
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.h
   ${DREAM_BASE_DIR}/readout/DataParser.h
   )
@@ -69,6 +72,7 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/DreamInstrument.cpp
   ${DREAM_BASE_DIR}/geometry/Config.cpp
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   )
