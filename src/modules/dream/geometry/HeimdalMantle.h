@@ -25,8 +25,7 @@ public:
   const uint8_t WiresPerCounter{32};
   uint16_t StripsPerCass{64};
 
-  ///\brief change default number of strips per cassette to differentiate
-  /// between DREAM (256) and MAGIC (128)
+  ///\brief change default number of strips per cassette
   explicit HeimdalMantle(uint16_t Strips) : StripsPerCass(Strips){};
 
   int getY(int Strip, int Wire) { return Strip + Wire * StripsPerCass; }
@@ -45,7 +44,7 @@ public:
     uint8_t Wire = Data.Anode % WiresPerCounter;
     uint8_t Strip = Data.Cathode % StripsPerCass;
 
-    XTRACE(DATA, DEB, "M.U. %u, Cassette %u, Counter %u, WIre %u, Strip %u",
+    XTRACE(DATA, DEB, "M.U. %u, Cassette %u, Counter %u, Wire %u, Strip %u",
            MountingUnit, Cassette, Counter, Wire, Strip);
 
     int y = getY(Strip, Wire);
@@ -54,6 +53,6 @@ public:
   }
 
 private:
-  ESSGeometry Geometry{141, 2048, 1, 1};
+  ESSGeometry Geometry{144, 2048, 1, 1};
 };
 } // namespace Dream

@@ -32,13 +32,18 @@ set(DreamGeometryTest_SRC
 create_test_executable(DreamGeometryTest)
 
 set(MagicGeometryTest_INC
-  ${DREAM_BASE_DIR}/geometry/DreamGeometry.h
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
 set(MagicGeometryTest_SRC
-  ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
   MagicGeometryTest.cpp)
 create_test_executable(MagicGeometryTest)
+
+set(HeimdalGeometryTest_INC
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.h)
+set(HeimdalGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
+  HeimdalGeometryTest.cpp)
+create_test_executable(HeimdalGeometryTest)
 
 
 set(DreamConfigTest_INC

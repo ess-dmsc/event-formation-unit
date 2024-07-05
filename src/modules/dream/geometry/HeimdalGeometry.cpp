@@ -45,7 +45,7 @@ int HeimdalGeometry::getPixelOffset(Config::ModuleType Type) {
     RetVal = 0;
     break;
   default:
-    XTRACE(DATA, WAR, "Module type not valid for HEIMDAL");
+    XTRACE(DATA, WAR, "Module type %d not valid for HEIMDAL", Type);
     break;
   }
   return RetVal;
