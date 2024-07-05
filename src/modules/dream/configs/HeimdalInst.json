@@ -16,8 +16,6 @@
     { "Ring" :  4, "FEN":  0, "Type": "HeimdalMantle", "Index" : 0, "Index2" : 0},
     { "Ring" :  4, "FEN":  1, "Type": "HeimdalMantle", "Index" : 0, "Index2" : 0},
     { "Ring" :  5, "FEN":  0, "Type": "HeimdalMantle", "Index" : 0, "Index2" : 0},
-    { "Ring" :  5, "FEN":  1, "Type": "HeimdalMantle", "Index" : 0, "Index2" : 0},
-
+    { "Ring" :  5, "FEN":  1, "Type": "HeimdalMantle", "Index" : 0, "Index2" : 0}
   ]
-
 }

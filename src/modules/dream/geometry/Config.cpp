@@ -40,6 +40,10 @@ void Config::apply() {
     Instance = MAGIC;
     LOG(INIT, Sev::Info, "Instance is MAGIC Instrument");
     XTRACE(INIT, ALW, "Instance is MAGIC Instrument");
+  } else if (Name == "HEIMDAL") {
+    Instance = HEIMDAL;
+    LOG(INIT, Sev::Info, "Instance is HEIMDAL Instrument");
+    XTRACE(INIT, ALW, "Instance is HEIMDAL Instrument");
   } else {
     errorExit(fmt::format("Invalid instrument name {}, expected DREAM or MAGIC",
                           Name));

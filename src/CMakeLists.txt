@@ -68,6 +68,7 @@ add_subdirectory(modules)
 add_subdirectory(generators)
 
 get_filename_component(DREAM_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/DreamEndcap.json" ABSOLUTE)
+get_filename_component(HEIMDAL_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/HeimdalInst.json" ABSOLUTE)
 get_filename_component(MAGIC_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/MagicInst.json" ABSOLUTE)
 get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
 get_filename_component(TREX_CFG_FILE "${ESS_MODULE_DIR}/trex/configs/trex.json" ABSOLUTE)
@@ -89,6 +90,7 @@ get_filename_component(TBL3HE_CAL_FILE "${ESS_MODULE_DIR}/tbl3he/configs/tbl3hen
 add_custom_target(copycfgs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
     COMMAND ${CMAKE_COMMAND} -E copy ${DREAM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${HEIMDAL_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${MAGIC_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${FREIA_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
     COMMAND ${CMAKE_COMMAND} -E copy ${TREX_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
@@ -117,6 +119,7 @@ add_custom_target(runefu
     COMMAND cspec    "-f" "../configs/cspec.json"      "--calibration" "../configs/cspecnullcalib.json"    "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
     COMMAND perfgen  "-s" "1" "--nohwcheck"
     COMMAND dream    "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
+    COMMAND heimdal  "-f" "../configs/HeimdalInst.json" "-s" "2" "--nohwcheck"
     COMMAND magic    "-f" "../configs/MagicInst.json" "-s" "2" "--nohwcheck"
     COMMAND freia    "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND trex     "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
