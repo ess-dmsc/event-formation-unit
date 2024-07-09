@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,7 +22,7 @@ protected:
 TEST_F(DreamGeometryTest, PixelOffsets) {
   ASSERT_EQ(geometry.getPixelOffset(Config::FwEndCap), 0);
   ASSERT_EQ(geometry.getPixelOffset(Config::BwEndCap), 71680);
-  ASSERT_EQ(geometry.getPixelOffset(Config::Mantle), 229376);
+  ASSERT_EQ(geometry.getPixelOffset(Config::DreamMantle), 229376);
   ASSERT_EQ(geometry.getPixelOffset(Config::SANS), 720896);
   ASSERT_EQ(geometry.getPixelOffset(Config::HR), 1122304);
 }
@@ -36,7 +36,7 @@ TEST_F(DreamGeometryTest, GetPixel) {
   Readout.UnitId = 6;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 71681);
 
-  Parms.Type = Config::ModuleType::Mantle;
+  Parms.Type = Config::ModuleType::DreamMantle;
   Parms.P2.Cassette = 0;
   ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 229377);
 

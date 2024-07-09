@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,22 +22,19 @@ namespace Dream {
 
 class HeimdalMantle {
 public:
-  const uint8_t WiresPerCounter{32};
-  uint16_t StripsPerCass{64};
-
   ///\brief change default number of strips per cassette
   explicit HeimdalMantle(uint16_t Strips) : StripsPerCass(Strips){};
 
-  int getY(int Strip, int Wire) { return Strip + Wire * StripsPerCass; }
+  int getY(int Strip, int Wire) const { return Strip + Wire * StripsPerCass; }
 
   /// \brief get global y-coordinate for Cuboid with a given index
-  int getX(int MU, int Cassette, int Counter) {
+  int getX(int MU, int Cassette, int Counter) const {
     return 12 * MU + 2 * Cassette + Counter;
   }
 
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::DreamReadout &Data) {
+                      DataParser::DreamReadout &Data) const {
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
     uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
@@ -53,6 +50,8 @@ public:
   }
 
 private:
+  const uint8_t WiresPerCounter{32};
+  const uint16_t StripsPerCass{64};
   ESSGeometry Geometry{144, 2048, 1, 1};
 };
 } // namespace Dream

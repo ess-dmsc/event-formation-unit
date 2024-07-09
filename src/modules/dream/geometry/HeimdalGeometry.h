@@ -22,10 +22,10 @@ public:
   /// \brief return the global pixel id offset for each of the Heimdal detector
   /// components. This offset must be added to the local pixel id calculated
   /// for that module (see ICD for full description)
-  int getPixelOffset(Config::ModuleType Type);
+  int getPixelOffset(Config::ModuleType Type) const;
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
+  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data) const;
 
   HeimdalMantle mantle{64};
 };

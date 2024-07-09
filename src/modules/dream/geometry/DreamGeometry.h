@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Cuboid.h>
-#include <dream/geometry/Mantle.h>
+#include <dream/geometry/DreamMantle.h>
 #include <dream/geometry/SUMO.h>
 #include <dream/readout/DataParser.h>
 
@@ -34,6 +34,6 @@ public:
   SUMO fwec{280, 256};
   SUMO bwec{616, 256};
   Cuboid cuboid;
-  Mantle mantle{256};
+  DreamMantle mantle{256};
 };
 } // namespace Dream

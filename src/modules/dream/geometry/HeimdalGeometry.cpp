@@ -15,7 +15,7 @@
 namespace Dream {
 
 int HeimdalGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::DreamReadout &Data) {
+                            DataParser::DreamReadout &Data) const {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
@@ -38,7 +38,7 @@ int HeimdalGeometry::getPixel(Config::ModuleParms &Parms,
   return GlobalPixel;
 }
 
-int HeimdalGeometry::getPixelOffset(Config::ModuleType Type) {
+int HeimdalGeometry::getPixelOffset(Config::ModuleType Type) const {
   int RetVal{-1};
   switch (Type) {
   case Config::HeimdalMantle:

@@ -26,7 +26,7 @@ TEST_F(HeimdalGeometryTest, PixelOffsets) {
   ASSERT_EQ(geometry.getPixelOffset(Config::SANS), -1);
   ASSERT_EQ(geometry.getPixelOffset(Config::FwEndCap), -1);
   ASSERT_EQ(geometry.getPixelOffset(Config::BwEndCap), -1);
-  ASSERT_EQ(geometry.getPixelOffset(Config::Mantle), -1);
+  ASSERT_EQ(geometry.getPixelOffset(Config::DreamMantle), -1);
 }
 
 ///\todo only tests (some) x-coordinates
