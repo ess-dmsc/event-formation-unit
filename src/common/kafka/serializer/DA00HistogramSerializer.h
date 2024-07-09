@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "da00_dataarray_generated.h"
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
@@ -245,7 +246,7 @@ private:
     flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
                                            256);
 
-    Builder.Finish(DataArray.pack(Builder));
+    Builder.Finish(DataArray.pack(Builder), da00_DataArrayIdentifier());
     Buffer = Builder.Release();
 
     DataBins.clear();

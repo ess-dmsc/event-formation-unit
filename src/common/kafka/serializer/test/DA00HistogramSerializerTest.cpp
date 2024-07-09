@@ -7,12 +7,15 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/serializer/FlatbufferTypes.h>
+#include "da00_dataarray_generated.h"
+#include "flatbuffers/flatbuffers.h"
 #include <common/kafka/Producer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
+#include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
 #include <common/time/ESSTime.h>
+#include <fmt/core.h>
 #include <unistd.h>
 
 using namespace std::chrono;
@@ -91,9 +94,7 @@ public:
     this->ExpectedResults = ExpectedResults;
   }
 
-  void setData(const std::vector<T> &Data) {
-    this->ExpectedResults = Data;
-  }
+  void setData(const std::vector<T> &Data) { this->ExpectedResults = Data; }
 
   fbserializer::HistogramSerializer<T, R> createHistogramSerializer() {
     return fbserializer::HistogramSerializer<T, R>(
@@ -113,6 +114,11 @@ public:
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
                         int64_t TestProduceCallTime) {
     const uint8_t *FbPtr = TestFlatBuffer.data();
+
+    EXPECT_TRUE(da00_DataArrayBufferHasIdentifier(FbPtr));
+
+    flatbuffers::Verifier Verifier(FbPtr, TestFlatBuffer.size());
+    EXPECT_TRUE(Verifyda00_DataArrayBuffer(Verifier));
 
     auto DeserializedDataArray =
         DataArray(flatbuffers::GetRoot<const da00_DataArray>(FbPtr));
@@ -398,9 +404,10 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
 }
 
 TEST_F(HistogramSerializerTest, TestEmtpyCalls) {
-  
+
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }};
+  TestValidator<int64_t, double> Validator{CommonFbMembers,
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
 
@@ -433,7 +440,8 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
 
   Validator.setData(ExpectedResultData);
   /// Perform test
-  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime + TimeDurationNano(10));
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime +
+                                      TimeDurationNano(10));
 
   EXPECT_EQ(serializer.stats().ProduceRefTimeTriggered, 1);
 }
