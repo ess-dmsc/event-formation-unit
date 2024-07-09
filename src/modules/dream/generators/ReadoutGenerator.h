@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -55,7 +55,7 @@ protected:
 
   ///\brief may or may not generate a readout due to
   /// the detector mask, hence the bool return value
-  bool getRandomReadout(DataParser::DreamReadout &DR);
+  bool getRandomReadout(DataParser::CDTReadout &DR);
 
   ///\brief For TOF distribution calculations
   DistributionGenerator TofDist{1000.0/14};

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <dream/geometry/Config.h>
-#include <dream/geometry/Mantle.h>
+#include <dream/geometry/DreamMantle.h>
 #include <dream/geometry/PADetector.h>
 #include <dream/readout/DataParser.h>
 
@@ -27,9 +27,9 @@ public:
   int getPixelOffset(Config::ModuleType Type);
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
+  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
 
   PADetector padetector{256, 512};
-  Mantle frdetector{128};
+  DreamMantle frdetector{128};
 };
 } // namespace Dream

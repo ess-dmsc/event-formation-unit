@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -100,7 +100,7 @@ public:
 
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::DreamReadout &Data) {
+                      DataParser::CDTReadout &Data) {
     uint8_t Index = Parms.P1.Index;
     Index += Data.UnitId;
 

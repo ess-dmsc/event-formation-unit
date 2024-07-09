@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,6 +16,7 @@
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
 #include <dream/geometry/DreamGeometry.h>
+#include <dream/geometry/HeimdalGeometry.h>
 #include <dream/geometry/MagicGeometry.h>
 #include <dream/readout/DataParser.h>
 
@@ -39,7 +40,7 @@ public:
 
   //
   uint32_t calcPixel(Config::ModuleParms &Parms,
-                     DataParser::DreamReadout &Data);
+                     DataParser::CDTReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' DREAM together
@@ -53,6 +54,7 @@ public:
   EV44Serializer *Serializer;
   DreamGeometry DreamGeom;
   MagicGeometry MagicGeom;
+  HeimdalGeometry HeimdalGeom;
 };
 
 } // namespace Dream

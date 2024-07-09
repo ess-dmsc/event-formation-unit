@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -32,7 +32,7 @@ public:
   //
   MiraclesDatReader(std::string file, bool Verbose);
 
-  // Read a DreamReadout struct, return bytes read, 0 if line is
+  // Read a CDTReadout struct, return bytes read, 0 if line is
   // ignored, or -1 upon error/end
   int readReadout(struct dat_data_t &reaout);
 

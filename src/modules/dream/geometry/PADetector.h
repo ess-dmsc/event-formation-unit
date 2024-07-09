@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC, see LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source ERIC, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -43,7 +43,7 @@ public:
 
   /// \todo CHECK AND VALIDATE, THIS IS UNCONFIRMED
   uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::DreamReadout &Data) {
+                      DataParser::CDTReadout &Data) {
     uint8_t Sector = Parms.P1.Sector;
     ///\todo two sumos per CDRE or just one?
 

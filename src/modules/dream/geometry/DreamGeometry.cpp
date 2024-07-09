@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,7 +16,7 @@
 namespace Dream {
 
 int DreamGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::DreamReadout &Data) {
+                            DataParser::CDTReadout &Data) {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
@@ -30,7 +30,7 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
     Pixel = fwec.getPixelId(Parms, Data);
     break;
 
-  case Config::Mantle:
+  case Config::DreamMantle:
     Pixel = mantle.getPixelId(Parms, Data);
     break;
 
@@ -61,7 +61,7 @@ int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
   case Config::BwEndCap:
     RetVal = 71680; ///< Offset value from ICD
     break;
-  case Config::Mantle:
+  case Config::DreamMantle:
     RetVal = 229376; ///< Offset value from ICD
     break;
   case Config::SANS:

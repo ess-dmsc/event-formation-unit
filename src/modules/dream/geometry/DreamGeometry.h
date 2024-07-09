@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Cuboid.h>
-#include <dream/geometry/Mantle.h>
+#include <dream/geometry/DreamMantle.h>
 #include <dream/geometry/SUMO.h>
 #include <dream/readout/DataParser.h>
 
@@ -29,11 +29,11 @@ public:
   int getPixelOffset(Config::ModuleType Type);
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
+  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
 
   SUMO fwec{280, 256};
   SUMO bwec{616, 256};
   Cuboid cuboid;
-  Mantle mantle{256};
+  DreamMantle mantle{256};
 };
 } // namespace Dream

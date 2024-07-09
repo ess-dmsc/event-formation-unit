@@ -12,9 +12,11 @@ set(dream_common_inc
   DreamInstrument.h
   geometry/Config.h
   geometry/DreamGeometry.h
+  geometry/HeimdalGeometry.h
   geometry/MagicGeometry.h
   geometry/Cuboid.h
-  geometry/Mantle.h
+  geometry/HeimdalMantle.h
+  geometry/DreamMantle.h
   geometry/PADetector.h
   geometry/SUMO.h
   readout/DataParser.h
@@ -25,6 +27,7 @@ set(dream_common_src
   DreamInstrument.cpp
   DreamBase.cpp
   geometry/DreamGeometry.cpp
+  geometry/HeimdalGeometry.cpp
   geometry/MagicGeometry.cpp
   geometry/Config.cpp
   readout/DataParser.cpp
@@ -63,3 +66,13 @@ set(magic_SRC
   main_magic.cpp)
 set(magic_LIB efu_essreadout)
 create_executable(magic)
+
+#=============================================================================
+# heimdal detector module - identical to dream except instrument name
+#=============================================================================
+set(heimdal_INC ${dream_common_inc})
+set(heimdal_SRC
+  ${dream_common_src}
+  main_heimdal.cpp)
+set(heimdal_LIB efu_essreadout)
+create_executable(heimdal)

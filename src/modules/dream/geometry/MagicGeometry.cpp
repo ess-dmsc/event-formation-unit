@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@
 namespace Dream {
 
 int MagicGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::DreamReadout &Data) {
+                            DataParser::CDTReadout &Data) {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);

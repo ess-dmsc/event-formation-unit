@@ -1,5 +1,5 @@
 
-// Copyright (C) 2023 European Spallation Source ERIC, see LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source ERIC, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,7 +14,7 @@ using namespace Dream;
 
 class PADetectorTest : public TestBase {
 protected:
-  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
+  DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
 
   Config::ModuleParms Parms{false, Config::ModuleType::PA, {0}, {0}};
   PADetector detb{256, 512};

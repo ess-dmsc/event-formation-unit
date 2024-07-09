@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,19 +24,21 @@ public:
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
-  enum DetectorInstance { NONE, DREAM, MAGIC };
-  enum ModuleType { BwEndCap, FwEndCap, Mantle, HR, SANS, FR, PA };
+  enum DetectorInstance { NONE, DREAM, MAGIC, HEIMDAL };
+  enum ModuleType { BwEndCap, FwEndCap, DreamMantle, HR, SANS, FR, PA, HeimdalMantle};
   // clang-format off
   std::map<std::string, ModuleType> ModuleTypeMap = {
       // DREAM Detectors
       {"BwEndCap", BwEndCap},
       {"FwEndCap", FwEndCap},
-      {"Mantle", Mantle},
+      {"DreamMantle", DreamMantle}, // also Magic
       {"HR", HR},
       {"SANS", SANS},
       // MAGIC Detectors
       {"PADetector", PA},
-      {"FRDetector", FR}
+      {"FRDetector", FR},
+      // HEIMDAL Detector
+      {"HeimdalMantle", HeimdalMantle}
     };
   // clang-format on
 

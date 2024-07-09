@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,7 +27,7 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 
 ///\brief ICD has been reviewed, but it would be surprising
 // if this was 100% correct
-bool ReadoutGenerator::getRandomReadout(DataParser::DreamReadout &ReadoutData) {
+bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
 
   if (DreamSettings.Tof) {
@@ -121,7 +121,7 @@ void ReadoutGenerator::generateData() {
   DataPtr += HeaderSize;
 
   uint32_t Readouts{0};
-  DataParser::DreamReadout ReadoutData;
+  DataParser::CDTReadout ReadoutData;
 
   while (Readouts < Settings.NumReadouts) {
     bool Valid = getRandomReadout(ReadoutData);

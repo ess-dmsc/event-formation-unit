@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,7 +20,7 @@ public:
   const unsigned int MaxFENId{12};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct DreamReadout {
+  struct CDTReadout {
     uint8_t FiberId;
     uint8_t FENId;
     uint16_t DataLength;
@@ -32,7 +32,7 @@ public:
     uint8_t Anode;
   } __attribute__((__packed__));
 
-  static_assert(sizeof(DreamReadout) == 16,
+  static_assert(sizeof(CDTReadout) == 16,
                 "DREAM readout header length error");
 
   DataParser(struct Counters &counters) : Stats(counters) {
@@ -44,7 +44,7 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   // To be iterated over in processing thread
-  std::vector<struct DreamReadout> Result;
+  std::vector<struct CDTReadout> Result;
 
   struct Counters &Stats;
 };

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,6 +36,8 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
     Type = Parser::DREAM;
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
     Type = Parser::MAGIC;
+  } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
+    Type = Parser::HEIMDAL;
   } else {
     throw std::runtime_error(
         "Unsupported instrument instance (not DREAM/MAGIC)");
@@ -43,11 +45,13 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 }
 
 uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
-                                    DataParser::DreamReadout &Data) {
+                                    DataParser::CDTReadout &Data) {
   if (DreamConfiguration.Instance == Config::DREAM) {
     return DreamGeom.getPixel(Parms, Data);
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
     return MagicGeom.getPixel(Parms, Data);
+  } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
+    return HeimdalGeom.getPixel(Parms, Data);
   } else {
     return 0;
   }

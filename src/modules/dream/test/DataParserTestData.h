@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@ std::vector<uint8_t> ErrGoodRingBadFEN
 };
 
 
-std::vector<uint8_t> OkThreeDreamReadouts
+std::vector<uint8_t> OkThreeCDTReadouts
 {
   // Readout 1
   0x00, 0x01, 0x10, 0x00, // fiber 0, fen 1, data size 40 bytes

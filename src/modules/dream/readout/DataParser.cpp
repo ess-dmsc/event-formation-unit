@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 
 namespace Dream {
 
-constexpr unsigned int DreamReadoutSize{sizeof(DataParser::DreamReadout)};
+constexpr unsigned int CDTReadoutSize{sizeof(DataParser::CDTReadout)};
 
 // Assume we start after the PacketHeader
 int DataParser::parse(const char *Buffer, unsigned int Size) {
@@ -33,7 +33,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       return ParsedReadouts;
     }
 
-    auto Data = (DreamReadout *)((char *)DataPtr);
+    auto Data = (CDTReadout *)((char *)DataPtr);
 
     if (BytesLeft < Data->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -58,9 +58,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            Data->DataLength);
     Stats.DataHeaders++;
 
-    if (Data->DataLength != DreamReadoutSize) {
+    if (Data->DataLength != CDTReadoutSize) {
       XTRACE(DATA, WAR, "Invalid data length %u, expected %u", Data->DataLength,
-             DreamReadoutSize);
+             CDTReadoutSize);
       Stats.DataLenErrors++;
       return ParsedReadouts;
     }

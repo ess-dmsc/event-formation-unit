@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,7 @@ using namespace Dream;
 
 class MagicGeometryTest : public TestBase {
 protected:
-  DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CDTReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Config::ModuleParms Parms{false, Config::ModuleType::PA, {0}, {0}};
   MagicGeometry geometry;
   void SetUp() override {}

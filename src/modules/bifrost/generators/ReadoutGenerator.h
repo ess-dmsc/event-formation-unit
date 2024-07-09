@@ -43,7 +43,7 @@ struct BiforstGeneratorSettings {
   static_assert(sizeof(struct dat_data_t) == 16, "wrong packing");
 
   /**
-   * @brief Reads a DreamReadout struct from the DAT file.
+   * @brief Reads a CDTReadout struct from the DAT file.
    * @param reaout The reference to the dat_data_t struct to store the readout
    * data.
    * @return The number of bytes read, 0 if the line is ignored, or -1 upon

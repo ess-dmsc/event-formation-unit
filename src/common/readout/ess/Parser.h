@@ -58,7 +58,8 @@ public:
     FREIA = 0x48,
     TREX = 0x50,
     DREAM = 0x60,
-    MAGIC = 0x64
+    MAGIC = 0x64,
+    HEIMDAL = 0x68
   };
 
   uint64_t NextSeqNum[MaxOutputQueues];

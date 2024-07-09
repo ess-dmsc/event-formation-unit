@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,6 +6,7 @@
 /// \brief CDT Mantle module abstractions
 ///
 /// Consult ICD for logical geometry dimensions, rotations etc.
+/// The Dream mantle is also used by Magic.
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -20,14 +21,12 @@
 
 namespace Dream {
 
-class Mantle {
+class DreamMantle {
 public:
-  const uint8_t WiresPerCounter{32};
-  uint16_t StripsPerCass{256};
 
   ///\brief change default number of strips per cassette to differentiate
   /// between DREAM (256) and MAGIC (128)
-  explicit Mantle(uint16_t Strips) : StripsPerCass(Strips){};
+  explicit DreamMantle(uint16_t Strips) : StripsPerCass(Strips){};
 
   int getX(int Strip) { return Strip; }
 
@@ -38,7 +37,7 @@ public:
 
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::DreamReadout &Data) {
+                      DataParser::CDTReadout &Data) {
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
     uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
@@ -54,6 +53,8 @@ public:
   }
 
 private:
+  uint16_t StripsPerCass{256}; // for DREAM, 128 for Magic
+  const uint8_t WiresPerCounter{32};
   ESSGeometry Geometry{256, 1920, 1, 1};
 };
 } // namespace Dream
