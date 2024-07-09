@@ -25,7 +25,7 @@ public:
   int getPixelOffset(Config::ModuleType Type) const;
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data) const;
+  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data) const;
 
   HeimdalMantle mantle{64};
 };

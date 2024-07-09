@@ -1,5 +1,5 @@
 
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ using namespace Dream;
 
 class DreamGeometryTest : public TestBase {
 protected:
-  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
+  DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 16, 16};
   Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
   SUMO endcap{616, 256};
   void SetUp() override {}

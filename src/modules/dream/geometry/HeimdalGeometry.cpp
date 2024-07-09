@@ -15,7 +15,7 @@
 namespace Dream {
 
 int HeimdalGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::DreamReadout &Data) const {
+                            DataParser::CDTReadout &Data) const {
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);

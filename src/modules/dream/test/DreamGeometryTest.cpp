@@ -12,7 +12,7 @@ using namespace Dream;
 
 class DreamGeometryTest : public TestBase {
 protected:
-  DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CDTReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
   DreamGeometry geometry;
   void SetUp() override {}

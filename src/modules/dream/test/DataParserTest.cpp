@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,7 +40,7 @@ TEST_F(DataParserTest, BadSize) {
 }
 
 TEST_F(DataParserTest, HeaderSizeError) {
-  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 3);
+  auto Res = Parser.parse((char *)&OkThreeCDTReadouts[0], 3);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.DataHeaders, 0);
@@ -65,7 +65,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, DataSizeMismatch) {
-  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0], 10);
+  auto Res = Parser.parse((char *)&OkThreeCDTReadouts[0], 10);
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.BufferErrors, 1);
@@ -73,8 +73,8 @@ TEST_F(DataParserTest, DataSizeMismatch) {
 }
 
 TEST_F(DataParserTest, ParseThree) {
-  auto Res = Parser.parse((char *)&OkThreeDreamReadouts[0],
-                          OkThreeDreamReadouts.size());
+  auto Res = Parser.parse((char *)&OkThreeCDTReadouts[0],
+                          OkThreeCDTReadouts.size());
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(Parser.Stats.Readouts, 3);
   ASSERT_EQ(Parser.Stats.DataHeaders, 3);

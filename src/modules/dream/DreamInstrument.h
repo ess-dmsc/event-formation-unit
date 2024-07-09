@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,7 +40,7 @@ public:
 
   //
   uint32_t calcPixel(Config::ModuleParms &Parms,
-                     DataParser::DreamReadout &Data);
+                     DataParser::CDTReadout &Data);
 
 public:
   /// \brief Stuff that 'ties' DREAM together

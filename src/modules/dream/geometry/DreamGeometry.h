@@ -29,7 +29,7 @@ public:
   int getPixelOffset(Config::ModuleType Type);
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
+  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
 
   SUMO fwec{280, 256};
   SUMO bwec{616, 256};

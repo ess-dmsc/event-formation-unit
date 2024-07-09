@@ -12,7 +12,7 @@ using namespace Dream;
 
 class HeimdalGeometryTest : public TestBase {
 protected:
-  DataParser::DreamReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CDTReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
   Config::ModuleParms Parms{false, Config::ModuleType::HeimdalMantle, {0}, {0}};
   HeimdalGeometry geometry;
   void SetUp() override {}

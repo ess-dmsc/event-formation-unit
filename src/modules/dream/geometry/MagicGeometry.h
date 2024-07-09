@@ -27,7 +27,7 @@ public:
   int getPixelOffset(Config::ModuleType Type);
 
   /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::DreamReadout &Data);
+  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
 
   PADetector padetector{256, 512};
   DreamMantle frdetector{128};

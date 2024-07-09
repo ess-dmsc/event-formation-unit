@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2023 - 2024 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) {
 
   Dream::ReadoutGenerator DreamGen;
-  uint8_t DreamDataSize = sizeof(Dream::DataParser::DreamReadout);
+  uint8_t DreamDataSize = sizeof(Dream::DataParser::CDTReadout);
   DreamGen.setReadoutDataSize(DreamDataSize);
 
   DreamGen.argParse(argc, argv);

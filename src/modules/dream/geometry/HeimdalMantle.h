@@ -34,7 +34,7 @@ public:
 
   //
   uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::DreamReadout &Data) const {
+                      DataParser::CDTReadout &Data) const {
     uint8_t MountingUnit = Parms.P1.MU;
     uint8_t Cassette = Parms.P2.Cassette;
     uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;

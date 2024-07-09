@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -69,14 +69,14 @@ TEST_F(DreamInstrumentTest, ConstructorMagic) {
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, Settings);
-  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
+  DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   Settings.ConfigFile = ConfigFileMagic;
   DreamInstrument Dream(counters, Settings);
-  DataParser::DreamReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),
             245760 + 1);
 }
