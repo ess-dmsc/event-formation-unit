@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "da00_dataarray_generated.h"
+#include <da00_dataarray_generated.h>
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>

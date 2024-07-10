@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "da00_dataarray_generated.h"
-#include "flatbuffers/flatbuffers.h"
+#include <da00_dataarray_generated.h>
+#include <flatbuffers/flatbuffers.h>
 #include <common/kafka/Producer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
