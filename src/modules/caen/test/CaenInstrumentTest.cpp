@@ -49,6 +49,13 @@ TEST_F(CaenInstrumentTest, CspecConstructor) {
   CaenInstrument Caen(counters, Settings);
 }
 
+TEST_F(CaenInstrumentTest, Tbl3HeConstructor) {
+  Settings.ConfigFile = TBL3HE_CONFIG;
+  Settings.CalibFile = TBL3HE_CALIB;
+  Settings.DetectorName = "tbl3he";
+  CaenInstrument Caen(counters, Settings);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
