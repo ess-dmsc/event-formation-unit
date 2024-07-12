@@ -91,12 +91,26 @@ TEST_F(FreiaConfigTest, ParmMaxGapWire) {
   EXPECT_EQ(config.CfgParms.MaxGapWire, 129);
 }
 
+TEST_F(FreiaConfigTest, DefaultParmMaxGapWire) {
+  json_change_key(config.root, "MaxGapWire", "NoMaxGapWire");
+  EXPECT_EQ(config.CfgParms.MaxGapWire, 0);
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxGapWire, 0);
+}
+
 TEST_F(FreiaConfigTest, ParmMaxGapStrip) {
   EXPECT_EQ(config.CfgParms.MaxGapStrip, 0);
 
   config.root["MaxGapStrip"] = 129;
   config.applyConfig();
   EXPECT_EQ(config.CfgParms.MaxGapStrip, 129);
+}
+
+TEST_F(FreiaConfigTest, DefaultParmMaxGapStrip) {
+  json_change_key(config.root, "MaxGapStrip", "NoMaxGapStrip");
+  EXPECT_EQ(config.CfgParms.MaxGapStrip, 0);
+  config.applyConfig();
+  EXPECT_EQ(config.CfgParms.MaxGapStrip, 0);
 }
 
 TEST_F(FreiaConfigTest, ParmSplitMultiEvents) {
