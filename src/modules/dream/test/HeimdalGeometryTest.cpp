@@ -42,6 +42,11 @@ TEST_F(HeimdalGeometryTest, GetPixel) {
   ASSERT_EQ(geometry.getPixel(Parms, Readout), 143); // last Cass of last MU
 }
 
+TEST_F(HeimdalGeometryTest, GetPixelBadType) {
+  Parms.Type = Config::ModuleType::DreamMantle;
+  ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

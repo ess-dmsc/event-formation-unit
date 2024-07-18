@@ -41,6 +41,19 @@ std::string ConfigStrMagic = R"(
   }
 )";
 
+std::string ConfigFileHeimdal{"deleteme_dreaminstrumenttestheimdal.json"};
+std::string ConfigStrHeimdal = R"(
+  {
+    "Detector" : "HEIMDAL",
+
+    "MaxPulseTimeDiffNS" : 16,
+
+    "Config" : [
+      { "Ring" :  0, "FEN":  0, "Type": "HeimdalMantle"}
+    ]
+  }
+)";
+
 class DreamInstrumentTest : public TestBase {
 protected:
   struct Counters counters;
@@ -67,6 +80,12 @@ TEST_F(DreamInstrumentTest, ConstructorMagic) {
   ASSERT_EQ(Dream.counters.Readouts, 0);
 }
 
+TEST_F(DreamInstrumentTest, ConstructorHeimdal) {
+  Settings.ConfigFile = ConfigFileHeimdal;
+  DreamInstrument Dream(counters, Settings);
+  ASSERT_EQ(Dream.counters.Readouts, 0);
+}
+
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(counters, Settings);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
@@ -79,6 +98,13 @@ TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),
             245760 + 1);
+}
+
+TEST_F(DreamInstrumentTest, CalcPixelHeimdal) {
+  Settings.ConfigFile = ConfigFileHeimdal;
+  DreamInstrument Dream(counters, Settings);
+  DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
@@ -175,11 +201,14 @@ int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(ConfigFileMagic, (void *)ConfigStrMagic.c_str(),
              ConfigStrMagic.size());
+ saveBuffer(ConfigFileHeimdal, (void *)ConfigStrHeimdal.c_str(),
+            ConfigStrHeimdal.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
 
   deleteFile(ConfigFile);
   deleteFile(ConfigFileMagic);
+  deleteFile(ConfigFileHeimdal);
   return RetVal;
 }

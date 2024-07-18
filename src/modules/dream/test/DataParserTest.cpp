@@ -72,6 +72,14 @@ TEST_F(DataParserTest, DataSizeMismatch) {
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
+TEST_F(DataParserTest, ReadoutSizeErrorOnSecond) {
+  auto Res = Parser.parse((char *)&ErrReadoutSize[0], ErrReadoutSize.size());
+  ASSERT_EQ(Res, 1); // One good readout, the second failed
+  ASSERT_EQ(Parser.Stats.Readouts, 1);
+  ASSERT_EQ(Parser.Stats.DataLenErrors, 1);
+  ASSERT_EQ(Parser.Result.size(), 1);
+}
+
 TEST_F(DataParserTest, ParseThree) {
   auto Res = Parser.parse((char *)&OkThreeCDTReadouts[0],
                           OkThreeCDTReadouts.size());

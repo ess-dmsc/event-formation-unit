@@ -8,6 +8,8 @@ get_filename_component(LOKI_CONFIG "${ESS_MODULE_DIR}/loki/configs/LokiFull.json
 get_filename_component(LOKI_CALIB "${ESS_MODULE_DIR}/loki/configs/lokinullcalib.json" ABSOLUTE)
 get_filename_component(BIFROST_CONFIG "${ESS_MODULE_DIR}/bifrost/configs/bifrost.json" ABSOLUTE)
 get_filename_component(BIFROST_CALIB "${ESS_MODULE_DIR}/bifrost/configs/bifrostnullcalib.json" ABSOLUTE)
+get_filename_component(TBL3HE_CONFIG "${ESS_MODULE_DIR}/tbl3he/configs/tbl3he.json" ABSOLUTE)
+get_filename_component(TBL3HE_CALIB "${ESS_MODULE_DIR}/tbl3he/configs/tbl3henullcalib.json" ABSOLUTE)
 get_filename_component(MIRACLES_CONFIG "${ESS_MODULE_DIR}/miracles/configs/miracles.json" ABSOLUTE)
 get_filename_component(MIRACLES_CALIB "${ESS_MODULE_DIR}/miracles/configs/miraclesnullcalib.json" ABSOLUTE)
 get_filename_component(CSPEC_CONFIG "${ESS_MODULE_DIR}/cspec/configs/cspec.json" ABSOLUTE)
@@ -71,6 +73,8 @@ target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG
 target_compile_definitions(CaenInstrumentTest PRIVATE LOKI_CALIB="${LOKI_CALIB}")
 target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CONFIG="${BIFROST_CONFIG}")
 target_compile_definitions(CaenInstrumentTest PRIVATE BIFROST_CALIB="${BIFROST_CALIB}")
+target_compile_definitions(CaenInstrumentTest PRIVATE TBL3HE_CONFIG="${TBL3HE_CONFIG}")
+target_compile_definitions(CaenInstrumentTest PRIVATE TBL3HE_CALIB="${TBL3HE_CALIB}")
 target_compile_definitions(CaenInstrumentTest PRIVATE CSPEC_CONFIG="${CSPEC_CONFIG}")
 target_compile_definitions(CaenInstrumentTest PRIVATE CSPEC_CALIB="${CSPEC_CALIB}")
 
