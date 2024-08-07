@@ -9,10 +9,11 @@
 
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/Parser.h"
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
+#include <common/readout/ess/Parser.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -88,6 +89,29 @@ void ReadoutGenerator::generateData() {
     addTicksBtwReadoutsToReadoutTime();
 
     SentReadouts++;
+  }
+}
+
+void ReadoutGenerator::main() {
+  ReadoutGeneratorBase::main();
+
+  // If the number of packets is not set, calculate it how much packet is
+  // required to send all the readouts in the file
+  if (Settings.NumberOfPackets == 0 && Settings.Loop == false) {
+    struct stat fileStat;
+
+    if (stat(bifrostSettings.FilePath.c_str(), &fileStat) == -1) {
+      throw std::runtime_error(
+          "Failed to open the file: " + bifrostSettings.FilePath +
+          ". Biforst gen requires dat file with sample data");
+    }
+
+    off_t fileSize = fileStat.st_size;
+
+    // Calculate the number of dat_data_t that can fit into the file size
+    size_t readoutInDatFile = fileSize / sizeof(struct dat_data_t);
+
+    Settings.NumberOfPackets = readoutInDatFile / numberOfReadouts;
   }
 }
 
