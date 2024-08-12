@@ -6,42 +6,29 @@
 
 import bitstruct
 import struct
+import numpy as np
 
 def gen_tdc_readout(counter, tdc_ns):
     # Define the tdc format of the payload
-    # format = 'u4u4u12u35u4u5'
-    # format = 'u5u4u35u12u4u4'
+    format = 'u4u4u12u35u4u5'
 
-    # tdc_header = 0x6
-    # tdc_type = 0xb
+    tdc_header = 0x6
+    tdc_type = 15
 
-    # timestamp = int(tdc_ns / 3.125)
-    # stamp = 12
+    timestamp = int(tdc_ns / 3.125)
+    stamp = 12
 
-    # # Pack the values into a byte structure
-    # payload = bitstruct.pack(format, tdc_header, tdc_type, counter, timestamp, stamp, 0)
-    # payload = bitstruct.pack(format, 0, stamp, timestamp, counter, tdc_type, tdc_header)
+    tdc_packet = bitstruct.pack(format, tdc_header, tdc_type, counter, timestamp, stamp, 0)
 
-    format = 't16u8u8u8u16'
+    tdc_packet = tdc_packet[::-1]
 
-    payload = bitstruct.pack(format, 'TP', ord('X'), 3, 1, 1, 0)
-
-    # payload = b''
-
-    # payload += bitstruct.pack('u5', 0)
-    # payload += bitstruct.pack('u4', stamp)
-    # payload += bitstruct.pack('u35', timestamp)
-    # payload += bitstruct.pack('u12', counter)
-    # payload += bitstruct.pack('u4', 0x6)
-    # payload += bitstruct.pack('u4', 0xb)
-
-    return payload
+    return tdc_packet
 
 def gen_pixel_cluster(tdc_ns, delay_to_tdc, cluster_size):
     # Define the pixel format of the payload
-    format = '<u4u16u14u10u4u16'
+    format = 'u4u16u14u10u4u16'
 
-    pixel_header = 0xb
+    pixel_header = 11
 
     pixel_time_ns = tdc_ns + delay_to_tdc
 
@@ -57,29 +44,61 @@ def gen_pixel_cluster(tdc_ns, delay_to_tdc, cluster_size):
 
         tot = 50
 
-        toa += i
+        pix_addr = 100 + i
 
-        pix_addr = 1000 + i
-
-        # Pack the values into a byte structure
-        # payload += bitstruct.pack(format, pixel_header, pix_addr, toa, tot, ftoa, spdr)
+        payload = bitstruct.pack(format, pixel_header, pix_addr, toa + i, tot, ftoa, spdr)[::-1]
 
     return payload
+
+def print_pixel_readout(data):
+    format = 'u4u16u14u10u4u16'
+    packed = struct.pack('>Q', data)
+    unpacked = struct.unpack('<Q', packed)[0]
+    swaped_bytes = struct.pack('<Q', unpacked)
+    pix_header, pix_addr, toa, tot, ftoa, spdr = bitstruct.unpack(format, swaped_bytes)
+    print(pix_header, pix_addr, toa, tot, ftoa, spdr, sep='\t')
+
+def print_tdc_readout(data):
+    format = 'u4u4u12u35u4u5'
+    packed = struct.pack('>Q', data)
+    unpacked = struct.unpack('<Q', packed)[0]
+    swaped_bytes = struct.pack('<Q', unpacked)
+    tdc_header, tdc_type, counter, timestamp, stamp, _ = bitstruct.unpack(format, swaped_bytes)
+    print(tdc_header, tdc_type, counter, timestamp, stamp, sep='\t')
 
 def main():
     # Generate TDC readout payload
     counter = 1
-    tdc_ns = 500
-    data = b""
-    data += gen_tdc_readout(counter, tdc_ns)
-
-    delay_to_tdc = 2000
+    tdc_ns = 0
+    delay_to_tdc = 50000
     cluster_size = 8
 
-    data += gen_pixel_cluster(tdc_ns, delay_to_tdc, cluster_size)
+    data = b""
+
+    for i in range(1000):
+        data += gen_tdc_readout(counter, tdc_ns)
+        data += gen_pixel_cluster(tdc_ns, delay_to_tdc, cluster_size)
+
+        tdc_ns += int(1e9 / 14)
+        if tdc_ns > 107374182400:
+            tdc_ns = 0
 
     with open('file', 'wb') as file:
         file.write(data)
+
+    # with open('file', 'rb') as file:
+    #     raw_data = file.read()
+
+    # data_array = np.frombuffer(raw_data, dtype=np.uint64)
+
+    # print("p_head\tp_addr\ttoa\ttot\tftoa\tspdr")
+
+    # for i in range(len(data_array)):
+    #     if (data_array[i] >> 60) & 0xF == 0x6:
+    #         print_tdc_readout(data_array[i])
+    #     else:
+    #         print_pixel_readout(data_array[i])
+    
 
 if __name__ == "__main__":
     main()
