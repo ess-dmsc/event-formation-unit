@@ -11,26 +11,38 @@
 
 class HwCheckTest : public TestBase {
 protected:
+  HwCheck check;
   void SetUp() override {}
   void TearDown() override {}
 };
 
 // Test cases below
-TEST_F(HwCheckTest, HwCheckPass) {
-  std::vector<std::string> IgnoredInterfaces{"0", "00", "br-"};
-  HwCheck check;
-  bool pass = check.checkMTU(IgnoredInterfaces, true);
-  ASSERT_TRUE(pass);
+TEST_F(HwCheckTest, HwCheckFail) {
+  std::vector<std::string> MandatoryInterfaces{"if_does_not_exist"};
+  ASSERT_FALSE(check.checkMTU(MandatoryInterfaces, true));
 }
 
-// Can't get this to fail on all platforms on Jenkins
-// TEST_F(HwCheckTest, HwCheckFail) {
-//   std::vector<std::string> IgnoredInterfaces {"0", "00"};
-//   HwCheck check;
-//   check.setMinimumMTU(6553500);
-//   bool pass = check.checkMTU(IgnoredInterfaces);
-//   ASSERT_FALSE(pass);
-// }
+TEST_F(HwCheckTest, HwCheckNoInterfaces) {
+  std::vector<std::string> MandatoryInterfaces{};
+  ASSERT_TRUE(check.checkMTU(MandatoryInterfaces, true));
+}
+
+
+TEST_F(HwCheckTest, HwCheckMacOs) {
+  #ifdef __APPLE__
+  std::vector<std::string> MandatoryInterfaces{"lo0"};
+  ASSERT_TRUE(check.checkMTU(MandatoryInterfaces, true));
+  #endif
+}
+
+TEST_F(HwCheckTest, HwCheckLinux) {
+  #ifdef __linux__
+  std::vector<std::string> MandatoryInterfaces{"lo"};
+  ASSERT_TRUE(check.checkMTU(MandatoryInterfaces, true));
+  #endif
+}
+
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

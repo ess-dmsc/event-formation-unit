@@ -22,11 +22,24 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+
+bool HwCheck::ignoreInterface(char * IfName) {
+  bool Ignored = true;
+  for (auto & Interface : CheckedInterfaces) {
+    if (strstr(IfName, Interface.c_str()) != NULL) {
+      Ignored = false;
+    }
+  }
+  return Ignored;
+}
+
 /// Checks for minimum MTU sizes by walking through the list of interfaces
 /// returned by getifaddrs() of type AF_INET, which are both UP and RUNNING.
 /// There is also support for ignoring certain interface name patterns to remove
 /// MTU check for irrelevant interfaces such as ppp0 and docker0
-bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
+bool HwCheck::checkMTU(std::vector<std::string> InterfaceList, bool PrintOnSuccess) {
+  CheckedInterfaces = InterfaceList;
+  int MatchCount{0};
   struct ifaddrs *ifaddr, *ifa;
   int n;
 
@@ -47,16 +60,11 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
       continue;
     }
 
-    bool tobeignored = false;
-    for (auto &ignorePattern : ignore) {
-      if (strstr(ifa->ifa_name, ignorePattern.c_str()) != NULL) {
-        tobeignored = true;
-      }
-    }
 
-    if (tobeignored) {
+    if (ignoreInterface(ifa->ifa_name)) {
       LOG(INIT, Sev::Debug, "no checking of MTU for {}", ifa->ifa_name);
     } else {
+      MatchCount++;
       if (!checkMTU(ifa->ifa_name)) {
         LOG(INIT, Sev::Warning, "MTU check failed for interface {}",
             ifa->ifa_name);
@@ -64,11 +72,15 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess) {
         return false;
       } else {
         if (PrintOnSuccess) {
-          LOG(INIT, Sev::Warning, "MTU check succeded for interface {}",
+          LOG(INIT, Sev::Info, "MTU check succeded for interface {}",
               ifa->ifa_name);
         }
       }
     }
+  }
+  if (MatchCount != (int)CheckedInterfaces.size()) {
+    LOG(INIT, Sev::Warning, "MTU check - not all specified interfaces exist");
+    return false;
   }
   freeifaddrs(ifaddr);
   return true;
