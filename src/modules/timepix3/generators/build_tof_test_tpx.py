@@ -1,12 +1,20 @@
 # Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
 # ===----------------------------------------------------------------------===#
 #
-# Brief: Test code.
+# Brief: This code is generating a tpx file which can be used with the tpx
+#        generator. The tpx generator is a tool that generates udp packets
+#        from tpx data and sends it to the EFU.
+#
+#        This code is generating tpx file with a minimal data to initialize
+#        the timepix efu and send some pixel packets with exact delays to
+#        test TOF calculation.
 # ===----------------------------------------------------------------------===#
 
 import bitstruct
 import struct
 import numpy as np
+import sys
+import argparse
 
 PIXEL_MAX_TIMESTAMP_NS = 26843545600
 UDP_MAX_SIZE = 8952
@@ -87,21 +95,38 @@ def print_tdc_readout(data):
     print(tdc_header, tdc_type, counter, timestamp, stamp, sep="\t")
 
 
+def us_to_ns(us):
+    return us * 1000
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="TPX Test Generator")
+    parser.add_argument("-d", "--delay", type=float, help="Delay in microseconds")
+    return parser.parse_args()
+
+
 def main():
-    # Generate TDC readout payload
+    
+    args = parse_arguments()
+    delay = args.delay
+    
+    if delay is None:
+        print("Error: Delay parameter is required. Use -h or --help for more information.")
+        sys.exit(1)
+
     counter = 1
-    tdc_ns = 0
-    us_to_ns = 1000
+    tdc_ns = 10
     cluster_size = 1
 
     data = b""
 
+    # Generate an empty tpx file
     with open("tpx/file", "wb") as file:
         file.write(data)
 
     for i in range(1):
         data += gen_tdc_readout(counter + i, tdc_ns)
-        data += gen_pixel_cluster(tdc_ns, 40000 * us_to_ns, cluster_size)
+        data += gen_pixel_cluster(tdc_ns, us_to_ns(delay), cluster_size)
 
         tdc_ns += int(1e9 / 10)
         if tdc_ns > 107374182400:
