@@ -201,8 +201,8 @@ int main(int argc, char **argv) {
   saveBuffer(ConfigFile, (void *)ConfigStr.c_str(), ConfigStr.size());
   saveBuffer(ConfigFileMagic, (void *)ConfigStrMagic.c_str(),
              ConfigStrMagic.size());
- saveBuffer(ConfigFileHeimdal, (void *)ConfigStrHeimdal.c_str(),
-            ConfigStrHeimdal.size());
+  saveBuffer(ConfigFileHeimdal, (void *)ConfigStrHeimdal.c_str(),
+             ConfigStrHeimdal.size());
 
   testing::InitGoogleTest(&argc, argv);
   auto RetVal = RUN_ALL_TESTS();
