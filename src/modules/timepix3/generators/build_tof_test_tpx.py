@@ -39,6 +39,7 @@ def print_tdc_readout(data):
     print(tdc_header, tdc_type, counter, timestamp, stamp, sep="\t")
 
 def gen_tdc(counter, tdc_ns):
+  
     # Define the tdc format of the payload
     format = "u4u4u12u35u4u5"
 
@@ -56,7 +57,6 @@ def gen_tdc(counter, tdc_ns):
 
     return tdc_packet
 
-
 def gen_pixel(tdc_ns, delay_to_tdc):
     # Define the pixel format of the payload
     format = "u4u16u14u10u4u16"
@@ -69,7 +69,6 @@ def gen_pixel(tdc_ns, delay_to_tdc):
 
     spdr = int(pixel_time_ns / 409600)
     spdr_remainder = pixel_time_ns % 409600
-    spdr_remainder2 = pixel_time_ns - (spdr * 409600)
     toa = int(spdr_remainder / 25)
     toa_remainder = spdr_remainder % 25
     ftoa = int(toa_remainder / 1.5625)
@@ -93,7 +92,6 @@ def fill_payload(payload):
 
 def us_to_ns(us):
     return us * 1000
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="TPX Test Generator")
@@ -139,7 +137,6 @@ def main():
     # Generate an empty tpx file
     with open("tpx/file", "wb") as file:
         file.write(data)
-
     # Generate a tdc packet to initialize the timepix efu
     data += gen_tdc(counter, tdc_ns)
     fill_payload(data)
@@ -162,7 +159,7 @@ def main():
         tdc_ns += calculate_frequency_period(frequncy)
         if tdc_ns > 107374182400:
             tdc_ns = 0
-
+            
     # with open('file', 'rb') as file:
     #     raw_data = file.read()
 

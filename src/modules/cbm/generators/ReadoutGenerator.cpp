@@ -70,7 +70,7 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
 // Generate data for IBM type beam monitors
 void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
-  uint32_t dataValue = 100000;
+  uint32_t dataValue = 100;
 
   for (uint32_t Readout = 0; Readout <= numberOfReadouts; Readout++) {
 
@@ -89,14 +89,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     // Currently we generating for 1 beam monitor only
     dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 0;
-    dataPkt->NPos = Fuzzer.randomInterval(1, 1000) + dataValue;
-
-    if (Readout > numberOfReadouts / 4 &&
-        Readout < 3 * numberOfReadouts / 4) {
-      dataValue += 10000;
-    } else {
-      dataValue = 0;
-    }
+    dataPkt->NPos = dataValue;
 
     // Increment time for next readout
     addTicksBtwReadoutsToReadoutTime();
