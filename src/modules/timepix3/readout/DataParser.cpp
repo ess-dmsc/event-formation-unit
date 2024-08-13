@@ -7,6 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <iostream>
+#include <ostream>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -79,9 +81,9 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           (*DataBytesPtr & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
           (*DataBytesPtr & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
           (*DataBytesPtr & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
+          (*DataBytesPtr & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
           (*DataBytesPtr & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
           (*DataBytesPtr & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
-          (*DataBytesPtr & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
           *DataBytesPtr & PIXEL_SPTIME_MASK);
 
       DataEventObservable<PixelReadout>::publishData(pixelDataEvent);

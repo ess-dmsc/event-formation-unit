@@ -237,9 +237,9 @@ struct PixelReadout {
   const uint16_t dCol;      ///< The digital column of the pixel.
   const uint16_t sPix;      ///< The sub pixel index of the pixel.
   const uint8_t pix;        ///< The pixel index within the sub pixel.
+  const uint16_t toa;       ///< The Time-of-Arrival value of the pixel.
   const uint16_t ToT;       ///< The Time-over-Threshold value of the pixel.
   const uint8_t fToA;       ///< The fine Time-of-Arrival value of the pixel.
-  const uint16_t toa;       ///< The Time-of-Arrival value of the pixel.
   const uint32_t spidrTime; ///< The SPIDR timestamp of the pixel.
 
   /**
@@ -248,14 +248,14 @@ struct PixelReadout {
    * @param dCol The digital column of the pixel.
    * @param sPix The sub pixel index of the pixel.
    * @param pix The pixel index within the sub pixel.
+   * @param toa The Time-of-Arrival value of the pixel.
    * @param ToT The Time-over-Threshold value of the pixel.
    * @param fToA The fine Time-of-Arrival value of the pixel.
-   * @param toa The Time-of-Arrival value of the pixel.
    * @param spidrTime The SPIDR timestamp of the pixel.
    */
-  PixelReadout(uint16_t dCol, uint16_t sPix, uint8_t pix, uint16_t ToT,
-               uint8_t fToA, uint16_t toa, uint32_t spidrTime)
-      : dCol(dCol), sPix(sPix), pix(pix), ToT(ToT), fToA(fToA), toa(toa),
+  PixelReadout(uint16_t dCol, uint16_t sPix, uint8_t pix, uint16_t toa, uint16_t ToT,
+               uint8_t fToA, uint32_t spidrTime)
+      : dCol(dCol), sPix(sPix), pix(pix), toa(toa), ToT(ToT),  fToA(fToA),
         spidrTime(spidrTime) {}
 
   /**

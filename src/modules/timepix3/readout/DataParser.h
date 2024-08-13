@@ -33,7 +33,7 @@ namespace Timepix3 {
 #define PIXEL_DCOL_OFFSET   52
 #define PIXEL_SPIX_OFFSET   45
 #define PIXEL_PIX_OFFSET    44
-#define PIXEL_TOA_OFFSET    28
+#define PIXEL_TOA_OFFSET    30
 #define PIXEL_TOT_OFFSET    20
 #define PIXEL_FTOA_OFFSET   16
 
