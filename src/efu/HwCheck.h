@@ -23,16 +23,15 @@ public:
   /// \brief Currently the constructor does nothing
   HwCheck(){};
 
+  /// \brief check if interface should be ignored
+  bool ignoreInterface(char * IfName);
+
   /// \brief Select interfaces to check
   bool checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess = false);
 
   /// setter for MTU size check, mostly used for reverting
   /// to a lower MTU size, when running on ad hoc servers
   void setMinimumMTU(int mtu) { MinimumMtu = mtu; }
-
-  /// Gleaned from MacOS and CentOS and deemed ignore worthy
-  std::vector<std::string> IgnoredInterfaces = {"ppp0", "docker", "ov-",
-                                                "virbr"};
 
   /// \brief
   // bool checkDiskSpace(std::vector<std::string> checkdirs);
@@ -44,8 +43,8 @@ private:
   /// Check a single interface
   bool checkMTU(const char *interface);
 
-  ///
-  // void debugPrint(struct ifaddrs * ifa);
+  /// \brief List of interfaces that must pass
+  std::vector<std::string> CheckedInterfaces{};
 
   /// default for Ethernet interfaces is 1500 bytes, but better performance
   /// can be achieved using larger packet sizes

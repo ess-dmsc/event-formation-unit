@@ -65,7 +65,7 @@ int MainProg::run(Detector *inst) {
   if (DetectorSettings.NoHwCheck) {
     LOG(MAIN, Sev::Warning, "({}) Skipping HwCheck - performance might suffer", Name);
   } else {
-    if (hwcheck.checkMTU(hwcheck.IgnoredInterfaces) == false) {
+    if (hwcheck.checkMTU(DetectorSettings.Interfaces) == false) {
       LOG(MAIN, Sev::Error, "({}) MTU checks failed, for a quick fix, try", Name);
       LOG(MAIN, Sev::Error,
           "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");

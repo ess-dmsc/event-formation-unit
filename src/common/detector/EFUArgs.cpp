@@ -52,6 +52,9 @@ EFUArgs::EFUArgs() {
   CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
       ->group("EFU Options");
 
+  CLIParser.add_option("--checkif", EFUSettings.Interfaces, "Perform MTU check on these interfaces")
+      ->group("EFU Options");
+
   std::string DetectorDescription{"Detector name"};
 
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress,
