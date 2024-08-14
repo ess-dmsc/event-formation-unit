@@ -19,52 +19,52 @@ using namespace Observer;
 // clang-format off
 std::vector<uint8_t> singlePixelReadoutData{
     // Single readout
-    0x91, 0xc6, 0x30, 0x80,
-    0x8b, 0xa8, 0x3a, 0xbf
+  0x92, 0x00, 0xd3, 0x4c, // spdr(u16): 146. ftoa(u4): 3, tot(u10): 205
+  0xc0, 0x97, 0x01, 0xb1  // toa(u14): 7937, dcol(u8): 16, spix(u7): 12, pix(u1): 1
 };
 
-PixelReadout singlePixelReadout{15, 2231, 30,
-                                                  6, 45, 454, 33};
+PixelReadout singlePixelReadout{16, 12, 1,7937,
+                                                   205, 3, 146};
 
 std::vector<uint8_t> TooShort{
-    0x00, 0x01
+  0x00, 0x01
 };
 
 std::vector<uint8_t> tdc1RisingReadoutData{
-     // TDC1 rising readout
-    0xc0, 0x42, 0x9f, 0xdd,
-    0xa4, 0x7e, 0x8b, 0x6f
+  // TDC1 rising readout
+  0xe0, 0xff, 0xff, 0xff, // timestamp(u35): 34359738367, stamp(u5): 15
+  0xff, 0xff, 0xff, 0x6f  // header(u4): 6, type(u4): 15, triggercounter(u12): 4095
 };
 
-TDCReadout tdc1RisingReadout{15, 2231, 31447764897,
-                                                  6};
+TDCReadout tdc1RisingReadout{15, 4095, 34359738367,
+                                                  15};
 
 std::vector<uint8_t> tdc1FallingReadoutData{
      // TDC1 falling readout
-    0xc0, 0x42, 0x9f, 0xdd,
-    0xa4, 0x7e, 0x8b, 0x6a
+  0xe0, 0xff, 0xff, 0xff, // timestamp(u35): 34359738367, stamp(u5): 15
+  0xff, 0xff, 0xff, 0x6a  // header(u4): 6, type(u4): 10, triggercounter(u12): 4095
 };
 
-TDCReadout tdc1FallingReadout{10, 2231, 31447764897,
-                                                  6};
+TDCReadout tdc1FallingReadout{10, 4095, 34359738367,
+                                                  15};
 
 std::vector<uint8_t> tdc2RisingReadoutData{
     // TDC2 rising readout
-    0xc0, 0x42, 0x9f, 0xdd,
-    0xa4, 0x7e, 0x8b, 0x6e
+  0xe0, 0xff, 0xff, 0xff, // timestamp(u35): 34359738367, stamp(u5): 15
+  0xff, 0xff, 0xff, 0x6e  // header(u4): 6, type(u4): 14, triggercounter(u12): 4095
 };
 
-TDCReadout tdc2RisingReadout{14, 2231, 31447764897,
-                                                  6};
+TDCReadout tdc2RisingReadout{14, 4095, 34359738367,
+                                                  15};
 
 std::vector<uint8_t> tdc2FallingReadoutData{
      // TDC2 falling
-    0xc0, 0x42, 0x9f, 0xdd,
-    0xa4, 0x7e, 0x8b, 0x6b
+  0xe0, 0xff, 0xff, 0xff, // timestamp(u35): 34359738367, stamp(u5): 15
+  0xff, 0xff, 0xff, 0x6b  // header(u4): 6, type(u4): 11, triggercounter(u12): 4095
 };
 
-TDCReadout tdc2FallingReadout{11, 2231, 31447764897,
-                                                  6};
+TDCReadout tdc2FallingReadout{11, 4095, 34359738367,
+                                                  15};
 
 std::vector<uint8_t> SingleEVRReadoutData{
   0x01, 0x45, 0x53, 0x53,
@@ -86,11 +86,11 @@ static_cast<uint32_t>(999999965),
 
 std::vector<uint8_t> TDCAndPixelReadout{
   // Single TDC readout
-  0xc0, 0x42, 0x9f, 0xdd,
-  0xa4, 0x7e, 0x8b, 0x6f,
+  0xe0, 0xff, 0xff, 0xff, // timestamp(u35): 34359738367, stamp(u5): 15
+  0xff, 0xff, 0xff, 0x6f,  // header(u4): 6, type(u4): 15, triggercounter(u12): 4095
   // Single pixel readout
-  0x91, 0xc6, 0x30, 0x80,
-  0x8b, 0xa8, 0x3a, 0xbf
+  0x92, 0x00, 0xd3, 0x4c, // spdr(u16): 146. ftoa(u4): 3, tot(u10): 205
+  0xc0, 0x97, 0x01, 0xb1  // toa(u14): 7937, dcol(u8): 16, spix(u7): 12, pix(u1): 1
 };
 // clang-format on
 
@@ -114,6 +114,8 @@ protected:
 
     timepix3Parser.DataEventObservable<TDCReadout>::subscribe(&tdcTestHandler);
     timepix3Parser.DataEventObservable<EVRReadout>::subscribe(&evrTestHandler);
+    timepix3Parser.DataEventObservable<PixelReadout>::subscribe(
+        &pixelTestHandler);
   }
 
   void TearDown() override {}

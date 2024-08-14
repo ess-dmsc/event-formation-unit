@@ -9,9 +9,10 @@
 a.out
 *core
 
-# Misc programs
+# Misc programs project files
 */timepix_gen/*
 *Test$
+*/tpx_readouts
 
 #directories
 build/*

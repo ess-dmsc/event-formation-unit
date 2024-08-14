@@ -137,8 +137,8 @@ TEST_F(Timepix3PixelEventHandlerTest, SerializerReferenceTimeUpdated) {
 TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
   uint16_t INVALID_SPIX = 500;
   testEventHandler.applyData(PixelReadout{
-      TEST_DCOL, INVALID_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
-      TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+      TEST_DCOL, INVALID_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToA,
+      TEST_DEFAULT_PIXEL_TIME.ToT, TEST_DEFAULT_PIXEL_TIME.fToA,
       TEST_DEFAULT_PIXEL_TIME.spidrTime});
 
   EXPECT_EQ(counters.InvalidPixelReadout, 1);
@@ -154,8 +154,8 @@ TEST_F(Timepix3PixelEventHandlerTest, TestIfEventIsLaterThenNextTdc) {
       {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
 
   testEventHandler.applyData(
-      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
-                   TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToA,
+                   TEST_DEFAULT_PIXEL_TIME.ToT, TEST_DEFAULT_PIXEL_TIME.fToA,
                    spidrLateArrival});
 
   testEventHandler.pushDataToKafka();
@@ -171,8 +171,8 @@ TEST_F(Timepix3PixelEventHandlerTest, TestEventTimeShortlyAfterTdcPublished) {
   testEventHandler.applyData(
       {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
   testEventHandler.applyData(
-      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToT,
-                   TEST_DEFAULT_PIXEL_TIME.fToA, TEST_DEFAULT_PIXEL_TIME.ToA,
+      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToA,
+                   TEST_DEFAULT_PIXEL_TIME.ToT, TEST_DEFAULT_PIXEL_TIME.fToA,
                    TEST_DEFAULT_PIXEL_TIME.spidrTime});
 
   testEventHandler.pushDataToKafka();
@@ -194,8 +194,8 @@ TEST_F(Timepix3PixelEventHandlerTest, TestPixelIsAfterReset) {
   testEventHandler.applyData(
       {TEST_PULSE_TIME_NS, pixelAfterReset.tdcClockInPixelTime});
   testEventHandler.applyData(PixelReadout{
-      TEST_DCOL, TEST_SPIX, TEST_PIX, pixelAfterReset.ToT, pixelAfterReset.fToA,
-      pixelAfterReset.ToA, pixelAfterReset.spidrTime});
+      TEST_DCOL, TEST_SPIX, TEST_PIX, pixelAfterReset.ToA, pixelAfterReset.ToT,
+      pixelAfterReset.fToA, pixelAfterReset.spidrTime});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 0);
