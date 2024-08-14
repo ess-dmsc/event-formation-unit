@@ -7,8 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <iostream>
-#include <ostream>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -64,11 +62,11 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
       break;
     }
-    
+
     // we read the data as 64 bit integers, and then use bitmasks to extract the
     // relevant information. This is done to avoid alignment issues, as the data
     // is not guaranteed to be aligned to 64 bits
-    DataBytesPtr = reinterpret_cast<uint64_t*>(DataPtr);
+    DataBytesPtr = reinterpret_cast<uint64_t *>(DataPtr);
 
     // regardless of readout type, the type variable is always in the same place
     // we read it here
@@ -99,7 +97,8 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       // mask and offset values are defined in DataParser.h
       TDCReadout tdcReadout(
           (*DataBytesPtr & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
-          (*DataBytesPtr & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+          (*DataBytesPtr & TDC_TRIGGERCOUNTER_MASK) >>
+              TDC_TRIGGERCOUNTER_OFFSET,
           (*DataBytesPtr & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
           (*DataBytesPtr & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
