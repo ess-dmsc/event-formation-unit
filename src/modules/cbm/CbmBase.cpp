@@ -252,6 +252,8 @@ void CbmBase::processing_thread() {
     }
 
     // Not only flush serializer data but also update runtime stats
+    // This not applies for histogram serializer which should be flushed
+    // only in case new pulse time is detected
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask =
           RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.CbmCounts,
@@ -262,10 +264,6 @@ void CbmBase::processing_thread() {
         serializerMap->produce();
       }
 
-      for (auto &serializerMap : HistogramSerializerMapPtr->toValuesList()) {
-        XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        serializerMap->produce();
-      }
       Counters.ProduceCauseTimeout++;
       Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
