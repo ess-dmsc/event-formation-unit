@@ -14,6 +14,7 @@
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
 #include <common/time/ESSTime.h>
+#include <cstdint>
 
 class ReadoutGeneratorBase {
 public:
@@ -82,17 +83,52 @@ protected:
 
   /// \brief Increment the readout time with ticks btw. readouts according to
   /// settings
-  inline void addTicksBtwReadoutsToReadoutTime() { readoutTime += Settings.TicksBtwReadouts; }
+  inline void addTicksBtwReadoutsToReadoutTime() {
+    readoutTime += Settings.TicksBtwReadouts;
+  }
+
+  /// \brief Reset the readout time to the next pulse time
+  inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
 
   /// \brief Increment the readout time with btw. events acording to
   /// settings
-  inline void addTickBtwEventsToReadoutTime() { readoutTime += Settings.TicksBtwEvents; }
+  inline void addTickBtwEventsToReadoutTime() {
+    readoutTime += Settings.TicksBtwEvents;
+  }
 
   // Get the value of readoutTimeHigh
   uint32_t getReadoutTimeHigh() const { return readoutTime.getTimeHigh(); }
 
   // Get the value of readoutTimeLow
   uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
+
+  // Get the value of readoutTime
+  esstime::TimeDurationNano getReadoutTimeNs() const {
+    return readoutTime.toNS();
+  }
+
+  // Get the value of pulseTime
+  esstime::TimeDurationNano getPulseTimeNs() const { return pulseTime.toNS(); }
+
+  // Get the value of prevPulseTime
+  esstime::TimeDurationNano getPrevPulseTimeNs() const {
+    return prevPulseTime.toNS();
+  }
+
+  /// \brief Perform the next pulse time calculation with ESSTime and return the
+  /// nanosecond precesion next pulse time, calculated according to ESS clock
+  /// ticks
+  esstime::TimeDurationNano getNextPulseTimeNs() const {
+    esstime::ESSTime nextPulseTime = pulseTime;
+    nextPulseTime += pulseFrequencyNs;
+    return nextPulseTime.toNS();
+  }
+
+  esstime::ESSTime getNextPulseTime() const {
+    esstime::ESSTime nextPulseTime = pulseTime;
+    nextPulseTime += pulseFrequencyNs;
+    return nextPulseTime;
+  }
 
   // Time offsets for readout generation
   const uint32_t TimeLowOffset{20000};     // ticks
@@ -104,8 +140,6 @@ protected:
 
   uint64_t Packets{0};
   uint32_t SeqNum{0};
-  ESSReadout::ESSTime pulseTime;
-  ESSReadout::ESSTime prevPulseTime;
   uint16_t DataSize{0}; // Number of data bytes in packet
   uint8_t HeaderSize{0};
 
@@ -117,6 +151,8 @@ private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0};
 
+  ESSReadout::ESSTime pulseTime;
+  ESSReadout::ESSTime prevPulseTime;
   ESSReadout::ESSTime readoutTime;
 
   esstime::TimeDurationNano pulseFrequencyNs{0};

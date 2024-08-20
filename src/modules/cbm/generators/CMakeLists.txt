@@ -8,12 +8,14 @@ set(cbm_udp_generated_INC
   ReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   )
 set(cbm_udp_generated_SRC
   ReadoutGenerator.cpp
   udpgen.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   )
 create_executable(cbm_udp_generated)
 

@@ -15,6 +15,7 @@
 #include <cbm/geometry/Parser.h>
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <generators/functiongenerators/DistributionGenerator.h>
 
 namespace cbm {
 
@@ -26,6 +27,9 @@ public:
 private:
   // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
   static constexpr uint8_t CBM_FIBER_ID = 22;
+  static constexpr int MILLISEC = 1e3;
+
+  std::unique_ptr<DistributionGenerator> FunctionGenerator;
 
   struct CbmGeneratorSettings {
     CbmType monitorType{CbmType::TTL};

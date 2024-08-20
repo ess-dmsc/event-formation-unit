@@ -96,7 +96,7 @@ void ReadoutGeneratorBase::generateHeader() {
   if (pulseFrequencyNs != TimeDurationNano(0)) {
     // if the readout time is greater than the pulse time, update generate new
     // pulse time for the header
-    if (readoutTime.toNS() >= pulseTime.toNS() + pulseFrequencyNs) {
+    if (readoutTime.toNS() >= getNextPulseTimeNs()) {
       prevPulseTime = pulseTime;
       pulseTime += pulseFrequencyNs;
       XTRACE(DATA, INF,

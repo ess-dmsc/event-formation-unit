@@ -9,7 +9,10 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "generators/functiongenerators/DistributionGenerator.h"
+#include <chrono>
 #include <common/debug/Trace.h>
+#include <common/time/ESSTime.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
 
 // #undef TRC_LEVEL
@@ -17,16 +20,21 @@
 
 namespace cbm {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
+ReadoutGenerator::ReadoutGenerator()
+    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
   app.add_option("--monitor_type", cbmSettings.monitorType,
                  "Beam monitor type (TTL, N2GEM, IBM, etc)");
-  app.add_option("--fen", cbmSettings.FenId,
-                 "Override FEN ID (default 0)");
+  app.add_option("--fen", cbmSettings.FenId, "Override FEN ID (default 0)");
   app.add_option("--channel", cbmSettings.ChannelId,
                  "Override channel ID (default 0)");
 }
 
 void ReadoutGenerator::generateData() {
+  if (FunctionGenerator == nullptr) {
+    FunctionGenerator =
+        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency);
+  }
+
   auto dataPtr = (uint8_t *)Buffer;
   dataPtr += HeaderSize;
 
@@ -70,9 +78,16 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
 // Generate data for IBM type beam monitors
 void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
-  uint32_t dataValue = 100;
+  esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
   for (uint32_t Readout = 0; Readout <= numberOfReadouts; Readout++) {
+
+    // Check if we need to generate new pulse time and reset readout time
+    // stop generating readouts and sync readout time with new spulse time
+    if (getReadoutTimeNs() > nextPulseTime) {
+      resetReadoutToPulseTime();
+      break;
+    }
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -89,7 +104,10 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     // Currently we generating for 1 beam monitor only
     dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 0;
-    dataPkt->NPos = dataValue;
+
+    esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
+    dataPkt->NPos = 1000 * FunctionGenerator->getDistFromTof(
+                               static_cast<double>(Tof.count() / 1000000.0));
 
     // Increment time for next readout
     addTicksBtwReadoutsToReadoutTime();
