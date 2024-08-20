@@ -133,7 +133,7 @@ public:
 public:
   BaseSettings EFUSettings;
   Statistics Stats;
-  
+
   /// \todo figure out the right size  of EthernetBufferMaxEntries
   static constexpr int EthernetBufferMaxEntries{2000};
   static constexpr int EthernetBufferSize{9000}; /// bytes
@@ -165,4 +165,5 @@ public:
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
   uint32_t RuntimeStatusMask{0};
+  bool CalibrationMode{false};
 };

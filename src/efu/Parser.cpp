@@ -71,6 +71,45 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 }
 
 //=============================================================================
+static int calib_mode_set(std::vector<std::string> cmdargs, UNUSED char *output,
+                    UNUSED unsigned int *obytes, std::shared_ptr<Detector> detector) {
+  LOG(CMD, Sev::Debug, "CALIB_MODE_SET");
+
+  if (cmdargs.size() != 2) {
+    LOG(CMD, Sev::Warning, "CALIB_MODE_SET: wrong number of arguments");
+    return -Parser::EBADARGS;
+  }
+  auto index = atoi(cmdargs.at(1).c_str());
+  if (index != 0 and index != 1) {
+    return -Parser::EBADARGS;
+  }
+
+  detector->CalibrationMode = bool(index);
+  LOG(CMD, Sev::Debug, "CALIB_ {}", index);
+  return Parser::OK;
+}
+
+//=============================================================================
+static int calib_mode_get(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
+  LOG(CMD, Sev::Debug, "CALIB_MODE_GET");
+
+  if (cmdargs.size() != 1) {
+    LOG(CMD, Sev::Warning, "CALIB_MODE_GET: wrong number of arguments");
+    return -Parser::EBADARGS;
+  }
+
+  int Mode = (int)(detector->CalibrationMode);
+  printf("Calibration mode %d\n", Mode);
+
+  LOG(CMD, Sev::Debug, "CALIB_MODE_GET {}", Mode);
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "CALIB_MODE_GET %d", Mode);
+
+  return Parser::OK;
+}
+
+//=============================================================================
 static int version_get(const std::vector<std::string> &cmdargs, char *output,
                        unsigned int *obytes) {
   auto nargs = cmdargs.size();
@@ -255,8 +294,19 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
 
   registercmd("RUNTIMESTATS", [detector](const std::vector<std::string> &cmd,
                                          char *resp, unsigned int *nrChars) {
-    return runtime_stats(cmd, resp, nrChars, detector);
-  });
+                return runtime_stats(cmd, resp, nrChars, detector);
+              });
+
+  registercmd("CALIB_MODE_SET",
+              [detector](const std::vector<std::string> &cmd,
+                                    char *resp, unsigned int *nrChars) {
+                return calib_mode_set(cmd, resp, nrChars, detector);
+              });
+  registercmd("CALIB_MODE_GET",
+              [detector](const std::vector<std::string> &cmd,
+                                    char *resp, unsigned int *nrChars) {
+                return calib_mode_get(cmd, resp, nrChars, detector);
+              });
 }
 
 int Parser::registercmd(const std::string &cmd_name, cmdFunction cmd_fn) {
