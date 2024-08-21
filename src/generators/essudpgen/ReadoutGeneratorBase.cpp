@@ -7,8 +7,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/Parser.h"
-#include "common/time/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
@@ -57,6 +55,10 @@ uint16_t ReadoutGeneratorBase::makePacket() {
   generateData();
   finishPacket();
   return DataSize;
+}
+
+void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
+  ReadoutDataSize = ReadoutSize;
 }
 
 void ReadoutGeneratorBase::generateHeader() {

@@ -16,145 +16,218 @@
 #include <common/time/ESSTime.h>
 #include <cstdint>
 
+///
+/// \class ReadoutGeneratorBase
+/// \brief Base class for UDP data generator for ESS readout data.
+///
 class ReadoutGeneratorBase {
 public:
-  struct GeneratorSettings {
-    uint16_t NFibers{2};
-    uint8_t Type{0}; // Will be determined at compile time, can be overridden
-    uint8_t TypeOverride{0}; // to force a specific type field
-    /// udp generator generic
-    std::string IpAddress{"127.0.0.1"};
-    uint16_t UDPPort{9000};
-    uint64_t NumberOfPackets{0};     // 0 == all packets
-    uint32_t NumReadouts{370};       // # readouts in packet
-    uint32_t TicksBtwReadouts{10};   // 88 ticks ~ 1us
-    uint32_t TicksBtwEvents{3 * 88}; // 3 * 88 ticks ~ 3us
-    uint64_t SpeedThrottle{0};       // 0 is fastest higher is slower
-    uint64_t PktThrottle{0};         // 0 is fastest
-    /// \todo This should be the default mode and obsoete pe packet generation
-    uint16_t Frequency{0};    // 0 is time updates for each packet
-    uint8_t headerVersion{1}; // v1 header by default
-    bool Loop{false};         // Keep looping the same file forever
 
-    bool Randomise{false}; // Randomise header and data
-    // Not yet CLI settings
-    uint32_t KernelTxBufferSize{1000000};
+  ///
+  /// \struct GeneratorSettings
+  /// \brief Struct that holds the generator settings.
+  ///
+  struct GeneratorSettings {
+    uint16_t NFibers{2};     ///< Number of fibers
+    uint8_t Type{0};         ///< Data type as specified in the ESS Readout ICD
+    uint8_t TypeOverride{0}; ///< Override for the data type field
+    std::string IpAddress{"127.0.0.1"}; ///< IP address for UDP transmission
+    uint16_t UDPPort{9000};             ///< UDP port for transmission
+    uint64_t NumberOfPackets{
+        0}; ///< Number of packets to transmit (0 means all packets)
+    uint32_t NumReadouts{370};     ///< Number of VMM readouts in the UDP packet
+    uint32_t TicksBtwReadouts{10}; ///< Ticks between readouts
+    uint32_t TicksBtwEvents{3 * 88}; ///< Ticks between events
+    uint64_t SpeedThrottle{0};       ///< Speed throttle for transmission
+    uint64_t PktThrottle{0};         ///< Packet throttle for transmission
+
+    /// \todo This should be the default mode and obsoete pe packet generation
+    uint16_t Frequency{0}; ///< Frequency of time updates for each packet
+
+    uint8_t headerVersion{1}; ///< Header version
+    bool Loop{false};         ///< Flag to keep looping the same file forever
+    bool Randomise{false};    ///< Flag to randomize header and data
+    uint32_t KernelTxBufferSize{1000000}; ///< Kernel transmit buffer size
   } Settings;
 
-  /// \brief
-  ReadoutGeneratorBase(ESSReadout::Parser::DetectorType);
+  ///
+  /// \brief Constructor for ReadoutGeneratorBase.
+  /// \param detectorType The type of detector.
+  ///
+  ReadoutGeneratorBase(ESSReadout::Parser::DetectorType detectorType);
 
-  /// \brief create a packet ready for UDP transmission, calls private methods
-  /// \param Type Data type as specified in the ESS Readout ICD
-  /// \param NumReadouts number of VMM readouts in the UDP packet
-  /// \param Rings number if rings in use
+  ///
+  /// \brief Creates a packet ready for UDP transmission.
+  /// \return The type of the packet.
+  ///
   uint16_t makePacket();
 
-  /// \brief Set the readout data size (required)
-  void setReadoutDataSize(uint8_t ReadoutSize) {
-    ReadoutDataSize = ReadoutSize;
-  }
+  ///
+  /// \brief Sets the readout data size.
+  /// \param ReadoutSize The size of the readout data.
+  ///
+  void setReadoutDataSize(uint8_t ReadoutSize);
 
-  /// \brief update Settings based on CLI arguments
+  ///
+  /// \brief Updates the settings based on command-line arguments.
+  /// \param argc The number of command-line arguments.
+  /// \param argv The command-line arguments.
+  /// \return The status code.
+  ///
   int argParse(int argc, char *argv[]);
 
-  /// \brief setup buffers, socket etc.
+  ///
+  /// \brief Sets up buffers, socket, etc.
+  ///
   void main();
 
-  /// \brief transmit the specified packets
+  ///
+  /// \brief Start the transmission loop for the generator.
+  ///
   void transmitLoop();
 
-  static constexpr int BufferSize{8972};
-  uint8_t Buffer[BufferSize];
+  static constexpr int BufferSize{8972}; ///< Size of the buffer
+  uint8_t Buffer[BufferSize];            ///< Buffer for the packet
 
 protected:
   CLI::App app{"UDP data generator for ESS readout data"};
 
-  /// \brief Generate common readout header
-  /// \param Type Data type as specified in the ESS Readout ICD
-  /// \param NumReadouts number of readouts in the UDP packet
+  ///
+  /// \brief Generates the header of the packet.
+  ///
   void generateHeader();
 
-  /// \brief Fill out specified buffer with readouts
+  ///
+  /// \brief Fills out the specified buffer with readouts.
+  ///
   virtual void generateData() = 0;
 
-  /// \brief Increment sequence number and do fuzzing
+  ///
+  /// \brief Finishes the packet by incrementing the sequence number and
+  /// performing fuzzing.
+  ///
   void finishPacket();
 
-  /// \brief Increment the readout time with ticks btw. readouts according to
-  /// settings
+  ///
+  /// \brief Increments the readout time with ticks between readouts according
+  /// to the settings.
+  ///
   inline void addTicksBtwReadoutsToReadoutTime() {
     readoutTime += Settings.TicksBtwReadouts;
   }
 
-  /// \brief Reset the readout time to the next pulse time
+  ///
+  /// \brief Resets the readout time to the next pulse time.
+  ///
   inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
 
-  /// \brief Increment the readout time with btw. events acording to
-  /// settings
+  ///
+  /// \brief Increments the readout time with ticks between events according to
+  /// the settings.
+  ///
+
   inline void addTickBtwEventsToReadoutTime() {
     readoutTime += Settings.TicksBtwEvents;
   }
 
-  // Get the value of readoutTimeHigh
-  uint32_t getReadoutTimeHigh() const { return readoutTime.getTimeHigh(); }
+  ///
+  /// \brief Gets the value of readoutTimeHigh.
+  /// \return The value of readoutTimeHigh.
+  ///
+  inline uint32_t getReadoutTimeHigh() const {
+    return readoutTime.getTimeHigh();
+  }
 
-  // Get the value of readoutTimeLow
-  uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
+  ///
+  /// \brief Gets the value of readoutTimeLow.
+  /// \return The value of readoutTimeLow.
+  ///
+  inline uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
 
-  // Get the value of readoutTime
-  esstime::TimeDurationNano getReadoutTimeNs() const {
+  ///
+  /// \brief Gets the value of readoutTime in nanoseconds.
+  /// \return The value of readoutTime in nanoseconds.
+  ///
+  inline esstime::TimeDurationNano getReadoutTimeNs() const {
     return readoutTime.toNS();
   }
 
-  // Get the value of pulseTime
-  esstime::TimeDurationNano getPulseTimeNs() const { return pulseTime.toNS(); }
+  ///
+  /// \brief Gets the value of pulseTimeHigh.
+  /// \return The value of pulseTimeHigh.
+  ///
+  inline uint32_t getPulseTimeHigh() const { return pulseTime.getTimeHigh(); }
 
-  // Get the value of prevPulseTime
-  esstime::TimeDurationNano getPrevPulseTimeNs() const {
+  ///
+  /// \brief Gets the value of pulseTimeLow.
+  /// \return The value of pulseTimeLow.
+  ///
+  inline uint32_t getPulseTimeLow() const { return pulseTime.getTimeLow(); }
+
+  ///
+  /// \brief Gets the value of pulseTime in nanoseconds.
+  /// \return The value of pulseTime in nanoseconds.
+  ///
+  inline esstime::TimeDurationNano getPulseTimeNs() const {
+    return pulseTime.toNS();
+  }
+
+  ///
+  /// \brief Gets the value of prevPulseTime in nanoseconds.
+  /// \return The value of prevPulseTime in nanoseconds.
+  ///
+  inline esstime::TimeDurationNano getPrevPulseTimeNs() const {
     return prevPulseTime.toNS();
   }
 
-  /// \brief Perform the next pulse time calculation with ESSTime and return the
-  /// nanosecond precesion next pulse time, calculated according to ESS clock
-  /// ticks
-  esstime::TimeDurationNano getNextPulseTimeNs() const {
+  ///
+  /// \brief Performs the next pulse time calculation with ESSTime and returns
+  /// the next pulse time in nanoseconds.
+  /// \return The next pulse time in nanoseconds.
+  ///
+  inline esstime::TimeDurationNano getNextPulseTimeNs() const {
     esstime::ESSTime nextPulseTime = pulseTime;
     nextPulseTime += pulseFrequencyNs;
     return nextPulseTime.toNS();
   }
 
-  esstime::ESSTime getNextPulseTime() const {
+  ///
+  /// \brief Performs the next pulse time calculation with ESSTime and returns
+  /// the next pulse time.
+  /// \return The next pulse time.
+  ///
+  inline esstime::ESSTime getNextPulseTime() const {
     esstime::ESSTime nextPulseTime = pulseTime;
     nextPulseTime += pulseFrequencyNs;
     return nextPulseTime;
   }
 
-  // Time offsets for readout generation
-  const uint32_t TimeLowOffset{20000};     // ticks
-  const uint32_t PrevTimeLowOffset{10000}; // ticks
-  // const uint32_t TimeToFirstReadout{1000}; // ticks
+  const uint32_t TimeLowOffset{
+      20000}; ///< Time offset for readout generation (ticks)
+  const uint32_t PrevTimeLowOffset{
+      10000}; ///< Previous time offset for readout generation (ticks)
 
-  uint8_t ReadoutDataSize{0};
-  uint16_t numberOfReadouts{0};
+  uint8_t ReadoutDataSize{0};   ///< Size of the readout data
+  uint16_t numberOfReadouts{0}; ///< Number of readouts
 
-  uint64_t Packets{0};
-  uint32_t SeqNum{0};
-  uint16_t DataSize{0}; // Number of data bytes in packet
-  uint8_t HeaderSize{0};
+  uint64_t Packets{0};   ///< Number of packets
+  uint32_t SeqNum{0};    ///< Sequence number
+  uint16_t DataSize{0};  ///< Number of data bytes in packet
+  uint8_t HeaderSize{0}; ///< Size of the header
 
-  DataFuzzer Fuzzer;
+  DataFuzzer Fuzzer; ///< Data fuzzer
 
-  UDPTransmitter *DataSource{nullptr};
+  UDPTransmitter *DataSource{nullptr}; ///< Data source
 
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
-      ESSReadout::Parser::HeaderVersion::V0};
+      ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
-  ESSReadout::ESSTime pulseTime;
-  ESSReadout::ESSTime prevPulseTime;
-  ESSReadout::ESSTime readoutTime;
+  ESSReadout::ESSTime pulseTime;     ///< Pulse time
+  ESSReadout::ESSTime prevPulseTime; ///< Previous pulse time
+  ESSReadout::ESSTime readoutTime;   ///< Readout time
 
-  esstime::TimeDurationNano pulseFrequencyNs{0};
+  esstime::TimeDurationNano pulseFrequencyNs{
+      0}; ///< Pulse frequency in nanoseconds
 };
 // GCOVR_EXCL_STOP

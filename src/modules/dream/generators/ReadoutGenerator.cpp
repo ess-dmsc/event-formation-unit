@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include <cstdint>
 #include <modules/dream/generators/ReadoutGenerator.h>
 
 namespace Dream {
@@ -32,8 +33,8 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
 
   if (DreamSettings.Tof) {
     double TofMs = TofDist.getValue();
-    ReadoutData.TimeHigh = pulseTime.getTimeHigh();
-    ReadoutData.TimeLow = pulseTime.getTimeLow() + TofMs * TicksPerMs;
+    ReadoutData.TimeHigh = getPulseTimeHigh();
+    ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
   } else {
     ReadoutData.TimeHigh = getReadoutTimeHigh();
     ReadoutData.TimeLow = getReadoutTimeLow();
