@@ -9,11 +9,14 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "generators/functiongenerators/DistributionGenerator.h"
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
+#include <functional>
+#include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/LinearGenerator.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
+#include <string>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -22,18 +25,49 @@ namespace cbm {
 
 ReadoutGenerator::ReadoutGenerator()
     : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
+
+  // Set default values for the generator
   app.add_option("--monitor_type", cbmSettings.monitorType,
                  "Beam monitor type (TTL, N2GEM, IBM, etc)");
   app.add_option("--fen", cbmSettings.FenId, "Override FEN ID (default 0)");
   app.add_option("--channel", cbmSettings.ChannelId,
                  "Override channel ID (default 0)");
+  app.add_option(
+      "--value", cbmSettings.genValue,
+      "Fixed value for value generator (required for Fixed generator type)");
+
+  auto checkGenType = [this](std::string &value) -> std::string {
+    if (value == "Fixed" && !cbmSettings.genValue.has_value()) {
+      throw CLI::ValidationError("Requires --value to be set");
+    } else if (value == "Linear" && !cbmSettings.genValue.has_value()) {
+      throw CLI::ValidationError("Requires --value to be set");
+    }
+    return "";
+  };
+
+  CLI::Validator genTypeValidator =
+      CLI::Validator(checkGenType, "Invalid value");
+
+  app.add_option("--generator_type", cbmSettings.generatorTypeStr,
+                 "Type of generator (Distribution, Linear, Fixed)")
+      ->check(CLI::IsMember({"Distribution", "Linear", "Fixed"}))
+      ->check(genTypeValidator)
+      ->transform([this](const std::string &str) {
+        if (str == "Distribution") {
+          cbmSettings.generatorType = GeneratorType::Distribution;
+        } else if (str == "Linear") {
+          cbmSettings.generatorType = GeneratorType::Linear;
+        } else if (str == "Fixed") {
+          cbmSettings.generatorType = GeneratorType::Fixed;
+        } else {
+          std::cout << "Invalid generator type\n";
+          std::exit(-1);
+        }
+        return str;
+      });
 }
 
 void ReadoutGenerator::generateData() {
-  if (FunctionGenerator == nullptr) {
-    FunctionGenerator =
-        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency);
-  }
 
   auto dataPtr = (uint8_t *)Buffer;
   dataPtr += HeaderSize;
@@ -105,9 +139,13 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 0;
 
-    esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
-    dataPkt->NPos = 1000 * FunctionGenerator->getDistFromTof(
-                               static_cast<double>(Tof.count() / 1000000.0));
+    if (cbmSettings.generatorType == GeneratorType::Distribution) {
+      distributionValueGenerator(dataPkt);
+    } else if (cbmSettings.generatorType == GeneratorType::Linear) {
+      linearValueGenerator(dataPkt);
+    } else {
+      fixedValueGenerator(dataPkt);
+    }
 
     // Increment time for next readout
     addTicksBtwReadoutsToReadoutTime();
@@ -115,6 +153,31 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
   }
+}
+
+void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
+  if (Generator == nullptr) {
+    Generator =
+        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency);
+  }
+
+  esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
+  value->NPos =
+      1000 * Generator->getValue(static_cast<double>(Tof.count() / 1000000.0));
+}
+
+void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
+  if (Generator == nullptr) {
+    Generator = std::make_unique<LinearGenerator>(cbmSettings.genValue.value());
+  }
+
+  esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
+  value->NPos =
+      Generator->getValue(static_cast<double>(Tof.count() / 1000000.0));
+}
+
+void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
+  value->NPos = cbmSettings.genValue.value();
 }
 
 } // namespace cbm

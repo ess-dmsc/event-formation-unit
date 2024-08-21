@@ -33,11 +33,12 @@ DistributionGenerator::DistributionGenerator(double MaxVal) : MaxRange(MaxVal) {
   Norm = CDF[Bins - 1];
 }
 
-double DistributionGenerator::getDistFromTof(double Tof) {
-  int Index = static_cast<int>(Tof / BinWidth);
+double DistributionGenerator::getValue(const double &Pos) {
+  int Index = static_cast<int>(Pos / BinWidth);
   return Dist[Index];
 }
 
+///
 /// \brief draw a random value according to distribution
 /// \todo this is the slow part of this implementation. Optimisation ideas:
 /// precalculate an array of values and then reuse these rather than calculating

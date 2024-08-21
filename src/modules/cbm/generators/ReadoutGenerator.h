@@ -14,10 +14,15 @@
 #include <cbm/CbmTypes.h>
 #include <cbm/geometry/Parser.h>
 #include <common/testutils/DataFuzzer.h>
+#include <cstdint>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
+#include <memory>
+#include <optional>
 
 namespace cbm {
+
+enum class GeneratorType { Distribution, Linear, Fixed };
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 
@@ -29,18 +34,25 @@ private:
   static constexpr uint8_t CBM_FIBER_ID = 22;
   static constexpr int MILLISEC = 1e3;
 
-  std::unique_ptr<DistributionGenerator> FunctionGenerator;
+  std::unique_ptr<FunctionGenerator> Generator{nullptr};
 
   struct CbmGeneratorSettings {
     CbmType monitorType{CbmType::TTL};
     uint8_t FenId{0};
     uint8_t ChannelId{0};
+    std::string generatorTypeStr{"Distribution"};
+    GeneratorType generatorType{GeneratorType::Distribution};
+    std::optional<uint32_t> genValue;
   } cbmSettings;
 
   void generateData() override;
 
   void generateIBMData(uint8_t *dataPtr);
   void generateTTLData(uint8_t *dataPtr);
+
+  void distributionValueGenerator(Parser::CbmReadout *);
+  void linearValueGenerator(Parser::CbmReadout *);
+  void fixedValueGenerator(Parser::CbmReadout *);
 };
 
 } // namespace cbm

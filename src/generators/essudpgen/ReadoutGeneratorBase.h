@@ -72,9 +72,8 @@ public:
   /// \brief Updates the settings based on command-line arguments.
   /// \param argc The number of command-line arguments.
   /// \param argv The command-line arguments.
-  /// \return The status code.
   ///
-  int argParse(int argc, char *argv[]);
+  void argParse(int argc, char *argv[]);
 
   ///
   /// \brief Sets up buffers, socket, etc.

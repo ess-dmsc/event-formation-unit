@@ -10,6 +10,7 @@
 #pragma once
 
 #include <random>
+#include <generators/functiongenerators/FunctionGenerator.h>
 
 ///
 /// The DistributionGenerator class represents a generator for random values
@@ -32,7 +33,7 @@
 /// mersenne_twister_engine with a seed of 1066.
 /// - dis: An object for generating uniform real numbers between 0.0 and 1.0.
 ///
-class DistributionGenerator {
+class DistributionGenerator : public FunctionGenerator {
 public:
   ///\brief The constructor populates relevant data structures
   /// 1) calculate values for distribution and 2) integrate into a cumulative
@@ -43,7 +44,7 @@ public:
   double getValue();
 
   ///\brief return the distribution value at a specific index
-  double getDistFromTof(double TofMs);
+  double getValue(const double &) override;
 
 public:
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms

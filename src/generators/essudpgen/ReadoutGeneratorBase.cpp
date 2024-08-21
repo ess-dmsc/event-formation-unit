@@ -7,8 +7,10 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "Error.hpp"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
+#include <cstdlib>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
@@ -143,15 +145,14 @@ void ReadoutGeneratorBase::finishPacket() {
   }
 }
 
-int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
-  CLI11_PARSE(app, argc, argv);
-
-  // if help was requested, return -1
-  if (app.get_help_ptr()) {
-    return -1;
+void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::CallForHelp &e) {
+    std::exit(app.exit(e));
+  } catch (const CLI::ParseError &e) {
+    std::exit(app.exit(e));
   }
-
-  return 0;
 }
 
 void ReadoutGeneratorBase::transmitLoop() {
