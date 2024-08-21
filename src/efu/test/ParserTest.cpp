@@ -1,4 +1,11 @@
-// Copyright (C) 2016, 2017 European Spallation Source ERIC
+// Copyright (C) 2016-2025 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command parser unit test
+///
+//===----------------------------------------------------------------------===//
 
 #include <algorithm>
 #include <common/detector/EFUArgs.h>
@@ -16,9 +23,10 @@ static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
 // clang-format off
 std::vector<std::string> commands {
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 1",
-  "CMD_GET_COUNT",                  "CMD_GET_COUNT 9",
+  "CMD_GET_COUNT",                  "CMD_GET_COUNT 11",
   "STAT_GET 1",                     "STAT_GET dummystat 42",
   "STAT_GET 2",                     "STAT_GET  -1",
+  "CALIB_MODE_GET",                 "CALIB_MODE_GET 0",
   "EXIT",                           "<OK>"
 };
 
