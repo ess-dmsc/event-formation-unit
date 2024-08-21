@@ -1,4 +1,11 @@
-// Copyright (C) 2016, 2017 European Spallation Source ERIC
+// Copyright (C) 2016-2025 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command parser unit test
+///
+//===----------------------------------------------------------------------===//
 
 #include <algorithm>
 #include <common/detector/EFUArgs.h>

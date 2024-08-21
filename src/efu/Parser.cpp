@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016-2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -70,7 +70,12 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-//=============================================================================
+/// \brief function handling the calib_mode_set command
+/// \param cmdargs vector of the command and its arguments
+/// \param output pointer (UNUSED) to buffer containing the result
+/// \param obytes pointer (UNUSED) to the number of chars in the buffer
+/// \param detector pointer to detector instance
+/// \return status negative for error
 static int calib_mode_set(std::vector<std::string> cmdargs, UNUSED char *output,
                     UNUSED unsigned int *obytes, std::shared_ptr<Detector> detector) {
   LOG(CMD, Sev::Debug, "CALIB_MODE_SET");
@@ -89,7 +94,12 @@ static int calib_mode_set(std::vector<std::string> cmdargs, UNUSED char *output,
   return Parser::OK;
 }
 
-//=============================================================================
+/// \brief function handling the calib_mode_get command
+/// \param cmdargs vector of the command and its arguments
+/// \param output pointer to buffer containing the result
+/// \param obytes pointer to the number of chars in the buffer
+/// \param detector pointer to detector instance
+/// \return status negative for error
 static int calib_mode_get(std::vector<std::string> cmdargs, char *output,
                     unsigned int *obytes, std::shared_ptr<Detector> detector) {
   LOG(CMD, Sev::Debug, "CALIB_MODE_GET");
