@@ -27,30 +27,33 @@ ReadoutGenerator::ReadoutGenerator()
     : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
 
   // Set default values for the generator
-  app.add_option("--monitor_type", cbmSettings.monitorType,
-                 "Beam monitor type (TTL, N2GEM, IBM, etc)");
-  app.add_option("--fen", cbmSettings.FenId, "Override FEN ID (default 0)");
-  app.add_option("--channel", cbmSettings.ChannelId,
-                 "Override channel ID (default 0)");
-  app.add_option(
-      "--value", cbmSettings.genValue,
-      "Fixed value for value generator (required for Fixed generator type)");
 
-  auto checkGenType = [this](std::string &value) -> std::string {
-    if (value == "Fixed" && !cbmSettings.genValue.has_value()) {
-      throw CLI::ValidationError("Requires --value to be set");
-    } else if (value == "Linear" && !cbmSettings.genValue.has_value()) {
-      throw CLI::ValidationError("Requires --value to be set");
-    }
-    return "";
-  };
+  CLI::Validator genTypeValidator = CLI::Validator(
+      [this](std::string &value) -> std::string {
+        if (value == "Fixed" && !cbmSettings.Value.has_value()) {
+          throw CLI::ValidationError("Requires --value to be set");
+        } else if (value == "Linear" && !cbmSettings.Gradient.has_value()) {
+          throw CLI::ValidationError("Requires --gradient to be set");
+        }
+        return "";
+      },
+      "");
 
-  CLI::Validator genTypeValidator =
-      CLI::Validator(checkGenType, "Invalid value");
+  auto CbmGroup = app.add_option_group("CBM Options");
+  CbmGroup->add_option("--monitor_type", cbmSettings.monitorType,
+                       "Beam monitor type (TTL, N2GEM, IBM, etc)");
+  CbmGroup->add_option("--fen", cbmSettings.FenId,
+                       "Override FEN ID (default 0)");
+  CbmGroup->add_option("--channel", cbmSettings.ChannelId,
+                       "Override channel ID (default 0)");
 
-  app.add_option("--generator_type", cbmSettings.generatorTypeStr,
-                 "Type of generator (Distribution, Linear, Fixed)")
-      ->check(CLI::IsMember({"Distribution", "Linear", "Fixed"}))
+  auto IbmGroup = app.add_option_group("IBM Options");
+  auto GenTypeGroup = IbmGroup->add_option_group("--generator-type");
+
+  IbmGroup
+      ->add_set("--generator_type", cbmSettings.generatorTypeStr,
+                {"Dist", "Linear", "Fixed"},
+                "Generator type Dist by default. Only used with IBM monitors")
       ->check(genTypeValidator)
       ->transform([this](const std::string &str) {
         if (str == "Distribution") {
@@ -65,6 +68,16 @@ ReadoutGenerator::ReadoutGenerator()
         }
         return str;
       });
+
+  GenTypeGroup->add_option(
+      "--value", cbmSettings.Value,
+      "Fixed value for the value function (required for Fixed generator type)");
+  GenTypeGroup->add_option(
+      "--gradient", cbmSettings.Gradient,
+      "Gradient of the Linear function (required for Linear generator type)");
+  GenTypeGroup->add_option("--offset", cbmSettings.Offset,
+                           "Function generator offset for the start value "
+                           "(Optional for all generator)");
 }
 
 void ReadoutGenerator::generateData() {
@@ -168,7 +181,8 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
-    Generator = std::make_unique<LinearGenerator>(cbmSettings.genValue.value());
+    Generator = std::make_unique<LinearGenerator>(cbmSettings.Value.value(),
+                                                  cbmSettings.Offset);
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
@@ -177,7 +191,7 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
-  value->NPos = cbmSettings.genValue.value();
+  value->NPos = cbmSettings.Value.value() + cbmSettings.Offset;
 }
 
 } // namespace cbm

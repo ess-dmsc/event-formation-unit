@@ -69,7 +69,9 @@ public:
   void setReadoutDataSize(uint8_t ReadoutSize);
 
   ///
-  /// \brief Updates the settings based on command-line arguments.
+  /// \brief Process command line arguments, update settings.
+  /// Exit application if -h defined or in case of parsing error.
+  ///
   /// \param argc The number of command-line arguments.
   /// \param argv The command-line arguments.
   ///

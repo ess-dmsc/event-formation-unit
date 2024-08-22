@@ -42,7 +42,9 @@ private:
     uint8_t ChannelId{0};
     std::string generatorTypeStr{"Distribution"};
     GeneratorType generatorType{GeneratorType::Distribution};
-    std::optional<uint32_t> genValue;
+    uint32_t Offset{0};
+    std::optional<uint32_t> Value;
+    std::optional<uint32_t> Gradient;
   } cbmSettings;
 
   void generateData() override;
