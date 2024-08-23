@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/utils/EfuUtils.h"
+#include <common/utils/EfuUtils.h>
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>

@@ -8,7 +8,9 @@ set(cbm_udp_generated_INC
   ReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/FunctionGenerator.h
   ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/LinearGenerator.h
   )
 set(cbm_udp_generated_SRC
   ReadoutGenerator.cpp

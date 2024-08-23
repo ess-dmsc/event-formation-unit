@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "Error.hpp"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
 #include <cstdlib>
