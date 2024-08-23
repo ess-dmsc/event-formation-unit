@@ -35,15 +35,15 @@
 ///
 class DistributionGenerator : public FunctionGenerator {
 public:
-  ///\brief The constructor populates relevant data structures
+  /// \brief The constructor populates relevant data structures
   /// 1) calculate values for distribution and 2) integrate into a cumulative
   /// distribution function (not normalised). Then 3) get normalisation factor.
   DistributionGenerator(double MaxX);
 
-  ///\brief return a random value based on the distribution function
+  /// \brief return a random value based on the distribution function
   double getValue();
 
-  ///\brief return the distribution value at a specific index
+  /// \brief return the distribution value at a specific index
   double getValue(const double &) override;
 
 public:

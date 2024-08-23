@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/utils/EfuUtils.h"
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
@@ -48,36 +49,35 @@ ReadoutGenerator::ReadoutGenerator()
                        "Override channel ID (default 0)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
-  auto GenTypeGroup = IbmGroup->add_option_group("--generator-type");
+
+  IbmGroup->add_option(
+      "--value", cbmSettings.Value,
+      "Fixed value for the value function (required for Fixed generator type)");
+  IbmGroup->add_option(
+      "--gradient", cbmSettings.Gradient,
+      "Gradient of the Linear function (required for Linear generator type)");
+  IbmGroup->add_option("--offset", cbmSettings.Offset,
+                       "Function generator offset for the start value "
+                       "(Optional for all generator type)");
+
+  std::string genTypeStr = "";
 
   IbmGroup
-      ->add_set("--generator_type", cbmSettings.generatorTypeStr,
-                {"Dist", "Linear", "Fixed"},
-                "Generator type Dist by default. Only used with IBM monitors")
+      ->add_set("--generator_type", genTypeStr, {"Dist", "Linear", "Fixed"},
+                "Set the generator type (default : Dist)")
       ->check(genTypeValidator)
       ->transform([this](const std::string &str) {
-        if (str == "Distribution") {
+        if (str == "Dist") {
           cbmSettings.generatorType = GeneratorType::Distribution;
         } else if (str == "Linear") {
           cbmSettings.generatorType = GeneratorType::Linear;
         } else if (str == "Fixed") {
           cbmSettings.generatorType = GeneratorType::Fixed;
         } else {
-          std::cout << "Invalid generator type\n";
-          std::exit(-1);
+          throw CLI::ValidationError("Invalid generator type: " + str);
         }
         return str;
       });
-
-  GenTypeGroup->add_option(
-      "--value", cbmSettings.Value,
-      "Fixed value for the value function (required for Fixed generator type)");
-  GenTypeGroup->add_option(
-      "--gradient", cbmSettings.Gradient,
-      "Gradient of the Linear function (required for Linear generator type)");
-  GenTypeGroup->add_option("--offset", cbmSettings.Offset,
-                           "Function generator offset for the start value "
-                           "(Optional for all generator)");
 }
 
 void ReadoutGenerator::generateData() {
@@ -175,19 +175,20 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
-  value->NPos =
-      1000 * Generator->getValue(static_cast<double>(Tof.count() / 1000000.0));
+  value->NPos = 1000 * Generator->getValue(
+                           efutils::nsToMilliseconds(Tof.count()).count());
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
-    Generator = std::make_unique<LinearGenerator>(cbmSettings.Value.value(),
+    Generator = std::make_unique<LinearGenerator>(MILLISEC / Settings.Frequency,
+                                                  cbmSettings.Gradient.value(),
                                                   cbmSettings.Offset);
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
   value->NPos =
-      Generator->getValue(static_cast<double>(Tof.count() / 1000000.0));
+      Generator->getValue(efutils::nsToMilliseconds(Tof.count()).count());
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
