@@ -7,10 +7,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/readout/ess/Parser.h"
-#include "common/time/ESSTime.h"
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
+#include <cstdlib>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 // #undef TRC_LEVEL
@@ -59,6 +58,10 @@ uint16_t ReadoutGeneratorBase::makePacket() {
   return DataSize;
 }
 
+void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
+  ReadoutDataSize = ReadoutSize;
+}
+
 void ReadoutGeneratorBase::generateHeader() {
 
   DataSize = HeaderSize + numberOfReadouts * ReadoutDataSize;
@@ -96,7 +99,7 @@ void ReadoutGeneratorBase::generateHeader() {
   if (pulseFrequencyNs != TimeDurationNano(0)) {
     // if the readout time is greater than the pulse time, update generate new
     // pulse time for the header
-    if (readoutTime.toNS() >= pulseTime.toNS() + pulseFrequencyNs) {
+    if (readoutTime.toNS() >= getNextPulseTimeNs()) {
       prevPulseTime = pulseTime;
       pulseTime += pulseFrequencyNs;
       XTRACE(DATA, INF,
@@ -141,15 +144,14 @@ void ReadoutGeneratorBase::finishPacket() {
   }
 }
 
-int ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
-  CLI11_PARSE(app, argc, argv);
-
-  // if help was requested, return -1
-  if (app.get_help_ptr()) {
-    return -1;
+void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::CallForHelp &e) {
+    std::exit(app.exit(e));
+  } catch (const CLI::ParseError &e) {
+    std::exit(app.exit(e));
   }
-
-  return 0;
 }
 
 void ReadoutGeneratorBase::transmitLoop() {
