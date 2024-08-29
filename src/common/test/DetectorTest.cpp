@@ -4,8 +4,6 @@
 #include <common/testutils/TestBase.h>
 #include <memory>
 
-#define UNUSED __attribute__((unused))
-
 class TestDetector : public Detector {
 public:
   explicit TestDetector(BaseSettings settings) : Detector(settings){};
