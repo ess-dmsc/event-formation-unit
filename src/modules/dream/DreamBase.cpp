@@ -68,6 +68,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
+  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
@@ -100,6 +101,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   XTRACE(INIT, ALW, "Creating %d Dream Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
+
 
 ///
 /// \brief Normal processing thread

@@ -88,6 +88,8 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
+  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+
   // System counters
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -157,7 +159,7 @@ void CaenBase::processingThread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  MonitorSerializer = std::make_shared<AR51Serializer>(EFUSettings.DetectorName, ProduceMonitor);
+  MonitorSerializer = new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
   unsigned int DataIndex;
 

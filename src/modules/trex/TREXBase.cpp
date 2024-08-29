@@ -99,6 +99,8 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
 
+  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+
   //
   Stats.create("thread.receive_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -122,7 +124,7 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
   Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-  
+
   // Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   // Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   // Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
