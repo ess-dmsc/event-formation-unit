@@ -14,7 +14,6 @@
 #include <efu/Parser.h>
 #include <memory>
 
-#define UNUSED __attribute__((unused))
 
 static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
   return 0;
@@ -57,7 +56,7 @@ std::vector<std::string> check_detector_loaded {
 
 class ParserTestDetector : public Detector {
 public:
-  explicit ParserTestDetector(UNUSED BaseSettings settings)
+  explicit ParserTestDetector(__attribute__((unused)) BaseSettings settings)
       : Detector(settings){};
   ~ParserTestDetector(){};
 };
