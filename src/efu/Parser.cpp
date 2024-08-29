@@ -19,7 +19,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+#ifndef UNUSED
 #define UNUSED __attribute__((unused))
+#endif
 
 //=============================================================================
 static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
