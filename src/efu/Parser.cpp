@@ -19,9 +19,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#ifndef UNUSED
-#define UNUSED __attribute__((unused))
-#endif
 
 //=============================================================================
 static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
@@ -78,8 +75,10 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 /// \param obytes pointer (UNUSED) to the number of chars in the buffer
 /// \param detector pointer to detector instance
 /// \return status negative for error
-static int calib_mode_set(std::vector<std::string> cmdargs, UNUSED char *output,
-                    UNUSED unsigned int *obytes, std::shared_ptr<Detector> detector) {
+static int calib_mode_set(std::vector<std::string> cmdargs,
+                          __attribute__((unused)) char *output,
+                          __attribute__((unused)) unsigned int *obytes,
+                          std::shared_ptr<Detector> detector) {
   LOG(CMD, Sev::Debug, "CALIB_MODE_SET");
 
   if (cmdargs.size() != 2) {
@@ -223,7 +222,8 @@ static int detector_info_get(const std::vector<std::string> &cmdargs,
 
 //=============================================================================
 static int efu_exit(const std::vector<std::string> &cmdargs,
-                    UNUSED char *output, UNUSED unsigned int *obytes,
+                    __attribute__((unused)) char *output,
+                    __attribute__((unused)) unsigned int *obytes,
                     int &keep_running) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "EXIT");
