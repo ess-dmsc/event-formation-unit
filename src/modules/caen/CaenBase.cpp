@@ -88,6 +88,8 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
+  // Monitor and calibration stats
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
   Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
 
   // System counters

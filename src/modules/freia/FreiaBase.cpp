@@ -91,6 +91,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
+  // Monitor and calibration stats
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
   Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
 
   //
