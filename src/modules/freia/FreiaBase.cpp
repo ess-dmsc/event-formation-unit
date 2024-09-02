@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,10 +7,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/time/Timer.h>
+#include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/RuntimeStat.h>
+#include <common/time/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
 
@@ -149,7 +149,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
 void FreiaBase::processing_thread() {
 
-
   // Event producer
   assert(EFUSettings.KafkaTopic != "");
 
@@ -168,8 +167,10 @@ void FreiaBase::processing_thread() {
 
   Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
 
-  Stats.create("produce.cause.pulse_change", Serializer->stats().ProduceRefTimeTriggered);
-  Stats.create("produce.cause.max_events_reached", Serializer->stats().ProduceTriggeredMaxEvents);
+  Stats.create("produce.cause.pulse_change",
+               Serializer->stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer->stats().ProduceTriggeredMaxEvents);
 
   MonitorSerializer = new AR51Serializer("freia", ProduceMonitor);
 
@@ -179,7 +180,8 @@ void FreiaBase::processing_thread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   Timer h5flushtimer;
   // Monitor these counters
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+                      Counters.KafkaStats.produce_bytes_ok});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -224,8 +226,10 @@ void FreiaBase::processing_thread() {
       // done processing data
 
       // send monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod < EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu", ITCounters.RxPackets);
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+          EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               ITCounters.RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
         Counters.TxRawReadoutPackets++;
@@ -239,8 +243,9 @@ void FreiaBase::processing_thread() {
 
     if (ProduceTimer.timeout()) {
 
-      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events, Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask =
+          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
+                                       Counters.KafkaStats.produce_bytes_ok});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,7 +13,6 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
-
 
 static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
   return 0;

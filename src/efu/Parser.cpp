@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,7 +18,6 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-
 
 //=============================================================================
 static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
@@ -102,7 +101,8 @@ static int calib_mode_set(std::vector<std::string> cmdargs,
 /// \param detector pointer to detector instance
 /// \return status negative for error
 static int calib_mode_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
+                          unsigned int *obytes,
+                          std::shared_ptr<Detector> detector) {
   LOG(CMD, Sev::Debug, "CALIB_MODE_GET");
 
   if (cmdargs.size() != 1) {
@@ -306,19 +306,17 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
 
   registercmd("RUNTIMESTATS", [detector](const std::vector<std::string> &cmd,
                                          char *resp, unsigned int *nrChars) {
-                return runtime_stats(cmd, resp, nrChars, detector);
-              });
+    return runtime_stats(cmd, resp, nrChars, detector);
+  });
 
-  registercmd("CALIB_MODE_SET",
-              [detector](const std::vector<std::string> &cmd,
-                                    char *resp, unsigned int *nrChars) {
-                return calib_mode_set(cmd, resp, nrChars, detector);
-              });
-  registercmd("CALIB_MODE_GET",
-              [detector](const std::vector<std::string> &cmd,
-                                    char *resp, unsigned int *nrChars) {
-                return calib_mode_get(cmd, resp, nrChars, detector);
-              });
+  registercmd("CALIB_MODE_SET", [detector](const std::vector<std::string> &cmd,
+                                           char *resp, unsigned int *nrChars) {
+    return calib_mode_set(cmd, resp, nrChars, detector);
+  });
+  registercmd("CALIB_MODE_GET", [detector](const std::vector<std::string> &cmd,
+                                           char *resp, unsigned int *nrChars) {
+    return calib_mode_get(cmd, resp, nrChars, detector);
+  });
 }
 
 int Parser::registercmd(const std::string &cmd_name, cmdFunction cmd_fn) {

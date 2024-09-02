@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,15 +12,15 @@
 #include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/Statistics.h>
+#include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/BaseSettings.h>
-#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/AR51Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
 #include <functional>
-#include <common/debug/Log.h>
 #include <map>
 #include <memory>
 #include <stdio.h>
@@ -63,8 +63,8 @@ public:
     dataReceiver.printBufferSizes();
     dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
 
-    LOG(INIT, Sev::Info, "Detector input thread started on {}:{}", local.IpAddress,
-        local.Port);
+    LOG(INIT, Sev::Info, "Detector input thread started on {}:{}",
+        local.IpAddress, local.Port);
 
     while (runThreads) {
       int readSize;
@@ -72,9 +72,8 @@ public:
 
       RxRingbuffer.setDataLength(rxBufferIndex, 0);
       auto DataPtr = RxRingbuffer.getDataBuffer(rxBufferIndex);
-      if ((readSize =
-               dataReceiver.receive(DataPtr,
-                                    RxRingbuffer.getMaxBufSize())) > 0) {
+      if ((readSize = dataReceiver.receive(DataPtr,
+                                           RxRingbuffer.getMaxBufSize())) > 0) {
         RxRingbuffer.setDataLength(rxBufferIndex, readSize);
         XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
                readSize);
