@@ -20,7 +20,7 @@ namespace fbserializer {
 
 AbstractSerializer::AbstractSerializer(const ProducerCallback Callback,
                                        SerializerStats &Stats)
-    : ProduceCallback(std::move(Callback)), Stats(Stats){};
+    : ProduceCallback(std::move(Callback)), Stats(Stats){}
 flatbuffers::DetachedBuffer Buffer;
 
 void AbstractSerializer::produce() {
@@ -39,7 +39,7 @@ void AbstractSerializer::produce() {
 
   ProduceCallback(nonstd::span<const uint8_t>(Buffer.data(), Buffer.size()),
                   CurrentHwClock);
-};
+}
 
 void AbstractSerializer::checkAndSetReferenceTime(
     const TimeDurationNano &Time) {
@@ -57,6 +57,6 @@ void AbstractSerializer::checkAndSetReferenceTime(
   produce();
   Stats.ProduceRefTimeTriggered++;
   ReferenceTime = Time;
-};
+}
 
 } // namespace fbserializer
