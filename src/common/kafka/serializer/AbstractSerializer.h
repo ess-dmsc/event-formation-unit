@@ -32,14 +32,12 @@ using namespace esstime;
 /// \brief Structure to hold statistics related to serialization.
 ///
 struct SerializerStats {
-  int64_t ProduceCalled{
-      0}; ///< Number of times the produce() function has been called.
-  int64_t ProduceRefTimeTriggered{
-      0}; ///< Number of times the produce() function has caused a change in
-          ///< pulse time.
-  int64_t ProduceFailedNoReferenceTime{
-      0}; ///< Number of times the produce() function has failed due to no
-          ///< reference time being set.
+  /// Number of times the produce() function has been called
+  int64_t ProduceCalled{0};
+  /// # of times produce() call was caused by a change in pulse time
+  int64_t ProduceRefTimeTriggered{0};
+  /// # of times the produce() call failed due to no reference time being set
+  int64_t ProduceFailedNoReferenceTime{0};
 };
 
 /// \class AbstractSerializer
