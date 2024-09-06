@@ -15,8 +15,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 ReadoutGenerator::ReadoutGenerator()
     : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
