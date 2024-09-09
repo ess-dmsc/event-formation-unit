@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,13 +12,15 @@
 #include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/Statistics.h>
+#include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/detector/BaseSettings.h>
+#include <common/kafka/AR51Serializer.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
 #include <functional>
-#include <common/debug/Log.h>
 #include <map>
 #include <memory>
 #include <stdio.h>
@@ -41,6 +43,7 @@ public:
     int64_t RxBytes{0};
     int64_t FifoPushErrors{0};
     int64_t RxIdle{0};
+    int64_t CalibModePackets{0};
   } ITCounters; // Input Thread Counters
 
   using CommandFunction =
@@ -60,22 +63,29 @@ public:
     dataReceiver.printBufferSizes();
     dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
 
-    LOG(INIT, Sev::Info, "Detector input thread started on {}:{}", local.IpAddress,
-        local.Port);
+    LOG(INIT, Sev::Info, "Detector input thread started on {}:{}",
+        local.IpAddress, local.Port);
 
     while (runThreads) {
       int readSize;
       unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
       RxRingbuffer.setDataLength(rxBufferIndex, 0);
-      if ((readSize =
-               dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
-                                    RxRingbuffer.getMaxBufSize())) > 0) {
+      auto DataPtr = RxRingbuffer.getDataBuffer(rxBufferIndex);
+      if ((readSize = dataReceiver.receive(DataPtr,
+                                           RxRingbuffer.getMaxBufSize())) > 0) {
         RxRingbuffer.setDataLength(rxBufferIndex, readSize);
         XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
                readSize);
         ITCounters.RxPackets++;
         ITCounters.RxBytes += readSize;
+
+        if (CalibrationMode) {
+          MonitorSerializer->serialize((uint8_t *)DataPtr, readSize);
+          MonitorSerializer->produce();
+          ITCounters.CalibModePackets++;
+          continue;
+        }
 
         if (InputFifo.push(rxBufferIndex) == false) {
           ITCounters.FifoPushErrors++;
@@ -166,4 +176,8 @@ public:
   std::atomic_bool runThreads{true};
   uint32_t RuntimeStatusMask{0};
   bool CalibrationMode{false};
+
+  // Common to all EFUs
+  EV44Serializer *Serializer;
+  AR51Serializer *MonitorSerializer;
 };

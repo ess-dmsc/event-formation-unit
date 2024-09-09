@@ -1,10 +1,15 @@
-// Copyright (C) 2016, 2017 European Spallation Source ERIC
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Unit test for Detector class
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/detector/Detector.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
-
-#define UNUSED __attribute__((unused))
 
 class TestDetector : public Detector {
 public:
