@@ -9,10 +9,10 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/utils/EfuUtils.h>
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
+#include <common/utils/EfuUtils.h>
 #include <functional>
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <generators/functiongenerators/LinearGenerator.h>
@@ -59,6 +59,8 @@ ReadoutGenerator::ReadoutGenerator()
   IbmGroup->add_option("--offset", cbmSettings.Offset,
                        "Function generator offset for the start value "
                        "(Optional for all generator type)");
+  IbmGroup->add_option("--bins", cbmSettings.NumberOfBins,
+                       "Number of bins (sampling) of the distribution function (default 512)");
 
   std::string genTypeStr = "";
 

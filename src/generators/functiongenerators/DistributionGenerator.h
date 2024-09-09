@@ -35,10 +35,21 @@
 ///
 class DistributionGenerator : public FunctionGenerator {
 public:
-  /// \brief The constructor populates relevant data structures
+  /// \brief The constructor populates relevant data structures with the default
+  /// bin number of 512.
   /// 1) calculate values for distribution and 2) integrate into a cumulative
   /// distribution function (not normalised). Then 3) get normalisation factor.
+  /// \param MaxX The maximum range of the distribution.
   DistributionGenerator(double MaxX);
+
+  /// \brief The constructor populates relevant data structures but with a 
+  /// custom defined bin number. Bin numver defines the resolution of the
+  /// distribution function.
+  /// 1) calculate values for distribution and 2) integrate into a cumulative
+  /// distribution function (not normalised). Then 3) get normalisation factor.
+  /// \param MaxX The maximum range of the distribution.
+  /// \param Bins The number of bins in the distribution. We always use the absolute value of Bins.
+  DistributionGenerator(double MaxX, int Bins);
 
   /// \brief return a random value based on the distribution function
   double getValue();
@@ -48,7 +59,7 @@ public:
 
 public:
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms
-  int Bins{512};
+  uint NumberOfBins{512};
   double BinWidth{0.0};
   double Norm{1.0};
   std::vector<double> Dist;
