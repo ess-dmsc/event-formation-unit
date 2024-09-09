@@ -36,7 +36,7 @@ DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange
   Norm = CDF[NumberOfBins - 1];
 }
 
-double DistributionGenerator::getValue(const double &Pos) {
+double DistributionGenerator::getDistValue(const double &Pos) {
   int Index = static_cast<int>(Pos / BinWidth);
   return Dist[Index];
 }

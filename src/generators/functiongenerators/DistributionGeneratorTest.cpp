@@ -76,7 +76,7 @@ TEST_F(DistributionGeneratorTest, GetValueWithinRange) {
   int Bins = 512;
   DistributionGenerator MyDist(MaxVal, Bins);
 
-  double value = MyDist.getValue(500.0);
+  double value = MyDist.getDistValue(500.0) * MaxVal;
   ASSERT_GE(value, 0.0);
   ASSERT_LE(value, MaxVal);
 }
@@ -86,7 +86,7 @@ TEST_F(DistributionGeneratorTest, GetValueHigherThanMaxVal) {
   int Bins = 512;
   DistributionGenerator MyDist(MaxVal, Bins);
 
-  double value = MyDist.getValue(MaxVal + 100.0);
+  double value = MyDist.getDistValue(MaxVal + 100.0) * MaxVal;
   ASSERT_GE(value, 0.0);
   ASSERT_LE(value, MaxVal);
 }
@@ -104,6 +104,7 @@ TEST_F(DistributionGeneratorTest, GetValueRandom) {
   ASSERT_LE(value2, MaxVal);
   ASSERT_NE(value1, value2);
 }
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

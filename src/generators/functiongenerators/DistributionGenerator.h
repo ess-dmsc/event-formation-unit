@@ -55,7 +55,7 @@ public:
   double getValue();
 
   /// \brief return the distribution value at a specific index
-  double getValue(const double &) override;
+  double getDistValue(const double &) override;
 
 public:
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms
