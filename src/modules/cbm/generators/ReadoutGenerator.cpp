@@ -173,7 +173,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator =
-        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency);
+        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
