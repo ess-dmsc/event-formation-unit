@@ -53,6 +53,7 @@ public:
         GeneratorType::Distribution}; // The generator type.
     std::optional<uint32_t> Value;    // The optional value.
     std::optional<uint32_t> Gradient; // The optional gradient.
+    uint32_t NumberOfBins{512};         // The number of bins.
   } cbmSettings;
 
   ///
