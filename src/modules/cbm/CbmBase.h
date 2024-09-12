@@ -29,7 +29,7 @@ public:
   ///
   /// Constructs a CbmBase object with the given settings.
   ///
-  /// @param settings The settings for the CbmBase detector.
+  /// \param settings The settings for the CbmBase detector.
   CbmBase(BaseSettings const &settings);
 
   /// Destructor.
