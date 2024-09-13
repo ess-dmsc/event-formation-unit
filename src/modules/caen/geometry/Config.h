@@ -13,6 +13,7 @@
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/LokiConfig.h>
+#include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,7 @@ public:
 
   LokiConfig LokiConf;
 
+  Tbl3HeConfig Tbl3HeConf;
 
   std::string ConfigFileName{""};
   nlohmann::json root; // configuration (json)

@@ -45,7 +45,12 @@ void Config::parseConfig() {
     LokiConf.parseConfig();
   }
 
-  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles") or (InstrumentName == "tbl3he")) {
+  if (InstrumentName == "tbl3he") {
+    Tbl3HeConf.root = root;
+    Tbl3HeConf.parseConfig();
+  }
+
+  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles")) {
     try {
       // Assumed the same for all straws in all banks
       Resolution = root["StrawResolution"].get<unsigned int>();
@@ -69,6 +74,7 @@ void Config::parseConfig() {
       } catch (...) {
         // Use default value
       }
+
       LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
       XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
 
