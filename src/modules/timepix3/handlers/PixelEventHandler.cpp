@@ -131,12 +131,17 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // detector, it is the time the first photon in the cluster hit the
     // detector.
 
-    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits || cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
+    // if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits) {
+    //   statCounters.ClusterSizeTooSmall++;
+    //   continue;
+    // }
+
+    if (cluster.weightSum() < TimepixConfiguration.MinEventSizeHits) {
       statCounters.ClusterSizeTooSmall++;
       continue;
     }
 
-    if (cluster.timeSpan() < TimepixConfiguration.MinEventTimeSpan) {
+    if (cluster.timeSpan() < 90) {
       continue;
     }
 
