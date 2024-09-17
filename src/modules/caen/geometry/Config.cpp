@@ -1,4 +1,4 @@
-// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -26,73 +26,73 @@ Config::Config(std::string ConfigFile) : ConfigFileName(ConfigFile) {
 
 void Config::parseConfig() {
   try {
-    InstrumentName = root["Detector"].get<std::string>();
+    Legacy.InstrumentName = root["Detector"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
   }
 
-  if ((InstrumentName != "loki") and (InstrumentName != "bifrost") and
-      (InstrumentName != "miracles") and (InstrumentName != "cspec") and
-      (InstrumentName != "tbl3he")) {
+  if ((Legacy.InstrumentName != "loki") and (Legacy.InstrumentName != "bifrost") and
+      (Legacy.InstrumentName != "miracles") and (Legacy.InstrumentName != "cspec") and
+      (Legacy.InstrumentName != "tbl3he")) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name, expected "
                              "loki, bifrost, tbl3he, miracles, or cspec");
   }
 
-  if (InstrumentName == "loki") {
+  if (Legacy.InstrumentName == "loki") {
     LokiConf.root = root;
     LokiConf.parseConfig();
   }
 
-  if (InstrumentName == "tbl3he") {
+  if (Legacy.InstrumentName == "tbl3he") {
     Tbl3HeConf.root = root;
     Tbl3HeConf.parseConfig();
   }
 
-  if ((InstrumentName == "bifrost") or (InstrumentName == "miracles")) {
+  if ((Legacy.InstrumentName == "bifrost") or (Legacy.InstrumentName == "miracles")) {
     try {
       // Assumed the same for all straws in all banks
-      Resolution = root["StrawResolution"].get<unsigned int>();
+      Legacy.Resolution = root["StrawResolution"].get<unsigned int>();
 
       try {
-        MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
+        Legacy.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }
-      LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", MaxPulseTimeNS);
+      LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", Legacy.MaxPulseTimeNS);
 
       try {
-        MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
+        Legacy.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }
-      LOG(INIT, Sev::Info, "MaxTOFNS: {}", MaxTOFNS);
+      LOG(INIT, Sev::Info, "MaxTOFNS: {}", Legacy.MaxTOFNS);
 
       try {
-        MaxRing = root["MaxRing"].get<unsigned int>();
+        Legacy.MaxRing = root["MaxRing"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }
 
-      LOG(INIT, Sev::Info, "MaxRing: {}", MaxRing);
-      XTRACE(INIT, DEB, "MaxRing: %u", MaxRing);
+      LOG(INIT, Sev::Info, "MaxRing: {}", Legacy.MaxRing);
+      XTRACE(INIT, DEB, "MaxRing: %u", Legacy.MaxRing);
 
       try {
-        MaxFEN = root["MaxFEN"].get<unsigned int>();
+        Legacy.MaxFEN = root["MaxFEN"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }
-      LOG(INIT, Sev::Info, "MaxFEN: {}", MaxFEN);
-      XTRACE(INIT, DEB, "MaxFEN: %u", MaxFEN);
+      LOG(INIT, Sev::Info, "MaxFEN: {}", Legacy.MaxFEN);
+      XTRACE(INIT, DEB, "MaxFEN: %u", Legacy.MaxFEN);
 
       try {
-        MaxGroup = root["MaxGroup"].get<unsigned int>();
+        Legacy.MaxGroup = root["MaxGroup"].get<unsigned int>();
       } catch (...) {
         // Use default value
       }
-      LOG(INIT, Sev::Info, "MaxGroup: {}", MaxGroup);
-      XTRACE(INIT, DEB, "MaxGroup: %u", MaxGroup);
+      LOG(INIT, Sev::Info, "MaxGroup: {}", Legacy.MaxGroup);
+      XTRACE(INIT, DEB, "MaxGroup: %u", Legacy.MaxGroup);
 
     } catch (...) {
       LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",

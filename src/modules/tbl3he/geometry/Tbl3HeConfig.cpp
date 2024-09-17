@@ -9,6 +9,7 @@
 #include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <unistd.h>
 
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
@@ -23,18 +24,24 @@ Tbl3HeConfig::Tbl3HeConfig(std::string ConfigFile) : ConfigFileName(ConfigFile) 
   root = from_json_file(ConfigFile);
 }
 
+void Tbl3HeConfig::errorExit(std::string ErrMsg) {
+  LOG(INIT, Sev::Error, ErrMsg);
+  XTRACE(INIT, ERR, "%s\n", ErrMsg.c_str());
+  sleep(1);
+  throw std::runtime_error(ErrMsg);
+}
+
 void Tbl3HeConfig::parseConfig() {
 
-  json_check_keys("Mandatory keys", root, {"Detector", "Resolution", "NumOfFENs", "Topology"});
+  json_check_keys("Mandatory keys", root, {"Detector", "Resolution", "NumOfFENs", "Topology", "MinValidAmplitude"});
 
   Parms.InstrumentName = root["Detector"].get<std::string>();
   if (Parms.InstrumentName != "tbl3he") {
-    LOG(INIT, Sev::Error, "Invalid instrument name ({}) for tbl3he", Parms.InstrumentName);
-    throw std::runtime_error("InstrumentName != 'tblhe'");
+    errorExit(fmt::format("Invalid instrument name ({}) for tbl3he", Parms.InstrumentName));
   }
 
   try {
-    // Assumed the same for all straws in all banks
+    // Assumed the same for all tubes
     Parms.Resolution = root["Resolution"].get<int>();
     XTRACE(INIT, DEB, "Resolution %d", Parms.Resolution);
 
@@ -44,28 +51,40 @@ void Tbl3HeConfig::parseConfig() {
     Parms.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
     LOG(INIT, Sev::Info, "MaxTOFNS: {}", Parms.MaxTOFNS);
 
+    Parms.NumOfFENs = root["NumOfFENs"].get<unsigned int>();
+    LOG(INIT, Sev::Info, "NumOfFENs: {}", Parms.NumOfFENs);
 
-    TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
+    Parms.MinValidAmplitude = root["MinValidAmplitude"].get<unsigned int>();
+    LOG(INIT, Sev::Info, "MinValidAmplitude: {}", Parms.MinValidAmplitude);
+
+    Parms.MaxGroup = root["MaxGroup"].get<unsigned int>();
+    LOG(INIT, Sev::Info, "MaxGroup: {}", Parms.MaxGroup);
+
     // Run through the Topology section
     auto Configs = root["Topology"];
 
-    for (auto & elt : Configs) {
-      printf(".\n");
-      int Ring = elt["Ring"].get<int>();
-      if ((Ring < 0) or (Ring >= Parms.NumRings)) {
-        XTRACE(INIT, WAR, "Invalid ring: %d", Ring);
-        continue;
-      }
-      int FEN = elt["FEN"].get<unsigned int>();
-      int Bank = elt["Bank"].get<unsigned int>();
-      //BankTopology.add(Ring, FEN, )
-      printf("Use Hashmap for Ring %d, FEN %d, Bank %d\n", Ring, FEN, Bank);
-      //
+    if (Parms.NumOfFENs != (int)Configs.size()) {
+      errorExit(fmt::format("RING/FEN topology mismatch {}"));
     }
-    printf("ZZ ZZ\n");
-    //XTRACE(INIT, ALW, "Rings configured: %d", Parms.ConfiguredRings);
 
+    TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
+    for (auto & elt : Configs) {
+      int Ring = elt["Ring"].get<int>();
+      int FEN = elt["FEN"].get<int>();
+      int Bank = elt["Bank"].get<int>();
+
+      if ((Ring < Parms.MinRing) or (Ring > Parms.MaxRing)) {
+        errorExit(fmt::format("Invalid ring: %d", Ring));
+      }
+
+      if (TopologyMapPtr->isValue(Ring, FEN)) {
+        errorExit(fmt::format("Duplicate entry for Ring {} FEN {}", Ring, FEN));
+      }
+
+      auto topo = std::make_unique<Topology>(Bank);
+      TopologyMapPtr->add(Ring, FEN, topo);
+    }
 
 
   } catch (...) {

@@ -16,18 +16,22 @@
 
 namespace Caen {
 
-Tbl3HeGeometry::Tbl3HeGeometry(Config &CaenConfiguration) {
+Tbl3HeGeometry::Tbl3HeGeometry(Config &CaenConfiguration)
+    : Conf(CaenConfiguration.Tbl3HeConf) {
   ESSGeom = new ESSGeometry(100, 8, 1, 1);
-  setResolution(CaenConfiguration.Resolution);
-  MaxRing = CaenConfiguration.MaxRing;
-  MaxFEN = CaenConfiguration.MaxFEN;
-  MaxGroup = CaenConfiguration.MaxGroup;
+  setResolution(Conf.Parms.Resolution);
 }
 
 
-///\todo refactoring oportunity: this code is identical to the code in bifrost
+///\todo refactoring oportunity: this code is nearly identical to the code in bifrost
 std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
                                                        int AmpB) {
+  int MinAmpl = Conf.Parms.MinValidAmplitude;
+  if ((AmpA < MinAmpl) or (AmpB < MinAmpl)) { ///\todo replace with configuration
+    XTRACE(DATA, DEB, "At least one amplitude is too low");
+    Stats.AmplitudeLow++;
+    return InvalidPos;
+  }
 
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
@@ -65,19 +69,21 @@ bool Tbl3HeGeometry::validateData(DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
-  if (Ring > MaxRing) {
+
+  if (Ring > Conf.Parms.MaxRing) {
     XTRACE(DATA, WAR, "RING %d is incompatible with config (MaxRing %d)", Ring, MaxRing);
     Stats.RingErrors++;
     return false;
   }
 
-  if (Data.FENId > MaxFEN) {
-    XTRACE(DATA, WAR, "FEN %d is incompatible with config", Data.FENId);
-    Stats.FENErrors++;
+
+  if (not Conf.TopologyMapPtr->isValue(Ring, Data.FENId)) {
+    XTRACE(DATA, WAR, "Ring %d, FEN %d is incompatible with config", Ring, Data.FENId);
+    Stats.TopologyErrors++;
     return false;
   }
 
-  if (Data.Group > MaxGroup) {
+  if (Data.Group > Conf.Parms.MaxGroup) {
     XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
     Stats.GroupErrors++;
     return false;
@@ -92,8 +98,10 @@ uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout __attribute__((unused
   int Ring = Data.FiberId / 2;
   int Tube = Data.Group;
 
+  int Bank = Conf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
+
   // Get global Group id - will be used for calibration
-  int GlobalGroup = Ring * 4 + Tube;
+  int GlobalGroup = Bank * 4 + Tube;
 
   std::pair<int, double> UnitPos = calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB);
 
@@ -126,7 +134,8 @@ size_t Tbl3HeGeometry::numSerializers() const {
 }
 
 size_t Tbl3HeGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
-  return Data.FiberId / 2;
+  int Ring = Data.FiberId / 2;
+  return Conf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
 }
 
 std::string Tbl3HeGeometry::serializerName(size_t Index) const {

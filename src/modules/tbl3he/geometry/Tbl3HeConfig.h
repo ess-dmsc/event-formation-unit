@@ -27,25 +27,36 @@ public:
   ///\brief constructor used in EFU to load json from file
   Tbl3HeConfig(std::string ConfigFile);
 
+  // wrapper function for runtime exception
+  void errorExit(std::string ErrMsg);
+
+
   ///\brief parse the loaded json object
   void parseConfig();
 
+
   struct {
+    // configurable parameters
     std::string InstrumentName{""};
+    uint32_t MaxPulseTimeNS{0};
+    uint32_t MaxTOFNS{0};
     int Resolution{0};
-    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
-    uint32_t MaxTOFNS{800000000};
-    int NumRings{12};
     int NumOfFENs{0};
+    int MaxGroup{0};
+    int MinValidAmplitude{0};
+    // Non configurable parameters
+    int MinRing{0};
+    int MaxRing{11};
   } Parms;
+
 
   struct Topology {
     int Bank{-1};
 
+    Topology(int Bank) : Bank(Bank) {}
+
     Topology() = default;
   };
-
-
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;
 

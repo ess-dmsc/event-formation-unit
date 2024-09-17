@@ -51,5 +51,6 @@ public:
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
+  Tbl3HeConfig & Conf;
 };
 } // namespace Caen

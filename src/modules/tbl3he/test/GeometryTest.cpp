@@ -1,4 +1,8 @@
 // Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+//===----------------------------------------------------------------------===//
 
 #include <tbl3he/geometry/Tbl3HeGeometry.h>
 #include <common/testutils/TestBase.h>
@@ -11,10 +15,8 @@ protected:
   Config CaenConfiguration;
 
   void SetUp() override {
-    CaenConfiguration.Resolution = 100;
-    CaenConfiguration.MaxRing = 1;
-    CaenConfiguration.MaxFEN = 0;
-    CaenConfiguration.MaxGroup = 7;
+    CaenConfiguration.Tbl3HeConf.Parms.Resolution = 100;
+    CaenConfiguration.Tbl3HeConf.Parms.MaxGroup = 7;
     geom = new Tbl3HeGeometry(CaenConfiguration);
 
     geom->CaenCDCalibration.Parms.Groups=8;
@@ -23,15 +25,19 @@ protected:
       geom->CaenCDCalibration.Intervals.push_back({{0.00, 1.00}});
       geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}});
     }
+
+    geom->Conf.TopologyMapPtr.reset(new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
+    auto topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(0);
+    geom->Conf.TopologyMapPtr->add(0, 0, topo);
+    topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(1);
+    geom->Conf.TopologyMapPtr->add(1, 0, topo);
   }
   void TearDown() override {}
 };
 
 
 TEST_F(Tbl3HeGeometryTest, Constructor) {
-  ASSERT_EQ(geom->MaxRing, 1);
   ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->MaxGroup, 7);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
   ASSERT_EQ(geom->Stats.RingErrors, 0);
   ASSERT_EQ(geom->Stats.FENErrors, 0);
@@ -39,40 +45,22 @@ TEST_F(Tbl3HeGeometryTest, Constructor) {
 }
 
 
-TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFiberId) {
+TEST_F(Tbl3HeGeometryTest, ValidateReadouts) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid FiberIds
-  int MaxFiberId = (geom->MaxRing + 1)*2;
-  ASSERT_EQ(MaxFiberId, 4);
-  for (int i = 0; i <= 23; i++) {
-    readout.FiberId = i;
-    if (i < MaxFiberId) {
-      ASSERT_EQ(geom->validateData(readout), true);
-    } else {
-      ASSERT_EQ(geom->validateData(readout), false);
+  for (int FiberId = 0; FiberId < 24; FiberId++) {
+    for (int FENId = 0; FENId < 12; FENId++) {
+        readout.FiberId = FiberId;
+        readout.FENId = FENId;
+        if ((FiberId < 4) and (FENId < 1)) {
+          ASSERT_EQ(geom->validateData(readout), true);
+        } else {
+          ASSERT_EQ(geom->validateData(readout), false);
+        }
+      }
     }
-  }
-  ASSERT_EQ(geom->Stats.RingErrors, 20);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-}
-
-
-TEST_F(Tbl3HeGeometryTest, ValidateReadoutsFENId) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  // Check valid FENIds
-  for (int i = 0; i <= 23; i++) {
-    readout.FENId = i;
-    if (i <= geom->MaxFEN) {
-      ASSERT_EQ(geom->validateData(readout), true);
-    } else {
-      ASSERT_EQ(geom->validateData(readout), false);
-    }
-  }
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 23);
+  ASSERT_EQ(geom->Stats.TopologyErrors, 24 * 12 - 4);
   ASSERT_EQ(geom->Stats.GroupErrors, 0);
 }
 
@@ -83,7 +71,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   // Check valid Groups
   for (int i = 0; i <= 23; i++) {
     readout.Group = i;
-    if (i <= geom->MaxGroup) {
+    if (i <= geom->Conf.Parms.MaxGroup) {
       ASSERT_EQ(geom->validateData(readout), true);
     } else {
       ASSERT_EQ(geom->validateData(readout), false);
@@ -100,6 +88,7 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
   ASSERT_EQ(geom->calcPixel(readout), 0);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
 }
+
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
   //                              R  F               G     A    B
@@ -122,6 +111,7 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   DataParser::CaenReadout readout4{1, 0, 0, 0, 0, 0, 7, 0, 10, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout4), 800);
 }
+
 
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};

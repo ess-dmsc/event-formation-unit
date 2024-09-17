@@ -70,8 +70,8 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
     }
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.MaxPulseTimeNS);
-  ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.MaxTOFNS);
+  ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.Legacy.MaxPulseTimeNS);
+  ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.Legacy.MaxTOFNS);
 }
 
 CaenInstrument::~CaenInstrument() {}
