@@ -55,16 +55,16 @@ void Hierarchical2DClusterer::cluster_by_x() {
       continue; // skip points that have already been visited
     }
     XTRACE(DATA, DEB, "Starting new cluster");
-    Hit2DVector space_cluster; // initialize a new cluster
-    space_cluster.push_back(current_time_cluster_[i]);
+    Cluster2D space_cluster; // initialize a new cluster
+    space_cluster.insert(current_time_cluster_[i]);
     visited[i] = true;
     for (uint j = i + 1; j < clusterSize; j++) {
       if (visited[j]) {
         continue; // skip points that have already been visited
       }
-      double x_distance = (double)current_time_cluster_[i].x_coordinate -
+      double x_distance = space_cluster.xCoordCenter() -
                           (double)current_time_cluster_[j].x_coordinate;
-      double y_distance = (double)current_time_cluster_[i].y_coordinate -
+      double y_distance = space_cluster.yCoordCenter() -
                           (double)current_time_cluster_[j].y_coordinate;
 
       // Calculate distance according to d^2 = dx^2 + dy^2 to remove sqrt calculation
@@ -81,7 +81,7 @@ void Hierarchical2DClusterer::cluster_by_x() {
       // Compare with the squere of the max_coord_gap to save computation time on sqrt above
       if (distance_sqr < max_coord_gap_sqr_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
-        space_cluster.push_back(
+        space_cluster.insert(
             current_time_cluster_[j]); // add point to current cluster
         visited[j] = true;
       } else {
@@ -92,13 +92,13 @@ void Hierarchical2DClusterer::cluster_by_x() {
   }
 }
 
-void Hierarchical2DClusterer::stash_cluster(Hit2DVector &xz_cluster) {
-  Cluster2D cluster;
-  for (const auto &hit : xz_cluster) {
-    cluster.insert(hit);
-  }
-  Abstract2DClusterer::stash_cluster(cluster);
-}
+// void Hierarchical2DClusterer::stash_cluster(Hit2DVector &xz_cluster) {
+//   Cluster2D cluster;
+//   for (const auto &hit : xz_cluster) {
+//     cluster.insert(hit);
+//   }
+//   Abstract2DClusterer::stash_cluster(cluster);
+// }
 
 std::string Hierarchical2DClusterer::config(const std::string &prepend) const {
   std::stringstream ss;
