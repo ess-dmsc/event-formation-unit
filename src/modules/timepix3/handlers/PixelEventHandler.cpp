@@ -135,6 +135,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       statCounters.ClusterSizeTooSmall++;
       continue;
     }
+    
 
     if (cluster.timeSpan() < TimepixConfiguration.MinEventTimeSpan) {
       continue;
