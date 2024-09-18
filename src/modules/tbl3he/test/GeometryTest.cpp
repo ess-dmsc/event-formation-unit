@@ -165,6 +165,35 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
 }
 
+TEST_F(Tbl3HeGeometryTest, ErrorAmplitudeLow) {
+  geom->Conf.Parms.MinValidAmplitude = 1;
+  //                               R  F              G     A   B  C  D
+  DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout1), 0);
+
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 1);
+}
+
+TEST_F(Tbl3HeGeometryTest, ErrorMaxRing) {
+  //                               R  F              G     A   B  C  D
+  DataParser::CaenReadout readout{24, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
+  ASSERT_EQ(geom->validateData(readout), false);
+
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 1);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+}
+
 
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
   geom->Conf.Parms.MinValidAmplitude = -100;
