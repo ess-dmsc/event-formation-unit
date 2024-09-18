@@ -63,6 +63,7 @@ TEST_F(Tbl3HeGeometryTest, Constructor) {
   ASSERT_EQ(geom->Stats.RingErrors, 0);
   ASSERT_EQ(geom->Stats.FENErrors, 0);
   ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
 }
 
 
@@ -83,6 +84,13 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadouts) {
     }
   ASSERT_EQ(geom->Stats.TopologyErrors, 24 * 12 - 4);
   ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
 }
 
 
@@ -98,9 +106,14 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
       ASSERT_EQ(geom->validateData(readout), false);
     }
   }
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 16);
+
+  ASSERT_EQ(geom->MaxFEN, 0);
   ASSERT_EQ(geom->Stats.RingErrors, 0);
   ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.GroupErrors, 16);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
 }
 
 
@@ -108,6 +121,12 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
   ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
 }
 
 
@@ -115,6 +134,12 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
   //                              R  F               G     A    B
   DataParser::CaenReadout readout{3, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
 }
 
 
@@ -131,10 +156,18 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
 
   DataParser::CaenReadout readout4{1, 0, 0, 0, 0, 0, 7, 0, 10, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout4), 800);
+
+  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_EQ(geom->MaxFEN, 0);
+  ASSERT_EQ(geom->Stats.RingErrors, 0);
+  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
 }
 
 
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
+  geom->Conf.Parms.MinValidAmplitude = -100;
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 }
