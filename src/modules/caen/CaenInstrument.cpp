@@ -101,7 +101,7 @@ void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
       ESSReadoutParser.Packet.HeaderPtr.getPrevPulseLow();
   CurrentReadout.EventTimeHigh = Data.TimeHigh;
   CurrentReadout.EventTimeLow = Data.TimeLow;
-  CurrentReadout.DataSeqNum = Data.DataSeqNum;
+  CurrentReadout.Unused = Data.Unused;
   CurrentReadout.OutputQueue =
       ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
   CurrentReadout.AmpA = Data.AmpA;
@@ -152,7 +152,7 @@ void CaenInstrument::processReadouts() {
     XTRACE(DATA, DEB,
            "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %d, B "
            "%d, C %d, D %d",
-           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.DataSeqNum,
+           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused,
            Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixel and apply calibration

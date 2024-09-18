@@ -7,6 +7,27 @@
 #include <tbl3he/geometry/Tbl3HeGeometry.h>
 #include <common/testutils/TestBase.h>
 
+
+auto ValidConfig = R"(
+  {
+    "Detector": "tbl3he",
+    "MaxRing": 11,
+    "Resolution": 100,
+    "MaxGroup": 7,
+    "MaxPulseTimeNS" : 71428600,
+    "MaxTOFNS" : 500000000,
+
+    "NumOfFENs" : 2,
+
+    "MinValidAmplitude" : 0,
+
+    "Topology" : [
+       {"Ring" : 10, "FEN" : 0, "Bank" : 0},
+       {"Ring" :  9, "FEN" : 0, "Bank" : 1}
+    ]
+  }
+)"_json;
+
 using namespace Caen;
 
 class Tbl3HeGeometryTest : public TestBase {
@@ -128,6 +149,58 @@ TEST_F(Tbl3HeGeometryTest, Serialisers) {
   ASSERT_EQ(geom->calcSerializer(readout), 1);
   readout.FiberId = 3;
   ASSERT_EQ(geom->calcSerializer(readout), 1);
+}
+
+
+// Pretty ugly and not easily testable, but it works.
+TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
+  CaenConfiguration.root = ValidConfig;
+  CaenConfiguration.parseConfig();
+  Tbl3HeGeometry g(CaenConfiguration);
+
+  // Create nullcalibration profile for the eight Groups (tubes)
+  g.CaenCDCalibration.Parms.Groups = 8;
+  for (int group = 0; group < 8; group++) {
+    g.CaenCDCalibration.Intervals.push_back({{0.00, 1.00}});
+    g.CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}});
+  }
+
+  DataParser::CaenReadout readout;
+  readout.FENId = 0;
+  readout.DataLength = 0; // not used for geometry
+  readout.TimeHigh = 0; // not used for geometry
+  readout.TimeLow = 0; // not used for geometry
+  readout.FlagsOM = 0; // not used for geometry
+  readout.Unused = 0; // not used for geometry
+  readout.AmpC = 0;
+  readout.AmpD = 0;
+
+  // Here goes, ...
+  readout.FiberId = 20; // Ring 10
+  readout.Group = 0; // first Tube
+  readout.AmpA = 0;
+  readout.AmpB = 10;
+  ASSERT_EQ(g.calcPixel(readout), 1);
+
+  readout.AmpA = 10;
+  readout.AmpB = 0;
+  ASSERT_EQ(g.calcPixel(readout), 100);
+
+  readout.Group = 3; // fourth tube
+  ASSERT_EQ(g.calcPixel(readout), 400);
+
+  readout.FiberId = 18; // Ring 9
+  readout.Group = 0;
+  readout.AmpA = 0;
+  readout.AmpB = 10;
+  ASSERT_EQ(g.calcPixel(readout), 401);
+
+  readout.AmpA = 10;
+  readout.AmpB = 0;
+  ASSERT_EQ(g.calcPixel(readout), 500);
+
+  readout.Group = 3; // fourth tube
+  ASSERT_EQ(g.calcPixel(readout), 800);
 }
 
 

@@ -27,7 +27,7 @@ public:
     uint32_t TimeLow;
     uint8_t unused;
     uint8_t Group;
-    uint16_t DataSeqNum;
+    uint16_t Unused;
 
   } __attribute__((__packed__));
 

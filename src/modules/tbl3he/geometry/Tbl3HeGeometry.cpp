@@ -94,11 +94,14 @@ bool Tbl3HeGeometry::validateData(DataParser::CaenReadout &Data) {
 
 /// \brief calulate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
-uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout __attribute__((unused)) &Data) {
+uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
   int Tube = Data.Group;
 
   int Bank = Conf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
+
+  XTRACE(DATA, DEB, "FiberId %d, Ring %d, Group %d, Bank %d", Data.FiberId,
+         Ring, Tube, Bank);
 
   // Get global Group id - will be used for calibration
   int GlobalGroup = Bank * 4 + Tube;
@@ -115,7 +118,7 @@ uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout __attribute__((unused
   int xlocal = CalibratedUnitPos * (UnitPixellation - 1);
 
   int X = xlocal;
-  int Y = Ring * 4 + Tube;
+  int Y = GlobalGroup;
 
   uint32_t pixel = ESSGeom->pixel2D(X, Y);
   if (pixel == 0) {

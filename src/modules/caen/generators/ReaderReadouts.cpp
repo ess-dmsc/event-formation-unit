@@ -66,9 +66,9 @@ size_t ReaderReadouts::read(char *buf) {
         LRDP[i].DataLength = 24;
         LRDP[i].TimeHigh = LokiData[i].EventTimeHigh;
         LRDP[i].TimeLow = LokiData[i].EventTimeLow;
-        LRDP[i].unused = 0x00;
+        LRDP[i].FlagsOM = 0x00;
         LRDP[i].Group = LokiData[i].Group;
-        LRDP[i].DataSeqNum = 0x0000;
+        LRDP[i].Unused = 0x0000;
         LRDP[i].AmpA = LokiData[i].AmpA;
         LRDP[i].AmpB = LokiData[i].AmpB;
         LRDP[i].AmpC = LokiData[i].AmpC;
