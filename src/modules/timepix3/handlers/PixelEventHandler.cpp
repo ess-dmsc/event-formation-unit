@@ -133,6 +133,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
 
     if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits ||
         cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
+      
       statCounters.ClusterSizeTooSmall++;
       continue;
     }
