@@ -33,7 +33,9 @@ void Tbl3HeConfig::errorExit(std::string ErrMsg) {
 
 void Tbl3HeConfig::parseConfig() {
 
-  json_check_keys("Mandatory keys", root, {"Detector", "Resolution", "NumOfFENs", "Topology", "MinValidAmplitude"});
+  json_check_keys("Mandatory keys", root, {"Detector", "Resolution",
+    "MaxPulseTimeNS", "MaxTOFNS", "NumOfFENs", "MinValidAmplitude",
+    "MaxGroup", "Topology" });
 
   Parms.InstrumentName = root["Detector"].get<std::string>();
   if (Parms.InstrumentName != "tbl3he") {
