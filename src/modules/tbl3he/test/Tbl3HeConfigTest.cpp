@@ -48,9 +48,11 @@ TEST_F(Tbl3HeConfigTest, Constructor) {
   ASSERT_EQ(config.Parms.MaxGroup, 0);
 }
 
+
 TEST_F(Tbl3HeConfigTest, BadJsonFile) {
   ASSERT_THROW(Tbl3HeConfig MyConfig("nofile.json"), std::runtime_error);
 }
+
 
 TEST_F(Tbl3HeConfigTest, BadDetectorName) {
   config.root = ValidConfig;

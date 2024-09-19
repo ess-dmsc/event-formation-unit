@@ -72,6 +72,8 @@ void Tbl3HeConfig::parseConfig() {
     TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
     for (auto & elt : Configs) {
+      json_check_keys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
+
       int Ring = elt["Ring"].get<int>();
       int FEN = elt["FEN"].get<int>();
       int Bank = elt["Bank"].get<int>();
