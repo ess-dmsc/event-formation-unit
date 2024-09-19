@@ -72,6 +72,19 @@ TEST_F(Tbl3HeConfigTest, ValidConfig) {
   ASSERT_EQ(config.Parms.MaxGroup, 7);
 }
 
+
+TEST_F(Tbl3HeConfigTest, InvalidConfigMinRing) {
+  config.root = ValidConfig;
+  config.root["Topology"][0]["Ring"] = -1; // outside interval 0 - 11
+  ASSERT_THROW(config.parseConfig(), std::runtime_error);
+}
+
+TEST_F(Tbl3HeConfigTest, InvalidConfigMaxRing) {
+  config.root = ValidConfig;
+  config.root["Topology"][0]["Ring"] = 12; // outside interval 0 - 11 
+  ASSERT_THROW(config.parseConfig(), std::runtime_error);
+}
+
 TEST_F(Tbl3HeConfigTest, InvalidConfigNumOfFENs) {
   config.root = ValidConfig;
   config.root["NumOfFENs"] = 3;
