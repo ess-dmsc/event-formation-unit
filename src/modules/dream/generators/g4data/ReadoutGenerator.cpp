@@ -70,6 +70,7 @@ void ReadoutGenerator::generateData() {
   memset(&dataPkt, 0, sizeof(dataPkt));
 
   int res = 0;
+  ESSReadout::ESSTime time;
 
   auto dataPtr = (uint8_t *)Buffer;
   dataPtr += HeaderSize;
@@ -80,11 +81,19 @@ void ReadoutGenerator::generateData() {
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = DatReadout.fen;
     dataPkt.DataLength = ReadoutDataSize;
-    dataPkt.TimeHigh = DatReadout.timehi;
+    // dataPkt.TimeHigh = DatReadout.timehi;
     dataPkt.TimeLow = DatReadout.timelo;
     dataPkt.UnitId = DatReadout.uid;
     dataPkt.Cathode = DatReadout.cathode;
     dataPkt.Anode = DatReadout.anode;
+
+    auto PulseTimeNS = getPulseTimeNs();
+    auto OffsetNS = time.toNS(0, dataPkt.TimeLow);
+    auto ReadoutTimeNS = PulseTimeNS + OffsetNS;
+
+    ESSReadout::ESSTime NewReadoutTime = ESSReadout::ESSTime(ReadoutTimeNS);
+    dataPkt.TimeHigh = NewReadoutTime.getTimeHigh();
+    dataPkt.TimeLow = NewReadoutTime.getTimeLow();
 
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
