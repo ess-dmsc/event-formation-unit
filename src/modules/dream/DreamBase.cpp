@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,12 +6,12 @@
 /// \todo unofficial - not reviewed Readout structure
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/KafkaConfig.h>
 #include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
-#include <modules/dream/DreamInstrument.h>
+#include <common/kafka/KafkaConfig.h>
 #include <modules/dream/DreamBase.h>
+#include <modules/dream/DreamInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -68,6 +68,7 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
+  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);

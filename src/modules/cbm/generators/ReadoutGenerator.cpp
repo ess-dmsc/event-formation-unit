@@ -9,10 +9,10 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/utils/EfuUtils.h>
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
+#include <common/utils/EfuUtils.h>
 #include <functional>
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <generators/functiongenerators/LinearGenerator.h>
@@ -59,6 +59,8 @@ ReadoutGenerator::ReadoutGenerator()
   IbmGroup->add_option("--offset", cbmSettings.Offset,
                        "Function generator offset for the start value "
                        "(Optional for all generator type)");
+  IbmGroup->add_option("--bins", cbmSettings.NumberOfBins,
+                       "Number of bins (sampling) of the distribution function (default 512)");
 
   std::string genTypeStr = "";
 
@@ -171,11 +173,11 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator =
-        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency);
+        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
-  value->NPos = 1000 * Generator->getValue(
+  value->NPos = 1000 * Generator->getDistValue(
                            efutils::nsToMilliseconds(Tof.count()).count());
 }
 
@@ -188,7 +190,7 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
   value->NPos =
-      Generator->getValue(efutils::nsToMilliseconds(Tof.count()).count());
+      Generator->getDistValue(efutils::nsToMilliseconds(Tof.count()).count());
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {

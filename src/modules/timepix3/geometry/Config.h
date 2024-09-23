@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <string>
 #include <sys/types.h>
 
@@ -32,7 +33,8 @@ public:
 
   uint32_t MaxTimeGapNS{1};
   uint32_t MinEventSizeHits{1};
-  uint32_t MinimumToTSum{0};
+  uint32_t MinimumToTSum{20};
+  uint32_t MinEventTimeSpan{1};
   uint16_t MaxCoordinateGap{5};
 };
 } // namespace Timepix3

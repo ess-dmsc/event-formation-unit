@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,8 +10,6 @@
 
 #include <caen/CaenCounters.h>
 #include <common/detector/Detector.h>
-#include <common/kafka/EV44Serializer.h>
-#include <common/kafka/AR51Serializer.h>
 
 namespace Caen {
 
@@ -28,7 +26,6 @@ public:
 
 protected:
   std::vector<std::shared_ptr<EV44Serializer>> Serializers;
-  std::shared_ptr<AR51Serializer> MonitorSerializer;
 };
 
 } // namespace Caen

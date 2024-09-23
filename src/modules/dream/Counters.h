@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,11 +15,11 @@
 
 struct Counters {
   // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors;
+  int64_t FifoSeqErrors{0};
 
   // ESSReadout parser
   struct ESSReadout::ESSHeaderStats ReadoutStats;
-  int64_t ErrorESSHeaders;
+  int64_t ErrorESSHeaders{0};
 
   // DREAM DataParser
   int64_t DataHeaders{0};
@@ -34,14 +34,14 @@ struct Counters {
   int64_t ConfigErrors{0};
 
   //
-  int64_t ProcessingIdle;
-  int64_t Events;
-  int64_t GeometryErrors;
+  int64_t ProcessingIdle{0};
+  int64_t Events{0};
+  int64_t GeometryErrors{0};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
 
-  int64_t TxRawReadoutPackets;
+  int64_t TxRawReadoutPackets{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,37 +16,38 @@
 
 struct Counters {
   // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors;
+  int64_t FifoSeqErrors{0};
 
   // ESSReadout parser
   struct ESSReadout::ESSHeaderStats ReadoutStats;
-  int64_t ErrorESSHeaders;
+  int64_t ErrorESSHeaders{0};
   // int64_t RingRx[24];
 
   // VMM3a Readouts
   struct ESSReadout::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
-  int64_t HybridMappingErrors;
-  int64_t TOFErrors;
-  int64_t MinADC;
-  int64_t MaxADC;
-  int64_t MappingErrors;
+  int64_t HybridMappingErrors{0};
+  int64_t TOFErrors{0};
+  int64_t MinADC{0};
+  int64_t MaxADC{0};
+  int64_t MappingErrors{0};
 
   //
-  int64_t ProcessingIdle;
-  int64_t Events;
-  int64_t ClustersNoCoincidence;
-  int64_t ClustersMatchedWireOnly;
-  int64_t ClustersMatchedGridOnly;
-  int64_t ClustersTooLargeGridSpan;
-  int64_t EventsMatchedClusters;
-  int64_t PixelErrors;
+  int64_t ProcessingIdle{0};
+  int64_t Events{0};
+  int64_t ClustersNoCoincidence{0};
+  int64_t ClustersMatchedWireOnly{0};
+  int64_t ClustersMatchedGridOnly{0};
+  int64_t ClustersTooLargeGridSpan{0};
+  int64_t EventsMatchedClusters{0};
+  int64_t PixelErrors{0};
   int64_t TimeErrors;
+  int64_t TxRawReadoutPackets{0};
   struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
-  int64_t ProduceCauseTimeout;
+  int64_t ProduceCauseTimeout{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

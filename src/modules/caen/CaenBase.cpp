@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,12 +10,12 @@
 #include <common/RuntimeStat.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
+#include <common/time/CheckTimer.h>
 #include <common/time/TimeString.h>
 #include <common/time/Timer.h>
 #include <modules/caen/CaenBase.h>
 #include <modules/caen/CaenInstrument.h>
 #include <unistd.h>
-#include <common/time/CheckTimer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -88,6 +88,10 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
+  // Monitor and calibration stats
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
+  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+
   // System counters
   Stats.create("thread.input_idle", ITCounters.RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -144,8 +148,9 @@ void CaenBase::processingThread() {
   CaenInstrument Caen(Counters, EFUSettings);
   // and its serializers
   Serializers.reserve(Caen.Geom->numSerializers());
-  for (size_t i=0; i < Caen.Geom->numSerializers(); ++i){
-    Serializers.emplace_back(std::make_shared<EV44Serializer>(KafkaBufferSize, Caen.Geom->serializerName(i), Produce));
+  for (size_t i = 0; i < Caen.Geom->numSerializers(); ++i) {
+    Serializers.emplace_back(std::make_shared<EV44Serializer>(
+        KafkaBufferSize, Caen.Geom->serializerName(i), Produce));
   }
   // give the instrument shared pointers to the serializers
   Caen.setSerializers(Serializers);
@@ -157,14 +162,16 @@ void CaenBase::processingThread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  MonitorSerializer = std::make_shared<AR51Serializer>(EFUSettings.DetectorName, ProduceMonitor);
+  MonitorSerializer =
+      new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
   unsigned int DataIndex;
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       Counters.KafkaStats.produce_bytes_ok});
   // Create the periodic timer for producing messages, in case of low event rate
-  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ); // x86 specific
+  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
+  // // x86 specific
   CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
   while (runThreads) {
@@ -221,13 +228,13 @@ void CaenBase::processingThread() {
       usleep(10);
     }
 
-    if (ProduceTimer.timeout()){
+    if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask =
           RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
                                        Counters.KafkaStats.produce_bytes_ok});
       // Produce messages if there are events
-      for (auto &Serializer: Serializers) {
+      for (auto &Serializer : Serializers) {
         Serializer->produce();
       }
 
@@ -235,12 +242,12 @@ void CaenBase::processingThread() {
       Counters.ProduceCauseTimeout++;
       Counters.ProduceCausePulseChange = std::transform_reduce(
           Serializers.begin(), Serializers.end(), 0, std::plus<>(),
-          [](auto &Serializer) { return Serializer->ProduceCausePulseChange; }
-      );
+          [](auto &Serializer) { return Serializer->ProduceCausePulseChange; });
       Counters.ProduceCauseMaxEventsReached = std::transform_reduce(
           Serializers.begin(), Serializers.end(), 0, std::plus<>(),
-          [](auto &Serializer) { return Serializer->ProduceCauseMaxEventsReached; }
-      );
+          [](auto &Serializer) {
+            return Serializer->ProduceCauseMaxEventsReached;
+          });
     }
 
     /// Kafka stats update - common to all detectors

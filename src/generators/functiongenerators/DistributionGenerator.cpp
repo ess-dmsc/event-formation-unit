@@ -16,13 +16,16 @@ static double gaussianPDF(double X, double Mu, double Sigma) {
          exp(-(pow((X - Mu) / Sigma, 2) / 2.0));
 }
 
-/// \brief generate Dist and CDF for the specified shape
-DistributionGenerator::DistributionGenerator(double MaxVal) : MaxRange(MaxVal) {
-  Dist.reserve(Bins);
-  CDF.reserve(Bins);
-  BinWidth = MaxRange / (Bins - 1);
+DistributionGenerator::DistributionGenerator(double MaxVal)
+    : DistributionGenerator(MaxVal, 512) {}
 
-  for (int i = 0; i < Bins; i++) {
+/// \brief generate Dist and CDF for the specified shape. Always use the absolute value of Bins.
+DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange(MaxVal), NumberOfBins(abs(Bins)) {
+  Dist.resize(NumberOfBins);
+  CDF.resize(NumberOfBins);
+  BinWidth = MaxRange / (NumberOfBins - 1);
+
+  for (uint i = 0; i < NumberOfBins; i++) {
     double XCoord = i * BinWidth;
     Dist[i] = 0.001 + gaussianPDF(XCoord, 30.0, 4) +
               0.6 * gaussianPDF(XCoord, 42.0, 4);
@@ -30,10 +33,10 @@ DistributionGenerator::DistributionGenerator(double MaxVal) : MaxRange(MaxVal) {
       CDF[i] = CDF[i - 1] + Dist[i];
     }
   }
-  Norm = CDF[Bins - 1];
+  Norm = CDF[NumberOfBins - 1];
 }
 
-double DistributionGenerator::getValue(const double &Pos) {
+double DistributionGenerator::getDistValue(const double &Pos) {
   int Index = static_cast<int>(Pos / BinWidth);
   return Dist[Index];
 }
@@ -46,7 +49,7 @@ double DistributionGenerator::getValue(const double &Pos) {
 /// Or implement a faster search than the loop below (dictionary or something)
 double DistributionGenerator::getValue() {
   double Value = dis(gen) * Norm;
-  for (int i = 0; i < Bins; i++) {
+  for (uint i = 0; i < NumberOfBins; i++) {
     if (CDF[i] >= Value) {
       return i * BinWidth;
     }

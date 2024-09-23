@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,8 +10,6 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV44Serializer.h>
-#include <common/kafka/AR51Serializer.h>
 #include <freia/Counters.h>
 
 namespace Freia {
@@ -24,10 +22,6 @@ public:
   void processing_thread();
 
   struct Counters Counters {};
-
-protected:
-  EV44Serializer *Serializer;
-  AR51Serializer *MonitorSerializer;
 };
 
 } // namespace Freia

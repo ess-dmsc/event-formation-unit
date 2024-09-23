@@ -56,12 +56,19 @@ Config::Config(std::string ConfigFile) {
         XResolution, YResolution, ScaleUpFactor, XResolution * ScaleUpFactor,
         YResolution * ScaleUpFactor);
   } catch (...) {
-    LOG(INIT, Sev::Info, "Using default ScaleUpFactor = {}, super resolution not applied", ScaleUpFactor);
+    LOG(INIT, Sev::Info,
+        "Using default ScaleUpFactor = {}, super resolution not applied",
+        ScaleUpFactor);
   }
   try {
     MaxTimeGapNS = root["MaxTimeGapNS"].get<uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default MaxTimeGapNS = {}", MaxTimeGapNS);
+  }
+  try {
+    MinEventTimeSpan = root["MinEventTimeSpanNS"].get<uint32_t>();
+  } catch (...) {
+    LOG(INIT, Sev::Info, "Using default MaxTimeGapNS = {}", MinEventTimeSpan);
   }
   try {
     FrequencyHz = root["FrequencyHz"].get<float>();
