@@ -1,9 +1,12 @@
-// Copyright (C) 2017 European Spallation Source ERIC
-
-/// @file
-
-/// @brief Multigrid electronics
+// Copyright (C) 2017 - 2024 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Multigrid electronics
+///
 /// Handles mappings between (digitizer, channels) and (x,y,z) coordinates.
+//===----------------------------------------------------------------------===//
 
 #include <common/reduction/multigrid/ModuleGeometry.h>
 

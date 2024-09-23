@@ -40,6 +40,7 @@ set(IntervalTest_INC
 set(IntervalTest_SRC
   ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
+  ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.h
   IntervalTest.cpp)
 create_test_executable(IntervalTest)
 
@@ -49,6 +50,7 @@ set(CaenConfigTest_INC
 set(CaenConfigTest_SRC
   ${ESS_MODULE_DIR}/caen/geometry/Config.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
+  ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.cpp
   ConfigTest.cpp)
 create_test_executable(CaenConfigTest)
 

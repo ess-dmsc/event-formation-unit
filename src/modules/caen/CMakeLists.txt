@@ -31,6 +31,7 @@ set(caen_common_inc
   ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.h
+  ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.h
   ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeGeometry.h
   readout/DataParser.h
   )
@@ -45,6 +46,7 @@ set(caen_common_src
   ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
   ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
   ${ESS_MODULE_DIR}/miracles/geometry/MiraclesGeometry.cpp
+  ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.cpp
   ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeGeometry.cpp
   readout/DataParser.cpp
   )

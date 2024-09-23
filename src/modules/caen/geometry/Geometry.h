@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -56,15 +56,18 @@ public:
     int64_t RingMappingErrors{0};
     int64_t FENErrors{0};
     int64_t FENMappingErrors{0};
+    int64_t TopologyErrors{0}; ///\todo replace mapping errors?
     int64_t GroupErrors{0};
     int64_t AmplitudeZero{0};
+    int64_t AmplitudeLow{0};
   } Stats;
 
   CDCalibration CaenCDCalibration;
   ESSGeometry *ESSGeom;
   uint16_t NPos{512}; ///< resolution of position
-  uint8_t MaxRing{2};
+  uint8_t MaxRing{0};
   uint8_t MaxFEN{0};
-  uint8_t MaxGroup{14};
+  uint8_t MaxGroup{0};
+  int MinAmpl{0};
 };
 } // namespace Caen

@@ -72,8 +72,8 @@ struct HistrogramSerializerStats : public SerializerStats {
   int64_t DataOverPeriodLastBin{0};
 };
 
-/// @class HistogramSerializer
-/// @brief A class that builds a 1D histogram frame for serialization
+/// \class HistogramSerializer
+/// \brief A class that builds a 1D histogram frame for serialization
 ///
 /// \tparam T is the type of the data to be serialized
 /// \tparam R is the type of the data used for the axis. This can be time with

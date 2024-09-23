@@ -1,4 +1,4 @@
-// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,6 +13,7 @@
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <loki/geometry/LokiConfig.h>
+#include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <string>
 #include <vector>
 
@@ -32,19 +33,20 @@ public:
   void parseConfig();
 
   // Should be moved to BIFROST config
-  std::string InstrumentName;
-  uint8_t NPanels{0};              // Caen panels, not logical geometry panels
-  uint16_t NGroupsTotal{0};        // total number of groups in instrument
-  uint16_t Resolution{0};          /// Resolution along straws
-  uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
-  uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
-  uint32_t MaxTOFNS{800000000};
-  uint8_t MaxRing{0};
-  uint8_t MaxFEN{0};
-  uint8_t MaxGroup{14};
+  struct {
+    std::string InstrumentName;
+    uint16_t NGroupsTotal{0};        // total number of groups in instrument
+    uint16_t Resolution{0};          /// Resolution along straws
+    uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
+    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
+    uint32_t MaxTOFNS{800000000};
+    uint8_t MaxRing{0};
+    uint8_t MaxFEN{0};
+    uint8_t MaxGroup{14};
+} Legacy;
 
   LokiConfig LokiConf;
-
+  Tbl3HeConfig Tbl3HeConf;
 
   std::string ConfigFileName{""};
   nlohmann::json root; // configuration (json)
