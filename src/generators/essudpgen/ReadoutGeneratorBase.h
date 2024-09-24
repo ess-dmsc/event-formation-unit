@@ -22,7 +22,6 @@
 ///
 class ReadoutGeneratorBase {
 public:
-
   ///
   /// \struct GeneratorSettings
   /// \brief Struct that holds the generator settings.
@@ -37,7 +36,7 @@ public:
         0}; ///< Number of packets to transmit (0 means all packets)
     uint32_t NumReadouts{370};     ///< Number of VMM readouts in the UDP packet
     uint32_t TicksBtwReadouts{10}; ///< Ticks between readouts
-    uint32_t TicksBtwEvents{3 * 88}; ///< Ticks between events
+    uint32_t TicksBtwEvents{3 * 88}; ///< Ticks between events (88 ticks ~1us)
     uint64_t SpeedThrottle{0};       ///< Speed throttle for transmission
     uint64_t PktThrottle{0};         ///< Packet throttle for transmission
 
@@ -55,6 +54,9 @@ public:
   /// \param detectorType The type of detector.
   ///
   ReadoutGeneratorBase(ESSReadout::Parser::DetectorType detectorType);
+
+  /// \brief Destructor for ReadoutGeneratorBase.
+  virtual ~ReadoutGeneratorBase() = default;
 
   ///
   /// \brief Creates a packet ready for UDP transmission.
