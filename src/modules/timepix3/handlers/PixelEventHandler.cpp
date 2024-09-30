@@ -133,31 +133,37 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
 
     if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits ||
         cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
+
       statCounters.ClusterSizeTooSmall++;
       continue;
     }
 
     if (cluster.timeSpan() < TimepixConfiguration.MinEventTimeSpan) {
+      statCounters.ClusterToShort++;
       continue;
     }
 
     uint64_t eventTime = cluster.timeStart();
-    long eventTof = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
+    long eventTofNs = eventTime - lastEpochESSPulseTime->pulseTimeInEpochNs;
     statCounters.TofCount++;
 
-    if (eventTof < 0) {
+    if (eventTofNs < 0) {
       statCounters.TofNegative++;
       continue;
     }
 
-    if (eventTof > FrequencyPeriodNs.count()) {
+    // If the event would be the next pulse, move it to the beginning of the
+    // current pulse to keep up statistics
+    if (eventTofNs > FrequencyPeriodNs.count()) {
       XTRACE(EVENT, WAR,
              "Event is for the next pulse, EventTime: %u, Current "
              "pulse time: %u, Difference: %u",
-             eventTime, lastEpochESSPulseTime->pulseTimeInEpochNs, eventTof);
+             eventTime, lastEpochESSPulseTime->pulseTimeInEpochNs, eventTofNs);
       statCounters.EventTimeForNextPulse++;
-      continue;
+      // Normalize the event time to the current pulse
+      eventTofNs = eventTofNs % FrequencyPeriodNs.count(); // Ensure eventTofNs is within the period
     }
+
     double EventCoordX = cluster.xCoordCenter();
     double EventCoordY = cluster.yCoordCenter();
     uint32_t PixelId = geometry->calcPixelId(EventCoordX, EventCoordY);
@@ -169,7 +175,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       continue;
     }
     XTRACE(EVENT, DEB, "New event, Time: %u, PixelId: %u", eventTime, PixelId);
-    serializer.addEvent(eventTof, PixelId);
+    serializer.addEvent(eventTofNs, PixelId);
     statCounters.Events++;
   }
   clusters.clear();

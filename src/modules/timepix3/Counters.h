@@ -30,6 +30,7 @@ struct Counters {
   int64_t TofNegative{0};
   int64_t PrevTofCount{0};
   int64_t ClusterSizeTooSmall{0};
+  int64_t ClusterToShort{0};
 
   int64_t PixelReadouts{0};
   int64_t InvalidPixelReadout{0};
