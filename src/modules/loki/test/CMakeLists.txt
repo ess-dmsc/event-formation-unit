@@ -20,6 +20,7 @@ set(LokiGeometryTest_INC
     ${ESS_MODULE_DIR}/caen/geometry/Interval.h
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
+    ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.h
 )
 set(LokiGeometryTest_SRC
     LokiGeometryTest.cpp
@@ -28,6 +29,7 @@ set(LokiGeometryTest_SRC
     ${ESS_MODULE_DIR}/caen/geometry/Interval.cpp
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
+    ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.cpp
 )
 create_test_executable(LokiGeometryTest)
 

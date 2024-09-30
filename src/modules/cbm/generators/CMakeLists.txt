@@ -6,6 +6,7 @@
 
 set(cbm_udp_generated_INC
   ReadoutGenerator.h
+  GeneratorType.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_SOURCE_DIR}/generators/functiongenerators/FunctionGenerator.h

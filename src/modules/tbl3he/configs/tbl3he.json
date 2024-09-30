@@ -1,6 +1,16 @@
 {
   "Detector": "tbl3he",
-  "MaxRing": 1,
-  "StrawResolution": 100,
-  "MaxGroup": 7
+  "Resolution": 100,
+  "MaxGroup": 7,
+  "MaxPulseTimeNS" : 71428600,
+  "MaxTOFNS" : 500000000,
+
+  "NumOfFENs" : 2,
+
+  "MinValidAmplitude" : 2,
+
+  "Topology" : [
+     {"Ring" : 10, "FEN" : 0, "Bank" : 0},
+     {"Ring" :  9, "FEN" : 0, "Bank" : 1}
+  ]
 }

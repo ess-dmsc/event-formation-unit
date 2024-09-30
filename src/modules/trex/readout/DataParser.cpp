@@ -71,7 +71,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
            "0x%04x B "
            "0x%04x C 0x%04x D 0x%04x",
            DataHdrPtr->FiberId, DataHdrPtr->FENId, Data->TimeHigh,
-           Data->TimeLow, Data->DataSeqNum, Data->Group, Data->AmpA, Data->AmpB,
+           Data->TimeLow, Data->Unused, Data->Group, Data->AmpA, Data->AmpB,
            Data->AmpC, Data->AmpD);
 
     CurrentDataSection.Data = *Data;

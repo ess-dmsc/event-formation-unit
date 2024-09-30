@@ -25,9 +25,9 @@ public:
     uint16_t DataLength;
     uint32_t TimeHigh;
     uint32_t TimeLow;
-    uint8_t unused;
+    uint8_t FlagsOM;
     uint8_t Group;
-    uint16_t DataSeqNum;
+    uint16_t Unused;
     int16_t AmpA;
     int16_t AmpB;
     int16_t AmpC;

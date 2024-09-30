@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -101,8 +101,8 @@ protected:
 };
 
 TEST_F(CaenConfigTest, Constructor) {
-  ASSERT_EQ(config.Resolution, 0);
-  ASSERT_EQ(config.NGroupsTotal, 0);
+  ASSERT_EQ(config.Legacy.Resolution, 0);
+  ASSERT_EQ(config.Legacy.NGroupsTotal, 0);
 }
 
 TEST_F(CaenConfigTest, NoConfigFile) {

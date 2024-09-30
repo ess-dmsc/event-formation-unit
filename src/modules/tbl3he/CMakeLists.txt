@@ -7,9 +7,11 @@ add_subdirectory(test)
 #=============================================================================
 
 set(tbl3he_INC
+  geometry/Tbl3HeConfig.h
   geometry/Tbl3HeGeometry.h
 )
 set(tbl3he_SRC
+  geometry/Tbl3HeConfig.cpp
   geometry/Tbl3HeGeometry.cpp
   main.cpp
 )

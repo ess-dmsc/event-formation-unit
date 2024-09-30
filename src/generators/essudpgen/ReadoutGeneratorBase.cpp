@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include <Error.hpp>
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
 #include <cstdlib>
@@ -88,7 +89,7 @@ void ReadoutGeneratorBase::generateHeader() {
   // Generate pulse time first time
   if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
     pulseTime = ESSTime(time(NULL), 0);
-    readoutTime = pulseTime + Settings.TicksBtwReadouts;
+    readoutTime = pulseTime;
     prevPulseTime = pulseTime;
 
     XTRACE(DATA, INF,
@@ -149,7 +150,7 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
     app.parse(argc, argv);
   } catch (const CLI::CallForHelp &e) {
     std::exit(app.exit(e));
-  } catch (const CLI::ParseError &e) {
+  } catch (const CLI::Error &e) {
     std::exit(app.exit(e));
   }
 }

@@ -118,7 +118,7 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
   for (auto const &Data : CaenParser.Result) {
     printf("Fiber %u, FEN %u\n", Data.FiberId, Data.FENId);
     printf("time (%u, %u), SeqNum %u, Group %u, A %u, B %u, C %u, D %u\n",
-           Data.TimeHigh, Data.TimeLow, Data.DataSeqNum, Data.Group, Data.AmpA,
+           Data.TimeHigh, Data.TimeLow, Data.Unused, Data.Group, Data.AmpA,
            Data.AmpB, Data.AmpC, Data.AmpD);
   }
 }
