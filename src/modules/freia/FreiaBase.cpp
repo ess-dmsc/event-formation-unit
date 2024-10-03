@@ -57,6 +57,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.error_hybrid_mapping", Counters.HybridMappingErrors);
   Stats.create("readouts.error_ring_mapping", Counters.RingMappingErrors);
   Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
+  Stats.create("readouts.error_invalid_xcoord", Counters.InvalidXCoord);
+  Stats.create("readouts.error_invalid_ycoord", Counters.InvalidYCoord);
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.VMMStats.ErrorFiber);
