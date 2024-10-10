@@ -6,7 +6,8 @@ project = "event-formation-unit"
 module_src="${project}/src/modules/"
 coverage_on = "centos7"
 clangformat_os = "debian11"
-archive_what = "centos7-release"
+archive_centos = "centos7"
+archive_ubuntu = "ubuntu2204"
 
 // Set number of old builds to keep.
  properties([[
@@ -23,7 +24,7 @@ archive_what = "centos7-release"
 container_build_nodes = [
   'almalinux8': ContainerBuildNode.getDefaultContainerBuildNode('almalinux8-gcc12'),
   'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
+//   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc11'),
   'debian11': ContainerBuildNode.getDefaultContainerBuildNode('debian11'),
   'ubuntu2204': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu2204')
 ]
@@ -188,7 +189,7 @@ builders = pipeline_builder.createBuilders { container ->
         }  // stage
     }
 
-    if (container.key == archive_what) {
+    if (container.key == archive_centos || container.key == archive_ubuntu) {
         pipeline_builder.stage("${container.key}: archive") {
             container.sh """
                                 mkdir -p archive/event-formation-unit
@@ -210,14 +211,14 @@ builders = pipeline_builder.createBuilders { container ->
                                 echo 'Jenkins build: ${BUILD_NUMBER}' >> archive/event-formation-unit/BUILD_INFO
 
                                 cd archive
-                                tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
+                                tar czvf event-formation-unit-${container.key}.tar.gz event-formation-unit
                             """
-            container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
+            container.copyFrom("/home/jenkins/archive/event-formation-unit-${container.key}.tar.gz", '.')
             container.copyFrom("/home/jenkins/archive/event-formation-unit/BUILD_INFO", '.')
-            archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
+            archiveArtifacts "event-formation-unit-${container.key}.tar.gz,BUILD_INFO"
             if (env.CHANGE_ID) {
                 // Stash archive for integration test
-                stash 'event-formation-unit-centos7.tar.gz'
+                stash "event-formation-unit-${container.key}.tar.gz"
             }
         }
     }
