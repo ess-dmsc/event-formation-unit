@@ -24,10 +24,6 @@ public:
   void processing_thread();
 
   struct Counters Counters {};
-
-protected:
-  EV44Serializer *Serializer;
-  AR51Serializer *MonitorSerializer;
 };
 
 } // namespace Nmx

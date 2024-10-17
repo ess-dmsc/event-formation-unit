@@ -164,12 +164,6 @@ void NmxBase::processing_thread() {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "nmx_debug",
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
 
   Stats.create("produce.cause.pulse_change",
@@ -177,7 +171,16 @@ void NmxBase::processing_thread() {
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  MonitorSerializer = new AR51Serializer("nmx", ProduceMonitor);
+  // Create the raw-data monitor producer and serializer
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
+                          KafkaCfg.CfgParms);
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
+    };
+
+  MonitorSerializer =
+    new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
+
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
   unsigned int DataIndex;
