@@ -48,6 +48,20 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
   Settings.Type = Type;
+
+  NameToType["CBM"] = ESSReadout::Parser::CBM;
+  NameToType["LOKI"] = ESSReadout::Parser::LOKI;
+  NameToType["TBL3HE"] = ESSReadout::Parser::TBL3HE;
+  NameToType["BIFROST"] = ESSReadout::Parser::BIFROST;
+  NameToType["MIRACLES"] = ESSReadout::Parser::MIRACLES;
+  NameToType["CSPEC"] = ESSReadout::Parser::CSPEC;
+  NameToType["NMX"] = ESSReadout::Parser::NMX;
+  NameToType["FREIA"] = ESSReadout::Parser::FREIA;
+  NameToType["LOKI"] = ESSReadout::Parser::LOKI;
+  NameToType["TREX"] = ESSReadout::Parser::TREX;
+  NameToType["DREAM"] = ESSReadout::Parser::DREAM;
+  NameToType["MAGIC"] = ESSReadout::Parser::MAGIC;
+  NameToType["HEIMDAL"] = ESSReadout::Parser::HEIMDAL;
 }
 
 ///\brief

@@ -92,6 +92,9 @@ public:
   static constexpr int BufferSize{8972}; ///< Size of the buffer
   uint8_t Buffer[BufferSize];            ///< Buffer for the packet
 
+
+  std::map<std::string, ESSReadout::Parser::DetectorType> NameToType;
+
 protected:
   CLI::App app{"UDP data generator for ESS readout data"};
 
