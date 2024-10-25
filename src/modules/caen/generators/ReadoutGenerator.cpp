@@ -13,9 +13,9 @@
 
 namespace Caen {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::BIFROST) {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::Reserved) {
   app.add_option("--detector", CaenSettings.Detector,
-                "Specify detector name (LOKI, CSPEC, ..)");
+                "Specify detector name (LOKI, CSPEC, ..)")->required();
   app.add_flag("--tof", CaenSettings.Tof,
                 "generate tof distribution");
   app.add_flag("--loki", CaenSettings.Loki,
@@ -26,13 +26,15 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
                 "Mask out unused FENs");
   app.add_option("--groupmask", CaenSettings.GroupMask,
                 "Mask out unused Groupss");
+  app.add_flag("--debug", CaenSettings.Debug,
+                "print debug information");
 }
 
 
 // Values must be > 0 and <= 32, Mask must be nonzero
-uint8_t ReadoutGenerator::randU8WithMask(int Values, int Mask) {
+uint8_t ReadoutGenerator::randU8WithMask(int Range, int Mask) {
   while (true) {
-    uint8_t Id = Fuzzer.random8() % Values;
+    uint8_t Id = Fuzzer.random8() % Range;
     int BitVal = 1 << Id;
     if (BitVal & Mask) {
       return Id;
@@ -69,12 +71,14 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
     ReadoutData.AmpD = 0;
   }
 
-  // printf("fiber %2u, fen %2u, timehi %10u, timelo %10u, group %2u, a: %5u, b: %5u, c: %5u, d: %5u\n",
-  //     ReadoutData.FiberId, ReadoutData.FENId,
-  //     ReadoutData.TimeHigh, ReadoutData.TimeLow,
-  //     ReadoutData.Group,
-  //     (uint16_t)ReadoutData.AmpA, (uint16_t)ReadoutData.AmpB,
-  //     (uint16_t)ReadoutData.AmpC, (uint16_t)ReadoutData.AmpD);
+  if (CaenSettings.Debug) {
+    printf("fiber %2u, fen %2u, timehi %10u, timelo %10u, group %2u, a: %5u, b: %5u, c: %5u, d: %5u\n",
+        ReadoutData.FiberId, ReadoutData.FENId,
+        ReadoutData.TimeHigh, ReadoutData.TimeLow,
+        ReadoutData.Group,
+        (uint16_t)ReadoutData.AmpA, (uint16_t)ReadoutData.AmpB,
+        (uint16_t)ReadoutData.AmpC, (uint16_t)ReadoutData.AmpD);
+  }
 
   return true;
 }
