@@ -29,19 +29,20 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
 }
 
 
-uint8_t ReadoutGenerator::get8(int MaxVal, int Mask) {
+// Values must be > 0 and <= 32, Mask must be nonzero
+uint8_t ReadoutGenerator::randU8WithMask(int Values, int Mask) {
   while (true) {
-    uint8_t Id = Fuzzer.random8() % MaxVal;
-    int val = 1 << Id;
-    if (val & Mask) {
+    uint8_t Id = Fuzzer.random8() % Values;
+    int BitVal = 1 << Id;
+    if (BitVal & Mask) {
       return Id;
     }
+    // repeat until match
   }
 }
 
 bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
-
 
   if (CaenSettings.Tof) {
     double TofMs = TofDist.getValue();
@@ -51,13 +52,12 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
     ReadoutData.TimeHigh = getReadoutTimeHigh();
     ReadoutData.TimeLow = getReadoutTimeLow();
   }
+
   ReadoutData.FlagsOM = 0;
 
-
-
-  ReadoutData.FiberId = get8(23, CaenSettings.FiberMask);
-  ReadoutData.FENId = get8(12, CaenSettings.FENMask);
-  ReadoutData.Group = get8(15, CaenSettings.GroupMask);
+  ReadoutData.FiberId = randU8WithMask(24, CaenSettings.FiberMask);
+  ReadoutData.FENId = randU8WithMask(12, CaenSettings.FENMask);
+  ReadoutData.Group = randU8WithMask(15, CaenSettings.GroupMask);
   ReadoutData.AmpA = Fuzzer.random16();
   ReadoutData.AmpB = Fuzzer.random16();
 

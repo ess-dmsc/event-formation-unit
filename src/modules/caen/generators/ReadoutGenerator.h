@@ -31,7 +31,6 @@ public:
 
   ReadoutGenerator();
 
-  uint8_t get8(int MaxVal, int Mask); // crap function
 
   void setTypeByName(std::string Name) {
       Settings.TypeOverride = NameToType[Name];
@@ -47,6 +46,22 @@ protected:
   bool getRandomReadout(DataParser::CaenReadout &DR);
 
 
+  ///\brief Generate a random integer
+  ///\param Values number of values generated (from 0 to Values -1), must be
+  /// nonzero and <= 32
+  ///\param Mask the (32 bit) bitmask of allowed values, must be nonzero
+  ///
+  /// Constraints:
+  /// 1) The number must belong to the interval 0 to (Values - 1)
+  /// 2) The number, represented as a bit, must be accepted by the supplied mask
+  ///
+  /// Ex: If Mask is 0x03 (11 in binary), the only allowed values are 0
+  /// and 1 corresponding to the 0'th and first bit.
+  ///
+  /// Ex: Mask 0x09 would allow values 0 and 3, so randU8WithMask(16, 0x09)
+  /// will return a random sequence from the set (0, 3) where as
+  /// randU8WithMask(8, 0x09) will only return 0's.
+  uint8_t randU8WithMask(int Values, int Mask);
 
 
   ///\brief For TOF distribution calculations
