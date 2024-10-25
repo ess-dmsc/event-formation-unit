@@ -69,13 +69,12 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
     ReadoutData.AmpD = 0;
   }
 
-
-  printf("fiber %2u, fen %2u, timehi %10u, timelo %10u, group %2u, a: %5u, b: %5u, c: %5u, d: %5u\n",
-      ReadoutData.FiberId, ReadoutData.FENId,
-      ReadoutData.TimeHigh, ReadoutData.TimeLow,
-      ReadoutData.Group,
-      (uint16_t)ReadoutData.AmpA, (uint16_t)ReadoutData.AmpB,
-      (uint16_t)ReadoutData.AmpC, (uint16_t)ReadoutData.AmpD);
+  // printf("fiber %2u, fen %2u, timehi %10u, timelo %10u, group %2u, a: %5u, b: %5u, c: %5u, d: %5u\n",
+  //     ReadoutData.FiberId, ReadoutData.FENId,
+  //     ReadoutData.TimeHigh, ReadoutData.TimeLow,
+  //     ReadoutData.Group,
+  //     (uint16_t)ReadoutData.AmpA, (uint16_t)ReadoutData.AmpB,
+  //     (uint16_t)ReadoutData.AmpC, (uint16_t)ReadoutData.AmpD);
 
   return true;
 }
