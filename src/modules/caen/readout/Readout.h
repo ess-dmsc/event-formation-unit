@@ -51,7 +51,7 @@ struct __attribute__((packed)) Readout {
   uint32_t PrevPulseTimeLow{0};
   uint32_t EventTimeHigh{0};
   uint32_t EventTimeLow{0};
-  uint16_t DataSeqNum{0}; // Pulse Height in debug mode
+  uint16_t Unused{0}; // Pulse Height in debug mode
   int16_t AmpA{0};
   int16_t AmpB{0};
   int16_t AmpC{0};
@@ -83,7 +83,7 @@ public:
     H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeLow);
     H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
     H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(DataSeqNum);
+    H5_COMPOUND_INSERT_MEMBER(Unused);
     H5_COMPOUND_INSERT_MEMBER(AmpA);
     H5_COMPOUND_INSERT_MEMBER(AmpB);
     H5_COMPOUND_INSERT_MEMBER(AmpC);

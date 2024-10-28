@@ -62,6 +62,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("readouts.headers", Counters.Parser.DataHeaders);
   Stats.create("readouts.count", Counters.Parser.Readouts);
   Stats.create("readouts.error_amplitude", Counters.Parser.ReadoutsBadAmpl);
+
   Stats.create("readouts.error_headersize", Counters.Parser.DataHeaderSizeErrors);
   Stats.create("readouts.error_datlen_mismatch", Counters.Parser.DataLenMismatch);
   Stats.create("readouts.error_datlen_invalid", Counters.Parser.DataLenInvalid);
@@ -77,8 +78,10 @@ CaenBase::CaenBase(BaseSettings const &settings,
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingErrors);
   Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENErrors);
+  Stats.create("geometry.topology_errors", Counters.Geom.TopologyErrors);
   Stats.create("geometry.group_errors", Counters.Geom.GroupErrors);
   Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
+  Stats.create("geometry.ampl_low", Counters.Geom.AmplitudeLow);
   Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
   Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
   Stats.create("geometry.calib_group_errors", Counters.Calibration.GroupErrors);

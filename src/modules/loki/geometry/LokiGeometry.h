@@ -58,7 +58,7 @@ public:
   bool validateData(DataParser::CaenReadout &Data) override;
 
   // Holds the parsed configuration
-  Config Conf;
+  Config & Conf;
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
 

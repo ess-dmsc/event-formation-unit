@@ -12,10 +12,9 @@
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <random>
 
-///
-/// @class LinearGenerator
-/// @brief A class that generates linear values based on a given gradient.
-///
+
+/// \class LinearGenerator
+/// \brief A class that generates linear values based on a given gradient.
 class LinearGenerator : public FunctionGenerator {
 public:
   LinearGenerator(double MaxX, double gradient, uint32_t offset = 0.0)
@@ -27,7 +26,7 @@ public:
     }
   };
 
-  ///
+
   /// \brief Get the value at a given position.
   ///
   double getDistValue(const double &Pos) override {

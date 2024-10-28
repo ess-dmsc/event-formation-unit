@@ -49,7 +49,6 @@ ReadoutGenerator::ReadoutGenerator()
                        "Override channel ID (default 0)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
-
   IbmGroup->add_option(
       "--value", cbmSettings.Value,
       "Fixed value for the value function (required for Fixed generator type)");
@@ -59,27 +58,14 @@ ReadoutGenerator::ReadoutGenerator()
   IbmGroup->add_option("--offset", cbmSettings.Offset,
                        "Function generator offset for the start value "
                        "(Optional for all generator type)");
-  IbmGroup->add_option("--bins", cbmSettings.NumberOfBins,
-                       "Number of bins (sampling) of the distribution function (default 512)");
-
-  std::string genTypeStr = "";
+  IbmGroup->add_option(
+      "--bins", cbmSettings.NumberOfBins,
+      "Number of bins (sampling) of the distribution function (default 512)");
 
   IbmGroup
-      ->add_set("--generator_type", genTypeStr, {"Dist", "Linear", "Fixed"},
-                "Set the generator type (default : Dist)")
-      ->check(genTypeValidator)
-      ->transform([this](const std::string &str) {
-        if (str == "Dist") {
-          cbmSettings.generatorType = GeneratorType::Distribution;
-        } else if (str == "Linear") {
-          cbmSettings.generatorType = GeneratorType::Linear;
-        } else if (str == "Fixed") {
-          cbmSettings.generatorType = GeneratorType::Fixed;
-        } else {
-          throw CLI::ValidationError("Invalid generator type: " + str);
-        }
-        return str;
-      });
+      ->add_option("--generator_type", cbmSettings.generatorType,
+                   "Set the generator type (default : Dist)")
+      ->check(genTypeValidator);
 }
 
 void ReadoutGenerator::generateData() {
@@ -172,8 +158,8 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
 void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
-    Generator =
-        std::make_unique<DistributionGenerator>(MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
+    Generator = std::make_unique<DistributionGenerator>(
+        MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
