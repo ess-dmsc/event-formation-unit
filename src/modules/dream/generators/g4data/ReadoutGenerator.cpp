@@ -81,17 +81,11 @@ void ReadoutGenerator::generateData() {
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = DatReadout.fen;
     dataPkt.DataLength = ReadoutDataSize;
-    // dataPkt.TimeHigh = DatReadout.timehi;
-    dataPkt.TimeLow = DatReadout.timelo;
     dataPkt.UnitId = DatReadout.uid;
     dataPkt.Cathode = DatReadout.cathode;
     dataPkt.Anode = DatReadout.anode;
 
-    auto PulseTimeNS = getPulseTimeNs();
-    auto OffsetNS = time.toNS(0, dataPkt.TimeLow);
-    auto ReadoutTimeNS = PulseTimeNS + OffsetNS;
-
-    ESSReadout::ESSTime NewReadoutTime = ESSReadout::ESSTime(ReadoutTimeNS);
+    ESSReadout::ESSTime NewReadoutTime = getPulseTime() + dataPkt.TimeLow;
     dataPkt.TimeHigh = NewReadoutTime.getTimeHigh();
     dataPkt.TimeLow = NewReadoutTime.getTimeLow();
 
