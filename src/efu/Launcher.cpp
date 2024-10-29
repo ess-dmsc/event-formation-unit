@@ -8,14 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <cassert>
-#include <common/debug/Log.h>
-#include <common/detector/Detector.h>
-#include <common/detector/EFUArgs.h>
 #include <efu/Launcher.h>
-#include <iostream>
-#include <map>
-#include <thread>
 
 void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
   auto startThreadsWithoutAffinity = [&detector, this]() {
