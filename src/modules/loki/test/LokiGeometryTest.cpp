@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, see LICENSE file, ERIC
+// Copyright (C) 2019 - 2024 European Spallation Source, see LICENSE file, ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -77,34 +77,47 @@ TEST_F(LokiGeometryTest, UnitLimits) {
 }
 
 
+///\brief Using formula from ICD to calculate Unit (straw in LOKI terms)
+///
+///            B + D
+/// Unit = -------------
+///        A + B + C + D
+///
 TEST_F(LokiGeometryTest, MinMaxUnit) {
   geom->setResolution(512);
   unsigned int iMax = 4096;
   for (unsigned int i = 1; i < iMax; i++) {
-    auto Res = geom->calcUnitAndPos(0, 0, i, 0, 0);
-    ASSERT_EQ(Res.first, 6);
-    Res = geom->calcUnitAndPos(0, 0, 0, 0, i);
-    ASSERT_EQ(Res.first, 0);
-    Res = geom->calcUnitAndPos(0, 0, i, 0, i);
-    ASSERT_EQ(Res.first, 3);
-    Res = geom->calcUnitAndPos(0, i, 0, i, 0);
-    ASSERT_EQ(Res.first, 3);
+    //                           Group A  B  C  D
+    auto Unit = geom->calcUnitAndPos(0, 0, i, 0, 0).first;
+    ASSERT_EQ(Unit, 6);
+    Unit = geom->calcUnitAndPos(0, 0, 0, 0, i).first;
+    ASSERT_EQ(Unit, 6);
+    Unit = geom->calcUnitAndPos(0, i, i, 0, 0).first;
+    ASSERT_EQ(Unit, 3);
+    Unit = geom->calcUnitAndPos(0, 0, 0, i, i).first;
+    ASSERT_EQ(Unit, 3);
   }
 }
 
 
-
+///\brief Using formula from ICD to calculate Position
+///
+///            A + B
+/// Pos  = -------------
+///        A + B + C + D
+///
 TEST_F(LokiGeometryTest, MinMaxPos) {
   geom->setResolution(512);
   for (unsigned int i = 1; i < 4095; i++) {
-    auto Res = geom->calcUnitAndPos(0, 0, 0, i, 0);
-    ASSERT_EQ(Res.second, 0);
-    Res = geom->calcUnitAndPos(0, 0, 0, 0, i);
-    ASSERT_EQ(Res.second, 0);
-    Res = geom->calcUnitAndPos(0, 0, 0, i, i);
-    ASSERT_EQ(Res.second, 0);
-    Res = geom->calcUnitAndPos(0, i, i, 0, 0);
-    ASSERT_EQ(Res.second, 1.0);
+    //                          Group  A  B  C  D
+    auto Pos = geom->calcUnitAndPos(0, 0, 0, i, 0).second;
+    ASSERT_EQ(Pos, 0);
+    Pos = geom->calcUnitAndPos(0, 0, 0, 0, i).second;
+    ASSERT_EQ(Pos, 0);
+    Pos = geom->calcUnitAndPos(0, 0, 0, i, i).second;
+    ASSERT_EQ(Pos, 0);
+    Pos = geom->calcUnitAndPos(0, i, i, 0, 0).second;
+    ASSERT_EQ(Pos, 1.0);
   }
 }
 
@@ -127,6 +140,7 @@ TEST_F(LokiGeometryTest, validate) {
 }
 
 
+///\todo Very rudimentary test, should be extended
 TEST_F(LokiGeometryTest, calcPixel) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
@@ -135,7 +149,9 @@ TEST_F(LokiGeometryTest, calcPixel) {
   readout.AmpB = 10;
   readout.AmpC = 10;
   readout.AmpD = 10;
-  ASSERT_EQ(geom->calcPixel(readout), 1790);
+  // Should result in Unit = 3, Pos = 0.5
+  // So pixel is 3 * 512 + 255 + 1 =
+  ASSERT_EQ(geom->calcPixel(readout), 1792);
 }
 
 
