@@ -54,11 +54,9 @@ public:
     int FENOffset = RParm.FENOffset;
 
     auto & BParm = Parms.Banks[Bank];
-    int GroupsN = BParm.GroupsN;
-
-    int UnitsPerLayer = GroupsN * 7;
-    int Z = Group % 4;
-    return Z * UnitsPerLayer + (FENOffset+FEN)*2*7 + 7*(Group/4) + Unit;
+    int UnitsPerLayer = BParm.GroupsN * 7;
+    int Layer = Group % 4;
+    return BParm.YOffset + Layer * UnitsPerLayer + (FENOffset+FEN)*2*7 + 7*(Group/4) + Unit;
   }
 
 

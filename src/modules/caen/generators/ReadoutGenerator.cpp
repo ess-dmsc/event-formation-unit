@@ -18,14 +18,25 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
                 "Specify detector name (LOKI, CSPEC, ..)")->required();
   app.add_flag("--tof", CaenSettings.Tof,
                 "generate tof distribution");
+
   app.add_flag("--loki", CaenSettings.Loki,
                 "generate data for all four amplitudes");
+
   app.add_option("--fibermask", CaenSettings.FiberMask,
                 "Mask out unused fibers");
+  app.add_option("--fibervals", CaenSettings.FiberVals,
+                "Number of Fiber values to generate");
+
   app.add_option("--fenmask", CaenSettings.FENMask,
                 "Mask out unused FENs");
+  app.add_option("--fenvals", CaenSettings.FENVals,
+                "Number of FEN values to generate");
+
   app.add_option("--groupmask", CaenSettings.GroupMask,
                 "Mask out unused Groupss");
+  app.add_option("--groupvals", CaenSettings.GroupVals,
+                "Number of Group values to generate");
+
   app.add_flag("--debug", CaenSettings.Debug,
                 "print debug information");
 }
@@ -57,15 +68,15 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
 
   ReadoutData.FlagsOM = 0;
 
-  ReadoutData.FiberId = randU8WithMask(24, CaenSettings.FiberMask);
-  ReadoutData.FENId = randU8WithMask(12, CaenSettings.FENMask);
-  ReadoutData.Group = randU8WithMask(15, CaenSettings.GroupMask);
-  ReadoutData.AmpA = Fuzzer.random16();
-  ReadoutData.AmpB = Fuzzer.random16();
+  ReadoutData.FiberId = randU8WithMask(CaenSettings.FiberVals, CaenSettings.FiberMask);
+  ReadoutData.FENId = randU8WithMask(CaenSettings.FENVals, CaenSettings.FENMask);
+  ReadoutData.Group = randU8WithMask(CaenSettings.GroupVals, CaenSettings.GroupMask);
+  ReadoutData.AmpA = Fuzzer.random16() & CaenSettings.AmplitudeMask;
+  ReadoutData.AmpB = Fuzzer.random16() & CaenSettings.AmplitudeMask;
 
   if (CaenSettings.Loki) {
-    ReadoutData.AmpC = Fuzzer.random16();
-    ReadoutData.AmpD = Fuzzer.random16();
+    ReadoutData.AmpC = Fuzzer.random16() & CaenSettings.AmplitudeMask;
+    ReadoutData.AmpD = Fuzzer.random16() & CaenSettings.AmplitudeMask;
   } else {
     ReadoutData.AmpC = 0;
     ReadoutData.AmpD = 0;
