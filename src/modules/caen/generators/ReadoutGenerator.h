@@ -25,8 +25,12 @@ public:
     bool Debug{false};
 
     // Masks are used to restrict the generated data
+    int AmplitudeMask{0x7fff}; // Remove highest bit (could be signed)
+    int FiberVals{24};
     int FiberMask{0xffffff}; // Fibers 0 - 23
+    int FENVals{16};
     int FENMask{0xfff}; // FENs 0 - 11
+    int GroupVals{16};
     int GroupMask{0xffff}; // Groups 0 - 14
   } CaenSettings;
 
