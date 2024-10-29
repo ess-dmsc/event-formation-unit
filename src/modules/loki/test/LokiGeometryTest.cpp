@@ -80,7 +80,7 @@ TEST_F(LokiGeometryTest, UnitLimits) {
 ///\brief Using formula from ICD to calculate Unit (straw in LOKI terms)
 ///
 ///            B + D
-/// Unit = -------------
+/// Unit = ------------- * 6
 ///        A + B + C + D
 ///
 TEST_F(LokiGeometryTest, MinMaxUnit) {
@@ -96,11 +96,13 @@ TEST_F(LokiGeometryTest, MinMaxUnit) {
     ASSERT_EQ(Unit, 3);
     Unit = geom->calcUnitAndPos(0, 0, 0, i, i).first;
     ASSERT_EQ(Unit, 3);
+    Unit = geom->calcUnitAndPos(0, 0, 0, i, 0).first;
+    ASSERT_EQ(Unit, 0);
   }
 }
 
 
-///\brief Using formula from ICD to calculate Position
+///\brief Using formula from ICD to calculate Position (in unit interval)
 ///
 ///            A + B
 /// Pos  = -------------
