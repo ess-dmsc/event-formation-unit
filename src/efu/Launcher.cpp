@@ -29,7 +29,7 @@ void Launcher::exceptionHandlingWrapper(ThreadInfo &ThreadInfo) {
   try {
     ThreadInfo.func();
   } catch (const std::exception &e) {
-    LOG(INIT, Sev::Alert, "Initiate shutdown. Thread {} threw an unhandled exception: {}", ThreadInfo.name, e.what());
+    LOG(INIT, Sev::Alert, "Initiate shutdown. Thread [{}] threw an unhandled exception! [{}]", ThreadInfo.name, e.what());
     KeepRunningRef = 0;
   }
 }

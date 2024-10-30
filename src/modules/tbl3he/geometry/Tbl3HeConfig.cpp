@@ -6,9 +6,12 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/debug/Error.h>
+#include <fmt/core.h>
+#include <stdexcept>
+#include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <unistd.h>
 
 #undef TRC_LEVEL
@@ -19,7 +22,8 @@ namespace Caen {
 ///
 Tbl3HeConfig::Tbl3HeConfig() {}
 
-Tbl3HeConfig::Tbl3HeConfig(std::string ConfigFile) : ConfigFileName(ConfigFile) {
+Tbl3HeConfig::Tbl3HeConfig(std::string ConfigFile)
+    : ConfigFile(ConfigFile), ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
 }
@@ -33,13 +37,14 @@ void Tbl3HeConfig::errorExit(std::string ErrMsg) {
 
 void Tbl3HeConfig::parseConfig() {
 
-  json_check_keys("Mandatory keys", root, {"Detector", "Resolution",
-    "MaxPulseTimeNS", "MaxTOFNS", "NumOfFENs", "MinValidAmplitude",
-    "MaxGroup", "Topology" });
+  json_check_keys("Mandatory keys", root,
+                  {"Detector", "Resolution", "MaxPulseTimeNS", "MaxTOFNS",
+                   "NumOfFENs", "MinValidAmplitude", "MaxGroup", "Topology"});
 
   Parms.InstrumentName = root["Detector"].get<std::string>();
   if (Parms.InstrumentName != "tbl3he") {
-    errorExit(fmt::format("Invalid instrument name ({}) for tbl3he", Parms.InstrumentName));
+    errorExit(fmt::format("Invalid instrument name ({}) for tbl3he",
+                          Parms.InstrumentName));
   }
 
   try {
@@ -66,12 +71,13 @@ void Tbl3HeConfig::parseConfig() {
     auto Configs = root["Topology"];
 
     if (Parms.NumOfFENs != (int)Configs.size()) {
-      errorExit(fmt::format("RING/FEN topology mismatch {}"));
+      errorExit(fmt::format("RING/FEN topology mismatch, NumOfFEN: {} != Config size: {}",
+                            Parms.NumOfFENs, Configs.size()));
     }
 
     TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
-    for (auto & elt : Configs) {
+    for (auto &elt : Configs) {
       json_check_keys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
 
       int Ring = elt["Ring"].get<int>();
@@ -90,11 +96,12 @@ void Tbl3HeConfig::parseConfig() {
       TopologyMapPtr->add(Ring, FEN, topo);
     }
 
-
-  } catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
-        ConfigFileName);
-    throw std::runtime_error("Invalid Json file");
+  } catch (fmt::format_error &e) {
+    LOG(INIT, Sev::Critical,
+        "JSON config - code error during fm::format() call: {}", e.what());
+    throw std::runtime_error(std::string("(fmt::fomat_error) ") + e.what());
+  } catch (std::exception &e) {
+    RETHROW_WITH_HINT(e);
   }
 }
 
