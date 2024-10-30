@@ -3,13 +3,14 @@
 #define ERROR_H
 
 #include <exception>
+#include <stdexcept>
 #include <string>
 #include <sstream>
 
-class error_with_hint : public std::exception {
+class error_with_hint : public std::runtime_error {
 public:
     error_with_hint(const std::string& message, const char* file, int line)
-        : message_(message), file_(file), line_(line) {}
+        : std::runtime_error(message), message_(message), file_(file), line_(line) {}
 
     const char* what() const noexcept override {
         std::ostringstream oss;
