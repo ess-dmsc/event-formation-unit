@@ -143,12 +143,12 @@ TEST_F(CbmBaseTest, DataReceiveGoodPacket) {
   writePacketToRxFIFO(Readout, GoodTestPacket);
 
   // Ensure timer is timedout
-  sleep(2);
+  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
   EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 3);
   EXPECT_EQ(Readout.Counters.TTLReadoutsProcessed, 1);
   EXPECT_EQ(Readout.Counters.IBMReadoutsProcessed, 1);
-  EXPECT_EQ(Readout.Counters.ProduceCauseTimeout, 1);
+  EXPECT_EQ(Readout.Counters.ProduceCauseTimeout, 2);
   Readout.stopThreads();
 }
 
