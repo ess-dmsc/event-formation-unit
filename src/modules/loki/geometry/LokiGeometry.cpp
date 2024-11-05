@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,6 +30,8 @@ LokiGeometry::LokiGeometry(Config &CaenConfiguration)
 std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
     int AmpB, int AmpC, int AmpD) {
 
+  XTRACE(DATA, DEB, "calcUnitAndPos: GlobalGroup %d", GlobalGroup);
+
   int Denominator = AmpA + AmpB + AmpC + AmpD;
 
   if ( Denominator == 0) {
@@ -38,29 +40,23 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
     return InvalidPos;
   }
 
-  double GlobalPos = 1.0 * (AmpA + AmpB )/ Denominator; // [0.0 ; 1.0]
-  if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
-    XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+  // Calculate uncorrected position as float
+  double UncorrPos = 1.0 * (AmpA + AmpB )/ Denominator; // [0.0 ; 1.0]
+    if ((UncorrPos < 0) or (UncorrPos > 1.0)) {
+    XTRACE(DATA, WAR, "UncorrPos %f not in unit interval", UncorrPos);
     return InvalidPos;
   }
 
-  int Unit = CaenCDCalibration.getUnitId(GlobalGroup, GlobalPos);
+  // Calculate straw as float in the unit interval [0.0 ; 1.0]
+  double Straw = 1.0 * (AmpB + AmpD) / Denominator;
+  int Unit = CaenCDCalibration.getUnitId(GlobalGroup, Straw);
   if (Unit == -1) {
-    XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
-           AmpB, GlobalPos);
+    XTRACE(DATA, DEB, "B %d, D %d, Straw %f outside specified region", AmpB,
+           AmpD, Straw);
     return InvalidPos;
   }
 
-  ///\brief raw unit pos will be in the interval [0;1] regardless of the width
-  /// of the interval
-  auto &Intervals = CaenCDCalibration.Intervals[GlobalGroup];
-  double Lower = Intervals[Unit].first;
-  double Upper = Intervals[Unit].second;
-  double RawUnitPos = (GlobalPos - Lower) / (Upper - Lower);
-
-  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f, RawUnitPos %f", Unit, GlobalPos,
-         RawUnitPos);
-  return std::make_pair(Unit, RawUnitPos);
+  return std::make_pair(Unit, UncorrPos);
 }
 
 

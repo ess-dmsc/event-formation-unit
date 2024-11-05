@@ -66,6 +66,8 @@ double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
 
 ///\brief
 int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) {
+  XTRACE(EVENT, DEB, "GroupIndex %u GlobalPos %f", GroupIndex, GlobalPos);
+
   if (GroupIndex >= Parms.Groups) {
     XTRACE(EVENT, WAR, "Provided GroupIndex %d > config (%d)", GroupIndex, Parms.Groups);
     Stats.GroupErrors++;

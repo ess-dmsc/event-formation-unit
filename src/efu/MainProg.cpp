@@ -82,7 +82,7 @@ int MainProg::run(Detector *inst) {
   LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}",
       DetectorSettings.DetectorName);
 
-  Launcher launcher;
+  Launcher launcher(keep_running);
 
   launcher.launchThreads(detector);
 

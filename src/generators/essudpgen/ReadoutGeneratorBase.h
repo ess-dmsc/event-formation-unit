@@ -92,6 +92,9 @@ public:
   static constexpr int BufferSize{8972}; ///< Size of the buffer
   uint8_t Buffer[BufferSize];            ///< Buffer for the packet
 
+
+  std::map<std::string, ESSReadout::Parser::DetectorType> NameToType;
+
 protected:
   CLI::App app{"UDP data generator for ESS readout data"};
 
@@ -193,6 +196,12 @@ protected:
     nextPulseTime += pulseFrequencyNs;
     return nextPulseTime.toNS();
   }
+
+  ///
+  /// \brief Get a copy of to the pulse time
+  /// \return A copy of the pulse time object
+  ///
+  inline esstime::ESSTime getPulseTime() const { return pulseTime; }
 
   ///
   /// \brief Performs the next pulse time calculation with ESSTime and returns

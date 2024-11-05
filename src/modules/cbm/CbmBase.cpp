@@ -5,6 +5,7 @@
 ///
 /// \brief CBM instrument base class which define the detector and required data
 ///        processing
+///
 //===----------------------------------------------------------------------===//
 
 #include <common/kafka/EV44Serializer.h>

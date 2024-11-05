@@ -14,10 +14,10 @@
 
 #pragma once
 
-#include <da00_dataarray_generated.h>
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
+#include <da00_dataarray_generated.h>
 #include <fmt/format.h>
 
 namespace fbserializer {
@@ -84,7 +84,7 @@ struct HistrogramSerializerStats : public SerializerStats {
 /// the histogram, serialize the data, and initialize the time X-axis values.
 template <class T, class R = T>
 class HistogramSerializer : public AbstractSerializer {
-  using data_t = std::vector<std::vector<T>>;
+  using data_t = std::vector<std::pair<T, uint32_t>>;
   using time_t = int32_t;
 
   const std::string Source;
@@ -97,7 +97,6 @@ class HistogramSerializer : public AbstractSerializer {
   const enum BinningStrategy BinningStrategy;
   HistrogramSerializerStats Stats;
 
-  size_t InitialBinSize{20};
   std::vector<size_t> BinSizes;
 
   data_t DataBins;
@@ -130,9 +129,8 @@ public:
         BinningStrategy(std::move(Strategy)), Stats() {
 
     initAxis();
-    DataBins = data_t(XAxisValues.size());
+    DataBins = data_t(XAxisValues.size(), {0, 0});
     XTRACE(INIT, DEB, "Data Bins vector initialized to %zu", DataBins.size());
-    BinSizes = std::vector<size_t>(DataBins.size(), InitialBinSize);
   }
 
   /// \brief Constructor for the HistogramBuilder class.
@@ -151,8 +149,7 @@ public:
         BinCount(other.BinCount), Name(other.Name), Unit(other.Unit),
         TimeUnit(other.TimeUnit), Stats(other.Stats),
         AggregateFunction(other.AggregateFunction),
-        BinningStrategy(other.BinningStrategy),
-        InitialBinSize(other.InitialBinSize), BinSizes(other.BinSizes),
+        BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
   /// \brief This function finds the bin index for a given time.
@@ -169,7 +166,8 @@ public:
     R Step = (MaxValue - MinValue) / (XAxisValues.size() - 1); // step size
 
     size_t BinIndex = static_cast<size_t>((Time - MinValue) / Step);
-    XTRACE(DATA, DEB, "BinIndex %zu calculated from time: %zi.", BinIndex, Time);
+    XTRACE(DATA, DEB, "BinIndex %zu calculated from time: %zi.", BinIndex,
+           Time);
 
     // Check if the binIndex is out of bounds and put edge values in the last
     // bin
@@ -188,26 +186,13 @@ public:
       Stats.DataOverPeriodLastBin++;
     }
 
-    if (DataBins[BinIndex].empty()) {
-      DataBins[BinIndex].reserve(InitialBinSize);
-      XTRACE(INIT, DEB, "Bin %zu not initialized, Initialize with %zu size",
-             BinIndex, InitialBinSize);
-    }
-
-    /// Check if the bin is full and resize it with the double of the initial
-    /// size, to avoid multiple reallocations
-    if (DataBins[BinIndex].size() >= BinSizes[BinIndex]) {
-      BinSizes[BinIndex] += InitialBinSize * 2;
-      DataBins[BinIndex].reserve(BinSizes[BinIndex]);
-      XTRACE(DATA, DEB,
-             "Data Bin %zu is Full! Reserve new size, new DataBin[%zu] size "
-             "%zu, new BinSizes[%zu] is %zu.",
-             BinIndex, BinIndex, DataBins[BinIndex].size(), BinIndex,
-             BinSizes[BinIndex]);
-    }
-
-    DataBins[BinIndex].push_back(Value);
-    XTRACE(DATA, DEB, "Value %zu added to DataBin[%zu].", Value, BinIndex);
+    // If the bin is not empty, get the last value out
+    auto &firstPair = DataBins[BinIndex];
+    firstPair.first += Value;
+    firstPair.second++;
+    XTRACE(DATA, DEB,
+           "Value %zu added to DataBin[%zu] New value sum: %zu, count: %zu.",
+           Value, BinIndex, firstPair.first, firstPair.second);
   }
   // Getter function for the Stats member
   HistrogramSerializerStats &stats() { return Stats; }
@@ -250,7 +235,7 @@ private:
     Buffer = Builder.Release();
 
     DataBins.clear();
-    DataBins.resize(XAxisValues.size());
+    DataBins.resize(XAxisValues.size(), {0, 0});
   }
 
   /// \brief Initialize the X-axis values.

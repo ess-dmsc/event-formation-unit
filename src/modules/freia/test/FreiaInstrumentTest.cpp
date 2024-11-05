@@ -6,10 +6,10 @@
 
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <freia/FreiaInstrument.h>
-#include <common/testutils/HeaderFactory.h>
 
 using namespace Freia;
 using namespace ESSReadout;
@@ -108,6 +108,36 @@ std::vector<uint8_t> GoodEvent{
     0x00, 0x00, 0x00, 0x01, // ADC 0x100
     0x00, 0x00, 0x01, 0x10, // GEO 0, TDC 0, VMM 1, CH 16
 };
+
+std::vector<uint8_t> InvalidChannel{
+    // First readout - plane Y - Wires - Fail in processing with invalid channel
+    0x04, 0x00, 0x14, 0x00, // Data Header - Ring 4, FEN 0
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x00, 0x00, 0x0F, // GEO 0, TDC 0, VMM 0, CH 15
+
+    // Second readout - plane Y - Wires - Fail in processing with invalid channel
+    0x05, 0x00, 0x14, 0x00, // Data Header, Ring 5, FEN 0
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x00, 0x00, 0x30, // GEO 0, TDC 0, VMM 1, CH 48
+
+    // Second readout - plane X - Strips - Fail in parsing with channel error
+    0x05, 0x00, 0x14, 0x00, // Data Header, Ring 5, FEN 0
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x00, 0x01, 0x41, // GEO 0, TDC 0, VMM 1, CH 65
+
+    // Second readout - plane X - Strips - Let it pass to overwide the channel
+    0x05, 0x00, 0x14, 0x00, // Data Header, Ring 5, FEN 0
+    0x00, 0x00, 0x00, 0x00, // Time HI 0 s
+    0x11, 0x00, 0x00, 0x00, // Time LO 17 ticka
+    0x00, 0x00, 0x00, 0x01, // ADC 0x100
+    0x00, 0x00, 0x01, 0x00, // GEO 0, TDC 0, VMM 1, CH 0
+};
 // clang-format on
 
 class FreiaInstrumentTest : public TestBase {
@@ -193,6 +223,22 @@ TEST_F(FreiaInstrumentTest, MaxRingMaxFENErrors) {
   counters.VMMStats = freia->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
+}
+
+TEST_F(FreiaInstrumentTest, InvalidWireChannels) {
+  makeHeader(freia->ESSReadoutParser.Packet, InvalidChannel);
+  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  counters.VMMStats = freia->VMMParser.Stats;
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.ErrorChannel, 1);
+
+  // Hack last readout have valid channel
+  freia->VMMParser.Result[2].Channel = 65;
+  freia->processReadouts();
+
+  ASSERT_EQ(counters.InvalidXCoord, 1);
+  ASSERT_EQ(counters.InvalidYCoord, 2);
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {

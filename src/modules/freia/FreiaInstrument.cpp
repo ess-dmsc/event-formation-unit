@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -52,12 +52,9 @@ void FreiaInstrument::loadConfigAndCalib() {
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(
-        Conf.CfgParms.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(
-        Conf.CfgParms.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(
-        Conf.CfgParms.MaxClusteringTimeGap);
+    builder.matcher.setMaximumTimeGap(Conf.CfgParms.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(Conf.CfgParms.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(Conf.CfgParms.MaxClusteringTimeGap);
     if (Conf.CfgParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
           Conf.CfgParms.SplitMultiEvents,
@@ -73,7 +70,8 @@ void FreiaInstrument::loadConfigAndCalib() {
 }
 
 void FreiaInstrument::processReadouts(void) {
-  XTRACE(DATA, DEB,"\n================== NEW PACKET =====================\n\n");
+  XTRACE(DATA, DEB,
+         "\n================== NEW PACKET =====================\n\n");
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
@@ -131,7 +129,8 @@ void FreiaInstrument::processReadouts(void) {
       continue;
     }
 
-    uint64_t TimeNS = ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+    uint64_t TimeNS =
+        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS,
            TDCCorr);
@@ -153,22 +152,30 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
+      uint16_t XCoord = Geom.xCoord(readout.VMM, readout.Channel);
       XTRACE(DATA, INF,
              "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneX, Geom.xCoord(readout.VMM, readout.Channel),
-             readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert(
-          {TimeNS, Geom.xCoord(readout.VMM, readout.Channel), ADC, PlaneX});
+             TimeNS, PlaneX, XCoord, readout.Channel, ADC);
+
+      if (XCoord == GeometryBase::InvalidCoord) {
+        counters.InvalidXCoord++;
+        continue;
+      }
+
+      builders[Hybrid.HybridNumber].insert({TimeNS, XCoord, ADC, PlaneX});
 
     } else { // implicit isYCoord
+      uint16_t yCoord =
+          Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel);
       XTRACE(DATA, INF,
              "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneY,
-             Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
-             readout.Channel, ADC);
-      builders[Hybrid.HybridNumber].insert(
-          {TimeNS, Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel),
-           ADC, PlaneY});
+             TimeNS, PlaneY, yCoord, readout.Channel, ADC);
+      if (yCoord == GeometryBase::InvalidCoord) {
+        counters.InvalidYCoord++;
+        continue;
+      }
+
+      builders[Hybrid.HybridNumber].insert({TimeNS, yCoord, ADC, PlaneY});
     }
   }
 
@@ -179,7 +186,7 @@ void FreiaInstrument::processReadouts(void) {
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
   ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
-  //XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
+  // XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &e : Events) {
     if (e.empty()) {
       XTRACE(EVENT, DEB, "Empty event");
@@ -187,8 +194,10 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (!e.both_planes()) {
-      XTRACE(EVENT, DEB,"\n================== NO COINCIDENCE =====================\n\n");
-      XTRACE(EVENT, DEB, "Event has no coincidence\n %s\n", e.to_string({}, true).c_str());
+      XTRACE(EVENT, DEB,
+             "\n================== NO COINCIDENCE =====================\n\n");
+      XTRACE(EVENT, DEB, "Event has no coincidence\n %s\n",
+             e.to_string({}, true).c_str());
       counters.EventsNoCoincidence++;
 
       if (not e.ClusterB.empty()) {

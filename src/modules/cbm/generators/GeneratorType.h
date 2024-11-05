@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Error.hpp"
+#include <Error.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -48,7 +48,7 @@ public:
   std::string toString() const {
     switch (type_) {
     case Distribution:
-      return "Distribution";
+      return "Dist";
     case Linear:
       return "Linear";
     case Fixed:
@@ -60,7 +60,7 @@ public:
 
   /// \brief Returns the GeneratorTypes enum value from a string representation.
   static GeneratorTypes fromString(const std::string &typeStr) {
-    if (typeStr == "Distribution")
+    if (typeStr == "Dist")
       return Distribution;
     if (typeStr == "Linear")
       return Linear;

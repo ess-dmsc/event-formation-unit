@@ -34,6 +34,7 @@ set(efu_common_INC
   ${VERSION_INCLUDE_DIR}/common/Version.h
   debug/Assert.h
   debug/Expect.h
+  debug/Error.h
   debug/Hexdump.h
   debug/Log.h
   debug/Trace.h

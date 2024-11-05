@@ -60,6 +60,7 @@ public:
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;
 
+  std::string ConfigFile{""};
   std::string ConfigFileName{""};
   nlohmann::json root; // configuration (json)
 };

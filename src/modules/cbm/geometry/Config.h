@@ -82,6 +82,5 @@ public:
   std::string FileName{""};
   nlohmann::json root;
 };
-;
 
 } // namespace cbm

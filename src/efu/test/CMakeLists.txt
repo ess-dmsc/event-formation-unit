@@ -30,3 +30,14 @@ set(ParserTest_INC
   ../Parser.h
   )
 create_test_executable(ParserTest)
+
+#
+set(LauncherTest_SRC
+  LauncherTest.cpp
+)
+set(LauncherTest_INC
+  ../Launcher.h
+  )
+
+  
+create_test_executable(LauncherTest)

@@ -29,6 +29,8 @@ struct Counters {
   int64_t RingMappingErrors;
   int64_t FENMappingErrors;
   int64_t HybridMappingErrors;
+  int64_t InvalidXCoord;
+  int64_t InvalidYCoord;
   int64_t MaxTOFErrors;
   int64_t MaxADC;
   int64_t ADCBelowThreshold;
@@ -52,8 +54,8 @@ struct Counters {
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
   /// \todo cleanup unused variables
-  //int64_t ProduceCausePulseChange;
-  //int64_t ProduceCauseMaxEventsReached;
+  // int64_t ProduceCausePulseChange;
+  // int64_t ProduceCauseMaxEventsReached;
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

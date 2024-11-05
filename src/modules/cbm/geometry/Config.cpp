@@ -67,7 +67,7 @@ void Config::apply() {
 
   try {
     Parms.MaxFENId = root["MaxFENId"].get<int>();
-    
+
     // Number of FENs must must be 1 even is MaxFENId is 0
     Parms.NumOfFENs = Parms.MaxFENId + 1;
   } catch (...) {
@@ -91,8 +91,10 @@ void Config::apply() {
   // temporary map storage to check for duplicates ofthe two unique keys
 
   for (auto &Module : Modules) {
-    int FEN;
-    int Channel;
+    // Initialize the parameters with invalid values which are
+    // not used in the MAP to recall topology object
+    int FEN{-1};
+    int Channel{-1};
     std::string Source{""};
     std::string Type{""};
 
