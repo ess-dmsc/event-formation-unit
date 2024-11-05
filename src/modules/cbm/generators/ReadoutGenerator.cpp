@@ -115,7 +115,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
-  for (uint32_t Readout = 0; Readout <= numberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     // Check if we need to generate new pulse time and reset readout time
     // stop generating readouts and sync readout time with new spulse time
