@@ -99,7 +99,7 @@ builders = pipeline_builder.createBuilders { container ->
             def xtra_flags = ""
             if (container.key == coverage_on) {
                 xtra_flags = "-DCOV=ON"
-            } else if (container.key == archive_what) {
+            } else if (container.key == archive_centos || container.key == archive_ubuntu) {
                 xtra_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON"
             }
             container.sh """
