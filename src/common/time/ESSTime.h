@@ -17,7 +17,12 @@
 namespace esstime {
 
 using TimePointNano = std::chrono::high_resolution_clock::time_point;
+/// \brief Duration in nanoseconds with uint64_t precision
 using TimeDurationNano = std::chrono::duration<uint64_t, std::nano>;
+/// \brief Duration in milliseconds with double precision
+using TimeDurationMilli = std::chrono::duration<double, std::milli>;
+/// \brief Duration in seconds with double precision
+using TimeDurationSec = std::chrono::duration<double, std::ratio<1>>;
 
 /// \class ESSTime
 ///
