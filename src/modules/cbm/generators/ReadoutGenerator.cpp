@@ -163,7 +163,9 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
-  value->NPos = 1000 * Generator->getDistValue(Tof.count() / 1e6); // convert to milliseconds
+  value->NPos =
+      1000 * Generator->getDistValue(
+                 duration_cast<esstime::TimeDurationMilli>(Tof).count());
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
@@ -174,8 +176,8 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   }
 
   esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
-  value->NPos =
-      Generator->getDistValue(Tof.count() / 1e6); // convert to milliseconds
+  value->NPos = Generator->getDistValue(
+      duration_cast<esstime::TimeDurationMilli>(Tof).count());
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
