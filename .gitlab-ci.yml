@@ -223,7 +223,7 @@ publish_tar_job:
     - when: never
 
 
-publish_docker:
+publish_docker_job:
   parallel: 
     matrix:
       - INSTRUMENT: "bifrost"
