@@ -1,0 +1,275 @@
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: always
+    - if: $CI_COMMIT_TAG
+      when: always
+    - when: never
+
+default:
+  tags:
+    - docker
+  
+stages:
+  - build
+  - test
+  - publish
+
+variables:
+  ALMALINUX8_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/almalinux8:1.0"
+  CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/centos7:1.0"
+  UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/ubuntu2204:1.0"
+  DEBIAN11_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/debian11:1.0"
+
+# Job template to reduce duplication
+.build_template: &build_template
+  before_script:
+    - |
+      if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [[ "$ID" == "almalinux" ]]; then
+            echo 'source scl_source enable gcc-toolset-12' >> ~/.bashrc
+            source ~/.bashrc
+        elif [[ "$ID" == "centos" ]]; then
+            echo 'source /opt/rh/devtoolset-11/enable' >> ~/.bashrc
+            source ~/.bashrc
+        fi
+      fi
+
+    - |
+      conan remote add \
+        --insert 0 \
+        --force \
+        ecdc-conan-external https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-external
+
+    - cmake --version
+    - gcc --version
+    - g++ --version
+    - cppcheck --version
+
+    - git config --global --add safe.directory '*'
+
+
+build_job:
+  <<: *build_template
+  parallel: 
+    matrix:
+      - NAME : "almalinux8"
+        CONTAINER_IMAGE: $ALMALINUX8_IMAGE
+
+      - NAME: "centos7"
+        CONTAINER_IMAGE: $CENTOS7_IMAGE
+
+      - NAME: "ubuntu2204"
+        CONTAINER_IMAGE: $UBUNTU2204_IMAGE
+
+  stage: build
+  image: $CONTAINER_IMAGE
+  dependencies: []
+  cache:
+    key: "$CI_COMMIT_SHA-$CONTAINER_IMAGE"
+    paths:
+      - build/
+  artifacts:
+    paths:
+      - build/bin
+      - build/generators
+      - build/lib
+      - build/licenses
+      - build/CONAN_INFO
+    expire_in: 1 day
+  script:
+    - echo "Running on $NAME"
+
+    - mkdir -p build
+    - cd build
+
+    # Check if build artifacts already exist
+    - if [ "$(ls -A build/bin 2>/dev/null)" ]; then
+        echo "Build artifacts found, skipping build.";
+      else
+        echo "No build artifacts found, proceeding to build.";
+
+        echo "Installing dependencies";
+        conan install --build=outdated ..;
+        conan info ../conanfile.txt > CONAN_INFO;
+
+        echo "Configuring with CMake";
+        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON ..;
+
+        echo "Building project";
+        make -j$(nproc) all;
+        make;
+      fi
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - when: never
+
+
+clangformat_test_job:
+  stage: test
+  image: $DEBIAN11_IMAGE
+  dependencies: []
+  before_script:
+    - export HTTP_PROXY="http://172.20.72.11:8888"
+    - export HTTPS_PROXY="http://172.20.72.11:8888"
+    - export NO_PROXY="localhost,127.0.0.1"
+  variables:
+    TEST_OUTPUT: cppcheck.xml
+  script:
+    - |
+      cppcheck -j$(nproc) \
+        -v `./cppcheck_exclude_tests.sh src` \
+        --platform=unix64 \
+        --force \
+        --enable=all \
+        -I ./src \
+        '--template={file},{line},{severity},{id},{message}' \
+        --xml --xml-version=2 \
+        ./src --output-file=$TEST_OUTPUT
+  artifacts:
+    reports:
+      codequality: $TEST_OUTPUT
+    paths:
+      - $TEST_OUTPUT 
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: on_success
+    - when: never
+
+unit_test_job:
+  stage: test
+  image: $CENTOS7_IMAGE
+  dependencies: []
+  <<: *build_template
+  script:
+    - mkdir -p build
+    - cd build
+
+    - echo "Installing dependencies"
+    - conan install --build=outdated ..
+
+    - echo "Configuring with CMake"
+    - |
+      cmake \
+      -DCONAN=MANUAL \
+      -DGOOGLE_BENCHMARK=ON \
+      -DCOV=ON \
+      ..
+
+    - make -j$(nproc) runtest
+    - make -j$(nproc) runefu
+    - make -j$(nproc) coverage
+  artifacts:
+    reports:
+      junit: build/test_results/*.xml
+      coverage_report:
+        coverage_format: cobertura    
+        path: build/coverage/coverage.xml
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: on_success
+    - when: never
+
+
+publish_tar_job:
+  stage: publish
+  image: alpine:latest
+  dependencies: [build_job]
+  artifacts: 
+    paths:
+      - event-formation-unit-centos7.tar.gz
+  needs:
+  - job: build_job
+    parallel:
+      matrix:
+        - NAME: "centos7"
+          CONTAINER_IMAGE: $CENTOS7_IMAGE
+
+  script:
+    - apk update
+    - apk add --no-cache bash tar
+
+    - mkdir -p archive/event-formation-unit
+    - cp -r build/bin archive/event-formation-unit
+    - cp -r build/generators archive/event-formation-unit
+    - cp -r build/lib archive/event-formation-unit
+    - cp -r build/licenses archive/event-formation-unit
+    - mkdir archive/event-formation-unit/util
+    - cp -r utils/efushell archive/event-formation-unit/util
+    - mkdir archive/event-formation-unit/configs
+    - mkdir archive/event-formation-unit/data
+    - cp build/CONAN_INFO archive/event-formation-unit
+
+    # - # Create file with build information
+    - touch archive/event-formation-unit/BUILD_INFO
+    - echo 'Repository replace_real_repo_name' >> archive/event-formation-unit/BUILD_INFO
+    - echo 'Commit replace_git_commit' >> archive/event-formation-unit/BUILD_INFO
+    - echo 'Jenkins build replace_build_id' >> archive/event-formation-unit/BUILD_INFO
+    
+    - tar czvf event-formation-unit-centos7.tar.gz archive/event-formation-unit
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - when: never
+
+
+publish_docker:
+  parallel: 
+    matrix:
+      - INSTRUMENT: "bifrost"
+      - INSTRUMENT: "cbm"
+      - INSTRUMENT: "cspec"
+      - INSTRUMENT: "dream"
+      - INSTRUMENT: "estia"
+      - INSTRUMENT: "freia"
+      - INSTRUMENT: "heimdal"
+      - INSTRUMENT: "loki"
+      - INSTRUMENT: "magic"
+      - INSTRUMENT: "miracles"
+      - INSTRUMENT: "nmx"
+      - INSTRUMENT: "trex"
+
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    IMAGE_NAME: "$CI_REGISTRY_IMAGE/efu-$INSTRUMENT"
+  dependencies: [build_job]
+  needs:
+    - job: build_job
+      parallel:
+        matrix:
+          - NAME: "almalinux8"
+            CONTAINER_IMAGE: $ALMALINUX8_IMAGE
+  script:
+    - echo "Publishing docker image"
+    - |
+      docker login \
+      -u "$CI_REGISTRY_USER" \
+      -p "$CI_REGISTRY_PASSWORD" \
+      "$CI_REGISTRY"
+
+    - |
+      docker build \
+          --build-arg https_proxy="http://172.20.72.11:8888" \
+          --build-arg http_proxy="http://172.20.72.11:8888" \
+          -t "$IMAGE_NAME" \
+          -f Dockerfile.deploy .
+    - docker push "$IMAGE_NAME"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - when: never
