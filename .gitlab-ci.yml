@@ -237,6 +237,8 @@ publish_docker_job:
       - INSTRUMENT: "magic"
       - INSTRUMENT: "miracles"
       - INSTRUMENT: "nmx"
+      - INSTRUMENT: "tbl3he"
+      - INSTRUMENT: "timepix3"
       - INSTRUMENT: "trex"
 
   stage: publish
