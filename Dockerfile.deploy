@@ -1,0 +1,40 @@
+# Stage 1
+FROM almalinux/9-base AS builder
+
+ARG INSTRUMENT_NAME=""
+
+RUN dnf install -y libxcrypt-compat && \
+    dnf clean all
+
+RUN mkdir -p /ess/ecdc/event_formation_unit
+RUN mkdir -p /ess/ecdc/event_formation_unit/config
+COPY build/lib /ess/ecdc/event_formation_unit/lib
+COPY build/licenses /ess/ecdc/event_formation_unit/licenses
+COPY utils/efushell /ess/ecdc/event_formation_unit/efushell
+COPY build/bin/${INSTRUMENT_NAME} /ess/ecdc/event_formation_unit/bin/${INSTRUMENT_NAME}
+COPY Dockerfile_entrypoint.sh /ess/ecdc/event_formation_unit/entrypoint.sh
+
+
+# Stage 2
+FROM almalinux/9-minimal
+
+ARG INSTRUMENT_NAME=""
+
+COPY --from=builder /ess/ecdc/event_formation_unit /ess/ecdc/event_formation_unit
+COPY --from=builder /usr/lib64/libcrypt.so.1 /usr/lib64/
+
+ENV BROKER_ADDR=""
+ENV BROKER_TOPIC="${INSTRUMENT_NAME}_detector"
+ENV GRAPHITE=""
+ENV FILE=""
+ENV CALIBRATION=""
+
+ENV BINARY_PATH="./bin/${INSTRUMENT_NAME}"
+ENV LD_LIBRARY_PATH="./lib/"
+
+RUN chmod -R 755 /ess/ecdc/event_formation_unit/bin && \
+    chmod +x /ess/ecdc/event_formation_unit/entrypoint.sh
+
+WORKDIR /ess/ecdc/event_formation_unit
+
+CMD ["/ess/ecdc/event_formation_unit/entrypoint.sh"]
