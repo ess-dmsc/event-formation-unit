@@ -66,10 +66,10 @@ services:
       - "8888:8888/tcp"
 
     volumes:
-      - /home/jekabskarklins/Desktop/test/event-formation-unit/src/modules/dream/configs/:/ess/ecdc/event_formation_unit/config/ 
+      - /<essconfig_path>/essconfig/instruments/<instrument_name>/efu/config:/ess/ecdc/event_formation_unit/config/ # e.g. dream
     environment:
-      - BROKER_TOPIC=dream_detector_mantle
-      - FILE=DreamInst.json
+      - BROKER_TOPIC=<broker_topic> # e.g. dream_detector_mantle
+      - FILE=<config_file_name> # e.g. 2024_06_06_1437_mantle.json
       # - CALIBRATION=cspecnullcalib.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
@@ -86,7 +86,8 @@ services:
     environment:
       - DAQLITE_BROKER=-b kafka2:9092
       - DAQLITE_PRODUCTION=true
-      - VNC_PASSWORD=password
+      - VNC_PASSWORD=<vnc_password> # e.g. password
+      - VNC_RESOLUTION=1280x800 # Increase resolution for better view
 
   akhq:
     image: tchiotludo/akhq:latest
