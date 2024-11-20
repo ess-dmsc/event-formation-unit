@@ -266,6 +266,7 @@ publish_docker_job:
       docker build \
           --build-arg https_proxy="http://172.20.72.11:8888" \
           --build-arg http_proxy="http://172.20.72.11:8888" \
+          --build-arg INSTRUMENT_NAME=$INSTRUMENT \
           -t "$IMAGE_NAME" \
           -f Dockerfile.deploy .
     - docker push "$IMAGE_NAME"
