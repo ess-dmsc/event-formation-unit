@@ -216,8 +216,11 @@ publish_tar_job:
     
     - tar czvf event-formation-unit-centos7.tar.gz archive/event-formation-unit
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
-      when: on_success
+    - if: >
+        $CI_COMMIT_BRANCH == "master" &&
+        ($CI_PIPELINE_SOURCE == "push" ||
+         $CI_PIPELINE_SOURCE == "merge_request_event" ||
+         $CI_PIPELINE_SOURCE == "web")
     - if: $CI_COMMIT_TAG
       when: on_success
     - when: never
@@ -271,7 +274,11 @@ publish_docker_job:
           -f Dockerfile.deploy .
     - docker push "$IMAGE_NAME"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: >
+        $CI_COMMIT_BRANCH == "master" &&
+        ($CI_PIPELINE_SOURCE == "push" ||
+         $CI_PIPELINE_SOURCE == "merge_request_event" ||
+         $CI_PIPELINE_SOURCE == "web")
       when: on_success
     - if: $CI_COMMIT_TAG
       when: on_success
