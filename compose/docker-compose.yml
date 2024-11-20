@@ -39,8 +39,22 @@ services:
     ports:
       - "8081:80"
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
+    depends_on:
+      - graphite
+
   efu:
-    image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-<instrument_name>:latest # e.g. dream
+    image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-dream:latest
     hostname: efu
     container_name: efu
     depends_on:
@@ -52,10 +66,10 @@ services:
       - "8888:8888/tcp"
 
     volumes:
-      - /<essconfig_path>/essconfig/instruments/<instrument_name>/efu/config:/ess/ecdc/event_formation_unit/config/ # e.g. dream
+      - /home/jekabskarklins/Desktop/test/event-formation-unit/src/modules/dream/configs/:/ess/ecdc/event_formation_unit/config/ 
     environment:
-      - BROKER_TOPIC=<broker_topic> # e.g. dream_detector_mantle
-      - FILE=<config_file_name> # e.g. 2024_06_06_1437_mantle.json
+      - BROKER_TOPIC=dream_detector_mantle
+      - FILE=DreamInst.json
       # - CALIBRATION=cspecnullcalib.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
@@ -72,7 +86,7 @@ services:
     environment:
       - DAQLITE_BROKER=-b kafka2:9092
       - DAQLITE_PRODUCTION=true
-      - VNC_PASSWORD=<vnc_password> # e.g. password
+      - VNC_PASSWORD=password
 
   akhq:
     image: tchiotludo/akhq:latest
