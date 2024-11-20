@@ -66,7 +66,9 @@ services:
       - "8888:8888/tcp"
 
     volumes:
-      - /<essconfig_path>/essconfig/instruments/<instrument_name>/efu/config:/ess/ecdc/event_formation_unit/config/ # e.g. dream
+    # Please replace <essconfig_path> with the path to your locel essconfig directory
+    # and <instrument_name> with the name of the instrument
+      - /<essconfig_path>/instruments/<instrument_name>/efu/config:/ess/ecdc/event_formation_unit/config/
     environment:
       - BROKER_TOPIC=<broker_topic> # e.g. dream_detector_mantle
       - FILE=<config_file_name> # e.g. 2024_06_06_1437_mantle.json
@@ -86,7 +88,8 @@ services:
     environment:
       - DAQLITE_BROKER=-b kafka2:9092
       - DAQLITE_PRODUCTION=true
-      - VNC_PASSWORD=<vnc_password> # e.g. password
+      # Please replace <vnc_password> with the password you want to use
+      - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
 
   akhq:
