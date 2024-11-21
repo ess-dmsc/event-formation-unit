@@ -76,8 +76,10 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("readouts.prevtof_high", Counters.TimeStats.PrevTofHigh);
 
   // Logical and Digital geometry incl. Calibration
-  Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingErrors);
-  Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENErrors);
+  Stats.create("geometry.ring_errors", Counters.Geom.RingErrors);
+  Stats.create("geometry.fen_errors", Counters.Geom.FENErrors);
+  Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingMappingErrors);
+  Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENMappingErrors);
   Stats.create("geometry.topology_errors", Counters.Geom.TopologyErrors);
   Stats.create("geometry.group_errors", Counters.Geom.GroupErrors);
   Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
