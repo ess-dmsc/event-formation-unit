@@ -18,7 +18,7 @@ fi
 
 
 if [ -n "$CALIBRATION" ]; then
-    CMD="$CMD -c ./config/$CALIBRATION"
+    CMD="$CMD --calibration ./config/$CALIBRATION"
 fi
 echo "Running $CMD"
 
