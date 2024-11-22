@@ -52,6 +52,7 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
     depends_on:
       - graphite
+    restart: always
 
   efu:
     image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-tbl3he:latest
@@ -76,6 +77,7 @@ services:
       - CALIBRATION=tbl3henullcalib.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
+    restart: always
 
 
   daqlite:
@@ -93,6 +95,7 @@ services:
       # default password is "password" if VNC_PASSWORD is not set
       # - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
+    restart: always
 
   akhq:
     image: tchiotludo/akhq:latest
