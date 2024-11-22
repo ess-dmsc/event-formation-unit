@@ -68,8 +68,8 @@ services:
     volumes:
     # Required to mount the configuration and calibration to the container
     # Replace <essconfig_path> with the path to your locel essconfig directory
-      - <essconfig_path>/instruments/bifrost/efu/config/bifrost.json:/ess/ecdc/event_formation_unit/config/bifrost.json
-      - <essconfig_path>/instruments/bifrost/efu/calib/bifrostnullcalib.json:/ess/ecdc/event_formation_unit/config/bifrostnullcalib.json
+      - ${ESSCONFIG_PATH}/instruments/bifrost/efu/config/bifrost.json:/ess/ecdc/event_formation_unit/config/bifrost.json
+      - ${ESSCONFIG_PATH}/instruments/bifrost/efu/calib/bifrostnullcalib.json:/ess/ecdc/event_formation_unit/config/bifrostnullcalib.json
     environment:
       - BROKER_TOPIC=bifrost_detector
       - FILE=bifrost.json
