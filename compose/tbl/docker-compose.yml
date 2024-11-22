@@ -52,11 +52,12 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
     depends_on:
       - graphite
+    restart: always
 
   efu:
-    image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-bifrost:latest
-    hostname: efu
-    container_name: efu
+    image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-tbl3he:latest
+    hostname: efu-tbl3he
+    container_name: efu-tbl3he
     depends_on:
       - kafka2
       - kafka1
@@ -68,14 +69,15 @@ services:
     volumes:
     # Required to mount the configuration and calibration to the container
     # Replace <essconfig_path> with the path to your locel essconfig directory
-      - ${ESSCONFIG_PATH}/instruments/bifrost/efu/config/bifrost.json:/ess/ecdc/event_formation_unit/config/bifrost.json
-      - ${ESSCONFIG_PATH}/instruments/bifrost/efu/calib/bifrostnullcalib.json:/ess/ecdc/event_formation_unit/config/bifrostnullcalib.json
+      - ${ESSCONFIG_PATH}/instruments/tbl/efu/config/tbl3he.json:/ess/ecdc/event_formation_unit/config/tbl3he.json
+      - ${ESSCONFIG_PATH}/instruments/tbl/efu/calib/tbl3henullcalib.json:/ess/ecdc/event_formation_unit/config/tbl3henullcalib.json
     environment:
-      - BROKER_TOPIC=bifrost_detector
-      - FILE=bifrost.json
-      - CALIBRATION=bifrostnullcalib.json
+      - BROKER_TOPIC=tbl3he_detector
+      - FILE=tbl3he.json
+      - CALIBRATION=tbl3henullcalib.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
+    restart: always
 
 
   daqlite:
@@ -93,6 +95,7 @@ services:
       # default password is "password" if VNC_PASSWORD is not set
       # - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
+    restart: always
 
   akhq:
     image: tchiotludo/akhq:latest

@@ -114,7 +114,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.count), 'readouts/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.count), 'readouts/s')"
         },
         {
           "datasource": {
@@ -124,7 +124,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.headers), 'headers/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.headers), 'headers/s')"
         },
         {
           "datasource": {
@@ -134,7 +134,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.bytes), 'bytes/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.bytes), 'bytes/s')"
         },
         {
           "datasource": {
@@ -144,7 +144,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "D",
-          "target": "alias(perSecond(efu.bifrost.$region.receive.fifo_seq_errors), 'fifo_seq err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.receive.fifo_seq_errors), 'fifo_seq err/s')"
         }
       ],
       "title": "Input",
@@ -206,7 +206,7 @@
         {
           "refCount": 0,
           "refId": "A",
-          "target": "efu.bifrost.$region.main.uptime"
+          "target": "efu.tbl3he.$region.main.uptime"
         }
       ],
       "title": "Uptime",
@@ -279,7 +279,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(asPercent(efu.bifrost.$region.thread.input_idle, 28000), 'ide/s')"
+          "target": "alias(asPercent(efu.tbl3he.$region.thread.input_idle, 28000), 'ide/s')"
         }
       ],
       "title": "Input Thread Idle",
@@ -352,7 +352,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(asPercent(efu.bifrost.$region.thread.processing_idle, 45000000), 'ide/s')"
+          "target": "alias(asPercent(efu.tbl3he.$region.thread.processing_idle, 45000000), 'ide/s')"
         }
       ],
       "title": "Processing Thread Idle",
@@ -451,7 +451,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.error_amplitude), 'ampl err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.error_amplitude), 'ampl err/s')"
         },
         {
           "datasource": {
@@ -461,7 +461,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.count), 'readouts/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.count), 'readouts/s')"
         }
       ],
       "title": "Readouts",
@@ -560,7 +560,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.version.v1), 'header v1/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.version.v1), 'header v1/s')"
         },
         {
           "datasource": {
@@ -570,7 +570,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_buffer), 'buffer err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_buffer), 'buffer err/s')"
         },
         {
           "datasource": {
@@ -580,7 +580,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_cookie), 'cookie err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_cookie), 'cookie err/s')"
         },
         {
           "datasource": {
@@ -590,7 +590,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "D",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_header), 'header err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_header), 'header err/s')"
         },
         {
           "datasource": {
@@ -600,7 +600,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "E",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_pad), 'pad err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_pad), 'pad err/s')"
         },
         {
           "datasource": {
@@ -610,7 +610,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "G",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_seqno), 'deq err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_seqno), 'deq err/s')"
         },
         {
           "datasource": {
@@ -620,7 +620,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "H",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_size), 'size err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_size), 'size err/s')"
         },
         {
           "datasource": {
@@ -630,7 +630,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "I",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_version), 'version err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_version), 'version err/s')"
         },
         {
           "datasource": {
@@ -640,7 +640,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "J",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_type), 'type err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_type), 'type err/s')"
         },
         {
           "datasource": {
@@ -650,7 +650,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "K",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.error_timehigh), 'timehigh err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.error_timehigh), 'timehigh err/s')"
         }
       ],
       "title": "ESS Header",
@@ -749,7 +749,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.error_amplitude), 'ampl err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.error_amplitude), 'ampl err/s')"
         },
         {
           "datasource": {
@@ -759,7 +759,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.error_headersize), 'header size err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.error_headersize), 'header size err/s')"
         },
         {
           "datasource": {
@@ -769,7 +769,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.error_datlen_invalid), 'datalen err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.error_datlen_invalid), 'datalen err/s')"
         },
         {
           "datasource": {
@@ -779,7 +779,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "D",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.error_ringfen), 'datalen err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.error_ringfen), 'datalen err/s')"
         },
         {
           "datasource": {
@@ -789,7 +789,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "E",
-          "target": "alias(perSecond(efu.bifrost.$region.readouts.tof_high), 'tof high err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.readouts.tof_high), 'tof high err/s')"
         },
         {
           "datasource": {
@@ -799,7 +799,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "F",
-          "target": "alias(perSecond(efu.bifrost.$region.essheader.version.v0), 'header v0/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.essheader.version.v0), 'header v0/s')"
         }
       ],
       "title": "Readout Errors",
@@ -898,7 +898,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(perSecond(efu.bifrost.$region.events.count), 'events/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.events.count), 'events/s')"
         },
         {
           "datasource": {
@@ -908,7 +908,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.produce_bytes_ok), 'bytes ok/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.produce_bytes_ok), 'bytes ok/s')"
         }
       ],
       "title": "Events",
@@ -1007,7 +1007,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.produce_bytes_ok), 'bytes ok/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.produce_bytes_ok), 'bytes ok/s')"
         },
         {
           "datasource": {
@@ -1017,7 +1017,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.produce_bytes_error), 'bytes err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.produce_bytes_error), 'bytes err/s')"
         },
         {
           "datasource": {
@@ -1027,7 +1027,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.err_unknown_topic), 'topic err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.err_unknown_topic), 'topic err/s')"
         },
         {
           "datasource": {
@@ -1037,7 +1037,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "D",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.err_queue_full), 'queue err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.err_queue_full), 'queue err/s')"
         },
         {
           "datasource": {
@@ -1047,7 +1047,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "E",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.produce_errors), 'produce err/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.produce_errors), 'produce err/s')"
         },
         {
           "datasource": {
@@ -1057,7 +1057,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "F",
-          "target": "alias(perSecond(efu.bifrost.$region.kafka.produce_no_errors), 'produce ok/s')"
+          "target": "alias(perSecond(efu.tbl3he.$region.kafka.produce_no_errors), 'produce ok/s')"
         }
       ],
       "title": "Output",
@@ -1082,7 +1082,7 @@
         "query": {
           "queryType": "Default",
           "refId": "A",
-          "target": "efu.bifrost.*"
+          "target": "efu.tbl3he.*"
         },
         "refresh": 1,
         "regex": "",
