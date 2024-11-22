@@ -23,6 +23,7 @@ if [ -n "$CALIBRATION" ]; then
         exit 1
     else
         CMD="$CMD --calibration ./calib/$CALIBRATION"
+    fi
 fi
 
 echo "Running $CMD"
