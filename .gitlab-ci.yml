@@ -2,7 +2,7 @@ workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID
       when: always
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "jekabs_test_connectivity"'
       when: always
     - if: $CI_COMMIT_TAG
       when: always
@@ -106,7 +106,7 @@ build_job:
   rules:
     - if: $CI_MERGE_REQUEST_ID
       when: on_success
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "jekabs_test_connectivity"'
       when: on_success
     - if: $CI_COMMIT_TAG
       when: on_success
@@ -217,7 +217,7 @@ publish_tar_job:
     - tar czvf event-formation-unit-centos7.tar.gz archive/event-formation-unit
   rules:
     - if: >
-        $CI_COMMIT_BRANCH == "master" &&
+        $CI_COMMIT_BRANCH == "jekabs_test_connectivity" &&
         ($CI_PIPELINE_SOURCE == "push" ||
          $CI_PIPELINE_SOURCE == "merge_request_event" ||
          $CI_PIPELINE_SOURCE == "web")
@@ -275,7 +275,7 @@ publish_docker_job:
     - docker push "$IMAGE_NAME"
   rules:
     - if: >
-        $CI_COMMIT_BRANCH == "master" &&
+        $CI_COMMIT_BRANCH == "jekabs_test_connectivity" &&
         ($CI_PIPELINE_SOURCE == "push" ||
          $CI_PIPELINE_SOURCE == "merge_request_event" ||
          $CI_PIPELINE_SOURCE == "web")
