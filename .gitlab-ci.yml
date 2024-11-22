@@ -82,6 +82,7 @@ build_job:
     expire_in: 1 day
   script:
     - echo "Running on $NAME"
+    - echo "test #1"
 
     - mkdir -p build
     - cd build
