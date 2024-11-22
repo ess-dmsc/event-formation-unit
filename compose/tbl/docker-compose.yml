@@ -69,8 +69,8 @@ services:
     volumes:
     # Required to mount the configuration and calibration to the container
     # Replace <essconfig_path> with the path to your locel essconfig directory
-      - ${ESSCONFIG_PATH}/instruments/tbl/efu/config/tbl3he.json:/ess/ecdc/event_formation_unit/config/tbl3he.json
-      - ${ESSCONFIG_PATH}/instruments/tbl/efu/calib/tbl3henullcalib.json:/ess/ecdc/event_formation_unit/config/tbl3henullcalib.json
+      - ${ESSCONFIG_PATH}/instruments/tbl/efu/config:/ess/ecdc/event_formation_unit/config
+      - ${ESSCONFIG_PATH}/instruments/tbl/efu/calib:/ess/ecdc/event_formation_unit/calib
     environment:
       - BROKER_TOPIC=tbl3he_detector
       - FILE=tbl3he.json

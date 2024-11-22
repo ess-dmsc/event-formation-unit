@@ -18,12 +18,13 @@ fi
 
 
 if [ -n "$CALIBRATION" ]; then
-    elif [ ! -r "./calib/$CALIBRATION" ]; then
+    if [ ! -r "./calib/$CALIBRATION" ]; then
         echo "File $CALIBRATION does not exist or is not readable"
         exit 1
-else
-    CMD="$CMD --calibration ./calib/$CALIBRATION"
+    else
+        CMD="$CMD --calibration ./calib/$CALIBRATION"
 fi
+
 echo "Running $CMD"
 
 exec $CMD
