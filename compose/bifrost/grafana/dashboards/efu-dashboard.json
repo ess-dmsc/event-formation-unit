@@ -1065,6 +1065,7 @@
     }
   ],
   "preload": false,
+  "refresh": "auto",
   "schemaVersion": 40,
   "tags": [],
   "templating": {
@@ -1090,13 +1091,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "EFU",
   "uid": "ae4i7mv97dzi8c",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
