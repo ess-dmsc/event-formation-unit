@@ -85,7 +85,7 @@ services:
       - kafka2
       - kafka1
     ports:
-      - "5902:5901"
+      - "5901:5901"
     environment:
       - DAQLITE_BROKER=-b kafka2:9092
       - DAQLITE_PRODUCTION=true
