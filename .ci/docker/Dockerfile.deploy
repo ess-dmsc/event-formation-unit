@@ -8,11 +8,12 @@ RUN dnf install -y libxcrypt-compat && \
 
 RUN mkdir -p /ess/ecdc/event_formation_unit
 RUN mkdir -p /ess/ecdc/event_formation_unit/config
+RUN mkdir -p /ess/ecdc/event_formation_unit/calib
 COPY build/lib /ess/ecdc/event_formation_unit/lib
 COPY build/licenses /ess/ecdc/event_formation_unit/licenses
 COPY utils/efushell /ess/ecdc/event_formation_unit/efushell
 COPY build/bin/${INSTRUMENT_NAME} /ess/ecdc/event_formation_unit/bin/${INSTRUMENT_NAME}
-COPY Dockerfile_entrypoint.sh /ess/ecdc/event_formation_unit/entrypoint.sh
+COPY .ci/docker/Dockerfile_entrypoint.sh /ess/ecdc/event_formation_unit/entrypoint.sh
 
 
 # Stage 2
