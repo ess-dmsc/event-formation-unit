@@ -2,8 +2,7 @@
 FROM almalinux/9-base AS builder
 
 ARG INSTRUMENT_NAME=""
-
-RUN dnf install -y libxcrypt-compat && \
+RUN dnf install -y libxcrypt-compat iproute tcpdump net-tools && \
     dnf clean all
 
 RUN mkdir -p /ess/ecdc/event_formation_unit
