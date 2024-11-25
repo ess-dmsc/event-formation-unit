@@ -1,3 +1,9 @@
+networks:
+  efu:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 9000
+      
 services:
   kafka1:
     image: confluentinc/cp-kafka:latest
@@ -13,6 +19,8 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       CLUSTER_ID: "abcde"
+    networks:
+      - efu
 
   kafka2:
     image: confluentinc/cp-kafka:latest
@@ -32,12 +40,16 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "abcde"
+    networks:
+      - efu
 
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
     ports:
       - "8081:80"
+    networks:
+      - efu
 
   grafana:
     image: grafana/grafana:latest
@@ -53,6 +65,8 @@ services:
     depends_on:
       - graphite
     restart: always
+    networks:
+      - efu
 
   efu:
     image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-tbl3he:latest
@@ -65,6 +79,8 @@ services:
     ports:
       - "9000:9000/udp"
       - "8888:8888/tcp"
+    networks:
+      - efu
 
     volumes:
     # Required to mount the configuration and calibration to the container
@@ -96,6 +112,8 @@ services:
       # - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
     restart: always
+    networks:
+      - efu
 
   akhq:
     image: tchiotludo/akhq:latest
@@ -115,3 +133,5 @@ services:
                 security.protocol: PLAINTEXT
                 sasl.mechanism: PLAIN
     restart: always
+    networks:
+      - efu
