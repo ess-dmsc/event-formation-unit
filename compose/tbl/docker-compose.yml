@@ -19,6 +19,11 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
     networks:
       - efu
 
@@ -40,6 +45,11 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
     networks:
       - efu
 
