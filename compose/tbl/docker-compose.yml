@@ -24,6 +24,7 @@ services:
       KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
       KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
       KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
     networks:
       - efu
 
@@ -50,12 +51,14 @@ services:
       KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
       KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
       KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
     networks:
       - efu
 
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
+    restart: always
     ports:
       - "8081:80"
     networks:
