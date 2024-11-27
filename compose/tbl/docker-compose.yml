@@ -4,7 +4,7 @@ networks:
     driver_opts:
       com.docker.network.driver.mtu: 9000
 
-service:
+services:
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
