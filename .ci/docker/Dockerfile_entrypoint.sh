@@ -26,6 +26,15 @@ if [ -n "$CALIBRATION" ]; then
     fi
 fi
 
+if [ -n "$KAFKA_CONFIG_PATH" ]; then
+    if [ ! -r "$KAFKA_CONFIG_PATH" ]; then
+        echo "File $KAFKA_CONFIG_PATH does not exist or is not readable"
+        exit 1
+    else
+        CMD="$CMD --kafka_config $KAFKA_CONFIG_PATH"
+    fi
+fi
+
 echo "Running $CMD"
 
 exec $CMD

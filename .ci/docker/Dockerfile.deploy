@@ -28,6 +28,7 @@ COPY --from=builder /usr/lib64/libcrypt.so.1 /usr/lib64/
 
 ENV BROKER_ADDR=""
 ENV BROKER_TOPIC="${INSTRUMENT_NAME}_detector"
+ENV KAFKA_CONFIG_PATH=""
 ENV GRAPHITE=""
 ENV FILE=""
 ENV CALIBRATION=""
