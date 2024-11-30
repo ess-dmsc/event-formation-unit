@@ -41,7 +41,6 @@ struct ESSHeaderStats {
   int64_t OQRxPackets[MaxOutputQueues]{0};
 };
 
-
 class Parser {
 public:
   enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
@@ -59,7 +58,8 @@ public:
     TREX = 0x50,
     DREAM = 0x60,
     MAGIC = 0x64,
-    HEIMDAL = 0x68
+    HEIMDAL = 0x68,
+    ESTIA = 0x52
   };
 
   uint64_t NextSeqNum[MaxOutputQueues];

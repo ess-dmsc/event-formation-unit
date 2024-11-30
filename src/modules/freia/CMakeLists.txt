@@ -32,16 +32,6 @@ create_executable(freia)
 
 
 
-
-set(estia_INC ${freia_common_inc})
-set(estia_SRC
-  ${freia_common_src}
-  main_estia.cpp
-  )
-set(estia_LIB efu_reduction efu_essreadout)
-create_executable(estia)
-
-
 ##
 ## FreiaiBaseTest Module integration test
 ##

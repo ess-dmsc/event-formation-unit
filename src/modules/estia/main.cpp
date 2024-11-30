@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,12 +6,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <modules/freia/FreiaBase.h>
+#include <modules/estia/EstiaBase.h>
 
 int main(int argc, char *argv[]) {
   MainProg Main("estia", argc, argv);
 
-  auto Detector = new Freia::FreiaBase(Main.DetectorSettings);
+  auto Detector = new Estia::EstiaBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }
