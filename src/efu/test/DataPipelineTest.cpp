@@ -1,0 +1,111 @@
+#include <chrono>
+#include <common/testutils/TestBase.h>
+#include <efu/DataPipeline.h>
+#include <string>
+#include <thread>
+
+class DataPipelineTest : public TestBase {
+protected:
+  void SetUp() override {}
+};
+
+TEST_F(DataPipelineTest, DifferentInputOutputTypes) {
+  data_pipeline::Pipeline pipeline = data_pipeline::Pipeline();
+
+  auto &stage1 = pipeline.createNewStage<int, std::string>(
+      [](int input) { return std::to_string(input); });
+  auto &stage2 = pipeline.createNewStage<std::string, size_t>(
+      [](std::string input) { return input.length(); });
+
+  stage1.connectOutput(stage2.getInputQueue());
+
+  auto inputQueue = stage1.getInputQueue();
+  auto outputQueue = stage2.getOutputQueue();
+
+  pipeline.start();
+
+  inputQueue->enqueue(123);
+  inputQueue->enqueue(4567);
+  inputQueue->enqueue(89);
+
+  std::vector<size_t> results;
+  size_t result;
+  const int expectedResults = 3;
+  const int timeoutMs = 1000;
+  const int checkIntervalMs = 10;
+  int elapsedMs = 0;
+
+  while (results.size() < expectedResults && elapsedMs < timeoutMs) {
+    while (outputQueue->dequeue(result)) {
+      results.push_back(result);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalMs));
+    elapsedMs += checkIntervalMs;
+  }
+
+  pipeline.stop();
+
+  ASSERT_EQ(results.size(), expectedResults);
+  EXPECT_EQ(results[0], 3); // "123" has 3 characters
+  EXPECT_EQ(results[1], 4); // "4567" has 4 characters
+  EXPECT_EQ(results[2], 2); // "89" has 2 characters
+}
+
+TEST_F(DataPipelineTest, GracefulStopOnException) {
+  data_pipeline::Pipeline pipeline = data_pipeline::Pipeline();
+
+  auto &stage1 = pipeline.createNewStage<int, std::string>([](int input) {
+    if (input == 100) {
+      return std::string("error");
+    } else {
+      return std::to_string(input);
+    }
+  });
+
+  auto &stage2 =
+      pipeline.createNewStage<std::string, size_t>([](std::string input) {
+        if (input == "error") {
+          throw std::runtime_error("Test exception");
+        }
+        return input.length();
+      });
+
+  stage1.connectOutput(stage2.getInputQueue());
+
+  auto inputQueue = stage1.getInputQueue();
+  auto outputQueue = stage2.getOutputQueue();
+
+  pipeline.start();
+
+  inputQueue->enqueue(123);
+  inputQueue->enqueue(4567);
+  inputQueue->enqueue(100);
+  inputQueue->enqueue(123);
+
+  std::vector<size_t> results;
+  size_t result;
+  const int expectedResults = 2;
+  const int timeoutMs = 1000;
+  const int checkIntervalMs = 10;
+  int elapsedMs = 0;
+
+  while (results.size() < expectedResults && elapsedMs < timeoutMs) {
+    while (outputQueue->dequeue(result)) {
+      results.push_back(result);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalMs));
+    elapsedMs += checkIntervalMs;
+  }
+
+  pipeline.stop();
+
+  ASSERT_EQ(results.size(), expectedResults);
+  EXPECT_EQ(results[0], 3); // "123" has 3 characters
+  EXPECT_EQ(results[1], 4); // "4567" has 4 characters
+
+}
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

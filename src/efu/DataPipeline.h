@@ -7,25 +7,36 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#pragma once
 
-#include <atomic>
+#include <common/memory/LockFreeQueue.h>
 #include <functional>
-#include <iostream>
+#include <memory>
 #include <thread>
 #include <utility>
 #include <vector>
 
-#include <common/memory/LockFreeQueue.h>
+namespace data_pipeline {
 
-// Pipeline stage
-template <typename In, typename Out> class PipelineStage {
+class Pipeline; // Forward declaration
+
+class PipelineStageBase {
 public:
-  PipelineStage(std::function<Out(In)> func, LockFreeQueue<In> *inputQueue,
-                LockFreeQueue<Out> *outputQueue)
-      : func(func), inputQueue(inputQueue), outputQueue(outputQueue),
-        stopFlag(false) {}
+  virtual void start() = 0;
+  virtual void stop() = 0;
+  virtual ~PipelineStageBase() = default;
 
-  void start() {
+protected:
+  PipelineStageBase() = default;
+
+private:
+  friend class Pipeline;
+};
+
+template <typename In, typename Out>
+class PipelineStage : public PipelineStageBase {
+public:
+  void start() override {
     thread = std::thread([this]() {
       In input;
       while (!stopFlag.load(std::memory_order_acquire)) {
@@ -41,73 +52,70 @@ public:
     });
   }
 
-  void stop() {
+  void stop() override {
     stopFlag.store(true, std::memory_order_release);
     if (thread.joinable()) {
       thread.join();
     }
   }
 
+  void connectOutput(std::shared_ptr<LockFreeQueue<Out>> nextOutputQueue) {
+    outputQueue = nextOutputQueue;
+  }
+
+  std::shared_ptr<LockFreeQueue<In>> getInputQueue() const {
+    return inputQueue;
+  }
+
+  std::shared_ptr<LockFreeQueue<Out>> getOutputQueue() const {
+    return outputQueue;
+  }
+
 private:
+  static const size_t defaultQueueSize = 1024;
+
+  PipelineStage(std::function<Out(In)> func,
+                size_t inputQueueSize = defaultQueueSize,
+                size_t outputQueueSize = defaultQueueSize)
+      : func(func),
+        inputQueue(std::make_shared<LockFreeQueue<In>>(inputQueueSize)),
+        outputQueue(std::make_shared<LockFreeQueue<Out>>(outputQueueSize)),
+        stopFlag(false) {}
+
   std::function<Out(In)> func;
-  LockFreeQueue<In> *inputQueue;
-  LockFreeQueue<Out> *outputQueue;
+  std::shared_ptr<LockFreeQueue<In>> inputQueue;
+  std::shared_ptr<LockFreeQueue<Out>> outputQueue;
   std::atomic<bool> stopFlag;
   std::thread thread;
+
+  friend class Pipeline;
 };
 
-template <typename T>
 class Pipeline {
 public:
-    Pipeline(size_t queueSize) : queueSize(queueSize) {}
+  template <typename In, typename Out>
+  PipelineStage<In, Out> &createNewStage(std::function<Out(In)> func) {
+    auto stage = std::unique_ptr<PipelineStage<In, Out>>(
+        new PipelineStage<In, Out>(func));
+    auto *stagePtr = stage.get();
+    stages.push_back(std::move(stage));
+    return *stagePtr;
+  }
 
-    void addTransformation(std::function<T(T)> transformation) {
-        transformations.push_back(transformation);
+  void start() {
+    for (auto &stage : stages) {
+      stage->start();
     }
+  }
 
-    void build() {
-        if (transformations.empty()) {
-            throw std::runtime_error("No transformations added to the pipeline.");
-        }
-
-        // Create queues
-        for (size_t i = 0; i <= transformations.size(); ++i) {
-            queues.push_back(std::make_unique<LockFreeQueue<T>>(queueSize));
-        }
-
-        // Create pipeline stages
-        for (size_t i = 0; i < transformations.size(); ++i) {
-            stages.push_back(std::make_unique<PipelineStage<T, T>>(
-                transformations[i], 
-                queues[i].get(), 
-                queues[i + 1].get()
-            ));
-        }
+  void stop() {
+    for (auto &stage : stages) {
+      stage->stop();
     }
-
-    void start() {
-        for (auto& stage : stages) {
-            stage->start();
-        }
-    }
-
-    void stop() {
-        for (auto& stage : stages) {
-            stage->stop();
-        }
-    }
-
-    LockFreeQueue<T>* getInputQueue() {
-        return queues.front().get();
-    }
-
-    LockFreeQueue<T>* getOutputQueue() {
-        return queues.back().get();
-    }
+  }
 
 private:
-    size_t queueSize;
-    std::vector<std::function<T(T)>> transformations;
-    std::vector<std::unique_ptr<LockFreeQueue<T>>> queues;
-    std::vector<std::unique_ptr<PipelineStage<T, T>>> stages;
+  std::vector<std::unique_ptr<PipelineStageBase>> stages;
 };
+
+} // namespace data_pipeline

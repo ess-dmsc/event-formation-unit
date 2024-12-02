@@ -39,5 +39,13 @@ set(LauncherTest_INC
   ../Launcher.h
   )
 
+set(DataPipelineTest_SRC
+    DataPipelineTest.cpp
+)
+set(DataPipelineTest_INC
+  ../DataPipeline.h
+  )
+
+create_test_executable(DataPipelineTest)
   
 create_test_executable(LauncherTest)
