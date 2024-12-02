@@ -38,7 +38,7 @@ EstiaInstrument::EstiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
   if (Conf.FileParameters.InstrumentGeometry == "Estia") {
-    essgeom = new ESSGeometry(1536, 128, 1, 0);
+    essgeom = new ESSGeometry(1536, 128, 1, 1);
   }
 
   ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);

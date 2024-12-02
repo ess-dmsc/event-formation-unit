@@ -59,7 +59,7 @@ public:
     DREAM = 0x60,
     MAGIC = 0x64,
     HEIMDAL = 0x68,
-    ESTIA = 0x52
+    ESTIA = 0x4C
   };
 
   uint64_t NextSeqNum[MaxOutputQueues];
