@@ -12,7 +12,7 @@
   "WireChOffset": 16,
   "Config": [
     {
-      "CassetteNumber": 0,
+      "CassetteNumber": 48,
       "Ring": 0,
       "FEN": 0,
       "Hybrid": 0,
@@ -27,7 +27,7 @@
       "HybridId": "E5533333222222221111111100000000"
     },
     {
-      "CassetteNumber": 1,
+      "CassetteNumber": 49,
       "Ring": 0,
       "FEN": 0,
       "Hybrid": 1,
@@ -42,10 +42,10 @@
       "HybridId": "E5533333222222221111111100000001"
     },
     {
-      "CassetteNumber": 2,
+      "CassetteNumber": 50,
       "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 0,
+      "FEN": 0,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -57,10 +57,10 @@
       "HybridId": "E5533333222222221111111100000002"
     },
     {
-      "CassetteNumber": 3,
+      "CassetteNumber": 51,
       "Ring": 0,
-      "FEN": 1,
-      "Hybrid": 1,
+      "FEN": 0,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -72,10 +72,10 @@
       "HybridId": "E5533333222222221111111100000003"
     },
     {
-      "CassetteNumber": 4,
-      "Ring": 1,
+      "CassetteNumber": 52,
+      "Ring": 0,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -87,10 +87,10 @@
       "HybridId": "E5533333222222221111111100000004"
     },
     {
-      "CassetteNumber": 5,
+      "CassetteNumber": 53,
       "Ring": 1,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 0,
       "Thresholds": [
         [
           0
@@ -102,10 +102,10 @@
       "HybridId": "E5533333222222221111111100000005"
     },
     {
-      "CassetteNumber": 6,
+      "CassetteNumber": 54,
       "Ring": 1,
-      "FEN": 1,
-      "Hybrid": 0,
+      "FEN": 0,
+      "Hybrid": 1,
       "Thresholds": [
         [
           0
@@ -117,10 +117,10 @@
       "HybridId": "E5533333222222221111111100000006"
     },
     {
-      "CassetteNumber": 7,
+      "CassetteNumber": 55,
       "Ring": 1,
-      "FEN": 1,
-      "Hybrid": 1,
+      "FEN": 0,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -132,10 +132,10 @@
       "HybridId": "E5533333222222221111111100000007"
     },
     {
-      "CassetteNumber": 8,
-      "Ring": 2,
+      "CassetteNumber": 56,
+      "Ring": 1,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -147,10 +147,10 @@
       "HybridId": "E5533333222222221111111100000008"
     },
     {
-      "CassetteNumber": 9,
-      "Ring": 2,
+      "CassetteNumber": 57,
+      "Ring": 1,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -162,9 +162,9 @@
       "HybridId": "E5533333222222221111111100000009"
     },
     {
-      "CassetteNumber": 10,
+      "CassetteNumber": 58,
       "Ring": 2,
-      "FEN": 1,
+      "FEN": 0,
       "Hybrid": 0,
       "Thresholds": [
         [
@@ -177,9 +177,9 @@
       "HybridId": "E5533333222222221111111100000010"
     },
     {
-      "CassetteNumber": 11,
+      "CassetteNumber": 59,
       "Ring": 2,
-      "FEN": 1,
+      "FEN": 0,
       "Hybrid": 1,
       "Thresholds": [
         [
@@ -192,10 +192,10 @@
       "HybridId": "E5533333222222221111111100000011"
     },
     {
-      "CassetteNumber": 12,
-      "Ring": 3,
+      "CassetteNumber": 60,
+      "Ring": 2,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -207,10 +207,10 @@
       "HybridId": "E5533333222222221111111100000012"
     },
     {
-      "CassetteNumber": 13,
-      "Ring": 3,
+      "CassetteNumber": 61,
+      "Ring": 2,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -222,10 +222,10 @@
       "HybridId": "E5533333222222221111111100000013"
     },
     {
-      "CassetteNumber": 14,
-      "Ring": 4,
+      "CassetteNumber": 62,
+      "Ring": 2,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -237,10 +237,10 @@
       "HybridId": "E5533333222222221111111100000014"
     },
     {
-      "CassetteNumber": 15,
-      "Ring": 4,
+      "CassetteNumber": 63,
+      "Ring": 3,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 0,
       "Thresholds": [
         [
           0
@@ -252,10 +252,10 @@
       "HybridId": "E5533333222222221111111100000015"
     },
     {
-      "CassetteNumber": 16,
-      "Ring": 5,
+      "CassetteNumber": 64,
+      "Ring": 3,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 1,
       "Thresholds": [
         [
           0
@@ -267,10 +267,10 @@
       "HybridId": "E5533333222222221111111100000016"
     },
     {
-      "CassetteNumber": 17,
-      "Ring": 5,
+      "CassetteNumber": 65,
+      "Ring": 3,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -282,10 +282,10 @@
       "HybridId": "E5533333222222221111111100000017"
     },
     {
-      "CassetteNumber": 18,
-      "Ring": 6,
+      "CassetteNumber": 66,
+      "Ring": 3,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -297,10 +297,10 @@
       "HybridId": "E5533333222222221111111100000018"
     },
     {
-      "CassetteNumber": 19,
-      "Ring": 6,
+      "CassetteNumber": 67,
+      "Ring": 3,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -312,8 +312,8 @@
       "HybridId": "E5533333222222221111111100000019"
     },
     {
-      "CassetteNumber": 20,
-      "Ring": 7,
+      "CassetteNumber": 68,
+      "Ring": 4,
       "FEN": 0,
       "Hybrid": 0,
       "Thresholds": [
@@ -327,8 +327,8 @@
       "HybridId": "E5533333222222221111111100000020"
     },
     {
-      "CassetteNumber": 21,
-      "Ring": 7,
+      "CassetteNumber": 69,
+      "Ring": 4,
       "FEN": 0,
       "Hybrid": 1,
       "Thresholds": [
@@ -342,10 +342,10 @@
       "HybridId": "E5533333222222221111111100000021"
     },
     {
-      "CassetteNumber": 22,
-      "Ring": 8,
+      "CassetteNumber": 70,
+      "Ring": 4,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -357,10 +357,10 @@
       "HybridId": "E5533333222222221111111100000022"
     },
     {
-      "CassetteNumber": 23,
-      "Ring": 8,
+      "CassetteNumber": 71,
+      "Ring": 4,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -372,10 +372,10 @@
       "HybridId": "E5533333222222221111111100000023"
     },
     {
-      "CassetteNumber": 24,
-      "Ring": 9,
+      "CassetteNumber": 72,
+      "Ring": 4,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -387,10 +387,10 @@
       "HybridId": "E5533333222222221111111100000024"
     },
     {
-      "CassetteNumber": 25,
-      "Ring": 9,
+      "CassetteNumber": 73,
+      "Ring": 5,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 0,
       "Thresholds": [
         [
           0
@@ -402,10 +402,10 @@
       "HybridId": "E5533333222222221111111100000025"
     },
     {
-      "CassetteNumber": 26,
-      "Ring": 9,
-      "FEN": 1,
-      "Hybrid": 0,
+      "CassetteNumber": 74,
+      "Ring": 5,
+      "FEN": 0,
+      "Hybrid": 1,
       "Thresholds": [
         [
           0
@@ -417,10 +417,10 @@
       "HybridId": "E5533333222222221111111100000026"
     },
     {
-      "CassetteNumber": 27,
-      "Ring": 9,
-      "FEN": 1,
-      "Hybrid": 1,
+      "CassetteNumber": 75,
+      "Ring": 5,
+      "FEN": 0,
+      "Hybrid": 2,
       "Thresholds": [
         [
           0
@@ -432,10 +432,10 @@
       "HybridId": "E5533333222222221111111100000027"
     },
     {
-      "CassetteNumber": 28,
-      "Ring": 10,
+      "CassetteNumber": 76,
+      "Ring": 5,
       "FEN": 0,
-      "Hybrid": 0,
+      "Hybrid": 3,
       "Thresholds": [
         [
           0
@@ -447,10 +447,10 @@
       "HybridId": "E5533333222222221111111100000028"
     },
     {
-      "CassetteNumber": 29,
-      "Ring": 10,
+      "CassetteNumber": 77,
+      "Ring": 5,
       "FEN": 0,
-      "Hybrid": 1,
+      "Hybrid": 4,
       "Thresholds": [
         [
           0
@@ -462,8 +462,8 @@
       "HybridId": "E5533333222222221111111100000029"
     },
     {
-      "CassetteNumber": 30,
-      "Ring": 10,
+      "CassetteNumber": 78,
+      "Ring": 6,
       "FEN": 1,
       "Hybrid": 0,
       "Thresholds": [
@@ -477,9 +477,9 @@
       "HybridId": "E5533333222222221111111100000030"
     },
     {
-      "CassetteNumber": 31,
-      "Ring": 10,
-      "FEN": 1,
+      "CassetteNumber": 79,
+      "Ring": 6,
+      "FEN": 0,
       "Hybrid": 1,
       "Thresholds": [
         [
@@ -490,6 +490,246 @@
         ]
       ],
       "HybridId": "E5533333222222221111111100000031"
+    },
+    {
+      "CassetteNumber": 80,
+      "Ring": 6,
+      "FEN": 0,
+      "Hybrid": 2,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000032"
+    },
+    {
+      "CassetteNumber": 81,
+      "Ring": 6,
+      "FEN": 0,
+      "Hybrid": 3,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000033"
+    },
+    {
+      "CassetteNumber": 82,
+      "Ring": 6,
+      "FEN": 0,
+      "Hybrid": 4,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000034"
+    },
+    {
+      "CassetteNumber": 83,
+      "Ring": 7,
+      "FEN": 0,
+      "Hybrid": 0,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000035"
+    },
+    {
+      "CassetteNumber": 84,
+      "Ring": 7,
+      "FEN": 0,
+      "Hybrid": 1,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000036"
+    },
+    {
+      "CassetteNumber": 85,
+      "Ring": 7,
+      "FEN": 0,
+      "Hybrid": 2,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000037"
+    },
+    {
+      "CassetteNumber": 86,
+      "Ring": 7,
+      "FEN": 0,
+      "Hybrid": 3,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000038"
+    },
+    {
+      "CassetteNumber": 87,
+      "Ring": 7,
+      "FEN": 0,
+      "Hybrid": 4,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000039"
+    },
+    {
+      "CassetteNumber": 88,
+      "Ring": 8,
+      "FEN": 0,
+      "Hybrid": 0,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000040"
+    },
+    {
+      "CassetteNumber": 89,
+      "Ring": 8,
+      "FEN": 0,
+      "Hybrid": 1,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000041"
+    },
+    {
+      "CassetteNumber": 90,
+      "Ring": 8,
+      "FEN": 0,
+      "Hybrid": 2,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000042"
+    },
+    {
+      "CassetteNumber": 91,
+      "Ring": 8,
+      "FEN": 0,
+      "Hybrid": 3,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000043"
+    },
+    {
+      "CassetteNumber": 92,
+      "Ring": 8,
+      "FEN": 0,
+      "Hybrid": 4,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000044"
+    },
+    {
+      "CassetteNumber": 93,
+      "Ring": 9,
+      "FEN": 0,
+      "Hybrid": 0,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000045"
+    },
+    {
+      "CassetteNumber": 94,
+      "Ring": 9,
+      "FEN": 0,
+      "Hybrid": 1,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000046"
+    },
+    {
+      "CassetteNumber": 95,
+      "Ring": 9,
+      "FEN": 0,
+      "Hybrid": 2,
+      "Thresholds": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "HybridId": "E5533333222222221111111100000047"
     }
   ],
   "MaxPulseTimeNS": 71428570,
