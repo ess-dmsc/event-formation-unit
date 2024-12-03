@@ -80,6 +80,108 @@ void FreiaInstrument::processReadouts(void) {
       /// \todo sometimes PrevPulseTime maybe?
       ESSReadoutParser.Packet.Time.getRefTimeUInt64());
 
+
+  // Loop through the cluster data (VMM operates in clustered mode)
+  for (const auto &readout : VMMParser.ResultCluster) {
+
+    XTRACE(DATA, INF,
+           "readout: FiberId %d, FENId %d, Hybrid %d, Pos0 %d, Pos1 %d, TimeLow %d",
+           readout.FiberId, readout.FENId, readout.Hybrid, readout.Position0, readout.Position1,
+           readout.TimeLow);
+
+    // Convert from physical rings to logical rings
+    uint8_t Ring = readout.FiberId / 2;
+
+    // Check for configuration mismatch
+    if (Ring > VMM3Config::MaxRing) {
+      counters.RingMappingErrors++;
+      continue;
+    }
+
+    if (readout.FENId > VMM3Config::MaxFEN) {
+      counters.FENMappingErrors++;
+      continue;
+    }
+
+    uint8_t HybridId = readout.Hybrid;
+    if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
+      XTRACE(DATA, WAR,
+             "Hybrid for Ring %d, FEN %d, Hybrid %d not defined in config file",
+             Ring, readout.FENId, HybridId);
+      counters.HybridMappingErrors++;
+      continue;
+    }
+ 	
+ 	ESSReadout::Hybrid &Hybrid =
+        Conf.getHybrid(Ring, readout.FENId, readout.Hybrid);
+  
+     uint64_t EventTimeNS =
+        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+        
+      uint16_t XCoord =
+          Geom.xCoord(readout.Hybrid*2, readout.Position0);
+      XTRACE(DATA, INF,
+             "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Position0 %u, Multiplicity %u, ADC %u",
+             EventTimeNS, PlaneX, XCoord, readout.Position0, (readout.MultADC0 >> 11), readout.MultADC0 & 0x1FFF);
+
+      if (XCoord == GeometryBase::InvalidCoord) {
+        counters.InvalidXCoord++;
+        continue;
+      }
+  	  uint16_t YCoord =
+          Geom.yCoord(Hybrid.YOffset, readout.Hybrid*2+1, readout.Position1);
+      XTRACE(DATA, INF,
+             "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Position1 %u, Multiplicity %u, ADC %u",
+             EventTimeNS, PlaneX, YCoord, readout.Position1, (readout.MultADC1 >> 11), readout.MultADC1 & 0x1FFF);
+
+      if (YCoord == GeometryBase::InvalidCoord) {
+        counters.InvalidYCoord++;
+        continue;
+      }
+      
+      //Cluster data is valid, directly create an event without using a builder
+      counters.EventsMatchedClusters++;
+      XTRACE(EVENT, INF, "Event Valid\n");
+
+	
+	 ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
+
+      // Calculate TOF in ns
+      XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTimeNS,
+           TimeRef.getRefTimeUInt64());
+
+    if (TimeRef.getRefTimeUInt64() > EventTimeNS) {
+      XTRACE(EVENT, WAR, "Negative TOF!");
+      counters.TimeErrors++;
+      continue;
+    }
+
+ 	
+    uint64_t TimeOfFlight = EventTimeNS - TimeRef.getRefTimeUInt64();
+
+    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
+      counters.MaxTOFErrors++;
+      continue;
+    }
+
+    auto PixelId = essgeom.pixel2D(XCoord, YCoord);
+
+    if (PixelId == 0) {
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u",
+             EventTimeNS, TimeOfFlight, XCoord, YCoord, PixelId);
+      counters.PixelErrors++;
+      continue;
+    }
+
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", EventTimeNS,
+           TimeOfFlight, XCoord, YCoord, PixelId);
+    Serializer->addEvent(TimeOfFlight, PixelId);
+    counters.Events++;
+
+  }
+  
+   // Loop through the hit data (VMM operates in hit mode)
   for (const auto &readout : VMMParser.Result) {
 
     if (DumpFile) {

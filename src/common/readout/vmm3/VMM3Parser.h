@@ -57,9 +57,27 @@ public:
     uint8_t VMM;
     uint8_t Channel;
   } __attribute__((packed));
+  
+struct VMM3Cluster {
+    uint8_t FiberId;
+    uint8_t FENId;
+    uint16_t DataLength;
+    uint32_t TimeHigh;
+    uint32_t TimeLow;
+    uint16_t MultADC0;
+    uint16_t MultADC1;
+    uint8_t GEO;
+    uint8_t Hybrid;
+    uint8_t Position0;
+    uint8_t Position1;
+  } __attribute__((packed));
+  
 
   static_assert(sizeof(VMM3Parser::VMM3Data) == (VMM3DATASIZE),
                 "Wrong header size (update assert or check packing)");
+                
+  static_assert(sizeof(VMM3Parser::VMM3Cluster) == (VMM3DATASIZE),
+                "Wrong header size (update assert or check packing)");                
 
   VMM3Parser() { Result.reserve(MaxReadoutsInPacket); };
 
@@ -78,9 +96,15 @@ public:
   void dumpReadoutToFile(const VMM3Data &Data,
                          const ESSReadout::Parser ESSReadoutParser,
                          std::shared_ptr<VMM3::ReadoutFile> DumpFile);
-
+                         
+  ///\brief Dumps VMM3 readouts to file
+  void dumpReadoutToFile(const VMM3Cluster &Data,
+                         const ESSReadout::Parser ESSReadoutParser,
+                         std::shared_ptr<VMM3::ReadoutFile> DumpFile);
+                         
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;
+  std::vector<struct VMM3Cluster> ResultCluster;
 
   struct VMM3ParserStats Stats;
 
@@ -92,6 +116,8 @@ private:
   const uint16_t MaxChannelValue{63};
   const uint16_t OverThresholdMask{0x8000};
   const uint16_t ADCMask{0x7fff};
+  const uint16_t ADCClusterMask{0x1fff};
+  const uint16_t ADCMultiplicityShift{11};
   bool IsMonitor{false};
 };
 } // namespace ESSReadout

@@ -22,6 +22,7 @@ namespace ESSReadout {
 // Assume we start after the Common PacketHeader
 int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
   Result.clear();
+  ResultCluster.clear();
   uint32_t GoodReadouts{0};
 
   char *Buffer = (char *)PacketData.DataPtr;
@@ -42,9 +43,13 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
   }
 
   VMM3Parser::VMM3Data *DataPtr = (struct VMM3Data *)Buffer;
+  VMM3Parser::VMM3Cluster *ClusterPtr = (struct VMM3Cluster *)Buffer;
+   
   for (unsigned int i = 0; i < Size / DataLength; i++) {
     Stats.Readouts++;
     VMM3Parser::VMM3Data Readout = DataPtr[i];
+    VMM3Parser::VMM3Cluster ReadoutCluster = ClusterPtr[i];
+    
     if (Readout.FiberId > MaxFiberId) {
       XTRACE(DATA, WAR, "Invalid FiberId %d (Max is %d)", Readout.FiberId,
              MaxFiberId);
@@ -84,53 +89,109 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
+	
+	//It's a data readout
+	if ((Readout.GEO & 0x40) == 0) {
+		if (Readout.BC > MaxBCValue) {
+		  XTRACE(DATA, WAR, "Invalid BC %u (max is %u)", Readout.BC, MaxBCValue);
+		  Stats.ErrorBC++;
+		  continue;
+		}
+	
+		// If monitor there are no invalid ADC values
+		if (not IsMonitor) {
+		  if ((Readout.OTADC & ADCMask) > MaxADCValue) {
+			XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff,
+				   MaxADCValue);
+			Stats.ErrorADC++;
+			continue;
+		  }
+		}
+		XTRACE(DATA, DEB, "Valid OTADC %u", Readout.OTADC);
+	
+		// So far no checks for GEO and TDC
+	
+		if (Readout.VMM > MaxVMMValue) {
+		  XTRACE(DATA, WAR, "Invalid VMM %u (max is %u)", Readout.VMM, MaxVMMValue);
+		  Stats.ErrorVMM++;
+		  continue;
+		}
+	
+		if (Readout.Channel > MaxChannelValue) {
+		  XTRACE(DATA, WAR, "Invalid Channel %u (max is %u)", Readout.Channel,
+				 MaxChannelValue);
+		  Stats.ErrorChannel++;
+		  continue;
+		}
+	
+		// Validation done, increment stats for decoded parameters
+	
+		if (Readout.OTADC & OverThresholdMask) {
+		  Stats.OverThreshold++;
+		}
+	
+		if ((Readout.GEO & 0x80) == 0) {
+		  Stats.DataReadouts++;
+		} else {
+		  Stats.CalibReadouts++;
+		}
+		GoodReadouts++;
+    	Result.push_back(Readout);
+	}
+	//It's a cluster
+	else {
+		if (ReadoutCluster.Hybrid > 6) {
+		  XTRACE(DATA, WAR, "Invalid hybrid %u (max is %u)", ReadoutCluster.Hybrid, 6);
+		  Stats.ErrorVMM++;
+		  continue;
+		}
+	
+		if (ReadoutCluster.Position0 > 64) {
+		  XTRACE(DATA, WAR, "Invalid Position0 %u (max is %u)", ReadoutCluster.Position0,
+				 64);
+		  Stats.ErrorChannel++;
+		  continue;
+		}
+	
+		if (ReadoutCluster.Position1 > 64) {
+		  XTRACE(DATA, WAR, "Invalid Position1 %u (max is %u)", ReadoutCluster.Position1,
+				 64);
+		  Stats.ErrorChannel++;
+		  continue;
+		}
+				
+		if ((ReadoutCluster.MultADC0 >> ADCMultiplicityShift) == 0x0000) {
+		  XTRACE(DATA, WAR, "Invalid Multiplicity0 %u (min is %u)", (ReadoutCluster.MultADC0 >> ADCMultiplicityShift),
+				 1);
+		  Stats.ErrorADC++;
+		  continue;
+		}
+		if ((ReadoutCluster.MultADC1 >> ADCMultiplicityShift) == 0x0000) {
+		  XTRACE(DATA, WAR, "Invalid Multiplicity1 %u (min is %u)", (ReadoutCluster.MultADC1 >> ADCMultiplicityShift),
+				 1);
+		  Stats.ErrorADC++;
+		  continue;
+		}
+		if (ReadoutCluster.MultADC0 & ADCClusterMask == 0x0000) {
+		  XTRACE(DATA, WAR, "Invalid ADC0 %u (min is %u)", ReadoutCluster.MultADC0 & ADCClusterMask,
+				 1);
+		  Stats.ErrorADC++;
+		  continue;
+		}
+		if (ReadoutCluster.MultADC1 & ADCClusterMask == 0x0000) {
+		  XTRACE(DATA, WAR, "Invalid ADC1 %u (min is %u)", ReadoutCluster.MultADC1 & ADCClusterMask,
+				 1);
+		  Stats.ErrorADC++;
+		  continue;
+		}
 
-    if (Readout.BC > MaxBCValue) {
-      XTRACE(DATA, WAR, "Invalid BC %u (max is %u)", Readout.BC, MaxBCValue);
-      Stats.ErrorBC++;
-      continue;
-    }
+		// Validation done, increment stats for decoded parameters
+		Stats.DataReadouts++;
+		GoodReadouts++;
+    	ResultCluster.push_back(ReadoutCluster);
+	
+	}
 
-    // If monitor there are no invalid ADC values
-    if (not IsMonitor) {
-      if ((Readout.OTADC & ADCMask) > MaxADCValue) {
-        XTRACE(DATA, WAR, "Invalid ADC %u (max is %u)", Readout.OTADC & 0x7fff,
-               MaxADCValue);
-        Stats.ErrorADC++;
-        continue;
-      }
-    }
-    XTRACE(DATA, DEB, "Valid OTADC %u", Readout.OTADC);
-
-    // So far no checks for GEO and TDC
-
-    if (Readout.VMM > MaxVMMValue) {
-      XTRACE(DATA, WAR, "Invalid VMM %u (max is %u)", Readout.VMM, MaxVMMValue);
-      Stats.ErrorVMM++;
-      continue;
-    }
-
-    if (Readout.Channel > MaxChannelValue) {
-      XTRACE(DATA, WAR, "Invalid Channel %u (max is %u)", Readout.Channel,
-             MaxChannelValue);
-      Stats.ErrorChannel++;
-      continue;
-    }
-
-    // Validation done, increment stats for decoded parameters
-
-    if (Readout.OTADC & OverThresholdMask) {
-      Stats.OverThreshold++;
-    }
-
-    if ((Readout.GEO & 0x80) == 0) {
-      Stats.DataReadouts++;
-    } else {
-      Stats.CalibReadouts++;
-    }
-
-    GoodReadouts++;
-    Result.push_back(Readout);
   }
 
   return GoodReadouts;
