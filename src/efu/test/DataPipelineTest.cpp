@@ -1,8 +1,10 @@
 #include <chrono>
 #include <common/testutils/TestBase.h>
 #include <efu/DataPipeline.h>
+#include <exception>
 #include <string>
 #include <thread>
+#include <vector>
 
 class DataPipelineTest : public TestBase {
 protected:
@@ -77,32 +79,27 @@ TEST_F(DataPipelineTest, GracefulStopOnException) {
 
   pipeline.start();
 
-  inputQueue->enqueue(123);
-  inputQueue->enqueue(4567);
   inputQueue->enqueue(100);
   inputQueue->enqueue(123);
+  inputQueue->enqueue(4567);
+  inputQueue->enqueue(123);
 
-  std::vector<size_t> results;
-  size_t result;
-  const int expectedResults = 2;
   const int timeoutMs = 1000;
   const int checkIntervalMs = 10;
   int elapsedMs = 0;
 
-  while (results.size() < expectedResults && elapsedMs < timeoutMs) {
-    while (outputQueue->dequeue(result)) {
-      results.push_back(result);
-    }
+  while (pipeline.isPipelineHealty() && elapsedMs < timeoutMs) {
     std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalMs));
     elapsedMs += checkIntervalMs;
   }
 
+  std::vector<std::runtime_error> pipelineErrors = pipeline.getPipelineErros();
   pipeline.stop();
 
-  ASSERT_EQ(results.size(), expectedResults);
-  EXPECT_EQ(results[0], 3); // "123" has 3 characters
-  EXPECT_EQ(results[1], 4); // "4567" has 4 characters
-
+  ASSERT_FALSE(pipeline.isPipelineHealty());
+  EXPECT_EQ(pipelineErrors.size(), 1);
+  EXPECT_STREQ(pipelineErrors.back().what(), "Test exception");
+  EXPECT_EQ(pipeline.getRunningStages(), 0);
 }
 
 int main(int argc, char **argv) {

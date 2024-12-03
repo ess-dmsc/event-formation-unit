@@ -9,9 +9,16 @@
 
 #pragma once
 
+#include <atomic>
+#include <common/debug/Log.h>
 #include <common/memory/LockFreeQueue.h>
+#include <exception>
+#include <fmt/format.h>
 #include <functional>
+#include <future>
+#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -27,6 +34,8 @@ public:
   virtual ~PipelineStageBase() = default;
 
 protected:
+  std::future<void> future;
+
   PipelineStageBase() = default;
 
 private:
@@ -35,13 +44,20 @@ private:
 
 template <typename In, typename Out>
 class PipelineStage : public PipelineStageBase {
+
 public:
   void start() override {
-    thread = std::thread([this]() {
+    future = std::async(std::launch::async, [this]() {
       In input;
       while (!stopFlag.load(std::memory_order_acquire)) {
         if (inputQueue->dequeue(input)) {
-          Out output = func(input);
+          Out output;
+          try {
+            output = func(input);
+          } catch (const std::exception &e) {
+            throw;
+          }
+
           while (!outputQueue->enqueue(std::move(output))) {
             std::this_thread::yield();
           }
@@ -54,8 +70,8 @@ public:
 
   void stop() override {
     stopFlag.store(true, std::memory_order_release);
-    if (thread.joinable()) {
-      thread.join();
+    if (future.valid()) {
+      future.get();
     }
   }
 
@@ -85,14 +101,15 @@ private:
   std::function<Out(In)> func;
   std::shared_ptr<LockFreeQueue<In>> inputQueue;
   std::shared_ptr<LockFreeQueue<Out>> outputQueue;
-  std::atomic<bool> stopFlag;
-  std::thread thread;
+  std::atomic_bool stopFlag;
 
   friend class Pipeline;
 };
 
 class Pipeline {
 public:
+  ~Pipeline() { stop(); }
+
   template <typename In, typename Out>
   PipelineStage<In, Out> &createNewStage(std::function<Out(In)> func) {
     auto stage = std::unique_ptr<PipelineStage<In, Out>>(
@@ -112,6 +129,44 @@ public:
     for (auto &stage : stages) {
       stage->stop();
     }
+  }
+
+  bool isPipelineHealty() {
+    bool allStageHealty = true;
+    for (auto &stage : stages) {
+      if (!stage->future.valid() || stage->future.wait_for(std::chrono::seconds(
+                                        0)) == std::future_status::ready) {
+        allStageHealty = false;
+      }
+    }
+    return allStageHealty;
+  }
+
+  std::vector<std::runtime_error> getPipelineErros() {
+    std::vector<std::runtime_error> errorList;
+
+    for (auto &stage : stages) {
+      if (stage->future.valid() && stage->future.wait_for(std::chrono::seconds(
+                                       0)) == std::future_status::ready) {
+        try {
+          stage->future.get();
+        } catch (const std::exception &e) {
+          errorList.emplace_back(e.what());
+        }
+      }
+    }
+    return errorList;
+  }
+
+  size_t getRunningStages() {
+    size_t runningStages = 0;
+    for (auto &stage : stages) {
+      if (stage->future.valid() && stage->future.wait_for(std::chrono::seconds(
+                                       0)) != std::future_status::ready) {
+        runningStages++;
+      }
+    }
+    return runningStages;
   }
 
 private:
