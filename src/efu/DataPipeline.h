@@ -52,12 +52,7 @@ public:
       while (!stopFlag.load(std::memory_order_acquire)) {
         if (inputQueue->dequeue(input)) {
           Out output;
-          try {
-            output = func(input);
-          } catch (const std::exception &e) {
-            throw;
-          }
-
+          output = func(input);
           while (!outputQueue->enqueue(std::move(output))) {
             std::this_thread::yield();
           }

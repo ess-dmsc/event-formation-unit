@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <cstddef>
 #include <atomic>
+#include <cstddef>
 
 template <typename T> class LockFreeQueue {
 public:
@@ -29,6 +29,8 @@ public:
     tail.store(next_tail, std::memory_order_release);
     return true;
   }
+
+  bool enqueue(const T &data) { return enqueue(std::move(data)); }
 
   bool dequeue(T &result) {
     size_t current_head = head.load(std::memory_order_relaxed);
