@@ -21,7 +21,7 @@ protected:
 
 TEST_F(AMORChannelMappingTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
-    ASSERT_EQ(Geom.xCoord(VMMX, i), 63 - i);
+    ASSERT_EQ(Geom.xCoord(0, VMMX, i), 63 - i);
   }
 
   uint YCoordMinChannel = 16;
@@ -38,8 +38,8 @@ TEST_F(AMORChannelMappingTest, Coordinates) {
 }
 
 TEST_F(AMORChannelMappingTest, XCoordErrors) {
-  ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
-  ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
+  ASSERT_EQ(Geom.xCoord(0, VMMY, 0), Geom.InvalidCoord);  // bad VMM
+  ASSERT_EQ(Geom.xCoord(0, VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
 TEST_F(AMORChannelMappingTest, YCoordErrors) {

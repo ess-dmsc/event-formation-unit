@@ -21,7 +21,7 @@ protected:
 
 TEST_F(FreiaChannelMappingTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
-    ASSERT_EQ(Geom.xCoord(VMMX, i), i);
+    ASSERT_EQ(Geom.xCoord(0, VMMX, i), i);
   }
   for (unsigned int i = 16; i < 47; i++) {
     ASSERT_EQ(Geom.yCoord(Cassette0, VMMY, i), i - 16);
@@ -29,8 +29,8 @@ TEST_F(FreiaChannelMappingTest, Coordinates) {
 }
 
 TEST_F(FreiaChannelMappingTest, XCoordErrors) {
-  ASSERT_EQ(Geom.xCoord(VMMY, 0), Geom.InvalidCoord);  // bad VMM
-  ASSERT_EQ(Geom.xCoord(VMMX, 64), Geom.InvalidCoord); // bad Channel
+  ASSERT_EQ(Geom.xCoord(0, VMMY, 0), Geom.InvalidCoord);  // bad VMM
+  ASSERT_EQ(Geom.xCoord(0, VMMX, 64), Geom.InvalidCoord); // bad Channel
 }
 
 TEST_F(FreiaChannelMappingTest, YCoordErrors) {

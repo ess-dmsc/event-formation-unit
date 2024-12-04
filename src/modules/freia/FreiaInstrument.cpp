@@ -152,7 +152,7 @@ void FreiaInstrument::processReadouts(void) {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      uint16_t XCoord = Geom.xCoord(readout.VMM, readout.Channel);
+      uint16_t XCoord = Geom.xCoord(Hybrid.XOffset, readout.VMM, readout.Channel);
       XTRACE(DATA, INF,
              "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
              TimeNS, PlaneX, XCoord, readout.Channel, ADC);

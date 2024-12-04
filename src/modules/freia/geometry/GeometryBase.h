@@ -24,7 +24,7 @@ public:
 
   virtual bool isYCoord(uint8_t VMM) = 0;
 
-  virtual uint16_t xCoord(uint8_t VMM, uint8_t Channel) = 0;
+  virtual uint16_t xCoord(uint16_t XOffset, uint8_t VMM, uint8_t Channel) = 0;
 
   virtual uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) = 0;
 
