@@ -22,7 +22,7 @@ protected:
 
 TEST_F(AMORChannelMappingTest, Coordinates) {
   for (unsigned int i = 0; i < 64; i++) {
-    ASSERT_EQ(Geom.xCoord(0, VMMX, i), 63 - i);
+    ASSERT_EQ(Geom.xCoord(Cassette0Xoffset, VMMX, i), 63 - i);
   }
 
   uint YCoordMinChannel = 16;
