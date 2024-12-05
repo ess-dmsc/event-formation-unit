@@ -14,6 +14,7 @@ set(freia_common_inc
   FreiaInstrument.h
   geometry/Config.h
   geometry/FreiaChannelMapping.h
+  geometry/EstiaChannelMapping.h
   geometry/AMORChannelMapping.h
   )
 set(freia_common_src
