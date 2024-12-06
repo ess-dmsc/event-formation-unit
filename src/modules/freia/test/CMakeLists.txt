@@ -40,3 +40,10 @@ set(AMORChannelMappingTest_INC
 set(AMORChannelMappingTest_SRC
   ../test/AMORChannelMappingTest.cpp)
 create_test_executable(AMORChannelMappingTest)
+
+
+set(EstiaChannelMappingTest_INC
+  ../geometry/FreiaChannelMapping.h)
+set(EstiaChannelMappingTest_SRC
+  ../test/EstiaChannelMappingTest.cpp)
+create_test_executable(EstiaChannelMappingTest)

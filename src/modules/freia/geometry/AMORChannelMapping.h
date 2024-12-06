@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -26,7 +26,7 @@ public:
   /// Formulae taken from the Freia ICD, AMOR section
   /// strip = 64 - channel
   /// x = strip - 1       ( == 63 - channel )
-  uint16_t xCoord(uint8_t VMM, uint8_t Channel) {
+  uint16_t xCoord(uint16_t __attribute__((unused)) XOffset, uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
       return InvalidCoord;
