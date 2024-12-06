@@ -7,14 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <da00_dataarray_generated.h>
-#include <flatbuffers/flatbuffers.h>
 #include <common/kafka/Producer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
 #include <common/time/ESSTime.h>
+#include <da00_dataarray_generated.h>
+#include <flatbuffers/flatbuffers.h>
 #include <fmt/core.h>
 #include <unistd.h>
 
@@ -24,9 +24,7 @@ using namespace da00flatbuffers;
 
 struct CommonFbMemebers {
   std::string Source;
-  std::string Name;
   std::string DataUnit;
-  std::string TimeUnit;
   int64_t Period;
   size_t BinSize;
   TimeDurationNano ReferenceTime;
@@ -37,18 +35,8 @@ struct CommonFbMemebers {
     return *this;
   }
 
-  CommonFbMemebers &setName(const std::string &Name) {
-    this->Name = Name;
-    return *this;
-  }
-
   CommonFbMemebers &setDataUnit(const std::string &DataUnit) {
     this->DataUnit = DataUnit;
-    return *this;
-  }
-
-  CommonFbMemebers &setTimeUnit(const std::string &TimeUnit) {
-    this->TimeUnit = TimeUnit;
     return *this;
   }
 
@@ -99,16 +87,14 @@ public:
   fbserializer::HistogramSerializer<T, R> createHistogramSerializer() {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        MockedProduceFunction);
+        CommonMembers.DataUnit, MockedProduceFunction);
   }
 
   fbserializer::HistogramSerializer<T, R>
   createHistogramSerializer(fbserializer::BinningStrategy Strategy) {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        Strategy, MockedProduceFunction);
+        CommonMembers.DataUnit, Strategy, MockedProduceFunction);
   }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
@@ -132,9 +118,9 @@ public:
     Variable Axis = DeserializedDataArray.getData().at(0);
     Variable Data = DeserializedDataArray.getData().at(1);
 
-    EXPECT_EQ(Axis.getName(), "time");
-    EXPECT_EQ(Axis.getAxes(), std::vector<std::string>{"t"});
-    EXPECT_EQ(Axis.getUnit(), CommonMembers.TimeUnit);
+    EXPECT_EQ(Axis.getName(), "frame_time");
+    EXPECT_EQ(Axis.getAxes(), std::vector<std::string>{"frame_time"});
+    EXPECT_EQ(Axis.getUnit(), "ns");
     EXPECT_EQ(Axis.getData().size(), CommonMembers.BinSize * sizeof(R));
 
     double step = static_cast<double>(CommonMembers.Period) /
@@ -150,8 +136,8 @@ public:
       EXPECT_NEAR(axisVector[i], i * step, 0.0001);
     }
 
-    EXPECT_EQ(Data.getName(), CommonMembers.Name);
-    EXPECT_EQ(Data.getAxes(), std::vector<std::string>{"a.u."});
+    EXPECT_EQ(Data.getName(), "signal");
+    EXPECT_EQ(Data.getAxes(), std::vector<std::string>{"frame_time"});
     EXPECT_EQ(Data.getUnit(), CommonMembers.DataUnit);
     EXPECT_EQ(Data.getData().size(), CommonMembers.BinSize * sizeof(T));
 
@@ -174,10 +160,8 @@ protected:
   void SetUp() override {
     CommonFbMembers =
         CommonFbMemebers()
-            .setName("TestData")
             .setSource("TestSource")
-            .setDataUnit("v")
-            .setTimeUnit("millisecounds")
+            .setDataUnit("V")
             .setBinSize(10)
             .setProduceCallTime(duration_cast<milliseconds>(
                                     system_clock::now().time_since_epoch())

@@ -8,10 +8,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV44Serializer.h>
-#include <common/memory/HashMap2D.h>
 #include <common/RuntimeStat.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
+#include <common/memory/HashMap2D.h>
 #include <memory>
 #include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
@@ -176,8 +176,8 @@ void CbmBase::processing_thread() {
 
       std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
           std::make_unique<HistogramSerializer<int32_t>>(
-              Topology->Source, Topology->maxTofBin, Topology->BinCount,
-              "serializer", "A", "ns", Produce);
+              Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
+              Produce);
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);

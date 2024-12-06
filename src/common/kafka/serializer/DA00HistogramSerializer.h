@@ -17,6 +17,8 @@
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
+#include <cstddef>
+#include <cstdint>
 #include <da00_dataarray_generated.h>
 #include <fmt/format.h>
 
@@ -90,9 +92,7 @@ class HistogramSerializer : public AbstractSerializer {
   const std::string Source;
   const time_t Period;
   const time_t BinCount;
-  const std::string Name;
-  const std::string Unit;
-  const std::string TimeUnit;
+  const std::string SignalUnit;
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const enum BinningStrategy BinningStrategy;
   HistrogramSerializerStats Stats;
@@ -117,15 +117,13 @@ public:
   /// \param Strategy is the enum like binning strategy we can select
 
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string DataUnit, std::string TimeUnit,
+      std::string Source, time_t Period, time_t BinCount, std::string DataUnit,
       ProducerCallback Callback = {},
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
       : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
         Period(std::move(Period)), BinCount(std::move(BinCount)),
-        Name(std::move(Name)), Unit(std::move(DataUnit)),
-        TimeUnit(std::move(TimeUnit)), AggregateFunction(std::move(AggFunc)),
+        SignalUnit(std::move(DataUnit)), AggregateFunction(std::move(AggFunc)),
         BinningStrategy(std::move(Strategy)), Stats() {
 
     initAxis();
@@ -136,19 +134,17 @@ public:
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string Unit, std::string TimeUnit, enum BinningStrategy Strategy,
-      ProducerCallback Callback = {},
+      std::string Source, time_t Period, time_t BinCount, std::string Unit,
+      enum BinningStrategy Strategy, ProducerCallback Callback = {},
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Source, Period, BinCount, Name, Unit, TimeUnit,
-                            Callback, AggFunc, Strategy) {}
+      : HistogramSerializer(Source, Period, BinCount, Unit, Callback, AggFunc,
+                            Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)
       : AbstractSerializer(other), Source(other.Source), Period(other.Period),
-        BinCount(other.BinCount), Name(other.Name), Unit(other.Unit),
-        TimeUnit(other.TimeUnit), Stats(other.Stats),
-        AggregateFunction(other.AggregateFunction),
+        BinCount(other.BinCount), SignalUnit(other.SignalUnit),
+        Stats(other.Stats), AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
@@ -215,15 +211,16 @@ private:
       AggregatedBins.push_back(AggregateFunction(Data));
     }
 
-    auto XAxis = (da00flatbuffers::Variable("time", {"t"},
-                                            {static_cast<time_t>(BinCount)})
-                      .unit(TimeUnit)
+    auto XAxis = (da00flatbuffers::Variable("frame_time", {"frame_time"},
+                                            {static_cast<int64_t>(BinCount)})
+                      .unit("ns")
                       .data(XAxisValues));
 
-    auto YAxis = (da00flatbuffers::Variable(Name, {"a.u."},
-                                            {static_cast<time_t>(BinCount)})
-                      .unit(Unit)
-                      .data(AggregatedBins));
+    auto YAxis =
+        (da00flatbuffers::Variable("signal", {"frame_time"},
+                                   {static_cast<int64_t>(BinCount)})
+             .unit(SignalUnit)
+             .data(AggregatedBins));
 
     const auto DataArray = da00flatbuffers::DataArray(
         Source, ReferenceTime.value(), {XAxis, YAxis});
