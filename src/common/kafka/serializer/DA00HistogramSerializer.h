@@ -159,12 +159,12 @@ public:
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string Unit, std::string TimeUnit, R BinOffset = 0,
+      std::string Unit, std::string TimeUnit,
       enum BinningStrategy Strategy = BinningStrategy::Drop,
-      ProducerCallback Callback = {},
+      ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
       : HistogramSerializer(Source, Period, BinCount, Name, Unit, TimeUnit,
-                            BinOffset, Callback, AggFunc, Strategy) {}
+                           Callback,  BinOffset, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)

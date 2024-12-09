@@ -114,7 +114,7 @@ public:
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        CommonMembers.BinOffset, Strategy, MockedProduceFunction);
+        Strategy, MockedProduceFunction, CommonMembers.BinOffset);
   }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
