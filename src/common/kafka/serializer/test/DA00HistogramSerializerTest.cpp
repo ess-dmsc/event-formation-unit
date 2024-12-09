@@ -476,7 +476,7 @@ TEST_F(HistogramSerializerTest, TestBinOffset) {
   serializer.addEvent(25, 1);  // Should be dropped due to BinOffset
   serializer.addEvent(55, 1);  // Should go into second bin
   serializer.addEvent(59, 1);  // Should go into second bin
-  serializer.addEvent(150, 1); // Should be drtopped due to period
+  serializer.addEvent(150, 1); // Should be dropped due to period
 
   serializer.produce();
 
