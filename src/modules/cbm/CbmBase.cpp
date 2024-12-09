@@ -8,10 +8,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV44Serializer.h>
-#include <common/memory/HashMap2D.h>
 #include <common/RuntimeStat.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
+#include <common/memory/HashMap2D.h>
 #include <memory>
 #include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
@@ -181,6 +181,9 @@ void CbmBase::processing_thread() {
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source +
+                       ".tof_before_offset_dropped",
+                   SerializerPtr->stats().DataBeforeTimeOffsetDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_dropped",
                    SerializerPtr->stats().DataOverPeriodDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_last_bin",
