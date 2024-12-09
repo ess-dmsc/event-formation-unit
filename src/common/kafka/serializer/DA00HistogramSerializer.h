@@ -284,9 +284,7 @@ private:
           BinWidth));
     }
 
-    XAxisValues.push_back(BinOffset);
-
-    for (auto i = 1; i <= BinCount; ++i) {
+    for (auto i = 0; i <= BinCount; ++i) {
       XAxisValues.push_back(BinOffset + i * BinWidth);
       XTRACE(INIT, DEB, "X Axis unit added, index: %zu, value: %zu", i,
              XAxisValues[i]);
