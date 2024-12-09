@@ -7,14 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <da00_dataarray_generated.h>
-#include <flatbuffers/flatbuffers.h>
 #include <common/kafka/Producer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
 #include <common/testutils/TestBase.h>
 #include <common/time/ESSTime.h>
+#include <da00_dataarray_generated.h>
+#include <flatbuffers/flatbuffers.h>
 #include <fmt/core.h>
 #include <unistd.h>
 
@@ -31,6 +31,7 @@ struct CommonFbMemebers {
   size_t BinSize;
   TimeDurationNano ReferenceTime;
   int64_t ProduceCallTime;
+  int64_t BinOffset{0}; // Add BinOffset with default value
 
   CommonFbMemebers &setSource(const std::string &Source) {
     this->Source = Source;
@@ -71,6 +72,11 @@ struct CommonFbMemebers {
     this->Period = Period;
     return *this;
   }
+
+  CommonFbMemebers &setBinOffset(int64_t Offset) {
+    this->BinOffset = Offset;
+    return *this;
+  }
 };
 
 template <typename T, typename R = T> class TestValidator {
@@ -100,7 +106,7 @@ public:
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        MockedProduceFunction);
+        MockedProduceFunction, CommonMembers.BinOffset);
   }
 
   fbserializer::HistogramSerializer<T, R>
@@ -108,7 +114,7 @@ public:
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        Strategy, MockedProduceFunction);
+        CommonMembers.BinOffset, Strategy, MockedProduceFunction);
   }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
@@ -129,36 +135,38 @@ public:
               CommonMembers.ReferenceTime);
     EXPECT_EQ(DeserializedDataArray.getData().size(), 2);
 
-    Variable Axis = DeserializedDataArray.getData().at(0);
-    Variable Data = DeserializedDataArray.getData().at(1);
+    Variable TimeAxis = DeserializedDataArray.getData().at(0);
+    Variable SignalAxis = DeserializedDataArray.getData().at(1);
 
-    EXPECT_EQ(Axis.getName(), "time");
-    EXPECT_EQ(Axis.getAxes(), std::vector<std::string>{"t"});
-    EXPECT_EQ(Axis.getUnit(), CommonMembers.TimeUnit);
-    EXPECT_EQ(Axis.getData().size(), CommonMembers.BinSize * sizeof(R));
+    EXPECT_EQ(TimeAxis.getName(), "time");
+    EXPECT_EQ(TimeAxis.getAxes(), std::vector<std::string>{"t"});
+    EXPECT_EQ(TimeAxis.getUnit(), CommonMembers.TimeUnit);
+    EXPECT_EQ(TimeAxis.getData().size(),
+              (CommonMembers.BinSize + 1) * sizeof(R));
 
-    double step = static_cast<double>(CommonMembers.Period) /
-                  static_cast<double>(CommonMembers.BinSize);
+    double step =
+        (static_cast<double>(CommonMembers.Period) - CommonMembers.BinOffset) /
+        static_cast<double>(CommonMembers.BinSize);
 
     std::vector<R> axisVector;
-    for (size_t i = 0; i < Axis.getData().size(); i += sizeof(R)) {
-      const R *valuePtr = reinterpret_cast<const R *>(&Axis.getData()[i]);
+    for (size_t i = 0; i < TimeAxis.getData().size(); i += sizeof(R)) {
+      const R *valuePtr = reinterpret_cast<const R *>(&TimeAxis.getData()[i]);
       axisVector.push_back(*valuePtr);
     }
 
     for (size_t i = 0; i < axisVector.size(); i++) {
-      EXPECT_NEAR(axisVector[i], i * step, 0.0001);
+      EXPECT_NEAR(axisVector[i], CommonMembers.BinOffset + i * step, 0.0001);
     }
 
-    EXPECT_EQ(Data.getName(), CommonMembers.Name);
-    EXPECT_EQ(Data.getAxes(), std::vector<std::string>{"a.u."});
-    EXPECT_EQ(Data.getUnit(), CommonMembers.DataUnit);
-    EXPECT_EQ(Data.getData().size(), CommonMembers.BinSize * sizeof(T));
+    EXPECT_EQ(SignalAxis.getName(), CommonMembers.Name);
+    EXPECT_EQ(SignalAxis.getAxes(), std::vector<std::string>{"a.u."});
+    EXPECT_EQ(SignalAxis.getUnit(), CommonMembers.DataUnit);
+    EXPECT_EQ(SignalAxis.getData().size(), CommonMembers.BinSize * sizeof(T));
 
     // Convert Data vector to type T vector
     std::vector<T> dataVector;
-    for (size_t i = 0; i < Data.getData().size(); i += sizeof(T)) {
-      const T *valuePtr = reinterpret_cast<const T *>(&Data.getData()[i]);
+    for (size_t i = 0; i < SignalAxis.getData().size(); i += sizeof(T)) {
+      const T *valuePtr = reinterpret_cast<const T *>(&SignalAxis.getData()[i]);
       dataVector.push_back(*valuePtr);
     }
 
@@ -444,6 +452,37 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
                                       TimeDurationNano(10));
 
   EXPECT_EQ(serializer.stats().ProduceRefTimeTriggered, 1);
+}
+
+TEST_F(HistogramSerializerTest, TestBinOffset) {
+  /// Setup test condition
+  CommonFbMembers.setPeriod(100)
+      .setBinSize(10)
+      .setReferenceTime(std::chrono::seconds(10))
+      .setBinOffset(50); // Set BinOffset
+
+  std::vector<int64_t> ExpectedData(CommonFbMembers.BinSize, 0);
+  ExpectedData[1] = 2; // Events at 55 and 59
+
+  // Initialize validator and create serializer using
+  // createHistogramSerializer()
+  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedData};
+  auto serializer = Validator.createHistogramSerializer();
+
+  /// Perform test
+  serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
+
+  // Add events before and after the BinOffset
+  serializer.addEvent(25, 1);  // Should be dropped due to BinOffset
+  serializer.addEvent(55, 1);  // Should go into second bin
+  serializer.addEvent(59, 1);  // Should go into second bin
+  serializer.addEvent(150, 1); // Should be drtopped due to period
+
+  serializer.produce();
+
+  EXPECT_EQ(serializer.stats().DataOverPeriodDropped,
+            1); // One event before offset
+  EXPECT_EQ(serializer.stats().DataOverPeriodLastBin, 0);
 }
 
 int main(int argc, char **argv) {
