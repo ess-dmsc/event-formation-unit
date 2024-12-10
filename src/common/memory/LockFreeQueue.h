@@ -10,7 +10,13 @@
 #include <atomic>
 #include <cstddef>
 
-template <typename T> class LockFreeQueue {
+class LockFreeQueueBase {
+public:
+  virtual ~LockFreeQueueBase() = default;
+  // Define any common interface methods if necessary
+};
+
+template <typename T> class LockFreeQueue : public LockFreeQueueBase {
 public:
   LockFreeQueue(size_t size)
       : size(size), buffer(new T[size]), head(0), tail(0) {}
