@@ -181,6 +181,9 @@ void CbmBase::processing_thread() {
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source +
+                       ".tof_before_offset_dropped",
+                   SerializerPtr->stats().DataBeforeTimeOffsetDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_dropped",
                    SerializerPtr->stats().DataOverPeriodDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_last_bin",
