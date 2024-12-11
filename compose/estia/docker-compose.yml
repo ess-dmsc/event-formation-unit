@@ -1,0 +1,150 @@
+networks:
+  efu:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 9000
+
+services:
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka1
+    container_name: kafka1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka1:9093"
+      KAFKA_LISTENERS: "CONTROLLER://kafka1:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT"
+      KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN"
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
+    networks:
+      - efu
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka2
+    container_name: kafka2
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: "broker"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka1:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://kafka2:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka2:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN"
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "PLAIN"
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
+    networks:
+      - efu
+
+  graphite:
+    image: graphiteapp/graphite-statsd
+    container_name: graphite
+    restart: always
+    ports:
+      - "8081:80"
+    networks:
+      - efu
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning
+      - ../grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
+    depends_on:
+      - graphite
+    restart: always
+    networks:
+      - efu
+
+  efu:
+    image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-estia:latest
+    hostname: efu-estia
+    container_name: efu-estia
+    depends_on:
+      - kafka2
+      - kafka1
+      - graphite
+    ports:
+      - "9000:9000/udp"
+      - "8888:8888/tcp"
+    networks:
+      - efu
+
+    volumes:
+    # Required to mount the configuration and calibration to the container
+    # Replace <essconfig_path> with the path to your locel essconfig directory
+      - ${ESSCONFIG_PATH}/instruments/estia/efu/config:/ess/ecdc/event_formation_unit/config
+      - ${ESSCONFIG_PATH}/instruments/estia/efu/calib:/ess/ecdc/event_formation_unit/calib
+    environment:
+      - BROKER_TOPIC=estia_detector
+      - FILE=2024_11_05.json
+      #- CALIBRATION=missingcalib.json
+      - BROKER_ADDR=kafka2:9092
+      - GRAPHITE=graphite
+    restart: always
+
+
+  daqlite:
+    image: registry.esss.lu.se/ecdc/ess-dmsc/daqlite:latest
+    container_name: daqlite
+    depends_on:
+      - kafka2
+      - kafka1
+    ports:
+      - "5901:5901"
+    environment:
+      - DAQLITE_BROKER=-b kafka2:9092
+      - DAQLITE_PRODUCTION=true
+      # Please replace <vnc_password> with the password you want to use
+      # default password is "password" if VNC_PASSWORD is not set
+      # - VNC_PASSWORD=<vnc_password> # password for VNC
+      - VNC_RESOLUTION=1280x800 # Increase resolution for better view
+    restart: always
+    networks:
+      - efu
+
+  akhq:
+    image: tchiotludo/akhq:latest
+    container_name: akhq
+    depends_on:
+      - kafka2
+      - kafka1
+    ports:
+      - "8082:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            kafka:
+              properties:
+                bootstrap.servers: "kafka2:9092"
+                security.protocol: PLAINTEXT
+                sasl.mechanism: PLAIN
+    restart: always
+    networks:
+      - efu
