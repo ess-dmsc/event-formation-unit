@@ -9,38 +9,44 @@
 
 #pragma once
 
-#include <atomic>
 #include <common/debug/Log.h>
 #include <common/memory/LockFreeQueue.h>
-#include <exception>
-#include <fmt/format.h>
-#include <functional>
 #include <future>
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include <thread>
-#include <utility>
-#include <variant>
 #include <vector>
 
 namespace data_pipeline {
 
 class Pipeline; // Forward declaration
 
+/// \brief Base class for pipeline stages.
+///
+/// This class provides the interface for pipeline stages.
+/// It should be inherited by specific pipeline stage implementations.
 class PipelineStageBase {
 public:
+  /// \brief Start the pipeline stages.
   virtual void start() = 0;
+
+  /// \brief Stop the pipeline stages.
   virtual void stop() = 0;
+
   virtual ~PipelineStageBase() = default;
 
+  /// \brief Get the input queue.
+  /// \return Shared pointer to the input \ref LockFreeQueueBase.
   virtual std::shared_ptr<LockFreeQueueBase> getInputQueue() const = 0;
+
+  /// \brief Get the output queue.
+  /// \return Shared pointer to the output \ref LockFreeQueueBase.
   virtual std::shared_ptr<LockFreeQueueBase> getOutputQueue() const = 0;
+
+  /// \brief Connect the output queue to the next stage's input.
+  /// \param nextOutputQueue Shared pointer to the next stage's input queue.
   virtual void
-  connectOutput(std::shared_ptr<LockFreeQueueBase> nextOutputQueue) = 0;
+  connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) = 0;
 
 protected:
-  std::future<void> future;
+  std::future<void> Future;
 
   PipelineStageBase() = default;
 
@@ -48,26 +54,35 @@ private:
   friend class Pipeline;
 };
 
+/// \brief Template class for a pipeline stage.
+///
+/// \tparam In Type of input data.
+/// \tparam Out Type of output data.
 template <typename In, typename Out>
 class PipelineStage : public PipelineStageBase {
 
 public:
-  PipelineStage(std::function<Out(In)> func,
-                size_t inputQueueSize = defaultQueueSize,
-                size_t outputQueueSize = defaultQueueSize)
-      : func(func),
-        inputQueue(std::make_shared<LockFreeQueue<In>>(inputQueueSize)),
-        outputQueue(std::make_shared<LockFreeQueue<Out>>(outputQueueSize)),
-        stopFlag(false) {}
+  /// \brief Constructor for the pipeline stage.
+  /// \param func Processing function that takes \ref In and returns \ref Out.
+  /// \param inputQueueSize Size of the input queue (default 1024).
+  /// \param outputQueueSize Size of the output queue (default 1024).
+  PipelineStage(std::function<Out(In)> Func,
+                size_t InputQueueSize = DEFAULT_QUEUE_SIZE,
+                size_t OutputQueueSize = DEFAULT_QUEUE_SIZE)
+      : Func(Func),
+        InputQueue(std::make_shared<LockFreeQueue<In>>(InputQueueSize)),
+        OutputQueue(std::make_shared<LockFreeQueue<Out>>(OutputQueueSize)),
+        StopFlag(false) {}
 
+  /// \brief Start the pipeline stage.
   void start() override {
-    future = std::async(std::launch::async, [this]() {
-      In input;
-      while (!stopFlag.load(std::memory_order_acquire)) {
-        if (inputQueue->dequeue(input)) {
-          Out output;
-          output = func(input);
-          while (!outputQueue->enqueue(std::move(output))) {
+    Future = std::async(std::launch::async, [this]() {
+      In Input;
+      while (!StopFlag.load(std::memory_order_acquire)) {
+        if (InputQueue->dequeue(Input)) {
+          Out Output;
+          Output = Func(Input);
+          while (!OutputQueue->enqueue(std::move(Output))) {
             std::this_thread::yield();
           }
         } else {
@@ -77,161 +92,196 @@ public:
     });
   }
 
+  /// \brief Stop the pipeline stage.
   void stop() override {
-    stopFlag.store(true, std::memory_order_release);
-    if (future.valid()) {
-      future.get();
+    StopFlag.store(true, std::memory_order_release);
+    if (Future.valid()) {
+      Future.get();
     }
   }
 
-  // Implement connectOutput
+  /// \brief Connect the output queue to the next stage's input.
+  /// \param nextOutputQueue Shared pointer to the next stage's input queue.
   void
-  connectOutput(std::shared_ptr<LockFreeQueueBase> nextOutputQueue) override {
+  connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) override {
     // Cast to the appropriate type
-    auto castedQueue =
-        std::static_pointer_cast<LockFreeQueue<Out>>(nextOutputQueue);
-    outputQueue = castedQueue;
+    auto CastedQueue =
+        std::static_pointer_cast<LockFreeQueue<Out>>(NextStageInputQueue);
+    OutputQueue = CastedQueue;
   }
 
+  /// \brief Get the input queue.
+  /// \return Shared pointer to the input \ref LockFreeQueueBase.
   std::shared_ptr<LockFreeQueueBase> getInputQueue() const override {
-    return inputQueue;
+    return InputQueue;
   }
 
+  /// \brief Get the output queue.
+  /// \return Shared pointer to the output \ref LockFreeQueueBase.
   std::shared_ptr<LockFreeQueueBase> getOutputQueue() const override {
-    return outputQueue;
+    return OutputQueue;
   }
 
 private:
-  static const size_t defaultQueueSize = 1024;
+  static const size_t DEFAULT_QUEUE_SIZE = 1024;
 
-  std::function<Out(In)> func;
-  std::shared_ptr<LockFreeQueue<In>> inputQueue;
-  std::shared_ptr<LockFreeQueue<Out>> outputQueue;
-  std::atomic_bool stopFlag;
+  std::function<Out(In)> Func;
+  std::shared_ptr<LockFreeQueue<In>> InputQueue;
+  std::shared_ptr<LockFreeQueue<Out>> OutputQueue;
+  std::atomic_bool StopFlag;
 
   friend class Pipeline;
 };
 
+/// \brief Manages the pipeline composed of multiple stages.
 class Pipeline {
 public:
+  /// \brief Destructor that stops the pipeline first.
   ~Pipeline() { stop(); }
 
+  /// \brief Start all stages of the pipeline.
   void start() {
-    for (auto &stage : stages) {
-      stage->start();
+    for (auto &Stage : Stages) {
+      Stage->start();
     }
   }
 
+  /// \brief Stop all stages of the pipeline.
   void stop() {
-    for (auto &stage : stages) {
-      stage->stop();
+    for (auto &Stage : Stages) {
+      Stage->stop();
     }
   }
 
+  /// \brief Check if the pipeline is healthy.
+  /// \return True if all stages are running correctly.
   bool isPipelineHealty() {
-    bool allStageHealty = true;
-    for (auto &stage : stages) {
-      if (!stage->future.valid() || stage->future.wait_for(std::chrono::seconds(
+    bool AllStageHealty = true;
+    for (auto &Stage : Stages) {
+      if (!Stage->Future.valid() || Stage->Future.wait_for(std::chrono::seconds(
                                         0)) == std::future_status::ready) {
-        allStageHealty = false;
+        AllStageHealty = false;
       }
     }
-    return allStageHealty;
+    return AllStageHealty;
   }
 
+  /// \brief Get errors that occurred in the pipeline.
+  /// \return Vector of runtime errors from pipeline stages.
   std::vector<std::runtime_error> getPipelineErros() {
-    std::vector<std::runtime_error> errorList;
+    std::vector<std::runtime_error> ErrorList;
 
-    for (auto &stage : stages) {
-      if (stage->future.valid() && stage->future.wait_for(std::chrono::seconds(
+    for (auto &Stage : Stages) {
+      if (Stage->Future.valid() && Stage->Future.wait_for(std::chrono::seconds(
                                        0)) == std::future_status::ready) {
         try {
-          stage->future.get();
-        } catch (const std::exception &e) {
-          errorList.emplace_back(e.what());
+          Stage->Future.get();
+        } catch (const std::exception &E) {
+          ErrorList.emplace_back(E.what());
         }
       }
     }
-    return errorList;
+    return ErrorList;
   }
 
+  /// \brief Get the number of running stages.
+  /// \return Number of stages that are still running.
   size_t getRunningStages() {
-    size_t runningStages = 0;
-    for (auto &stage : stages) {
-      if (stage->future.valid() && stage->future.wait_for(std::chrono::seconds(
+    size_t RunningStages = 0;
+    for (auto &Stage : Stages) {
+      if (Stage->Future.valid() && Stage->Future.wait_for(std::chrono::seconds(
                                        0)) != std::future_status::ready) {
-        runningStages++;
+        RunningStages++;
       }
     }
-    return runningStages;
+    return RunningStages;
   }
 
+  /// \brief Get the input queue of the first stage.
+  /// \tparam In Type of input data.
+  /// \return Shared pointer to the input \ref LockFreeQueue.
   template <typename In> std::shared_ptr<LockFreeQueue<In>> getInputQueue() {
-    auto inputQueue = stages.front()->getInputQueue();
-    auto castedQueue = std::static_pointer_cast<LockFreeQueue<In>>(inputQueue);
-    return castedQueue;
+    auto InputQueue = Stages.front()->getInputQueue();
+    auto CastedQueue = std::static_pointer_cast<LockFreeQueue<In>>(InputQueue);
+    return CastedQueue;
   }
 
-  template <typename Out>
-  std::shared_ptr<LockFreeQueue<Out>> getOutputQueue() {
-    auto outputQueue = stages.back()->getOutputQueue();
-    auto castedQueue =
-        std::static_pointer_cast<LockFreeQueue<Out>>(outputQueue);
-    return castedQueue;
+  /// \brief Get the output queue of the last stage.
+  /// \tparam Out Type of output data.
+  /// \return Shared pointer to the output \ref LockFreeQueue.
+  template <typename Out> std::shared_ptr<LockFreeQueue<Out>> getOutputQueue() {
+    auto OutputQueue = Stages.back()->getOutputQueue();
+    auto CastedQueue =
+        std::static_pointer_cast<LockFreeQueue<Out>>(OutputQueue);
+    return CastedQueue;
   }
 
 private:
-  // Private constructor to enforce the use of the builder
-  Pipeline(std::vector<std::unique_ptr<PipelineStageBase>> stages)
-      : stages(std::move(stages)) {}
+  /// \brief Private constructor to enforce the use of the builder.
+  /// \param stages Vector of unique pointers to \ref PipelineStageBase.
+  Pipeline(std::vector<std::unique_ptr<PipelineStageBase>> Stages)
+      : Stages(std::move(Stages)) {}
 
-  std::vector<std::unique_ptr<PipelineStageBase>> stages;
+  std::vector<std::unique_ptr<PipelineStageBase>> Stages;
 
-  // Grant access to PipelineBuilder
+  /// \brief Grant access to \ref PipelineBuilder.
   template <typename... StageTypes> friend class PipelineBuilder;
 };
 
+/// \brief Builder class for creating a \ref Pipeline.
+///
+/// \tparam StageTypes Variadic template parameters for stage types.
 template <typename... StageTypes> class PipelineBuilder {
 public:
   PipelineBuilder() = default;
 
-  // Add and connect a new stage
+  /// \brief Add and connect a new stage to the pipeline.
+  /// \tparam NewStageType Type of the new stage.
+  /// \tparam Args Parameter pack for the new stage constructor arguments.
+  /// \param args Arguments to forward to the new stage constructor.
+  /// \return A new \ref PipelineBuilder with the new stage type added.
   template <typename NewStageType, typename... Args>
   auto addStage(Args &&...args) {
     static_assert(std::is_base_of_v<PipelineStageBase, NewStageType>,
                   "Stage must derive from PipelineStageBase");
 
-    auto stage = std::make_unique<NewStageType>(std::forward<Args>(args)...);
+    auto Stage = std::make_unique<NewStageType>(std::forward<Args>(args)...);
 
-    if (!stages_.empty()) {
+    if (!Stages_.empty()) {
       // Get the output queue of the last stage
-      auto &previousStage = stages_.back();
-      auto previousOutputQueue = previousStage->getOutputQueue();
+      auto &PreviousStage = Stages_.back();
+      auto PreviousOutputQueue = PreviousStage->getOutputQueue();
 
       // Get the input queue of the new stage
-      auto newInputQueue = stage->getInputQueue();
+      auto NewInputQueue = Stage->getInputQueue();
 
       // Connect the previous stage's output to the new stage's input
-      previousStage->connectOutput(newInputQueue);
+      PreviousStage->connectNextStage(NewInputQueue);
     }
 
-    stages_.push_back(std::move(stage));
+    Stages_.push_back(std::move(Stage));
 
     // Return a new builder with the new stage type added
-    return PipelineBuilder<StageTypes..., NewStageType>(std::move(stages_));
+    return PipelineBuilder<StageTypes..., NewStageType>(std::move(Stages_));
   }
 
-  // Build the pipeline
-  Pipeline build() { return Pipeline(std::move(stages_)); }
+  /// \brief Build the pipeline with the added stages.
+  /// \return A constructed \ref Pipeline.
+  Pipeline build() {
+    Stages_.empty() ? throw std::runtime_error("No stages added to pipeline")
+                    : 0;
+    return Pipeline(std::move(Stages_));
+  }
 
 private:
-  std::vector<std::unique_ptr<PipelineStageBase>> stages_;
+  std::vector<std::unique_ptr<PipelineStageBase>> Stages_;
 
-  // Private constructor used when adding a stage
-  PipelineBuilder(std::vector<std::unique_ptr<PipelineStageBase>> stages)
-      : stages_(std::move(stages)) {}
+  /// \brief Private constructor used when adding a stage.
+  /// \param stages Vector of unique pointers to \ref PipelineStageBase.
+  PipelineBuilder(std::vector<std::unique_ptr<PipelineStageBase>> Stages)
+      : Stages_(std::move(Stages)) {}
 
-  // Grant access to other instances of PipelineBuilder
+  /// \brief Grant access to other instances of \ref PipelineBuilder.
   template <typename... OtherStageTypes> friend class PipelineBuilder;
 };
 
