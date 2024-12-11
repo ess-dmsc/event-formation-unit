@@ -122,6 +122,7 @@ add_custom_target(runefu
     COMMAND heimdal  "-f" "../configs/HeimdalInst.json" "-s" "2" "--nohwcheck"
     COMMAND magic    "-f" "../configs/MagicInst.json" "-s" "2" "--nohwcheck"
     COMMAND freia    "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
+    COMMAND estia    "-f" "../configs/estia.json" "-s" "2" "--nohwcheck"
     COMMAND trex     "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
     COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
     COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"

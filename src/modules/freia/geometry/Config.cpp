@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -96,10 +96,20 @@ void Config::applyConfig() {
     ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
     uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
-    Hybrid.XOffset = 0;
-    Hybrid.YOffset = CassetteId * NumWiresPerCassette;
-    XTRACE(INIT, DEB, "Cass %u, Ring %u, FEN %u, Hybrid %u, Yoffset %u",
-           CassetteId, Ring, FEN, LocalHybrid, Hybrid.YOffset);
+
+    if (root["InstrumentGeometry"] != "Estia") {
+    // FREIA + AMOR
+      Hybrid.XOffset = 0;
+      Hybrid.YOffset = CassetteId * NumWiresPerCassette;
+    } else {
+      // ESTIA
+      Hybrid.YOffset =
+          static_cast<uint16_t>(CassetteId / 48) * NumStripsPerCassette;
+      Hybrid.XOffset =
+          static_cast<uint16_t>(CassetteId % 48) * NumWiresPerCassette;
+    }
+    XTRACE(INIT, DEB, "Cass %u, Ring %u, FEN %u, Hybrid %u, Xoffset %u, Yoffset %u",
+           CassetteId, Ring, FEN, LocalHybrid, Hybrid.XOffset, Hybrid.YOffset);
 
     /// Thresholds
     /// Version 1: one threshold for asic0 and asic1 at index, 0 and 1
