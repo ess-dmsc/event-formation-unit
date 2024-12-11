@@ -17,6 +17,7 @@
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/serializer/FlatbufferTypes.h>
 #include <common/math/NumericalMath.h>
+#include <cstdint>
 #include <da00_dataarray_generated.h>
 #include <fmt/format.h>
 
@@ -68,6 +69,7 @@ template <> struct DataTypeTrait<double> {
 enum class BinningStrategy { Drop, LastBin };
 
 struct HistrogramSerializerStats : public SerializerStats {
+  int64_t DataBeforeTimeOffsetDropped{0};
   int64_t DataOverPeriodDropped{0};
   int64_t DataOverPeriodLastBin{0};
 };
@@ -93,8 +95,9 @@ class HistogramSerializer : public AbstractSerializer {
   const std::string Name;
   const std::string Unit;
   const std::string TimeUnit;
-  const essmath::VectorAggregationFunc<T> AggregateFunction;
+  const R BinOffset;
   const enum BinningStrategy BinningStrategy;
+  const essmath::VectorAggregationFunc<T> AggregateFunction;
   HistrogramSerializerStats Stats;
 
   std::vector<size_t> BinSizes;
@@ -119,36 +122,56 @@ public:
   HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, std::string Name,
       std::string DataUnit, std::string TimeUnit,
-      ProducerCallback Callback = {},
+      ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
       : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
-        Period(std::move(Period)), BinCount(std::move(BinCount)),
-        Name(std::move(Name)), Unit(std::move(DataUnit)),
-        TimeUnit(std::move(TimeUnit)), AggregateFunction(std::move(AggFunc)),
-        BinningStrategy(std::move(Strategy)), Stats() {
+        Period(Period), BinCount(BinCount), Name(std::move(Name)),
+        Unit(std::move(DataUnit)), TimeUnit(std::move(TimeUnit)),
+        BinOffset(BinOffset), BinningStrategy(Strategy),
+        AggregateFunction(std::move(AggFunc)), Stats() {
+
+    // Check for negative values in the bin count and period
+    // Current concept not support negative values for bins
+    if (BinCount < 0) {
+      throw std::domain_error(fmt::format(
+          "binCount: {}! Cannot serialize negative bin counts", BinCount));
+    }
+
+    if (Period < 0) {
+      throw std::domain_error(fmt::format(
+          "period: {}! Cannot serialize negative time intervals for X axis.",
+          Period));
+    }
+
+    if (static_cast<time_t>(BinOffset) > Period) {
+      throw std::invalid_argument(
+          fmt ::format("binOffset: {}! cannot be greater than Period {}",
+                       BinOffset, Period));
+    }
 
     initAxis();
-    DataBins = data_t(XAxisValues.size(), {0, 0});
-    XTRACE(INIT, DEB, "Data Bins vector initialized to %zu", DataBins.size());
+    DataBins = data_t(BinCount, {0, 0});
+    XTRACE(INIT, DEB, "Data Bins vector initialized to %zu", BinCount);
   }
 
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string Unit, std::string TimeUnit, enum BinningStrategy Strategy,
-      ProducerCallback Callback = {},
+      std::string Unit, std::string TimeUnit,
+      enum BinningStrategy Strategy = BinningStrategy::Drop,
+      ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
       : HistogramSerializer(Source, Period, BinCount, Name, Unit, TimeUnit,
-                            Callback, AggFunc, Strategy) {}
+                           Callback,  BinOffset, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)
       : AbstractSerializer(other), Source(other.Source), Period(other.Period),
         BinCount(other.BinCount), Name(other.Name), Unit(other.Unit),
         TimeUnit(other.TimeUnit), Stats(other.Stats),
-        AggregateFunction(other.AggregateFunction),
+        BinOffset(other.BinOffset), AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
@@ -165,6 +188,12 @@ public:
     R MaxValue = XAxisValues.back();                           // maximum value
     R Step = (MaxValue - MinValue) / (XAxisValues.size() - 1); // step size
 
+    if (Time < MinValue) {
+      XTRACE(DATA, DEB, "Time %zi lower then min value %zi data dropped.", Time,
+             MinValue);
+      Stats.DataBeforeTimeOffsetDropped++;
+      return;
+    }
     size_t BinIndex = static_cast<size_t>((Time - MinValue) / Step);
     XTRACE(DATA, DEB, "BinIndex %zu calculated from time: %zi.", BinIndex,
            Time);
@@ -215,13 +244,13 @@ private:
       AggregatedBins.push_back(AggregateFunction(Data));
     }
 
-    auto XAxis = (da00flatbuffers::Variable("time", {"t"},
-                                            {static_cast<time_t>(BinCount)})
+    auto XAxis = (da00flatbuffers::Variable(
+                      "time", {"t"}, {static_cast<int64_t>(BinCount) + 1})
                       .unit(TimeUnit)
                       .data(XAxisValues));
 
     auto YAxis = (da00flatbuffers::Variable(Name, {"a.u."},
-                                            {static_cast<time_t>(BinCount)})
+                                            {static_cast<int64_t>(BinCount)})
                       .unit(Unit)
                       .data(AggregatedBins));
 
@@ -235,7 +264,7 @@ private:
     Buffer = Builder.Release();
 
     DataBins.clear();
-    DataBins.resize(XAxisValues.size(), {0, 0});
+    DataBins.resize(BinCount, {0, 0});
   }
 
   /// \brief Initialize the X-axis values.
@@ -245,31 +274,18 @@ private:
   void initAxis() {
     static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type is not supported for serialization!");
-    // Check for negative values in the bin count and period
-    // Current concept not support negative values for bins
-    if (BinCount < 0) {
-      throw std::domain_error(fmt::format(
-          "binCount: {}! Cannot serialize negative bin counts", BinCount));
-    }
 
-    if (Period < 0) {
-      throw std::domain_error(fmt::format(
-          "period: {}! Cannot serialize negative time intervals for X axis.",
-          Period));
-    }
-
-    XAxisValues.reserve(BinCount);
-    auto BinWidth = static_cast<R>(Period) / static_cast<R>(BinCount);
+    XAxisValues.reserve(BinCount + 1);
+    auto BinWidth =
+        (static_cast<R>(Period) - BinOffset) / static_cast<R>(BinCount);
     if (BinWidth < 0) {
       throw std::runtime_error(fmt::format(
           "dt: {}! Cannot serialize negative time intervals for X axis.",
           BinWidth));
     }
 
-    XAxisValues.push_back(0);
-
-    for (auto i = 1; i < BinCount; ++i) {
-      XAxisValues.push_back(XAxisValues.back() + BinWidth);
+    for (auto i = 0; i <= BinCount; ++i) {
+      XAxisValues.push_back(BinOffset + i * BinWidth);
       XTRACE(INIT, DEB, "X Axis unit added, index: %zu, value: %zu", i,
              XAxisValues[i]);
     }
