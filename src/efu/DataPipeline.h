@@ -102,8 +102,8 @@ public:
 
   /// \brief Connect the output queue to the next stage's input.
   /// \param nextOutputQueue Shared pointer to the next stage's input queue.
-  void
-  connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) override {
+  void connectNextStage(
+      std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) override {
     // Cast to the appropriate type
     auto CastedQueue =
         std::static_pointer_cast<LockFreeQueue<Out>>(NextStageInputQueue);
@@ -250,7 +250,6 @@ public:
     if (!Stages_.empty()) {
       // Get the output queue of the last stage
       auto &PreviousStage = Stages_.back();
-      auto PreviousOutputQueue = PreviousStage->getOutputQueue();
 
       // Get the input queue of the new stage
       auto NewInputQueue = Stage->getInputQueue();
@@ -268,8 +267,10 @@ public:
   /// \brief Build the pipeline with the added stages.
   /// \return A constructed \ref Pipeline.
   Pipeline build() {
-    Stages_.empty() ? throw std::runtime_error("No stages added to pipeline")
-                    : 0;
+    if (Stages_.empty()) {
+      throw std::runtime_error("No stages added to pipeline");
+    }
+
     return Pipeline(std::move(Stages_));
   }
 
