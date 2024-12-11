@@ -278,7 +278,7 @@ TEST_F(DataPipelineTest, PipelineWithLargeData) {
                               []() { return rand() % 20 + 1; });
                 return data;
               })
-          .addStage<data_pipeline::PipelineStage<std::vector<long,
+          .addStage<data_pipeline::PipelineStage<std::vector<long>,
                                                  std::vector<long>>>(
               [](std::vector<long> input) {
                 std::sort(input.begin(), input.end());
