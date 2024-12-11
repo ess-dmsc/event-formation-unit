@@ -147,8 +147,7 @@ public:
   MOCK_METHOD(void, addEvent, (int32_t time, int32_t data), (override));
 
   MockHistogramSerializer()
-      : HistogramSerializer("cbm", 10, 10, "serializer", "A", "ns",
-                            BinningStrategy::LastBin) {}
+      : HistogramSerializer("cbm", 10, 10, "A", BinningStrategy::LastBin) {}
 };
 
 class CbmInstrumentTest : public TestBase {
