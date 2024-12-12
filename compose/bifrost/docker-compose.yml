@@ -1,9 +1,17 @@
+networks:
+  efu:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 9000
+
 services:
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
     ports:
       - "8081:80"
+    networks:
+      - efu
 
   grafana:
     image: grafana/grafana:latest
@@ -18,6 +26,8 @@ services:
       - ../grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
     depends_on:
       - graphite
+    networks:
+      - efu
 
   efu:
     image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-bifrost:latest
@@ -27,7 +37,6 @@ services:
       - graphite
     ports:
       - "9000:9000/udp"
-      - "8888:8888/tcp"
 
     volumes:
       - /home/essdaq/kafka-config/staging_kafka.crt:/ess/ecdc/ssl/ecdc-kafka-ca.crt
@@ -37,9 +46,11 @@ services:
       - ${ESSCONFIG_PATH}/instruments/bifrost/efu/config:/ess/ecdc/event_formation_unit/config
       - ${ESSCONFIG_PATH}/instruments/bifrost/efu/calib:/ess/ecdc/event_formation_unit/calib
     environment:
-      - BROKER_TOPIC=bifrost_detector
+      - BROKER_TOPIC=timing_pulse
       - FILE=bifrost.json
       - CALIBRATION=bifrostnullcalib.json
       - KAFKA_CONFIG_PATH=/ess/ecdc/kafka-config-staging.json
       - BROKER_ADDR=10.102.80.36:8093
       - GRAPHITE=graphite
+    networks:
+      - efu
