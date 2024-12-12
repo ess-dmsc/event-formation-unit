@@ -176,8 +176,8 @@ void CbmBase::processing_thread() {
 
       std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
           std::make_unique<HistogramSerializer<int32_t>>(
-              Topology->Source, Topology->maxTofBin, Topology->BinCount,
-              "serializer", "A", "ns", Produce);
+              Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
+              Produce);
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);

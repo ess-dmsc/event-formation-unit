@@ -92,12 +92,10 @@ class HistogramSerializer : public AbstractSerializer {
   const std::string Source;
   const time_t Period;
   const time_t BinCount;
-  const std::string Name;
-  const std::string Unit;
-  const std::string TimeUnit;
+  const std::string SignalUnit;
+  const essmath::VectorAggregationFunc<T> AggregateFunction;
   const R BinOffset;
   const enum BinningStrategy BinningStrategy;
-  const essmath::VectorAggregationFunc<T> AggregateFunction;
   HistrogramSerializerStats Stats;
 
   std::vector<size_t> BinSizes;
@@ -111,25 +109,21 @@ public:
   /// \param Source is the source of the data
   /// \param Period is the length of time of one frame in the specified units
   /// \param BinCount is the number of the bins used
-  /// \param Name is the name of the binned data
   /// \param DataUnit is the unit of the binned data
-  /// \param TimeUnit is the unit of time used for period, and the binned axis
   /// \param Callback is the producer callback function
   /// \param AggFunc is the aggregation function used to aggregate the data
   /// inside the bins
   /// \param Strategy is the enum like binning strategy we can select
 
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string DataUnit, std::string TimeUnit,
+      std::string Source, time_t Period, time_t BinCount, std::string DataUnit,
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
       : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
-        Period(Period), BinCount(BinCount), Name(std::move(Name)),
-        Unit(std::move(DataUnit)), TimeUnit(std::move(TimeUnit)),
-        BinOffset(BinOffset), BinningStrategy(Strategy),
-        AggregateFunction(std::move(AggFunc)), Stats() {
+        Period(std::move(Period)), BinCount(std::move(BinCount)),
+        SignalUnit(std::move(DataUnit)), AggregateFunction(std::move(AggFunc)),
+        BinOffset(BinOffset), BinningStrategy(std::move(Strategy)), Stats() {
 
     // Check for negative values in the bin count and period
     // Current concept not support negative values for bins
@@ -149,7 +143,6 @@ public:
           fmt ::format("binOffset: {}! cannot be greater than Period {}",
                        BinOffset, Period));
     }
-
     initAxis();
     DataBins = data_t(BinCount, {0, 0});
     XTRACE(INIT, DEB, "Data Bins vector initialized to %zu", BinCount);
@@ -158,20 +151,19 @@ public:
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string Name,
-      std::string Unit, std::string TimeUnit,
+      std::string Source, time_t Period, time_t BinCount, std::string Unit,
       enum BinningStrategy Strategy = BinningStrategy::Drop,
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Source, Period, BinCount, Name, Unit, TimeUnit,
-                           Callback,  BinOffset, AggFunc, Strategy) {}
+      : HistogramSerializer(Source, Period, BinCount, Unit, Callback, BinOffset,
+                            AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
   HistogramSerializer(const HistogramSerializer &other)
       : AbstractSerializer(other), Source(other.Source), Period(other.Period),
-        BinCount(other.BinCount), Name(other.Name), Unit(other.Unit),
-        TimeUnit(other.TimeUnit), Stats(other.Stats),
-        BinOffset(other.BinOffset), AggregateFunction(other.AggregateFunction),
+        BinCount(other.BinCount), SignalUnit(other.SignalUnit),
+        Stats(other.Stats), BinOffset(BinOffset),
+        AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
         DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
 
@@ -244,15 +236,16 @@ private:
       AggregatedBins.push_back(AggregateFunction(Data));
     }
 
-    auto XAxis = (da00flatbuffers::Variable(
-                      "time", {"t"}, {static_cast<int64_t>(BinCount) + 1})
-                      .unit(TimeUnit)
+    auto XAxis = (da00flatbuffers::Variable("frame_time", {"frame_time"},
+                                            {static_cast<int64_t>(BinCount) + 1})
+                      .unit("ns")
                       .data(XAxisValues));
 
-    auto YAxis = (da00flatbuffers::Variable(Name, {"a.u."},
-                                            {static_cast<int64_t>(BinCount)})
-                      .unit(Unit)
-                      .data(AggregatedBins));
+    auto YAxis =
+        (da00flatbuffers::Variable("signal", {"frame_time"},
+                                   {static_cast<int64_t>(BinCount)})
+             .unit(SignalUnit)
+             .data(AggregatedBins));
 
     const auto DataArray = da00flatbuffers::DataArray(
         Source, ReferenceTime.value(), {XAxis, YAxis});

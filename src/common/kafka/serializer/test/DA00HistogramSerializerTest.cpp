@@ -24,9 +24,7 @@ using namespace da00flatbuffers;
 
 struct CommonFbMemebers {
   std::string Source;
-  std::string Name;
   std::string DataUnit;
-  std::string TimeUnit;
   int64_t Period;
   size_t BinSize;
   TimeDurationNano ReferenceTime;
@@ -38,18 +36,8 @@ struct CommonFbMemebers {
     return *this;
   }
 
-  CommonFbMemebers &setName(const std::string &Name) {
-    this->Name = Name;
-    return *this;
-  }
-
   CommonFbMemebers &setDataUnit(const std::string &DataUnit) {
     this->DataUnit = DataUnit;
-    return *this;
-  }
-
-  CommonFbMemebers &setTimeUnit(const std::string &TimeUnit) {
-    this->TimeUnit = TimeUnit;
     return *this;
   }
 
@@ -105,16 +93,15 @@ public:
   fbserializer::HistogramSerializer<T, R> createHistogramSerializer() {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        MockedProduceFunction, CommonMembers.BinOffset);
+        CommonMembers.DataUnit, MockedProduceFunction, CommonMembers.BinOffset);
   }
 
   fbserializer::HistogramSerializer<T, R>
   createHistogramSerializer(fbserializer::BinningStrategy Strategy) {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.Name, CommonMembers.DataUnit, CommonMembers.TimeUnit,
-        Strategy, MockedProduceFunction, CommonMembers.BinOffset);
+        CommonMembers.DataUnit, Strategy, MockedProduceFunction,
+        CommonMembers.BinOffset);
   }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
@@ -138,9 +125,9 @@ public:
     Variable TimeAxis = DeserializedDataArray.getData().at(0);
     Variable SignalAxis = DeserializedDataArray.getData().at(1);
 
-    EXPECT_EQ(TimeAxis.getName(), "time");
-    EXPECT_EQ(TimeAxis.getAxes(), std::vector<std::string>{"t"});
-    EXPECT_EQ(TimeAxis.getUnit(), CommonMembers.TimeUnit);
+    EXPECT_EQ(TimeAxis.getName(), "frame_time");
+    EXPECT_EQ(TimeAxis.getAxes(), std::vector<std::string>{"frame_time"});
+    EXPECT_EQ(TimeAxis.getUnit(), "ns");
     EXPECT_EQ(TimeAxis.getData().size(),
               (CommonMembers.BinSize + 1) * sizeof(R));
 
@@ -158,8 +145,8 @@ public:
       EXPECT_NEAR(axisVector[i], CommonMembers.BinOffset + i * step, 0.0001);
     }
 
-    EXPECT_EQ(SignalAxis.getName(), CommonMembers.Name);
-    EXPECT_EQ(SignalAxis.getAxes(), std::vector<std::string>{"a.u."});
+    EXPECT_EQ(SignalAxis.getName(), "signal");
+    EXPECT_EQ(SignalAxis.getAxes(), std::vector<std::string>{"frame_time"});
     EXPECT_EQ(SignalAxis.getUnit(), CommonMembers.DataUnit);
     EXPECT_EQ(SignalAxis.getData().size(), CommonMembers.BinSize * sizeof(T));
 
@@ -182,10 +169,8 @@ protected:
   void SetUp() override {
     CommonFbMembers =
         CommonFbMemebers()
-            .setName("TestData")
             .setSource("TestSource")
-            .setDataUnit("v")
-            .setTimeUnit("millisecounds")
+            .setDataUnit("V")
             .setBinSize(10)
             .setProduceCallTime(duration_cast<milliseconds>(
                                     system_clock::now().time_since_epoch())
