@@ -44,6 +44,10 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
+
+  /// \brief Covers FREIA, ESTIA and AMOR
+  /// Differentiation is done using the InstrumentGeometry value
+  /// see usage in Config.cpp and Geometry.h
   Conf = Config("Freia", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
