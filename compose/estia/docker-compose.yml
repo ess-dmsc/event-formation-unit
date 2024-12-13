@@ -102,8 +102,8 @@ services:
       - ${ESSCONFIG_PATH}/instruments/estia/efu/calib:/ess/ecdc/event_formation_unit/calib
     environment:
       - BROKER_TOPIC=estia_detector
-      - FILE=2024_11_05.json
-      #- CALIBRATION=missingcalib.json
+      - FILE=2024_12_12.json
+      - CALIBRATION=2024_12_12.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
     restart: always
