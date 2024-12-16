@@ -58,9 +58,9 @@ services:
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
-    restart: always
     ports:
       - "8081:80"
+    restart: always
     networks:
       - efu
 
@@ -94,7 +94,6 @@ services:
       - "8888:8888/tcp"
     networks:
       - efu
-
     volumes:
     # Required to mount the configuration and calibration to the container
     # Replace <essconfig_path> with the path to your locel essconfig directory

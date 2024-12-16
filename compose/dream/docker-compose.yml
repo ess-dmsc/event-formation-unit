@@ -1,3 +1,9 @@
+networks:
+  efu:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 9000
+
 services:
   kafka1:
     image: confluentinc/cp-kafka:latest
@@ -13,6 +19,14 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
+    networks:
+      - efu
 
   kafka2:
     image: confluentinc/cp-kafka:latest
@@ -32,12 +46,23 @@ services:
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: "PLAIN"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "abcde"
+      # Log cleanup configurations with adjusted value
+      KAFKA_LOG_RETENTION_HOURS: 48          # Retain logs for 7 days
+      KAFKA_LOG_RETENTION_BYTES: 10737418240  # Retain up to 10 GB per topic partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
+      KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
+    restart: always
+    networks:
+      - efu
 
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
     ports:
       - "8081:80"
+    restart: always
+    networks:
+      - efu
 
   grafana:
     image: grafana/grafana:latest
@@ -52,6 +77,9 @@ services:
       - ../grafana/dashboards:/var/lib/grafana/dashboards # Each dashboard is a json model file
     depends_on:
       - graphite
+    restart: always
+    networks:
+      - efu
 
   efu:
     image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-dream:latest
@@ -64,7 +92,8 @@ services:
     ports:
       - "9000:9000/udp"
       - "8888:8888/tcp"
-
+    networks:
+      - efu
     volumes:
     # Please replace <essconfig_path> with the path to your locel essconfig directory
     # and <instrument_name> with the name of the instrument
@@ -75,6 +104,7 @@ services:
       # - CALIBRATION=cspecnullcalib.json
       - BROKER_ADDR=kafka2:9092
       - GRAPHITE=graphite
+    restart: always
 
 
   daqlite:
@@ -91,6 +121,9 @@ services:
       # Please replace <vnc_password> with the password you want to use
       - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
+    restart: always
+    networks:
+      - efu
 
   akhq:
     image: tchiotludo/akhq:latest
@@ -110,3 +143,5 @@ services:
                 security.protocol: PLAINTEXT
                 sasl.mechanism: PLAIN
     restart: always
+    networks:
+      - efu

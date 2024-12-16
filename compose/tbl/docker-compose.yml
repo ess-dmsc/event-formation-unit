@@ -58,9 +58,9 @@ services:
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
-    restart: always
     ports:
       - "8081:80"
+    restart: always
     networks:
       - efu
 
