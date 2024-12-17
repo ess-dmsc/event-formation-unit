@@ -15,7 +15,7 @@
 #include <random>
 #include <vector>
 
-std::vector<double> generateRandomVector(int size) {
+std::vector<double> generateRandomVector(long size) {
   std::vector<double> randomNumbers;
   randomNumbers.reserve(size);
   std::mt19937 rng(std::random_device{}());
@@ -26,44 +26,31 @@ std::vector<double> generateRandomVector(int size) {
   return randomNumbers;
 }
 
-std::unique_ptr<std::vector<double>>
-longAndExpMath(std::unique_ptr<std::vector<double>> data) {
-  double *factorData = new double[data->size()];
-  for (size_t i = 0; i < data->size(); ++i) {
+std::vector<double> longAndExpMath(std::vector<double> data) {
+  std::vector<double> factorData(data.size());
+  for (size_t i = 0; i < data.size(); ++i) {
     // Perform intense math calculation, e.g., exponential and logarithm
-    factorData[i] = std::exp(data->at(i));
+    factorData[i] = std::exp(data[i]);
   }
 
-  for (size_t i = 0; i < data->size(); ++i) {
+  for (size_t i = 0; i < data.size(); ++i) {
     factorData[i] = std::log(factorData[i]);
   }
 
   // Reduce the array by deleting every second value
   std::vector<double> reducedData;
-  for (size_t i = 0; i < data->size(); i += 2) {
+  for (size_t i = 0; i < data.size(); i += 2) {
     reducedData.push_back(factorData[i]);
   }
 
-  delete[] factorData;
-  factorData = new double[reducedData.size()];
-  std::copy(reducedData.begin(), reducedData.end(), factorData);
-  std::unique_ptr<std::vector<double>> result =
-      std::make_unique<std::vector<double>>(factorData,
-                                            factorData + reducedData.size());
-  delete[] factorData;
-  return result;
+  return reducedData;
 }
 
-long long calculateSum(const std::unique_ptr<std::vector<double>> data) {
-  double *arrayData = new double[data->size()];
-  std::copy(data->begin(), data->end(), arrayData);
-
+long long calculateSum(const std::vector<double> &data) {
   long long sum = 0;
-  for (size_t i = 0; i < data->size(); ++i) {
-    sum += arrayData[i];
+  for (const auto &value : data) {
+    sum += value;
   }
-
-  delete[] arrayData;
   return sum;
 }
 
@@ -79,20 +66,19 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
 
   auto pipeline =
       data_pipeline::PipelineBuilder()
-          .addStage<data_pipeline::PipelineStage<
-              long, std::unique_ptr<std::vector<double>>>>(
-              [](long length) -> std::unique_ptr<std::vector<double>> {
-                return std::make_unique<std::vector<double>>(
-                    generateRandomVector(static_cast<int>(length)));
+          .addStage<data_pipeline::PipelineStage<long, std::vector<double>>>(
+              [](long length) -> std::vector<double> {
+                return generateRandomVector(length);
               })
-          .addStage<data_pipeline::PipelineStage<
-              std::unique_ptr<std::vector<double>>,
-              std::unique_ptr<std::vector<double>>>>(longAndExpMath)
-          .addStage<data_pipeline::PipelineStage<
-              std::unique_ptr<std::vector<double>>,
-              std::unique_ptr<std::vector<double>>>>(longAndExpMath)
-          .addStage<data_pipeline::PipelineStage<
-              std::unique_ptr<std::vector<double>>, long long>>(calculateSum)
+          .addStage<data_pipeline::PipelineStage<std::vector<double>,
+                                                 std::vector<double>>>(
+              longAndExpMath)
+          .addStage<data_pipeline::PipelineStage<std::vector<double>,
+                                                 std::vector<double>>>(
+              longAndExpMath)
+          .addStage<
+              data_pipeline::PipelineStage<std::vector<double>, long long>>(
+              calculateSum)
           .build();
 
   auto inputQueue = pipeline.getInputQueue<long>();
@@ -154,15 +140,11 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
   auto pipeline =
       data_pipeline::PipelineBuilder()
           .addStage<data_pipeline::PipelineStage<long, long long>>(
-              [](long length) -> long {
+              [](long length) -> long long {
                 // Combined operations using predefined functions
-                std::unique_ptr<std::vector<double>> randomVec =
-                    std::make_unique<std::vector<double>>(
-                        generateRandomVector(static_cast<int>(length)));
-                std::unique_ptr<std::vector<double>> processedVec =
-                    longAndExpMath(std::move(randomVec));
-                long long sum =
-                    calculateSum(longAndExpMath(std::move(processedVec)));
+                std::vector<double> randomVec = generateRandomVector(length);
+                std::vector<double> processedVec = longAndExpMath(randomVec);
+                long long sum = calculateSum(longAndExpMath(processedVec));
                 return sum;
               })
           .build();
