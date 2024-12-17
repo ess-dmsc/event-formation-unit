@@ -143,8 +143,10 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
               [](long length) -> long long {
                 // Combined operations using predefined functions
                 std::vector<double> randomVec = generateRandomVector(length);
-                std::vector<double> processedVec = longAndExpMath(randomVec);
-                long long sum = calculateSum(longAndExpMath(processedVec));
+                std::vector<double> processedVec =
+                    longAndExpMath(std::move(randomVec));
+                long long sum =
+                    calculateSum(longAndExpMath(std::move(processedVec)));
                 return sum;
               })
           .build();
