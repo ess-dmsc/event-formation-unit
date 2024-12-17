@@ -69,5 +69,5 @@ private:
   /// \brief helper function to clusters hits in current_time_cluster_
   void cluster_by_x();
 
-  void stash_cluster(Hit2DVector &xz_cluster);
+  // void stash_cluster(Hit2DVector &xz_cluster);
 };
