@@ -23,7 +23,7 @@ public:
 
   ~LockFreeQueue() { delete[] buffer; }
 
-  bool enqueue(const T &&data) {
+  bool enqueue(T &&data) {
     size_t current_tail = tail.load(std::memory_order_relaxed);
     size_t next_tail = (current_tail + 1) % size;
 
@@ -31,7 +31,7 @@ public:
       return false; // Queue is full
     }
 
-    buffer[current_tail] = data;
+    buffer[current_tail] = std::move(data);
     tail.store(next_tail, std::memory_order_release);
     return true;
   }
@@ -45,7 +45,7 @@ public:
       return false; // Queue is empty
     }
 
-    result = buffer[current_head];
+    result = std::move(buffer[current_head]);
     head.store((current_head + 1) % size, std::memory_order_release);
     return true;
   }

@@ -7,9 +7,35 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <chrono>
 #include <common/testutils/TestBase.h>
 #include <efu/DataPipeline.h>
 #include <numeric>
+#include <random>
+#include <vector>
+
+std::vector<double> generateRandomVector(int size) {
+  std::vector<double> randomNumbers;
+  randomNumbers.reserve(size);
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_int_distribution<int> dist(1, 50);
+  for (int i = 0; i < size; ++i) {
+    randomNumbers.push_back(dist(rng));
+  }
+  return randomNumbers;
+}
+
+std::vector<double> longAndExpMath(std::vector<double> data) {
+  for (auto &value : data) {
+    // Perform intense math calculation, e.g., exponential and logarithm
+    value = std::exp(value) + std::log(value + 1);
+  }
+  return data;
+}
+
+long long calculateSum(const std::vector<double> data) {
+  return std::accumulate(data.begin(), data.end(), 0LL);
+}
 
 class DataPipelineTest : public TestBase {
 protected:
@@ -262,82 +288,6 @@ TEST_F(DataPipelineTest, PipelineWithExceptionHandling) {
   EXPECT_EQ(pipelineErrors.size(), 1);
   EXPECT_STREQ(pipelineErrors.back().what(), "Test exception");
   EXPECT_EQ(pipeline.getRunningStages(), 0);
-}
-
-TEST_F(DataPipelineTest, PipelineWithLargeData) {
-  const int numElements = 6000;
-  const int timeoutMs = 10000;
-  const int checkIntervalMs = 10;
-
-  auto pipeline =
-      data_pipeline::PipelineBuilder()
-          .addStage<data_pipeline::PipelineStage<long, std::vector<long>>>(
-              [](long length) {
-                std::vector<long> data(length);
-                std::generate(data.begin(), data.end(),
-                              []() { return rand() % 20 + 1; });
-                return data;
-              })
-          .addStage<data_pipeline::PipelineStage<std::vector<long>,
-                                                 std::vector<long>>>(
-              [](std::vector<long> input) {
-                std::sort(input.begin(), input.end());
-                return input;
-              })
-          .addStage<data_pipeline::PipelineStage<std::vector<long>, long>>(
-              [](std::vector<long> input) {
-                return std::accumulate(input.begin(), input.end(), 0L);
-              })
-          .build();
-
-  auto inputQueue = pipeline.getInputQueue<long>();
-  auto outputQueue = pipeline.getOutputQueue<long>();
-
-  pipeline.start();
-
-  auto future = std::async(std::launch::async, [&]() {
-    std::vector<long> results;
-    long result;
-    while (results.size() < numElements) {
-      if (outputQueue->dequeue(result)) {
-        results.push_back(result);
-      } else {
-        std::this_thread::yield(); // Yield to avoid busy waiting if the
-        // is empty
-      }
-    }
-
-    return results;
-  });
-
-  for (int i = 0; i < numElements; ++i) {
-    bool enqueued = false;
-    while (!enqueued) {
-      enqueued = inputQueue->enqueue(i);
-      std::this_thread::yield(); // Yield to avoid busy waiting if the queue
-      // full
-    }
-  }
-
-  int elapsedMs = 0;
-
-  // Wait for the future to be ready or the timeout to be reached
-  while (future.wait_for(std::chrono::milliseconds(checkIntervalMs)) !=
-             std::future_status::ready &&
-         elapsedMs < timeoutMs) {
-    elapsedMs += checkIntervalMs;
-  }
-
-  std::cout << "Elapsed time: " << elapsedMs << " ms" << std::endl;
-
-  std::vector<long> results;
-  if (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-    results = future.get();
-  }
-
-  pipeline.stop();
-
-  ASSERT_EQ(results.size(), numElements);
 }
 
 int main(int argc, char **argv) {

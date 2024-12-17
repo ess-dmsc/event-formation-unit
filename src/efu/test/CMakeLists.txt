@@ -46,6 +46,13 @@ set(DataPipelineTest_INC
   ../DataPipeline.h
   )
 
-create_test_executable(DataPipelineTest)
+  set(DataPipelinePerfTest_SRC
+  DataPipelinePerfTest.cpp
+)
+set(DataPipelinePerfTest_INC
+../DataPipeline.h
+)
+
+create_test_executable(DataPipelinePerfTest)
   
 create_test_executable(LauncherTest)

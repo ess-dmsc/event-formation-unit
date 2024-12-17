@@ -9,9 +9,11 @@
 
 #pragma once
 
+#include <chrono>
 #include <common/debug/Log.h>
 #include <common/memory/LockFreeQueue.h>
 #include <future>
+#include <iostream>
 #include <vector>
 
 namespace data_pipeline {
@@ -45,6 +47,9 @@ public:
   virtual void
   connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) = 0;
 
+  virtual std::chrono::milliseconds getWaitTimeInput() const = 0;
+  virtual std::chrono::milliseconds getWaitTimeOutput() const = 0;
+
 protected:
   std::future<void> Future;
 
@@ -62,6 +67,10 @@ template <typename In, typename Out>
 class PipelineStage : public PipelineStageBase {
 
 public:
+  /// \todo: make them private later
+  std::chrono::nanoseconds WaitTimeInput{0};
+  std::chrono::nanoseconds WaitTimeOutput{0};
+
   /// \brief Constructor for the pipeline stage.
   /// \param func Processing function that takes \ref In and returns \ref Out.
   /// \param inputQueueSize Size of the input queue (default 1024).
@@ -80,13 +89,19 @@ public:
       In Input;
       while (!StopFlag.load(std::memory_order_acquire)) {
         if (InputQueue->dequeue(Input)) {
-          Out Output;
-          Output = Func(Input);
+          Out Output = Func(std::move(Input));
           while (!OutputQueue->enqueue(std::move(Output))) {
+            auto WaitStart = std::chrono::steady_clock::now();
             std::this_thread::yield();
+            WaitTimeOutput +=
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::steady_clock::now() - WaitStart);
           }
         } else {
+          auto WaitStart = std::chrono::steady_clock::now();
           std::this_thread::yield();
+          WaitTimeInput += std::chrono::duration_cast<std::chrono::nanoseconds>(
+              std::chrono::steady_clock::now() - WaitStart);
         }
       }
     });
@@ -120,6 +135,15 @@ public:
   /// \return Shared pointer to the output \ref LockFreeQueueBase.
   std::shared_ptr<LockFreeQueueBase> getOutputQueue() const override {
     return OutputQueue;
+  }
+
+  // Add getter functions for wait times
+  std::chrono::milliseconds getWaitTimeInput() const override {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(WaitTimeInput);
+  }
+  std::chrono::milliseconds getWaitTimeOutput() const override {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        WaitTimeOutput);
   }
 
 private:
@@ -214,6 +238,24 @@ public:
     auto CastedQueue =
         std::static_pointer_cast<LockFreeQueue<Out>>(OutputQueue);
     return CastedQueue;
+  }
+
+  void countWaitTime() {
+    std::chrono::milliseconds TotalWaitTimeInput{0};
+    std::chrono::milliseconds TotalWaitTimeOutput{0};
+    for (size_t i = 0; i < Stages.size(); ++i) {
+      auto &Stage = Stages[i];
+      auto WaitInput = Stage->getWaitTimeInput();
+      auto WaitOutput = Stage->getWaitTimeOutput();
+      TotalWaitTimeInput += WaitInput;
+      TotalWaitTimeOutput += WaitOutput;
+
+      std::cout << "Stage " << i << ": WaitTimeInput = " << WaitInput.count()
+                << " ms, WaitTimeOutput = " << WaitOutput.count() << " ms\n";
+    }
+    std::cout << "Total WaitTimeInput = " << TotalWaitTimeInput.count()
+              << " ms, Total WaitTimeOutput = " << TotalWaitTimeOutput.count()
+              << " ms\n";
   }
 
 private:
