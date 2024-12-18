@@ -62,7 +62,7 @@ protected:
 };
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
-  const int numElements = 100;
+  const int numElements = 50;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -106,7 +106,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
   for (int i = 0; i < numElements; ++i) {
     bool enqueued = false;
     while (!enqueued) {
-      enqueued = inputQueue->enqueue(500000); // Example input size
+      enqueued = inputQueue->enqueue(1000000); // Example input size
       std::this_thread::yield(); // Yield to avoid busy waiting if the queue is
                                  // full
     }
@@ -136,7 +136,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 {
-  const int numElements = 100;
+  const int numElements = 50;
 
   auto pipeline = data_pipeline_simple::Pipeline();
 
@@ -176,7 +176,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
   std::vector<std::future<void *>> futures;
   for (int i = 0; i < numElements; ++i)
   {
-    futures.push_back(pipeline.run(500000));
+    futures.push_back(pipeline.run(1000000));
   }
 
   std::vector<long long> results;
@@ -196,7 +196,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 }
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
-  const int numElements = 100;
+  const int numElements = 50;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -236,7 +236,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
   for (int i = 0; i < numElements; ++i) {
     bool enqueued = false;
     while (!enqueued) {
-      enqueued = inputQueue->enqueue(500000); // Example input size
+      enqueued = inputQueue->enqueue(1000000); // Example input size
       std::this_thread::yield(); // Yield to avoid busy waiting if the queue is
                                  // full
     }
