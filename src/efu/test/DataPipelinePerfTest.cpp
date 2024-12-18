@@ -10,9 +10,11 @@
 #include <chrono>
 #include <common/testutils/TestBase.h>
 #include <efu/DataPipeline.h>
+#include <efu/DataPipelineSimple.h>
 #include <memory>
 #include <numeric>
 #include <random>
+
 #include <vector>
 
 std::vector<double> generateRandomVector(long size) {
@@ -60,7 +62,7 @@ protected:
 };
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
-  const int numElements = 20;
+  const int numElements = 100;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -132,8 +134,69 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
   ASSERT_EQ(results.size(), numElements);
 }
 
+TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
+{
+  const int numElements = 100;
+
+  auto pipeline = data_pipeline_simple::Pipeline();
+
+  pipeline.addStage<int,
+                    std::vector<double>>(
+      [](int input) -> std::future<std::vector<double>>
+      {
+        return std::async(std::launch::async, [input]()
+                          { return generateRandomVector(input); });
+      });
+
+  pipeline.addStage<std::vector<double>, std::vector<double>>(
+      [](std::vector<double> input) -> std::future<std::vector<double>>
+      {
+        return std::async(std::launch::async, [input = std::move(input)]()
+                          { return longAndExpMath(input); });
+      });
+
+  pipeline.addStage<std::vector<double>, std::vector<double>>(
+      [](std::vector<double> input) -> std::future<std::vector<double>>
+      {
+        return std::async(std::launch::async, [input = std::move(input)]()
+                          { return longAndExpMath(input); });
+      });
+
+  pipeline.addStage<std::vector<double>, long long>(
+      [](std::vector<double> input) -> std::future<long long>
+      {
+        return std::async(std::launch::async, [input = std::move(input)]()
+                          { return calculateSum(input); });
+      });
+
+  int startTimer = std::chrono::duration_cast<std::chrono::milliseconds>(
+                       std::chrono::system_clock::now().time_since_epoch())
+                       .count();
+
+  std::vector<std::future<void *>> futures;
+  for (int i = 0; i < numElements; ++i)
+  {
+    futures.push_back(pipeline.run(500000));
+  }
+
+  std::vector<long long> results;
+  for (auto &future : futures)
+  {
+    void *finalData = future.get();
+    results.push_back(pipeline.getResult<long long>(finalData));
+  }
+
+  int endTimer = std::chrono::duration_cast<std::chrono::milliseconds>(
+                     std::chrono::system_clock::now().time_since_epoch())
+                     .count();
+
+  std::cout << "Elapsed time: " << endTimer - startTimer << " ms" << std::endl;
+
+  ASSERT_EQ(results.size(), numElements);
+}
+
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
-  const int numElements = 20;
+  const int numElements = 100;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
