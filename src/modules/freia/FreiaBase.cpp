@@ -167,7 +167,7 @@ void FreiaBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "freia", Produce);
+  Serializer = new EV44Serializer(KafkaBufferSize, FlatBufferSource, Produce);
 
   Stats.create("produce.cause.pulse_change",
                Serializer->stats().ProduceRefTimeTriggered);
