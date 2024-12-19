@@ -35,6 +35,10 @@ if [ -n "$KAFKA_CONFIG_PATH" ]; then
     fi
 fi
 
+if [ -n "$REGION" ]; then
+    CMD="$CMD --region $REGION"
+fi
+
 echo "Running $CMD"
 
 exec $CMD
