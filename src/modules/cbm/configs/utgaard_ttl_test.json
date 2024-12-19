@@ -1,0 +1,18 @@
+
+{
+  "Detector" : "CBM",
+
+  "TypeSubType" : 16,
+
+  "MaxPulseTimeDiffNS" : 1000000000,
+
+  "MaxTOFNS" : 10000000000,
+
+  "MonitorRing" : 11,
+
+  "MaxFENId" : 2,
+
+  "Topology" : [
+    { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+  ]
+}
