@@ -22,6 +22,8 @@ public:
   void processing_thread();
 
   struct Counters Counters {};
+
+  std::string FlatBufferSource{"multiblade"};
 };
 
 } // namespace Freia
