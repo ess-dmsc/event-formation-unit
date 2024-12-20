@@ -52,6 +52,7 @@ set(DataPipelineTest_INC
 set(DataPipelinePerfTest_INC
 ../DataPipeline.h
 ../DataPipelineSimple.h
+../ThreadPool.hpp
 )
 
 create_test_executable(DataPipelinePerfTest)

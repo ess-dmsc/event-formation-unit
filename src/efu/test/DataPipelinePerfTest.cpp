@@ -136,7 +136,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 {
-  const int numElements = 50;
+  const int numElements = 500;
 
   auto pipeline = data_pipeline_simple::Pipeline();
 
