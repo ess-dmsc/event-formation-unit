@@ -62,7 +62,7 @@ protected:
 };
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
-  const int numElements = 50;
+  const int numElements = 300;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -136,7 +136,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 {
-  const int numElements = 500;
+  const int numElements = 300;
 
   auto pipeline = data_pipeline_simple::Pipeline();
 
@@ -196,7 +196,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 }
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
-  const int numElements = 50;
+  const int numElements = 300;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
