@@ -43,6 +43,7 @@ public:
     uint8_t MaxRing{0};
     uint8_t MaxFEN{0};
     uint8_t MaxGroup{14};
+    int MaxAmpl{(std::numeric_limits<int>::max)()};
 } Legacy;
 
   LokiConfig LokiConf;

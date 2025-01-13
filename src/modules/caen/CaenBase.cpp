@@ -84,6 +84,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
   Stats.create("geometry.group_errors", Counters.Geom.GroupErrors);
   Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
   Stats.create("geometry.ampl_low", Counters.Geom.AmplitudeLow);
+  Stats.create("geometry.ampl_high", Counters.Geom.AmplitudeHigh);
   Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
   Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
   Stats.create("geometry.calib_group_errors", Counters.Calibration.GroupErrors);
