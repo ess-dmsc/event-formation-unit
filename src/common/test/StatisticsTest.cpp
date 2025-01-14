@@ -37,6 +37,18 @@ TEST_F(NewStatsTest, CreateStat) {
   ASSERT_EQ("stat2", stats.name(2));
 }
 
+TEST_F(NewStatsTest, ValueByName) {
+  Statistics stats;
+  int64_t ctr1 = 765;
+  int64_t ctr2 = 432;
+
+  stats.create(std::string("stat1"), ctr1);
+  stats.create(std::string("stat2"), ctr2);
+
+  ASSERT_EQ(ctr1, stats.valueByName("stat1"));
+  ASSERT_EQ(ctr2, stats.valueByName("stat2"));
+}
+
 TEST_F(NewStatsTest, CreateStatPrefix) {
   Statistics stats;
   stats.setPrefix("dmsc.efu", "0");
