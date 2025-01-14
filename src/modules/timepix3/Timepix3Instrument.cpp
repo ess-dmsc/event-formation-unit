@@ -47,7 +47,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
           timepix3Configuration.parallelThreads)),
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
       pixelEventHandler(counters, geomPtr, serializer, timepix3Configuration),
-      timepix3Parser(counters) {
+      timepix3Parser(counters, geomPtr, pixelEventHandler) {
 
   // Setup observable subscriptions
   timepix3Parser.DataEventObservable<TDCReadout>::subscribe(
@@ -55,10 +55,10 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
   timepix3Parser.DataEventObservable<EVRReadout>::subscribe(
       &timingEventHandler);
 
-  timepix3Parser.DataEventObservable<PixelReadout>::subscribe(
-      &pixelEventHandler);
   timingEventHandler.DataEventObservable<ESSGlobalTimeStamp>::subscribe(
       &pixelEventHandler);
+  timingEventHandler.DataEventObservable<ESSGlobalTimeStamp>::subscribe(
+      &timepix3Parser);
 }
 
 void Timepix3Instrument::processReadouts() {

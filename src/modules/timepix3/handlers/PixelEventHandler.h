@@ -9,8 +9,10 @@
 
 #pragma once
 
+#include "common/reduction/Hit2D.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
+#include <memory>
 #include <modules/timepix3/Counters.h>
 #include <modules/timepix3/dataflow/DataObserverTemplate.h>
 #include <modules/timepix3/dto/TimepixDataTypes.h>
@@ -39,8 +41,7 @@ namespace Timepix3 {
 /// \see Observer::DataEventObserver
 ///
 class PixelEventHandler
-    : public Observer::DataEventObserver<timepixReadout::PixelReadout>,
-      public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
+    : public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
   Counters &statCounters; /// < Reference to the Counters object for tracking
@@ -57,16 +58,11 @@ private:
   std::chrono::nanoseconds
       FrequencyPeriodNs; /// < Frequency period in nanoseconds.
 
-  std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
-      nullptr; /// < Unique pointer to the last epoch ESS pulse time.
-
-  std::vector<std::unique_ptr<Hierarchical2DClusterer>>
-      clusterers; /// < Vector of unique pointers to Hierarchical2DClusterer
-                  /// objects for clustering pixel hits.
-  std::vector<Hit2DVector>
-      sub2DFrames; /// < Vector of Hit2DVector objects for
-                   /// storing clustered hits for sub frames
-                   /// in case of parrallel processing
+  std::unique_ptr<Hierarchical2DClusterer>
+      clusterer; /// < Vector of unique pointers to Hierarchical2DClusterer
+                 /// objects for clustering pixel hits.
+                 /// storing clustered hits for sub frames
+                 /// in case of parrallel processing
 
   ///
   /// \brief Publishes the clustered events to the appropriate kafka topic.
@@ -93,21 +89,6 @@ private:
   ///
   void clusterHits(Hierarchical2DClusterer &clusterer, Hit2DVector &hitsVector);
 
-  ///
-  /// \brief Calculates the global time based on the pixel time over threshold
-  /// (ToT), fine time over amplitude (fToA), and SPIDR time.
-  ///
-  /// This method takes the ToT, fToA, and SPIDR time as input and calculates
-  /// the global time.
-  ///
-  /// \param toa The pixel time over threshold (ToT).
-  /// \param fToA The fine time over amplitude (fToA).
-  /// \param spidrTime The SPIDR time.
-  /// \return The calculated global time.
-  ///
-  uint64_t calculateGlobalTime(const uint16_t &toa, const uint8_t &fToA,
-                               const uint32_t &spidrTime);
-
 public:
   ///
   /// \brief Constructs a new PixelEventHandler object with the specified
@@ -121,6 +102,8 @@ public:
   /// geometry information.
   /// \param serializer The EV44Serializer object for serialization.
   ///
+  std::unique_ptr<Hit2DVector> Hits; /// < Use unique_ptr for Hits
+
   PixelEventHandler(Counters &counters,
                     std::shared_ptr<Timepix3Geometry> geometry,
                     EV44Serializer &serializer,
@@ -132,19 +115,6 @@ public:
   /// This destructor is virtual to allow proper cleanup of derived classes.
   ///
   virtual ~PixelEventHandler(){};
-
-  ///
-  /// \brief Applies the pixel data to the PixelEventHandler.
-  ///
-  /// This method is an implementation of the applyData method from the
-  /// Observer::DataEventObserver interface. It takes a
-  /// timepixReadout::PixelReadout object as input and applies the pixel data to
-  /// the PixelEventHandler.
-  ///
-  /// \param pixelDataEvent The timepixReadout::PixelReadout object containing
-  /// the pixel data.
-  ///
-  void applyData(const timepixReadout::PixelReadout &pixelDataEvent) override;
 
   ///
   /// \brief Applies the epoch ESS pulse time data to the PixelEventHandler.

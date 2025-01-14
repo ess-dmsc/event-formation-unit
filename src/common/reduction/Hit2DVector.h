@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <execution>
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>
@@ -202,9 +204,10 @@ using Hit2DVector = MyVector<Hit2D, Hit2DVectorAllocator<Hit2D>>;
 
 /// \brief convenience function for sorting Hit2Ds by increasing time
 inline void sort_chronologically(Hit2DVector &&hits) {
-  std::sort(hits.begin(), hits.end(), [](const Hit2D &hit1, const Hit2D &hit2) {
-    return hit1.time < hit2.time;
-  });
+  std::sort(hits.begin(), hits.end(),
+            [](const Hit2D &hit1, const Hit2D &hit2) {
+              return hit1.time < hit2.time;
+            });
 }
 
 /// \brief convenience function for sorting Hits by increasing coordinate

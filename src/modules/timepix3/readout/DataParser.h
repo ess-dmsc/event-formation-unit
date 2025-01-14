@@ -8,9 +8,14 @@
 
 #pragma once
 
+#include "common/reduction/Hit2D.h"
+#include "geometry/Timepix3Geometry.h"
+#include "handlers/PixelEventHandler.h"
 #include <cstdint>
 #include <dataflow/DataObserverTemplate.h>
 #include <dto/TimepixDataTypes.h>
+#include <future>
+#include <memory>
 #include <modules/timepix3/Counters.h>
 
 namespace Timepix3 {
@@ -61,19 +66,32 @@ namespace Timepix3 {
 class DataParser
     : public Observer::DataEventObservable<timepixReadout::TDCReadout>,
       public Observer::DataEventObservable<timepixReadout::EVRReadout>,
-      public Observer::DataEventObservable<timepixReadout::PixelReadout> {
+      public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  DataParser(Counters &counters);
+  DataParser(Counters &counters, std::shared_ptr<Timepix3Geometry> geometry,
+             Timepix3::PixelEventHandler &pixelEventHandler);
 
   ~DataParser(){};
 
+  void applyData(const timepixDTO::ESSGlobalTimeStamp &) override;
+
   int parse(const char *buffer, unsigned int size);
+
+  Hit2D
+  parsePixelReadout(const uint64_t ReadoutData,
+                    const timepixDTO::ESSGlobalTimeStamp *GlobalTimeStamp) const;
 
   struct Counters &Stats;
 
 private:
+  std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
+      nullptr; /// < Unique pointer to the last epoch ESS pulse time.
+
+  std::shared_ptr<Timepix3Geometry> Geometry;
+
+  Timepix3::PixelEventHandler &PixelEventHandler;
   // Const expression
   static constexpr uint8_t PIXEL_READOUT_TYPE_CONST = 11;
   static constexpr uint8_t TDC_READOUT_TYPE_CONST = 6;
@@ -82,6 +100,22 @@ private:
   static constexpr uint8_t TDC1_FALLING_CONST = 10;
   static constexpr uint8_t TDC2_RISING_CONST = 14;
   static constexpr uint8_t TDC2_FALLING_CONST = 11;
+
+  /// \brief calculated the X coordinate from a const PixelDataEvent
+  // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
+  // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
+  static inline uint32_t calcX(const timepixReadout::PixelReadout &Data) {
+    uint32_t Col = static_cast<uint32_t>(Data.dCol) + Data.pix / 4;
+    return Col;
+  }
+
+  /// \brief calculated the Y coordinate from a const PixelDataEvent
+  // Calculation and naming (Col and Row) is taken over from CFEL-CMI pymepix
+  // https://github.com/CFEL-CMI/pymepix/blob/develop/pymepix/processing/logic/packet_processor.py
+  static inline uint32_t calcY(const timepixReadout::PixelReadout &Data) {
+    uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
+    return Row;
+  }
 };
 
 } // namespace Timepix3

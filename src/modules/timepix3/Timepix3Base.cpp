@@ -72,6 +72,14 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
+  // Time measurement counters for parse function
+  Stats.create("readouts.parse.pixel_futures_ms", Counters.PixelFuturesTimeMs);
+  Stats.create("readouts.parse.evr_processing_ms", Counters.EVRProcessingTimeMs);
+  Stats.create("readouts.parse.tdc_processing_ms", Counters.TDCProcessingTimeMs);
+  Stats.create("readouts.parse.pixel_readouts_processing_ms", Counters.PixelReadoutsProcessingTimeMs);
+  Stats.create("readouts.parse.hit_vector_creation_ms", Counters.HitVectorCreationTimeMs);
+  Stats.create("readouts.parse.total_parse_ms", Counters.TotalParseTimeMs);
+
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
   Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);

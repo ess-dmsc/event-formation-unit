@@ -56,6 +56,14 @@ struct Counters {
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
 
+  // Time measurement counters (in milliseconds)
+  int64_t PixelFuturesTimeMs{0};
+  int64_t EVRProcessingTimeMs{0};
+  int64_t TDCProcessingTimeMs{0};
+  int64_t PixelReadoutsProcessingTimeMs{0};
+  int64_t HitVectorCreationTimeMs{0};
+  int64_t TotalParseTimeMs{0};
+
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
 

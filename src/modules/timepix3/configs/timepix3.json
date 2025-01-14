@@ -7,6 +7,6 @@
   "comment": "ParallelThreads - Is the number of threads used for parallel processing during clustering. Value has to be power of 2",
   "MaxTimeGapNS": 800,
   "MaxCoordinateGap": 4,
-  "MinEventSizeHits": 9,
+  "MinEventSizeHits": 12,
   "FrequencyHz": 10
 }

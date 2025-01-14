@@ -6,7 +6,19 @@
 /// \brief Parser for ESS readout of Timepix3 Modules
 //===----------------------------------------------------------------------===//
 
+#include "common/reduction/Hit2D.h"
+#include "common/reduction/Hit2DVector.h"
+#include "geometry/Timepix3Geometry.h"
+#include "handlers/PixelEventHandler.h"
+#include <chrono>
 #include <common/debug/Trace.h>
+#include <common/memory/ThreadPool.hpp>
+#include <cstdint>
+#include <exception>
+#include <future>
+#include <memory>
+#include <optional>
+#include <stdexcept>
 #include <timepix3/readout/DataParser.h>
 
 // #undef TRC_LEVEL
@@ -16,26 +28,25 @@ namespace Timepix3 {
 
 using namespace timepixReadout;
 
-DataParser::DataParser(struct Counters &counters) : Stats(counters) {}
+DataParser::DataParser(struct Counters &counters,
+                       std::shared_ptr<Timepix3Geometry> geometry,
+                       Timepix3::PixelEventHandler &pixelEventHandler)
+    : Stats(counters), Geometry(geometry),
+      PixelEventHandler(pixelEventHandler) {}
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
+  using namespace std::chrono;
+  auto start = steady_clock::now();
+
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
 
-  unsigned int ParsedReadouts = 0;
-
-  unsigned int BytesLeft = Size;
-  char *DataPtr = (char *)Buffer;
-
-  // packets in timepix3 datastream are either from the camera or the EVR system
-  // if from the EVR system, they will be 24 bits, and will contain pulse time
-  // information. If they are 24 bits but not type = 1, then it is a camera
-  // packet
-
+  // 1. Check for EVR
   if (Size == sizeof(struct EVRReadout)) {
-    XTRACE(DATA, DEB, "size is 24, could be EVR timestamp");
-    EVRReadout *Data = (EVRReadout *)((char *)DataPtr);
+    auto evrProcessingStart = steady_clock::now();
+    EVRReadout *Data = (EVRReadout *)((char *)Buffer);
 
     if (Data->type == EVR_READOUT_TYPE) {
+      // ...existing EVR processing code...
       XTRACE(DATA, DEB,
              "Processed readout, packet type = %u, counter = %u, pulsetime "
              "seconds = %u, "
@@ -47,97 +58,162 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
       DataEventObservable<EVRReadout>::publishData(*Data);
       Stats.EVRReadoutCounter++;
+      auto evrProcessingEnd = steady_clock::now();
+      Stats.EVRProcessingTimeMs +=
+          duration_cast<microseconds>(evrProcessingEnd - evrProcessingStart)
+              .count();
+
       return 1;
     }
-    XTRACE(DATA, DEB,
-           "Not type = 1, not an EVR timestamp, processing as normal");
   }
 
-  while (BytesLeft) {
-    uint64_t *DataBytesPtr;
+  // 2. Create vector that overlaps buffer data without copying
+  const uint64_t *dataStart = reinterpret_cast<const uint64_t *>(Buffer);
+  const size_t numElements = Size / sizeof(uint64_t);
+  const std::vector<uint64_t> readoutData(dataStart, dataStart + numElements);
 
-    if (BytesLeft < sizeof(*DataBytesPtr)) {
-      // TODO add some error handling here
-      // Maybe add a counter about demaged chunks
-      XTRACE(DATA, DEB, "not enough bytes left, %u", BytesLeft);
-      break;
-    }
+  // 3. Process TDC messages asynchronously
+  auto tdcFuture = ThreadPool::getInstance().enqueue([this, &readoutData]() {
+    for (const auto &data : readoutData) {
+      uint8_t ReadoutType = (data & TYPE_MASK) >> TYPE_OFFS;
+      if (ReadoutType == TDC_READOUT_TYPE_CONST) {
+        auto tdcProcessingStart = steady_clock::now();
 
-    // we read the data as 64 bit integers, and then use bitmasks to extract the
-    // relevant information. This is done to avoid alignment issues, as the data
-    // is not guaranteed to be aligned to 64 bits
-    DataBytesPtr = reinterpret_cast<uint64_t *>(DataPtr);
+        TDCReadout tdcReadout(
+            (data & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+            (data & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+            (data & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+            (data & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-    // regardless of readout type, the type variable is always in the same place
-    // we read it here
-    uint8_t ReadoutType = (*DataBytesPtr & TYPE_MASK) >> TYPE_OFFS;
+        // Process TDC readout
+        if (tdcReadout.type == TDC1_RISING_CONST) {
+          Stats.TDC1RisingReadouts++;
+          DataEventObservable<TDCReadout>::publishData(tdcReadout);
+        } else if (tdcReadout.type == TDC1_FALLING_CONST) {
+          Stats.TDC1FallingReadouts++;
+          DataEventObservable<TDCReadout>::publishData(tdcReadout);
+        } else if (tdcReadout.type == TDC2_RISING_CONST) {
+          Stats.TDC2RisingReadouts++;
+          DataEventObservable<TDCReadout>::publishData(tdcReadout);
+        } else if (tdcReadout.type == TDC2_FALLING_CONST) {
+          Stats.TDC2FallingReadouts++;
+          DataEventObservable<TDCReadout>::publishData(tdcReadout);
+        }
 
-    // pixel readout, identifies where a pixel on the camera was activated
-    if (ReadoutType == PIXEL_READOUT_TYPE_CONST) {
-
-      PixelReadout pixelDataEvent(
-          (*DataBytesPtr & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
-          (*DataBytesPtr & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
-          (*DataBytesPtr & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
-          (*DataBytesPtr & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
-          (*DataBytesPtr & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
-          (*DataBytesPtr & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
-          *DataBytesPtr & PIXEL_SPTIME_MASK);
-
-      DataEventObservable<PixelReadout>::publishData(pixelDataEvent);
-
-      ParsedReadouts++;
-      Stats.PixelReadouts++;
-
-      // TDC readout type, indicating when the camera received a TDC pulse. In
-      // the ESS setup, this should correspond to an EVR pulse, indicating the
-      // start of a new pulse.
-    } else if (ReadoutType == TDC_READOUT_TYPE_CONST) {
-
-      // mask and offset values are defined in DataParser.h
-      TDCReadout tdcReadout(
-          (*DataBytesPtr & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
-          (*DataBytesPtr & TDC_TRIGGERCOUNTER_MASK) >>
-              TDC_TRIGGERCOUNTER_OFFSET,
-          (*DataBytesPtr & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-          (*DataBytesPtr & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
-
-      ParsedReadouts++;
-      Stats.TDCReadoutCounter++;
-
-      // TDC readouts can belong to one of two channels, and can either
-      // indicate the rising or the falling edge of the signal. The camera
-      // setup will determine which of these are sent.
-      /// \todo: Review that it's necessary monitor which type of TDC we
-      /// received. Probably this is not important.
-      if (tdcReadout.type == TDC1_RISING_CONST) {
-        Stats.TDC1RisingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC1_FALLING_CONST) {
-        Stats.TDC1FallingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC2_RISING_CONST) {
-        Stats.TDC2RisingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC2_FALLING_CONST) {
-        Stats.TDC2FallingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else {
-        // this should never happen - if it does something has gone wrong with
-        // the data format or parsing
-        Stats.UnknownTDCReadouts++;
+        auto tdcProcessingEnd = steady_clock::now();
+        Stats.TDCProcessingTimeMs +=
+            duration_cast<microseconds>(tdcProcessingEnd - tdcProcessingStart)
+                .count();
       }
-
-    } else {
-      // we sometimes see packet type 7 here, which accompanies a lot of
-      // control signals
-      XTRACE(DATA, WAR, "Unknown packet type: %u", ReadoutType);
-      Stats.UndefinedReadoutCounter++;
     }
-    BytesLeft -= sizeof(*DataBytesPtr);
-    DataPtr += sizeof(*DataBytesPtr);
+  });
+
+  // 4. Transform data to Hit2D vector asynchronously
+  auto hitVectorCreationStart = steady_clock::now();
+
+  auto Hits = std::make_unique<Hit2DVector>();
+  Hits->reserve(numElements); // Pre-allocate space
+
+  // Create vector of futures for parallel processing
+  std::vector<std::future<Hit2D>> futures;
+  futures.reserve(numElements);
+
+  // Process each element that is a pixel readout
+  for (const auto &data : readoutData) {
+    uint8_t ReadoutType = (data & TYPE_MASK) >> TYPE_OFFS;
+    if (ReadoutType == PIXEL_READOUT_TYPE_CONST &&
+        lastEpochESSPulseTime != nullptr) {
+      futures.emplace_back(ThreadPool::getInstance().enqueue(
+          [this, data, timestamp = lastEpochESSPulseTime.get()]() {
+            return this->parsePixelReadout(data, timestamp);
+          }));
+    }
   }
-  return ParsedReadouts;
+
+  // Collect results
+  for (auto &future : futures) {
+    try {
+      Hits->emplace_back(future.get());
+    } catch (const std::exception &e) {
+      Stats.PixelErrors++;
+    }
+  }
+
+  // Wait for TDC processing to complete
+  tdcFuture.wait();
+
+  // Move hits to handler
+  PixelEventHandler.Hits = std::move(Hits);
+
+  auto hitVectorCreationEnd = steady_clock::now();
+  Stats.HitVectorCreationTimeMs +=
+      duration_cast<microseconds>(hitVectorCreationEnd - hitVectorCreationStart)
+          .count();
+
+  auto end = steady_clock::now();
+  Stats.TotalParseTimeMs += duration_cast<microseconds>(end - start).count();
+
+  return futures.size(); // Return number of processed pixel readouts
+}
+
+// Make parsePixelReadout const to ensure thread safety
+Hit2D DataParser::parsePixelReadout(
+    const uint64_t ReadoutData,
+    const timepixDTO::ESSGlobalTimeStamp *GlobalTimeStamp) const {
+  uint8_t ReadoutType = (ReadoutData & TYPE_MASK) >> TYPE_OFFS;
+
+  if (ReadoutType != PIXEL_READOUT_TYPE_CONST) {
+    throw std::runtime_error("Readout data is not a pixel readout");
+  }
+
+  PixelReadout pixelDataEvent(
+      (ReadoutData & PIXEL_DCOL_MASK) >> PIXEL_DCOL_OFFSET,
+      (ReadoutData & PIXEL_SPIX_MASK) >> PIXEL_SPIX_OFFSET,
+      (ReadoutData & PIXEL_PIX_MASK) >> PIXEL_PIX_OFFSET,
+      (ReadoutData & PIXEL_TOA_MASK) >> PIXEL_TOA_OFFSET,
+      (ReadoutData & PIXEL_TOT_MASK) >> PIXEL_TOT_OFFSET,
+      (ReadoutData & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
+      ReadoutData & PIXEL_SPTIME_MASK);
+
+  // if (Geometry->validateData(pixelDataEvent)) {
+  //   throw std::runtime_error("Invalid pixel data");
+  // }
+  // // Calculate TOF in ns
+  uint16_t X = calcX(pixelDataEvent);
+  uint16_t Y = calcY(pixelDataEvent);
+
+  uint64_t pixelClockTime =
+      409600 * static_cast<uint64_t>(pixelDataEvent.spidrTime) +
+      25 * static_cast<uint64_t>(pixelDataEvent.toa) -
+      1.5625 * static_cast<uint64_t>(pixelDataEvent.fToA);
+
+  uint64_t pixelGlobalTimeStamp = 0;
+  // Handle the case if pixel clock is smaller then the tdc clock
+  // happens in case of pixel clock reset between two tdc
+  if (GlobalTimeStamp->tdcClockInPixelTime > pixelClockTime) {
+
+    // Calculate time until reset from the last tdc time
+    uint64_t timeUntilReset =
+        PIXEL_MAX_TIMESTAMP_NS - GlobalTimeStamp->tdcClockInPixelTime;
+
+    pixelGlobalTimeStamp =
+        GlobalTimeStamp->pulseTimeInEpochNs + timeUntilReset + pixelClockTime;
+  } else {
+    uint64_t tofInPixelTime =
+        pixelClockTime - GlobalTimeStamp->tdcClockInPixelTime;
+    pixelGlobalTimeStamp = GlobalTimeStamp->pulseTimeInEpochNs + tofInPixelTime;
+  }
+
+  // Assuming Hit2D constructor parameters are (x, y, weight, time)
+  return {pixelGlobalTimeStamp - GlobalTimeStamp->pulseTimeInEpochNs, X, Y,
+          pixelDataEvent.ToT};
+};
+
+void DataParser::applyData(
+    const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) {
+
+  lastEpochESSPulseTime =
+      std::make_unique<timepixDTO::ESSGlobalTimeStamp>(epochEssPulseTime);
 }
 
 } // namespace Timepix3
