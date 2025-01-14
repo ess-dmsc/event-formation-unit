@@ -22,6 +22,7 @@ namespace Caen {
   MaxRing = CaenConfiguration.Legacy.MaxRing;
   MaxFEN = CaenConfiguration.Legacy.MaxFEN;
   MaxGroup = CaenConfiguration.Legacy.MaxGroup;
+  MaxAmpl = CaenConfiguration.Legacy.MaxAmpl;
 }
 
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
@@ -67,6 +68,12 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
     Stats.AmplitudeZero++;
+    return InvalidPos;
+  }
+
+  if (AmpA + AmpB > MaxAmpl){
+    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
+    Stats.AmplitudeHigh++;
     return InvalidPos;
   }
 

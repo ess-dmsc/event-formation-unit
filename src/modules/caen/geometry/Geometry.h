@@ -60,6 +60,7 @@ public:
     int64_t GroupErrors{0};
     int64_t AmplitudeZero{0};
     int64_t AmplitudeLow{0};
+    int64_t AmplitudeHigh{0};
   } Stats;
 
   CDCalibration CaenCDCalibration;
@@ -69,5 +70,6 @@ public:
   uint8_t MaxFEN{0};
   uint8_t MaxGroup{0};
   int MinAmpl{0};
+  int MaxAmpl{(std::numeric_limits<int>::max)()};
 };
 } // namespace Caen

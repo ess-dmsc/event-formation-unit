@@ -87,6 +87,14 @@ void Config::parseConfig() {
       XTRACE(INIT, DEB, "MaxFEN: %u", Legacy.MaxFEN);
 
       try {
+        Legacy.MaxAmpl = root["MaxAmpl"].get<int>();
+      } catch (...) {
+        // Use default (maximum for integer type) value
+      }
+      LOG(INIT, Sev::Info, "MaxAmpl: {}", Legacy.MaxAmpl);
+      XTRACE(INIT, DEB, "MaxAmpl: %u", Legacy.MaxAmpl);
+
+      try {
         Legacy.MaxGroup = root["MaxGroup"].get<unsigned int>();
       } catch (...) {
         // Use default value
