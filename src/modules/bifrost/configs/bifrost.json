@@ -3,5 +3,5 @@
   "MaxRing": 4,
   "StrawResolution": 300,
   "MaxGroup": 15,
-  "MaxAmpl": 32768
+  "MaxAmpl": 32767
 }

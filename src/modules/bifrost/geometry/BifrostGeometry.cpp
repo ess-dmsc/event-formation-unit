@@ -64,13 +64,16 @@ int BifrostGeometry::yOffset(int Group) {
 
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
                                                        int AmpB) {
-  if (int pulse_height = AmpA + AmpB; 0 == pulse_height || pulse_height > MaxAmpl){
-    XTRACE(DATA, DEB, (pulse_height ? "Sum of amplitudes exceeds maximum" : "Sum of amplitudes is zero"));
-    if (pulse_height) {
-      Stats.AmplitudeHigh++;
-    } else {
-      Stats.AmplitudeZero++;
-    }
+
+  if (AmpA + AmpB == 0) {
+    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+    Stats.AmplitudeZero++;
+    return InvalidPos;
+  }
+
+  if (AmpA + AmpB > MaxAmpl){
+    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
+    Stats.AmplitudeHigh++;
     return InvalidPos;
   }
 
