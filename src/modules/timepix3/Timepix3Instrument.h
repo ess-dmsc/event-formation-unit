@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "efu/DataPipeline.h"
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
@@ -31,9 +32,6 @@ public:
   /// loads configuration and calibration files, calulate and generate the
   /// logical geometry and initialise the amplitude to position calculations
 
-  /// \brief Generates Hits from Readouts, and adds them to event builder
-  void processReadouts();
-
   /// \brief calculate pixel ID from a Timepix3PixelReadout
   uint32_t calcPixel(timepixReadout::PixelReadout &Data);
 
@@ -49,6 +47,8 @@ public:
   TimingEventHandler timingEventHandler;
   PixelEventHandler pixelEventHandler;
   DataParser timepix3Parser;
+
+  data_pipeline::Pipeline DataPipeline;
 
   Timepix3Instrument(Counters &counters, const Config &timepix3Configuration,
                      EV44Serializer &serializer);

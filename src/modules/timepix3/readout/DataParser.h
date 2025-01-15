@@ -17,6 +17,7 @@
 #include <future>
 #include <memory>
 #include <modules/timepix3/Counters.h>
+#include <vector>
 
 namespace Timepix3 {
 
@@ -70,16 +71,40 @@ class DataParser
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
-  DataParser(Counters &counters, std::shared_ptr<Timepix3Geometry> geometry,
-             Timepix3::PixelEventHandler &pixelEventHandler);
+  DataParser(Counters &counters, std::shared_ptr<Timepix3Geometry> geometry);
 
   ~DataParser(){};
 
   void applyData(const timepixDTO::ESSGlobalTimeStamp &) override;
 
-  int parse(const char *buffer, unsigned int size);
+  std::vector<Hit2D> parseTPX(std::vector<uint64_t>&);
 
-  Hit2D parsePixelReadout(const uint64_t &ReadoutData) const;
+  inline int parseEVR(const char *buffer) {
+    using namespace std::chrono;
+    auto evrProcessingStart = steady_clock::now();
+
+    timepixReadout::EVRReadout *Data =
+        (timepixReadout::EVRReadout *)((char *)buffer);
+
+    XTRACE(DATA, DEB,
+           "Processed readout, packet type = %u, counter = %u, pulsetime "
+           "seconds = %u, "
+           "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
+           "previous pulsetime nanoseconds = %u",
+           1, Data->counter, Data->pulseTimeSeconds, Data->pulseTimeNanoSeconds,
+           Data->prevPulseTimeSeconds, Data->prevPulseTimeNanoSeconds);
+
+    Observer::DataEventObservable<timepixReadout::EVRReadout>::publishData(
+        *Data);
+    Stats.EVRReadoutCounter++;
+
+    auto evrProcessingEnd = steady_clock::now();
+    Stats.EVRProcessingTimeMs +=
+        duration_cast<microseconds>(evrProcessingEnd - evrProcessingStart)
+            .count();
+
+    return 1;
+  }
 
   struct Counters &Stats;
 
@@ -89,7 +114,6 @@ private:
 
   std::shared_ptr<Timepix3Geometry> Geometry;
 
-  Timepix3::PixelEventHandler &PixelEventHandler;
   // Const expression
   static constexpr uint8_t PIXEL_READOUT_TYPE_CONST = 11;
   static constexpr uint8_t TDC_READOUT_TYPE_CONST = 6;
@@ -115,7 +139,11 @@ private:
     return Row;
   }
 
+  Hit2D parsePixelReadout(const uint64_t &ReadoutData) const;
+
   void processTDCData(const uint64_t &readoutData) const;
+
+  int processEVRData(const char *buffer, unsigned int size) const;
 };
 
 } // namespace Timepix3

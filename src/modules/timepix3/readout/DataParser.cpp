@@ -21,6 +21,7 @@
 #include <optional>
 #include <stdexcept>
 #include <timepix3/readout/DataParser.h>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -30,54 +31,15 @@ namespace Timepix3 {
 using namespace timepixReadout;
 
 DataParser::DataParser(struct Counters &counters,
-                       std::shared_ptr<Timepix3Geometry> geometry,
-                       Timepix3::PixelEventHandler &pixelEventHandler)
-    : Stats(counters), Geometry(geometry),
-      PixelEventHandler(pixelEventHandler) {}
+                       std::shared_ptr<Timepix3Geometry> geometry)
+    : Stats(counters), Geometry(geometry) {}
 
-int DataParser::parse(const char *Buffer, unsigned int Size) {
+std::vector<Hit2D> DataParser::parseTPX(std::vector<uint64_t>& readoutData) {
   using namespace std::chrono;
 
   auto start = steady_clock::now();
 
-  XTRACE(DATA, DEB, "parsing data, size is %u", Size);
-
-  // 1. Check for EVR
-  if (Size == sizeof(struct EVRReadout)) {
-    auto evrProcessingStart = steady_clock::now();
-    EVRReadout *Data = (EVRReadout *)((char *)Buffer);
-
-    if (Data->type == EVR_READOUT_TYPE) {
-      // ...existing EVR processing code...
-      XTRACE(DATA, DEB,
-             "Processed readout, packet type = %u, counter = %u, pulsetime "
-             "seconds = %u, "
-             "pulsetime nanoseconds = %u, previous pulsetime seconds = %u, "
-             "previous pulsetime nanoseconds = %u",
-             1, Data->counter, Data->pulseTimeSeconds,
-             Data->pulseTimeNanoSeconds, Data->prevPulseTimeSeconds,
-             Data->prevPulseTimeNanoSeconds);
-
-      DataEventObservable<EVRReadout>::publishData(*Data);
-      Stats.EVRReadoutCounter++;
-
-      auto evrProcessingEnd = steady_clock::now();
-      Stats.EVRProcessingTimeMs +=
-          duration_cast<microseconds>(evrProcessingEnd - evrProcessingStart)
-              .count();
-
-      return 1;
-    }
-  }
-
-  // 2. Create vector that overlaps buffer data without copying
-  const uint64_t *dataStart = reinterpret_cast<const uint64_t *>(Buffer);
-  const size_t numElements = Size / sizeof(uint64_t);
-  const nonstd::span<const uint64_t> readoutData(dataStart,
-                                                 dataStart + numElements);
-
-  PixelEventHandler.Hits.clear();              // Clear previous hits
-  PixelEventHandler.Hits.reserve(numElements); // Pre-allocate space
+  std::vector<Hit2D> hits;
 
   // Create vector of futures for parallel processing
   auto startPixelReadoutProcessing = steady_clock::now();
@@ -95,7 +57,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
           Stats.NoGlobalTime++;
           continue;
         }
-        PixelEventHandler.Hits.emplace_back(parsePixelReadout(data));
+        hits.emplace_back(parsePixelReadout(data));
       }
     } catch (const std::exception &e) {
       Stats.PixelErrors++;
@@ -111,7 +73,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   auto end = steady_clock::now();
   Stats.TotalParseTimeMs += duration_cast<microseconds>(end - start).count();
 
-  return readoutData.size(); // Return number of processed pixel readouts
+  return hits;
 }
 
 // Make parsePixelReadout const to ensure thread safety

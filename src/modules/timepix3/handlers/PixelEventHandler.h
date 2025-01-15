@@ -135,7 +135,7 @@ public:
   ///
   /// This method pushes the data to Kafka.
   ///
-  void pushDataToKafka();
+  bool pushDataToKafka(std::vector<Hit2D> &);
 };
 
 } // namespace Timepix3

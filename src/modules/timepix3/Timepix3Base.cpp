@@ -6,11 +6,22 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
+#include "common/reduction/Hit2DVector.h"
+#include "efu/DataPipeline.h"
+#include <atomic>
+#include <chrono>
 #include <common/RuntimeStat.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/KafkaConfig.h>
+#include <cstdint>
+#include <future>
+#include <memory>
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
+#include <ratio>
+#include <thread>
+#include <utility>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -129,8 +140,10 @@ void Timepix3Base::processingThread() {
 
   EV44Serializer Serializer(KafkaBufferSize, "timepix3", Produce);
 
-  Stats.create("produce.cause.pulse_change", Serializer.stats().ProduceRefTimeTriggered);
-  Stats.create("produce.cause.max_events_reached", Serializer.stats().ProduceTriggeredMaxEvents);
+  Stats.create("produce.cause.pulse_change",
+               Serializer.stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer.stats().ProduceTriggeredMaxEvents);
 
   Timepix3Instrument Timepix3(Counters, timepix3Configuration, Serializer);
 
@@ -139,6 +152,20 @@ void Timepix3Base::processingThread() {
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       Counters.KafkaStats.produce_bytes_ok});
+
+  auto OutputQueue = Timepix3.DataPipeline.getOutputQueue<bool>();
+  std::shared_ptr<std::atomic_bool> run =
+      std::make_shared<std::atomic_bool>(true);
+
+  std::future<void> dequeueThread =
+      std::async(std::launch::async, [OutputQueue, run]() {
+        bool output = false;
+        while (run->load()) {
+          if (!OutputQueue->dequeue(output)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+          }
+        }
+      });
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -152,15 +179,26 @@ void Timepix3Base::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      XTRACE(DATA, DEB, "parsing data");
-      Timepix3.timepix3Parser.parse(DataPtr, DataLen);
+      if (DataLen == 24) {
+        Timepix3.timepix3Parser.parseEVR(DataPtr);
+        continue;
+      }
 
-      XTRACE(DATA, DEB, "processing data");
-      Timepix3.processReadouts();
+      std::vector<uint64_t> ReadoutData(DataLen / sizeof(uint64_t));
+      ReadoutData.insert(ReadoutData.begin(),
+                         reinterpret_cast<uint64_t *>(DataPtr),
+                         reinterpret_cast<uint64_t *>(DataPtr + DataLen));
+
+      auto InputQueue =
+          Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
+
+      while (!InputQueue->enqueue(std::move(ReadoutData))) {
+        usleep(10); // Wait if the queue is full
+      }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
-      usleep(10);
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
     if (ProduceTimer.timeout()) {
@@ -172,6 +210,12 @@ void Timepix3Base::processingThread() {
       Counters.ProduceCauseTimeout++;
       Counters.KafkaStats = EventProducer.stats;
     }
+  }
+
+  run->store(false);
+
+  if (dequeueThread.valid()) {
+    dequeueThread.wait();
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;

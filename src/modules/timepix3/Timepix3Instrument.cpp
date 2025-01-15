@@ -9,11 +9,14 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
+#include "common/reduction/Hit2DVector.h"
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <ctime>
 #include <dto/TimepixDataTypes.h>
-#include <readout/DataParser.h>
 #include <timepix3/Timepix3Instrument.h>
+#include <utility>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -47,7 +50,19 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
           timepix3Configuration.parallelThreads)),
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
       pixelEventHandler(counters, geomPtr, serializer, timepix3Configuration),
-      timepix3Parser(counters, geomPtr, pixelEventHandler) {
+      timepix3Parser(counters, geomPtr),
+      DataPipeline(
+          data_pipeline::PipelineBuilder()
+              .addStage<data_pipeline::PipelineStage<std::vector<uint64_t>,
+                                                     std::vector<Hit2D>>>(
+                  [this](std::vector<uint64_t> &&data) {
+                    return timepix3Parser.parseTPX(data);
+                  })
+              .addStage<data_pipeline::PipelineStage<std::vector<Hit2D>, bool>>(
+                  [this](std::vector<Hit2D> &&hits) {
+                    return pixelEventHandler.pushDataToKafka(hits);
+                  })
+              .build()) {
 
   // Setup observable subscriptions
   timepix3Parser.DataEventObservable<TDCReadout>::subscribe(
@@ -59,11 +74,8 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       &pixelEventHandler);
   timingEventHandler.DataEventObservable<ESSGlobalTimeStamp>::subscribe(
       &timepix3Parser);
-}
 
-void Timepix3Instrument::processReadouts() {
-  XTRACE(DATA, DEB, "Processing readouts and publishing data");
-  pixelEventHandler.pushDataToKafka();
+  DataPipeline.start();
 }
 
 Timepix3Instrument::~Timepix3Instrument() {}

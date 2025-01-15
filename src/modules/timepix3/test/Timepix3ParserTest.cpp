@@ -125,7 +125,7 @@ protected:
 
 TEST_F(Timepix3ParserTest, SinglePixelReadout) {
   pixelTestHandler.setData(singlePixelReadout);
-  auto Res = timepix3Parser.parse((char *)singlePixelReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)singlePixelReadoutData.data(),
                                   singlePixelReadoutData.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.PixelReadouts, 1);
@@ -135,7 +135,7 @@ TEST_F(Timepix3ParserTest, TDC1RisingReadouts) {
 
   tdcTestHandler.setData(tdc1RisingReadout);
 
-  auto Res = timepix3Parser.parse((char *)tdc1RisingReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)tdc1RisingReadoutData.data(),
                                   tdc1RisingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
@@ -149,7 +149,7 @@ TEST_F(Timepix3ParserTest, TDC1FallingReadouts) {
 
   tdcTestHandler.setData(tdc1FallingReadout);
 
-  auto Res = timepix3Parser.parse((char *)tdc1FallingReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)tdc1FallingReadoutData.data(),
                                   tdc1FallingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
@@ -163,7 +163,7 @@ TEST_F(Timepix3ParserTest, TDC2RisingReadouts) {
 
   tdcTestHandler.setData(tdc2RisingReadout);
 
-  auto Res = timepix3Parser.parse((char *)tdc2RisingReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)tdc2RisingReadoutData.data(),
                                   tdc2RisingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
@@ -177,7 +177,7 @@ TEST_F(Timepix3ParserTest, TDC2FallingReadouts) {
 
   tdcTestHandler.setData(tdc2FallingReadout);
 
-  auto Res = timepix3Parser.parse((char *)tdc2FallingReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)tdc2FallingReadoutData.data(),
                                   tdc2FallingReadoutData.size());
 
   EXPECT_EQ(Res, 1);
@@ -188,13 +188,13 @@ TEST_F(Timepix3ParserTest, TDC2FallingReadouts) {
 }
 
 TEST_F(Timepix3ParserTest, TooShort) {
-  auto Res = timepix3Parser.parse((char *)TooShort.data(), TooShort.size());
+  auto Res = timepix3Parser.parseTPX((char *)TooShort.data(), TooShort.size());
   EXPECT_EQ(Res, 0);
 }
 
 TEST_F(Timepix3ParserTest, SingleEVRReadout) {
   evrTestHandler.setData(singleEVRReadout);
-  auto Res = timepix3Parser.parse((char *)SingleEVRReadoutData.data(),
+  auto Res = timepix3Parser.parseTPX((char *)SingleEVRReadoutData.data(),
                                   SingleEVRReadoutData.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.EVRReadoutCounter, 1);
@@ -204,7 +204,7 @@ TEST_F(Timepix3ParserTest, TDCAndPixelReadout) {
   tdcTestHandler.setData(tdc1RisingReadout);
   pixelTestHandler.setData(singlePixelReadout);
 
-  auto Res = timepix3Parser.parse((char *)TDCAndPixelReadout.data(),
+  auto Res = timepix3Parser.parseTPX((char *)TDCAndPixelReadout.data(),
                                   TDCAndPixelReadout.size());
   EXPECT_EQ(Res, 2);
   EXPECT_EQ(counters.TDC1RisingReadouts, 1);

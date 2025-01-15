@@ -8,11 +8,15 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "common/memory/LockFreeQueue.h"
+#include "common/reduction/Hit2D.h"
 #include "geometry/Config.h"
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <future>
 #include <memory>
 #include <timepix3/Counters.h>
+#include <vector>
 
 class Timepix3BaseTest; // For access to private members for testing
 

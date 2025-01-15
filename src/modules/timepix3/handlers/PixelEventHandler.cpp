@@ -7,6 +7,7 @@
 ///        clustering.
 //===----------------------------------------------------------------------===//
 
+#include "common/reduction/Hit2D.h"
 #include "common/reduction/Hit2DVector.h"
 #include <common/debug/Trace.h>
 #include <memory>
@@ -50,9 +51,15 @@ void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
   clusterer.flush();
 }
 
-void PixelEventHandler::pushDataToKafka() {
-  clusterHits(*clusterer, Hits); // Dereference shared_ptr to access the vector
+bool PixelEventHandler::pushDataToKafka(std::vector<Hit2D> &hits) {
+  Hit2DVector Hits;
+  Hits.insert(Hits.begin(), std::make_move_iterator(hits.begin()),
+              std::make_move_iterator(hits.end()));
+
+  clusterHits(*clusterer, Hits);
   publishEvents(clusterer->clusters);
+
+  return true;
 }
 
 void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {

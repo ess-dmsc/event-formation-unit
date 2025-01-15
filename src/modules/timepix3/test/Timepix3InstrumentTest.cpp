@@ -117,7 +117,7 @@ TEST_F(Timepix3InstrumentTest, BadJsonNoChunkSettings) {
 /// \todo: review this test. What is the main goal.
 TEST_F(Timepix3InstrumentTest, SingleGoodReadout) {
   Timepix3Instrument Timepix3(counters, Config(ConfigFile), serializer);
-  auto Res = Timepix3.timepix3Parser.parse((char *)SingleGoodReadout.data(),
+  auto Res = Timepix3.timepix3Parser.parseTPX((char *)SingleGoodReadout.data(),
                                            SingleGoodReadout.size());
   EXPECT_EQ(Res, 1);
   EXPECT_EQ(counters.PixelReadouts, 1);
