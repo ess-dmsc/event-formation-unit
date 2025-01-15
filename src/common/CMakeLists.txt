@@ -54,6 +54,7 @@ set(efu_common_INC
   memory/PoolAllocator.h
   memory/RingBuffer.h
   memory/HashMap2D.h
+  memory/LockFreeQueue.h
   memory/ThreadPool.hpp
   math/BitMath.h
   math/NumericalMath.h
