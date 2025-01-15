@@ -37,6 +37,7 @@ DataParser::DataParser(struct Counters &counters,
 
 int DataParser::parse(const char *Buffer, unsigned int Size) {
   using namespace std::chrono;
+
   auto start = steady_clock::now();
 
   XTRACE(DATA, DEB, "parsing data, size is %u", Size);
@@ -75,28 +76,30 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   const nonstd::span<const uint64_t> readoutData(dataStart,
                                                  dataStart + numElements);
 
-  // Create local thread pool
-  ThreadPool threadPool = ThreadPool();
-  
-  // Process TDC messages using local thread pool
-  auto tdcFuture = threadPool.enqueue(&DataParser::processTDCData, this, readoutData);
-
   PixelEventHandler.Hits.clear();              // Clear previous hits
   PixelEventHandler.Hits.reserve(numElements); // Pre-allocate space
 
   // Create vector of futures for parallel processing
   auto startPixelReadoutProcessing = steady_clock::now();
-  std::vector<std::future<Hit2D>> futures;
-  futures.reserve(numElements);
 
-  if (!lastEpochESSPulseTime) {
-    Stats.NoGlobalTime++;
-    return 0;
-  }
-
-  // Use local thread pool for pixel processing
-  for (const auto& data : readoutData) {
-    futures.push_back(threadPool.enqueue(&DataParser::parsePixelReadout, this, data));
+  for (const auto &data : readoutData) {
+    try {
+      if ((data & TYPE_MASK) >> TYPE_OFFS == TDC_READOUT_TYPE_CONST) {
+        processTDCData(data);
+        continue;
+      } else if ((data & TYPE_MASK) >> TYPE_OFFS != PIXEL_READOUT_TYPE_CONST) {
+        Stats.UndefinedReadoutCounter++;
+        continue;
+      } else {
+        if (!lastEpochESSPulseTime) {
+          Stats.NoGlobalTime++;
+          continue;
+        }
+        PixelEventHandler.Hits.emplace_back(parsePixelReadout(data));
+      }
+    } catch (const std::exception &e) {
+      Stats.PixelErrors++;
+    }
   }
 
   auto stopPixelReadoutProcessing = steady_clock::now();
@@ -105,36 +108,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
                                   startPixelReadoutProcessing)
           .count();
   // Collect results
-
-  auto hitVectorCreationStart = steady_clock::now();
-  for (auto &future : futures) {
-    try {
-      PixelEventHandler.Hits.emplace_back(future.get());
-    } catch (const std::exception &e) {
-      Stats.PixelErrors++;
-    }
-  }
-
-  auto hitVectorCreationEnd = steady_clock::now();
-  Stats.HitVectorCreationTimeMs +=
-      duration_cast<microseconds>(hitVectorCreationEnd - hitVectorCreationStart)
-          .count();
-
-  tdcFuture.wait();
-
   auto end = steady_clock::now();
   Stats.TotalParseTimeMs += duration_cast<microseconds>(end - start).count();
 
-  return futures.size(); // Return number of processed pixel readouts
+  return readoutData.size(); // Return number of processed pixel readouts
 }
 
 // Make parsePixelReadout const to ensure thread safety
-Hit2D DataParser::parsePixelReadout(const uint64_t ReadoutData) const {
-  uint8_t ReadoutType = (ReadoutData & TYPE_MASK) >> TYPE_OFFS;
-
-  if (ReadoutType != PIXEL_READOUT_TYPE_CONST) {
-    throw std::runtime_error("Readout data is not a pixel readout");
-  }
+Hit2D DataParser::parsePixelReadout(const uint64_t &ReadoutData) const {
 
   if (!lastEpochESSPulseTime) {
     throw std::runtime_error("No epoch ESS pulse time available");
@@ -190,45 +171,38 @@ void DataParser::applyData(
       std::make_unique<timepixDTO::ESSGlobalTimeStamp>(epochEssPulseTime);
 }
 
-void DataParser::processTDCData(
-    const nonstd::span<const uint64_t> &readoutData) const {
+void DataParser::processTDCData(const uint64_t &readoutData) const {
   using namespace std::chrono;
+  auto tdcProcessingStart = steady_clock::now();
 
-  for (const auto &data : readoutData) {
-    uint8_t ReadoutType = (data & TYPE_MASK) >> TYPE_OFFS;
-    if (ReadoutType == TDC_READOUT_TYPE_CONST) {
-      auto tdcProcessingStart = steady_clock::now();
+  TDCReadout tdcReadout(
+      (readoutData & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
+      (readoutData & TDC_TRIGGERCOUNTER_MASK) >> TDC_TRIGGERCOUNTER_OFFSET,
+      (readoutData & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
+      (readoutData & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
 
-      TDCReadout tdcReadout((data & TDC_TYPE_MASK) >> TDC_TYPE_OFFSET,
-                            (data & TDC_TRIGGERCOUNTER_MASK) >>
-                                TDC_TRIGGERCOUNTER_OFFSET,
-                            (data & TDC_TIMESTAMP_MASK) >> TDC_TIMESTAMP_OFFSET,
-                            (data & TDC_STAMP_MASK) >> TDC_STAMP_OFFSET);
+  Stats.TDCReadoutCounter++;
 
-      Stats.TDCReadoutCounter++;
-
-      if (tdcReadout.type == TDC1_RISING_CONST) {
-        Stats.TDC1RisingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC1_FALLING_CONST) {
-        Stats.TDC1FallingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC2_RISING_CONST) {
-        Stats.TDC2RisingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else if (tdcReadout.type == TDC2_FALLING_CONST) {
-        Stats.TDC2FallingReadouts++;
-        DataEventObservable<TDCReadout>::publishData(tdcReadout);
-      } else {
-        Stats.UnknownTDCReadouts++;
-      }
-
-      auto tdcProcessingEnd = steady_clock::now();
-      Stats.TDCProcessingTimeMs +=
-          duration_cast<microseconds>(tdcProcessingEnd - tdcProcessingStart)
-              .count();
-    }
+  if (tdcReadout.type == TDC1_RISING_CONST) {
+    Stats.TDC1RisingReadouts++;
+    DataEventObservable<TDCReadout>::publishData(tdcReadout);
+  } else if (tdcReadout.type == TDC1_FALLING_CONST) {
+    Stats.TDC1FallingReadouts++;
+    DataEventObservable<TDCReadout>::publishData(tdcReadout);
+  } else if (tdcReadout.type == TDC2_RISING_CONST) {
+    Stats.TDC2RisingReadouts++;
+    DataEventObservable<TDCReadout>::publishData(tdcReadout);
+  } else if (tdcReadout.type == TDC2_FALLING_CONST) {
+    Stats.TDC2FallingReadouts++;
+    DataEventObservable<TDCReadout>::publishData(tdcReadout);
+  } else {
+    Stats.UnknownTDCReadouts++;
   }
+
+  auto tdcProcessingEnd = steady_clock::now();
+  Stats.TDCProcessingTimeMs +=
+      duration_cast<microseconds>(tdcProcessingEnd - tdcProcessingStart)
+          .count();
 }
 
 } // namespace Timepix3
