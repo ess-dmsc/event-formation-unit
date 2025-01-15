@@ -102,7 +102,7 @@ public:
   /// geometry information.
   /// \param serializer The EV44Serializer object for serialization.
   ///
-  std::unique_ptr<Hit2DVector> Hits; /// < Use unique_ptr for Hits
+  Hit2DVector Hits; /// < Use unique_ptr for Hits
 
   PixelEventHandler(Counters &counters,
                     std::shared_ptr<Timepix3Geometry> geometry,

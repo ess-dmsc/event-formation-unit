@@ -80,8 +80,7 @@ public:
   int parse(const char *buffer, unsigned int size);
 
   Hit2D
-  parsePixelReadout(const uint64_t ReadoutData,
-                    const timepixDTO::ESSGlobalTimeStamp *GlobalTimeStamp) const;
+  parsePixelReadout(const uint64_t ReadoutData) const;
 
   struct Counters &Stats;
 
@@ -116,6 +115,8 @@ private:
     uint32_t Row = static_cast<uint32_t>(Data.sPix) + (Data.pix & 0x3);
     return Row;
   }
+
+  void processTDCData(const nonstd::span<const uint64_t>& readoutData) const;
 };
 
 } // namespace Timepix3

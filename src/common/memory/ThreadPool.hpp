@@ -1,81 +1,77 @@
 #pragma once
 
-#include <vector>
-#include <queue>
-#include <thread>
-#include <mutex>
+#ifndef THREAD_POOL_HPP
+#define THREAD_POOL_HPP
+
+#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <future>
-#include <memory>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 class ThreadPool {
-private:
-    std::vector<std::thread> workers;
-    std::queue<std::function<void()>> tasks;
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-    bool stop;
-
-    ThreadPool(size_t threads) : stop(false) {
-        for(size_t i = 0; i < threads; ++i) {
-            workers.emplace_back([this] {
-                while(true) {
-                    std::function<void()> task;
-                    {
-                        std::unique_lock<std::mutex> lock(queue_mutex);
-                        condition.wait(lock, [this] { 
-                            return stop || !tasks.empty(); 
-                        });
-                        if(stop && tasks.empty()) return;
-                        task = std::move(tasks.front()); // Use move instead of copy
-                        tasks.pop();
-                    }
-                    task();
-                }
-            });
-        }
-    }
-
 public:
-    static ThreadPool& getInstance() {
-        static ThreadPool instance(std::thread::hardware_concurrency());
-        return instance;
-    }
+  ThreadPool(size_t threads = std::thread::hardware_concurrency())
+      : _threads(threads), _stop(false) {
+    for (size_t i = 0; i < _threads; ++i)
+      _workers.emplace_back([this] {
+        for (;;) {
+          std::function<void()> task;
 
-    template<class F, class... Args>
-    auto enqueue(F&& f, Args&&... args) 
-        -> std::future<typename std::result_of<F(Args...)>::type> {
-        using return_type = typename std::result_of<F(Args...)>::type;
+          {
+            std::unique_lock<std::mutex> lock(_queue_mutex);
+            _condition.wait(lock, [this] { return _stop || !_tasks.empty(); });
+            if (_stop && _tasks.empty())
+              return;
+            task = std::move(_tasks.front());
+            _tasks.pop();
+          }
 
-        // Create a shared pointer to the packaged task to ensure proper lifetime
-        auto task = std::make_shared<std::packaged_task<return_type()>>(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-        );
-        
-        std::future<return_type> res = task->get_future();
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            if(stop)
-                throw std::runtime_error("enqueue on stopped ThreadPool");
-
-            // Use a lambda that captures the shared_ptr by value to ensure proper lifetime
-            tasks.emplace([task]() { (*task)(); });
+          task();
         }
-        condition.notify_one();
-        return res;
-    }
+      });
+  }
 
-    ~ThreadPool() {
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            stop = true;
-        }
-        condition.notify_all();
-        for(std::thread &worker: workers)
-            worker.join();
+  ~ThreadPool() {
+    {
+      std::lock_guard<std::mutex> lock(_queue_mutex);
+      _stop = true;
     }
+    _condition.notify_all();
+    for (std::thread &worker : _workers)
+      worker.join();
+  }
 
-    ThreadPool(const ThreadPool&) = delete;
-    ThreadPool& operator=(const ThreadPool&) = delete;
+  template <class F, class... Args>
+  auto enqueue(F &&f, Args &&...args)
+      -> std::future<typename std::result_of<F(Args...)>::type> {
+    using return_type = typename std::result_of<F(Args...)>::type;
+
+    auto task = std::make_shared<std::packaged_task<return_type()>>(
+        std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+
+    std::future<return_type> res = task->get_future();
+
+    {
+      std::lock_guard<std::mutex> lock(_queue_mutex);
+      if (_stop)
+        throw std::runtime_error("ThreadPool stopped");
+
+      _tasks.emplace([task]() { (*task)(); });
+    }
+    _condition.notify_one();
+    return res;
+  }
+
+private:
+  size_t _threads;
+  std::vector<std::thread> _workers;
+  std::queue<std::function<void()>> _tasks;
+  std::mutex _queue_mutex;
+  std::condition_variable _condition;
+  std::atomic<bool> _stop;
 };
+
+#endif // THREAD_POOL_HPP

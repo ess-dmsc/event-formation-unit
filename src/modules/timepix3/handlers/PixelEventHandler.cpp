@@ -30,7 +30,7 @@ PixelEventHandler::PixelEventHandler(Counters &statCounters,
     : statCounters(statCounters), geometry(geometry), serializer(serializer),
       TimepixConfiguration(timepix3Configuration),
       FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)),
-      Hits(std::make_unique<Hit2DVector>()) { // Initialize Hits with unique_ptr
+      Hits(Hit2DVector()) { // Initialize Hits with unique_ptr
 
   clusterer = std::make_unique<Hierarchical2DClusterer>(
       Hierarchical2DClusterer(TimepixConfiguration.MaxTimeGapNS,
@@ -51,7 +51,7 @@ void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
 }
 
 void PixelEventHandler::pushDataToKafka() {
-  clusterHits(*clusterer, *Hits); // Dereference shared_ptr to access the vector
+  clusterHits(*clusterer, Hits); // Dereference shared_ptr to access the vector
   publishEvents(clusterer->clusters);
 }
 
