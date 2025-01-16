@@ -129,7 +129,6 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
   }
 
   pipeline.stop();
-  pipeline.countWaitTime(); // Add function to count wait times
 
   ASSERT_EQ(results.size(), numElements);
 }
@@ -259,7 +258,6 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
   }
 
   pipeline.stop();
-  pipeline.countWaitTime(); // Add function to count wait times
 
   std::cout << "Single stage executed " << numElements << " times\n";
 
