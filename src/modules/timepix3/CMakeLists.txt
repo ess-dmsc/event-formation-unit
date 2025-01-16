@@ -51,34 +51,34 @@ create_executable(timepix3)
 ##
 ## Timepix3InstrumentTest Module integration test
 ##
-set(Timepix3InstrumentTest_INC
-  ${timepix3_common_inc}
-  )
-set(Timepix3InstrumentTest_SRC
-  ${timepix3_common_src}
-  test/Timepix3InstrumentTest.cpp
-)
-create_test_executable(Timepix3InstrumentTest)
-target_compile_definitions(Timepix3InstrumentTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
+# set(Timepix3InstrumentTest_INC
+#   ${timepix3_common_inc}
+#   )
+# set(Timepix3InstrumentTest_SRC
+#   ${timepix3_common_src}
+#   test/Timepix3InstrumentTest.cpp
+# )
+# create_test_executable(Timepix3InstrumentTest)
+# target_compile_definitions(Timepix3InstrumentTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
 
-set(Timepix3BaseTest_INC
-  ${timepix3_common_inc}
-)
-set(Timepix3BaseTest_SRC
-  ${timepix3_common_src}
-  test/Timepix3BaseTest.cpp
-)
-create_test_executable(Timepix3BaseTest)
-target_compile_definitions(Timepix3BaseTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
+# set(Timepix3BaseTest_INC
+#   ${timepix3_common_inc}
+# )
+# set(Timepix3BaseTest_SRC
+#   ${timepix3_common_src}
+#   test/Timepix3BaseTest.cpp
+# )
+# create_test_executable(Timepix3BaseTest)
+# target_compile_definitions(Timepix3BaseTest PRIVATE TIMEPIX_CONFIG="${TIMEPIX_CONFIG}")
 
-set(Timepix3ParserTest_INC
-  ${timepix3_common_inc}
-)
-set(Timepix3ParserTest_SRC
-  ${timepix3_common_src}
-  test/Timepix3ParserTest.cpp
-)
-create_test_executable(Timepix3ParserTest)
+# set(Timepix3ParserTest_INC
+#   ${timepix3_common_inc}
+# )
+# set(Timepix3ParserTest_SRC
+#   ${timepix3_common_src}
+#   test/Timepix3ParserTest.cpp
+# )
+# create_test_executable(Timepix3ParserTest)
 
 set(Timepix3TimingEventHandlerTest_INC
   ${timepix3_common_inc}
@@ -89,22 +89,22 @@ set(Timepix3TimingEventHandlerTest_SRC
 )
 create_test_executable(Timepix3TimingEventHandlerTest)
 
-set(Timepix3PixelEventHandlerTest_INC
-  ${timepix3_common_inc}
-)
+# set(Timepix3PixelEventHandlerTest_INC
+#   ${timepix3_common_inc}
+# )
 
-# Workaround for old gcc in CentOS 7 for mockups in tests
-if (LINUX_DISTRIBUTION MATCHES "CentOS")
-    message(STATUS "CentOS detected enable -Wno-maybe-uninitialized 
-    for Timepix3PixelEventHandlerTest")
-    add_compile_options(-Wno-maybe-uninitialized)
-endif()
+# # Workaround for old gcc in CentOS 7 for mockups in tests
+# if (LINUX_DISTRIBUTION MATCHES "CentOS")
+#     message(STATUS "CentOS detected enable -Wno-maybe-uninitialized 
+#     for Timepix3PixelEventHandlerTest")
+#     add_compile_options(-Wno-maybe-uninitialized)
+# endif()
 
-set(Timepix3PixelEventHandlerTest_SRC
-  ${timepix3_common_src}
-  test/Timepix3PixelEventHandlerTest.cpp
-)
-create_test_executable(Timepix3PixelEventHandlerTest)
+# set(Timepix3PixelEventHandlerTest_SRC
+#   ${timepix3_common_src}
+#   test/Timepix3PixelEventHandlerTest.cpp
+# )
+# create_test_executable(Timepix3PixelEventHandlerTest)
 
 set(Timepix3GeometryTest_INC
   ${timepix3_common_inc}

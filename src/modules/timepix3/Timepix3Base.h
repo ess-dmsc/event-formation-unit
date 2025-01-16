@@ -13,6 +13,7 @@
 #include "geometry/Config.h"
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
+#include <efu/ThreadPool.hpp>
 #include <future>
 #include <memory>
 #include <timepix3/Counters.h>

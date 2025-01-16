@@ -9,14 +9,16 @@
 #include <common/debug/Trace.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <set>
+#include <utility>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 Hierarchical2DClusterer::Hierarchical2DClusterer(uint64_t max_time_gap,
                                                  uint16_t max_coord_gap)
-    : Abstract2DClusterer(), max_time_gap_(max_time_gap), 
-    // Store the sqr of the max coord gap to reduce computation during clustering
-    max_coord_gap_(max_coord_gap), max_coord_gap_sqr_(sqr(max_coord_gap)) {}
+    : Abstract2DClusterer(), max_time_gap_(max_time_gap),
+      // Store the sqr of the max coord gap to reduce computation during
+      // clustering
+      max_coord_gap_(max_coord_gap), max_coord_gap_sqr_(sqr(max_coord_gap)) {}
 
 void Hierarchical2DClusterer::insert(const Hit2D &hit) {
   /// Process time-cluster if time gap to next hit is large enough
@@ -67,18 +69,21 @@ void Hierarchical2DClusterer::cluster_by_x() {
       double y_distance = space_cluster.yCoordCenter() -
                           (double)current_time_cluster_[j].y_coordinate;
 
-      // Calculate distance according to d^2 = dx^2 + dy^2 to remove sqrt calculation
+      // Calculate distance according to d^2 = dx^2 + dy^2 to remove sqrt
+      // calculation
       double distance_sqr = sqr(x_distance) + sqr(y_distance);
       XTRACE(DATA, DEB,
-             "Determined squere of the distance between points is %f, the squere of threshold is %u",
+             "Determined squere of the distance between points is %f, the "
+             "squere of threshold is %u",
              distance_sqr, max_coord_gap_sqr_);
       XTRACE(DATA, DEB, "X1 = %u, X2 = %u, Y1 = %u, Y2 = %u",
              current_time_cluster_[i].x_coordinate,
              current_time_cluster_[j].x_coordinate,
              current_time_cluster_[i].y_coordinate,
              current_time_cluster_[j].y_coordinate);
-      
-      // Compare with the squere of the max_coord_gap to save computation time on sqrt above
+
+      // Compare with the squere of the max_coord_gap to save computation time
+      // on sqrt above
       if (distance_sqr < max_coord_gap_sqr_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
         space_cluster.insert(
@@ -88,7 +93,8 @@ void Hierarchical2DClusterer::cluster_by_x() {
         XTRACE(DATA, DEB, "Too far apart, not including in this cluster");
       }
     }
-    stash_cluster(space_cluster); // add completed cluster to list of clusters
+    stash_cluster(
+        std::move(space_cluster)); // add completed cluster to list of clusters
   }
 }
 

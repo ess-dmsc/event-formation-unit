@@ -30,39 +30,14 @@ PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      const Config &timepix3Configuration)
     : statCounters(statCounters), geometry(geometry), serializer(serializer),
       TimepixConfiguration(timepix3Configuration),
-      FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)),
-      Hits(Hit2DVector()) { // Initialize Hits with unique_ptr
-
-  clusterer = std::make_unique<Hierarchical2DClusterer>(
-      Hierarchical2DClusterer(TimepixConfiguration.MaxTimeGapNS,
-                              timepix3Configuration.MaxCoordinateGap));
+      FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)) {
 }
 
 void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
   serializer.setReferenceTime(epochEssPulseTime.pulseTimeInEpochNs);
 }
 
-void PixelEventHandler::clusterHits(Hierarchical2DClusterer &clusterer,
-                                    Hit2DVector &hitsVector) {
-
-  // sort hits by time of flight for clustering in time
-  sort_chronologically(std::move(hitsVector));
-  clusterer.cluster(hitsVector);
-  clusterer.flush();
-}
-
-bool PixelEventHandler::pushDataToKafka(std::vector<Hit2D> &hits) {
-  Hit2DVector Hits;
-  Hits.insert(Hits.begin(), std::make_move_iterator(hits.begin()),
-              std::make_move_iterator(hits.end()));
-
-  clusterHits(*clusterer, Hits);
-  publishEvents(clusterer->clusters);
-
-  return true;
-}
-
-void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
+int PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
   for (auto cluster : clusters) {
 
     // other options for time are timeEnd, timeCenter, etc. we picked timeStart
@@ -115,6 +90,9 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     serializer.addEvent(eventTofNs, PixelId);
     statCounters.Events++;
   }
-  clusters.clear();
+
+  /// \todo: check if we need to return the number of events
+  return serializer.eventCount();
 }
+
 } // namespace Timepix3

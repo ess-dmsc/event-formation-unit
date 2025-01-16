@@ -51,7 +51,7 @@ public:
 
   /// \brief changes reference time.
   /// Function is virtual to allow mocking
-  virtual void setReferenceTime(int64_t Time);
+  virtual void setReferenceTime(const int64_t& Time);
 
   /// \returns the currently set reference time
   int64_t referenceTime() const;

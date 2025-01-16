@@ -60,9 +60,10 @@ struct Counters {
   int64_t PixelFuturesTimeMs{0};
   int64_t EVRProcessingTimeMs{0};
   int64_t TDCProcessingTimeMs{0};
-  int64_t PixelReadoutsProcessingTimeMs{0};
-  int64_t HitVectorCreationTimeMs{0};
-  int64_t TotalParseTimeMs{0};
+  int64_t Stage1ProcessingTimeMs{0};
+  int64_t Stage2ProcessingTimeMs{0};
+  int64_t Stage3ProcessingTimeMs{0};
+  int64_t Stage4ProcessingTimeMs{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

@@ -13,6 +13,7 @@
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>
+#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -200,10 +201,10 @@ bool operator!=(const Hit2DVectorAllocator<T> &,
 
 //-----------------------------------------------------------------------------
 
-using Hit2DVector = MyVector<Hit2D, Hit2DVectorAllocator<Hit2D>>;
+using Hit2DVector = std::vector<Hit2D>;
 
 /// \brief convenience function for sorting Hit2Ds by increasing time
-inline void sort_chronologically(Hit2DVector &&hits) {
+inline void sort_chronologically(Hit2DVector &hits) {
   std::sort(hits.begin(), hits.end(),
             [](const Hit2D &hit1, const Hit2D &hit2) {
               return hit1.time < hit2.time;

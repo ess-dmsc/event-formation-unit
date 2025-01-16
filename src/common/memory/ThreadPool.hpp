@@ -44,6 +44,19 @@ public:
       worker.join();
   }
 
+  void stop() {
+    {
+      std::lock_guard<std::mutex> lock(_queue_mutex);
+      _stop = true;
+    }
+    _condition.notify_all();
+    for (std::thread &worker : _workers) {
+      if (worker.joinable()) {
+        worker.join();
+      }
+    }
+  }
+
   template <class F, class... Args>
   auto enqueue(F &&f, Args &&...args)
       -> std::future<typename std::result_of<F(Args...)>::type> {

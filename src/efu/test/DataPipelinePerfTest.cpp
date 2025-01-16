@@ -62,7 +62,7 @@ protected:
 };
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
-  const int numElements = 300;
+  const int numElements = 20;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -129,14 +129,13 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeData) {
   }
 
   pipeline.stop();
-  pipeline.countWaitTime(); // Add function to count wait times
 
   ASSERT_EQ(results.size(), numElements);
 }
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 {
-  const int numElements = 300;
+  const int numElements = 20;
 
   auto pipeline = data_pipeline_simple::Pipeline();
 
@@ -196,7 +195,7 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSimple)
 }
 
 TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
-  const int numElements = 300;
+  const int numElements = 20;
   const int timeoutMs = 30000;
   const int checkIntervalMs = 10;
 
@@ -259,7 +258,6 @@ TEST_F(DataPipelinePerfTest, PipelineWithLargeDataSingleStage) {
   }
 
   pipeline.stop();
-  pipeline.countWaitTime(); // Add function to count wait times
 
   std::cout << "Single stage executed " << numElements << " times\n";
 

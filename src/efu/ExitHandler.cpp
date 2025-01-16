@@ -19,8 +19,9 @@ static int LastSignal{0};
 
 void ExitHandler::InitExitHandler() {
   signal(SIGINT, &ExitHandler::nonCritical);
+  signal(SIGTERM, &ExitHandler::nonCritical);
+  signal(SIGQUIT, &ExitHandler::nonCritical);
   signal(SIGSEGV, &ExitHandler::critical);
-  signal(SIGTERM, &ExitHandler::critical);
   signal(SIGBUS, &ExitHandler::critical);
 }
 

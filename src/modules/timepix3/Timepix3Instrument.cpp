@@ -10,10 +10,17 @@
 //===----------------------------------------------------------------------===//
 
 #include "common/reduction/Hit2DVector.h"
+#include "common/reduction/clustering/Abstract2DClusterer.h"
+#include "common/reduction/clustering/Hierarchical2DClusterer.h"
+#include "efu/DataPipeline.h"
+#include "efu/ThreadPool.hpp"
+#include <chrono>
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <ctime>
 #include <dto/TimepixDataTypes.h>
+#include <future>
+#include <queue>
 #include <timepix3/Timepix3Instrument.h>
 #include <utility>
 #include <vector>
@@ -26,6 +33,12 @@ namespace Timepix3 {
 using namespace Observer;
 using namespace timepixDTO;
 using namespace timepixReadout;
+using namespace std;
+using namespace std::chrono;
+using namespace data_pipeline;
+
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 ///
 /// \brief Constructs a Timepix3Instrument object.
@@ -51,16 +64,41 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
       pixelEventHandler(counters, geomPtr, serializer, timepix3Configuration),
       timepix3Parser(counters, geomPtr),
+      MaxTimeGapNS(timepix3Configuration.MaxTimeGapNS),
+      MaxCoordinateGap(timepix3Configuration.MaxCoordinateGap),
       DataPipeline(
           data_pipeline::PipelineBuilder()
-              .addStage<data_pipeline::PipelineStage<std::vector<uint64_t>,
-                                                     std::vector<Hit2D>>>(
+              .addStage<PipelineStage<vector<uint64_t>, Hit2DVector>>(
                   [this](std::vector<uint64_t> &&data) {
-                    return timepix3Parser.parseTPX(data);
+                    return std::move(timepix3Parser.parseTPX(data));
+                  },
+                  4096)
+              .addStage<PipelineStage<Hit2DVector, Hit2DVector>>(
+                  [this](Hit2DVector &&hits) {
+                    sort_chronologically(hits);
+                    return std::move(hits);
                   })
-              .addStage<data_pipeline::PipelineStage<std::vector<Hit2D>, bool>>(
-                  [this](std::vector<Hit2D> &&hits) {
-                    return pixelEventHandler.pushDataToKafka(hits);
+              .addStage<
+                  PipelineStage<Hit2DVector, std::future<Cluster2DContainer>>>(
+                  [this](Hit2DVector &&hits) {
+                    // Start a new thread to cluster the hits parallel and
+                    // return the future (promise) of the result to the next
+                    // stage
+                    return ThreadPool::getInstance().enqueue([this, hits]() {
+                      Hierarchical2DClusterer ThreadClusterer(MaxTimeGapNS,
+                                                              MaxCoordinateGap);
+                      ThreadClusterer.cluster(hits);
+                      ThreadClusterer.flush();
+                      return std::move(ThreadClusterer.getClusters());
+                    });
+                  })
+              .addStage<PipelineStage<std::future<Cluster2DContainer>, int>>(
+                  [this](std::future<Cluster2DContainer> &&future) {
+                    // Process step by step the future promise stored in the
+                    // input queue. Wait for the future to be ready and then
+                    // publish the events
+                    auto event = std::move(future.get());
+                    return pixelEventHandler.publishEvents(event);
                   })
               .build()) {
 

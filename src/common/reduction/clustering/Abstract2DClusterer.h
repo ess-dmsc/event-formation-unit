@@ -14,7 +14,9 @@
 #pragma once
 
 #include <common/reduction/Cluster2D.h>
+#include <deque>
 #include <list>
+#include <queue>
 
 #define ENABLE_GREEDY_CLUSTER_ALLOCATOR 0
 
@@ -122,7 +124,7 @@ bool operator!=(const Cluster2DPoolAllocator<T> &,
 // Cluster2DContainerAllocator<Cluster2D>>;
 // using Cluster2DContainer = std::list<Cluster2D>;
 using Cluster2DContainer =
-    std::list<Cluster2D, Cluster2DPoolAllocator<Cluster2D>>;
+    std::list<Cluster2D>;
 
 /// \brief convenience function for printing a Cluster2DContainer
 std::string to_string(const Cluster2DContainer &container,
@@ -137,7 +139,6 @@ std::string to_string(const Cluster2DContainer &container,
 
 class Abstract2DClusterer {
 public:
-  Cluster2DContainer clusters; ///< clustered hits
   mutable size_t stats_cluster_count{
       0}; ///< cumulative number of clusters produced
 
@@ -160,6 +161,16 @@ public:
   /// \brief print current status of Clusterer
   virtual std::string status(const std::string &prepend, bool verbose) const;
 
+  inline Cluster2DContainer getClusters() {
+    Cluster2DContainer temp;
+    temp.insert(temp.end(), std::make_move_iterator(clusters.begin()),
+                std::make_move_iterator(clusters.end()));
+    clusters.clear();
+    return temp;
+  }
+
+  Cluster2DContainer clusters; ///< clustered hits
+
   /// \brief convenience function
   /// \returns if cluster container is empty
   bool empty() const;
@@ -167,5 +178,5 @@ public:
 protected:
   /// \brief moves cluster into clusters container, increments counter
   /// \param cluster to be stashed
-  void stash_cluster(Cluster2D &cluster);
+  void stash_cluster(Cluster2D &&cluster);
 };

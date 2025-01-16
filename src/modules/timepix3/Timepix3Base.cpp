@@ -6,21 +6,13 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include "common/reduction/Hit2DVector.h"
-#include "efu/DataPipeline.h"
-#include <atomic>
-#include <chrono>
 #include <common/RuntimeStat.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/KafkaConfig.h>
 #include <cstdint>
-#include <future>
 #include <memory>
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
-#include <ratio>
-#include <thread>
-#include <utility>
 #include <vector>
 
 // #undef TRC_LEVEL
@@ -87,9 +79,10 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.parse.pixel_futures_ms", Counters.PixelFuturesTimeMs);
   Stats.create("readouts.parse.evr_processing_ms", Counters.EVRProcessingTimeMs);
   Stats.create("readouts.parse.tdc_processing_ms", Counters.TDCProcessingTimeMs);
-  Stats.create("readouts.parse.pixel_readouts_processing_ms", Counters.PixelReadoutsProcessingTimeMs);
-  Stats.create("readouts.parse.hit_vector_creation_ms", Counters.HitVectorCreationTimeMs);
-  Stats.create("readouts.parse.total_parse_ms", Counters.TotalParseTimeMs);
+  Stats.create("readouts.parse.parsing_stage", Counters.Stage1ProcessingTimeMs);
+  Stats.create("readouts.parse.sorting_stage", Counters.Stage2ProcessingTimeMs);
+  Stats.create("readouts.parse.cluster_stage", Counters.Stage3ProcessingTimeMs);
+  Stats.create("readouts.parse.publish_stage", Counters.Stage4ProcessingTimeMs);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -153,13 +146,13 @@ void Timepix3Base::processingThread() {
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       Counters.KafkaStats.produce_bytes_ok});
 
-  auto OutputQueue = Timepix3.DataPipeline.getOutputQueue<bool>();
+  auto OutputQueue = Timepix3.DataPipeline.getOutputQueue<int>();
   std::shared_ptr<std::atomic_bool> run =
       std::make_shared<std::atomic_bool>(true);
 
   std::future<void> dequeueThread =
-      std::async(std::launch::async, [OutputQueue, run]() {
-        bool output = false;
+      std::async(std::launch::async, [OutputQueue, run = &runThreads]() {
+        int output = false;
         while (run->load()) {
           if (!OutputQueue->dequeue(output)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -198,8 +191,17 @@ void Timepix3Base::processingThread() {
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
+      this_thread::sleep_for(std::chrono::microseconds(1));
     }
+
+    Counters.Stage1ProcessingTimeMs =
+        Timepix3.DataPipeline.getStagePerformance(0);
+    Counters.Stage2ProcessingTimeMs =
+        Timepix3.DataPipeline.getStagePerformance(1);
+    Counters.Stage3ProcessingTimeMs =
+        Timepix3.DataPipeline.getStagePerformance(2);
+    Counters.Stage4ProcessingTimeMs =
+        Timepix3.DataPipeline.getStagePerformance(3);
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
@@ -212,11 +214,8 @@ void Timepix3Base::processingThread() {
     }
   }
 
-  run->store(false);
+  dequeueThread.wait();
 
-  if (dequeueThread.valid()) {
-    dequeueThread.wait();
-  }
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }

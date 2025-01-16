@@ -9,8 +9,10 @@
 #pragma once
 
 #include "common/reduction/Hit2D.h"
+#include "common/reduction/Hit2DVector.h"
 #include "geometry/Timepix3Geometry.h"
 #include "handlers/PixelEventHandler.h"
+#include <atomic>
 #include <cstdint>
 #include <dataflow/DataObserverTemplate.h>
 #include <dto/TimepixDataTypes.h>
@@ -77,7 +79,7 @@ public:
 
   void applyData(const timepixDTO::ESSGlobalTimeStamp &) override;
 
-  std::vector<Hit2D> parseTPX(std::vector<uint64_t>&);
+  Hit2DVector parseTPX(std::vector<uint64_t> &);
 
   inline int parseEVR(const char *buffer) {
     using namespace std::chrono;
@@ -109,8 +111,8 @@ public:
   struct Counters &Stats;
 
 private:
-  std::unique_ptr<timepixDTO::ESSGlobalTimeStamp> lastEpochESSPulseTime =
-      nullptr; /// < Unique pointer to the last epoch ESS pulse time.
+  std::optional<timepixDTO::ESSGlobalTimeStamp>
+      lastEpochESSPulseTime;
 
   std::shared_ptr<Timepix3Geometry> Geometry;
 

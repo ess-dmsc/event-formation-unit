@@ -10,6 +10,8 @@
 #pragma once
 
 #include "common/reduction/Hit2D.h"
+#include "common/reduction/Hit2DVector.h"
+#include "common/reduction/clustering/Abstract2DClusterer.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/reduction/clustering/Hierarchical2DClusterer.h>
 #include <memory>
@@ -58,37 +60,6 @@ private:
   std::chrono::nanoseconds
       FrequencyPeriodNs; /// < Frequency period in nanoseconds.
 
-  std::unique_ptr<Hierarchical2DClusterer>
-      clusterer; /// < Vector of unique pointers to Hierarchical2DClusterer
-                 /// objects for clustering pixel hits.
-                 /// storing clustered hits for sub frames
-                 /// in case of parrallel processing
-
-  ///
-  /// \brief Publishes the clustered events to the appropriate kafka topic.
-  ///
-  /// This method takes a Cluster2DContainer object as input and publishes the
-  /// clustered events to the appropriate kafka topic.
-  ///
-  /// \param clusters The Cluster2DContainer object containing the clustered
-  /// events.
-  ///
-  void publishEvents(Cluster2DContainer &clusters);
-
-  ///
-  /// \brief Clusters the pixel hits using the specified Hierarchical2DClusterer
-  /// object.
-  ///
-  /// This method takes a Hierarchical2DClusterer object and a Hit2DVector
-  /// object as input. It clusters the pixel hits using the specified clusterer
-  /// and stores the clustered hits in the windows vector.
-  ///
-  /// \param clusterer The Hierarchical2DClusterer object used for clustering.
-  /// \param hitsVector The Hit2DVector object containing the pixel hits to be
-  /// clustered.
-  ///
-  void clusterHits(Hierarchical2DClusterer &clusterer, Hit2DVector &hitsVector);
-
 public:
   ///
   /// \brief Constructs a new PixelEventHandler object with the specified
@@ -102,8 +73,6 @@ public:
   /// geometry information.
   /// \param serializer The EV44Serializer object for serialization.
   ///
-  Hit2DVector Hits; /// < Use unique_ptr for Hits
-
   PixelEventHandler(Counters &counters,
                     std::shared_ptr<Timepix3Geometry> geometry,
                     EV44Serializer &serializer,
@@ -127,15 +96,16 @@ public:
   /// \param epochEssPulseTime The timepixDTO::ESSGlobalTimeStamp object
   /// containing the epoch ESS pulse time data.
   ///
-  void
-  applyData(const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) override;
 
   ///
   /// \brief Pushes the data to Kafka.
   ///
   /// This method pushes the data to Kafka.
   ///
-  bool pushDataToKafka(std::vector<Hit2D> &);
+  int publishEvents(Cluster2DContainer &);
+
+  void
+  applyData(const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) override;
 };
 
 } // namespace Timepix3

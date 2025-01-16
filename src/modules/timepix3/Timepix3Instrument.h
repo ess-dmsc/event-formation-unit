@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "common/reduction/Hit2DVector.h"
 #include "efu/DataPipeline.h"
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/EV44Serializer.h>
@@ -47,6 +48,9 @@ public:
   TimingEventHandler timingEventHandler;
   PixelEventHandler pixelEventHandler;
   DataParser timepix3Parser;
+
+  int MaxTimeGapNS;
+  int MaxCoordinateGap;
 
   data_pipeline::Pipeline DataPipeline;
 

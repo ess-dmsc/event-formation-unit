@@ -56,7 +56,7 @@ std::string Abstract2DClusterer::status(const std::string &prepend,
 
 bool Abstract2DClusterer::empty() const { return clusters.empty(); }
 
-void Abstract2DClusterer::stash_cluster(Cluster2D &cluster) {
+void Abstract2DClusterer::stash_cluster(Cluster2D &&cluster) {
   XTRACE(CLUSTER, DEB, status("", true).c_str());
 
   clusters.emplace_back(std::move(cluster));

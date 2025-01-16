@@ -126,7 +126,7 @@ uint32_t EV44Serializer::checkAndSetReferenceTime(int64_t Time) {
   return bytesProduced;
 }
 
-void EV44Serializer::setReferenceTime(int64_t Time) {
+void EV44Serializer::setReferenceTime(const int64_t& Time) {
   XTRACE(OUTPUT, DEB, "Set reference time: %" PRIi64, Time);
   reinterpret_cast<int64_t *>(ReferenceTimePtr)[0] = Time;
 }

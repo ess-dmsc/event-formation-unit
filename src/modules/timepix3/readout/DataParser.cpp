@@ -34,12 +34,11 @@ DataParser::DataParser(struct Counters &counters,
                        std::shared_ptr<Timepix3Geometry> geometry)
     : Stats(counters), Geometry(geometry) {}
 
-std::vector<Hit2D> DataParser::parseTPX(std::vector<uint64_t>& readoutData) {
+Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
   using namespace std::chrono;
 
-  auto start = steady_clock::now();
-
-  std::vector<Hit2D> hits;
+  Hit2DVector hits;
+  hits.reserve(readoutData.size());
 
   // Create vector of futures for parallel processing
   auto startPixelReadoutProcessing = steady_clock::now();
@@ -69,9 +68,6 @@ std::vector<Hit2D> DataParser::parseTPX(std::vector<uint64_t>& readoutData) {
       duration_cast<microseconds>(stopPixelReadoutProcessing -
                                   startPixelReadoutProcessing)
           .count();
-  // Collect results
-  auto end = steady_clock::now();
-  Stats.TotalParseTimeMs += duration_cast<microseconds>(end - start).count();
 
   return hits;
 }
@@ -79,8 +75,11 @@ std::vector<Hit2D> DataParser::parseTPX(std::vector<uint64_t>& readoutData) {
 // Make parsePixelReadout const to ensure thread safety
 Hit2D DataParser::parsePixelReadout(const uint64_t &ReadoutData) const {
 
+  Stats.PixelReadouts++;
+
   if (!lastEpochESSPulseTime) {
     throw std::runtime_error("No epoch ESS pulse time available");
+    Stats.InvalidPixelReadout++;
   }
 
   PixelReadout pixelDataEvent(
@@ -92,6 +91,7 @@ Hit2D DataParser::parsePixelReadout(const uint64_t &ReadoutData) const {
       (ReadoutData & PIXEL_FTOA_MASK) >> PIXEL_FTOA_OFFSET,
       ReadoutData & PIXEL_SPTIME_MASK);
 
+  /// \todo Move Geometry back into parser and perform validation here
   // if (Geometry->validateData(pixelDataEvent)) {
   //   throw std::runtime_error("Invalid pixel data");
   // }
@@ -129,8 +129,7 @@ Hit2D DataParser::parsePixelReadout(const uint64_t &ReadoutData) const {
 void DataParser::applyData(
     const timepixDTO::ESSGlobalTimeStamp &epochEssPulseTime) {
 
-  lastEpochESSPulseTime =
-      std::make_unique<timepixDTO::ESSGlobalTimeStamp>(epochEssPulseTime);
+  lastEpochESSPulseTime.emplace(epochEssPulseTime);
 }
 
 void DataParser::processTDCData(const uint64_t &readoutData) const {
