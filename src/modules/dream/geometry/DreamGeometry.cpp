@@ -43,6 +43,11 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
     break;
   }
 
+  if (Pixel == 0) {
+    XTRACE(DATA, WAR, "Invalid pixel returned");
+    return 0;
+  }
+
   int Offset = getPixelOffset(Parms.Type);
   if (Offset == -1) {
     return 0;
