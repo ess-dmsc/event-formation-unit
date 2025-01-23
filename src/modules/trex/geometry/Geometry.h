@@ -12,6 +12,7 @@
 
 #include <common/debug/Trace.h>
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
