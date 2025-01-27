@@ -49,6 +49,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
+  
   Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
 
   /// Receiving UDP data is now common across all detectors

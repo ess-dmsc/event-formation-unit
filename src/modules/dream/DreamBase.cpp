@@ -113,7 +113,7 @@ void DreamBase::processingThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                          KafkaCfg.CfgParms);
 
-  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+  auto Produce = [&EventProducer](auto &DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
