@@ -1,5 +1,6 @@
 #pragma once
 #include <condition_variable>
+#include <efu/Graylog.h>
 #include <functional>
 #include <future>
 #include <mutex>
@@ -22,6 +23,7 @@ public:
   getInstance(); // Public accessor for the singleton instance
 
   void stop() {
+    LOG(MAIN, Sev::Info, "Stopping ThreadPool workers");
     {
       std::unique_lock<std::mutex> lock(queue_mutex);
       stopWorkers = true;
@@ -51,7 +53,9 @@ public:
     return res;
   }
 
-  ~ThreadPool();
+  ~ThreadPool() {
+    stop();
+  }
 };
 
 // Implementation of the constructor, destructor, and getInstance method
@@ -77,14 +81,4 @@ inline ThreadPool::ThreadPool(size_t threads) : stopWorkers(false) {
 inline ThreadPool &ThreadPool::getInstance() {
   static ThreadPool instance(std::thread::hardware_concurrency());
   return instance;
-}
-
-inline ThreadPool::~ThreadPool() {
-  {
-    std::unique_lock<std::mutex> lock(queue_mutex);
-    stopWorkers = true;
-  }
-  condition.notify_all();
-  for (std::thread &worker : workers)
-    worker.join();
 }

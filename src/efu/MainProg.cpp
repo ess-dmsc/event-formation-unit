@@ -14,6 +14,7 @@
 #include <efu/MainProg.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <efu/ThreadPool.hpp>
 
 MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
 
@@ -59,14 +60,18 @@ int MainProg::run(Detector *inst) {
   mainStats.create("main.uptime", statUpTime);
 
   LOG(MAIN, Sev::Info, "Event Formation Unit ({}) Starting", Name);
-  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) version: {}", Name, efu_version());
-  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) build: {}", Name, efu_buildstr());
+  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) version: {}", Name,
+      efu_version());
+  LOG(MAIN, Sev::Info, "Event Formation Unit ({}) build: {}", Name,
+      efu_buildstr());
 
   if (DetectorSettings.NoHwCheck) {
-    LOG(MAIN, Sev::Warning, "({}) Skipping HwCheck - performance might suffer", Name);
+    LOG(MAIN, Sev::Warning, "({}) Skipping HwCheck - performance might suffer",
+        Name);
   } else {
     if (hwcheck.checkMTU(DetectorSettings.Interfaces) == false) {
-      LOG(MAIN, Sev::Error, "({}) MTU checks failed, for a quick fix, try", Name);
+      LOG(MAIN, Sev::Error, "({}) MTU checks failed, for a quick fix, try",
+          Name);
       LOG(MAIN, Sev::Error,
           "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
       LOG(MAIN, Sev::Error, "exiting...");
@@ -100,6 +105,7 @@ int MainProg::run(Detector *inst) {
       if (keep_running == 0) {
         LOG(MAIN, Sev::Info, "Application stop, Exiting...");
         detector->stopThreads();
+        ThreadPool::getInstance().stop();
         sleep(1);
         break;
       }
@@ -109,6 +115,7 @@ int MainProg::run(Detector *inst) {
         DetectorSettings.StopAfterSec * MicrosecondsPerSecond) {
       LOG(MAIN, Sev::Info, "Application timeout, Exiting...");
       detector->stopThreads();
+      ThreadPool::getInstance().stop();
       sleep(1);
       break;
     }
