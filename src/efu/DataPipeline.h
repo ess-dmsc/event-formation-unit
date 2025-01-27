@@ -103,6 +103,12 @@ public:
         } else {
           std::this_thread::yield();
         }
+        auto end_time = std::chrono::steady_clock::now();
+        PerformanceCounter.fetch_add(
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time -
+                                                                  current_time)
+                .count(),
+            std::memory_order_release);
       }
     });
   }
