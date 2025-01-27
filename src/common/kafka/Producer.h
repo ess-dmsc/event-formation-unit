@@ -65,7 +65,7 @@ public:
   /// \param MessageTimestampMS The timestamp of the message in milliseconds.
   /// \return int Returns 0 if the operation is successful or an error code
   int produce(const nonstd::span<const std::uint8_t> &Buffer,
-              const std::int64_t MessageTimestampMS) override;
+              std::int64_t MessageTimestampMS) override;
 
   /// \brief Sets a Kafka configuration and checks the result.
   ///
@@ -108,5 +108,5 @@ protected:
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
 };
 
-using ProducerCallback = std::function<void(
-    const nonstd::span<const std::uint8_t> &, const std::int64_t)>;
+using ProducerCallback =
+    std::function<void(const nonstd::span<const std::uint8_t> &, std::int64_t)>;
