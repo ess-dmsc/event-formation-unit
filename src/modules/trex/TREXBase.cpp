@@ -162,7 +162,7 @@ void TrexBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                      KafkaCfg.CfgParms);
-  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+  auto Produce = [&eventprod](auto &DataBuffer, auto Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 

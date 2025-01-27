@@ -123,7 +123,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
 }
 
 void CbmBase::processing_thread() {
-
+  /// \todo: properly the quite and stop application and log the fault.
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INPUT, ALW, "Missing topic - mandatory for beam monitor");
     stopThreads();

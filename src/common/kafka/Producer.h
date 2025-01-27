@@ -34,10 +34,9 @@ public:
   /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX
   /// epoch
   /// \return Returns 0 on success, another value on failure.
-  virtual int produce(nonstd::span<const std::uint8_t> Buffer,
-                      std::int64_t MessageTimestampMS) = 0;
+  virtual int produce(const nonstd::span<const std::uint8_t> &Buffer,
+                      const std::int64_t MessageTimestampMS) = 0;
 };
-
 
 /// \brief The Producer class is responsible for producing Kafka messages and
 /// sending them to the cluster.
@@ -55,21 +54,18 @@ public:
   Producer(std::string Broker, std::string Topic,
            std::vector<std::pair<std::string, std::string>> &Configs);
 
-
-   /// \brief Cleans up by deleting allocated structures.
+  /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;
 
-
   /// \brief Produces Kafka messages and sends them to the cluster and increment
-  /// internal counters. This function is non-blocking, returns immediately after
-  /// the message is enqueueed for transmission.
+  /// internal counters. This function is non-blocking, returns immediately
+  /// after the message is enqueueed for transmission.
   ///
   /// \param Buffer The buffer containing the message data.
   /// \param MessageTimestampMS The timestamp of the message in milliseconds.
   /// \return int Returns 0 if the operation is successful or an error code
-  int produce(nonstd::span<const std::uint8_t> Buffer,
-              std::int64_t MessageTimestampMS) override;
-
+  int produce(const nonstd::span<const std::uint8_t> &Buffer,
+              const std::int64_t MessageTimestampMS) override;
 
   /// \brief Sets a Kafka configuration and checks the result.
   ///
@@ -78,13 +74,11 @@ public:
   /// \return RdKafka::Conf::ConfResult The result of setting the configuration.
   RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
 
-
   /// \brief Callback function for Kafka to handle events like errors,
   /// statistics.
   ///
   /// \param event The Kafka event to be handled
   void event_cb(RdKafka::Event &event) override;
-
 
   /// \brief Structure to hold producer statistics.
   struct ProducerStats {
@@ -114,5 +108,5 @@ protected:
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
 };
 
-using ProducerCallback =
-    std::function<void(nonstd::span<const std::uint8_t>, std::int64_t)>;
+using ProducerCallback = std::function<void(
+    const nonstd::span<const std::uint8_t> &, const std::int64_t)>;
