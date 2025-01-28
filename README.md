@@ -120,7 +120,7 @@ make valgrind
 make doxygen
 ```
 
-After the documentation has been build, the doxygen documentation tree can be accesed in the cmake build directory, by opening `doxygen/html/index.html`. 
+After the documentation has been build, the doxygen documentation tree can be accesed in the cmake build directory, by opening the file `doxygen/html/index.html`. 
 
 
 ## Running the event formation application
