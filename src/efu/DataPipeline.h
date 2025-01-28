@@ -72,7 +72,7 @@ public:
   /// \param func Processing function that takes \ref In and returns \ref Out.
   /// \param inputQueueSize Size of the input queue (default 1024).
   /// \param outputQueueSize Size of the output queue (default 1024).
-  PipelineStage(std::function<Out(In)> Func,
+  PipelineStage(std::function<Out(In&)> Func,
                 size_t InputQueueSize = DEFAULT_QUEUE_SIZE,
                 size_t OutputQueueSize = DEFAULT_QUEUE_SIZE)
       : Func(Func),
@@ -87,12 +87,23 @@ public:
       while (!StopFlag.load(std::memory_order_acquire)) {
         auto current_time = std::chrono::steady_clock::now();
         if (InputQueue->dequeue(Input)) {
-          Out Output = Func(std::move(Input));
+
+          Out Output = std::move(Func(Input));
+
+          auto end_time = std::chrono::steady_clock::now();
+          PerformanceCounter.fetch_add(
+              std::chrono::duration_cast<std::chrono::microseconds>(
+                  end_time - current_time)
+                  .count(),
+              std::memory_order_release);
+
           while (!OutputQueue->enqueue(std::move(Output))) {
-            std::this_thread::yield();
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(1));
           }
         } else {
-          std::this_thread::yield();
+          std::this_thread::sleep_for(
+              std::chrono::milliseconds(1));
         }
         auto end_time = std::chrono::steady_clock::now();
         PerformanceCounter.fetch_add(
@@ -142,7 +153,7 @@ public:
 private:
   static const size_t DEFAULT_QUEUE_SIZE = 1024;
 
-  std::function<Out(In)> Func;
+  std::function<Out(In&)> Func;
   std::atomic<int64_t> PerformanceCounter;
   std::shared_ptr<LockFreeQueue<In>> InputQueue;
   std::shared_ptr<LockFreeQueue<Out>> OutputQueue;
