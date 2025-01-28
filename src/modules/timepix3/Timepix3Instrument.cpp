@@ -9,16 +9,13 @@
 /// calculations and Timepix3 readout parser
 //===----------------------------------------------------------------------===//
 
-#include "common/reduction/Hit2DVector.h"
-#include "common/reduction/clustering/Abstract2DClusterer.h"
-#include "common/reduction/clustering/Hierarchical2DClusterer.h"
-#include "efu/DataPipeline.h"
-#include "efu/ThreadPool.hpp"
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <ctime>
 #include <dto/TimepixDataTypes.h>
+#include <efu/DataPipeline.h>
+#include <efu/ThreadPool.hpp>
 #include <future>
 #include <queue>
 #include <timepix3/Timepix3Instrument.h>
@@ -69,31 +66,33 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       DataPipeline(
           data_pipeline::PipelineBuilder()
               .addStage<PipelineStage<vector<uint64_t>, Hit2DVector>>(
-                  [this](std::vector<uint64_t> &&data) {
-                    return std::move(timepix3Parser.parseTPX(data));
+                  [this](std::vector<uint64_t> &data) {
+                    return timepix3Parser.parseTPX(data);
                   },
                   4096)
               .addStage<PipelineStage<Hit2DVector, Hit2DVector>>(
-                  [this](Hit2DVector &&hits) {
+                  [this](Hit2DVector &hits) {
                     sort_chronologically(hits);
-                    return std::move(hits);
+                    return hits;
                   })
               .addStage<
                   PipelineStage<Hit2DVector, std::future<Cluster2DContainer>>>(
-                  [this](Hit2DVector &&hits) {
-                    // Start a new thread to cluster the hits parallel and
-                    // return the future (promise) of the result to the next
-                    // stage
-                    return ThreadPool::getInstance().enqueue([this, hits]() {
-                      Hierarchical2DClusterer ThreadClusterer(MaxTimeGapNS,
-                                                              MaxCoordinateGap);
-                      ThreadClusterer.cluster(hits);
-                      ThreadClusterer.flush();
-                      return std::move(ThreadClusterer.getClusters());
-                    });
+                  [this](Hit2DVector &hits) {
+                    // Start a new thread to cluster the hits parallel. Ensure
+                    // that hits ownership moved over to new thread. After
+                    // initiaalizing the clustererm thread this stage returns a
+                    // future (promise) of the result to the next stage
+                    return ThreadPool::getInstance().enqueue(
+                        [this, hits = std::move(hits)]() mutable {
+                          Hierarchical2DClusterer ThreadClusterer(
+                              MaxTimeGapNS, MaxCoordinateGap);
+                          ThreadClusterer.cluster(hits);
+                          ThreadClusterer.flush();
+                          return ThreadClusterer.getClusters();
+                        });
                   })
               .addStage<PipelineStage<std::future<Cluster2DContainer>, int>>(
-                  [this](std::future<Cluster2DContainer> &&future) {
+                  [this](std::future<Cluster2DContainer> &future) {
                     // Process step by step the future promise stored in the
                     // input queue. Wait for the future to be ready and then
                     // publish the events
