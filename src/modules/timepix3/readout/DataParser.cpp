@@ -40,9 +40,6 @@ Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
   Hit2DVector hits;
   hits.reserve(readoutData.size());
 
-  // Create vector of futures for parallel processing
-  auto startPixelReadoutProcessing = steady_clock::now();
-
   for (const auto &data : readoutData) {
     try {
       if ((data & TYPE_MASK) >> TYPE_OFFS == TDC_READOUT_TYPE_CONST) {
@@ -56,18 +53,21 @@ Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
           Stats.NoGlobalTime++;
           continue;
         }
+        // Process pixel readout and measure processing time
+        auto startPixelReadoutProcessing = steady_clock::now();
+
         hits.emplace_back(parsePixelReadout(data));
+
+        auto stopPixelReadoutProcessing = steady_clock::now();
+        Stats.PixelFuturesTimeUs +=
+            duration_cast<microseconds>(stopPixelReadoutProcessing -
+                                        startPixelReadoutProcessing)
+                .count();
       }
     } catch (const std::exception &e) {
       Stats.PixelErrors++;
     }
   }
-
-  auto stopPixelReadoutProcessing = steady_clock::now();
-  Stats.PixelFuturesTimeMs +=
-      duration_cast<microseconds>(stopPixelReadoutProcessing -
-                                  startPixelReadoutProcessing)
-          .count();
 
   return hits;
 }
@@ -161,7 +161,7 @@ void DataParser::processTDCData(const uint64_t &readoutData) const {
   }
 
   auto tdcProcessingEnd = steady_clock::now();
-  Stats.TDCProcessingTimeMs +=
+  Stats.TDCProcessingTimeUs +=
       duration_cast<microseconds>(tdcProcessingEnd - tdcProcessingStart)
           .count();
 }

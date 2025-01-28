@@ -6,6 +6,7 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
+#include <chrono>
 #include <common/RuntimeStat.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/KafkaConfig.h>
@@ -13,6 +14,7 @@
 #include <memory>
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
+#include <thread>
 #include <vector>
 
 // #undef TRC_LEVEL
@@ -36,15 +38,18 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
  
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
+  Stats.create("readouts.pixel.pixel_processing_us", Counters.PixelFuturesTimeUs);
   Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
   Stats.create("readouts.tdc.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
   Stats.create("readouts.tdc.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
   Stats.create("readouts.tdc.unknown_tdc_type_count", Counters.UnknownTDCReadouts);
   Stats.create("readouts.tdc.tdc2falling_readout_count", Counters.TDC2FallingReadouts);
   Stats.create("readouts.evr.evr_readout_count", Counters.EVRReadoutCounter);
+  Stats.create("readouts.evr.evr_processing_us", Counters.EVRProcessingTimeUs);
   Stats.create("readouts.evr.evr_readout_dropped", Counters.EVRReadoutDropped);
   Stats.create("readouts.tdc.tdc_readout_count", Counters.TDCReadoutCounter);
   Stats.create("readouts.tdc.tdc_readout_dropped", Counters.TDCReadoutDropped);
+  Stats.create("readouts.tdc.tdc_processing_us", Counters.TDCProcessingTimeUs);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
 
   // Counters related to timing event handling and time syncronization
@@ -75,14 +80,11 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
-  // Time measurement counters for parse function
-  Stats.create("readouts.parse.pixel_futures_ms", Counters.PixelFuturesTimeMs);
-  Stats.create("readouts.parse.evr_processing_ms", Counters.EVRProcessingTimeMs);
-  Stats.create("readouts.parse.tdc_processing_ms", Counters.TDCProcessingTimeMs);
-  Stats.create("readouts.parse.parsing_stage", Counters.Stage1ProcessingTimeMs);
-  Stats.create("readouts.parse.sorting_stage", Counters.Stage2ProcessingTimeMs);
-  Stats.create("readouts.parse.cluster_stage", Counters.Stage3ProcessingTimeMs);
-  Stats.create("readouts.parse.publish_stage", Counters.Stage4ProcessingTimeMs);
+  // Time measurement on stages
+  Stats.create("thread.stages.parsing_us", Counters.Stage1ProcessingTimeUs);
+  Stats.create("thread.stages.sorting_us", Counters.Stage2ProcessingTimeUs);
+  Stats.create("thread.stages.cluster_us", Counters.Stage3ProcessingTimeUs);
+  Stats.create("thread.stages.publish_us", Counters.Stage4ProcessingTimeUs);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -177,6 +179,7 @@ void Timepix3Base::processingThread() {
         continue;
       }
 
+      // Copy the data to a vector for the pipeline
       std::vector<uint64_t> ReadoutData(DataLen / sizeof(uint64_t));
       ReadoutData.insert(ReadoutData.begin(),
                          reinterpret_cast<uint64_t *>(DataPtr),
@@ -186,21 +189,21 @@ void Timepix3Base::processingThread() {
           Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
 
       while (!InputQueue->enqueue(std::move(ReadoutData))) {
-        usleep(10); // Wait if the queue is full
+        std::this_thread::sleep_for(chrono::milliseconds(1));
       }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
-      this_thread::sleep_for(std::chrono::microseconds(1));
+      this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    Counters.Stage1ProcessingTimeMs =
+    Counters.Stage1ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformance(0);
-    Counters.Stage2ProcessingTimeMs =
+    Counters.Stage2ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformance(1);
-    Counters.Stage3ProcessingTimeMs =
+    Counters.Stage3ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformance(2);
-    Counters.Stage4ProcessingTimeMs =
+    Counters.Stage4ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformance(3);
 
     if (ProduceTimer.timeout()) {

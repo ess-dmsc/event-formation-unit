@@ -101,7 +101,7 @@ public:
     Stats.EVRReadoutCounter++;
 
     auto evrProcessingEnd = steady_clock::now();
-    Stats.EVRProcessingTimeMs +=
+    Stats.EVRProcessingTimeUs +=
         duration_cast<microseconds>(evrProcessingEnd - evrProcessingStart)
             .count();
 
