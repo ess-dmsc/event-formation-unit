@@ -85,7 +85,9 @@ public:
     Future = std::async(std::launch::async, [this]() {
       In Input;
       while (!StopFlag.load(std::memory_order_acquire)) {
+
         auto current_time = std::chrono::steady_clock::now();
+        
         if (InputQueue->dequeue(Input)) {
 
           Out Output = std::move(Func(Input));
@@ -105,12 +107,6 @@ public:
           std::this_thread::sleep_for(
               std::chrono::microseconds(1));
         }
-        auto end_time = std::chrono::steady_clock::now();
-        PerformanceCounter.fetch_add(
-            std::chrono::duration_cast<std::chrono::microseconds>(end_time -
-                                                                  current_time)
-                .count(),
-            std::memory_order_release);
       }
     });
   }
