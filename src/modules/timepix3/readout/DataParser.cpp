@@ -40,6 +40,8 @@ Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
   Hit2DVector hits;
   hits.reserve(readoutData.size());
 
+  // Process pixel readout and measure processing time
+  auto startParsingReadouts = steady_clock::now();
   for (const auto &data : readoutData) {
     try {
       if ((data & TYPE_MASK) >> TYPE_OFFS == TDC_READOUT_TYPE_CONST) {
@@ -53,21 +55,19 @@ Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
           Stats.NoGlobalTime++;
           continue;
         }
-        // Process pixel readout and measure processing time
-        auto startPixelReadoutProcessing = steady_clock::now();
 
         hits.emplace_back(parsePixelReadout(data));
-
-        auto stopPixelReadoutProcessing = steady_clock::now();
-        Stats.PixelFuturesTimeUs +=
-            duration_cast<microseconds>(stopPixelReadoutProcessing -
-                                        startPixelReadoutProcessing)
-                .count();
       }
     } catch (const std::exception &e) {
       Stats.PixelErrors++;
     }
   }
+
+  auto stopParsingReadouts = steady_clock::now();
+  Stats.ReadoutParsingUs +=
+      duration_cast<microseconds>(stopParsingReadouts -
+                                  startParsingReadouts)
+          .count();
 
   return hits;
 }

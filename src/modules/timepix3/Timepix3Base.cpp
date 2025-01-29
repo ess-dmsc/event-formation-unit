@@ -38,7 +38,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
  
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
-  Stats.create("readouts.pixel.pixel_processing_us", Counters.PixelFuturesTimeUs);
+  Stats.create("readouts.parsing_us", Counters.ReadoutParsingUs);
   Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
   Stats.create("readouts.tdc.tdc1falling_readout_count", Counters.TDC1FallingReadouts);
   Stats.create("readouts.tdc.tdc2rising_readout_count", Counters.TDC2RisingReadouts);
@@ -157,7 +157,7 @@ void Timepix3Base::processingThread() {
         int output = false;
         while (run->load()) {
           if (!OutputQueue->dequeue(output)) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
           }
         }
       });
@@ -189,12 +189,12 @@ void Timepix3Base::processingThread() {
           Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
 
       while (!InputQueue->enqueue(std::move(ReadoutData))) {
-        std::this_thread::sleep_for(chrono::milliseconds(1));
+        std::this_thread::sleep_for(chrono::microseconds(1));
       }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;
-      this_thread::sleep_for(std::chrono::milliseconds(1));
+      this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
     Counters.Stage1ProcessingTimeUs =

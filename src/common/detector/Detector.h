@@ -94,6 +94,7 @@ public:
         }
       } else {
         ITCounters.RxIdle++;
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
       }
     }
     XTRACE(INPUT, ALW, "Stopping input thread.");

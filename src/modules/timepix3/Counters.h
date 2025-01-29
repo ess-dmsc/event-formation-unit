@@ -57,7 +57,7 @@ struct Counters {
   int64_t ProduceCauseTimeout{0};
 
   // Time measurement counters (in milliseconds)
-  int64_t PixelFuturesTimeUs{0};
+  int64_t ReadoutParsingUs{0};
   int64_t EVRProcessingTimeUs{0};
   int64_t TDCProcessingTimeUs{0};
   int64_t Stage1ProcessingTimeUs{0};
