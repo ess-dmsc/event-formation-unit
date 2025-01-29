@@ -64,6 +64,7 @@ struct Counters {
   int64_t Stage2ProcessingTimeUs{0};
   int64_t Stage3ProcessingTimeUs{0};
   int64_t Stage4ProcessingTimeUs{0};
+  int64_t Stage5ProcessingTimeUs{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;

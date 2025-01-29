@@ -83,8 +83,9 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   // Time measurement on stages
   Stats.create("thread.stages.parsing_us", Counters.Stage1ProcessingTimeUs);
   Stats.create("thread.stages.sorting_us", Counters.Stage2ProcessingTimeUs);
-  Stats.create("thread.stages.cluster_us", Counters.Stage3ProcessingTimeUs);
-  Stats.create("thread.stages.publish_us", Counters.Stage4ProcessingTimeUs);
+  Stats.create("thread.stages.future_us", Counters.Stage3ProcessingTimeUs);
+  Stats.create("thread.stages.cluster_us", Counters.Stage4ProcessingTimeUs);
+  Stats.create("thread.stages.publish_us", Counters.Stage5ProcessingTimeUs);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -205,6 +206,8 @@ void Timepix3Base::processingThread() {
         Timepix3.DataPipeline.getStagePerformance(2);
     Counters.Stage4ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformance(3);
+    Counters.Stage5ProcessingTimeUs =
+        Timepix3.DataPipeline.getStagePerformance(4);
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");

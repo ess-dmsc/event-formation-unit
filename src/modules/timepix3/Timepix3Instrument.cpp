@@ -84,7 +84,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                   [this](std::future<Hit2DVector> &future) {
 
                     auto hits = std::move(future.get());
-                    
+
                     // Start a new thread to cluster the hits parallel. Ensure
                     // that hits ownership moved over to new thread. After
                     // initiaalizing the clustererm thread this stage returns a
@@ -98,13 +98,18 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                           return ThreadClusterer.getClusters();
                         });
                   })
-              .addStage<PipelineStage<std::future<Cluster2DContainer>, int>>(
+                .addStage<PipelineStage<std::future<Cluster2DContainer>, Cluster2DContainer>>(
                   [this](std::future<Cluster2DContainer> &future) {
+                    // This stage waits for the future to be ready and then
+                    // returns the result to the next stage
+                    return future.get();
+                  })
+              .addStage<PipelineStage<Cluster2DContainer, int>>(
+                  [this](Cluster2DContainer &clusters) {
                     // Process step by step the future promise stored in the
                     // input queue. Wait for the future to be ready and then
                     // publish the events
-                    auto event = std::move(future.get());
-                    return pixelEventHandler.publishEvents(event);
+                    return pixelEventHandler.publishEvents(clusters);
                   })
               .build()) {
 
