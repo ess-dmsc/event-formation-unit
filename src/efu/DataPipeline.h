@@ -106,7 +106,7 @@ public:
           }
         } else {
           int waitTime = 1;
-          StarwingCounter.fetch_add(waitTime, std::memory_order_release);
+          StarvingCounter.fetch_add(waitTime, std::memory_order_release);
           std::this_thread::sleep_for(std::chrono::microseconds(waitTime));
         }
       }
@@ -149,8 +149,8 @@ public:
   }
 
   /// \brief Get the number of times the output queue was starved.
-  uint64_t getStarwingCounterUs() const {
-    return StarwingCounter.load(std::memory_order_acquire);
+  uint64_t getStarvingCounterUs() const {
+    return StarvingCounter.load(std::memory_order_acquire);
   }
 
   /// \brief Get the number of times the output queue was blocked.
@@ -163,7 +163,7 @@ private:
 
   std::function<Out(In &)> Func;
   std::atomic<int64_t> PerformanceCounter;
-  std::atomic<int64_t> StarwingCounter;
+  std::atomic<int64_t> StarvingCounter;
   std::atomic<int64_t> BlockedCounter;
   std::shared_ptr<LockFreeQueue<In>> InputQueue;
   std::shared_ptr<LockFreeQueue<Out>> OutputQueue;
