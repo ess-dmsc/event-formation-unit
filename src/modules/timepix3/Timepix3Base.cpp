@@ -81,11 +81,26 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
   // Time measurement on stages
-  Stats.create("thread.stages.parsing_us", Counters.Stage1ProcessingTimeUs);
-  Stats.create("thread.stages.sorting_us", Counters.Stage2ProcessingTimeUs);
-  Stats.create("thread.stages.future_us", Counters.Stage3ProcessingTimeUs);
-  Stats.create("thread.stages.cluster_us", Counters.Stage4ProcessingTimeUs);
-  Stats.create("thread.stages.publish_us", Counters.Stage5ProcessingTimeUs);
+  Stats.create("thread.stages.parsing.process_us", Counters.Stage1ProcessingTimeUs);
+  Stats.create("thread.stages.parsing.starving_us", Counters.Stage1StarvingTimeUs);
+  Stats.create("thread.stages.parsing.blocked_us", Counters.Stage1BlockedTimeUs);
+
+  Stats.create("thread.stages.sorting.process_us", Counters.Stage2ProcessingTimeUs);
+  Stats.create("thread.stages.sorting.starving_us", Counters.Stage2StarvingTimeUs);
+  Stats.create("thread.stages.sorting.blocked_us", Counters.Stage2BlockedTimeUs);
+
+  Stats.create("thread.stages.future.process_us", Counters.Stage3ProcessingTimeUs);
+  Stats.create("thread.stages.future.starving_us", Counters.Stage3StarvingTimeUs);
+  Stats.create("thread.stages.future.blocked_us", Counters.Stage3BlockedTimeUs);
+
+  Stats.create("thread.stages.cluster.process_us", Counters.Stage4ProcessingTimeUs);
+  Stats.create("thread.stages.cluster.starving_us", Counters.Stage4StarvingTimeUs);
+  Stats.create("thread.stages.cluster.blocked_us", Counters.Stage4BlockedTimeUs);
+
+  Stats.create("thread.stages.publish.process_us", Counters.Stage5ProcessingTimeUs);
+  Stats.create("thread.stages.publish.starving_us", Counters.Stage5StarvingTimeUs);
+  Stats.create("thread.stages.publish.blocked_us", Counters.Stage5BlockedTimeUs);
+
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
@@ -199,15 +214,39 @@ void Timepix3Base::processingThread() {
     }
 
     Counters.Stage1ProcessingTimeUs =
-        Timepix3.DataPipeline.getStagePerformance(0);
+        Timepix3.DataPipeline.getStagePerformanceUs(0);
+    Counters.Stage1StarvingTimeUs =
+        Timepix3.DataPipeline.getStageStarvingCounterUs(0);
+    Counters.Stage1BlockedTimeUs =
+        Timepix3.DataPipeline.getStageBlockedCounterUs(0);
+
     Counters.Stage2ProcessingTimeUs =
-        Timepix3.DataPipeline.getStagePerformance(1);
+        Timepix3.DataPipeline.getStagePerformanceUs(1);
+    Counters.Stage2StarvingTimeUs =
+        Timepix3.DataPipeline.getStageStarvingCounterUs(1);
+    Counters.Stage2BlockedTimeUs =
+        Timepix3.DataPipeline.getStageBlockedCounterUs(1);
+
     Counters.Stage3ProcessingTimeUs =
-        Timepix3.DataPipeline.getStagePerformance(2);
+        Timepix3.DataPipeline.getStagePerformanceUs(2);
+    Counters.Stage3StarvingTimeUs =
+        Timepix3.DataPipeline.getStageStarvingCounterUs(2);
+    Counters.Stage3BlockedTimeUs =
+        Timepix3.DataPipeline.getStageBlockedCounterUs(2);
+
     Counters.Stage4ProcessingTimeUs =
-        Timepix3.DataPipeline.getStagePerformance(3);
+        Timepix3.DataPipeline.getStagePerformanceUs(3);
+    Counters.Stage4StarvingTimeUs =
+        Timepix3.DataPipeline.getStageStarvingCounterUs(3);
+    Counters.Stage4BlockedTimeUs =
+        Timepix3.DataPipeline.getStageBlockedCounterUs(3);
+
     Counters.Stage5ProcessingTimeUs =
-        Timepix3.DataPipeline.getStagePerformance(4);
+        Timepix3.DataPipeline.getStagePerformanceUs(4);
+    Counters.Stage5StarvingTimeUs =
+        Timepix3.DataPipeline.getStageStarvingCounterUs(4);
+    Counters.Stage5BlockedTimeUs =
+        Timepix3.DataPipeline.getStageBlockedCounterUs(4);
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");

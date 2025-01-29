@@ -60,11 +60,26 @@ struct Counters {
   int64_t ReadoutParsingUs{0};
   int64_t EVRProcessingTimeUs{0};
   int64_t TDCProcessingTimeUs{0};
+
   int64_t Stage1ProcessingTimeUs{0};
+  int64_t Stage1StarvingTimeUs{0};
+  int64_t Stage1BlockedTimeUs{0};
+
   int64_t Stage2ProcessingTimeUs{0};
+  int64_t Stage2StarvingTimeUs{0};
+  int64_t Stage2BlockedTimeUs{0};
+
   int64_t Stage3ProcessingTimeUs{0};
+  int64_t Stage3StarvingTimeUs{0};
+  int64_t Stage3BlockedTimeUs{0};
+
   int64_t Stage4ProcessingTimeUs{0};
+  int64_t Stage4StarvingTimeUs{0};
+  int64_t Stage4BlockedTimeUs{0};
+
   int64_t Stage5ProcessingTimeUs{0};
+  int64_t Stage5StarvingTimeUs{0};
+  int64_t Stage5BlockedTimeUs{0};
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
