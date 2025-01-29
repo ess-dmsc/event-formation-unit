@@ -107,8 +107,9 @@ Producer::Producer(std::string Broker, std::string Topic,
   }
 }
 
-int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
+int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
                       std::int64_t MessageTimestampMS) {
+
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }

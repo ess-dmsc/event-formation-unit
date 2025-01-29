@@ -123,7 +123,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
 }
 
 void CbmBase::processing_thread() {
-
+  /// \todo: properly the quite and stop application and log the fault.
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INPUT, ALW, "Missing topic - mandatory for beam monitor");
     stopThreads();
@@ -135,7 +135,7 @@ void CbmBase::processing_thread() {
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                      KafkaCfg.CfgParms);
 
-  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+  auto Produce = [&eventprod](const auto &DataBuffer, const auto &Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
   };
 
