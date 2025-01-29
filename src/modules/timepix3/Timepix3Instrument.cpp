@@ -70,14 +70,21 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                     return timepix3Parser.parseTPX(data);
                   },
                   4096)
-              .addStage<PipelineStage<Hit2DVector, Hit2DVector>>(
+              .addStage<PipelineStage<Hit2DVector, std::future<Hit2DVector>>>(
                   [this](Hit2DVector &hits) {
-                    sort_chronologically(hits);
-                    return hits;
+
+                    return ThreadPool::getInstance().enqueue(
+                        [this, hits = std::move(hits)]() mutable {
+                            sort_chronologically(hits);
+                            return hits;
+                        });
                   })
               .addStage<
-                  PipelineStage<Hit2DVector, std::future<Cluster2DContainer>>>(
-                  [this](Hit2DVector &hits) {
+                  PipelineStage<std::future<Hit2DVector>, std::future<Cluster2DContainer>>>(
+                  [this](std::future<Hit2DVector> &future) {
+
+                    auto hits = std::move(future.get());
+                    
                     // Start a new thread to cluster the hits parallel. Ensure
                     // that hits ownership moved over to new thread. After
                     // initiaalizing the clustererm thread this stage returns a
