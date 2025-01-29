@@ -99,11 +99,11 @@ public:
 
           while (!OutputQueue->enqueue(std::move(Output))) {
             std::this_thread::sleep_for(
-                std::chrono::milliseconds(1));
+                std::chrono::microseconds(1));
           }
         } else {
           std::this_thread::sleep_for(
-              std::chrono::milliseconds(1));
+              std::chrono::microseconds(1));
         }
         auto end_time = std::chrono::steady_clock::now();
         PerformanceCounter.fetch_add(
