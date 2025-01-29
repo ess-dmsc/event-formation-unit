@@ -49,7 +49,17 @@ public:
   virtual void
   connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) = 0;
 
+  /// \brief Get the performance counter.
+  /// \return Performance counter in microseconds.
   virtual uint64_t getPerformanceCounterUs() const = 0;
+
+  /// \brief Get the number of times the output queue was starved.
+  /// \return Number of times the output queue was starved.
+  virtual uint64_t getStarvingCounterUs() const = 0;
+
+  /// \brief Get the number of times the output queue was blocked.
+  /// \return Number of times the output queue was blocked.
+  virtual uint64_t getBlockedCounterUs() const = 0;
 
 protected:
   std::future<void> Future;
@@ -144,17 +154,17 @@ public:
   }
 
   /// \brief Get the performance counter.
-  uint64_t getPerformanceCounterUs() const override {
+  inline uint64_t getPerformanceCounterUs() const override {
     return PerformanceCounter.load(std::memory_order_acquire);
   }
 
   /// \brief Get the number of times the output queue was starved.
-  uint64_t getStarvingCounterUs() const {
+  inline uint64_t getStarvingCounterUs() const {
     return StarvingCounter.load(std::memory_order_acquire);
   }
 
   /// \brief Get the number of times the output queue was blocked.
-  uint64_t getBlockedCounterUs() const {
+  inline uint64_t getBlockedCounterUs() const {
     return BlockedCounter.load(std::memory_order_acquire);
   }
 
@@ -205,11 +215,23 @@ public:
     return AllStageHealty;
   }
 
-  uint64_t getStagePerformance(const int &StageNumber) const {
+  PipelineStageBase &operator[](const int &StageNumber) const {
     if (StageNumber < 0 || StageNumber >= static_cast<int>(Stages.size())) {
       throw std::out_of_range("StageNumber is out of range");
     }
+    return *Stages[StageNumber];
+  }
+
+  inline uint64_t getStagePerformanceUs(const int &StageNumber) const {
     return Stages[StageNumber]->getPerformanceCounterUs();
+  }
+
+  inline uint64_t getStageStarvingCounterUs(const int &StageNumber) const {
+    return Stages[StageNumber]->getStarvingCounterUs();
+  }
+
+  inline uint64_t getStageBlockedCounterUs(const int &StageNumber) const {
+    return Stages[StageNumber]->getBlockedCounterUs();
   }
 
   /// \brief Get errors that occurred in the pipeline.
