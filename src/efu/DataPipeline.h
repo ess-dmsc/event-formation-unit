@@ -49,7 +49,7 @@ public:
   virtual void
   connectNextStage(std::shared_ptr<LockFreeQueueBase> NextStageInputQueue) = 0;
 
-  virtual uint64_t getPerformanceCounter() const = 0;
+  virtual uint64_t getPerformanceCounterUs() const = 0;
 
 protected:
   std::future<void> Future;
@@ -72,7 +72,7 @@ public:
   /// \param func Processing function that takes \ref In and returns \ref Out.
   /// \param inputQueueSize Size of the input queue (default 1024).
   /// \param outputQueueSize Size of the output queue (default 1024).
-  PipelineStage(std::function<Out(In&)> Func,
+  PipelineStage(std::function<Out(In &)> Func,
                 size_t InputQueueSize = DEFAULT_QUEUE_SIZE,
                 size_t OutputQueueSize = DEFAULT_QUEUE_SIZE)
       : Func(Func),
@@ -87,7 +87,7 @@ public:
       while (!StopFlag.load(std::memory_order_acquire)) {
 
         auto current_time = std::chrono::steady_clock::now();
-        
+
         if (InputQueue->dequeue(Input)) {
 
           Out Output = std::move(Func(Input));
@@ -100,12 +100,14 @@ public:
               std::memory_order_release);
 
           while (!OutputQueue->enqueue(std::move(Output))) {
-            std::this_thread::sleep_for(
-                std::chrono::microseconds(1));
+            int waitTime = 1;
+            BlockedCounter.fetch_add(waitTime, std::memory_order_release);
+            std::this_thread::sleep_for(std::chrono::microseconds(waitTime));
           }
         } else {
-          std::this_thread::sleep_for(
-              std::chrono::microseconds(1));
+          int waitTime = 1;
+          StarwingCounter.fetch_add(waitTime, std::memory_order_release);
+          std::this_thread::sleep_for(std::chrono::microseconds(waitTime));
         }
       }
     });
@@ -141,16 +143,28 @@ public:
     return OutputQueue;
   }
 
-  // Add getter functions for wait times
-  uint64_t getPerformanceCounter() const override {
+  /// \brief Get the performance counter.
+  uint64_t getPerformanceCounterUs() const override {
     return PerformanceCounter.load(std::memory_order_acquire);
+  }
+
+  /// \brief Get the number of times the output queue was starved.
+  uint64_t getStarwingCounterUs() const {
+    return StarwingCounter.load(std::memory_order_acquire);
+  }
+
+  /// \brief Get the number of times the output queue was blocked.
+  uint64_t getBlockedCounterUs() const {
+    return BlockedCounter.load(std::memory_order_acquire);
   }
 
 private:
   static const size_t DEFAULT_QUEUE_SIZE = 1024;
 
-  std::function<Out(In&)> Func;
+  std::function<Out(In &)> Func;
   std::atomic<int64_t> PerformanceCounter;
+  std::atomic<int64_t> StarwingCounter;
+  std::atomic<int64_t> BlockedCounter;
   std::shared_ptr<LockFreeQueue<In>> InputQueue;
   std::shared_ptr<LockFreeQueue<Out>> OutputQueue;
   std::atomic_bool StopFlag;
@@ -195,7 +209,7 @@ public:
     if (StageNumber < 0 || StageNumber >= static_cast<int>(Stages.size())) {
       throw std::out_of_range("StageNumber is out of range");
     }
-    return Stages[StageNumber]->getPerformanceCounter();
+    return Stages[StageNumber]->getPerformanceCounterUs();
   }
 
   /// \brief Get errors that occurred in the pipeline.
