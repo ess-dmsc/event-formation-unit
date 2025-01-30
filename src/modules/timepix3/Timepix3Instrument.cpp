@@ -65,8 +65,8 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       MaxCoordinateGap(timepix3Configuration.MaxCoordinateGap),
       DataPipeline(
           data_pipeline::PipelineBuilder()
-              .addStage<PipelineStage<vector<uint64_t>, Hit2DVector>>(
-                  [this](std::vector<uint64_t> &data) {
+              .addStage<PipelineStage<nonstd::span<uint64_t>, Hit2DVector>>(
+                  [this](nonstd::span<uint64_t> &data) {
                     return timepix3Parser.parseTPX(data);
                   },
                   4096)

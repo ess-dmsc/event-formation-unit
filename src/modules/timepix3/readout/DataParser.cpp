@@ -34,7 +34,7 @@ DataParser::DataParser(struct Counters &counters,
                        std::shared_ptr<Timepix3Geometry> geometry)
     : Stats(counters), Geometry(geometry) {}
 
-Hit2DVector DataParser::parseTPX(std::vector<uint64_t> &readoutData) {
+Hit2DVector DataParser::parseTPX(nonstd::span<uint64_t> &readoutData) {
   using namespace std::chrono;
 
   Hit2DVector hits;

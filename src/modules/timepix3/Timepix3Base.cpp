@@ -14,6 +14,7 @@
 #include <memory>
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
+#include <common/memory/span.hpp>
 #include <thread>
 #include <vector>
 
@@ -196,13 +197,10 @@ void Timepix3Base::processingThread() {
       }
 
       // Copy the data to a vector for the pipeline
-      std::vector<uint64_t> ReadoutData(DataLen / sizeof(uint64_t));
-      ReadoutData.insert(ReadoutData.begin(),
-                         reinterpret_cast<uint64_t *>(DataPtr),
-                         reinterpret_cast<uint64_t *>(DataPtr + DataLen));
+      nonstd::span<uint64_t> ReadoutData(reinterpret_cast<uint64_t*>(DataPtr), DataLen / sizeof(uint64_t));
 
       auto InputQueue =
-          Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
+          Timepix3.DataPipeline.getInputQueue<nonstd::span<uint64_t>>();
 
       while (!InputQueue->enqueue(std::move(ReadoutData))) {
         std::this_thread::sleep_for(chrono::microseconds(1));
