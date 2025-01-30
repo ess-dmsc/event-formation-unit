@@ -178,6 +178,10 @@ void Timepix3Base::processingThread() {
           }
         }
       });
+  int size = (9000 / sizeof(uint64_t)) * 500;
+  static std::vector<uint64_t> combinedData(size);
+
+  int bufferCounter = 0;
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -198,13 +202,23 @@ void Timepix3Base::processingThread() {
 
       // Copy the data to a vector for the pipeline
       nonstd::span<uint64_t> ReadoutData(reinterpret_cast<uint64_t*>(DataPtr), DataLen / sizeof(uint64_t));
+      combinedData.insert(combinedData.end(), ReadoutData.begin(), ReadoutData.end());
 
-      auto InputQueue =
-          Timepix3.DataPipeline.getInputQueue<nonstd::span<uint64_t>>();
+      bufferCounter++;
 
-      while (!InputQueue->enqueue(std::move(ReadoutData))) {
-        std::this_thread::sleep_for(chrono::microseconds(1));
-      }
+      // Check if we have collected 5 buffers
+      if (bufferCounter >= 500) {
+        auto InputQueue = Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
+
+        // Enqueue the combined data
+        while (!InputQueue->enqueue(std::move(combinedData))) {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+        }
+
+        // Reset the counter and the combinedData vector
+        bufferCounter = 0;
+        combinedData.clear();
+    }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

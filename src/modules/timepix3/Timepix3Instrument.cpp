@@ -65,11 +65,10 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       MaxCoordinateGap(timepix3Configuration.MaxCoordinateGap),
       DataPipeline(
           data_pipeline::PipelineBuilder()
-              .addStage<PipelineStage<nonstd::span<uint64_t>, Hit2DVector>>(
-                  [this](nonstd::span<uint64_t> &data) {
+              .addStage<PipelineStage<std::vector<uint64_t>, Hit2DVector>>(
+                  [this](std::vector<uint64_t> &data) {
                     return timepix3Parser.parseTPX(data);
-                  },
-                  4096)
+                  })
               .addStage<PipelineStage<Hit2DVector, std::future<Hit2DVector>>>(
                   [this](Hit2DVector &hits) {
 
@@ -104,7 +103,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
                     // returns the result to the next stage
                     return future.get();
                   })
-              .addStage<PipelineStage<Cluster2DContainer, int>>(
+                .addStage<PipelineStage<Cluster2DContainer, int>>(
                   [this](Cluster2DContainer &clusters) {
                     // Process step by step the future promise stored in the
                     // input queue. Wait for the future to be ready and then

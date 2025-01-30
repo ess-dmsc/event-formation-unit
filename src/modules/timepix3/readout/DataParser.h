@@ -79,7 +79,7 @@ public:
 
   void applyData(const timepixDTO::ESSGlobalTimeStamp &) override;
 
-  Hit2DVector parseTPX(nonstd::span<uint64_t> &);
+  Hit2DVector parseTPX(std::vector<uint64_t> &);
 
   inline int parseEVR(const char *buffer) {
     using namespace std::chrono;
