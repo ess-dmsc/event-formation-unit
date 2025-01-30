@@ -13,6 +13,7 @@
 #include <chrono>
 #include <common/debug/Log.h>
 #include <common/memory/LockFreeQueue.h>
+#include <efu/ThreadPool.hpp>
 #include <cstdint>
 #include <future>
 #include <iostream>
@@ -92,7 +93,7 @@ public:
 
   /// \brief Start the pipeline stage.
   void start() override {
-    Future = std::async(std::launch::async, [this]() {
+    Future = ThreadPool::getInstance().enqueue([this]() {
       In Input;
       while (!StopFlag.load(std::memory_order_acquire)) {
 

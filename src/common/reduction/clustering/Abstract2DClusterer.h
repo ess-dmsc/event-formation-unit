@@ -124,7 +124,7 @@ bool operator!=(const Cluster2DPoolAllocator<T> &,
 // Cluster2DContainerAllocator<Cluster2D>>;
 // using Cluster2DContainer = std::list<Cluster2D>;
 using Cluster2DContainer =
-    std::list<Cluster2D>;
+    std::vector<Cluster2D>;
 
 /// \brief convenience function for printing a Cluster2DContainer
 std::string to_string(const Cluster2DContainer &container,

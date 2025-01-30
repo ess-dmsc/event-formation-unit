@@ -178,10 +178,11 @@ void Timepix3Base::processingThread() {
           }
         }
       });
-  int size = (9000 / sizeof(uint64_t)) * 500;
-  static std::vector<uint64_t> combinedData(size);
 
-  int bufferCounter = 0;
+  static std::vector<uint64_t> CombinedData;
+
+  int AddExtraPackets = 0;
+  bool BufferFlush = false;
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -196,29 +197,41 @@ void Timepix3Base::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       if (DataLen == 24) {
+        /// EVR data found trigger buffer flush
+        BufferFlush = true;
         Timepix3.timepix3Parser.parseEVR(DataPtr);
         continue;
       }
 
       // Copy the data to a vector for the pipeline
       nonstd::span<uint64_t> ReadoutData(reinterpret_cast<uint64_t*>(DataPtr), DataLen / sizeof(uint64_t));
-      combinedData.insert(combinedData.end(), ReadoutData.begin(), ReadoutData.end());
+      CombinedData.insert(CombinedData.end(), ReadoutData.begin(), ReadoutData.end());
 
-      bufferCounter++;
+      /// If EVR found we add some more packets and hand over the data for the pipeline to process
+      /// \todo this is unheatly for timing point of view since it delays the tdc packet calculation
+      if (BufferFlush) {
+        AddExtraPackets++;
 
-      // Check if we have collected 5 buffers
-      if (bufferCounter >= 500) {
-        auto InputQueue = Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
+      // if EVR found add 3 extra packet to the buffer and then hand over the data for the pipeline to process
+        if (AddExtraPackets >= 3) {
+            auto InputQueue = Timepix3.DataPipeline.getInputQueue<std::vector<uint64_t>>();
 
-        // Enqueue the combined data
-        while (!InputQueue->enqueue(std::move(combinedData))) {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            // learn the size of the vector to reuse it for reallocation
+            auto CombinedDataSize = CombinedData.size();
+
+            // Enqueue the combined data to the pipeline
+            while (!InputQueue->enqueue(std::move(CombinedData))) {
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
+            }
+
+            // Reset counter buffer and flags for the next pulse cycle
+            AddExtraPackets = 0;
+            BufferFlush = false;
+            // The vector moved to the pipeline, so we need clear and reset size to reinitiate the vector
+            CombinedData.clear();
+            CombinedData.reserve(CombinedDataSize);
         }
-
-        // Reset the counter and the combinedData vector
-        bufferCounter = 0;
-        combinedData.clear();
-    }
+      }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

@@ -33,6 +33,9 @@ PixelEventHandler::PixelEventHandler(Counters &statCounters,
       FrequencyPeriodNs(hzToNanoseconds(timepix3Configuration.FrequencyHz)) {
 }
 
+
+/// \todo: this is a possible error with the publishing thread, since we can change pulse time
+///        in the middle of the processing, we should use a lock to avoid this.
 void PixelEventHandler::applyData(const ESSGlobalTimeStamp &epochEssPulseTime) {
   serializer.setReferenceTime(epochEssPulseTime.pulseTimeInEpochNs);
 }
