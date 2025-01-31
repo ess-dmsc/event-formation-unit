@@ -1,4 +1,4 @@
-// Copyright (C) 2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,16 +24,28 @@
 
 class RuntimeStat {
 public:
-  RuntimeStat(std::vector<int64_t> Counters) : OldStats(Counters) {
-    if (Counters.size() == 0) {
-      throw std::runtime_error("RuntimeStat array must have nonzero size");
-    }
+  /// \brief Constructor used to initialize the runtime status
+  /// \param Counters vector of counters to be used for runtime status
+  /// A copy of the counters is stored internally
+  /// \note The size of the vector must be <= 32
+  RuntimeStat(const std::vector<int64_t> &Counters) {
+    checkCountersSize(Counters);
+    OldStats = Counters;
+  }
+
+  /// \brief Move constructor used to initialize the runtime status
+  /// \param Counters vector of counters to be used for runtime status
+  /// Optimized to move rvalue reference (temporary object) to internal storage
+  /// \note The size of the vector must be <= 32
+  RuntimeStat(std::vector<int64_t> &&Counters) {
+    checkCountersSize(Counters);
+    OldStats = std::move(Counters);
   }
 
   /// \brief Get  vector of current counters and compare with old values
   /// if the values change the 'stage' is deemed 'up' and the corresponding
   /// bit is set.
-  uint32_t getRuntimeStatusMask(std::vector<int64_t> Stats) {
+  uint32_t getRuntimeStatusMask(const std::vector<int64_t> &Stats) {
     uint32_t Status{0};
     if ((Stats.size() > 32) or (Stats.size() != OldStats.size())) {
       XTRACE(PROCESS, ERR, "Runtime stat size mismatch (%zu)", Stats.size());
@@ -51,4 +63,14 @@ public:
 
 private:
   std::vector<int64_t> OldStats;
+
+  inline void checkCountersSize(const std::vector<int64_t> &Counters) {
+    if (Counters.empty()) {
+      throw std::runtime_error("RuntimeStat array must have nonzero size");
+    }
+
+    if (Counters.size() > 32) {
+      throw std::runtime_error("RuntimeStat array must have size <= 32");
+    }
+  }
 };
