@@ -119,20 +119,20 @@ public:
     if (Parms.Type == Config::ModuleType::SANS) {
       if (Index >= (int)OffsetsSANS.size()) {
         XTRACE(DATA, WAR, "Bad SANS index %u", Index);
-        return -1;
+        return 0;
       }
       Offset = OffsetsSANS[Index];
       Rotation = RotateSANS[Index];
     } else if (Parms.Type == Config::ModuleType::HR) {
       if (Index >= (int)OffsetsHR.size()) {
         XTRACE(DATA, WAR, "Bad HR index %u", Index);
-        return -1;
+        return 0;
       }
       Offset = OffsetsHR[Index];
       Rotation = RotateHR[Index];
     } else {
       XTRACE(DATA, WAR, "Inconsistent type (%d) for Cuboid", Parms.Type);
-      return -1;
+      return 0;
     }
 
     int LocalX = 2 * Cassette + Counter; // unrotated x,y values
