@@ -4,9 +4,11 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/testutils/TestBase.h>
 #include <common/utils/EfuUtils.h>
+#include <cstdint>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <modules/timepix3/dto/TimepixDataTypes.h>
@@ -50,12 +52,17 @@ public:
 
   const uint64_t pixelClockTime;
 
-  PixelTimeTestHelper(int16_t ToA, uint8_t fToA)
+  PixelTimeTestHelper(uint16_t ToA, uint8_t fToA)
       : ToA(ToA), fToA(fToA), ToT(200), spidrTime(41503),
         tdcClockInPixelTime(16999999997),
         pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
 
-  PixelTimeTestHelper(int16_t ToA, uint8_t fToA, uint32_t spidrTime,
+  PixelTimeTestHelper(uint16_t ToA, uint8_t fToA, uint32_t spidrTime)
+      : ToA(ToA), fToA(fToA), ToT(200), spidrTime(spidrTime),
+        tdcClockInPixelTime(16999999997),
+        pixelClockTime(calculatePixelClockTime(spidrTime, ToA, fToA)) {}
+
+  PixelTimeTestHelper(uint16_t ToA, uint8_t fToA, uint32_t spidrTime,
                       uint64_t tdcClockInPixelTime)
       : ToA(ToA), fToA(fToA), ToT(200), spidrTime(spidrTime),
         tdcClockInPixelTime(tdcClockInPixelTime),
@@ -145,8 +152,23 @@ TEST_F(Timepix3PixelEventHandlerTest, TestInvalidPixelReadout) {
 }
 
 TEST_F(Timepix3PixelEventHandlerTest, TestIfEventIsLaterThenNextTdc) {
-  // This value ensures that the pixel time is later then the tdc clock
-  uint32_t spidrLateArrival = 55000;
+  nanoseconds FrequencyPeriodNs = hzToNanoseconds(Timepix3Config.FrequencyHz);
+
+  // This value ensures that the pixel time is later then the next tdc clock
+  uint32_t spidrDelayToPulse = 176;
+
+  PixelTimeTestHelper PixelTimeInNextPulse{
+      TEST_DEFAULT_PIXEL_TIME.ToA, TEST_DEFAULT_PIXEL_TIME.fToA,
+      TEST_DEFAULT_PIXEL_TIME.spidrTime + spidrDelayToPulse,
+      TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime};
+
+  serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
+  serializer.pixelIdToCompare = TEST_PIXEL_ID;
+
+  // Pixel tof should be normalized with the frequency period to fir to the
+  // current pulse
+  serializer.eventTimeToCompare =
+      PixelTimeInNextPulse.getEventTof() % FrequencyPeriodNs.count();
 
   serializer.pulseTimeToCompare = TEST_PULSE_TIME_NS;
 
@@ -154,13 +176,15 @@ TEST_F(Timepix3PixelEventHandlerTest, TestIfEventIsLaterThenNextTdc) {
       {TEST_PULSE_TIME_NS, TEST_DEFAULT_PIXEL_TIME.tdcClockInPixelTime});
 
   testEventHandler.applyData(
-      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, TEST_DEFAULT_PIXEL_TIME.ToA,
-                   TEST_DEFAULT_PIXEL_TIME.ToT, TEST_DEFAULT_PIXEL_TIME.fToA,
-                   spidrLateArrival});
+      PixelReadout{TEST_DCOL, TEST_SPIX, TEST_PIX, PixelTimeInNextPulse.ToA,
+                   PixelTimeInNextPulse.ToT, PixelTimeInNextPulse.fToA,
+                   PixelTimeInNextPulse.spidrTime});
 
   testEventHandler.pushDataToKafka();
   EXPECT_EQ(counters.EventTimeForNextPulse, 1);
-  EXPECT_EQ(serializer.addEventCallCounter, 0);
+
+  // We always add event since we normalize it to current pulse.
+  EXPECT_EQ(serializer.addEventCallCounter, 1);
 }
 
 TEST_F(Timepix3PixelEventHandlerTest, TestEventTimeShortlyAfterTdcPublished) {
