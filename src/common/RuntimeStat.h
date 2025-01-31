@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -35,7 +35,7 @@ public:
 
   /// \brief Move constructor used to initialize the runtime status
   /// \param Counters vector of counters to be used for runtime status
-  /// Optimized to move rvalue reference  (temporary object) to internal storage
+  /// Optimized to move rvalue reference (temporary object) to internal storage
   /// \note The size of the vector must be <= 32
   RuntimeStat(std::vector<int64_t> &&Counters) {
     checkCountersSize(Counters);
