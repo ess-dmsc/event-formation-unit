@@ -46,7 +46,7 @@ public:
   void merge(Cluster2D &other);
 
   void reserve(size_t size) { hits.reserve(size); }
-  
+
   /// \brief clears hits and resets calculated values
   void clear();
 
@@ -98,25 +98,25 @@ public:
   uint64_t timeSpan() const;
 
   /// \returns pre-calculated sum of each hit's weight
-  uint64_t weightSum() const;
+  double weightSum() const;
 
   /// \returns pre-calculated sum of each hit's weight squared
   double weight2Sum() const;
 
   /// \returns pre-calculated sum of each hit's weight*coord
-  uint64_t xCoordMass() const;
+  double xCoordMass() const;
   /// \returns center of mass in the coordinate dimension
   ///          can be NaN if weight sum is zero
   double xCoordCenter() const;
 
   /// \returns pre-calculated sum of each hit's weight*coord
-  uint64_t yCoordMass() const;
+  double yCoordMass() const;
   /// \returns center of mass in the coordinate dimension
   ///          can be NaN if weight sum is zero
   double yCoordCenter() const;
 
   /// \returns pre-calculated sum of each hit's weight*time
-  uint64_t timeMass() const;
+  double timeMass() const;
   /// \returns center of mass in the time dimension
   ///          can be NaN if weight sum is zero
   double timeCenter() const;
@@ -135,7 +135,7 @@ public:
   double yCoordCenter2() const;
 
   /// \returns pre-calculated sum of each hit's weight*weight*time
-  uint64_t timeMass2() const;
+  double timeMass2() const;
   /// \returns center of mass squared in the time dimension
   ///          can be NaN if weight sum is zero
   double timeCenter2() const;
@@ -171,15 +171,15 @@ private:
   uint64_t time_start_{0xFFFFFFFFFFFFFFFFULL};
   uint64_t time_end_{0};
 
-  uint64_t weight_sum_{0};   ///< sum of weight
-  uint64_t x_coord_mass_{0}; ///< sum of coord*weight
-  uint64_t y_coord_mass_{0}; ///< sum of coord*weight
-  uint64_t time_mass_{0};    ///< sum of time*weight
+  double weight_sum_{0.0};   ///< sum of weight
+  double x_coord_mass_{0.0}; ///< sum of coord*weight
+  double y_coord_mass_{0.0}; ///< sum of coord*weight
+  double time_mass_{0.0};    ///< sum of time*weight
 
-  uint64_t weight2_sum_{0};
-  uint64_t x_coord_mass2_{0}; ///< sum of coord*weight*weight
-  uint64_t y_coord_mass2_{0}; ///< sum of coord*weight*weight
-  uint64_t time_mass2_{0};    ///< sum of time*weight*weight
+  double weight2_sum_{0.0};
+  double x_coord_mass2_{0.0}; ///< sum of coord*weight*weight
+  double y_coord_mass2_{0.0}; ///< sum of coord*weight*weight
+  double time_mass2_{0.0};    ///< sum of time*weight*weight
 
   int utpc_idx_min_{0};
   int utpc_idx_max_{0};

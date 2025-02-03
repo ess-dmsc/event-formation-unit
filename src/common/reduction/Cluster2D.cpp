@@ -54,14 +54,33 @@ void Cluster2D::insert(const Hit2D &e) {
 
   DebugSplitOptimizer();
 
-  weight_sum_ += static_cast<uint64_t>(e.weight);
-  x_coord_mass_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.x_coordinate);
-  y_coord_mass_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.y_coordinate);
-  time_mass_ += static_cast<uint64_t>(e.weight) * e.time;
-  weight2_sum_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.weight);
-  x_coord_mass2_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.x_coordinate);
-  y_coord_mass2_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.y_coordinate);
-  time_mass2_ += static_cast<uint64_t>(e.weight) * static_cast<uint64_t>(e.weight) * e.time;
+  /// \todo can we avoid converting to doubles and stay in uint64?
+  double weight64 = static_cast<double>(e.weight);
+  double x_coordinate64 = static_cast<double>(e.x_coordinate);
+  double y_coordinate64 = static_cast<double>(e.y_coordinate);
+  double time64 = static_cast<double>(e.time);
+
+  DebugSplitOptimizer();
+
+  double We = weight64;
+  double We2 = weight64 * weight64;
+  double WeXCo = weight64 * x_coordinate64;
+  double We2XCo = weight64 * weight64 * x_coordinate64;
+  double WeYCo = weight64 * y_coordinate64;
+  double We2YCo = weight64 * weight64 * y_coordinate64;
+  double WeTi = weight64 * time64;
+  double We2Ti = weight64 * weight64 * time64;
+
+  DebugSplitOptimizer();
+
+  weight_sum_ += We;
+  x_coord_mass_ += WeXCo;
+  y_coord_mass_ += WeYCo;
+  time_mass_ += WeTi;
+  weight2_sum_ += We2;
+  x_coord_mass2_ += We2XCo;
+  y_coord_mass2_ += We2YCo;
+  time_mass2_ += We2Ti;
 
   DebugSplitOptimizer();
 
@@ -125,14 +144,14 @@ void Cluster2D::merge(Cluster2D &other) {
 
 void Cluster2D::clear() {
   hits.clear();
-  weight_sum_ = 0;
-  weight2_sum_ = 0;
-  x_coord_mass_ = 0;
-  y_coord_mass_ = 0;
-  time_mass_ = 0;
-  x_coord_mass2_ = 0;
-  y_coord_mass2_ = 0;
-  time_mass2_ = 0;
+  weight_sum_ = 0.0;
+  weight2_sum_ = 0.0;
+  x_coord_mass_ = 0.0;
+  y_coord_mass_ = 0.0;
+  time_mass_ = 0.0;
+  x_coord_mass2_ = 0.0;
+  y_coord_mass2_ = 0.0;
+  time_mass2_ = 0.0;
 }
 
 bool Cluster2D::empty() const { return hits.empty(); }
@@ -187,37 +206,29 @@ uint64_t Cluster2D::timeSpan() const {
   return (time_end_ - time_start_) + 1ul;
 }
 
-uint64_t Cluster2D::weightSum() const { return weight_sum_; }
+double Cluster2D::weightSum() const { return weight_sum_; }
 
-uint64_t Cluster2D::xCoordMass() const { return x_coord_mass_; }
+double Cluster2D::xCoordMass() const { return x_coord_mass_; }
 
-double Cluster2D::xCoordCenter() const { 
-  return static_cast<double>(x_coord_mass_) / static_cast<double>(weight_sum_);
+double Cluster2D::xCoordCenter() const { return x_coord_mass_ / weight_sum_; }
+
+double Cluster2D::yCoordMass() const { return y_coord_mass_; }
+
+double Cluster2D::yCoordCenter() const { return y_coord_mass_ / weight_sum_; }
+
+double Cluster2D::timeMass() const { return time_mass_; }
+
+double Cluster2D::timeCenter() const { return time_mass_ / weight_sum_; }
+
+double Cluster2D::xCoordMass2() const { return x_coord_mass2_; }
+
+double Cluster2D::xCoordCenter2() const {
+  return x_coord_mass2_ / weight2_sum_;
 }
 
-double Cluster2D::yCoordCenter() const { 
-  return static_cast<double>(y_coord_mass_) / static_cast<double>(weight_sum_);
-}
+double Cluster2D::timeMass2() const { return time_mass2_; }
 
-double Cluster2D::timeCenter() const { 
-  return static_cast<double>(time_mass_) / static_cast<double>(weight_sum_);
-}
-
-double Cluster2D::xCoordCenter2() const { 
-  return static_cast<double>(x_coord_mass2_) / static_cast<double>(weight2_sum_);
-}
-
-double Cluster2D::timeCenter2() const { 
-  return static_cast<double>(time_mass2_) / static_cast<double>(weight2_sum_);
-}
-
-uint64_t Cluster2D::yCoordMass() const { return y_coord_mass_; }
-
-uint64_t Cluster2D::timeMass() const { return time_mass_; }
-
-uint64_t Cluster2D::xCoordMass2() const { return x_coord_mass2_; }
-
-uint64_t Cluster2D::timeMass2() const { return time_mass2_; }
+double Cluster2D::timeCenter2() const { return time_mass2_ / weight2_sum_; }
 
 uint64_t Cluster2D::timeOverlap(const Cluster2D &other) const {
   if (empty() || other.empty())
