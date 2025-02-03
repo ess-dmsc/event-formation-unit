@@ -30,6 +30,7 @@ void Hierarchical2DClusterer::insert(const Hit2D &hit) {
 }
 
 void Hierarchical2DClusterer::cluster(const Hit2DVector &hits) {
+  current_time_cluster_.reserve(hits.size());
   /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
     insert(hit);
@@ -55,8 +56,9 @@ void Hierarchical2DClusterer::cluster_by_x() {
       continue; // skip points that have already been visited
     }
     XTRACE(DATA, DEB, "Starting new cluster");
-    Hit2DVector space_cluster; // initialize a new cluster
-    space_cluster.push_back(current_time_cluster_[i]);
+    Cluster2D space_cluster;
+    space_cluster.reserve(clusterSize); // reserve space for the cluster
+    space_cluster.insert(std::move(current_time_cluster_[i]));
     visited[i] = true;
     for (uint j = i + 1; j < clusterSize; j++) {
       if (visited[j]) {
@@ -81,8 +83,8 @@ void Hierarchical2DClusterer::cluster_by_x() {
       // Compare with the square of the max_coord_gap to save computation time on sqrt above
       if (distance_sqr < max_coord_gap_sqr_) {
         XTRACE(DATA, DEB, "Adding to existing cluster");
-        space_cluster.push_back(
-            current_time_cluster_[j]); // add point to current cluster
+        space_cluster.insert(std::move(
+            current_time_cluster_[j])); // add point to current cluster
         visited[j] = true;
       } else {
         XTRACE(DATA, DEB, "Too far apart, not including in this cluster");
@@ -92,13 +94,13 @@ void Hierarchical2DClusterer::cluster_by_x() {
   }
 }
 
-void Hierarchical2DClusterer::stash_cluster(Hit2DVector &xz_cluster) {
-  Cluster2D cluster;
-  for (const auto &hit : xz_cluster) {
-    cluster.insert(hit);
-  }
-  Abstract2DClusterer::stash_cluster(cluster);
-}
+// void Hierarchical2DClusterer::stash_cluster(Hit2DVector &&xz_cluster) {
+//   Cluster2D cluster;
+//   for (const auto &hit : xz_cluster) {
+//     cluster.insert(hit);
+//   }
+//   Abstract2DClusterer::stash_cluster(cluster);
+// }
 
 std::string Hierarchical2DClusterer::config(const std::string &prepend) const {
   std::stringstream ss;
