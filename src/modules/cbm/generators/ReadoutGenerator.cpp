@@ -115,7 +115,9 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
-  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
+  int drift = std::rand() % 1001;
+
+      for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     // Check if we need to generate new pulse time and reset readout time
     // stop generating readouts and sync readout time with new spulse time
@@ -141,7 +143,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->ADC = 0;
 
     if (cbmSettings.generatorType == GeneratorType::Distribution) {
-      distributionValueGenerator(dataPkt);
+      distributionValueGenerator(dataPkt, drift);
     } else if (cbmSettings.generatorType == GeneratorType::Linear) {
       linearValueGenerator(dataPkt);
     } else {
@@ -156,13 +158,15 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
   }
 }
 
-void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
+void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value,
+                                                  int drift) {
   if (Generator == nullptr) {
     Generator = std::make_unique<DistributionGenerator>(
         MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
   }
 
-  esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
+  esstime::TimeDurationNano Tof =
+      getReadoutTimeNs() - getPulseTimeNs() + esstime::TimeDurationNano(drift);
   value->NPos =
       1000 * Generator->getDistValue(
                  duration_cast<esstime::TimeDurationMilli>(Tof).count());

@@ -91,7 +91,7 @@ namespace cbm {
     ///
     /// \param cbmReadout Pointer to the CbmReadout object.
     ///
-    void distributionValueGenerator(Parser::CbmReadout *cbmReadout);
+    void distributionValueGenerator(Parser::CbmReadout *cbmReadout, int drift = 0);
 
     ///
     /// \brief Generates the linear value for the ReadoutGenerator.
