@@ -160,12 +160,12 @@ public:
   }
 
   /// \brief Get the number of times the output queue was starved.
-  inline uint64_t getStarvingCounterUs() const {
+  inline uint64_t getStarvingCounterUs() const override {
     return StarvingCounter.load(std::memory_order_acquire);
   }
 
   /// \brief Get the number of times the output queue was blocked.
-  inline uint64_t getBlockedCounterUs() const {
+  inline uint64_t getBlockedCounterUs() const override {
     return BlockedCounter.load(std::memory_order_acquire);
   }
 
