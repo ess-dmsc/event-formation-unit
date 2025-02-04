@@ -580,7 +580,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_buffer), 'buffer err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_buffer), 'buffer err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.buffer), 'buffer err/s')"
         },
         {
           "datasource": {
@@ -590,7 +600,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "C",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_cookie), 'cookie err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_cookie), 'cookie err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "C",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.cookie), 'cookie err/s')"
         },
         {
           "datasource": {
@@ -600,7 +620,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "D",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_header), 'header err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_header), 'header err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.header), 'header err/s')"
         },
         {
           "datasource": {
@@ -610,7 +640,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "E",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_pad), 'pad err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_pad), 'pad err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "E",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.pad), 'pad err/s')"
         },
         {
           "datasource": {
@@ -620,7 +660,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "G",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_seqno), 'deq err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_seqno), 'deq err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.seqno), 'deq err/s')"
         },
         {
           "datasource": {
@@ -630,7 +680,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "H",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_size), 'size err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_size), 'size err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "H",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.size), 'size err/s')"
         },
         {
           "datasource": {
@@ -640,7 +700,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "I",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_version), 'version err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_version), 'version err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "I",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.version), 'version err/s')"
         },
         {
           "datasource": {
@@ -650,7 +720,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "J",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_type), 'type err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_type), 'type err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "J",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.type), 'type err/s')"
         },
         {
           "datasource": {
@@ -660,7 +740,17 @@
           "hide": false,
           "refCount": 0,
           "refId": "K",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_timehigh), 'timehigh err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_timehigh), 'timehigh err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "K",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timehigh), 'timehigh err/s')"
         }
       ],
       "title": "ESS Header",
