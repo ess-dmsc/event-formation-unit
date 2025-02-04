@@ -100,11 +100,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -201,7 +202,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "refCount": 0,
@@ -269,7 +270,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -279,7 +280,19 @@
           "hide": false,
           "refCount": 0,
           "refId": "A",
-          "target": "alias(asPercent(perSecond(efu.$instrument.$region.thread.input_idle), 10), 'ide/s')"
+          "target": "alias(asPercent(perSecond(efu.$instrument.$region.thread.input_idle), 10), 'ide/s')",
+          "textEditor": true
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "alias(asPercent(perSecond(efu.$instrument.$region.thread.receive_idle), 10), 'ide/s')",
+          "textEditor": true
         }
       ],
       "title": "Input Thread Idle",
@@ -342,7 +355,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -437,11 +450,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -546,11 +560,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -559,7 +574,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "F",
+          "refId": "A",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v0), 'header v0/s')"
         },
         {
@@ -569,7 +584,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "A",
+          "refId": "B",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v1), 'header v1/s')"
         },
         {
@@ -579,7 +594,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "B",
+          "refId": "C",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_buffer), 'buffer err/s')"
         },
         {
@@ -589,7 +604,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "B",
+          "refId": "D",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.buffer), 'buffer err/s')"
         },
         {
@@ -599,7 +614,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "C",
+          "refId": "E",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_cookie), 'cookie err/s')"
         },
         {
@@ -609,7 +624,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "C",
+          "refId": "F",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.cookie), 'cookie err/s')"
         },
         {
@@ -619,7 +634,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "D",
+          "refId": "G",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_header), 'header err/s')"
         },
         {
@@ -629,7 +644,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "D",
+          "refId": "H",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.header), 'header err/s')"
         },
         {
@@ -639,7 +654,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "E",
+          "refId": "I",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_pad), 'pad err/s')"
         },
         {
@@ -649,7 +664,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "E",
+          "refId": "J",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.pad), 'pad err/s')"
         },
         {
@@ -659,7 +674,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "G",
+          "refId": "K",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_seqno), 'deq err/s')"
         },
         {
@@ -669,7 +684,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "G",
+          "refId": "L",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.seqno), 'deq err/s')"
         },
         {
@@ -679,7 +694,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "H",
+          "refId": "M",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_size), 'size err/s')"
         },
         {
@@ -689,7 +704,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "H",
+          "refId": "N",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.size), 'size err/s')"
         },
         {
@@ -699,7 +714,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "I",
+          "refId": "O",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_version), 'version err/s')"
         },
         {
@@ -709,7 +724,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "I",
+          "refId": "P",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.version), 'version err/s')"
         },
         {
@@ -719,7 +734,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "J",
+          "refId": "R",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_type), 'type err/s')"
         },
         {
@@ -729,7 +744,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "J",
+          "refId": "S",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.type), 'type err/s')"
         },
         {
@@ -739,7 +754,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "K",
+          "refId": "T",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_timehigh), 'timehigh err/s')"
         },
         {
@@ -749,7 +764,7 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "K",
+          "refId": "V",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timehigh), 'timehigh err/s')"
         }
       ],
@@ -835,11 +850,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1014,11 +1030,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1153,11 +1170,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.3.1",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1276,6 +1294,6 @@
   "timezone": "browser",
   "title": "EFU",
   "uid": "ae4i7mv97dzi8c",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
