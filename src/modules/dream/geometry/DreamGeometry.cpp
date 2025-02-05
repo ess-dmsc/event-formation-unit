@@ -43,8 +43,8 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
     break;
   }
 
-  if (Pixel == 0) {
-    XTRACE(DATA, WAR, "Invalid pixel returned");
+  if (Pixel < 1) {
+    XTRACE(DATA, WAR, "Invalid pixel returned: %d", Pixel);
     return 0;
   }
 

@@ -69,19 +69,19 @@ TEST_F(CuboidGeometryTest, Rotate3) {
 
 TEST_F(CuboidGeometryTest, OffsetRange) {
   Parms.P1.Index = 32;
-  ASSERT_NE(geometry.getPixelId(Parms, Readout), -1);
+  ASSERT_NE(geometry.getPixelId(Parms, Readout), 0);
   Parms.P1.Index = 33;
-  ASSERT_EQ(geometry.getPixelId(Parms, Readout), -1);
+  ASSERT_EQ(geometry.getPixelId(Parms, Readout), 0);
 
   Parms.Type = Config::ModuleType::SANS;
   Parms.P1.Index = 35;
-  ASSERT_NE(geometry.getPixelId(Parms, Readout), -1);
+  ASSERT_NE(geometry.getPixelId(Parms, Readout), 0);
   Parms.P1.Index = 36;
-  ASSERT_EQ(geometry.getPixelId(Parms, Readout), -1);
+  ASSERT_EQ(geometry.getPixelId(Parms, Readout), 0);
 
   Parms.Type = Config::ModuleType::FwEndCap;
   Parms.P1.Index = 0;
-  ASSERT_EQ(geometry.getPixelId(Parms, Readout), -1);
+  ASSERT_EQ(geometry.getPixelId(Parms, Readout), 0);
 }
 
 int main(int argc, char **argv) {
