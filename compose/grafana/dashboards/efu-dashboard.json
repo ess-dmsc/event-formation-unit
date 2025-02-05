@@ -465,7 +465,7 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_amplitude), 'ampl err/s')"
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.processed), 'readout processed/s')"
         },
         {
           "datasource": {
@@ -476,6 +476,46 @@
           "refCount": 0,
           "refId": "C",
           "target": "alias(perSecond(efu.$instrument.$region.readouts.count), 'readouts/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "A",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.type.ttl_proccessed), 'ttl readout/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.type.ibm_processed), 'ibm readout/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "E",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.tof_count), 'tof/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.prevtof_count), 'pre tof/s')"
         }
       ],
       "title": "Readouts",
@@ -766,6 +806,16 @@
           "refCount": 0,
           "refId": "V",
           "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timehigh), 'timehigh err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "Q",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timefrac), 'timefrac err/s')"
         }
       ],
       "title": "ESS Header",
@@ -946,6 +996,46 @@
           "refCount": 0,
           "refId": "I",
           "target": "alias(perSecond(efu.$instrument.$region.readouts.prevtof_neg), 'pretof neg/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "J",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.no_serializer), 'serializer err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "K",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.ring_mismatch), 'ring err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "L",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.time), 'time err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "M",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.type), 'type err/s')"
         }
       ],
       "title": "Readout Errors",
@@ -1086,6 +1176,26 @@
           "refCount": 0,
           "refId": "C",
           "target": "alias(perSecond(efu.$instrument.$region.events.pixel_errors), 'pixel err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.events.ibm), 'ibm events/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.events.ttl), 'ttl events/s')"
         }
       ],
       "title": "Events",
@@ -1294,6 +1404,6 @@
   "timezone": "browser",
   "title": "EFU",
   "uid": "ae4i7mv97dzi8c",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
