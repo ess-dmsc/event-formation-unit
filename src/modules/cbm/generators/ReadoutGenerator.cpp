@@ -61,6 +61,9 @@ ReadoutGenerator::ReadoutGenerator()
   IbmGroup->add_option(
       "--bins", cbmSettings.NumberOfBins,
       "Number of bins (sampling) of the distribution function (default 512)");
+  IbmGroup->add_flag(
+      "--shake", cbmSettings.ShakeBeam,
+      "Use random drift value for each pulse to shake the beam ");
 
   IbmGroup
       ->add_option("--generator_type", cbmSettings.generatorType,
@@ -115,14 +118,20 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
-  int drift = std::rand() % 1001;
-
-      for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
 
     // Check if we need to generate new pulse time and reset readout time
-    // stop generating readouts and sync readout time with new spulse time
+    // stop generating readouts and sync readout time with new pulse time
+    // also generate new drift value if we shake the beam
     if (getReadoutTimeNs() > nextPulseTime) {
       resetReadoutToPulseTime();
+      if (cbmSettings.ShakeBeam) {
+        RandomTimeDriftNS =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::microseconds(std::rand() % SHAKE_BEAM_US.second +
+                                          SHAKE_BEAM_US.first));
+      }
+
       break;
     }
 
@@ -135,7 +144,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->FENId = cbmSettings.FenId;
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->TimeHigh = getReadoutTimeHigh();
-    dataPkt->TimeLow = getReadoutTimeLow();
+    dataPkt->TimeLow = getReadoutTimeLow() + RandomTimeDriftNS.count();
     dataPkt->Type = CbmType::IBM;
 
     // Currently we generating for 1 beam monitor only
@@ -143,7 +152,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->ADC = 0;
 
     if (cbmSettings.generatorType == GeneratorType::Distribution) {
-      distributionValueGenerator(dataPkt, drift);
+      distributionValueGenerator(dataPkt);
     } else if (cbmSettings.generatorType == GeneratorType::Linear) {
       linearValueGenerator(dataPkt);
     } else {
@@ -158,15 +167,13 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
   }
 }
 
-void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value,
-                                                  int drift) {
+void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator = std::make_unique<DistributionGenerator>(
         MILLISEC / Settings.Frequency, cbmSettings.NumberOfBins);
   }
 
-  esstime::TimeDurationNano Tof =
-      getReadoutTimeNs() - getPulseTimeNs() + esstime::TimeDurationNano(drift);
+  esstime::TimeDurationNano Tof = getReadoutTimeNs() - getPulseTimeNs();
   value->NPos =
       1000 * Generator->getDistValue(
                  duration_cast<esstime::TimeDurationMilli>(Tof).count());
