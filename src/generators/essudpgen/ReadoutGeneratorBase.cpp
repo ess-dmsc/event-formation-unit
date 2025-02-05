@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,6 +8,7 @@
 // GCOVR_EXCL_START
 
 #include <Error.hpp>
+#include <chrono>
 #include <common/debug/Trace.h>
 #include <common/utils/EfuUtils.h>
 #include <cstdlib>
@@ -111,10 +112,29 @@ void ReadoutGeneratorBase::generateHeader() {
            pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
   }
 
+  // if the requested frequency is not 0, generate simulate frequency mode
+  // create new pulse time according to pulse frequency
   if (pulseFrequencyNs != TimeDurationNano(0)) {
-    // if the readout time is greater than the pulse time, update generate new
+
+    // if the readout time is greater than the pulse time, generate new
     // pulse time for the header
     if (readoutTime.toNS() >= getNextPulseTimeNs()) {
+
+      // convert the pulse time to milliseconds to remove signed overflow
+      auto pulseTimeMilli = nsToMicrosecons(pulseTime.toNS().count());
+      auto currentTimeMilli = sToMilliseconds(time(NULL));
+
+      /// \note: reset the pulse time if it is drifted too much from
+      /// real clock. This is a workaround for the file writer not accepting the
+      /// pulse time if it is too far from the real clock
+      if (pulseTimeMilli - currentTimeMilli >
+          sToMilliseconds(MAX_ALLOWED_DRIFT)) {
+
+        XTRACE(DATA, WAR, "Pulse time is driffted too much, reset it");
+        pulseTime = ESSTime(time(NULL), 0);
+        prevPulseTime = pulseTime;
+      }
+
       prevPulseTime = pulseTime;
       pulseTime += pulseFrequencyNs;
       XTRACE(DATA, INF,
@@ -125,7 +145,7 @@ void ReadoutGeneratorBase::generateHeader() {
     // if the requested frequency is 0, generate a new pulse time for each
     // packet and we use fake offset btw. pulse and prevPulse
     /// \todo This operation mode should be made obsolete as soon as
-    /// infrastructure updated ti use freq mode
+    /// infrastructure updated to use freq mode
   } else {
     prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
     pulseTime = ESSTime(time(NULL), TimeLowOffset);

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024-2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <random>
 #include <generators/functiongenerators/FunctionGenerator.h>
+#include <random>
 
 ///
 /// The DistributionGenerator class represents a generator for random values
@@ -42,13 +42,14 @@ public:
   /// \param MaxX The maximum range of the distribution.
   DistributionGenerator(double MaxX);
 
-  /// \brief The constructor populates relevant data structures but with a 
+  /// \brief The constructor populates relevant data structures but with a
   /// custom defined bin number. Bin numver defines the resolution of the
   /// distribution function.
   /// 1) calculate values for distribution and 2) integrate into a cumulative
   /// distribution function (not normalised). Then 3) get normalisation factor.
   /// \param MaxX The maximum range of the distribution.
-  /// \param Bins The number of bins in the distribution. We always use the absolute value of Bins.
+  /// \param Bins The number of bins in the distribution. We always use the
+  /// absolute value of Bins.
   DistributionGenerator(double MaxX, int Bins);
 
   /// \brief return a random value based on the distribution function
@@ -66,7 +67,8 @@ public:
   std::vector<double> CDF;
 
   // objects for random number generation
-  std::mt19937 gen{1066}; // Standard mersenne_twister_engine. Seed 1066
+  std::minstd_rand gen{
+      1066}; // MinstdRand (fast) random number generator with Seed 1066
   std::uniform_real_distribution<> dis{0.0, 1.0};
 };
 // GCOVR_EXCL_STOP

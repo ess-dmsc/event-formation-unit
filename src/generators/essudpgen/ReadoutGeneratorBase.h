@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -91,7 +91,6 @@ public:
 
   static constexpr int BufferSize{8972}; ///< Size of the buffer
   uint8_t Buffer[BufferSize];            ///< Buffer for the packet
-
 
   std::map<std::string, ESSReadout::Parser::DetectorType> NameToType;
 
@@ -218,6 +217,9 @@ protected:
       20000}; ///< Time offset for readout generation (ticks)
   const uint32_t PrevTimeLowOffset{
       10000}; ///< Previous time offset for readout generation (ticks)
+
+  static constexpr int MAX_ALLOWED_DRIFT{
+      20}; ///< Maximum allowed pulse time drift
 
   uint8_t ReadoutDataSize{0};   ///< Size of the readout data
   uint16_t numberOfReadouts{0}; ///< Number of readouts

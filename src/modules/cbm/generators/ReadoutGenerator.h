@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "common/time/ESSTime.h"
 #include <cbm/CbmTypes.h>
 #include <cbm/generators/GeneratorType.h>
 #include <cbm/geometry/Parser.h>
 #include <common/testutils/DataFuzzer.h>
+#include <common/time/ESSTime.h>
 #include <cstdint>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <generators/functiongenerators/FunctionGenerator.h>
@@ -51,6 +51,7 @@ public:
     uint8_t ChannelId{0};              // The channel ID.
     uint32_t Offset{0};                // The offset value.
     bool ShakeBeam{false};             // Flag to shake the beam.
+    bool Randomise{false};             // Flag to randomize the data.
     GeneratorType generatorType{
         GeneratorType::Distribution}; // The generator type.
     std::optional<uint32_t> Value;    // The optional value.
@@ -69,13 +70,21 @@ private:
   static constexpr int MILLISEC = 1e3;
 
   // Shake beam time in microseconds range
-  static constexpr std::pair<int, int> SHAKE_BEAM_US = {100, 800};
+  static constexpr std::pair<int, int> SHAKE_BEAM_US = {500, 1500};
 
   esstime::TimeDurationNano RandomTimeDriftNS{
       0}; // Variable to store the random time drift for shaking the beam.
 
   std::unique_ptr<FunctionGenerator> Generator{nullptr}; // The function
                                                          //  generator.
+
+  // Initialize random generator with a seed from std::random_device
+  std::minstd_rand RandomGenerator{std::random_device{}()};
+  // Initialize the distribution with SHAKE_BEAM_US range
+  std::uniform_int_distribution<int> BeamShakeDistMs{SHAKE_BEAM_US.first,
+                                                     SHAKE_BEAM_US.second};
+  std::uniform_int_distribution<int> NoiseDist{0, 50};
+
   ///
   /// \brief Generates the data for the ReadoutGenerator.
   ///
