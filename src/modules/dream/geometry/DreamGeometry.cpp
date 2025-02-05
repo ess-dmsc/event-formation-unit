@@ -43,13 +43,14 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
     break;
   }
 
-  if (Pixel < 1) {
-    XTRACE(DATA, WAR, "Invalid pixel returned: %d", Pixel);
+  if (Pixel == 0) {
+    XTRACE(DATA, WAR, "Invalid pixel returned in module: %i", Parms.Type);
     return 0;
   }
 
   int Offset = getPixelOffset(Parms.Type);
   if (Offset == -1) {
+    XTRACE(DATA, WAR, "No offset given for module %i", Parms.Type);
     return 0;
   }
   int GlobalPixel = Offset + Pixel;
