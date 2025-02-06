@@ -60,7 +60,7 @@ uint32_t ModuleGeometry::z_from_wire(uint16_t w) const {
   return z_offset + (flipped_z() ? flip(ret, z_range_) : ret);
 }
 
-std::string ModuleGeometry::debug(std::string prefix) const {
+std::string ModuleGeometry::debug(const std::string &prefix) const {
   std::string ret;
 
   ret += prefix +

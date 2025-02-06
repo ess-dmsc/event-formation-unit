@@ -59,7 +59,7 @@ public:
   };
 
   //
-  Config(std::string ConfigFile) : FileName(ConfigFile) {
+  Config(const std::string &ConfigFile) : FileName(ConfigFile) {
     memset(RMConfig, 0, sizeof(RMConfig));
   };
 
@@ -73,7 +73,7 @@ public:
   void apply();
 
   /// \brief log errormessage and throw runtime exception
-  void errorExit(std::string errmsg);
+  void errorExit(const std::string &errmsg);
 
   uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
 

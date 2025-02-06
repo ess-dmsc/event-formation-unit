@@ -12,7 +12,7 @@
 
 namespace Gem {
 
-ReaderHits::ReaderHits(std::string filename) {
+ReaderHits::ReaderHits(const std::string &filename) {
   file = HitFile::open(filename);
   total_ = file->count();
   ReadoutSize = sizeof(Hit);

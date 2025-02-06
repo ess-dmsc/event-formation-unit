@@ -17,7 +17,7 @@ namespace Gem {
 class ReaderHits {
 public:
   /// \todo document
-  ReaderHits(std::string filename);
+  ReaderHits(const std::string &filename);
 
   /// \todo document
   size_t read(char *buf);

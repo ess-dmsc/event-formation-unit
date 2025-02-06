@@ -10,7 +10,7 @@
 #include <common/Statistics.h>
 #include <common/debug/Log.h>
 
-int Statistics::create(std::string StatName, int64_t &Value) {
+int Statistics::create(const std::string &StatName, int64_t &Value) {
   LOG(UTILS, Sev::Info, "Adding stat {}", StatName);
   Value = 0; // all counters are cleared
   auto FullStatName = prefix + StatName;
@@ -41,7 +41,7 @@ int64_t Statistics::value(size_t Index) {
   return stats.at(Index - 1).StatValue;
 }
 
-int64_t Statistics::valueByName(std::string name) {
+int64_t Statistics::valueByName(const std::string &name) {
   for (const auto &stat : stats) {
     if (stat.StatName.find(name) != std::string::npos) {
       return stat.StatValue;
@@ -50,7 +50,7 @@ int64_t Statistics::valueByName(std::string name) {
   return -1;
 }
 
-void Statistics::setPrefix(std::string StatsPrefix, std::string StatsRegion) {
+void Statistics::setPrefix(const std::string &StatsPrefix, const std::string &StatsRegion) {
   if (StatsPrefix.size() > 0) {
     prefix = StatsPrefix;
     const char LastChar = StatsPrefix.back();

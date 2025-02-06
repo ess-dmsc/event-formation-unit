@@ -25,10 +25,10 @@ public:
   Tbl3HeConfig();
 
   ///\brief constructor used in EFU to load json from file
-  Tbl3HeConfig(std::string ConfigFile);
+  Tbl3HeConfig(const std::string &ConfigFile);
 
   // wrapper function for runtime exception
-  void errorExit(std::string ErrMsg);
+  void errorExit(const std::string &ErrMsg);
 
 
   ///\brief parse the loaded json object

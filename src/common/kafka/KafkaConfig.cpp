@@ -14,7 +14,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-KafkaConfig::KafkaConfig(std::string KafkaConfigFile) {
+KafkaConfig::KafkaConfig(const std::string &KafkaConfigFile) {
   if (KafkaConfigFile == "") {
     CfgParms = DefaultConfig;
     XTRACE(INIT, ALW, "KAFKA CONFIG - DEFAULT");

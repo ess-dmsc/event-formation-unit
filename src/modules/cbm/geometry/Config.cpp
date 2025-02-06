@@ -13,7 +13,7 @@ namespace cbm {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Config::errorExit(std::string ErrMsg) {
+void Config::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
   throw std::runtime_error(ErrMsg);
 }

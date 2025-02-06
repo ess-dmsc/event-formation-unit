@@ -24,7 +24,7 @@
 #define SEND_FLAGS 0
 #endif
 
-bool Socket::isValidIp(std::string ipAddress) {
+bool Socket::isValidIp(const std::string &ipAddress) {
   struct sockaddr_in SockAddr;
   return inet_pton(AF_INET, ipAddress.c_str(), &(SockAddr.sin_addr)) != 0;
 }

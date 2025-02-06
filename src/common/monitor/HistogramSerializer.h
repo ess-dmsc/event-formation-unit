@@ -17,7 +17,7 @@
 class HistogramSerializer {
 public:
   /// \todo document
-  HistogramSerializer(size_t buffer_half_size, std::string source_name);
+  HistogramSerializer(size_t buffer_half_size, const std::string &source_name);
 
   void set_callback(ProducerCallback cb);
 

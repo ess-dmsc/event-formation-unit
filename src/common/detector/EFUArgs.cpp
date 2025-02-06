@@ -41,7 +41,7 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--kafka_config", EFUSettings.KafkaConfigFile, "Kafka configuration file")
       ->group("EFU Options")->default_str("");
 
-  CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
+  CLIParser.add_option("-l,--log_level", [this](const std::vector<std::string> &Input) {
     return parseLogLevel(Input);
   }, "Set log message level. Set to 1 - 7 or one of \n                              `Critical`, `Error`, `Warning`, `Notice`, `Info`,\n                              or `Debug`. Ex: \"-l Notice\"")
   ->group("EFU Options")->default_str("Info");
@@ -140,7 +140,7 @@ EFUArgs::EFUArgs() {
   // clang-format on
 }
 
-bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
+bool EFUArgs::parseLogLevel(const std::vector<std::string> &LogLevelString) {
   std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3},
                                       {"Warning", 4},  {"Notice", 5},
                                       {"Info", 6},     {"Debug", 7}};

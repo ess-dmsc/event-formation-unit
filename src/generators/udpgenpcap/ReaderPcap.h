@@ -18,7 +18,7 @@ class ReaderPcap {
 public:
   /// \brief construct a reader for a specific file
   /// \param filename name of pcap file
-  ReaderPcap(std::string FileName);
+  ReaderPcap(const std::string &FileName);
 
   /// closes pcap handle
   ~ReaderPcap();

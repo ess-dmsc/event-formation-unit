@@ -18,7 +18,7 @@ namespace Caen {
 ///
 Config::Config() {}
 
-Config::Config(std::string ConfigFile) : ConfigFileName(ConfigFile) {
+Config::Config(const std::string &ConfigFile) : ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
   XTRACE(INIT, DEB, "Loaded json file");

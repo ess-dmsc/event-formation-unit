@@ -115,7 +115,7 @@ void VMM3Config::applyVMM3Config() {
   }
 }
 
-void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
+void VMM3Config::loadAndApplyCalibration(const std::string &CalibFile) {
   nlohmann::json calib_root;
   try {
     calib_root = from_json_file(CalibFile);
@@ -150,11 +150,11 @@ void VMM3Config::loadAndApplyCalibration(std::string CalibFile) {
 
 /// \brief validate the hybrid id string
 /// \todo too simplistic?
-bool VMM3Config::validHybridId(std::string HybridID) {
+bool VMM3Config::validHybridId(const std::string &HybridID) {
   return (HybridID.length() == 32);
 }
 
-void VMM3Config::applyCalibration(std::string HybridID,
+void VMM3Config::applyCalibration(const std::string &HybridID,
                                   nlohmann::json Calibration) {
 
   json_check_keys("Calibration error", Calibration, {"VMMHybridCalibration"});

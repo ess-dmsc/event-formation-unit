@@ -12,7 +12,7 @@
 #include <unistd.h>
 // GCOVR_EXCL_START
 
-void saveBuffer(std::string filename, void *buffer, uint64_t datasize) {
+void saveBuffer(const std::string &filename, void *buffer, uint64_t datasize) {
   int fd;
   const int flags = O_TRUNC | O_CREAT | O_RDWR;
   const int mode = S_IRUSR | S_IWUSR;

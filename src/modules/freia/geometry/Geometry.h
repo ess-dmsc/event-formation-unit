@@ -24,7 +24,7 @@ class Geometry {
 public:
   Geometry() { GeometryInst = &FreiaGeom; }
 
-  bool setGeometry(std::string NewGeometry) {
+  bool setGeometry(const std::string &NewGeometry) {
     if (NewGeometry == "AMOR") {
       GeometryInst = &AMORGeom;
       return true;

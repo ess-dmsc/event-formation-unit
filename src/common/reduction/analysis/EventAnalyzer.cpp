@@ -14,7 +14,7 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-EventAnalyzer::EventAnalyzer(std::string time_algorithm)
+EventAnalyzer::EventAnalyzer(const std::string &time_algorithm)
     : time_algorithm_(time_algorithm) {
   if (time_algorithm_ == "center-of-mass") {
     time_algo = TA_center_of_mass;

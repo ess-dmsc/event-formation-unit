@@ -53,10 +53,10 @@ struct Topology {
 
 class Config {
 
-  void errorExit(std::string ErrMsg);
+  void errorExit(const std::string &ErrMsg);
 
 public:
-  Config(std::string ConfigFile) : FileName(ConfigFile){};
+  Config(const std::string &ConfigFile) : FileName(ConfigFile){};
 
   Config(){};
 

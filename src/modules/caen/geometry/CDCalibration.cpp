@@ -23,7 +23,7 @@
 namespace Caen {
 
 /// loads calibration from file
-CDCalibration::CDCalibration(std::string Name, std::string CalibrationFile)
+CDCalibration::CDCalibration(const std::string &Name, const std::string &CalibrationFile)
     : Name(Name) {
 
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
@@ -219,7 +219,7 @@ bool CDCalibration::inUnitInterval(std::pair<double, double> &Pair) {
           (Pair.second >= 0.0) and (Pair.second <= 1.0));
 }
 
-void CDCalibration::throwException(std::string Message) {
+void CDCalibration::throwException(const std::string &Message) {
   XTRACE(INIT, ERR, "%s", Message.c_str());
   LOG(INIT, Sev::Error, Message);
   throw std::runtime_error(Message);

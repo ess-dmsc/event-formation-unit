@@ -27,7 +27,7 @@ public:
   Config();
 
   ///\brief constructor used in EFU to load json from file
-  Config(std::string ConfigFile);
+  Config(const std::string &ConfigFile);
 
   ///\brief parse the loaded json object
   void parseConfig();

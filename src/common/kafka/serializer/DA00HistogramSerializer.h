@@ -116,7 +116,7 @@ public:
   /// \param Strategy is the enum like binning strategy we can select
 
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string DataUnit,
+      std::string Source, time_t Period, time_t BinCount, const std::string &DataUnit,
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
@@ -151,7 +151,7 @@ public:
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binnig strategy is provided
   HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, std::string Unit,
+      std::string Source, time_t Period, time_t BinCount, const std::string &Unit,
       enum BinningStrategy Strategy = BinningStrategy::Drop,
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
