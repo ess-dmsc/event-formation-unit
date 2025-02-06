@@ -236,9 +236,9 @@ private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
-  ESSReadout::ESSTime pulseTime;     ///< Pulse time
-  ESSReadout::ESSTime prevPulseTime; ///< Previous pulse time
-  ESSReadout::ESSTime readoutTime;   ///< Readout time
+  esstime::ESSTime pulseTime;     ///< Pulse time
+  esstime::ESSTime prevPulseTime; ///< Previous pulse time
+  esstime::ESSTime readoutTime;   ///< Readout time
 
   esstime::TimeDurationNano pulseFrequencyNs{
       0}; ///< Pulse frequency in nanoseconds

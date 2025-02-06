@@ -10,7 +10,6 @@
 #include <Error.hpp>
 #include <chrono>
 #include <common/debug/Trace.h>
-#include <common/utils/EfuUtils.h>
 #include <cstdlib>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
@@ -18,7 +17,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
-using namespace efutils;
 
 ///\brief Constructor initialize the generator app
 ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
@@ -251,7 +249,7 @@ void ReadoutGeneratorBase::main() {
   }
 
   if (Settings.Frequency != 0) {
-    pulseFrequencyNs = efutils::hzToNanoseconds(Settings.Frequency);
+    pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
     numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
   } else {

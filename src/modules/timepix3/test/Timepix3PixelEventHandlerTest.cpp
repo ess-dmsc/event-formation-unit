@@ -6,7 +6,6 @@
 
 #include <common/kafka/EV44Serializer.h>
 #include <common/testutils/TestBase.h>
-#include <common/utils/EfuUtils.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <modules/timepix3/dto/TimepixDataTypes.h>
@@ -15,7 +14,6 @@
 
 using namespace Timepix3;
 using namespace timepixDTO;
-using namespace efutils;
 using namespace timepixReadout;
 using namespace std;
 

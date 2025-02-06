@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,10 +19,84 @@ namespace esstime {
 using TimePointNano = std::chrono::high_resolution_clock::time_point;
 /// \brief Duration in nanoseconds with uint64_t precision
 using TimeDurationNano = std::chrono::duration<uint64_t, std::nano>;
+/// \brief Duration in microseconds with uint64_t precision
+using TimeDurationMicro = std::chrono::duration<double, std::micro>;
 /// \brief Duration in milliseconds with double precision
 using TimeDurationMilli = std::chrono::duration<double, std::milli>;
 /// \brief Duration in seconds with double precision
 using TimeDurationSec = std::chrono::duration<double, std::ratio<1>>;
+
+/// \brief Converts a frequency in Hertz to a period in nanoseconds.
+/// \param FrequencyHz Frequency in Hertz.
+/// \return std::chrono::nanoseconds The corresponding period in nanoseconds.
+inline std::chrono::nanoseconds hzToNanoseconds(const float &FrequencyHz) {
+  uint64_t nsPeriod = static_cast<uint64_t>(1e9 / FrequencyHz);
+  return std::chrono::nanoseconds(nsPeriod);
+}
+
+/// \brief Converts a duration in nanoseconds (uint64_t) to microseconds.
+/// \param NanoSeconds Duration in nanoseconds.
+/// \return std::chrono::microseconds The corresponding duration in
+/// microseconds.
+inline std::chrono::microseconds nsToMicroseconds(const uint64_t &NanoSeconds) {
+  return std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::nanoseconds(NanoSeconds));
+}
+
+/// \brief Converts a duration in nanoseconds (TimeDurationNano) to microseconds.
+/// \param NanoSeconds Duration in nanoseconds.
+/// \return TimeDurationMicro(double) The corresponding duration in
+/// microseconds.
+inline TimeDurationMicro nsToMicroseconds(const TimeDurationNano &NanoSeconds) {
+  return std::chrono::duration_cast<TimeDurationMicro>(NanoSeconds);
+}
+
+/// \brief Converts a duration in nanoseconds (uint64_t) to milliseconds.
+/// \param NanoSeconds Duration in nanoseconds.
+/// \return std::chrono::milliseconds The corresponding duration in
+/// milliseconds.
+inline std::chrono::milliseconds nsToMilliseconds(const uint64_t &NanoSeconds) {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::nanoseconds(NanoSeconds));
+}
+
+/// \brief Converts a duration in nanoseconds (TimeDurationNano) to milliseconds.
+/// \param NanoSeconds Duration in nanoseconds.
+/// \return TimeDurationMilli(double) The corresponding duration in milliseconds.
+inline TimeDurationMilli nsToMilliseconds(const TimeDurationNano &NanoSeconds) {
+  return std::chrono::duration_cast<TimeDurationMilli>(NanoSeconds);
+}
+
+/// \brief Converts a duration in seconds (uint64_t) to nanoseconds.
+/// \param Seconds Duration in seconds.
+/// \return std::chrono::nanoseconds The corresponding duration in nanoseconds.
+inline std::chrono::nanoseconds sToNanoseconds(const uint64_t &Seconds) {
+  return std::chrono ::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::seconds(Seconds));
+}
+
+/// \brief Converts a duration in seconds (TimeDurationSec) to nanoseconds.
+/// \param Seconds Duration in seconds.
+/// \return TimeDurationNano(uint64_t) The corresponding duration in nanoseconds.
+inline TimeDurationNano sToNanoseconds(const TimeDurationSec &Seconds) {
+  return std::chrono::duration_cast<TimeDurationNano>(Seconds);
+}
+
+/// \brief Converts a duration in seconds (uint64_t) to milliseconds.
+/// \param Seconds Duration in seconds.
+/// \return std::chrono::milliseconds The corresponding duration in
+/// milliseconds.
+inline std::chrono::milliseconds sToMilliseconds(const uint64_t &Seconds) {
+  return std::chrono ::duration_cast<std::chrono::milliseconds>(
+      std::chrono::seconds(Seconds));
+}
+
+/// \brief Converts a duration in seconds (TimeDurationSec) to milliseconds.
+/// \param Seconds Duration in seconds.
+/// \return TimeDurationMilli(double) The corresponding duration in milliseconds.
+inline TimeDurationMilli sToMilliseconds(const TimeDurationSec &Seconds) {
+  return std::chrono::duration_cast<TimeDurationMilli>(Seconds);
+}
 
 /// \class ESSTime
 ///
@@ -62,10 +136,10 @@ public:
   ///
   /// \param timeInNs The duration in nanoseconds.
   ///
-  ESSTime(const TimeDurationNano timeInNs)
+  ESSTime(const TimeDurationNano TimeInNs)
       : TimeHigh(
-            std::chrono::duration_cast<std::chrono::seconds>(timeInNs).count()),
-        TimeLow(round((timeInNs.count() - (TimeHigh * SecInNs.count())) /
+            std::chrono::duration_cast<std::chrono::seconds>(TimeInNs).count()),
+        TimeLow(round((TimeInNs.count() - (TimeHigh * SecInNs.count())) /
                       ESSClockTick)) {}
 
   ///
@@ -79,9 +153,9 @@ public:
   ///
   /// \param nanoseconds The duration in nanoseconds to add.
   ///
-  inline void operator+=(const TimeDurationNano &nanoseconds) {
+  inline void operator+=(const TimeDurationNano &NanoSeconds) {
     uint32_t ticksToAdd =
-        static_cast<uint32_t>(nanoseconds.count() / ESSClockTick);
+        static_cast<uint32_t>(NanoSeconds.count() / ESSClockTick);
     this->operator+=(ticksToAdd);
   }
 
@@ -91,9 +165,9 @@ public:
   /// \param ticks The number of ticks to add.
   /// \return A new ESSTime object that represents the result of the addition.
   ///
-  inline ESSTime operator+(const uint32_t &ticks) {
+  inline ESSTime operator+(const uint32_t &Ticks) {
     ESSTime result = *this;
-    result += ticks;
+    result += Ticks;
     return result;
   }
 
@@ -101,13 +175,13 @@ public:
   /// \brief Adds the given number of ESS clock ticks to the ESSTime object.
   /// \param ticks The number of ticks to add.
   ///
-  inline void operator+=(const uint32_t &ticks) {
+  inline void operator+=(const uint32_t &Ticks) {
     uint32_t ticksToAdd = 0;
-    if (ticks >= ESSClockFreqHz) {
-      TimeHigh += static_cast<uint32_t>(ticks / ESSClockFreqHz);
-      ticksToAdd += static_cast<uint32_t>(std::fmod(ticks, ESSClockFreqHz));
+    if (Ticks >= ESSClockFreqHz) {
+      TimeHigh += static_cast<uint32_t>(Ticks / ESSClockFreqHz);
+      ticksToAdd += static_cast<uint32_t>(std::fmod(Ticks, ESSClockFreqHz));
     } else {
-      ticksToAdd += ticks;
+      ticksToAdd += Ticks;
     }
 
     if (TimeLow + ticksToAdd >= ESSClockFreqHz) {
@@ -197,7 +271,7 @@ public:
   ///
   /// \param pulseTime The pulse time used as the reference time.
   ///
-  ESSReferenceTime(ESSTime pulseTime) : TimeInNS(pulseTime.toNS()){};
+  ESSReferenceTime(ESSTime PulseTime) : TimeInNS(PulseTime.toNS()){};
 
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
@@ -207,7 +281,7 @@ public:
   /// \param refESSTime The reference time to set in ESSTime format.
   /// \return The reference time as a 64-bit unsigned integer.
   ///
-  uint64_t setReference(const ESSTime &refESSTime);
+  uint64_t setReference(const ESSTime &RefESSTime);
 
   ///
   /// \brief Sets the reference time.
@@ -215,7 +289,7 @@ public:
   /// \param refTime The reference time to set in uint64_t format.
   /// \return The reference time as a 64-bit unsigned integer.
   ///
-  uint64_t setReference(const uint64_t &refTime);
+  uint64_t setReference(const uint64_t &RefTime);
 
   ///
   /// \brief Sets the previous reference time.
@@ -223,7 +297,7 @@ public:
   /// \param refPrevESSTime The previous reference time to set.
   /// \return The previous reference time as a 64-bit unsigned integer.
   ///
-  uint64_t setPrevReference(const ESSTime &refPrevESSTime);
+  uint64_t setPrevReference(const ESSTime &RefPrevESSTime);
 
   ///
   /// \brief Sets the maximum TOF value.
@@ -272,21 +346,21 @@ public:
   /// \brief Calculates the time-of-flight (TOF) value based on the saved
   /// reference time and the current event time.
   ///
-  /// \param eventEssTime The current event time.
+  /// \param EventEssTime The current event time.
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated TOF value.
   ///
-  uint64_t getTOF(const ESSTime eventEssTime, const uint32_t DelayNS = 0);
+  uint64_t getTOF(const ESSTime EventEssTime, const uint32_t DelayNS = 0);
 
   ///
   /// \brief Calculates the previous time-of-flight (TOF) value based on the
   /// saved reference time and the current event time.
   ///
-  /// \param eventEssTime The current event time.
+  /// \param EventTime The current event time.
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated previous TOF value.
   ///
-  uint64_t getPrevTOF(const ESSTime eventTime, const uint32_t DelayNS = 0);
+  uint64_t getPrevTOF(const ESSTime EventTime, const uint32_t DelayNS = 0);
 
   struct Stats_t Stats = {};
 

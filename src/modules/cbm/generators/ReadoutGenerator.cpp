@@ -12,7 +12,6 @@
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
-#include <common/utils/EfuUtils.h>
 #include <functional>
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <generators/functiongenerators/LinearGenerator.h>
@@ -189,7 +188,8 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
         GenMaX, cbmSettings.NumberOfBins);
   }
 
-  auto Tof = getReadoutTimeNs() - getPulseTimeNs() + RandomTimeDriftNS;
+  esstime::TimeDurationMilli Tof = esstime::nsToMilliseconds(
+      (getReadoutTimeNs() - getPulseTimeNs() + RandomTimeDriftNS));
 
   int Noise{0};
 
@@ -198,10 +198,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     Noise = NoiseDist(RandomGenerator);
   }
 
-  value->NPos =
-      1000 * Generator->getDistValue(
-                 duration_cast<esstime::TimeDurationMilli>(Tof).count()) +
-      Noise;
+  value->NPos = 1000 * Generator->getDistValue(Tof.count()) + Noise;
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
@@ -212,8 +209,7 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   }
 
   auto Tof = getReadoutTimeNs() - getPulseTimeNs();
-  value->NPos = Generator->getDistValue(
-      duration_cast<esstime::TimeDurationMilli>(Tof).count());
+  value->NPos = Generator->getDistValue(Tof.count());
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
