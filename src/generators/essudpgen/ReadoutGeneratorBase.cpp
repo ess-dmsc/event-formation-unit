@@ -135,10 +135,12 @@ void ReadoutGeneratorBase::generateHeader() {
         XTRACE(DATA, WAR, "Pulse time has drifted too much, reset it");
         pulseTime = ESSTime(time(NULL), 0);
         prevPulseTime = pulseTime;
+        // reset the readout time as well since we resynced our time bases
+        readoutTime = pulseTime;
+      } else {
+        prevPulseTime = pulseTime;
+        pulseTime += pulseFrequencyNs;
       }
-
-      prevPulseTime = pulseTime;
-      pulseTime += pulseFrequencyNs;
       XTRACE(DATA, INF,
              "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
              pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
@@ -146,7 +148,7 @@ void ReadoutGeneratorBase::generateHeader() {
     }
     // if the requested frequency is 0, generate a new pulse time for each
     // packet and we use fake offset btw. pulse and prevPulse
-    
+
     /// \todo: This operation mode should be made obsolete as soon as
     /// infrastructure updated to use freq mode
   } else {
