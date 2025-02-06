@@ -13,7 +13,7 @@
 #include <string>
 
 /// \brief save buffer to file
-void saveBuffer(std::string filename, void *buffer, uint64_t datasize);
+void saveBuffer(const std::string &filename, void *buffer, uint64_t datasize);
 
 /// \brief helper function to remove temporary files after test
 void deleteFile(const std::string &filename);

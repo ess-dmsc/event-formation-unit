@@ -14,7 +14,7 @@
 
 namespace Caen {
 
-ReaderReadouts::ReaderReadouts(std::string filename) {
+ReaderReadouts::ReaderReadouts(const std::string &filename) {
   file = ReadoutFile::open(filename);
   total_ = file->count();
   ReadoutSize = sizeof(Readout);

@@ -51,7 +51,7 @@ public:
   /// \param Topic The name of the Kafka topic according to the agreement, for
   /// example, "trex_detector".
   /// \param Configs A vector of configuration <type,value> pairs.
-  Producer(std::string Broker, std::string Topic,
+  Producer(const std::string &Broker, const std::string &Topic,
            std::vector<std::pair<std::string, std::string>> &Configs);
 
   /// \brief Cleans up by deleting allocated structures.
@@ -72,7 +72,7 @@ public:
   /// \param Key The configuration key.
   /// \param Value The configuration value.
   /// \return RdKafka::Conf::ConfResult The result of setting the configuration.
-  RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
+  RdKafka::Conf::ConfResult setConfig(const std::string &Key, const std::string &Value);
 
   /// \brief Callback function for Kafka to handle events like errors,
   /// statistics.

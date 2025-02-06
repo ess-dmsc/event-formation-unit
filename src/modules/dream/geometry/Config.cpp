@@ -14,7 +14,7 @@
 
 namespace Dream {
 
-void Config::errorExit(std::string ErrMsg) {
+void Config::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
   throw std::runtime_error(ErrMsg);
 }

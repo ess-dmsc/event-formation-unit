@@ -35,7 +35,7 @@ public:
   /// \brief Is this a dotted quad ip address?
   /// Valid addresses must be of the form 'a.b.d.c' where
   /// a-d can range from 0 to 255
-  static bool isValidIp(std::string ipAddress);
+  static bool isValidIp(const std::string &ipAddress);
 
   /// \brief Return dotted quad by resolving hostname
   /// Essentially a wrapper for gethostbyname() returning
@@ -56,7 +56,7 @@ public:
   void setMulticastTTL();
 
   /// Allow reuse of ip and port, send igmp membership info
-  // void setMulticastReceive(std::string MultiCastAddress);
+  // void setMulticastReceive(const std::string &MultiCastAddress);
   void setMulticastReceive();
 
   /// Attempt to specify the socket receive and transmit buffer sizes (for
@@ -99,7 +99,7 @@ public:
   bool isValidSocket();
 
   /// \brief Check if address is IP multicast (Class 'D')
-  static bool isMulticast(std::string IpAddress) {
+  static bool isMulticast(const std::string &IpAddress) {
     return IN_MULTICAST(ntohl(inet_addr(IpAddress.c_str())));
   };
 

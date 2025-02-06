@@ -17,8 +17,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
-                                              std::string Value) {
+RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
+                                              const std::string &Value) {
   // Don't log passwords
   std::string LogValue{Value};
   if (Key == "sasl.password") {
@@ -62,7 +62,7 @@ void Producer::event_cb(RdKafka::Event &event) {
 }
 
 ///
-Producer::Producer(std::string Broker, std::string Topic,
+Producer::Producer(const std::string &Broker, const std::string &Topic,
                    std::vector<std::pair<std::string, std::string>> &Configs)
     : ProducerBase(), TopicName(Topic) {
 

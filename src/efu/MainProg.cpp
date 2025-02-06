@@ -15,7 +15,7 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-MainProg::MainProg(std::string instrument, int argc, char *argv[]) {
+MainProg::MainProg(const std::string &instrument, int argc, char *argv[]) {
 
   if (Args.parseArgs(argc, argv) != EFUArgs::Status::CONTINUE) {
     exit(0);

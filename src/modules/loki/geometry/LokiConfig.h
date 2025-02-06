@@ -24,7 +24,7 @@ public:
   LokiConfig();
 
   ///\brief constructor used in EFU to load json from file
-  LokiConfig(std::string ConfigFile);
+  LokiConfig(const std::string &ConfigFile);
 
   ///\brief parse the loaded json object
   void parseConfig();

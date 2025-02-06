@@ -23,7 +23,7 @@ class ReaderReadouts {
 public:
   /// \brief open H5 file for later reading, save ChunkSize
   /// also sets a few internal counters.
-  ReaderReadouts(std::string filename);
+  ReaderReadouts(const std::string &filename);
 
   /// \brief read from H5 file and format an ESS Readout data
   /// The read function keeps track of changing pulse times and

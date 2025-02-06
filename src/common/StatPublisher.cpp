@@ -11,7 +11,7 @@
 #include <fmt/format.h>
 
 ///
-StatPublisher::StatPublisher(std::string IP, int Port)
+StatPublisher::StatPublisher(const std::string &IP, int Port)
     : IpAddress(IP), TCPPort(Port) {
   if (not Socket::isValidIp(IpAddress)) {
     IpAddress = Socket::getHostByName(IpAddress);

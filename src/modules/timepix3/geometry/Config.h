@@ -22,7 +22,7 @@ class Config {
 public:
   Config();
 
-  Config(std::string ConfigFile);
+  Config(const std::string &ConfigFile);
 
   std::string InstrumentName;
   uint16_t XResolution{0};  /// Resolution along x axis

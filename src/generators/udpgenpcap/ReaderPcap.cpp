@@ -29,7 +29,7 @@ const int UDP_HEADER_SIZE = 8;
 int UDP_HEADER_OFFSET;
 int UDP_DATA_OFFSET;
 
-ReaderPcap::ReaderPcap(std::string FileName) : FileName(FileName) {
+ReaderPcap::ReaderPcap(const std::string &FileName) : FileName(FileName) {
   memset(&Stats, 0, sizeof(stats_t));
 }
 

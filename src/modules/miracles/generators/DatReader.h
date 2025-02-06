@@ -30,7 +30,7 @@ public:
   static_assert(sizeof(struct dat_data_t) == 24, "wrong packing");
 
   //
-  MiraclesDatReader(std::string file, bool Verbose);
+  MiraclesDatReader(const std::string &file, bool Verbose);
 
   // Read a CDTReadout struct, return bytes read, 0 if line is
   // ignored, or -1 upon error/end

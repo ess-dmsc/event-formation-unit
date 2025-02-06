@@ -26,7 +26,7 @@ public:
 
   /// \brief sets the time algorithm
   /// \param time_algorithm (center-of-mass, charge2, utpc, utpc-weighted)
-  void set_time_algorithm(std::string time_algorithm);
+  void set_time_algorithm(const std::string &time_algorithm);
 
   /// \brief CenterMatcher constructor
   /// \sa AbstractMatcher

@@ -22,6 +22,6 @@ public:
 
   void EmptyGraylogMessageQueue();
 
-  void AddLoghandlerForNetwork(std::string DetectorName, std::string FileName,
-                               int LogLevel, std::string Address, int Port);
+  void AddLoghandlerForNetwork(const std::string &DetectorName, const std::string &FileName,
+                               int LogLevel, const std::string &Address, int Port);
 };

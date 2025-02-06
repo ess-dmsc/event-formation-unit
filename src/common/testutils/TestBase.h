@@ -64,7 +64,7 @@ class TestBase : public ::testing::Test {
 protected:
   class Message : public std::stringstream {
   public:
-    static void saveToFile(std::string filename, void *buffer,
+    static void saveToFile(const std::string &filename, void *buffer,
                            uint64_t datasize);
   };
 

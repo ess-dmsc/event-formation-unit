@@ -18,7 +18,7 @@ namespace Caen {
 ///
 LokiConfig::LokiConfig() {}
 
-LokiConfig::LokiConfig(std::string ConfigFile) : ConfigFileName(ConfigFile) {
+LokiConfig::LokiConfig(const std::string &ConfigFile) : ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
 }

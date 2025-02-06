@@ -20,7 +20,7 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 
 AR51Serializer::AR51Serializer(
-    std::string SourceName, ProducerCallback Callback) :
+    const std::string &SourceName, ProducerCallback Callback) :
     Source(SourceName), ProduceFunctor(Callback) {
 }
 
