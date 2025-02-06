@@ -40,6 +40,8 @@ ReadoutGenerator::ReadoutGenerator()
       },
       "");
 
+  // clang-format off
+
   auto CbmGroup = app.add_option_group("CBM Options");
   CbmGroup->add_option("--monitor_type", cbmSettings.monitorType,
                        "Beam monitor type (TTL, N2GEM, IBM, etc)");
@@ -49,18 +51,16 @@ ReadoutGenerator::ReadoutGenerator()
                        "Override channel ID (default 0)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
-  IbmGroup->add_option(
-      "--value", cbmSettings.Value,
+  IbmGroup->add_option("--value", cbmSettings.Value,
       "Fixed value for the value function (required for Fixed generator type)");
-  IbmGroup->add_option(
-      "--gradient", cbmSettings.Gradient,
+  IbmGroup->add_option("--gradient", cbmSettings.Gradient,
       "Gradient of the Linear function (required for Linear generator type)");
   IbmGroup->add_option("--offset", cbmSettings.Offset,
                        "Function generator offset for the start value "
                        "(Optional for all generator type)");
-  IbmGroup->add_option(
-      "--bins", cbmSettings.NumberOfBins,
+  IbmGroup->add_option("--bins", cbmSettings.NumberOfBins,
       "Number of bins (sampling) of the distribution function (default 512)");
+
   IbmGroup->add_flag("--shake", cbmSettings.ShakeBeam,
                      "Use random drift value for each pulse to shake the beam "
                      "(default false)");
@@ -72,6 +72,7 @@ ReadoutGenerator::ReadoutGenerator()
                    "Set the generator type (default : Dist)")
       ->check(genTypeValidator);
 }
+// clang-format on
 
 void ReadoutGenerator::generateData() {
 
@@ -175,12 +176,14 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
 
     auto GenMaX = MILLISEC / Settings.Frequency;
-    if (cbmSettings.ShakeBeam)
+
+    if (cbmSettings.ShakeBeam) {
       // Add the maximum shake beam time to the generator max value to ensure
       // that the generator can generate values for the whole shake beam range.
       // Generator max value is in milliseconds, shake beam range is in
       // microseconds.
       GenMaX += round(static_cast<float>(SHAKE_BEAM_US.second) / 1e3);
+    }
 
     Generator = std::make_unique<DistributionGenerator>(
         GenMaX, cbmSettings.NumberOfBins);

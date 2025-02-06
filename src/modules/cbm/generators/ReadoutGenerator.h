@@ -45,19 +45,22 @@ public:
   ///
   /// \brief Struct representing the settings for the CbmGenerator.
   ///
+
+  // clang-format off
   struct CbmGeneratorSettings {
-    CbmType monitorType{CbmType::TTL}; // The type of monitor.
-    uint8_t FenId{0};                  // The FEN ID.
-    uint8_t ChannelId{0};              // The channel ID.
-    uint32_t Offset{0};                // The offset value.
-    bool ShakeBeam{false};             // Flag to shake the beam.
-    bool Randomise{false};             // Flag to randomize the data.
+    CbmType monitorType{CbmType::TTL}; //< The type of monitor.
+    uint8_t FenId{0};                  //< The FEN ID.
+    uint8_t ChannelId{0};              //< The channel ID.
+    uint32_t Offset{0};                //< The offset value.
+    bool ShakeBeam{false};             //< Flag to shake the beam.
+    bool Randomise{false};             //< Flag to randomize the data.
     GeneratorType generatorType{
-        GeneratorType::Distribution}; // The generator type.
-    std::optional<uint32_t> Value;    // The optional value.
-    std::optional<uint32_t> Gradient; // The optional gradient.
-    uint32_t NumberOfBins{512};       // The number of bins.
+       GeneratorType::Distribution};   // The generator type.
+    std::optional<uint32_t> Value;     // The optional value.
+    std::optional<uint32_t> Gradient;  // The optional gradient.
+    uint32_t NumberOfBins{512};        // The number of bins.
   } cbmSettings;
+  // clang-format on
 
   ///
   /// \brief Constructor for the ReadoutGenerator class.

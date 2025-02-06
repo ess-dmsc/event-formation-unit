@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -66,9 +66,11 @@ public:
   std::vector<double> Dist;
   std::vector<double> CDF;
 
-  // objects for random number generation
-  std::minstd_rand gen{
-      1066}; // MinstdRand (fast) random number generator with Seed 1066
+private:
+  // MinstdRand (fast) random number generator with Seed 1066
+  std::minstd_rand gen{1066};
+  // Predefined uniform real distribution between 0.0 and 1.0
   std::uniform_real_distribution<> dis{0.0, 1.0};
 };
+
 // GCOVR_EXCL_STOP

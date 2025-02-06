@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -50,7 +50,7 @@ inline nanoseconds hzToNanoseconds(const float &frequencyHz) {
   return nanoseconds(nsPeriod);
 }
 
-inline microseconds nsToMicrosecons(const uint64_t &nanoseconds) {
+inline microseconds nsToMicroseconds(const uint64_t &nanoseconds) {
   return std::chrono::duration_cast<std::chrono::microseconds>(
       std::chrono::nanoseconds(nanoseconds));
 }
