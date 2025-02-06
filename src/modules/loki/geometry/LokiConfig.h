@@ -84,7 +84,7 @@ public:
     int GroupsZ{0};
     int TotalGroups{0};
     static constexpr int NumBanks{9};
-    static constexpr int NumRings{11};
+    static constexpr int NumRings{12};
     struct BankCfg Banks[NumBanks];
     struct RingCfg Rings[NumRings];
   } Parms;

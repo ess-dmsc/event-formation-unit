@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -85,34 +85,10 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
 
   uint32_t pixel = Geom->calcPixel(Data);
   // seems to be wrong
-  // counters.ReadoutsBadAmpl = *Geom->Stats.AmplitudeZero;
   XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
   return pixel;
 }
 
-void CaenInstrument::dumpReadoutToFile(DataParser::CaenReadout &Data) {
-  Readout CurrentReadout;
-  CurrentReadout.PulseTimeHigh =
-      ESSReadoutParser.Packet.HeaderPtr.getPulseHigh();
-  CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr.getPulseLow();
-  CurrentReadout.PrevPulseTimeHigh =
-      ESSReadoutParser.Packet.HeaderPtr.getPrevPulseHigh();
-  CurrentReadout.PrevPulseTimeLow =
-      ESSReadoutParser.Packet.HeaderPtr.getPrevPulseLow();
-  CurrentReadout.EventTimeHigh = Data.TimeHigh;
-  CurrentReadout.EventTimeLow = Data.TimeLow;
-  CurrentReadout.Unused = Data.Unused;
-  CurrentReadout.OutputQueue =
-      ESSReadoutParser.Packet.HeaderPtr.getOutputQueue();
-  CurrentReadout.AmpA = Data.AmpA;
-  CurrentReadout.AmpB = Data.AmpB;
-  CurrentReadout.AmpC = Data.AmpC;
-  CurrentReadout.AmpD = Data.AmpD;
-  CurrentReadout.FiberId = Data.FiberId;
-  CurrentReadout.FENId = Data.FENId;
-  CurrentReadout.Group = Data.Group;
-  DumpFile->push(CurrentReadout);
-}
 
 void CaenInstrument::processReadouts() {
   XTRACE(DATA, DEB, "Reference time is %" PRIi64,
@@ -128,10 +104,6 @@ void CaenInstrument::processReadouts() {
     if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
       continue;
-    }
-
-    if (DumpFile) {
-      dumpReadoutToFile(Data);
     }
 
     // Calculate TOF in ns
@@ -155,6 +127,7 @@ void CaenInstrument::processReadouts() {
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused,
            Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
+
     // Calculate pixel and apply calibration
     uint32_t PixelId = calcPixel(Data);
 
@@ -162,7 +135,11 @@ void CaenInstrument::processReadouts() {
     auto SerializerId = Geom->calcSerializer(Data);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Pixel error");
+      XTRACE(DATA, DEB,
+             "Pixel Error  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %u, B "
+             "%u, C %u, D %u",
+             Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused,
+             Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
       counters.PixelErrors++;
     } else if (SerializerId >= Serializers.size()) {
       XTRACE(EVENT, WAR, "Serializer identification error");

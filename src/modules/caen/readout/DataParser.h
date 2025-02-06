@@ -37,7 +37,7 @@ public:
   struct Stats {
     int64_t DataHeaders{0};
     int64_t Readouts{0};
-    int64_t ReadoutsBadAmpl{0};
+    int64_t ReadoutsMaxADC{0};
     int64_t RingFenErrors{0};
     int64_t DataLenMismatch{0};
     int64_t DataLenInvalid{0};

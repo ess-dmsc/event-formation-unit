@@ -10,9 +10,9 @@ def intvandpolys(args):
         if j == 0:
             a = j*intvsize
         else:
-            a = j*intvsize + 0.001
+            a = j*intvsize + 0.00005
         b = (j+1)*intvsize
-        intvstr += f'[{a:5.3},{b:5.3}]'
+        intvstr += f'[{a:7.5}, {b:7.5}]'
         if args.type == 'const':
             polystr += f'[-0.5, 1.0, 0.0, 0.0] '
         else:
