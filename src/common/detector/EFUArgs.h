@@ -44,7 +44,7 @@ public:
   int buflen{9000}; ///< rx buffer length (B)
 
 private:
-  bool parseLogLevel(std::vector<std::string> LogLevelString);
+  bool parseLogLevel(const std::vector<std::string> &LogLevelString);
   int LogMessageLevel{6};
   std::string DetectorName;
   std::string LogFileName;

@@ -40,7 +40,7 @@ public:
   /// \brief after loading the config file, Config.HybridIdStr contains
   /// a vector of HybridIds. These are then loaded into the Hybrids so that
   /// we can later do consistency checks when applying the calibration data
-  void setHybridIds(std::vector<std::string> Ids);
+  void setHybridIds(const std::vector<std::string> &Ids);
 
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);

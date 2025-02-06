@@ -27,14 +27,14 @@ public:
   bool ignoreInterface(char * IfName);
 
   /// \brief Select interfaces to check
-  bool checkMTU(std::vector<std::string> ignore, bool PrintOnSuccess = false);
+  bool checkMTU(const std::vector<std::string> &ignore, bool PrintOnSuccess = false);
 
   /// setter for MTU size check, mostly used for reverting
   /// to a lower MTU size, when running on ad hoc servers
   void setMinimumMTU(int mtu) { MinimumMtu = mtu; }
 
   /// \brief
-  // bool checkDiskSpace(std::vector<std::string> checkdirs);
+  // bool checkDiskSpace(const std::vector<std::string> &checkdirs);
 
   /// \brief
   // std::vector<std::string> DirectoriesToCheck = {".", "/"};
