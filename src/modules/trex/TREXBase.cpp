@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -120,6 +120,9 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
   Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
   Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
+  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
+  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
+  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);

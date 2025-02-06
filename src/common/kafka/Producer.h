@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -83,6 +83,9 @@ public:
   /// \brief Structure to hold producer statistics.
   struct ProducerStats {
     int64_t config_errors;
+    int64_t ev_stats;
+    int64_t ev_logs;
+    int64_t ev_throttle;
     int64_t ev_errors;
     int64_t ev_others;
     int64_t dr_errors;

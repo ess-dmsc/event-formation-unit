@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -42,9 +42,16 @@ void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
   switch (event.type()) {
   case RdKafka::Event::EVENT_STATS:
+    stats.ev_stats++;
     res = nlohmann::json::parse(event.str());
     stats.librdkafka_msg_cnt += res["msg_cnt"].get<int64_t>();
     stats.librdkafka_msg_size += res["msg_size"].get<int64_t>();
+    break;
+  case RdKafka::Event::EVENT_LOG:
+    stats.ev_logs++;
+    break;
+  case RdKafka::Event::EVENT_THROTTLE:
+    stats.ev_throttle++;
     break;
   case RdKafka::Event::EVENT_ERROR:
     LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}",

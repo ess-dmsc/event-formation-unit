@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,7 +30,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
- 
+
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
@@ -81,6 +81,9 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
   Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
   Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
+  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
+  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
+  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
   Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
   Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
   Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);

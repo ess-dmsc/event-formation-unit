@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -39,24 +39,27 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("events.udder", mystats.events_udder);
+  Stats.create("events.udder", Counters.events_udder);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", mystats.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", mystats.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", mystats.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", mystats.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", mystats.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", mystats.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", mystats.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", mystats.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", mystats.KafkaStats.err_other);
-  Stats.create("kafka.ev_errors", mystats.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", mystats.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", mystats.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", mystats.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", mystats.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", mystats.KafkaStats.librdkafka_msg_size);
+  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
+  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
+  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
+  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
+  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
+  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
+  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
+  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
+  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
+  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
+  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
+  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
+  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
+  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
+  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
+  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
+  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
   // clang-format on
 
   std::function<void()> processingFunc = [this]() {
@@ -103,7 +106,7 @@ void PerfGenBase::processingThread() {
     for (uint32_t i = 0; i < EventsPerPulse; i++) {
       auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
       Serializer.addEvent(TimeOfFlight, PixelId);
-      mystats.events_udder++;
+      Counters.events_udder++;
       TimeOfFlight++;
     }
 
@@ -111,7 +114,7 @@ void PerfGenBase::processingThread() {
 
     /// Kafka stats update - common to all detectors
     /// don't increment as Producer & Serializer keep absolute count
-    mystats.KafkaStats = EventProducer.stats;
+    Counters.KafkaStats = EventProducer.stats;
     TimeOfFlight = 0;
   }
   /// \todo flush everything here
