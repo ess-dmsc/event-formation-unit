@@ -4,8 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/testutils/HeaderFactory.h"
-#include "common/utils/EfuUtils.h"
+#include <common/testutils/HeaderFactory.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>
@@ -382,8 +381,6 @@ std::vector<uint8_t> NoEventWireOnly {
 };
 
 // clang-format on
-
-using namespace efutils;
 
 class TREXInstrumentTest : public TestBase {
 public:

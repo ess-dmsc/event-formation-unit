@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <future>
+#include <common/time/ESSTime.h>
 #include <timepix3/handlers/PixelEventHandler.h>
 #include <timepix3/handlers/TimingEventHandler.h>
 
@@ -19,7 +21,7 @@ namespace Timepix3 {
 using namespace std;
 using namespace timepixReadout;
 using namespace timepixDTO;
-using namespace efutils;
+using namespace esstime;
 
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,
@@ -131,7 +133,8 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // detector, it is the time the first photon in the cluster hit the
     // detector.
 
-    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits || cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
+    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits ||
+        cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
       statCounters.ClusterSizeTooSmall++;
       continue;
     }

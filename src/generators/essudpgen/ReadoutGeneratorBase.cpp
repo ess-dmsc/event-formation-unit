@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,8 +8,8 @@
 // GCOVR_EXCL_START
 
 #include <Error.hpp>
+#include <chrono>
 #include <common/debug/Trace.h>
-#include <common/utils/EfuUtils.h>
 #include <cstdlib>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
@@ -17,7 +17,6 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 using namespace ESSReadout;
-using namespace efutils;
 
 ///\brief Constructor initialize the generator app
 ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
@@ -111,12 +110,35 @@ void ReadoutGeneratorBase::generateHeader() {
            pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
   }
 
+  // If pulseFrequencyNs is set, we generate pulse time
+  // by adding the pulse time window according to the pulse frequency
+  // which will simulate the real operation of the data source
   if (pulseFrequencyNs != TimeDurationNano(0)) {
-    // if the readout time is greater than the pulse time, update generate new
+
+    // if the readout time is greater than the pulse time, generate new
     // pulse time for the header
     if (readoutTime.toNS() >= getNextPulseTimeNs()) {
-      prevPulseTime = pulseTime;
-      pulseTime += pulseFrequencyNs;
+
+      // calculate the absolute time difference between the real time and the
+      // pulse time in milliseconds, because we do not need high precision
+      auto RealAndPulseTimeDiff =
+          abs(sToMilliseconds(time(NULL)) -
+              nsToMicroseconds(pulseTime.toNS().count()));
+
+      /// \note: reset the pulse time if it has drifted too much from
+      /// real clock. This is a workaround for the file writer not accepting the
+      /// pulse time if it is too far from the real clock
+      if (RealAndPulseTimeDiff > sToMilliseconds(MAX_TIME_DRIFT)) {
+
+        XTRACE(DATA, WAR, "Pulse time has drifted too much, reset it");
+        pulseTime = ESSTime(time(NULL), 0);
+        prevPulseTime = pulseTime;
+        // reset the readout time as well since we resynced our time bases
+        readoutTime = pulseTime;
+      } else {
+        prevPulseTime = pulseTime;
+        pulseTime += pulseFrequencyNs;
+      }
       XTRACE(DATA, INF,
              "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
              pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
@@ -124,8 +146,9 @@ void ReadoutGeneratorBase::generateHeader() {
     }
     // if the requested frequency is 0, generate a new pulse time for each
     // packet and we use fake offset btw. pulse and prevPulse
-    /// \todo This operation mode should be made obsolete as soon as
-    /// infrastructure updated ti use freq mode
+
+    /// \todo: This operation mode should be made obsolete as soon as
+    /// the infrastructure is updated to use frequency mode
   } else {
     prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
     pulseTime = ESSTime(time(NULL), TimeLowOffset);
@@ -226,7 +249,7 @@ void ReadoutGeneratorBase::main() {
   }
 
   if (Settings.Frequency != 0) {
-    pulseFrequencyNs = efutils::hzToNanoseconds(Settings.Frequency);
+    pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
     numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
   } else {
