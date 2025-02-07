@@ -102,6 +102,8 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
   Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
   Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.err_timeout", Counters.KafkaStats.err_timeout);
+  Stats.create("kafka.err_transport", Counters.KafkaStats.err_transport);
   Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
   Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
   Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
@@ -112,6 +114,10 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
   Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
   Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
+  Stats.create("kafka.librdkafka_tx_bytes", Counters.KafkaStats.librdkafka_tx_bytes);
+  Stats.create("kafka.librdkafka_broker_tx_bytes", Counters.KafkaStats.librdkafka_brokers_tx_byte);
+  Stats.create("kafka.librdkafka_broker_tx_errors", Counters.KafkaStats.librdkafka_brokers_txerrors);
+  Stats.create("kafka.librdkafka_broker_waitresp", Counters.KafkaStats.librdkafka_brokers_waitresp);
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
