@@ -43,7 +43,7 @@ public:
   DistributionGenerator(double MaxX);
 
   /// \brief The constructor populates relevant data structures but with a
-  /// custom defined bin number. Bin numver defines the resolution of the
+  /// custom defined bin number. Bin number defines the resolution of the
   /// distribution function.
   /// 1) calculate values for distribution and 2) integrate into a cumulative
   /// distribution function (not normalised). Then 3) get normalisation factor.

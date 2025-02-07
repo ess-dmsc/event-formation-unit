@@ -148,7 +148,7 @@ void ReadoutGeneratorBase::generateHeader() {
     // packet and we use fake offset btw. pulse and prevPulse
 
     /// \todo: This operation mode should be made obsolete as soon as
-    /// infrastructure updated to use freq mode
+    /// the infrastructure is updated to use frequency mode
   } else {
     prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
     pulseTime = ESSTime(time(NULL), TimeLowOffset);

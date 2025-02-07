@@ -129,7 +129,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
       resetReadoutToPulseTime();
       if (cbmSettings.ShakeBeam) {
         // Use the pre-initialized RandomGenerator and ShakeBeamDist to generate
-        // a random drift value for the whole pulse, which will be applyed by
+        // a random drift value for the whole pulse, which will be applied by
         // the function generator.
         RandomTimeDriftNS =
             std::chrono::duration_cast<std::chrono::nanoseconds>(

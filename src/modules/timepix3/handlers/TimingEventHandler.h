@@ -91,7 +91,7 @@ public:
   /// \param statCounters The reference to the Counters object for tracking
   /// statistics.
   ///
-  TimingEventHandler(Counters &statCounters, const int &Frequency = 14)
+  TimingEventHandler(Counters &statCounters, float Frequency = 14.0)
       : statCounters(statCounters),
         FrequencyPeriodNs(esstime::hzToNanoseconds(Frequency)) {}
 
