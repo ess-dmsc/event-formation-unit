@@ -59,7 +59,7 @@ public:
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
-  /// after the message is enqueueed for transmission.
+  /// after the message is enqueued for transmission.
   ///
   /// \param Buffer The buffer containing the message data.
   /// \param MessageTimestampMS The timestamp of the message in milliseconds.

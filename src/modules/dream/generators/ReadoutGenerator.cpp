@@ -116,7 +116,7 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
   return true;
 }
 
-/// \brief implementation of virtual functio from base class
+/// \brief implementation of virtual function from base class
 void ReadoutGenerator::generateData() {
   auto DataPtr = (uint8_t *)Buffer;
   DataPtr += HeaderSize;

@@ -108,7 +108,7 @@ private:
   nlohmann::json getObjectAndCheck(nlohmann::json JsonObject,
                                    std::string Property);
 
-  std::string Name{""}; ///< Detector/instrument name prvided in constructor
+  std::string Name{""}; ///< Detector/instrument name provided in constructor
 
   std::string Message; /// Used for throwing exceptions.
 };

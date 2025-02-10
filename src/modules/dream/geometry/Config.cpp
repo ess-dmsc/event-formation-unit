@@ -83,7 +83,7 @@ void Config::apply() {
     } catch (...) {
     }
 
-    // Check for array sizes and dupliacte entries
+    // Check for array sizes and duplicate entries
     if (Ring > MaxRing) {
       errorExit(fmt::format("Entry: {}, Invalid RING: {} Max: {}", Entry, Ring,
                             MaxRing));

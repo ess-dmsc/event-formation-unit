@@ -106,7 +106,7 @@ std::vector<uint8_t> FenAndChannelNotInCfgReadout {
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
-/// \brief Monitor readout with TOF value higer then MaxTof limit
+/// \brief Monitor readout with TOF value higher then MaxTof limit
 std::vector<uint8_t> TofToHighReadout {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x0A, 0x00, 0x00, 0x00,  // Time HI 10 s
@@ -372,7 +372,7 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
 }
 
 /// \brief Test case for monitor readout with Type not supported
-/// \note This test is temorary because since all CBM are supported metric will
+/// \note This test is temporary because since all CBM are supported metric will
 /// be removed
 TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
   makeHeader(cbm->ESSHeaderParser.Packet, NotSuppoertedTypeReadout);
@@ -458,7 +458,7 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
 
 ///
 /// \brief Test case for the scenario when the readout time is between the
-/// previoius and current pulse time and the case when is before the previous
+/// previous and current pulse time and the case when is before the previous
 /// pulse time
 ///
 TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {

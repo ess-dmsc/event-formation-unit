@@ -35,7 +35,7 @@ public:
   /// \param Resolution integer value to set camera resolution to
   void setYResolution(const uint16_t Resolution) { YResolution = Resolution; }
 
-  /// \brief returns the chunk window index in case of partitionning the camera
+  /// \brief returns the chunk window index in case of partitioning the camera
   /// pixel plane into smaller chunks. This is used in case of parrellel
   /// processing.
   /// \param X and Y coordinates of the pixel

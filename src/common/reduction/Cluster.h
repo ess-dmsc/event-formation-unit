@@ -108,7 +108,7 @@ public:
 
   /// \returns pre-calculated sum of each hit's weight*weigtht*coord
   double coordMass2() const;
-  /// \returns center of masss quared in the coordinate dimension
+  /// \returns center of mass squared in the coordinate dimension
   ///          can be NaN if weight sum is zero
   double coordCenter2() const;
 

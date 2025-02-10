@@ -5,7 +5,7 @@
 ///
 /// \brief FreiaInstrument is responsible for readout validation and event
 /// formation
-/// Its functions are called from the main prcessing loop in FreiaBase
+/// Its functions are called from the main processing loop in FreiaBase
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -63,7 +63,7 @@ public:
   /// \brief serialiser (and producer) for events
   EV44Serializer *Serializer{nullptr};
 
-  /// \brief One builder per cassette, rezise in constructor when we have
+  /// \brief One builder per cassette, resize in constructor when we have
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
 

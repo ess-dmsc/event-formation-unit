@@ -6,7 +6,7 @@
 /// \brief Dataset for running unit tests - do not edit if unsure of what
 /// they do!
 ///
-/// The test data consist of artifically constructed VMM3 readout data.
+/// The test data consist of artificially constructed VMM3 readout data.
 /// For specifics about the VMM3 data format, please read the current ICD
 /// on ownCloud:
 /// https://project.esss.dk/owncloud/index.php/s/Nv17qiLWwOTkbzE

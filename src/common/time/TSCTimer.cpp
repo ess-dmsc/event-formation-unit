@@ -14,7 +14,7 @@ TSCTimer::TSCTimer(void) { T0 = rdtsc(); }
 ///
 TSCTimer::TSCTimer(uint64_t Timeout) : TimeoutTicks(Timeout) { T0 = rdtsc(); }
 
-/// Determine if a timeout has occured and reset timer
+/// Determine if a timeout has occurred and reset timer
 bool TSCTimer::timeout(void) {
   if (timetsc() >= TimeoutTicks) {
     reset();

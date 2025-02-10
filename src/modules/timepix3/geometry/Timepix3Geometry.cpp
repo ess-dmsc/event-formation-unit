@@ -29,7 +29,7 @@ Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
       chunksPerDimension(static_cast<int>(sqrt(totalNumChunkWindows))),
       chunkSize(nx / chunksPerDimension) {}
 
-/// \todo: remove this function only used makes uneceassary to have it
+/// \todo: remove this function only used makes unnecessary to have it
 uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
   XTRACE(
       DATA, DEB,

@@ -28,7 +28,7 @@ class Timepix3Instrument {
 public:
   /// \brief 'create' the Timepix3 instruments
   ///
-  /// loads configuration and calibration files, calulate and generate the
+  /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
 
   /// \brief Generates Hits from Readouts, and adds them to event builder

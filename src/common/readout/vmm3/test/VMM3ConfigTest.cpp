@@ -23,7 +23,7 @@ protected:
 
 
 TEST_F(VMM3ConfigTest, ConfigFileNotJson) {
-  testvmm3.FileName="/etc/passwd"; // not a jason file
+  testvmm3.FileName="/etc/passwd"; // not a json file
   EXPECT_ANY_THROW(testvmm3.loadAndApplyConfig());
 }
 

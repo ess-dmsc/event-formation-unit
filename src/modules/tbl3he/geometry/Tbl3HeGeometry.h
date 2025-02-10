@@ -39,7 +39,7 @@ public:
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  /// \todo refactoring oportunity: thei code is the same as for bifrost
+  /// \todo refactoring oportunity: their code is the same as for bifrost
   std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
 
   /// \todo functions to handle multiple serialisers

@@ -5,7 +5,7 @@
 ///
 /// \brief Cbm is responsible for readout validation and
 /// common beam monitor 'event formation'
-/// Its functions are called from the main prcessing loop in CbmBase
+/// Its functions are called from the main processing loop in CbmBase
 //===----------------------------------------------------------------------===//
 
 #pragma once

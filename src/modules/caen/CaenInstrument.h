@@ -29,7 +29,7 @@ class CaenInstrument {
 public:
   /// \brief 'create' the Caen instruments
   ///
-  /// loads configuration and calibration files, calulate and generate the
+  /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
   CaenInstrument(CaenCounters &counters, BaseSettings &settings);
 
