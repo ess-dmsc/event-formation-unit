@@ -129,6 +129,7 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 void KafkaEventHandler::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
   switch (event.type()) {
+
   case RdKafka::Event::EVENT_STATS:
     res = nlohmann::json::parse(event.str());
     NumberOfMsgInQueue += res["msg_cnt"].get<int64_t>();
@@ -140,11 +141,12 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
       TxRequestRetries += broker_info.value("txerrs", (int64_t)0);
     }
     break;
+
   case RdKafka::Event::EVENT_ERROR:
 
     // First log the error and its error string.
     LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
-        event.err(), RdKafka::err2str(event.err()).c_str());
+        static_cast<int>(event.err()), RdKafka::err2str(event.err()).c_str());
     XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", event.err(),
            RdKafka::err2str(event.err()).c_str());
 
@@ -170,7 +172,9 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
       ++ErrOther;
       break;
     }
+
     break;
+
   default:
     break;
   }
@@ -194,9 +198,9 @@ void DeliveryReportHandler::dr_cb(RdKafka::Message &message) {
     break;
   }
 
-  if (message.err() != RdKafka::ERR_NO_ERROR) {
-    ++errorCount;
+  if (message.err() != RdKafka::ErrorCode::ERR_NO_ERROR) {
+    ++MsgError;
   } else {
-    ++successCount;
+    ++MsgDeliverySuccess;
   }
 }

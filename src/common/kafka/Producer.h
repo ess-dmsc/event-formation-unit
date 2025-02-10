@@ -47,15 +47,15 @@ public:
 
 class DeliveryReportHandler : public RdKafka::DeliveryReportCb {
 public:
-  DeliveryReportHandler() : TotalMessageDelivered(0), errorCount(0), successCount(0),
-                            MsgStatusNotPersisted(0), MsgStatusPossiblyPersisted(0), MsgStatusPersisted(0) {}
+  DeliveryReportHandler() {}
+
   void dr_cb(RdKafka::Message &message) override;
-  uint64_t TotalMessageDelivered;   // Total delivery reports received
-  uint64_t errorCount;   // Count of delivery reports with error
-  uint64_t successCount; // Count of successful delivery reports
-  uint64_t MsgStatusNotPersisted; // Count of messages not persisted
-  uint64_t MsgStatusPossiblyPersisted; // Count of messages possibly persisted
-  uint64_t MsgStatusPersisted; // Count of messages persisted
+  int64_t TotalMessageDelivered{0};      // Total delivery reports received
+  int64_t MsgError{0};                   // Count of delivery reports with error
+  int64_t MsgDeliverySuccess{0};         // Count of successful delivery reports
+  int64_t MsgStatusNotPersisted{0};      // Count of messages not persisted
+  int64_t MsgStatusPossiblyPersisted{0}; // Count of messages possibly persisted
+  int64_t MsgStatusPersisted{0};         // Count of messages persisted
 };
 
 ///

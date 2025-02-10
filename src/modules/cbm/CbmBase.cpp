@@ -100,24 +100,26 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.error.unknown_topic", Counters.KafkaEventHandler.ErrUnknownTopic);
-  Stats.create("kafka.error.queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.error.timeout", Counters.KafkaStats.err_timeout);
-  Stats.create("kafka.error.transport", Counters.KafkaStats.err_transport);
-  Stats.create("kafka.error.other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
-  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
-  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-  Stats.create("kafka.librdkafka_tx_bytes", Counters.KafkaStats.librdkafka_tx_bytes);
-  Stats.create("kafka.librdkafka_broker_tx_bytes", Counters.KafkaStats.librdkafka_brokers_tx_byte);
-  Stats.create("kafka.librdkafka_broker_tx_errors", Counters.KafkaStats.librdkafka_brokers_txerrors);
-  Stats.create("kafka.librdkafka_broker_waitresp", Counters.KafkaStats.librdkafka_brokers_waitresp);
+  
+  Stats.create("kafka.brokers.tx_bytes", Counters.KafkaEventStats.BytesTransmittedToBrokers);
+  Stats.create("kafka.brokers.tx_req_retries", Counters.KafkaEventStats.TxRequestRetries);
+
+  Stats.create("kafka.msg.num_of_msg_in_queue", Counters.KafkaEventStats.NumberOfMsgInQueue);
+  Stats.create("kafka.msg.size_of_msg_in_queue", Counters.KafkaEventStats.SizeOfMsgInQueue);
+  Stats.create("kafka.msg.delivery_success", Counters.KafkaMsgDeliveryStats.MsgDeliverySuccess);
+  Stats.create("kafka.msg.status_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusPersisted);
+  Stats.create("kafka.msg.status_not_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusNotPersisted);
+  Stats.create("kafka.msg.status_possibly_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusPossiblyPersisted);
+  Stats.create("kafka.msg.total_delivered", Counters.KafkaMsgDeliveryStats.TotalMessageDelivered);
+
+  Stats.create("kafka.error.msg_delivery", Counters.KafkaMsgDeliveryStats.MsgError);
+  Stats.create("kafka.error.transmission", Counters.KafkaEventStats.TransmissionErrors);
+  Stats.create("kafka.error.unknown_topic", Counters.KafkaEventStats.ErrUnknownTopic);
+  Stats.create("kafka.error.queue_full", Counters.KafkaEventStats.ErrQueueFull);
+  Stats.create("kafka.error.timeout", Counters.KafkaEventStats.ErrTimeout);
+  Stats.create("kafka.error.transport", Counters.KafkaEventStats.ErrTransport);
+  Stats.create("kafka.error.other", Counters.KafkaEventStats.ErrOther);
+
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
