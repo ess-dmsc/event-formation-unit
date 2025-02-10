@@ -26,7 +26,7 @@ class DreamInstrument {
 public:
   /// \brief 'create' the DREAM instrument
   ///
-  /// loads configuration and calibration files, calulate and generate the
+  /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
   DreamInstrument(Counters &counters, BaseSettings &settings);
 

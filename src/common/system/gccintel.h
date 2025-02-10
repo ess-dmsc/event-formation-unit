@@ -18,7 +18,7 @@
 #define unlikely(x) (x)
 #endif
 
-/// read time stamp counter - runs at processer Hz
+/// read time stamp counter - runs at processor Hz
 static __inline__ unsigned long long rdtsc(void) {
   unsigned hi, lo;
   __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));

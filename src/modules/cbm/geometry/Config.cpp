@@ -110,7 +110,7 @@ void Config::apply() {
           "Source)");
     }
 
-    // Check for array sizes and dupliacte entries
+    // Check for array sizes and duplicate entries
     if (FEN > Parms.MaxFENId) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
                             Parms.MaxFENId));

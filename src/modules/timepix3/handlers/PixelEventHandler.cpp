@@ -98,8 +98,8 @@ void PixelEventHandler::pushDataToKafka() {
   if (sub2DFramesNumber == 1) {
     clusterHits(*clusterers[0], sub2DFrames[0]);
   } else {
-    /// \todo parrallel processing of the subFrames not yet finalized and this
-    /// part not tested. Finish the implementation for parrallel processing.
+    /// \todo parallel processing of the subFrames not yet finalized and this
+    /// part not tested. Finish the implementation for parallel processing.
     for (int i = 0; i < sub2DFramesNumber; i++) {
       auto &subFrame = sub2DFrames[i];
       if (subFrame.size() > 0) {

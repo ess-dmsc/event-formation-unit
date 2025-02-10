@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Wrapper for the std::map to access data thorugh a 2D indexing as key
+/// \brief Wrapper for the std::map to access data through a 2D indexing as key
 //===----------------------------------------------------------------------===//
 
 #pragma once

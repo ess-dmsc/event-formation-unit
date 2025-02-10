@@ -7,7 +7,7 @@
 ///
 /// The server supports multiple
 /// clients, and is of type request-response. A client request is
-/// handled synchronously to completion before servring next request.
+/// handled synchronously to completion before serving next request.
 ///
 //===----------------------------------------------------------------------===//
 

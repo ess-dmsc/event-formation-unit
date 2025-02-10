@@ -79,7 +79,7 @@ struct HistrogramSerializerStats : public SerializerStats {
 ///
 /// \tparam T is the type of the data to be serialized
 /// \tparam R is the type of the data used for the axis. This can be time with
-/// double precession
+/// double precision
 ///
 /// The HistogramSerializer class is responsible for building a 1D histogram for
 /// a certain time period for serialization. It provides methods to add data to
@@ -149,7 +149,7 @@ public:
   }
 
   /// \brief Constructor for the HistogramBuilder class.
-  /// \details This constructor is used when binnig strategy is provided
+  /// \details This constructor is used when binning strategy is provided
   HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, const std::string &Unit,
       enum BinningStrategy Strategy = BinningStrategy::Drop,

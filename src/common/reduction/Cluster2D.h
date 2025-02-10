@@ -121,13 +121,13 @@ public:
 
   /// \returns pre-calculated sum of each hit's weight*weigtht*coord
   double xCoordMass2() const;
-  /// \returns center of masss quared in the coordinate dimension
+  /// \returns center of mass squared in the coordinate dimension
   ///          can be NaN if weight sum is zero
   double xCoordCenter2() const;
 
   /// \returns pre-calculated sum of each hit's weight*weigtht*coord
   double yCoordMass2() const;
-  /// \returns center of masss quared in the coordinate dimension
+  /// \returns center of mass squared in the coordinate dimension
   ///          can be NaN if weight sum is zero
   double yCoordCenter2() const;
 

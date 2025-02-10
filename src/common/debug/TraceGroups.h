@@ -25,7 +25,7 @@ const unsigned int TRC_G_CLUSTER = 0x00000400U;
 const unsigned int TRC_G_EVENT   = 0x00000800U;
 const unsigned int TRC_G_BUILDER = 0x00001000U;
 
-/// Add trace masks below, bitwise or of grouops
+/// Add trace masks below, bitwise or of groups
 
 // Do not edit below
 const unsigned int TRC_M_NONE = 0;

@@ -66,7 +66,7 @@ private:
   std::vector<Hit2DVector>
       sub2DFrames; /// < Vector of Hit2DVector objects for
                    /// storing clustered hits for sub frames
-                   /// in case of parrallel processing
+                   /// in case of parallel processing
 
   ///
   /// \brief Publishes the clustered events to the appropriate kafka topic.

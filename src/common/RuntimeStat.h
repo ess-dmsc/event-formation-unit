@@ -10,7 +10,7 @@
 ///
 /// The runtime status query should be run periodically (every N seconds)
 /// it can be used in the EFUs to report if a pipeline stage is running
-/// At the moment acticity is determined by observing a change in counts
+/// At the moment activity is determined by observing a change in counts
 /// between each poll.
 //===----------------------------------------------------------------------===//
 

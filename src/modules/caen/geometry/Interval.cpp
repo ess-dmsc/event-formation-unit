@@ -14,7 +14,7 @@
 
 namespace Caen {
 
-/// \brief Check for overlapping intevals in a list
+/// \brief Check for overlapping intervals in a list
 /// First put intervals into canonical order where the first element is
 /// smaller than the second (for calibration the reversal is ok). Then sort
 /// the intervals in ascending first elements. Finally, iterate through
@@ -28,7 +28,7 @@ bool Interval::overlaps(std::vector<std::pair<double, double>> Intervals) {
     }
   }
 
-  // Sort intervals and check if the end point of the i'th interval is larger 
+  // Sort intervals and check if the end point of the i'th interval is larger
   // than the start point of the next interval
   std::sort(Intervals.begin(), Intervals.end(), Compare);
   for (size_t i=1; i < Intervals.size(); i++) {

@@ -54,7 +54,7 @@ void LokiReadoutGenerator::generateData() {
     //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
 
-    // increment redout time for next redout
+    // increment readout time for next readout
     addTicksBtwReadoutsToReadoutTime();
   }
 }

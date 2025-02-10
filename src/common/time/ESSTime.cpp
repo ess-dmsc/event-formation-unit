@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Implementation of ESS time related methoods and classes
+/// \brief Implementation of ESS time related methods and classes
 ///
 //===----------------------------------------------------------------------===//
 

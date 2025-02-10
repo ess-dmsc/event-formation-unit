@@ -40,7 +40,7 @@ public:
     uint64_t SpeedThrottle{0};       ///< Speed throttle for transmission
     uint64_t PktThrottle{0};         ///< Packet throttle for transmission
 
-    /// \todo This should be the default mode and obsoete pe packet generation
+    /// \todo This should be the default mode and obsolete pe packet generation
     uint16_t Frequency{0}; ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1}; ///< Header version

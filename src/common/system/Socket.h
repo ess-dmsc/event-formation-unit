@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief This file contains the declaration of the Socket abstration for BSD
+/// \brief This file contains the declaration of the Socket abstraction for BSD
 /// socket system calls
 ///
 /// Used in detector pipeline plugins for receive udp unicast and multicast and
@@ -69,7 +69,7 @@ public:
   /// Check that buffer sizes meet expectations
   void checkRxBufferSizes(std::int32_t MinRxBufferSize);
 
-  /// Print the current values for receive and trasmit buffer sizes
+  /// Print the current values for receive and transmit buffer sizes
   void printBufferSizes(void);
 
   /// Set a timeout for recv() function rather than wait for ever
