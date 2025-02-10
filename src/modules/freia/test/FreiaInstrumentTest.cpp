@@ -28,7 +28,7 @@ std::string CalibStr = R"(
   "Calibrations" : [
     { "VMMHybridCalibration" : {
         "HybridId" : "E5533333222222221111111100000000",
-        "CalibrationDate" : "20210222-124533",
+        "CalibrationDate" : "20210222 - 124533",
 
         "vmm0" : {
           "Settings" : "all ain and no pain",

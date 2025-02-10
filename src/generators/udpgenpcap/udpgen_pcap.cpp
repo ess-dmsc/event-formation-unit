@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
       PcapPackets++;
 
       if (PcapPackets >= Settings.PcapOffset) {
-        
+
         if (Settings.SpeedThrottle) {
           usleep(Settings.SpeedThrottle);
         } else {

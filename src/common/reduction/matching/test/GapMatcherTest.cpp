@@ -1,4 +1,4 @@
-// Copyright (C) 2017-2022 European Spallation Source ERIC
+// Copyright (C) 2017 - 2022 European Spallation Source ERIC
 
 #include <common/reduction/matching/GapMatcher.h>
 

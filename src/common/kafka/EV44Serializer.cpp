@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -100,7 +100,7 @@ size_t EV44Serializer::produce() {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
     if (ProduceFunctor) {
-      
+
       // produce kafka message timestamp with current timestamp from hardware
       // clock
       uint64_t currentHwClock =
