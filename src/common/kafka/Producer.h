@@ -30,16 +30,16 @@ public:
 
   void event_cb(RdKafka::Event &event) override;
 
-  uint64_t ErrTimeout{0};
-  uint64_t ErrTransport{0};
-  uint64_t ErrBrokerNotAvailable{0};
-  uint64_t ErrUnknownTopic{0};
-  uint64_t ErrQueueFull{0};
-  uint64_t ErrOther{0};
+  int64_t ErrTimeout{0};
+  int64_t ErrTransport{0};
+  int64_t ErrBrokerNotAvailable{0};
+  int64_t ErrUnknownTopic{0};
+  int64_t ErrQueueFull{0};
+  int64_t ErrOther{0};
 
   // Counters for statistics
-  int64_t NumberOfMessageInQueue{0};
-  int64_t SizeOfMessageInQueue{0};
+  int64_t NumberOfMsgInQueue{0};
+  int64_t SizeOfMsgInQueue{0};
   int64_t BytesTransmittedToBrokers{0};
   int64_t TransmissionErrors{0};
   int64_t TxRequestRetries{0};
@@ -47,11 +47,15 @@ public:
 
 class DeliveryReportHandler : public RdKafka::DeliveryReportCb {
 public:
-  DeliveryReportHandler() : totalCount(0), errorCount(0), successCount(0) {}
+  DeliveryReportHandler() : TotalMessageDelivered(0), errorCount(0), successCount(0),
+                            MsgStatusNotPersisted(0), MsgStatusPossiblyPersisted(0), MsgStatusPersisted(0) {}
   void dr_cb(RdKafka::Message &message) override;
-  uint64_t totalCount;   // Total delivery reports received
+  uint64_t TotalMessageDelivered;   // Total delivery reports received
   uint64_t errorCount;   // Count of delivery reports with error
   uint64_t successCount; // Count of successful delivery reports
+  uint64_t MsgStatusNotPersisted; // Count of messages not persisted
+  uint64_t MsgStatusPossiblyPersisted; // Count of messages possibly persisted
+  uint64_t MsgStatusPersisted; // Count of messages persisted
 };
 
 ///
@@ -111,29 +115,11 @@ public:
   /// \brief Structure to hold producer statistics.
   struct ProducerStats {
     int64_t config_errors;
-    int64_t ev_stats;
-    int64_t ev_logs;
-    int64_t ev_throttle;
-    int64_t ev_errors;
-    int64_t ev_others;
-    int64_t dr_errors;
-    int64_t dr_noerrors;
     int64_t produce_bytes_ok;
     int64_t produce_bytes_error;
     int64_t produce_calls;
     int64_t produce_errors;
     int64_t produce_no_errors;
-    int64_t err_timeout;
-    int64_t err_transport;
-    int64_t err_unknown_topic;
-    int64_t err_queue_full;
-    int64_t err_other;
-    int64_t librdkafka_msg_cnt;
-    int64_t librdkafka_msg_size;
-    int64_t librdkafka_tx_bytes;
-    int64_t librdkafka_brokers_waitresp = 0;
-    int64_t librdkafka_brokers_tx_byte = 0;
-    int64_t librdkafka_brokers_txerrors = 0;
   } stats = {};
 
   KafkaEventHandler EventHandler;

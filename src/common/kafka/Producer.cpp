@@ -45,26 +45,6 @@ RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
   return configResult;
 }
 
-// void Producer::dr_cb(RdKafka::Message &message) {
-//   if (message.status() == RdKafka::Message::MSG_STATUS_NOT_PERSISTED) {
-//     std::cerr << "Message not persisted: " << message.errstr() << std::endl;
-//   } else if (message.status() ==
-//              RdKafka::Message::MSG_STATUS_POSSIBLY_PERSISTED) {
-//     std::cerr << "Message possibly persisted: " << message.errstr()
-//               << std::endl;
-//   } else if (message.status() == RdKafka::Message::MSG_STATUS_PERSISTED) {
-//     std::cerr << "Message persisted: " << message.errstr() << std::endl;
-//   }
-
-//   if (message.err()) {
-//     std::cerr << "Message delivery failed: " << message.errstr() << std::endl;
-//   } else {
-//     std::cout << "Message delivered to topic " << message.topic_name() << " ["
-//               << message.partition() << "] at offset " << message.offset()
-//               << std::endl;
-//   }
-// }
-
 ///
 Producer::Producer(const std::string &Broker, const std::string &Topic,
                    std::vector<std::pair<std::string, std::string>> &Configs)
@@ -89,12 +69,13 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     setConfig(Config.first, Config.second);
   }
 
-  // if (Config->set("event_cb", this, ErrorMessage) != RdKafka::Conf::CONF_OK)
-  // {
-  //   LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
-  // }
+  if (Config->set("event_cb", &EventHandler, ErrorMessage) !=
+      RdKafka::Conf::CONF_OK) {
+    LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
+  }
 
-  if (Config->set("dr_cb", this, ErrorMessage) != RdKafka::Conf::CONF_OK) {
+  if (Config->set("dr_cb", &DeliveryHandler, ErrorMessage) !=
+      RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
   }
 
@@ -129,35 +110,17 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
   }
 
   // non-blocking, copies the buffer to kafka thread for transfer
-  RdKafka::ErrorCode resp = KafkaProducer->produce(
-      TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
-      const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
-      MessageTimestampMS, NULL);
+  KafkaProducer->produce(TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
+                         const_cast<std::uint8_t *>(Buffer.data()),
+                         Buffer.size_bytes(), NULL, 0, MessageTimestampMS,
+                         NULL);
 
   stats.produce_calls++;
 
   // poll for events in the event queue and triggers callbacks on them
   KafkaProducer->poll(0);
 
-  /// \todo: this is probably not happen because we have async producer with
-  /// kafka
-  if (resp != RdKafka::ERR_NO_ERROR) {
-    if (resp == RdKafka::ERR__UNKNOWN_TOPIC) {
-      stats.err_unknown_topic++;
-    } else if (resp == RdKafka::ERR__QUEUE_FULL) {
-      stats.err_queue_full++;
-    } else {
-      stats.err_other++;
-    }
-
-    XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
-    stats.produce_bytes_error += Buffer.size_bytes();
-    stats.produce_errors++;
-    return resp;
-  } else {
-    stats.produce_bytes_ok += Buffer.size_bytes();
-    // stats.produce_no_errors++;
-  }
+  stats.produce_bytes_ok += Buffer.size_bytes();
 
   return 0;
 }
@@ -168,8 +131,8 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
   case RdKafka::Event::EVENT_STATS:
     res = nlohmann::json::parse(event.str());
-    NumberOfMessageInQueue += res["msg_cnt"].get<int64_t>();
-    SizeOfMessageInQueue += res["msg_size"].get<int64_t>();
+    NumberOfMsgInQueue += res["msg_cnt"].get<int64_t>();
+    SizeOfMsgInQueue += res["msg_size"].get<int64_t>();
     for (auto &broker : res["brokers"].items()) {
       const auto &broker_info = broker.value();
       BytesTransmittedToBrokers += broker_info.value("txbytes", (int64_t)0);
@@ -179,7 +142,7 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
     break;
   case RdKafka::Event::EVENT_ERROR:
 
-    // First log the error and it's erro string.
+    // First log the error and its error string.
     LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
         event.err(), RdKafka::err2str(event.err()).c_str());
     XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", event.err(),
@@ -187,24 +150,24 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
 
     switch (event.err()) {
     case RdKafka::ErrorCode::ERR__TIMED_OUT:
-      ErrTimeout++;
+      ++ErrTimeout;
       break;
     case RdKafka::ErrorCode::ERR__TRANSPORT:
-      ErrTransport++;
+      ++ErrTransport;
       break;
     case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
-      ErrBrokerNotAvailable++;
+      ++ErrBrokerNotAvailable;
       break;
     case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-      ErrUnknownTopic++;
+      ++ErrUnknownTopic;
       break;
     case RdKafka::ErrorCode::ERR__QUEUE_FULL:
-      ErrQueueFull++;
+      ++ErrQueueFull;
       break;
     case RdKafka::ErrorCode::ERR_NO_ERROR:
       break;
     default:
-      ErrOther++;
+      ++ErrOther;
       break;
     }
     break;
@@ -215,11 +178,25 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
 
 // Implementation of DeliveryReportHandler override
 void DeliveryReportHandler::dr_cb(RdKafka::Message &message) {
-  ++totalCount;
+  ++TotalMessageDelivered;
+
+  switch (message.status()) {
+  case RdKafka::Message::MSG_STATUS_NOT_PERSISTED:
+    ++MsgStatusNotPersisted;
+    break;
+  case RdKafka::Message::MSG_STATUS_POSSIBLY_PERSISTED:
+    ++MsgStatusPossiblyPersisted;
+    break;
+  case RdKafka::Message::MSG_STATUS_PERSISTED:
+    ++MsgStatusPersisted;
+    break;
+  default:
+    break;
+  }
+
   if (message.err() != RdKafka::ERR_NO_ERROR) {
     ++errorCount;
   } else {
     ++successCount;
   }
-  // ...existing code...
 }

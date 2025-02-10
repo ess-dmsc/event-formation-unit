@@ -57,6 +57,8 @@ struct Counters {
 
   // Kafka stats below are common to all detectors
   struct Producer::ProducerStats KafkaStats;
+  KafkaEventHandler KafkaEventHandler;
+  DeliveryReportHandler KafkaDeliveryReportHandler;
 
 } __attribute__((aligned(64)));
 

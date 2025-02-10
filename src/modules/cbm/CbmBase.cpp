@@ -100,11 +100,11 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
   Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_timeout", Counters.KafkaStats.err_timeout);
-  Stats.create("kafka.err_transport", Counters.KafkaStats.err_transport);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
+  Stats.create("kafka.error.unknown_topic", Counters.KafkaEventHandler.ErrUnknownTopic);
+  Stats.create("kafka.error.queue_full", Counters.KafkaStats.err_queue_full);
+  Stats.create("kafka.error.timeout", Counters.KafkaStats.err_timeout);
+  Stats.create("kafka.error.transport", Counters.KafkaStats.err_transport);
+  Stats.create("kafka.error.other", Counters.KafkaStats.err_other);
   Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
   Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
   Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
