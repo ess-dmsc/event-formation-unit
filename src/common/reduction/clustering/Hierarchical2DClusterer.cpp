@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file Hierarchical2DClusterer.cpp
