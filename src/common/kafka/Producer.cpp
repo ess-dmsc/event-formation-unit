@@ -47,7 +47,9 @@ RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
 
 ///
 Producer::Producer(const std::string &Broker, const std::string &Topic,
-                   std::vector<std::pair<std::string, std::string>> &Configs)
+                   std::vector<std::pair<std::string, std::string>> &Configs,
+                   KafkaEventHandler &EventHandler,
+                   DeliveryReportHandler &DeliveryHandler)
     : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));

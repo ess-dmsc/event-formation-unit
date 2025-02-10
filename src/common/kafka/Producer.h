@@ -89,10 +89,14 @@ public:
   /// example, "trex_detector".
   /// \param Configs A vector of configuration <type,value> pairs.
   Producer(const std::string &Broker, const std::string &Topic,
-           std::vector<std::pair<std::string, std::string>> &Configs);
+           std::vector<std::pair<std::string, std::string>> &Configs,
+           KafkaEventHandler &EventHandler, DeliveryReportHandler &DeliveryHandler);
 
   /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;
+
+  /// \brief Polls the producer for events.
+  void poll(int TimeoutMS) { KafkaProducer->poll(TimeoutMS); };
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -121,9 +125,6 @@ public:
     int64_t produce_errors;
     int64_t produce_no_errors;
   } stats = {};
-
-  KafkaEventHandler EventHandler;
-  DeliveryReportHandler DeliveryHandler;
 
 protected:
   std::string ErrorMessage;
