@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 
 #include <common/memory/PoolAllocator.h>
 #include <common/testutils/TestBase.h>
