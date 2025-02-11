@@ -107,26 +107,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
-  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
-  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-
   // Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   // Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   // Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
@@ -161,10 +141,10 @@ void NmxBase::processing_thread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                     KafkaCfg.CfgParms);
-  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                         KafkaCfg.CfgParms, &Stats);
+  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
   Serializer = new EV44Serializer(KafkaBufferSize, "nmx", Produce);
@@ -176,13 +156,14 @@ void NmxBase::processing_thread() {
 
   // Create the raw-data monitor producer and serializer
   Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                          KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer, const auto &Timestamp) {
+                           KafkaCfg.CfgParms);
+  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
+                                           const auto &Timestamp) {
     MonitorProducer.produce(DataBuffer, Timestamp);
-    };
+  };
 
   MonitorSerializer =
-    new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
+      new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
@@ -191,7 +172,7 @@ void NmxBase::processing_thread() {
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
-                      Counters.KafkaStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -255,13 +236,12 @@ void NmxBase::processing_thread() {
     }
 
     if (ProduceTimer.timeout()) {
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.Events,
+           EventProducer.getStats().MsgStatusPersisted});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.KafkaStats = eventprod.stats;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

@@ -71,26 +71,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
-  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
-  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -115,16 +95,19 @@ void Timepix3Base::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms, &Stats);
 
-  auto Produce = [&EventProducer](const auto &DataBuffer, const auto &Timestamp) {
+  auto Produce = [&EventProducer](const auto &DataBuffer,
+                                  const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
   EV44Serializer Serializer(KafkaBufferSize, "timepix3", Produce);
 
-  Stats.create("produce.cause.pulse_change", Serializer.stats().ProduceRefTimeTriggered);
-  Stats.create("produce.cause.max_events_reached", Serializer.stats().ProduceTriggeredMaxEvents);
+  Stats.create("produce.cause.pulse_change",
+               Serializer.stats().ProduceRefTimeTriggered);
+  Stats.create("produce.cause.max_events_reached",
+               Serializer.stats().ProduceTriggeredMaxEvents);
 
   Timepix3Instrument Timepix3(Counters, timepix3Configuration, Serializer);
 
@@ -132,7 +115,7 @@ void Timepix3Base::processingThread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
-                      Counters.KafkaStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -159,12 +142,11 @@ void Timepix3Base::processingThread() {
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.Events,
+           EventProducer.getStats().MsgStatusPersisted});
       Serializer.produce();
       Counters.ProduceCauseTimeout++;
-      Counters.KafkaStats = EventProducer.stats;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

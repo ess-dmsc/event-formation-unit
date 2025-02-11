@@ -93,38 +93,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.ProducerStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.ProducerStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.ProducerStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.ProducerStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.ProducerStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.ProducerStats.produce_errors);
-  
-  Stats.create("kafka.brokers.tx_bytes", Counters.ProducerStats.BytesTransmittedToBrokers);
-  Stats.create("kafka.brokers.tx_req_retries", Counters.ProducerStats.TxRequestRetries);
-
-  Stats.create("kafka.msg.num_of_msg_in_queue", Counters.ProducerStats.NumberOfMsgInQueue);
-  Stats.create("kafka.msg.max_num_of_msg_in_queue", Counters.ProducerStats.MaxNumOfMsgInQueue);
-  Stats.create("kafka.msg.bytes_of_msg_in_queue", Counters.ProducerStats.BytesOfMsgInQueue);
-  Stats.create("kafka.msg.max_bytes_of_msg_in_queue", Counters.ProducerStats.MaxBytesOfMsgInQueue);
-  Stats.create("kafka.msg.delivery_success", Counters.ProducerStats.MsgDeliverySuccess);
-  Stats.create("kafka.msg.status_persisted", Counters.ProducerStats.MsgStatusPersisted);
-  Stats.create("kafka.msg.status_not_persisted", Counters.ProducerStats.MsgStatusNotPersisted);
-  Stats.create("kafka.msg.status_possibly_persisted", Counters.ProducerStats.MsgStatusPossiblyPersisted);
-  Stats.create("kafka.msg.msg_delivery_event", Counters.ProducerStats.TotalMsgDeliveryEvent);
-
-  /// Kafka error stats
-  Stats.create("kafka.error.msg_delivery", Counters.ProducerStats.MsgError);
-  Stats.create("kafka.error.transmission", Counters.ProducerStats.TransmissionErrors);
-  Stats.create("kafka.error.unknown_topic", Counters.ProducerStats.ErrUnknownTopic);
-  Stats.create("kafka.error.queue_full", Counters.ProducerStats.ErrQueueFull);
-  Stats.create("kafka.error.timeout", Counters.ProducerStats.ErrTimeout);
-  Stats.create("kafka.error.msg_timeout", Counters.ProducerStats.ErrMsgTimeout);
-  Stats.create("kafka.error.transport", Counters.ProducerStats.ErrTransport);
-  Stats.create("kafka.error.authentication", Counters.ProducerStats.AuthError);
-  Stats.create("kafka.error.other", Counters.ProducerStats.ErrOther);
-
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -148,11 +116,12 @@ void CbmBase::processing_thread() {
 
   // Event producer
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                     KafkaCfg.CfgParms);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                         KafkaCfg.CfgParms, &Stats);
 
-  auto Produce = [&eventprod](const auto &DataBuffer, const auto &Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  auto Produce = [&EventProducer](const auto &DataBuffer,
+                                  const auto &Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
   // Process instrument config file
@@ -224,7 +193,7 @@ void CbmBase::processing_thread() {
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
-                      Counters.ProducerStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -271,7 +240,7 @@ void CbmBase::processing_thread() {
       usleep(10);
     }
 
-    eventprod.poll(0);
+    EventProducer.poll(0);
 
     // Not only flush serializer data but also update runtime stats
     // This not applies for histogram serializer which should be flushed
@@ -279,7 +248,7 @@ void CbmBase::processing_thread() {
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.CbmCounts,
-           Counters.ProducerStats.produce_bytes_ok});
+           EventProducer.getStats().MsgStatusPersisted});
 
       for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
@@ -287,7 +256,6 @@ void CbmBase::processing_thread() {
       }
 
       Counters.ProduceCauseTimeout++;
-      Counters.ProducerStats = eventprod.stats;
     } // ProduceTimer
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

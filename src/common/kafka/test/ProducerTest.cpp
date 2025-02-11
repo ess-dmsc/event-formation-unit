@@ -57,22 +57,22 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_NE(prod.KafkaTopic, nullptr);
   ASSERT_NE(prod.KafkaProducer, nullptr);
   ASSERT_EQ(ret, RdKafka::ERR_NO_ERROR);
-  ASSERT_EQ(prod.stats.dr_errors, 0);
-  ASSERT_EQ(prod.stats.dr_noerrors, 0);
-  ASSERT_EQ(prod.stats.ev_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.dr_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.dr_noerrors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.ev_errors, 0);
   // ASSERT_EQ(prod.stats.ev_others, 0);
-  ASSERT_EQ(prod.stats.produce_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto Res = prod.setConfig("queue.buffering.max.ms", "101");
   ASSERT_EQ(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.stats.config_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.config_errors, 0);
 
   Res = prod.setConfig("this.does.not.exist", "so.this.has.no.meaning");
   ASSERT_NE(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.stats.config_errors, 1);
+  ASSERT_EQ(prod.ProducerStatCounters.config_errors, 1);
 }
 
 TEST_F(ProducerTest, CreateConfFail1) {
@@ -101,10 +101,10 @@ TEST_F(ProducerTest, ProducerFail) {
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
   std::uint8_t SomeData[20];
-  ASSERT_EQ(prod.stats.produce_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
   int ret = prod.produce(SomeData, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.stats.produce_errors, 1);
+  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 1);
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
@@ -118,10 +118,10 @@ TEST_F(ProducerTest, ProducerSuccess) {
   prod.KafkaProducer.reset(TempProducer);
   unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
-  ASSERT_EQ(prod.stats.produce_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
   int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.stats.produce_errors, 0);
+  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {

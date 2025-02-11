@@ -40,26 +40,6 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings) : Detector(settings) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("events.udder", Counters.events_udder);
-
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_stats", Counters.KafkaStats.ev_stats);
-  Stats.create("kafka.ev_throttle", Counters.KafkaStats.ev_throttle);
-  Stats.create("kafka.ev_logs", Counters.KafkaStats.ev_logs);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
   // clang-format on
 
   std::function<void()> processingFunc = [this]() {
@@ -76,7 +56,7 @@ void PerfGenBase::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms, &Stats);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -112,9 +92,8 @@ void PerfGenBase::processingThread() {
 
     usleep(EFUSettings.TestImageUSleep);
 
-    /// Kafka stats update - common to all detectors
-    /// don't increment as Producer & Serializer keep absolute count
-    Counters.KafkaStats = EventProducer.stats;
+    EventProducer.poll(0);
+
     TimeOfFlight = 0;
   }
   /// \todo flush everything here
