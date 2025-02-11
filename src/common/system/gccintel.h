@@ -3,11 +3,19 @@
 ///
 /// \file
 ///
-/// \brief functions specific to gcc compilers and intel cpus
+/// \brief functions specific to gcc compilers and cpu architecture
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
+
+#ifdef __ARM_ARCH
+  #include <common/system/arm.h>
+#else
+  #include <common/system/intel.h>
+#endif
+
+// gcc specific macros
 
 /// branch prediction macros
 #if 0
@@ -18,12 +26,6 @@
 #define unlikely(x) (x)
 #endif
 
-/// read time stamp counter - runs at processor Hz
-static __inline__ unsigned long long rdtsc(void) {
-  unsigned hi, lo;
-  __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
-  return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
-}
 
 #ifdef RELEASE
 #define UNUSED
@@ -32,4 +34,3 @@ static __inline__ unsigned long long rdtsc(void) {
 #endif
 
 #define ALIGN(x) __attribute__((aligned(x)))
-//#define ALIGN(x)
