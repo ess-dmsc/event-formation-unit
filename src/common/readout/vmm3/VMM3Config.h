@@ -29,7 +29,7 @@ public:
   VMM3Config(){};
 
   // Load and apply the json config
-  VMM3Config(std::string Instrument, std::string ConfigFile)
+  VMM3Config(const std::string &Instrument, const std::string &ConfigFile)
       : ExpectedName(Instrument), FileName(ConfigFile) {}
 
   // load file into json object and apply
@@ -37,7 +37,7 @@ public:
 
   /// \brief Loads calibration file and applies to each hybrid based on string
   /// ID matching CalibFile parameter = string path to calibration json file
-  void loadAndApplyCalibration(std::string CalibFile);
+  void loadAndApplyCalibration(const std::string &CalibFile);
 
   /// \brief Applies calibration json object to specified VMM on Hybrid
   void applyVMM3Calibration(ESSReadout::Hybrid &Hybrid, unsigned vmmid,
@@ -49,7 +49,7 @@ public:
   /// \brief Apply detector specific aspects of loaded configuration json file
   virtual void applyConfig() = 0;
 
-  bool validHybridId(std::string HybridID);
+  bool validHybridId(const std::string &HybridID);
 
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
@@ -61,7 +61,7 @@ public:
   /// \brief Get Hybrid from the string Hybrid ID
   /// \todo candidate to refactor as it is nearly the same as getHybrid()
   /// check if HybridId is already configured.
-  bool lookupHybrid(std::string HybridID) {
+  bool lookupHybrid(const std::string &HybridID) {
     for (int RingID = 0; RingID <= MaxRing; RingID++) {
       for (int FENID = 0; FENID <= MaxFEN; FENID++) {
         for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
@@ -76,7 +76,7 @@ public:
 
   /// \brief Get Hybrid from the string Hybrid ID
   // Slow string comparison method, only to be used on EFU config initialisation
-  ESSReadout::Hybrid &getHybrid(std::string HybridID) {
+  ESSReadout::Hybrid &getHybrid(const std::string &HybridID) {
     for (int RingID = 0; RingID <= MaxRing; RingID++) {
       for (int FENID = 0; FENID <= MaxFEN; FENID++) {
         for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
@@ -92,7 +92,7 @@ public:
   }
 
   /// \brief Applies calibration to each VMM on Hybrid matching given Hybrid ID
-  void applyCalibration(std::string HybridID, nlohmann::json Calibration);
+  void applyCalibration(const std::string &HybridID, nlohmann::json Calibration);
 
 public:
   struct {

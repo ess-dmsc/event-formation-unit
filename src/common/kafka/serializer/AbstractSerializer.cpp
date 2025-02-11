@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,7 +20,7 @@ namespace fbserializer {
 
 AbstractSerializer::AbstractSerializer(const ProducerCallback Callback,
                                        SerializerStats &Stats)
-    : ProduceCallback(std::move(Callback)), Stats(Stats){}
+    : ProduceCallback(std::move(Callback)), Stats(Stats) {}
 flatbuffers::DetachedBuffer Buffer;
 
 void AbstractSerializer::produce() {
@@ -37,8 +37,9 @@ void AbstractSerializer::produce() {
 
   serialize();
 
-  ProduceCallback(nonstd::span<const uint8_t>(Buffer.data(), Buffer.size()),
-                  CurrentHwClock);
+  auto DataBuffer = nonstd::span<const uint8_t>(Buffer.data(), Buffer.size());
+
+  ProduceCallback(DataBuffer, CurrentHwClock);
 }
 
 void AbstractSerializer::checkAndSetReferenceTime(

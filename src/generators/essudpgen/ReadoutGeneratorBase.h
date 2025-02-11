@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -40,7 +40,7 @@ public:
     uint64_t SpeedThrottle{0};       ///< Speed throttle for transmission
     uint64_t PktThrottle{0};         ///< Packet throttle for transmission
 
-    /// \todo This should be the default mode and obsoete pe packet generation
+    /// \todo This should be the default mode and obsolete pe packet generation
     uint16_t Frequency{0}; ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1}; ///< Header version
@@ -91,7 +91,6 @@ public:
 
   static constexpr int BufferSize{8972}; ///< Size of the buffer
   uint8_t Buffer[BufferSize];            ///< Buffer for the packet
-
 
   std::map<std::string, ESSReadout::Parser::DetectorType> NameToType;
 
@@ -219,6 +218,8 @@ protected:
   const uint32_t PrevTimeLowOffset{
       10000}; ///< Previous time offset for readout generation (ticks)
 
+  static constexpr int MAX_TIME_DRIFT{20}; ///< Maximum allowed pulse time drift
+
   uint8_t ReadoutDataSize{0};   ///< Size of the readout data
   uint16_t numberOfReadouts{0}; ///< Number of readouts
 
@@ -235,9 +236,9 @@ private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
-  ESSReadout::ESSTime pulseTime;     ///< Pulse time
-  ESSReadout::ESSTime prevPulseTime; ///< Previous pulse time
-  ESSReadout::ESSTime readoutTime;   ///< Readout time
+  esstime::ESSTime pulseTime;     ///< Pulse time
+  esstime::ESSTime prevPulseTime; ///< Previous pulse time
+  esstime::ESSTime readoutTime;   ///< Readout time
 
   esstime::TimeDurationNano pulseFrequencyNs{
       0}; ///< Pulse frequency in nanoseconds

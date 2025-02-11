@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ namespace Timepix3 {
 ///
 Config::Config() {}
 
-Config::Config(std::string ConfigFile) {
+Config::Config(const std::string &ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   nlohmann::json root = from_json_file(ConfigFile);
   XTRACE(INIT, DEB, "Loaded json file");

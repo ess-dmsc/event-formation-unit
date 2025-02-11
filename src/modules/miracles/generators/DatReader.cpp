@@ -16,7 +16,7 @@
 
 // GCOVR_EXCL_START
 
-MiraclesDatReader::MiraclesDatReader(std::string file, bool Verbose)
+MiraclesDatReader::MiraclesDatReader(const std::string &file, bool Verbose)
     : filename(file), Verbose(Verbose) {
   infile = new std::ifstream(filename);
 }

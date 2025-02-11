@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -45,7 +45,7 @@ inline void json_change_key(nlohmann::json &object, const std::string& old_key, 
 
 /// \brief Given a nlohmann json object and a list of known required fields
 /// return a string with the missing fields.
-inline void json_check_keys(std::string Prefix, nlohmann::json &object,
+inline void json_check_keys(const std::string &Prefix, nlohmann::json &object,
   std::vector<std::string> RequiredFields) {
   std::string Missing{""};
 

@@ -49,6 +49,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
+  
   Detector(BaseSettings settings) : EFUSettings(settings), Stats(){};
 
   /// Receiving UDP data is now common across all detectors
@@ -112,7 +113,7 @@ public:
 
   /// \brief returns the value of a runtime counter (efustat) based on name
   /// used by Parser.cpp for command query
-  virtual int64_t statvaluebyname(std::string name) {
+  virtual int64_t statvaluebyname(const std::string &name) {
     return Stats.valueByName(name);
   }
 
@@ -167,7 +168,7 @@ public:
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
 
-  void AddCommandFunction(std::string Name, CommandFunction FunctionObj) {
+  void AddCommandFunction(const std::string &Name, CommandFunction FunctionObj) {
     DetectorCommands[Name] = FunctionObj;
   };
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,11 +21,11 @@ protected:
 };
 
 TEST_F(FreiaChannelMappingTest, Coordinates) {
-  for (unsigned int i = 0; i < 64; i++) {
-    ASSERT_EQ(Geom.xCoord(Cassette0Xoffset, VMMX, i), i);
+  for (unsigned int channel = 0; channel < 64; channel++) {
+    ASSERT_EQ(Geom.xCoord(Cassette0Xoffset, VMMX, channel), 63 - channel);
   }
-  for (unsigned int i = 16; i < 47; i++) {
-    ASSERT_EQ(Geom.yCoord(Cassette0Yoffset, VMMY, i), i - 16);
+  for (unsigned int channel = 16; channel < 48; channel++) {
+    ASSERT_EQ(Geom.yCoord(Cassette0Yoffset, VMMY, channel), 47 - channel);
   }
 }
 

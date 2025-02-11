@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,7 +30,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
- 
+
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.tdc.tdc1rising_readout_count", Counters.TDC1RisingReadouts);
@@ -44,7 +44,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.tdc.tdc_readout_dropped", Counters.TDCReadoutDropped);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
 
-  // Counters related to timing event handling and time syncronization
+  // Counters related to timing event handling and time synchronization
   Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
   Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
   Stats.create("handlers.timeingevent.evr_pair_count", Counters.EVRPairFound);
@@ -114,7 +114,7 @@ void Timepix3Base::processingThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
                          KafkaCfg.CfgParms);
 
-  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+  auto Produce = [&EventProducer](const auto &DataBuffer, const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 

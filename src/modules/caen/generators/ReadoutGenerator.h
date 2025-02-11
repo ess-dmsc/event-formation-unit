@@ -37,7 +37,7 @@ public:
   ReadoutGenerator();
 
 
-  void setTypeByName(std::string Name) {
+  void setTypeByName(const std::string &Name) {
       Settings.TypeOverride = NameToType[Name];
       printf("Detector %s has type %u\n", Name.c_str(),
              Settings.TypeOverride);

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,8 +17,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-RdKafka::Conf::ConfResult Producer::setConfig(std::string Key,
-                                              std::string Value) {
+RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
+                                              const std::string &Value) {
   // Don't log passwords
   std::string LogValue{Value};
   if (Key == "sasl.password") {
@@ -62,7 +62,7 @@ void Producer::event_cb(RdKafka::Event &event) {
 }
 
 ///
-Producer::Producer(std::string Broker, std::string Topic,
+Producer::Producer(const std::string &Broker, const std::string &Topic,
                    std::vector<std::pair<std::string, std::string>> &Configs)
     : ProducerBase(), TopicName(Topic) {
 
@@ -107,8 +107,9 @@ Producer::Producer(std::string Broker, std::string Topic,
   }
 }
 
-int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
+int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
                       std::int64_t MessageTimestampMS) {
+
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }

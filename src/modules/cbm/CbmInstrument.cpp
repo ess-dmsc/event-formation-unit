@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,6 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Trace.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
@@ -105,7 +106,8 @@ void CbmInstrument::processMonitorReadouts(void) {
             ->addEvent(TimeOfFlight, AdcValue);
 
         XTRACE(DATA, DEB,
-               "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64 "ns",
+               "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64
+               "ns",
                Readout.Type, AdcValue, TimeOfFlight);
 
         counters.IBMEvents++;
@@ -122,7 +124,8 @@ void CbmInstrument::processMonitorReadouts(void) {
             ->addEvent(TimeOfFlight, PixelId);
 
         XTRACE(DATA, DEB,
-               "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64 "ns",
+               "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
+               "ns",
                Readout.Type, PixelId, TimeOfFlight);
 
         counters.TTLEvents++;
@@ -134,16 +137,14 @@ void CbmInstrument::processMonitorReadouts(void) {
         continue;
       }
     } catch (std::out_of_range &e) {
-      LOG(UTILS, Sev::Warning,
-          "No serializer configured for FEN {}, Channel {}", Readout.FENId,
-          Readout.Channel);
+      XTRACE(DATA, WAR, "No serializer configured for FEN {}, Channel {}",
+             Readout.FENId, Readout.Channel);
 
       counters.NoSerializerCfgError++;
       continue;
     } catch (std::invalid_argument &e) {
-      LOG(UTILS, Sev::Warning,
-          "Invalid CbmType: {} for readout {} with time {}", e.what(),
-          counters.CbmCounts, ReadoutTime.toNS().count());
+      XTRACE(DATA, WAR, "Invalid CbmType: {} for readout {} with time {}",
+             e.what(), counters.CbmCounts, ReadoutTime.toNS().count());
       counters.TypeNotSupported++;
       continue;
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,11 +25,11 @@ public:
 
   /// \brief this constructor just saves the detector name, used in
   /// unit tests.
-  CDCalibration(std::string Name) : Name(Name){};
+  CDCalibration(const std::string &Name) : Name(Name){};
 
   /// \brief load json from file into the jsion root object, used
   /// in detector plugin.
-  CDCalibration(std::string Name, std::string CalibrationFile);
+  CDCalibration(const std::string &Name, const std::string &CalibrationFile);
 
   /// \brief parse the calibration and validate internal consistency
   /// \retval True if file is valid, else False.
@@ -75,7 +75,7 @@ public:
 
 private:
   ///\brief log and trace then throw runtime exception
-  void throwException(std::string Message);
+  void throwException(const std::string &Message);
 
   ///\brief Do an initial sanity check of the provided json file
   /// called from parseCaibration()
@@ -108,7 +108,7 @@ private:
   nlohmann::json getObjectAndCheck(nlohmann::json JsonObject,
                                    std::string Property);
 
-  std::string Name{""}; ///< Detector/instrument name prvided in constructor
+  std::string Name{""}; ///< Detector/instrument name provided in constructor
 
   std::string Message; /// Used for throwing exceptions.
 };

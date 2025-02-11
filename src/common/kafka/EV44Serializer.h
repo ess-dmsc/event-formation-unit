@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -33,7 +33,7 @@ public:
   /// \brief creates ev44 flat buffer serializer
   /// \param max_array_length maximum number of events
   /// \param source_name value for source_name field
-  EV44Serializer(size_t MaxArrayLength, std::string SourceName,
+  EV44Serializer(size_t MaxArrayLength, const std::string &SourceName,
                  ProducerCallback Callback = {});
 
   virtual ~EV44Serializer() = default;

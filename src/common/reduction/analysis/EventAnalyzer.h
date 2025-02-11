@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,7 +21,7 @@ public:
   /// uncertainty
   /// \param max_timedif maximum span of timebins to consider for upper
   /// uncertainty
-  EventAnalyzer(std::string time_algorithm);
+  EventAnalyzer(const std::string &time_algorithm);
 
   /// \brief analyzes particle track in one plane
   ReducedHit analyze(Cluster &) const;

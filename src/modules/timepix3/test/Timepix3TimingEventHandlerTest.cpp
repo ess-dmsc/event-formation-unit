@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,7 +8,6 @@
 #include <chrono>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
-#include <common/utils/EfuUtils.h>
 #include <cstdint>
 #include <dto/TimepixDataTypes.h>
 #include <exception>
@@ -24,7 +23,6 @@
 
 using namespace Timepix3;
 using namespace timepixDTO;
-using namespace efutils;
 using namespace chrono;
 using namespace timepixReadout;
 using namespace std;

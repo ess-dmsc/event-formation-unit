@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,7 +18,7 @@
 #define unlikely(x) (x)
 #endif
 
-/// read time stamp counter - runs at processer Hz
+/// read time stamp counter - runs at processor Hz
 static __inline__ unsigned long long rdtsc(void) {
   unsigned hi, lo;
   __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));

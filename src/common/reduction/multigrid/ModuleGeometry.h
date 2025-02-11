@@ -44,7 +44,7 @@ public:
   uint32_t y_from_grid(uint16_t g) const;
   uint32_t z_from_wire(uint16_t w) const;
 
-  std::string debug(std::string prefix = {}) const;
+  std::string debug(const std::string &prefix = {}) const;
 
 private:
   uint16_t grids_{40};

@@ -1,9 +1,9 @@
-// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 /// \brief macros LIKELY and UNLIKELY are hints for codegeneration, when some
-///        code path is unlikely or expectional.
+///        code path is unlikely or exceptional.
 //===----------------------------------------------------------------------===//
 
 #pragma once

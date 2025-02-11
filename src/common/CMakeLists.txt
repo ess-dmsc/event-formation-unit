@@ -37,6 +37,7 @@ set(efu_common_INC
   debug/Error.h
   debug/Hexdump.h
   debug/Log.h
+  debug/Time.h
   debug/Trace.h
   debug/TraceGroups.h
   detector/BaseSettings.h
@@ -56,7 +57,6 @@ set(efu_common_INC
   memory/HashMap2D.h
   math/BitMath.h
   math/NumericalMath.h
-  utils/EfuUtils.h
   system/gccintel.h
   system/Socket.h
   DumpFile.h

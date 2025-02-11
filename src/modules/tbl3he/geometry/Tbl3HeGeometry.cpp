@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -92,7 +92,7 @@ bool Tbl3HeGeometry::validateData(DataParser::CaenReadout &Data) {
 }
 
 
-/// \brief calulate the pixel id from the readout data
+/// \brief calculate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
 uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;

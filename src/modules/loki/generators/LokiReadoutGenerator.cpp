@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -54,7 +54,7 @@ void LokiReadoutGenerator::generateData() {
     //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
 
-    // increment redout time for next redout
+    // increment readout time for next readout
     addTicksBtwReadoutsToReadoutTime();
   }
 }

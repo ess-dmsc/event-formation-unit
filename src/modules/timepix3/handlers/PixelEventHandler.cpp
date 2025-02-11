@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <future>
+#include <common/time/ESSTime.h>
 #include <timepix3/handlers/PixelEventHandler.h>
 #include <timepix3/handlers/TimingEventHandler.h>
 
@@ -19,7 +21,7 @@ namespace Timepix3 {
 using namespace std;
 using namespace timepixReadout;
 using namespace timepixDTO;
-using namespace efutils;
+using namespace esstime;
 
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,
@@ -96,8 +98,8 @@ void PixelEventHandler::pushDataToKafka() {
   if (sub2DFramesNumber == 1) {
     clusterHits(*clusterers[0], sub2DFrames[0]);
   } else {
-    /// \todo parrallel processing of the subFrames not yet finalized and this
-    /// part not tested. Finish the implementation for parrallel processing.
+    /// \todo parallel processing of the subFrames not yet finalized and this
+    /// part not tested. Finish the implementation for parallel processing.
     for (int i = 0; i < sub2DFramesNumber; i++) {
       auto &subFrame = sub2DFrames[i];
       if (subFrame.size() > 0) {
@@ -131,7 +133,8 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
     // detector, it is the time the first photon in the cluster hit the
     // detector.
 
-    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits || cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
+    if (cluster.hitCount() < TimepixConfiguration.MinEventSizeHits ||
+        cluster.weightSum() < TimepixConfiguration.MinimumToTSum) {
       statCounters.ClusterSizeTooSmall++;
       continue;
     }

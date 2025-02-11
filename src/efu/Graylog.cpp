@@ -65,9 +65,9 @@ void Graylog::EmptyGraylogMessageQueue() {
   Log::RemoveAllHandlers();
 }
 
-void Graylog::AddLoghandlerForNetwork(std::string DetectorName,
-                                      std::string FileName, int LogLevel,
-                                      std::string Address, int Port) {
+void Graylog::AddLoghandlerForNetwork(const std::string &DetectorName,
+                                      const std::string &FileName, int LogLevel,
+                                      const std::string &Address, int Port) {
   // Set-up logging before we start doing important stuff
   // change process to "efu" and set process_name to Instrument
   std::string ProcessKey{"process"};

@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,7 +17,7 @@ namespace Gem {
 class ReaderHits {
 public:
   /// \todo document
-  ReaderHits(std::string filename);
+  ReaderHits(const std::string &filename);
 
   /// \todo document
   size_t read(char *buf);

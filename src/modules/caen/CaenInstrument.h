@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,7 +29,7 @@ class CaenInstrument {
 public:
   /// \brief 'create' the Caen instruments
   ///
-  /// loads configuration and calibration files, calulate and generate the
+  /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
   CaenInstrument(CaenCounters &counters, BaseSettings &settings);
 

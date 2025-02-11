@@ -9,7 +9,7 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
 HistogramSerializer::HistogramSerializer(size_t buffer_half_size,
-                                         std::string source_name)
+                                         const std::string &source_name)
     : builder(2 * buffer_half_size + 256), SourceName(source_name) {}
 
 void HistogramSerializer::set_callback(ProducerCallback cb) {

@@ -22,13 +22,13 @@ namespace Caen {
 ///
 Tbl3HeConfig::Tbl3HeConfig() {}
 
-Tbl3HeConfig::Tbl3HeConfig(std::string ConfigFile)
+Tbl3HeConfig::Tbl3HeConfig(const std::string &ConfigFile)
     : ConfigFile(ConfigFile), ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
 }
 
-void Tbl3HeConfig::errorExit(std::string ErrMsg) {
+void Tbl3HeConfig::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
   XTRACE(INIT, ERR, "%s\n", ErrMsg.c_str());
   sleep(1);

@@ -100,8 +100,8 @@ class Variable {
 public:
   /// \brief Create a new variable with a name.
   /// \param Name The name of the variable
-  explicit Variable(std::string Name) : Name(std::move(Name)) {}
-  Variable(std::string Name, std::vector<std::string> Axes,
+  explicit Variable(const std::string &Name) : Name(std::move(Name)) {}
+  Variable(const std::string &Name, std::vector<std::string> Axes,
            std::vector<int64_t> Shape)
       : Name(std::move(Name)), Axes(std::move(Axes)), Shape(std::move(Shape)) {
     if (Axes.size() != Shape.size())
@@ -346,7 +346,7 @@ public:
   /// \param SourceName The name of the data source
   /// \param ReferenceTime The reference time for this data array
   /// \param Data The vector of variables to include in the data array
-  DataArray(std::string SourceName, TimeDurationNano ReferenceTime,
+  DataArray(const std::string &SourceName, TimeDurationNano ReferenceTime,
             std::vector<Variable> Data)
       : SourceName(std::move(SourceName)),
         ReferenceTime(std::move(ReferenceTime)), Data(std::move(Data)) {}

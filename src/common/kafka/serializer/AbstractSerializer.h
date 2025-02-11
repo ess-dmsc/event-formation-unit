@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -88,7 +88,7 @@ public:
 
   /// \brief Sets the reference time for serialization.
   ///
-  /// \param Time The reference time in ns precesion
+  /// \param Time The reference time in ns precision
   ///
   void checkAndSetReferenceTime(const TimeDurationNano &Time);
 };

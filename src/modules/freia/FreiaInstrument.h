@@ -1,11 +1,11 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief FreiaInstrument is responsible for readout validation and event
 /// formation
-/// Its functions are called from the main prcessing loop in FreiaBase
+/// Its functions are called from the main processing loop in FreiaBase
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -40,7 +40,7 @@ public:
   /// \brief after loading the config file, Config.HybridIdStr contains
   /// a vector of HybridIds. These are then loaded into the Hybrids so that
   /// we can later do consistency checks when applying the calibration data
-  void setHybridIds(std::vector<std::string> Ids);
+  void setHybridIds(const std::vector<std::string> &Ids);
 
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);
@@ -63,7 +63,7 @@ public:
   /// \brief serialiser (and producer) for events
   EV44Serializer *Serializer{nullptr};
 
-  /// \brief One builder per cassette, rezise in constructor when we have
+  /// \brief One builder per cassette, resize in constructor when we have
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
 

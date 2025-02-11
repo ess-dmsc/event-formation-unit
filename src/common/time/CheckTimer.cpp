@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ CheckTimer::CheckTimer(uint64_t Timeout) : TimeoutNS(Timeout) {
   reset();
 }
 
-/// Determine if a timeout has occured and reset timer
+/// Determine if a timeout has occurred and reset timer
 bool CheckTimer::timeout(void) {
   if (timetsc() >= TimeoutNS) {
     reset();

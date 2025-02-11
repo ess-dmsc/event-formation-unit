@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,7 +14,7 @@ TSCTimer::TSCTimer(void) { T0 = rdtsc(); }
 ///
 TSCTimer::TSCTimer(uint64_t Timeout) : TimeoutTicks(Timeout) { T0 = rdtsc(); }
 
-/// Determine if a timeout has occured and reset timer
+/// Determine if a timeout has occurred and reset timer
 bool TSCTimer::timeout(void) {
   if (timetsc() >= TimeoutTicks) {
     reset();
