@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "KafkaMocks.h"
+#include <common/Statistics.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
 #include <common/testutils/TestBase.h>
@@ -35,8 +36,9 @@ void reporter<specialized>::send(severity s, char const *file,
 
 class ProducerStandIn : public Producer {
 public:
-  ProducerStandIn(const std::string &Broker, const std::string &Topic)
-      : Producer(Broker, Topic, KafkaCfg.CfgParms) {}
+  ProducerStandIn(const std::string &Broker, const std::string &Topic,
+                  Statistics *Stats = nullptr)
+      : Producer(Broker, Topic, KafkaCfg.CfgParms, Stats) {}
   using Producer::Config;
   using Producer::KafkaProducer;
   using Producer::KafkaTopic;
@@ -57,22 +59,78 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_NE(prod.KafkaTopic, nullptr);
   ASSERT_NE(prod.KafkaProducer, nullptr);
   ASSERT_EQ(ret, RdKafka::ERR_NO_ERROR);
-  ASSERT_EQ(prod.ProducerStatCounters.dr_errors, 0);
-  ASSERT_EQ(prod.ProducerStatCounters.dr_noerrors, 0);
-  ASSERT_EQ(prod.ProducerStatCounters.ev_errors, 0);
-  // ASSERT_EQ(prod.stats.ev_others, 0);
-  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
+  EXPECT_EQ(prod.getStats().produce_bytes_error, 0);
+  EXPECT_EQ(prod.getStats().produce_bytes_ok, 10);
+  EXPECT_EQ(prod.getStats().produce_calls, 1);
+  EXPECT_EQ(prod.getStats().produce_errors, 0);
+  EXPECT_EQ(prod.getStats().ErrTimeout, 0);
+  EXPECT_EQ(prod.getStats().ErrTransport, 0);
+  EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 0);
+  EXPECT_EQ(prod.getStats().ErrUnknownTopic, 0);
+  EXPECT_EQ(prod.getStats().ErrQueueFull, 0);
+  EXPECT_EQ(prod.getStats().ErrOther, 0);
+  EXPECT_EQ(prod.getStats().ErrMsgTimeout, 0);
+  EXPECT_EQ(prod.getStats().ErrAuth, 0);
+  EXPECT_EQ(prod.getStats().ErrMsgSizeTooLarge, 0);
+  EXPECT_EQ(prod.getStats().ErrUknownPartition, 0);
+  EXPECT_EQ(prod.getStats().TransmissionErrors, 0);
+  EXPECT_EQ(prod.getStats().MsgError, 0);
+  EXPECT_EQ(prod.getStats().MsgDeliverySuccess, 0);
+  EXPECT_EQ(prod.getStats().MsgStatusPersisted, 0);
+  EXPECT_EQ(prod.getStats().MsgStatusPossiblyPersisted, 0);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 0);
+  EXPECT_EQ(prod.getStats().TotalMsgDeliveryEvent, 0);
+  EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 0);
+  EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue, 0);
+  EXPECT_EQ(prod.getStats().BytesOfMsgInQueue, 0);
+  EXPECT_EQ(prod.getStats().MaxBytesOfMsgInQueue, 0);
+  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 0);
+  EXPECT_EQ(prod.getStats().TxRequestRetries, 0);
+}
+
+TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
+  Statistics Stats;
+
+  ProducerStandIn prod{"nobroker", "notopic", &Stats};
+
+  EXPECT_EQ(Stats.valueByName("kafka.config_errors"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_ok"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_error"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.produce_calls"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.produce_errors"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.brokers.tx_bytes"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.brokers.tx_req_retries"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.max_num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.max_bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.delivery_success"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.status_persisted"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.status_not_persisted"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.status_possibly_persisted"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.msg.msg_delivery_event"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.msg_delivery"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.transmission"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.unknown_topic"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.unknown_partition"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.queue_full"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.timeout"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.msg_timeout"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.transport"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.authentication"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.msg_size"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error.other"), 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto Res = prod.setConfig("queue.buffering.max.ms", "101");
   ASSERT_EQ(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.ProducerStatCounters.config_errors, 0);
+  ASSERT_EQ(prod.getStats().config_errors, 0);
 
   Res = prod.setConfig("this.does.not.exist", "so.this.has.no.meaning");
   ASSERT_NE(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.ProducerStatCounters.config_errors, 1);
+  ASSERT_EQ(prod.getStats().config_errors, 1);
 }
 
 TEST_F(ProducerTest, CreateConfFail1) {
@@ -101,10 +159,10 @@ TEST_F(ProducerTest, ProducerFail) {
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
   std::uint8_t SomeData[20];
-  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
+  ASSERT_EQ(prod.getStats().produce_errors, 0);
   int ret = prod.produce(SomeData, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 1);
+  ASSERT_EQ(prod.getStats().produce_errors, 1);
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
@@ -118,10 +176,14 @@ TEST_F(ProducerTest, ProducerSuccess) {
   prod.KafkaProducer.reset(TempProducer);
   unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
-  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
+  ASSERT_EQ(prod.getStats().produce_errors, 0);
+  ASSERT_EQ(prod.getStats().produce_bytes_ok, 0);
+
   int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.ProducerStatCounters.produce_errors, 0);
+  ASSERT_EQ(prod.getStats().produce_errors, 0);
+  ASSERT_EQ(prod.getStats().produce_bytes_ok, 200);
+
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
