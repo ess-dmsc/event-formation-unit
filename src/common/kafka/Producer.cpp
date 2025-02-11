@@ -51,55 +51,9 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
                    Statistics *Stats)
     : ProducerBase(), TopicName(Topic) {
 
-  Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
-  TopicConfig.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC));
-
-  if (Config == nullptr) {
-    LOG(KAFKA, Sev::Error, "Unable to create CONF_GLOBAL object");
-    return;
-  }
-
-  if (TopicConfig == nullptr) {
-    LOG(KAFKA, Sev::Error, "Unable to create CONF_TOPIC object");
-    return;
-  }
-
-  setConfig("metadata.broker.list", Broker); // can be overwritten
-
-  for (auto &Config : Configs) {
-    setConfig(Config.first, Config.second);
-  }
-
-  if (Config->set("event_cb", static_cast<RdKafka::EventCb *>(this),
-                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
-    LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
-  }
-
-  if (Config->set("dr_cb", static_cast<RdKafka::DeliveryReportCb *>(this),
-                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
-    LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
-  }
-
-  // Set message timeout to 1 minute
-  Config->set("message.timeout.ms", "60000", ErrorMessage);
-
-  KafkaProducer.reset(RdKafka::Producer::create(Config.get(), ErrorMessage));
-  if (!KafkaProducer) {
-    LOG(KAFKA, Sev::Error, "Failed to create producer: {}", ErrorMessage);
-    return;
-  }
-
-  KafkaTopic.reset(RdKafka::Topic::create(KafkaProducer.get(), TopicName,
-                                          TopicConfig.get(), ErrorMessage));
-  if (!KafkaTopic) {
-    LOG(KAFKA, Sev::Error, "Failed to create topic: {}", ErrorMessage);
-    return;
-  }
-
+  /// If Stats is nullptr, no internal stat counters will be be not registered
   if (Stats != nullptr) {
     // clang-format off
-    /// regirster producer stats into the stats system
-    /// efu producer stats
     Stats->create("kafka.config_errors", ProducerStatCounters.config_errors);
     Stats->create("kafka.produce_bytes_ok", ProducerStatCounters.produce_bytes_ok);
     Stats->create("kafka.produce_bytes_error", ProducerStatCounters.produce_bytes_error);
@@ -134,6 +88,55 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     Stats->create("kafka.error.msg_size", ProducerStatCounters.ErrMsgSizeTooLarge);
     Stats->create("kafka.error.other", ProducerStatCounters.ErrOther);
     // clang-format on
+  }
+
+  /// Perform the configuration of the Kafka producer
+  Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
+  TopicConfig.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC));
+
+  if (Config == nullptr) {
+    LOG(KAFKA, Sev::Error, "Unable to create CONF_GLOBAL object");
+    return;
+  }
+
+  if (TopicConfig == nullptr) {
+    LOG(KAFKA, Sev::Error, "Unable to create CONF_TOPIC object");
+    return;
+  }
+
+  setConfig("metadata.broker.list", Broker); // can be overwritten
+
+  for (auto &Config : Configs) {
+    setConfig(Config.first, Config.second);
+  }
+
+  /// Register ourself as the event call back handler to receive events
+  if (Config->set("event_cb", static_cast<RdKafka::EventCb *>(this),
+                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
+    LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
+  }
+
+  /// Register ourself as the delivery report handler to receive message
+  /// delivery reports
+  if (Config->set("dr_cb", static_cast<RdKafka::DeliveryReportCb *>(this),
+                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
+    LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
+  }
+
+  // Set message timeout to 1 minute
+  Config->set("message.timeout.ms", "60000", ErrorMessage);
+
+  KafkaProducer.reset(RdKafka::Producer::create(Config.get(), ErrorMessage));
+  if (!KafkaProducer) {
+    LOG(KAFKA, Sev::Error, "Failed to create producer: {}", ErrorMessage);
+    return;
+  }
+
+  KafkaTopic.reset(RdKafka::Topic::create(KafkaProducer.get(), TopicName,
+                                          TopicConfig.get(), ErrorMessage));
+  if (!KafkaTopic) {
+    LOG(KAFKA, Sev::Error, "Failed to create topic: {}", ErrorMessage);
+    return;
   }
 }
 
