@@ -47,9 +47,7 @@ RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
 
 ///
 Producer::Producer(const std::string &Broker, const std::string &Topic,
-                   std::vector<std::pair<std::string, std::string>> &Configs,
-                   KafkaEventHandler &EventHandler,
-                   DeliveryReportHandler &DeliveryHandler)
+                   std::vector<std::pair<std::string, std::string>> &Configs)
     : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
@@ -71,24 +69,24 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     setConfig(Config.first, Config.second);
   }
 
-  if (Config->set("event_cb", &EventHandler, ErrorMessage) !=
-      RdKafka::Conf::CONF_OK) {
+  if (Config->set("event_cb", static_cast<RdKafka::EventCb *>(this),
+                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
   }
 
-  if (Config->set("dr_cb", &DeliveryHandler, ErrorMessage) !=
-      RdKafka::Conf::CONF_OK) {
+  if (Config->set("dr_cb", static_cast<RdKafka::DeliveryReportCb *>(this),
+                  ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
   }
 
-  // Set message timeout to 5 seconds
-  Config->set("message.timeout.ms", "5000", ErrorMessage);
+  // // Set message timeout to 5 seconds
+  // Config->set("message.timeout.ms", "5000", ErrorMessage);
 
-  // Set retry backoff to 100ms
-  Config->set("retry.backoff.ms", "100", ErrorMessage);
+  // // Set retry backoff to 100ms
+  // Config->set("retry.backoff.ms", "100", ErrorMessage);
 
   // Set the number of retries to 3
-  Config->set("retries", "3", ErrorMessage);
+  // Config->set("retries", "3", ErrorMessage);
 
   KafkaProducer.reset(RdKafka::Producer::create(Config.get(), ErrorMessage));
   if (!KafkaProducer) {
@@ -119,28 +117,28 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 
   stats.produce_calls++;
 
-  // poll for events in the event queue and triggers callbacks on them
-  KafkaProducer->poll(0);
-
   stats.produce_bytes_ok += Buffer.size_bytes();
 
   return 0;
 }
 
 // Implementation of KafkaEventHandler override
-void KafkaEventHandler::event_cb(RdKafka::Event &event) {
+void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
   switch (event.type()) {
 
   case RdKafka::Event::EVENT_STATS:
     res = nlohmann::json::parse(event.str());
-    NumberOfMsgInQueue += res["msg_cnt"].get<int64_t>();
-    SizeOfMsgInQueue += res["msg_size"].get<int64_t>();
+    stats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
+    stats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
+    stats.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
+    stats.MaxBytesOfMsgInQueue += res["msg_size_max"].get<int64_t>();
     for (auto &broker : res["brokers"].items()) {
       const auto &broker_info = broker.value();
-      BytesTransmittedToBrokers += broker_info.value("txbytes", (int64_t)0);
-      TransmissionErrors += broker_info.value("txerrs", (int64_t)0);
-      TxRequestRetries += broker_info.value("txerrs", (int64_t)0);
+      stats.BytesTransmittedToBrokers =
+          broker_info.value("txbytes", (int64_t)0);
+      stats.TransmissionErrors = broker_info.value("txerrs", (int64_t)0);
+      stats.TxRequestRetries = broker_info.value("txretries", (int64_t)0);
     }
     break;
 
@@ -152,28 +150,7 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
     XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", event.err(),
            RdKafka::err2str(event.err()).c_str());
 
-    switch (event.err()) {
-    case RdKafka::ErrorCode::ERR__TIMED_OUT:
-      ++ErrTimeout;
-      break;
-    case RdKafka::ErrorCode::ERR__TRANSPORT:
-      ++ErrTransport;
-      break;
-    case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
-      ++ErrBrokerNotAvailable;
-      break;
-    case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-      ++ErrUnknownTopic;
-      break;
-    case RdKafka::ErrorCode::ERR__QUEUE_FULL:
-      ++ErrQueueFull;
-      break;
-    case RdKafka::ErrorCode::ERR_NO_ERROR:
-      break;
-    default:
-      ++ErrOther;
-      break;
-    }
+    applyKafkaErrorCode(event.err());
 
     break;
 
@@ -183,26 +160,29 @@ void KafkaEventHandler::event_cb(RdKafka::Event &event) {
 }
 
 // Implementation of DeliveryReportHandler override
-void DeliveryReportHandler::dr_cb(RdKafka::Message &message) {
-  ++TotalMessageDelivered;
+void Producer::dr_cb(RdKafka::Message &message) {
+  ++stats.TotalMsgDeliveryEvent;
 
   switch (message.status()) {
   case RdKafka::Message::MSG_STATUS_NOT_PERSISTED:
-    ++MsgStatusNotPersisted;
+    ++stats.MsgStatusNotPersisted;
     break;
   case RdKafka::Message::MSG_STATUS_POSSIBLY_PERSISTED:
-    ++MsgStatusPossiblyPersisted;
+    ++stats.MsgStatusPossiblyPersisted;
     break;
   case RdKafka::Message::MSG_STATUS_PERSISTED:
-    ++MsgStatusPersisted;
+    ++stats.MsgStatusPersisted;
     break;
   default:
     break;
   }
 
   if (message.err() != RdKafka::ErrorCode::ERR_NO_ERROR) {
-    ++MsgError;
+
+    applyKafkaErrorCode(message.err());
+    ++stats.MsgError;
+
   } else {
-    ++MsgDeliverySuccess;
+    ++stats.MsgDeliverySuccess;
   }
 }

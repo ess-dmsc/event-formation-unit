@@ -23,41 +23,6 @@
 #include <utility>
 #include <vector>
 
-// New handler classes
-class KafkaEventHandler : public RdKafka::EventCb {
-public:
-  KafkaEventHandler() {}
-
-  void event_cb(RdKafka::Event &event) override;
-
-  int64_t ErrTimeout{0};
-  int64_t ErrTransport{0};
-  int64_t ErrBrokerNotAvailable{0};
-  int64_t ErrUnknownTopic{0};
-  int64_t ErrQueueFull{0};
-  int64_t ErrOther{0};
-
-  // Counters for statistics
-  int64_t NumberOfMsgInQueue{0};
-  int64_t SizeOfMsgInQueue{0};
-  int64_t BytesTransmittedToBrokers{0};
-  int64_t TransmissionErrors{0};
-  int64_t TxRequestRetries{0};
-};
-
-class DeliveryReportHandler : public RdKafka::DeliveryReportCb {
-public:
-  DeliveryReportHandler() {}
-
-  void dr_cb(RdKafka::Message &message) override;
-  int64_t TotalMessageDelivered{0};      // Total delivery reports received
-  int64_t MsgError{0};                   // Count of delivery reports with error
-  int64_t MsgDeliverySuccess{0};         // Count of successful delivery reports
-  int64_t MsgStatusNotPersisted{0};      // Count of messages not persisted
-  int64_t MsgStatusPossiblyPersisted{0}; // Count of messages possibly persisted
-  int64_t MsgStatusPersisted{0};         // Count of messages persisted
-};
-
 ///
 class ProducerBase {
 public:
@@ -79,7 +44,9 @@ public:
 /// sending them to the cluster.
 ///
 /// It inherits from ProducerBase and RdKafka::EventCb.
-class Producer : public ProducerBase {
+class Producer : public ProducerBase,
+                 public RdKafka::EventCb,
+                 public RdKafka::DeliveryReportCb {
 public:
   /// \brief Constructs a Producer object.
   ///
@@ -89,14 +56,17 @@ public:
   /// example, "trex_detector".
   /// \param Configs A vector of configuration <type,value> pairs.
   Producer(const std::string &Broker, const std::string &Topic,
-           std::vector<std::pair<std::string, std::string>> &Configs,
-           KafkaEventHandler &EventHandler, DeliveryReportHandler &DeliveryHandler);
+           std::vector<std::pair<std::string, std::string>> &Configs);
 
   /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;
 
   /// \brief Polls the producer for events.
   void poll(int TimeoutMS) { KafkaProducer->poll(TimeoutMS); };
+
+  void dr_cb(RdKafka::Message &message) override;
+
+  void event_cb(RdKafka::Event &event) override;
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -118,12 +88,38 @@ public:
 
   /// \brief Structure to hold producer statistics.
   struct ProducerStats {
-    int64_t config_errors;
-    int64_t produce_bytes_ok;
-    int64_t produce_bytes_error;
-    int64_t produce_calls;
-    int64_t produce_errors;
-    int64_t produce_no_errors;
+    int64_t config_errors{0};
+    int64_t produce_bytes_ok{0};
+    int64_t produce_bytes_error{0};
+    int64_t produce_calls{0};
+    int64_t produce_errors{0};
+    int64_t produce_no_errors{0};
+
+    int64_t ErrTimeout{0};
+    int64_t ErrTransport{0};
+    int64_t ErrBrokerNotAvailable{0};
+    int64_t ErrUnknownTopic{0};
+    int64_t ErrQueueFull{0};
+    int64_t ErrOther{0};
+    int64_t ErrMsgTimeout{0};
+    int64_t AuthError{0};
+
+    // Counters for statistics
+    int64_t NumberOfMsgInQueue{0};
+    int64_t MaxNumOfMsgInQueue{0};
+    int64_t BytesOfMsgInQueue{0};
+    int64_t MaxBytesOfMsgInQueue{0};
+    int64_t BytesTransmittedToBrokers{0};
+    int64_t TransmissionErrors{0};
+    int64_t TxRequestRetries{0};
+
+    int64_t TotalMsgDeliveryEvent{0}; // Total delivery reports received
+    int64_t MsgError{0};              // Count of delivery reports with error
+    int64_t MsgDeliverySuccess{0};    // Count of successful delivery reports
+    int64_t MsgStatusNotPersisted{0}; // Count of messages not persisted
+    int64_t MsgStatusPossiblyPersisted{
+        0};                        // Count of messages possibly persisted
+    int64_t MsgStatusPersisted{0}; // Count of messages persisted
   } stats = {};
 
 protected:
@@ -133,6 +129,38 @@ protected:
   std::unique_ptr<RdKafka::Conf> TopicConfig;
   std::unique_ptr<RdKafka::Topic> KafkaTopic;
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
+
+private:
+  inline void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) noexcept {
+    switch (ErrorCode) {
+    case RdKafka::ErrorCode::ERR__TIMED_OUT:
+      ++stats.ErrTimeout;
+      break;
+    case RdKafka::ErrorCode::ERR__TRANSPORT:
+      ++stats.ErrTransport;
+      break;
+    case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
+      ++stats.ErrBrokerNotAvailable;
+      break;
+    case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
+      ++stats.ErrUnknownTopic;
+      break;
+    case RdKafka::ErrorCode::ERR__QUEUE_FULL:
+      ++stats.ErrQueueFull;
+      break;
+    case RdKafka::ErrorCode::ERR__MSG_TIMED_OUT:
+      ++stats.ErrMsgTimeout;
+      break;
+    case RdKafka::ErrorCode::ERR__AUTHENTICATION:
+      ++stats.AuthError;
+      break;
+    case RdKafka::ErrorCode::ERR_NO_ERROR:
+      break;
+    default:
+      ++stats.ErrOther;
+      break;
+    }
+  }
 };
 
 using ProducerCallback =

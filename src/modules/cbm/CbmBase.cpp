@@ -101,24 +101,29 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("kafka.produce_no_errors", Counters.ProducerStats.produce_no_errors);
   Stats.create("kafka.produce_errors", Counters.ProducerStats.produce_errors);
   
-  Stats.create("kafka.brokers.tx_bytes", Counters.KafkaEventStats.BytesTransmittedToBrokers);
-  Stats.create("kafka.brokers.tx_req_retries", Counters.KafkaEventStats.TxRequestRetries);
+  Stats.create("kafka.brokers.tx_bytes", Counters.ProducerStats.BytesTransmittedToBrokers);
+  Stats.create("kafka.brokers.tx_req_retries", Counters.ProducerStats.TxRequestRetries);
 
-  Stats.create("kafka.msg.num_of_msg_in_queue", Counters.KafkaEventStats.NumberOfMsgInQueue);
-  Stats.create("kafka.msg.size_of_msg_in_queue", Counters.KafkaEventStats.SizeOfMsgInQueue);
-  Stats.create("kafka.msg.delivery_success", Counters.KafkaMsgDeliveryStats.MsgDeliverySuccess);
-  Stats.create("kafka.msg.status_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusPersisted);
-  Stats.create("kafka.msg.status_not_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusNotPersisted);
-  Stats.create("kafka.msg.status_possibly_persisted", Counters.KafkaMsgDeliveryStats.MsgStatusPossiblyPersisted);
-  Stats.create("kafka.msg.total_delivered", Counters.KafkaMsgDeliveryStats.TotalMessageDelivered);
+  Stats.create("kafka.msg.num_of_msg_in_queue", Counters.ProducerStats.NumberOfMsgInQueue);
+  Stats.create("kafka.msg.max_num_of_msg_in_queue", Counters.ProducerStats.MaxNumOfMsgInQueue);
+  Stats.create("kafka.msg.bytes_of_msg_in_queue", Counters.ProducerStats.BytesOfMsgInQueue);
+  Stats.create("kafka.msg.max_bytes_of_msg_in_queue", Counters.ProducerStats.MaxBytesOfMsgInQueue);
+  Stats.create("kafka.msg.delivery_success", Counters.ProducerStats.MsgDeliverySuccess);
+  Stats.create("kafka.msg.status_persisted", Counters.ProducerStats.MsgStatusPersisted);
+  Stats.create("kafka.msg.status_not_persisted", Counters.ProducerStats.MsgStatusNotPersisted);
+  Stats.create("kafka.msg.status_possibly_persisted", Counters.ProducerStats.MsgStatusPossiblyPersisted);
+  Stats.create("kafka.msg.msg_delivery_event", Counters.ProducerStats.TotalMsgDeliveryEvent);
 
-  Stats.create("kafka.error.msg_delivery", Counters.KafkaMsgDeliveryStats.MsgError);
-  Stats.create("kafka.error.transmission", Counters.KafkaEventStats.TransmissionErrors);
-  Stats.create("kafka.error.unknown_topic", Counters.KafkaEventStats.ErrUnknownTopic);
-  Stats.create("kafka.error.queue_full", Counters.KafkaEventStats.ErrQueueFull);
-  Stats.create("kafka.error.timeout", Counters.KafkaEventStats.ErrTimeout);
-  Stats.create("kafka.error.transport", Counters.KafkaEventStats.ErrTransport);
-  Stats.create("kafka.error.other", Counters.KafkaEventStats.ErrOther);
+  /// Kafka error stats
+  Stats.create("kafka.error.msg_delivery", Counters.ProducerStats.MsgError);
+  Stats.create("kafka.error.transmission", Counters.ProducerStats.TransmissionErrors);
+  Stats.create("kafka.error.unknown_topic", Counters.ProducerStats.ErrUnknownTopic);
+  Stats.create("kafka.error.queue_full", Counters.ProducerStats.ErrQueueFull);
+  Stats.create("kafka.error.timeout", Counters.ProducerStats.ErrTimeout);
+  Stats.create("kafka.error.msg_timeout", Counters.ProducerStats.ErrMsgTimeout);
+  Stats.create("kafka.error.transport", Counters.ProducerStats.ErrTransport);
+  Stats.create("kafka.error.authentication", Counters.ProducerStats.AuthError);
+  Stats.create("kafka.error.other", Counters.ProducerStats.ErrOther);
 
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
@@ -144,8 +149,7 @@ void CbmBase::processing_thread() {
   // Event producer
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                     KafkaCfg.CfgParms, Counters.KafkaEventStats,
-                     Counters.KafkaMsgDeliveryStats);
+                     KafkaCfg.CfgParms);
 
   auto Produce = [&eventprod](const auto &DataBuffer, const auto &Timestamp) {
     eventprod.produce(DataBuffer, Timestamp);
@@ -267,9 +271,8 @@ void CbmBase::processing_thread() {
       usleep(10);
     }
 
+    eventprod.poll(0);
 
-    eventprod.poll(1);
-    
     // Not only flush serializer data but also update runtime stats
     // This not applies for histogram serializer which should be flushed
     // only in case new pulse time is detected
