@@ -27,14 +27,17 @@ public:
   bool setGeometry(const std::string &NewGeometry) {
     if (NewGeometry == "AMOR") {
       GeometryInst = &AMORGeom;
+      essgeom = new ESSGeometry{64, 448, 1, 1};
       return true;
     }
     if (NewGeometry == "Freia") {
       GeometryInst = &FreiaGeom;
+      essgeom = new ESSGeometry{64, 1024, 1, 1};
       return true;
     }
     if (NewGeometry == "Estia") {
       GeometryInst = &EstiaGeom;
+      essgeom = new ESSGeometry(1536, 128, 1, 1);
       return true;
     }
     XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
