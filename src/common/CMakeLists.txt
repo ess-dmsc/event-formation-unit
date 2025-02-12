@@ -58,6 +58,8 @@ set(efu_common_INC
   math/BitMath.h
   math/NumericalMath.h
   system/gccintel.h
+  system/intel.h
+  system/arm.h
   system/Socket.h
   DumpFile.h
   JsonFile.h
