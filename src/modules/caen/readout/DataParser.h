@@ -19,6 +19,19 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
+  /// \todo Multiple issues regarding amplitudes
+  // This struct is only superficially correct
+  /// Regarding signed vs unsigned this is correct only for LOKI
+  /// where the four amplitudes are actually signed integers.
+  /// For BIFROST and TBL3HE (and presumably MIRACLES, VESPA, CSPEC too)
+  /// the amplitudes are unsigned.
+  // Currently (for BIFROST) thuis is taken care of in the code. But we
+  // should probably fix this at some point
+  ///
+  /// For the identification of the amplitudes this is NOT correct for
+  /// LOKI as the amplitudes A and B are swapped and C and D are swapped.
+  /// this is 'corrected' in the charge division formulae for LOKI.
+  /// For BIFROST (and the others) these are correct.
   struct CaenReadout {
     uint8_t FiberId;
     uint8_t FENId;

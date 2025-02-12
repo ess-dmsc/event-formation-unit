@@ -5,8 +5,11 @@
 ///
 /// \brief Calculate pixelid from digital identifiers, see latest reviewed
 /// ICD for Loki:
-/// ...
 ///
+/// \todo Note there is some confusion about the LOKI amplitudes.
+/// Amplitudes A and B are actually swapped (in firmware) and so are
+/// amplitudes C and D.
+/// This should be fixed at some point.
 //===----------------------------------------------------------------------===//
 
 #include <modules/loki/geometry/LokiGeometry.h>
@@ -32,6 +35,8 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
 
   XTRACE(DATA, DEB, "calcUnitAndPos: GlobalGroup %d", GlobalGroup);
 
+  // While formally wrong, this calculation is not affected by the
+  // amplitude swapping.
   int Denominator = AmpA + AmpB + AmpC + AmpD;
 
   if ( Denominator == 0) {
@@ -41,6 +46,8 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   }
 
   // Calculate uncorrected position as float
+  // While formally wrong, this calculation is not affected by the
+  // amplitude swapping.
   double UncorrPos = 1.0 * (AmpA + AmpB )/ Denominator; // [0.0 ; 1.0]
     if ((UncorrPos < 0) or (UncorrPos > 1.0)) {
     XTRACE(DATA, WAR, "UncorrPos %f not in unit interval", UncorrPos);
@@ -48,6 +55,9 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   }
 
   // Calculate straw as float in the unit interval [0.0 ; 1.0]
+  /// \todo This implementation compensates for the amplitude swap.
+  /// and has been validated by Wireshark capture and the LOKI pattern
+  /// generator functionality.
   double Straw = 1.0 * (AmpB + AmpD) / Denominator;
   int Unit = CaenCDCalibration.getUnitId(GlobalGroup, Straw);
   if (Unit == -1) {
