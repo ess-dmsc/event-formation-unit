@@ -20,7 +20,6 @@
 #include <freia/FreiaBase.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
-#include <logical_geometry/ESSGeometry.h>
 
 namespace Freia {
 
@@ -73,10 +72,6 @@ public:
   /// \brief digital geometry
   /// get x- and y- coordinates from cassettes and channels
   Geometry Geom;
-
-  /// \brief logical geometry
-  /// get pixel IDs from x- and y- coordinates
-  ESSGeometry essgeom{64, 1024, 1, 1};
 
   // Each cassette holds 2 VMMCalibrations
   std::vector<ESSReadout::Hybrid> Hybrids;
