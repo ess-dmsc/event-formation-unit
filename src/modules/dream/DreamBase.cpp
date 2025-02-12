@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -72,24 +72,8 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
-
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
   // clang-format on
+
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
 
@@ -111,9 +95,10 @@ void DreamBase::processingThread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms, &Stats);
 
-  auto Produce = [&EventProducer](const auto &DataBuffer, const auto &Timestamp) {
+  auto Produce = [&EventProducer](const auto &DataBuffer,
+                                  const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
@@ -139,7 +124,7 @@ void DreamBase::processingThread() {
   TSCTimer ProduceTimer;
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
-                      Counters.KafkaStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -184,19 +169,18 @@ void DreamBase::processingThread() {
       usleep(10);
     }
 
+    /// poll producer stats
+    EventProducer.poll(0);
+
     if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.Events,
+           EventProducer.getStats().MsgStatusPersisted});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-      Counters.KafkaStats = EventProducer.stats;
 
       ProduceTimer.reset();
     }

@@ -44,14 +44,12 @@ struct CaenCounters {
   int64_t SerializerErrors{0};
 
   // Time
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats{};
+  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats {};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
   int64_t ProduceCausePulseChange{0};
   int64_t ProduceCauseMaxEventsReached{0};
 
-  // Kafka stats below are common to all detectors
-  struct Producer::ProducerStats KafkaStats{};
 } __attribute__((aligned(64)));
 } // namespace Caen

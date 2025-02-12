@@ -29,7 +29,7 @@ protected:
     int64_t events_udder;
     // Kafka stats below are common to all detectors
     struct Producer::ProducerStats KafkaStats;
-  } __attribute__((aligned(64))) mystats;
+  } __attribute__((aligned(64))) Counters;
 };
 
 } // namespace PerfGen

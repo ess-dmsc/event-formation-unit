@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "common/kafka/Producer.h"
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/matching/GapMatcher.h>
@@ -53,11 +54,5 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-  /// \todo cleanup unused variables
-  // int64_t ProduceCausePulseChange;
-  // int64_t ProduceCauseMaxEventsReached;
-
-  // Kafka stats below are common to all detectors
-  struct Producer::ProducerStats KafkaStats;
 
 } __attribute__((aligned(64)));
