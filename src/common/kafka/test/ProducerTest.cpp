@@ -272,8 +272,6 @@ TEST_F(ProducerTest, EventCbProcessesErrors) {
                          RdKafka::ERR_TOPIC_EXCEPTION);
   prod.event_cb(errorEvent);
   EXPECT_EQ(prod.getStats().ErrTopic, 3);
-
-  
 }
 
 int main(int argc, char **argv) {
