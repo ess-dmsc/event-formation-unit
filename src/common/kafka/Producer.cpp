@@ -12,8 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
-#include <common/debug/Log.h>
-#include <common/debug/Trace.h>
 #include <common/kafka/Producer.h>
 #include <common/system/gccintel.h>
 #include <cstdint>
@@ -78,7 +76,7 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     /// librdkafka error stats
     Stats->create("kafka.error.msg_delivery", ProducerStatCounters.MsgError);
     Stats->create("kafka.error.transmission", ProducerStatCounters.TransmissionErrors);
-    Stats->create("kafka.error.unknown_topic", ProducerStatCounters.ErrUnknownTopic);
+    Stats->create("kafka.error.unknown_topic", ProducerStatCounters.ErrTopic);
     Stats->create("kafka.error.unknown_partition", ProducerStatCounters.ErrUknownPartition);
     Stats->create("kafka.error.queue_full", ProducerStatCounters.ErrQueueFull);
     Stats->create("kafka.error.timeout", ProducerStatCounters.ErrTimeout);
@@ -203,15 +201,7 @@ void Producer::event_cb(RdKafka::Event &event) {
     break;
 
   case RdKafka::Event::EVENT_ERROR:
-
-    // First log the error and its error string.
-    LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
-        static_cast<int>(event.err()), RdKafka::err2str(event.err()).c_str());
-    XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", event.err(),
-           RdKafka::err2str(event.err()).c_str());
-
     applyKafkaErrorCode(event.err());
-
     break;
 
   default:

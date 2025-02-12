@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "KafkaMocks.h"
+#include "MockEvent.h"
 #include <common/Statistics.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
@@ -66,7 +67,7 @@ TEST_F(ProducerTest, ConstructorOK) {
   EXPECT_EQ(prod.getStats().ErrTimeout, 0);
   EXPECT_EQ(prod.getStats().ErrTransport, 0);
   EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 0);
-  EXPECT_EQ(prod.getStats().ErrUnknownTopic, 0);
+  EXPECT_EQ(prod.getStats().ErrTopic, 0);
   EXPECT_EQ(prod.getStats().ErrQueueFull, 0);
   EXPECT_EQ(prod.getStats().ErrOther, 0);
   EXPECT_EQ(prod.getStats().ErrMsgTimeout, 0);
@@ -183,7 +184,6 @@ TEST_F(ProducerTest, ProducerSuccess) {
   ASSERT_EQ(ret, ReturnValue);
   ASSERT_EQ(prod.getStats().produce_errors, 0);
   ASSERT_EQ(prod.getStats().produce_bytes_ok, 200);
-
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
@@ -193,6 +193,87 @@ TEST_F(ProducerTest, ProducerFailDueToSize) {
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
+}
+
+TEST_F(ProducerTest, EventCbIncreasesCounters) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+
+  std::string fakeEventJson = R"({
+    "msg_cnt": 10,
+    "msg_max": 20,
+    "msg_size": 1000,
+    "msg_size_max": 2000,
+    "brokers": {
+      "broker1": {
+        "txbytes": 500,
+        "txerrs": 2,
+        "txretries": 1
+      },
+      "broker2": {
+        "txbytes": 300,
+        "txerrs": 1,
+        "txretries": 2
+      }
+    }
+  })";
+
+  MockEvent fakeEvent(fakeEventJson);
+  prod.event_cb(fakeEvent);
+
+  EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 10);
+  EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue, 20);
+  EXPECT_EQ(prod.getStats().BytesOfMsgInQueue, 1000);
+  EXPECT_EQ(prod.getStats().MaxBytesOfMsgInQueue, 2000);
+  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 800);
+  EXPECT_EQ(prod.getStats().TransmissionErrors, 3);
+  EXPECT_EQ(prod.getStats().TxRequestRetries, 3);
+}
+
+TEST_F(ProducerTest, EventCbProcessesErrors) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  std::string errorEventJson = R"({"error": "mock error"})";
+
+  MockEvent errorEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                       RdKafka::ERR__TIMED_OUT);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTimeout, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR_BROKER_NOT_AVAILABLE);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR__TRANSPORT);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTransport, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR__AUTHENTICATION);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrAuth, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR__MSG_TIMED_OUT);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrMsgTimeout, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR__UNKNOWN_TOPIC);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTopic, 1);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTopic, 2);
+
+  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
+                         RdKafka::ERR_TOPIC_EXCEPTION);
+  prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTopic, 3);
+
+  
 }
 
 int main(int argc, char **argv) {

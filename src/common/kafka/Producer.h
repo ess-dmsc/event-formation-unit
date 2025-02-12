@@ -9,13 +9,15 @@
 
 #pragma once
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <cstdint>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 #include <common/memory/Buffer.h>
 #include <common/memory/span.hpp>
 #include <functional>
@@ -84,7 +86,7 @@ public:
     /// \brief Count of broker not available errors
     int64_t ErrBrokerNotAvailable{0};
     /// \brief Count of unknown topic errors
-    int64_t ErrUnknownTopic{0};
+    int64_t ErrTopic{0};
     /// \brief Count of queue full errors
     int64_t ErrQueueFull{0};
     /// \brief Count of other/unspecified errors
@@ -138,7 +140,7 @@ public:
 
   /// \brief Returns the producer statistics reference.
   /// \return ProducerStats The producer statistics.
-  const ProducerStats& getStats() const { return ProducerStatCounters; }
+  const ProducerStats &getStats() const { return ProducerStatCounters; }
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -169,6 +171,13 @@ private:
   ProducerStats ProducerStatCounters = {};
 
   inline void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) noexcept {
+
+    // First log the error and its error string.
+    LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
+        static_cast<int>(ErrorCode), RdKafka::err2str(ErrorCode).c_str());
+    XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", ErrorCode,
+           RdKafka::err2str(ErrorCode).c_str());
+
     switch (ErrorCode) {
     case RdKafka::ErrorCode::ERR__TIMED_OUT:
       ++ProducerStatCounters.ErrTimeout;
@@ -180,7 +189,13 @@ private:
       ++ProducerStatCounters.ErrBrokerNotAvailable;
       break;
     case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-      ++ProducerStatCounters.ErrUnknownTopic;
+      ++ProducerStatCounters.ErrTopic;
+      break;
+    case RdKafka::ErrorCode::ERR_TOPIC_EXCEPTION:
+      ++ProducerStatCounters.ErrTopic;
+      break;
+    case RdKafka::ErrorCode::ERR_TOPIC_AUTHORIZATION_FAILED:
+      ++ProducerStatCounters.ErrTopic;
       break;
     case RdKafka::ErrorCode::ERR__QUEUE_FULL:
       ++ProducerStatCounters.ErrQueueFull;
