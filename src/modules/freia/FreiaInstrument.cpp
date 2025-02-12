@@ -257,7 +257,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     // calculate local x and y using center of mass
     auto x = static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
     auto y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
-    auto PixelId = essgeom.pixel2D(x, y);
+    auto PixelId = Geom.pixel2D(x, y);
 
     if (PixelId == 0) {
       XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u",

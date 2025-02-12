@@ -11,6 +11,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <string>
 
 // #undef TRC_LEVEL
@@ -33,10 +34,15 @@ public:
   static const uint16_t NumWires;
   static const uint16_t MinWireChannel;
   static const uint16_t MaxWireChannel;
+
+  /// \brief logical geometry
+  ESSGeometry * essgeom;
 };
+
 inline uint16_t const GeometryBase::InvalidCoord = 0xFFFF;
 inline uint16_t const GeometryBase::NumStrips = 64;
 inline uint16_t const GeometryBase::NumWires = 32;
 inline uint16_t const GeometryBase::MinWireChannel = 16;
 inline uint16_t const GeometryBase::MaxWireChannel = 47;
+
 } // namespace Freia

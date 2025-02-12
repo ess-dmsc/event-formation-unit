@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,17 +27,17 @@ public:
   bool setGeometry(const std::string &NewGeometry) {
     if (NewGeometry == "AMOR") {
       GeometryInst = &AMORGeom;
-      essgeom = new ESSGeometry{64, 448, 1, 1};
+      GeometryInst->essgeom = new ESSGeometry{64, 448, 1, 1};
       return true;
     }
     if (NewGeometry == "Freia") {
       GeometryInst = &FreiaGeom;
-      essgeom = new ESSGeometry{64, 1024, 1, 1};
+      GeometryInst->essgeom = new ESSGeometry{64, 1024, 1, 1};
       return true;
     }
     if (NewGeometry == "Estia") {
       GeometryInst = &EstiaGeom;
-      essgeom = new ESSGeometry(1536, 128, 1, 1);
+      GeometryInst->essgeom = new ESSGeometry(1536, 128, 1, 1);
       return true;
     }
     XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
@@ -59,6 +59,11 @@ public:
 
   // wrapper function for specific instrument geometry instance
   bool isYCoord(uint8_t VMM) { return GeometryInst->isYCoord(VMM); }
+
+  // wrapper for pixel2D
+  uint16_t pixel2D(uint16_t x, uint16_t y) {
+    return GeometryInst->essgeom->pixel2D(x, y);
+  }
 
 private:
   AMORGeometry AMORGeom;
