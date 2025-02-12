@@ -6,7 +6,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "KafkaMocks.h"
-#include "MockEvent.h"
 #include <common/Statistics.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
@@ -52,6 +51,7 @@ class ProducerTest : public TestBase {
 };
 
 TEST_F(ProducerTest, ConstructorOK) {
+
   ProducerStandIn prod{"nobroker", "notopic"};
   std::vector<unsigned char> DataBuffer(10);
   int ret = prod.produce(DataBuffer, time(nullptr) * 1000);
@@ -229,9 +229,18 @@ TEST_F(ProducerTest, EventCbIncreasesCounters) {
   EXPECT_EQ(prod.getStats().TxRequestRetries, 3);
 }
 
-TEST_F(ProducerTest, EventCbProcessesErrors) {
+TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
+  mockLogger = nullptr;
+  
   ProducerStandIn prod{"nobroker", "notopic"};
   std::string errorEventJson = R"({"error": "mock error"})";
+  
+  mockLogger = new MockLogger;
+  MockLogger &logger = *mockLogger;
+  REQUIRE_CALL(logger, log(_, _))
+      .TIMES(8)
+      .WITH(_1 == "KAFKA" &&
+            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
 
   MockEvent errorEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
                        RdKafka::ERR__TIMED_OUT);
@@ -271,6 +280,53 @@ TEST_F(ProducerTest, EventCbProcessesErrors) {
   errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
                          RdKafka::ERR_TOPIC_EXCEPTION);
   prod.event_cb(errorEvent);
+  EXPECT_EQ(prod.getStats().ErrTopic, 3);
+
+  delete mockLogger;
+}
+
+TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
+  mockLogger = nullptr;
+  
+  ProducerStandIn prod{"nobroker", "notopic"};
+  
+  mockLogger = new MockLogger;
+  MockLogger &logger = *mockLogger;
+  REQUIRE_CALL(logger, log(_, _))
+      .TIMES(8)
+      .WITH(_1 == "KAFKA" &&
+            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
+
+  MockMessage errorMessage(RdKafka::ERR__TIMED_OUT);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrTimeout, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR_BROKER_NOT_AVAILABLE);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR__TRANSPORT);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrTransport, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR__AUTHENTICATION);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrAuth, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR__MSG_TIMED_OUT);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrMsgTimeout, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR__UNKNOWN_TOPIC);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrTopic, 1);
+
+  errorMessage = MockMessage(RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
+  prod.dr_cb(errorMessage);
+  EXPECT_EQ(prod.getStats().ErrTopic, 2);
+
+  errorMessage = MockMessage(RdKafka::ERR_TOPIC_EXCEPTION);
+  prod.dr_cb(errorMessage);
   EXPECT_EQ(prod.getStats().ErrTopic, 3);
 }
 
