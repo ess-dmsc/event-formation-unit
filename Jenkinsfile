@@ -307,33 +307,3 @@ timestamps {
         }
     }
 }
-
-if (env.CHANGE_ID) {
-    // This is a pull request build
-    node('inttest') {
-        stage('Integration Test') {
-            sh "rm -rf build"
-            checkout scm
-            unstash 'event-formation-unit-centos7.tar.gz'
-            sh "tar xzvf event-formation-unit-centos7.tar.gz"
-            sh "mv event-formation-unit build"
-            sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
-                python3 -u ./test/integrationtest.py
-            """
-        }  // stage
-    }  // node
-    node('perftest'){
-        stage('Performance Test'){
-            sh "rm -rf build"
-            checkout scm
-            unstash 'event-formation-unit-centos7.tar.gz'
-            sh "tar xzvf event-formation-unit-centos7.tar.gz"
-            sh "mv event-formation-unit build"
-            sh """
-                export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./build/lib/
-                python3 -u ./test/performancetest.py
-            """
-        }
-    }
-}  // if

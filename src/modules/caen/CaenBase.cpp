@@ -61,7 +61,7 @@ CaenBase::CaenBase(BaseSettings const &settings,
   // LoKI Readout Data
   Stats.create("readouts.headers", Counters.Parser.DataHeaders);
   Stats.create("readouts.count", Counters.Parser.Readouts);
-  Stats.create("readouts.error_amplitude", Counters.Parser.ReadoutsBadAmpl);
+  Stats.create("readouts.error_maxadc", Counters.Parser.ReadoutsMaxADC);
 
   Stats.create("readouts.error_headersize", Counters.Parser.DataHeaderSizeErrors);
   Stats.create("readouts.error_datlen_mismatch", Counters.Parser.DataLenMismatch);
