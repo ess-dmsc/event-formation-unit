@@ -47,7 +47,12 @@ public:
 
 class ProducerTest : public TestBase {
   void SetUp() override {}
-  void TearDown() override {}
+
+  void TearDown() override {
+    /// reset the mock loggerto nullpointer which inactivate the mock
+    delete mockLogger;
+    mockLogger = nullptr;
+  }
 };
 
 TEST_F(ProducerTest, ConstructorOK) {
@@ -230,13 +235,16 @@ TEST_F(ProducerTest, EventCbIncreasesCounters) {
 }
 
 TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
-  mockLogger = nullptr;
-  
   ProducerStandIn prod{"nobroker", "notopic"};
   std::string errorEventJson = R"({"error": "mock error"})";
-  
+
+  /// Reinitialize the mock logger pointer which otherwise would be null.
+  /// This is necessary because the mock logger is deleted in TearDown.
+  /// If mockLogger is null the LOG macro will not be called.
   mockLogger = new MockLogger;
   MockLogger &logger = *mockLogger;
+
+  /// Register the expected log messages calls for the mock logger
   REQUIRE_CALL(logger, log(_, _))
       .TIMES(8)
       .WITH(_1 == "KAFKA" &&
@@ -281,17 +289,18 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
                          RdKafka::ERR_TOPIC_EXCEPTION);
   prod.event_cb(errorEvent);
   EXPECT_EQ(prod.getStats().ErrTopic, 3);
-
-  delete mockLogger;
 }
 
 TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
-  mockLogger = nullptr;
-  
   ProducerStandIn prod{"nobroker", "notopic"};
-  
+
+  /// Reinitialize the mock logger pointer which otherwise would be null.
+  /// This is necessary because the mock logger is deleted in TearDown.
+  /// If mockLogger is null the LOG macro will not be called.
   mockLogger = new MockLogger;
   MockLogger &logger = *mockLogger;
+
+  /// Register the expected log messages calls for the mock logger
   REQUIRE_CALL(logger, log(_, _))
       .TIMES(8)
       .WITH(_1 == "KAFKA" &&
