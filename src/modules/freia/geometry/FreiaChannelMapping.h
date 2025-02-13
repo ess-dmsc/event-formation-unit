@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include<cinttypes>
 #include <common/debug/Trace.h>
 #include <freia/geometry/GeometryBase.h>
 
