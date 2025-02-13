@@ -235,6 +235,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   std::string errorEventJson = R"({"error": "mock error"})";
 
   /// Create a logger factory which initializes the logger mock
+  /// if this object goes out of scope, the logger mock is destroyed
   auto LoggerFactory = MockLoggerFactory();
 
   /// Register the Mocked logger to be chekced
@@ -289,6 +290,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
 
   /// Create a logger factory which initializes the logger mock
+  /// if this object goes out of scope, the logger mock is destroyed
   auto LoggerFactory = MockLoggerFactory();
 
   /// Register the Mocked logger to be chekced
