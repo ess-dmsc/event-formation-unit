@@ -126,8 +126,8 @@ add_library(efu_essreadout STATIC
 # To be used as a dependency in the module's CMakeLists.txt
 # aimed to be built with UNIT_TEST macro defined
 add_library(efu_essreadout-unit_test STATIC
-  $<TARGET_OBJECTS:EssReadoutLib>
-  $<TARGET_OBJECTS:EssTimingLib>
+  $<TARGET_OBJECTS:EssReadoutLib-unit_test>
+  $<TARGET_OBJECTS:EssTimingLib-unit_test>
 )
 
 # Set precompiler flag UNIT_TEST for the library
