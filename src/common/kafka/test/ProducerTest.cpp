@@ -48,11 +48,7 @@ public:
 class ProducerTest : public TestBase {
   void SetUp() override {}
 
-  void TearDown() override {
-    /// reset the mock loggerto nullpointer which inactivate the mock
-    delete mockLogger;
-    mockLogger = nullptr;
-  }
+  void TearDown() override {}
 };
 
 TEST_F(ProducerTest, ConstructorOK) {
@@ -238,14 +234,12 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
   std::string errorEventJson = R"({"error": "mock error"})";
 
-  /// Reinitialize the mock logger pointer which otherwise would be null.
-  /// This is necessary because the mock logger is deleted in TearDown.
-  /// If mockLogger is null the LOG macro will not be called.
-  mockLogger = new MockLogger;
-  MockLogger &logger = *mockLogger;
+  /// Create a logger factory which initializes the logger mock
+  auto LoggerFactory = MockLoggerFactory();
 
-  /// Register the expected log messages calls for the mock logger
-  REQUIRE_CALL(logger, log(_, _))
+  /// Register the Mocked logger to be chekced
+  /// for called 8 times with the correct log
+  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
       .TIMES(8)
       .WITH(_1 == "KAFKA" &&
             _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
@@ -294,14 +288,12 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
 
-  /// Reinitialize the mock logger pointer which otherwise would be null.
-  /// This is necessary because the mock logger is deleted in TearDown.
-  /// If mockLogger is null the LOG macro will not be called.
-  mockLogger = new MockLogger;
-  MockLogger &logger = *mockLogger;
+  /// Create a logger factory which initializes the logger mock
+  auto LoggerFactory = MockLoggerFactory();
 
-  /// Register the expected log messages calls for the mock logger
-  REQUIRE_CALL(logger, log(_, _))
+  /// Register the Mocked logger to be chekced
+  /// for called 8 times with the correct log
+  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
       .TIMES(8)
       .WITH(_1 == "KAFKA" &&
             _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);

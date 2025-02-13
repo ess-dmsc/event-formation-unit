@@ -8,11 +8,13 @@
 #include "Log.h"
 
 #ifdef UNIT_TEST
-MockLogger *mockLogger = nullptr;
+
+MockLogger *MockLogger::instance = nullptr; // Definition and initialization
 
 void mockLogFunction(const std::string &category, const std::string &message) {
-  if (mockLogger) {
-    mockLogger->log(category, message);
+  MockLogger *ptrToInstance = MockLogger::instance;
+  if (ptrToInstance) {
+    ptrToInstance->log(category, message);
   }
 }
 #endif
