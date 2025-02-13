@@ -8,7 +8,6 @@
 #include <common/StatPublisher.h>
 #include <common/Version.h>
 #include <common/debug/Log.h>
-#include <cstdio>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/MainProg.h>
