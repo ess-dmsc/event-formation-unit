@@ -187,7 +187,7 @@ void FreiaBase::processing_thread() {
 
   uint8_t DataType{ESSReadout::Parser::FREIA};
 
-  if (EFUSettings.DetectorName == "Estia") {
+  if (EFUSettings.DetectorName == "estia") {
     DataType = ESSReadout::Parser::ESTIA;
   }
 
