@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.4)
+cmake_minimum_required(VERSION 3.10)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
 
@@ -88,7 +88,6 @@ function(install_python_executable python_exec_name)
         ${output_dir}
       # Use execute_process to call chmod directly
       COMMAND ${CMAKE_COMMAND} -E env chmod 755 ${output_dir}/${python_file}
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${python_file}
       COMMENT "Installing Python executable: ${python_file}"
     )
   endforeach()
