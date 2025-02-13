@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <cinttypes>
 #include <common/time/ESSTime.h>
 #include <cstddef>
 #include <cstdint>
