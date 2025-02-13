@@ -46,9 +46,6 @@ public:
   /// \brief Caen pixel calculations
   uint32_t calcPixel(DataParser::CaenReadout &Data);
 
-  /// \brief writes a single readout to file
-  void dumpReadoutToFile(DataParser::CaenReadout &Data);
-
 public:
   /// \brief Stuff that 'ties' Caen together
   struct CaenCounters &counters;
