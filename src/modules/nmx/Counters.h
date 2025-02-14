@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -55,8 +55,4 @@ struct Counters {
   int64_t ProduceCauseTimeout;
 
   int64_t TxRawReadoutPackets;
-  
-  // Kafka stats below are common to all detectors
-  struct Producer::ProducerStats KafkaStats;
-
 } __attribute__((aligned(64)));

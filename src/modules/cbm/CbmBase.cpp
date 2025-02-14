@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -93,22 +93,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -132,11 +116,12 @@ void CbmBase::processing_thread() {
 
   // Event producer
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                     KafkaCfg.CfgParms);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                         KafkaCfg.CfgParms, &Stats);
 
-  auto Produce = [&eventprod](const auto &DataBuffer, const auto &Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  auto Produce = [&EventProducer](const auto &DataBuffer,
+                                  const auto &Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
   // Process instrument config file
@@ -208,7 +193,7 @@ void CbmBase::processing_thread() {
   // Monitor these counters
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
-                      Counters.KafkaStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
@@ -255,13 +240,15 @@ void CbmBase::processing_thread() {
       usleep(10);
     }
 
+    EventProducer.poll(0);
+
     // Not only flush serializer data but also update runtime stats
     // This not applies for histogram serializer which should be flushed
     // only in case new pulse time is detected
     if (ProduceTimer.timeout()) {
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.CbmCounts,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.CbmCounts,
+           EventProducer.getStats().MsgStatusPersisted});
 
       for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
@@ -269,7 +256,6 @@ void CbmBase::processing_thread() {
       }
 
       Counters.ProduceCauseTimeout++;
-      Counters.KafkaStats = eventprod.stats;
     } // ProduceTimer
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

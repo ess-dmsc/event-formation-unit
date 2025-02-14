@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <fmt/format.h>
 #include <libgen.h>
+#include <trompeloeil.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -31,9 +32,70 @@ inline int SevToInt(Sev Level) { // Force the use of the correct type
   return static_cast<int>(Level);
 }
 
+#ifdef UNIT_TEST
+
+class MockLoggerFactory;
+
+/// \brief MockLogger is a mock class for the logger. It provides a log method
+/// that can be mocked to check if the logger is called with the correct
+/// parameters.
+class MockLogger {
+public:
+  /// \brief Mocked log method that can be mocked to check if the logger is
+  /// called with the correct parameters.
+  MAKE_MOCK2(log,
+             void(const std::string &category, const std::string &message));
+
+private:
+  static MockLogger *instance;
+
+  MockLogger() = default;
+  MockLogger(const MockLogger &) = delete;
+  MockLogger &operator=(const MockLogger &) = delete;
+
+  friend void mockLogFunction(const std::string &category,
+                              const std::string &message);
+
+  friend MockLoggerFactory;
+};
+
+/// \brief MockLoggerFactory is a singleton class that provides access to the
+/// mocked logger instance. When this singelton is destroyed, the mocked logger
+/// instance is destroyed and set to nullptr to disable further logging.
+class MockLoggerFactory {
+public:
+  /// \brief Get the mocked logger instance
+  /// \return The mocked logger instance
+  MockLogger &getMockedLogger() {
+    if (!MockLogger::instance) {
+      MockLogger::instance = new MockLogger();
+    }
+    return *MockLogger::instance;
+  }
+
+  /// \brief Destructor that deletes the mocked logger instance
+  /// and sets it to nullptr
+  ~MockLoggerFactory() {
+    if (MockLogger::instance) {
+      delete MockLogger::instance;
+      MockLogger::instance = nullptr;
+    }
+  }
+};
+
+/// \brief Function to log messages using the mock logger. If the MockLogger
+/// instance is not set, the log message is ignored.
+/// \param category The category of the log message
+/// \param message The message to log
+void mockLogFunction(const std::string &category, const std::string &message);
+
+#define LOG(Group, Severity, Format, ...)                                      \
+  mockLogFunction(#Group, fmt::format(Format, ##__VA_ARGS__))
+#else
 #define LOG(Group, Severity, Format, ...)                                      \
   ((TRC_MASK & TRC_G_##Group)                                                  \
        ? Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__),      \
                   {{"file", std::string(__FILE__)},                            \
                    {"line", std::int64_t(__LINE__)}})                          \
        : (void)0)
+#endif
