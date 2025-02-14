@@ -8,7 +8,7 @@
 
   "MaxTOFNS" : 10000000000,
 
-  "MonitorRing" : 11,
+  "MonitorRing" : 0,
 
   "MaxFENId" : 2,
 
