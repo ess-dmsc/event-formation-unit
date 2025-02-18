@@ -140,6 +140,8 @@ void Timepix3Base::processingThread() {
       usleep(10);
     }
 
+    EventProducer.poll(0);
+
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(

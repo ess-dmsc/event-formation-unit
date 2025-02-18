@@ -140,7 +140,7 @@ public:
 
   /// \brief Returns the producer statistics reference.
   /// \return ProducerStats The producer statistics.
-  const ProducerStats &getStats() const { return ProducerStatCounters; }
+  const ProducerStats &getStats() const { return ProducerStats; }
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -168,7 +168,9 @@ public:
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
 
 private:
-  ProducerStats ProducerStatCounters = {};
+  /// Local struct to store producer statistics. References of these counters
+  /// are registered into the Statistics object.
+  ProducerStats ProducerStats = {};
 
   inline void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) noexcept {
 
@@ -180,42 +182,42 @@ private:
 
     switch (ErrorCode) {
     case RdKafka::ErrorCode::ERR__TIMED_OUT:
-      ++ProducerStatCounters.ErrTimeout;
+      ++ProducerStats.ErrTimeout;
       break;
     case RdKafka::ErrorCode::ERR__TRANSPORT:
-      ++ProducerStatCounters.ErrTransport;
+      ++ProducerStats.ErrTransport;
       break;
     case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
-      ++ProducerStatCounters.ErrBrokerNotAvailable;
+      ++ProducerStats.ErrBrokerNotAvailable;
       break;
     case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-      ++ProducerStatCounters.ErrTopic;
+      ++ProducerStats.ErrTopic;
       break;
     case RdKafka::ErrorCode::ERR_TOPIC_EXCEPTION:
-      ++ProducerStatCounters.ErrTopic;
+      ++ProducerStats.ErrTopic;
       break;
     case RdKafka::ErrorCode::ERR_TOPIC_AUTHORIZATION_FAILED:
-      ++ProducerStatCounters.ErrTopic;
+      ++ProducerStats.ErrTopic;
       break;
     case RdKafka::ErrorCode::ERR__QUEUE_FULL:
-      ++ProducerStatCounters.ErrQueueFull;
+      ++ProducerStats.ErrQueueFull;
       break;
     case RdKafka::ErrorCode::ERR__MSG_TIMED_OUT:
-      ++ProducerStatCounters.ErrMsgTimeout;
+      ++ProducerStats.ErrMsgTimeout;
       break;
     case RdKafka::ErrorCode::ERR__AUTHENTICATION:
-      ++ProducerStatCounters.ErrAuth;
+      ++ProducerStats.ErrAuth;
       break;
     case RdKafka::ErrorCode::ERR_MSG_SIZE_TOO_LARGE:
-      ++ProducerStatCounters.ErrMsgSizeTooLarge;
+      ++ProducerStats.ErrMsgSizeTooLarge;
       break;
     case RdKafka::ErrorCode::ERR__UNKNOWN_PARTITION:
-      ++ProducerStatCounters.ErrUknownPartition;
+      ++ProducerStats.ErrUknownPartition;
       break;
     case RdKafka::ErrorCode::ERR_NO_ERROR:
       break;
     default:
-      ++ProducerStatCounters.ErrOther;
+      ++ProducerStats.ErrOther;
       break;
     }
   }

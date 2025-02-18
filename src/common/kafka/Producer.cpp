@@ -38,7 +38,7 @@ RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
   if (configResult != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key,
         LogValue);
-    ProducerStatCounters.config_errors++;
+    ProducerStats.config_errors++;
   }
   return configResult;
 }
@@ -52,39 +52,39 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
   /// If Stats is nullptr, no internal stat counters will be be not registered
   if (Stats != nullptr) {
     // clang-format off
-    Stats->create("kafka.config_errors", ProducerStatCounters.config_errors);
-    Stats->create("kafka.produce_bytes_ok", ProducerStatCounters.produce_bytes_ok);
-    Stats->create("kafka.produce_bytes_error", ProducerStatCounters.produce_bytes_error);
-    Stats->create("kafka.produce_calls", ProducerStatCounters.produce_calls);
-    Stats->create("kafka.produce_errors", ProducerStatCounters.produce_errors);
+    Stats->create("kafka.config_errors", ProducerStats.config_errors);
+    Stats->create("kafka.produce_bytes_ok", ProducerStats.produce_bytes_ok);
+    Stats->create("kafka.produce_bytes_error", ProducerStats.produce_bytes_error);
+    Stats->create("kafka.produce_calls", ProducerStats.produce_calls);
+    Stats->create("kafka.produce_errors", ProducerStats.produce_errors);
     
     /// librdkafka transmission stats
-    Stats->create("kafka.brokers.tx_bytes", ProducerStatCounters.BytesTransmittedToBrokers);
-    Stats->create("kafka.brokers.tx_req_retries", ProducerStatCounters.TxRequestRetries);
+    Stats->create("kafka.brokers.tx_bytes", ProducerStats.BytesTransmittedToBrokers);
+    Stats->create("kafka.brokers.tx_req_retries", ProducerStats.TxRequestRetries);
     
     /// librdkafka message stats
-    Stats->create("kafka.msg.num_of_msg_in_queue", ProducerStatCounters.NumberOfMsgInQueue);
-    Stats->create("kafka.msg.max_num_of_msg_in_queue", ProducerStatCounters.MaxNumOfMsgInQueue);
-    Stats->create("kafka.msg.bytes_of_msg_in_queue", ProducerStatCounters.BytesOfMsgInQueue);
-    Stats->create("kafka.msg.max_bytes_of_msg_in_queue", ProducerStatCounters.MaxBytesOfMsgInQueue);
-    Stats->create("kafka.msg.delivery_success", ProducerStatCounters.MsgDeliverySuccess);
-    Stats->create("kafka.msg.status_persisted", ProducerStatCounters.MsgStatusPersisted);
-    Stats->create("kafka.msg.status_not_persisted", ProducerStatCounters.MsgStatusNotPersisted);
-    Stats->create("kafka.msg.status_possibly_persisted", ProducerStatCounters.MsgStatusPossiblyPersisted);
-    Stats->create("kafka.msg.msg_delivery_event", ProducerStatCounters.TotalMsgDeliveryEvent);
+    Stats->create("kafka.msg.num_of_msg_in_queue", ProducerStats.NumberOfMsgInQueue);
+    Stats->create("kafka.msg.max_num_of_msg_in_queue", ProducerStats.MaxNumOfMsgInQueue);
+    Stats->create("kafka.msg.bytes_of_msg_in_queue", ProducerStats.BytesOfMsgInQueue);
+    Stats->create("kafka.msg.max_bytes_of_msg_in_queue", ProducerStats.MaxBytesOfMsgInQueue);
+    Stats->create("kafka.msg.delivery_success", ProducerStats.MsgDeliverySuccess);
+    Stats->create("kafka.msg.status_persisted", ProducerStats.MsgStatusPersisted);
+    Stats->create("kafka.msg.status_not_persisted", ProducerStats.MsgStatusNotPersisted);
+    Stats->create("kafka.msg.status_possibly_persisted", ProducerStats.MsgStatusPossiblyPersisted);
+    Stats->create("kafka.msg.msg_delivery_event", ProducerStats.TotalMsgDeliveryEvent);
     
     /// librdkafka error stats
-    Stats->create("kafka.error.msg_delivery", ProducerStatCounters.MsgError);
-    Stats->create("kafka.error.transmission", ProducerStatCounters.TransmissionErrors);
-    Stats->create("kafka.error.unknown_topic", ProducerStatCounters.ErrTopic);
-    Stats->create("kafka.error.unknown_partition", ProducerStatCounters.ErrUknownPartition);
-    Stats->create("kafka.error.queue_full", ProducerStatCounters.ErrQueueFull);
-    Stats->create("kafka.error.timeout", ProducerStatCounters.ErrTimeout);
-    Stats->create("kafka.error.msg_timeout", ProducerStatCounters.ErrMsgTimeout);
-    Stats->create("kafka.error.transport", ProducerStatCounters.ErrTransport);
-    Stats->create("kafka.error.authentication", ProducerStatCounters.ErrAuth);
-    Stats->create("kafka.error.msg_size", ProducerStatCounters.ErrMsgSizeTooLarge);
-    Stats->create("kafka.error.other", ProducerStatCounters.ErrOther);
+    Stats->create("kafka.error.msg_delivery", ProducerStats.MsgError);
+    Stats->create("kafka.error.transmission", ProducerStats.TransmissionErrors);
+    Stats->create("kafka.error.unknown_topic", ProducerStats.ErrTopic);
+    Stats->create("kafka.error.unknown_partition", ProducerStats.ErrUknownPartition);
+    Stats->create("kafka.error.queue_full", ProducerStats.ErrQueueFull);
+    Stats->create("kafka.error.timeout", ProducerStats.ErrTimeout);
+    Stats->create("kafka.error.msg_timeout", ProducerStats.ErrMsgTimeout);
+    Stats->create("kafka.error.transport", ProducerStats.ErrTransport);
+    Stats->create("kafka.error.authentication", ProducerStats.ErrAuth);
+    Stats->create("kafka.error.msg_size", ProducerStats.ErrMsgSizeTooLarge);
+    Stats->create("kafka.error.other", ProducerStats.ErrOther);
     // clang-format on
   }
 
@@ -153,11 +153,11 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 
   KafkaProducer->poll(0);
 
-  ProducerStatCounters.produce_calls++;
+  ProducerStats.produce_calls++;
 
   if (error != RdKafka::ERR_NO_ERROR) {
-    ProducerStatCounters.produce_errors++;
-    ProducerStatCounters.produce_bytes_error += Buffer.size_bytes();
+    ProducerStats.produce_errors++;
+    ProducerStats.produce_bytes_error += Buffer.size_bytes();
     applyKafkaErrorCode(error);
 
     LOG(KAFKA, Sev::Error, "Failed to produce message: {}",
@@ -165,7 +165,7 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
     return error;
   }
 
-  ProducerStatCounters.produce_bytes_ok += Buffer.size_bytes();
+  ProducerStats.produce_bytes_ok += Buffer.size_bytes();
 
   return 0;
 }
@@ -177,25 +177,27 @@ void Producer::event_cb(RdKafka::Event &event) {
 
   case RdKafka::Event::EVENT_STATS:
     res = nlohmann::json::parse(event.str());
-    ProducerStatCounters.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
-    ProducerStatCounters.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
-    ProducerStatCounters.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
-    ProducerStatCounters.MaxBytesOfMsgInQueue +=
+    ProducerStats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
+    ProducerStats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
+    ProducerStats.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
+    ProducerStats.MaxBytesOfMsgInQueue +=
         res["msg_size_max"].get<int64_t>();
 
     /// reset broker related counters before looping over brokers
     /// and summing up the values
-    ProducerStatCounters.BytesTransmittedToBrokers = 0;
-    ProducerStatCounters.TransmissionErrors = 0;
-    ProducerStatCounters.TxRequestRetries = 0;
+    /// \todo: This is not thread safe we can pull these counters by main thread
+    /// can read these while I increment them
+    ProducerStats.BytesTransmittedToBrokers = 0;
+    ProducerStats.TransmissionErrors = 0;
+    ProducerStats.TxRequestRetries = 0;
     /// loop over brokers and sum up the values
     for (auto &broker : res["brokers"].items()) {
       const auto &broker_info = broker.value();
-      ProducerStatCounters.BytesTransmittedToBrokers +=
+      ProducerStats.BytesTransmittedToBrokers +=
           broker_info.value("txbytes", (int64_t)0);
-      ProducerStatCounters.TransmissionErrors +=
+      ProducerStats.TransmissionErrors +=
           broker_info.value("txerrs", (int64_t)0);
-      ProducerStatCounters.TxRequestRetries +=
+      ProducerStats.TxRequestRetries +=
           broker_info.value("txretries", (int64_t)0);
     }
     break;
@@ -211,17 +213,17 @@ void Producer::event_cb(RdKafka::Event &event) {
 
 // Implementation of DeliveryReportHandler override
 void Producer::dr_cb(RdKafka::Message &message) {
-  ++ProducerStatCounters.TotalMsgDeliveryEvent;
+  ++ProducerStats.TotalMsgDeliveryEvent;
 
   switch (message.status()) {
   case RdKafka::Message::MSG_STATUS_NOT_PERSISTED:
-    ++ProducerStatCounters.MsgStatusNotPersisted;
+    ++ProducerStats.MsgStatusNotPersisted;
     break;
   case RdKafka::Message::MSG_STATUS_POSSIBLY_PERSISTED:
-    ++ProducerStatCounters.MsgStatusPossiblyPersisted;
+    ++ProducerStats.MsgStatusPossiblyPersisted;
     break;
   case RdKafka::Message::MSG_STATUS_PERSISTED:
-    ++ProducerStatCounters.MsgStatusPersisted;
+    ++ProducerStats.MsgStatusPersisted;
     break;
   default:
     break;
@@ -230,9 +232,9 @@ void Producer::dr_cb(RdKafka::Message &message) {
   if (message.err() != RdKafka::ErrorCode::ERR_NO_ERROR) {
 
     applyKafkaErrorCode(message.err());
-    ++ProducerStatCounters.MsgError;
+    ++ProducerStats.MsgError;
 
   } else {
-    ++ProducerStatCounters.MsgDeliverySuccess;
+    ++ProducerStats.MsgDeliverySuccess;
   }
 }
