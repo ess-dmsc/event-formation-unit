@@ -113,9 +113,7 @@ public:
   RdKafka::ErrorCode offset_store(int32_t, int64_t) override {
     return RdKafka::ERR_NO_ERROR;
   };
-  struct rd_kafka_topic_s *c_ptr() override {
-    return {};
-  };
+  struct rd_kafka_topic_s *c_ptr() override { return {}; };
 };
 
 class MockConf : public RdKafka::Conf {
@@ -192,4 +190,93 @@ public:
              override);
   MAKE_MOCK0(dump, std::list<std::string> *(), override);
 };
+
+class MockEvent : public RdKafka::Event {
+public:
+  MockEvent(const std::string &jsonStr,
+            RdKafka::Event::Type eventType = RdKafka::Event::EVENT_STATS,
+            RdKafka::ErrorCode errorCode = RdKafka::ERR_NO_ERROR)
+      : jsonStr(jsonStr), eventType(eventType), errorCode(errorCode) {}
+
+  Type type() const override { return eventType; }
+
+  RdKafka::ErrorCode err() const override { return errorCode; }
+
+  Severity severity() const override {
+    return RdKafka::Event::EVENT_SEVERITY_INFO;
+  }
+
+  std::string fac() const override { return "MOCK"; }
+
+  std::string str() const override { return jsonStr; }
+
+  int throttle_time() const override { return 0; }
+
+  std::string broker_name() const override { return "mock_broker"; }
+
+  int broker_id() const override { return 0; }
+
+  bool fatal() const override { return false; }
+
+private:
+  std::string jsonStr;
+  RdKafka::Event::Type eventType;
+  RdKafka::ErrorCode errorCode;
+};
+
+class MockMessage : public RdKafka::Message {
+public:
+  MockMessage(RdKafka::ErrorCode errorCode = RdKafka::ERR_NO_ERROR,
+              RdKafka::Message::Status status =
+                  RdKafka::Message::Status::MSG_STATUS_NOT_PERSISTED)
+      : errorCode(errorCode), messageStatus(status) {}
+
+  std::string errstr() const override {
+    return errorCode == RdKafka::ERR_NO_ERROR ? "" : "Error";
+  }
+
+  RdKafka::ErrorCode err() const override { return errorCode; }
+
+  RdKafka::Topic *topic() const override { return nullptr; }
+
+  std::string topic_name() const override { return "mock_topic"; }
+
+  int32_t partition() const override { return 0; }
+
+  void *payload() const override { return nullptr; }
+
+  size_t len() const override { return 0; }
+
+  const std::string *key() const override { return nullptr; }
+
+  const void *key_pointer() const override { return nullptr; }
+
+  size_t key_len() const override { return 0; }
+
+  int64_t offset() const override { return 0; }
+
+  RdKafka::MessageTimestamp timestamp() const override { return {}; }
+
+  void *msg_opaque() const override { return nullptr; }
+
+  int64_t latency() const override { return 0; }
+
+  RdKafka::Headers *headers() override { return nullptr; }
+
+  RdKafka::Headers *headers(RdKafka::ErrorCode *err) override {
+    *err = RdKafka::ERR_NO_ERROR;
+    return nullptr;
+  }
+
+  int32_t broker_id() const override { return 0; }
+
+  RdKafka::Message::Status status() const override { return messageStatus; }
+
+  rd_kafka_message_s *c_ptr() override { return nullptr; }
+
+private:
+  RdKafka::ErrorCode errorCode;
+  RdKafka::Message::Status messageStatus;
+};
+
 // GCOVR_EXCL_STOP
