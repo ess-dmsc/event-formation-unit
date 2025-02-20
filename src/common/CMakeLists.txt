@@ -84,7 +84,7 @@ add_library(efu_common STATIC
 )
 
 # Only include the 'minimum' necessary
-# aimed to be built with UNIT_TEST macro defined
+# aimed to be built with the UNIT_TEST macro defined
 add_library(efu_common-unit_test STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
@@ -105,7 +105,7 @@ add_library(efu_reduction STATIC
 )
 
 # To be used as a dependency in the module's CMakeLists.txt
-# aimed to be built with UNIT_TEST macro defined
+# aimed to be built with the UNIT_TEST macro defined
 add_library(efu_reduction-unit_test STATIC
   $<TARGET_OBJECTS:ReductionLib>
   $<TARGET_OBJECTS:ClusteringLib>

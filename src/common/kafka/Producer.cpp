@@ -49,7 +49,7 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
                    Statistics *Stats)
     : ProducerBase(), TopicName(Topic) {
 
-  /// If Stats is nullptr, no internal stat counters will be be not registered
+  /// If Stats is nullptr, internal stat counters will not be registered
   if (Stats != nullptr) {
     // clang-format off
     Stats->create("kafka.config_errors", ProducerStats.config_errors);
@@ -108,14 +108,15 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     setConfig(Config.first, Config.second);
   }
 
-  /// Register ourself as the event call back handler to receive events
+  /// Register this producer (this object) as the event call back handler to
+  /// receive events
   if (Config->set("event_cb", static_cast<RdKafka::EventCb *>(this),
                   ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
   }
 
-  /// Register ourself as the delivery report handler to receive message
-  /// delivery reports
+  /// Register this producer (this object) as the delivery report call back
+  /// handler to receive delivery reports
   if (Config->set("dr_cb", static_cast<RdKafka::DeliveryReportCb *>(this),
                   ErrorMessage) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
@@ -173,33 +174,37 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 // Implementation of KafkaEventHandler override
 void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
-  switch (event.type()) {
 
+  /// initialize variable to sum up the values later when looping over brokers
+  int64_t TransmissionErrors = 0;
+  int64_t BytesTransmittedToBrokers = 0;
+  int64_t TxRequestRetries = 0;
+
+  switch (event.type()) {
   case RdKafka::Event::EVENT_STATS:
     res = nlohmann::json::parse(event.str());
     ProducerStats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
     ProducerStats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
     ProducerStats.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
-    ProducerStats.MaxBytesOfMsgInQueue +=
-        res["msg_size_max"].get<int64_t>();
+    ProducerStats.MaxBytesOfMsgInQueue += res["msg_size_max"].get<int64_t>();
 
-    /// reset broker related counters before looping over brokers
-    /// and summing up the values
-    /// \todo: This is not thread safe we can pull these counters by main thread
-    /// can read these while I increment them
-    ProducerStats.BytesTransmittedToBrokers = 0;
-    ProducerStats.TransmissionErrors = 0;
-    ProducerStats.TxRequestRetries = 0;
-    /// loop over brokers and sum up the values
-    for (auto &broker : res["brokers"].items()) {
-      const auto &broker_info = broker.value();
-      ProducerStats.BytesTransmittedToBrokers +=
-          broker_info.value("txbytes", (int64_t)0);
-      ProducerStats.TransmissionErrors +=
-          broker_info.value("txerrs", (int64_t)0);
-      ProducerStats.TxRequestRetries +=
-          broker_info.value("txretries", (int64_t)0);
+    /// \note loop over brokers and sum up the values into local variables
+    /// before assigning them to the ProducerStats struct.
+    /// This is to impriove thread safety becase the ProducerStats struct
+    /// is registered into the Statistics object and can be accessed from
+    /// multiple threads.
+    for (const auto &[key, broker_info] : res["brokers"].items()) {
+      BytesTransmittedToBrokers += broker_info.value("txbytes", (int64_t)0);
+      TransmissionErrors += broker_info.value("txerrs", (int64_t)0);
+      TxRequestRetries += broker_info.value("txretries", (int64_t)0);
     }
+
+    /// assign the values to the ProducerStats struct in one step
+    /// to ensure thread safety
+    ProducerStats.BytesTransmittedToBrokers = BytesTransmittedToBrokers;
+    ProducerStats.TransmissionErrors = TransmissionErrors;
+    ProducerStats.TxRequestRetries = TxRequestRetries;
+
     break;
 
   case RdKafka::Event::EVENT_ERROR:
@@ -236,5 +241,55 @@ void Producer::dr_cb(RdKafka::Message &message) {
 
   } else {
     ++ProducerStats.MsgDeliverySuccess;
+  }
+}
+
+void Producer::applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) {
+
+  // First log the error and its error string.
+  LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
+      static_cast<int>(ErrorCode), RdKafka::err2str(ErrorCode).c_str());
+  XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", ErrorCode,
+         RdKafka::err2str(ErrorCode).c_str());
+
+  switch (ErrorCode) {
+  case RdKafka::ErrorCode::ERR__TIMED_OUT:
+    ++ProducerStats.ErrTimeout;
+    break;
+  case RdKafka::ErrorCode::ERR__TRANSPORT:
+    ++ProducerStats.ErrTransport;
+    break;
+  case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
+    ++ProducerStats.ErrBrokerNotAvailable;
+    break;
+  case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
+    ++ProducerStats.ErrTopic;
+    break;
+  case RdKafka::ErrorCode::ERR_TOPIC_EXCEPTION:
+    ++ProducerStats.ErrTopic;
+    break;
+  case RdKafka::ErrorCode::ERR_TOPIC_AUTHORIZATION_FAILED:
+    ++ProducerStats.ErrTopic;
+    break;
+  case RdKafka::ErrorCode::ERR__QUEUE_FULL:
+    ++ProducerStats.ErrQueueFull;
+    break;
+  case RdKafka::ErrorCode::ERR__MSG_TIMED_OUT:
+    ++ProducerStats.ErrMsgTimeout;
+    break;
+  case RdKafka::ErrorCode::ERR__AUTHENTICATION:
+    ++ProducerStats.ErrAuth;
+    break;
+  case RdKafka::ErrorCode::ERR_MSG_SIZE_TOO_LARGE:
+    ++ProducerStats.ErrMsgSizeTooLarge;
+    break;
+  case RdKafka::ErrorCode::ERR__UNKNOWN_PARTITION:
+    ++ProducerStats.ErrUknownPartition;
+    break;
+  case RdKafka::ErrorCode::ERR_NO_ERROR:
+    break;
+  default:
+    ++ProducerStats.ErrOther;
+    break;
   }
 }

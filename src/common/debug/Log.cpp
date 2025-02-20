@@ -9,7 +9,8 @@
 
 #ifdef UNIT_TEST
 
-MockLogger *MockLogger::instance = nullptr; // Definition and initialization
+// Definition and initialization
+MockLogger *MockLogger::instance = nullptr;
 
 void mockLogFunction(const std::string &category, const std::string &message) {
   MockLogger *ptrToInstance = MockLogger::instance;

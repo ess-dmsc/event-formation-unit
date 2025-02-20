@@ -134,13 +134,17 @@ public:
   /// \brief Polls the producer for events.
   void poll(int TimeoutMS) { KafkaProducer->poll(TimeoutMS); };
 
+  /// \brief Delivery report callback. This function is called when we
+  /// processing delivery reports from the producer when calling poll().
   void dr_cb(RdKafka::Message &message) override;
 
+  /// \brief Event callback. This function is called when we receive events from
+  /// the producer when calling poll().
   void event_cb(RdKafka::Event &event) override;
 
   /// \brief Returns the producer statistics reference.
   /// \return ProducerStats The producer statistics.
-  const ProducerStats &getStats() const { return ProducerStats; }
+  inline const ProducerStats &getStats() const { return ProducerStats; }
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -172,55 +176,7 @@ private:
   /// are registered into the Statistics object.
   ProducerStats ProducerStats = {};
 
-  inline void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) noexcept {
-
-    // First log the error and its error string.
-    LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
-        static_cast<int>(ErrorCode), RdKafka::err2str(ErrorCode).c_str());
-    XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", ErrorCode,
-           RdKafka::err2str(ErrorCode).c_str());
-
-    switch (ErrorCode) {
-    case RdKafka::ErrorCode::ERR__TIMED_OUT:
-      ++ProducerStats.ErrTimeout;
-      break;
-    case RdKafka::ErrorCode::ERR__TRANSPORT:
-      ++ProducerStats.ErrTransport;
-      break;
-    case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
-      ++ProducerStats.ErrBrokerNotAvailable;
-      break;
-    case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-      ++ProducerStats.ErrTopic;
-      break;
-    case RdKafka::ErrorCode::ERR_TOPIC_EXCEPTION:
-      ++ProducerStats.ErrTopic;
-      break;
-    case RdKafka::ErrorCode::ERR_TOPIC_AUTHORIZATION_FAILED:
-      ++ProducerStats.ErrTopic;
-      break;
-    case RdKafka::ErrorCode::ERR__QUEUE_FULL:
-      ++ProducerStats.ErrQueueFull;
-      break;
-    case RdKafka::ErrorCode::ERR__MSG_TIMED_OUT:
-      ++ProducerStats.ErrMsgTimeout;
-      break;
-    case RdKafka::ErrorCode::ERR__AUTHENTICATION:
-      ++ProducerStats.ErrAuth;
-      break;
-    case RdKafka::ErrorCode::ERR_MSG_SIZE_TOO_LARGE:
-      ++ProducerStats.ErrMsgSizeTooLarge;
-      break;
-    case RdKafka::ErrorCode::ERR__UNKNOWN_PARTITION:
-      ++ProducerStats.ErrUknownPartition;
-      break;
-    case RdKafka::ErrorCode::ERR_NO_ERROR:
-      break;
-    default:
-      ++ProducerStats.ErrOther;
-      break;
-    }
-  }
+  void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode);
 };
 
 using ProducerCallback =
