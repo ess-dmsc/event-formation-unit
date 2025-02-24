@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,7 +36,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("receive.bytes", ITCounters.RxBytes);
   Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
- 
+
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
   Stats.create("readouts.parsing_us", Counters.ReadoutParsingUs);
@@ -53,7 +53,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("readouts.tdc.tdc_processing_us", Counters.TDCProcessingTimeUs);
   Stats.create("readouts.undefined_readout_count", Counters.UndefinedReadoutCounter);
 
-  // Counters related to timing event handling and time syncronization
+  // Counters related to timing event handling and time synchronization
   Stats.create("handlers.timeingevent.miss_tdc_count", Counters.MissTDCCounter);
   Stats.create("handlers.timeingevent.miss_evr_count", Counters.MissEVRCounter);
   Stats.create("handlers.timeingevent.evr_pair_count", Counters.EVRPairFound);
@@ -102,24 +102,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("thread.stages.publish.starving_us", Counters.Stage5StarvingTimeUs);
   Stats.create("thread.stages.publish.blocked_us", Counters.Stage5BlockedTimeUs);
 
-
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-
   // clang-format on
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
@@ -144,9 +126,10 @@ void Timepix3Base::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms);
+                         KafkaCfg.CfgParms, &Stats);
 
-  auto Produce = [&EventProducer](const auto &DataBuffer, const auto &Timestamp) {
+  auto Produce = [&EventProducer](const auto &DataBuffer,
+                                  const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
@@ -163,7 +146,7 @@ void Timepix3Base::processingThread() {
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
-                      Counters.KafkaStats.produce_bytes_ok});
+    EventProducer.getStats().MsgStatusPersisted});
 
   auto OutputQueue = Timepix3.DataPipeline.getOutputQueue<int>();
   std::shared_ptr<std::atomic_bool> run =
@@ -238,6 +221,9 @@ void Timepix3Base::processingThread() {
       this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
+  
+    EventProducer.poll(0);
+    
     Counters.Stage1ProcessingTimeUs =
         Timepix3.DataPipeline.getStagePerformanceUs(0);
     Counters.Stage1StarvingTimeUs =
@@ -275,12 +261,11 @@ void Timepix3Base::processingThread() {
 
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.Events,
+           EventProducer.getStats().MsgStatusPersisted});
       Serializer.produce();
       Counters.ProduceCauseTimeout++;
-      Counters.KafkaStats = EventProducer.stats;
     }
   }
 

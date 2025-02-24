@@ -1,9 +1,9 @@
-// Copyright (C) 2019-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Implementation of ESS time related methoods and classes
+/// \brief Implementation of ESS time related methods and classes
 ///
 //===----------------------------------------------------------------------===//
 
@@ -20,7 +20,7 @@ uint64_t ESSReferenceTime::setReference(const ESSTime &refESSTime) {
   return TimeInNS.count();
 }
 
-uint64_t ESSReferenceTime::setReference(const uint64_t &refTime) {
+uint64_t ESSReferenceTime::setReference(uint64_t refTime) {
   TimeInNS = TimeDurationNano(refTime);
   return TimeInNS.count();
 }
@@ -34,7 +34,7 @@ void ESSReferenceTime::setMaxTOF(uint64_t NewMaxTOF) {
   MaxTOF = TimeDurationNano(NewMaxTOF);
 }
 
-uint64_t ESSReferenceTime::getTOF(const ESSTime eventTime, const uint32_t DelayNS) {
+uint64_t ESSReferenceTime::getTOF(const ESSTime &eventTime, uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < TimeInNS) {
     XTRACE(EVENT, WAR,
@@ -56,7 +56,7 @@ uint64_t ESSReferenceTime::getTOF(const ESSTime eventTime, const uint32_t DelayN
   return (timeval - TimeInNS).count();
 }
 
-uint64_t ESSReferenceTime::getPrevTOF(const ESSTime eventTime,const uint32_t DelayNS) {
+uint64_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime, uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < PrevTimeInNS) {
     XTRACE(EVENT, WAR,

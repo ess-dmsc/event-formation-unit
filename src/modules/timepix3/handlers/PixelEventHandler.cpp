@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,7 +22,7 @@ namespace Timepix3 {
 using namespace std;
 using namespace timepixReadout;
 using namespace timepixDTO;
-using namespace efutils;
+using namespace esstime;
 
 PixelEventHandler::PixelEventHandler(Counters &statCounters,
                                      shared_ptr<Timepix3Geometry> geometry,

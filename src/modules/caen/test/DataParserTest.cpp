@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2022 European Spallation Source ERIC
+// Copyright (C) 2016 - 2025 European Spallation Source ERIC
 
 #include <caen/readout/DataParser.h>
 #include <caen/test/DataParserTestData.h>

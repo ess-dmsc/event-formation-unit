@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ class StatPublisher {
 public:
   /// \brief Connect to a Carbon/Graphite server by ip address/hostname and tcp
   /// port
-  StatPublisher(std::string IP, int Port);
+  StatPublisher(const std::string &IP, int Port);
 
   /// \brief Send detector metrics to Carbon/Graphite server given additional
   /// stats

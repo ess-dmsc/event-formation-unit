@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -142,7 +142,7 @@ void Server::serverPoll() {
         LOG(IPC, Sev::Error, "serverPoll() - internal error");
         throw std::runtime_error("serverPoll() - internal error");
       }
-      LOG(IPC, Sev::Debug, "New cilent socket: {}", *freefd);
+      LOG(IPC, Sev::Debug, "New client socket: {}", *freefd);
 #ifdef SYSTEM_NAME_DARWIN
       LOG(IPC, Sev::Debug, "setsockopt() - MacOS specific");
       int on = 1;

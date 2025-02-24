@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,7 +24,7 @@ class FreiaGeometry : public GeometryBase {
 public:
   ///\brief return global x-coordinate from the digital geometry
   /// Formulae taken from the Freia ICD
-  /// strip = channel + 1
+  /// strip = 64 - channel
   /// x = strip - 1
   uint16_t xCoord(uint16_t __attribute__((unused)) XOffset, uint8_t VMM, uint8_t Channel) {
     if (Channel >= NumStrips) {
@@ -36,14 +36,14 @@ public:
       XTRACE(DATA, WAR, "Invalid VMM (%d) for x-coordinates", VMM);
       return GeometryBase::InvalidCoord;
     } else {
-      return Channel;
+      return NumStrips - Channel - 1;
     }
   }
 
   ///\brief return global y-coordinate from the digital geometry
   /// Formulae taken from the Freia ICD
-  /// wire = 32 - (channel - 16)
-  /// y = cass * 32 + 32 - wire
+  /// wire = 32 - (channel - 15)
+  /// y = cass * 32 + 32 - wire (= cass * 32 + 47 - channel)
   uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
@@ -56,7 +56,7 @@ public:
       XTRACE(DATA, WAR, "Invalid VMM (%d) for y-coordinates", VMM);
       return GeometryBase::InvalidCoord;
     } else {
-      return YOffset + Channel - MinWireChannel;
+      return YOffset + MaxWireChannel - Channel;
     }
   }
 

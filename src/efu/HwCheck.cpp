@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2018 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -37,7 +37,7 @@ bool HwCheck::ignoreInterface(char * IfName) {
 /// returned by getifaddrs() of type AF_INET, which are both UP and RUNNING.
 /// There is also support for ignoring certain interface name patterns to remove
 /// MTU check for irrelevant interfaces such as ppp0 and docker0
-bool HwCheck::checkMTU(std::vector<std::string> InterfaceList, bool PrintOnSuccess) {
+bool HwCheck::checkMTU(const std::vector<std::string> &InterfaceList, bool PrintOnSuccess) {
   CheckedInterfaces = InterfaceList;
   int MatchCount{0};
   struct ifaddrs *ifaddr, *ifa;

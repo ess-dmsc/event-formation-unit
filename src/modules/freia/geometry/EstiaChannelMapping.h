@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -26,7 +26,7 @@ public:
   /// Formulae taken from the Estia ICD
   /// wire = channel + 1 - 16
   /// xoffset = (cass%48) * 32
-  /// x = xoffset + wire-1
+  /// x = xoffset + wire - 1
   uint16_t xCoord(uint16_t XOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {

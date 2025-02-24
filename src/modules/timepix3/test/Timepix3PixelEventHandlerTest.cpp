@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,8 +7,6 @@
 #include <chrono>
 #include <common/kafka/EV44Serializer.h>
 #include <common/testutils/TestBase.h>
-#include <common/utils/EfuUtils.h>
-#include <cstdint>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <modules/timepix3/dto/TimepixDataTypes.h>
@@ -17,7 +15,6 @@
 
 using namespace Timepix3;
 using namespace timepixDTO;
-using namespace efutils;
 using namespace timepixReadout;
 using namespace std;
 

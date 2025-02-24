@@ -27,7 +27,7 @@ public:
   Config();
 
   ///\brief constructor used in EFU to load json from file
-  Config(std::string ConfigFile);
+  Config(const std::string &ConfigFile);
 
   ///\brief parse the loaded json object
   void parseConfig();
@@ -43,6 +43,7 @@ public:
     uint8_t MaxRing{0};
     uint8_t MaxFEN{0};
     uint8_t MaxGroup{14};
+    int MaxAmpl{(std::numeric_limits<int>::max)()};
 } Legacy;
 
   LokiConfig LokiConf;

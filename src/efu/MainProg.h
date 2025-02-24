@@ -18,7 +18,7 @@ public:
   /// \brief initialise by passing the instrument name and the arguments
   /// cannot return but uses exit() instead.
   /// constructor - roughly this is first half of the old main() function
-  MainProg(std::string instrument, int argc, char *argv[]);
+  MainProg(const std::string &instrument, int argc, char *argv[]);
 
   /// \brief setup exithandlers, launch detector - roughly equivalent to the
   /// second half of the old main()

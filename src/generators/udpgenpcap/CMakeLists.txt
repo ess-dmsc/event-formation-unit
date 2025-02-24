@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 #=============================================================================
 # PCAP generator
 #=============================================================================

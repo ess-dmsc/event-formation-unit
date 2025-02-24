@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,7 +14,7 @@
 
 namespace Dream {
 
-void Config::errorExit(std::string ErrMsg) {
+void Config::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
   throw std::runtime_error(ErrMsg);
 }
@@ -83,7 +83,7 @@ void Config::apply() {
     } catch (...) {
     }
 
-    // Check for array sizes and dupliacte entries
+    // Check for array sizes and duplicate entries
     if (Ring > MaxRing) {
       errorExit(fmt::format("Entry: {}, Invalid RING: {} Max: {}", Entry, Ring,
                             MaxRing));

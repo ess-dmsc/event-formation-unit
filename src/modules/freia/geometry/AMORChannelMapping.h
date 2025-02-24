@@ -1,9 +1,9 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Freia geometry class
+/// \brief AMOR geometry class
 ///
 /// Mapping from digital identifiers to x- and y- coordinates
 //===----------------------------------------------------------------------===//
@@ -42,8 +42,8 @@ public:
 
   ///\brief return global y-coordinate from the digital geometry
   /// Formulae taken from the Freia ICD, AMOR section
-  /// wire = channel + 1 - 16
-  /// y = (cass - 1) * 32 + 47 - channel
+  /// wire = channel - 15
+  /// y = cass * 32 + 32 - wire (= cass*32 + 47 - channel)
   uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {

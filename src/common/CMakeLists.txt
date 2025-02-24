@@ -11,6 +11,7 @@ add_subdirectory(kafka/serializer)
 
 set(efu_common_SRC
   debug/Hexdump.cpp
+  debug/Log.cpp
   detector/EFUArgs.cpp
   kafka/EV44Serializer.cpp
   kafka/AR51Serializer.cpp
@@ -37,6 +38,7 @@ set(efu_common_INC
   debug/Error.h
   debug/Hexdump.h
   debug/Log.h
+  debug/Time.h
   debug/Trace.h
   debug/TraceGroups.h
   detector/BaseSettings.h
@@ -58,8 +60,9 @@ set(efu_common_INC
   memory/ThreadPool.hpp
   math/BitMath.h
   math/NumericalMath.h
-  utils/EfuUtils.h
   system/gccintel.h
+  system/intel.h
+  system/arm.h
   system/Socket.h
   DumpFile.h
   JsonFile.h
@@ -84,6 +87,18 @@ add_library(efu_common STATIC
   $<TARGET_OBJECTS:EssTimingLib>
 )
 
+# Only include the 'minimum' necessary
+# aimed to be built with the UNIT_TEST macro defined
+add_library(efu_common-unit_test STATIC
+  ${efu_common_SRC}
+  ${efu_common_INC}
+  # Add required object libraries
+  $<TARGET_OBJECTS:EssTimingLib>
+)
+
+# Set precompiler flag UNIT_TEST for the library
+target_compile_definitions(efu_common-unit_test PUBLIC -DUNIT_TEST)
+
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_reduction STATIC
   $<TARGET_OBJECTS:ReductionLib>
@@ -94,13 +109,40 @@ add_library(efu_reduction STATIC
 )
 
 # To be used as a dependency in the module's CMakeLists.txt
+# aimed to be built with the UNIT_TEST macro defined
+add_library(efu_reduction-unit_test STATIC
+  $<TARGET_OBJECTS:ReductionLib>
+  $<TARGET_OBJECTS:ClusteringLib>
+  $<TARGET_OBJECTS:MatchingLib>
+  $<TARGET_OBJECTS:AnalysisLib>
+  $<TARGET_OBJECTS:MonitorLib>
+)
+
+# Set precompiler flag UNIT_TEST for the library
+target_compile_definitions(efu_reduction-unit_test PUBLIC -DUNIT_TEST)
+
+# To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_essreadout STATIC
   $<TARGET_OBJECTS:EssReadoutLib>
   $<TARGET_OBJECTS:EssTimingLib>
 )
 
+# To be used as a dependency in the module's CMakeLists.txt
+# aimed to be built with UNIT_TEST macro defined
+add_library(efu_essreadout-unit_test STATIC
+  $<TARGET_OBJECTS:EssReadoutLib-unit_test>
+  $<TARGET_OBJECTS:EssTimingLib-unit_test>
+)
+
+# Set precompiler flag UNIT_TEST for the library
+target_compile_definitions(efu_essreadout-unit_test PUBLIC -DUNIT_TEST)
 
 target_include_directories(efu_common
+  PUBLIC ${CLI11_INCLUDE_DIR}
+  PUBLIC ..
+  )
+
+  target_include_directories(efu_common-unit_test
   PUBLIC ${CLI11_INCLUDE_DIR}
   PUBLIC ..
   )
@@ -110,7 +152,15 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
 endif()
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_common-unit_test "-Wl,--no-as-needed")
+endif()
+
+if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_essreadout "-Wl,--no-as-needed")
+endif()
+
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_essreadout-unit_test "-Wl,--no-as-needed")
 endif()
 
 enable_coverage(efu_common)

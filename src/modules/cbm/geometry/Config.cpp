@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,7 +13,7 @@ namespace cbm {
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void Config::errorExit(std::string ErrMsg) {
+void Config::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
   throw std::runtime_error(ErrMsg);
 }
@@ -110,7 +110,7 @@ void Config::apply() {
           "Source)");
     }
 
-    // Check for array sizes and dupliacte entries
+    // Check for array sizes and duplicate entries
     if (FEN > Parms.MaxFENId) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
                             Parms.MaxFENId));

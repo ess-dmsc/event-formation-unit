@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,7 +36,7 @@ static constexpr int64_t FBMutablePlaceholder = 1;
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-EV44Serializer::EV44Serializer(size_t MaxArrayLength, std::string SourceName,
+EV44Serializer::EV44Serializer(size_t MaxArrayLength, const std::string &SourceName,
                                ProducerCallback Callback)
     : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256),
       ProduceFunctor(Callback), Stats() {

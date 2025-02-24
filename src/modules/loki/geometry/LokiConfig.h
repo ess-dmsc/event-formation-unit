@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,13 +24,13 @@ public:
   LokiConfig();
 
   ///\brief constructor used in EFU to load json from file
-  LokiConfig(std::string ConfigFile);
+  LokiConfig(const std::string &ConfigFile);
 
   ///\brief parse the loaded json object
   void parseConfig();
 
 
-  // New and temporary \todo move somwhere else
+  // New and temporary \todo move somewhere else
   // assumption is that Ring, FEN and LocalGroup have
   // already been validated
   int getGlobalGroup(int Ring, int FEN, int LocalGroup) {
@@ -47,7 +47,7 @@ public:
     return YOffset/7 + Z * GroupsN + (FENOffset+FEN)*2 + LocalGroup/4;
   }
 
-  // New and temporary \todo move somwhere else
+  // New and temporary \todo move somewhere else
   int getY(int Ring, int FEN, int Group, int Unit) {
     auto & RParm = Parms.Rings[Ring];
     int Bank = RParm.Bank;
@@ -84,7 +84,7 @@ public:
     int GroupsZ{0};
     int TotalGroups{0};
     static constexpr int NumBanks{9};
-    static constexpr int NumRings{11};
+    static constexpr int NumRings{12};
     struct BankCfg Banks[NumBanks];
     struct RingCfg Rings[NumRings];
   } Parms;

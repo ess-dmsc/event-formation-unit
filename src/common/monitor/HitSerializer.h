@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ public:
   /// \brief Create the HitSerializer
   /// \param maxentries the number of readout tuples to buffer before sending to
   /// Kafka
-  HitSerializer(size_t maxentries, std::string source_name);
+  HitSerializer(size_t maxentries, const std::string &source_name);
 
   void set_callback(ProducerCallback cb);
 

@@ -29,7 +29,7 @@ public:
   Config() { FileParameters.InstrumentGeometry = "Freia"; };
 
   // Load and apply the json config
-  Config(std::string Instrument, std::string ConfigFile)
+  Config(const std::string &Instrument, const std::string &ConfigFile)
       : VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file

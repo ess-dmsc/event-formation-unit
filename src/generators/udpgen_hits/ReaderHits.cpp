@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, see LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,7 +12,7 @@
 
 namespace Gem {
 
-ReaderHits::ReaderHits(std::string filename) {
+ReaderHits::ReaderHits(const std::string &filename) {
   file = HitFile::open(filename);
   total_ = file->count();
   ReadoutSize = sizeof(Hit);

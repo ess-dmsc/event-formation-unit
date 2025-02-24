@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,15 +9,20 @@
 
 #pragma once
 
+#include <common/Statistics.h>
+#include <cstdint>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
+#include <common/debug/Log.h>
+#include <common/debug/Trace.h>
 #include <common/memory/Buffer.h>
 #include <common/memory/span.hpp>
 #include <functional>
 #include <memory>
+#include <unordered_map> // add if not already included
 #include <utility>
 #include <vector>
 
@@ -42,7 +47,9 @@ public:
 /// sending them to the cluster.
 ///
 /// It inherits from ProducerBase and RdKafka::EventCb.
-class Producer : public ProducerBase, public RdKafka::EventCb {
+class Producer : public ProducerBase,
+                 public RdKafka::EventCb,
+                 public RdKafka::DeliveryReportCb {
 public:
   /// \brief Constructs a Producer object.
   ///
@@ -51,15 +58,97 @@ public:
   /// \param Topic The name of the Kafka topic according to the agreement, for
   /// example, "trex_detector".
   /// \param Configs A vector of configuration <type,value> pairs.
-  Producer(std::string Broker, std::string Topic,
-           std::vector<std::pair<std::string, std::string>> &Configs);
+  Producer(const std::string &Broker, const std::string &Topic,
+           std::vector<std::pair<std::string, std::string>> &Configs,
+           Statistics *Stats = nullptr);
 
   /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;
 
+  /// \brief Structure to hold producer statistics.
+  struct ProducerStats {
+    /// \brief Count of configuration errors
+    int64_t config_errors{0};
+    /// \brief Count of bytes successfully produced
+    int64_t produce_bytes_ok{0};
+    /// \brief Count of bytes that failed to produce
+    int64_t produce_bytes_error{0};
+    /// \brief Total number of produce() calls
+    int64_t produce_calls{0};
+    /// \brief Count of failed produce() calls
+    int64_t produce_errors{0};
+
+    // librdkafka error statistics
+    /// \brief Count of timeout errors
+    int64_t ErrTimeout{0};
+    /// \brief Count of transport errors
+    int64_t ErrTransport{0};
+    /// \brief Count of broker not available errors
+    int64_t ErrBrokerNotAvailable{0};
+    /// \brief Count of unknown topic errors
+    int64_t ErrTopic{0};
+    /// \brief Count of queue full errors
+    int64_t ErrQueueFull{0};
+    /// \brief Count of other/unspecified errors
+    int64_t ErrOther{0};
+    /// \brief Count of message timeout errors
+    int64_t ErrMsgTimeout{0};
+    /// \brief Count of kafka authentication errors
+    int64_t ErrAuth{0};
+    /// \brief Count of message size too large errors
+    int64_t ErrMsgSizeTooLarge{0};
+    /// \brief Count of unknown partition errors
+    int64_t ErrUknownPartition{0};
+    /// \brief Total count of transmission errors
+    int64_t TransmissionErrors{0};
+    /// \brief Count of delivery reports with errors
+    int64_t MsgError{0};
+
+    // librdkafka message statistics
+    /// \brief Count of successful message deliveries
+    int64_t MsgDeliverySuccess{0};
+    /// \brief Count of messages confirmed as persisted
+    int64_t MsgStatusPersisted{0};
+    /// \brief Count of messages possibly persisted but unconfirmed
+    int64_t MsgStatusPossiblyPersisted{0};
+    /// \brief Count of messages confirmed as not persisted
+    int64_t MsgStatusNotPersisted{0};
+    /// \brief Total count of delivery report events
+    int64_t TotalMsgDeliveryEvent{0};
+    /// \brief Current number of messages in queue
+    int64_t NumberOfMsgInQueue{0};
+    /// \brief Maximum number of messages in queue
+    int64_t MaxNumOfMsgInQueue{0};
+    /// \brief Current bytes of messages in queue
+    int64_t BytesOfMsgInQueue{0};
+    /// \brief Maximum bytes of messages in queue
+    int64_t MaxBytesOfMsgInQueue{0};
+
+    // librdkafka transmission statistics
+    /// \brief Total bytes transmitted to brokers
+    int64_t BytesTransmittedToBrokers{0};
+    /// \brief Count of transmission request retries
+    int64_t TxRequestRetries{0};
+  } __attribute__((aligned(64)));
+
+  /// \brief Polls the producer for events.
+  void poll(int TimeoutMS) { KafkaProducer->poll(TimeoutMS); };
+
+  /// \brief Delivery report callback. This function is called when we
+  /// processing delivery reports from the producer when calling poll().
+  void dr_cb(RdKafka::Message &message) override;
+
+  /// \brief Event callback. This function is called when we receive events from
+  /// the producer when calling poll().
+  void event_cb(RdKafka::Event &event) override;
+
+  /// \brief Returns the producer statistics reference.
+  /// \return ProducerStats The producer statistics.
+  inline const ProducerStats &getStats() const { return ProducerStats; }
+
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
-  /// after the message is enqueueed for transmission.
+  /// after the message is enqueued for transmission.
   ///
   /// \param Buffer The buffer containing the message data.
   /// \param MessageTimestampMS The timestamp of the message in milliseconds.
@@ -72,40 +161,22 @@ public:
   /// \param Key The configuration key.
   /// \param Value The configuration value.
   /// \return RdKafka::Conf::ConfResult The result of setting the configuration.
-  RdKafka::Conf::ConfResult setConfig(std::string Key, std::string Value);
+  RdKafka::Conf::ConfResult setConfig(const std::string &Key,
+                                      const std::string &Value);
 
-  /// \brief Callback function for Kafka to handle events like errors,
-  /// statistics.
-  ///
-  /// \param event The Kafka event to be handled
-  void event_cb(RdKafka::Event &event) override;
-
-  /// \brief Structure to hold producer statistics.
-  struct ProducerStats {
-    int64_t config_errors;
-    int64_t ev_errors;
-    int64_t ev_others;
-    int64_t dr_errors;
-    int64_t dr_noerrors;
-    int64_t produce_bytes_ok;
-    int64_t produce_bytes_error;
-    int64_t produce_calls;
-    int64_t produce_errors;
-    int64_t produce_no_errors;
-    int64_t err_unknown_topic;
-    int64_t err_queue_full;
-    int64_t err_other;
-    int64_t librdkafka_msg_cnt;
-    int64_t librdkafka_msg_size;
-  } stats = {};
-
-protected:
   std::string ErrorMessage;
   std::string TopicName;
   std::unique_ptr<RdKafka::Conf> Config;
   std::unique_ptr<RdKafka::Conf> TopicConfig;
   std::unique_ptr<RdKafka::Topic> KafkaTopic;
   std::unique_ptr<RdKafka::Producer> KafkaProducer;
+
+private:
+  /// Local struct to store producer statistics. References of these counters
+  /// are registered into the Statistics object.
+  ProducerStats ProducerStats = {};
+
+  void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode);
 };
 
 using ProducerCallback =

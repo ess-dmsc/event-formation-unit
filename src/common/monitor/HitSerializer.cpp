@@ -11,7 +11,7 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HitSerializer::HitSerializer(size_t maxarraylength, std::string source_name)
+HitSerializer::HitSerializer(size_t maxarraylength, const std::string &source_name)
     : maxlen(maxarraylength), SourceName(source_name) {
   builder.Clear();
 }

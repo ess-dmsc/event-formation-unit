@@ -23,22 +23,32 @@ To build and run this software the following dependencies are required.
 * [**bash**](https://www.gnu.org/software/bash/) For properly setting paths to the conan provided dependencies.
 * A recent C/C++ compiler with support for C++14.
 
-Conan is used to download dependencies. For conan to know where the dependencies can
-be downloaded from, the ecdc package repository must be added by running the following command:
+Note also that for additional functionality, you might want to install the following dependencies manually:
 
-* `conan remote add ecdc-conan-release https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-release`
+* [**libpcap**](http://www.tcpdump.org) —Network monitoring
+* [**Valgrind**](http://valgrind.org) — Memory usage (and other) tests
+* [**gcovr**](https://gcovr.com/en/stable/index.html), [**lcov**](https://lcov.readthedocs.io/en/latest/#lcov),  and [**gcov**](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) — Generate coverage reports
 
-Note also that for additional functionality you might want to install the following dependencies manually:
+### Conan
 
-* [**libpcap**](http://www.tcpdump.org)
-* [**Valgrind**](http://valgrind.org) For doing memory usage (and other) tests.
-* **lcov/gcov/gcovr** Required to generate coverage reports.
+Conan is a Python package used to download dependencies. To install the latest version smaller than 2, run 
+
+```
+pip install "conan<2"
+```
+
+and ensure that the directory conatining the conan executable has been added to your path.  
+
+For conan to know where the dependencies can be downloaded from, the ECDC package repository must be added by running the following command
+
+```conan remote add ecdc-conan-release https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-release```
+
 
 ### Building
 
 Run the following commands:
 
-```bash
+```
 git clone https://github.com/ess-dmsc/event-formation-unit.git
 
 cd event-formation-unit
@@ -52,11 +62,23 @@ cmake ..
 make
 ```
 
-#### Building under Ubuntu 16
+Note, by utilizing several processors, you can speed up the build process by running parallel compiler jobs. You do this by passing the `-j` option to make. For example, to launch eight parallel jobs run make as
+
+```
+make -j 8
+```
+
+The total number of available processors on can be queried by calling the `nproc` command. To use all available processors, run make like this
+
+```
+make -j $(nproc)
+```
+
+#### Building with Ubuntu verions 16 or larger 
 Wen using conan to provide the dependencies, an extra option has to be provided:
 `--settings compiler.libcxx=libstdc++11`. Thus the call to conan turns into:
 
-```bash
+```
 conan install --build=outdated .. --settings compiler.libcxx=libstdc++11
 ```
 
@@ -89,6 +111,17 @@ To run a memory leak test (using Valgrind), run:
 ```
 make valgrind
 ```
+
+## Building Doxygen docmentation
+
+[Doxygen](https://www.doxygen.nl/) documentation for the EFU C++ classes can be build by running
+
+```
+make doxygen
+```
+
+After the documentation has been build, the doxygen documentation tree can be accesed in the cmake build directory, by opening the file `doxygen/html/index.html`. 
+
 
 ## Running the event formation application
 

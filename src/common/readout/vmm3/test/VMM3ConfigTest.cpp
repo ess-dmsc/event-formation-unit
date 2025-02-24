@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@ protected:
 
 
 TEST_F(VMM3ConfigTest, ConfigFileNotJson) {
-  testvmm3.FileName="/etc/passwd"; // not a jason file
+  testvmm3.FileName="/etc/passwd"; // not a json file
   EXPECT_ANY_THROW(testvmm3.loadAndApplyConfig());
 }
 

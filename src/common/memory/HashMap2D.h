@@ -1,9 +1,9 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Wrapper for the std::map to access data thorugh a 2D indexing as key
+/// \brief Wrapper for the std::map to access data through a 2D indexing as key
 //===----------------------------------------------------------------------===//
 
 #pragma once

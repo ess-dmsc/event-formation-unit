@@ -38,6 +38,9 @@ protected:
           {{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
     }
     geom->CaenCDCalibration.Intervals[ManualCalibGroup] = ManualCalib;
+
+    // force the half-range upper limit on pulse-height values
+    geom->MaxAmpl = 32767;
   }
   void TearDown() override {}
 };
@@ -90,6 +93,18 @@ TEST_F(BifrostGeometryTest, PosOutsideInterval) {
 TEST_F(BifrostGeometryTest, BadAmplitudes) {
   // A = -1, B = 20 -> pos < 0
   std::pair<int, float> Result = geom->calcUnitAndPos(ManualCalibGroup, -1, 20);
+  ASSERT_EQ(Result.first, -1);
+}
+
+TEST_F(BifrostGeometryTest, TooLargeAmplitudes){
+  // A + B > 32768  -> pos < 0
+  auto Result = geom->calcUnitAndPos(ManualCalibGroup, 32767, 1);
+  ASSERT_EQ(Result.first, -1);
+  Result = geom->calcUnitAndPos(ManualCalibGroup, 1, 32767);
+  ASSERT_EQ(Result.first, -1);
+  Result = geom->calcUnitAndPos(ManualCalibGroup, 0, 32768);
+  ASSERT_EQ(Result.first, -1);
+  Result = geom->calcUnitAndPos(ManualCalibGroup, 32768, 0);
   ASSERT_EQ(Result.first, -1);
 }
 

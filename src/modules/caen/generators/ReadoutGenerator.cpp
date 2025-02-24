@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -94,7 +94,7 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
   return true;
 }
 
-/// \brief implementation of virtual functio from base class
+/// \brief implementation of virtual function from base class
 void ReadoutGenerator::generateData() {
   auto DataPtr = (uint8_t *)Buffer;
   DataPtr += HeaderSize;

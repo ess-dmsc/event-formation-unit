@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@ public:
   /// Create a TSC timer with a timeout value
   TSCTimer(uint64_t TimeOut);
 
-  // Has timeout occured? Then reset timer
+  // Has timeout occurred? Then reset timer
   bool timeout(void);
 
   void reset(void); ///< record current time_point

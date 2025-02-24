@@ -18,7 +18,7 @@ namespace Caen {
 ///
 Config::Config() {}
 
-Config::Config(std::string ConfigFile) : ConfigFileName(ConfigFile) {
+Config::Config(const std::string &ConfigFile) : ConfigFileName(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   root = from_json_file(ConfigFile);
   XTRACE(INIT, DEB, "Loaded json file");
@@ -85,6 +85,14 @@ void Config::parseConfig() {
       }
       LOG(INIT, Sev::Info, "MaxFEN: {}", Legacy.MaxFEN);
       XTRACE(INIT, DEB, "MaxFEN: %u", Legacy.MaxFEN);
+
+      try {
+        Legacy.MaxAmpl = root["MaxAmpl"].get<int>();
+      } catch (...) {
+        // Use default (maximum for integer type) value
+      }
+      LOG(INIT, Sev::Info, "MaxAmpl: {}", Legacy.MaxAmpl);
+      XTRACE(INIT, DEB, "MaxAmpl: %u", Legacy.MaxAmpl);
 
       try {
         Legacy.MaxGroup = root["MaxGroup"].get<unsigned int>();

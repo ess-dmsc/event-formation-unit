@@ -1,11 +1,11 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief TREXInstrument is responsible for readout validation and event
 /// formation
-/// Its functions are called from the main prcessing loop in TREXBase
+/// Its functions are called from the main processing loop in TREXBase
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -64,7 +64,7 @@ public:
   /// ADC value histograms for all channels
   Hists ADCHist{1, 1}; // reinit in ctor
 
-  /// \brief One builder per cassette, rezise in constructor when we have
+  /// \brief One builder per cassette, resize in constructor when we have
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
 

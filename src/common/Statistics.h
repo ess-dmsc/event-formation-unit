@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,7 +17,7 @@
 class StatTuple {
 public:
   /// \brief holds a name, value pair defining a 'stat'
-  StatTuple(std::string Name, const int64_t &Value)
+  StatTuple(const std::string &Name, const int64_t &Value)
       : StatName(Name), StatValue(Value){};
   std::string StatName;
   const int64_t &StatValue;
@@ -33,7 +33,7 @@ public:
 
   /// \brief creates a 'stat' entry with name and address for counter
   /// duplicates are not allowed.
-  int create(std::string StatName, int64_t &Value);
+  int create(const std::string &StatName, int64_t &Value);
 
   /// \brief returns the number of registered stats
   size_t size();
@@ -45,11 +45,11 @@ public:
   int64_t value(size_t Index);
 
   /// \brief return value by name
-  int64_t valueByName(std::string name);
+  int64_t valueByName(const std::string &name);
 
   /// \brief create grafana metric prefix by concatenation of strings
   /// PointChar will be added to the end
-  void setPrefix(std::string StatsPrefix, std::string StatsRegion);
+  void setPrefix(const std::string &StatsPrefix, const std::string &StatsRegion);
 
 private:
   std::string prefix{""};       ///< prepend to all stat names

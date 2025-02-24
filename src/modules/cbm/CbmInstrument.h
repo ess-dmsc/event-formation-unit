@@ -1,11 +1,11 @@
-// Copyright (C) 2022-2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 /// \brief Cbm is responsible for readout validation and
 /// common beam monitor 'event formation'
-/// Its functions are called from the main prcessing loop in CbmBase
+/// Its functions are called from the main processing loop in CbmBase
 //===----------------------------------------------------------------------===//
 
 #pragma once

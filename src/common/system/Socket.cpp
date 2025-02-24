@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,7 +24,7 @@
 #define SEND_FLAGS 0
 #endif
 
-bool Socket::isValidIp(std::string ipAddress) {
+bool Socket::isValidIp(const std::string &ipAddress) {
   struct sockaddr_in SockAddr;
   return inet_pton(AF_INET, ipAddress.c_str(), &(SockAddr.sin_addr)) != 0;
 }
@@ -178,7 +178,7 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
     throw std::runtime_error(Msg);
   }
 
-  LOG(IPC, Sev::Info, "Socket succesfuly bound to {}:{}", ipaddr, port);
+  LOG(IPC, Sev::Info, "Socket successfully bound to {}:{}", ipaddr, port);
 }
 
 void Socket::setRemoteSocket(const std::string ipaddr, int port) {

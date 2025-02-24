@@ -16,7 +16,7 @@ void CenterMatcher::set_max_delta_time(uint64_t max_delta_time) {
   max_delta_time_ = max_delta_time;
 }
 
-void CenterMatcher::set_time_algorithm(std::string time_algorithm) {
+void CenterMatcher::set_time_algorithm(const std::string &time_algorithm) {
   time_algorithm_ = time_algorithm;
 }
 
