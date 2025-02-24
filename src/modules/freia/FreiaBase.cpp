@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -107,23 +107,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   //Stats.create("produce.cause.pulse_change", Counters.ProduceCausePulseChange);
   //Stats.create("produce.cause.max_events_reached", Counters.ProduceCauseMaxEventsReached);
 
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.config_errors", Counters.KafkaStats.config_errors);
-  Stats.create("kafka.produce_bytes_ok", Counters.KafkaStats.produce_bytes_ok);
-  Stats.create("kafka.produce_bytes_error", Counters.KafkaStats.produce_bytes_error);
-  Stats.create("kafka.produce_calls", Counters.KafkaStats.produce_calls);
-  Stats.create("kafka.produce_no_errors", Counters.KafkaStats.produce_no_errors);
-  Stats.create("kafka.produce_errors", Counters.KafkaStats.produce_errors);
-  Stats.create("kafka.err_unknown_topic", Counters.KafkaStats.err_unknown_topic);
-  Stats.create("kafka.err_queue_full", Counters.KafkaStats.err_queue_full);
-  Stats.create("kafka.err_other", Counters.KafkaStats.err_other);
-  Stats.create("kafka.ev_errors", Counters.KafkaStats.ev_errors);
-  Stats.create("kafka.ev_others", Counters.KafkaStats.ev_others);
-  Stats.create("kafka.dr_errors", Counters.KafkaStats.dr_errors);
-  Stats.create("kafka.dr_others", Counters.KafkaStats.dr_noerrors);
-  Stats.create("kafka.librdkafka_msg_cnt", Counters.KafkaStats.librdkafka_msg_cnt);
-  Stats.create("kafka.librdkafka_msg_size", Counters.KafkaStats.librdkafka_msg_size);
-
   Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
   Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
   Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
@@ -135,8 +118,8 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
   Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
   Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
-
   // clang-format on
+
   std::function<void()> inputFunc = [this]() { inputThread(); };
   AddThreadFunction(inputFunc, "input");
 
@@ -155,10 +138,10 @@ void FreiaBase::processing_thread() {
   assert(EFUSettings.KafkaTopic != "");
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                     KafkaCfg.CfgParms);
-  auto Produce = [&eventprod](const auto &DataBuffer, const auto &Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
+                     KafkaCfg.CfgParms, &Stats);
+  auto Produce = [&EventProducer](const auto &DataBuffer, const auto &Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
   Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
@@ -183,7 +166,7 @@ void FreiaBase::processing_thread() {
   Timer h5flushtimer;
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
-                      Counters.KafkaStats.produce_bytes_ok});
+                      EventProducer.getStats().MsgStatusPersisted});
 
   uint8_t DataType{ESSReadout::Parser::FREIA};
 
@@ -250,13 +233,12 @@ void FreiaBase::processing_thread() {
 
     if (ProduceTimer.timeout()) {
 
-      RuntimeStatusMask =
-          RtStat.getRuntimeStatusMask({ITCounters.RxPackets, Counters.Events,
-                                       Counters.KafkaStats.produce_bytes_ok});
+      RuntimeStatusMask = RtStat.getRuntimeStatusMask(
+          {ITCounters.RxPackets, Counters.Events,
+           EventProducer.getStats().MsgStatusPersisted});
 
       Serializer->produce();
       Counters.ProduceCauseTimeout++;
-      Counters.KafkaStats = eventprod.stats;
     }
   }
   XTRACE(INPUT, ALW, "Stopping processing thread.");

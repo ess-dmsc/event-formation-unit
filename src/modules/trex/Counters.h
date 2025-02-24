@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -48,8 +48,4 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
-
-  // Kafka stats below are common to all detectors
-  struct Producer::ProducerStats KafkaStats;
-
 } __attribute__((aligned(64)));
