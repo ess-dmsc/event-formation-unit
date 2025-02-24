@@ -61,7 +61,7 @@ public:
   bool isYCoord(uint8_t VMM) { return GeometryInst->isYCoord(VMM); }
 
   // wrapper for pixel2D
-  uint32_t pixel2D(uint16_t x, uint16_t y) {
+  uint32_t pixel2D(uint16_t x, uint16_t y) const {
     return GeometryInst->essgeom->pixel2D(x, y);
   }
 
