@@ -10,9 +10,10 @@
 
 #pragma once
 
-#include<cinttypes>
 #include <common/debug/Trace.h>
 #include <freia/geometry/GeometryBase.h>
+
+#include <cinttypes>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
