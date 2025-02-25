@@ -10,16 +10,22 @@
 
 #pragma once
 
-#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/EventBuilder2D.h>
-#include <freia/Counters.h>
-#include <freia/FreiaBase.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
+
+#include <memory>
+#include <vector>
+
+// Forward declarations
+class EV44Serializer;
+class Event;
+struct BaseSettings;
+struct Counters;
 
 namespace Freia {
 
