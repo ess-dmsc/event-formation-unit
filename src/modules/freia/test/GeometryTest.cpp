@@ -73,12 +73,13 @@ TEST_F(GeometryTest, SelectEstia) {
 }
 
 // Checking that correct 2D geometry is loaded
-//GeometryInst->essgeom = new ESSGeometry(1536, 128, 1, 1);
 TEST_F(GeometryTest, EstiaPixels) {
+  // Test using the ESTIA ICD dimensions
+  Geom.setGeometry("Estia");
+
   const uint16_t nx = 1536;
   const uint16_t ny = 128;
 
-  Geom.setGeometry("Estia");
   ASSERT_EQ(1, Geom.pixel2D(     0,      0));
   ASSERT_TRUE( Geom.pixel2D(nx - 1,      0) > 0);
   ASSERT_EQ(0, Geom.pixel2D(    nx,      0));
@@ -86,14 +87,15 @@ TEST_F(GeometryTest, EstiaPixels) {
   ASSERT_EQ(0, Geom.pixel2D(     0,     ny));
 
   // Check that https://jira.ess.eu/browse/ECDC-4545 is fixed by testing that
-  // all four corners are mapped to the expected pixel id
+  // all four corners of the pixel geometry are mapped to the expected pixel id
   std::vector<std::tuple<uint16_t, uint16_t, uint32_t>> testData = {
+    // x       y        pixel ID
     {     0,      0,               1},
     {nx - 1,      0,              nx},
     {     0, ny - 1, nx*(ny - 1) + 1},
     {nx - 1, ny - 1,           nx*ny},
   };
-  for (const auto& [x, y, id]: testData) {
+  for (const auto &[x, y, id]: testData) {
     ASSERT_EQ(id, Geom.pixel2D(x, y));
   }
 }
