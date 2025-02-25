@@ -103,6 +103,8 @@ public:
     int64_t TransmissionErrors{0};
     /// \brief Count of delivery reports with errors
     int64_t MsgError{0};
+    /// \brief Total count of statistics events
+    int64_t StatsEventCounter{0};
 
     // librdkafka message statistics
     /// \brief Count of successful message deliveries
@@ -123,6 +125,8 @@ public:
     int64_t BytesOfMsgInQueue{0};
     /// \brief Maximum bytes of messages in queue
     int64_t MaxBytesOfMsgInQueue{0};
+    /// \brief Total count of transmitted bytes
+    int64_t TotalTxBytes{0};
 
     // librdkafka transmission statistics
     /// \brief Total bytes transmitted to brokers

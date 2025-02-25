@@ -20,8 +20,8 @@
 #include <librdkafka/rdkafkacpp.h>
 #include <nlohmann/json.hpp>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
                                               const std::string &Value) {
@@ -53,6 +53,7 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
   if (Stats != nullptr) {
     // clang-format off
     Stats->create("kafka.config_errors", ProducerStats.config_errors);
+    Stats->create("kafka.stat_events", ProducerStats.StatsEventCounter);
     Stats->create("kafka.produce_bytes_ok", ProducerStats.produce_bytes_ok);
     Stats->create("kafka.produce_bytes_error", ProducerStats.produce_bytes_error);
     Stats->create("kafka.produce_calls", ProducerStats.produce_calls);
@@ -61,6 +62,8 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     /// librdkafka transmission stats
     Stats->create("kafka.brokers.tx_bytes", ProducerStats.BytesTransmittedToBrokers);
     Stats->create("kafka.brokers.tx_req_retries", ProducerStats.TxRequestRetries);
+    Stats->create("kafka.brokers.tx_total_bytes", ProducerStats.TotalTxBytes);
+    
     
     /// librdkafka message stats
     Stats->create("kafka.msg.num_of_msg_in_queue", ProducerStats.NumberOfMsgInQueue);
@@ -174,6 +177,7 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 // Implementation of KafkaEventHandler override
 void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
+  ++ProducerStats.StatsEventCounter;
 
   /// initialize variable to sum up the values later when looping over brokers
   int64_t TransmissionErrors = 0;
@@ -186,7 +190,10 @@ void Producer::event_cb(RdKafka::Event &event) {
     ProducerStats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
     ProducerStats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
     ProducerStats.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
-    ProducerStats.MaxBytesOfMsgInQueue += res["msg_size_max"].get<int64_t>();
+    ProducerStats.MaxBytesOfMsgInQueue = res["msg_size_max"].get<int64_t>();
+    ProducerStats.TotalTxBytes = res["tx_bytes"].get<int64_t>();
+
+    std::cout << res.dump() << std::endl;
 
     /// \note loop over brokers and sum up the values into local variables
     /// before assigning them to the ProducerStats struct.
