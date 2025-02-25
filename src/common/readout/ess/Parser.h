@@ -13,7 +13,6 @@
 #include <common/time/ESSTime.h>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 
 namespace ESSReadout {
 
@@ -56,6 +55,7 @@ public:
     CSPEC = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
+    ESTIA = 0x4C,
     TREX = 0x50,
     DREAM = 0x60,
     MAGIC = 0x64,

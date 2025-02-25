@@ -12,8 +12,8 @@
 
 #include <common/debug/Trace.h>
 #include <freia/geometry/GeometryBase.h>
-#include <string>
-#include <vector>
+
+#include <cinttypes>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -45,6 +45,7 @@ public:
   /// wire = 32 - (channel - 15)
   /// y = cass * 32 + 32 - wire (= cass * 32 + 47 - channel)
   uint16_t yCoord(uint16_t YOffset, uint8_t VMM, uint8_t Channel) {
+    XTRACE(DATA, DEB, "YOffset %u, VMM %u, Channel %u", YOffset, VMM, Channel);
 
     if ((Channel < MinWireChannel) or (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)", Channel,

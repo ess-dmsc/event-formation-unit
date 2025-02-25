@@ -168,6 +168,12 @@ void FreiaBase::processing_thread() {
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
+  uint8_t DataType{ESSReadout::Parser::FREIA};
+
+  if (EFUSettings.DetectorName == "estia") {
+    DataType = ESSReadout::Parser::ESTIA;
+  }
+
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
@@ -180,8 +186,7 @@ void FreiaBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                 ESSReadout::Parser::FREIA);
+      auto Res = Freia.ESSReadoutParser.validate(DataPtr, DataLen, DataType);
       Counters.ReadoutStats = Freia.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

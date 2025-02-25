@@ -10,16 +10,22 @@
 
 #pragma once
 
-#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/Hybrid.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/EventBuilder2D.h>
-#include <freia/Counters.h>
-#include <freia/FreiaBase.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/Geometry.h>
+
+#include <memory>
+#include <vector>
+
+// Forward declarations
+class EV44Serializer;
+class Event;
+struct BaseSettings;
+struct Counters;
 
 namespace Freia {
 
@@ -36,19 +42,11 @@ public:
   /// files. This step will throw an exception upon errors.
   void loadConfigAndCalib();
 
-  /// \brief after loading the config file, Config.HybridIdStr contains
-  /// a vector of HybridIds. These are then loaded into the Hybrids so that
-  /// we can later do consistency checks when applying the calibration data
-  void setHybridIds(const std::vector<std::string> &Ids);
-
   /// \brief process parsed vmm data into clusters
   void processReadouts(void);
 
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> &Events);
-
-  /// \brief dump readout data to HDF5
-  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
 
   /// \brief initialise the serializer. This is used both in FreiaInstrument
   // and FreiaBase. Called from FreiaBase

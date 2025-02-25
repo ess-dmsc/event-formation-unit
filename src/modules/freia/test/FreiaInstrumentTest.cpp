@@ -1,7 +1,9 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
+///
+/// \brief Unit tests for FreiaInstrument
 //===----------------------------------------------------------------------===//
 
 #include <common/kafka/EV44Serializer.h>
@@ -9,6 +11,9 @@
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+
+#include <freia/Counters.h>
+#include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
 
 using namespace Freia;

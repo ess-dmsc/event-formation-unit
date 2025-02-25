@@ -36,16 +36,31 @@ TEST_F(GeometryTest, SelectFreia) {
   ASSERT_TRUE(Geom.isYCoord(VMM0));
 }
 
-// CHecking that correct 2D geometry is loaded
+// Checking that correct 2D geometry is loaded
 TEST_F(GeometryTest, FreiaPixels) {
+  // Test using the Freia ICD dimensions
   Geom.setGeometry("AMOR");
   Geom.setGeometry("Freia");
+  const uint16_t nx = 64;
+  const uint16_t ny = 1024;
 
-  ASSERT_EQ(1, Geom.pixel2D( 0,    0));
-  ASSERT_TRUE( Geom.pixel2D(63,    0) > 0);
-  ASSERT_EQ(0, Geom.pixel2D(64,    0));
-  ASSERT_TRUE( Geom.pixel2D( 0, 1023) > 0);
-  ASSERT_EQ(0, Geom.pixel2D( 0, 1024));
+  ASSERT_EQ(1, Geom.pixel2D(     0,      0));
+  ASSERT_TRUE( Geom.pixel2D(nx - 1,      0) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(    nx,      0));
+  ASSERT_TRUE( Geom.pixel2D(     0, ny - 1) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(     0,     ny));
+
+  // Test that all four corners of the pixel geometry are mapped to the expected pixel id
+  std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint32_t>> testData = {
+  // #     x       y       Pixel ID
+    {1,      0,      0,               1},
+    {2, nx - 1,      0,              nx},
+    {3,      0, ny - 1, nx*(ny - 1) + 1},
+    {4, nx - 1, ny - 1,           nx*ny},
+  };
+  for (const auto &[corner, x, y, id]: testData) {
+    ASSERT_EQ(id, Geom.pixel2D(x, y)) << "Pixel ID test failed for corner #" << std::to_string(corner);
+  }
 }
 
 // x- and y- vmms are swapped compared with Freia
@@ -57,14 +72,29 @@ TEST_F(GeometryTest, SelectAMOR) {
 
 // Checking that correct 2D geometry is loaded
 TEST_F(GeometryTest, AMORPixels) {
+  // Test using the AMOR ICD dimensions
   Geom.setGeometry("AMOR");
-  ASSERT_EQ(1, Geom.pixel2D( 0,   0));
-  ASSERT_TRUE( Geom.pixel2D(63,   0) > 0);
-  ASSERT_EQ(0, Geom.pixel2D(64,   0));
-  ASSERT_TRUE( Geom.pixel2D( 0, 447) > 0);
-  ASSERT_EQ(0, Geom.pixel2D( 0, 448));
-}
+  const uint16_t nx = 64;
+  const uint16_t ny = 448;
 
+  ASSERT_EQ(1, Geom.pixel2D(     0,      0));
+  ASSERT_TRUE( Geom.pixel2D(nx - 1,      0) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(    nx,      0));
+  ASSERT_TRUE( Geom.pixel2D(     0, ny - 1) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(     0,     ny));
+
+  // Test that all four corners of the pixel geometry are mapped to the expected pixel id
+  std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint32_t>> testData = {
+  // #     x       y       Pixel ID
+    {1,      0,      0,               1},
+    {2, nx - 1,      0,              nx},
+    {3,      0, ny - 1, nx*(ny - 1) + 1},
+    {4, nx - 1, ny - 1,           nx*ny},
+  };
+  for (const auto &[corner, x, y, id]: testData) {
+    ASSERT_EQ(id, Geom.pixel2D(x, y)) << "Pixel ID test failed for corner #" << std::to_string(corner);
+  }
+}
 
 TEST_F(GeometryTest, SelectEstia) {
   ASSERT_TRUE(Geom.setGeometry("Estia"));
@@ -73,14 +103,30 @@ TEST_F(GeometryTest, SelectEstia) {
 }
 
 // Checking that correct 2D geometry is loaded
-//GeometryInst->essgeom = new ESSGeometry(1536, 128, 1, 1);
 TEST_F(GeometryTest, EstiaPixels) {
+  // Test using the ESTIA ICD dimensions
   Geom.setGeometry("Estia");
-  ASSERT_EQ(1, Geom.pixel2D(   0,   0));
-  ASSERT_TRUE( Geom.pixel2D(1535,   0) > 0);
-  ASSERT_EQ(0, Geom.pixel2D(1536,   0));
-  ASSERT_TRUE( Geom.pixel2D(   0, 127) > 0);
-  ASSERT_EQ(0, Geom.pixel2D(   0, 128));
+  const uint16_t nx = 1536;
+  const uint16_t ny = 128;
+
+  ASSERT_EQ(1, Geom.pixel2D(     0,      0));
+  ASSERT_TRUE( Geom.pixel2D(nx - 1,      0) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(    nx,      0));
+  ASSERT_TRUE( Geom.pixel2D(     0, ny - 1) > 0);
+  ASSERT_EQ(0, Geom.pixel2D(     0,     ny));
+
+  // Check that https://jira.ess.eu/browse/ECDC-4545 is fixed by testing that
+  // all four corners of the pixel geometry are mapped to the expected pixel id
+  std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint32_t>> testData = {
+  // #     x       y       Pixel ID
+    {1,      0,      0,               1},
+    {2, nx - 1,      0,              nx},
+    {3,      0, ny - 1, nx*(ny - 1) + 1},
+    {4, nx - 1, ny - 1,           nx*ny},
+  };
+  for (const auto &[corner, x, y, id]: testData) {
+    ASSERT_EQ(id, Geom.pixel2D(x, y)) << "Pixel ID test failed for corner #" << std::to_string(corner);
+  }
 }
 
 TEST_F(GeometryTest, SelectInvalid) {
