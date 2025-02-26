@@ -125,8 +125,6 @@ public:
     int64_t BytesOfMsgInQueue{0};
     /// \brief Maximum bytes of messages in queue
     int64_t MaxBytesOfMsgInQueue{0};
-    /// \brief Total count of transmitted bytes
-    int64_t TotalTxBytes{0};
 
     // librdkafka transmission statistics
     /// \brief Total bytes transmitted to brokers

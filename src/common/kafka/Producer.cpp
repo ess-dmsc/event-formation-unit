@@ -62,8 +62,6 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     /// librdkafka transmission stats
     Stats->create("kafka.brokers.tx_bytes", ProducerStats.BytesTransmittedToBrokers);
     Stats->create("kafka.brokers.tx_req_retries", ProducerStats.TxRequestRetries);
-    Stats->create("kafka.brokers.tx_total_bytes", ProducerStats.TotalTxBytes);
-    
     
     /// librdkafka message stats
     Stats->create("kafka.msg.num_of_msg_in_queue", ProducerStats.NumberOfMsgInQueue);
@@ -191,9 +189,6 @@ void Producer::event_cb(RdKafka::Event &event) {
     ProducerStats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
     ProducerStats.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
     ProducerStats.MaxBytesOfMsgInQueue = res["msg_size_max"].get<int64_t>();
-    ProducerStats.TotalTxBytes = res["tx_bytes"].get<int64_t>();
-
-    std::cout << res.dump() << std::endl;
 
     /// \note loop over brokers and sum up the values into local variables
     /// before assigning them to the ProducerStats struct.
