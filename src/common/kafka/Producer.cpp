@@ -181,7 +181,7 @@ void Producer::event_cb(RdKafka::Event &event) {
   
   switch (event.type()) {
     case RdKafka::Event::EVENT_STATS:
-    ++ProducerStats.StatsEventCounter;
+    ProducerStats.StatsEventCounter++;
 
     res = nlohmann::json::parse(event.str());
     ProducerStats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
@@ -209,7 +209,7 @@ void Producer::event_cb(RdKafka::Event &event) {
     break;
 
   case RdKafka::Event::EVENT_ERROR:
-    ++ProducerStats.ErrorEventCounter;
+    ProducerStats.ErrorEventCounter++;
     applyKafkaErrorCode(event.err());
     break;
 
@@ -220,17 +220,17 @@ void Producer::event_cb(RdKafka::Event &event) {
 
 // Implementation of DeliveryReportHandler override
 void Producer::dr_cb(RdKafka::Message &message) {
-  ++ProducerStats.TotalMsgDeliveryEvent;
+  ProducerStats.TotalMsgDeliveryEvent++;
 
   switch (message.status()) {
   case RdKafka::Message::MSG_STATUS_NOT_PERSISTED:
-    ++ProducerStats.MsgStatusNotPersisted;
+    ProducerStats.MsgStatusNotPersisted++;
     break;
   case RdKafka::Message::MSG_STATUS_POSSIBLY_PERSISTED:
-    ++ProducerStats.MsgStatusPossiblyPersisted;
+    ProducerStats.MsgStatusPossiblyPersisted++;
     break;
   case RdKafka::Message::MSG_STATUS_PERSISTED:
-    ++ProducerStats.MsgStatusPersisted;
+    ProducerStats.MsgStatusPersisted++;
     break;
   default:
     break;
@@ -239,10 +239,10 @@ void Producer::dr_cb(RdKafka::Message &message) {
   if (message.err() != RdKafka::ErrorCode::ERR_NO_ERROR) {
 
     applyKafkaErrorCode(message.err());
-    ++ProducerStats.MsgError;
+    ProducerStats.MsgError++;
 
   } else {
-    ++ProducerStats.MsgDeliverySuccess;
+    ProducerStats.MsgDeliverySuccess++;
   }
 }
 
@@ -256,42 +256,42 @@ void Producer::applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) {
 
   switch (ErrorCode) {
   case RdKafka::ErrorCode::ERR__TIMED_OUT:
-    ++ProducerStats.ErrTimeout;
+    ProducerStats.ErrTimeout++;
     break;
   case RdKafka::ErrorCode::ERR__TRANSPORT:
-    ++ProducerStats.ErrTransport;
+    ProducerStats.ErrTransport++;
     break;
   case RdKafka::ErrorCode::ERR_BROKER_NOT_AVAILABLE:
-    ++ProducerStats.ErrBrokerNotAvailable;
+    ProducerStats.ErrBrokerNotAvailable++;
     break;
   case RdKafka::ErrorCode::ERR__UNKNOWN_TOPIC:
-    ++ProducerStats.ErrTopic;
+    ProducerStats.ErrTopic++;
     break;
   case RdKafka::ErrorCode::ERR_TOPIC_EXCEPTION:
-    ++ProducerStats.ErrTopic;
+    ProducerStats.ErrTopic++;
     break;
   case RdKafka::ErrorCode::ERR_TOPIC_AUTHORIZATION_FAILED:
-    ++ProducerStats.ErrTopic;
+    ProducerStats.ErrTopic++;
     break;
   case RdKafka::ErrorCode::ERR__QUEUE_FULL:
-    ++ProducerStats.ErrQueueFull;
+    ProducerStats.ErrQueueFull++;
     break;
   case RdKafka::ErrorCode::ERR__MSG_TIMED_OUT:
-    ++ProducerStats.ErrMsgTimeout;
+    ProducerStats.ErrMsgTimeout++;
     break;
   case RdKafka::ErrorCode::ERR__AUTHENTICATION:
-    ++ProducerStats.ErrAuth;
+    ProducerStats.ErrAuth++;
     break;
   case RdKafka::ErrorCode::ERR_MSG_SIZE_TOO_LARGE:
-    ++ProducerStats.ErrMsgSizeTooLarge;
+    ProducerStats.ErrMsgSizeTooLarge++;
     break;
   case RdKafka::ErrorCode::ERR__UNKNOWN_PARTITION:
-    ++ProducerStats.ErrUknownPartition;
+    ProducerStats.ErrUknownPartition++;
     break;
   case RdKafka::ErrorCode::ERR_NO_ERROR:
     break;
   default:
-    ++ProducerStats.ErrOther;
+    ProducerStats.ErrOther++;
     break;
   }
 }
