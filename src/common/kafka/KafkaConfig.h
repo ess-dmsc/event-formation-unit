@@ -26,8 +26,10 @@ public:
   static inline std::vector<std::pair<std::string, std::string>> DefaultConfig{
       {"message.max.bytes", "10000000"},      // max size of a msg (10MB)
       {"message.copy.max.bytes", "10000000"}, // max bytes of a msg to copy over into kafka buffer (10MB)
+      {"message.max.bytes", "10000000"},      // max size of a msg (10MB)
+      {"message.copy.max.bytes", "10000000"}, // max bytes of a msg to copy over into kafka buffer (10MB)
       {"queue.buffering.max.ms", "100"},
-      {"statistics.interval.ms" : "1000"},    // every sec read out kafka statistic
-      {"message.timeout.ms" : "600000"},      // 10 minutes to keep msg memory
+      {"statistics.interval.ms", "1000"},    // every sec read out kafka statistic
+      {"message.timeout.ms", "600000"},      // 10 minutes to keep msg memory
       {"api.version.request", "true"}};
 };
