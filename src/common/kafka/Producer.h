@@ -105,6 +105,8 @@ public:
     int64_t MsgError{0};
     /// \brief Total count of statistics events
     int64_t StatsEventCounter{0};
+    /// \brief Total count of error events
+    int64_t ErrorEventCounter{0};
 
     // librdkafka message statistics
     /// \brief Count of successful message deliveries
