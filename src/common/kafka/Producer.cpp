@@ -53,6 +53,8 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
   if (Stats != nullptr) {
     // clang-format off
     Stats->create("kafka.config_errors", ProducerStats.config_errors);
+    Stats->create("kafka.stat_events", ProducerStats.StatsEventCounter);
+    Stats->create("kafka.error_events", ProducerStats.ErrorEventCounter);
     Stats->create("kafka.produce_bytes_ok", ProducerStats.produce_bytes_ok);
     Stats->create("kafka.produce_bytes_error", ProducerStats.produce_bytes_error);
     Stats->create("kafka.produce_calls", ProducerStats.produce_calls);
@@ -122,9 +124,6 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
   }
 
-  // Set message timeout to 1 minute
-  Config->set("message.timeout.ms", "60000", ErrorMessage);
-
   KafkaProducer.reset(RdKafka::Producer::create(Config.get(), ErrorMessage));
   if (!KafkaProducer) {
     LOG(KAFKA, Sev::Error, "Failed to create producer: {}", ErrorMessage);
@@ -174,14 +173,16 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 // Implementation of KafkaEventHandler override
 void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
-
+  
   /// initialize variable to sum up the values later when looping over brokers
   int64_t TransmissionErrors = 0;
   int64_t BytesTransmittedToBrokers = 0;
   int64_t TxRequestRetries = 0;
-
+  
   switch (event.type()) {
-  case RdKafka::Event::EVENT_STATS:
+    case RdKafka::Event::EVENT_STATS:
+    ++ProducerStats.StatsEventCounter;
+
     res = nlohmann::json::parse(event.str());
     ProducerStats.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
     ProducerStats.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
@@ -208,6 +209,7 @@ void Producer::event_cb(RdKafka::Event &event) {
     break;
 
   case RdKafka::Event::EVENT_ERROR:
+    ++ProducerStats.ErrorEventCounter;
     applyKafkaErrorCode(event.err());
     break;
 
