@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,10 +7,13 @@
 // based on Freia ICD document
 // https://project.esss.dk/owncloud/index.php/f/14683667
 //===----------------------------------------------------------------------===//
+
 // GCOVR_EXCL_START
 
-
 #include <modules/freia/generators/ReadoutGenerator.h>
+#include <common/readout/vmm3/VMM3Parser.h>
+
+#include <cmath>
 
 namespace Freia {
 
@@ -35,10 +38,10 @@ void ReadoutGenerator::generateData() {
     ReadoutData->OTADC = 1000;
 
     if ((Readout % 2) == 0) {
+      constexpr double DEG_TO_RADS = M_PI/180.0;
       Angle = Fuzzer.random8() * 360.0 / 255;
-      XChannel =
-          44.0 - ReadoutData->FiberId + 10.0 * cos(Angle * 2 * 3.14156 / 360.0);
-      YChannel = 30.0 + 10.0 * sin(Angle * 2 * 3.14156 / 360.0);
+      XChannel = 44.0 - ReadoutData->FiberId + 10.0 * cos(Angle * DEG_TO_RADS);
+      YChannel = 30.0 + 10.0 * sin(Angle * DEG_TO_RADS);
       ReadoutData->Channel = YChannel;
     } else {
       ReadoutData->Channel = XChannel;
