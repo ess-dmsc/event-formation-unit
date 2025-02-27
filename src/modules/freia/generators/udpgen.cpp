@@ -1,4 +1,4 @@
-// Copyright (C) 2025 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
