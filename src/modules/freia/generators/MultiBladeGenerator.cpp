@@ -16,42 +16,52 @@
 namespace Freia {
 
 void MultiBladeGenerator::generateData() {
-  auto DP = (uint8_t *)Buffer;
-  DP += HeaderSize;
-
   double Angle{0};
   double XChannel{32};
   double YChannel{32};
 
-  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
-    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
-    ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
+  constexpr double DEG_TO_RADS = M_PI/180.0;
+  constexpr size_t DATA_LENGTH = sizeof(VMM3Data);
+
+  for (size_t Count = 0; Count < numberOfReadouts; Count++) {
+    // Get a VMM3Data struct pointer for the next Buffer write position
+    VMM3Data * ReadoutData = getReadoutDataPtr(Count);
+
+    // Set readout data
+    ReadoutData->FiberId = (Count / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
-    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+
+    ReadoutData->DataLength = DATA_LENGTH;
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = getReadoutTimeHigh();
     ReadoutData->TimeLow = getReadoutTimeLow();
-    ReadoutData->VMM = Readout & 0x3;
+    ReadoutData->VMM = Count & 0x3;
     ReadoutData->OTADC = 1000;
 
-    if ((Readout % 2) == 0) {
-      constexpr double DEG_TO_RADS = M_PI/180.0;
+    if ((Count % 2) == 0) {
       Angle = Fuzzer.random8() * 360.0 / 255;
       XChannel = 44.0 - ReadoutData->FiberId + 10.0 * cos(Angle * DEG_TO_RADS);
       YChannel = 30.0 + 10.0 * sin(Angle * DEG_TO_RADS);
       ReadoutData->Channel = YChannel;
-    } else {
+    }
+
+    else {
       ReadoutData->Channel = XChannel;
     }
 
-    DP += ReadoutDataSize;
-    if ((Readout % 2) == 0) {
+    if ((Count % 2) == 0) {
       addTicksBtwReadoutsToReadoutTime();
-    } else {
+    }
+
+    else {
       addTickBtwEventsToReadoutTime();
     }
   }
+}
+
+VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
+  return (VMM3Data *) &Buffer[HeaderSize + Index * ReadoutDataSize];
 }
 
 } // namespace Freia

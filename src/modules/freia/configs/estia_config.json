@@ -733,7 +733,7 @@
       "HybridId": "E5533333222222221111111100000047"
     }
   ],
-  "MaxPulseTimeNS": 71428570,
+  "MaxPulseTimeNS": 4000000000,
   "MaxGapWire": 0,
   "MaxGapStrip": 0
 }
