@@ -15,6 +15,40 @@
 
 namespace Freia {
 
+
+// Values must be > 0 and <= 32, Mask must be nonzero
+uint8_t MultiBladeGenerator::randU8WithMask(int Range, int Mask) {
+  while (true) {
+    uint8_t Id = Fuzzer.random8() % Range;
+    int BitVal = 1 << Id;
+    if (BitVal & Mask) {
+      return Id;
+    }
+    // repeat until match
+  }
+}
+
+MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {
+  // app.add_option("--detector", MultiBladeSettings.Detector,
+  //         "Specify detector name (LOKI, CSPEC, ..)")->required();
+
+  app.add_option("--fibermask", MultiBladeSettings.FiberMask,
+          "Mask out unused fibers");
+  app.add_option("--fibervals", MultiBladeSettings.FiberVals,
+          "Number of Fiber values to generate");
+
+  app.add_option("--fenmask", MultiBladeSettings.FENMask,
+          "Mask out unused FENs");
+  app.add_option("--fenvals", MultiBladeSettings.FENVals,
+          "Number of FEN values to generate");
+
+  // app.add_option("--groupmask", MultiBladeSettings.GroupMask,
+  //         "Mask out unused Groupss");
+  // app.add_option("--groupvals", MultiBladeSettings.GroupVals,
+  //         "Number of Group values to generate");
+
+}
+
 void MultiBladeGenerator::generateData() {
   double Angle{0};
   double XChannel{32};
@@ -28,21 +62,22 @@ void MultiBladeGenerator::generateData() {
     VMM3Data * ReadoutData = getReadoutDataPtr(Count);
 
     // Set readout data
-    ReadoutData->FiberId = (Count / 10) % Settings.NFibers;
-    ReadoutData->FENId = 0x00;
+    ReadoutData->FiberId = randU8WithMask(MultiBladeSettings.FiberVals, MultiBladeSettings.FiberMask);
+    ReadoutData->FENId   = randU8WithMask(MultiBladeSettings.FENVals,   MultiBladeSettings.FENMask);
 
     ReadoutData->DataLength = DATA_LENGTH;
+
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
-    ReadoutData->VMM = Count & 0x3;
+    ReadoutData->TimeLow  = getReadoutTimeLow();
+    ReadoutData->VMM = Count & 0x03;
     ReadoutData->OTADC = 1000;
 
     if ((Count % 2) == 0) {
-      Angle = Fuzzer.random8() * 360.0 / 255;
-      XChannel = 44.0 - ReadoutData->FiberId + 10.0 * cos(Angle * DEG_TO_RADS);
-      YChannel = 30.0 + 10.0 * sin(Angle * DEG_TO_RADS);
+      Angle = 360.0 * Fuzzer.random8() / 255.0;
+      XChannel = 44.0 - 10 * ReadoutData->FiberId + 5.0 * cos(Angle * DEG_TO_RADS);
+      YChannel = 30.0 + 5.0 * sin(Angle * DEG_TO_RADS);
       ReadoutData->Channel = YChannel;
     }
 

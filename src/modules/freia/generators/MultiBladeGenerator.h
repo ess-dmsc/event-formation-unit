@@ -19,16 +19,31 @@ using VMM3Data = ESSReadout::VMM3Parser::VMM3Data;
 class MultiBladeGenerator : public ReadoutGeneratorBase {
 
 public:
-  MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {}
+  //MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {}
+  MultiBladeGenerator();
 
-protected:
+  struct {
+    std::string Detector;
+    // bool Tof{false};
+    // bool Loki{false}; // implies four amplitudes
+    // bool Debug{false};
+
+    // Masks are used to restrict the generated data
+    int FiberVals{4};
+    int FiberMask{0xff};   // Fibers 0 - 4
+
+    int FENVals{4};
+    int FENMask{0xff};     // FENs   0 - 4
+  } MultiBladeSettings;
+
+  protected:
   ///
-  /// \brief Generate readout data and store these in Buffer container
+  /// \brief Generate readout data and store these in the Buffer container
   ///
   void generateData() override;
 
   ///
-  /// \brief For a given readout index, return a VMM3Data pointer for the associated Buffer
+  /// \brief For a given readout index, return a VMM3Data pointer to the associated Buffer
   ///        write position
   /// @param Index The readout index
   ///
@@ -36,7 +51,9 @@ protected:
   ///
   VMM3Data *getReadoutDataPtr(size_t Index);
 
-  const uint32_t TimeToFirstReadout{1000};
+  const uint32_t mTimeToFirstReadout{1000};
+
+  uint8_t randU8WithMask(int Range, int Mask);
 };
 
 } // namespace Freia

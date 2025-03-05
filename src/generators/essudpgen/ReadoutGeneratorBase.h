@@ -27,25 +27,24 @@ public:
   /// \brief Struct that holds the generator settings.
   ///
   struct GeneratorSettings {
-    uint16_t NFibers{2};     ///< Number of fibers
-    uint8_t Type{0};         ///< Data type as specified in the ESS Readout ICD
-    uint8_t TypeOverride{0}; ///< Override for the data type field
-    std::string IpAddress{"127.0.0.1"}; ///< IP address for UDP transmission
-    uint16_t UDPPort{9000};             ///< UDP port for transmission
-    uint64_t NumberOfPackets{
-        0}; ///< Number of packets to transmit (0 means all packets)
-    uint32_t NumReadouts{370};     ///< Number of VMM readouts in the UDP packet
-    uint32_t TicksBtwReadouts{10}; ///< Ticks between readouts
-    uint32_t TicksBtwEvents{3 * 88}; ///< Ticks between events (88 ticks ~1us)
-    uint64_t SpeedThrottle{0};       ///< Speed throttle for transmission
-    uint64_t PktThrottle{0};         ///< Packet throttle for transmission
+    uint16_t NFibers{2};                  ///< Number of fibers
+    uint8_t Type{0};                      ///< Data type as specified in the ESS Readout ICD
+    uint8_t TypeOverride{0};              ///< Override for the data type field
+    std::string IpAddress{"127.0.0.1"};   ///< IP address for UDP transmission
+    uint16_t UDPPort{9000};               ///< UDP port for transmission
+    uint64_t NumberOfPackets{0};          ///< Number of packets to transmit (0 means all packets)
+    uint32_t NumReadouts{370};            ///< Number of VMM readouts in the UDP packet
+    uint32_t TicksBtwReadouts{10};        ///< Ticks between readouts
+    uint32_t TicksBtwEvents{3 * 88};      ///< Ticks between events (88 ticks ~1us)
+    uint64_t SpeedThrottle{0};            ///< Speed throttle for transmission
+    uint64_t PktThrottle{0};              ///< Packet throttle for transmission
 
     /// \todo This should be the default mode and obsolete pe packet generation
-    uint16_t Frequency{0}; ///< Frequency of time updates for each packet
+    uint16_t Frequency{0};                ///< Frequency of time updates for each packet
 
-    uint8_t headerVersion{1}; ///< Header version
-    bool Loop{false};         ///< Flag to keep looping the same file forever
-    bool Randomise{false};    ///< Flag to randomize header and data
+    uint8_t headerVersion{1};             ///< Header version
+    bool Loop{false};                     ///< Flag to keep looping the same file forever
+    bool Randomise{false};                ///< Flag to randomize header and data
     uint32_t KernelTxBufferSize{1000000}; ///< Kernel transmit buffer size
   } Settings;
 
