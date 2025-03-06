@@ -32,15 +32,14 @@ MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Pa
   // app.add_option("--detector", MultiBladeSettings.Detector,
   //         "Specify detector name (LOKI, CSPEC, ..)")->required();
 
-  app.add_option("--fibermask", MultiBladeSettings.FiberMask,
-          "Mask out unused fibers");
-  app.add_option("--fibervals", MultiBladeSettings.FiberVals,
-          "Number of Fiber values to generate");
+  app.add_option("--fibervals",  MultiBladeSettings.FiberVals, "Number of Fiber values to generate");
+  app.add_option("--fibermask",  MultiBladeSettings.FiberMask, "Mask out unused fibers");
+ 
+  app.add_option("--fenvals",    MultiBladeSettings.FENVals, "Number of FEN values to generate");
+  app.add_option("--fenmask",    MultiBladeSettings.FENMask, "Mask out unused FENs");
 
-  app.add_option("--fenmask", MultiBladeSettings.FENMask,
-          "Mask out unused FENs");
-  app.add_option("--fenvals", MultiBladeSettings.FENVals,
-          "Number of FEN values to generate");
+  app.add_option("--hybridvals", MultiBladeSettings.HybridVals, "Number of Hybrid values to generate");
+  app.add_option("--hybridmask", MultiBladeSettings.HybridMask, "Mask out unused Hybrids");
 
   // app.add_option("--groupmask", MultiBladeSettings.GroupMask,
   //         "Mask out unused Groupss");

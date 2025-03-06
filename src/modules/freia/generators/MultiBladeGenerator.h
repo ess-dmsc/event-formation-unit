@@ -32,8 +32,11 @@ public:
     int FiberVals{4};
     int FiberMask{0xff};   // Fibers 0 - 4
 
-    int FENVals{4};
-    int FENMask{0xff};     // FENs   0 - 4
+    int FENVals{2};
+    int FENMask{0xff};     // FENs   0 - 2
+
+    int HybridVals{2};
+    int HybridMask{0xff};  // VMMs   0 - 2
   } MultiBladeSettings;
 
   protected:
