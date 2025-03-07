@@ -11,6 +11,7 @@
 #include <modules/freia/generators/MultiBladeGenerator.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
+#include <fmt/core.h>
 #include <cmath>
 
 namespace Freia {
@@ -65,17 +66,34 @@ void MultiBladeGenerator::generateData() {
     ReadoutData->FENId   = randU8WithMask(MultiBladeSettings.FENVals,   MultiBladeSettings.FENMask);
 
     ReadoutData->DataLength = DATA_LENGTH;
-
     assert(ReadoutData->DataLength == 20);
 
     ReadoutData->TimeHigh = getReadoutTimeHigh();
     ReadoutData->TimeLow  = getReadoutTimeLow();
-    ReadoutData->VMM = Count & 0x03;
+
+    
+    // We number consecutive the VMMs as 0, 1, 2, and 3
+    const uint8_t VMM = Count & 0x3;
+
+    // Consecutive VMM pairs are accepted as 
+    // 
+    //    Mask        VMM Pair(s) 
+    //   3 - 0x3   [0, 1]
+    //  12 - 0xc   [2, 3]
+    //  15 - 0xf   [0, 1] and [2, 3]
+    //
+    // Check if a pair passes the mask 
+    if ((1 << VMM) & ~MultiBladeSettings.HybridMask) {
+      continue;
+    }
+
+    ReadoutData->VMM = VMM;
+    fmt::print("VMM = {} {}\n", Count & 0x3, 1 << (Count & 0x3));
     ReadoutData->OTADC = 1000;
 
     if ((Count % 2) == 0) {
       Angle = 360.0 * Fuzzer.random8() / 255.0;
-      XChannel = 44.0 - 10 * ReadoutData->FiberId + 5.0 * cos(Angle * DEG_TO_RADS);
+      XChannel = 54.0 - 15 * ReadoutData->FiberId + 5.0 * cos(Angle * DEG_TO_RADS);
       YChannel = 30.0 + 5.0 * sin(Angle * DEG_TO_RADS);
       ReadoutData->Channel = YChannel;
     }
