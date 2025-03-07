@@ -75,7 +75,7 @@ void MultiBladeGenerator::generateData() {
     // We number consecutive the VMMs as 0, 1, 2, and 3
     const uint8_t VMM = Count & 0x3;
 
-    // Consecutive VMM pairs are accepted as 
+    // The following consecutive VMM pairs are accepted
     // 
     //    Mask        VMM Pair(s) 
     //   3 - 0x3   [0, 1]
