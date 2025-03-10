@@ -28,6 +28,8 @@ public:
   ///
   struct GeneratorSettings {
     uint16_t NFibers{2};                  ///< Number of fibers
+    uint8_t  FiberMask{0xff};             ///< Mask out unused fibers
+
     uint8_t Type{0};                      ///< Data type as specified in the ESS Readout ICD
     uint8_t TypeOverride{0};              ///< Override for the data type field
     std::string IpAddress{"127.0.0.1"};   ///< IP address for UDP transmission
@@ -56,6 +58,18 @@ public:
 
   /// \brief Destructor for ReadoutGeneratorBase.
   virtual ~ReadoutGeneratorBase() = default;
+
+  ///
+  /// \brief
+  ///
+  /// \param Type
+  void setDetectorType(ESSReadout::Parser::DetectorType Type);
+
+  ///
+  /// \brief
+  ///
+  /// \param Type
+  void setDetectorType(const std::string &Name);
 
   ///
   /// \brief Creates a packet ready for UDP transmission.

@@ -13,14 +13,14 @@
 
 int main(int argc, char *argv[]) {
 
-  Freia::MultiBladeGenerator MultiBladeGen;
+  Freia::MultiBladeGenerator Generator;
   uint8_t MultiBladeDataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
-  MultiBladeGen.setReadoutDataSize(MultiBladeDataSize);
+  Generator.setReadoutDataSize(MultiBladeDataSize);
 
-  MultiBladeGen.argParse(argc, argv);
-  MultiBladeGen.main();
+  Generator.argParse(argc, argv);
+  Generator.main();
 
-  MultiBladeGen.transmitLoop();
+  Generator.transmitLoop();
 
   return 0;
 }

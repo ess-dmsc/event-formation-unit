@@ -56,6 +56,7 @@ public:
     NMX = 0x44,
     FREIA = 0x48,
     ESTIA = 0x4C,
+    AMOR = 0x4E,
     TREX = 0x50,
     DREAM = 0x60,
     MAGIC = 0x64,

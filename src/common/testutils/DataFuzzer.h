@@ -32,6 +32,27 @@ public:
     return Begin + RealDist(Generator) * (End - Begin);
   }
 
+  /// \brief Generate a random int `I` ∊ [0 ; Range - 1]
+  /// 
+  /// \param Range  `I` ∊ [0 ; Range - 1]
+  /// \param Mask   `I` & Mask must be true
+  ///
+  /// \return The generated int
+  uint8_t randU8WithMask(int Range, int Mask=0xFF) {
+    if (Mask < 1) {
+      return 0;
+    }
+
+      // Repeat until match
+      while (true) {
+      uint8_t Id = random8() % Range;
+      int BitVal = 1 << Id;
+      if (BitVal & Mask) {
+        return Id;
+      }
+    }
+  }
+
 private:
   std::seed_seq SeedSequence{1, 2, 3, 4, 5};
   std::mt19937 Generator{SeedSequence};

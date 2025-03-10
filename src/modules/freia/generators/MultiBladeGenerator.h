@@ -10,6 +10,7 @@
 #pragma once
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <generators/functiongenerators/DistributionGenerator.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
 namespace Freia {
@@ -18,28 +19,35 @@ using VMM3Data = ESSReadout::VMM3Parser::VMM3Data;
 
 class MultiBladeGenerator : public ReadoutGeneratorBase {
 
-public:
-  //MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {}
+ public:
   MultiBladeGenerator();
 
   struct {
-    std::string Detector;
-    // bool Tof{false};
-    // bool Loki{false}; // implies four amplitudes
-    // bool Debug{false};
+    std::string Detector{"Freia"};
+    bool Tof{false};
+
+    // Instruments
+    bool Freia{false};
+    bool Estia{false};
+    bool Amor{false};
+
+    bool Debug{false};
 
     // Masks are used to restrict the generated data
-    int FiberVals{4};
-    int FiberMask{0xff};   // Fibers 0 - 4
+    int NFibers{4};      // Fibers 0 - 4
+    int FiberMask{0xff};   
 
-    int FENVals{2};
-    int FENMask{0xff};     // FENs   0 - 2
+    int NFENs{2};        // FENs   0 - 2
+    int FENMask{0xff};     
 
-    int HybridVals{2};
-    int HybridMask{0xff};  // VMMs   0 - 2
+    int VMMMask{0xff};  
   } MultiBladeSettings;
 
-  protected:
+  ///
+  /// \brief Intercept the main function to access CLI parsed options
+  void main();
+
+ protected:
   ///
   /// \brief Generate readout data and store these in the Buffer container
   ///
@@ -48,6 +56,7 @@ public:
   ///
   /// \brief For a given readout index, return a VMM3Data pointer to the associated Buffer
   ///        write position
+  ///
   /// @param Index The readout index
   ///
   /// @return A pointer to
@@ -56,7 +65,12 @@ public:
 
   const uint32_t mTimeToFirstReadout{1000};
 
-  uint8_t randU8WithMask(int Range, int Mask);
+  size_t XDim;
+  size_t YDim;
+
+  ///\brief For TOF distribution calculations
+  DistributionGenerator TofDist{1000.0/14};
+  float TicksPerMs{88552.0};
 };
 
 } // namespace Freia

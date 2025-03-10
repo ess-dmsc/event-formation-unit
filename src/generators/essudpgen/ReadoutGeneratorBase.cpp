@@ -8,10 +8,12 @@
 // GCOVR_EXCL_START
 
 #include <Error.hpp>
-#include <chrono>
 #include <common/debug/Trace.h>
-#include <cstdlib>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
+
+#include <chrono>
+#include <cstdlib>
+#include <ctype.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -20,6 +22,10 @@ using namespace ESSReadout;
 
 ///\brief Constructor initialize the generator app
 ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
+  // Store the detector type
+  Settings.Type = Type;
+
+  // Options
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
@@ -29,8 +35,11 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-  app.add_option("-f, --fibers", Settings.NFibers,
-                 "Number of Fibers used in data header");
+  
+  app.add_option("-f, --fibers", Settings.NFibers,   "Number of Fibers used in data header");
+  app.add_option("--fibermask",  Settings.FiberMask, "Mask out unused fibers");
+
+
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
                  "each packet)");
@@ -42,28 +51,40 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
                  "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
+
+  // Flags
   app.add_flag("-r, --random", Settings.Randomise,
                "Randomise header and data fields");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
-  Settings.Type = Type;
-
-  NameToType["CBM"] = ESSReadout::Parser::CBM;
-  NameToType["LOKI"] = ESSReadout::Parser::LOKI;
-  NameToType["TBL3HE"] = ESSReadout::Parser::TBL3HE;
-  NameToType["BIFROST"] = ESSReadout::Parser::BIFROST;
-  NameToType["MIRACLES"] = ESSReadout::Parser::MIRACLES;
-  NameToType["CSPEC"] = ESSReadout::Parser::CSPEC;
-  NameToType["NMX"] = ESSReadout::Parser::NMX;
-  NameToType["FREIA"] = ESSReadout::Parser::FREIA;
-  NameToType["LOKI"] = ESSReadout::Parser::LOKI;
-  NameToType["TREX"] = ESSReadout::Parser::TREX;
-  NameToType["DREAM"] = ESSReadout::Parser::DREAM;
-  NameToType["MAGIC"] = ESSReadout::Parser::MAGIC;
-  NameToType["HEIMDAL"] = ESSReadout::Parser::HEIMDAL;
+  // Look-up convenience
+  NameToType["AMOR"] = Parser::AMOR;
+  NameToType["BIFROST"] = Parser::BIFROST;
+  NameToType["CBM"] = Parser::CBM;
+  NameToType["CSPEC"] = Parser::CSPEC;
+  NameToType["DREAM"] = Parser::DREAM;
+  NameToType["ESTIA"] = Parser::ESTIA;
+  NameToType["FREIA"] = Parser::FREIA;
+  NameToType["HEIMDAL"] = Parser::HEIMDAL;
+  NameToType["LOKI"] = Parser::LOKI;
+  NameToType["LOKI"] = Parser::LOKI;
+  NameToType["MAGIC"] = Parser::MAGIC;
+  NameToType["MIRACLES"] = Parser::MIRACLES;
+  NameToType["NMX"] = Parser::NMX;
+  NameToType["TBL3HE"] = Parser::TBL3HE;
+  NameToType["TREX"] = Parser::TREX;
 }
 
-///\brief
+void ReadoutGeneratorBase::setDetectorType(const std::string &Name) {
+  std::string str = Name;
+  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+  setDetectorType(NameToType[str]);
+}
+
+void ReadoutGeneratorBase::setDetectorType(Parser::DetectorType Type) {
+  Settings.Type = Type;
+}
+
 uint16_t ReadoutGeneratorBase::makePacket() {
   assert(ReadoutDataSize != 0); // must be set in generator application
   generateHeader();
