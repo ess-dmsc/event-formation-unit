@@ -117,7 +117,7 @@ function(create_test_executable)
 
   set_property(TARGET ${exec_name}
   # Set UNIT_TEST flag to trigger UNIT_TEST specific macros for the test executables
-    APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT -DUNIT_TEST")
+    APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT -DUNIT_TEST -DENABLE_TESTING=ON")
 
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}

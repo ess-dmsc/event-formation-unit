@@ -53,8 +53,6 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
   if (Stats != nullptr) {
     // clang-format off
     Stats->create("kafka.config_errors", ProducerStats.config_errors);
-    Stats->create("kafka.stat_events", ProducerStats.StatsEventCounter);
-    Stats->create("kafka.error_events", ProducerStats.ErrorEventCounter);
     Stats->create("kafka.produce_bytes_ok", ProducerStats.produce_bytes_ok);
     Stats->create("kafka.produce_bytes_error", ProducerStats.produce_bytes_error);
     Stats->create("kafka.produce_calls", ProducerStats.produce_calls);

@@ -9,13 +9,12 @@
 
 #ifdef UNIT_TEST
 
-// Definition and initialization
-MockLogger *MockLogger::instance = nullptr;
+MockLogger *MockLogger::currentMockLogger = nullptr;
 
-void mockLogFunction(const std::string &category, const std::string &message) {
-  MockLogger *ptrToInstance = MockLogger::instance;
-  if (ptrToInstance) {
-    ptrToInstance->log(category, message);
+void MockLogger::mockLogFunction(const std::string category,
+                                 const std::string message) {
+  if (currentMockLogger) {
+    currentMockLogger->log(category, message);
   }
 }
 #endif

@@ -12,6 +12,7 @@
 #include <common/testutils/TestBase.h>
 #include <cstring>
 #include <dlfcn.h>
+#include <fakeit.hpp>
 #include <librdkafka/rdkafkacpp.h>
 #include <trompeloeil.hpp>
 
@@ -46,7 +47,15 @@ public:
 };
 
 class ProducerTest : public TestBase {
-  void SetUp() override {}
+
+public:
+  fakeit::Mock<MockLogger> LoggerMock;
+
+  void SetUp() override {
+    LoggerMock.Reset();
+    MockLogger::registerMockLogger(&LoggerMock.get());
+    fakeit::When(Method(LoggerMock, log)).AlwaysReturn();
+  }
 
   void TearDown() override {}
 };
@@ -234,26 +243,28 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
   std::string errorEventJson = R"({"error": "mock error"})";
 
-  /// Create a logger factory which initializes the logger mock
-  /// if this object goes out of scope, the logger mock is destroyed
-  auto LoggerFactory = MockLoggerFactory();
-
-  /// Register the Mocked logger to be chekced
-  /// for called 8 times with the correct log
-  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
-      .TIMES(8)
-      .WITH(_1 == "KAFKA" &&
-            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
-
   MockEvent errorEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
                        RdKafka::ERR__TIMED_OUT);
   prod.event_cb(errorEvent);
   EXPECT_EQ(prod.getStats().ErrTimeout, 1);
 
+  fakeit::Verify(
+      Method(LoggerMock, log)
+          .Using("KAFKA",
+                 "Rdkafka::Event::EVENT_ERROR [-185]: Local: Timed out"))
+      .Once();
+
   errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
                          RdKafka::ERR_BROKER_NOT_AVAILABLE);
   prod.event_cb(errorEvent);
   EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 1);
+
+  fakeit::Verify(
+      Method(LoggerMock, log)
+          .Using(
+              "KAFKA",
+              "Rdkafka::Event::EVENT_ERROR [8]: Broker: Broker not available"))
+      .Once();
 
   errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
                          RdKafka::ERR__TRANSPORT);
@@ -288,17 +299,6 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 
 TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
-
-  /// Create a logger factory which initializes the logger mock
-  /// if this object goes out of scope, the logger mock is destroyed
-  auto LoggerFactory = MockLoggerFactory();
-
-  /// Register the Mocked logger to be chekced
-  /// for called 8 times with the correct log
-  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
-      .TIMES(8)
-      .WITH(_1 == "KAFKA" &&
-            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
 
   MockMessage errorMessage(RdKafka::ERR__TIMED_OUT);
   prod.dr_cb(errorMessage);
