@@ -61,6 +61,7 @@ public:
     FREIA = 0x48,
     TBLVMM = 0x49,
     ESTIA = 0x4C,
+    BEER = 0x50,
     DREAM = 0x60,
     MAGIC = 0x64,
     HEIMDAL = 0x68
