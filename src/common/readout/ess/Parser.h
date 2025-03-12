@@ -3,7 +3,10 @@
 ///
 /// \file
 ///
-/// \brief ESS Readout System Data definitions and parsing functions
+/// \brief ESS Readout System Data definitions and parsing functions. For further
+/// details, see the readout ICD
+///
+///   https://project.esss.dk/nextcloud/index.php/apps/files/files/16376550?dir=/DM/detectors/02%20instruments/01%20common/02%20Readout/02%20ICD        
 ///
 //===----------------------------------------------------------------------===//
 
@@ -52,12 +55,12 @@ public:
     TBL3HE = 0x32,
     BIFROST = 0x34,
     MIRACLES = 0x38,
-    CSPEC = 0x40,
+    CSPEC = 0x3C,
+    TREX = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
+    TBLVMM = 0x49,
     ESTIA = 0x4C,
-    AMOR = 0x4E,
-    TREX = 0x50,
     DREAM = 0x60,
     MAGIC = 0x64,
     HEIMDAL = 0x68

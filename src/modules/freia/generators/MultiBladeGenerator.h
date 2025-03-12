@@ -25,22 +25,16 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
   struct {
     std::string Detector{"Freia"};
     bool Tof{false};
-
-    // Instruments
-    bool Freia{false};
-    bool Estia{false};
-    bool Amor{false};
-
     bool Debug{false};
 
-    // Masks are used to restrict the generated data
-    int NFibers{4};      // Fibers 0 - 4
-    int FiberMask{0xff};   
+    // Masks are used to restrict fibers and FENs
+    uint32_t NFibers{4};            // Fibers 0 - 4
+    uint32_t FiberMask{0x00ffffff};   
 
-    int NFENs{2};        // FENs   0 - 2
-    int FENMask{0xff};     
+    uint16_t NFENs{2};              // FENs   0 - 2
+    uint16_t FENMask{0xffff};     
 
-    int VMMMask{0xff};  
+    uint8_t VMMMask{0xff};  
   } MultiBladeSettings;
 
   ///
@@ -54,23 +48,26 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
   void generateData() override;
 
   ///
-  /// \brief For a given readout index, return a VMM3Data pointer to the associated Buffer
-  ///        write position
+  /// \brief For a given readout index, return a pointer to the readout buffer 
+  /// of the corresponding VMM3Data data
   ///
-  /// @param Index The readout index
+  /// \param Index The readout index
   ///
-  /// @return A pointer to
+  /// \return A pointer to readout data
   ///
   VMM3Data *getReadoutDataPtr(size_t Index);
 
   const uint32_t mTimeToFirstReadout{1000};
 
-  size_t XDim;
-  size_t YDim;
-
   ///\brief For TOF distribution calculations
-  DistributionGenerator TofDist{1000.0/14};
-  float TicksPerMs{88552.0};
+  DistributionGenerator mTofDist{1000.0/14};
+  float mTicksPerMs{88552.0};
+
+  /// Pixel resolution in the x-direction
+  size_t XDim;
+
+  /// Pixel resolution in the y-direction
+  size_t YDim;
 };
 
 } // namespace Freia

@@ -58,21 +58,20 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
 
   // Look-up convenience
-  NameToType["AMOR"] = Parser::AMOR;
-  NameToType["BIFROST"] = Parser::BIFROST;
-  NameToType["CBM"] = Parser::CBM;
-  NameToType["CSPEC"] = Parser::CSPEC;
-  NameToType["DREAM"] = Parser::DREAM;
-  NameToType["ESTIA"] = Parser::ESTIA;
-  NameToType["FREIA"] = Parser::FREIA;
-  NameToType["HEIMDAL"] = Parser::HEIMDAL;
-  NameToType["LOKI"] = Parser::LOKI;
-  NameToType["LOKI"] = Parser::LOKI;
-  NameToType["MAGIC"] = Parser::MAGIC;
+  NameToType["CBM"]      = Parser::CBM;
+  NameToType["LOKI"]     = Parser::LOKI;
+  NameToType["TBL3HE"]   = Parser::TBL3HE;
+  NameToType["BIFROST"]  = Parser::BIFROST;
   NameToType["MIRACLES"] = Parser::MIRACLES;
-  NameToType["NMX"] = Parser::NMX;
-  NameToType["TBL3HE"] = Parser::TBL3HE;
-  NameToType["TREX"] = Parser::TREX;
+  NameToType["CSPEC"]    = Parser::CSPEC;
+  NameToType["TREX"]     = Parser::TREX;
+  NameToType["NMX"]      = Parser::NMX;
+  NameToType["FREIA"]    = Parser::FREIA;
+  NameToType["TBLVMM"]   = Parser::TBLVMM;
+  NameToType["ESTIA"]    = Parser::ESTIA;
+  NameToType["DREAM"]    = Parser::DREAM;
+  NameToType["MAGIC"]    = Parser::MAGIC;
+  NameToType["HEIMDAL"]  = Parser::HEIMDAL;
 }
 
 void ReadoutGeneratorBase::setDetectorType(const std::string &Name) {

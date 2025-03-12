@@ -27,8 +27,8 @@ public:
   /// \brief Struct that holds the generator settings.
   ///
   struct GeneratorSettings {
-    uint16_t NFibers{2};                  ///< Number of fibers
-    uint8_t  FiberMask{0xff};             ///< Mask out unused fibers
+    uint32_t NFibers{2};                  ///< Number of fibers
+    uint32_t  FiberMask{0x00ffffff};       ///< Mask out unused fibers
 
     uint8_t Type{0};                      ///< Data type as specified in the ESS Readout ICD
     uint8_t TypeOverride{0};              ///< Override for the data type field

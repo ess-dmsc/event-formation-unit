@@ -19,10 +19,10 @@ namespace Freia {
 
 MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {
   // Options
-  app.add_option("--detector", MultiBladeSettings.Detector, "Specify detector name (Freia, Estia, or AMOR)");
+  app.add_option("--detector", MultiBladeSettings.Detector, "Specify detector name (Freia or Estia)");
   app.add_option("--fens",     MultiBladeSettings.NFENs,    "Number of FENs (Front End Nodes)");
   app.add_option("--fenmask",  MultiBladeSettings.FENMask,  "Mask out unused FENs");
-  app.add_option("--vmmmask",  MultiBladeSettings.VMMMask,  "Mask out unused Hybrids");
+  app.add_option("--vmmmask",  MultiBladeSettings.VMMMask,  "Mask out unused VMMs");
 
   // Flags
   app.add_flag("--tof",   MultiBladeSettings.Tof,   "Generate tof distribution");
@@ -32,11 +32,11 @@ void MultiBladeGenerator::generateData() {
   // Angular used for circular baseds data 
   double Theta{0};
 
-  // Channels for upper half circle
+  // Channels for upper semi-circle
   double X0Channel{32};
   double Y0Channel{32};
 
-  // Channels for lower half circle
+  // Channels for lower semi-circle
   double X1Channel{32};
   double Y1Channel{32};
 
@@ -66,7 +66,7 @@ void MultiBladeGenerator::generateData() {
     if (Count % 2 == 0) {
       FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.NFibers, MultiBladeSettings.FiberMask);
       FENId   = Fuzzer.randU8WithMask(MultiBladeSettings.NFENs,   MultiBladeSettings.FENMask);
-      TofMs   = TofDist.getValue();
+      TofMs   = mTofDist.getValue();
     }
 
     ReadoutData->FiberId = FiberId;
@@ -75,7 +75,7 @@ void MultiBladeGenerator::generateData() {
     // Tof or not
     if (MultiBladeSettings.Tof) {
       ReadoutData->TimeHigh = getPulseTimeHigh();
-      ReadoutData->TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
+      ReadoutData->TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * mTicksPerMs);
     } 
     
     else {

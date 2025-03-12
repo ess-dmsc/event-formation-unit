@@ -44,7 +44,7 @@ public:
     }
 
       // Repeat until match
-      while (true) {
+    while (true) {
       uint8_t Id = random8() % Range;
       int BitVal = 1 << Id;
       if (BitVal & Mask) {
