@@ -205,6 +205,27 @@ TEST_F(ProducerTest, ProducerFailDueToSize) {
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
 }
 
+class TestStubBase {
+  public:
+    virtual int func1() = 0;
+    virtual void func2() = 0;
+};
+
+class TestStub : virtual public TestStubBase {
+  public:
+    void func3() {}
+    int func1() override { return 0;}
+};
+
+TEST_F(ProducerTest, Test) {
+  fakeit::Mock<TestStub> mock;
+  fakeit::When(Method(mock, func1)).Return(1);
+
+  EXPECT_EQ(mock.get().func1(), 1);
+
+  fakeit::Verify(Method(mock, func1)).Once();
+}
+
 TEST_F(ProducerTest, EventCbIncreasesCounters) {
   ProducerStandIn prod{"nobroker", "notopic"};
 
