@@ -183,7 +183,7 @@ unit_test_job:
 
 publish_tar_job:
   stage: publish
-  image: alpine:latest
+  image: alpine/curl:latest
   dependencies: [build_job]
   artifacts: 
     paths:
@@ -194,11 +194,11 @@ publish_tar_job:
       matrix:
         - NAME: "centos7"
           CONTAINER_IMAGE: $CENTOS7_IMAGE
-
+  before_script:
+    - curl -fL https://install-cli.jfrog.io | sh
+    - jf config add $ESS_ARTIFACTORY_ID --url=$ESS_ARTIFACTORY_URL --user=$ESS_ARTIFACTORY_ECDC_USER --password=$ESS_ARTIFACTORY_ECDC_GENERIC_TOKEN
+    - jf config show
   script:
-    - apk update
-    - apk add --no-cache bash tar
-
     - mkdir -p archive/event-formation-unit
     - cp -r build/bin archive/event-formation-unit
     - cp -r build/generators archive/event-formation-unit
@@ -216,16 +216,18 @@ publish_tar_job:
     - echo 'Commit replace_git_commit' >> archive/event-formation-unit/BUILD_INFO
     - echo 'Jenkins build replace_build_id' >> archive/event-formation-unit/BUILD_INFO
     
-    - tar czvf event-formation-unit-centos7.tar.gz archive/event-formation-unit
+    - tar czvf event-formation-unit-centos7.tar.gz -C archive event-formation-unit
+    - jf rt u --build-name="event-formation-unit-centos7" --build-number=${CI_JOB_ID} event-formation-unit.tar.gz ecdc-generic-release/${ARTIFACTORY_UPLOAD_PATH}
   rules:
-    - if: >
-        $CI_COMMIT_BRANCH == "master" &&
-        ($CI_PIPELINE_SOURCE == "push" ||
-         $CI_PIPELINE_SOURCE == "merge_request_event" ||
-         $CI_PIPELINE_SOURCE == "web")
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        ARTIFACTORY_UPLOAD_PATH: "${CI_PROJECT_NAME}/${CI_DEFAULT_BRANCH}/${CI_PIPELINE_IID}/"
     - if: $CI_COMMIT_TAG
-      when: on_success
-    - when: never
+      variables:
+        ARTIFACTORY_UPLOAD_PATH: "${CI_PROJECT_NAME}/tags/${CI_COMMIT_TAG}/"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+
 
 
 publish_docker_job:
