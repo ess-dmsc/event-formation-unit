@@ -234,7 +234,7 @@ protected:
   static constexpr int MAX_TIME_DRIFT{20}; ///< Maximum allowed pulse time drift
 
   uint8_t ReadoutDataSize{0};   ///< Size of the readout data
-  uint16_t numberOfReadouts{0}; ///< Number of readouts
+  uint16_t NumberOfReadouts{0}; ///< Number of readouts
 
   uint64_t Packets{0};   ///< Number of packets
   uint32_t SeqNum{0};    ///< Sequence number

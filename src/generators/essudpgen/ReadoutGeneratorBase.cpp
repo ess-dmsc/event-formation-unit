@@ -98,7 +98,7 @@ void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
 
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + numberOfReadouts * ReadoutDataSize;
+  DataSize = HeaderSize + NumberOfReadouts * ReadoutDataSize;
   if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
@@ -270,10 +270,10 @@ void ReadoutGeneratorBase::main() {
 
   if (Settings.Frequency != 0) {
     pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
-    numberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
+    NumberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
   } else {
-    numberOfReadouts = Settings.NumReadouts;
+    NumberOfReadouts = Settings.NumReadouts;
   }
 }
 

@@ -27,13 +27,14 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
     bool Tof{false};
     bool Debug{false};
 
-    // Masks are used to restrict fibers and FENs
+    // Masks are used to restrict fibers, FENs, and VMMs
     uint32_t NFibers{4};            // Fibers 0 - 4
     uint32_t FiberMask{0x00ffffff};   
 
     uint16_t NFENs{2};              // FENs   0 - 2
     uint16_t FENMask{0xffff};     
 
+    uint8_t NVMMs{2};               // VMMs   0 - 2
     uint8_t VMMMask{0xff};  
   } MultiBladeSettings;
 
@@ -46,6 +47,14 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
   /// \brief Generate readout data and store these in the Buffer container
   ///
   void generateData() override;
+
+  ///
+  /// \brief Round channels to closest int, and check if they should be swapped.
+  ///
+  /// \param X The X-channel
+  /// \param Y The Y-channel
+  ///
+  void checkChannels(double &X, double &Y);
 
   ///
   /// \brief For a given readout index, return a pointer to the readout buffer 
