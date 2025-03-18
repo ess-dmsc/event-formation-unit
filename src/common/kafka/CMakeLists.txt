@@ -6,12 +6,12 @@
 
 include_directories(.)
 
-find_package(Trompeloeil REQUIRED)
+find_package(Fakeit REQUIRED)
 
 set(ProducerTest_SRC test/ProducerTest.cpp)
 set(ProducerTest_INC test/KafkaMocks.h)
 create_test_executable(ProducerTest)
-target_include_directories(ProducerTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
+target_include_directories(ProducerTest PRIVATE ${Fakeit_INCLUDE_DIR})
 
 
 set(EV44SerializerTest_SRC
