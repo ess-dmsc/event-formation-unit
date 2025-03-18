@@ -56,7 +56,7 @@ public:
     BIFROST = 0x34,
     MIRACLES = 0x38,
     CSPEC = 0x3C,
-    TREX = 0x50,
+    TREX = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
     TBLVMM = 0x49,
