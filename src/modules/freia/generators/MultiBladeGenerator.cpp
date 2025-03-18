@@ -8,9 +8,8 @@
 
 // GCOVR_EXCL_START
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
 #include <modules/freia/generators/MultiBladeGenerator.h>
+#include <modules/freia/generators/BitMaps.h>
 #include <modules/freia/geometry/Geometry.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
@@ -34,16 +33,21 @@ MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Pa
   // Flags
   app.add_flag("--tof",   MultiBladeSettings.Tof,   "Generate tof distribution");
   app.add_flag("--debug", MultiBladeSettings.Debug, "Print debug info");
+
+  // Load bitmaps
+  mImages.push_back(BitMaps::si1_0);
+  mImages.push_back(BitMaps::si1_1);
+  mImages.push_back(BitMaps::si2_0);
+  mImages.push_back(BitMaps::si2_1);
+  mImages.push_back(BitMaps::zeta);
 }
 
 void MultiBladeGenerator::generateData() {
   constexpr size_t DATA_LENGTH = sizeof(VMM3Data);
 
-  // We loop over all readout counts. For a given Fiber and FEN, we use two iterations to 
-  // generate a channel pair lying on either 
-  // 
-  //   - upper semi-circle (even VMM)
-  //   - lower semi-circle (uneven VMM) 
+  // We loop over all readout counts. For a given Fiber and FEN, we use two iterations to
+  // generate a channel pair that corresponds to a non-background pixel for a bitmap
+  // associated with a given VMM.
   const size_t N = NumberOfReadouts / 2;
 
   for (size_t Count = 0; Count < N; Count++) {
@@ -56,14 +60,14 @@ void MultiBladeGenerator::generateData() {
     const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.NVMMs, MultiBladeSettings.VMMMask);
     const bool isEven = VMM0 % 2 == 0;
 
-    // Parameters for semi-circle
+    // Parameters for pixel coordinates
+    const bool isFreia = (Settings.Type == Parser::FREIA);
     double XChannel{32};
     double YChannel{32};
 
-    const double R = 31;
+    const double R = isFreia ? 0.9 : 1.0;
+    const double Delta = isFreia ? 15 : 14;
     const double Sg = (FiberId % 2) ? 1 : -1;
-    const double Delta = 12;
-    const double Theta = M_PI * Fuzzer.random8() / 255.0;
 
     for (size_t i: {0, 1}) {
       // Get a VMM3Data struct pointer for the next Buffer write position
@@ -76,14 +80,14 @@ void MultiBladeGenerator::generateData() {
       if (MultiBladeSettings.Tof) {
         ReadoutData->TimeHigh = getPulseTimeHigh();
         ReadoutData->TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * mTicksPerMs);
-      } 
-      
+      }
+
       else {
         ReadoutData->TimeHigh = getReadoutTimeHigh();
         ReadoutData->TimeLow = getReadoutTimeLow();
       }
 
-      // Misc 
+      // Misc
       ReadoutData->DataLength = DATA_LENGTH;
       ReadoutData->OTADC = 1000;
       assert(ReadoutData->DataLength == 20);
@@ -91,34 +95,31 @@ void MultiBladeGenerator::generateData() {
       // Get VMM Id
       const u_int8_t VMM = 2 * VMM0 + i;
       ReadoutData->VMM = VMM;
+      Image image = mImages[VMM0 % mImages.size()];
 
-      // Upper semi-circle
-      if (isEven) {
-        if (i == 0) {
-          XChannel = 63 - (31 + 0.25 * R * cos(Theta) + Sg * Delta);
-          YChannel = 16 + R * sin(Theta);
-          checkChannels(XChannel, YChannel);
+      if (i == 0) {
+        const int index = Fuzzer.randomInterval(0, image.size());
+        const auto &[x, y] = image[index];
+
+        if (isFreia) {
+          XChannel = 63 - (16 + R * x + Sg * Delta);
+          YChannel = 47 - y;
         }
-      }
-
-      // Lower semi-circle
-      else {
-        if (i == 0) {
-          XChannel = 63 - (31 + 0.25 * R * cos(Theta)  + Sg * Delta);
-          YChannel = 47 - R * sin(Theta);
-          checkChannels(XChannel, YChannel);
+        else {
+          XChannel = 16 + x;
+          YChannel = 63 - (16 + R * y + Sg * Delta);
         }
       }
 
       // Store channel
-      ReadoutData->Channel = (i == 0) ? XChannel : YChannel;
+      ReadoutData->Channel = (i == 0) ? YChannel : XChannel;
 
-      // Short time delta between correlated X- and Y-channels 
+      // Short time delta between correlated X- and Y-channels
       if (i == 0) {
         addTicksBtwReadoutsToReadoutTime();
       }
 
-      // Large time delta between uncorrelated X- and Y-channels 
+      // Large time delta between uncorrelated X- and Y-channels
       else {
         addTickBtwEventsToReadoutTime();
       }
@@ -129,7 +130,7 @@ void MultiBladeGenerator::generateData() {
           fmt::print("FENId = {}\n", FENId);
           fmt::print("VMM0  = {}\n", VMM0);
         }
-    
+
         std::string circle = isEven ? "Upper" : "Lower";
         std::string axis = i == 0 ? "X" : "Y";
         std::string nl = i == 0 ? "\n" : "\n\n";
@@ -140,12 +141,8 @@ void MultiBladeGenerator::generateData() {
   }
 }
 
-void MultiBladeGenerator::checkChannels(double &X, double &Y) {
-  X = round(X);
-  Y = round(Y);
-  if (Settings.Type == Parser::FREIA) {
-    std::swap(X, Y);
-  }
+VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
+  return (VMM3Data *) &Buffer[HeaderSize + Index * ReadoutDataSize];
 }
 
 void MultiBladeGenerator::main() {
@@ -169,10 +166,6 @@ void MultiBladeGenerator::main() {
   Geom.setGeometry(MultiBladeSettings.Detector);
   XDim = Geom.xDim();
   YDim = Geom.yDim();
-}
-
-VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
-  return (VMM3Data *) &Buffer[HeaderSize + Index * ReadoutDataSize];
 }
 
 } // namespace Freia

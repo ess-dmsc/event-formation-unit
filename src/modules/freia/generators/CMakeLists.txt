@@ -32,8 +32,10 @@ set(mbvm3_udp_generated_INC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   ${ESS_MODULE_DIR}/freia/generators/MultiBladeGenerator.h
+  ${ESS_MODULE_DIR}/freia/generators/BitMaps.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   )
+
 set(mbvm3_udp_generated_SRC
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
