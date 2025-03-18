@@ -7,6 +7,8 @@
 
 #include "Log.h"
 
+// GCOVR_EXCL_START
+
 #ifdef UNIT_TEST
 
 // Definition and initialization
@@ -19,3 +21,5 @@ void mockLogFunction(const std::string &category, const std::string &message) {
   }
 }
 #endif
+
+// GCOVR_EXCL_STOP

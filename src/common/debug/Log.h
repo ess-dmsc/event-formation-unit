@@ -31,6 +31,8 @@ inline int SevToInt(Sev Level) { // Force the use of the correct type
   return static_cast<int>(Level);
 }
 
+// GCOVR_EXCL_START
+
 #ifdef UNIT_TEST
 #include <gmock/gmock.h>
 
@@ -65,6 +67,9 @@ void mockLogFunction(const std::string &category, const std::string &message);
 #define LOG(Group, Severity, Format, ...)                                      \
   mockLogFunction(#Group, fmt::format(Format, ##__VA_ARGS__))
 #else
+
+// GCOVR_EXCL_STOP
+
 #define LOG(Group, Severity, Format, ...)                                      \
   ((TRC_MASK & TRC_G_##Group)                                                  \
        ? Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__),      \
