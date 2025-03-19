@@ -237,8 +237,8 @@ void Producer::dr_cb(RdKafka::Message &message) {
   }
 
   if (message.err() != RdKafka::ErrorCode::ERR_NO_ERROR) {
-
-    applyKafkaErrorCode(message.err());
+    auto error = message.err();
+    applyKafkaErrorCode(error);
     ProducerStats.MsgError++;
 
   } else {
@@ -249,9 +249,9 @@ void Producer::dr_cb(RdKafka::Message &message) {
 void Producer::applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) {
 
   // First log the error and its error string.
-  LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR [{}]: {}",
+  LOG(KAFKA, Sev::Warning, "Rdkafka error occured: [{}] {}",
       static_cast<int>(ErrorCode), RdKafka::err2str(ErrorCode).c_str());
-  XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR [%d]: %s\n", ErrorCode,
+  XTRACE(KAFKA, WAR, "Rdkafka error occured: [%d] %s\n", ErrorCode,
          RdKafka::err2str(ErrorCode).c_str());
 
   switch (ErrorCode) {

@@ -12,27 +12,14 @@
 #include <common/testutils/TestBase.h>
 #include <cstring>
 #include <dlfcn.h>
+#include <fakeit.hpp>
 #include <librdkafka/rdkafkacpp.h>
-#include <trompeloeil.hpp>
 
 KafkaConfig KafkaCfg{""};
 
-using trompeloeil::_;
-
-namespace trompeloeil {
-template <>
-void reporter<specialized>::send(severity s, char const *file,
-                                 unsigned long line, const char *msg) {
-  if (s == severity::fatal) {
-    std::ostringstream os;
-    if (line != 0U) {
-      os << file << ':' << line << '\n';
-    }
-    throw expectation_violation(os.str() + msg);
-  }
-  ADD_FAILURE_AT(file, line) << msg;
-}
-} // namespace trompeloeil
+using fakeit::Mock;
+using fakeit::When;
+using testing::_;
 
 class ProducerStandIn : public Producer {
 public:
@@ -46,6 +33,7 @@ public:
 };
 
 class ProducerTest : public TestBase {
+protected:
   void SetUp() override {}
 
   void TearDown() override {}
@@ -96,6 +84,8 @@ TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
   ProducerStandIn prod{"nobroker", "notopic", &Stats};
 
   EXPECT_EQ(Stats.valueByName("kafka.config_errors"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.stat_events"), 0);
+  EXPECT_EQ(Stats.valueByName("kafka.error_events"), 0);
   EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_ok"), 0);
   EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_error"), 0);
   EXPECT_EQ(Stats.valueByName("kafka.produce_calls"), 0);
@@ -153,43 +143,63 @@ TEST_F(ProducerTest, CreateConfFail2) {
 
 TEST_F(ProducerTest, ProducerFail) {
   ProducerStandIn prod{"nobroker", "notopic"};
-  auto *TempProducer = new MockProducer;
+
+  /// will be deleted by the TestProducer when unique_ptr goes out of scope
+  auto MockKafkaProducer = new MockProducer();
+
   RdKafka::ErrorCode ReturnValue = RdKafka::ERR__STATE;
-  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _))
-      .TIMES(1)
-      .RETURN(ReturnValue);
-  REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
-  prod.KafkaProducer.reset(TempProducer);
+
+  EXPECT_CALL(*MockKafkaProducer, produce(_, _, _, _, _, _, _, _, _))
+      .Times(1)
+      .WillRepeatedly(testing::Return(ReturnValue));
+
+  EXPECT_CALL(*MockKafkaProducer, poll(_))
+      .Times(1)
+      .WillRepeatedly(testing::Return(0));
+
+  prod.KafkaProducer.reset(MockKafkaProducer);
   std::uint8_t SomeData[20];
+
   ASSERT_EQ(prod.getStats().produce_errors, 0);
+
   int ret = prod.produce(SomeData, 999);
+
   ASSERT_EQ(ret, ReturnValue);
   ASSERT_EQ(prod.getStats().produce_errors, 1);
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
-  ProducerStandIn prod{"nobroker", "notopic"};
-  auto *TempProducer = new MockProducer;
+  ProducerStandIn TestProducer{"nobroker", "notopic"};
+
+  /// will be deleted by the TestProducer when unique_ptr goes out of scope
+  auto MockKafkaProducer = new MockProducer();
+
   RdKafka::ErrorCode ReturnValue = RdKafka::ERR_NO_ERROR;
-  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _))
-      .TIMES(1)
-      .RETURN(ReturnValue);
-  REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
-  prod.KafkaProducer.reset(TempProducer);
+
+  EXPECT_CALL(*MockKafkaProducer, produce(_, _, _, _, _, _, _, _, _))
+      .Times(1)
+      .WillRepeatedly(testing::Return(ReturnValue));
+
+  EXPECT_CALL(*MockKafkaProducer, poll(_))
+      .Times(1)
+      .WillRepeatedly(testing::Return(0));
+
+  TestProducer.KafkaProducer.reset(MockKafkaProducer);
   unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
-  ASSERT_EQ(prod.getStats().produce_errors, 0);
-  ASSERT_EQ(prod.getStats().produce_bytes_ok, 0);
 
-  int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
+  ASSERT_EQ(TestProducer.getStats().produce_errors, 0);
+  ASSERT_EQ(TestProducer.getStats().produce_bytes_ok, 0);
+
+  int ret = TestProducer.produce({SomeData.get(), NrOfBytes}, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.getStats().produce_errors, 0);
-  ASSERT_EQ(prod.getStats().produce_bytes_ok, 200);
+  ASSERT_EQ(TestProducer.getStats().produce_errors, 0);
+  ASSERT_EQ(TestProducer.getStats().produce_bytes_ok, 200);
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
   KafkaConfig KafkaCfg2("");
-  ASSERT_EQ(KafkaCfg2.CfgParms.size(), 6);
+  ASSERT_EQ(KafkaCfg2.CfgParms.size(), static_cast<size_t>(6));
   Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
@@ -218,8 +228,10 @@ TEST_F(ProducerTest, EventCbIncreasesCounters) {
     }
   })";
 
-  MockEvent fakeEvent(fakeEventJson);
-  prod.event_cb(fakeEvent);
+  Mock<RdKafka::Event> statsEvent;
+  When(Method(statsEvent, type)).AlwaysReturn(RdKafka::Event::EVENT_STATS);
+  When(Method(statsEvent, str)).AlwaysReturn(fakeEventJson);
+  prod.event_cb(statsEvent.get());
 
   EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 10);
   EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue, 20);
@@ -232,105 +244,216 @@ TEST_F(ProducerTest, EventCbIncreasesCounters) {
 
 TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
-  std::string errorEventJson = R"({"error": "mock error"})";
 
-  /// Create a logger factory which initializes the logger mock
-  /// if this object goes out of scope, the logger mock is destroyed
-  auto LoggerFactory = MockLoggerFactory();
+  // Mock logger to capture log messages
+  auto LoggerMock = MockLogger();
+  Mock<RdKafka::Event> fakeEvent;
+  When(Method(fakeEvent, type)).AlwaysReturn(RdKafka::Event::EVENT_ERROR);
 
-  /// Register the Mocked logger to be chekced
-  /// for called 8 times with the correct log
-  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
-      .TIMES(8)
-      .WITH(_1 == "KAFKA" &&
-            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
+  ON_CALL(LoggerMock, log(::testing::_, ::testing::_))
+      .WillByDefault(
+          [](const std::string &category, const std::string &message) {
+            std::cout << "LoggerMock called with category: " << category
+                      << ", message: " << message << std::endl;
+          });
 
-  MockEvent errorEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                       RdKafka::ERR__TIMED_OUT);
-  prod.event_cb(errorEvent);
+  // Testing for Timed out error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA", "Rdkafka error occured: [-185] Local: Timed out"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).Return(RdKafka::ERR__TIMED_OUT);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrTimeout, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR_BROKER_NOT_AVAILABLE);
-  prod.event_cb(errorEvent);
+  // Testing for Broker not available error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [8] Broker: Broker not available"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR_BROKER_NOT_AVAILABLE);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR__TRANSPORT);
-  prod.event_cb(errorEvent);
+  // Testing for Broker transport failure error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA",
+                  "Rdkafka error occured: [-195] Local: Broker transport "
+                  "failure"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__TRANSPORT);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrTransport, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR__AUTHENTICATION);
-  prod.event_cb(errorEvent);
+  // Testing for Authentication failure error
+  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occured: [-169] "
+                                       "Local: Authentication failure"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__AUTHENTICATION);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrAuth, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR__MSG_TIMED_OUT);
-  prod.event_cb(errorEvent);
+  // Testing for Message timed out error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [-192] Local: Message timed out"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__MSG_TIMED_OUT);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrMsgTimeout, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR__UNKNOWN_TOPIC);
-  prod.event_cb(errorEvent);
+  // Testing for Unknown topic error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [-188] Local: Unknown topic"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__UNKNOWN_TOPIC);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 1);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
-  prod.event_cb(errorEvent);
+  // Testing for Topic authorization failed error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA", "Rdkafka error occured: [29] Broker: Topic "
+                           "authorization failed"))
+      .Times(1);
+
+  When(Method(fakeEvent, err))
+      .AlwaysReturn(RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 2);
 
-  errorEvent = MockEvent(errorEventJson, RdKafka::Event::EVENT_ERROR,
-                         RdKafka::ERR_TOPIC_EXCEPTION);
-  prod.event_cb(errorEvent);
+  // Testing for Invalid topic error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA", "Rdkafka error occured: [17] Broker: Invalid topic"))
+      .Times(1);
+
+  When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
+  prod.event_cb(fakeEvent.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 3);
 }
 
 TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   ProducerStandIn prod{"nobroker", "notopic"};
 
-  /// Create a logger factory which initializes the logger mock
-  /// if this object goes out of scope, the logger mock is destroyed
-  auto LoggerFactory = MockLoggerFactory();
+  // Mock logger to capture log messages
+  auto LoggerMock = MockLogger();
 
-  /// Register the Mocked logger to be chekced
-  /// for called 8 times with the correct log
-  REQUIRE_CALL(LoggerFactory.getMockedLogger(), log(_, _))
-      .TIMES(8)
-      .WITH(_1 == "KAFKA" &&
-            _2.find("Rdkafka::Event::EVENT_ERROR") != std::string::npos);
+  Mock<RdKafka::Message> fakeMessage;
+  When(Method(fakeMessage, status))
+      .AlwaysReturn(RdKafka::Message::MSG_STATUS_NOT_PERSISTED);
 
-  MockMessage errorMessage(RdKafka::ERR__TIMED_OUT);
-  prod.dr_cb(errorMessage);
+  ON_CALL(LoggerMock, log(::testing::_, ::testing::_))
+      .WillByDefault(
+          [](const std::string &category, const std::string &message) {
+            std::cout << "LoggerMock called with category: " << category
+                      << ", message: " << message << std::endl;
+          });
+
+  // Testing for Timed out error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA", "Rdkafka error occured: [-185] Local: Timed out"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__TIMED_OUT);
+
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrTimeout, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 1);
 
-  errorMessage = MockMessage(RdKafka::ERR_BROKER_NOT_AVAILABLE);
-  prod.dr_cb(errorMessage);
+  // Testing for Broker not available error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [8] Broker: Broker not available"))
+      .Times(1);
+
+  When(Method(fakeMessage, err))
+      .AlwaysReturn(RdKafka::ERR_BROKER_NOT_AVAILABLE);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 2);
 
-  errorMessage = MockMessage(RdKafka::ERR__TRANSPORT);
-  prod.dr_cb(errorMessage);
+  // Testing for Broker transport failure error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA",
+          "Rdkafka error occured: [-195] Local: Broker transport failure"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__TRANSPORT);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrTransport, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 3);
 
-  errorMessage = MockMessage(RdKafka::ERR__AUTHENTICATION);
-  prod.dr_cb(errorMessage);
+  // Testing for Authentication failure error
+  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occured: [-169] "
+                                       "Local: Authentication failure"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__AUTHENTICATION);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrAuth, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 4);
 
-  errorMessage = MockMessage(RdKafka::ERR__MSG_TIMED_OUT);
-  prod.dr_cb(errorMessage);
+  // Testing for Message timed out error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [-192] Local: Message timed out"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__MSG_TIMED_OUT);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrMsgTimeout, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 5);
 
-  errorMessage = MockMessage(RdKafka::ERR__UNKNOWN_TOPIC);
-  prod.dr_cb(errorMessage);
+  // Testing for Unknown topic error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occured: [-188] Local: Unknown topic"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__UNKNOWN_TOPIC);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 6);
 
-  errorMessage = MockMessage(RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
-  prod.dr_cb(errorMessage);
+  // Testing for Topic authorization failed error
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA",
+          "Rdkafka error occured: [29] Broker: Topic authorization failed"))
+      .Times(1);
+
+  When(Method(fakeMessage, err))
+      .AlwaysReturn(RdKafka::ERR_TOPIC_AUTHORIZATION_FAILED);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 2);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 7);
 
-  errorMessage = MockMessage(RdKafka::ERR_TOPIC_EXCEPTION);
-  prod.dr_cb(errorMessage);
+  // Testing for Invalid topic error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA", "Rdkafka error occured: [17] Broker: Invalid topic"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
+  prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrTopic, 3);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 8);
+
+  // Testing for Message size too large error
+  EXPECT_CALL(LoggerMock,
+              log("KAFKA",
+                  "Rdkafka error occured: [10] Broker: Message size too large"))
+      .Times(1);
+
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_MSG_SIZE_TOO_LARGE);
+  prod.dr_cb(fakeMessage.get());
+  EXPECT_EQ(prod.getStats().ErrMsgSizeTooLarge, 1);
+  EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 9);
 }
 
 int main(int argc, char **argv) {

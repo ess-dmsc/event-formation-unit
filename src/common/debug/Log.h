@@ -14,7 +14,6 @@
 #include <cstdint>
 #include <fmt/format.h>
 #include <libgen.h>
-#include <trompeloeil.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -32,9 +31,10 @@ inline int SevToInt(Sev Level) { // Force the use of the correct type
   return static_cast<int>(Level);
 }
 
-#ifdef UNIT_TEST
+// GCOVR_EXCL_START
 
-class MockLoggerFactory;
+#ifdef UNIT_TEST
+#include <gmock/gmock.h>
 
 /// \brief MockLogger is a mock class for the logger. It provides a log method
 /// that can be mocked to check if the logger is called with the correct
@@ -43,44 +43,19 @@ class MockLogger {
 public:
   /// \brief Mocked log method that can be mocked to check if the logger is
   /// called with the correct parameters.
-  MAKE_MOCK2(log,
-             void(const std::string &category, const std::string &message));
+  MOCK_METHOD(void, log, (const std::string &category, const std::string &message), ());
+
+  MockLogger() { instance = this; }
+  virtual ~MockLogger() { instance = nullptr; }
 
 private:
-  static MockLogger *instance;
 
-  MockLogger() = default;
+  static MockLogger *instance;
   MockLogger(const MockLogger &) = delete;
   MockLogger &operator=(const MockLogger &) = delete;
 
   friend void mockLogFunction(const std::string &category,
                               const std::string &message);
-
-  friend MockLoggerFactory;
-};
-
-/// \brief MockLoggerFactory is a singleton class that provides access to the
-/// mocked logger instance. When this singelton is destroyed, the mocked logger
-/// instance is destroyed and set to nullptr to disable further logging.
-class MockLoggerFactory {
-public:
-  /// \brief Get the mocked logger instance
-  /// \return The mocked logger instance
-  MockLogger &getMockedLogger() {
-    if (!MockLogger::instance) {
-      MockLogger::instance = new MockLogger();
-    }
-    return *MockLogger::instance;
-  }
-
-  /// \brief Destructor that deletes the mocked logger instance
-  /// and sets it to nullptr
-  ~MockLoggerFactory() {
-    if (MockLogger::instance) {
-      delete MockLogger::instance;
-      MockLogger::instance = nullptr;
-    }
-  }
 };
 
 /// \brief Function to log messages using the mock logger. If the MockLogger
@@ -92,6 +67,16 @@ void mockLogFunction(const std::string &category, const std::string &message);
 #define LOG(Group, Severity, Format, ...)                                      \
   mockLogFunction(#Group, fmt::format(Format, ##__VA_ARGS__))
 #else
+
+// GCOVR_EXCL_STOP
+
+/// \brief Macro to log messages using the ESS logger. The log message is only
+/// logged if the trace group is enabled.
+/// \param Group The trace group of the log message
+/// \param Severity The severity of the log message
+/// \param Format The format string of the log message
+/// \param ... The arguments to the format string
+/// \note The file and line number are automatically added to the log message
 #define LOG(Group, Severity, Format, ...)                                      \
   ((TRC_MASK & TRC_G_##Group)                                                  \
        ? Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__),      \

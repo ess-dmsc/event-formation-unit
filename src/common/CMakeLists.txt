@@ -94,8 +94,11 @@ add_library(efu_common-unit_test STATIC
   $<TARGET_OBJECTS:EssTimingLib>
 )
 
+# Link gtest library
+target_link_libraries(efu_common-unit_test ${CONAN_LIBS_GTEST})
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_common-unit_test PUBLIC -DUNIT_TEST)
+
 
 # To be used as a dependency in the module's CMakeLists.txt
 add_library(efu_reduction STATIC
@@ -116,6 +119,8 @@ add_library(efu_reduction-unit_test STATIC
   $<TARGET_OBJECTS:MonitorLib>
 )
 
+# Link gtest library
+target_link_libraries(efu_reduction-unit_test ${CONAN_LIBS_GTEST})
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_reduction-unit_test PUBLIC -DUNIT_TEST)
 
@@ -132,6 +137,8 @@ add_library(efu_essreadout-unit_test STATIC
   $<TARGET_OBJECTS:EssTimingLib-unit_test>
 )
 
+# Link gtest library
+target_link_libraries(efu_essreadout-unit_test ${CONAN_LIBS_GTEST})
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_essreadout-unit_test PUBLIC -DUNIT_TEST)
 
