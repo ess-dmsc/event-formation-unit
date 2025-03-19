@@ -45,8 +45,8 @@ public:
   /// called with the correct parameters.
   MOCK_METHOD(void, log, (const std::string &category, const std::string &message), ());
 
-  MockLogger() { instance = this; };
-  virtual ~MockLogger() { instance = nullptr; };
+  MockLogger() { instance = this; }
+  virtual ~MockLogger() { instance = nullptr; }
 
 private:
 
@@ -70,6 +70,13 @@ void mockLogFunction(const std::string &category, const std::string &message);
 
 // GCOVR_EXCL_STOP
 
+/// \brief Macro to log messages using the ESS logger. The log message is only
+/// logged if the trace group is enabled.
+/// \param Group The trace group of the log message
+/// \param Severity The severity of the log message
+/// \param Format The format string of the log message
+/// \param ... The arguments to the format string
+/// \note The file and line number are automatically added to the log message
 #define LOG(Group, Severity, Format, ...)                                      \
   ((TRC_MASK & TRC_G_##Group)                                                  \
        ? Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__),      \
