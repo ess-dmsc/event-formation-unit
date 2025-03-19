@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.9
+#! env python3
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
@@ -62,14 +62,14 @@ class Searcher:
             for file in f:
                 if re.search(match, file):
                     filepath = os.path.join(r, file)
-                    results += [os.path.relpath(filepath, dir)]                
+                    results += [os.path.relpath(filepath, dir)]
         return results
 
     # Here we search for efu binary, module plugins (.so), config and calib files (.json)
     def get_values(self, cfg):
         return [
             self.find_files(os.path.join(cfg.options["efudir"], "bin"), "", "-X--xXX"),
-            [""] + self.find_files(cfg.options["datadir"], "\.json", "build"),
+            [""] + self.find_files(cfg.options["datadir"], ".*config.*\.json", "build"),
             [""] + self.find_files(cfg.options["datadir"], ".*calib.*\.json", "build"),
         ]
 
@@ -102,6 +102,7 @@ class Dialog(QDialog):  # WMainWindow
         type.setMinimumWidth(600)
         layout.addRow(lbl, type)
 
+    # Create the layout of the dialog
     def create_layout(self):
         self.efu_group_box = QGroupBox("Select EFU")
         toplayout = QFormLayout()
@@ -117,6 +118,9 @@ class Dialog(QDialog):  # WMainWindow
         self.datadirle = QLineEdit()
         self.datadirle.textChanged.connect(self.update)
         self.add_row(fileslayout, "data dir:", self.datadirle)
+        self.filterle = QLineEdit()
+        self.filterle.textChanged.connect(self.update)
+        self.add_row(fileslayout, "filter:", self.filterle)
         self.cfgcb = QComboBox()
         self.add_row(fileslayout, "Config:", self.cfgcb)
         self.calcb = QComboBox()
@@ -135,14 +139,23 @@ class Dialog(QDialog):  # WMainWindow
         self.add_row(optslayout, "Region:", self.regionle)
         self.options_box.setLayout(optslayout)
 
-    def _populate_field(self, field, list):
-        for name in list:
-            field.addItem(name)
+
+    def _populate_field(self, field, list, filter=""):
+        if filter != "":
+            field.addItem("")
+            for name in list:
+                if filter in name:
+                    field.addItem(name)
+        else:
+            for name in list:
+                field.addItem(name)
+        
 
     def populate(self, detector, config, calib):
         self._populate_field(self.detcb, detector)
-        self._populate_field(self.cfgcb, config)
-        self._populate_field(self.calcb, calib)
+        self._populate_field(self.cfgcb, config, self.filterle.text())
+        self._populate_field(self.calcb, calib, self.filterle.text())
+
 
     # returns currently selected options as a dictionary
     def get_selection(self):
