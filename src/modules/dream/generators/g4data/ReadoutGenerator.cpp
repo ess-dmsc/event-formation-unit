@@ -76,7 +76,7 @@ void ReadoutGenerator::generateData() {
   dataPtr += HeaderSize;
 
   while (((res = readReadout(DatReadout)) > 0) &&
-         (SentReadouts < numberOfReadouts)) {
+         (SentReadouts < NumberOfReadouts)) {
 
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = DatReadout.fen;
@@ -118,7 +118,7 @@ void ReadoutGenerator::main() {
     // Calculate the number of dat_data_t that can fit into the file size
     size_t readoutInDatFile = fileSize / sizeof(struct dat_data_t);
 
-    Settings.NumberOfPackets = readoutInDatFile / numberOfReadouts;
+    Settings.NumberOfPackets = readoutInDatFile / NumberOfReadouts;
   }
 }
 

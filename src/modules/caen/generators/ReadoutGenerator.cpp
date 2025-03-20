@@ -8,8 +8,9 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <cstdint>
 #include <modules/caen/generators/ReadoutGenerator.h>
+
+#include <cstdint>
 
 namespace Caen {
 
@@ -41,19 +42,6 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
                 "print debug information");
 }
 
-
-// Values must be > 0 and <= 32, Mask must be nonzero
-uint8_t ReadoutGenerator::randU8WithMask(int Range, int Mask) {
-  while (true) {
-    uint8_t Id = Fuzzer.random8() % Range;
-    int BitVal = 1 << Id;
-    if (BitVal & Mask) {
-      return Id;
-    }
-    // repeat until match
-  }
-}
-
 bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
 
@@ -68,9 +56,9 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CaenReadout &ReadoutData) {
 
   ReadoutData.FlagsOM = 0;
 
-  ReadoutData.FiberId = randU8WithMask(CaenSettings.FiberVals, CaenSettings.FiberMask);
-  ReadoutData.FENId = randU8WithMask(CaenSettings.FENVals, CaenSettings.FENMask);
-  ReadoutData.Group = randU8WithMask(CaenSettings.GroupVals, CaenSettings.GroupMask);
+  ReadoutData.FiberId = Fuzzer.randU8WithMask(CaenSettings.FiberVals, CaenSettings.FiberMask);
+  ReadoutData.FENId = Fuzzer.randU8WithMask(CaenSettings.FENVals, CaenSettings.FENMask);
+  ReadoutData.Group = Fuzzer.randU8WithMask(CaenSettings.GroupVals, CaenSettings.GroupMask);
   ReadoutData.AmpA = Fuzzer.random16() & CaenSettings.AmplitudeMask;
   ReadoutData.AmpB = Fuzzer.random16() & CaenSettings.AmplitudeMask;
 

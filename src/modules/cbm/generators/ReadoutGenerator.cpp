@@ -90,7 +90,7 @@ void ReadoutGenerator::generateData() {
 // Generate data for TTL monitor
 void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
 
-  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -120,7 +120,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
-  for (uint32_t Readout = 0; Readout < numberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
 
     // Check if we need to generate new pulse time and reset readout time
     // stop generating readouts and sync readout time with new pulse time

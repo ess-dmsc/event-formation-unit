@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,8 +6,10 @@
 /// \brief Generate artificial FREIA readouts
 //===----------------------------------------------------------------------===//
 
-#include <modules/freia/generators/ReadoutGenerator.h>
 // GCOVR_EXCL_START
+
+#include <modules/freia/generators/ReadoutGenerator.h>
+#include <common/readout/vmm3/VMM3Parser.h>
 
 int main(int argc, char *argv[]) {
 
