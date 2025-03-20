@@ -65,6 +65,16 @@ public:
     return GeometryInst->essgeom->pixel2D(x, y);
   }
 
+  // Get number of X pixels
+  uint16_t xDim() const {
+    return GeometryInst->essgeom->nx();
+  }
+
+  // Get number of Y pixels
+  uint16_t yDim() const {
+    return GeometryInst->essgeom->ny();
+  }
+
 private:
   AMORGeometry AMORGeom;
   FreiaGeometry FreiaGeom;

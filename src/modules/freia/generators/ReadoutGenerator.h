@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <common/readout/vmm3/VMM3Parser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Freia {
@@ -21,7 +20,7 @@ public:
 
 protected:
   void generateData() override;
-  
+
   const uint32_t TimeToFirstReadout{1000};
 };
 
