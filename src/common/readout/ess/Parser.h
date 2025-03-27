@@ -6,7 +6,7 @@
 /// \brief ESS Readout System Data definitions and parsing functions. For further
 /// details, see the readout ICD
 ///
-///   https://project.esss.dk/nextcloud/index.php/apps/files/files/16376550?dir=/DM/detectors/02%20instruments/01%20common/02%20Readout/02%20ICD        
+///   https://project.esss.dk/nextcloud/index.php/apps/files/files/16376550?dir=/DM/detectors/02%20instruments/01%20common/02%20Readout/02%20ICD
 ///
 //===----------------------------------------------------------------------===//
 
@@ -59,7 +59,7 @@ public:
     TREX = 0x40,
     NMX = 0x44,
     FREIA = 0x48,
-    TBLVMM = 0x49,
+    TBLMB = 0x49,
     ESTIA = 0x4C,
     BEER = 0x50,
     DREAM = 0x60,

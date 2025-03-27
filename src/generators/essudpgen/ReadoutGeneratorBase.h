@@ -233,7 +233,7 @@ protected:
   const uint32_t PrevTimeLowOffset{
       10000}; ///< Previous time offset for readout generation (ticks)
 
-  static constexpr int MAX_TIME_DRIFT{20}; ///< Maximum allowed pulse time drift
+  static constexpr int MAX_TIME_DRIFT_NS{20}; ///< Maximum allowed pulse time drift
 
   uint8_t ReadoutDataSize{0};   ///< Size of the readout data
   uint16_t NumberOfReadouts{0}; ///< Number of readouts

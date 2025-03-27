@@ -1,4 +1,4 @@
-# Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
 add_subdirectory(generators)
@@ -17,23 +17,27 @@ set(freia_common_inc
   geometry/EstiaChannelMapping.h
   geometry/AMORChannelMapping.h
   )
+
 set(freia_common_src
   FreiaBase.cpp
   FreiaInstrument.cpp
   geometry/Config.cpp
   )
 
+#=============================================================================
+# freia detector binary
+#=============================================================================
 set(freia_INC ${freia_common_inc})
 set(freia_SRC
   ${freia_common_src}
-  main.cpp
+  main_freia.cpp
   )
 set(freia_LIB efu_reduction efu_essreadout)
 create_executable(freia)
 
-
-
-
+#=============================================================================
+# estia detector binary
+#=============================================================================
 set(estia_INC ${freia_common_inc})
 set(estia_SRC
   ${freia_common_src}
@@ -41,6 +45,17 @@ set(estia_SRC
   )
 set(estia_LIB efu_reduction efu_essreadout)
 create_executable(estia)
+
+#=============================================================================
+# tblmb detector binary
+#=============================================================================
+set(tblmb_INC ${freia_common_inc})
+set(tblmb_SRC
+  ${freia_common_src}
+  main_tblmb.cpp
+  )
+set(tblmb_LIB efu_reduction efu_essreadout)
+create_executable(tblmb)
 
 
 ##
