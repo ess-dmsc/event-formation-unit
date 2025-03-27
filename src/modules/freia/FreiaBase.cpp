@@ -168,10 +168,18 @@ void FreiaBase::processing_thread() {
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
+  // Set the datatype
   uint8_t DataType{ESSReadout::Parser::FREIA};
+  if (EFUSettings.DetectorName == "freia") {
+    DataType = ESSReadout::Parser::FREIA;
+  }
 
-  if (EFUSettings.DetectorName == "estia") {
+  else if (EFUSettings.DetectorName == "estia") {
     DataType = ESSReadout::Parser::ESTIA;
+  }
+
+  else if (EFUSettings.DetectorName == "tblmb") {
+    DataType = ESSReadout::Parser::TBLMB;
   }
 
   while (runThreads) {

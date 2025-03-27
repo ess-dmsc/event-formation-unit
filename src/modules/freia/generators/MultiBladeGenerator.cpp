@@ -22,7 +22,7 @@ namespace Freia {
 
 MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {
   // Options
-  app.add_option("--detector", MultiBladeSettings.Detector, "Specify detector name (Freia or Estia)");
+  app.add_option("--detector", MultiBladeSettings.Detector, "Specify detector name (Freia, ESTIA, or TBLMB)");
 
   app.add_option("--fens",     MultiBladeSettings.NFENs,    "Number of FENs (Front End Nodes)");
   app.add_option("--fenmask",  MultiBladeSettings.FENMask,  "Mask out unused FENs");
@@ -66,7 +66,7 @@ void MultiBladeGenerator::generateData() {
     double YChannel{32};
 
     const double R = isFreia ? 0.9 : 1.0;
-    const double Delta = isFreia ? 15 : 14;
+    const double Delta = isFreia ? 15 : 16;
     const double Sg = (FiberId % 2) ? 1 : -1;
 
     for (size_t i: {0, 1}) {
@@ -99,14 +99,25 @@ void MultiBladeGenerator::generateData() {
         const int index = Fuzzer.randomInterval(0, image.size());
         const auto &[x, y] = image[index];
 
-        if (isFreia) {
-          XChannel = 63 - (16 + R * x + Sg * Delta);
-          YChannel = 47 - y;
-        }
-        else {
-          XChannel = 16 + x;
-          YChannel = 63 - (16 + R * y + Sg * Delta);
-        }
+        switch (Settings.Type) {
+          case Parser::FREIA:
+            XChannel = 63 - (16 + R * x + Sg * Delta);
+            YChannel = 47 - y;
+            break;
+
+          case Parser::ESTIA:
+            XChannel = 16 + x;
+            YChannel = 63 - (16 + R * y + Sg * Delta);
+            break;
+
+          case Parser::TBLMB:
+            XChannel = 47 - y;
+            YChannel = 63 - (16 + R * x + Sg * Delta);
+            break;
+
+          default:
+            break;
+          }
       }
 
       // Store channel

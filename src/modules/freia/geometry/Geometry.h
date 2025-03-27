@@ -11,8 +11,10 @@
 
 #include <common/debug/Trace.h>
 #include <freia/geometry/AMORChannelMapping.h>
+#include <freia/geometry/TBLMBChannelMapping.h>
 #include <freia/geometry/EstiaChannelMapping.h>
 #include <freia/geometry/FreiaChannelMapping.h>
+
 #include <string>
 
 // #undef TRC_LEVEL
@@ -38,6 +40,11 @@ public:
     if (NewGeometry == "Estia") {
       GeometryInst = &EstiaGeom;
       GeometryInst->essgeom = new ESSGeometry(1536, 128, 1, 1);
+      return true;
+    }
+    if (NewGeometry == "TBLMB") {
+      GeometryInst = &TBLMBGeom;
+      GeometryInst->essgeom = new ESSGeometry{64, 448, 1, 1};
       return true;
     }
     XTRACE(DATA, ERR, "Unknown instrument mapping: %s", NewGeometry.c_str());
@@ -77,8 +84,9 @@ public:
 
 private:
   AMORGeometry AMORGeom;
-  FreiaGeometry FreiaGeom;
   EstiaGeometry EstiaGeom;
+  FreiaGeometry FreiaGeom;
+  TBLMBGeometry TBLMBGeom;
   GeometryBase *GeometryInst{nullptr};
 };
 } // namespace Freia

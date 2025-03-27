@@ -5,8 +5,12 @@
 ///
 /// \brief Bitmaps used to mask active netron detector areas
 ///
-/// - The three space invader monstars in both of their two possible
-///   physical configs
+/// - The three space invader monsters in both of their two possible
+///   physical configs. Indivdual invaders were cropped from the sprite taken
+///   from here
+///
+///     https://www.spriters-resource.com/fullview/115520
+///
 /// - Lower case version of the greek letter zeta taken from the Computer
 ///   Modern font family
 //===----------------------------------------------------------------------===//
@@ -18,7 +22,6 @@
 
 // clang-format off
 namespace Freia {
-
     namespace BitMaps {
 
         // First space invader - state 1
@@ -310,7 +313,6 @@ namespace Freia {
         };
 
     } // namespace BitMaps
-
 } // namespace Freia
 
 // clang-format on

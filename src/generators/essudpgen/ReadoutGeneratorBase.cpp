@@ -67,7 +67,7 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   NameToType["TREX"]     = Parser::TREX;
   NameToType["NMX"]      = Parser::NMX;
   NameToType["FREIA"]    = Parser::FREIA;
-  NameToType["TBLVMM"]   = Parser::TBLVMM;
+  NameToType["TBLMB"]    = Parser::TBLMB;
   NameToType["ESTIA"]    = Parser::ESTIA;
   NameToType["DREAM"]    = Parser::DREAM;
   NameToType["MAGIC"]    = Parser::MAGIC;
@@ -148,7 +148,7 @@ void ReadoutGeneratorBase::generateHeader() {
       /// \note: reset the pulse time if it has drifted too much from
       /// real clock. This is a workaround for the file writer not accepting the
       /// pulse time if it is too far from the real clock
-      if (RealAndPulseTimeDiff > sToMilliseconds(MAX_TIME_DRIFT)) {
+      if (RealAndPulseTimeDiff > sToMilliseconds(MAX_TIME_DRIFT_NS)) {
 
         XTRACE(DATA, WAR, "Pulse time has drifted too much, reset it");
         pulseTime = ESSTime(time(NULL), 0);
