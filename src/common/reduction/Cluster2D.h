@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <common/reduction/Hit2DVector.h>
 
 /// \class Cluster2D Cluster2D.h

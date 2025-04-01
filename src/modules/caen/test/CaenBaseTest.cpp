@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -162,7 +162,6 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
-  Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket2);
@@ -185,7 +184,6 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
   Settings.UpdateIntervalSec = 0;
-  Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
 
   writePacketToRxFIFO(Readout, TestPacket2);
@@ -201,7 +199,6 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
   Settings.UpdateIntervalSec = 0;
-  Settings.DumpFilePrefix = "deleteme_";
   Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
 
   writePacketToRxFIFO(Readout, TestPacket2);

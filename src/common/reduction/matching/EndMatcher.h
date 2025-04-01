@@ -1,4 +1,4 @@
-// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2018 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file EndMatcher.h
@@ -8,6 +8,8 @@
 
 #pragma once
 
+
+#include <fmt/format.h>
 #include <common/reduction/matching/AbstractMatcher.h>
 
 /// \class EndMatcher EndMatcher.h

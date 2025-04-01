@@ -57,7 +57,6 @@ public:
   DataParser CaenParser;
   Geometry *Geom;
   std::vector<std::shared_ptr<EV44Serializer>> Serializers;
-  std::shared_ptr<ReadoutFile> DumpFile;
 };
 
 } // namespace Caen

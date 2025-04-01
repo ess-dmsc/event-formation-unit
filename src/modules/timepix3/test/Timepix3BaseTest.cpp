@@ -33,7 +33,6 @@ public:
     Settings.ConfigFile = TIMEPIX_CONFIG;
     Settings.DetectorName = "timepix3";
     Settings.UpdateIntervalSec = 0;
-    Settings.DumpFilePrefix = "deleteme_";
 
     Readout = std::make_unique<Timepix3::Timepix3Base>(Settings);
     testCounters = &Readout->Counters;

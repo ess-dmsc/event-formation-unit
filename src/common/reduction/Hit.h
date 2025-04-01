@@ -34,8 +34,9 @@
 
 #pragma once
 
-#include <common/DumpFile.h>
+#include <cstdint>
 #include <limits>
+#include <string>
 
 struct __attribute__((packed)) Hit {
   // \todo use constexpr string_view when c++17 arrives
@@ -58,24 +59,3 @@ struct __attribute__((packed)) Hit {
   static constexpr uint8_t InvalidPlane{std::numeric_limits<uint8_t>::max()};
   static constexpr uint8_t PulsePlane{std::numeric_limits<uint8_t>::max() - 1};
 };
-
-namespace hdf5 {
-
-namespace datatype {
-template <> class TypeTrait<Hit> {
-public:
-  H5_COMPOUND_DEFINE_TYPE(Hit) {
-    H5_COMPOUND_INIT;
-    /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(time);
-    H5_COMPOUND_INSERT_MEMBER(coordinate);
-    H5_COMPOUND_INSERT_MEMBER(weight);
-    H5_COMPOUND_INSERT_MEMBER(plane);
-    H5_COMPOUND_RETURN;
-  }
-};
-} // namespace datatype
-
-} // namespace hdf5
-
-using HitFile = DumpFile<Hit>;

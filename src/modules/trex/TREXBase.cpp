@@ -171,7 +171,7 @@ void TrexBase::processing_thread() {
 
   unsigned int DataIndex;
   TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  Timer h5flushtimer;
+  
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});

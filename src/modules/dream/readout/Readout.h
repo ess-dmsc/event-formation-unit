@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -38,7 +38,9 @@
 
 #pragma once
 
-#include <common/DumpFile.h>
+#include <cstdlib>
+#include <limits>
+#include <string>
 
 namespace Dream {
 
@@ -68,34 +70,3 @@ struct __attribute__((packed)) Readout {
 };
 
 } // namespace Dream
-
-namespace hdf5 {
-
-namespace datatype {
-template <> class TypeTrait<Dream::Readout> {
-public:
-  H5_COMPOUND_DEFINE_TYPE(Dream::Readout) {
-    H5_COMPOUND_INIT;
-    /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(FiberId);
-    H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(OperatingMode);
-    H5_COMPOUND_INSERT_MEMBER(UnitId);
-    H5_COMPOUND_INSERT_MEMBER(Cathode);
-    H5_COMPOUND_INSERT_MEMBER(Anode);
-    H5_COMPOUND_RETURN;
-  }
-};
-} // namespace datatype
-
-} // namespace hdf5
-
-namespace Dream {
-
-using ReadoutFile = DumpFile<Readout>;
-
-}

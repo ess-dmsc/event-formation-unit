@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -415,21 +415,6 @@ protected:
     Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
-
-/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(TREXInstrumentTest, DumpTofile) {
-  Settings.DumpFilePrefix = "deleteme_";
-  TREXInstrument TREXDump(counters, Settings, serializer);
-  TREXDump.setSerializer(serializer);
-
-  makeHeader(TREXDump.ESSReadoutParser.Packet, GoodEvent);
-  auto Res = TREXDump.VMMParser.parse(TREXDump.ESSReadoutParser.Packet);
-  TREXDump.processReadouts();
-
-  counters.VMMStats = TREXDump.VMMParser.Stats;
-  ASSERT_EQ(Res, 3);
-  ASSERT_EQ(counters.VMMStats.Readouts, 3);
-}
 
 // Test cases below
 TEST_F(TREXInstrumentTest, BadConfig) {

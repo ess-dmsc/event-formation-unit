@@ -4,10 +4,9 @@ cli11/1.9.1
 fmt/10.1.1
 graylog-logger/2.1.4-2@ess-dmsc/stable
 gtest/1.15.0
-h5cpp/9486a26@ess-dmsc/stable
 nlohmann_json/3.10.5
 libpcap/1.10.1
-librdkafka/2.0.2#47048b3f05407bab726e359b27740c46
+librdkafka/2.8.0
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 concurrentqueue/1.0.3
@@ -21,7 +20,7 @@ virtualrunenv
 cmake_find_package
 
 [options]
-librdkafka:shared=False
+librdkafka:shared=True
 librdkafka:ssl=True
 librdkafka:sasl=True
 

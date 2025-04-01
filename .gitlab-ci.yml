@@ -18,46 +18,40 @@ stages:
   - publish
 
 variables:
-  ALMALINUX8_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/almalinux8:1.0"
+  ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.1.0"
   CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/centos7:1.0"
   UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/ubuntu2204:1.0"
   DEBIAN11_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/debian11:1.0"
 
 # Job template to reduce duplication
 .build_template: &build_template
-  before_script:
+  before_script: 
     - |
+      CONAN_PROFILE=linux_x86_64_gcc11
+
       if [ -f /etc/os-release ]; then
         . /etc/os-release
-        if [[ "$ID" == "almalinux" ]]; then
-            echo 'source scl_source enable gcc-toolset-12' >> ~/.bashrc
-            source ~/.bashrc
-        elif [[ "$ID" == "centos" ]]; then
+        if [[ "$ID" == "centos" ]]; then
+            CONAN_PROFILE=linux_x86_64_gcc11_legacy
             echo 'source /opt/rh/devtoolset-11/enable' >> ~/.bashrc
             source ~/.bashrc
         fi
       fi
 
-    - |
-      conan remote add \
-        --insert 0 \
-        --force \
-        ecdc-conan-external https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-external
+    - conan config install http://github.com/ess-dmsc/conan-configuration.git
 
     - cmake --version
     - gcc --version
     - g++ --version
     - cppcheck --version
-
     - git config --global --add safe.directory '*'
-
 
 build_job:
   <<: *build_template
   parallel: 
     matrix:
-      - NAME : "almalinux8"
-        CONTAINER_IMAGE: $ALMALINUX8_IMAGE
+      - NAME : "almalinux9"
+        CONTAINER_IMAGE: $ALMALINUX9_IMAGE
 
       - NAME: "centos7"
         CONTAINER_IMAGE: $CENTOS7_IMAGE
@@ -87,21 +81,24 @@ build_job:
     - cd build
 
     # Check if build artifacts already exist
-    - if [ "$(ls -A build/bin 2>/dev/null)" ]; then
-        echo "Build artifacts found, skipping build.";
+    - |
+      if [ "$(ls -A build/bin 2>/dev/null)" ]; then
+        echo "Build artifacts found, skipping build."
       else
-        echo "No build artifacts found, proceeding to build.";
+        echo "No build artifacts found, proceeding to build."
 
-        echo "Installing dependencies";
-        conan install --build=outdated ..;
-        conan info ../conanfile.txt > CONAN_INFO;
+        echo "Installing dependencies"
 
-        echo "Configuring with CMake";
-        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON ..;
+        conan install --build=missing .. --profile=$CONAN_PROFILE
 
-        echo "Building project";
-        make -j$(nproc) all;
-        make;
+        conan info ../conanfile.txt > CONAN_INFO
+
+        echo "Configuring with CMake"
+        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON ..
+
+        echo "Building project"
+        make -j$(nproc) all
+        make
       fi
   rules:
     - if: $CI_MERGE_REQUEST_ID
@@ -154,7 +151,8 @@ unit_test_job:
     - cd build
 
     - echo "Installing dependencies"
-    - conan install --build=outdated ..
+    - conan install --build=missing .. --profile=$CONAN_PROFILE
+    - conan info ../conanfile.txt > CONAN_INFO
 
     - echo "Configuring with CMake"
     - |
@@ -258,8 +256,8 @@ publish_docker_job:
     - job: build_job
       parallel:
         matrix:
-          - NAME: "almalinux8"
-            CONTAINER_IMAGE: $ALMALINUX8_IMAGE
+          - NAME: "almalinux9"
+            CONTAINER_IMAGE: $ALMALINUX9_IMAGE
   script:
     - echo "Publishing docker image"
     - |

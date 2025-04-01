@@ -8,6 +8,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/reduction/clustering/GapClusterer2D.h>
+#include <fmt/format.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 

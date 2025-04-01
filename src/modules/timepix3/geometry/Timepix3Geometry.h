@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstdint>
 #include <dto/TimepixDataTypes.h>
-#include <h5cpp/property/dataset_access.hpp>
 #include <logical_geometry/ESSGeometry.h>
 #include <math.h>
 

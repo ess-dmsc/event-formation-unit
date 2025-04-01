@@ -16,7 +16,6 @@ find_package(Threads REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(fmt REQUIRED)
 find_package(GraylogLogger REQUIRED)
-find_package(h5cpp REQUIRED)
 find_package(PCAP REQUIRED)
 find_package(asio REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -26,11 +25,9 @@ set(EFU_COMMON_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
   RdKafka::rdkafka
   RdKafka::rdkafka++
-  ${HDF5_C_LIBRARIES}
   ${Boost_LIBRARIES}
   GraylogLogger::graylog_logger_static
   fmt::fmt
-  h5cpp::h5cpp
   nlohmann_json::nlohmann_json
   )
 
@@ -113,10 +110,10 @@ add_custom_target(copycfgs
 add_custom_target(allefus DEPENDS dream loki bifrost miracles freia trex cbm nmx cspec timepix3)
 
 add_custom_target(runefu
-    COMMAND loki     "-f" "../configs/LokiFull.json" "--calibration" "../configs/lokinullcalib.json"     "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
-    COMMAND bifrost  "-f" "../configs/bifrost.json"    "--calibration" "../configs/bifrostnullcalib.json"  "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_user.h5"
+    COMMAND loki     "-f" "../configs/LokiFull.json" "--calibration" "../configs/lokinullcalib.json"     "-s" "1" "--nohwcheck"
+    COMMAND bifrost  "-f" "../configs/bifrost.json"    "--calibration" "../configs/bifrostnullcalib.json"  "-s" "2" "--nohwcheck"
     COMMAND miracles "-f" "../configs/miracles.json"   "--calibration" "../configs/miraclesnullcalib.json" "-s" "2" "--nohwcheck"
-    COMMAND cspec    "-f" "../configs/cspec.json"      "--calibration" "../configs/cspecnullcalib.json"    "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_cspec.h5"
+    COMMAND cspec    "-f" "../configs/cspec.json"      "--calibration" "../configs/cspecnullcalib.json"    "-s" "2" "--nohwcheck"
     COMMAND perfgen  "-s" "1" "--nohwcheck"
     COMMAND dream    "-f" "../configs/DreamEndcap.json" "-s" "2" "--nohwcheck"
     COMMAND heimdal  "-f" "../configs/HeimdalInst.json" "-s" "2" "--nohwcheck"
@@ -124,9 +121,9 @@ add_custom_target(runefu
     COMMAND freia    "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND estia    "-f" "../configs/estia.json" "-s" "2" "--nohwcheck"
     COMMAND trex     "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
-    COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_ttlmon_" "-t" "freia_beam_monitor"
+    COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "-t" "freia_beam_monitor"
     COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
     COMMAND timepix3 "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
-    COMMAND tbl3he   "-f" "../configs/tbl3he.json"    "--calibration" "../configs/tbl3henullcalib.json"  "-s" "2" "--nohwcheck" "--dumptofile" "deleteme_tbl3he.h5"
+    COMMAND tbl3he   "-f" "../configs/tbl3he.json"    "--calibration" "../configs/tbl3henullcalib.json"  "-s" "2" "--nohwcheck"
     DEPENDS copycfgs allefus
     )

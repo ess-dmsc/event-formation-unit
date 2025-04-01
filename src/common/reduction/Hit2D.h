@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -34,7 +34,8 @@
 
 #pragma once
 
-#include <common/DumpFile.h>
+#include <cstdint>
+#include <string>
 #include <limits>
 
 struct __attribute__((packed)) Hit2D {
@@ -56,24 +57,3 @@ struct __attribute__((packed)) Hit2D {
   static constexpr uint8_t InvalidPlane{std::numeric_limits<uint8_t>::max()};
   static constexpr uint8_t PulsePlane{std::numeric_limits<uint8_t>::max() - 1};
 };
-
-namespace hdf5 {
-
-namespace datatype {
-template <> class TypeTrait<Hit2D> {
-public:
-  H5_COMPOUND_DEFINE_TYPE(Hit2D) {
-    H5_COMPOUND_INIT;
-    /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(time);
-    H5_COMPOUND_INSERT_MEMBER(x_coordinate);
-    H5_COMPOUND_INSERT_MEMBER(y_coordinate);
-    H5_COMPOUND_INSERT_MEMBER(weight);
-    H5_COMPOUND_RETURN;
-  }
-};
-} // namespace datatype
-
-} // namespace hdf5
-
-using HitFile = DumpFile<Hit2D>;

@@ -59,17 +59,6 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
       CDCalibration(settings.DetectorName, Settings.CalibFile);
   Geom->CaenCDCalibration.parseCalibration();
 
-  if (not Settings.DumpFilePrefix.empty()) {
-    if (std::filesystem::path(Settings.DumpFilePrefix).has_extension()) {
-      DumpFile =
-          ReadoutFile::create(std::filesystem::path(Settings.DumpFilePrefix)
-                                  .replace_extension(""));
-    } else {
-      DumpFile =
-          ReadoutFile::create(Settings.DumpFilePrefix + "_" + timeString());
-    }
-  }
-
   ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.Legacy.MaxPulseTimeNS);
   ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.Legacy.MaxTOFNS);
 }

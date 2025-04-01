@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -107,11 +107,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--calibration", EFUSettings.CalibFile,
                   "Detector calibration file (JSON)")
       ->group("EFU Options")->default_str("");
-
-  CLIParser.add_option("--dumptofile", EFUSettings.DumpFilePrefix,
-                  "dump to specified file")
-      ->group("EFU Options")->default_str("");
-
 
 // MONITORING
   CLIParser.add_option("--monitor_every", EFUSettings.MonitorPeriod,
