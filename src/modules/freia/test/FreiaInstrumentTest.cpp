@@ -187,21 +187,6 @@ TEST_F(FreiaInstrumentTest, Constructor) {
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
 }
 
-/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(FreiaInstrumentTest, DumpTofile) {
-  Settings.DumpFilePrefix = "deleteme_";
-  FreiaInstrument FreiaDump(counters, Settings, serializer);
-  FreiaDump.setSerializer(serializer);
-
-  makeHeader(FreiaDump.ESSReadoutParser.Packet, GoodEvent);
-  auto Res = FreiaDump.VMMParser.parse(FreiaDump.ESSReadoutParser.Packet);
-  FreiaDump.processReadouts();
-
-  counters.VMMStats = FreiaDump.VMMParser.Stats;
-  ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.VMMStats.Readouts, 2);
-}
-
 TEST_F(FreiaInstrumentTest, MappingError) {
   makeHeader(freia->ESSReadoutParser.Packet, MappingError);
   auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);

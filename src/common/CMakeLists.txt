@@ -62,7 +62,6 @@ set(efu_common_INC
   system/intel.h
   system/arm.h
   system/Socket.h
-  DumpFile.h
   JsonFile.h
   Statistics.h
   StatPublisher.h

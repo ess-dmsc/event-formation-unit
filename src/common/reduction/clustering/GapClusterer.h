@@ -9,6 +9,7 @@
 #pragma once
 
 #include <common/reduction/clustering/AbstractClusterer.h>
+#include <fmt/core.h>
 
 /// \class GapClusterer GapClusterer.h
 /// \brief Clusterer for hits in one plane, discriminating clusters

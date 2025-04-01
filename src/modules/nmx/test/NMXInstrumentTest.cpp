@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -426,21 +426,6 @@ protected:
     Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 };
-
-/// THIS IS NOT A TEST, just ensure we also try dumping to hdf5
-TEST_F(NMXInstrumentTest, DumpTofile) {
-  Settings.DumpFilePrefix = "deleteme_";
-  NMXInstrument NMXDump(counters, Settings, serializer);
-  NMXDump.setSerializer(serializer);
-
-  makeHeader(NMXDump.ESSReadoutParser.Packet, GoodEvent);
-  auto Res = NMXDump.VMMParser.parse(NMXDump.ESSReadoutParser.Packet);
-  NMXDump.processReadouts();
-
-  counters.VMMStats = NMXDump.VMMParser.Stats;
-  ASSERT_EQ(Res, 3);
-  ASSERT_EQ(counters.VMMStats.Readouts, 3);
-}
 
 // Test cases below
 TEST_F(NMXInstrumentTest, BadConfig) {

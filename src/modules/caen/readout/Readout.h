@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -34,7 +34,8 @@
 
 #pragma once
 
-#include <common/DumpFile.h>
+#include <cstdlib>
+#include <string>
 
 namespace Caen {
 
@@ -68,40 +69,3 @@ struct __attribute__((packed)) Readout {
 };
 
 } // namespace Caen
-
-namespace hdf5 {
-
-namespace datatype {
-template <> class TypeTrait<Caen::Readout> {
-public:
-  H5_COMPOUND_DEFINE_TYPE(Caen::Readout) {
-    H5_COMPOUND_INIT;
-    /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(Unused);
-    H5_COMPOUND_INSERT_MEMBER(AmpA);
-    H5_COMPOUND_INSERT_MEMBER(AmpB);
-    H5_COMPOUND_INSERT_MEMBER(AmpC);
-    H5_COMPOUND_INSERT_MEMBER(AmpD);
-    H5_COMPOUND_INSERT_MEMBER(OutputQueue);
-    H5_COMPOUND_INSERT_MEMBER(FiberId);
-    H5_COMPOUND_INSERT_MEMBER(FENId);
-    H5_COMPOUND_INSERT_MEMBER(Group);
-
-    H5_COMPOUND_RETURN;
-  }
-};
-} // namespace datatype
-
-} // namespace hdf5
-
-namespace Caen {
-
-using ReadoutFile = DumpFile<Readout>;
-
-}

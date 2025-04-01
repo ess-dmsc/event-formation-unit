@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -45,7 +45,6 @@ struct BaseSettings {
   bool          NoHwCheck       {false};
   std::vector<std::string>  Interfaces {};
   std::string   CalibFile       {""};
-  std::string   DumpFilePrefix  {""};
   ///\brief module specific configurations
   // perfgen
   bool          TestImage            {false};

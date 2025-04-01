@@ -1,4 +1,4 @@
-// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2018 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file AbstractMatcher.h
@@ -10,6 +10,9 @@
 
 #include <common/reduction/Event.h>
 #include <common/reduction/clustering/AbstractClusterer.h>
+
+#include <fmt/format.h>
+
 #include <deque>
 
 /// \class AbstractMatcher AbstractMatcher.h

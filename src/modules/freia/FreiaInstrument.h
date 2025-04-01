@@ -79,9 +79,6 @@ public:
 
   /// \brief parser for VMM3 readout data
   ESSReadout::VMM3Parser VMMParser;
-
-  /// \brief for dumping raw VMM3 readouts to HDF5 files
-  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
 } // namespace Freia

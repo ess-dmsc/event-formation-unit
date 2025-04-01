@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 ///                              WARNING
@@ -34,7 +34,8 @@
 
 #pragma once
 
-#include <common/DumpFile.h>
+#include <cstdlib>
+#include <string>
 
 namespace VMM3 {
 
@@ -70,42 +71,3 @@ struct __attribute__((packed)) Readout {
 };
 
 } // namespace VMM3
-
-namespace hdf5 {
-
-namespace datatype {
-template <> class TypeTrait<VMM3::Readout> {
-public:
-  H5_COMPOUND_DEFINE_TYPE(VMM3::Readout) {
-    H5_COMPOUND_INIT;
-    /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(PrevPulseTimeLow);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
-    H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
-
-    H5_COMPOUND_INSERT_MEMBER(BC);
-    H5_COMPOUND_INSERT_MEMBER(OTADC);
-    H5_COMPOUND_INSERT_MEMBER(GEO);
-    H5_COMPOUND_INSERT_MEMBER(TDC);
-    H5_COMPOUND_INSERT_MEMBER(VMM);
-    H5_COMPOUND_INSERT_MEMBER(Channel);
-
-    H5_COMPOUND_INSERT_MEMBER(OutputQueue);
-    H5_COMPOUND_INSERT_MEMBER(FiberId);
-    H5_COMPOUND_INSERT_MEMBER(FENId);
-
-    H5_COMPOUND_RETURN;
-  }
-};
-} // namespace datatype
-
-} // namespace hdf5
-
-namespace VMM3 {
-
-using ReadoutFile = DumpFile<Readout>;
-
-}

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <common/reduction/HitVector.h>
 
 /// \class Cluster Cluster.h

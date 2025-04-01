@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 ///===--------------------------------------------------------------------===///
 ///
 /// \file Hit2DVector.h
@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>

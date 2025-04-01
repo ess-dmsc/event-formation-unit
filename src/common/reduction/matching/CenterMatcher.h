@@ -1,4 +1,4 @@
-// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file CenterMatcher.h
@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <common/reduction/matching/AbstractMatcher.h>
 
 /// \class CenterMatcher CenterMatcher.h

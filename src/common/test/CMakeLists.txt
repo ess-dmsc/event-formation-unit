@@ -4,11 +4,6 @@ set(BufferTest_SRC
   )
 create_test_executable(BufferTest)
 
-set(DumpFileTest_SRC
-  DumpFileTest.cpp
-  )
-create_test_executable(DumpFileTest)
-
 set(DetectorTest_SRC
   DetectorTest.cpp
   )

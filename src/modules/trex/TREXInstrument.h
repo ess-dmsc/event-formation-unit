@@ -46,9 +46,6 @@ public:
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> &Events);
 
-  /// \brief dump readout data to HDF5
-  void dumpReadoutToFile(const ESSReadout::VMM3Parser::VMM3Data &Data);
-
   /// \brief initialise the serializer. This is used both in TREXInstrument
   // and TREXBase. Called from TREXBase
   void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
@@ -91,9 +88,6 @@ public:
 
   /// \brief parser for VMM3 readout data
   ESSReadout::VMM3Parser VMMParser;
-
-  /// \brief for dumping raw VMM3 readouts to HDF5 files
-  std::shared_ptr<VMM3::ReadoutFile> DumpFile;
 };
 
 } // namespace Trex

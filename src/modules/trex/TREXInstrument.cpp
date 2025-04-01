@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,11 +29,6 @@ TREXInstrument::TREXInstrument(struct Counters &counters,
                                BaseSettings &settings,
                                EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
-  if (!Settings.DumpFilePrefix.empty()) {
-    std::string DumpFileName = Settings.DumpFilePrefix + "trex_" + timeString();
-    XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
-    DumpFile = VMM3::ReadoutFile::create(DumpFileName);
-  }
 
   loadConfigAndCalib();
 
@@ -101,9 +96,6 @@ void TREXInstrument::processReadouts(void) {
 
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
-    if (DumpFile) {
-      VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
-    }
 
     // Convert from physical fiber to rings
     uint8_t Ring = readout.FiberId / 2;

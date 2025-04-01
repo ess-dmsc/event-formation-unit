@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <common/reduction/Cluster.h>
 
 /// \class Event Event.h

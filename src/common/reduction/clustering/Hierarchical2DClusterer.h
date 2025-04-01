@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file Hierarchical2DClusterer.h
@@ -12,6 +12,7 @@
 #include <common/reduction/clustering/Abstract2DClusterer.h>
 #include <common/reduction/multigrid/ModuleGeometry.h>
 #include <cstdint>
+#include <fmt/format.h>
 
 /// \todo update documentation for 2D version
 

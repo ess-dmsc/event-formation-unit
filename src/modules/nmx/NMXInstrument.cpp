@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -26,11 +26,6 @@ namespace Nmx {
 NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
                              EV44Serializer *serializer)
     : counters(counters), Settings(settings), Serializer(serializer) {
-  if (!Settings.DumpFilePrefix.empty()) {
-    std::string DumpFileName = Settings.DumpFilePrefix + "nmx_" + timeString();
-    XTRACE(INIT, ALW, "Creating HDF5 dumpfile: %s", DumpFileName.c_str());
-    DumpFile = VMM3::ReadoutFile::create(DumpFileName);
-  }
 
   loadConfigAndCalib();
 
@@ -85,9 +80,6 @@ void NMXInstrument::processReadouts(void) {
   Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.getRefTimeUInt64());
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
-    if (DumpFile) {
-      VMMParser.dumpReadoutToFile(readout, ESSReadoutParser, DumpFile);
-    }
 
     XTRACE(DATA, DEB,
            "readout: FiberId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
