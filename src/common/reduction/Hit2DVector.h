@@ -13,6 +13,8 @@
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>
 
+#include <vector>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 

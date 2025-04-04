@@ -23,8 +23,7 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
   app.add_flag("--loki", CaenSettings.Loki,
                 "generate data for all four amplitudes");
 
-  app.add_option("--fibermask", CaenSettings.FiberMask,
-                "Mask out unused fibers");
+  // Fibermask option is already handled by the base class - see ReadoutGenerator::main
   app.add_option("--fibervals", CaenSettings.FiberVals,
                 "Number of Fiber values to generate");
 
@@ -103,6 +102,17 @@ void ReadoutGenerator::generateData() {
     Readouts++;
   }
 }
+
+void ReadoutGenerator::main() {
+  // Call base class and extract the fiber related CLI values
+  ReadoutGeneratorBase::main();
+
+  // Get the fiber mask
+  if (app.get_option("--fibermask") != nullptr) {
+    CaenSettings.FiberMask = Settings.FiberMask;
+  }
+}
+
 
 } // namespace Dream
 // GCOVR_EXCL_STOP

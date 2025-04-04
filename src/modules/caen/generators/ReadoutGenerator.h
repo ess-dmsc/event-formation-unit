@@ -43,6 +43,11 @@ public:
              Settings.TypeOverride);
   }
 
+  ///
+  /// \brief Intercept the main function to access CLI parsed options
+  void main();
+
+
 protected:
   void generateData() override;
 
