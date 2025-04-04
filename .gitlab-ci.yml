@@ -130,6 +130,7 @@ unit_test_job:
   dependencies: []
   <<: *build_template
   script:
+    - asdfdsf fail intentionally
     - mkdir -p build
     - cd build
 
