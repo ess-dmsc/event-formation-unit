@@ -164,7 +164,7 @@ unit_test_job:
 
     - make -j$(nproc) runtest
     - make -j$(nproc) runefu
-    - make -j$(nproc) coverage
+    - make coverage
   artifacts:
     reports:
       junit: build/test_results/*.xml
