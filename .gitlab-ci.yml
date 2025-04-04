@@ -1,12 +1,8 @@
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: always
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
-      when: always
-    - when: never
 
 default:
   tags:
@@ -23,8 +19,7 @@ variables:
   UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/ubuntu2204:1.0"
   DEBIAN11_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/debian11:1.0"
 
-# Job template to reduce duplication
-.build_template: &build_template
+.conan_config: &conan_config
   before_script: 
     - |
       CONAN_PROFILE=linux_x86_64_gcc11
@@ -46,26 +41,10 @@ variables:
     - cppcheck --version
     - git config --global --add safe.directory '*'
 
-build_job:
-  <<: *build_template
-  parallel: 
-    matrix:
-      - NAME : "almalinux9"
-        CONTAINER_IMAGE: $ALMALINUX9_IMAGE
-
-      - NAME: "centos7"
-        CONTAINER_IMAGE: $CENTOS7_IMAGE
-
-      - NAME: "ubuntu2204"
-        CONTAINER_IMAGE: $UBUNTU2204_IMAGE
-
+# Job template to reduce duplication
+.build_template: &build_template
   stage: build
-  image: $CONTAINER_IMAGE
-  dependencies: []
-  cache:
-    key: "$CI_COMMIT_SHA-$CONTAINER_IMAGE"
-    paths:
-      - build/
+  <<: *conan_config
   artifacts:
     paths:
       - build/bin
@@ -100,20 +79,22 @@ build_job:
         make -j$(nproc) all
         make
       fi
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - if: $CI_COMMIT_TAG
-      when: on_success
-    - when: never
 
+build-almalinux9:
+  image: $ALMALINUX9_IMAGE
+  <<: *build_template
+
+build-centos7:
+  image: $CENTOS7_IMAGE
+  <<: *build_template
+
+build-ubuntu2204:
+  image: $UBUNTU2204_IMAGE
+  <<: *build_template
 
 clangformat_test_job:
   stage: test
   image: $DEBIAN11_IMAGE
-  dependencies: []
   before_script:
     - export HTTP_PROXY="http://172.20.72.11:8888"
     - export HTTPS_PROXY="http://172.20.72.11:8888"
@@ -136,16 +117,11 @@ clangformat_test_job:
       codequality: $TEST_OUTPUT
     paths:
       - $TEST_OUTPUT 
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - when: never
 
 unit_test_job:
+  <<: *conan_config
   stage: test
   image: $CENTOS7_IMAGE
-  dependencies: []
-  <<: *build_template
   script:
     - mkdir -p build
     - cd build
@@ -171,27 +147,15 @@ unit_test_job:
       coverage_report:
         coverage_format: cobertura    
         path: build/coverage/coverage.xml
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - when: never
-
 
 publish_tar_job:
   stage: publish
   image: alpine/curl:latest
-  dependencies: [build_job]
+  dependencies:
+    - build-centos7
   artifacts: 
     paths:
       - event-formation-unit-centos7.tar.gz
-  needs:
-  - job: build_job
-    parallel:
-      matrix:
-        - NAME: "centos7"
-          CONTAINER_IMAGE: $CENTOS7_IMAGE
   before_script:
     - curl -fL https://install-cli.jfrog.io | sh
     - jf config add $ESS_ARTIFACTORY_ID --url=$ESS_ARTIFACTORY_URL --user=$ESS_ARTIFACTORY_ECDC_USER --password=$ESS_ARTIFACTORY_ECDC_GENERIC_TOKEN
@@ -251,13 +215,8 @@ publish_docker_job:
     - docker:dind
   variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/efu-$INSTRUMENT"
-  dependencies: [build_job]
-  needs:
-    - job: build_job
-      parallel:
-        matrix:
-          - NAME: "almalinux9"
-            CONTAINER_IMAGE: $ALMALINUX9_IMAGE
+  dependencies:
+    - build-almalinux9
   script:
     - echo "Publishing docker image"
     - |
@@ -275,12 +234,7 @@ publish_docker_job:
           -f .ci/docker/Dockerfile.deploy .
     - docker push "$IMAGE_NAME"
   rules:
-    - if: >
-        $CI_COMMIT_BRANCH == "master" &&
-        ($CI_PIPELINE_SOURCE == "push" ||
-         $CI_PIPELINE_SOURCE == "merge_request_event" ||
-         $CI_PIPELINE_SOURCE == "web")
-      when: on_success
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
-      when: on_success
-    - when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
