@@ -1,12 +1,8 @@
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: always
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
-      when: always
-    - when: never
 
 default:
   tags:
@@ -100,15 +96,6 @@ build_job:
         make -j$(nproc) all
         make
       fi
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - if: $CI_COMMIT_TAG
-      when: on_success
-    - when: never
-
 
 clangformat_test_job:
   stage: test
@@ -136,10 +123,6 @@ clangformat_test_job:
       codequality: $TEST_OUTPUT
     paths:
       - $TEST_OUTPUT 
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - when: never
 
 unit_test_job:
   stage: test
@@ -171,13 +154,6 @@ unit_test_job:
       coverage_report:
         coverage_format: cobertura    
         path: build/coverage/coverage.xml
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - when: never
-
 
 publish_tar_job:
   stage: publish
@@ -275,12 +251,7 @@ publish_docker_job:
           -f .ci/docker/Dockerfile.deploy .
     - docker push "$IMAGE_NAME"
   rules:
-    - if: >
-        $CI_COMMIT_BRANCH == "master" &&
-        ($CI_PIPELINE_SOURCE == "push" ||
-         $CI_PIPELINE_SOURCE == "merge_request_event" ||
-         $CI_PIPELINE_SOURCE == "web")
-      when: on_success
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
-      when: on_success
-    - when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
