@@ -228,34 +228,30 @@ protected:
     return nextPulseTime;
   }
 
-  const uint32_t TimeLowOffset{
-      20000}; ///< Time offset for readout generation (ticks)
-  const uint32_t PrevTimeLowOffset{
-      10000}; ///< Previous time offset for readout generation (ticks)
-
+  // clang-format off
   static constexpr int MAX_TIME_DRIFT_NS{20}; ///< Maximum allowed pulse time drift
-
-  uint8_t ReadoutDataSize{0};   ///< Size of the readout data
-  uint16_t NumberOfReadouts{0}; ///< Number of readouts
-
-  uint64_t Packets{0};   ///< Number of packets
-  uint32_t SeqNum{0};    ///< Sequence number
-  uint16_t DataSize{0};  ///< Number of data bytes in packet
-  uint8_t HeaderSize{0}; ///< Size of the header
+  const uint32_t TimeLowOffset{20000};        ///< Time offset for readout generation (ticks)
+  const uint32_t PrevTimeLowOffset{10000};    ///< Previous time offset for readout generation (ticks)
+  uint8_t ReadoutDataSize{0};                 ///< Size of the readout data
+  uint16_t NumberOfReadouts{0};               ///< Number of readouts
+  uint64_t Packets{0};                        ///< Number of packets
+  uint32_t SeqNum{0};                         ///< Sequence number
+  uint16_t DataSize{0};                       ///< Number of data bytes in packet
+  uint8_t HeaderSize{0};                      ///< Size of the header
+  // clang-format on
 
   DataFuzzer Fuzzer; ///< Data fuzzer
-
   UDPTransmitter *DataSource{nullptr}; ///< Data source
 
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
-  esstime::ESSTime pulseTime;     ///< Pulse time
-  esstime::ESSTime prevPulseTime; ///< Previous pulse time
-  esstime::ESSTime readoutTime;   ///< Readout time
-
-  esstime::TimeDurationNano pulseFrequencyNs{
-      0}; ///< Pulse frequency in nanoseconds
+  // clang-format off
+  esstime::ESSTime pulseTime;                    ///< Pulse time
+  esstime::ESSTime prevPulseTime;                ///< Previous pulse time
+  esstime::ESSTime  readoutTime;                 ///< Readout time
+  esstime::TimeDurationNano pulseFrequencyNs{0}; ///< Pulse frequency in nanoseconds
+  // clang-format on
 };
 // GCOVR_EXCL_STOP

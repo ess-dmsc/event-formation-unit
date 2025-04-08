@@ -10,15 +10,15 @@
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
-#include <math.h>
 #include <modules/loki/generators/LokiReadoutGenerator.h>
-#include <time.h>
 
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <math.h>
 #include <stdexcept>
+#include <time.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

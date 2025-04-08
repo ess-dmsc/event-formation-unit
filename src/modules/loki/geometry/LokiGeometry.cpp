@@ -93,7 +93,7 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
 
   double CalibratedUnitPos =
       CaenCDCalibration.posCorrection(GlobalGroup, UnitPos.first, UnitPos.second);
-  uint16_t CalibratedPos = CalibratedUnitPos * (NPos - 1);
+  uint16_t CalibratedPos = round(CalibratedUnitPos * (NPos - 1));
   XTRACE(EVENT, DEB, "Group %d, Unit %d - calibrated unit pos: %g, pos %d",
          GlobalGroup, UnitPos.first, CalibratedUnitPos, CalibratedPos);
 

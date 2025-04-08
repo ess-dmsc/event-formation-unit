@@ -153,7 +153,7 @@ TEST_F(LokiGeometryTest, calcPixel) {
   readout.AmpD = 10;
   // Should result in Unit = 3, Pos = 0.5
   // So pixel is 3 * 512 + 255 + 1 =
-  ASSERT_EQ(geom->calcPixel(readout), 1792);
+  ASSERT_EQ(geom->calcPixel(readout), 1793);
 }
 
 

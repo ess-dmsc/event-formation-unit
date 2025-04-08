@@ -9,11 +9,12 @@
 // GCOVR_EXCL_START
 
 #include <modules/freia/generators/MultiBladeGenerator.h>
-#include <modules/freia/generators/BitMaps.h>
 #include <modules/freia/geometry/Geometry.h>
 #include <common/readout/vmm3/VMM3Parser.h>
+#include <common/testutils/bitmaps/BitMaps.h>
 
 #include <fmt/core.h>
+
 #include <cmath>
 
 using namespace ESSReadout;
@@ -21,25 +22,32 @@ using namespace ESSReadout;
 namespace Freia {
 
 MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {
+  // clang-format off
+
   // Options
   app.add_option("--detector", MultiBladeSettings.Detector, "Specify detector name (Freia, ESTIA, or TBLMB)");
 
-  app.add_option("--fens",     MultiBladeSettings.NFENs,    "Number of FENs (Front End Nodes)");
-  app.add_option("--fenmask",  MultiBladeSettings.FENMask,  "Mask out unused FENs");
+  app.add_option("--fibervals", MultiBladeSettings.FiberVals, "Number of Fiber values to generate");
+  app.add_option("--fibermask", MultiBladeSettings.FiberMask, "Mask out unused fibers");
 
-  app.add_option("--vmms",     MultiBladeSettings.NVMMs,    "Number of VMMs (Hybrids)");
-  app.add_option("--vmmmask",  MultiBladeSettings.VMMMask,  "Mask out unused VMMs");
+  app.add_option("--fenvals", MultiBladeSettings.FENVals, "Number of FEN values to generate");
+  app.add_option("--fenmask", MultiBladeSettings.FENMask, "Mask out unused FENs");
+
+  app.add_option("--vmmvals", MultiBladeSettings.VMMVals, "Number of VMMs (Hybrids)");
+  app.add_option("--vmmmask", MultiBladeSettings.VMMMask, "Mask out unused VMMs");
 
   // Flags
   app.add_flag("--tof",   MultiBladeSettings.Tof,   "Generate tof distribution");
   app.add_flag("--debug", MultiBladeSettings.Debug, "Print debug info");
 
+  // clang-format on
+
   // Load bitmaps
-  mImages.push_back(BitMaps::si1_0);
-  mImages.push_back(BitMaps::si1_1);
-  mImages.push_back(BitMaps::si2_0);
-  mImages.push_back(BitMaps::si2_1);
-  mImages.push_back(BitMaps::zeta);
+  mImages.push_back(&BitMaps::si1_0);
+  mImages.push_back(&BitMaps::si1_1);
+  mImages.push_back(&BitMaps::si2_0);
+  mImages.push_back(&BitMaps::si2_1);
+  mImages.push_back(&BitMaps::zeta);
 }
 
 void MultiBladeGenerator::generateData() {
@@ -52,12 +60,12 @@ void MultiBladeGenerator::generateData() {
 
   for (size_t Count = 0; Count < N; Count++) {
     // Get FEN and Fibers Ids + Tof
-    const uint8_t FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.NFibers, MultiBladeSettings.FiberMask);
-    const uint8_t FENId   = Fuzzer.randU8WithMask(MultiBladeSettings.NFENs,   MultiBladeSettings.FENMask);
+    const uint8_t FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.FiberVals, MultiBladeSettings.FiberMask);
+    const uint8_t FENId   = Fuzzer.randU8WithMask(MultiBladeSettings.FENVals,   MultiBladeSettings.FENMask);
     const double TofMs    = mTofDist.getValue();
 
     // Get the VMM Id
-    const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.NVMMs, MultiBladeSettings.VMMMask);
+    const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.VMMVals, MultiBladeSettings.VMMMask);
     const bool isEven = VMM0 % 2 == 0;
 
     // Parameters for pixel coordinates
@@ -93,10 +101,10 @@ void MultiBladeGenerator::generateData() {
       // Get VMM Id
       const u_int8_t VMM = 2 * VMM0 + i;
       ReadoutData->VMM = VMM;
-      Image image = mImages[VMM0 % mImages.size()];
+      const Image &image = *mImages[VMM0 % mImages.size()];
 
       if (i == 0) {
-        const int index = Fuzzer.randomInterval(0, image.size());
+        const int index = Fuzzer.randomInterval(1, image.size() - 1);
         const auto &[x, y] = image[index];
 
         switch (Settings.Type) {
@@ -155,26 +163,11 @@ VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
 }
 
 void MultiBladeGenerator::main() {
-  // Call base class and extract the fiber related CLI values
+  // Call base class
   ReadoutGeneratorBase::main();
-
-  // Get number of fibers and the associated mask
-  if (app.get_option("--fibers") != nullptr) {
-    MultiBladeSettings.NFibers = Settings.NFibers;
-  }
-
-  if (app.get_option("--fibermask") != nullptr) {
-    MultiBladeSettings.FiberMask = Settings.FiberMask;
-  }
 
   // Set detector type
   setDetectorType(MultiBladeSettings.Detector);
-
-  // Extract instrument geometry
-  Geometry Geom;
-  Geom.setGeometry(MultiBladeSettings.Detector);
-  XDim = Geom.xDim();
-  YDim = Geom.yDim();
 }
 
 } // namespace Freia

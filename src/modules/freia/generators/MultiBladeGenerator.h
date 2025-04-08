@@ -19,7 +19,7 @@ using VMM3Data = ESSReadout::VMM3Parser::VMM3Data;
 
 class MultiBladeGenerator : public ReadoutGeneratorBase {
   using Image = std::vector<std::pair<uint8_t, uint8_t>>;
-  using Images = std::vector<Image>;
+  using Images = std::vector<const Image *>;
 
  public:
   MultiBladeGenerator();
@@ -30,18 +30,18 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
     bool Debug{false};
 
     // Masks are used to restrict fibers, FENs, and VMMs
-    uint8_t  NFibers{4};            // Fibers 0 - 4
+    uint8_t  FiberVals{4};            // Fibers 0 - 4
     uint32_t FiberMask{0x00ffffff};
 
-    uint8_t  NFENs{2};              // FENs   0 - 2
+    uint8_t  FENVals{2};              // FENs   0 - 2
     uint16_t FENMask{0xffff};
 
-    uint8_t  NVMMs{2};              // VMMs   0 - 2
+    uint8_t  VMMVals{2};              // VMMs   0 - 2
     uint16_t VMMMask{0xff};
   } MultiBladeSettings;
 
   ///
-  /// \brief Intercept the main function to access CLI parsed options
+  /// \brief Intercept the main function to set the detector type
   void main();
 
  protected:
@@ -71,12 +71,6 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
 
   /// \brief Tick frequency
   float mTicksPerMs{88552.0};
-
-  /// Pixel resolution in the x-direction
-  size_t XDim;
-
-  /// Pixel resolution in the y-direction
-  size_t YDim;
 };
 
 } // namespace Freia

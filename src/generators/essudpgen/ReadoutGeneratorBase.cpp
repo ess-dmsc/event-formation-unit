@@ -37,8 +37,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
 
   app.add_option("-f, --fibers", Settings.NFibers,   "Number of Fibers used in data header");
-  app.add_option("--fibermask",  Settings.FiberMask, "Mask out unused fibers");
-
 
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
