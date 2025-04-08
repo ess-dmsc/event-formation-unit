@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <filesystem>
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
 #include <common/reduction/Hit2D.h>
 
+#include <filesystem>
 #include <vector>
 
 // #undef TRC_LEVEL
