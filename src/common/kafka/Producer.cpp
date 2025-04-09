@@ -6,7 +6,7 @@
 ///
 /// \note: See https://github.com/edenhill/librdkafka
 ///
-/// For more information the avaialbe producer statistics see:
+/// For more information the available producer statistics see:
 /// https://github.com/confluentinc/librdkafka/blob/master/STATISTICS.md
 ///
 //===----------------------------------------------------------------------===//
@@ -59,11 +59,11 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     Stats->create("kafka.produce_bytes_error", ProducerStats.produce_bytes_error);
     Stats->create("kafka.produce_calls", ProducerStats.produce_calls);
     Stats->create("kafka.produce_errors", ProducerStats.produce_errors);
-    
+
     /// librdkafka transmission stats
     Stats->create("kafka.brokers.tx_bytes", ProducerStats.BytesTransmittedToBrokers);
     Stats->create("kafka.brokers.tx_req_retries", ProducerStats.TxRequestRetries);
-    
+
     /// librdkafka message stats
     Stats->create("kafka.msg.num_of_msg_in_queue", ProducerStats.NumberOfMsgInQueue);
     Stats->create("kafka.msg.max_num_of_msg_in_queue", ProducerStats.MaxNumOfMsgInQueue);
@@ -74,7 +74,7 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     Stats->create("kafka.msg.status_not_persisted", ProducerStats.MsgStatusNotPersisted);
     Stats->create("kafka.msg.status_possibly_persisted", ProducerStats.MsgStatusPossiblyPersisted);
     Stats->create("kafka.msg.msg_delivery_event", ProducerStats.TotalMsgDeliveryEvent);
-    
+
     /// librdkafka error stats
     Stats->create("kafka.error.msg_delivery", ProducerStats.MsgError);
     Stats->create("kafka.error.transmission", ProducerStats.TransmissionErrors);
@@ -173,12 +173,12 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
 // Implementation of KafkaEventHandler override
 void Producer::event_cb(RdKafka::Event &event) {
   nlohmann::json res;
-  
+
   /// initialize variable to sum up the values later when looping over brokers
   int64_t TransmissionErrors = 0;
   int64_t BytesTransmittedToBrokers = 0;
   int64_t TxRequestRetries = 0;
-  
+
   switch (event.type()) {
     case RdKafka::Event::EVENT_STATS:
     ProducerStats.StatsEventCounter++;
@@ -191,7 +191,7 @@ void Producer::event_cb(RdKafka::Event &event) {
 
     /// \note loop over brokers and sum up the values into local variables
     /// before assigning them to the ProducerStats struct.
-    /// This is to impriove thread safety becase the ProducerStats struct
+    /// This is to improve thread safety because the ProducerStats struct
     /// is registered into the Statistics object and can be accessed from
     /// multiple threads.
     for (const auto &[key, broker_info] : res["brokers"].items()) {
@@ -249,9 +249,9 @@ void Producer::dr_cb(RdKafka::Message &message) {
 void Producer::applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode) {
 
   // First log the error and its error string.
-  LOG(KAFKA, Sev::Warning, "Rdkafka error occured: [{}] {}",
+  LOG(KAFKA, Sev::Warning, "Rdkafka error occurred: [{}] {}",
       static_cast<int>(ErrorCode), RdKafka::err2str(ErrorCode).c_str());
-  XTRACE(KAFKA, WAR, "Rdkafka error occured: [%d] %s\n", ErrorCode,
+  XTRACE(KAFKA, WAR, "Rdkafka error occurred: [%d] %s\n", ErrorCode,
          RdKafka::err2str(ErrorCode).c_str());
 
   switch (ErrorCode) {

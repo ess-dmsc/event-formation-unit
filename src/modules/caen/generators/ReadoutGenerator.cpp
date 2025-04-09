@@ -8,10 +8,6 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
 #include <modules/caen/generators/ReadoutGenerator.h>
 #include <common/testutils/bitmaps/BitMaps.h>
 
@@ -154,7 +150,7 @@ void ReadoutGenerator::generateMaskedData() {
     size_t offset = isLowerGroup ? 0 : 7;
     offset += isFENEven ? 0 : 14;
 
-    // Get random straw and postion number
+    // Get random straw and position number
     size_t s = Fuzzer.randomInterval(0, 7);
     size_t p = Fuzzer.randomInterval(0, 512);
 

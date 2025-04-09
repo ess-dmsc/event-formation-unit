@@ -259,7 +259,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 
   // Testing for Timed out error
   EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occured: [-185] Local: Timed out"))
+              log("KAFKA", "Rdkafka error occurred: [-185] Local: Timed out"))
       .Times(1);
 
   When(Method(fakeEvent, err)).Return(RdKafka::ERR__TIMED_OUT);
@@ -269,7 +269,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   // Testing for Broker not available error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [8] Broker: Broker not available"))
+      log("KAFKA", "Rdkafka error occurred: [8] Broker: Broker not available"))
       .Times(1);
 
   When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR_BROKER_NOT_AVAILABLE);
@@ -279,7 +279,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   // Testing for Broker transport failure error
   EXPECT_CALL(LoggerMock,
               log("KAFKA",
-                  "Rdkafka error occured: [-195] Local: Broker transport "
+                  "Rdkafka error occurred: [-195] Local: Broker transport "
                   "failure"))
       .Times(1);
 
@@ -288,7 +288,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   EXPECT_EQ(prod.getStats().ErrTransport, 1);
 
   // Testing for Authentication failure error
-  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occured: [-169] "
+  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occurred: [-169] "
                                        "Local: Authentication failure"))
       .Times(1);
 
@@ -299,7 +299,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   // Testing for Message timed out error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [-192] Local: Message timed out"))
+      log("KAFKA", "Rdkafka error occurred: [-192] Local: Message timed out"))
       .Times(1);
 
   When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__MSG_TIMED_OUT);
@@ -309,7 +309,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   // Testing for Unknown topic error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [-188] Local: Unknown topic"))
+      log("KAFKA", "Rdkafka error occurred: [-188] Local: Unknown topic"))
       .Times(1);
 
   When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR__UNKNOWN_TOPIC);
@@ -318,7 +318,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 
   // Testing for Topic authorization failed error
   EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occured: [29] Broker: Topic "
+              log("KAFKA", "Rdkafka error occurred: [29] Broker: Topic "
                            "authorization failed"))
       .Times(1);
 
@@ -329,7 +329,7 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 
   // Testing for Invalid topic error
   EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occured: [17] Broker: Invalid topic"))
+              log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
       .Times(1);
 
   When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
@@ -356,7 +356,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
 
   // Testing for Timed out error
   EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occured: [-185] Local: Timed out"))
+              log("KAFKA", "Rdkafka error occurred: [-185] Local: Timed out"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__TIMED_OUT);
@@ -368,7 +368,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   // Testing for Broker not available error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [8] Broker: Broker not available"))
+      log("KAFKA", "Rdkafka error occurred: [8] Broker: Broker not available"))
       .Times(1);
 
   When(Method(fakeMessage, err))
@@ -381,7 +381,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   EXPECT_CALL(
       LoggerMock,
       log("KAFKA",
-          "Rdkafka error occured: [-195] Local: Broker transport failure"))
+          "Rdkafka error occurred: [-195] Local: Broker transport failure"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__TRANSPORT);
@@ -390,7 +390,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 3);
 
   // Testing for Authentication failure error
-  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occured: [-169] "
+  EXPECT_CALL(LoggerMock, log("KAFKA", "Rdkafka error occurred: [-169] "
                                        "Local: Authentication failure"))
       .Times(1);
 
@@ -402,7 +402,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   // Testing for Message timed out error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [-192] Local: Message timed out"))
+      log("KAFKA", "Rdkafka error occurred: [-192] Local: Message timed out"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__MSG_TIMED_OUT);
@@ -413,7 +413,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   // Testing for Unknown topic error
   EXPECT_CALL(
       LoggerMock,
-      log("KAFKA", "Rdkafka error occured: [-188] Local: Unknown topic"))
+      log("KAFKA", "Rdkafka error occurred: [-188] Local: Unknown topic"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR__UNKNOWN_TOPIC);
@@ -425,7 +425,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   EXPECT_CALL(
       LoggerMock,
       log("KAFKA",
-          "Rdkafka error occured: [29] Broker: Topic authorization failed"))
+          "Rdkafka error occurred: [29] Broker: Topic authorization failed"))
       .Times(1);
 
   When(Method(fakeMessage, err))
@@ -436,7 +436,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
 
   // Testing for Invalid topic error
   EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occured: [17] Broker: Invalid topic"))
+              log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
@@ -447,7 +447,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   // Testing for Message size too large error
   EXPECT_CALL(LoggerMock,
               log("KAFKA",
-                  "Rdkafka error occured: [10] Broker: Message size too large"))
+                  "Rdkafka error occurred: [10] Broker: Message size too large"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_MSG_SIZE_TOO_LARGE);

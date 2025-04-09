@@ -25,7 +25,7 @@ public:
   /// where the four amplitudes are actually signed integers.
   /// For BIFROST and TBL3HE (and presumably MIRACLES, VESPA, CSPEC too)
   /// the amplitudes are unsigned.
-  // Currently (for BIFROST) thuis is taken care of in the code. But we
+  // Currently (for BIFROST) this is taken care of in the code. But we
   // should probably fix this at some point
   ///
   /// For the identification of the amplitudes this is NOT correct for
