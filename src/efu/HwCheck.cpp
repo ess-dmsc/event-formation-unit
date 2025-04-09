@@ -72,7 +72,7 @@ bool HwCheck::checkMTU(const std::vector<std::string> &InterfaceList, bool Print
         return false;
       } else {
         if (PrintOnSuccess) {
-          LOG(INIT, Sev::Info, "MTU check succeded for interface {}",
+          LOG(INIT, Sev::Info, "MTU check succeeded for interface {}",
               ifa->ifa_name);
         }
       }

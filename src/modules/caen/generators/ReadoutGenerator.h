@@ -66,20 +66,27 @@ public:
   ///
   /// --------------------------------------------------------------------------
   /// Produce readout data that uses bitmaps to mask data, in order to produce
-  /// images ot text characters. Asymmetrical letters will reveal mirror flips
+  /// images or text characters. Asymmetrical letters will reveal mirror flips
   /// along both horizontal and vertical axes.
   ///
   /// We utilize the property that group ids G0 in [0, 1, 2, 3] produce even
-  /// pixel strips of width 7, whereas group ids G1 in [4, 5, 6, 7] will
-  /// produce uneven pixel strips of height 7.
+  /// pixel strips of height 7, whereas group ids G1 in [4, 5, 6, 7] will
+  /// produce odd pixel strips of height 7.
   ///
-  /// For a given FEN id, if we then combine two groups from each set, for
+  /// Them, for a given FEN id, if we combine two groups from each set, for
   /// example [0, 4], we will get a continuous strip with a pixel height of 14.
+  /// In this case, this corresponds to specifying the group mask
   ///
-  /// Finally, we may then combine two consecutive FEN ids, for example 2 and 4,
+  ///   --groupmask 0x11 (hex) or --groupmask 17 (decimal)
+  ///
+  /// Finally, we may then combine two consecutive FEN ids, for example 2 and 3,
   /// to get a a continuous pixel strip of height of 28. This then enables us to
   /// use bitmaps of size 28x28 to draw characters or images by masking randomly
-  /// generated pixels.
+  /// generated pixels. For this example, the following combination of masks
+  /// should nbe used
+  ///
+  ///    --groupmask 0x11  --fenmask 0xc (hex)
+  ///    --groupmask 17    --fenmask 12  (decimal)
   void generateMaskedData();
 
   ///
