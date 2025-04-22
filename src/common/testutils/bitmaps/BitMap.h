@@ -482,7 +482,6 @@ namespace bmp {
     *	Vertically flips the bitmap and returns the flipped version
     *
     */
-    [[nodiscard("Bitmap::flip_v() is immutable")]]
     Bitmap flip_v() const {
       Bitmap finished(m_width, m_height);
       for (std::int32_t x = 0; x < m_width; ++x) {
@@ -498,7 +497,6 @@ namespace bmp {
     *	Horizontally flips the bitmap and returns the flipped version
     *
     */
-    [[nodiscard("Bitmap::flip_h() is immutable")]]
     Bitmap flip_h() const {
       Bitmap finished(m_width, m_height);
       for (std::int32_t y = 0; y < m_height; ++y) {
@@ -514,7 +512,6 @@ namespace bmp {
     *	Rotates the bitmap to the right and returns the rotated version
     *
     */
-    [[nodiscard("Bitmap::rotate_90_left() is immutable")]]
     Bitmap rotate_90_left() const {
       Bitmap finished(m_height, m_width); // Swap dimensions
 
@@ -533,7 +530,6 @@ namespace bmp {
     *	Rotates the bitmap to the left and returns the rotated version
     *
     */
-    [[nodiscard("Bitmap::rotate_90_right() is immutable")]]
     Bitmap rotate_90_right() const {
       Bitmap finished(m_height, m_width); // Swap dimensions
       for (std::int32_t y = 0; y < m_height; ++y) {
