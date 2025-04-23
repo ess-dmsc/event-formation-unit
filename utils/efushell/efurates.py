@@ -5,6 +5,10 @@ import argparse
 import time
 
 def getRates(args):
+    """
+    Calculate the rate of change for a pre-selected set of EFU statistical
+    quantities.
+    """
     # Initialize EFU metrics
     metrics = Metrics(args.i, args.p)
     stat = metrics._get_efu_command("STAT_GET_COUNT")
@@ -30,7 +34,7 @@ def getRates(args):
             keys.append(stat.strip().split()[1])
 
     # Length of longest key
-    length = max(len(l) for l in keys)
+    length = max(len(key) for key in keys)
 
     # Initialize variables
     dt = args.d
@@ -40,7 +44,7 @@ def getRates(args):
     r0 = None
     r1 = None
 
-    caption = "\nRates per second"
+    caption = "Change per second"
     caption = caption + '\n' + '-'*(len(caption) + 1)
 
     while (True):
@@ -54,7 +58,7 @@ def getRates(args):
 
         # Print new rates
         if ((t0 is not None) and (r0 is not None)):
-            print (caption)
+            print ("\n{}".format(caption))
             for index in range(4):
                 delta = float(t1 - t0)
                 print("{}: {:.1f}".format(keys[index].ljust(length), (r1[index] - r0[index])/delta))
