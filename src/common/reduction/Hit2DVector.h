@@ -13,6 +13,7 @@
 #include <common/reduction/Hit2D.h>
 
 #include <filesystem>
+#include <sstream>
 #include <vector>
 
 // #undef TRC_LEVEL
