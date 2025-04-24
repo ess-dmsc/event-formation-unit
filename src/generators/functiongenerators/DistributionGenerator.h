@@ -10,6 +10,7 @@
 #pragma once
 
 #include <generators/functiongenerators/FunctionGenerator.h>
+
 #include <random>
 
 ///

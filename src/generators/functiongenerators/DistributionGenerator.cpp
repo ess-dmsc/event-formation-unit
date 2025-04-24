@@ -6,9 +6,10 @@
 /// \brief Creates a custom distribution function
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
-
-#include <cstdint>
 #include <generators/functiongenerators/DistributionGenerator.h>
+
+#include <algorithm>
+#include <cstdint>
 
 ///\todo could be optimised, but this is not the bottleneck
 static double gaussianPDF(double X, double Mu, double Sigma) {
@@ -42,19 +43,19 @@ double DistributionGenerator::getDistValue(const double &Pos) {
 }
 
 ///
-/// \brief draw a random value according to distribution
-/// \todo this is the slow part of this implementation. Optimisation ideas:
-/// precalculate an array of values and then reuse these rather than calculating
-/// values every time.
-/// Or implement a faster search than the loop below (dictionary or something)
+/// \brief draw a random value according to the distribution
 double DistributionGenerator::getValue() {
-  double Value = dis(gen) * Norm;
-  for (uint i = 0; i < NumberOfBins; i++) {
-    if (CDF[i] >= Value) {
-      return i * BinWidth;
-    }
+  // Find the index of this value
+  const double Value = dis(gen) * Norm;
+
+  // Since CDF is sorted and increasing, we can use std::upper_bound
+  const auto it = std::upper_bound(CDF.cbegin(), CDF.cend(), Value);
+  if (it == CDF.end()) {
+    return MaxRange;
   }
-  return MaxRange;
+  const size_t index = std::distance(CDF.cbegin(), it);
+
+  return index * BinWidth;
 }
 
 // GCOVR_EXCL_STOP
