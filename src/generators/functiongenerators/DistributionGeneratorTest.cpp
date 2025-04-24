@@ -105,6 +105,17 @@ TEST_F(DistributionGeneratorTest, GetValueRandom) {
   ASSERT_NE(value1, value2);
 }
 
+TEST_F(DistributionGeneratorTest, OneMillionRandomValues) {
+  double MaxVal = 1000.0;
+  int Bins = 512;
+  DistributionGenerator Dist(MaxVal, Bins);
+
+  for (size_t i = 0; i < 100000; ++i) {
+    const double value = Dist.getValue();
+    ASSERT_GE(value, 0.0);
+    ASSERT_LE(value, MaxVal);
+  }
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
