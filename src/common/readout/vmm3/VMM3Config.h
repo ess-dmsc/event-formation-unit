@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -49,7 +49,7 @@ public:
   /// \brief Apply detector specific aspects of loaded configuration json file
   virtual void applyConfig() = 0;
 
-  bool validHybridId(const std::string &HybridID);
+  bool validHybridId(const std::string &HybridID) const;
 
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
@@ -58,34 +58,21 @@ public:
   }
 
 
-  /// \brief Get Hybrid from the string Hybrid ID
-  /// \todo candidate to refactor as it is nearly the same as getHybrid()
-  /// check if HybridId is already configured.
-  bool lookupHybrid(const std::string &HybridID) {
-    for (int RingID = 0; RingID <= MaxRing; RingID++) {
-      for (int FENID = 0; FENID <= MaxFEN; FENID++) {
-        for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
-          if (Hybrids[RingID][FENID][HybridNum].HybridId == HybridID) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+  /// \brief Return true, if a Hybrid with a given Id exists (this implementation
+  /// uses a fast map-based look-up)
+  bool lookupHybrid(const std::string &HybridID) const {
+    return (HybridMap.find(HybridID) != HybridMap.cend());
   }
 
-  /// \brief Get Hybrid from the string Hybrid ID
-  // Slow string comparison method, only to be used on EFU config initialisation
+  /// \brief Get a Hybrid with a given Hybrid Id; if no Hybrid is located, an
+  /// exception is thrown (this implementation uses a fast map-based look-up)
   ESSReadout::Hybrid &getHybrid(const std::string &HybridID) {
-    for (int RingID = 0; RingID <= MaxRing; RingID++) {
-      for (int FENID = 0; FENID <= MaxFEN; FENID++) {
-        for (int HybridNum = 0; HybridNum <= MaxHybrid; HybridNum++) {
-          if (Hybrids[RingID][FENID][HybridNum].HybridId == HybridID) {
-            return Hybrids[RingID][FENID][HybridNum];
-          }
-        }
-      }
+    // If Hybrid with a given Id is in the map, return it
+    const auto iter = HybridMap.find(HybridID);
+    if (iter != HybridMap.cend()) {
+      return *(iter->second);
     }
+
     XTRACE(INIT, ERR, "HybridID %s requested not in configuration file",
            HybridID.c_str());
     throw std::runtime_error("Invalid HybridID requested");
@@ -102,8 +89,11 @@ public:
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
   } FileParameters;
 
-  // Derived parameters
+  // Container used for storing a Hybrid with a given (Ring, FEN, Hybrid)
   ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+
+  // Map used for fast access to a Hybrid with a given Id
+  std::map<std::string, ESSReadout::Hybrid*> HybridMap;
 
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
@@ -111,6 +101,7 @@ public:
   // Other parameters
   std::string ExpectedName{""};
   std::string FileName{""};
+
   // JSON object
   nlohmann::json root;
 };
