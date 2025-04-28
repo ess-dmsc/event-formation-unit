@@ -79,7 +79,7 @@ public:
   }
 
   /// \brief Applies calibration to each VMM on Hybrid matching given Hybrid ID
-  void applyCalibration(const std::string &HybridID, nlohmann::json Calibration);
+  void applyCalibration(const std::string &HybridID, const nlohmann::json &Calibration);
 
 public:
   struct {
