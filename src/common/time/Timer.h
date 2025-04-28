@@ -11,16 +11,26 @@
 #include <cstdint>
 
 class Timer {
-
-  typedef std::chrono::high_resolution_clock HRClock;
-  typedef std::chrono::time_point<HRClock> TP;
+  using HRClock = std::chrono::high_resolution_clock;
+  using TP = std::chrono::_V2::system_clock::time_point;
 
 public:
-  Timer(void);
+  /// \brief Constructor
+  Timer();
 
-  void reset(void); ///< record current time_point
+  /// \brief Record current time point
+  void reset();
 
-  uint64_t timeus(void); ///< time since tp
+  /// \return Return time in micro seconds since last time point
+  uint64_t timeus();
+
+  /// \return Return time in milli seconds since last time point
+  uint64_t timems();
+
+  /// \return the current time
+  static TP now() {
+    return HRClock::now();
+  }
 
 private:
   TP T0;

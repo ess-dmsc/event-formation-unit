@@ -8,11 +8,22 @@
 
 #include <common/time/Timer.h>
 
-Timer::Timer(void) { T0 = HRClock::now(); }
+Timer::Timer() {
+  T0 = HRClock::now();
+}
 
-void Timer::reset(void) { T0 = HRClock::now(); }
+void Timer::reset() {
+  T0 = HRClock::now();
+}
 
-uint64_t Timer::timeus(void) {
-  Timer::TP T1 = Timer::HRClock::now();
+uint64_t Timer::timeus() {
+  TP T1 = HRClock::now();
+
   return std::chrono::duration_cast<std::chrono::microseconds>(T1 - T0).count();
+}
+
+uint64_t Timer::timems() {
+  TP T1 = HRClock::now();
+
+  return std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count();
 }

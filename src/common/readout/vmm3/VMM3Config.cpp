@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -82,6 +82,7 @@ void VMM3Config::applyVMM3Config() {
         throw std::runtime_error(Message);
       }
 
+      // Define new hybrid
       ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
@@ -102,6 +103,9 @@ void VMM3Config::applyVMM3Config() {
 
       Hybrid.HybridNumber = NumHybrids;
       NumHybrids++;
+
+      // Add Hybrid to the map for fast look-up
+      HybridMap[Hybrid.HybridId] = &Hybrid;
     }
 
     LOG(INIT, Sev::Info,
@@ -150,7 +154,7 @@ void VMM3Config::loadAndApplyCalibration(const std::string &CalibFile) {
 
 /// \brief validate the hybrid id string
 /// \todo too simplistic?
-bool VMM3Config::validHybridId(const std::string &HybridID) {
+bool VMM3Config::validHybridId(const std::string &HybridID) const {
   return (HybridID.length() == 32);
 }
 
