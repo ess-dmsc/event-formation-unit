@@ -17,7 +17,6 @@ namespace Dream {
 
 // Settings local to DREAM data generator
 struct {
-  bool Tof{false};
   int DetectorMask{-1}; // mask of active detector elements
   int Param2{-1}; // free parameter to modify data pattern
   int Param3{-1}; // free parameter to modify data pattern

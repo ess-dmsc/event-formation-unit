@@ -37,8 +37,6 @@ MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Pa
   app.add_option("--vmmmask", MultiBladeSettings.VMMMask, "Mask out unused VMMs");
 
   // Flags
-  app.add_flag("--tof",   MultiBladeSettings.Tof,   "Generate tof distribution");
-  app.add_flag("--debug", MultiBladeSettings.Debug, "Print debug info");
 
   // clang-format on
 
@@ -85,7 +83,7 @@ void MultiBladeGenerator::generateData() {
       ReadoutData->FENId   = FENId;
 
       // Tof or not
-      if (MultiBladeSettings.Tof) {
+      if (Settings.Tof) {
         ReadoutData->TimeHigh = getPulseTimeHigh();
         ReadoutData->TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * mTicksPerMs);
       } else {
@@ -141,7 +139,7 @@ void MultiBladeGenerator::generateData() {
         addTickBtwEventsToReadoutTime();
       }
 
-      if (MultiBladeSettings.Debug) {
+      if (Settings.Debug) {
         if (i == 0) {
           fmt::print("Fiber = {}\n", FiberId);
           fmt::print("FENId = {}\n", FENId);

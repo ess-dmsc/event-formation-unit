@@ -53,7 +53,7 @@ public:
     uint8_t ChannelId{0};              //< The channel ID.
     uint32_t Offset{0};                //< The offset value.
     bool ShakeBeam{false};             //< Flag to shake the beam.
-    bool Randomise{false};             //< Flag to randomize the data.
+    bool Randomise{false};             //< Flag to Randomise the data.
     GeneratorType generatorType{
        GeneratorType::Distribution};   // The generator type.
     std::optional<uint32_t> Value;     // The optional value.

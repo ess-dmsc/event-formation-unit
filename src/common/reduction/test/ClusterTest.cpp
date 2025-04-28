@@ -323,7 +323,7 @@ TEST_F(ClusterTest, HasGap) {
   ASSERT_EQ(cluster.hasGap(1), false);
 }
 
-/// \todo have functions for generation of randomized clusters
+/// \todo have functions for generation of randomised clusters
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
