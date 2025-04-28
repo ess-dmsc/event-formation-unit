@@ -159,17 +159,24 @@ void CDCalibration::loadCalibration() {
 
 }
 
-nlohmann::json CDCalibration::getObjectAndCheck(nlohmann::json JsonObject,
-                                                std::string Property) {
+nlohmann::json CDCalibration::getObjectAndCheck(const nlohmann::json &JsonObject,
+                                                const std::string &Property) {
+  // Check if the key exists
+  if (!JsonObject.contains(Property)) {
+    Message = fmt::format("The key '{}' is not present in JSON object", Property);
+    throwException(Message);
+  }
+
+  // Then check if the value is a valid JSON object
   nlohmann::json JsonObj = JsonObject[Property];
   if (not JsonObj.is_object()) {
-    Message = fmt::format("'{}' does not return a json object", Property);
+    Message = fmt::format("The key '{}' does not return a JSON object", Property);
     throwException(Message);
   }
   return JsonObj;
 }
 
-void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
+void CDCalibration::validateIntervals(int Index, const nlohmann::json &Parameter) {
   std::vector<std::pair<double, double>> Intervals = Parameter["intervals"];
   if (Intervals.size() != (unsigned int)(Parms.GroupSize)) {
     Message = fmt::format(
@@ -197,7 +204,7 @@ void CDCalibration::validateIntervals(int Index, nlohmann::json Parameter) {
   }
 }
 
-void CDCalibration::validatePolynomials(int Index, nlohmann::json Parameter) {
+void CDCalibration::validatePolynomials(int Index, const nlohmann::json &Parameter) {
   std::vector<std::vector<double>> Polynomials = Parameter["polynomials"];
   if (Polynomials.size() != (unsigned int)Parms.GroupSize) {
     Message = fmt::format("Groupindex {} bad groupsize: expected {}, got {}",

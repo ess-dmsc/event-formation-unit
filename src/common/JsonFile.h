@@ -45,7 +45,7 @@ inline void json_change_key(nlohmann::json &object, const std::string& old_key, 
 
 /// \brief Given a nlohmann json object and a list of known required fields
 /// return a string with the missing fields.
-inline void json_check_keys(const std::string &Prefix, nlohmann::json &object,
+inline void json_check_keys(const std::string &Prefix, const nlohmann::json &object,
   std::vector<std::string> RequiredFields) {
   std::string Missing{""};
 

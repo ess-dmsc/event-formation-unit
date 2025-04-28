@@ -159,7 +159,7 @@ bool VMM3Config::validHybridId(const std::string &HybridID) const {
 }
 
 void VMM3Config::applyCalibration(const std::string &HybridID,
-                                  nlohmann::json Calibration) {
+                                  const nlohmann::json &Calibration) {
 
   json_check_keys("Calibration error", Calibration, {"VMMHybridCalibration"});
 

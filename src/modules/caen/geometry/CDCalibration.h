@@ -78,7 +78,7 @@ private:
   void throwException(const std::string &Message);
 
   ///\brief Do an initial sanity check of the provided json file
-  /// called from parseCaibration()
+  /// called from parseCalibration()
   void consistencyCheck();
 
   ///\brief Load the parameters into a suitable structure
@@ -87,7 +87,7 @@ private:
   ///\brief validate that the supplied intervals are consistent
   ///\param Index groupindex used for error messages
   ///\param Parameter the parameter section object
-  void validateIntervals(int Index, nlohmann::json Parameter);
+  void validateIntervals(int Index, const nlohmann::json &Parameter);
 
   ///\brief helper function to validate points in an interval are within
   /// the unit interval.
@@ -99,14 +99,14 @@ private:
   /// values and complain if the fraction is too large.
   ///\param Index groupindex used for error messages
   ///\param Parameter the parameter section object
-  void validatePolynomials(int Index, nlohmann::json Parameter);
+  void validatePolynomials(int Index, const nlohmann::json &Parameter);
 
   ///\brief helper function to check that the returned value is an object.
-  /// \todo not torally sure when it is expected to be this. For example if
+  /// \todo not totally sure when it is expected to be this. For example if
   /// the returned value can be parsed as a string it is not an object.
   /// might be removed in the future if not useful.
-  nlohmann::json getObjectAndCheck(nlohmann::json JsonObject,
-                                   std::string Property);
+  nlohmann::json getObjectAndCheck(const nlohmann::json &JsonObject,
+                                   const std::string &Property);
 
   std::string Name{""}; ///< Detector/instrument name provided in constructor
 
