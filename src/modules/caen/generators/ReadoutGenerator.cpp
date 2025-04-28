@@ -34,8 +34,6 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::
   app.add_option("--groupmask", CaenSettings.GroupMask, "Mask out unused Groups");
 
   // Flags
-  app.add_flag("--debug",   CaenSettings.Debug,   "print debug information");
-  app.add_flag("--tof",     CaenSettings.Tof,     "generate tof distribution");
   app.add_flag("--loki",    CaenSettings.Loki,    "generate data for all four amplitudes");
   app.add_flag("--bitmaps", CaenSettings.Bitmaps, "generate data using bitmap images");
 
@@ -48,7 +46,7 @@ void ReadoutGenerator::generateRandomData() {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
 
-    if (CaenSettings.Tof) {
+    if (Settings.Tof) {
       double TofMs = TofDist.getValue();
       ReadoutData.TimeHigh = getPulseTimeHigh();
       ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
@@ -73,7 +71,7 @@ void ReadoutGenerator::generateRandomData() {
       ReadoutData.AmpD = 0;
     }
 
-    if (CaenSettings.Debug) {
+    if (Settings.Debug) {
       printDebug(ReadoutData);
     }
   }
@@ -81,7 +79,7 @@ void ReadoutGenerator::generateRandomData() {
 
 void ReadoutGenerator::generateMaskedData() {
   // Check amplitude algorithm for all valid straw and position combos
-  if (CaenSettings.Debug) {
+  if (Settings.Debug) {
     testAmplitudes();
   }
 
@@ -119,7 +117,7 @@ void ReadoutGenerator::generateMaskedData() {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
 
-    if (CaenSettings.Tof) {
+    if (Settings.Tof) {
       double TofMs = TofDist.getValue();
       ReadoutData.TimeHigh = getPulseTimeHigh();
       ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
@@ -170,7 +168,7 @@ void ReadoutGenerator::generateMaskedData() {
     ReadoutData.AmpC = C & CaenSettings.AmplitudeMask;
     ReadoutData.AmpD = D & CaenSettings.AmplitudeMask;
 
-    if (CaenSettings.Debug) {
+    if (Settings.Debug) {
       printDebug(ReadoutData);
     }
 

@@ -21,17 +21,11 @@ public:
   struct {
     std::string Detector;
 
-    /// \brief Generate nicely distributed tof data
-    bool Tof{false};
-
     /// \brief If true, generate data for four amplitudes
     bool Loki{false};
 
     /// \brief If true, use bitmap images as pixel masks for the data
     bool Bitmaps{false};
-
-    /// \brief Print debug info
-    bool Debug{false};
 
     // Masks used to restrict generated data
     uint32_t AmplitudeMask{0xffff};  // Amplitudes

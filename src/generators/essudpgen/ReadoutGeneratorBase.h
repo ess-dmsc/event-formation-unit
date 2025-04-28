@@ -28,6 +28,9 @@ public:
   ///
   // clang-format off
   struct GeneratorSettings {
+    bool Tof{false};                      ///< Generate nicely distributed tof data
+    bool Debug{false};                    ///< Print debug info
+
     uint32_t NFibers{2};                  ///< Number of fibers
     uint32_t FiberMask{0x00ffffff};       ///< Mask out unused fibers
 
@@ -47,7 +50,7 @@ public:
 
     uint8_t headerVersion{1};             ///< Header version
     bool Loop{false};                     ///< Flag to keep looping the same file forever
-    bool Randomise{false};                ///< Flag to randomize header and data
+    bool Randomise{false};                ///< Flag to randomise header and data
     uint32_t KernelTxBufferSize{1000000}; ///< Kernel transmit buffer size
   } Settings;
   // clang-format on

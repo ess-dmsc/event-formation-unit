@@ -26,18 +26,20 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   Settings.Type = Type;
 
   // Options
-  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
+  app.add_option("-i, --ip", Settings.IpAddress, 
+                 "Destination IP address");
+  app.add_option("-p, --port", Settings.UDPPort, 
+                 "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
                  "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle,
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.TypeOverride, "Detector type id");
-
-  app.add_option("-f, --fibers", Settings.NFibers,   "Number of Fibers used in data header");
-
+  app.add_option("-y, --type", Settings.TypeOverride, 
+                 "Detector type id");
+  app.add_option("-f, --fibers", Settings.NFibers,
+                 "Number of Fibers used in data header");
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
                  "each packet)");
@@ -53,7 +55,12 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
   // Flags
   app.add_flag("-r, --random", Settings.Randomise,
                "Randomise header and data fields");
-  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+  app.add_flag("-l, --loop", Settings.Loop,
+               "Run forever");
+  app.add_flag("--debug", Settings.Debug,
+               "print debug information");
+  app.add_flag("--tof", Settings.Tof,
+               "generate tof distribution");
 
   // Look-up convenience
   NameToType["CBM"]      = Parser::CBM;

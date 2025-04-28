@@ -14,8 +14,6 @@
 namespace Dream {
 
 ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
-  app.add_flag("--tof", DreamSettings.Tof,
-                "generate tof distribution");
   app.add_option("--p1", DreamSettings.DetectorMask,
                 "Detector element mask");
   app.add_option("--p2", DreamSettings.Param2,
@@ -31,7 +29,7 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
 
-  if (DreamSettings.Tof) {
+  if (Settings.Tof) {
     double TofMs = TofDist.getValue();
     ReadoutData.TimeHigh = getPulseTimeHigh();
     ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
