@@ -8,12 +8,14 @@ set(trex_udp_generated_INC
   ${ESS_MODULE_DIR}/trex/generators/ReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   )
 set(trex_udp_generated_SRC
   ${ESS_MODULE_DIR}/trex/generators/ReadoutGenerator.cpp
   ${ESS_MODULE_DIR}/trex/generators/udpgen.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   )
 create_executable(trex_udp_generated)
 
@@ -32,12 +34,14 @@ set(let_udp_generated_INC
   ${ESS_MODULE_DIR}/trex/generators/LETReadoutGenerator.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   )
 set(let_udp_generated_SRC
   ${ESS_MODULE_DIR}/trex/generators/LETReadoutGenerator.cpp
   ${ESS_MODULE_DIR}/trex/generators/udpgen_let.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   )
 create_executable(let_udp_generated)
 

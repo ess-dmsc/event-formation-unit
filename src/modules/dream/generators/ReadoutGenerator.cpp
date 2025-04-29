@@ -29,14 +29,10 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
 
-  if (Settings.Tof) {
-    double TofMs = TofDist.getValue();
-    ReadoutData.TimeHigh = getPulseTimeHigh();
-    ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
-  } else {
-    ReadoutData.TimeHigh = getReadoutTimeHigh();
-    ReadoutData.TimeLow = getReadoutTimeLow();
-  }
+  auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
+  ReadoutData.TimeHigh = pulseTimeHigh;
+  ReadoutData.TimeLow = pulseTimeLow;
+
   ReadoutData.OM = 0;
   ReadoutData.UnitId = 0; //will be determined later
 

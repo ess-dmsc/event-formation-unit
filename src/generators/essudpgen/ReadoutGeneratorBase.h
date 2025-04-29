@@ -10,6 +10,7 @@
 #pragma once
 
 #include <CLI/CLI.hpp>
+#include <generators/functiongenerators/DistributionGenerator.h>
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
@@ -148,10 +149,17 @@ protected:
   /// \brief Increments the readout time with ticks between events according to
   /// the settings.
   ///
-
   inline void addTickBtwEventsToReadoutTime() {
     readoutTime += Settings.TicksBtwEvents;
   }
+
+  ///
+  /// \brief Get value tuple with readout time. If --ToF option is set 
+  /// the value will include a time of flight distribution calculated in 
+  /// DistributionGenerator
+  /// \return Readout time tuple [high, low].
+  ///
+  virtual std::tuple<int32_t, uint32_t> getReadOutTime();
 
   ///
   /// \brief Gets the value of readoutTimeHigh.
@@ -256,5 +264,11 @@ private:
   esstime::ESSTime  readoutTime;                 ///< Readout time
   esstime::TimeDurationNano pulseFrequencyNs{0}; ///< Pulse frequency in nanoseconds
   // clang-format on
+
+  /// \brief For TOF distribution calculations
+  /// TofDist could be calculated from default values in Settings struct
+  /// by setting Frequency to 14
+  DistributionGenerator timeOffFlightDist{ 1000.0/14 };
+  float TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

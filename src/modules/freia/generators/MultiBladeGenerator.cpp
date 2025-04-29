@@ -60,7 +60,6 @@ void MultiBladeGenerator::generateData() {
     // Get FEN and Fibers Ids + Tof
     const uint8_t FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.FiberVals, MultiBladeSettings.FiberMask);
     const uint8_t FENId   = Fuzzer.randU8WithMask(MultiBladeSettings.FENVals,   MultiBladeSettings.FENMask);
-    const double TofMs    = mTofDist.getValue();
 
     // Get the VMM Id
     const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.VMMVals, MultiBladeSettings.VMMMask);
@@ -82,15 +81,10 @@ void MultiBladeGenerator::generateData() {
       ReadoutData->FiberId = FiberId;
       ReadoutData->FENId   = FENId;
 
-      // Tof or not
-      if (Settings.Tof) {
-        ReadoutData->TimeHigh = getPulseTimeHigh();
-        ReadoutData->TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * mTicksPerMs);
-      } else {
-        ReadoutData->TimeHigh = getReadoutTimeHigh();
-        ReadoutData->TimeLow = getReadoutTimeLow();
-      }
-
+      auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
+      ReadoutData->TimeHigh = pulseTimeHigh;
+      ReadoutData->TimeLow = pulseTimeLow;
+  
       // Misc
       ReadoutData->DataLength = DATA_LENGTH;
       ReadoutData->OTADC = 1000;

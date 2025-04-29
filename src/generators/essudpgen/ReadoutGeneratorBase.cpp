@@ -89,6 +89,16 @@ void ReadoutGeneratorBase::setDetectorType(Parser::DetectorType Type) {
   Settings.Type = Type;
 }
 
+std::tuple<int32_t, uint32_t> ReadoutGeneratorBase::getReadOutTime() {
+  if (Settings.Tof) {
+    const double timeOfFlight = timeOffFlightDist.getValue();
+    return std::make_tuple(
+      getPulseTimeHigh(), 
+      getPulseTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs));
+  } 
+  return std::make_tuple(getPulseTimeHigh(), getPulseTimeLow());
+}
+
 uint16_t ReadoutGeneratorBase::makePacket() {
   assert(ReadoutDataSize != 0); // must be set in generator application
   generateHeader();

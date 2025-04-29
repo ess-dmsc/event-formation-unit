@@ -45,15 +45,9 @@ void ReadoutGenerator::generateRandomData() {
   for (size_t Count = 0; Count < Settings.NumReadouts; Count++) {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
-
-    if (Settings.Tof) {
-      double TofMs = TofDist.getValue();
-      ReadoutData.TimeHigh = getPulseTimeHigh();
-      ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
-    } else {
-      ReadoutData.TimeHigh = getReadoutTimeHigh();
-      ReadoutData.TimeLow = getReadoutTimeLow();
-    }
+    auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
+    ReadoutData.TimeHigh = pulseTimeHigh;
+    ReadoutData.TimeLow = pulseTimeLow;
 
     ReadoutData.FlagsOM = 0;
 
@@ -117,14 +111,9 @@ void ReadoutGenerator::generateMaskedData() {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
 
-    if (Settings.Tof) {
-      double TofMs = TofDist.getValue();
-      ReadoutData.TimeHigh = getPulseTimeHigh();
-      ReadoutData.TimeLow = getPulseTimeLow() + static_cast<uint32_t>(TofMs * TicksPerMs);
-    } else {
-      ReadoutData.TimeHigh = getReadoutTimeHigh();
-      ReadoutData.TimeLow = getReadoutTimeLow();
-    }
+    auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
+    ReadoutData.TimeHigh = pulseTimeHigh;
+    ReadoutData.TimeLow = pulseTimeLow;
 
     ReadoutData.FlagsOM = 0;
 
