@@ -155,7 +155,7 @@ protected:
 
   ///
   /// \brief Get a tuple containing the high and the low readout time. If the 
-  /// --ToF option  is set the value will include a time of flight distribution 
+  /// --ToF option is set the value will include a time of flight distribution 
   /// calculated in DistributionGenerator
   /// \return Readout time pair [high, low].
   ///
