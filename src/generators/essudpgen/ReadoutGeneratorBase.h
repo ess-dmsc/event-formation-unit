@@ -154,12 +154,12 @@ protected:
   }
 
   ///
-  /// \brief Get value tuple with readout time. If --ToF option is set 
-  /// the value will include a time of flight distribution calculated in 
-  /// DistributionGenerator
-  /// \return Readout time tuple [high, low].
+  /// \brief Get a tuple containing the high and the low readout time. If the 
+  /// --ToF option  is set the value will include a time of flight distribution 
+  /// calculated in DistributionGenerator
+  /// \return Readout time pair [high, low].
   ///
-  virtual std::tuple<int32_t, uint32_t> getReadOutTime();
+  virtual std::pair<uint32_t, uint32_t> getReadOutTimes();
 
   ///
   /// \brief Gets the value of readoutTimeHigh.
@@ -182,18 +182,6 @@ protected:
   inline esstime::TimeDurationNano getReadoutTimeNs() const {
     return readoutTime.toNS();
   }
-
-  ///
-  /// \brief Gets the value of pulseTimeHigh.
-  /// \return The value of pulseTimeHigh.
-  ///
-  inline uint32_t getPulseTimeHigh() const { return pulseTime.getTimeHigh(); }
-
-  ///
-  /// \brief Gets the value of pulseTimeLow.
-  /// \return The value of pulseTimeLow.
-  ///
-  inline uint32_t getPulseTimeLow() const { return pulseTime.getTimeLow(); }
 
   ///
   /// \brief Gets the value of pulseTime in nanoseconds.

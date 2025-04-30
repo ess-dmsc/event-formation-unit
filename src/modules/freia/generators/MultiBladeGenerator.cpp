@@ -81,9 +81,9 @@ void MultiBladeGenerator::generateData() {
       ReadoutData->FiberId = FiberId;
       ReadoutData->FENId   = FENId;
 
-      auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
-      ReadoutData->TimeHigh = pulseTimeHigh;
-      ReadoutData->TimeLow = pulseTimeLow;
+      auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+      ReadoutData->TimeHigh = readoutTimeHigh;
+      ReadoutData->TimeLow = readoutTimeLow;
   
       // Misc
       ReadoutData->DataLength = DATA_LENGTH;

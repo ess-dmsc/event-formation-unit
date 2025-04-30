@@ -45,9 +45,9 @@ void ReadoutGenerator::generateRandomData() {
   for (size_t Count = 0; Count < Settings.NumReadouts; Count++) {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
-    auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
-    ReadoutData.TimeHigh = pulseTimeHigh;
-    ReadoutData.TimeLow = pulseTimeLow;
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData.TimeHigh = readoutTimeHigh;
+    ReadoutData.TimeLow = readoutTimeLow;
 
     ReadoutData.FlagsOM = 0;
 
@@ -111,9 +111,9 @@ void ReadoutGenerator::generateMaskedData() {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
 
-    auto [pulseTimeHigh, pulseTimeLow] = getReadOutTime();
-    ReadoutData.TimeHigh = pulseTimeHigh;
-    ReadoutData.TimeLow = pulseTimeLow;
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData.TimeHigh = readoutTimeHigh;
+    ReadoutData.TimeLow = readoutTimeLow;
 
     ReadoutData.FlagsOM = 0;
 
