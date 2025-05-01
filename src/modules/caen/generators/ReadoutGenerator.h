@@ -11,7 +11,6 @@
 
 #include <caen/readout/DataParser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <generators/functiongenerators/DistributionGenerator.h>
 
 namespace Caen {
 
@@ -131,10 +130,6 @@ public:
   ///
   /// \return A pointer to the readout data
   DataParser::CaenReadout *getReadoutDataPtr(size_t Index);
-
-  ///\brief For TOF distribution calculations
-  DistributionGenerator TofDist{1000.0/14};
-  float TicksPerMs{88552.0};
 };
 } // namespace Caen
 // GCOVR_EXCL_STOP

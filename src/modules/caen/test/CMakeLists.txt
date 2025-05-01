@@ -80,6 +80,7 @@ set(CombinedParserTest_INC
   ${ESS_COMMON_DIR}/readout/ess/Parser.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
   )
 set(CombinedParserTest_SRC
   CombinedParserTest.cpp
@@ -88,5 +89,6 @@ set(CombinedParserTest_SRC
   ${ESS_COMMON_DIR}/readout/ess/Parser.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   )
 create_test_executable(CombinedParserTest)

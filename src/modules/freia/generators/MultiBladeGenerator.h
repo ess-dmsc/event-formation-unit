@@ -10,7 +10,6 @@
 #pragma once
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <generators/functiongenerators/DistributionGenerator.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
 namespace Freia {
@@ -63,12 +62,6 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
 
   ///
   const uint32_t mTimeToFirstReadout{1000};
-
-  /// \brief TOF distribution
-  DistributionGenerator mTofDist{1000.0/14};
-
-  /// \brief Tick frequency
-  float mTicksPerMs{88552.0};
 };
 
 } // namespace Freia
