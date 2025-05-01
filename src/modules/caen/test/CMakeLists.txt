@@ -76,7 +76,7 @@ create_test_executable(CaenDataParserTest)
 ##
 set(CombinedParserTest_INC
   ${ESS_MODULE_DIR}/caen/readout/DataParser.h
-  ${ESS_MODULE_DIR}/loki/generators/LokiReadoutGenerator.h
+  ${ESS_MODULE_DIR}/loki/generators/ReadoutGenerator.h
   ${ESS_COMMON_DIR}/readout/ess/Parser.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
@@ -84,7 +84,7 @@ set(CombinedParserTest_INC
   )
 set(CombinedParserTest_SRC
   CombinedParserTest.cpp
-  ${ESS_MODULE_DIR}/loki/generators/LokiReadoutGenerator.cpp
+  ${ESS_MODULE_DIR}/loki/generators/ReadoutGenerator.cpp
   ${ESS_MODULE_DIR}/caen/readout/DataParser.cpp
   ${ESS_COMMON_DIR}/readout/ess/Parser.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp

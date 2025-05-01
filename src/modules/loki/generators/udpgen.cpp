@@ -6,12 +6,12 @@
 /// \brief Generate artificial LOKI readouts
 //===----------------------------------------------------------------------===//
 
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
 
-  Caen::LokiReadoutGenerator LokiGen;
+  Caen::ReadoutGenerator LokiGen;
   uint8_t LokiDataSize = sizeof(Caen::DataParser::CaenReadout);
   LokiGen.setReadoutDataSize(LokiDataSize);
 
