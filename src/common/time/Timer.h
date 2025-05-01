@@ -12,7 +12,7 @@
 
 class Timer {
   using HRClock = std::chrono::high_resolution_clock;
-  using TP = std::chrono::_V2::system_clock::time_point;
+  using TP = std::chrono::time_point<HRClock>;
 
 public:
   /// \brief Constructor
