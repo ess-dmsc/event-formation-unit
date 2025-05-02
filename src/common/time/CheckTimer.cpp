@@ -9,32 +9,25 @@
 
 #include <common/time/CheckTimer.h>
 
-///
-CheckTimer::CheckTimer(void) {
+CheckTimer::CheckTimer(uint64_t Timeout)
+  : TimeOutNS(Timeout) {
   reset();
 }
 
-/// \param Timeout
-CheckTimer::CheckTimer(uint64_t Timeout) : TimeoutNS(Timeout) {
-  reset();
-}
-
-/// Determine if a timeout has occurred and reset timer
-bool CheckTimer::timeout(void) {
-  if (timetsc() >= TimeoutNS) {
+bool CheckTimer::timeout() {
+  if (timeNS() >= TimeOutNS) {
     reset();
     return true;
   }
+
   return false;
 }
 
-///
-void CheckTimer::reset(void) {
-  T0TimePoint = std::chrono::high_resolution_clock::now();
+void CheckTimer::reset() {
+  T0 = std::chrono::high_resolution_clock::now();
 }
 
-///
-uint64_t CheckTimer::timetsc(void) {
-  auto Now = std::chrono::high_resolution_clock::now();
-  return std::chrono::duration_cast<std::chrono::nanoseconds>(Now - T0TimePoint).count();
+uint64_t CheckTimer::timeNS() {
+  auto T1 = std::chrono::high_resolution_clock::now();
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(T1 - T0).count();
 }

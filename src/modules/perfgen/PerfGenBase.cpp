@@ -79,7 +79,7 @@ void PerfGenBase::processingThread() {
 
   while (runThreads) {
     // ns since 1970 - but with us resolution
-    uint64_t EfuTime = EfuTimeRef + 1000 * Elapsed.timeus();
+    uint64_t EfuTime = EfuTimeRef + 1000 * Elapsed.timeUS();
     XTRACE(DATA, DEB, "EFU Time (ns since 1970): %lu", EfuTime);
     Serializer.checkAndSetReferenceTime(EfuTime);
 

@@ -172,7 +172,7 @@ void DreamBase::processingThread() {
     /// poll producer stats
     EventProducer.poll(0);
 
-    if (ProduceTimer.timetsc() >=
+    if (ProduceTimer.timeTSC() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(

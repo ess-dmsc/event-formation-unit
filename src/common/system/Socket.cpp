@@ -106,7 +106,7 @@ void Socket::getBufferSizes(int &sendBuffer, int &receiveBuffer) {
   receiveBuffer = getSockOpt(SO_RCVBUF);
 }
 
-void Socket::printBufferSizes(void) {
+void Socket::printBufferSizes() {
   LOG(IPC, Sev::Info, "Socket receive buffer size: {}", getSockOpt(SO_RCVBUF));
   LOG(IPC, Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
