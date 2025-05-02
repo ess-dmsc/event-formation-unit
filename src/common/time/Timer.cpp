@@ -16,13 +16,13 @@ void Timer::reset() {
   T0 = HRClock::now();
 }
 
-uint64_t Timer::timeus() {
+uint64_t Timer::timeUS() {
   TP T1 = HRClock::now();
 
   return std::chrono::duration_cast<std::chrono::microseconds>(T1 - T0).count();
 }
 
-uint64_t Timer::timems() {
+uint64_t Timer::timeMS() {
   TP T1 = HRClock::now();
 
   return std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count();

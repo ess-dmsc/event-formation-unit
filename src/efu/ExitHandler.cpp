@@ -45,7 +45,7 @@ ExitHandler::Exit ExitHandler::HandleLastSignal() {
 }
 
 // Obtain a backtrace and print it to stdout.
-void ExitHandler::printTrace(void) {
+void ExitHandler::printTrace() {
   void *array[10];
   size_t size;
   char **strings;

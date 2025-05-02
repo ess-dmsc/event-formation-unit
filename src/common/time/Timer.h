@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <chrono>
 #include <cstdint>
 
@@ -22,10 +23,10 @@ public:
   void reset();
 
   /// \return Return time in micro seconds since last time point
-  uint64_t timeus();
+  uint64_t timeUS();
 
   /// \return Return time in milli seconds since last time point
-  uint64_t timems();
+  uint64_t timeMS();
 
   /// \return the current time
   static TP now() {

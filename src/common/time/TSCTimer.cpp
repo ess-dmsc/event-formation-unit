@@ -3,28 +3,29 @@
 ///
 /// \file
 ///
-/// \brief Implementation (\todo put in header?
 //===----------------------------------------------------------------------===//
 
 #include <common/time/TSCTimer.h>
+#include <common/system/intel.h>
 
-///
-TSCTimer::TSCTimer(void) { T0 = rdtsc(); }
+TSCTimer::TSCTimer(uint64_t Timeout)
+  : TimeOutTicks(Timeout) {
+  T0 = rdtsc();
+}
 
-///
-TSCTimer::TSCTimer(uint64_t Timeout) : TimeoutTicks(Timeout) { T0 = rdtsc(); }
-
-/// Determine if a timeout has occurred and reset timer
-bool TSCTimer::timeout(void) {
-  if (timetsc() >= TimeoutTicks) {
+bool TSCTimer::timeout() {
+  if (timeTSC() >= TimeOutTicks) {
     reset();
     return true;
   }
+
   return false;
 }
 
-///
-void TSCTimer::reset(void) { T0 = rdtsc(); }
+void TSCTimer::reset() {
+  T0 = rdtsc();
+}
 
-///
-uint64_t TSCTimer::timetsc(void) { return (rdtsc() - T0); }
+uint64_t TSCTimer::timeTSC() {
+  return (rdtsc() - T0);
+}

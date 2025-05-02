@@ -95,7 +95,7 @@ int MainProg::run(Detector *inst) {
 
   while (true) {
     // Do not allow immediate exits
-    if (RunTimer.timeus() >= MicrosecondsPerSecond / 10) {
+    if (RunTimer.timeUS() >= MicrosecondsPerSecond / 10) {
       if (keep_running == 0) {
         LOG(MAIN, Sev::Info, "Application stop, Exiting...");
         detector->stopThreads();
@@ -104,7 +104,7 @@ int MainProg::run(Detector *inst) {
       }
     }
 
-    if (RunTimer.timeus() >=
+    if (RunTimer.timeUS() >=
         DetectorSettings.StopAfterSec * MicrosecondsPerSecond) {
       LOG(MAIN, Sev::Info, "Application timeout, Exiting...");
       detector->stopThreads();
@@ -112,8 +112,8 @@ int MainProg::run(Detector *inst) {
       break;
     }
 
-    if (livestats.timeus() >= MicrosecondsPerSecond) {
-      statUpTime = RunTimer.timeus() / 1000000;
+    if (livestats.timeUS() >= MicrosecondsPerSecond) {
+      statUpTime = RunTimer.timeUS() / 1000000;
       metrics.publish(detector, mainStats);
       livestats.reset();
     }

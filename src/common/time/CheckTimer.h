@@ -1,9 +1,10 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief platform independent equivalent replacement of wrapper for the cheap and fast time stamp counter (TSC)
+/// \brief platform independent equivalent replacement of wrapper for the cheap
+/// and fast time stamp counter (TSC)
 ///
 /// Uses the standard chrono library to provide a high resolution timer.
 //===----------------------------------------------------------------------===//
@@ -16,22 +17,20 @@
 class CheckTimer {
 
 public:
-  /// Create a check timer without timeout value
-  CheckTimer(void);
+  /// \brief Create a check timer with a timeout value in nanoseconds
+  /// \param TimeOut If a time out is not set, use this 'infinite' value
+  CheckTimer(uint64_t TimeOut=0xffffffffffffffff);
 
-  /// Create a check timer with a timeout value in nanoseconds
-  CheckTimer(uint64_t TimeOut);
+  /// \brief If a timeout has occurred, then reset timer
+  bool timeout();
 
-  // Has timeout occurred? Then reset timer
-  bool timeout(void);
+  /// \brief Record current time point
+  void reset();
 
-  void reset(void); ///< record current time_point
-
-  uint64_t timetsc(void); ///< time since T0
+  /// \brief Return time since last recorded time stamp
+  uint64_t timeNS();
 
 private:
-  std::chrono::high_resolution_clock::time_point T0TimePoint;
-
-  // If timeout not set use this 'infinite' value
-  uint64_t TimeoutNS{0xffffffffffffffff};
+  std::chrono::high_resolution_clock::time_point T0;
+  uint64_t TimeOutNS;
 };

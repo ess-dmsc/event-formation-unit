@@ -65,7 +65,7 @@ void StatPublisher::handleReconnect() {
   if (Retries == 1) { // Not started yet
     reconnectHelper();
   } else {
-    if (ReconnectTime.timeus() < ReconnectDelayUS) {
+    if (ReconnectTime.timeUS() < ReconnectDelayUS) {
       return;
     }
     reconnectHelper();
