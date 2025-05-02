@@ -13,6 +13,15 @@ set(ProducerTest_INC test/KafkaMocks.h)
 create_test_executable(ProducerTest)
 target_include_directories(ProducerTest PRIVATE ${FakeIt_INCLUDE_DIR})
 
+# Add compiler-specific options for ProducerTest
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Options specific to Clang compiler
+  target_compile_options(ProducerTest PRIVATE -Wno-cast-function-type-mismatch 
+  -Wno-missing-template-arg-list-after-template-kw)
+  message(STATUS "ECDC: To compile fakeit mockings, we set 
+  \033[1m-Wno-cast-function-type-mismatch 
+  -Wno-missing-template-arg-list-after-template-kw\033[0m for clang")
+endif()
 
 set(EV44SerializerTest_SRC
   test/EV44SerializerTest.cpp

@@ -68,7 +68,7 @@ variables:
 
         echo "Installing dependencies"
 
-        conan install --build=missing .. --profile=$CONAN_PROFILE
+        conan install --build=missing --profile=$CONAN_PROFILE .. 
 
         conan info ../conanfile.txt > CONAN_INFO
 
