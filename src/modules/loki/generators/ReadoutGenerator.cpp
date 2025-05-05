@@ -10,7 +10,7 @@
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
 
 #include <cassert>
 #include <cstdint>
@@ -25,7 +25,7 @@
 
 namespace Caen {
 
-void LokiReadoutGenerator::generateData() {
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);

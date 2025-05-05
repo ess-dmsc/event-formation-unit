@@ -11,7 +11,7 @@
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-#include <loki/generators/LokiReadoutGenerator.h>
+#include <loki/generators/ReadoutGenerator.h>
 
 // Example of UDP readout
 // Two Data Sections each containing three readouts
@@ -63,7 +63,7 @@ TEST_F(CombinedParserTest, DataGenV0) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
-    Caen::LokiReadoutGenerator gen;
+    Caen::ReadoutGenerator gen;
     gen.Settings.headerVersion = 0;
     gen.Settings.NumReadouts = Sections;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
@@ -87,7 +87,7 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
-    Caen::LokiReadoutGenerator gen;
+    Caen::ReadoutGenerator gen;
     gen.Settings.NumReadouts = Sections;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
