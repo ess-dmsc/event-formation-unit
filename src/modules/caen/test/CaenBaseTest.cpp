@@ -27,7 +27,7 @@ public:
 };
 
 TEST_F(CaenBaseTest, LokiConstructor) {
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, DetectorType::LOKI);
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
 
@@ -35,7 +35,7 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
   Settings.DetectorName = "bifrost";
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, DetectorType::BIFROST);
   Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
@@ -45,7 +45,7 @@ TEST_F(CaenBaseTest, CspecConstructor) {
   Settings.ConfigFile = CSPEC_CONFIG;
   Settings.CalibFile = CSPEC_CALIB;
   Settings.DetectorName = "cspec";
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::CSPEC);
+  Caen::CaenBase Readout(Settings, DetectorType::CSPEC);
   Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
@@ -54,7 +54,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
   Settings.DetectorName = "miracles";
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, DetectorType::MIRACLES);
   Readout.Counters = {};
   EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
 }
@@ -124,7 +124,7 @@ std::vector<uint8_t> TestPacket2{
 // clang-format on
 
 TEST_F(CaenBaseTest, DataReceiveLoki) {
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, DetectorType::LOKI);
 
   writePacketToRxFIFO(Readout, BadTestPacket);
 
@@ -140,7 +140,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.DetectorName = "bifrost";
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, DetectorType::BIFROST);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -153,7 +153,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
   Settings.DetectorName = "miracles";
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, DetectorType::MIRACLES);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -162,7 +162,7 @@ TEST_F(CaenBaseTest, DataReceiveMiracles) {
 }
 
 TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, DetectorType::LOKI);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -184,7 +184,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
   Settings.UpdateIntervalSec = 0;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::BIFROST);
+  Caen::CaenBase Readout(Settings, DetectorType::BIFROST);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -199,7 +199,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
   Settings.ConfigFile = MIRACLES_CONFIG;
   Settings.CalibFile = MIRACLES_CALIB;
   Settings.UpdateIntervalSec = 0;
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::MIRACLES);
+  Caen::CaenBase Readout(Settings, DetectorType::MIRACLES);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -210,7 +210,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
 
 
 TEST_F(CaenBaseTest, EmulateFIFOError) {
-  Caen::CaenBase Readout(Settings, ESSReadout::Parser::LOKI);
+  Caen::CaenBase Readout(Settings, DetectorType::LOKI);
   EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
 
   Readout.startThreads();

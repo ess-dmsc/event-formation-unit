@@ -19,7 +19,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 ReadoutGenerator::ReadoutGenerator()
-    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
+    : ReadoutGeneratorBase(DetectorType::DREAM) {
   app.add_option("-n, --data", dreamSettings.FilePath,
                  "Record data file to read from");
 }

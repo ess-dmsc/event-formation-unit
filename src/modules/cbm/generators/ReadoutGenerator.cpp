@@ -24,7 +24,7 @@
 namespace cbm {
 
 ReadoutGenerator::ReadoutGenerator()
-    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::CBM) {
+    : ReadoutGeneratorBase(DetectorType::CBM) {
 
   // Set default values for the generator
 

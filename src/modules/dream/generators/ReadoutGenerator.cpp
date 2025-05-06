@@ -13,7 +13,7 @@
 
 namespace Dream {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::DREAM) {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::DREAM) {
   app.add_option("--p1", DreamSettings.DetectorMask,
                 "Detector element mask");
   app.add_option("--p2", DreamSettings.Param2,

@@ -17,7 +17,7 @@
 
 namespace Caen {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::Reserved) {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::RESERVED) {
   // clang-format off
 
   // Options

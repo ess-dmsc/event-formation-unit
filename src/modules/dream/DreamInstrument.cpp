@@ -33,11 +33,11 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
   ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 
   if (DreamConfiguration.Instance == Config::DREAM) {
-    Type = Parser::DREAM;
+    Type = DetectorType::DREAM;
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
-    Type = Parser::MAGIC;
+    Type = DetectorType::MAGIC;
   } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
-    Type = Parser::HEIMDAL;
+    Type = DetectorType::HEIMDAL;
   } else {
     throw std::runtime_error(
         "Unsupported instrument instance (not DREAM/MAGIC)");

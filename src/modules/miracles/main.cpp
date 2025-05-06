@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("miracles", argc, argv);
 
   auto Detector =
-      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::MIRACLES);
+      new Caen::CaenBase(Main.DetectorSettings, DetectorType::MIRACLES);
 
   return Main.run(Detector);
 }

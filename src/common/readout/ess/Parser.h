@@ -12,8 +12,10 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <common/time/ESSTime.h>
+#include <common/types/DetectorType.h>
+
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 
@@ -48,25 +50,6 @@ class Parser {
 public:
   enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
-  enum DetectorType {
-    Reserved = 0x00,
-    CBM = 0x10,
-    LOKI = 0x30,
-    TBL3HE = 0x32,
-    BIFROST = 0x34,
-    MIRACLES = 0x38,
-    CSPEC = 0x3C,
-    TREX = 0x40,
-    NMX = 0x44,
-    FREIA = 0x48,
-    TBLMB = 0x49,
-    ESTIA = 0x4C,
-    BEER = 0x50,
-    DREAM = 0x60,
-    MAGIC = 0x64,
-    HEIMDAL = 0x68
-  };
-
   uint64_t NextSeqNum[MaxOutputQueues];
 
   // Header common to all ESS readout data

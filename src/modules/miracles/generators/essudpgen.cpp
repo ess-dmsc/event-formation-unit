@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
   MiraclesDatReader reader(Config.FileName, Config.Verbose);
   struct MiraclesDatReader::dat_data_t Readout;
-  PacketGenerator gen(ESSReadout::Parser::MIRACLES,
+  PacketGenerator gen(DetectorType::MIRACLES,
                       sizeof(struct MiraclesDatReader::dat_data_t) - 4);
 
   Socket::Endpoint local("0.0.0.0", 0);

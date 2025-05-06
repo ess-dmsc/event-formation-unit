@@ -15,10 +15,10 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Trex {
-  
+
 class LETReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  LETReadoutGenerator(): ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::TREX) {}
+  LETReadoutGenerator(): ReadoutGeneratorBase(DetectorType::TREX) {}
 
 protected:
   void generateData() override;

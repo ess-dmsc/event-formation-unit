@@ -8,38 +8,43 @@
 #include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <common/Version.h>
+
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/MainProg.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-MainProg::MainProg(const std::string &instrument, int argc, char *argv[]) {
+MainProg::MainProg(const DetectorType &Type, int argc, char *argv[])
+  : MainProg(Type.toLowerCase(), argc, argv) {
+}
 
+MainProg::MainProg(const std::string &Instrument, int argc, char *argv[]) {
   if (Args.parseArgs(argc, argv) != EFUArgs::Status::CONTINUE) {
     exit(0);
   }
+
   Args.printSettings();
   DetectorSettings = Args.getBaseSettings();
-  DetectorSettings.DetectorName = instrument;
+  DetectorSettings.DetectorName = Instrument;
 
   // If KafkaTopic is set via CLI use that topic and generate the _samples
   // topic for the raw readout samples. Else use the default value
 
   if (DetectorSettings.KafkaTopic.empty()) {
-    DetectorSettings.KafkaTopic = instrument + "_detector";
-    DetectorSettings.KafkaDebugTopic = instrument + "_detector_samples";
+    DetectorSettings.KafkaTopic = Instrument + "_detector";
+    DetectorSettings.KafkaDebugTopic = Instrument + "_detector_samples";
   } else {
     DetectorSettings.KafkaDebugTopic = DetectorSettings.KafkaTopic + "_samples";
   }
 
   graylog.AddLoghandlerForNetwork(
-      instrument, Args.getLogFileName(), Args.getLogLevel(),
+      Instrument, Args.getLogFileName(), Args.getLogLevel(),
       Args.getGraylogSettings().address, Args.getGraylogSettings().port);
 
   // Allow for customisation
   if (DetectorSettings.GraphitePrefix.empty()) {
-    DetectorSettings.GraphitePrefix = std::string("efu.") + instrument;
+    DetectorSettings.GraphitePrefix = std::string("efu.") + Instrument;
   }
 }
 

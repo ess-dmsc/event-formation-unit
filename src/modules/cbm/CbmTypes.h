@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
 
 #include <cstdint>
 #include <stdexcept>
@@ -54,113 +55,83 @@ namespace cbm {
 class CbmType {
 
 public:
-  /// \enum CbmTypes
+  /// \enum Types
   /// \brief Enumeration of CBM beam monitor types.
-  enum CbmTypes {
-    TTL = 0x01,   ///< TTL beam monitor type.
-    N2GEM = 0x02, ///< N2GEM beam monitor type.
-    IBM = 0x03,   ///< IBM beam monitor type.
-    GEM = 0x04,   ///< GEM beam monitor type.
-    FC = 0x05,    ///< FC beam monitor type.
-    MM = 0x06     ///< MM beam monitor type.
+  enum Types {
+    TTL   = 0x01,    ///< TTL beam monitor type.
+    N2GEM = 0x02,    ///< N2GEM beam monitor type.
+    IBM   = 0x03,    ///< IBM beam monitor type.
+    GEM   = 0x04,    ///< GEM beam monitor type.
+    FC    = 0x05,    ///< FC beam monitor type.
+    MM    = 0x06     ///< MM beam monitor type.
   };
 
   /// \var MAX
   /// \brief Maximum CBM type value.
-  static constexpr int MAX = CbmTypes::MM;
+  static constexpr int MAX = Types::MM;
 
   /// \var MIN
   /// \brief Minimum CBM type value.
-  static constexpr int MIN = CbmTypes::TTL;
+  static constexpr int MIN = Types::TTL;
 
-  /// \brief Constructs a CbmType object from a string representation of the CBM type.
-  /// \param typeStr The string representation of the CBM type.
-  /// \throws std::invalid_argument if the provided typeStr is not a valid CBM type.
-  CbmType(const std::string &typeStr) {
-    if (typeStr == "TTL") {
-      beamMonitorType = CbmTypes::TTL;
-    } else if (typeStr == "N2GEM") {
-      beamMonitorType = CbmTypes::N2GEM;
-    } else if (typeStr == "IBM") {
-      beamMonitorType = CbmTypes::IBM;
-    } else if (typeStr == "GEM") {
-      beamMonitorType = CbmTypes::GEM;
-    } else if (typeStr == "FC") {
-      beamMonitorType = CbmTypes::FC;
-    } else if (typeStr == "MM") {
-      beamMonitorType = CbmTypes::MM;
+  // Construct from string
+  CbmType(const std::string &typeName) {
+    // Convert to upper case, so both "value" and "VALUE" will work
+    std::string upper = typeName;
+    std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c){ return std::toupper(c); });
+
+    const auto t = magic_enum::enum_cast<Types>(upper);
+    if (t.has_value()) {
+      mBeamMonitorType = t.value();
     } else {
-      throw std::invalid_argument("Invalid CBM type string: " + typeStr);
+      throw std::out_of_range("Invalid CbmType string: " + typeName);
     }
   }
 
-  /// \brief Constructs a CbmType object from an integer representation of the CBM type.
-  /// \param type_int The integer representation of the CBM type.
-  /// \throws std::invalid_argument if the provided type_int is not a valid CBM type.
-  CbmType(const int type_int) {
-    if (type_int == 0x01) {
-      beamMonitorType = CbmTypes::TTL;
-    } else if (type_int == 0x02) {
-      beamMonitorType = CbmTypes::N2GEM;
-    } else if (type_int == 0x03) {
-      beamMonitorType = CbmTypes::IBM;
-    } else if (type_int == 0x04) {
-      beamMonitorType = CbmTypes::GEM;
-    } else if (type_int == 0x05) {
-      beamMonitorType = CbmTypes::FC;
-    } else if (type_int == 0x06) {
-      beamMonitorType = CbmTypes::MM;
-    } else {
-      throw std::invalid_argument("Invalid CBM type integer: " +
-                                  std::to_string(type_int));
+  // Construct from integer
+  CbmType(const int type=TTL) {
+    if (type >= MIN && type <= MAX) {
+      mBeamMonitorType = static_cast<Types>(type);
+    }
+
+    else {
+      throw std::out_of_range("Invalid CbmType integer: " +
+                                  std::to_string(type));
     }
   }
 
   /// \brief Converts the CBM type to its string representation.
   /// \return The string representation of the CBM type.
-  const char *to_string() const {
-    switch (beamMonitorType) {
-    case CbmTypes::TTL:
-      return "TTL";
-    case CbmTypes::N2GEM:
-      return "N2GEM";
-    case CbmTypes::IBM:
-      return "IBM";
-    case CbmTypes::GEM:
-      return "GEM";
-    case CbmTypes::FC:
-      return "FC";
-    case CbmTypes::MM:
-      return "MM";
-    default:
-      return "Unknown";
-    }
+  std::string toString() const {
+    const std::string name(magic_enum::enum_name(mBeamMonitorType));
+
+    return name;
   }
 
 private:
-  CbmTypes beamMonitorType;
+  Types mBeamMonitorType;
 
 public:
   /// \brief Conversion operator to int.
   /// \return The integer representation of the CBM type.
-  operator int() const { return static_cast<int>(beamMonitorType); }
+  operator int() const { return static_cast<int>(mBeamMonitorType); }
 
   /// \brief Conversion operator to uint8_t.
   /// \return The uint8_t representation of the CBM type.
-  operator uint8_t() const { return static_cast<uint8_t>(beamMonitorType); }
+  operator uint8_t() const { return static_cast<uint8_t>(mBeamMonitorType); }
 
   /// \brief Overload of the equality operator (==) for comparing two CbmType objects.
   /// \param other The CbmType object to compare with.
   /// \return true if the CbmType objects are equal, false otherwise.
   bool operator==(const CbmType &other) const {
-    return beamMonitorType == other.beamMonitorType;
+    return mBeamMonitorType == other.mBeamMonitorType;
   }
 
   /// \brief Overload of the equality operator (==) for comparing a CbmType object with a CbmTypes enum value.
   /// \param other The CbmTypes enum value to compare with.
   /// \return true if the CbmType object is equal to the CbmTypes enum value, false otherwise.
-  bool operator==(const CbmTypes &other) const {
-    return beamMonitorType == other;
+  bool operator==(const Types &other) const {
+    return mBeamMonitorType == other;
   }
 };
 

@@ -19,7 +19,7 @@ namespace Nmx {
 class MultiHitReadoutGenerator : public ReadoutGeneratorBase {
 public:
   MultiHitReadoutGenerator()
-      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
+      : ReadoutGeneratorBase(DetectorType::NMX) {}
 
 protected:
   void generateData() override;

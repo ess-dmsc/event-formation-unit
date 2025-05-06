@@ -21,14 +21,14 @@
 using namespace ESSReadout;
 
 ///\brief Constructor initialize the generator app
-ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
+ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   // Store the detector type
-  Settings.Type = Type;
+  Settings.Detector = Type;
 
   // Options
-  app.add_option("-i, --ip", Settings.IpAddress, 
+  app.add_option("-i, --ip", Settings.IpAddress,
                  "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort, 
+  app.add_option("-p, --port", Settings.UDPPort,
                  "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
                  "Number of packets to send");
@@ -36,7 +36,7 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.TypeOverride, 
+  app.add_option("-y, --type", Settings.Detector,
                  "Detector type id");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
@@ -61,41 +61,15 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(Parser::DetectorType Type) {
                "print debug information");
   app.add_flag("--tof", Settings.Tof,
                "generate tof distribution");
-
-  // Look-up convenience
-  NameToType["CBM"]      = Parser::CBM;
-  NameToType["LOKI"]     = Parser::LOKI;
-  NameToType["TBL3HE"]   = Parser::TBL3HE;
-  NameToType["BIFROST"]  = Parser::BIFROST;
-  NameToType["MIRACLES"] = Parser::MIRACLES;
-  NameToType["CSPEC"]    = Parser::CSPEC;
-  NameToType["TREX"]     = Parser::TREX;
-  NameToType["NMX"]      = Parser::NMX;
-  NameToType["FREIA"]    = Parser::FREIA;
-  NameToType["TBLMB"]    = Parser::TBLMB;
-  NameToType["ESTIA"]    = Parser::ESTIA;
-  NameToType["DREAM"]    = Parser::DREAM;
-  NameToType["MAGIC"]    = Parser::MAGIC;
-  NameToType["HEIMDAL"]  = Parser::HEIMDAL;
-}
-
-void ReadoutGeneratorBase::setDetectorType(const std::string &Name) {
-  std::string str = Name;
-  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-  setDetectorType(NameToType[str]);
-}
-
-void ReadoutGeneratorBase::setDetectorType(Parser::DetectorType Type) {
-  Settings.Type = Type;
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
   if (Settings.Tof) {
     const double timeOfFlight = timeOffFlightDist.getValue();
     return {
-      pulseTime.getTimeHigh(), 
+      pulseTime.getTimeHigh(),
       pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)};
-  } 
+  }
   return { getReadoutTimeHigh(), getReadoutTimeLow() };
 }
 
@@ -121,7 +95,7 @@ void ReadoutGeneratorBase::generateHeader() {
   memset(Buffer, 0, BufferSize);
   auto Header = reinterpret_cast<Parser::PacketHeaderV0 *>(Buffer);
 
-  Header->CookieAndType = (Settings.Type << 24) + 0x535345;
+  Header->CookieAndType = (Settings.Detector << 24) + 0x535345;
   Header->Padding0 = 0;
 
   if (headerVersion == Parser::HeaderVersion::V0) {
@@ -228,10 +202,6 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 }
 
 void ReadoutGeneratorBase::transmitLoop() {
-  if (Settings.TypeOverride != 0) {
-    Settings.Type = Settings.TypeOverride;
-  }
-
   do {
     uint16_t DataSize = makePacket();
 

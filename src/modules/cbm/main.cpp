@@ -9,7 +9,7 @@
 #include <modules/cbm/CbmBase.h>
 
 int main(int argc, char *argv[]) {
-  MainProg Main("cbm", argc, argv);
+  MainProg Main(DetectorType::CBM, argc, argv);
 
   auto Detector = new cbm::CbmBase(Main.DetectorSettings);
 
