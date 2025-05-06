@@ -25,9 +25,8 @@ namespace Caen {
 
 const char *classname = "Caen detector with ESS readout";
 
-CaenBase::CaenBase(BaseSettings const &settings,
-                   ESSReadout::Parser::DetectorType t)
-    : Detector(settings), type(t) {
+CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
+    : Detector(settings), Type(type) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -180,7 +179,7 @@ void CaenBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, type);
+      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, Type);
 
       /// \todo could be moved
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;

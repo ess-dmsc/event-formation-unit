@@ -10,14 +10,15 @@
 
 #include <caen/CaenCounters.h>
 #include <common/detector/Detector.h>
+#include <common/types/DetectorType.h>
 
 namespace Caen {
 
 class CaenBase : public Detector {
-  ESSReadout::Parser::DetectorType type;
+  DetectorType Type;
 
 public:
-  CaenBase(BaseSettings const &Settings, ESSReadout::Parser::DetectorType t);
+  CaenBase(BaseSettings const &Settings, DetectorType type);
   ~CaenBase() = default;
 
   void processingThread();

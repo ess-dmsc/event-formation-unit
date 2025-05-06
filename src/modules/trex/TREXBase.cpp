@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <cinttypes>
+#include <stdio.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -189,8 +191,7 @@ void TrexBase::processing_thread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = TREX.ESSReadoutParser.validate(DataPtr, DataLen,
-                                                ESSReadout::Parser::TREX);
+      auto Res = TREX.ESSReadoutParser.validate(DataPtr, DataLen, DetectorType::TREX);
       Counters.ReadoutStats = TREX.ESSReadoutParser.Stats;
 
       if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {

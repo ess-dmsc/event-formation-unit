@@ -129,7 +129,7 @@ protected:
 };
 
 TEST_F(CbmConfigTest, Constructor) {
-  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::CBM);
+  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
   EXPECT_EQ(config.Parms.MonitorRing, 11);
@@ -149,7 +149,7 @@ TEST_F(CbmConfigTest, InvalidInstrument) {
 TEST_F(CbmConfigTest, DefaultValues) {
   config.root = DefaultValuesOnly;
   config.apply();
-  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::CBM);
+  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
 }
@@ -226,7 +226,7 @@ TEST_F(CbmConfigTest, NoTopology) {
 TEST_F(CbmConfigTest, FullInstrument) {
   config = Config(CBM_FULL);
   config.loadAndApply();
-  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::CBM);
+  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.NumberOfMonitors, 1);
@@ -235,7 +235,7 @@ TEST_F(CbmConfigTest, FullInstrument) {
 TEST_F(CbmConfigTest, TestTopology) {
   config.root = ConfigWithTopology;
   config.apply();
-  ASSERT_EQ(config.Parms.TypeSubType, ESSReadout::Parser::CBM);
+  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MonitorRing, 11);
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);

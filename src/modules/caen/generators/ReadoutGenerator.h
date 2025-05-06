@@ -18,7 +18,7 @@ class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   // Settings local to CAEN data generator
   struct {
-    std::string Detector;
+    DetectorType Detector{DetectorType::RESERVED};
 
     /// \brief If true, generate data for four amplitudes
     bool Loki{false};
@@ -37,12 +37,6 @@ public:
   } CaenSettings;
 
   ReadoutGenerator();
-
-  void setTypeByName(const std::string &Name) {
-      Settings.TypeOverride = NameToType[Name];
-      printf("Detector %s has type %u\n", Name.c_str(),
-             Settings.TypeOverride);
-  }
 
  protected:
   ///

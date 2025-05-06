@@ -17,7 +17,7 @@
 namespace Caen {
 class LokiReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  LokiReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::LOKI) {}
+  LokiReadoutGenerator() : ReadoutGeneratorBase(DetectorType::LOKI) {}
 
 protected:
   void generateData() override;

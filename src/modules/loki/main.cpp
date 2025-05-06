@@ -12,7 +12,10 @@ int main(int argc, char *argv[]) {
   MainProg Main("loki", argc, argv);
 
   auto Detector =
-      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::LOKI);
+      new Caen::CaenBase(Main.DetectorSettings, DetectorType::LOKI);
+  // auto Detector =
+  //     new Caen::CaenBase(Main.DetectorSettings, DetectorFoo);
+  // exit(-1);
 
   return Main.run(Detector);
 }

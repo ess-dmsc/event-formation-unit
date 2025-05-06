@@ -62,6 +62,7 @@ set(efu_common_INC
   system/intel.h
   system/arm.h
   system/Socket.h
+  types/DetectorType.h
   JsonFile.h
   Statistics.h
   StatPublisher.h
@@ -75,6 +76,7 @@ set(efu_common_INC
   )
 
 find_package(CLI11 REQUIRED)
+find_package(magic_enum REQUIRED)
 
 # Only include the 'minimum' necessary
 add_library(efu_common STATIC
