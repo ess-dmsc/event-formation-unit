@@ -7,12 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
-#include <common/debug/Trace.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/time/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
+
+#include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
+#include <common/time/Timer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -162,8 +163,10 @@ void FreiaBase::processing_thread() {
   FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  
+
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
+
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});

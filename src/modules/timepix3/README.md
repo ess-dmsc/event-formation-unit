@@ -1,19 +1,19 @@
 ## Brief description
-This module responsible to initialize an EFU which capable to process raw UDP stearm comming form timepix3 camera and EVR. The EFU responsible to
-1. check validity for each data packet.
-1. match the proper pulse time to TDC time from camera
-1. calculate the TOF of each pixel according to pulse time
-1. clusterize the pixels in time and in space
-1. identiy and create neutron events
-1. publish events to KAFKA
+This module is responsible to initialize an EFU which is capable of processing a raw UDP stream coming from a timepix3 camera and EVR. The EFU is responsible for
+* Check validity for each data packet.
+* Match the proper pulse time to TDC time from camera
+* Calculate the TOF of each pixel according to pulse time
+* Cluster the pixels in time and in space
+* Identify and create neutron events
+* Publish events to KAFKA
 
 ## Problems identified in the code
-* Owner of EV44Serializer in not clear. Function accessed from ultiple objects
-* no clear strategy on member visibility
-* Geometry object could inherit from ESS geam to prevent uncessary object composition
+* Owner of EV44Serializer in not clear. Function accessed from multiple objects
+* No clear strategy on member visibility
+* Geometry object could inherit from ESS geam to prevent unnecessary object composition
 * DataPArser is accessed from different location which may not necessary
 
-Please see below the manullay made and simiplifed class chart about the most important classes in the module for a short review.
+Please see below the manually made and simplified class chart about the most important classes in the module for a short review.
 ## Class diagram of the detector module
 
 ```mermaid
@@ -24,7 +24,7 @@ classDiagram
     Timepix3Base<--EV44Serializer : calls produce()
 
     Timepix3Instrument*--EV44Serializer : stores
-    Timepix3Instrument<--EV44Serializer : mutiple calls
+    Timepix3Instrument<--EV44Serializer : multiple calls
     Timepix3Instrument*--DataParser : creates
     Timepix3Instrument<..DataParser : access PixelResult
     Timepix3Instrument*--Timepix3Geometry : creates
@@ -52,8 +52,8 @@ classDiagram
         +generateEvents()
     }
     class EV44Serializer {
-        +TSCTimer ProduceTimer
-        +TSCTimer DebugTimer
+        +Timer ProduceTimer
+        +Timer DebugTimer
         +setProducerCallback(ProducerCallback) void
         +setReferenceTime(int64_t) void
         +checkAndSetReferenceTime(int64_t Time) uint32_t
@@ -115,5 +115,5 @@ classDiagram
         uint32_t PulseTimeNanoSeconds
         uint32_t PrevPulseTimeSeconds
         uint32_t PrevPulseTimeNanoSeconds
-    } 
+    }
 ```

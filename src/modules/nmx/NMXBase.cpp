@@ -7,12 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
-#include <common/debug/Trace.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/time/Timer.h>
 #include <nmx/NMXBase.h>
 #include <nmx/NMXInstrument.h>
+
+#include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
+#include <common/time/Timer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -167,13 +168,14 @@ void NmxBase::processing_thread() {
 
   NMXInstrument NMX(Counters, EFUSettings, Serializer);
 
-  unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
+
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
+  unsigned int DataIndex;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);

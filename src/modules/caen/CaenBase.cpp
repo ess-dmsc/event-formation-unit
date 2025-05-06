@@ -6,15 +6,16 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
+
 #include <common/RuntimeStat.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/time/CheckTimer.h>
-#include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <modules/caen/CaenBase.h>
-#include <modules/caen/CaenInstrument.h>
+#include <common/time/TimeString.h>
+
+#include <cinttypes>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -157,15 +158,13 @@ void CaenBase::processingThread() {
   MonitorSerializer =
       new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
-  unsigned int DataIndex;
-
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
-  // Create the periodic timer for producing messages, in case of low event rate
-  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  // // x86 specific
-  CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
+
+  unsigned int DataIndex;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
