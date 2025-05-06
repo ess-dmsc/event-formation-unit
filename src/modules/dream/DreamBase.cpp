@@ -6,13 +6,13 @@
 /// \todo unofficial - not reviewed Readout structure
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
-#include <common/debug/Trace.h>
-#include <common/detector/EFUArgs.h>
-#include <common/kafka/KafkaConfig.h>
 #include <modules/dream/DreamBase.h>
 #include <modules/dream/DreamInstrument.h>
 
+#include <common/debug/Trace.h>
+#include <common/detector/EFUArgs.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -121,7 +121,7 @@ void DreamBase::processingThread() {
   Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer;
+  Timer ProduceTimer;
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
@@ -172,8 +172,8 @@ void DreamBase::processingThread() {
     /// poll producer stats
     EventProducer.poll(0);
 
-    if (ProduceTimer.timeTSC() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    // Time out after one second
+    if (ProduceTimer.timeNS() >= EFUSettings.UpdateIntervalSec * 1'000'000'000) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
           {ITCounters.RxPackets, Counters.Events,

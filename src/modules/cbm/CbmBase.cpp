@@ -8,13 +8,15 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
+#include <modules/cbm/CbmBase.h>
+#include <modules/cbm/CbmInstrument.h>
+
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/HashMap2D.h>
+#include <common/RuntimeStat.h>
+
 #include <memory>
-#include <modules/cbm/CbmBase.h>
-#include <modules/cbm/CbmInstrument.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -189,12 +191,12 @@ void CbmBase::processing_thread() {
   CbmInstrument cbmInstrument(Counters, CbmConfiguration, *EV44SerializerMapPtr,
                               *HistogramSerializerMapPtr);
 
-  unsigned int DataIndex;
-  // Monitor these counters
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
+  // Monitor these counters and time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
                       EventProducer.getStats().MsgStatusPersisted});
 
+  unsigned int DataIndex;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);

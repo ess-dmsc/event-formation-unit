@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <caen/geometry/CDCalibration.h>
+#include <common/time/Timer.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 

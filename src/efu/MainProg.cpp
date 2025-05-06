@@ -5,9 +5,9 @@
 /// \brief Wrapper for EFU main application
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Log.h>
 #include <common/StatPublisher.h>
 #include <common/Version.h>
-#include <common/debug/Log.h>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/MainProg.h>
@@ -91,7 +91,7 @@ int MainProg::run(Detector *inst) {
   Parser cmdParser(detector, mainStats, keep_running);
   Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
 
-  Timer livestats;
+  Timer LiveStats;
 
   while (true) {
     // Do not allow immediate exits
@@ -112,10 +112,10 @@ int MainProg::run(Detector *inst) {
       break;
     }
 
-    if (livestats.timeUS() >= MicrosecondsPerSecond) {
+    if (LiveStats.timeUS() >= MicrosecondsPerSecond) {
       statUpTime = RunTimer.timeUS() / 1000000;
       metrics.publish(detector, mainStats);
-      livestats.reset();
+      LiveStats.reset();
     }
 
     cmdAPI.serverPoll();

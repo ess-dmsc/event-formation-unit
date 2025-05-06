@@ -7,24 +7,23 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "PerfGenBase.h"
 
-#include <cinttypes>
-#include <common/TestImageUdder.h>
+#include <modules/perfgen/PerfGenBase.h>
+
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/time/TimeString.h>
-
-#include <unistd.h>
-
 #include <common/memory/SPSCFifo.h>
 #include <common/system/Socket.h>
-#include <common/time/TSCTimer.h>
+#include <common/TestImageUdder.h>
 #include <common/time/Timer.h>
-
+#include <common/time/TimeString.h>
 #include <logical_geometry/ESSGeometry.h>
+
+#include <cinttypes>
+#include <unistd.h>
+
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -75,7 +74,9 @@ void PerfGenBase::processingThread() {
 
   // ns since 1970 - but with a resolution of one second
   uint64_t EfuTimeRef = 1000000000LU * (uint64_t)time(NULL);
-  Timer Elapsed; // provide a us timer
+
+  // This timer will be used in units of micro seconds
+  Timer Elapsed;
 
   while (runThreads) {
     // ns since 1970 - but with us resolution
