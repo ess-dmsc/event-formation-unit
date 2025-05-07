@@ -69,7 +69,7 @@ void FreiaInstrument::loadConfigAndCalib() {
   }
 }
 
-void FreiaInstrument::processReadouts(void) {
+void FreiaInstrument::processReadouts() {
   XTRACE(DATA, DEB,
          "\n================== NEW PACKET =====================\n\n");
   // All readouts are potentially now valid, but rings and fens

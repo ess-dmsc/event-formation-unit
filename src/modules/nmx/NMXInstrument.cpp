@@ -71,7 +71,7 @@ void NMXInstrument::loadConfigAndCalib() {
   }
 }
 
-void NMXInstrument::processReadouts(void) {
+void NMXInstrument::processReadouts() {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here

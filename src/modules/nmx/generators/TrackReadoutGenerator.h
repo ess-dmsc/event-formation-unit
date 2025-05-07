@@ -19,7 +19,7 @@ namespace Nmx {
 class TrackReadoutGenerator : public ReadoutGeneratorBase {
 public:
   TrackReadoutGenerator()
-      : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
+      : ReadoutGeneratorBase(DetectorType::NMX) {}
 
 protected:
   void generateData() override;

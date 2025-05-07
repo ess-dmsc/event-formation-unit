@@ -19,7 +19,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 ReadoutGenerator::ReadoutGenerator()
-    : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::BIFROST) {
+    : ReadoutGeneratorBase(DetectorType::BIFROST) {
   app.add_option("-n, --data", bifrostSettings.FilePath,
                  "Record data file to read from");
 }

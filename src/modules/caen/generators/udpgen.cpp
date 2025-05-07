@@ -10,15 +10,11 @@
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
-
   Caen::ReadoutGenerator CaenGen;
   CaenGen.argParse(argc, argv);
 
   CaenGen.main();
-
   CaenGen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-  CaenGen.setTypeByName(CaenGen.CaenSettings.Detector);
-
   CaenGen.transmitLoop();
 
   return 0;

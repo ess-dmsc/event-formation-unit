@@ -9,12 +9,15 @@
 
 #pragma once
 
-#include <CLI/CLI.hpp>
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <common/readout/ess/Parser.h>
 #include <common/system/Socket.h>
 #include <common/testutils/DataFuzzer.h>
 #include <common/time/ESSTime.h>
+#include <common/types/DetectorType.h>
+
+#include <CLI/CLI.hpp>
+
 #include <cstdint>
 
 ///
@@ -29,22 +32,21 @@ public:
   ///
   // clang-format off
   struct GeneratorSettings {
-    bool Tof{false};                      ///< Generate nicely distributed tof data
-    bool Debug{false};                    ///< Print debug info
+    bool Tof{false};                                        ///< Generate nicely distributed tof data
+    bool Debug{false};                                      ///< Print debug info
 
-    uint32_t NFibers{2};                  ///< Number of fibers
-    uint32_t FiberMask{0x00ffffff};       ///< Mask out unused fibers
+    uint32_t NFibers{2};                                    ///< Number of fibers
+    uint32_t FiberMask{0x00ffffff};                         ///< Mask out unused fibers
 
-    uint8_t Type{0};                      ///< Data type as specified in the ESS Readout ICD
-    uint8_t TypeOverride{0};              ///< Override for the data type field
-    std::string IpAddress{"127.0.0.1"};   ///< IP address for UDP transmission
-    uint16_t UDPPort{9000};               ///< UDP port for transmission
-    uint64_t NumberOfPackets{0};          ///< Number of packets to transmit (0 means all packets)
-    uint32_t NumReadouts{370};            ///< Number of VMM readouts in the UDP packet
-    uint32_t TicksBtwReadouts{10};        ///< Ticks between readouts
-    uint32_t TicksBtwEvents{3 * 88};      ///< Ticks between events (88 ticks ~1us)
-    uint64_t SpeedThrottle{0};            ///< Speed throttle for transmission
-    uint64_t PktThrottle{0};              ///< Packet throttle for transmission
+    DetectorType Detector{DetectorType::RESERVED};          ///< Data type as specified in the ESS Readout ICD
+    std::string IpAddress{"127.0.0.1"};                     ///< IP address for UDP transmission
+    uint16_t UDPPort{9000};                                 ///< UDP port for transmission
+    uint64_t NumberOfPackets{0};                            ///< Number of packets to transmit (0 means all packets)
+    uint32_t NumReadouts{370};                              ///< Number of VMM readouts in the UDP packet
+    uint32_t TicksBtwReadouts{10};                          ///< Ticks between readouts
+    uint32_t TicksBtwEvents{3 * 88};                        ///< Ticks between events (88 ticks ~1us)
+    uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
+    uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
     /// \todo This should be the default mode and obsolete pe packet generation
     uint16_t Frequency{0};                ///< Frequency of time updates for each packet
@@ -60,22 +62,10 @@ public:
   /// \brief Constructor for ReadoutGeneratorBase.
   /// \param detectorType The type of detector.
   ///
-  ReadoutGeneratorBase(ESSReadout::Parser::DetectorType detectorType);
+  ReadoutGeneratorBase(DetectorType detectorType);
 
   /// \brief Destructor for ReadoutGeneratorBase.
   virtual ~ReadoutGeneratorBase() = default;
-
-  ///
-  /// \brief
-  ///
-  /// \param Type
-  void setDetectorType(ESSReadout::Parser::DetectorType Type);
-
-  ///
-  /// \brief
-  ///
-  /// \param Type
-  void setDetectorType(const std::string &Name);
 
   ///
   /// \brief Creates a packet ready for UDP transmission.
@@ -110,8 +100,6 @@ public:
 
   static constexpr int BufferSize{8972}; ///< Size of the buffer
   uint8_t Buffer[BufferSize];            ///< Buffer for the packet
-
-  std::map<std::string, ESSReadout::Parser::DetectorType> NameToType;
 
 protected:
   CLI::App app{"UDP data generator for ESS readout data"};
@@ -154,8 +142,8 @@ protected:
   }
 
   ///
-  /// \brief Get a tuple containing the high and the low readout time. If the 
-  /// --ToF option is set the value will include a time of flight distribution 
+  /// \brief Get a tuple containing the high and the low readout time. If the
+  /// --ToF option is set the value will include a time of flight distribution
   /// calculated in DistributionGenerator
   /// \return Readout time pair [high, low].
   ///

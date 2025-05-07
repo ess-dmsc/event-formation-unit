@@ -9,10 +9,10 @@
 #include <modules/caen/CaenBase.h>
 
 int main(int argc, char *argv[]) {
-  MainProg Main("bifrost", argc, argv);
+  DetectorType Type = DetectorType::BIFROST;
 
-  auto Detector =
-      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::BIFROST);
+  MainProg Main(Type.toLowerCase(), argc, argv);
+  auto Detector = new Caen::CaenBase(Main.DetectorSettings, Type);
 
   return Main.run(Detector);
 }

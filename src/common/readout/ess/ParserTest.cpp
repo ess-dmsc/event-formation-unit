@@ -57,7 +57,7 @@ TEST_F(ReadoutTest, ErrorBufferSize) {
 }
 
 TEST_F(ReadoutTest, HeaderLTMin) {
-  auto Res = RdOut.validate((char *)&ErrCookie[0], 3, Parser::LOKI);
+  auto Res = RdOut.validate((char *)&ErrCookie[0], 3, DetectorType::LOKI);
   ASSERT_EQ(Res, -Parser::ESIZE);
   ASSERT_EQ(RdOut.Stats.ErrorSize, 1);
 }

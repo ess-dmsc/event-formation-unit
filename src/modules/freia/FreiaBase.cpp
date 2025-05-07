@@ -7,12 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
-#include <common/debug/Trace.h>
-#include <common/kafka/KafkaConfig.h>
-#include <common/time/Timer.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
+
+#include <common/debug/Trace.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
+#include <common/time/Timer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
@@ -162,24 +163,27 @@ void FreiaBase::processing_thread() {
   FreiaInstrument Freia(Counters, EFUSettings, Serializer);
 
   unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  
+
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
+
   // Monitor these counters
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
   // Set the datatype
-  uint8_t DataType{ESSReadout::Parser::FREIA};
+  uint8_t DataType{DetectorType::FREIA};
+
   if (EFUSettings.DetectorName == "freia") {
-    DataType = ESSReadout::Parser::FREIA;
+    DataType = DetectorType::FREIA;
   }
 
   else if (EFUSettings.DetectorName == "estia") {
-    DataType = ESSReadout::Parser::ESTIA;
+    DataType = DetectorType::ESTIA;
   }
 
   else if (EFUSettings.DetectorName == "tblmb") {
-    DataType = ESSReadout::Parser::TBLMB;
+    DataType = DetectorType::TBLMB;
   }
 
   while (runThreads) {

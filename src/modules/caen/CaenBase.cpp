@@ -6,15 +6,16 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
+
 #include <common/RuntimeStat.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/time/CheckTimer.h>
-#include <common/time/TimeString.h>
 #include <common/time/Timer.h>
-#include <modules/caen/CaenBase.h>
-#include <modules/caen/CaenInstrument.h>
+#include <common/time/TimeString.h>
+
+#include <cinttypes>
 #include <unistd.h>
 
 // #undef TRC_LEVEL
@@ -24,9 +25,8 @@ namespace Caen {
 
 const char *classname = "Caen detector with ESS readout";
 
-CaenBase::CaenBase(BaseSettings const &settings,
-                   ESSReadout::Parser::DetectorType t)
-    : Detector(settings), type(t) {
+CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
+    : Detector(settings), Type(type) {
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -157,15 +157,13 @@ void CaenBase::processingThread() {
   MonitorSerializer =
       new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
-  unsigned int DataIndex;
-
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
-  // Create the periodic timer for producing messages, in case of low event rate
-  // TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
-  // // x86 specific
-  CheckTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
+
+  unsigned int DataIndex;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
@@ -181,7 +179,7 @@ void CaenBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, type);
+      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, Type);
 
       /// \todo could be moved
       Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;

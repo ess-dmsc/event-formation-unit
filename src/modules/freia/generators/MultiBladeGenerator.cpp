@@ -21,7 +21,7 @@ using namespace ESSReadout;
 
 namespace Freia {
 
-MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::FREIA) {
+MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(DetectorType::FREIA) {
   // clang-format off
 
   // Options
@@ -66,7 +66,7 @@ void MultiBladeGenerator::generateData() {
     const bool isEven = VMM0 % 2 == 0;
 
     // Parameters for pixel coordinates
-    const bool isFreia = (Settings.Type == Parser::FREIA);
+    const bool isFreia = (Settings.Detector == DetectorType::FREIA);
     double XChannel{32};
     double YChannel{32};
 
@@ -84,7 +84,7 @@ void MultiBladeGenerator::generateData() {
       auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
       ReadoutData->TimeHigh = readoutTimeHigh;
       ReadoutData->TimeLow = readoutTimeLow;
-  
+
       // Misc
       ReadoutData->DataLength = DATA_LENGTH;
       ReadoutData->OTADC = 1000;
@@ -99,18 +99,18 @@ void MultiBladeGenerator::generateData() {
         const int index = Fuzzer.randomInterval(1, image.size() - 1);
         const auto &[x, y] = image[index];
 
-        switch (Settings.Type) {
-          case Parser::FREIA:
+        switch (Settings.Detector) {
+          case DetectorType::FREIA:
             XChannel = 63 - (16 + R * x + Sg * Delta);
             YChannel = 47 - y;
             break;
 
-          case Parser::ESTIA:
+          case DetectorType::ESTIA:
             XChannel = 16 + x;
             YChannel = 63 - (16 + R * y + Sg * Delta);
             break;
 
-          case Parser::TBLMB:
+          case DetectorType::TBLMB:
             XChannel = 47 - y;
             YChannel = 63 - (16 + R * x + Sg * Delta);
             break;
@@ -159,7 +159,7 @@ void MultiBladeGenerator::main() {
   ReadoutGeneratorBase::main();
 
   // Set detector type
-  setDetectorType(MultiBladeSettings.Detector);
+  Settings.Detector = MultiBladeSettings.Detector;
 }
 
 } // namespace Freia

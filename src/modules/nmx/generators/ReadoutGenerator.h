@@ -18,7 +18,7 @@ namespace Nmx {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  ReadoutGenerator() : ReadoutGeneratorBase(ESSReadout::Parser::DetectorType::NMX) {}
+  ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::NMX) {}
 
 protected:
   void generateData() override;

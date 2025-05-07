@@ -24,7 +24,7 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
   MultiBladeGenerator();
 
   struct {
-    std::string Detector{"Freia"};
+    DetectorType Detector{DetectorType::FREIA};
 
     // Masks are used to restrict fibers, FENs, and VMMs
     uint8_t  FiberVals{4};            // Fibers 0 - 4

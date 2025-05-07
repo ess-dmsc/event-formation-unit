@@ -1,24 +1,20 @@
 
 #=============================================================================
-# Add ess timin modules
+# Add ess timing modules
 #=============================================================================
 
 include_directories(.)
 
 set(esstime_obj_SRC
   ESSTime.cpp
-  Timer.cpp
   TimeString.cpp
-  TSCTimer.cpp
-  CheckTimer.cpp
+  Timer.cpp
 )
 
 set(esstime_obj_INC
-ESSTime.h
-Timer.h
-TimeString.h
-TSCTimer.h
-CheckTimer.h
+  ESSTime.h
+  TimeString.h
+  Timer.h
 )
 
 add_library(EssTimingLib OBJECT
@@ -31,7 +27,7 @@ add_library(EssTimingLib-unit_test OBJECT
   ${esstime_obj_INC}
   )
 
-# Set precompiler flag UNIT_TEST for the library
+# Set pre-compiler flag UNIT_TEST for the library
 target_compile_definitions(EssTimingLib-unit_test PUBLIC -DUNIT_TEST)
 
 enable_coverage_flags(EssTimingLib)

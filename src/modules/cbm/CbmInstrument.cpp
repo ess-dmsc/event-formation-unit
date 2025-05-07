@@ -36,7 +36,7 @@ CbmInstrument::CbmInstrument(
   ESSHeaderParser.Packet.Time.setMaxTOF(Conf.Parms.MaxTOFNS);
 }
 
-void CbmInstrument::processMonitorReadouts(void) {
+void CbmInstrument::processMonitorReadouts() {
   ESSReadout::ESSReferenceTime &RefTime = ESSHeaderParser.Packet.Time;
   // All readouts are now potentially valid, negative TOF is not
   // possible, or 0 ADC values, but rings and fens could still be outside the

@@ -68,7 +68,7 @@ public:
 
   // Parameters (eventually) obtained from JSON config file
   struct {
-    uint8_t TypeSubType{ESSReadout::Parser::CBM};
+    uint8_t TypeSubType{DetectorType::CBM};
     uint32_t MaxTOFNS{20 * 71'428'571};          // < Twenty 14Hz pulses
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // < Five 14Hz pulses
     uint8_t MonitorRing{11};     // < Ring number for the monitors

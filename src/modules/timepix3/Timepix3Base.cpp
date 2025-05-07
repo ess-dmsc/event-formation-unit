@@ -6,11 +6,12 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include <common/RuntimeStat.h>
-#include <common/detector/BaseSettings.h>
-#include <common/kafka/KafkaConfig.h>
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
+
+#include <common/detector/BaseSettings.h>
+#include <common/kafka/KafkaConfig.h>
+#include <common/RuntimeStat.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -111,12 +112,13 @@ void Timepix3Base::processingThread() {
 
   Timepix3Instrument Timepix3(Counters, timepix3Configuration, Serializer);
 
-  unsigned int DataIndex;
-  TSCTimer ProduceTimer(EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ);
+  // Time out after one second
+  Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
   RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
+  unsigned int DataIndex;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);

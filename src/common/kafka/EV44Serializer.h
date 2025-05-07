@@ -15,7 +15,7 @@
 
 #include <common/kafka/serializer/AbstractSerializer.h>
 #include <common/kafka/Producer.h>
-#include <common/time/TSCTimer.h>
+#include <common/time/Timer.h>
 #include <flatbuffers/flatbuffers.h>
 
 struct Event44Message;
@@ -82,7 +82,8 @@ public:
   /// \returns reference to statistics object
   EV44SerializerStats &stats() { return Stats; }
 
-  TSCTimer ProduceTimer, DebugTimer;
+  Timer ProduceTimer;
+  Timer DebugTimer;
 
   // Counters for causes of calls to produce()
   int64_t ProduceCausePulseChange;

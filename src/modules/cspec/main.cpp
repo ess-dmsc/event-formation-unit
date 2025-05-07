@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("cspec", argc, argv);
 
   auto Detector =
-      new Caen::CaenBase(Main.DetectorSettings, ESSReadout::Parser::CSPEC);
+      new Caen::CaenBase(Main.DetectorSettings, DetectorType::CSPEC);
 
   return Main.run(Detector);
 }
