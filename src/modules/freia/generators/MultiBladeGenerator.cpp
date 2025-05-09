@@ -123,16 +123,6 @@ void MultiBladeGenerator::generateData() {
       // Store channel
       ReadoutData->Channel = (i == 0) ? YChannel : XChannel;
 
-      // Short time delta between correlated X- and Y-channels
-      if (i == 0) {
-        addTicksBtwReadoutsToReadoutTime();
-      }
-
-      // Large time delta between uncorrelated X- and Y-channels
-      else {
-        addTickBtwEventsToReadoutTime();
-      }
-
       if (Settings.Debug) {
         if (i == 0) {
           fmt::print("Fiber = {}\n", FiberId);

@@ -95,14 +95,6 @@ void TrackReadoutGenerator::generateData() {
     ReadoutData->FENId = FEN;
     DP += ReadoutDataSize;
 
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to NMX
-    if (((Readout + 1) % ReadoutsPerEvent) != 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
-
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "
            "TimeHigh:%u, TimeLow:%u",

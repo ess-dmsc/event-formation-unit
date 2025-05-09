@@ -43,10 +43,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
                  "each packet)");
-  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
-                 "Delay (ticks) between events");
-  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
-                 "Delay (ticks) between coincident readouts");
   app.add_option("-o, --readouts", Settings.NumReadouts,
                  "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
@@ -161,7 +157,7 @@ void ReadoutGeneratorBase::generateHeader() {
   } else {
     prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
     pulseTime = ESSTime(time(NULL), TimeLowOffset);
-    readoutTime = pulseTime + Settings.TicksBtwReadouts;
+    readoutTime = pulseTime;
     XTRACE(DATA, INF,
            "New pulseTime generated for this packet, High: %u, Low: %u",
            pulseTime.getTimeHigh(), pulseTime.getTimeLow());

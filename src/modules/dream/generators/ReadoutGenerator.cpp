@@ -125,9 +125,6 @@ void ReadoutGenerator::generateData() {
     }
     memcpy(DataPtr, &ReadoutData, ReadoutDataSize);
     DataPtr += ReadoutDataSize;
-
-    // Increment the time for next readout
-    addTickBtwEventsToReadoutTime();
     Readouts++;
   }
 }

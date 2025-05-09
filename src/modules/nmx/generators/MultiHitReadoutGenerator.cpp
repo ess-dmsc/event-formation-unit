@@ -18,8 +18,6 @@
 namespace Nmx {
 
 void Nmx::MultiHitReadoutGenerator::generateData() {
-  Settings.TicksBtwReadouts = 3;
-  Settings.TicksBtwEvents = 500000;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -86,12 +84,6 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     ReadoutData->OTADC = ADC;
 
     DP += ReadoutDataSize;
-
-    if ((Readout % 4) == 3) {
-      addTickBtwEventsToReadoutTime();
-    } else {
-      addTicksBtwReadoutsToReadoutTime();
-    }
 
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "

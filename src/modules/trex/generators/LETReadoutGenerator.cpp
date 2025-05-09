@@ -102,17 +102,6 @@ void LETReadoutGenerator::generateData() {
     XTRACE(DATA, DEB, "Coordinate XGlobal %u, XLocal %u, YLocal %u", XGlobal,
            XLocal, YLocal);
 
-    if ((GlobalReadout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-      XTRACE(DATA, DEB,
-             "Ticking between readouts for same event, Time Low = %u",
-             getReadoutTimeLow());
-    } else {
-      addTickBtwEventsToReadoutTime();
-      XTRACE(DATA, DEB, "Ticking between readouts for new event, Time Low = %u",
-             getReadoutTimeLow());
-    }
-
     GlobalReadout++;
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", getReadoutTimeLow(),
            getReadoutTimeHigh());

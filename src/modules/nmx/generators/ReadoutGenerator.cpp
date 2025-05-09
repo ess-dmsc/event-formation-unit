@@ -79,13 +79,6 @@ void ReadoutGenerator::generateData() {
     ReadoutData->FENId = FEN;
     DP += ReadoutDataSize;
 
-    /// \todo work out if time low increase is applies to NMX
-    if ((Readout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
-
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "
            "TimeHigh:%u, TimeLow:%u",

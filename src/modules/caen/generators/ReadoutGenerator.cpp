@@ -160,8 +160,6 @@ void ReadoutGenerator::generateMaskedData() {
     if (Settings.Debug) {
       printDebug(ReadoutData);
     }
-
-    addTickBtwEventsToReadoutTime();
   }
 }
 

@@ -103,14 +103,6 @@ void ReadoutGenerator::generateData() {
     ReadoutData->Channel = Channel;
 
     DP += ReadoutDataSize;
-
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to TREX
-    if ((Readout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
   }
 }
 

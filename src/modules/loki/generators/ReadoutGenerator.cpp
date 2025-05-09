@@ -53,9 +53,6 @@ void ReadoutGenerator::generateData() {
     //        ReadoutData->FiberId,
     //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
-
-    // increment readout time for next readout
-    addTicksBtwReadoutsToReadoutTime();
   }
 }
 

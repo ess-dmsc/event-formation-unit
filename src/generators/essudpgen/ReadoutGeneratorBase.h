@@ -48,8 +48,6 @@ public:
     uint16_t UDPPort{9000};                                 ///< UDP port for transmission
     uint64_t NumberOfPackets{0};                            ///< Number of packets to transmit (0 means all packets)
     uint32_t NumReadouts{370};                              ///< Number of VMM readouts in the UDP packet
-    uint32_t TicksBtwReadouts{10};                          ///< Ticks between readouts
-    uint32_t TicksBtwEvents{3 * 88};                        ///< Ticks between events (88 ticks ~1us)
     uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
@@ -126,25 +124,9 @@ protected:
   void finishPacket();
 
   ///
-  /// \brief Increments the readout time with ticks between readouts according
-  /// to the settings.
-  ///
-  inline void addTicksBtwReadoutsToReadoutTime() {
-    readoutTime += Settings.TicksBtwReadouts;
-  }
-
-  ///
   /// \brief Resets the readout time to the next pulse time.
   ///
   inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
-
-  ///
-  /// \brief Increments the readout time with ticks between events according to
-  /// the settings.
-  ///
-  inline void addTickBtwEventsToReadoutTime() {
-    readoutTime += Settings.TicksBtwEvents;
-  }
 
   ///
   /// \brief Get a tuple containing the high and the low readout time. If the

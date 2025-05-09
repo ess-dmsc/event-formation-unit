@@ -107,9 +107,6 @@ void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
     dataPkt->ADC = 12345;
     dataPkt->NPos = 0;
 
-    // Increment time for next readout and adjust high time if needed
-    addTicksBtwReadoutsToReadoutTime();
-
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
   }
@@ -162,9 +159,6 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     } else {
       fixedValueGenerator(dataPkt);
     }
-
-    // Increment time for next readout
-    addTicksBtwReadoutsToReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);

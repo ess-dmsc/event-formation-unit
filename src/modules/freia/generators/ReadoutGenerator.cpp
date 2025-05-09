@@ -48,11 +48,6 @@ void ReadoutGenerator::generateData() {
     }
 
     DP += ReadoutDataSize;
-    if ((Readout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
   }
 }
 
