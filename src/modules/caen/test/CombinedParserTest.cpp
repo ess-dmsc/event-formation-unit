@@ -66,6 +66,9 @@ TEST_F(CombinedParserTest, DataGenV0) {
     Caen::ReadoutGenerator gen;
     gen.Settings.headerVersion = 0;
     gen.Settings.NumReadouts = Sections;
+    // When number of readout is controlled by settings Frequency must be zero or else it will
+    // be overriden gen.main()
+    gen.Settings.Frequency = 0;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
     gen.main();
@@ -89,6 +92,9 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 
     Caen::ReadoutGenerator gen;
     gen.Settings.NumReadouts = Sections;
+    // When number of readout is controlled by settings Frequency must be zero or else it will
+    // be overriden gen.main()
+    gen.Settings.Frequency = 0;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
     gen.main();

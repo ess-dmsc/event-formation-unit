@@ -19,6 +19,7 @@
 #include <CLI/CLI.hpp>
 
 #include <cstdint>
+#include <memory>
 
 ///
 /// \class ReadoutGeneratorBase
@@ -26,6 +27,10 @@
 ///
 class ReadoutGeneratorBase {
 public:
+  /// \brief default frequency for all generators. It can be changed with command line parameter
+  /// q, --frequency.
+  static constexpr uint16_t DefaultFrequency{ 14 };
+
   ///
   /// \struct GeneratorSettings
   /// \brief Struct that holds the generator settings.
@@ -49,7 +54,7 @@ public:
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
     /// \todo This should be the default mode and obsolete pe packet generation
-    uint16_t Frequency{0};                ///< Frequency of time updates for each packet
+    uint16_t Frequency{ DefaultFrequency };                ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1};             ///< Header version
     bool Loop{false};                     ///< Flag to keep looping the same file forever
@@ -243,8 +248,8 @@ private:
 
   /// \brief For TOF distribution calculations
   /// TofDist could be calculated from default values in Settings struct
-  /// by setting Frequency to 14
-  DistributionGenerator timeOffFlightDist{ 1000.0/14 };
+  /// by setting Frequency to default.
+  std::unique_ptr<DistributionGenerator> timeOffFlightDist{};
   float TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

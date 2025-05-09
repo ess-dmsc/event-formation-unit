@@ -65,7 +65,7 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
   if (Settings.Tof) {
-    const double timeOfFlight = timeOffFlightDist.getValue();
+    const double timeOfFlight = timeOffFlightDist->getValue();
     return {
       pulseTime.getTimeHigh(),
       pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)};
@@ -253,7 +253,12 @@ void ReadoutGeneratorBase::main() {
     assert(HeaderSize == 32);
   }
 
+  if ((Settings.Frequency == 0) && (Settings.Tof)) {
+    throw std::runtime_error("Invalid combination of -q and --tof. Frequency of zero is not allowed ");
+  }
+
   if (Settings.Frequency != 0) {
+    timeOffFlightDist = std::make_unique<DistributionGenerator>( 1000.0 / DefaultFrequency);
     pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
     NumberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
     XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
