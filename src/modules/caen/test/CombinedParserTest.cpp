@@ -137,6 +137,9 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
     int bufferLength = buffer.size();
     ASSERT_GT(bufferLength, sizeof(ESSReadout::Parser::PacketHeaderV0) + (4 + 20));
     ASSERT_LT(bufferLength, Caen::ReadoutGenerator::BufferSize);
+    auto Res =
+          CommonReadout.validate((char *)buffer.data(), bufferLength, DataType);
+    ASSERT_EQ(Res, ESSReadout::Parser::OK);
   }
 }
 
