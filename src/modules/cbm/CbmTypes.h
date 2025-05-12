@@ -33,11 +33,11 @@ namespace cbm {
 
 /// Example usage:
 /// \code
-/// CbmType cbmType("TTL");
+/// CbmType cbmType("EVENT_0D");
 /// int typeInt = static_cast<int>(cbmType);
 /// std::string typeStr = cbmType.to_string();
 ///
-/// CbmType cbmType2("GEM");
+/// CbmType cbmType2("2D");
 /// if (cbmType == cbmType2) {
 ///     std::cout << "Both CBM types are the same." << std::endl;
 /// } else {
@@ -58,27 +58,25 @@ public:
   /// \enum Types
   /// \brief Enumeration of CBM beam monitor types.
   enum Types {
-    TTL   = 0x01,    ///< TTL beam monitor type.
-    N2GEM = 0x02,    ///< N2GEM beam monitor type.
-    IBM   = 0x03,    ///< IBM beam monitor type.
-    GEM   = 0x04,    ///< GEM beam monitor type.
-    FC    = 0x05,    ///< FC beam monitor type.
-    MM    = 0x06     ///< MM beam monitor type.
+    EVENT_0D = 0x01, ///< Event 0D type.
+    EVENT_2D = 0x02, ///< Event 2D type.
+    IBM = 0x03,      ///< IBM histogram type.
   };
 
   /// \var MAX
   /// \brief Maximum CBM type value.
-  static constexpr int MAX = Types::MM;
+  static constexpr int MAX = Types::IBM;
 
   /// \var MIN
   /// \brief Minimum CBM type value.
-  static constexpr int MIN = Types::TTL;
+  static constexpr int MIN = Types::EVENT_0D;
 
   // Construct from string
   CbmType(const std::string &typeName) {
     // Convert to upper case, so both "value" and "VALUE" will work
     std::string upper = typeName;
-    std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c){ return std::toupper(c); });
+    std::transform(upper.begin(), upper.end(), upper.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
 
     const auto t = magic_enum::enum_cast<Types>(upper);
     if (t.has_value()) {
@@ -89,14 +87,14 @@ public:
   }
 
   // Construct from integer
-  CbmType(const int type=TTL) {
+  CbmType(const int type = EVENT_0D) {
     if (type >= MIN && type <= MAX) {
       mBeamMonitorType = static_cast<Types>(type);
     }
 
     else {
       throw std::out_of_range("Invalid CbmType integer: " +
-                                  std::to_string(type));
+                              std::to_string(type));
     }
   }
 
@@ -120,16 +118,17 @@ public:
   /// \return The uint8_t representation of the CBM type.
   operator uint8_t() const { return static_cast<uint8_t>(mBeamMonitorType); }
 
-  /// \brief Overload of the equality operator (==) for comparing two CbmType objects.
-  /// \param other The CbmType object to compare with.
-  /// \return true if the CbmType objects are equal, false otherwise.
+  /// \brief Overload of the equality operator (==) for comparing two CbmType
+  /// objects. \param other The CbmType object to compare with. \return true if
+  /// the CbmType objects are equal, false otherwise.
   bool operator==(const CbmType &other) const {
     return mBeamMonitorType == other.mBeamMonitorType;
   }
 
-  /// \brief Overload of the equality operator (==) for comparing a CbmType object with a CbmTypes enum value.
-  /// \param other The CbmTypes enum value to compare with.
-  /// \return true if the CbmType object is equal to the CbmTypes enum value, false otherwise.
+  /// \brief Overload of the equality operator (==) for comparing a CbmType
+  /// object with a CbmTypes enum value. \param other The CbmTypes enum value to
+  /// compare with. \return true if the CbmType object is equal to the CbmTypes
+  /// enum value, false otherwise.
   bool operator==(const Types &other) const {
     return mBeamMonitorType == other;
   }

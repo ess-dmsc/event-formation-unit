@@ -75,12 +75,12 @@ void CbmInstrument::processMonitorReadouts() {
 
     ESSTime ReadoutTime = ESSTime(Readout.TimeHigh, Readout.TimeLow);
 
-    /// \todo: This function can come back with a valid TOF based on the
-    /// previous pulse time configured on the RefTime class. This means the
-    /// result looks valid, but for many detectors this TOF will be added to
-    /// the Serializer with the current PulseTime. Handling of this case
-    /// should be reviewed, maybe this will lead to incorrect statistics.
-    /// Currently we just count the event for statistics.
+    /// Calculates the time of flight (TOF) for the readout based on the
+    /// reference time and the readout time. If the readout time is smaller than
+    /// the reference time, it means that tof would be negative and this fucntion
+    /// returns the TOF according to the previous reference time. This is includes
+    /// delayed readouts into the current pulse statistics.
+    /// \note: If time calculation fails, the function returns InvalidTOF
     uint64_t TimeOfFlight = RefTime.getTOF(ReadoutTime);
 
     if (TimeOfFlight == RefTime.InvalidTOF) {
@@ -91,6 +91,7 @@ void CbmInstrument::processMonitorReadouts() {
       counters.TimeError++;
       continue;
     }
+    
     // Check for out_of_range errors thrown by the HashMap2D, which contains
     // the serializers
     try {
@@ -113,8 +114,8 @@ void CbmInstrument::processMonitorReadouts() {
         counters.IBMEvents++;
       }
 
-      else if (Type == CbmType::TTL) {
-        counters.TTLReadoutsProcessed++;
+      else if (Type == CbmType::EVENT_0D) {
+        counters.Event0DReadoutsProcessed++;
 
         // Register pixels according to the topology map pixel offset
         auto &PixelId = Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
@@ -128,12 +129,12 @@ void CbmInstrument::processMonitorReadouts() {
                "ns",
                Readout.Type, PixelId, TimeOfFlight);
 
-        counters.TTLEvents++;
+        counters.Event0DEvents++;
 
       } else {
         XTRACE(DATA, WAR, "Type %d currently not supported by EFU",
                Readout.Type);
-        counters.TypeNotSupported++;
+        counters.TypeNotConfigured++;
         continue;
       }
     } catch (std::out_of_range &e) {
@@ -145,7 +146,7 @@ void CbmInstrument::processMonitorReadouts() {
     } catch (std::invalid_argument &e) {
       XTRACE(DATA, WAR, "Invalid CbmType: {} for readout {} with time {}",
              e.what(), counters.CbmCounts, ReadoutTime.toNS().count());
-      counters.TypeNotSupported++;
+      counters.TypeNotConfigured++;
       continue;
     }
 

@@ -63,13 +63,6 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout->Type > CbmType::MAX || Readout->Type < CbmType::MIN) {
-      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", Readout->Type,
-             CbmType::MIN, CbmType::MAX);
-      Stats.ErrorType++;
-      continue;
-    }
-
     if (Readout->DataLength != DataLength) {
       XTRACE(DATA, WAR, "Invalid header length %d - must be %d bytes",
              Readout->DataLength, DataLength);
@@ -77,20 +70,43 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    // Check for invalid ADC values only for TTL readouts
-    if (Readout->Type == CbmType::TTL && Readout->ADC == 0) {
-      XTRACE(DATA, WAR, "Invalid ADC (0)");
-      Stats.ErrorADC++;
-    } else if (Readout->Type != CbmType::TTL && Readout->ADC != 0) {
-      XTRACE(DATA, WAR, "Invalid ADC unsued for this type should be 0");
-      Stats.ErrorADC++;
-      continue;
-    }
-
     if (Readout->TimeLow > ESSReadout::MaxFracTimeCount) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout->TimeLow,
              ESSReadout::MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
+      continue;
+    }
+
+    if (Readout->Type > CbmType::MAX || Readout->Type < CbmType::MIN) {
+      XTRACE(DATA, WAR, "Invalid data type %d (valid: %d - %d)", Readout->Type,
+             CbmType::MIN, CbmType::MAX);
+      Stats.ErrorType++;
+      continue;
+    }
+
+    /// check redouts are valid accoridng to the supported data types
+    switch (Readout->Type) {
+
+    case CbmType::EVENT_0D:
+      break;
+
+    case CbmType::EVENT_2D:
+      break;
+
+    case CbmType::IBM:
+      if (Readout->NPos >
+          static_cast<uint32_t>(
+              0x00FFFFFF)) { // Max value for 24-bit is 0x00FFFFFF
+        XTRACE(DATA, WAR, "Invalid ADC value %d (max is %d)", Readout->NPos,
+               0x00FFFFFF);
+        Stats.ErrorADC++;
+        continue;
+      }
+      break;
+
+    default:
+      XTRACE(DATA, WAR, "Unsupported type %d", Readout->Type);
+      Stats.ErrorType++;
       continue;
     }
 

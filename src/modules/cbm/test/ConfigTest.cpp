@@ -7,6 +7,10 @@
 #include <cbm/geometry/Config.h>
 #include <common/testutils/TestBase.h>
 
+#include <filesystem>
+
+using std::filesystem::path;
+
 // clang-format off
 auto MissingDetector = R"(
   {
@@ -26,7 +30,7 @@ auto DefaultValuesOnly = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -38,7 +42,7 @@ auto IncorrectFEN = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  12, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  12, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -50,7 +54,7 @@ auto FENIdEdgeCase = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -61,7 +65,7 @@ auto NoMaxFENId = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -73,8 +77,8 @@ auto DuplicateEntry = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0},
-      { "FEN":  10, "Channel": 10, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0}
+      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0},
+      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -108,9 +112,9 @@ auto ConfigWithTopology = R"(
     "MaxFENId" : 2,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0},
-      { "FEN":  0, "Channel": 1, "Type": "TTL", "Source" : "cbm2", "PixelOffset": 0},
-      { "FEN":  1, "Channel": 0, "Type": "TTL", "Source" : "cbm3", "PixelOffset": 0},
+      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0},
+      { "FEN":  0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 0},
+      { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 0},
       { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  0, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100}
@@ -124,7 +128,17 @@ using namespace cbm;
 class CbmConfigTest : public TestBase {
 protected:
   Config config{"config.json"}; // dummy filename, not used
-  void SetUp() override {}
+
+  inline static path FullConfigFile{""};
+
+  void SetUp() override {
+
+    // Get base test dir
+    path TestDir = path(__FILE__).parent_path();
+    // Define test files
+    FullConfigFile = TestDir / path("cbm_config_test.json");
+  }
+
   void TearDown() override {}
 };
 
@@ -223,13 +237,15 @@ TEST_F(CbmConfigTest, NoTopology) {
   }
 }
 
-TEST_F(CbmConfigTest, FullInstrument) {
-  config = Config(CBM_FULL);
+TEST_F(CbmConfigTest, LoadFileFullInstrument) {
+  config = Config(FullConfigFile);
   config.loadAndApply();
   ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
+  EXPECT_EQ(config.Parms.MonitorRing, 11);
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 1);
+  EXPECT_EQ(config.Parms.MaxFENId, 2);
+  EXPECT_EQ(config.Parms.NumberOfMonitors, 2);
 }
 
 TEST_F(CbmConfigTest, TestTopology) {
@@ -244,21 +260,21 @@ TEST_F(CbmConfigTest, TestTopology) {
   // Testing topology
   // Test first entry
   auto *TopologyEntry = config.TopologyMapPtr->get(0, 0);
-  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_0D);
   EXPECT_EQ(TopologyEntry->Source, "cbm1");
   EXPECT_EQ(TopologyEntry->FEN, 0);
   EXPECT_EQ(TopologyEntry->Channel, 0);
 
   // Test second entry
   TopologyEntry = config.TopologyMapPtr->get(0, 1);
-  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_0D);
   EXPECT_EQ(TopologyEntry->Source, "cbm2");
   EXPECT_EQ(TopologyEntry->FEN, 0);
   EXPECT_EQ(TopologyEntry->Channel, 1);
 
   // Test third entry
   TopologyEntry = config.TopologyMapPtr->get(1, 0);
-  EXPECT_EQ(TopologyEntry->Type, CbmType::TTL);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_0D);
   EXPECT_EQ(TopologyEntry->Source, "cbm3");
   EXPECT_EQ(TopologyEntry->FEN, 1);
   EXPECT_EQ(TopologyEntry->Channel, 0);

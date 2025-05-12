@@ -31,13 +31,13 @@ struct Counters {
   };
 
   // Readout processing
-  int64_t TTLReadoutsProcessed{0};
+  int64_t Event0DReadoutsProcessed{0};
   int64_t IBMReadoutsProcessed{0};
-  int64_t TypeNotSupported{0};
+  int64_t TypeNotConfigured{0};
 
   // Events
   int64_t IBMEvents{0};
-  int64_t TTLEvents{0};
+  int64_t Event0DEvents{0};
 
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgError{0};

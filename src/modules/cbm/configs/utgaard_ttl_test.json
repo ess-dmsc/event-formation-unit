@@ -13,6 +13,6 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 0, "Type": "TTL", "Source" : "cbm1", "PixelOffset": 0}
+    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
   ]
 }
