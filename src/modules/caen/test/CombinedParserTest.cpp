@@ -84,6 +84,62 @@ private:
   Buffer buffer{};
 };
 
+class MultipackageSocketMock : public SocketInterface {
+  public:
+    using BufferItem = std::vector<char>;
+    using BufferList = std::vector<BufferItem>;
+  
+    const BufferList& PackageList() const {
+      return bufferList;
+    }
+  
+    void Clear() {
+      bufferList.clear();
+    }
+  
+    int send(void const * dataBuffer, int dataLength) override {
+      BufferItem value{};
+      value.reserve(dataLength);
+      for (int i = 0; i < dataLength; i++) {
+        value.emplace_back(((char*)dataBuffer)[i]);
+      }
+      
+      bufferList.emplace_back(value);
+      return dataLength;
+    }
+  
+    MultipackageSocketMock() = default;
+    ~MultipackageSocketMock() = default;
+  private:
+  BufferList bufferList{};
+};
+  
+// Cycle through all section values with equal number of readouts
+TEST_F(CombinedParserTest, DataMultiPackage) {
+  MultipackageSocketMock socket{};
+  const std::chrono::microseconds pulseTimeDuration{ 71428 };
+  std::shared_ptr<DistributionGenerator> distribution = 
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
+
+
+  Caen::ReadoutGenerator gen;
+  gen.Settings.headerVersion = 0;
+  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+
+  gen.main(distribution);
+
+  socket.Clear();
+  gen.generatePackages(&socket, pulseTimeDuration);
+
+  auto collection = socket.PackageList();
+  ASSERT_GT(collection.size(), 1);
+  for (auto buffer : collection) {
+    int bufferLength = buffer.size();
+    ASSERT_GT(bufferLength, sizeof(ESSReadout::Parser::PacketHeaderV0) + (4 + 20));
+    ASSERT_LT(bufferLength, Caen::ReadoutGenerator::BufferSize);
+  }
+}
+
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGenV0) {
   SocketMock socket{};
