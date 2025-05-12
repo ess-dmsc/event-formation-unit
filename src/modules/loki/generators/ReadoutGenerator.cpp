@@ -37,8 +37,9 @@ void ReadoutGenerator::generateData() {
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
 
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;

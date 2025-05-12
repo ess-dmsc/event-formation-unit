@@ -37,7 +37,6 @@ public:
   ///
   // clang-format off
   struct GeneratorSettings {
-    bool Tof{false};                                        ///< Generate nicely distributed tof data
     bool Debug{false};                                      ///< Print debug info
 
     uint32_t NFibers{2};                                    ///< Number of fibers
@@ -47,7 +46,6 @@ public:
     std::string IpAddress{"127.0.0.1"};                     ///< IP address for UDP transmission
     uint16_t UDPPort{9000};                                 ///< UDP port for transmission
     uint64_t NumberOfPackets{0};                            ///< Number of packets to transmit (0 means all packets)
-    uint32_t NumReadouts{370};                              ///< Number of VMM readouts in the UDP packet
     uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
@@ -74,13 +72,19 @@ public:
   /// \brief Creates a packet ready for UDP transmission.
   /// \return The type of the packet.
   ///
-  uint16_t makePacket();
+  void generatePackages(SocketInterface* socket, const std::chrono::microseconds& pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.
   /// \param ReadoutSize The size of the readout data.
   ///
   void setReadoutDataSize(uint8_t ReadoutSize);
+
+  ///
+  /// \brief Sets number of readouts per package.
+  /// \param ReadoutCount Readout count
+  ///
+  void setNumberOfReadouts(uint32_t ReadoutCount);
 
   ///
   /// \brief Process command line arguments, update settings.
@@ -94,7 +98,7 @@ public:
   ///
   /// \brief Sets up buffers, socket, etc.
   ///
-  void main();
+  void main(std::shared_ptr<FunctionGenerator> generator);
 
   ///
   /// \brief Start the transmission loop for the generator.
@@ -137,20 +141,6 @@ protected:
   virtual std::pair<uint32_t, uint32_t> getReadOutTimes();
 
   ///
-  /// \brief Gets the value of readoutTimeHigh.
-  /// \return The value of readoutTimeHigh.
-  ///
-  inline uint32_t getReadoutTimeHigh() const {
-    return readoutTime.getTimeHigh();
-  }
-
-  ///
-  /// \brief Gets the value of readoutTimeLow.
-  /// \return The value of readoutTimeLow.
-  ///
-  inline uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
-
-  ///
   /// \brief Gets the value of readoutTime in nanoseconds.
   /// \return The value of readoutTime in nanoseconds.
   ///
@@ -167,22 +157,12 @@ protected:
   }
 
   ///
-  /// \brief Gets the value of prevPulseTime in nanoseconds.
-  /// \return The value of prevPulseTime in nanoseconds.
-  ///
-  inline esstime::TimeDurationNano getPrevPulseTimeNs() const {
-    return prevPulseTime.toNS();
-  }
-
-  ///
   /// \brief Performs the next pulse time calculation with ESSTime and returns
   /// the next pulse time in nanoseconds.
   /// \return The next pulse time in nanoseconds.
   ///
   inline esstime::TimeDurationNano getNextPulseTimeNs() const {
-    esstime::ESSTime nextPulseTime = pulseTime;
-    nextPulseTime += pulseFrequencyNs;
-    return nextPulseTime.toNS();
+    return getNextPulseTime().toNS();
   }
 
   ///
@@ -221,6 +201,11 @@ private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
+  /// \brief Update internal time stamps. 
+  /// If bool is true, pulse time including previous pulse time and readout time will be updated
+  /// if bool is false, only readout time will be set to pulse time.
+  const esstime::ESSTime& UpdateTimestamps(bool updateTime);
+
   // clang-format off
   esstime::ESSTime pulseTime;                    ///< Pulse time
   esstime::ESSTime prevPulseTime;                ///< Previous pulse time
@@ -231,7 +216,8 @@ private:
   /// \brief For TOF distribution calculations
   /// TofDist could be calculated from default values in Settings struct
   /// by setting Frequency to default.
-  std::unique_ptr<DistributionGenerator> timeOffFlightDist{};
+  // std::shared_ptr<DistributionGenerator> timeOffFlightDist{};
+  std::shared_ptr<FunctionGenerator> distributionGenerator{};
   float TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

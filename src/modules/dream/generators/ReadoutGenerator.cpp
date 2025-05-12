@@ -118,7 +118,7 @@ void ReadoutGenerator::generateData() {
   uint32_t Readouts{0};
   DataParser::CDTReadout ReadoutData;
 
-  while (Readouts < Settings.NumReadouts) {
+  while (Readouts < NumberOfReadouts) {
     bool Valid = getRandomReadout(ReadoutData);
     if (not Valid) {
       continue;

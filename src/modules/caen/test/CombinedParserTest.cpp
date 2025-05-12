@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <vector>
 #include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
@@ -58,53 +59,85 @@ protected:
   void TearDown() override {}
 };
 
+class SocketMock : public SocketInterface {
+public:
+  using Buffer = std::vector<char>;
+
+  void Clear() {
+    buffer.clear();
+  }
+
+  const Buffer& GetData() const {
+    return buffer;
+  } 
+
+  int send(void const * dataBuffer, int dataLength) override {
+    for (int i = 0; i < dataLength; i++) {
+      buffer.emplace_back(((char*)dataBuffer)[i]);
+    }
+    return dataLength;
+  }
+
+  SocketMock() = default;
+  ~SocketMock() = default;
+private:
+  Buffer buffer{};
+};
+
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGenV0) {
+  SocketMock socket{};
+  const std::chrono::microseconds pulseTimeDuration{ 0 };
+  std::shared_ptr<DistributionGenerator> distribution = 
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
     Caen::ReadoutGenerator gen;
     gen.Settings.headerVersion = 0;
-    gen.Settings.NumReadouts = Sections;
-    // When number of readout is controlled by settings Frequency must be zero or else it will
-    // be overriden gen.main()
-    gen.Settings.Frequency = 0;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+    gen.setNumberOfReadouts(Sections);
 
-    gen.main();
+    gen.main(distribution);
 
-    uint16_t DataSize = gen.makePacket();
-    ASSERT_EQ(DataSize,
+    socket.Clear();
+    gen.generatePackages(&socket, pulseTimeDuration);
+
+    unsigned long packageSize = socket.GetData().size();
+    ASSERT_EQ(packageSize,
               sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
-
     auto Res =
-        CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
+          CommonReadout.validate((char *)socket.GetData().data(), packageSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
     Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
-                           CommonReadout.Packet.DataLength);
+                            CommonReadout.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
   }
 }
 
 TEST_F(CombinedParserTest, DataGenDefault) {
 
+  SocketMock socket{};
+  const std::chrono::microseconds pulseTimeDuration{ 0 };
+  std::shared_ptr<DistributionGenerator> distribution = 
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
+  
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
     Caen::ReadoutGenerator gen;
-    gen.Settings.NumReadouts = Sections;
-    // When number of readout is controlled by settings Frequency must be zero or else it will
-    // be overriden gen.main()
-    gen.Settings.Frequency = 0;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+    gen.setNumberOfReadouts(Sections);
 
-    gen.main();
+    gen.main(distribution);
 
-    uint16_t DataSize = gen.makePacket();
-    ASSERT_EQ(DataSize,
+    socket.Clear();
+    gen.generatePackages(&socket, pulseTimeDuration);
+    unsigned long packageSize = socket.GetData().size();
+   ASSERT_EQ(packageSize,
               sizeof(ESSReadout::Parser::PacketHeaderV1) + Sections * (4 + 20));
 
     auto Res =
-        CommonReadout.validate((char *)&gen.Buffer[0], DataSize, DataType);
+        CommonReadout.validate((char *)socket.GetData().data(), packageSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
     Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
                            CommonReadout.Packet.DataLength);

@@ -16,7 +16,9 @@ int main(int argc, char *argv[]) {
   NmxGen.setReadoutDataSize(DataSize);
 
   NmxGen.argParse(argc, argv);
-  NmxGen.main();
+
+  std::shared_ptr<DistributionGenerator> distribution = DistributionGenerator::Factory(NmxGen.Settings.Frequency);
+  NmxGen.main(distribution);
 
   NmxGen.transmitLoop();
 

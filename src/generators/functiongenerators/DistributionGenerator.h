@@ -11,7 +11,9 @@
 
 #include <generators/functiongenerators/FunctionGenerator.h>
 
+#include <memory>
 #include <random>
+#include <stdexcept>
 
 ///
 /// The DistributionGenerator class represents a generator for random values
@@ -53,13 +55,15 @@ public:
   /// absolute value of Bins.
   DistributionGenerator(double MaxX, int Bins);
 
+  /// \brief Distribution factory based on the rotation frequency of the target wheel
+  static std::shared_ptr<DistributionGenerator> Factory(uint16_t Frequency);
+
   /// \brief return a random value based on the distribution function
   double getValue();
 
   /// \brief return the distribution value at a specific index
   double getDistValue(const double &) override;
 
-public:
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms
   uint NumberOfBins{512};
   double BinWidth{0.0};

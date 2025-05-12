@@ -12,7 +12,6 @@
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <random>
 
-
 /// \class LinearGenerator
 /// \brief A class that generates linear values based on a given gradient.
 class LinearGenerator : public FunctionGenerator {
@@ -34,6 +33,11 @@ public:
     int binIndex = static_cast<int>(Pos / BinWidth);
 
     return Offset + ValueBins[binIndex];
+  }
+
+  /// \brief return a random value based on the distribution function
+  double getValue() override {
+    return 0.0;
   }
 
 public:

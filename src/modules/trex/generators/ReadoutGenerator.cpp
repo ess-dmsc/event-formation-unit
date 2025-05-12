@@ -40,8 +40,9 @@ void ReadoutGenerator::generateData() {
     // TREX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->OTADC = 1000;
 
     // TREX is 16 wires deep in Z direction

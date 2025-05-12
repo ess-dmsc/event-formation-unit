@@ -18,7 +18,17 @@ int main(int argc, char *argv[]) {
   CbmGen.setReadoutDataSize(cbmReadoutDataSize);
 
   CbmGen.argParse(argc, argv);
-  CbmGen.main();
+
+  std::shared_ptr<DistributionGenerator> distribution;
+  if (CbmGen.cbmSettings.monitorType == cbm::CbmType::TTL) {
+    distribution = DistributionGenerator::Factory(CbmGen.Settings.Frequency);
+  } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
+    distribution = std::make_unique<DistributionGenerator>( 1000.0 / CbmGen.Settings.Frequency);
+  } else {
+    throw std::runtime_error("Unsupported monitor type");
+  }
+
+  CbmGen.main(distribution);
 
   CbmGen.transmitLoop();
 

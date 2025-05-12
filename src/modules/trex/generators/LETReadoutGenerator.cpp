@@ -37,16 +37,18 @@ void LETReadoutGenerator::generateData() {
 
   for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
 
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", getReadoutTimeLow(),
-           getReadoutTimeHigh());
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", readoutTimeLow,
+           readoutTimeHigh);
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     // TREX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->OTADC = 1000;
 
     // TREX is 16 wires deep in Z direction
@@ -103,8 +105,8 @@ void LETReadoutGenerator::generateData() {
            XLocal, YLocal);
 
     GlobalReadout++;
-    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", getReadoutTimeLow(),
-           getReadoutTimeHigh());
+    XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh - %u", readoutTimeLow,
+           readoutTimeHigh);
   }
 }
 

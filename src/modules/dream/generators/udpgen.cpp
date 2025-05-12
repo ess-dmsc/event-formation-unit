@@ -17,7 +17,8 @@ int main(int argc, char *argv[]) {
 
   DreamGen.argParse(argc, argv);
 
-  DreamGen.main();
+  std::shared_ptr<DistributionGenerator> distribution = DistributionGenerator::Factory(DreamGen.Settings.Frequency);
+  DreamGen.main(distribution);
   DreamGen.transmitLoop();
 
   return 0;
