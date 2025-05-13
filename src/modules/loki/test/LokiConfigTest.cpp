@@ -28,28 +28,26 @@ TEST_F(LokiConfigTest, ParseConfig) {
 }
 
 TEST_F(LokiConfigTest, NoDetectorKey) {
-  json_change_key(config.root, "Detector", "InvalidDetector");
+  json_change_key(config.root(), "Detector", "InvalidDetector");
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(LokiConfigTest, BadDetectorName) {
-  config.root["Detector"] = "nosuchdetector";
+  config["Detector"] = "nosuchdetector";
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
-
 TEST_F(LokiConfigTest, BadBank) {
-  config.root["Banks"][0]["Bank"] = 200;
+  config["Banks"][0]["Bank"] = 200;
   ASSERT_NO_THROW(config.parseConfig());
   ASSERT_EQ(config.Parms.ConfiguredBanks, 8);
 }
 
 TEST_F(LokiConfigTest, BadRing) {
-  config.root["Config"][0]["Ring"] = 200;
+  config["Config"][0]["Ring"] = 200;
   ASSERT_NO_THROW(config.parseConfig());
   ASSERT_EQ(config.Parms.ConfiguredRings, 9);
 }
-
 
 TEST_F(LokiConfigTest, Constructor) {
   for (int i = 0; i < config.Parms.NumRings; i++) {
@@ -63,7 +61,6 @@ TEST_F(LokiConfigTest, Constructor) {
   }
   ASSERT_EQ(config.Parms.Resolution, 0);
 }
-
 
 TEST_F(LokiConfigTest, GetGlobalGroup) {
   config.parseConfig();

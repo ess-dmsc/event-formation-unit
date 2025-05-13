@@ -119,22 +119,22 @@ TEST_F(CaenConfigTest, NotJson) {
 }
 
 TEST_F(CaenConfigTest, BadDetectorName) {
-  config.root = BadDetector;
+  config.setRoot(BadDetector);
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, InvalidConfig) {
-  config.root = InvalidConfig;
+  config.setRoot(InvalidConfig);
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, InvalidConfigII) {
-  config.root = InvalidConfigII;
+  config.setRoot(InvalidConfigII);
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, ValidConfig) {
-  config.root = ValidConfig;
+  config.setRoot(ValidConfig);
   config.parseConfig();
   ASSERT_EQ(config.LokiConf.Parms.TotalGroups, (32 + 24) * 4);
 }

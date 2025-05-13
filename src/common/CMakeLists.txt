@@ -10,6 +10,7 @@ add_subdirectory(readout)
 add_subdirectory(kafka/serializer)
 
 set(efu_common_SRC
+  config/Config.cpp
   debug/Hexdump.cpp
   debug/Log.cpp
   detector/EFUArgs.cpp
@@ -33,6 +34,7 @@ set(efu_common_SRC
 set(efu_common_INC
   ${VERSION_INCLUDE_DIR}/common/version_num.h
   ${VERSION_INCLUDE_DIR}/common/Version.h
+  config/Config.h
   debug/Assert.h
   debug/Expect.h
   debug/Error.h

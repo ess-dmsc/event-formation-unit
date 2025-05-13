@@ -1,12 +1,13 @@
-// Copyright (C) 2019 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read configurations from file
+/// \brief use nlohmann::json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
 #include <caen/geometry/Config.h>
+
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 
@@ -15,19 +16,18 @@
 
 namespace Caen {
 
-///
 Config::Config() {}
 
-Config::Config(const std::string &ConfigFile) : ConfigFileName(ConfigFile) {
+Config::Config(const std::string &ConfigFile)
+  : Configurations::Config(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
-  root = from_json_file(ConfigFile);
+  loadFromFile();
   XTRACE(INIT, DEB, "Loaded json file");
 }
 
 void Config::parseConfig() {
-  try {
-    Legacy.InstrumentName = root["Detector"].get<std::string>();
-  } catch (...) {
+  setMask(CHECK | XTRACE);
+  if (!assign("Detector", Legacy.InstrumentName)) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
   }
@@ -41,70 +41,33 @@ void Config::parseConfig() {
   }
 
   if (Legacy.InstrumentName == "loki") {
-    LokiConf.root = root;
+    LokiConf.setRoot(root());
     LokiConf.parseConfig();
   }
 
   if (Legacy.InstrumentName == "tbl3he") {
-    Tbl3HeConf.root = root;
+    Tbl3HeConf.setRoot(root());
     Tbl3HeConf.parseConfig();
   }
 
   if ((Legacy.InstrumentName == "bifrost") or (Legacy.InstrumentName == "miracles")) {
     try {
       // Assumed the same for all straws in all banks
-      Legacy.Resolution = root["StrawResolution"].get<unsigned int>();
+      setMask(LOG | CHECK);
+      assign("StrawResolution", Legacy.Resolution);
 
-      try {
-        Legacy.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-      } catch (...) {
-        // Use default value
-      }
-      LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", Legacy.MaxPulseTimeNS);
+      setMask(LOG);
+      assign("MaxPulseTimeNS", Legacy.MaxPulseTimeNS);
+      assign("MaxTOFNS",       Legacy.MaxTOFNS);
 
-      try {
-        Legacy.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
-      } catch (...) {
-        // Use default value
-      }
-      LOG(INIT, Sev::Info, "MaxTOFNS: {}", Legacy.MaxTOFNS);
-
-      try {
-        Legacy.MaxRing = root["MaxRing"].get<unsigned int>();
-      } catch (...) {
-        // Use default value
-      }
-
-      LOG(INIT, Sev::Info, "MaxRing: {}", Legacy.MaxRing);
-      XTRACE(INIT, DEB, "MaxRing: %u", Legacy.MaxRing);
-
-      try {
-        Legacy.MaxFEN = root["MaxFEN"].get<unsigned int>();
-      } catch (...) {
-        // Use default value
-      }
-      LOG(INIT, Sev::Info, "MaxFEN: {}", Legacy.MaxFEN);
-      XTRACE(INIT, DEB, "MaxFEN: %u", Legacy.MaxFEN);
-
-      try {
-        Legacy.MaxAmpl = root["MaxAmpl"].get<int>();
-      } catch (...) {
-        // Use default (maximum for integer type) value
-      }
-      LOG(INIT, Sev::Info, "MaxAmpl: {}", Legacy.MaxAmpl);
-      XTRACE(INIT, DEB, "MaxAmpl: %u", Legacy.MaxAmpl);
-
-      try {
-        Legacy.MaxGroup = root["MaxGroup"].get<unsigned int>();
-      } catch (...) {
-        // Use default value
-      }
-      LOG(INIT, Sev::Info, "MaxGroup: {}", Legacy.MaxGroup);
-      XTRACE(INIT, DEB, "MaxGroup: %u", Legacy.MaxGroup);
-
+      setMask(LOG | XTRACE);
+      assign("MaxRing",  Legacy.MaxRing);
+      assign("MaxFEN",   Legacy.MaxFEN);
+      assign("MaxAmpl",  Legacy.MaxAmpl);
+      assign("MaxGroup", Legacy.MaxGroup);
     } catch (...) {
       LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
-          ConfigFileName);
+          configFile());
       throw std::runtime_error("Invalid Json file");
     }
   }
