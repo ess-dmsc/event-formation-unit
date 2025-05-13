@@ -216,7 +216,7 @@ TEST_F(Tbl3HeGeometryTest, Serialisers) {
 
 // Pretty ugly and not easily testable, but it works.
 TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
-  CaenConfiguration.root = ValidConfig;
+  CaenConfiguration.setRoot(ValidConfig);
   CaenConfiguration.parseConfig();
   Tbl3HeGeometry g(CaenConfiguration);
 

@@ -1,12 +1,13 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read configurations from file
+/// \brief use nlohmann::json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
 #include <loki/geometry/LokiConfig.h>
+
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 
@@ -15,17 +16,19 @@
 
 namespace Caen {
 
-///
 LokiConfig::LokiConfig() {}
 
-LokiConfig::LokiConfig(const std::string &ConfigFile) : ConfigFileName(ConfigFile) {
+LokiConfig::LokiConfig(const std::string &ConfigFile)
+  : Configurations::Config(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
-  root = from_json_file(ConfigFile);
+  loadFromFile();
 }
 
 void LokiConfig::parseConfig() {
   try {
-    Parms.InstrumentName = root["Detector"].get<std::string>();
+    // Get detector/instrument name
+    setMask(CHECK | XTRACE);
+    assign("Detector", Parms.InstrumentName);
   } catch (...) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
@@ -38,25 +41,18 @@ void LokiConfig::parseConfig() {
 
   try {
     // Assumed the same for all straws in all banks
-    Parms.Resolution = root["Resolution"].get<int>();
-    XTRACE(INIT, DEB, "Resolution %d", Parms.Resolution);
+    assign("Resolution", Parms.Resolution);
 
-    Parms.ReadoutConstDelayNS = root["ReadoutConstDelayNS"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "ReadoutConstDelayNS: {}", Parms.ReadoutConstDelayNS);
-
-    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", Parms.MaxPulseTimeNS);
-
-    Parms.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MaxTOFNS: {}", Parms.MaxTOFNS);
-
-    Parms.GroupsZ = root["GroupsZ"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "GroupsZ: {}", Parms.GroupsZ);
+    setMask(LOG);
+    assign("ReadoutConstDelayNS", Parms.ReadoutConstDelayNS);
+    assign("MaxPulseTimeNS",      Parms.MaxPulseTimeNS);
+    assign("MaxTOFNS",            Parms.MaxTOFNS);
+    assign("GroupsZ",             Parms.GroupsZ);
 
     // First run through the Banks section
-    auto Banks = root["Banks"];
-    for (auto & elt : Banks) {
-      int Bank = elt["Bank"].get<int>();
+    auto Banks = root()["Banks"];
+    for (const auto &elt : Banks) {
+      const int Bank = elt["Bank"].get<int>();
       if ((Bank <0) or (Bank >= Parms.NumBanks)) {
         XTRACE(INIT, WAR, "Invalid bank: %d", Bank);
         continue;
@@ -71,8 +67,8 @@ void LokiConfig::parseConfig() {
 
 
     // Then run through the Config section
-    auto Configs = root["Config"];
-    for (auto & elt : Configs) {
+    auto Configs = root()["Config"];
+    for (const auto &elt : Configs) {
       int Ring = elt["Ring"].get<int>();
       if ((Ring <0) or (Ring >= Parms.NumRings)) {
         XTRACE(INIT, WAR, "Invalid ring: %d", Ring);
@@ -97,13 +93,9 @@ void LokiConfig::parseConfig() {
       Parms.ConfiguredRings++;
     }
     XTRACE(INIT, ALW, "Rings configured: %d", Parms.ConfiguredRings);
-
-
-
-
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}",
-        ConfigFileName);
+        configFile());
     throw std::runtime_error("Invalid Json file");
   }
 }
