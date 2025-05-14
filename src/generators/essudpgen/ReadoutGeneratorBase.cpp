@@ -11,6 +11,7 @@
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
+#include <cmath>
 #include <chrono>
 #include <cstdlib>
 #include <ctype.h>
@@ -63,13 +64,18 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
                "generate tof distribution");
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
+std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
   if (Settings.Tof) {
-    const double timeOfFlight = timeOffFlightDist.getValue();
+    if (std::isnan(timeOfFlight)) {
+      timeOfFlight = timeOffFlightDist.getValue();
+    }
+
     return {
       pulseTime.getTimeHigh(),
-      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)};
+      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
+    };
   }
+
   return { getReadoutTimeHigh(), getReadoutTimeLow() };
 }
 
