@@ -64,12 +64,12 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
                "generate tof distribution");
 }
 
+std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
+  return getReadOutTimes(timeOffFlightDist.getValue());
+}
+
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
   if (Settings.Tof) {
-    if (std::isnan(timeOfFlight)) {
-      timeOfFlight = timeOffFlightDist.getValue();
-    }
-
     return {
       pulseTime.getTimeHigh(),
       pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)

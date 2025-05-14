@@ -147,7 +147,11 @@ protected:
   /// calculated by the DistributionGenerator
   /// \param timeOfFlight  If specified, use this value for the time of flight
   /// \return Readout time pair [high, low].
-  virtual std::pair<uint32_t, uint32_t> getReadOutTimes(double timeOfFlight=std::nan(""));
+  virtual std::pair<uint32_t, uint32_t> getReadOutTimes(double timeOfFlight);
+
+  ///
+  /// \overload
+  virtual std::pair<uint32_t, uint32_t> getReadOutTimes();
 
   ///
   /// \return a time of flight value from the distribution generator
