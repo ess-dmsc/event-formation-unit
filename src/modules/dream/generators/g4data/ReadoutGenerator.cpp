@@ -85,9 +85,9 @@ void ReadoutGenerator::generateData() {
     dataPkt.Cathode = DatReadout.cathode;
     dataPkt.Anode = DatReadout.anode;
 
-    ESSReadout::ESSTime NewReadoutTime = getPulseTime() + dataPkt.TimeLow;
-    dataPkt.TimeHigh = NewReadoutTime.getTimeHigh();
-    dataPkt.TimeLow = NewReadoutTime.getTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    dataPkt.TimeHigh = readoutTimeHigh;
+    dataPkt.TimeLow = readoutTimeLow;
 
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
