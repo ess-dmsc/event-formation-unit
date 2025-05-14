@@ -118,7 +118,7 @@ class MultipackageSocketMock : public SocketInterface {
 TEST_F(CombinedParserTest, DataMultiPackage) {
   MultipackageSocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 71428 };
-  std::shared_ptr<DistributionGenerator> distribution = 
+  std::shared_ptr<FunctionGenerator> distribution = 
     DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
 
 
@@ -147,7 +147,7 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
 TEST_F(CombinedParserTest, DataGenV0) {
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
-  std::shared_ptr<DistributionGenerator> distribution = 
+  std::shared_ptr<FunctionGenerator> distribution = 
     DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
@@ -178,7 +178,7 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
-  std::shared_ptr<DistributionGenerator> distribution = 
+  std::shared_ptr<FunctionGenerator> distribution = 
     DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
   
   for (unsigned int Sections = 1; Sections < 372; Sections++) {

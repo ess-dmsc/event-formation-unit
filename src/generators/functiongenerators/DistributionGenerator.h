@@ -56,7 +56,7 @@ public:
   DistributionGenerator(double MaxX, int Bins);
 
   /// \brief Distribution factory based on the rotation frequency of the target wheel
-  static std::shared_ptr<DistributionGenerator> Factory(uint16_t Frequency);
+  static std::shared_ptr<FunctionGenerator> Factory(uint16_t Frequency);
 
   /// \brief return a random value based on the distribution function
   double getValue();

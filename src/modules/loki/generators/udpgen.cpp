@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
   LokiGen.argParse(argc, argv);
 
-  std::shared_ptr<DistributionGenerator> distribution = DistributionGenerator::Factory(LokiGen.Settings.Frequency);
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(LokiGen.Settings.Frequency);
   LokiGen.main(distribution);
 
   LokiGen.transmitLoop();

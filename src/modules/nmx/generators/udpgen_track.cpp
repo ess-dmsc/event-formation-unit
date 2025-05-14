@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
   NmxGen.argParse(argc, argv);
 
-  std::shared_ptr<DistributionGenerator> distribution = DistributionGenerator::Factory(NmxGen.Settings.Frequency);
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(NmxGen.Settings.Frequency);
   NmxGen.main(distribution);
 
   NmxGen.transmitLoop();

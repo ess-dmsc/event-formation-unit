@@ -37,11 +37,11 @@ DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange
   Norm = CDF[NumberOfBins - 1];
 }
 
-std::shared_ptr<DistributionGenerator> DistributionGenerator::Factory(uint16_t Frequency) {
+std::shared_ptr<FunctionGenerator> DistributionGenerator::Factory(uint16_t Frequency) {
   if (Frequency == 0) {
     throw std::runtime_error("This generator must have a frequency value larger than zero ");
   }
-  return std::make_unique<DistributionGenerator>( 1000.0 / Frequency);
+  return std::make_shared<DistributionGenerator>( 1000.0 / Frequency);
 }
 
 double DistributionGenerator::getDistValue(const double &Pos) {

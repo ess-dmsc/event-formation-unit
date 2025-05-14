@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   CbmGen.argParse(argc, argv);
 
-  std::shared_ptr<DistributionGenerator> distribution;
+  std::shared_ptr<FunctionGenerator> distribution;
   if (CbmGen.cbmSettings.monitorType == cbm::CbmType::TTL) {
     distribution = DistributionGenerator::Factory(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
