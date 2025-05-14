@@ -54,17 +54,17 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   app.add_flag("--debug", Settings.Debug,
                "print debug information");
 
-    auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-    pulseTime = ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
-    prevPulseTime = pulseTime;
-    readoutTime = pulseTime;
+  auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+  pulseTime = ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
+  prevPulseTime = pulseTime;
+  readoutTime = pulseTime;
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
-    const double timeDelta = distributionGenerator->getValue();
-    return {
-      pulseTime.getTimeHigh(),
-      pulseTime.getTimeLow() + static_cast<uint32_t>(timeDelta * TicksPerMs)};
+  const double timeDelta = distributionGenerator->getValue();
+  return {
+    pulseTime.getTimeHigh(),
+    pulseTime.getTimeLow() + static_cast<uint32_t>(timeDelta * TicksPerMs)};
 }
 
 const esstime::ESSTime& ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
