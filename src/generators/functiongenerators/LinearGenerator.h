@@ -11,6 +11,7 @@
 
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <random>
+#include <memory>
 
 /// \class LinearGenerator
 /// \brief A class that generates linear values based on a given gradient.
@@ -25,6 +26,13 @@ public:
     }
   };
 
+  /// \brief Distribution factory based on the rotation frequency of the target wheel
+  static std::shared_ptr<FunctionGenerator> Factory(uint16_t Frequency, double gradient = 1.0, uint32_t offset = 0.0) {
+    if (Frequency == 0) {
+      throw std::runtime_error("This generator must have a frequency value larger than zero ");
+    }
+    return std::make_shared<LinearGenerator>( 1000.0 / Frequency, gradient, offset);
+  }
 
   /// \brief Get the value at a given position.
   ///

@@ -57,6 +57,8 @@ public:
 
   /// \brief Distribution factory based on the rotation frequency of the target wheel
   static std::shared_ptr<FunctionGenerator> Factory(uint16_t Frequency);
+  /// \brief Distribution factory based length of pulse.
+  static std::shared_ptr<FunctionGenerator> Factory(uint16_t Frequency, int Bins);
 
   /// \brief return a random value based on the distribution function
   double getValue();
