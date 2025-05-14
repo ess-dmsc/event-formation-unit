@@ -11,6 +11,7 @@
 
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <random>
+#include <vector>
 #include <memory>
 
 /// \class LinearGenerator
@@ -18,16 +19,16 @@
 class LinearGenerator : public FunctionGenerator {
 public:
   LinearGenerator(double MaxX, double gradient, uint32_t offset = 0.0)
-      : Offset(offset), BinWidth{static_cast<float>(MaxX / Bins)},
-        ValueBins(new uint32_t[Bins]) {
+      : Offset(offset), BinWidth{static_cast<float>(MaxX / DefaultBinCount)} {
+    ValueBins.reserve(DefaultBinCount);
 
-    for (int i = 0; i < Bins; i++) {
-      ValueBins[i] = static_cast<uint32_t>(i * gradient);
+    for (int i = 0; i < DefaultBinCount; i++) {
+      ValueBins.emplace_back(static_cast<uint32_t>(i * gradient));
     }
   };
 
   /// \brief Distribution factory based on the rotation frequency of the target wheel
-  static std::shared_ptr<FunctionGenerator> Factory(uint16_t Frequency, double gradient = 1.0, uint32_t offset = 0.0) {
+  static std::shared_ptr<LinearGenerator> Factory(uint16_t Frequency, double gradient = 1.0, uint32_t offset = 0.0) {
     if (Frequency == 0) {
       throw std::runtime_error("This generator must have a frequency value larger than zero ");
     }
@@ -45,14 +46,19 @@ public:
 
   /// \brief return a random value based on the distribution function
   double getValue() override {
-    return 0.0;
+    return BinWidth * distribution(gen);
   }
 
-public:
-  int Bins{512};
+private:
+
+  // MinstdRand (fast) random number generator with Seed 1066
+  std::minstd_rand gen{1066};
+  // Predefined uniform real distribution between 0.0 and 1.0
+  std::uniform_int_distribution<> distribution{1, DefaultBinCount};
+
   uint32_t Offset;
   float BinWidth{0.0};
-  uint32_t *ValueBins;
+  std::vector<uint32_t> ValueBins{};
 };
 
 // GCOVR_EXCL_STOP

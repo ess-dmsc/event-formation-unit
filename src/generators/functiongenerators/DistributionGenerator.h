@@ -67,7 +67,7 @@ public:
   double getDistValue(const double &) override;
 
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms
-  uint NumberOfBins{512};
+  uint NumberOfBins{DefaultBinCount};
   double BinWidth{0.0};
   double Norm{1.0};
   std::vector<double> Dist;
