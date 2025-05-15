@@ -171,7 +171,7 @@ public:
   /// \note This function marked virtual for testing purposes.
   /// \param Time is the time for which used to calculate the correct bin index
   /// \param Value is the value to be added to the bin
-  virtual inline void addEvent(const R Time, const T Value) {
+  virtual inline void addEvent(const R &Time, const T &Value) {
     static_assert(DataTypeTrait<R>::type != da00_dtype::none,
                   "Data type R not supported for serialization!");
 

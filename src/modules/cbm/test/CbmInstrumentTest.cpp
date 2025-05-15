@@ -153,7 +153,7 @@ public:
 
 class MockHistogramSerializer : public HistogramSerializer<int32_t> {
 public:
-  MOCK_METHOD(void, addEvent, (int32_t time, int32_t data), (override));
+  MOCK_METHOD(void, addEvent, (const int32_t &time,const  int32_t &data), (override));
 
   MockHistogramSerializer()
       : HistogramSerializer("cbm", 10, 10, "A", BinningStrategy::LastBin) {}
