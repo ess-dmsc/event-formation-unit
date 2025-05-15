@@ -101,15 +101,13 @@ void CbmInstrument::processMonitorReadouts() {
       if (Type == CbmType::IBM) {
         counters.IBMReadoutsProcessed++;
 
-        auto AdcValue = Readout.NPos & IBM_ADC_MASK; // Extract lower 24 bits
-
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
-            ->addEvent(TimeOfFlight, AdcValue);
+            ->addEvent(TimeOfFlight, Readout.NPos);
 
         XTRACE(DATA, DEB,
                "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64
                "ns",
-               Readout.Type, AdcValue, TimeOfFlight);
+               Readout.Type, Readout.NPos, TimeOfFlight);
 
         counters.IBMEvents++;
       }
