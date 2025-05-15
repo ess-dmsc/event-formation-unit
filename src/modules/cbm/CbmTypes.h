@@ -11,6 +11,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
