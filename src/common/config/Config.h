@@ -84,7 +84,8 @@ class Config {
         }
 
         if (mMask & XTRACE) {
-          XTRACE(INIT, DEB, "%s: %u", Key.c_str(), Receiver);
+          const std::string message = fmt::format("{} {}", Key, Receiver);
+          XTRACE(INIT, DEB, "%s", message.c_str());
         }
 
         return true;
