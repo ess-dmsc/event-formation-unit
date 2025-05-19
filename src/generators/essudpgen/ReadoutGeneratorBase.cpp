@@ -54,10 +54,11 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   app.add_flag("--debug", Settings.Debug,
                "print debug information");
 
-  auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-  pulseTime = ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
+  // Set pulse time and readout time. Previous pulse time will be set to wrong value and must be
+  // set after this.
+  UpdateTimestamps(true);
+  // Setting previous pulse time to current pulse time. At this point there have not been any pulse
   prevPulseTime = pulseTime;
-  readoutTime = pulseTime;
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
@@ -67,7 +68,7 @@ std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
     pulseTime.getTimeLow() + static_cast<uint32_t>(timeDelta * TicksPerMs)};
 }
 
-const esstime::ESSTime& ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
+void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
   if (updateTime) {
     auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
     prevPulseTime = pulseTime;
@@ -75,19 +76,29 @@ const esstime::ESSTime& ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) 
   }
 
   readoutTime = pulseTime;
-  return pulseTime;
 }
 
-void ReadoutGeneratorBase::generatePackages(SocketInterface* socket, const std::chrono::microseconds& pulseTimeDuration) {
+void ReadoutGeneratorBase::generatePackages(SocketInterface* socket, const std::chrono::nanoseconds& pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
-  const esstime::ESSTime& start = UpdateTimestamps(true);
+  UpdateTimestamps(true);
+  const TimeDurationNano start = pulseTime.toNS();
   do {
     generateHeader();
     generateData();
     finishPacket();
     socket->send(&Buffer[0], DataSize);
+    Packets++;
+    if (Settings.PktThrottle) {
+      if (Packets % Settings.PktThrottle == 0) {
+        usleep(10);
+      }
+    }
+    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
+      break;
+    }
+
     UpdateTimestamps(false);
-  } while(std::chrono::high_resolution_clock::now().time_since_epoch() - start.toNS() < pulseTimeDuration);
+  } while(std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
@@ -158,11 +169,7 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 void ReadoutGeneratorBase::transmitLoop() {
 
    // Estimate how many packages it is possible to generate per pulse.
-  std::chrono::microseconds pulseTimeDuration{ static_cast<int64_t>(1000.0 / Settings.Frequency) };
-
-  pulseTime = UpdateTimestamps(true);
-  // just setting previous pulse time to current pulse time
-  prevPulseTime = pulseTime;
+  std::chrono::nanoseconds pulseTimeDuration{ static_cast<int64_t>(1000000000 / Settings.Frequency) };
 
   XTRACE(DATA, INF,
         "First pulse time generated, High: %u, Low: %u, periodNs: %u",
@@ -173,15 +180,6 @@ void ReadoutGeneratorBase::transmitLoop() {
 
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
-    }
-    Packets++;
-    if (Settings.PktThrottle) {
-      if (Packets % Settings.PktThrottle == 0) {
-        usleep(10);
-      }
-    }
-    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      break;
     }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);

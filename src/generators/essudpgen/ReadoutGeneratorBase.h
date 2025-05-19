@@ -72,7 +72,7 @@ public:
   /// \brief Creates a packet ready for UDP transmission.
   /// \return The type of the packet.
   ///
-  void generatePackages(SocketInterface* socket, const std::chrono::microseconds& pulseTimeDuration);
+  void generatePackages(SocketInterface* socket, const std::chrono::nanoseconds& pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.
@@ -204,7 +204,7 @@ private:
   /// \brief Update internal time stamps. 
   /// If bool is true, pulse time including previous pulse time and readout time will be updated
   /// if bool is false, only readout time will be set to pulse time.
-  const esstime::ESSTime& UpdateTimestamps(bool updateTime);
+  void UpdateTimestamps(bool updateTime);
 
   // clang-format off
   esstime::ESSTime pulseTime;                    ///< Pulse time
@@ -218,6 +218,6 @@ private:
   /// by setting Frequency to default.
   // std::shared_ptr<DistributionGenerator> timeOffFlightDist{};
   std::shared_ptr<FunctionGenerator> distributionGenerator{};
-  float TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
+  double TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP
