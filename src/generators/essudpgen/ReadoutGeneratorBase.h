@@ -62,7 +62,7 @@ public:
   /// \brief Constructor for ReadoutGeneratorBase.
   /// \param detectorType The type of detector.
   ///
-  ReadoutGeneratorBase(DetectorType detectorType);
+  ReadoutGeneratorBase(DetectorType detectorType=DetectorType::RESERVED);
 
   /// \brief Destructor for ReadoutGeneratorBase.
   virtual ~ReadoutGeneratorBase() = default;
