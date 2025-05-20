@@ -11,8 +11,7 @@
 
 class FunctionGenerator {
 public:
-    /// \brief Number of Bins defines the resolution of the
-    /// distribution function.
+    /// \brief Number of Bins defines the resolution of the distribution function.
     static constexpr int DefaultBinCount{512};
     virtual ~FunctionGenerator() {}
     

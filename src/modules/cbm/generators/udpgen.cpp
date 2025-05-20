@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     throw std::runtime_error("Unsupported monitor type");
   }
 
-  CbmGen.main(distribution);
+  CbmGen.initialize(distribution);
 
   CbmGen.transmitLoop();
 

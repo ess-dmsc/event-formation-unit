@@ -7,12 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <vector>
 #include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
 #include <loki/generators/ReadoutGenerator.h>
+
+#include <vector>
 
 // Example of UDP readout
 // Two Data Sections each containing three readouts
@@ -126,10 +127,10 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
   gen.Settings.headerVersion = 0;
   gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
-  gen.main(distribution);
+  gen.initialize(distribution);
 
   socket.Clear();
-  gen.generatePackages(&socket, pulseTimeDuration);
+  gen.generatePackets(&socket, pulseTimeDuration);
 
   auto collection = socket.PackageList();
   ASSERT_GT(collection.size(), 1);
@@ -157,10 +158,10 @@ TEST_F(CombinedParserTest, DataGenV0) {
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.setNumberOfReadouts(Sections);
 
-    gen.main(distribution);
+    gen.initialize(distribution);
 
     socket.Clear();
-    gen.generatePackages(&socket, pulseTimeDuration);
+    gen.generatePackets(&socket, pulseTimeDuration);
 
     unsigned long packageSize = socket.GetData().size();
     ASSERT_EQ(packageSize,
@@ -187,10 +188,10 @@ TEST_F(CombinedParserTest, DataGenDefault) {
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.setNumberOfReadouts(Sections);
 
-    gen.main(distribution);
+    gen.initialize(distribution);
 
     socket.Clear();
-    gen.generatePackages(&socket, pulseTimeDuration);
+    gen.generatePackets(&socket, pulseTimeDuration);
     unsigned long packageSize = socket.GetData().size();
    ASSERT_EQ(packageSize,
               sizeof(ESSReadout::Parser::PacketHeaderV1) + Sections * (4 + 20));

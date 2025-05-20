@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   CaenGen.argParse(argc, argv);
 
   std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(CaenGen.Settings.Frequency);
-  CaenGen.main(distribution);
+  CaenGen.initialize(distribution);
   CaenGen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
   CaenGen.transmitLoop();
 

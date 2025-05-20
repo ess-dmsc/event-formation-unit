@@ -49,7 +49,8 @@ public:
     uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
-    /// \todo This should be the default mode and obsolete pe packet generation
+    /// \todo This should be the default mode and obsolete per packet generation
+    /// \todo Frequency should be a double instead of integer.
     uint16_t Frequency{ DefaultFrequency };                ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1};             ///< Header version
@@ -70,9 +71,11 @@ public:
 
   ///
   /// \brief Creates a packet ready for UDP transmission.
-  /// \return The type of the packet.
-  ///
-  void generatePackages(SocketInterface* socket, const std::chrono::nanoseconds& pulseTimeDuration);
+  /// Method will create as many network packets possible with in a pulse duration. Each packet will
+  /// be populated with as many readout as possible.
+  /// \param socket, interface to transmit object.
+  /// \param pulseTimeDuration. Duration of a of a pulse in nano seconds
+  void generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.
@@ -81,7 +84,10 @@ public:
   void setReadoutDataSize(uint8_t ReadoutSize);
 
   ///
-  /// \brief Sets number of readouts per package.
+  /// \brief Sets number of readouts per packet.
+  /// Method can be used to set number of readout to a different number
+  /// that are possible to include in a packet. The number will be validated
+  /// and if the value is to large program will throw an exception.
   /// \param ReadoutCount Readout count
   ///
   void setNumberOfReadouts(uint32_t ReadoutCount);
@@ -98,7 +104,7 @@ public:
   ///
   /// \brief Sets up buffers, socket, etc.
   ///
-  void main(std::shared_ptr<FunctionGenerator> generator);
+  void initialize(std::shared_ptr<FunctionGenerator> generator);
 
   ///
   /// \brief Start the transmission loop for the generator.
@@ -226,8 +232,8 @@ private:
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
   /// \brief Update internal time stamps. 
-  /// If bool is true, pulse time including previous pulse time and readout time will be updated
-  /// if bool is false, only readout time will be set to pulse time.
+  /// \param updateTime.  If updateTime is true, the pulse time including previous pulse time and readout time will be updated.
+  /// Otherwise, only the readout time will be set to pulse time.
   void UpdateTimestamps(bool updateTime);
 
   // clang-format off
@@ -240,7 +246,6 @@ private:
   /// \brief For TOF distribution calculations
   /// TofDist could be calculated from default values in Settings struct
   /// by setting Frequency to default.
-  // std::shared_ptr<DistributionGenerator> timeOffFlightDist{};
   std::shared_ptr<FunctionGenerator> distributionGenerator{};
   static constexpr double TicksPerMs{ esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };

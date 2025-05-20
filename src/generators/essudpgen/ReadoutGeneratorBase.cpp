@@ -67,10 +67,10 @@ std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
-    return {
-      pulseTime.getTimeHigh(),
-      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
-    };
+  return {
+    pulseTime.getTimeHigh(),
+    pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
+  };
 }
 
 void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
@@ -83,7 +83,7 @@ void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
   readoutTime = pulseTime;
 }
 
-void ReadoutGeneratorBase::generatePackages(SocketInterface* socket, const std::chrono::nanoseconds& pulseTimeDuration) {
+void ReadoutGeneratorBase::generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
   UpdateTimestamps(true);
   const TimeDurationNano start = pulseTime.toNS();
@@ -181,7 +181,7 @@ void ReadoutGeneratorBase::transmitLoop() {
         pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
 
   do {
-    generatePackages(DataSource, pulseTimeDuration);
+    generatePackets(DataSource, pulseTimeDuration);
 
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
@@ -192,7 +192,7 @@ void ReadoutGeneratorBase::transmitLoop() {
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::main(std::shared_ptr<FunctionGenerator> generator) {
+void ReadoutGeneratorBase::initialize(std::shared_ptr<FunctionGenerator> generator) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 

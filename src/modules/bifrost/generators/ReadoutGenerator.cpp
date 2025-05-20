@@ -93,7 +93,7 @@ void ReadoutGenerator::generateData() {
 
 void ReadoutGenerator::main() {
   std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(Settings.Frequency);
-  ReadoutGeneratorBase::main(distribution);
+  ReadoutGeneratorBase::initialize(distribution);
 
   // If the number of packets is not set, calculate it how much packet is
   // required to send all the readouts in the file

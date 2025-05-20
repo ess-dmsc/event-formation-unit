@@ -148,7 +148,7 @@ VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
 void MultiBladeGenerator::main() {
   // Call base class
   std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(Settings.Frequency);
-  ReadoutGeneratorBase::main(distribution);
+  ReadoutGeneratorBase::initialize(distribution);
 
   // Set detector type
   Settings.Detector = MultiBladeSettings.Detector;
