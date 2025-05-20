@@ -69,17 +69,17 @@ CbmBase::CbmBase(BaseSettings const &settings)
 
   // Readout processing stats
   Stats.create("readouts.processed", Counters.CbmCounts);
-  Stats.create("readouts.type.ttl_proccessed", Counters.TTLReadoutsProcessed);
+  Stats.create("readouts.type.event0d_proccessed", Counters.Event0DReadoutsProcessed);
   Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
 
   // Events published
   Stats.create("events.ibm", Counters.IBMEvents);
-  Stats.create("events.ttl", Counters.TTLEvents);
+  Stats.create("events.event0d", Counters.Event0DEvents);
 
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
-  Stats.create("readouts.errors.type", Counters.TypeNotSupported);
+  Stats.create("readouts.errors.type_not_configured", Counters.TypeNotConfigured);
   Stats.create("readouts.errors.time", Counters.TimeError);
 
   // Time stats
@@ -139,7 +139,7 @@ void CbmBase::processing_thread() {
       CbmConfiguration.Parms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
-    if (Topology->Type == CbmType::TTL) {
+    if (Topology->Type == CbmType::EVENT_0D) {
 
       std::unique_ptr<EV44Serializer> SerializerPtr =
           std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,

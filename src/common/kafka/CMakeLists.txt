@@ -16,11 +16,15 @@ target_include_directories(ProducerTest PRIVATE ${FakeIt_INCLUDE_DIR})
 # Add compiler-specific options for ProducerTest
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # Options specific to Clang compiler
-  target_compile_options(ProducerTest PRIVATE -Wno-cast-function-type-mismatch 
-  -Wno-missing-template-arg-list-after-template-kw)
-  message(STATUS "ECDC: To compile fakeit mockings, we set 
-  \033[1m-Wno-cast-function-type-mismatch 
-  -Wno-missing-template-arg-list-after-template-kw\033[0m for clang")
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_compile_options(ProducerTest PRIVATE -Wno-cast-function-type-mismatch
+    -Wno-missing-template-arg-list-after-template-kw)
+    message(STATUS "ECDC: To compile FakeIt mocks, we set -Wno-cast-function-type-mismatch -Wno-missing-template-arg-list-after-template-kw for clang")
+  else()
+    target_compile_options(ProducerTest PRIVATE -Wno-cast-function-type-strict
+    -Wno-gnu-string-literal-operator-template)
+    message(STATUS "ECDC: To compile FakeIt mocks, we set -Wno-cast-function-type-strict -Wno-gnu-string-literal-operator-template for clang")
+  endif()
 endif()
 
 set(EV44SerializerTest_SRC

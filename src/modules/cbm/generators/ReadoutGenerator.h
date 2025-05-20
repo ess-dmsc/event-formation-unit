@@ -48,7 +48,7 @@ public:
 
   // clang-format off
   struct CbmGeneratorSettings {
-    CbmType monitorType{CbmType::TTL}; //< The type of monitor.
+    CbmType monitorType{CbmType::EVENT_0D}; //< The type of monitor.
     uint8_t FenId{0};                  //< The FEN ID.
     uint8_t ChannelId{0};              //< The channel ID.
     uint32_t Offset{0};                //< The offset value.
@@ -101,11 +101,11 @@ private:
   void generateIBMData(uint8_t *dataPtr);
 
   ///
-  /// \brief Generates the TTL data for the ReadoutGenerator.
+  /// \brief Generates the 0D event data for the ReadoutGenerator.
   ///
   /// \param dataPtr Pointer to the data buffer.
   ///
-  void generateTTLData(uint8_t *dataPtr);
+  void generateEvent0DData(uint8_t *dataPtr);
 
   ///
   /// \brief Generates the distribution value for the ReadoutGenerator.

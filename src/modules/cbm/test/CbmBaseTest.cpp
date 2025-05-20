@@ -10,8 +10,11 @@
 #include <cbm/CbmBase.h>
 #include <cinttypes>
 #include <common/testutils/TestBase.h>
+#include <filesystem>
 #include <string>
 #include <vector>
+
+using std::filesystem::path;
 
 // clang-format off
 std::vector<uint8_t> BadTestPacket {
@@ -28,7 +31,7 @@ std::vector<uint8_t> BadTestPacket {
   0x16, 0x00, 0x14, 0x00,  // Data Header: Fiber 22, FEN 0, Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 1
+  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 
   // Second monitor readout - invalid Ring
@@ -54,21 +57,21 @@ std::vector<uint8_t> GoodTestPacket {
   0x16, 0x00, 0x14, 0x00,  // Data Header: Fiber 22, FEN 0, Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
+  0x01, 0x00, 0x00, 0x00,  // Type 1, Ch 0, ADC 0
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 
   // Second monitor readout - Valid IBM
   0x16, 0x01, 0x14, 0x00,  // Data Header: Fiber 22, FEN 1, Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
-  0x03, 0x01, 0x00, 0x00,  // Type 3, Ch 1, ADC 1
-  0x00, 0x00, 0x00, 0xFF,  // NPOS 255
+  0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
+  0xFF, 0x00, 0x00, 0x00,  // NPOS 255
 
   // Third monitor readout - Valid TTL
   0x18, 0x00, 0x14, 0x00,  // Data Header: Fiber 24, FEN 0, Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 1, ADC 1
+  0x01, 0x01, 0x01, 0x00,  // Type 1, Ch 1, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
 
@@ -79,9 +82,14 @@ using namespace cbm;
 class CbmBaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
+  inline static path FullConfigFile{""};
 
   void SetUp() override {
-    Settings.ConfigFile = CBM_CONFIG;
+
+    // Get base test dir
+    path TestDir = path(__FILE__).parent_path();
+    // Define test files
+    Settings.ConfigFile = TestDir / path("cbm_base_test.json");
     Settings.KafkaTopic = "freia_beam_monitor";
     Settings.NoHwCheck = true;
   }
@@ -90,66 +98,66 @@ public:
 };
 
 TEST_F(CbmBaseTest, Constructor) {
-  CbmBase Readout(Settings);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
-  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 0);
+  CbmBase DetectorBase(Settings);
+  EXPECT_EQ(DetectorBase.ITCounters.RxPackets, 0);
+  EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
 }
 
 TEST_F(CbmBaseTest, DataReceive) {
-  CbmBase Readout(Settings);
+  CbmBase DetectorBase(Settings);
 
-  writePacketToRxFIFO(Readout, BadTestPacket);
+  writePacketToRxFIFO(DetectorBase, BadTestPacket);
 
-  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 2);
-  Readout.stopThreads();
+  EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 2);
+  DetectorBase.stopThreads();
 }
 
 TEST_F(CbmBaseTest, DataReceiveBadHeader) {
-  CbmBase Readout(Settings);
+  CbmBase DetectorBase(Settings);
 
   BadTestPacket[0] = 0xff; // pad should be 0
-  writePacketToRxFIFO(Readout, BadTestPacket);
+  writePacketToRxFIFO(DetectorBase, BadTestPacket);
 
-  EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
+  EXPECT_EQ(DetectorBase.Counters.ErrorESSHeaders, 1);
 
   // no readouts as header is bad
-  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 0);
-  Readout.stopThreads();
+  EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
+  DetectorBase.stopThreads();
 }
 
 TEST_F(CbmBaseTest, EmulateFIFOError) {
-  CbmBase Readout(Settings);
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+  CbmBase DetectorBase(Settings);
+  EXPECT_EQ(DetectorBase.Counters.FifoSeqErrors, 0);
 
-  Readout.startThreads();
+  DetectorBase.startThreads();
 
-  unsigned int rxBufferIndex = Readout.RxRingbuffer.getDataIndex();
+  unsigned int rxBufferIndex = DetectorBase.RxRingbuffer.getDataIndex();
   ASSERT_EQ(rxBufferIndex, 0);
 
-  Readout.RxRingbuffer.setDataLength(rxBufferIndex, 0); ///< invalid size
+  DetectorBase.RxRingbuffer.setDataLength(rxBufferIndex, 0); ///< invalid size
 
-  ASSERT_TRUE(Readout.InputFifo.push(rxBufferIndex));
-  Readout.RxRingbuffer.getNextBuffer();
+  ASSERT_TRUE(DetectorBase.InputFifo.push(rxBufferIndex));
+  DetectorBase.RxRingbuffer.getNextBuffer();
 
-  waitForProcessing(Readout);
+  waitForProcessing(DetectorBase);
 
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
-  Readout.stopThreads();
+  EXPECT_EQ(DetectorBase.Counters.FifoSeqErrors, 1);
+  DetectorBase.stopThreads();
 }
 
 TEST_F(CbmBaseTest, DataReceiveGoodPacket) {
-  CbmBase Readout(Settings);
+  CbmBase DetectorBase(Settings);
 
-  writePacketToRxFIFO(Readout, GoodTestPacket);
+  writePacketToRxFIFO(DetectorBase, GoodTestPacket);
 
   // Ensure timer is timedout
   std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
-  EXPECT_EQ(Readout.Counters.CbmStats.Readouts, 3);
-  EXPECT_EQ(Readout.Counters.TTLReadoutsProcessed, 1);
-  EXPECT_EQ(Readout.Counters.IBMReadoutsProcessed, 1);
-  EXPECT_EQ(Readout.Counters.ProduceCauseTimeout, 2);
-  Readout.stopThreads();
+  EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 3);
+  EXPECT_EQ(DetectorBase.Counters.Event0DReadoutsProcessed, 1);
+  EXPECT_EQ(DetectorBase.Counters.IBMReadoutsProcessed, 1);
+  EXPECT_EQ(DetectorBase.Counters.ProduceCauseTimeout, 2);
+  DetectorBase.stopThreads();
 }
 
 int main(int argc, char **argv) {

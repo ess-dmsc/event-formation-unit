@@ -1,31 +1,33 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief using nlohmann json parser to read configurations from file
+/// \brief use nlohmann::json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/Error.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/debug/Error.h>
-#include <fmt/core.h>
-#include <stdexcept>
 #include <tbl3he/geometry/Tbl3HeConfig.h>
+
+#include <fmt/core.h>
+
+#include <stdexcept>
 #include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
 
-///
 Tbl3HeConfig::Tbl3HeConfig() {}
 
 Tbl3HeConfig::Tbl3HeConfig(const std::string &ConfigFile)
-    : ConfigFile(ConfigFile), ConfigFileName(ConfigFile) {
+    : Configurations::Config(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
-  root = from_json_file(ConfigFile);
+  loadFromFile();
+  XTRACE(INIT, DEB, "json file loaded ");
 }
 
 void Tbl3HeConfig::errorExit(const std::string &ErrMsg) {
@@ -36,12 +38,13 @@ void Tbl3HeConfig::errorExit(const std::string &ErrMsg) {
 }
 
 void Tbl3HeConfig::parseConfig() {
-
-  json_check_keys("Mandatory keys", root,
+  json_check_keys("Mandatory keys", root(),
                   {"Detector", "Resolution", "MaxPulseTimeNS", "MaxTOFNS",
                    "NumOfFENs", "MinValidAmplitude", "MaxGroup", "Topology"});
 
-  Parms.InstrumentName = root["Detector"].get<std::string>();
+  // Get detector/instrument name
+  setMask(CHECK | XTRACE);
+  assign("Detector", Parms.InstrumentName);
   if (Parms.InstrumentName != "tbl3he") {
     errorExit(fmt::format("Invalid instrument name ({}) for tbl3he",
                           Parms.InstrumentName));
@@ -49,26 +52,17 @@ void Tbl3HeConfig::parseConfig() {
 
   try {
     // Assumed the same for all tubes
-    Parms.Resolution = root["Resolution"].get<int>();
-    XTRACE(INIT, DEB, "Resolution %d", Parms.Resolution);
+    assign("Resolution",        Parms.Resolution);
 
-    Parms.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MaxPulseTimeNS: {}", Parms.MaxPulseTimeNS);
-
-    Parms.MaxTOFNS = root["MaxTOFNS"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MaxTOFNS: {}", Parms.MaxTOFNS);
-
-    Parms.NumOfFENs = root["NumOfFENs"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "NumOfFENs: {}", Parms.NumOfFENs);
-
-    Parms.MinValidAmplitude = root["MinValidAmplitude"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MinValidAmplitude: {}", Parms.MinValidAmplitude);
-
-    Parms.MaxGroup = root["MaxGroup"].get<unsigned int>();
-    LOG(INIT, Sev::Info, "MaxGroup: {}", Parms.MaxGroup);
+    setMask(LOG);
+    assign("MaxPulseTimeNS",    Parms.MaxPulseTimeNS);
+    assign("MaxTOFNS",          Parms.MaxTOFNS);
+    assign("NumOfFENs",         Parms.NumOfFENs);
+    assign("MinValidAmplitude", Parms.MinValidAmplitude);
+    assign("MaxGroup",          Parms.MaxGroup);
 
     // Run through the Topology section
-    auto Configs = root["Topology"];
+    auto Configs = root()["Topology"];
 
     if (Parms.NumOfFENs != (int)Configs.size()) {
       errorExit(fmt::format("RING/FEN topology mismatch, NumOfFEN: {} != Config size: {}",
@@ -92,14 +86,14 @@ void Tbl3HeConfig::parseConfig() {
         errorExit(fmt::format("Duplicate entry for Ring {} FEN {}", Ring, FEN));
       }
 
-      auto topo = std::make_unique<Topology>(Bank);
-      TopologyMapPtr->add(Ring, FEN, topo);
+      auto topology = std::make_unique<Topology>(Bank);
+      TopologyMapPtr->add(Ring, FEN, topology);
     }
 
   } catch (fmt::format_error &e) {
     LOG(INIT, Sev::Critical,
         "JSON config - code error during fm::format() call: {}", e.what());
-    throw std::runtime_error(std::string("(fmt::fomat_error) ") + e.what());
+    throw std::runtime_error(std::string("(fmt::format_error) ") + e.what());
   } catch (std::exception &e) {
     RETHROW_WITH_HINT(e);
   }

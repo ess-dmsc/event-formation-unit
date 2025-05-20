@@ -9,17 +9,16 @@
 
 #pragma once
 
-#include <common/JsonFile.h>
-#include <common/debug/Trace.h>
+#include <common/config/Config.h>
 #include <string>
-#include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class LokiConfig {
-public:
+
+class LokiConfig : public Configurations::Config {
+ public:
   ///\brief default constructor (useful for unit tests)
   LokiConfig();
 
@@ -30,9 +29,10 @@ public:
   void parseConfig();
 
 
-  // New and temporary \todo move somewhere else
-  // assumption is that Ring, FEN and LocalGroup have
-  // already been validated
+  /// New and temporary
+  /// \todo move somewhere else
+  ///
+  /// We assume that Ring, FEN and LocalGroup already have been validated
   int getGlobalGroup(int Ring, int FEN, int LocalGroup) {
     auto & RParm = Parms.Rings[Ring];
     int FENOffset = RParm.FENOffset;
@@ -75,8 +75,8 @@ public:
   struct LokiCfg {
     std::string InstrumentName{""};
     int Resolution{0};
-    uint32_t ReadoutConstDelayNS{0}; /// added to readout data timestamp
-    uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9
+    uint32_t ReadoutConstDelayNS{0};         /// added to readout data timestamp
+    uint32_t MaxPulseTimeNS{5 * 71'428'571}; /// 5 * 1/14 * 10^9
     uint32_t MaxTOFNS{800000000};
 
     int ConfiguredBanks{0};
@@ -88,9 +88,5 @@ public:
     struct BankCfg Banks[NumBanks];
     struct RingCfg Rings[NumRings];
   } Parms;
-
-
-  std::string ConfigFileName{""};
-  nlohmann::json root; // configuration (json)
 };
 } // namespace Caen

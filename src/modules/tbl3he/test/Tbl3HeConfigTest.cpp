@@ -9,7 +9,6 @@
 
 using namespace Caen;
 
-
 auto ValidConfig = R"(
   {
     "Detector": "tbl3he",
@@ -55,14 +54,14 @@ TEST_F(Tbl3HeConfigTest, BadJsonFile) {
 
 
 TEST_F(Tbl3HeConfigTest, BadDetectorName) {
-  config.root = ValidConfig;
-  config.root["Detector"] = "mybad";
+  config.setRoot(ValidConfig);
+  config["Detector"] = "mybad";
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 
 TEST_F(Tbl3HeConfigTest, ValidConfig) {
-  config.root = ValidConfig;
+  config.setRoot(ValidConfig);
   ASSERT_NO_THROW(config.parseConfig());
   ASSERT_EQ(config.Parms.Resolution, 100);
   ASSERT_EQ(config.Parms.MaxPulseTimeNS, 71428600);
@@ -74,26 +73,26 @@ TEST_F(Tbl3HeConfigTest, ValidConfig) {
 
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigMinRing) {
-  config.root = ValidConfig;
-  config.root["Topology"][0]["Ring"] = -1; // outside interval 0 - 11
+  config.setRoot(ValidConfig);
+  config["Topology"][0]["Ring"] = -1; // outside interval 0 - 11
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigMaxRing) {
-  config.root = ValidConfig;
-  config.root["Topology"][0]["Ring"] = 12; // outside interval 0 - 11 
+  config.setRoot(ValidConfig);
+  config["Topology"][0]["Ring"] = 12; // outside interval 0 - 11
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigNumOfFENs) {
-  config.root = ValidConfig;
-  config.root["NumOfFENs"] = 3;
+  config.setRoot(ValidConfig);
+  config["NumOfFENs"] = 3;
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigDuplicateRingFEN) {
-  config.root = ValidConfig;
-  config.root["Topology"][0]["Ring"] = 9;
+  config.setRoot(ValidConfig);
+  config["Topology"][0]["Ring"] = 9;
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 

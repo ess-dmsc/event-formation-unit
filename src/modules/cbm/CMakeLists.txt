@@ -1,10 +1,7 @@
 # Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
 
-add_subdirectory(test)
 add_subdirectory(generators)
 include_directories(.)
-
-get_filename_component(CBM_CONFIG "${ESS_MODULE_DIR}/cbm/configs/test.json" ABSOLUTE)
 
 #=============================================================================
 # cbm detector module and base test
@@ -34,27 +31,48 @@ set(cbm_SRC
 set(cbm_LIB efu_essreadout)
 create_executable(cbm)
 
-
-#
+#============================================================================
+# CBMBaseTest Module integration test
+#============================================================================
 set(CbmBaseTest_INC
   ${cbm_common_inc}
 )
 set(CbmBaseTest_SRC
-  test/CbmBaseTest.cpp
   ${cbm_common_src}
+  test/CbmBaseTest.cpp
 )
 create_test_executable(CbmBaseTest)
-target_compile_definitions(CbmBaseTest PRIVATE CBM_CONFIG="${CBM_CONFIG}")
 
-#
+#============================================================================
 # CBMInstrumentTest Module integration test
-#
+#============================================================================
 set(CbmInstrumentTest_INC
   ${cbm_common_inc}
-  )
+)
 set(CbmInstrumentTest_SRC
   ${cbm_common_src}
   test/CbmInstrumentTest.cpp
 )
 create_test_executable(CbmInstrumentTest)
-target_compile_definitions(CbmInstrumentTest PRIVATE CBM_CONFIG="${CBM_CONFIG}")
+
+#============================================================================
+# CBMParserTest Module integration test
+#============================================================================
+set(CbmParserTest_INC
+  ${cbm_common_inc}
+)
+set(CbmParserTest_SRC
+  ${cbm_common_src}
+  test/ParserTest.cpp)
+create_test_executable(CbmParserTest)
+
+#============================================================================
+# CBMConfigTest Module integration test
+#============================================================================
+set(CbmConfigTest_INC
+  ${cbm_common_inc}  
+)
+set(CbmConfigTest_SRC
+  ${cbm_common_src}
+  test/ConfigTest.cpp)
+create_test_executable(CbmConfigTest)

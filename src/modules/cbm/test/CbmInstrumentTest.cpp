@@ -9,6 +9,7 @@
 #include <common/reduction/Event.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
+#include <filesystem>
 #include <gmock/gmock.h>
 #include <memory>
 #include <modules/cbm/CbmInstrument.h>
@@ -16,11 +17,12 @@
 using namespace cbm;
 using namespace ESSReadout;
 
+using std::filesystem::path;
+
 // clang-format off
 
-
-/// \brief Monitor readout with valid TTL readouts with time values
-std::vector<uint8_t> ValidTTLReadouts {
+/// \brief Monitor readout with valid Event0D readouts with time values
+std::vector<uint8_t> ValidEvent0DReadouts {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
@@ -46,22 +48,29 @@ std::vector<uint8_t> ValidIBMReadouts {
   0x16, 0x01, 0x14, 0x00,  // Fiber 22, FEN 1, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
-  0x03, 0x01, 0x00, 0x00,  // Type 3, Ch 1, ADC 1
+  0x03, 0x01, 0x00, 0x01,  // Type 3, Ch 1, ADC 1
   0x0A, 0x00, 0x00, 0x00,  // NPOS 10
 
   // Test medium 16bit NPOS value
   0x16, 0x01, 0x14, 0x00,  // Fiber 22, FEN 1, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA2, 0x86, 0x01, 0x00,  // Time LO 100002 tick
-  0x03, 0x02, 0x00, 0x00,  // Type 3, Ch 2, ADC 1
+  0x03, 0x02, 0x01, 0x00,  // Type 3, Ch 2, ADC 1
   0xF4, 0x01, 0x00, 0x00,  // NPOS 500
 
-  // Test high 32bit NPOS value, should be processed as 24bit
+    // Test high 24bit NPOS value
   0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
-  0x03, 0x01, 0x00, 0x00,  // Type 3, Ch 0, ADC 1
-  0xFF, 0xFF, 0xFF, 0xFF   // XPos 0, YPos 0
+  0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
+  0xFF, 0xFF, 0xFF, 0x00,   // NPOS Limit
+
+  // Test high 32bit NPOS value, should not be accepted
+  0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
+  0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+  0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
+  0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
+  0xFF, 0xFF, 0xFF, 0xFF   // NPOS MAX
 };
 
 /// \brief Monitor readout with invalid Ring
@@ -78,7 +87,7 @@ std::vector<uint8_t> NotSuppoertedTypeReadout {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
   0x00, 0x00, 0x00, 0x00,  // Time HI 0 s
   0x11, 0x00, 0x00, 0x00,  // Time LO 17 ticks
-  0x06, 0x00, 0x00, 0x00,  // Type 6, Ch 0, ADC 0
+  0x02, 0x00, 0x00, 0x00,  // Type 6, Ch 0, ADC 0
   0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
 };
 
@@ -144,7 +153,7 @@ public:
 
 class MockHistogramSerializer : public HistogramSerializer<int32_t> {
 public:
-  MOCK_METHOD(void, addEvent, (int32_t time, int32_t data), (override));
+  MOCK_METHOD(void, addEvent, (const int32_t &time,const  int32_t &data), (override));
 
   MockHistogramSerializer()
       : HistogramSerializer("cbm", 10, 10, "A", BinningStrategy::LastBin) {}
@@ -163,8 +172,14 @@ protected:
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
+  inline static path FullConfigFile{""};
+
   void SetUp() override {
-    Settings.ConfigFile = CBM_CONFIG;
+
+    // Get base test dir
+    path TestDir = path(__FILE__).parent_path();
+    // Define test files
+    Settings.ConfigFile = TestDir / path("cbm_instrument_test.json");
 
     Configuration = Config(Settings.ConfigFile);
     Configuration.loadAndApply();
@@ -194,7 +209,7 @@ protected:
 private:
   void initializeSerializers() {
     for (auto &Topology : Configuration.TopologyMapPtr->toValuesList()) {
-      if (Topology->Type == CbmType::TTL) {
+      if (Topology->Type == CbmType::EVENT_0D) {
         std::unique_ptr<EV44Serializer> SerializerPtr =
             std::make_unique<MockEV44Serializer>();
         EV44SerializerPtrs.add(Topology->FEN, Topology->Channel, SerializerPtr);
@@ -212,14 +227,14 @@ private:
 TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgError, 0); }
 
 ///
-/// \brief Test case for validating TTL type readouts.
+/// \brief Test case for validating Event0D type readouts.
 ///
 /// This test case sets expectations on the mocked serializer objects and checks
 /// if the monitor readouts are processed correctly. It verifies the parser
 /// counters and the processed readout counts. Also test that the serializer's
 /// addEvent is called with proper arguments.
 ///
-TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
+TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
 
   // Set expectations on the mocked serializer objects, one for each monitor
   // readout
@@ -249,7 +264,7 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
       .Times(testing::AtLeast(1));
 
   // initialze test data
-  makeHeader(cbm->ESSHeaderParser.Packet, ValidTTLReadouts);
+  makeHeader(cbm->ESSHeaderParser.Packet, ValidEvent0DReadouts);
   cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
   cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 0));
 
@@ -268,10 +283,10 @@ TEST_F(CbmInstrumentTest, TestValidTTLTypeReadouts) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 3);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 3);
+  EXPECT_EQ(counters.Event0DEvents, 3);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -325,10 +340,10 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   counters.CbmStats = cbm->CbmReadoutParser.Stats;
 
   // check parser counters are as expected
-  EXPECT_EQ(counters.CbmStats.Readouts, 3);
+  EXPECT_EQ(counters.CbmStats.Readouts, 4);
   EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
   EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(counters.CbmStats.ErrorADC, 1);
   EXPECT_EQ(counters.CbmStats.ErrorType, 0);
 
   // check monitor readouts are processed correctly
@@ -336,10 +351,10 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(counters.RingCfgError, 0);
   EXPECT_EQ(counters.CbmCounts, 3);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMEvents, 3);
-  EXPECT_EQ(counters.TTLEvents, 0);
+  EXPECT_EQ(counters.Event0DEvents, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -367,7 +382,7 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
 }
 
@@ -388,13 +403,13 @@ TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
 
   cbm->processMonitorReadouts();
   EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.TypeNotSupported, 1);
+  EXPECT_EQ(counters.TypeNotConfigured, 1);
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 0);
+  EXPECT_EQ(counters.Event0DEvents, 0);
 }
 
 ///
@@ -419,9 +434,9 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 3);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 3);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 3);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 0);
+  EXPECT_EQ(counters.Event0DEvents, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 3);
 }
 
@@ -448,9 +463,9 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(counters.CbmCounts, 0);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 0);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 0);
+  EXPECT_EQ(counters.Event0DEvents, 0);
   EXPECT_EQ(counters.TimeError, 1);
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
   EXPECT_EQ(counters.TimeStats.TofHigh, 1);
@@ -480,9 +495,9 @@ TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   EXPECT_EQ(counters.CbmCounts, 1);
   EXPECT_EQ(counters.NoSerializerCfgError, 0);
   EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TTLReadoutsProcessed, 1);
+  EXPECT_EQ(counters.Event0DReadoutsProcessed, 1);
   EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.TTLEvents, 1);
+  EXPECT_EQ(counters.Event0DEvents, 1);
   EXPECT_EQ(counters.TimeError, 1);
   EXPECT_EQ(counters.TimeStats.TofHigh, 0);
   EXPECT_EQ(counters.TimeStats.TofCount, 0);
