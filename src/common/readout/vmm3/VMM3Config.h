@@ -9,16 +9,19 @@
 
 #pragma once
 
+#include <common/config/Config.h>
+
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/readout/vmm3/Hybrid.h>
+
 #include <string>
 #include <vector>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-class VMM3Config {
+class VMM3Config : public Configurations::Config {
 public:
   // Provide maximum values from all VMM3 detectors
   static constexpr uint8_t MaxRing{
@@ -30,7 +33,9 @@ public:
 
   // Load and apply the json config
   VMM3Config(const std::string &Instrument, const std::string &ConfigFile)
-      : ExpectedName(Instrument), FileName(ConfigFile) {}
+    : Configurations::Config(ConfigFile)
+    , ExpectedName(Instrument) {
+  }
 
   // load file into json object and apply
   void loadAndApplyConfig();
@@ -100,8 +105,4 @@ public:
 
   // Other parameters
   std::string ExpectedName{""};
-  std::string FileName{""};
-
-  // JSON object
-  nlohmann::json root;
 };

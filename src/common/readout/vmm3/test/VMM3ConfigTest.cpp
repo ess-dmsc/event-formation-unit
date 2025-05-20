@@ -39,21 +39,21 @@ protected:
 
 TEST_F(VMM3ConfigTest, ConfigFileNotJson) {
   testvmm3.ExpectedName = "Freia";
-  testvmm3.FileName = VMMInvalidJSONFile.string();
+  testvmm3.setConfigFile(VMMInvalidJSONFile.string());
   EXPECT_ANY_THROW(testvmm3.loadAndApplyConfig());
 }
 
 TEST_F(VMM3ConfigTest, ConfigFileDuplicateHybrid) {
   testvmm3.ExpectedName = "Freia";
-  testvmm3.root = from_json_file(VMMConfigFile.string());
+  testvmm3.setRootFromFile(VMMConfigFile.string());
 
-  testvmm3.root["Config"][3]["HybridId"] = testvmm3.root["Config"][0]["HybridId"];
+  testvmm3["Config"][3]["HybridId"] = testvmm3["Config"][0]["HybridId"];
   EXPECT_ANY_THROW(testvmm3.applyVMM3Config());
 }
 
 TEST_F(VMM3ConfigTest, InvalidHybridId) {
   testvmm3.ExpectedName = "Freia";
-  testvmm3.root = from_json_file(VMMConfigFile.string());
+  testvmm3.setRootFromFile(VMMConfigFile.string());
   testvmm3.applyVMM3Config();
 
   EXPECT_FALSE(testvmm3.lookupHybrid("I do not exist"));
@@ -62,7 +62,7 @@ TEST_F(VMM3ConfigTest, InvalidHybridId) {
 
 TEST_F(VMM3ConfigTest, ValidHybridId) {
   testvmm3.ExpectedName = "Freia";
-  testvmm3.root = from_json_file(VMMConfigFile.string());
+  testvmm3.setRootFromFile(VMMConfigFile.string());
   testvmm3.applyVMM3Config();
 
   const std::string Id = "a0800006b882a0803410082006704410";
@@ -74,7 +74,7 @@ TEST_F(VMM3ConfigTest, ValidHybridId) {
 
 TEST_F(VMM3ConfigTest, ConfigPerformance) {
   testvmm3.ExpectedName = "Freia";
-  testvmm3.root = from_json_file(VMMConfigFile.string());
+  testvmm3.setRootFromFile(VMMConfigFile.string());
   testvmm3.applyVMM3Config();
 
   // Get all Id's and test they are correct

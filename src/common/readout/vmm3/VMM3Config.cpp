@@ -17,7 +17,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 void VMM3Config::loadAndApplyConfig() {
-  root = from_json_file(FileName);
+  loadFromFile();
   applyVMM3Config();
   applyConfig();
 }
@@ -25,7 +25,7 @@ void VMM3Config::loadAndApplyConfig() {
 void VMM3Config::applyVMM3Config() {
   std::string Name;
   try {
-    FileParameters.InstrumentName = root["Detector"].get<std::string>();
+    FileParameters.InstrumentName = root()["Detector"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Error, "Missing 'Detector' field");
     throw std::runtime_error("Missing 'Detector' field");
@@ -38,7 +38,7 @@ void VMM3Config::applyVMM3Config() {
 
   try {
     FileParameters.InstrumentGeometry =
-        root["InstrumentGeometry"].get<std::string>();
+        root()["InstrumentGeometry"].get<std::string>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
   }
@@ -46,14 +46,14 @@ void VMM3Config::applyVMM3Config() {
       FileParameters.InstrumentGeometry);
 
   try {
-    FileParameters.MaxPulseTimeNS = root["MaxPulseTimeNS"].get<std::uint32_t>();
+    FileParameters.MaxPulseTimeNS = root()["MaxPulseTimeNS"].get<std::uint32_t>();
   } catch (...) {
     LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
   }
   LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", FileParameters.MaxPulseTimeNS);
 
   try {
-    auto PanelConfig = root["Config"];
+    auto PanelConfig = root()["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
@@ -112,7 +112,7 @@ void VMM3Config::applyVMM3Config() {
         "JSON config - Detector has {} cassettes/hybrids and {} pixels",
         NumHybrids, NumPixels);
   } catch (...) {
-    auto Message = fmt::format("JSON config - error: Invalid Config file: {}", FileName);
+    auto Message = fmt::format("JSON config - error: Invalid Config file: {}", configFile());
     XTRACE(INIT, ERR, "%s", Message.c_str());
     LOG(INIT, Sev::Error, Message);
     throw std::runtime_error(Message);
