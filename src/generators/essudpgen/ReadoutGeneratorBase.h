@@ -242,6 +242,6 @@ private:
   /// by setting Frequency to default.
   // std::shared_ptr<DistributionGenerator> timeOffFlightDist{};
   std::shared_ptr<FunctionGenerator> distributionGenerator{};
-  static constexpr double TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
+  static constexpr double TicksPerMs{ esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

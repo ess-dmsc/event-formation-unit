@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   CbmGen.argParse(argc, argv);
 
   std::shared_ptr<FunctionGenerator> distribution;
-  if (CbmGen.cbmSettings.monitorType == cbm::CbmType::TTL) {
+  if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
     distribution = DistributionGenerator::Factory(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
     distribution = LinearGenerator::Factory(CbmGen.Settings.Frequency);

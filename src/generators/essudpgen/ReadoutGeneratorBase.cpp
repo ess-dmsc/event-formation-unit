@@ -63,10 +63,14 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
-  const double timeDelta = distributionGenerator->getValue();
-  return {
-    pulseTime.getTimeHigh(),
-    pulseTime.getTimeLow() + static_cast<uint32_t>(timeDelta * TicksPerMs)};
+  return getReadOutTimes(distributionGenerator->getValue());
+}
+
+std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
+    return {
+      pulseTime.getTimeHigh(),
+      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
+    };
 }
 
 void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
