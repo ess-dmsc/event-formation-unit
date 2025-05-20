@@ -11,6 +11,7 @@
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
+#include <cmath>
 #include <chrono>
 #include <cstdlib>
 #include <ctype.h>

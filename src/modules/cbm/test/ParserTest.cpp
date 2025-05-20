@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Unit tests for TTL Monitor Parser
+/// \brief Unit tests for Beam Monitor Parser
 ///
 //===----------------------------------------------------------------------===//
 
@@ -48,17 +48,17 @@ std::vector<uint8_t> DataBadSize{
 /// \brief Bad data type in readout data field
 std::vector<uint8_t> DataBadType{
     // First readout - type low edge
-    0x16, 0x00, 0x15, 0x00, // Data header - Ring 22, FEN 0, Size 21
+    0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x00, 0x00, 0x00, 0x01, // Type 0x00 (not good), Channel 0, ADC 0x100
     0x00, 0x00, 0x00, 0x00, // XPos 0, YPos 0
 
     // Second readout - type high edge
-    0x16, 0x00, 0x13, 0x00, // Data header - Ring 22, FEN 0, Size 19
+    0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x08, 0x00, 0x00, 0x01, // Type 0x08 (not good), Channel 0, ADC 0x100
+    0x04, 0x00, 0x00, 0x01, // Type 0x04 (not good), Channel 0, ADC 0x100
     0x00, 0x00, 0x00, 0x00}; // XPos 0, YPos 0
 
 /// \brief Good Data
@@ -67,14 +67,14 @@ std::vector<uint8_t> DataGood{
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x01, 0x00, 0x00, 0x01, // Type 0x01, Channel 0, ADC 0x100
+    0x01, 0x00, 0x00, 0x01, // Type 0x01, Channel 0, ADC 0x000
     0x00, 0x00, 0x00, 0x00, // XPos 0, YPos 0
 
     // Second readout
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x01, 0x00, 0x00, 0x01, // Type 0x01, Channel 0, ADC 0x100
+    0x03, 0x00, 0x00, 0x01, // Type 0x01, Channel 0, ADC 0x100
     0x00, 0x00, 0x00, 0x00}; // XPos 0, YPos 0
 
 /// \brief Bad FEN value
@@ -86,36 +86,36 @@ std::vector<uint8_t> BadFENData{
     0x00, 0x00, 0x00, 0x00, // XPos 0, YPos 0
 };
 
-/// \brief Bad ADC values for TTL and non TTL readouts
-std::vector<uint8_t> BadADCData{
+/// \brief Bad ADC (NPOD) value for IBM readout
+std::vector<uint8_t> BadIBMNPOSData{
     // First readout
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x01, 0x00, 0x00, 0x00, // Type 0x01, Channel 0, ADC 0x000
-    0x00, 0x00, 0x00, 0x00, // XPos 0, YPos 0
+    0x03, 0x00, 0x00, 0x00, // Type 0x01, Channel 0, ADC 0x000
+    0xFF, 0xFF, 0xFF, 0x00, // NPOS 0x00FFFFFF (Good)
 
     // Second readout
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
     0x03, 0x00, 0x00, 0x01, // Type 0x03, Channel 0, ADC 0x100
-    0x00, 0x00, 0x00, 0x00}; // XPos 0, YPos 0
+    0xFF, 0xFF, 0xFF, 0x01}; // NPOS 0x01FFFFFF (Bad)
 
-/// \brief Good ADC values for TTL and non TTL readouts
-std::vector<uint8_t> GoodADCData{
+/// \brief Good ADC values for event and non event readouts
+std::vector<uint8_t> GoodNonIBMADCData{
     // First readout
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x01, 0x00, 0x00, 0x01, // Type 0x01, Channel 0, ADC 0x100
+    0x01, 0x00, 0x01, 0x00, // Type 0x01, Channel 0, ADC 0x100
     0x00, 0x00, 0x00, 0x00, // XPos 0, YPos 0
 
     // Second readout
     0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
     0x01, 0x00, 0x00, 0x00, // Time HI 1 s
     0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
-    0x03, 0x00, 0x00, 0x00, // Type 0x01, Channel 0, ADC 0x100
+    0x01, 0x00, 0x00, 0x00, // Type 0x01, Channel 0, ADC 0x000
     0x00, 0x00, 0x00, 0x00}; // XPos 0, YPos 0
 
 class CbmParserTest : public TestBase {
@@ -143,8 +143,8 @@ TEST_F(CbmParserTest, ErrorBufferPtr) {
   PacketData.DataPtr = 0;
   PacketData.DataLength = 100;
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorSize, 1);
-  ASSERT_EQ(parser.Stats.Readouts, 0);
+  EXPECT_EQ(parser.Stats.ErrorSize, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 0);
 }
 
 // no data in buffer
@@ -152,7 +152,7 @@ TEST_F(CbmParserTest, NoData) {
   makeHeader(DataGood);
   PacketData.DataLength = 0;
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.Readouts, 0);
+  EXPECT_EQ(parser.Stats.Readouts, 0);
 }
 
 // invalid data size provided in call
@@ -161,8 +161,9 @@ TEST_F(CbmParserTest, ErrorHdrDataSize) {
   PacketData.DataLength = 19;
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorSize, 1);
-  ASSERT_EQ(parser.Stats.Readouts, 0);
+  EXPECT_EQ(parser.Stats.ErrorSize, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 0);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 // invalid data length in readout
@@ -170,8 +171,9 @@ TEST_F(CbmParserTest, ErrorDataSize) {
   makeHeader(DataBadSize);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorDataLength, 2);
-  ASSERT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorDataLength, 2);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 // invalid fractional time
@@ -179,8 +181,9 @@ TEST_F(CbmParserTest, ErrorDataTime) {
   makeHeader(DataBadFracTime);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorTimeFrac, 1);
-  ASSERT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorTimeFrac, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 // invalid fractional time
@@ -188,38 +191,42 @@ TEST_F(CbmParserTest, ErrorDataType) {
   makeHeader(DataBadType);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorType, 2);
-  ASSERT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 2);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
 }
 
 TEST_F(CbmParserTest, DataGood) {
   makeHeader(DataGood);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorSize, 0);
-  ASSERT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorSize, 0);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 TEST_F(CbmParserTest, ErrorFENId) {
   makeHeader(BadFENData);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.Readouts, 1);
-  ASSERT_EQ(parser.Stats.ErrorFEN, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 1);
+  EXPECT_EQ(parser.Stats.ErrorFEN, 1);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 TEST_F(CbmParserTest, CheckADCValues) {
-  makeHeader(BadADCData);
+  makeHeader(BadIBMNPOSData);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorADC, 2);
-  ASSERT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorADC, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 
-  makeHeader(GoodADCData);
+  makeHeader(GoodNonIBMADCData);
 
   parser.parse(PacketData);
-  ASSERT_EQ(parser.Stats.ErrorADC, 2);
-  ASSERT_EQ(parser.Stats.Readouts, 4);
+  EXPECT_EQ(parser.Stats.ErrorADC, 1);
+  EXPECT_EQ(parser.Stats.Readouts, 4);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
 
 int main(int argc, char **argv) {

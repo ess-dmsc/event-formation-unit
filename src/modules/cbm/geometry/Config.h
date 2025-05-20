@@ -27,7 +27,7 @@ struct Topology {
   const int FEN{0};
   const int Channel{0};
   const std::string Source{"CBM"};
-  const CbmType Type{CbmType::TTL};
+  const CbmType Type{CbmType::EVENT_0D};
   union {
     int param1{0};
     int pixelOffset;

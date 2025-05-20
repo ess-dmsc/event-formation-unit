@@ -69,7 +69,7 @@ get_filename_component(HEIMDAL_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/Heimdal
 get_filename_component(MAGIC_CFG_FILE "${ESS_MODULE_DIR}/dream/configs/MagicInst.json" ABSOLUTE)
 get_filename_component(FREIA_CFG_FILE "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
 get_filename_component(TREX_CFG_FILE "${ESS_MODULE_DIR}/trex/configs/trex.json" ABSOLUTE)
-get_filename_component(CBM_CFG_FILE "${ESS_MODULE_DIR}/cbm/configs/freiamon.json" ABSOLUTE)
+get_filename_component(CBM_CFG_FILE "${ESS_MODULE_DIR}/cbm/configs/cbmtest.json" ABSOLUTE)
 get_filename_component(NMX_CFG_FILE "${ESS_MODULE_DIR}/nmx/configs/nmx.json" ABSOLUTE)
 get_filename_component(LOKI_CFG_FILE "${ESS_MODULE_DIR}/loki/configs/LokiFull.json" ABSOLUTE)
 get_filename_component(LOKI_CAL_FILE "${ESS_MODULE_DIR}/loki/configs/lokinullcalib.json" ABSOLUTE)
@@ -121,7 +121,7 @@ add_custom_target(runefu
     COMMAND freia    "-f" "../configs/freia.json" "-s" "2" "--nohwcheck" "-l" "Info" "--log_file" "deleteme_graylog.log"
     COMMAND estia    "-f" "../configs/estia.json" "-s" "2" "--nohwcheck"
     COMMAND trex     "-f" "../configs/trex.json" "-s" "2" "--nohwcheck"
-    COMMAND cbm      "-f" "../configs/freiamon.json" "-s" "2" "--nohwcheck" "-t" "freia_beam_monitor"
+    COMMAND cbm      "-f" "../configs/cbmtest.json" "-s" "2" "--nohwcheck" "-t" "freia_beam_monitor"
     COMMAND nmx      "-f" "../configs/nmx.json" "-s" "2"  "--nohwcheck"
     COMMAND timepix3 "-f" "../configs/timepix3.json" "-s" "2" "--nohwcheck"
     COMMAND tbl3he   "-f" "../configs/tbl3he.json"    "--calibration" "../configs/tbl3henullcalib.json"  "-s" "2" "--nohwcheck"

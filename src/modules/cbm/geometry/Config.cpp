@@ -6,6 +6,7 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
+#include "CbmTypes.h"
 #include <modules/cbm/geometry/Config.h>
 
 namespace cbm {
@@ -122,7 +123,7 @@ void Config::apply() {
     }
 
     // Add parameter to the temporary map
-    CbmType MonitorType = CbmType::TTL;
+    CbmType MonitorType = CbmType::EVENT_0D;
     try {
       MonitorType = CbmType(Type);
     } catch (...) {
@@ -133,15 +134,15 @@ void Config::apply() {
     int param1{0};
     int param2{0};
 
-    if (MonitorType == CbmType::TTL) {
+    if (MonitorType == CbmType::EVENT_0D) {
 
       try {
         param1 = Module["PixelOffset"].get<int>();
       } catch (...) {
         errorExit(fmt::format(
-            "Entry: {}, Malformed 'Topology' section for TTL Type (Need "
+            "Entry: {}, Malformed 'Topology' section for {} Type (Need "
             "PixelOffset, PixelRange)",
-            Entry));
+            Entry, MonitorType.toString()));
       }
     }
 
@@ -152,9 +153,9 @@ void Config::apply() {
         param2 = Module["BinCount"].get<int>();
       } catch (...) {
         errorExit(fmt::format(
-            "Entry: {}, Malformed 'Topology' section for IBM Type (Need "
+            "Entry: {}, Malformed 'Topology' section for {} Type (Need "
             "MaxTofBin, BinCount)",
-            Entry));
+            Entry, MonitorType.toString()));
       }
     }
 

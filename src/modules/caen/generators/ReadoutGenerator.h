@@ -18,8 +18,6 @@ class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   // Settings local to CAEN data generator
   struct {
-    DetectorType Detector{DetectorType::RESERVED};
-
     /// \brief If true, generate data for four amplitudes
     bool Loki{false};
 

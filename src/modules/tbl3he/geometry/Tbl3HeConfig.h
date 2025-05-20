@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/config/Config.h>
 #include <common/JsonFile.h>
 #include <common/debug/Trace.h>
 #include <common/memory/HashMap2D.h>
@@ -19,8 +20,8 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class Tbl3HeConfig {
-public:
+class Tbl3HeConfig : public Configurations::Config {
+ public:
   ///\brief default constructor (useful for unit tests)
   Tbl3HeConfig();
 
@@ -33,7 +34,6 @@ public:
 
   ///\brief parse the loaded json object
   void parseConfig();
-
 
   struct {
     // configurable parameters
@@ -59,9 +59,5 @@ public:
   };
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;
-
-  std::string ConfigFile{""};
-  std::string ConfigFileName{""};
-  nlohmann::json root; // configuration (json)
 };
 } // namespace Caen

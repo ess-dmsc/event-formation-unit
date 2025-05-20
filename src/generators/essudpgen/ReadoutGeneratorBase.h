@@ -63,7 +63,7 @@ public:
   /// \brief Constructor for ReadoutGeneratorBase.
   /// \param detectorType The type of detector.
   ///
-  ReadoutGeneratorBase(DetectorType detectorType);
+  ReadoutGeneratorBase(DetectorType detectorType=DetectorType::RESERVED);
 
   /// \brief Destructor for ReadoutGeneratorBase.
   virtual ~ReadoutGeneratorBase() = default;
@@ -135,10 +135,34 @@ protected:
   ///
   /// \brief Get a tuple containing the high and the low readout time. If the
   /// --ToF option is set the value will include a time of flight distribution
-  /// calculated in DistributionGenerator
+  /// calculated by the DistributionGenerator
+  /// \param timeOfFlight  If specified, use this value for the time of flight
   /// \return Readout time pair [high, low].
+  virtual std::pair<uint32_t, uint32_t> getReadOutTimes(double timeOfFlight);
+
   ///
+  /// \overload
   virtual std::pair<uint32_t, uint32_t> getReadOutTimes();
+
+  ///
+  /// \return a time of flight value from the distribution generator
+  double getTimeOffFlight() {
+    return distributionGenerator->getValue();
+  }
+
+  ///
+  /// \brief Gets the value of readoutTimeHigh.
+  /// \return The value of readoutTimeHigh.
+  ///
+  inline uint32_t getReadoutTimeHigh() const {
+    return readoutTime.getTimeHigh();
+  }
+
+  ///
+  /// \brief Gets the value of readoutTimeLow.
+  /// \return The value of readoutTimeLow.
+  ///
+  inline uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
 
   ///
   /// \brief Gets the value of readoutTime in nanoseconds.
@@ -209,7 +233,7 @@ private:
   // clang-format off
   esstime::ESSTime pulseTime;                    ///< Pulse time
   esstime::ESSTime prevPulseTime;                ///< Previous pulse time
-  esstime::ESSTime  readoutTime;                 ///< Readout time
+  esstime::ESSTime readoutTime;                  ///< Readout time
   esstime::TimeDurationNano pulseFrequencyNs{0}; ///< Pulse frequency in nanoseconds
   // clang-format on
 
@@ -218,6 +242,6 @@ private:
   /// by setting Frequency to default.
   // std::shared_ptr<DistributionGenerator> timeOffFlightDist{};
   std::shared_ptr<FunctionGenerator> distributionGenerator{};
-  double TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
+  static constexpr double TicksPerMs{  esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

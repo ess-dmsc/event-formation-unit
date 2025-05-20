@@ -17,12 +17,11 @@
 
 namespace Caen {
 
-ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::RESERVED) {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
   // clang-format off
 
   // Options
-  app.add_option("--detector", CaenSettings.Detector,
-                "Specify detector name (LOKI, CSPEC, ..)")->required();
+  app.add_option("--detector", Settings.Detector, "Specify detector name (LOKI, CSPEC, ..)")->required();
 
   app.add_option("--fibervals", CaenSettings.FiberVals, "Number of Fiber values to generate");
   app.add_option("--fibermask", CaenSettings.FiberMask, "Mask out unused fibers");

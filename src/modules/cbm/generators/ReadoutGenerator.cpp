@@ -78,8 +78,8 @@ void ReadoutGenerator::generateData() {
   auto dataPtr = (uint8_t *)Buffer;
   dataPtr += HeaderSize;
 
-  if (cbmSettings.monitorType == CbmType::TTL) {
-    generateTTLData(dataPtr);
+  if (cbmSettings.monitorType == CbmType::EVENT_0D) {
+    generateEvent0DData(dataPtr);
   } else if (cbmSettings.monitorType == CbmType::IBM) {
     generateIBMData(dataPtr);
   } else {
@@ -87,8 +87,8 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-// Generate data for TTL monitor
-void ReadoutGenerator::generateTTLData(uint8_t *dataPtr) {
+// Generate data for 0D event monitor
+void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 
   for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
 
