@@ -17,37 +17,14 @@ namespace Trex {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  try {
-    TREXFileParameters.DefaultMinADC =
-        root["DefaultMinADC"].get<std::uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
-  }
-  LOG(INIT, Sev::Info, "DefaultMinADC {}", TREXFileParameters.DefaultMinADC);
+  setMask(LOG);
+  assign("DefaultMinADC", TREXFileParameters.DefaultMinADC);
+  assign("SizeX",         TREXFileParameters.SizeX);
+  assign("SizeY",         TREXFileParameters.SizeY);
+  assign("SizeZ",         TREXFileParameters.SizeZ);
 
   try {
-    TREXFileParameters.SizeX = root["SizeX"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Size X");
-  }
-  LOG(INIT, Sev::Info, "Size X {}", TREXFileParameters.SizeX);
-
-  try {
-    TREXFileParameters.SizeY = root["SizeY"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Size Y");
-  }
-  LOG(INIT, Sev::Info, "Size Y {}", TREXFileParameters.SizeY);
-
-  try {
-    TREXFileParameters.SizeZ = root["SizeZ"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Size Z");
-  }
-  LOG(INIT, Sev::Info, "Size Z {}", TREXFileParameters.SizeZ);
-
-  try {
-    auto PanelConfig = root["Config"];
+    auto PanelConfig = root()["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
@@ -60,29 +37,29 @@ void Config::applyConfig() {
 
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =
-          root["Vessel_Config"][VesselID]["Rotation"];
+          root()["Vessel_Config"][VesselID]["Rotation"];
 
       try {
         Short[Ring][FEN][LocalHybrid] =
-            root["Vessel_Config"][VesselID]["Short"];
+            root()["Vessel_Config"][VesselID]["Short"];
       } catch (...) {
         Short[Ring][FEN][LocalHybrid] = false;
       }
 
       try {
-        Hybrid.XOffset = root["Vessel_Config"][VesselID]["XOffset"];
+        Hybrid.XOffset = root()["Vessel_Config"][VesselID]["XOffset"];
       } catch (...) {
         Hybrid.XOffset = 0;
       }
 
       try {
-        Hybrid.YOffset = root["Vessel_Config"][VesselID]["YOffset"];
+        Hybrid.YOffset = root()["Vessel_Config"][VesselID]["YOffset"];
       } catch (...) {
         Hybrid.YOffset = 0;
       }
 
       try {
-        Hybrid.MinADC = root["Vessel_Config"][VesselID]["MinADC"];
+        Hybrid.MinADC = root()["Vessel_Config"][VesselID]["MinADC"];
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
@@ -94,7 +71,7 @@ void Config::applyConfig() {
     // assumed 6 * 16 wires per column and 2 columns per vessel
     try {
       uint8_t NumGrids = 0;
-      for (auto const &Vessel : root["Vessel_Config"]) {
+      for (auto const &Vessel : root()["Vessel_Config"]) {
         NumGrids = Vessel["NumGrids"];
         NumPixels += NumGrids * 6 * 16 * 2;
       }
@@ -104,7 +81,7 @@ void Config::applyConfig() {
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
+        configFile());
     throw std::runtime_error("Invalid Json file");
   }
 }

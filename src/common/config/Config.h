@@ -35,6 +35,12 @@ class Config {
     return mConfigFile;
   }
 
+  /// \brief Set a new config file
+  /// \param ConfigFile  Name of config file
+  void setConfigFile(const std::string &ConfigFile) {
+    mConfigFile = ConfigFile;
+  }
+
   /// \brief Set a new json object
   /// \param Root  The new json object
   void setRoot(const nlohmann::json &Root) {
@@ -44,6 +50,13 @@ class Config {
   /// \return the current json object
   nlohmann::json &root() {
     return mRoot;
+  }
+
+  /// \brief Set and load the root json object from a new config file
+  /// \param ConfigFile  Path for the new config file
+  void setRootFromFile(const std::string &ConfigFile) {
+    mConfigFile = ConfigFile;
+    loadFromFile();
   }
 
   /// \brief Load the json object from the current config file
@@ -97,14 +110,14 @@ class Config {
         throw(e);
       }
     } else {
-      const std::string warning = fmt::format("JSON config - warning: The requested key '{}' does not exist", Key);
-
       if (mMask & LOG) {
-        LOG(INIT, Sev::Error, warning);
+        std::string warning = fmt::format("Using default value for {}", Key);
+        LOG(INIT, Sev::Info, warning);
       }
 
       if (mMask & CHECK) {
-        throw std::runtime_error(warning);
+        const std::string error = fmt::format("JSON config - error: The requested key '{}' does not exist", Key);
+        throw std::runtime_error(error);
       }
     }
 
