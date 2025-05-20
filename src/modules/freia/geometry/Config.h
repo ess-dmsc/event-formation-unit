@@ -48,7 +48,7 @@ public:
     float SplitMultiEventsCoefficientHigh{1.2};
     uint16_t MaxMatchingTimeGap{500};
     uint16_t MaxClusteringTimeGap{500};
-  } CfgParms;
+  } MBFileParameters;
 };
 
 const std::vector<std::string> RootFields{

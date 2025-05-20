@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-auto j2 = R"(
+auto Empty = R"(
 {
   "DoesNothing" : 0
 }
@@ -51,7 +51,7 @@ auto InvalidRing = R"(
 }
 )"_json;
 
-std::string InvalidConfig = R"(
+auto InvalidConfig = R"(
 {
   "Detector": "TREX",
 
@@ -66,7 +66,7 @@ std::string InvalidConfig = R"(
 
   "MaxPulseTimeNS" : 357000000
 }
-)";
+)"_json;
 
 auto DuplicateEntry = R"(
 {
@@ -89,7 +89,7 @@ using namespace Trex;
 class TrexConfigTest : public TestBase {
 protected:
   Config config{"TREX", "config.json"};
-  void SetUp() override { config.root = j2; }
+  void SetUp() override { config.setRoot(Empty); }
   void TearDown() override {}
 };
 
@@ -103,27 +103,27 @@ TEST_F(TrexConfigTest, UninitialisedHybrids) {
 }
 
 TEST_F(TrexConfigTest, NoDetector) {
-  config.root = NoDetector;
+  config.setRoot(NoDetector);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(TrexConfigTest, InvalidDetector) {
-  config.root = InvalidDetector;
+  config.setRoot(InvalidDetector);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(TrexConfigTest, InvalidRing) {
-  config.root = InvalidRing;
+  config.setRoot(InvalidRing);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(TrexConfigTest, InvalidConfig) {
-  config.root = InvalidConfig;
+  config.setRoot(InvalidConfig);
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
 TEST_F(TrexConfigTest, Duplicate) {
-  config.root = DuplicateEntry;
+  config.setRoot(DuplicateEntry);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 

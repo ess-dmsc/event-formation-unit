@@ -16,77 +16,32 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  json_check_keys("Config error", root, RootFields);
+  json_check_keys("Config error", root(), RootFields);
 
-  CfgParms.Version = root["Version"].get<int>();
-
-  if (CfgParms.Version != 1) {
+  // Initialize and check Version parameter
+  setMask(LOG);
+  assign("Version", MBFileParameters.Version);
+  if (MBFileParameters.Version != 1) {
     auto Msg =
-        fmt::format("Invalid config version {} - expected 1", CfgParms.Version);
+        fmt::format("Invalid config version {} - expected 1", MBFileParameters.Version);
     LOG(INIT, Sev::Error, Msg.c_str());
     throw std::runtime_error(Msg);
   }
-  LOG(INIT, Sev::Info, "Config file version {}", CfgParms.Version);
+  LOG(INIT, Sev::Info, "Config file version {}", MBFileParameters.Version);
 
-  if (root.contains("MaxGapWire")) {
-    CfgParms.MaxGapWire = root["MaxGapWire"].get<std::uint16_t>();
-  } else {
-    LOG(INIT, Sev::Info, "Using default value for MaxGapWire");
-  }
-  LOG(INIT, Sev::Info, "MaxGapWire {}", CfgParms.MaxGapWire);
-
-  if (root.contains("MaxGapStrip")) {
-    CfgParms.MaxGapStrip = root["MaxGapStrip"].get<std::uint16_t>();
-  } else {
-    LOG(INIT, Sev::Info, "Using default value for MaxGapStrip");
-  }
-  LOG(INIT, Sev::Info, "MaxGapStrip {}", CfgParms.MaxGapStrip);
-
-  if (root.contains("SplitMultiEvents")) {
-    CfgParms.SplitMultiEvents = root["SplitMultiEvents"].get<bool>();
-  } else {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}", CfgParms.SplitMultiEvents);
-
-  if (root.contains("SplitMultiEventsCoefficientLow")) {
-    CfgParms.SplitMultiEventsCoefficientLow =
-        root["SplitMultiEventsCoefficientLow"].get<float>();
-  } else {
-    LOG(INIT, Sev::Info,
-        "Using default value for SplitMultiEventsCoefficientLow");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
-      CfgParms.SplitMultiEventsCoefficientLow);
-
-  if (root.contains("SplitMultiEventsCoefficientHigh")) {
-    CfgParms.SplitMultiEventsCoefficientHigh =
-        root["SplitMultiEventsCoefficientHigh"].get<float>();
-  } else {
-    LOG(INIT, Sev::Info,
-        "Using default value for SplitMultiEventsCoefficientHigh");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
-      CfgParms.SplitMultiEventsCoefficientHigh);
-
-  if (root.contains("MaxMatchingTimeGap")) {
-    CfgParms.MaxMatchingTimeGap = root["MaxMatchingTimeGap"].get<float>();
-  } else {
-    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
-  }
-  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}", CfgParms.MaxMatchingTimeGap);
-
-  if (root.contains("MaxClusteringTimeGap")) {
-    CfgParms.MaxClusteringTimeGap = root["MaxClusteringTimeGap"].get<float>();
-  } else {
-    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
-  }
-  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}", CfgParms.MaxClusteringTimeGap);
+  // Initialize all other parameter
+  assign("MaxGapWire", MBFileParameters.MaxGapWire);
+  assign("MaxGapStrip", MBFileParameters.MaxGapStrip);
+  assign("SplitMultiEvents", MBFileParameters.SplitMultiEvents);
+  assign("SplitMultiEventsCoefficientLow", MBFileParameters.SplitMultiEventsCoefficientLow);
+  assign("SplitMultiEventsCoefficientHigh", MBFileParameters.SplitMultiEventsCoefficientHigh);
+  assign("MaxMatchingTimeGap", MBFileParameters.MaxMatchingTimeGap);
+  assign("MaxClusteringTimeGap", MBFileParameters.MaxClusteringTimeGap);
 
   /// RING/FEN/Hybrid
-  auto PanelConfig = root["Config"];
+  auto PanelConfig = root()["Config"];
 
-  for (auto &Mapping : PanelConfig) {
+  for (const auto &Mapping : PanelConfig) {
     json_check_keys("Config error", Mapping, MappingFields);
 
     uint8_t Ring = Mapping["Ring"].get<uint8_t>();
@@ -97,7 +52,7 @@ void Config::applyConfig() {
 
     uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
 
-    if (root["InstrumentGeometry"] != "Estia") {
+    if (root()["InstrumentGeometry"] != "Estia") {
     // FREIA + AMOR
       Hybrid.XOffset = 0;
       Hybrid.YOffset = CassetteId * NumWiresPerCassette;
@@ -113,7 +68,7 @@ void Config::applyConfig() {
 
     /// Thresholds
     /// Version 1: one threshold for asic0 and asic1 at index, 0 and 1
-    if (CfgParms.Version == 1) {
+    if (MBFileParameters.Version == 1) {
      XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d",
             LocalHybrid, Ring, FEN);
      auto &Thresholds = Mapping["Thresholds"];

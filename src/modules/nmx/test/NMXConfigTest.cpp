@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-auto j2 = R"(
+auto Empty = R"(
 {
   "DoesNothing" : 0
 }
@@ -48,9 +48,9 @@ auto InvalidRing = R"(
   "DefaultMinADC":50,
   "Config" : [
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
@@ -58,9 +58,9 @@ auto InvalidRing = R"(
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  20, 
-          "FEN": 0, 
-          "Hybrid" :  1, 
+          "Ring" :  20,
+          "FEN": 0,
+          "Hybrid" :  1,
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
@@ -99,9 +99,9 @@ auto DuplicateEntry = R"(
   "DefaultMinADC":50,
   "Config" : [
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
@@ -109,9 +109,9 @@ auto DuplicateEntry = R"(
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
-          "Ring" :  0, 
-          "FEN": 0, 
-          "Hybrid" :  0, 
+          "Ring" :  0,
+          "FEN": 0,
+          "Hybrid" :  0,
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
@@ -127,7 +127,7 @@ using namespace Nmx;
 class NMXConfigTest : public TestBase {
 protected:
   Config config{"NMX", NMX_FULL};
-  void SetUp() override { config.root = j2; }
+  void SetUp() override { config.setRoot(Empty); }
   void TearDown() override {}
 };
 
@@ -142,17 +142,17 @@ TEST_F(NMXConfigTest, UninitialisedHybrids) {
 }
 
 TEST_F(NMXConfigTest, InvalidJson) {
-  config.root = InvalidJson;
+  config.setRoot(InvalidJson);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(NMXConfigTest, NoDetector) {
-  config.root = NoDetector;
+  config.setRoot(NoDetector);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(NMXConfigTest, MinimalConfig) {
-  config.root = MinimalConfig;
+  config.setRoot(MinimalConfig);
   config.applyVMM3Config();
   config.applyConfig();
   ASSERT_EQ(config.getHybrid(0, 0, 0).Initialised, false);
@@ -160,17 +160,17 @@ TEST_F(NMXConfigTest, MinimalConfig) {
 }
 
 TEST_F(NMXConfigTest, InvalidDetector) {
-  config.root = InvalidDetector;
+  config.setRoot(InvalidDetector);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(NMXConfigTest, InvalidRing) {
-  config.root = InvalidRing;
+  config.setRoot(InvalidRing);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
 TEST_F(NMXConfigTest, Duplicate) {
-  config.root = DuplicateEntry;
+  config.setRoot(DuplicateEntry);
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 

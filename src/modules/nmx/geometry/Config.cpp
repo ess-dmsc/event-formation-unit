@@ -17,125 +17,26 @@ namespace Nmx {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  try {
-    NMXFileParameters.DefaultMinADC =
-        root["DefaultMinADC"].get<std::uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for DefaultMinADC");
-  }
-  LOG(INIT, Sev::Info, "DefaultMinADC {}", NMXFileParameters.DefaultMinADC);
+  // Initialize parameters
+  setMask(LOG);
+  assign("DefaultMinADC", NMXFileParameters.DefaultMinADC);
+  assign("SizeX", NMXFileParameters.SizeX);
+  assign("SizeY", NMXFileParameters.SizeY);
+  assign("MaxSpanX", NMXFileParameters.MaxSpanX);
+  assign("MaxSpanY", NMXFileParameters.MaxSpanY);
+  assign("MinSpanX", NMXFileParameters.MinSpanX);
+  assign("MinSpanY", NMXFileParameters.MinSpanY);
+  assign("MaxGapX", NMXFileParameters.MaxGapX);
+  assign("MaxGapY", NMXFileParameters.MaxGapY);
+  assign("MaxMatchingTimeGap", NMXFileParameters.MaxMatchingTimeGap);
+  assign("MaxClusteringTimeGap", NMXFileParameters.MaxClusteringTimeGap);
+  assign("NumPanels", NMXFileParameters.NumPanels);
+  assign("SplitMultiEvents", NMXFileParameters.SplitMultiEvents);
+  assign("SplitMultiEventsCoefficientLow", NMXFileParameters.SplitMultiEventsCoefficientLow);
+  assign("SplitMultiEventsCoefficientHigh", NMXFileParameters.SplitMultiEventsCoefficientHigh);
 
   try {
-    NMXFileParameters.SizeX = root["SizeX"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Size X");
-  }
-  LOG(INIT, Sev::Info, "Size X {}", NMXFileParameters.SizeX);
-
-  try {
-    NMXFileParameters.SizeY = root["SizeY"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for Size Y");
-  }
-  LOG(INIT, Sev::Info, "Size Y {}", NMXFileParameters.SizeY);
-
-  try {
-    NMXFileParameters.MaxSpanX = root["MaxSpanX"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxSpanX");
-  }
-  LOG(INIT, Sev::Info, "MaxSpanX {}", NMXFileParameters.MaxSpanX);
-
-  try {
-    NMXFileParameters.MaxSpanY = root["MaxSpanY"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxSpanY");
-  }
-  LOG(INIT, Sev::Info, "MaxSpanY {}", NMXFileParameters.MaxSpanY);
-
-  try {
-    NMXFileParameters.MinSpanX = root["MinSpanX"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MinSpanX");
-  }
-  LOG(INIT, Sev::Info, "MinSpanX {}", NMXFileParameters.MinSpanX);
-
-  try {
-    NMXFileParameters.MinSpanY = root["MinSpanY"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MinSpanY");
-  }
-  LOG(INIT, Sev::Info, "MinSpanY {}", NMXFileParameters.MinSpanY);
-
-  try {
-    NMXFileParameters.MaxGapX = root["MaxGapX"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxGapX");
-  }
-  LOG(INIT, Sev::Info, "MaxGapX {}", NMXFileParameters.MaxGapX);
-
-  try {
-    NMXFileParameters.MaxGapY = root["MaxGapY"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxYGap");
-  }
-  LOG(INIT, Sev::Info, "MaxGapY {}", NMXFileParameters.MaxGapY);
-
-  try {
-    NMXFileParameters.MaxMatchingTimeGap =
-        root["MaxMatchingTimeGap"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxMatchingTimeGap");
-  }
-  LOG(INIT, Sev::Info, "MaxMatchingTimeGap {}",
-      NMXFileParameters.MaxMatchingTimeGap);
-
-  try {
-    NMXFileParameters.MaxClusteringTimeGap =
-        root["MaxClusteringTimeGap"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxClusteringTimeGap");
-  }
-  LOG(INIT, Sev::Info, "MaxClusteringTimeGap {}",
-      NMXFileParameters.MaxClusteringTimeGap);
-
-  try {
-    NMXFileParameters.NumPanels = root["NumPanels"].get<uint16_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for NumPanels");
-  }
-  LOG(INIT, Sev::Info, "NumPanels {}", NMXFileParameters.NumPanels);
-
-  try {
-    NMXFileParameters.SplitMultiEvents = root["SplitMultiEvents"].get<bool>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for SplitMultiEvents");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEvents {}",
-      NMXFileParameters.SplitMultiEvents);
-
-  try {
-    NMXFileParameters.SplitMultiEventsCoefficientLow =
-        root["SplitMultiEventsCoefficientLow"].get<float>();
-  } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for SplitMultiEventsCoefficientLow");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientLow {}",
-      NMXFileParameters.SplitMultiEventsCoefficientLow);
-
-  try {
-    NMXFileParameters.SplitMultiEventsCoefficientHigh =
-        root["SplitMultiEventsCoefficientHigh"].get<float>();
-  } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default value for SplitMultiEventsCoefficientHigh");
-  }
-  LOG(INIT, Sev::Info, "SplitMultiEventsCoefficientHigh {}",
-      NMXFileParameters.SplitMultiEventsCoefficientHigh);
-
-  try {
-    auto PanelConfig = root["Config"];
+    auto PanelConfig = root()["Config"];
     for (auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
@@ -188,7 +89,7 @@ void Config::applyConfig() {
 
   } catch (...) {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Config file: {}",
-        FileName);
+        configFile());
     throw std::runtime_error("Invalid Json file");
   }
 }

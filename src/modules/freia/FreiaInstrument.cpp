@@ -52,14 +52,14 @@ void FreiaInstrument::loadConfigAndCalib() {
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(Conf.CfgParms.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(Conf.CfgParms.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(Conf.CfgParms.MaxClusteringTimeGap);
-    if (Conf.CfgParms.SplitMultiEvents) {
+    builder.matcher.setMaximumTimeGap(Conf.MBFileParameters.MaxMatchingTimeGap);
+    builder.ClustererX.setMaximumTimeGap(Conf.MBFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(Conf.MBFileParameters.MaxClusteringTimeGap);
+    if (Conf.MBFileParameters.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
-          Conf.CfgParms.SplitMultiEvents,
-          Conf.CfgParms.SplitMultiEventsCoefficientLow,
-          Conf.CfgParms.SplitMultiEventsCoefficientHigh);
+          Conf.MBFileParameters.SplitMultiEvents,
+          Conf.MBFileParameters.SplitMultiEventsCoefficientLow,
+          Conf.MBFileParameters.SplitMultiEventsCoefficientHigh);
     }
   }
 
@@ -208,7 +208,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.CfgParms.MaxGapWire)) {
+      if (e.ClusterB.hasGap(Conf.MBFileParameters.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -216,7 +216,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.CfgParms.MaxGapStrip)) {
+      if (e.ClusterA.hasGap(Conf.MBFileParameters.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
