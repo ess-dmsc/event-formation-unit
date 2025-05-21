@@ -18,7 +18,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "SocketInterface.h"
+#include <common/system/SocketInterface.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket : public SocketInterface {
