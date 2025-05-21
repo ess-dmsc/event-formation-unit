@@ -47,7 +47,7 @@ public:
   SocketImpl(SocketImpl::SocketType Type);
 
   /// Close the file descriptor
-  ~SocketImpl() {
+  virtual ~SocketImpl() {
     if (SocketFileDescriptor >= 0) {
       close(SocketFileDescriptor);
     }

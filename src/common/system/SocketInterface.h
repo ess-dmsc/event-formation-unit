@@ -13,6 +13,7 @@
 /// injection into generator method that creates multiple packets and unit test.
 class SocketInterface {
 public:
+  virtual ~SocketInterface() = default;
   /// \brief Send data in buffer with specified length
   /// \param dataBuffer pointer to data buffer.
   /// \param dataLength length of buffer.
