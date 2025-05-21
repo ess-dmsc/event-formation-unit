@@ -84,8 +84,11 @@ function(enable_coverage coverage_target)
         COMPILE_FLAGS ${COVERAGE_COMPILE_FLAGS})
     set_target_properties(${coverage_target} PROPERTIES
         LINK_FLAGS ${COVERAGE_LINK_FLAGS})
+  
     target_link_libraries(${coverage_target}
-        ${COVERAGE_LIBRARIES})
+      PRIVATE
+        ${COVERAGE_LIBRARIES}
+    )
   endif()
 endfunction()
 

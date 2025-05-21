@@ -40,6 +40,11 @@ add_library(ReductionLib OBJECT
   ${reduction_obj_INC}
   )
 
+target_link_libraries(ReductionLib
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 enable_coverage_flags(ReductionLib)
 
 #=============================================================================

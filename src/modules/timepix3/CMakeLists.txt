@@ -35,6 +35,11 @@ add_library(timepix3_common STATIC
   ${timepix3_common_inc}
   )
 
+target_link_libraries(timepix3_common
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(timepix3_common "-Wl,--no-as-needed")
 endif()

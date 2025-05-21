@@ -77,15 +77,17 @@ set(efu_common_INC
   ${ESS_SOURCE_DIR}/efu/Server.h
   )
 
-find_package(CLI11 REQUIRED)
-find_package(magic_enum REQUIRED)
-
 # Only include the 'minimum' necessary
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
   # Add required object libraries
   $<TARGET_OBJECTS:EssTimingLib>
+)
+
+target_link_libraries(efu_common
+  PRIVATE
+    ${EFU_COMMON_LIBS}
 )
 
 # Only include the 'minimum' necessary
@@ -97,8 +99,11 @@ add_library(efu_common-unit_test STATIC
   $<TARGET_OBJECTS:EssTimingLib>
 )
 
-# Link gtest library
-target_link_libraries(efu_common-unit_test ${CONAN_LIBS_GTEST})
+target_link_libraries(efu_common-unit_test
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_common-unit_test PUBLIC -DUNIT_TEST)
 
@@ -112,6 +117,11 @@ add_library(efu_reduction STATIC
   $<TARGET_OBJECTS:MonitorLib>
 )
 
+target_link_libraries(efu_reduction 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 # To be used as a dependency in the module's CMakeLists.txt
 # aimed to be built with the UNIT_TEST macro defined
 add_library(efu_reduction-unit_test STATIC
@@ -122,8 +132,11 @@ add_library(efu_reduction-unit_test STATIC
   $<TARGET_OBJECTS:MonitorLib>
 )
 
-# Link gtest library
-target_link_libraries(efu_reduction-unit_test ${CONAN_LIBS_GTEST})
+target_link_libraries(efu_reduction-unit_test 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_reduction-unit_test PUBLIC -DUNIT_TEST)
 
@@ -131,6 +144,11 @@ target_compile_definitions(efu_reduction-unit_test PUBLIC -DUNIT_TEST)
 add_library(efu_essreadout STATIC
   $<TARGET_OBJECTS:EssReadoutLib>
   $<TARGET_OBJECTS:EssTimingLib>
+)
+
+target_link_libraries(efu_essreadout 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
 )
 
 # To be used as a dependency in the module's CMakeLists.txt
@@ -141,7 +159,10 @@ add_library(efu_essreadout-unit_test STATIC
 )
 
 # Link gtest library
-target_link_libraries(efu_essreadout-unit_test ${CONAN_LIBS_GTEST})
+target_link_libraries(efu_essreadout-unit_test 
+  PRIVATE
+    ${CONAN_LIBS_GTEST}
+)
 # Set precompiler flag UNIT_TEST for the library
 target_compile_definitions(efu_essreadout-unit_test PUBLIC -DUNIT_TEST)
 
@@ -173,8 +194,6 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common ${EFU_COMMON_LIBS})
-
 
 set(TestUtilsLib_INC
     testutils/SaveBuffer.h
@@ -186,6 +205,11 @@ add_library(TestUtilsLib OBJECT
   ${TestUtilsLib_INC}
   ${TestUtilsLib_SRC}
   )
+
+target_link_libraries(TestUtilsLib 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
 
 #=============================================================================
 # Tests

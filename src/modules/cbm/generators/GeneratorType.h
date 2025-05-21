@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <Error.hpp>
+#include <CLI/Error.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>

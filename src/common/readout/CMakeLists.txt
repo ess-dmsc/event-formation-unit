@@ -29,12 +29,23 @@ add_library(EssReadoutLib OBJECT
   ${essreadout_obj_SRC}
   ${essreadout_obj_INC}
   )
+
+target_link_libraries(EssReadoutLib 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 # To be used as a dependency in the module's CMakeLists.txt
 # aimed to be built with UNIT_TEST macro defined
 add_library(EssReadoutLib-unit_test OBJECT
   ${essreadout_obj_SRC}
   ${essreadout_obj_INC}
   )
+
+target_link_libraries(EssReadoutLib-unit_test 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
 
 target_compile_definitions(EssReadoutLib-unit_test PUBLIC -DUNIT_TEST)
 

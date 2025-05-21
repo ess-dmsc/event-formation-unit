@@ -22,6 +22,11 @@ add_library(EssTimingLib OBJECT
   ${esstime_obj_INC}
   )
 
+target_link_libraries(EssTimingLib
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 add_library(EssTimingLib-unit_test OBJECT
   ${esstime_obj_SRC}
   ${esstime_obj_INC}
