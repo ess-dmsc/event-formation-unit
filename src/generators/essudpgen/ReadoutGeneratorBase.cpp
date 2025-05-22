@@ -101,7 +101,9 @@ void ReadoutGeneratorBase::generatePackets(SocketInterface *socket, const std::c
     if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
       break;
     }
-
+    if (Settings.SpeedThrottle) {
+      usleep(Settings.SpeedThrottle);
+    }
     UpdateTimestamps(false);
   } while(std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
 }
@@ -183,9 +185,6 @@ void ReadoutGeneratorBase::transmitLoop() {
   do {
     generatePackets(DataSource, pulseTimeDuration);
 
-    if (Settings.SpeedThrottle) {
-      usleep(Settings.SpeedThrottle);
-    }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
