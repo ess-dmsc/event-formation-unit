@@ -93,7 +93,7 @@ centos7_release:
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
 
-centos7_tests:
+runefu:
   image: $CENTOS7_IMAGE
   stage: test
   dependencies:
@@ -103,20 +103,34 @@ centos7_tests:
     - cd build
     - conan install .. --build=missing --profile=linux_x86_64_gcc11_legacy -s build_type=Debug
     - cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
-    - make -j$(nproc) runtest
     - make -j$(nproc) runefu
-    - gcovr -r .. --txt
-    - gcovr -r .. --xml-pretty --output coverage.xml
   artifacts:
     paths:
       - build/
+    expire_in: 1 day
+
+coverage:
+  image: $ALMALINUX9_IMAGE
+  stage: test
+  dependencies:
+    - conan_setup
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11 -s build_type=Debug
+    - cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
+    - make -j$(nproc) runtest
+    - make coverage_all
+  artifacts:
+    paths:
+      - build/coverage
     expire_in: 1 week
     reports:
       junit: build/test_results/*.xml
       coverage_report:
         coverage_format: cobertura    
-        path: build/coverage.xml
-  coverage: '/lines: (\d+\.\d+)%/'
+        path: build/coverage/coverage.xml
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
 
 publish_tar_job:
   stage: publish

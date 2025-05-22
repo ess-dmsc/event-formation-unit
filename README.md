@@ -122,7 +122,12 @@ make runtest
 
 #### 5. Generate coverage report:
 ```bash
-make coverage
+make coverage_all
+```
+
+View the report:
+```bash
+open coverage/coverage.html
 ```
 
 #### 6. To run a memory leak test, run:

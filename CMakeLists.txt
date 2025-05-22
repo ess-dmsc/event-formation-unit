@@ -89,19 +89,6 @@ add_custom_target(cppcheckhtml
   COMMAND cppcheck-htmlreport --file cppcheck.xml --report-dir cppcheckhtml)
 
 #=============================================================================
-# Finalize coverage
-#=============================================================================
-set(gcovr_excl_opts
-  "--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'")
-create_coverage_targets(
-  coverage
-  runtest
-  ${PROJECT_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}
-  ${PROJECT_BINARY_DIR}/coverage
-  ${gcovr_excl_opts})
-
-#=============================================================================
 # Help target
 #=============================================================================
 add_custom_target(hints

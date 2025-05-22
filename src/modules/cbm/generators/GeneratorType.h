@@ -94,3 +94,5 @@ public:
 private:
   GeneratorTypes type_;
 };
+
+// GCOVR_EXCL_STOP
