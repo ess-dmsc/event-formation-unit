@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,10 +11,15 @@
 
 class FunctionGenerator {
 public:
-    virtual ~FunctionGenerator() {}
-    
-    /// \brief Get the value at a given position in the generator function.
-    virtual double getDistValue(const double&) = 0;
+  /// \brief Number of Bins defines the resolution of the distribution function.
+  static constexpr int DefaultBinCount{512};
+  virtual ~FunctionGenerator() {}
+
+  /// \brief Get the value at a given position in the generator function.
+  virtual double getDistValue(const double &) = 0;
+
+  /// \brief return a random value based on the distribution function
+  virtual double getValue() = 0;
 };
 
 // GCOVR_EXCL_STOP

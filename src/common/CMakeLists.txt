@@ -63,6 +63,7 @@ set(efu_common_INC
   system/gccintel.h
   system/intel.h
   system/arm.h
+  system/SocketInterface.h
   system/Socket.h
   types/DetectorType.h
   JsonFile.h

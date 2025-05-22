@@ -32,8 +32,9 @@ void ReadoutGenerator::generateData() {
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->VMM = Readout & 0x3;
     ReadoutData->OTADC = 1000;
 
@@ -48,11 +49,6 @@ void ReadoutGenerator::generateData() {
     }
 
     DP += ReadoutDataSize;
-    if ((Readout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
   }
 }
 

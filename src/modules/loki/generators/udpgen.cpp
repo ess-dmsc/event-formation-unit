@@ -16,7 +16,9 @@ int main(int argc, char *argv[]) {
   LokiGen.setReadoutDataSize(LokiDataSize);
 
   LokiGen.argParse(argc, argv);
-  LokiGen.main();
+
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(LokiGen.Settings.Frequency);
+  LokiGen.initialize(distribution);
 
   LokiGen.transmitLoop();
 

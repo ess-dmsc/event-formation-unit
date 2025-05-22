@@ -18,7 +18,9 @@ int main(int argc, char *argv[]) {
   FreiaGen.setReadoutDataSize(FreiaDataSize);
 
   FreiaGen.argParse(argc, argv);
-  FreiaGen.main();
+
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(FreiaGen.Settings.Frequency);
+  FreiaGen.initialize(distribution);
 
   FreiaGen.transmitLoop();
 

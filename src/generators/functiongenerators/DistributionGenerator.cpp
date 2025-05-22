@@ -18,7 +18,7 @@ static double gaussianPDF(double X, double Mu, double Sigma) {
 }
 
 DistributionGenerator::DistributionGenerator(double MaxVal)
-    : DistributionGenerator(MaxVal, 512) {}
+    : DistributionGenerator(MaxVal, DefaultBinCount) {}
 
 /// \brief generate Dist and CDF for the specified shape. Always use the absolute value of Bins.
 DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange(MaxVal), NumberOfBins(abs(Bins)) {
@@ -35,6 +35,17 @@ DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange
     }
   }
   Norm = CDF[NumberOfBins - 1];
+}
+
+std::shared_ptr<FunctionGenerator> DistributionGenerator::Factory(uint16_t Frequency) {
+  return Factory(Frequency, DefaultBinCount);
+}
+
+std::shared_ptr<FunctionGenerator> DistributionGenerator::Factory(uint16_t Frequency, int Bins) {
+  if (Frequency == 0) {
+    throw std::runtime_error("This generator must have a frequency value larger than zero ");
+  }
+  return std::make_shared<DistributionGenerator>( 1000.0 / Frequency, Bins);
 }
 
 double DistributionGenerator::getDistValue(const double &Pos) {

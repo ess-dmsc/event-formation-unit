@@ -16,8 +16,9 @@ int main(int argc, char *argv[]) {
   TrexGen.setReadoutDataSize(TrexDataSize);
 
   TrexGen.argParse(argc, argv);
-  TrexGen.main();
 
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(TrexGen.Settings.Frequency);
+  TrexGen.initialize(distribution);
   TrexGen.transmitLoop();
 
   return 0;

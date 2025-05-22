@@ -18,9 +18,10 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <common/system/SocketInterface.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
-class Socket {
+class Socket : public SocketInterface {
 public:
   enum class SocketType { UDP, TCP };
 

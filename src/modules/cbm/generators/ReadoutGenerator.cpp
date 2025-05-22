@@ -100,15 +100,13 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = cbmSettings.FenId;
-    dataPkt->TimeHigh = getReadoutTimeHigh();
-    dataPkt->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    dataPkt->TimeHigh = readoutTimeHigh;
+    dataPkt->TimeLow = readoutTimeLow;
     dataPkt->Type = cbmSettings.monitorType;
     dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 12345;
     dataPkt->NPos = 0;
-
-    // Increment time for next readout and adjust high time if needed
-    addTicksBtwReadoutsToReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
@@ -147,8 +145,9 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = cbmSettings.FenId;
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    dataPkt->TimeHigh = getReadoutTimeHigh();
-    dataPkt->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    dataPkt->TimeHigh = readoutTimeHigh;
+    dataPkt->TimeLow = readoutTimeLow;
     dataPkt->Type = CbmType::IBM;
 
     // Currently we generating for 1 beam monitor only
@@ -162,9 +161,6 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     } else {
       fixedValueGenerator(dataPkt);
     }
-
-    // Increment time for next readout
-    addTicksBtwReadoutsToReadoutTime();
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);

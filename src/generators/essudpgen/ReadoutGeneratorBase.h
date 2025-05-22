@@ -19,6 +19,7 @@
 #include <CLI/CLI.hpp>
 
 #include <cstdint>
+#include <memory>
 
 ///
 /// \class ReadoutGeneratorBase
@@ -26,13 +27,16 @@
 ///
 class ReadoutGeneratorBase {
 public:
+  /// \brief default frequency for all generators. It can be changed with command line parameter
+  /// q, --frequency.
+  static constexpr uint16_t DefaultFrequency{ 14 };
+
   ///
   /// \struct GeneratorSettings
   /// \brief Struct that holds the generator settings.
   ///
   // clang-format off
   struct GeneratorSettings {
-    bool Tof{false};                                        ///< Generate nicely distributed tof data
     bool Debug{false};                                      ///< Print debug info
 
     uint32_t NFibers{2};                                    ///< Number of fibers
@@ -42,14 +46,12 @@ public:
     std::string IpAddress{"127.0.0.1"};                     ///< IP address for UDP transmission
     uint16_t UDPPort{9000};                                 ///< UDP port for transmission
     uint64_t NumberOfPackets{0};                            ///< Number of packets to transmit (0 means all packets)
-    uint32_t NumReadouts{370};                              ///< Number of VMM readouts in the UDP packet
-    uint32_t TicksBtwReadouts{10};                          ///< Ticks between readouts
-    uint32_t TicksBtwEvents{3 * 88};                        ///< Ticks between events (88 ticks ~1us)
     uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
 
-    /// \todo This should be the default mode and obsolete pe packet generation
-    uint16_t Frequency{0};                ///< Frequency of time updates for each packet
+    /// \todo This should be the default mode and obsolete per packet generation
+    /// \todo Frequency should be a double instead of integer.
+    uint16_t Frequency{ DefaultFrequency };                ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1};             ///< Header version
     bool Loop{false};                     ///< Flag to keep looping the same file forever
@@ -69,15 +71,26 @@ public:
 
   ///
   /// \brief Creates a packet ready for UDP transmission.
-  /// \return The type of the packet.
-  ///
-  uint16_t makePacket();
+  /// Method will create as many network packets possible with in a pulse duration. Each packet will
+  /// be populated with as many readout as possible.
+  /// \param socket, interface to transmit object.
+  /// \param pulseTimeDuration. Duration of a of a pulse in nano seconds
+  void generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.
   /// \param ReadoutSize The size of the readout data.
   ///
   void setReadoutDataSize(uint8_t ReadoutSize);
+
+  ///
+  /// \brief Sets number of readouts per packet.
+  /// Method can be used to set number of readout to a different number
+  /// that are possible to include in a packet. The number will be validated
+  /// and if the value is to large program will throw an exception.
+  /// \param ReadoutCount Readout count
+  ///
+  void setNumberOfReadouts(uint32_t ReadoutCount);
 
   ///
   /// \brief Process command line arguments, update settings.
@@ -91,7 +104,7 @@ public:
   ///
   /// \brief Sets up buffers, socket, etc.
   ///
-  void main();
+  void initialize(std::shared_ptr<FunctionGenerator> generator);
 
   ///
   /// \brief Start the transmission loop for the generator.
@@ -121,25 +134,9 @@ protected:
   void finishPacket();
 
   ///
-  /// \brief Increments the readout time with ticks between readouts according
-  /// to the settings.
-  ///
-  inline void addTicksBtwReadoutsToReadoutTime() {
-    readoutTime += Settings.TicksBtwReadouts;
-  }
-
-  ///
   /// \brief Resets the readout time to the next pulse time.
   ///
   inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
-
-  ///
-  /// \brief Increments the readout time with ticks between events according to
-  /// the settings.
-  ///
-  inline void addTickBtwEventsToReadoutTime() {
-    readoutTime += Settings.TicksBtwEvents;
-  }
 
   ///
   /// \brief Get a tuple containing the high and the low readout time. If the
@@ -156,7 +153,7 @@ protected:
   ///
   /// \return a time of flight value from the distribution generator
   double getTimeOffFlight() {
-    return timeOffFlightDist.getValue();
+    return distributionGenerator->getValue();
   }
 
   ///
@@ -190,22 +187,12 @@ protected:
   }
 
   ///
-  /// \brief Gets the value of prevPulseTime in nanoseconds.
-  /// \return The value of prevPulseTime in nanoseconds.
-  ///
-  inline esstime::TimeDurationNano getPrevPulseTimeNs() const {
-    return prevPulseTime.toNS();
-  }
-
-  ///
   /// \brief Performs the next pulse time calculation with ESSTime and returns
   /// the next pulse time in nanoseconds.
   /// \return The next pulse time in nanoseconds.
   ///
   inline esstime::TimeDurationNano getNextPulseTimeNs() const {
-    esstime::ESSTime nextPulseTime = pulseTime;
-    nextPulseTime += pulseFrequencyNs;
-    return nextPulseTime.toNS();
+    return getNextPulseTime().toNS();
   }
 
   ///
@@ -244,6 +231,11 @@ private:
   ESSReadout::Parser::HeaderVersion headerVersion{
       ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
+  /// \brief Update internal time stamps. 
+  /// \param updateTime.  If updateTime is true, the pulse time including previous pulse time and readout time will be updated.
+  /// Otherwise, only the readout time will be set to pulse time.
+  void UpdateTimestamps(bool updateTime);
+
   // clang-format off
   esstime::ESSTime pulseTime;                    ///< Pulse time
   esstime::ESSTime prevPulseTime;                ///< Previous pulse time
@@ -253,8 +245,8 @@ private:
 
   /// \brief For TOF distribution calculations
   /// TofDist could be calculated from default values in Settings struct
-  /// by setting Frequency to 14
-  DistributionGenerator timeOffFlightDist{ 1000.0/14 };
+  /// by setting Frequency to default.
+  std::shared_ptr<FunctionGenerator> distributionGenerator{};
   static constexpr double TicksPerMs{ esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

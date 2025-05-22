@@ -37,8 +37,9 @@ void SmileReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->OTADC = 1000;
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
@@ -90,14 +91,6 @@ void SmileReadoutGenerator::generateData() {
     ReadoutData->Channel = Channel;
     ReadoutData->FENId = FEN;
     DP += ReadoutDataSize;
-
-    /// \todo work out why updating TimeLow is done this way, and if it applies
-    /// to NMX
-    if ((Readout % 2) == 0) {
-      addTicksBtwReadoutsToReadoutTime();
-    } else {
-      addTickBtwEventsToReadoutTime();
-    }
 
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "

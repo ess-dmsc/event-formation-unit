@@ -44,12 +44,6 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
                  "each packet)");
-  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
-                 "Delay (ticks) between events");
-  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
-                 "Delay (ticks) between coincident readouts");
-  app.add_option("-o, --readouts", Settings.NumReadouts,
-                 "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
 
@@ -60,35 +54,66 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
                "Run forever");
   app.add_flag("--debug", Settings.Debug,
                "print debug information");
-  app.add_flag("--tof", Settings.Tof,
-               "generate tof distribution");
+
+  // Set pulse time and readout time. Previous pulse time will be set to wrong value and must be
+  // set after this.
+  UpdateTimestamps(true);
+  // Setting previous pulse time to current pulse time. At this point there have not been any pulse
+  prevPulseTime = pulseTime;
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
-  return getReadOutTimes(timeOffFlightDist.getValue());
+  return getReadOutTimes(distributionGenerator->getValue());
 }
 
 std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
-  if (Settings.Tof) {
-    return {
-      pulseTime.getTimeHigh(),
-      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
-    };
-  }
-
-  return { getReadoutTimeHigh(), getReadoutTimeLow() };
+  return {
+    pulseTime.getTimeHigh(),
+    pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
+  };
 }
 
-uint16_t ReadoutGeneratorBase::makePacket() {
+void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
+  if (updateTime) {
+    auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    prevPulseTime = pulseTime;
+    pulseTime = ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
+  }
+
+  readoutTime = pulseTime;
+}
+
+void ReadoutGeneratorBase::generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
-  generateHeader();
-  generateData();
-  finishPacket();
-  return DataSize;
+  UpdateTimestamps(true);
+  const TimeDurationNano start = pulseTime.toNS();
+  do {
+    generateHeader();
+    generateData();
+    finishPacket();
+    socket->send(&Buffer[0], DataSize);
+    Packets++;
+    if (Settings.PktThrottle) {
+      if (Packets % Settings.PktThrottle == 0) {
+        usleep(10);
+      }
+    }
+    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
+      break;
+    }
+    if (Settings.SpeedThrottle) {
+      usleep(Settings.SpeedThrottle);
+    }
+    UpdateTimestamps(false);
+  } while(std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
   ReadoutDataSize = ReadoutSize;
+}
+
+void ReadoutGeneratorBase::setNumberOfReadouts(uint32_t ReadoutCount) {
+  NumberOfReadouts = ReadoutCount;
 }
 
 void ReadoutGeneratorBase::generateHeader() {
@@ -113,65 +138,6 @@ void ReadoutGeneratorBase::generateHeader() {
   // Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
-
-  // Generate pulse time first time
-  if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
-    pulseTime = ESSTime(time(NULL), 0);
-    readoutTime = pulseTime;
-    prevPulseTime = pulseTime;
-
-    XTRACE(DATA, INF,
-           "First pulse time generated, High: %u, Low: %u, periodNs: %u",
-           pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
-  }
-
-  // If pulseFrequencyNs is set, we generate pulse time
-  // by adding the pulse time window according to the pulse frequency
-  // which will simulate the real operation of the data source
-  if (pulseFrequencyNs != TimeDurationNano(0)) {
-
-    // if the readout time is greater than the pulse time, generate new
-    // pulse time for the header
-    if (readoutTime.toNS() >= getNextPulseTimeNs()) {
-
-      // calculate the absolute time difference between the real time and the
-      // pulse time in milliseconds, because we do not need high precision
-      auto RealAndPulseTimeDiff =
-          abs(sToMilliseconds(time(NULL)) -
-              nsToMicroseconds(pulseTime.toNS().count()));
-
-      /// \note: reset the pulse time if it has drifted too much from
-      /// real clock. This is a workaround for the file writer not accepting the
-      /// pulse time if it is too far from the real clock
-      if (RealAndPulseTimeDiff > sToMilliseconds(MAX_TIME_DRIFT_NS)) {
-
-        XTRACE(DATA, WAR, "Pulse time has drifted too much, reset it");
-        pulseTime = ESSTime(time(NULL), 0);
-        prevPulseTime = pulseTime;
-        // reset the readout time as well since we resynced our time bases
-        readoutTime = pulseTime;
-      } else {
-        prevPulseTime = pulseTime;
-        pulseTime += pulseFrequencyNs;
-      }
-      XTRACE(DATA, INF,
-             "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
-             pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
-             pulseFrequencyNs.count());
-    }
-    // if the requested frequency is 0, generate a new pulse time for each
-    // packet and we use fake offset btw. pulse and prevPulse
-
-    /// \todo: This operation mode should be made obsolete as soon as
-    /// the infrastructure is updated to use frequency mode
-  } else {
-    prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
-    pulseTime = ESSTime(time(NULL), TimeLowOffset);
-    readoutTime = pulseTime + Settings.TicksBtwReadouts;
-    XTRACE(DATA, INF,
-           "New pulseTime generated for this packet, High: %u, Low: %u",
-           pulseTime.getTimeHigh(), pulseTime.getTimeLow());
-  }
 
   Header->PulseHigh = pulseTime.getTimeHigh();
   Header->PulseLow = pulseTime.getTimeLow();
@@ -208,30 +174,24 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 }
 
 void ReadoutGeneratorBase::transmitLoop() {
+
+   // Estimate how many packages it is possible to generate per pulse.
+  std::chrono::nanoseconds pulseTimeDuration{ static_cast<int64_t>(1000000000 / Settings.Frequency) };
+
+  XTRACE(DATA, INF,
+        "First pulse time generated, High: %u, Low: %u, periodNs: %u",
+        pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
+
   do {
-    uint16_t DataSize = makePacket();
+    generatePackets(DataSource, pulseTimeDuration);
 
-    DataSource->send(&Buffer[0], DataSize);
-
-    if (Settings.SpeedThrottle) {
-      usleep(Settings.SpeedThrottle);
-    }
-    Packets++;
-    if (Settings.PktThrottle) {
-      if (Packets % Settings.PktThrottle == 0) {
-        usleep(10);
-      }
-    }
-    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      break;
-    }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::main() {
+void ReadoutGeneratorBase::initialize(std::shared_ptr<FunctionGenerator> generator) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
@@ -259,13 +219,12 @@ void ReadoutGeneratorBase::main() {
     assert(HeaderSize == 32);
   }
 
-  if (Settings.Frequency != 0) {
-    pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
+  // Figure out distribution that will be used for the generator.
+  distributionGenerator = generator;
+  pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
+  if (NumberOfReadouts == 0)
     NumberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
-    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
-  } else {
-    NumberOfReadouts = Settings.NumReadouts;
-  }
+  XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
 }
 
 // GCOVR_EXCL_STOP

@@ -85,22 +85,20 @@ void ReadoutGenerator::generateData() {
     dataPkt.Cathode = DatReadout.cathode;
     dataPkt.Anode = DatReadout.anode;
 
-    ESSReadout::ESSTime NewReadoutTime = getPulseTime() + dataPkt.TimeLow;
-    dataPkt.TimeHigh = NewReadoutTime.getTimeHigh();
-    dataPkt.TimeLow = NewReadoutTime.getTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    dataPkt.TimeHigh = readoutTimeHigh;
+    dataPkt.TimeLow = readoutTimeLow;
 
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
-
-    // Increment time for the next readout
-    addTicksBtwReadoutsToReadoutTime();
 
     SentReadouts++;
   }
 }
 
 void ReadoutGenerator::main() {
-  ReadoutGeneratorBase::main();
+  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(Settings.Frequency);
+  ReadoutGeneratorBase::initialize(distribution);
 
   // If the number of packets is not set, calculate it how much packet is
   // required to send all the readouts in the file
