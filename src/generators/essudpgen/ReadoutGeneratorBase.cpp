@@ -7,12 +7,13 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "common/time/ESSTime.h"
 #include <Error.hpp>
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-#include <cmath>
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <ctype.h>
 
@@ -27,18 +28,15 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   Settings.Detector = Type;
 
   // Options
-  app.add_option("-i, --ip", Settings.IpAddress,
-                 "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort,
-                 "Destination UDP port");
+  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
+  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
                  "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle,
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Detector,
-                 "Detector type id");
+  app.add_option("-y, --type", Settings.Detector, "Detector type id");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
   app.add_option("-q, --frequency", Settings.Frequency,
@@ -50,15 +48,14 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   // Flags
   app.add_flag("-r, --random", Settings.Randomise,
                "Randomise header and data fields");
-  app.add_flag("-l, --loop", Settings.Loop,
-               "Run forever");
-  app.add_flag("--debug", Settings.Debug,
-               "print debug information");
+  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+  app.add_flag("--debug", Settings.Debug, "print debug information");
 
-  // Set pulse time and readout time. Previous pulse time will be set to wrong value and must be
-  // set after this.
+  // Set pulse time and readout time. Previous pulse time will be set to wrong
+  // value and must be set after this.
   UpdateTimestamps(true);
-  // Setting previous pulse time to current pulse time. At this point there have not been any pulse
+  // Setting previous pulse time to current pulse time. At this point there have
+  // not been any pulse
   prevPulseTime = pulseTime;
 }
 
@@ -66,10 +63,12 @@ std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
   return getReadOutTimes(distributionGenerator->getValue());
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
+std::pair<uint32_t, uint32_t>
+ReadoutGeneratorBase::getReadOutTimes(double timeOfFlightMs) {
+  ESSTime readoutTime = pulseTime + esstime::msToNanosecounds(timeOfFlightMs);
   return {
-    pulseTime.getTimeHigh(),
-    pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
+    readoutTime.getTimeHigh(),
+    readoutTime.getTimeLow()
   };
 }
 
@@ -77,13 +76,16 @@ void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
   if (updateTime) {
     auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
     prevPulseTime = pulseTime;
-    pulseTime = ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
+    pulseTime =
+        ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
   }
 
   readoutTime = pulseTime;
 }
 
-void ReadoutGeneratorBase::generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration) {
+void ReadoutGeneratorBase::generatePackets(
+    SocketInterface *socket,
+    const std::chrono::nanoseconds &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
   UpdateTimestamps(true);
   const TimeDurationNano start = pulseTime.toNS();
@@ -105,7 +107,9 @@ void ReadoutGeneratorBase::generatePackets(SocketInterface *socket, const std::c
       usleep(Settings.SpeedThrottle);
     }
     UpdateTimestamps(false);
-  } while(std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
+  } while (std::chrono::high_resolution_clock::now().time_since_epoch() -
+               start <
+           pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
@@ -175,12 +179,13 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 
 void ReadoutGeneratorBase::transmitLoop() {
 
-   // Estimate how many packages it is possible to generate per pulse.
-  std::chrono::nanoseconds pulseTimeDuration{ static_cast<int64_t>(1000000000 / Settings.Frequency) };
+  // Estimate how many packages it is possible to generate per pulse.
+  std::chrono::nanoseconds pulseTimeDuration{
+      static_cast<int64_t>(1000000000 / Settings.Frequency)};
 
   XTRACE(DATA, INF,
-        "First pulse time generated, High: %u, Low: %u, periodNs: %u",
-        pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
+         "First pulse time generated, High: %u, Low: %u, periodNs: %u",
+         pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
 
   do {
     generatePackets(DataSource, pulseTimeDuration);
@@ -191,7 +196,8 @@ void ReadoutGeneratorBase::transmitLoop() {
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::initialize(std::shared_ptr<FunctionGenerator> generator) {
+void ReadoutGeneratorBase::initialize(
+    std::shared_ptr<FunctionGenerator> generator) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
