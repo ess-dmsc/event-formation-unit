@@ -18,7 +18,7 @@ stages:
 variables:
   ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.3.0"
   CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-centos7-conan:1.1.0"
-  UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-ubuntu2204-conan:1.0.0"
+  UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-ubuntu2204-conan:1.1.0-dev.1"
   CONAN_USER_HOME: "$CI_PROJECT_DIR"
 
 conan_setup:
@@ -45,7 +45,7 @@ cppcheck:
       - cppcheck.xml
     expire_in: 1 week
 
-almalinux9_release:
+almalinux9_gcc11_release:
   image: $ALMALINUX9_IMAGE
   stage: build
   dependencies:
@@ -61,7 +61,7 @@ almalinux9_release:
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
 
-ubuntu2204_release:
+ubuntu2204_clang17_release:
   image: $UBUNTU2204_IMAGE
   stage: build
   dependencies:
@@ -70,14 +70,23 @@ ubuntu2204_release:
     paths:
       - build/
     expire_in: 1 day
+  variables:
+    CC: /usr/bin/clang-17
+    CXX: /usr/bin/clang++-17
   script:
     - mkdir -p build
     - cd build
-    - conan install .. --build=missing --profile=linux_x86_64_gcc11
+    - conan install .. --build=missing --profile=linux_x86_64_clang17
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-centos7_release:
+centos7_gcc11_release:
   image: $CENTOS7_IMAGE
   stage: build
   dependencies:
@@ -136,7 +145,7 @@ publish_tar_job:
   stage: publish
   image: alpine/curl:latest
   dependencies:
-    - centos7_release
+    - centos7_gcc11_release
   artifacts: 
     paths:
       - event-formation-unit-centos7.tar.gz
@@ -200,7 +209,7 @@ publish_docker_job:
   variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/efu-$INSTRUMENT"
   dependencies:
-    - almalinux9_release
+    - almalinux9_gcc11_release
   script:
     - echo "Publishing docker image"
     - |
