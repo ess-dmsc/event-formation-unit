@@ -1,6 +1,6 @@
 // Copyright (C) 2018 European Spallation Source
 
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <common/testutils/TestBase.h>
 #include <stdio.h>
 
@@ -9,7 +9,7 @@ std::vector<std::string> ipOk = {"0.0.0.0", "10.10.10.10", "127.0.0.1",
 std::vector<std::string> ipNotOk = {"a.0.0.0", "1.2.3", "1.2",
                                     "", "127.0.0.256", "metrics"};
 
-class SocketTest : public ::testing::Test
+class SocketImplTest : public ::testing::Test
 {
 protected:
   const int TEST_PORT_NUMBER = 8922;
@@ -23,7 +23,7 @@ protected:
   {
     struct sockaddr_in serv_addr;
 
-    ASSERT_GE(socketFileDescriptor, 0) << "Cannot create test socket during the SetUp() phase of the tests.";
+    ASSERT_GE(socketFileDescriptor, 0) << "Cannot create test SocketImpl during the SetUp() phase of the tests.";
 
 
     // Setup local address and port for start listening server
@@ -32,7 +32,7 @@ protected:
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(TEST_PORT_NUMBER);
 
-    // Try to bind to the socket on local address on port
+    // Try to bind to the SocketImpl on local address on port
     // TEST_PORT_NUMBER to create a listening server and block other
     // services to bind to that port. This technique useful
     // in case of containerized test runs. If there is already a
@@ -49,48 +49,48 @@ protected:
   }
 };
 
-TEST_F(SocketTest, ConstructorValid)
+TEST_F(SocketImplTest, ConstructorValid)
 {
-  Socket udpsocket(Socket::SocketType::UDP);
+  SocketImpl udpsocket(SocketImpl::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
 
-  Socket tcpsocket(Socket::SocketType::TCP);
+  SocketImpl tcpsocket(SocketImpl::SocketType::TCP);
   ASSERT_TRUE(tcpsocket.isValidSocket());
 }
 
-TEST_F(SocketTest, SendUninitialized)
+TEST_F(SocketImplTest, SendUninitialized)
 {
   char buffer[100];
-  Socket udpsocket(Socket::SocketType::UDP);
+  SocketImpl udpsocket(SocketImpl::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   auto res = udpsocket.send(buffer, 100);
   ASSERT_TRUE(res < 0);
   ASSERT_FALSE(udpsocket.isValidSocket());
 
-  Socket tcpsocket(Socket::SocketType::TCP);
+  SocketImpl tcpsocket(SocketImpl::SocketType::TCP);
   ASSERT_TRUE(tcpsocket.isValidSocket());
   res = tcpsocket.send(buffer, 100);
   ASSERT_TRUE(res < 0);
   ASSERT_FALSE(tcpsocket.isValidSocket());
 }
 
-TEST_F(SocketTest, ValidInvalidIp)
+TEST_F(SocketImplTest, ValidInvalidIp)
 {
   for (auto ipaddr : ipOk)
   {
-    ASSERT_TRUE(Socket::isValidIp(ipaddr));
-    auto res = Socket::getHostByName(ipaddr);
+    ASSERT_TRUE(SocketImpl::isValidIp(ipaddr));
+    auto res = SocketImpl::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
   for (auto ipaddr : ipNotOk)
   {
-    ASSERT_FALSE(Socket::isValidIp(ipaddr));
+    ASSERT_FALSE(SocketImpl::isValidIp(ipaddr));
   }
 }
 
-TEST_F(SocketTest, InetAtonInvalidIP)
+TEST_F(SocketImplTest, InetAtonInvalidIP)
 {
-  Socket tcpsocket(Socket::SocketType::TCP);
+  SocketImpl tcpsocket(SocketImpl::SocketType::TCP);
   ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000),
                std::runtime_error);
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
@@ -99,23 +99,23 @@ TEST_F(SocketTest, InetAtonInvalidIP)
                std::runtime_error);
 }
 
-TEST_F(SocketTest, PortInUse)
+TEST_F(SocketImplTest, PortInUse)
 {
-  Socket tcpsocket(Socket::SocketType::TCP);
+  SocketImpl tcpsocket(SocketImpl::SocketType::TCP);
 
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", TEST_PORT_NUMBER), std::runtime_error);
 }
 
-TEST_F(SocketTest, IsMulticast)
+TEST_F(SocketImplTest, IsMulticast)
 {
-  ASSERT_TRUE(Socket::isMulticast("224.1.2.3"));
-  ASSERT_FALSE(Socket::isMulticast("240.1.2.3"));
+  ASSERT_TRUE(SocketImpl::isMulticast("224.1.2.3"));
+  ASSERT_FALSE(SocketImpl::isMulticast("240.1.2.3"));
 }
 
 // Create tcp transmitter and send 0 and !=0 number of bytes
 // to localhost port TEST_PORT_NUMBER where we set or listening
 // service during the setup phase.
-TEST_F(SocketTest, TCPTransmitter)
+TEST_F(SocketImplTest, TCPTransmitter)
 {
 
   char DummyData[]{0x01, 0x02, 0x03, 0x04};
@@ -127,49 +127,49 @@ TEST_F(SocketTest, TCPTransmitter)
   ASSERT_EQ(res, sizeof(DummyData));
 }
 
-TEST_F(SocketTest, UDPTransmitter)
+TEST_F(SocketImplTest, UDPTransmitter)
 {
-  Socket::Endpoint local("127.0.0.1", 13241);
-  Socket::Endpoint remote("127.0.0.1", 13241);
+  SocketImpl::Endpoint local("127.0.0.1", 13241);
+  SocketImpl::Endpoint remote("127.0.0.1", 13241);
   UDPTransmitter UDPXmitter(local, remote);
 
   ASSERT_EQ(UDPXmitter.isValidSocket(), true);
 }
 
-TEST_F(SocketTest, GetHostByName)
+TEST_F(SocketImplTest, GetHostByName)
 {
   std::string name{"localhost"};
-  auto res = Socket::getHostByName(name);
+  auto res = SocketImpl::getHostByName(name);
   ASSERT_TRUE(res == "127.0.0.1");
   for (auto ipaddr : ipOk)
   {
-    res = Socket::getHostByName(ipaddr);
+    res = SocketImpl::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
   // Checking weird case - not sure if this is right
   // this step can be deleted if it causes problems later
   std::string weirdIp{"8.8.8"};
-  res = Socket::getHostByName(weirdIp);
+  res = SocketImpl::getHostByName(weirdIp);
   ASSERT_TRUE(res == "8.8.0.8");
 }
 
-TEST_F(SocketTest, GetHostByNameInvalid)
+TEST_F(SocketImplTest, GetHostByNameInvalid)
 {
-  Socket tcpsocket(Socket::SocketType::TCP);
+  SocketImpl tcpsocket(SocketImpl::SocketType::TCP);
   std::string InvalidHostName("#$%@^");
   ASSERT_THROW(tcpsocket.getHostByName(InvalidHostName), std::runtime_error);
 }
 
-TEST_F(SocketTest, MultiCastSetTTL)
+TEST_F(SocketImplTest, MultiCastSetTTL)
 {
-  Socket udpsocket(Socket::SocketType::UDP);
+  SocketImpl udpsocket(SocketImpl::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   udpsocket.setMulticastTTL();
 }
 
-TEST_F(SocketTest, MultiCastSetReceive)
+TEST_F(SocketImplTest, MultiCastSetReceive)
 {
-  Socket udpsocket(Socket::SocketType::UDP);
+  SocketImpl udpsocket(SocketImpl::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   ASSERT_NO_THROW(udpsocket.setLocalSocket("224.1.2.1", 9729));
 }

@@ -13,7 +13,7 @@
 // GCOVR_EXCL_START
 
 #include <CLI/CLI.hpp>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <generators/PacketGenerator.h>
 #include <miracles/generators/DatReader.h>
 
@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
   PacketGenerator gen(DetectorType::MIRACLES,
                       sizeof(struct MiraclesDatReader::dat_data_t) - 4);
 
-  Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
+  SocketImpl::Endpoint local("0.0.0.0", 0);
+  SocketImpl::Endpoint remote(Config.IpAddress.c_str(), Config.UDPPort);
   UDPTransmitter DataSource(local, remote);
   DataSource.setBufferSizes(Config.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();

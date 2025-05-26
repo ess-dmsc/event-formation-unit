@@ -11,7 +11,7 @@
 
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <common/readout/ess/Parser.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <common/testutils/DataFuzzer.h>
 #include <common/time/ESSTime.h>
 #include <common/types/DetectorType.h>

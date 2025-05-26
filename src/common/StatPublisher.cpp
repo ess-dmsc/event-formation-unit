@@ -13,8 +13,8 @@
 ///
 StatPublisher::StatPublisher(const std::string &IP, int Port)
     : IpAddress(IP), TCPPort(Port) {
-  if (not Socket::isValidIp(IpAddress)) {
-    IpAddress = Socket::getHostByName(IpAddress);
+  if (not SocketImpl::isValidIp(IpAddress)) {
+    IpAddress = SocketImpl::getHostByName(IpAddress);
   }
   StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
 }

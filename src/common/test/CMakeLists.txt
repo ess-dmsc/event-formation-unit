@@ -39,7 +39,7 @@ create_test_executable(ESSGeometryTest)
 
 
 set(SocketTest_SRC
-  SocketTest.cpp
+  SocketImplTest.cpp
   )
 create_test_executable(SocketTest)
 

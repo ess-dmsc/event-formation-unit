@@ -19,7 +19,7 @@ set(efu_common_SRC
   kafka/KafkaConfig.cpp
   kafka/Producer.cpp
   kafka/serializer/AbstractSerializer.cpp
-  system/Socket.cpp
+  system/SocketImpl.cpp
   Statistics.cpp
   StatPublisher.cpp
   ${ESS_SOURCE_DIR}/efu/ExitHandler.cpp
@@ -64,7 +64,7 @@ set(efu_common_INC
   system/intel.h
   system/arm.h
   system/SocketInterface.h
-  system/Socket.h
+  system/SocketImpl.h
   types/DetectorType.h
   JsonFile.h
   Statistics.h

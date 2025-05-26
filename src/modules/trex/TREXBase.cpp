@@ -17,7 +17,7 @@
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/RuntimeStat.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <common/time/Timer.h>
 #include <common/time/TimeString.h>
 
