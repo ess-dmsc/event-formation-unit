@@ -9,6 +9,7 @@
 
 #include <common/testutils/TestBase.h>
 #include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 class DistributionGeneratorTest : public TestBase {
 protected:
@@ -23,7 +24,7 @@ protected:
 ///\brief not the best of test, just checking end of ranges with current
 // known values
 TEST_F(DistributionGeneratorTest, Constructors) {
-  DistributionGenerator MyDist(1000.0/14);
+  DistributionGenerator MyDist(1000.0/ReadoutGeneratorBase::DefaultFrequency);
   ASSERT_NEAR(MyDist.Dist[0], 0.001, 1e-4);
   ASSERT_NEAR(MyDist.Dist[MyDist.DefaultBinCount - 1], 0.001, 1e-4);
   ASSERT_NEAR(MyDist.CDF[0], 0.000, 1e-4);

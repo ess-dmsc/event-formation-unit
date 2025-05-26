@@ -166,6 +166,15 @@ public:
   ESSTime(const ESSTime &other)
       : TimeHigh(other.TimeHigh), TimeLow(other.TimeLow) {}
 
+  
+  ///
+  /// \brief Create an ESSTime object set to current system time based on a high resolution time
+  ///
+  static inline ESSTime now() {
+    auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    return ESSTime(std::chrono::duration_cast<TimeDurationNano>(now));
+  }
+
   /// \brief Adds the given duration in nanoseconds to the ESSTime object.
   ///
   /// \param nanoseconds The duration in nanoseconds to add.

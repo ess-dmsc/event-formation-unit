@@ -25,14 +25,14 @@ void ReadoutGenerator::generateData() {
   double XChannel{32};
   double YChannel{32};
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     ReadoutData->TimeHigh = readoutTimeHigh;
     ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->VMM = Readout & 0x3;

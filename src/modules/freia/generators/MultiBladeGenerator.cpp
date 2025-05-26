@@ -54,7 +54,7 @@ void MultiBladeGenerator::generateData() {
   // We loop over all readout counts. For a given Fiber and FEN, we use two iterations to
   // generate a channel pair that corresponds to a non-background pixel for a bitmap
   // associated with a given VMM.
-  const size_t N = NumberOfReadouts / 2;
+  const size_t N = ReadoutPerPacket / 2;
 
   for (size_t Count = 0; Count < N; Count++) {
     // Get FEN and Fibers Ids + Tof
@@ -82,7 +82,7 @@ void MultiBladeGenerator::generateData() {
       ReadoutData->FiberId = FiberId;
       ReadoutData->FENId   = FENId;
 
-      const auto [T0, T1] = getReadOutTimes(ToF);
+      const auto [T0, T1] = generateReadoutTime(ToF);
       ReadoutData->TimeHigh = T0;
       ReadoutData->TimeLow  = T1;
 

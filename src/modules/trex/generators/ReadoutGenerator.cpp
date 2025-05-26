@@ -33,14 +33,14 @@ void ReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     // TREX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     ReadoutData->TimeHigh = readoutTimeHigh;
     ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->OTADC = 1000;

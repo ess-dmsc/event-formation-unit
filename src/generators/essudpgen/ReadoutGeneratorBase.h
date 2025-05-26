@@ -75,7 +75,7 @@ public:
   /// be populated with as many readout as possible.
   /// \param socket, interface to transmit object.
   /// \param pulseTimeDuration. Duration of a of a pulse in nano seconds
-  void generatePackets(SocketInterface *socket, const TimeDurationNano &pulseTimeDuration);
+  void generatePackets(SocketInterface *socket, const esstime::TimeDurationNano &pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.
@@ -90,7 +90,7 @@ public:
   /// and if the value is to large program will throw an exception.
   /// \param ReadoutCount Readout count
   ///
-  void setNumberOfReadouts(uint32_t ReadoutCount);
+  void setReadoutPerPacket(uint32_t ReadoutCount);
 
   ///
   /// \brief Process command line arguments, update settings.
@@ -118,22 +118,6 @@ protected:
   CLI::App app{"UDP data generator for ESS readout data"};
 
   ///
-  /// \brief Generates the header of the packet.
-  ///
-  void generateHeader();
-
-  ///
-  /// \brief Fills out the specified buffer with readouts.
-  ///
-  virtual void generateData() = 0;
-
-  ///
-  /// \brief Finishes the packet by incrementing the sequence number and
-  /// performing fuzzing.
-  ///
-  void finishPacket();
-
-  ///
   /// \brief Resets the readout time to the next pulse time.
   ///
   inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
@@ -144,31 +128,17 @@ protected:
   /// calculated by the DistributionGenerator
   /// \param timeOfFlight  If specified, use this value for the time of flight
   /// \return Readout time pair [high, low].
-  virtual std::pair<uint32_t, uint32_t> getReadOutTimes(double timeOfFlight);
+  virtual std::pair<uint32_t, uint32_t> generateReadoutTime(double timeOfFlight);
 
   ///
   /// \overload
-  virtual std::pair<uint32_t, uint32_t> getReadOutTimes();
+  virtual std::pair<uint32_t, uint32_t> generateReadoutTime();
 
   ///
   /// \return a time of flight value from the distribution generator
   double getTimeOffFlight() {
     return distributionGenerator->getValue();
   }
-
-  ///
-  /// \brief Gets the value of readoutTimeHigh.
-  /// \return The value of readoutTimeHigh.
-  ///
-  inline uint32_t getReadoutTimeHigh() const {
-    return readoutTime.getTimeHigh();
-  }
-
-  ///
-  /// \brief Gets the value of readoutTimeLow.
-  /// \return The value of readoutTimeLow.
-  ///
-  inline uint32_t getReadoutTimeLow() const { return readoutTime.getTimeLow(); }
 
   ///
   /// \brief Gets the value of readoutTime in nanoseconds.
@@ -196,12 +166,6 @@ protected:
   }
 
   ///
-  /// \brief Get a copy of to the pulse time
-  /// \return A copy of the pulse time object
-  ///
-  inline esstime::ESSTime getPulseTime() const { return pulseTime; }
-
-  ///
   /// \brief Performs the next pulse time calculation with ESSTime and returns
   /// the next pulse time.
   /// \return The next pulse time.
@@ -217,7 +181,7 @@ protected:
   const uint32_t TimeLowOffset{20000};        ///< Time offset for readout generation (ticks)
   const uint32_t PrevTimeLowOffset{10000};    ///< Previous time offset for readout generation (ticks)
   uint8_t ReadoutDataSize{0};                 ///< Size of the readout data
-  uint16_t NumberOfReadouts{0};               ///< Number of readouts
+  uint16_t ReadoutPerPacket{0};               ///< Number of readouts
   uint64_t Packets{0};                        ///< Number of packets
   uint32_t SeqNum{0};                         ///< Sequence number
   uint16_t DataSize{0};                       ///< Number of data bytes in packet
@@ -229,12 +193,23 @@ protected:
 
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
-      ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
+    ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
 
-  /// \brief Update internal time stamps. 
-  /// \param updateTime.  If updateTime is true, the pulse time including previous pulse time and readout time will be updated.
-  /// Otherwise, only the readout time will be set to pulse time.
-  void UpdateTimestamps(bool updateTime);
+  ///
+  /// \brief Generates the header of the packet.
+  ///
+  void generateHeader();
+
+  ///
+  /// \brief Fills out the specified buffer with readouts.
+  ///
+  virtual void generateData() = 0;
+
+  ///
+  /// \brief Finishes the packet by incrementing the sequence number and
+  /// performing fuzzing.
+  ///
+  void finishPacket();
 
   // clang-format off
   esstime::ESSTime pulseTime;                    ///< Pulse time

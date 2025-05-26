@@ -156,7 +156,7 @@ TEST_F(CombinedParserTest, DataGenV0) {
     Caen::ReadoutGenerator gen;
     gen.Settings.headerVersion = 0;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-    gen.setNumberOfReadouts(Sections);
+    gen.setReadoutPerPacket(Sections);
 
     gen.initialize(distribution);
 
@@ -186,7 +186,7 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 
     Caen::ReadoutGenerator gen;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
-    gen.setNumberOfReadouts(Sections);
+    gen.setReadoutPerPacket(Sections);
 
     gen.initialize(distribution);
 

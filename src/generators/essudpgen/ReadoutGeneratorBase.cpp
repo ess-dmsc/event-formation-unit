@@ -51,20 +51,16 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
   app.add_flag("--debug", Settings.Debug, "print debug information");
 
-  // Set pulse time and readout time. Previous pulse time will be set to wrong
-  // value and must be set after this.
-  UpdateTimestamps(true);
-  // Setting previous pulse time to current pulse time. At this point there have
-  // not been any pulse
+  pulseTime = ESSTime::now();
   prevPulseTime = pulseTime;
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
-  return getReadOutTimes(distributionGenerator->getValue());
+std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::generateReadoutTime() {
+  return generateReadoutTime(distributionGenerator->getValue());
 }
 
 std::pair<uint32_t, uint32_t>
-ReadoutGeneratorBase::getReadOutTimes(double timeOfFlightMs) {
+ReadoutGeneratorBase::generateReadoutTime(double timeOfFlightMs) {
   ESSTime readoutTime = pulseTime + esstime::msToNanosecounds(timeOfFlightMs);
   return {
     readoutTime.getTimeHigh(),
@@ -72,22 +68,12 @@ ReadoutGeneratorBase::getReadOutTimes(double timeOfFlightMs) {
   };
 }
 
-void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
-  if (updateTime) {
-    auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-    prevPulseTime = pulseTime;
-    pulseTime =
-        ESSTime(std::chrono::duration_cast<TimeDurationNano>(now));
-  }
-
-  readoutTime = pulseTime;
-}
-
 void ReadoutGeneratorBase::generatePackets(
     SocketInterface *socket,
     const TimeDurationNano &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
-  UpdateTimestamps(true);
+  prevPulseTime = pulseTime;
+  pulseTime = ESSTime::now();
   const TimeDurationNano start = pulseTime.toNS();
   do {
     generateHeader();
@@ -106,23 +92,20 @@ void ReadoutGeneratorBase::generatePackets(
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
     }
-    UpdateTimestamps(false);
-  } while (std::chrono::high_resolution_clock::now().time_since_epoch() -
-               start <
-           pulseTimeDuration);
+  } while (ESSTime::now().toNS() - start < pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
   ReadoutDataSize = ReadoutSize;
 }
 
-void ReadoutGeneratorBase::setNumberOfReadouts(uint32_t ReadoutCount) {
-  NumberOfReadouts = ReadoutCount;
+void ReadoutGeneratorBase::setReadoutPerPacket(uint32_t ReadoutCount) {
+  ReadoutPerPacket = ReadoutCount;
 }
 
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + NumberOfReadouts * ReadoutDataSize;
+  DataSize = HeaderSize + ReadoutPerPacket * ReadoutDataSize;
   if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
@@ -228,8 +211,8 @@ void ReadoutGeneratorBase::initialize(
   // Figure out distribution that will be used for the generator.
   distributionGenerator = generator;
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
-  if (NumberOfReadouts == 0)
-    NumberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
+  if (ReadoutPerPacket == 0)
+    ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;
   XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
 }
 

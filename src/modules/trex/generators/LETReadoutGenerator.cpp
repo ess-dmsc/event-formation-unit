@@ -35,9 +35,9 @@ void LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
 
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", readoutTimeLow,
            readoutTimeHigh);

@@ -30,14 +30,14 @@ void ReadoutGenerator::generateData() {
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
     auto ReadoutData = (DataParser::CaenReadout *)DP;
 
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
 
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     ReadoutData->TimeHigh = readoutTimeHigh;
     ReadoutData->TimeLow = readoutTimeLow;
 

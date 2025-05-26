@@ -90,7 +90,7 @@ void ReadoutGenerator::generateData() {
 // Generate data for 0D event monitor
 void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -100,7 +100,7 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = cbmSettings.FenId;
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     dataPkt->TimeHigh = readoutTimeHigh;
     dataPkt->TimeLow = readoutTimeLow;
     dataPkt->Type = cbmSettings.monitorType;
@@ -118,7 +118,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
     // Check if we need to generate new pulse time and reset readout time
     // stop generating readouts and sync readout time with new pulse time
@@ -145,7 +145,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     dataPkt->FiberId = CBM_FIBER_ID;
     dataPkt->FENId = cbmSettings.FenId;
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     dataPkt->TimeHigh = readoutTimeHigh;
     dataPkt->TimeLow = readoutTimeLow;
     dataPkt->Type = CbmType::IBM;
