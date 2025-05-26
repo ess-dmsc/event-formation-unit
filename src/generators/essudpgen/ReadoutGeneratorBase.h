@@ -75,7 +75,7 @@ public:
   /// be populated with as many readout as possible.
   /// \param socket, interface to transmit object.
   /// \param pulseTimeDuration. Duration of a of a pulse in nano seconds
-  void generatePackets(SocketInterface *socket, const std::chrono::nanoseconds &pulseTimeDuration);
+  void generatePackets(SocketInterface *socket, const TimeDurationNano &pulseTimeDuration);
 
   ///
   /// \brief Sets the readout data size.

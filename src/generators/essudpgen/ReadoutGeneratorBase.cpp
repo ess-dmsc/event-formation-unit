@@ -77,7 +77,7 @@ void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
     auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
     prevPulseTime = pulseTime;
     pulseTime =
-        ESSTime(std::chrono::duration_cast<std::chrono::nanoseconds>(now));
+        ESSTime(std::chrono::duration_cast<TimeDurationNano>(now));
   }
 
   readoutTime = pulseTime;
@@ -85,7 +85,7 @@ void ReadoutGeneratorBase::UpdateTimestamps(bool updateTime) {
 
 void ReadoutGeneratorBase::generatePackets(
     SocketInterface *socket,
-    const std::chrono::nanoseconds &pulseTimeDuration) {
+    const TimeDurationNano &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
   UpdateTimestamps(true);
   const TimeDurationNano start = pulseTime.toNS();
@@ -180,7 +180,7 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 void ReadoutGeneratorBase::transmitLoop() {
 
   // Estimate how many packages it is possible to generate per pulse.
-  std::chrono::nanoseconds pulseTimeDuration{
+  TimeDurationNano pulseTimeDuration{
       static_cast<int64_t>(1000000000 / Settings.Frequency)};
 
   XTRACE(DATA, INF,
