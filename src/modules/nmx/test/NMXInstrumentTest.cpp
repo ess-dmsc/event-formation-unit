@@ -35,7 +35,7 @@ std::string BadConfigStr = R"(
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : false,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
@@ -45,7 +45,7 @@ std::string BadConfigStr = R"(
           "Plane" : 1,
           "Offset" : 0,
           "ReversedChannels" : false,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000001"
         }
 ]
@@ -75,12 +75,12 @@ std::string ConfigStr = R"(
   "Config" : [
     {
       "Ring" : 0, "FEN": 0, "Hybrid" : 0, "Plane" : 0, "Offset" : 0,
-      "ReversedChannels" : false, "Panel" : 0,
+      "ReversedChannels" : false, "Module" : 0,
       "HybridId" : "E5533333222222221111111100000000"
     },
     {
       "Ring" : 0, "FEN": 0, "Hybrid" : 1, "Plane" : 1, "Offset" : 0,
-      "ReversedChannels" : false, "Panel" : 0,
+      "ReversedChannels" : false, "Module" : 0,
       "HybridId" : "E5533333222222221111111100000001"
     }
   ]

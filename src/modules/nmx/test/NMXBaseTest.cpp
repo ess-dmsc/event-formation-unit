@@ -58,7 +58,7 @@ std::vector<uint8_t> BadTestPacket {
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
@@ -68,7 +68,7 @@ std::vector<uint8_t> BadTestPacket {
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000001"
         },
         {
@@ -78,7 +78,7 @@ std::vector<uint8_t> BadTestPacket {
           "Plane" : 0,
           "Offset" : 256,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000002"
         }
       ]

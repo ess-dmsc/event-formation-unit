@@ -49,7 +49,7 @@ void NMXInstrument::loadConfigAndCalib() {
   Conf.loadAndApplyConfig();
   checkConfigAndGeometry();
 
-  builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
+  builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumModules);
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(
         Conf.NMXFileParameters.MaxMatchingTimeGap);
@@ -102,7 +102,7 @@ void NMXInstrument::processReadouts() {
     uint8_t AsicId = readout.VMM & 0x1;
     uint16_t Offset = Conf.Offset[Ring][readout.FENId][HybridId];
     uint8_t Plane = Conf.Plane[Ring][readout.FENId][HybridId];
-    uint8_t Panel = Conf.Panel[Ring][readout.FENId][HybridId];
+    uint8_t Module = Conf.Module[Ring][readout.FENId][HybridId];
     bool ReversedChannels =
         Conf.ReversedChannels[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
@@ -153,9 +153,9 @@ void NMXInstrument::processReadouts() {
       continue;
     }
 
-    XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Panel %u", Plane, Coord,
-           readout.Channel, Panel);
-    builders[Panel].insert({TimeNS, Coord, ADC, Plane});
+    XTRACE(DATA, DEB, "Plane %u, Coord %u, Channel %u, Module %u", Plane, Coord,
+           readout.Channel, Module);
+    builders[Module].insert({TimeNS, Coord, ADC, Plane});
   }
 
   for (auto &builder : builders) {
@@ -172,9 +172,9 @@ void NMXInstrument::checkConfigAndGeometry() {
       for (int HybridId = 0; HybridId <= Conf.MaxHybrid; HybridId++) {
         ESSReadout::Hybrid h = Conf.getHybrid(Ring, FENId, HybridId);
         if (h.Initialised) {
-          int Panel = Conf.Panel[Ring][FENId][HybridId];
+          int Module = Conf.Module[Ring][FENId][HybridId];
           int Plane = Conf.Plane[Ring][FENId][HybridId];
-          CurrentCoordSet = &Coords[Panel][Plane];
+          CurrentCoordSet = &Coords[Module][Plane];
           for (int Asic = 0; Asic < 2; Asic++) {
             XTRACE(EVENT, DEB, "Ring %u, Fen %u, Hybrid %u", Ring, FENId,
                    HybridId);
