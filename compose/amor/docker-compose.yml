@@ -1,8 +1,11 @@
-# networks:
-#   efu:
-#     driver: bridge
-#     driver_opts:
-#       com.docker.network.driver.mtu: 9000
+networks:
+  efu:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+          gateway: 10.20.30.1
 
 services:
   kafka1:
@@ -25,6 +28,9 @@ services:
       KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
       KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
     restart: always
+    networks:
+      - efu
+    
 
   kafka2:
     image: confluentinc/cp-kafka:latest
@@ -50,6 +56,8 @@ services:
       KAFKA_LOG_SEGMENT_BYTES: 1073741824     # Segment size of 1 GB (within INT limit)
       KAFKA_LOG_CLEANUP_POLICY: "delete"      # Set cleanup policy to delete old logs
     restart: always
+    networks:
+      - efu
 
   graphite:
     image: graphiteapp/graphite-statsd
@@ -57,6 +65,8 @@ services:
     ports:
       - "8081:80"
     restart: always
+    networks:
+      - efu
 
   grafana:
     image: grafana/grafana:latest
@@ -72,6 +82,8 @@ services:
     depends_on:
       - graphite
     restart: always
+    networks:
+      - efu
 
   efu-ibm:
     image: registry.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/efu-cbm:latest
@@ -94,6 +106,8 @@ services:
       - GRAPHITE=graphite
       - REGION=ibm
     restart: always
+    networks:
+      - efu
 
   daqlite:
     image: registry.esss.lu.se/ecdc/ess-dmsc/daqlite:latest
@@ -111,6 +125,8 @@ services:
       # - VNC_PASSWORD=<vnc_password> # password for VNC
       - VNC_RESOLUTION=1280x800 # Increase resolution for better view
     restart: always
+    networks:
+      - efu
 
   akhq:
     image: tchiotludo/akhq:latest
@@ -130,3 +146,5 @@ services:
                 security.protocol: PLAINTEXT
                 sasl.mechanism: PLAIN
     restart: always
+    networks:
+      - efu
