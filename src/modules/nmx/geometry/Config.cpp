@@ -30,14 +30,14 @@ void Config::applyConfig() {
   assign("MaxGapY", NMXFileParameters.MaxGapY);
   assign("MaxMatchingTimeGap", NMXFileParameters.MaxMatchingTimeGap);
   assign("MaxClusteringTimeGap", NMXFileParameters.MaxClusteringTimeGap);
-  assign("NumPanels", NMXFileParameters.NumPanels);
+  assign("NumModules", NMXFileParameters.NumModules);
   assign("SplitMultiEvents", NMXFileParameters.SplitMultiEvents);
   assign("SplitMultiEventsCoefficientLow", NMXFileParameters.SplitMultiEventsCoefficientLow);
   assign("SplitMultiEventsCoefficientHigh", NMXFileParameters.SplitMultiEventsCoefficientHigh);
 
   try {
-    auto PanelConfig = root()["Config"];
-    for (auto &Mapping : PanelConfig) {
+    auto ModuleConfig = root()["Config"];
+    for (auto &Mapping : ModuleConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
@@ -73,10 +73,10 @@ void Config::applyConfig() {
       }
 
       try {
-        Panel[Ring][FEN][LocalHybrid] = Mapping["Panel"].get<uint64_t>();
-        XTRACE(INIT, DEB, "Got Panel: %u", Panel[Ring][FEN][LocalHybrid]);
+        Module[Ring][FEN][LocalHybrid] = Mapping["Module"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Module: %u", Module[Ring][FEN][LocalHybrid]);
       } catch (...) {
-        Panel[Ring][FEN][LocalHybrid] = 0;
+        Module[Ring][FEN][LocalHybrid] = 0;
       }
 
       Hybrid.MinADC = NMXFileParameters.DefaultMinADC;

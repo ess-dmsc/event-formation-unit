@@ -41,7 +41,7 @@ public:
   struct {
     uint16_t SizeX{1280};
     uint16_t SizeY{1280};
-    uint16_t NumPanels{4};
+    uint16_t NumModules{4};
     uint16_t MaxSpanX{10};
     uint16_t MaxSpanY{10};
     uint16_t MinSpanX{1}; //< \todo should be larger?
@@ -61,7 +61,7 @@ public:
   // NMX specific Hybrid fields not included in common Hybrid class
   bool ReversedChannels[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   uint8_t Plane[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint8_t Panel[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  uint8_t Module[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   uint64_t Offset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
 } // namespace Nmx

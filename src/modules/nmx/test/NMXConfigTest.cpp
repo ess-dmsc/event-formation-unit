@@ -54,7 +54,7 @@ auto InvalidRing = R"(
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
@@ -64,7 +64,7 @@ auto InvalidRing = R"(
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000001"
         }
   ]
@@ -105,7 +105,7 @@ auto DuplicateEntry = R"(
           "Plane" : 0,
           "Offset" : 0,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000000"
         },
         {
@@ -115,7 +115,7 @@ auto DuplicateEntry = R"(
           "Plane" : 0,
           "Offset" : 128,
           "ReversedChannels" : true,
-          "Panel" : 0,
+          "Module" : 0,
           "HybridId" : "E5533333222222221111111100000001"
         }
   ]
