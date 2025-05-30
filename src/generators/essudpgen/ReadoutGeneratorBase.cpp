@@ -92,7 +92,7 @@ void ReadoutGeneratorBase::generatePackets(
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
     }
-  } while (ESSTime::now().toNS() - start < pulseTimeDuration);
+  } while (std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
@@ -180,7 +180,7 @@ void ReadoutGeneratorBase::transmitLoop() {
 }
 
 void ReadoutGeneratorBase::initialize(
-    std::shared_ptr<FunctionGenerator> generator) {
+    std::shared_ptr<FunctionGenerator> readoutGenerator) {
   SocketImpl::Endpoint local("0.0.0.0", 0);
   SocketImpl::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
@@ -208,8 +208,8 @@ void ReadoutGeneratorBase::initialize(
     assert(HeaderSize == 32);
   }
 
-  // Figure out distribution that will be used for the generator.
-  distributionGenerator = generator;
+  // Figure out distribution that will be used for the readoutGenerator.
+  distributionGenerator = readoutGenerator;
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
   if (ReadoutPerPacket == 0)
     ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;

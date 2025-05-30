@@ -102,9 +102,14 @@ public:
   void argParse(int argc, char *argv[]);
 
   ///
-  /// \brief Sets up buffers, socket, etc.
-  ///
-  void initialize(std::shared_ptr<FunctionGenerator> generator);
+  /// \brief Sets up a generator. Internal Buffers, socket, etc. are instantiated
+  /// 
+  /// \param generator A pointer to a readout generator that can return a value for readout
+  /// time (input value) and a function/distribution value (output value).
+  /// Input parameter should be DistributionGenerator when neutron arrival follows a probability distribution
+  /// Input parameter should be LinearDistribution when neutrons are expect a specific intervals.
+  /// 
+  void initialize(std::shared_ptr<FunctionGenerator> readoutGenerator);
 
   ///
   /// \brief Start the transmission loop for the generator.
@@ -116,11 +121,6 @@ public:
 
 protected:
   CLI::App app{"UDP data generator for ESS readout data"};
-
-  ///
-  /// \brief Resets the readout time to the next pulse time.
-  ///
-  inline void resetReadoutToPulseTime() { readoutTime = getNextPulseTime(); }
 
   ///
   /// \brief Get a tuple containing the high and the low readout time. If the
@@ -138,42 +138,6 @@ protected:
   /// \return a time of flight value from the distribution generator
   double getTimeOffFlight() {
     return distributionGenerator->getValue();
-  }
-
-  ///
-  /// \brief Gets the value of readoutTime in nanoseconds.
-  /// \return The value of readoutTime in nanoseconds.
-  ///
-  inline esstime::TimeDurationNano getReadoutTimeNs() const {
-    return readoutTime.toNS();
-  }
-
-  ///
-  /// \brief Gets the value of pulseTime in nanoseconds.
-  /// \return The value of pulseTime in nanoseconds.
-  ///
-  inline esstime::TimeDurationNano getPulseTimeNs() const {
-    return pulseTime.toNS();
-  }
-
-  ///
-  /// \brief Performs the next pulse time calculation with ESSTime and returns
-  /// the next pulse time in nanoseconds.
-  /// \return The next pulse time in nanoseconds.
-  ///
-  inline esstime::TimeDurationNano getNextPulseTimeNs() const {
-    return getNextPulseTime().toNS();
-  }
-
-  ///
-  /// \brief Performs the next pulse time calculation with ESSTime and returns
-  /// the next pulse time.
-  /// \return The next pulse time.
-  ///
-  inline esstime::ESSTime getNextPulseTime() const {
-    esstime::ESSTime nextPulseTime = pulseTime;
-    nextPulseTime += pulseFrequencyNs;
-    return nextPulseTime;
   }
 
   // clang-format off

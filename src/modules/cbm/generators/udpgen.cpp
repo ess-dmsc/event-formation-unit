@@ -8,8 +8,8 @@
 
 // GCOVR_EXCL_START
 
-#include <modules/cbm/generators/ReadoutGenerator.h>
 #include <generators/functiongenerators/LinearGenerator.h>
+#include <modules/cbm/generators/ReadoutGenerator.h>
 #include <modules/cbm/geometry/Parser.h>
 
 int main(int argc, char *argv[]) {
@@ -24,7 +24,10 @@ int main(int argc, char *argv[]) {
   if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
     distribution = DistributionGenerator::Factory(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
-    distribution = LinearGenerator::Factory(CbmGen.Settings.Frequency);
+    distribution = LinearGenerator::Factory(CbmGen.Settings.Frequency,
+                                            CbmGen.cbmSettings.NumberOfBins,
+                                            CbmGen.cbmSettings.Gradient.value(),
+                                            CbmGen.cbmSettings.Offset);
   } else {
     throw std::runtime_error("Unsupported monitor type");
   }

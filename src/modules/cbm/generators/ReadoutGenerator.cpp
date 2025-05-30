@@ -116,26 +116,16 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 // Generate data for IBM type beam monitors
 void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
-  esstime::TimeDurationNano nextPulseTime = getNextPulseTimeNs();
+  if (cbmSettings.ShakeBeam) {
+    // Use the pre-initialized RandomGenerator and ShakeBeamDist to generate
+    // a random drift value for the whole pulse, which will be applied by
+    // the function generator.
+    RandomTimeDriftNS =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::microseconds(BeamShakeDistMs(RandomGenerator)));
+  }
 
   for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
-
-    // Check if we need to generate new pulse time and reset readout time
-    // stop generating readouts and sync readout time with new pulse time
-    // also generate new drift value if we shake the beam
-    if (getReadoutTimeNs() > nextPulseTime) {
-      resetReadoutToPulseTime();
-      if (cbmSettings.ShakeBeam) {
-        // Use the pre-initialized RandomGenerator and ShakeBeamDist to generate
-        // a random drift value for the whole pulse, which will be applied by
-        // the function generator.
-        RandomTimeDriftNS =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(
-                std::chrono::microseconds(BeamShakeDistMs(RandomGenerator)));
-      }
-
-      break;
-    }
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -184,8 +174,9 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
         GenMaX, cbmSettings.NumberOfBins);
   }
 
-  esstime::TimeDurationMilli Tof = esstime::nsToMilliseconds(
-      (getReadoutTimeNs() - getPulseTimeNs() + RandomTimeDriftNS));
+  esstime::TimeDurationMilli Tof =
+      esstime::nsToMilliseconds(RandomTimeDriftNS) +
+      esstime::TimeDurationMilli(Generator->getValue());
 
   int Noise{0};
 
@@ -199,12 +190,12 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
-    Generator = std::make_unique<LinearGenerator>(MILLISEC / Settings.Frequency,
+    Generator = std::make_unique<LinearGenerator>(LinearGenerator::TimeDurationUnit / Settings.Frequency,
                                                   cbmSettings.Gradient.value(),
                                                   cbmSettings.Offset);
   }
 
-  auto Tof = getReadoutTimeNs() - getPulseTimeNs();
+  auto Tof = esstime::nsToMilliseconds(Generator->getValue());
   value->NPos = Generator->getDistValue(Tof.count());
 }
 

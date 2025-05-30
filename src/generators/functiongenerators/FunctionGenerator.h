@@ -18,8 +18,9 @@ public:
   /// \brief Get the value at a given position in the generator function.
   virtual double getDistValue(const double &) = 0;
 
-  /// \brief return a random value based on the distribution function
+  /// \brief return a parameter value used to generate a distribution function. 
   virtual double getValue() = 0;
+  
 };
 
 // GCOVR_EXCL_STOP
