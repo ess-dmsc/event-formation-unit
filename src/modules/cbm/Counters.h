@@ -42,6 +42,7 @@ struct Counters {
   // Logical and Digital geometry incl. Calibration
   int64_t RingCfgError{0};
   int64_t CbmCounts{0};
+  int64_t NPOSCount{0};
 
   // Configuration errors
   int64_t NoSerializerCfgError{0};

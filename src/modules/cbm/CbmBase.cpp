@@ -75,6 +75,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // Events published
   Stats.create("events.ibm", Counters.IBMEvents);
   Stats.create("events.event0d", Counters.Event0DEvents);
+  Stats.create("events.ibm_npos_sum", Counters.NPOSCount);
 
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
