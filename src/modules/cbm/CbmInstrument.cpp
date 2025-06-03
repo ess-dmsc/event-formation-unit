@@ -110,6 +110,7 @@ void CbmInstrument::processMonitorReadouts() {
                Readout.Type, Readout.NPos, TimeOfFlight);
 
         counters.IBMEvents++;
+        counters.NPOSCount += Readout.NPos;
       }
 
       else if (Type == CbmType::EVENT_0D) {

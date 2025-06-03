@@ -71,6 +71,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.processed", Counters.CbmCounts);
   Stats.create("readouts.type.event0d_proccessed", Counters.Event0DReadoutsProcessed);
   Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
+  Stats.create("readouts.type.ibm_npos", Counters.NPOSCount);
 
   // Events published
   Stats.create("events.ibm", Counters.IBMEvents);
