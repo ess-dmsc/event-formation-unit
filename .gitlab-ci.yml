@@ -179,13 +179,6 @@ publish_tar_job:
     - cp -r utils/efushell archive/event-formation-unit/util
     - mkdir archive/event-formation-unit/configs
     - mkdir archive/event-formation-unit/data
-    - cp build/CONAN_INFO archive/event-formation-unit
-
-    # - # Create file with build information
-    - touch archive/event-formation-unit/BUILD_INFO
-    - echo 'Repository replace_real_repo_name' >> archive/event-formation-unit/BUILD_INFO
-    - echo 'Commit replace_git_commit' >> archive/event-formation-unit/BUILD_INFO
-    - echo 'Jenkins build replace_build_id' >> archive/event-formation-unit/BUILD_INFO
     
     - tar czvf event-formation-unit-centos7.tar.gz -C archive event-formation-unit
     - jf rt u --build-name="event-formation-unit-centos7" --build-number=${CI_JOB_ID} event-formation-unit-centos7.tar.gz ecdc-generic-release/${ARTIFACTORY_UPLOAD_PATH}
