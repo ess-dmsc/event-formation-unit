@@ -19,6 +19,7 @@
 #include <CLI/CLI.hpp>
 
 #include <cstdint>
+#include <memory>
 
 ///
 /// \class ReadoutGeneratorBase
@@ -238,7 +239,8 @@ protected:
   // clang-format on
 
   DataFuzzer Fuzzer; ///< Data fuzzer
-  UDPTransmitter *DataSource{nullptr}; ///< Data source
+
+  std::unique_ptr<class UDPTransmitter> DataSource;
 
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{
