@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <Error.hpp>
+#include <CLI/Error.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -94,3 +94,5 @@ public:
 private:
   GeneratorTypes type_;
 };
+
+// GCOVR_EXCL_STOP

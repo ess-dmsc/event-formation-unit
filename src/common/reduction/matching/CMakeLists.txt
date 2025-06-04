@@ -23,6 +23,11 @@ add_library(MatchingLib OBJECT
   ${matching_obj_INC}
   )
 
+target_link_libraries(MatchingLib
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 enable_coverage_flags(MatchingLib)
 
 #=============================================================================
@@ -30,4 +35,3 @@ enable_coverage_flags(MatchingLib)
 #=============================================================================
 
 add_subdirectory(test)
-

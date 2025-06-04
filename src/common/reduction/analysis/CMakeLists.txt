@@ -24,6 +24,11 @@ add_library(AnalysisLib OBJECT
   ${analysis_obj_INC}
   )
 
+target_link_libraries(AnalysisLib
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 enable_coverage_flags(AnalysisLib)
 
 #=============================================================================

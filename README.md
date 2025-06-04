@@ -29,86 +29,109 @@ Note also that for additional functionality, you might want to install the follo
 * [**Valgrind**](http://valgrind.org) — Memory usage (and other) tests
 * [**gcovr**](https://gcovr.com/en/stable/index.html), [**lcov**](https://lcov.readthedocs.io/en/latest/#lcov),  and [**gcov**](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) — Generate coverage reports
 
-### Conan
+## Install and Configure Conan
 
-Conan is a Python package used to download dependencies. To install the latest version smaller than 2, run 
+#### 1. Create and activate a virtual environment
 
+```bash
+python3 -m venv venv
+source venv/bin/activate
 ```
+#### 2. Install Conan (version < 2)
+```bash
 pip install "conan<2"
 ```
 
-and ensure that the directory conatining the conan executable has been added to your path.  
+#### 3. Verify Conan installation
 
-For conan to know where the dependencies can be downloaded from, the ECDC package repository must be added by running the following command
-
-```conan remote add ecdc-conan-release https://artifactory.esss.lu.se/artifactory/api/conan/ecdc-conan-release```
-
-
-### Building
-
-Run the following commands:
-
-```
-git clone https://github.com/ess-dmsc/event-formation-unit.git
-
-cd event-formation-unit
-
-mkdir build
-
-cd build
-
-cmake ..
-
-make
+```bash
+conan --version
 ```
 
-Note, by utilizing several processors, you can speed up the build process by running parallel compiler jobs. You do this by passing the `-j` option to make. For example, to launch eight parallel jobs run make as
+#### 4. Install the Conan configuration
+This includes supported Conan profiles and access to the ECDC internal package repository:
 
-```
-make -j 8
-```
-
-The total number of available processors on can be queried by calling the `nproc` command. To use all available processors, run make like this
-
-```
-make -j $(nproc)
+```bash
+conan config install http://github.com/ess-dmsc/conan-configuration.git
 ```
 
-#### Building with Ubuntu verions 16 or larger 
-Wen using conan to provide the dependencies, an extra option has to be provided:
-`--settings compiler.libcxx=libstdc++11`. Thus the call to conan turns into:
+## Release Build
 
+#### 1. Create a build directory:
+```bash
+mkdir build && cd build
 ```
-conan install --build=outdated .. --settings compiler.libcxx=libstdc++11
+
+#### 2. Install Dependencies with Conan 
+
+The ECDC Conan configuration includes a predefined profile: `linux_x86_64_gcc11`. 
+This profile is well-tested and has many prebuilt binaries available in our remote repository. 
+It's also the one we use in automated ci builds for this project.
+
+If you're working on a different architecture (e.g. Apple Silicon) or using a different compiler (e.g. GCC 13), note that no predefined profiles exist in our config for those setups. 
+In such cases, you'll need to use Conan's locally generated `default` profile. 
+
+
+Verify your default profile exists:
+```bash
+conan profile show default
 ```
 
-## Running the tests
-
-### Unit tests
-To run the unit tests for this project, run the following commands:
-
+To install dependencies using your local profile:
+```bash
+conan install .. --build=missing
 ```
+
+To use the ECDC-supported Linux x86 GCC 11 profile instead, add:
+```bash
+--profile=linux_x86_64_gcc11
+```
+
+#### 3. Configure the project with CMake:
+```bash
+cmake .. -DCMAKE_BUILD_TYPE=Release
+```
+
+#### 4. Build the project:
+```bash
+make -j$(nproc)
+```
+
+## Debug build for unit tests and coverage
+
+#### 1. Create a build directory:
+```bash
+mkdir build && cd build
+```
+
+#### 2. Install dependencies with Conan:
+```bash
+conan install .. --build=missing -s build_type=Debug
+```
+
+#### 3. Configure the project with CMake:
+```bash
+cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
+```
+
+#### 4. Run unit tests:
+
+```bash
 make runtest
 ```
 
-### Other tests
-
-It is also possible to get a test coverage report if the required prerequisites have been installed. 
-For this you have to enable coverage test in the makefile with cmake. 
-To enable coverage test for makefiles, run
-
-```
-cmake -DCOV=Y
-```
-Then to get the coverage report, run
-
-```
-make coverage
+#### 5. Generate coverage report:
+```bash
+make coverage_all
 ```
 
-To run a memory leak test (using Valgrind), run:
-
+View the report:
+```bash
+open coverage/coverage.html
 ```
+
+#### 6. To run a memory leak test, run:
+```bash
 make valgrind
 ```
 
@@ -116,7 +139,7 @@ make valgrind
 
 [Doxygen](https://www.doxygen.nl/) documentation for the EFU C++ classes can be build by running
 
-```
+```bash
 make doxygen
 ```
 
@@ -127,7 +150,7 @@ After the documentation has been build, the doxygen documentation tree can be ac
 
 An example of the commands required to run an event formation pipeline (in this case the *freia* pipeline) follows:
 
-```
+```bash
 make efu freia
 cd bin
 ./efu -d ../modules/freia --nohwcheck
@@ -136,7 +159,7 @@ cd bin
 Note you will need to provide a config file in the case of the *freia* module as well.
 
 To get the available command line arguments, use `-h` or `--help`. This works when providing a detector module argument as well. For example:
-```
+```bash
 ./efu -d ../modules/freia -h
 ```
 

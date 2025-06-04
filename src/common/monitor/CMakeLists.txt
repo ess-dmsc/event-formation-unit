@@ -21,6 +21,11 @@ add_library(MonitorLib OBJECT
   ${monitor_obj_INC}
   )
 
+target_link_libraries(MonitorLib 
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 enable_coverage_flags(MonitorLib)
 
 #=============================================================================

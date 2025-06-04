@@ -15,10 +15,15 @@ set(ESS_COMMON_DIR ${ESS_SOURCE_DIR}/common/)
 find_package(Threads REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(fmt REQUIRED)
-find_package(GraylogLogger REQUIRED)
-find_package(PCAP REQUIRED)
+find_package(graylog-logger REQUIRED)
+find_package(libpcap REQUIRED)
 find_package(asio REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(CLI11 REQUIRED)
+find_package(magic_enum REQUIRED)
+find_package(streaming-data-types REQUIRED)
+find_package(logical-geometry REQUIRED)
+find_package(FakeIt REQUIRED)
 
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}
@@ -26,9 +31,15 @@ set(EFU_COMMON_LIBS
   RdKafka::rdkafka
   RdKafka::rdkafka++
   ${Boost_LIBRARIES}
-  GraylogLogger::graylog_logger_static
+  GraylogLogger::graylog_logger
   fmt::fmt
   nlohmann_json::nlohmann_json
+  magic_enum::magic_enum
+  streaming-data-types::streaming-data-types
+  logical-geometry::logical-geometry
+  CLI11::CLI11
+  libpcap::libpcap
+  fakeit::fakeit
   )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
