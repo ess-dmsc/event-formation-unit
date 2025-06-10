@@ -185,7 +185,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     Noise = NoiseDist(RandomGenerator);
   }
 
-  value->NPos = 1000 * Generator->getDistValue(Tof.count()) + Noise;
+  value->NPos = 1000 * Generator->getValueByIndex(Tof.count()) + Noise;
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
@@ -197,7 +197,7 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   }
 
   auto Tof = esstime::nsToMilliseconds(Generator->getValue());
-  value->NPos = Generator->getDistValue(Tof.count());
+  value->NPos = Generator->getValueByIndex(Tof.count());
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {

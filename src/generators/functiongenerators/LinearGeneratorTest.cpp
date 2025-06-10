@@ -49,7 +49,7 @@ namespace {
 
 TEST_F(LinearGeneratorTest, Constructors) {
   LinearGenerator generator(50000.0, 2000.0);
-  ASSERT_NEAR(generator.getDistValue(0), 0.000, 1e-4);
+  ASSERT_NEAR(generator.getValueByIndex(0), 0.000, 1e-4);
 }
 
 TEST_F(LinearGeneratorTest, CheckReadouts) {

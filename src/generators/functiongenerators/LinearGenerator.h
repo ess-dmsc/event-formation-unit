@@ -33,7 +33,7 @@ public:
   /// \param Bins The number of bins in the distribution. We always use the
   /// absolute value of Bins.
   /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getDistValue.
+  /// \param Offset value that will be added to getValueByIndex.
   ///
   explicit LinearGenerator(double MaxX, uint32_t Bins, double Gradient, uint32_t Offset = 0.0)
     : PulseDuration{MaxX}
@@ -48,7 +48,7 @@ public:
   ///
   /// \param MaxX maximum duration of the pulse in nano seconds
   /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getDistValue.
+  /// \param Offset value that will be added to getValueByIndex.
   ///
   explicit LinearGenerator(double MaxX, double Gradient, uint32_t Offset = 0.0)
       : LinearGenerator{MaxX, DEFAULT_BIN_COUNT, Gradient, Offset} {
@@ -60,7 +60,7 @@ public:
   ///
   /// \param Frequency pulse frequency
   /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getDistValue.
+  /// \param Offset value that will be added to getValueByIndex.
   ///
   explicit LinearGenerator(uint16_t frequency, double Gradient, uint32_t Offset = 0.0)
       : LinearGenerator {TimeDurationUnit / frequency, Gradient, Offset} {
@@ -68,7 +68,7 @@ public:
 
   /// \brief Get the value at a given position.
   ///
-  double getDistValue(const double &Pos) override {
+  double getValueByIndex(const double &Pos) override {
 
     int binIndex = static_cast<int>(Pos / BinWidth);
 

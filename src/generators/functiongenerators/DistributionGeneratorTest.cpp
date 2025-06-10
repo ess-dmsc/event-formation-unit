@@ -77,7 +77,7 @@ TEST_F(DistributionGeneratorTest, GetValueWithinRange) {
   double MaxVal = 1000.0;
   DistributionGenerator MyDist(MaxVal);
 
-  double value = MyDist.getDistValue(500.0) * MaxVal;
+  double value = MyDist.getValueByIndex(500.0) * MaxVal;
   ASSERT_GE(value, 0.0);
   ASSERT_LE(value, MaxVal);
 }
@@ -86,7 +86,7 @@ TEST_F(DistributionGeneratorTest, GetValueHigherThanMaxVal) {
   double MaxVal = 1000.0;
   DistributionGenerator MyDist(MaxVal);
 
-  double value = MyDist.getDistValue(MaxVal + 100.0) * MaxVal;
+  double value = MyDist.getValueByIndex(MaxVal + 100.0) * MaxVal;
   ASSERT_GE(value, 0.0);
   ASSERT_LE(value, MaxVal);
 }
