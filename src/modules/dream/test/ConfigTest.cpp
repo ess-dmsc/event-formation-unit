@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -150,37 +150,37 @@ TEST_F(DreamConfigTest, JsonFileNotExist) {
 }
 
 TEST_F(DreamConfigTest, InvalidConfig) {
-  config.root = InvalidCfgMissingDetectorField;
+  config.setRoot(InvalidCfgMissingDetectorField);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, InvalidConfigName) {
-  config.root = InvalidCfgWrongDetectorName;
+  config.setRoot(InvalidCfgWrongDetectorName);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, InvalidRingConfParm) {
-  config.root = InvalidRingConfParm;
+  config.setRoot(InvalidRingConfParm);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, InvalidFENConfParm) {
-  config.root = InvalidFENConfParm;
+  config.setRoot(InvalidFENConfParm);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, InvalidTypeConfParm) {
-  config.root = InvalidTypeConfParm;
+  config.setRoot(InvalidTypeConfParm);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, DuplicateConfParm) {
-  config.root = DuplicateConfParm;
+  config.setRoot(DuplicateConfParm);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(DreamConfigTest, MissingRing) {
-  config.root = MissingRing;
+  config.setRoot(MissingRing);
   ASSERT_ANY_THROW(config.apply());
 }
 
@@ -189,7 +189,7 @@ TEST_F(DreamConfigTest, MissingRing) {
 TEST_F(DreamConfigTest, ValidConfig) {
   ASSERT_FALSE(config.RMConfig[4][2].Initialised);
 
-  config.root = ValidConfig;
+  config.setRoot(ValidConfig);
   config.apply();
 
   ASSERT_TRUE(config.RMConfig[4][2].Initialised);
@@ -197,7 +197,7 @@ TEST_F(DreamConfigTest, ValidConfig) {
 }
 
 TEST_F(DreamConfigTest, ValidConfigDefaultPulseTime) {
-  config.root = ValidConfigDefaultPulseTime;
+  config.setRoot(ValidConfigDefaultPulseTime);
   config.MaxPulseTimeDiffNS = 1;
   config.apply();
   ASSERT_EQ(config.MaxPulseTimeDiffNS, 1);
@@ -208,7 +208,7 @@ TEST_F(DreamConfigTest, ValidIndexes) {
   ASSERT_EQ(config.RMConfig[4][2].P1.Index, 0);
   ASSERT_EQ(config.RMConfig[4][2].P2.Index, 0);
 
-  config.root = ValidConfigIndexes;
+  config.setRoot(ValidConfigIndexes);
   config.apply();
 
   ASSERT_TRUE(config.RMConfig[4][2].Initialised);

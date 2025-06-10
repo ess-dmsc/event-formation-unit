@@ -139,7 +139,7 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
       continue;
     }
 
-    if (cluster.timeSpan() < TimepixConfiguration.MinEventTimeSpan) {
+    if (cluster.timeSpan() < TimepixConfiguration.MinEventTimeSpanNS) {
       continue;
     }
 

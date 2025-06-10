@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -44,7 +44,7 @@ Timepix3Instrument::Timepix3Instrument(Counters &counters,
       geomPtr(std::make_shared<Timepix3Geometry>(
           timepix3Configuration.XResolution, timepix3Configuration.YResolution,
           timepix3Configuration.ScaleUpFactor,
-          timepix3Configuration.parallelThreads)),
+          timepix3Configuration.ParallelThreads)),
       timingEventHandler(counters, timepix3Configuration.FrequencyHz),
       pixelEventHandler(counters, geomPtr, serializer, timepix3Configuration),
       timepix3Parser(counters) {

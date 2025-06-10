@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,7 +19,7 @@ protected:
   Config config{"Freia", "config.json"};
 
   void SetUp() override {
-    config.setRoot(from_json_file(FREIA_FULL));
+    config.setRoot(Json::fromFile(FREIA_FULL));
   }
 
   void TearDown() override {}
@@ -39,7 +39,7 @@ TEST_F(FreiaConfigTest, UninitialisedHybrids) {
 
 
 TEST_F(FreiaConfigTest, NoDetector) {
-  json_change_key(config.root(), "Detector", "NoMoreDetector");
+  Json::changeKey(config.root(), "Detector", "NoMoreDetector");
   ASSERT_ANY_THROW(config.applyVMM3Config());
 }
 
@@ -57,7 +57,7 @@ TEST_F(FreiaConfigTest, InvalidRing) {
 
 
 TEST_F(FreiaConfigTest, InvalidConfig) {
-  json_change_key(config["Config"][4], "Ring", "Ringo");
+  Json::changeKey(config["Config"][4], "Ring", "Ringo");
   ASSERT_ANY_THROW(config.applyConfig());
 }
 
@@ -92,7 +92,7 @@ TEST_F(FreiaConfigTest, ParmMaxGapWire) {
 }
 
 TEST_F(FreiaConfigTest, DefaultParmMaxGapWire) {
-  json_change_key(config.root(), "MaxGapWire", "NoMaxGapWire");
+  Json::changeKey(config.root(), "MaxGapWire", "NoMaxGapWire");
   EXPECT_EQ(config.MBFileParameters.MaxGapWire, 0);
   config.applyConfig();
   EXPECT_EQ(config.MBFileParameters.MaxGapWire, 0);
@@ -107,7 +107,7 @@ TEST_F(FreiaConfigTest, ParmMaxGapStrip) {
 }
 
 TEST_F(FreiaConfigTest, DefaultParmMaxGapStrip) {
-  json_change_key(config.root(), "MaxGapStrip", "NoMaxGapStrip");
+  Json::changeKey(config.root(), "MaxGapStrip", "NoMaxGapStrip");
   EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 0);
   config.applyConfig();
   EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 0);

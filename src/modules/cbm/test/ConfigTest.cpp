@@ -151,17 +151,17 @@ TEST_F(CbmConfigTest, Constructor) {
 }
 
 TEST_F(CbmConfigTest, MissingMandatoryField) {
-  config.root = MissingDetector;
+  config.setRoot(MissingDetector);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(CbmConfigTest, InvalidInstrument) {
-  config.root = InvalidDetector;
+  config.setRoot(InvalidDetector);
   ASSERT_ANY_THROW(config.apply());
 }
 
 TEST_F(CbmConfigTest, DefaultValues) {
-  config.root = DefaultValuesOnly;
+  config.setRoot(DefaultValuesOnly);
   config.apply();
   ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
@@ -170,7 +170,7 @@ TEST_F(CbmConfigTest, DefaultValues) {
 
 TEST_F(CbmConfigTest, IncorrectFENConfig) {
   try {
-    config.root = IncorrectFEN;
+    config.setRoot(IncorrectFEN);
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
@@ -181,17 +181,17 @@ TEST_F(CbmConfigTest, IncorrectFENConfig) {
 }
 
 TEST_F(CbmConfigTest, FenIdEdgeTestCase) {
-  config.root = FENIdEdgeCase;
+  config.setRoot(FENIdEdgeCase);
   ASSERT_NO_THROW(config.apply());
 }
 
 TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
   try {
-    config.root = NoMaxFENId;
+    config.setRoot(NoMaxFENId);
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("MaxFENId not specified"));
+    EXPECT_EQ(err.what(), std::string("JSON config - error: The requested key 'MaxFENId' does not exist"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
@@ -199,7 +199,7 @@ TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
 
 TEST_F(CbmConfigTest, DuplicateFENChannelEntry) {
   try {
-    config.root = DuplicateEntry;
+    config.setRoot(DuplicateEntry);
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
@@ -212,7 +212,7 @@ TEST_F(CbmConfigTest, DuplicateFENChannelEntry) {
 
 TEST_F(CbmConfigTest, IncorrectCBMType) {
   try {
-    config.root = IncorrectType;
+    config.setRoot(IncorrectType);
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
@@ -225,7 +225,7 @@ TEST_F(CbmConfigTest, IncorrectCBMType) {
 
 TEST_F(CbmConfigTest, NoTopology) {
   try {
-    config.root = NoTopology;
+    config.setRoot(NoTopology);
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
@@ -249,7 +249,7 @@ TEST_F(CbmConfigTest, LoadFileFullInstrument) {
 }
 
 TEST_F(CbmConfigTest, TestTopology) {
-  config.root = ConfigWithTopology;
+  config.setRoot(ConfigWithTopology);
   config.apply();
   ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
   EXPECT_EQ(config.Parms.MonitorRing, 11);
