@@ -35,7 +35,7 @@ public:
   /// \param Gradient readout interval in nanoseconds
   /// \param Offset value that will be added to getDistValue.
   ///
-  explicit LinearGenerator(double MaxX, int Bins, double Gradient, uint32_t Offset = 0.0)
+  explicit LinearGenerator(double MaxX, uint32_t Bins, double Gradient, uint32_t Offset = 0.0)
     : PulseDuration{MaxX}
     , gradient{Gradient} 
     , offset(Offset) 
@@ -65,37 +65,6 @@ public:
   explicit LinearGenerator(uint16_t frequency, double Gradient, uint32_t Offset = 0.0)
       : LinearGenerator {TimeDurationUnit / frequency, Gradient, Offset} {
   };
-
-  ///
-  /// \brief Distribution factory based on the rotation frequency of the target
-  /// wheel
-  ///
-  /// \param MaxX maximum duration of the pulse in nano seconds
-  /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getDistValue.
-  ///
-  static std::shared_ptr<LinearGenerator>
-  Factory(uint16_t frequency, int Bins, double Gradient = 1.0, uint32_t Offset = 0.0) {
-    if (frequency == 0) {
-      throw std::runtime_error(
-          "This generator must have a frequency value larger than zero ");
-    }
-    return std::make_shared<LinearGenerator>(TimeDurationUnit / frequency, Bins, Gradient,
-                                             Offset);
-  }
-
-  ///
-  /// \brief Distribution factory based on the rotation frequency of the target
-  /// wheel
-  ///
-  /// \param MaxX maximum duration of the pulse in nano seconds
-  /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getDistValue.
-  ///
-  static std::shared_ptr<LinearGenerator>
-  Factory(uint16_t frequency, double Gradient = 1.0, uint32_t Offset = 0.0) {
-    return Factory(frequency, DEFAULT_BIN_COUNT, Gradient, Offset);
-  }
 
   /// \brief Get the value at a given position.
   ///

@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
 
   TrexGen.argParse(argc, argv);
 
-  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(TrexGen.Settings.Frequency);
-  TrexGen.initialize(distribution);
+  DistributionGenerator distribution(TrexGen.Settings.Frequency);
+  TrexGen.initialize(&distribution);
 
   TrexGen.transmitLoop();
 

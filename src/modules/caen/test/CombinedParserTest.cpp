@@ -119,15 +119,13 @@ class MultipackageSocketMock : public SocketInterface {
 TEST_F(CombinedParserTest, DataMultiPackage) {
   MultipackageSocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 71428 };
-  std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
-
+  DistributionGenerator distribution(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   Caen::ReadoutGenerator gen;
   gen.Settings.headerVersion = 0;
   gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
-  gen.initialize(distribution);
+  gen.initialize(&distribution);
 
   socket.Clear();
   gen.generatePackets(&socket, pulseTimeDuration);
@@ -148,8 +146,7 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
 TEST_F(CombinedParserTest, DataGenV0) {
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
-  std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
+  DistributionGenerator distribution(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
@@ -158,7 +155,7 @@ TEST_F(CombinedParserTest, DataGenV0) {
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.setReadoutPerPacket(Sections);
 
-    gen.initialize(distribution);
+    gen.initialize(&distribution);
 
     socket.Clear();
     gen.generatePackets(&socket, pulseTimeDuration);
@@ -179,16 +176,15 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
-  std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
-  
+  DistributionGenerator distribution(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
+
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
     Caen::ReadoutGenerator gen;
     gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
     gen.setReadoutPerPacket(Sections);
 
-    gen.initialize(distribution);
+    gen.initialize(&distribution);
 
     socket.Clear();
     gen.generatePackets(&socket, pulseTimeDuration);

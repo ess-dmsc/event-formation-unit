@@ -8,11 +8,12 @@
 // GCOVR_EXCL_START
 
 #pragma once
+#include <cstdint>
 
 class FunctionGenerator {
 public:
   /// \brief Number of Bins defines the resolution of the distribution function.
-  static constexpr int DEFAULT_BIN_COUNT{512};
+  static constexpr uint32_t DEFAULT_BIN_COUNT{512};
   virtual ~FunctionGenerator() {}
 
   /// \brief Get the value at a given position in the generator function.

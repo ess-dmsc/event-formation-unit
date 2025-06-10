@@ -20,11 +20,11 @@ int main(int argc, char *argv[]) {
 
   CbmGen.argParse(argc, argv);
 
-  std::shared_ptr<FunctionGenerator> distribution;
+  std::unique_ptr<FunctionGenerator> distribution;
   if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
-    distribution = DistributionGenerator::Factory(CbmGen.Settings.Frequency);
+    distribution = std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
-    distribution = LinearGenerator::Factory(CbmGen.Settings.Frequency,
+    distribution = std::make_unique<LinearGenerator>(CbmGen.Settings.Frequency,
                                             CbmGen.cbmSettings.NumberOfBins,
                                             CbmGen.cbmSettings.Gradient.value(),
                                             CbmGen.cbmSettings.Offset);
@@ -32,10 +32,9 @@ int main(int argc, char *argv[]) {
     throw std::runtime_error("Unsupported monitor type");
   }
 
-  CbmGen.initialize(distribution);
+  CbmGen.initialize(distribution.get());
 
   CbmGen.transmitLoop();
-
   return 0;
 }
 // GCOVR_EXCL_STOP

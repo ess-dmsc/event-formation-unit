@@ -179,8 +179,7 @@ void ReadoutGeneratorBase::transmitLoop() {
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::initialize(
-    std::shared_ptr<FunctionGenerator> readoutGenerator) {
+void ReadoutGeneratorBase::initialize(FunctionGenerator *readoutGenerator) {
   SocketImpl::Endpoint local("0.0.0.0", 0);
   SocketImpl::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 

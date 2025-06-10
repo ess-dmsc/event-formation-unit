@@ -110,7 +110,7 @@ public:
   /// Input parameter should be LinearDistribution when neutrons are expect a specific intervals.
   /// \throws std::runtime_error Header version is not V0 or V1.
   /// 
-  void initialize(std::shared_ptr<FunctionGenerator> readoutGenerator);
+  void initialize(FunctionGenerator *readoutGenerator);
 
   ///
   /// \brief Start the transmission loop for the generator.
@@ -188,7 +188,7 @@ private:
   /// \brief For TOF distribution calculations
   /// TofDist could be calculated from default values in Settings struct
   /// by setting Frequency to default.
-  std::shared_ptr<FunctionGenerator> distributionGenerator{};
+  FunctionGenerator *distributionGenerator{};
   static constexpr double TicksPerMs{ esstime::ESSTime::ESSClockFreqHz/1000.0 };
 };
 // GCOVR_EXCL_STOP

@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
 
   FreiaGen.argParse(argc, argv);
 
-  std::shared_ptr<FunctionGenerator> distribution = DistributionGenerator::Factory(FreiaGen.Settings.Frequency);
-  FreiaGen.initialize(distribution);
+  DistributionGenerator distribution(FreiaGen.Settings.Frequency);
+  FreiaGen.initialize(&distribution);
 
   FreiaGen.transmitLoop();
 

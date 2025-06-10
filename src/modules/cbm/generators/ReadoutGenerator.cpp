@@ -171,7 +171,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     }
 
     Generator = std::make_unique<DistributionGenerator>(
-        GenMaX, cbmSettings.NumberOfBins);
+        static_cast<double>(GenMaX), cbmSettings.NumberOfBins);
   }
 
   esstime::TimeDurationMilli Tof =
@@ -190,9 +190,10 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
-    Generator = std::make_unique<LinearGenerator>(LinearGenerator::TimeDurationUnit / Settings.Frequency,
-                                                  cbmSettings.Gradient.value(),
-                                                  cbmSettings.Offset);
+    Generator = std::make_unique<LinearGenerator>(
+      static_cast<double>(LinearGenerator::TimeDurationUnit / Settings.Frequency),
+      static_cast<double>(cbmSettings.Gradient.value()),
+      cbmSettings.Offset);
   }
 
   auto Tof = esstime::nsToMilliseconds(Generator->getValue());
