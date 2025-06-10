@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "common/time/ESSTime.h"
+#include <common/time/ESSTime.h>
 #include <Error.hpp>
 #include <common/debug/Trace.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
