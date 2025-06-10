@@ -51,7 +51,7 @@ public:
   /// \param Offset value that will be added to getDistValue.
   ///
   explicit LinearGenerator(double MaxX, double Gradient, uint32_t Offset = 0.0)
-      : LinearGenerator{MaxX, DefaultBinCount, Gradient, Offset} {
+      : LinearGenerator{MaxX, DEFAULT_BIN_COUNT, Gradient, Offset} {
   };
 
   ///
@@ -94,7 +94,7 @@ public:
   ///
   static std::shared_ptr<LinearGenerator>
   Factory(uint16_t frequency, double Gradient = 1.0, uint32_t Offset = 0.0) {
-    return Factory(frequency, DefaultBinCount, Gradient, Offset);
+    return Factory(frequency, DEFAULT_BIN_COUNT, Gradient, Offset);
   }
 
   /// \brief Get the value at a given position.

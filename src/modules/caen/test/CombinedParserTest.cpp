@@ -120,7 +120,7 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
   MultipackageSocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 71428 };
   std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
 
   Caen::ReadoutGenerator gen;
@@ -149,7 +149,7 @@ TEST_F(CombinedParserTest, DataGenV0) {
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
   std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 
@@ -180,7 +180,7 @@ TEST_F(CombinedParserTest, DataGenDefault) {
   SocketMock socket{};
   const std::chrono::microseconds pulseTimeDuration{ 0 };
   std::shared_ptr<FunctionGenerator> distribution = 
-    DistributionGenerator::Factory(ReadoutGeneratorBase::DefaultFrequency);
+    DistributionGenerator::Factory(ReadoutGeneratorBase::DEFAULT_FREQUENCY);
   
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
 

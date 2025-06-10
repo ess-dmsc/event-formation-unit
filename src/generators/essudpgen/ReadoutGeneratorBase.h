@@ -29,7 +29,7 @@ class ReadoutGeneratorBase {
 public:
   /// \brief default frequency for all generators. It can be changed with command line parameter
   /// q, --frequency.
-  static constexpr uint16_t DefaultFrequency{ 14 };
+  static constexpr uint16_t DEFAULT_FREQUENCY{ 14 };
 
   ///
   /// \struct GeneratorSettings
@@ -51,7 +51,7 @@ public:
 
     /// \todo This should be the default mode and obsolete per packet generation
     /// \todo Frequency should be a double instead of integer.
-    uint16_t Frequency{ DefaultFrequency };                ///< Frequency of time updates for each packet
+    uint16_t Frequency{ DEFAULT_FREQUENCY };                ///< Frequency of time updates for each packet
 
     uint8_t headerVersion{1};             ///< Header version
     bool Loop{false};                     ///< Flag to keep looping the same file forever
@@ -70,9 +70,10 @@ public:
   virtual ~ReadoutGeneratorBase() = default;
 
   ///
-  /// \brief Creates a packet ready for UDP transmission.
-  /// Method will create as many network packets possible with in a pulse duration. Each packet will
-  /// be populated with as many readout as possible.
+  /// \brief Creates multiple packets with header, readout data and transmit it over UDP within one pulse time.
+  /// Another part of the method controls the pulse time.
+  /// Method will create as many network packets as possible with in a pulse duration where each packet will
+  /// be populated with as many readout as possible with in the BufferSize limit.
   /// \param socket, interface to transmit object.
   /// \param pulseTimeDuration. Duration of a of a pulse in nano seconds
   void generatePackets(SocketInterface *socket, const esstime::TimeDurationNano &pulseTimeDuration);
@@ -86,8 +87,7 @@ public:
   ///
   /// \brief Sets number of readouts per packet.
   /// Method can be used to set number of readout to a different number
-  /// that are possible to include in a packet. The number will be validated
-  /// and if the value is to large program will throw an exception.
+  /// that are possible to include in a packet.
   /// \param ReadoutCount Readout count
   ///
   void setReadoutPerPacket(uint32_t ReadoutCount);
@@ -108,6 +108,7 @@ public:
   /// time (input value) and a function/distribution value (output value).
   /// Input parameter should be DistributionGenerator when neutron arrival follows a probability distribution
   /// Input parameter should be LinearDistribution when neutrons are expect a specific intervals.
+  /// \throws std::runtime_error Header version is not V0 or V1.
   /// 
   void initialize(std::shared_ptr<FunctionGenerator> readoutGenerator);
 
@@ -161,6 +162,8 @@ private:
 
   ///
   /// \brief Generates the header of the packet.
+  /// \throws std::runtime_error if readouts per packet and readout data size will
+  /// exceed buffer size.
   ///
   void generateHeader();
 

@@ -28,7 +28,7 @@ namespace {
 
     // Internally the generator contains a number of bins that build up
     // the linear curve
-    double binDelta = max / (LinearGenerator::DefaultBinCount);
+    double binDelta = max / (LinearGenerator::DEFAULT_BIN_COUNT);
     ASSERT_GT(binDelta, 0);
 
     size_t readoutCount = static_cast<size_t>(std::ceil(max / gradient));
@@ -53,6 +53,6 @@ TEST_F(LinearGeneratorTest, Constructors) {
 }
 
 TEST_F(LinearGeneratorTest, CheckReadouts) {
-  ReadoutTest(ReadoutGeneratorBase::DefaultFrequency, 2000.0);
+  ReadoutTest(ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0);
   ReadoutTest(25, 20000.0);
 }

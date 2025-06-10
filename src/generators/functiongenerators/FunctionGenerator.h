@@ -12,7 +12,7 @@
 class FunctionGenerator {
 public:
   /// \brief Number of Bins defines the resolution of the distribution function.
-  static constexpr int DefaultBinCount{512};
+  static constexpr int DEFAULT_BIN_COUNT{512};
   virtual ~FunctionGenerator() {}
 
   /// \brief Get the value at a given position in the generator function.

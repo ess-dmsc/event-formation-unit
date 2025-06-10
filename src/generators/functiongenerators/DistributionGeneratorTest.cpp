@@ -24,21 +24,21 @@ protected:
 ///\brief not the best of test, just checking end of ranges with current
 // known values
 TEST_F(DistributionGeneratorTest, Constructors) {
-  DistributionGenerator MyDist(1000.0/ReadoutGeneratorBase::DefaultFrequency);
+  DistributionGenerator MyDist(1000.0/ReadoutGeneratorBase::DEFAULT_FREQUENCY);
   ASSERT_NEAR(MyDist.Dist[0], 0.001, 1e-4);
-  ASSERT_NEAR(MyDist.Dist[MyDist.DefaultBinCount - 1], 0.001, 1e-4);
+  ASSERT_NEAR(MyDist.Dist[MyDist.DEFAULT_BIN_COUNT - 1], 0.001, 1e-4);
   ASSERT_NEAR(MyDist.CDF[0], 0.000, 1e-4);
   ASSERT_NEAR(MyDist.CDF[1], 0.001, 1e-4);
-  ASSERT_NEAR(MyDist.CDF[MyDist.DefaultBinCount - 1], 11.957, 0.005);
+  ASSERT_NEAR(MyDist.CDF[MyDist.DEFAULT_BIN_COUNT - 1], 11.957, 0.005);
 }
 
 TEST_F(DistributionGeneratorTest, ConstructorWithMaxVal) {
   double MaxVal = 1000.0;
-  int Bins = DistributionGenerator::DefaultBinCount;
+  int Bins = DistributionGenerator::DEFAULT_BIN_COUNT;
   DistributionGenerator MyDist(MaxVal);
 
   ASSERT_EQ(MyDist.MaxRange, MaxVal);
-  ASSERT_EQ(MyDist.DefaultBinCount, Bins);
+  ASSERT_EQ(MyDist.DEFAULT_BIN_COUNT, Bins);
   ASSERT_EQ(MyDist.Dist.size(), Bins);
   ASSERT_EQ(MyDist.CDF.size(), Bins);
   ASSERT_NEAR(MyDist.BinWidth, MaxVal / (Bins - 1), 1e-6);
@@ -47,11 +47,11 @@ TEST_F(DistributionGeneratorTest, ConstructorWithMaxVal) {
 
 TEST_F(DistributionGeneratorTest, ConstructorWithMaxValDefaultBins) {
   double MaxVal = 1000.0;
-  int DefaultBins = DistributionGenerator::DefaultBinCount;
+  int DefaultBins = DistributionGenerator::DEFAULT_BIN_COUNT;
   DistributionGenerator MyDist(MaxVal);
 
   ASSERT_EQ(MyDist.MaxRange, MaxVal);
-  ASSERT_EQ(MyDist.DefaultBinCount, DefaultBins);
+  ASSERT_EQ(MyDist.DEFAULT_BIN_COUNT, DefaultBins);
   ASSERT_EQ(MyDist.Dist.size(), DefaultBins);
   ASSERT_EQ(MyDist.CDF.size(), DefaultBins);
   ASSERT_NEAR(MyDist.BinWidth, MaxVal / (DefaultBins - 1), 1e-6);
@@ -61,12 +61,12 @@ TEST_F(DistributionGeneratorTest, ConstructorWithMaxValDefaultBins) {
 // This test does not make sense. Negative bin 
 TEST_F(DistributionGeneratorTest, ConstructorWithNegativeBins) {
   double MaxVal = 1000.0;
-  int NegativeBins = -DistributionGenerator::DefaultBinCount;
+  int NegativeBins = -DistributionGenerator::DEFAULT_BIN_COUNT;
   int AbsBins = abs(NegativeBins);
   DistributionGenerator MyDist(MaxVal);
 
   ASSERT_EQ(MyDist.MaxRange, MaxVal);
-  ASSERT_EQ(MyDist.DefaultBinCount, AbsBins); // Bins should be set to absolute value of NegativeBins
+  ASSERT_EQ(MyDist.DEFAULT_BIN_COUNT, AbsBins); // Bins should be set to absolute value of NegativeBins
   ASSERT_EQ(MyDist.Dist.size(), AbsBins);
   ASSERT_EQ(MyDist.CDF.size(), AbsBins);
   ASSERT_NEAR(MyDist.BinWidth, MaxVal / (AbsBins - 1), 1e-6);
