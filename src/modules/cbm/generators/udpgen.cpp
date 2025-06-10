@@ -25,7 +25,6 @@ int main(int argc, char *argv[]) {
     distribution = std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
     distribution = std::make_unique<LinearGenerator>(CbmGen.Settings.Frequency,
-                                            CbmGen.cbmSettings.NumberOfBins,
                                             CbmGen.cbmSettings.Gradient.value(),
                                             CbmGen.cbmSettings.Offset);
   } else {

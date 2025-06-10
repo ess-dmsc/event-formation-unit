@@ -53,7 +53,8 @@ ReadoutGenerator::ReadoutGenerator()
   IbmGroup->add_option("--value", cbmSettings.Value,
       "Fixed value for the value function (required for Fixed generator type)");
   IbmGroup->add_option("--gradient", cbmSettings.Gradient,
-      "Gradient of the Linear function (required for Linear generator type)");
+                      "Gradient of the Linear function. Units must be in nano seconds"
+                      "(required for Linear generator type)");
   IbmGroup->add_option("--offset", cbmSettings.Offset,
                        "Function generator offset for the start value "
                        "(Optional for all generator type)");
@@ -191,7 +192,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator = std::make_unique<LinearGenerator>(
-      static_cast<double>(LinearGenerator::TimeDurationUnit / Settings.Frequency),
+      static_cast<double>(LinearGenerator::LINEAR_TIME_UNIT / Settings.Frequency),
       static_cast<double>(cbmSettings.Gradient.value()),
       cbmSettings.Offset);
   }

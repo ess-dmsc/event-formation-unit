@@ -22,13 +22,13 @@ protected:
 //---------------------------------------------------------------------
 
 namespace {
-  void ReadoutTest(uint16_t frequency, double gradient) {
-    double max = LinearGenerator::TimeDurationUnit / frequency;
-    LinearGenerator generator(max, gradient);
+  void ReadoutTest(uint8_t pulseCount, uint16_t frequency, double gradient, uint32_t readoutsPerPulse, double offset = 0.0) {
+    double max = LinearGenerator::LINEAR_TIME_UNIT / frequency;
+    LinearGenerator generator(max, gradient, offset);
 
     // Internally the generator contains a number of bins that build up
     // the linear curve
-    double binDelta = max / (LinearGenerator::DEFAULT_BIN_COUNT);
+    double binDelta = max / gradient;
     ASSERT_GT(binDelta, 0);
 
     size_t readoutCount = static_cast<size_t>(std::ceil(max / gradient));
@@ -37,12 +37,23 @@ namespace {
     // readout is higher than pulse time.
     if (std::abs(std::ceil(max / gradient) - max / gradient) < 1E-5)
         ++readoutCount;
-
-    for (size_t i = 0; i < readoutCount; i++) {
+    
+    size_t counter = 0;
+    for (size_t i = 0; i < pulseCount * readoutCount; i++) {
         double xValue = generator.getValue();
-        //int offset = static_cast<int>(std::ceil(i * gradient / binDelta));
-        double comperand = std::ceil(i * gradient / binDelta) * binDelta;
-        ASSERT_NEAR(xValue, comperand, 1e-5);
+        //xValue must be less than max pulse time. To avoid rounding errors 
+        //an epsilon value is added for rounding
+        ASSERT_LT(xValue, max + 1e-3);
+
+        // if counter is larger than readoutCount then we start on a new pulse.
+        if (counter >= readoutsPerPulse)
+          counter = 0; 
+        double xComperand = std::ceil(counter++ * gradient / binDelta) * binDelta;
+        ASSERT_NEAR(xValue, xComperand, 1e-5);
+
+        double yValue = generator.getValueByIndex(xValue);
+        double yComperand = static_cast<int>(xValue / binDelta) * binDelta + offset;
+        ASSERT_NEAR(yValue, yComperand, 1e-5);
     }
   }
 }
@@ -53,6 +64,18 @@ TEST_F(LinearGeneratorTest, Constructors) {
 }
 
 TEST_F(LinearGeneratorTest, CheckReadouts) {
-  ReadoutTest(ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0);
-  ReadoutTest(25, 20000.0);
+  // Test with gradient of 1 microseconds
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 71429);
+  // Test with gradient of 2 microseconds
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 35715);
+  // Test with gradient of 20 microseconds
+  ReadoutTest(6, 25, 20000.0, 2001);
+
+  // Test with gradient of 1 microseconds
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 71429, 456789.0);
+  // Test with gradient of 2 microseconds
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 35715, 987654.0);
+  // Test with gradient of 20 microseconds
+  ReadoutTest(6, 25, 20000.0, 2001, 987456.0);
+
 }

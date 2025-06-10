@@ -23,35 +23,20 @@
 class LinearGenerator : public FunctionGenerator {
 public:
   /// \brief Linear generator is working in nano seconds
-  static constexpr double TimeDurationUnit{1E9};
+  static constexpr double LINEAR_TIME_UNIT{1E9};
 
   ///
-  /// \brief Distribution constructor based on the rotation frequency of the target
-  /// wheel. 
-  ///
-  /// \param MaxX maximum duration of the pulse in nano seconds
-  /// \param Bins The number of bins in the distribution. We always use the
-  /// absolute value of Bins.
-  /// \param Gradient readout interval in nanoseconds
-  /// \param Offset value that will be added to getValueByIndex.
-  ///
-  explicit LinearGenerator(double MaxX, uint32_t Bins, double Gradient, uint32_t Offset = 0.0)
-    : PulseDuration{MaxX}
-    , gradient{Gradient} 
-    , offset(Offset) 
-    , BinWidth{static_cast<double>(MaxX / Bins)}{
-  };
-
-  ///
-  /// \brief Distribution constructor based on the rotation frequency of the target
-  /// wheel. 
+  /// \brief Distribution constructor based on pulse length in nano seconds
   ///
   /// \param MaxX maximum duration of the pulse in nano seconds
   /// \param Gradient readout interval in nanoseconds
   /// \param Offset value that will be added to getValueByIndex.
   ///
   explicit LinearGenerator(double MaxX, double Gradient, uint32_t Offset = 0.0)
-      : LinearGenerator{MaxX, DEFAULT_BIN_COUNT, Gradient, Offset} {
+    : PulseDuration{MaxX}
+    , gradient(Gradient)
+    , offset(Offset) 
+    , BinWidth{static_cast<double>(MaxX / Gradient)}{
   };
 
   ///
@@ -63,7 +48,7 @@ public:
   /// \param Offset value that will be added to getValueByIndex.
   ///
   explicit LinearGenerator(uint16_t frequency, double Gradient, uint32_t Offset = 0.0)
-      : LinearGenerator {TimeDurationUnit / frequency, Gradient, Offset} {
+      : LinearGenerator {LINEAR_TIME_UNIT / frequency, Gradient, Offset} {
   };
 
   /// \brief Get the value at a given position.
@@ -96,6 +81,7 @@ private:
   double gradient;
   uint32_t offset;
   double BinWidth{0.0};
+  uint32_t MaxBins{0};
 };
 
 // GCOVR_EXCL_STOP
