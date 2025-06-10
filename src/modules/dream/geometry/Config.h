@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,8 +9,10 @@
 
 #pragma once
 
-#include <common/JsonFile.h>
+#include <common/config/Config.h>
 #include <common/debug/Trace.h>
+#include <common/JsonFile.h>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -19,8 +21,16 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Dream {
-class Config {
+class Config : public Configurations::Config {
+
 public:
+  Config(const std::string &ConfigFile)
+    : Configurations::Config(ConfigFile) {
+    memset(RMConfig, 0, sizeof(RMConfig));
+  };
+
+  Config(){};
+
   static constexpr int MaxRing{11};
   static constexpr int MaxFEN{11};
 
@@ -58,14 +68,6 @@ public:
     } P2;
   };
 
-  //
-  Config(const std::string &ConfigFile) : FileName(ConfigFile) {
-    memset(RMConfig, 0, sizeof(RMConfig));
-  };
-
-  //
-  Config(){};
-
   // load file into json object and apply
   void loadAndApply();
 
@@ -79,11 +81,9 @@ public:
 
   ModuleParms RMConfig[MaxRing + 1][MaxFEN + 1];
 
-  //
-  std::string FileName{""};
-  nlohmann::json root;
   DetectorInstance Instance{NONE};
-  std::string Name; // Name specified in json, used to check later
+
+  std::string DetectorName; // Name specified in json, used to check later
 
 private:
 };

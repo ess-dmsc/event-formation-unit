@@ -20,78 +20,43 @@ void Config::errorExit(const std::string &ErrMsg) {
 }
 
 void Config::loadAndApply() {
-  root = from_json_file(FileName);
+  loadFromFile();
   apply();
 }
 
 void Config::apply() {
   std::string DetectorName;
-  try {
-    DetectorName = root["Detector"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Error, "Missing 'Detector' field");
-    throw std::runtime_error("Missing 'Detector' field");
-  }
+
+  setMask(LOG | CHECK);
+  assign("Detector", DetectorName);
 
   if (DetectorName != "CBM") {
     LOG(INIT, Sev::Error, "Detector name mismatch, expected CBM");
     throw std::runtime_error("Detector name mismatch, expected CBM");
   }
 
-  try {
-    Parms.TypeSubType = root["TypeSubType"].get<std::uint8_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for TypeSubType");
-  }
-  LOG(INIT, Sev::Info, "TypeSubType {}", Parms.TypeSubType);
+  setMask(LOG);
+  assign("TypeSubType", Parms.TypeSubType);
+  assign("MaxPulseTimeDiffNS", Parms.MaxPulseTimeDiffNS);
+  assign("MaxTOFNS", Parms.MaxTOFNS);
+  assign("MonitorRing", Parms.MonitorRing);
 
-  try {
-    Parms.MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeDiffNS");
-  }
-  LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS {}", Parms.MaxPulseTimeDiffNS);
+  setMask(LOG | CHECK);
+  assign("MaxFENId", Parms.MaxFENId);
 
-  try {
-    Parms.MaxTOFNS = root["MaxTOFNS"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxTOFNS");
-  }
-  LOG(INIT, Sev::Info, "MaxTOFNS {}", Parms.MaxTOFNS);
-
-  try {
-    Parms.MonitorRing = root["MonitorRing"].get<std::uint8_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MonitorRing");
-  }
-  LOG(INIT, Sev::Info, "MonitorRing {}", Parms.MonitorRing);
-
-  try {
-    Parms.MaxFENId = root["MaxFENId"].get<int>();
-
-    // Number of FENs must must be 1 even is MaxFENId is 0
-    Parms.NumOfFENs = Parms.MaxFENId + 1;
-  } catch (...) {
-    LOG(INIT, Sev::Error, "MaxFENId not specified");
-    throw std::runtime_error("MaxFENId not specified");
-  }
-  LOG(INIT, Sev::Info, "MaxFENId {}", Parms.MaxFENId);
+  // Number of FENs must must be 1 even is MaxFENId is 0
+  Parms.NumOfFENs = Parms.MaxFENId + 1;
 
   TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
-
-  auto TopologyIt = root.find("Topology");
-  if (TopologyIt == root.end()) {
+  if (!root().contains("Topology")) {
     throw std::runtime_error("No 'Topology' section found in the "
                              "configuration. Cannot setup Beam Monitors");
   }
+  const nlohmann::json Modules = root()["Topology"];
 
+  // Temporary map storage to check for duplicates of the two unique keys
   int Entry{0};
-  nlohmann::json Modules;
-  Modules = root["Topology"];
-
-  // temporary map storage to check for duplicates ofthe two unique keys
-
-  for (auto &Module : Modules) {
+  for (const auto &Module : Modules) {
     // Initialize the parameters with invalid values which are
     // not used in the MAP to recall topology object
     int FEN{-1};

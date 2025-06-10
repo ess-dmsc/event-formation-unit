@@ -28,7 +28,7 @@ TEST_F(LokiConfigTest, ParseConfig) {
 }
 
 TEST_F(LokiConfigTest, NoDetectorKey) {
-  json_change_key(config.root(), "Detector", "InvalidDetector");
+  Json::changeKey(config.root(), "Detector", "InvalidDetector");
   ASSERT_ANY_THROW(config.parseConfig());
 }
 

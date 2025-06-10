@@ -23,38 +23,21 @@ void VMM3Config::loadAndApplyConfig() {
 }
 
 void VMM3Config::applyVMM3Config() {
-  std::string Name;
-  try {
-    FileParameters.InstrumentName = root()["Detector"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Error, "Missing 'Detector' field");
-    throw std::runtime_error("Missing 'Detector' field");
-  }
+  setMask(LOG | CHECK);
 
+  assign("Detector", FileParameters.InstrumentName);
   if (FileParameters.InstrumentName != ExpectedName) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }
 
-  try {
-    FileParameters.InstrumentGeometry =
-        root()["InstrumentGeometry"].get<std::string>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for InstrumentGeometry");
-  }
-  LOG(INIT, Sev::Info, "InstrumentGeometry {}",
-      FileParameters.InstrumentGeometry);
+  setMask(LOG);
+  assign("InstrumentGeometry", FileParameters.InstrumentGeometry);
+  assign("MaxPulseTimeNS", FileParameters.MaxPulseTimeNS);
 
   try {
-    FileParameters.MaxPulseTimeNS = root()["MaxPulseTimeNS"].get<std::uint32_t>();
-  } catch (...) {
-    LOG(INIT, Sev::Info, "Using default value for MaxPulseTimeNS");
-  }
-  LOG(INIT, Sev::Info, "MaxPulseTimeNS {}", FileParameters.MaxPulseTimeNS);
-
-  try {
-    auto PanelConfig = root()["Config"];
-    for (auto &Mapping : PanelConfig) {
+    const auto PanelConfig = root()["Config"];
+    for (const auto &Mapping : PanelConfig) {
       uint8_t Ring = Mapping["Ring"].get<uint8_t>();
       uint8_t FEN = Mapping["FEN"].get<uint8_t>();
       uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
@@ -96,6 +79,7 @@ void VMM3Config::applyVMM3Config() {
       Hybrid.Initialised = true;
       Hybrid.HybridId = IDString;
 
+      const std::string Name = FileParameters.InstrumentName;
       auto Message = fmt::format("JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
       "{}", Name, NumHybrids, Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, Message.c_str());
@@ -122,16 +106,16 @@ void VMM3Config::applyVMM3Config() {
 void VMM3Config::loadAndApplyCalibration(const std::string &CalibFile) {
   nlohmann::json calib_root;
   try {
-    calib_root = from_json_file(CalibFile);
+    calib_root = Json::fromFile(CalibFile);
   } catch (...) {
     auto Message = fmt::format("Error loading json calibration file {}", CalibFile);
     LOG(INIT, Sev::Error, Message.c_str());
     throw std::runtime_error(Message);
   }
 
-  json_check_keys("Calibration error", calib_root, {"Detector", "Version", "Comment", "Date", "Info", "Calibrations"});
+  Json::checkKeys("Calibration error", calib_root, {"Detector", "Version", "Comment", "Date", "Info", "Calibrations"});
 
-  std::string Name = calib_root["Detector"];
+  const std::string Name = calib_root["Detector"];
   unsigned Version = calib_root["Version"].get<unsigned int>();
   auto Calibrations = calib_root["Calibrations"];
 
@@ -161,13 +145,13 @@ bool VMM3Config::validHybridId(const std::string &HybridID) const {
 void VMM3Config::applyCalibration(const std::string &HybridID,
                                   const nlohmann::json &Calibration) {
 
-  json_check_keys("Calibration error", Calibration, {"VMMHybridCalibration"});
+  Json::checkKeys("Calibration error", Calibration, {"VMMHybridCalibration"});
 
   ESSReadout::Hybrid &CurrentHybrid = getHybrid(HybridID);
 
   auto & CalibEntry = Calibration["VMMHybridCalibration"];
 
-  json_check_keys("Calibration error", CalibEntry, {"CalibrationDate", "HybridId", "vmm0", "vmm1"});
+  Json::checkKeys("Calibration error", CalibEntry, {"CalibrationDate", "HybridId", "vmm0", "vmm1"});
 
 
   std::string Date = CalibEntry["CalibrationDate"];
@@ -176,11 +160,11 @@ void VMM3Config::applyCalibration(const std::string &HybridID,
   XTRACE(INIT, ALW, "Hybrid ID %s, Date %s", HybridID.c_str(), Date.c_str());
 
   auto &vmm0cal = CalibEntry["vmm0"];
-  json_check_keys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
+  Json::checkKeys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
   applyVMM3Calibration(CurrentHybrid, 0, vmm0cal);
 
   auto &vmm1cal = CalibEntry["vmm1"];
-  json_check_keys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
+  Json::checkKeys("Calibration error", vmm0cal, {"Settings", "adc_offset", "adc_slope", "tdc_offset", "tdc_slope"});
   applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
 }
 

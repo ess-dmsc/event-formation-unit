@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -21,7 +21,7 @@ KafkaConfig::KafkaConfig(const std::string &KafkaConfigFile) {
     return;
   }
   XTRACE(INIT, ALW, "KAFKA CONFIG FROM FILE");
-  nlohmann::json root = from_json_file(KafkaConfigFile);
+  nlohmann::json root = Json::fromFile(KafkaConfigFile);
 
   try {
     nlohmann::json KafkaParms = root["KafkaParms"];

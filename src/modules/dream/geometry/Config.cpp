@@ -20,53 +20,42 @@ void Config::errorExit(const std::string &ErrMsg) {
 }
 
 void Config::loadAndApply() {
-  root = from_json_file(FileName);
+  loadFromFile();
   apply();
 }
 
 void Config::apply() {
+  setMask(LOG | CHECK);
 
-  try {
-    Name = root["Detector"].get<std::string>();
-  } catch (nlohmann::json::exception const &) {
-    errorExit("Missing Detector in JSON");
-  }
+  // Get and validate detector name
+  assign("Detector", DetectorName);
 
-  if (Name == "DREAM") {
+  if (DetectorName == "DREAM") {
     Instance = DREAM;
-    LOG(INIT, Sev::Info, "Instance is DREAM Instrument");
-    XTRACE(INIT, ALW, "Instance is DREAM Instrument");
-  } else if (Name == "MAGIC") {
+  } else if (DetectorName == "MAGIC") {
     Instance = MAGIC;
-    LOG(INIT, Sev::Info, "Instance is MAGIC Instrument");
-    XTRACE(INIT, ALW, "Instance is MAGIC Instrument");
-  } else if (Name == "HEIMDAL") {
+  } else if (DetectorName == "HEIMDAL") {
     Instance = HEIMDAL;
-    LOG(INIT, Sev::Info, "Instance is HEIMDAL Instrument");
-    XTRACE(INIT, ALW, "Instance is HEIMDAL Instrument");
   } else {
     errorExit(fmt::format("Invalid instrument name {}, expected DREAM or MAGIC",
-                          Name));
+                          DetectorName));
   }
 
-  try {
-    MaxPulseTimeDiffNS = root["MaxPulseTimeDiffNS"].get<unsigned int>();
-  } catch (nlohmann::json::exception const &) {
-    LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS using default value");
-    XTRACE(INIT, ALW, "MaxPulseTimeDiffNS using default value");
-  }
-  LOG(INIT, Sev::Info, "MaxPulseTimeDiffNS: {}", MaxPulseTimeDiffNS);
-  XTRACE(INIT, ALW, "MaxPulseTimeDiffNS: %u", MaxPulseTimeDiffNS);
+  const auto mess = fmt::format("Instance is {} Instrument", DetectorName);
+  LOG(INIT, Sev::Info, mess.c_str());
+  XTRACE(INIT, ALW, mess.c_str());
+
+  setMask(LOG | XTRACE);
+  assign("MaxPulseTimeDiffNS", MaxPulseTimeDiffNS);
 
   // Initialise all configured modules
   int Entry{0};
-  nlohmann::json Modules;
-  Modules = root["Config"];
+  nlohmann::json Modules = root()["Config"];
   for (auto &Module : Modules) {
     int Ring{MaxRing + 1};
     int FEN{MaxFEN + 1};
     std::string Type{""};
-    int Index{0};
+    int Index1{0};
     int Index2{0};
 
     try {
@@ -78,7 +67,7 @@ void Config::apply() {
     }
 
     try {
-      Index = Module["Index"];
+      Index1 = Module["Index"];
       Index2 = Module["Index2"];
     } catch (...) {
     }
@@ -103,7 +92,7 @@ void Config::apply() {
                             Type));
     }
     RMConfig[Ring][FEN].Type = ModuleTypeMap[Type];
-    RMConfig[Ring][FEN].P1.Index = Index;
+    RMConfig[Ring][FEN].P1.Index = Index1;
     RMConfig[Ring][FEN].P2.Index = Index2;
     XTRACE(INIT, ALW, "Entry %02d, RING %02d, FEN %02d, Type %s", Entry, Ring,
            FEN, Type.c_str());
