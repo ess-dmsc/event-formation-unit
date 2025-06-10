@@ -60,8 +60,9 @@ inline TimeDurationMilli nsToMilliseconds(uint64_t NanoSeconds) {
 }
 
 /// \brief Converts a duration in nanoseconds (TimeDurationNano) to
-/// milliseconds. \param NanoSeconds Duration in nanoseconds. \return
-/// TimeDurationMilli(double) The corresponding duration in milliseconds.
+/// milliseconds. 
+/// \param NanoSeconds Duration in nanoseconds.
+/// \return TimeDurationMilli(double) The corresponding duration in milliseconds.
 inline TimeDurationMilli nsToMilliseconds(const TimeDurationNano &NanoSeconds) {
   return std::chrono::duration_cast<TimeDurationMilli>(NanoSeconds);
 }
