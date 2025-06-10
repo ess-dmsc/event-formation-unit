@@ -27,7 +27,7 @@ DistributionGenerator::DistributionGenerator(double MaxVal)
     : DistributionGenerator(MaxVal, DEFAULT_BIN_COUNT) {}
 
 /// \brief generate Dist and CDF for the specified shape. Always use the absolute value of Bins.
-DistributionGenerator::DistributionGenerator(double MaxVal, uint32_t Bins) : MaxRange(MaxVal), NumberOfBins(abs(Bins)) {
+DistributionGenerator::DistributionGenerator(double MaxVal, uint32_t Bins) : MaxRange(MaxVal), NumberOfBins(Bins) {
   Dist.resize(NumberOfBins);
   CDF.resize(NumberOfBins);
   BinWidth = MaxRange / (NumberOfBins - 1);
