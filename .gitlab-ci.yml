@@ -21,6 +21,17 @@ variables:
   UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-ubuntu2204-conan:1.1.0"
   CONAN_USER_HOME: "$CI_PROJECT_DIR"
 
+.template_build_info: &template_build_info
+  after_script:
+    - |
+      {
+         echo "Build type: $(grep CMAKE_BUILD_TYPE build/CMakeCache.txt | cut -d= -f2)"
+          echo "Git branch: $CI_COMMIT_REF_NAME"
+          echo "Git commit: ${CI_COMMIT_SHORT_SHA}"
+          echo "Build date: $(date +'%Y-%m-%d %H:%M:%S')"
+          echo "Build image: $(basename $CI_JOB_IMAGE)"
+      } > build/BUILD_INFO
+
 conan_setup:
   stage: setup
   image: $ALMALINUX9_IMAGE
@@ -54,6 +65,7 @@ almalinux9_gcc11_release:
     paths:
       - build/
     expire_in: 1 day
+  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
@@ -70,6 +82,7 @@ ubuntu2204_gcc11_release:
     paths:
       - build/
     expire_in: 1 day
+  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
@@ -89,6 +102,7 @@ ubuntu2204_clang17_release:
   variables:
     CC: /usr/bin/clang-17
     CXX: /usr/bin/clang++-17
+  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
@@ -111,6 +125,7 @@ centos7_gcc11_release:
     paths:
       - build/
     expire_in: 1 day
+  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
@@ -175,6 +190,7 @@ publish_tar_job:
     - cp -r build/generators archive/event-formation-unit
     - cp -r build/lib archive/event-formation-unit
     - cp -r build/licenses archive/event-formation-unit
+    - cp -r build/BUILD_INFO archive/event-formation-unit
     - mkdir archive/event-formation-unit/util
     - cp -r utils/efushell archive/event-formation-unit/util
     - mkdir archive/event-formation-unit/configs
