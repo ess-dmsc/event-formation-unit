@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,7 +16,7 @@ namespace Freia {
 // #define TRC_LEVEL TRC_L_DEB
 
 void Config::applyConfig() {
-  json_check_keys("Config error", root(), RootFields);
+  Json::checkKeys("Config error", root(), RootFields);
 
   // Initialize and check Version parameter
   setMask(LOG);
@@ -42,7 +42,7 @@ void Config::applyConfig() {
   auto PanelConfig = root()["Config"];
 
   for (const auto &Mapping : PanelConfig) {
-    json_check_keys("Config error", Mapping, MappingFields);
+    Json::checkKeys("Config error", Mapping, MappingFields);
 
     uint8_t Ring = Mapping["Ring"].get<uint8_t>();
     uint8_t FEN = Mapping["FEN"].get<uint8_t>();

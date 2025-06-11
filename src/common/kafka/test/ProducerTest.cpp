@@ -158,7 +158,7 @@ TEST_F(ProducerTest, ProducerFail) {
       .WillRepeatedly(testing::Return(0));
 
   prod.KafkaProducer.reset(MockKafkaProducer);
-  std::uint8_t SomeData[20];
+  uint8_t SomeData[20];
 
   ASSERT_EQ(prod.getStats().produce_errors, 0);
 

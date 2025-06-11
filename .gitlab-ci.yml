@@ -9,150 +9,174 @@ default:
     - docker
   
 stages:
+  - setup
+  - cppcheck
   - build
   - test
   - publish
 
 variables:
-  ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.1.0"
-  CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/centos7:1.0"
-  UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/ubuntu2204:1.0"
-  DEBIAN11_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/build-nodes/debian11:1.0"
+  ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.3.0"
+  CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-centos7-conan:1.1.0"
+  UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-ubuntu2204-conan:1.1.0"
+  CONAN_USER_HOME: "$CI_PROJECT_DIR"
 
-.conan_config: &conan_config
-  before_script: 
+.template_build_info: &template_build_info
+  after_script:
     - |
-      CONAN_PROFILE=linux_x86_64_gcc11
+      {
+         echo "Build type: $(grep CMAKE_BUILD_TYPE build/CMakeCache.txt | cut -d= -f2)"
+          echo "Git branch: $CI_COMMIT_REF_NAME"
+          echo "Git commit: ${CI_COMMIT_SHORT_SHA}"
+          echo "Build date: $(date +'%Y-%m-%d %H:%M:%S')"
+          echo "Build image: $(basename $CI_JOB_IMAGE)"
+      } > build/BUILD_INFO
 
-      if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        if [[ "$ID" == "centos" ]]; then
-            CONAN_PROFILE=linux_x86_64_gcc11_legacy
-            echo 'source /opt/rh/devtoolset-11/enable' >> ~/.bashrc
-            source ~/.bashrc
-        fi
-      fi
-
+conan_setup:
+  stage: setup
+  image: $ALMALINUX9_IMAGE
+  script:
     - conan config install http://github.com/ess-dmsc/conan-configuration.git
-
-    - cmake --version
-    - gcc --version
-    - g++ --version
-    - cppcheck --version
-    - git config --global --add safe.directory '*'
-
-# Job template to reduce duplication
-.build_template: &build_template
-  stage: build
-  <<: *conan_config
   artifacts:
     paths:
-      - build/bin
-      - build/generators
-      - build/lib
-      - build/licenses
-      - build/CONAN_INFO
-    expire_in: 1 day
-  script:
-    - echo "Running on $NAME"
+      - .conan/
+    expire_in: 1 hour
+    when: always
 
-    - mkdir -p build
-    - cd build
-
-    # Check if build artifacts already exist
-    - |
-      if [ "$(ls -A build/bin 2>/dev/null)" ]; then
-        echo "Build artifacts found, skipping build."
-      else
-        echo "No build artifacts found, proceeding to build."
-
-        echo "Installing dependencies"
-
-        conan install --build=missing --profile=$CONAN_PROFILE .. 
-
-        conan info ../conanfile.txt > CONAN_INFO
-
-        echo "Configuring with CMake"
-        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON ..
-
-        echo "Building project"
-        make -j$(nproc) all
-        make
-      fi
-
-build-almalinux9:
+cppcheck:
+  stage: cppcheck
   image: $ALMALINUX9_IMAGE
-  <<: *build_template
-
-build-centos7:
-  image: $CENTOS7_IMAGE
-  <<: *build_template
-
-build-ubuntu2204:
-  image: $UBUNTU2204_IMAGE
-  <<: *build_template
-
-clangformat_test_job:
-  stage: test
-  image: $DEBIAN11_IMAGE
-  before_script:
-    - export HTTP_PROXY="http://172.20.72.11:8888"
-    - export HTTPS_PROXY="http://172.20.72.11:8888"
-    - export NO_PROXY="localhost,127.0.0.1"
-  variables:
-    TEST_OUTPUT: cppcheck.xml
   script:
-    - |
-      cppcheck -j$(nproc) \
-        -v `./cppcheck_exclude_tests.sh src` \
-        --platform=unix64 \
-        --force \
-        --enable=all \
-        -I ./src \
-        '--template={file},{line},{severity},{id},{message}' \
-        --xml --xml-version=2 \
-        ./src --output-file=$TEST_OUTPUT
+    - find src/ -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.h' \) '!' -path "*/test/*" '!' -name "*Test*" > cppcheck_files.txt
+    - cppcheck --enable=all --inconclusive --std=c++14 --suppress=missingIncludeSystem --file-list=cppcheck_files.txt 2> cppcheck.xml
   artifacts:
     reports:
-      codequality: $TEST_OUTPUT
+      codequality: cppcheck.xml
     paths:
-      - $TEST_OUTPUT 
+      - cppcheck.xml
+    expire_in: 1 week
 
-unit_test_job:
-  <<: *conan_config
-  stage: test
-  image: $CENTOS7_IMAGE
+almalinux9_gcc11_release:
+  image: $ALMALINUX9_IMAGE
+  stage: build
+  dependencies:
+    - conan_setup
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make -j$(nproc) all
 
-    - echo "Installing dependencies"
-    - conan install --build=missing .. --profile=$CONAN_PROFILE
-    - conan info ../conanfile.txt > CONAN_INFO
-
-    - echo "Configuring with CMake"
-    - |
-      cmake \
-      -DCONAN=MANUAL \
-      -DGOOGLE_BENCHMARK=ON \
-      -DCOV=ON \
-      ..
-
-    - make -j$(nproc) runtest
-    - make -j$(nproc) runefu
-    - make coverage
+ubuntu2204_gcc11_release:
+  image: $UBUNTU2204_IMAGE
+  stage: build
+  dependencies:
+    - conan_setup
   artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+  <<: *template_build_info
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make -j$(nproc) all
+
+ubuntu2204_clang17_release:
+  image: $UBUNTU2204_IMAGE
+  stage: build
+  dependencies:
+    - conan_setup
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+  variables:
+    CC: /usr/bin/clang-17
+    CXX: /usr/bin/clang++-17
+  <<: *template_build_info
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_clang17
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make -j$(nproc) all
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+centos7_gcc11_release:
+  image: $CENTOS7_IMAGE
+  stage: build
+  dependencies:
+    - conan_setup
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+  <<: *template_build_info
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11_legacy
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make -j$(nproc) all
+
+runefu:
+  image: $CENTOS7_IMAGE
+  stage: test
+  dependencies:
+    - conan_setup
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11_legacy -s build_type=Debug
+    - cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
+    - make -j$(nproc) runefu
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+
+coverage:
+  image: $ALMALINUX9_IMAGE
+  stage: test
+  dependencies:
+    - conan_setup
+  script:
+    - mkdir -p build
+    - cd build
+    - conan install .. --build=missing --profile=linux_x86_64_gcc11 -s build_type=Debug
+    - cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
+    - make -j$(nproc) runtest
+    - make coverage_all
+  artifacts:
+    paths:
+      - build/coverage
+    expire_in: 1 week
     reports:
       junit: build/test_results/*.xml
       coverage_report:
         coverage_format: cobertura    
         path: build/coverage/coverage.xml
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
 
 publish_tar_job:
   stage: publish
   image: alpine/curl:latest
   dependencies:
-    - build-centos7
+    - centos7_gcc11_release
   artifacts: 
     paths:
       - event-formation-unit-centos7.tar.gz
@@ -166,17 +190,11 @@ publish_tar_job:
     - cp -r build/generators archive/event-formation-unit
     - cp -r build/lib archive/event-formation-unit
     - cp -r build/licenses archive/event-formation-unit
+    - cp -r build/BUILD_INFO archive/event-formation-unit
     - mkdir archive/event-formation-unit/util
     - cp -r utils/efushell archive/event-formation-unit/util
     - mkdir archive/event-formation-unit/configs
     - mkdir archive/event-formation-unit/data
-    - cp build/CONAN_INFO archive/event-formation-unit
-
-    # - # Create file with build information
-    - touch archive/event-formation-unit/BUILD_INFO
-    - echo 'Repository replace_real_repo_name' >> archive/event-formation-unit/BUILD_INFO
-    - echo 'Commit replace_git_commit' >> archive/event-formation-unit/BUILD_INFO
-    - echo 'Jenkins build replace_build_id' >> archive/event-formation-unit/BUILD_INFO
     
     - tar czvf event-formation-unit-centos7.tar.gz -C archive event-formation-unit
     - jf rt u --build-name="event-formation-unit-centos7" --build-number=${CI_JOB_ID} event-formation-unit-centos7.tar.gz ecdc-generic-release/${ARTIFACTORY_UPLOAD_PATH}
@@ -216,7 +234,7 @@ publish_docker_job:
   variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/efu-$INSTRUMENT"
   dependencies:
-    - build-almalinux9
+    - almalinux9_gcc11_release
   script:
     - echo "Publishing docker image"
     - |

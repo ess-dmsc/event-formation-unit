@@ -105,8 +105,7 @@ private:
   /// \param spidrTime The SPIDR time.
   /// \return The calculated global time.
   ///
-  uint64_t calculateGlobalTime(const uint16_t &toa, const uint8_t &fToA,
-                               const uint32_t &spidrTime);
+  uint64_t calculateGlobalTime(uint16_t toa, uint8_t fToA, uint32_t spidrTime);
 
 public:
   ///

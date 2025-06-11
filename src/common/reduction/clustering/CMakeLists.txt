@@ -26,6 +26,11 @@ add_library(ClusteringLib OBJECT
   ${clustering_obj_INC}
   )
 
+target_link_libraries(ClusteringLib
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 enable_coverage_flags(ClusteringLib)
 
 #=============================================================================

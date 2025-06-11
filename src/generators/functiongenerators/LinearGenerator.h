@@ -53,7 +53,7 @@ public:
 
   /// \brief Get the value at a given position.
   ///
-  double getValueByIndex(const double &Pos) override {
+  double getValueByIndex(double Pos) override {
 
     int binIndex = static_cast<int>(Pos / BinWidth);
 

@@ -111,7 +111,7 @@ void SocketImpl::printBufferSizes() {
   LOG(IPC, Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
 
-void SocketImpl::checkRxBufferSizes(std::int32_t MinRxBufferSize) {
+void SocketImpl::checkRxBufferSizes(int32_t MinRxBufferSize) {
   int __attribute__((unused)) TxBufferSize;
   int RxBufferSize;
   getBufferSizes(TxBufferSize, RxBufferSize);

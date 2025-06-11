@@ -30,7 +30,7 @@ Timepix3Geometry::Timepix3Geometry(uint32_t nx, uint32_t ny,
       chunkSize(nx / chunksPerDimension) {}
 
 /// \todo: remove this function only used makes unnecessary to have it
-uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
+uint32_t Timepix3Geometry::calcPixelId(double X, double Y) const {
   XTRACE(
       DATA, DEB,
       "Calculating scaled up pixel coordinates from X %f, Y %f with factor: %d",
@@ -48,8 +48,7 @@ uint32_t Timepix3Geometry::calcPixelId(const double &X, const double &Y) const {
 /// \param X is the X coordinate
 /// \param Y is the Y coordinate
 /// \return the chunk window index
-int Timepix3Geometry::getChunkWindowIndex(const uint16_t X,
-                                          const uint16_t Y) const {
+int Timepix3Geometry::getChunkWindowIndex(uint16_t X, uint16_t Y) const {
   // If there is only one chunk, return 0 index position
   if (totalNumChunkWindows == 1) {
     return 0;

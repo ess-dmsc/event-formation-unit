@@ -61,7 +61,7 @@ class Config {
 
   /// \brief Load the json object from the current config file
   void loadFromFile() {
-    mRoot = from_json_file(mConfigFile);
+    mRoot = Json::fromFile(mConfigFile);
   }
 
   /// \brief Const access to a json value associated with a given key

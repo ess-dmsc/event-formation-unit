@@ -66,8 +66,8 @@ classDiagram
     }
 
     class Timepix3Geometry {
-        -std::uint16_t XResolution
-        -std::uint16_t YResolution
+        -uint16_t XResolution
+        -uint16_t YResolution
         +validateData(Timepix3PixelReadout): bool
         +calcPixel(Timepix3PixelReadout): uint32_t
         +calcX(Timepix3PixelReadout): uint16_t

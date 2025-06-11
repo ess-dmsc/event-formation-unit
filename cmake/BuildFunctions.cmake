@@ -21,16 +21,21 @@ function(create_module module_name)
 
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-  target_link_libraries(${module_name} efu
-    ${${module_name}_LIB}
-    ${EFU_COMMON_LIBS}
+  target_link_libraries(${module_name} 
+    PRIVATE  
+      efu
+      ${${module_name}_LIB}
+      ${EFU_COMMON_LIBS}
     )
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
 
   if(GPERF)
-    target_link_libraries(${module_name} ${GPERFTOOLS_PROFILER})
+    target_link_libraries(${module_name}
+      PRIVATE
+        ${GPERFTOOLS_PROFILER}
+    )
   endif()
 
   set_target_properties(${module_name} PROPERTIES
@@ -48,12 +53,17 @@ function(create_executable exec_name)
     ${${exec_name}_INC})
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
-    ${EFU_COMMON_LIBS}
-    efu_common)
+    PRIVATE
+      ${${exec_name}_LIB}
+      ${EFU_COMMON_LIBS}
+      efu_common
+  )
 
   if(GPERF)
-    target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
+    target_link_libraries(${exec_name} 
+      PRIVATE
+        ${GPERFTOOLS_PROFILER}
+    )
   endif()
 
   set_target_properties(${exec_name} PROPERTIES
@@ -120,10 +130,12 @@ function(create_test_executable)
     APPEND_STRING PROPERTY COMPILE_FLAGS "-DBUILD_IS_TEST_ENVIRONMENT -DUNIT_TEST")
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
-    ${EFU_COMMON_LIBS}
-  # Use the unit_test version of the main libraries to ensure UNIT_TEST specific macros are used
-    ${CONAN_LIBS_GTEST} efu_common-unit_test efu_reduction-unit_test efu_essreadout-unit_test TestUtilsLib)
+    PRIVATE
+      ${${exec_name}_LIB}
+      ${EFU_COMMON_LIBS}
+      # Use the unit_test version of the main libraries to ensure UNIT_TEST specific macros are used
+      ${CONAN_LIBS_GTEST} efu_common-unit_test efu_reduction-unit_test efu_essreadout-unit_test TestUtilsLib
+  )
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
@@ -159,7 +171,9 @@ function(create_integration_test_executable exec_name)
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/integration_tests")
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
-    ${EFU_COMMON_LIBS}
-    efu_common)
+    PRIVATE
+      ${${exec_name}_LIB}
+      ${EFU_COMMON_LIBS}
+      efu_common
+  )
 endfunction(create_integration_test_executable)

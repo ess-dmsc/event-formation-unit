@@ -56,6 +56,11 @@ add_library(caen_common STATIC
   ${caen_common_inc}
   )
 
+target_link_libraries(caen_common
+  PRIVATE
+    ${EFU_COMMON_LIBS}
+)
+
 if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(caen_common "-Wl,--no-as-needed")
 endif()

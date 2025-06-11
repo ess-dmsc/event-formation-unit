@@ -39,8 +39,8 @@ public:
   /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX
   /// epoch
   /// \return Returns 0 on success, another value on failure.
-  virtual int produce(const nonstd::span<const std::uint8_t> &Buffer,
-                      const std::int64_t MessageTimestampMS) = 0;
+  virtual int produce(const nonstd::span<const uint8_t> &Buffer,
+                      int64_t MessageTimestampMS) = 0;
 };
 
 /// \brief The Producer class is responsible for producing Kafka messages and
@@ -157,8 +157,8 @@ public:
   /// \param Buffer The buffer containing the message data.
   /// \param MessageTimestampMS The timestamp of the message in milliseconds.
   /// \return int Returns 0 if the operation is successful or an error code
-  int produce(const nonstd::span<const std::uint8_t> &Buffer,
-              std::int64_t MessageTimestampMS) override;
+  int produce(const nonstd::span<const uint8_t> &Buffer,
+              int64_t MessageTimestampMS) override;
 
   /// \brief Sets a Kafka configuration and checks the result.
   ///
@@ -184,4 +184,4 @@ private:
 };
 
 using ProducerCallback =
-    std::function<void(const nonstd::span<const std::uint8_t> &, std::int64_t)>;
+    std::function<void(const nonstd::span<const uint8_t> &, int64_t)>;

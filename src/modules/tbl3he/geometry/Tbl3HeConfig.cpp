@@ -38,7 +38,7 @@ void Tbl3HeConfig::errorExit(const std::string &ErrMsg) {
 }
 
 void Tbl3HeConfig::parseConfig() {
-  json_check_keys("Mandatory keys", root(),
+  Json::checkKeys("Mandatory keys", root(),
                   {"Detector", "Resolution", "MaxPulseTimeNS", "MaxTOFNS",
                    "NumOfFENs", "MinValidAmplitude", "MaxGroup", "Topology"});
 
@@ -72,7 +72,7 @@ void Tbl3HeConfig::parseConfig() {
     TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
 
     for (auto &elt : Configs) {
-      json_check_keys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
+      Json::checkKeys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
 
       int Ring = elt["Ring"].get<int>();
       int FEN = elt["FEN"].get<int>();

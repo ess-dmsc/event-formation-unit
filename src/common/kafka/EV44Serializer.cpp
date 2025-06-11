@@ -62,13 +62,11 @@ EV44Serializer::EV44Serializer(size_t MaxArrayLength, const std::string &SourceN
   Event44Message_ = const_cast<Event44Message *>(
       GetEvent44Message(Builder_.GetBufferPointer()));
   TimeLengthPtr =
-      reinterpret_cast<flatbuffers::uoffset_t *>(const_cast<std::uint8_t *>(
-          Event44Message_->time_of_flight()->Data())) -
-      1;
+      reinterpret_cast<flatbuffers::uoffset_t *>(const_cast<uint8_t *>(
+          Event44Message_->time_of_flight()->Data())) - 1;
   PixelLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(Event44Message_->pixel_id()->Data())) -
-      1;
+          const_cast<uint8_t *>(Event44Message_->pixel_id()->Data())) - 1;
 
   Event44Message_->mutate_message_id(0);
 }
@@ -100,7 +98,7 @@ size_t EV44Serializer::produce() {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
     if (ProduceFunctor) {
-      
+
       // produce kafka message timestamp with current timestamp from hardware
       // clock
       uint64_t currentHwClock =

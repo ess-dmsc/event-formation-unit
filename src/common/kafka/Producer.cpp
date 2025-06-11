@@ -138,8 +138,8 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
   }
 }
 
-int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
-                      std::int64_t MessageTimestampMS) {
+int Producer::produce(const nonstd::span<const uint8_t> &Buffer,
+                      int64_t MessageTimestampMS) {
 
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
@@ -148,7 +148,7 @@ int Producer::produce(const nonstd::span<const std::uint8_t> &Buffer,
   // non-blocking, copies the buffer to kafka thread for transfer
   auto error = KafkaProducer->produce(
       TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
-      const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
+      const_cast<uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
       MessageTimestampMS, NULL);
 
   KafkaProducer->poll(0);

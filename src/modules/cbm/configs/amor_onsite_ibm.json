@@ -1,0 +1,18 @@
+
+{
+  "Detector" : "CBM",
+
+  "TypeSubType" : 16,
+
+  "MaxPulseTimeDiffNS" : 1000000000,
+
+  "MaxTOFNS" : 10000000000,
+
+  "MonitorRing" : 3,
+
+  "MaxFENId" : 2,
+
+  "Topology" : [
+    { "FEN":  0, "Channel": 0, "Type": "IBM", "Source" : "cbm1", "MaxTofBin": 150000000, "BinCount": 1500} 
+  ]
+}

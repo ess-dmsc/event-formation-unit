@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -29,7 +29,7 @@ CDCalibration::CDCalibration(const std::string &Name, const std::string &Calibra
   LOG(INIT, Sev::Info, "Loading calibration file {}", CalibrationFile);
 
   try {
-    root = from_json_file(CalibrationFile);
+    root = Json::fromFile(CalibrationFile);
   } catch (...) {
     Message = fmt::format("Caen calibration - error: Invalid Json file: {}",
                           CalibrationFile);
