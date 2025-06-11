@@ -28,23 +28,23 @@ public:
 
   /// \brief sets the pixel resolution of the camera in x plane
   /// \param Resolution integer value to set camera resolution to
-  void setXResolution(const uint16_t Resolution) { XResolution = Resolution; }
+  void setXResolution(uint16_t Resolution) { XResolution = Resolution; }
 
   /// \brief sets the pixel resolution of the camera in y plane
   /// \param Resolution integer value to set camera resolution to
-  void setYResolution(const uint16_t Resolution) { YResolution = Resolution; }
+  void setYResolution(uint16_t Resolution) { YResolution = Resolution; }
 
   /// \brief returns the chunk window index in case of partitioning the camera
-  /// pixel plane into smaller chunks. This is used in case of parrellel
+  /// pixel plane into smaller chunks. This is used in case of parallel
   /// processing.
   /// \param X and Y coordinates of the pixel
-  int getChunkWindowIndex(const uint16_t X, const uint16_t Y) const;
+  int getChunkWindowIndex(uint16_t X, uint16_t Y) const;
 
   /// \brief calculates an integer pixel value from a double X and Y coordinate
   /// after clustering
   /// \param X is the X coordinate
   /// \param Y is the Y coordinate
-  uint32_t calcPixelId(const double &X, const double &Y) const;
+  uint32_t calcPixelId(double X, double Y) const;
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data PixelDataEvent to check validity of.
@@ -70,9 +70,9 @@ public:
   int getChunkNumber() const { return totalNumChunkWindows; }
 
 private:
-  std::uint16_t XResolution;  ///< resolution of X axis
-  std::uint16_t YResolution;  ///< resolution of Y axis
-  std::uint8_t scaleUpFactor; ///< scale up factor for super resolution
+  uint16_t XResolution;       ///< resolution of X axis
+  uint16_t YResolution;       ///< resolution of Y axis
+  uint8_t scaleUpFactor;      ///< scale up factor for super resolution
   int totalNumChunkWindows;   ///< number of chunks windows in total
   int chunksPerDimension;     ///< number of chunks per dimension
   int chunkSize;              ///< size of each chunk

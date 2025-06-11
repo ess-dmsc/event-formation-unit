@@ -12,9 +12,9 @@
 class FunctionGenerator {
 public:
     virtual ~FunctionGenerator() {}
-    
+
     /// \brief Get the value at a given position in the generator function.
-    virtual double getDistValue(const double&) = 0;
+    virtual double getDistValue(double) = 0;
 };
 
 // GCOVR_EXCL_STOP

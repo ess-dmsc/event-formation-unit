@@ -16,7 +16,7 @@
 
 struct GraylogSettings {
   std::string address;
-  std::uint16_t port;
+  uint16_t port;
 };
 
 class EFUArgs {

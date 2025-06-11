@@ -35,8 +35,8 @@ struct ESSGlobalTimeStamp {
   /// \param pulseTimeInEpochNs The pulse time in epoch nanoseconds.
   /// \param tdcClockInPixelTime The TDC clock in pixel time.
   ///
-  ESSGlobalTimeStamp(const uint64_t &pulseTimeInEpochNs,
-                     const uint64_t &tdcClockInPixelTime)
+  ESSGlobalTimeStamp(uint64_t pulseTimeInEpochNs,
+                     uint64_t tdcClockInPixelTime)
       : pulseTimeInEpochNs(pulseTimeInEpochNs),
         tdcClockInPixelTime(tdcClockInPixelTime) {}
 

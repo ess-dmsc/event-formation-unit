@@ -177,9 +177,9 @@ void PixelEventHandler::publishEvents(Cluster2DContainer &clusters) {
   clusters.clear();
 }
 
-uint64_t PixelEventHandler::calculateGlobalTime(const uint16_t &toa,
-                                                const uint8_t &fToA,
-                                                const uint32_t &spidrTime) {
+uint64_t PixelEventHandler::calculateGlobalTime(uint16_t toa,
+                                                uint8_t fToA,
+                                                uint32_t spidrTime) {
 
   // Calculate pixel clock time according to timepix documentation. Use static
   // cast to ensure all result is 64 bit
