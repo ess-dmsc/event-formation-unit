@@ -81,7 +81,6 @@ private:
   double gradient;
   uint32_t offset;
   double BinWidth{0.0};
-  uint32_t MaxBins{0};
 };
 
 // GCOVR_EXCL_STOP
