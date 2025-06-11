@@ -235,7 +235,7 @@ void ReadoutGeneratorBase::main() {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
-  DataSource = new UDPTransmitter(local, remote);
+  DataSource = std::make_unique<UDPTransmitter>(local, remote);
   DataSource->setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource->printBufferSizes();
 
