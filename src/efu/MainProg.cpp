@@ -28,13 +28,14 @@ MainProg::MainProg(const std::string &Instrument, int argc, char *argv[]) {
   DetectorSettings = Args.getBaseSettings();
   DetectorSettings.DetectorName = Instrument;
 
-  // If KafkaTopic is set via CLI use that topic and generate the _samples
-  // topic for the raw readout samples. Else use the default value
 
+  // If KafkaTopic is set via CLI, use that topic. Else create one based on Instrument
   if (DetectorSettings.KafkaTopic.empty()) {
     DetectorSettings.KafkaTopic = Instrument + "_detector";
-    DetectorSettings.KafkaDebugTopic = Instrument + "_detector_samples";
-  } else {
+  }
+
+  // If KafkaDebugTopic is set via CLI, use that topic. Else create one based on the Kafka topic
+  if (DetectorSettings.KafkaDebugTopic.empty()) {
     DetectorSettings.KafkaDebugTopic = DetectorSettings.KafkaTopic + "_samples";
   }
 
