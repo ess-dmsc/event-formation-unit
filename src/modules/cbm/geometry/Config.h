@@ -42,13 +42,13 @@ struct Topology {
 
   Topology() = default;
 
-  Topology(const int &FEN, const int &Channel, const std::string &Source,
-           const CbmType &Type, const int &param1)
+  Topology(int FEN, int Channel, const std::string &Source,
+           const CbmType &Type, int param1)
       : FEN(FEN), Channel(Channel), Source(Source), Type(Type),
         param1(param1){};
 
-  Topology(const int &FEN, const int &Channel, const std::string &Source,
-           const CbmType &Type, const int &param1, const int &param2)
+  Topology(int FEN, int Channel, const std::string &Source,
+           const CbmType &Type, int param1, int param2)
       : FEN(FEN), Channel(Channel), Source(Source), Type(Type),
         param1(param1), param2(param2){};
 };

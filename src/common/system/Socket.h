@@ -67,7 +67,7 @@ public:
   void getBufferSizes(int &sendBuffer, int &receiveBuffer);
 
   /// Check that buffer sizes meet expectations
-  void checkRxBufferSizes(std::int32_t MinRxBufferSize);
+  void checkRxBufferSizes(int32_t MinRxBufferSize);
 
   /// Print the current values for receive and transmit buffer sizes
   void printBufferSizes(void);

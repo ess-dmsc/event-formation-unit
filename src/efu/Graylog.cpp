@@ -13,7 +13,7 @@ std::string Graylog::ConsoleFormatter(const Log::LogMessage &Msg) {
   static const std::vector<std::string> SevToString{
       "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
-  std::int64_t LineNr = -1;
+  int64_t LineNr = -1;
   for (auto const &CField : Msg.AdditionalFields) {
     if (CField.first == "file") {
       FileName = CField.second.strVal;
@@ -33,7 +33,7 @@ std::string Graylog::FileFormatter(const Log::LogMessage &Msg) {
   static const std::vector<std::string> SevToString{
       "EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
-  std::int64_t LineNr = -1;
+  int64_t LineNr = -1;
   for (auto const &CField : Msg.AdditionalFields) {
     if (CField.first == "file") {
       FileName = CField.second.strVal;

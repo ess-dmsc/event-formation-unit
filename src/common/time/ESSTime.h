@@ -220,8 +220,7 @@ public:
   /// \param Low The low part of the timestamp.
   /// \return The duration in nanoseconds.
   ///
-  inline static TimeDurationNano toNS(const uint32_t &High,
-                                      const uint32_t &Low) {
+  inline static TimeDurationNano toNS(uint32_t High, uint32_t Low) {
     return TimeDurationNano(High * SecInNs.count() +
                             (uint64_t)(Low * ESSClockTick));
   }

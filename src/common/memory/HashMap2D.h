@@ -23,7 +23,7 @@ template <typename T> class HashMap2D {
 public:
 
   /// Constructor to initialize the number of columns.
-  HashMap2D(const int &NumColumns) : NumColumns(NumColumns) {}
+  HashMap2D(int NumColumns) : NumColumns(NumColumns) {}
 
   /// Copy assignment operator.
   ///
@@ -50,7 +50,7 @@ public:
   /// \param Row The Row index.
   /// \param Value The value to be added (the pointer is dereferenced and
   /// moved).
-  inline void add(const int &Col, const int &Row, std::unique_ptr<T> &Value) {
+  inline void add(int Col, int Row, std::unique_ptr<T> &Value) {
     int Index = Row * NumColumns + Col;
     ValueMap.emplace(Index, std::move(Value));
   }
@@ -64,7 +64,7 @@ public:
   /// \param Row The Row index.
   /// \return A reference to the value.
   /// \throws std::out_of_range if the value does not exist in the map.
-  inline T *get(const int &Col, const int &Row) const {
+  inline T *get(int Col, int Row) const {
     int Index = Row * NumColumns + Col;
     return ValueMap.at(Index).get();
   }
@@ -77,7 +77,7 @@ public:
   /// \param Col The Column index.
   /// \param Row The Row index.
   /// \return True if the value exists, false otherwise.
-  inline bool isValue(const int &Col, const int &Row) const {
+  inline bool isValue(int Col, int Row) const {
     int Index = Row * NumColumns + Col;
     return ValueMap.count(Index) > 0;
   }

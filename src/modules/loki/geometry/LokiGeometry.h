@@ -49,8 +49,8 @@ public:
   /// is stored in the two member variables (UnitId, PosId) if an
   /// invalid input is given the output will be outside the valid
   /// ranges.
-  // bool calcPositions(std::int16_t AmplitudeA, std::int16_t AmplitudeB,
-  //                    std::int16_t AmplitudeC, std::int16_t AmplitudeD);
+  // bool calcPositions(int16_t AmplitudeA, int16_t AmplitudeB,
+  //                    int16_t AmplitudeC, int16_t AmplitudeD);
 
   void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
 
