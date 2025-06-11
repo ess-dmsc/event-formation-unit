@@ -78,7 +78,7 @@ public:
 
 
   /// \brief return a random value based on the distribution function
-  double getValue();
+  double getValue() override;
 
   /// \brief return the distribution value at a specific index
   double getValueByIndex(double) override;
