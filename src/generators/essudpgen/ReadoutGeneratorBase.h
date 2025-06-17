@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "generators/functiongenerators/FunctionGenerator.h"
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <common/readout/ess/Parser.h>
 #include <common/system/SocketImpl.h>
 #include <common/testutils/DataFuzzer.h>
@@ -21,7 +21,6 @@
 #include <CLI/CLI.hpp>
 
 #include <cstdint>
-#include <memory>
 #include <memory>
 
 ///
@@ -164,7 +163,7 @@ protected:
   // clang-format on
 
   DataFuzzer Fuzzer;                   ///< Data fuzzer
-  UDPTransmitter *DataSource{nullptr}; ///< Data source
+  std::unique_ptr<UDPTransmitter> DataSource{}; ///< Data source
 
 private:
   ESSReadout::Parser::HeaderVersion headerVersion{

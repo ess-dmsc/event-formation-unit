@@ -180,7 +180,7 @@ void ReadoutGeneratorBase::transmitLoop() {
          pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
 
   do {
-    generatePackets(DataSource, pulseTimeDuration);
+    generatePackets(DataSource.get(), pulseTimeDuration);
 
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
