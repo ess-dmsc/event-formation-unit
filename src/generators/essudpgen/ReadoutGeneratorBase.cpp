@@ -7,15 +7,16 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include <common/time/ESSTime.h>
 #include <CLI/Error.hpp>
 #include <common/debug/Trace.h>
+#include <common/time/ESSTime.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <ctype.h>
+#include <memory>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -55,22 +56,28 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   prevPulseTime = pulseTime;
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::generateReadoutTime() {
-  return generateReadoutTime(distributionGenerator->getValue());
+std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::generateReadoutTime() const {
+  if (readoutTimeGenerator == nullptr) {
+    throw std::runtime_error("Readout time generator is not initialized");
+  }
+  return generateReadoutTime(readoutTimeGenerator->getValue());
+}
+
+double ReadoutGeneratorBase::getTimeOfFlight() const {
+  if (readoutTimeGenerator == nullptr) {
+    throw std::runtime_error("Readout time generator is not initialized");
+  }
+  return readoutTimeGenerator->getValue();
 }
 
 std::pair<uint32_t, uint32_t>
-ReadoutGeneratorBase::generateReadoutTime(double timeOfFlightMs) {
+ReadoutGeneratorBase::generateReadoutTime(double timeOfFlightMs) const {
   ESSTime readoutTime = pulseTime + esstime::msToNanosecounds(timeOfFlightMs);
-  return {
-    readoutTime.getTimeHigh(),
-    readoutTime.getTimeLow()
-  };
+  return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
 }
 
 void ReadoutGeneratorBase::generatePackets(
-    SocketInterface *socket,
-    const TimeDurationNano &pulseTimeDuration) {
+    SocketInterface *socket, const TimeDurationNano &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
   prevPulseTime = pulseTime;
   pulseTime = ESSTime::now();
@@ -92,7 +99,9 @@ void ReadoutGeneratorBase::generatePackets(
     if (Settings.SpeedThrottle) {
       usleep(Settings.SpeedThrottle);
     }
-  } while (std::chrono::high_resolution_clock::now().time_since_epoch() - start < pulseTimeDuration);
+  } while (std::chrono::high_resolution_clock::now().time_since_epoch() -
+               start <
+           pulseTimeDuration);
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
@@ -179,7 +188,8 @@ void ReadoutGeneratorBase::transmitLoop() {
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::initialize(FunctionGenerator *readoutGenerator) {
+void ReadoutGeneratorBase::initialize(
+    std::unique_ptr<FunctionGenerator> readoutGenerator) {
   SocketImpl::Endpoint local("0.0.0.0", 0);
   SocketImpl::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
@@ -208,7 +218,8 @@ void ReadoutGeneratorBase::initialize(FunctionGenerator *readoutGenerator) {
   }
 
   // Figure out distribution that will be used for the readoutGenerator.
-  distributionGenerator = readoutGenerator;
+  readoutTimeGenerator = std::move(readoutGenerator);
+
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
   if (ReadoutPerPacket == 0)
     ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;

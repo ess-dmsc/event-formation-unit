@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,6 +6,9 @@
 /// \brief Generate artificial NMX readouts
 //===----------------------------------------------------------------------===//
 
+#include "generators/functiongenerators/DistributionGenerator.h"
+#include "generators/functiongenerators/FunctionGenerator.h"
+#include <memory> // Add include for std::unique_ptr
 #include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 // GCOVR_EXCL_START
 
@@ -17,8 +20,9 @@ int main(int argc, char *argv[]) {
 
   NmxGen.argParse(argc, argv);
 
-  DistributionGenerator distribution(NmxGen.Settings.Frequency);
-  NmxGen.initialize(&distribution);
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(NmxGen.Settings.Frequency);
+  NmxGen.initialize(std::move(readoutTimeGenerator));
 
   NmxGen.transmitLoop();
 

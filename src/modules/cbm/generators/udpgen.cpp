@@ -20,18 +20,18 @@ int main(int argc, char *argv[]) {
 
   CbmGen.argParse(argc, argv);
 
-  std::unique_ptr<FunctionGenerator> distribution;
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator;
   if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
-    distribution = std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
+    readoutTimeGenerator = std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
-    distribution = std::make_unique<LinearGenerator>(CbmGen.Settings.Frequency,
+    readoutTimeGenerator = std::make_unique<LinearGenerator>(CbmGen.Settings.Frequency,
                                             CbmGen.cbmSettings.Gradient.value(),
                                             CbmGen.cbmSettings.Offset);
   } else {
     throw std::runtime_error("Unsupported monitor type");
   }
 
-  CbmGen.initialize(distribution.get());
+  CbmGen.initialize(std::move(readoutTimeGenerator));
 
   CbmGen.transmitLoop();
   return 0;

@@ -191,7 +191,7 @@ public:
   ///
   /// \param NanoSeconds The duration in nanoseconds to add.
   /// \return A new ESSTime object that represents the result of the addition.
-  inline ESSTime operator+(const TimeDurationNano &NanoSeconds) {
+  inline ESSTime operator+(const TimeDurationNano &NanoSeconds) const {
     ESSTime result = *this;
     uint32_t ticksToAdd =
         static_cast<uint32_t>(NanoSeconds.count() / ESSClockTick);
