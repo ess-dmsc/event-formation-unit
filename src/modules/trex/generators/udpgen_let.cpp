@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,8 +17,9 @@ int main(int argc, char *argv[]) {
 
   TrexGen.argParse(argc, argv);
 
-  DistributionGenerator distribution(TrexGen.Settings.Frequency);
-  TrexGen.initialize(&distribution);
+    std::unique_ptr<FunctionGenerator> readoutTimeGenerator = 
+      std::make_unique<DistributionGenerator>(TrexGen.Settings.Frequency);
+  TrexGen.initialize(std::move(readoutTimeGenerator));
   TrexGen.transmitLoop();
 
   return 0;

@@ -17,8 +17,9 @@ int main(int argc, char *argv[]) {
 
   LokiGen.argParse(argc, argv);
 
-  DistributionGenerator distribution(LokiGen.Settings.Frequency);
-  LokiGen.initialize(&distribution);
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator = 
+      std::make_unique<DistributionGenerator>(LokiGen.Settings.Frequency);
+  LokiGen.initialize(std::move(readoutTimeGenerator));
 
   LokiGen.transmitLoop();
 

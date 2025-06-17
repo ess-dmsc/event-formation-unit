@@ -9,10 +9,13 @@
 
 // GCOVR_EXCL_START
 
+#include "generators/functiongenerators/DistributionGenerator.h"
+#include "generators/functiongenerators/FunctionGenerator.h"
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <fcntl.h>
+#include <memory>
 #include <sys/stat.h>
 
 // #undef TRC_LEVEL
@@ -92,8 +95,9 @@ void ReadoutGenerator::generateData() {
 }
 
 void ReadoutGenerator::main() {
-  DistributionGenerator distribution(Settings.Frequency);
-  ReadoutGeneratorBase::initialize(&distribution);
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(Settings.Frequency);
+  ReadoutGeneratorBase::initialize(std::move(readoutTimeGenerator));
 
   // If the number of packets is not set, calculate it how much packet is
   // required to send all the readouts in the file

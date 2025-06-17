@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,9 +9,9 @@
 
 // GCOVR_EXCL_START
 
-#include <dream/generators/g4data/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
+#include <dream/generators/g4data/ReadoutGenerator.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -45,9 +45,10 @@ int ReadoutGenerator::readReadout(struct dat_data_t &Readout) {
            Readout.pulsetimehi, Readout.pulsetimelo, Readout.prevpulsetimehi);
 
     XTRACE(DATA, WAR,
-           "fiber %2u, fen %2u, timehi %08x, timelo %08x, uid %2u, anode %u, cathode %u\n",
-           Readout.fiber, Readout.fen, Readout.timehi, Readout.timelo, Readout.uid,
-           Readout.anode, Readout.cathode);
+           "fiber %2u, fen %2u, timehi %08x, timelo %08x, uid %2u, anode %u, "
+           "cathode %u\n",
+           Readout.fiber, Readout.fen, Readout.timehi, Readout.timelo,
+           Readout.uid, Readout.anode, Readout.cathode);
 
     return 1;
   }
@@ -97,8 +98,9 @@ void ReadoutGenerator::generateData() {
 }
 
 void ReadoutGenerator::main() {
-  DistributionGenerator distribution(Settings.Frequency);
-  ReadoutGeneratorBase::initialize(&distribution);
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(Settings.Frequency);
+  ReadoutGeneratorBase::initialize(std::move(readoutTimeGenerator));
 
   // If the number of packets is not set, calculate it how much packet is
   // required to send all the readouts in the file
