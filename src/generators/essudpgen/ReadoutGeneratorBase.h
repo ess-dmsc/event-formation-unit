@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <memory>
 
 ///
 /// \class ReadoutGeneratorBase
