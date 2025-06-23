@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <fmt/format.h>
 
 ///\todo could be optimised, but this is not the bottleneck
 static double gaussianPDF(double X, double Mu, double Sigma) {
@@ -53,7 +54,10 @@ double DistributionGenerator::getValue() {
   if (it == CDF.end()) {
     return MaxRange;
   }
-  const size_t index = std::distance(CDF.cbegin(), it);
+
+  // Locate the index and add noise to avoid generating a discrete set of values
+  double index = std::distance(CDF.cbegin(), it) + dis(gen);
+  index = std::min(index, CDF.size() - 1.0);
 
   return index * BinWidth;
 }
