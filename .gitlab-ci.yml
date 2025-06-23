@@ -22,7 +22,6 @@ variables:
   CONAN_USER_HOME: "$CI_PROJECT_DIR"
 
 .template_build_info: &template_build_info
-  after_script:
     - |
       {
          echo "Build type: $(grep CMAKE_BUILD_TYPE build/CMakeCache.txt | cut -d= -f2)"
@@ -31,6 +30,30 @@ variables:
           echo "Build date: $(date +'%Y-%m-%d %H:%M:%S')"
           echo "Build image: $(basename $CI_JOB_IMAGE)"
       } > build/BUILD_INFO
+
+.prepare_archive: &prepare_archive
+    - mkdir -p archive/event-formation-unit
+    - cp -r build/bin archive/event-formation-unit
+    - cp -r build/generators archive/event-formation-unit
+    - cp -r build/lib archive/event-formation-unit
+    - cp -r build/licenses archive/event-formation-unit
+    - cp -r build/BUILD_INFO archive/event-formation-unit
+    - mkdir archive/event-formation-unit/util
+    - cp -r utils/efushell archive/event-formation-unit/util
+    - mkdir archive/event-formation-unit/configs
+    - mkdir archive/event-formation-unit/data
+
+.versioning_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      variables:
+        VERSION: ${CI_COMMIT_SHORT_SHA}
+    - if: $CI_COMMIT_TAG
+      variables:
+        VERSION: ${CI_COMMIT_TAG}
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        VERSION: ${CI_COMMIT_SHORT_SHA}
 
 conan_setup:
   stage: setup
@@ -61,54 +84,63 @@ almalinux9_gcc11_release:
   stage: build
   dependencies:
     - conan_setup
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 day
-  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
     - conan install .. --build=missing --profile=linux_x86_64_gcc11
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
+  after_script:
+    - *template_build_info
+    - *prepare_archive
+    - ARCHIVE_NAME="event-formation-unit-${VERSION}-almalinux9.tar.gz"
+    - mkdir -p dist
+    - tar -C archive -czf dist/$ARCHIVE_NAME event-formation-unit
+  artifacts:
+    paths:
+      - build/
+      - dist/
+    expire_in: 1 day
+  extends: .versioning_rules
 
 ubuntu2204_gcc11_release:
   image: $UBUNTU2204_IMAGE
   stage: build
   dependencies:
     - conan_setup
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 day
-  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
     - conan install .. --build=missing --profile=linux_x86_64_gcc11
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
+  after_script:
+    - *template_build_info
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
 
 ubuntu2204_clang17_release:
   image: $UBUNTU2204_IMAGE
   stage: build
   dependencies:
     - conan_setup
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 day
   variables:
     CC: /usr/bin/clang-17
     CXX: /usr/bin/clang++-17
-  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
     - conan install .. --build=missing --profile=linux_x86_64_clang17
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
+  after_script:
+    - *template_build_info
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: never
@@ -121,17 +153,24 @@ centos7_gcc11_release:
   stage: build
   dependencies:
     - conan_setup
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 day
-  <<: *template_build_info
   script:
     - mkdir -p build
     - cd build
     - conan install .. --build=missing --profile=linux_x86_64_gcc11_legacy
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make -j$(nproc) all
+  after_script:
+    - *template_build_info
+    - *prepare_archive
+    - ARCHIVE_NAME="event-formation-unit-${VERSION}-centos7.tar.gz"
+    - mkdir -p dist
+    - tar -C archive -czf dist/$ARCHIVE_NAME event-formation-unit
+  artifacts:
+    paths:
+      - build/
+      - dist/
+    expire_in: 1 day
+  extends: .versioning_rules
 
 runefu:
   image: $CENTOS7_IMAGE
@@ -177,27 +216,12 @@ publish_tar_job:
   image: alpine/curl:latest
   dependencies:
     - centos7_gcc11_release
-  artifacts: 
-    paths:
-      - event-formation-unit-centos7.tar.gz
+    - almalinux9_gcc11_release
   before_script:
     - curl -fL https://install-cli.jfrog.io | sh
     - jf config add $ESS_ARTIFACTORY_ID --url=$ESS_ARTIFACTORY_URL --user=$ESS_ARTIFACTORY_ECDC_USER --password=$ESS_ARTIFACTORY_ECDC_GENERIC_TOKEN
-    - jf config show
   script:
-    - mkdir -p archive/event-formation-unit
-    - cp -r build/bin archive/event-formation-unit
-    - cp -r build/generators archive/event-formation-unit
-    - cp -r build/lib archive/event-formation-unit
-    - cp -r build/licenses archive/event-formation-unit
-    - cp -r build/BUILD_INFO archive/event-formation-unit
-    - mkdir archive/event-formation-unit/util
-    - cp -r utils/efushell archive/event-formation-unit/util
-    - mkdir archive/event-formation-unit/configs
-    - mkdir archive/event-formation-unit/data
-    
-    - tar czvf event-formation-unit-centos7.tar.gz -C archive event-formation-unit
-    - jf rt u --build-name="event-formation-unit-centos7" --build-number=${CI_JOB_ID} event-formation-unit-centos7.tar.gz ecdc-generic-release/${ARTIFACTORY_UPLOAD_PATH}
+    - jf rt u --build-name="event-formation-unit-gitlab-ci" --build-number=${CI_PIPELINE_IID} "dist/*.tar.gz" ecdc-generic-release/${ARTIFACTORY_UPLOAD_PATH} --flat=true
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
