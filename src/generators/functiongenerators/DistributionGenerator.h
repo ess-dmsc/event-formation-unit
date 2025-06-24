@@ -81,7 +81,7 @@ public:
   double getValue() override;
 
   /// \brief return the distribution value at a specific index
-  double getValueByIndex(double) override;
+  double getValueByPos(double) override;
 
   double MaxRange{1000.0 / 14}; // ESS 14Hz -> 71.43 ms
   uint32_t NumberOfBins{DEFAULT_BIN_COUNT};

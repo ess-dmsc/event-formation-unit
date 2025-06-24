@@ -1,14 +1,15 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief Generator of artificial readout data for CBM beam monitor types
-///        based on TTLMon ICD
+/// \brief Generator of artificial readout data for CBM beam monitor types like
+/// IBM, EVENT_0D, etc.
 /// \todo add link
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "cbm/CbmTypes.h"
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
@@ -17,14 +18,14 @@
 #include <generators/functiongenerators/LinearGenerator.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
 #include <string>
+#include <thread>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace cbm {
 
-ReadoutGenerator::ReadoutGenerator()
-    : ReadoutGeneratorBase(DetectorType::CBM) {
+ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
 
   // Set default values for the generator
 
@@ -43,13 +44,15 @@ ReadoutGenerator::ReadoutGenerator()
 
   auto CbmGroup = app.add_option_group("CBM Options");
   CbmGroup->add_option("--monitor_type", cbmSettings.monitorType,
-                       "Beam monitor type (TTL, N2GEM, IBM, etc)");
+                       "Beam monitor type (" + CbmType::getTypeNames() + ")");
   CbmGroup->add_option("--fen", cbmSettings.FenId,
                        "Override FEN ID (default 0)");
   CbmGroup->add_option("--channel", cbmSettings.ChannelId,
                        "Override channel ID (default 0)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
+  IbmGroup->add_option("--numReadout", cbmSettings.NumReadout,
+                       "Number of readouts per pulse");
   IbmGroup->add_option("--value", cbmSettings.Value,
       "Fixed value for the value function (required for Fixed generator type)");
   IbmGroup->add_option("--gradient", cbmSettings.Gradient,
@@ -69,7 +72,7 @@ ReadoutGenerator::ReadoutGenerator()
 
   IbmGroup
       ->add_option("--generator_type", cbmSettings.generatorType,
-                   "Set the generator type (default : Dist)")
+                   "Set the generator type ([Dist, Fixed, Linear] default : Dist)")
       ->check(genTypeValidator);
 }
 // clang-format on
@@ -121,40 +124,43 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
     // Use the pre-initialized RandomGenerator and ShakeBeamDist to generate
     // a random drift value for the whole pulse, which will be applied by
     // the function generator.
-    RandomTimeDriftNS =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::microseconds(BeamShakeDistMs(RandomGenerator)));
+    RandomTimeDriftNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::microseconds(BeamShakeDistMs(RandomGenerator)));
   }
 
   for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
-    // Get pointer to the data buffer and clear memory with zeros
-    auto dataPkt = (Parser::CbmReadout *)dataPtr;
-    memset(dataPkt, 0, sizeof(Parser::CbmReadout));
+    if (numberOfReadouts < cbmSettings.NumReadout) {
 
-    // write data packet to the buffer
-    dataPkt->FiberId = CBM_FIBER_ID;
-    dataPkt->FENId = cbmSettings.FenId;
-    dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
-    dataPkt->TimeHigh = readoutTimeHigh;
-    dataPkt->TimeLow = readoutTimeLow;
-    dataPkt->Type = CbmType::IBM;
+      // Get pointer to the data buffer and clear memory with zeros
+      auto dataPkt = (Parser::CbmReadout *)dataPtr;
+      memset(dataPkt, 0, sizeof(Parser::CbmReadout));
 
-    // Currently we generating for 1 beam monitor only
-    dataPkt->Channel = cbmSettings.ChannelId;
-    dataPkt->ADC = 0;
+      // write data packet to the buffer
+      dataPkt->FiberId = CBM_FIBER_ID;
+      dataPkt->FENId = cbmSettings.FenId;
+      dataPkt->DataLength = sizeof(Parser::CbmReadout);
+      auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+      dataPkt->TimeHigh = readoutTimeHigh;
+      dataPkt->TimeLow = readoutTimeLow;
+      dataPkt->Type = CbmType::IBM;
 
-    if (cbmSettings.generatorType == GeneratorType::Distribution) {
-      distributionValueGenerator(dataPkt);
-    } else if (cbmSettings.generatorType == GeneratorType::Linear) {
-      linearValueGenerator(dataPkt);
-    } else {
-      fixedValueGenerator(dataPkt);
+      // Currently we generating for 1 beam monitor only
+      dataPkt->Channel = cbmSettings.ChannelId;
+      dataPkt->ADC = 0;
+
+      if (cbmSettings.generatorType == GeneratorType::Distribution) {
+        distributionValueGenerator(dataPkt);
+      } else if (cbmSettings.generatorType == GeneratorType::Linear) {
+        linearValueGenerator(dataPkt);
+      } else {
+        fixedValueGenerator(dataPkt);
+      }
+
+      // Move pointer to next readout
+      dataPtr += sizeof(Parser::CbmReadout);
+      numberOfReadouts++;
     }
-
-    // Move pointer to next readout
-    dataPtr += sizeof(Parser::CbmReadout);
   }
 }
 
@@ -175,9 +181,8 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
         static_cast<double>(GenMaX), cbmSettings.NumberOfBins);
   }
 
-  esstime::TimeDurationMilli Tof =
-      esstime::nsToMilliseconds(RandomTimeDriftNS) +
-      esstime::TimeDurationMilli(Generator->getValue());
+  auto readoutTime = esstime::ESSTime(value->TimeHigh, value->TimeLow);
+  auto Tof = esstime::nsToMilliseconds(getTimeOfFlight(readoutTime)).count();
 
   int Noise{0};
 
@@ -186,19 +191,20 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     Noise = NoiseDist(RandomGenerator);
   }
 
-  value->NPos = 1000 * Generator->getValueByIndex(Tof.count()) + Noise;
+  value->NPos = 1000 * Generator->getValueByPos(Tof) + Noise;
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator = std::make_unique<LinearGenerator>(
-      static_cast<double>(LinearGenerator::LINEAR_TIME_UNIT / Settings.Frequency),
-      static_cast<double>(cbmSettings.Gradient.value()),
-      cbmSettings.Offset);
+        Settings.Frequency, cbmSettings.NumReadout,
+        cbmSettings.Gradient.value());
   }
 
-  auto Tof = esstime::nsToMilliseconds(Generator->getValue());
-  value->NPos = Generator->getValueByIndex(Tof.count());
+  auto readoutTime = esstime::ESSTime(value->TimeHigh, value->TimeLow);
+  auto Tof = getTimeOfFlight(readoutTime).count();
+
+  value->NPos = Generator->getValueByPos(Tof);
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {

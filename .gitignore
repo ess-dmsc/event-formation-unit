@@ -28,6 +28,6 @@ CMakeLists.txt.user
 *.code-workspace
 .cache
 .vscode
-.devcontainer
+.gitmodules
 .clang-format
 resources
