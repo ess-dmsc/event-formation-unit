@@ -72,7 +72,7 @@ ReadoutGeneratorBase::getTimeOfFlight(ESSTime &readoutTime) const {
 
 std::pair<uint32_t, uint32_t>
 ReadoutGeneratorBase::generateReadoutTime(double timeOfFlightMs) const {
-  ESSTime readoutTime = pulseTime + esstime::msToNanosecounds(timeOfFlightMs);
+  ESSTime readoutTime = pulseTime + esstime::msToNanoseconds(timeOfFlightMs);
   return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
 }
 
