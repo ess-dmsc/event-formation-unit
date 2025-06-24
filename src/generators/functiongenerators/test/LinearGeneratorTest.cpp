@@ -25,7 +25,7 @@ protected:
 
 void ReadoutTest(uint8_t pulseCount, uint16_t frequency, double gradient,
                  uint32_t readoutsPerPulse) {
-  double max = LinearGenerator::TIME_UNIT_NS / frequency;
+  double max = LinearGenerator::TIME_UNIT_MS / frequency;
 
   LinearGenerator generator(frequency, readoutsPerPulse, gradient);
 

@@ -25,7 +25,7 @@
 class LinearGenerator : public FunctionGenerator {
 public:
   /// \brief Linear generator is working in nano seconds
-  static constexpr double TIME_UNIT_NS{1E9};
+  static constexpr double TIME_UNIT_MS{1E3};
 
   /// \brief LinearGenerator generates a function where Y values are
   /// lineraly increasing while X values also increasing from 0 towards the
@@ -53,7 +53,7 @@ public:
     if (Gradient < 0) {
       throw std::invalid_argument("Gradient cannot be negative");
     }
-    binWidth = ceil(PulseDuration / numBins);
+    binWidth = PulseDuration / numBins;
   }
 
   /// \brief LinearGenerator generates a function where Y values are
@@ -68,15 +68,16 @@ public:
   /// ensure we do not generate values at the bin edges.
   ///
   explicit LinearGenerator(double MaxXValue, uint32_t numBins)
-      : LinearGenerator(MaxXValue, numBins, ceil(MaxXValue / numBins),
-                        ceil(MaxXValue / numBins / 2)) {}
+      : LinearGenerator(MaxXValue, numBins, MaxXValue / numBins,
+                        MaxXValue / numBins / 2) {}
 
   /// \brief LinearGenerator generates a function where Y values are
   /// lineraly increasing while X values also increasing from 0 towards the
   /// maximum X value. X values are increase according to the number of bins.
   /// Negative X values are not supported.
   /// \param frequency The frequency in Hz for the generator, which is used to
-  /// calculate the maximum X value as TIME_UNIT_NS / frequency.
+  /// calculate the maximum X value as TIME_UNIT_MS / frequency. The X time unit
+  /// is in milliseconds with double precision.
   /// \param numBins The number of bins to divide the X value into.
   /// \param Gradient The gradient value for the linear function.
   /// \throws std::invalid_argument if frequency is zero.
@@ -89,7 +90,7 @@ public:
       throw std::invalid_argument("Frequency cannot be zero");
     }
 
-    *this = LinearGenerator(ceil(TIME_UNIT_NS / frequency), numBins, gradient);
+    *this = LinearGenerator(TIME_UNIT_MS / frequency, numBins, gradient);
   }
 
   /// \brief LinearGenerator generates a function where Y values are
@@ -97,7 +98,8 @@ public:
   /// maximum X value. X values are increase according to the number of bins.
   /// Negative X values are not supported.
   /// \param frequency The frequency in Hz for the generator, which is used to
-  /// calculate the maximum X value as TIME_UNIT_NS / frequency.
+  /// calculate the maximum X value as TIME_UNIT_MS / frequency. The X time unit
+  /// is in milliseconds with double precision.
   /// \param numBins The number of bins to divide the X value into.
   /// \param Gradient The gradient value for the linear function.
   /// \throws std::invalid_argument if frequency is zero.
@@ -111,7 +113,7 @@ public:
       throw std::invalid_argument("Frequency cannot be zero");
     }
 
-    *this = LinearGenerator(ceil(TIME_UNIT_NS / frequency), numBins);
+    *this = LinearGenerator(TIME_UNIT_MS / frequency, numBins);
   }
 
   /// \brief Get the value at a given position.

@@ -182,7 +182,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
   }
 
   auto readoutTime = esstime::ESSTime(value->TimeHigh, value->TimeLow);
-  auto Tof = esstime::nsToMilliseconds(getTimeOfFlight(readoutTime)).count();
+  auto TofMs = esstime::nsToMilliseconds(getTimeOfFlightNS(readoutTime)).count();
 
   int Noise{0};
 
@@ -191,7 +191,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     Noise = NoiseDist(RandomGenerator);
   }
 
-  value->NPos = 1000 * Generator->getValueByPos(Tof) + Noise;
+  value->NPos = 1000 * Generator->getValueByPos(TofMs) + Noise;
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
@@ -202,9 +202,9 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   }
 
   auto readoutTime = esstime::ESSTime(value->TimeHigh, value->TimeLow);
-  auto Tof = getTimeOfFlight(readoutTime).count();
+  auto TofMs = esstime::nsToMilliseconds(getTimeOfFlightNS(readoutTime)).count();
 
-  value->NPos = Generator->getValueByPos(Tof);
+  value->NPos = Generator->getValueByPos(TofMs);
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {

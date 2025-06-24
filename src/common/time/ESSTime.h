@@ -105,7 +105,7 @@ inline TimeDurationMilli sToMilliseconds(const TimeDurationSec &Seconds) {
 /// \param Miliseconds Duration in milliseconds represented as a double.
 /// \return TimeDurationNano The corresponding duration in
 /// nanoseconds.
-inline TimeDurationNano msToNanoseconds(TimeDurationMilli Milliseconds) {
+inline TimeDurationNano msToNanoseconds(const TimeDurationMilli &Milliseconds) {
   return TimeDurationNano(static_cast<int64_t>(Milliseconds.count() * 1e6));
 }
 
@@ -113,8 +113,7 @@ inline TimeDurationNano msToNanoseconds(TimeDurationMilli Milliseconds) {
 /// \param Miliseconds Duration in milliseconds represented as a double.
 /// \return TimeDurationNano The corresponding duration in nanoseconds.
 inline TimeDurationNano msToNanoseconds(double Milliseconds) {
-  return std::chrono::duration_cast<TimeDurationNano>(
-      std::chrono::nanoseconds(static_cast<int64_t>(Milliseconds * 1e6)));
+  return TimeDurationNano(static_cast<int64_t>(Milliseconds * 1e6));
 }
 
 /// \class ESSTime
