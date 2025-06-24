@@ -56,18 +56,18 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   prevPulseTime = pulseTime;
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::generateReadoutTime() const {
+std::pair<uint32_t, uint32_t>
+ReadoutGeneratorBase::generateReadoutTime() const {
   if (readoutTimeGenerator == nullptr) {
     throw std::runtime_error("Readout time generator is not initialized");
   }
-  return generateReadoutTime(readoutTimeGenerator->getValue());
+  return generateReadoutTime(
+      nsToMilliseconds(readoutTimeGenerator->getValue()).count());
 }
 
-double ReadoutGeneratorBase::getTimeOfFlight() const {
-  if (readoutTimeGenerator == nullptr) {
-    throw std::runtime_error("Readout time generator is not initialized");
-  }
-  return readoutTimeGenerator->getValue();
+TimeDurationNano
+ReadoutGeneratorBase::getTimeOfFlight(ESSTime &readoutTime) const {
+  return readoutTime - pulseTime;
 }
 
 std::pair<uint32_t, uint32_t>
@@ -102,6 +102,7 @@ void ReadoutGeneratorBase::generatePackets(
   } while (std::chrono::high_resolution_clock::now().time_since_epoch() -
                start <
            pulseTimeDuration);
+  numberOfReadouts = 0; // reset readout counter for next packet
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {

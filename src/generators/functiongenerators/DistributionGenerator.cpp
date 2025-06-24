@@ -43,8 +43,11 @@ DistributionGenerator::DistributionGenerator(double MaxVal, uint32_t Bins) : Max
   Norm = CDF[NumberOfBins - 1];
 }
 
-double DistributionGenerator::getValueByIndex(double Pos) {
-  int Index = static_cast<int>(Pos / BinWidth);
+double DistributionGenerator::getValueByPos(double Pos) {
+  uint Index = abs(static_cast<int>(Pos / BinWidth));
+  if (Index >= NumberOfBins) {
+    return Dist[NumberOfBins - 1];
+  }
   return Dist[Index];
 }
 

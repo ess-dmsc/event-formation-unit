@@ -17,7 +17,7 @@ public:
   virtual ~FunctionGenerator() {}
 
   /// \brief Get the value at a given position in the generator function.
-  virtual double getValueByIndex(double) = 0;
+  virtual double getValueByPos(double) = 0;
 
   /// \brief return a parameter value used to generate a distribution function. 
   virtual double getValue() = 0;

@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <generators/functiongenerators/FunctionGenerator.h>
 #include <common/readout/ess/Parser.h>
 #include <common/system/SocketImpl.h>
 #include <common/testutils/DataFuzzer.h>
@@ -17,6 +16,7 @@
 #include <common/types/DetectorType.h>
 #include <flatbuffers/stl_emulation.h>
 #include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
 
 #include <CLI/CLI.hpp>
 
@@ -148,7 +148,7 @@ protected:
   /// \return Time of flight in double precision.
   /// \note The unit depends on the generator configuration, typically in ms.
   /// \throws std::runtime_error if readout time generator is not initialized.
-  double getTimeOfFlight() const;
+  esstime::TimeDurationNano getTimeOfFlight(esstime::ESSTime &) const;
 
   // clang-format off
   static constexpr int MAX_TIME_DRIFT_NS{20}; ///< Maximum allowed pulse time drift
@@ -160,9 +160,11 @@ protected:
   uint32_t SeqNum{0};                         ///< Sequence number
   uint16_t DataSize{0};                       ///< Number of data bytes in packet
   uint8_t HeaderSize{0};                      ///< Size of the header
+
+  uint32_t numberOfReadouts{0}; ///< Number of readouts genearated
   // clang-format on
 
-  DataFuzzer Fuzzer;                   ///< Data fuzzer
+  DataFuzzer Fuzzer;                            ///< Data fuzzer
   std::unique_ptr<UDPTransmitter> DataSource{}; ///< Data source
 
 private:

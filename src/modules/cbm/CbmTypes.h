@@ -133,6 +133,20 @@ public:
   bool operator==(const Types &other) const {
     return mBeamMonitorType == other;
   }
+
+  /// \brief Gets a string representation of all available CBM types.
+  /// \return A string containing all CBM type names separated by commas.
+  static std::string getTypeNames() {
+    std::string result;
+    auto names = magic_enum::enum_names<Types>();
+    for (size_t i = 0; i < names.size(); ++i) {
+      result += std::string(names[i]);
+      if (i < names.size() - 1) {
+        result += ", ";
+      }
+    }
+    return result;
+  }
 };
 
 } // namespace cbm

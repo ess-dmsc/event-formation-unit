@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
 
   std::unique_ptr<FunctionGenerator> readoutTimeGenerator;
   if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
-    readoutTimeGenerator = std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
+    readoutTimeGenerator =
+        std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
-    readoutTimeGenerator = std::make_unique<LinearGenerator>(CbmGen.Settings.Frequency,
-                                            CbmGen.cbmSettings.Gradient.value(),
-                                            CbmGen.cbmSettings.Offset);
+    readoutTimeGenerator = std::make_unique<LinearGenerator>(
+        CbmGen.Settings.Frequency, CbmGen.cbmSettings.NumReadout);
   } else {
     throw std::runtime_error("Unsupported monitor type");
   }

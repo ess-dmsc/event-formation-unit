@@ -17,8 +17,8 @@
 namespace esstime {
 
 using TimePointNano = std::chrono::high_resolution_clock::time_point;
-/// \brief Duration in nanoseconds with uint64_t precision
-using TimeDurationNano = std::chrono::duration<uint64_t, std::nano>;
+/// \brief Duration in nanoseconds with int64_t precision
+using TimeDurationNano = std::chrono::duration<int64_t, std::nano>;
 /// \brief Duration in microseconds with uint64_t precision
 using TimeDurationMicro = std::chrono::duration<double, std::micro>;
 /// \brief Duration in milliseconds with double precision
@@ -34,12 +34,12 @@ inline std::chrono::nanoseconds hzToNanoseconds(float FrequencyHz) {
   return std::chrono::nanoseconds(nsPeriod);
 }
 
-/// \brief Converts a duration in nanoseconds (uint64_t) to microseconds.
+/// \brief Converts a duration in nanoseconds (int64_t) to microseconds.
 /// \param NanoSeconds Duration in nanoseconds.
 /// \return std::chrono::microseconds The corresponding duration in
 /// microseconds.
-inline TimeDurationMicro nsToMicroseconds(uint64_t NanoSeconds) {
-  return std::chrono::duration_cast<std::chrono::microseconds>(
+inline TimeDurationMicro nsToMicroseconds(int64_t NanoSeconds) {
+  return std::chrono::duration_cast<TimeDurationMicro>(
       std::chrono::nanoseconds(NanoSeconds));
 }
 
@@ -50,28 +50,29 @@ inline TimeDurationMicro nsToMicroseconds(const TimeDurationNano &NanoSeconds) {
   return std::chrono::duration_cast<TimeDurationMicro>(NanoSeconds);
 }
 
-/// \brief Converts a duration in nanoseconds (uint64_t) to milliseconds.
+/// \brief Converts a duration in nanoseconds (int64_t) to milliseconds.
 /// \param NanoSeconds Duration in nanoseconds.
 /// \return std::chrono::milliseconds The corresponding duration in
 /// milliseconds.
-inline TimeDurationMilli nsToMilliseconds(uint64_t NanoSeconds) {
-  return std::chrono::duration_cast<std::chrono::milliseconds>(
+inline TimeDurationMilli nsToMilliseconds(int64_t NanoSeconds) {
+  return std::chrono::duration_cast<TimeDurationMilli>(
       std::chrono::nanoseconds(NanoSeconds));
 }
 
 /// \brief Converts a duration in nanoseconds (TimeDurationNano) to
-/// milliseconds. 
+/// milliseconds.
 /// \param NanoSeconds Duration in nanoseconds.
-/// \return TimeDurationMilli(double) The corresponding duration in milliseconds.
+/// \return TimeDurationMilli(double) The corresponding duration in
+/// milliseconds.
 inline TimeDurationMilli nsToMilliseconds(const TimeDurationNano &NanoSeconds) {
   return std::chrono::duration_cast<TimeDurationMilli>(NanoSeconds);
 }
 
-/// \brief Converts a duration in seconds (uint64_t) to nanoseconds.
+/// \brief Converts a duration in seconds (int64_t) to nanoseconds.
 /// \param Seconds Duration in seconds.
 /// \return std::chrono::nanoseconds The corresponding duration in nanoseconds.
-inline TimeDurationNano sToNanoseconds(uint64_t Seconds) {
-  return std::chrono ::duration_cast<std::chrono::nanoseconds>(
+inline TimeDurationNano sToNanoseconds(int64_t Seconds) {
+  return std::chrono ::duration_cast<TimeDurationNano>(
       std::chrono::seconds(Seconds));
 }
 
@@ -83,12 +84,12 @@ inline TimeDurationNano sToNanoseconds(const TimeDurationSec &Seconds) {
   return std::chrono::duration_cast<TimeDurationNano>(Seconds);
 }
 
-/// \brief Converts a duration in seconds (uint64_t) to milliseconds.
+/// \brief Converts a duration in seconds (int64_t) to milliseconds.
 /// \param Seconds Duration in seconds.
 /// \return std::chrono::milliseconds The corresponding duration in
 /// milliseconds.
-inline TimeDurationMilli sToMilliseconds(uint64_t Seconds) {
-  return std::chrono ::duration_cast<std::chrono::milliseconds>(
+inline TimeDurationMilli sToMilliseconds(int64_t Seconds) {
+  return std::chrono ::duration_cast<TimeDurationMilli>(
       std::chrono::seconds(Seconds));
 }
 
@@ -104,16 +105,16 @@ inline TimeDurationMilli sToMilliseconds(const TimeDurationSec &Seconds) {
 /// \param Miliseconds Duration in milliseconds represented as a double.
 /// \return TimeDurationNano The corresponding duration in
 /// nanoseconds.
-inline TimeDurationNano msToNanosecounds(TimeDurationMilli Miliseconds) {
-  return TimeDurationNano(static_cast<uint64_t>(Miliseconds.count() * 1e6));
+inline TimeDurationNano msToNanosecounds(TimeDurationMilli Milliseconds) {
+  return TimeDurationNano(static_cast<int64_t>(Milliseconds.count() * 1e6));
 }
 
 /// \brief Converts a duration in milliseconds to nanoseconds.
 /// \param Miliseconds Duration in milliseconds represented as a double.
 /// \return TimeDurationNano The corresponding duration in nanoseconds.
-inline TimeDurationNano msToNanosecounds(double Miliseconds) {
+inline TimeDurationNano msToNanosecounds(double Milliseconds) {
   return std::chrono::duration_cast<TimeDurationNano>(
-      std::chrono::nanoseconds(static_cast<uint64_t>(Miliseconds * 1e6)));
+      std::chrono::nanoseconds(static_cast<int64_t>(Milliseconds * 1e6)));
 }
 
 /// \class ESSTime
@@ -167,9 +168,9 @@ public:
   ESSTime(const ESSTime &other)
       : TimeHigh(other.TimeHigh), TimeLow(other.TimeLow) {}
 
-  
   ///
-  /// \brief Create an ESSTime object set to current system time based on a high resolution time
+  /// \brief Create an ESSTime object set to current system time based on a high
+  /// resolution time
   ///
   static inline ESSTime now() {
     auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
@@ -186,8 +187,8 @@ public:
     this->operator+=(ticksToAdd);
   }
 
-  /// \brief Overloads the '+' operator to add a specified duration in nanoseconds to an
-  /// ESSTime object.
+  /// \brief Overloads the '+' operator to add a specified duration in
+  /// nanoseconds to an ESSTime object.
   ///
   /// \param NanoSeconds The duration in nanoseconds to add.
   /// \return A new ESSTime object that represents the result of the addition.
@@ -196,6 +197,18 @@ public:
     uint32_t ticksToAdd =
         static_cast<uint32_t>(NanoSeconds.count() / ESSClockTick);
     return result + ticksToAdd;
+  }
+
+  /// \brief Overloads the '-' operator to subtract another ESSTime object from
+  /// this one.
+  ///
+  /// \param other The ESSTime object to subtract.
+  /// \return The time difference between the two ESSTime objects as a TimeDurationNano.
+  inline TimeDurationNano operator-(const ESSTime &other) const {
+    TimeDurationNano thisDuration = this->toNS();
+    TimeDurationNano otherDuration = other.toNS();
+
+    return thisDuration - otherDuration;
   }
 
   /// \brief Overloads the '+' operator to add a specified number of ticks to an
