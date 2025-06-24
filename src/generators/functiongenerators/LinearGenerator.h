@@ -57,7 +57,7 @@ public:
   }
 
   /// \brief LinearGenerator generates a function where Y values are
-  /// lineraly increasing while X values also increasing from 0 towards the
+  /// linearly increasing while X values also increasing from 0 towards the
   /// maximum X value. X values are increase according to the number of bins.
   /// Negative X values are not supported.
   /// \param MaxXValue The maximum X value for the generator.
@@ -72,7 +72,7 @@ public:
                         MaxXValue / numBins / 2) {}
 
   /// \brief LinearGenerator generates a function where Y values are
-  /// lineraly increasing while X values also increasing from 0 towards the
+  /// linearly increasing while X values also increasing from 0 towards the
   /// maximum X value. X values are increase according to the number of bins.
   /// Negative X values are not supported.
   /// \param frequency The frequency in Hz for the generator, which is used to
@@ -94,7 +94,7 @@ public:
   }
 
   /// \brief LinearGenerator generates a function where Y values are
-  /// lineraly increasing while X values also increasing from 0 towards the
+  /// linearly increasing while X values also increasing from 0 towards the
   /// maximum X value. X values are increase according to the number of bins.
   /// Negative X values are not supported.
   /// \param frequency The frequency in Hz for the generator, which is used to
