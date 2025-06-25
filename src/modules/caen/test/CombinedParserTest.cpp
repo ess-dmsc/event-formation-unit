@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "generators/functiongenerators/FunctionGenerator.h"
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>

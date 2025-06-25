@@ -6,7 +6,7 @@
 /// \brief Generate artificial DREAM readouts
 //===----------------------------------------------------------------------===//
 
-#include "generators/functiongenerators/FunctionGenerator.h"
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <memory>
 #include <modules/dream/generators/ReadoutGenerator.h>
 #include <utility>

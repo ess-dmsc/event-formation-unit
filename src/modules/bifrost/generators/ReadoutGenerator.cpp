@@ -9,8 +9,8 @@
 
 // GCOVR_EXCL_START
 
-#include "generators/functiongenerators/DistributionGenerator.h"
-#include "generators/functiongenerators/FunctionGenerator.h"
+#include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>

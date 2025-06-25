@@ -6,8 +6,8 @@
 /// \brief Generate artificial NMX readouts
 //===----------------------------------------------------------------------===//
 
-#include "generators/functiongenerators/DistributionGenerator.h"
-#include "generators/functiongenerators/FunctionGenerator.h"
+#include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <memory> // Add include for std::unique_ptr
 #include <modules/nmx/generators/MultiHitReadoutGenerator.h>
 // GCOVR_EXCL_START

@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/testutils/HeaderFactory.h"
+#include <common/testutils/HeaderFactory.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/SaveBuffer.h>

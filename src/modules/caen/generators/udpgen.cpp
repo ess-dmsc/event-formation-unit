@@ -6,7 +6,7 @@
 /// \brief Generate artificial CAEN readouts
 //===----------------------------------------------------------------------===//
 
-#include "generators/functiongenerators/DistributionGenerator.h"
+#include <generators/functiongenerators/DistributionGenerator.h>
 #include <modules/caen/generators/ReadoutGenerator.h>
 #include <utility>
 // GCOVR_EXCL_START

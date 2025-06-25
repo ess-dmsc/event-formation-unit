@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
-#include "cbm/CbmTypes.h"
+#include <cbm/CbmTypes.h>
 #include <chrono>
 #include <common/debug/Trace.h>
 #include <common/time/ESSTime.h>
