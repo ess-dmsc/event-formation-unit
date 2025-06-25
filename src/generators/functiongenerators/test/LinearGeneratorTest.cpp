@@ -24,26 +24,34 @@ protected:
 //---------------------------------------------------------------------
 
 void ReadoutTest(uint8_t pulseCount, uint16_t frequency, double gradient,
-                 uint32_t readoutsPerPulse) {
-  double max = LinearGenerator::TIME_UNIT_MS / frequency;
+                 uint32_t binCount) {
+  double max = binCount * gradient;
+  double binWidth = 1000.0 / frequency / binCount;
 
-  LinearGenerator generator(frequency, readoutsPerPulse, gradient);
+  LinearGenerator generator(frequency, binCount, gradient);
 
   size_t readoutCounter = 0;
-  for (size_t i = 0; i < pulseCount * readoutsPerPulse; i++) {
+  for (size_t i = 0; i < pulseCount * binCount; i++) {
     double xValue = generator.getValue();
-    double posValue = generator.getValueByPos(gradient * readoutCounter);
     // xValue must be less than max pulse time. To avoid rounding errors
     // an epsilon value is added for rounding
     ASSERT_LE(xValue, max);
 
     // if counter is larger than readoutCounter then we start on a new pulse.
-    if (readoutCounter >= readoutsPerPulse)
+    if (readoutCounter >= binCount)
       readoutCounter = 0;
-    double xComperand = readoutCounter * gradient;
+    double comparand = readoutCounter * gradient;
+    ASSERT_EQ(xValue, comparand);
 
-    ASSERT_EQ(xValue, xComperand);
-    ASSERT_EQ(posValue, xComperand);
+    double position = gradient * readoutCounter;
+    if (static_cast<uint32_t>(position / binWidth) > binCount) {
+      comparand = 0.0;
+    } else {
+      comparand = static_cast<uint32_t>(position / binWidth) * gradient;
+    }
+
+    double posValue = generator.getValueByPos(position);
+    ASSERT_EQ(posValue, comparand);
 
     readoutCounter++;
   }
@@ -51,39 +59,39 @@ void ReadoutTest(uint8_t pulseCount, uint16_t frequency, double gradient,
 
 TEST_F(LinearGeneratorTest, TestConstructors) {
   // test max X value defined with unique gradient
-  LinearGenerator generator(400000.0, 1000, 1000.0);
+  LinearGenerator generator(400000.0, 1000, 1000.0);  
   EXPECT_EQ(generator.getValueByPos(0), 0.000);
   EXPECT_EQ(generator.getValueByPos(800), 2000.000);
   EXPECT_EQ(generator.getValueByPos(399999), 999 * 1000.0);
   EXPECT_EQ(generator.getValueByPos(400000), 0.0);
 
   // test frequency defined instead max values and with unique gradient
-  generator = LinearGenerator(static_cast<uint16_t>(2500), 1000, 1000.0);
+  generator = LinearGenerator(static_cast<uint16_t>(25), 1000, 1000.0); 
   EXPECT_EQ(generator.getValueByPos(0), 0.000);
-  EXPECT_EQ(generator.getValueByPos(800), 2000.000);
-  EXPECT_EQ(generator.getValueByPos(399999), 999 * 1000.0);
-  EXPECT_EQ(generator.getValueByPos(400000), 0.0);
+  EXPECT_EQ(generator.getValueByPos(0.8), 20 * 1000.000); 
+  EXPECT_EQ(generator.getValueByPos(39.9999), 999 * 1000.0); 
+  EXPECT_EQ(generator.getValueByPos(40.0), 0.0);
 
-  /// Test frequncy defined but gradient calculated
-  generator = LinearGenerator(static_cast<uint16_t>(2500), 1000);
+  /// Test frequency defined but gradient calculated
+  generator = LinearGenerator(static_cast<uint16_t>(25), 1000);
   EXPECT_EQ(generator.getValueByPos(0), 0.000);
-  EXPECT_EQ(generator.getValueByPos(800), 800.000);
-  EXPECT_EQ(generator.getValueByPos(399999), 999 * 400.0);
-  EXPECT_EQ(generator.getValueByPos(400000), 0.0);
+  EXPECT_EQ(generator.getValueByPos(0.8), 20 *  0.04);
+  EXPECT_EQ(generator.getValueByPos(39.9999), 999 * 0.04);
+  EXPECT_EQ(generator.getValueByPos(40.0), 0.0);
 }
 
 TEST_F(LinearGeneratorTest, TestReadoutsRolloverForMultiplePulses) {
   // Test with gradient of 1 microseconds
-  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 71429);
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 512);
   // Test with gradient of 2 microseconds
-  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 35715);
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 512);
   // Test with gradient of 20 microseconds
-  ReadoutTest(6, 25, 20000.0, 2001);
+  ReadoutTest(6, 25, 20000.0, 512);
 
   // Test with gradient of 1 microseconds
-  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 71429);
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 1000.0, 512);
   // Test with gradient of 2 microseconds
-  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 35715);
+  ReadoutTest(4, ReadoutGeneratorBase::DEFAULT_FREQUENCY, 2000.0, 512);
   // Test with gradient of 20 microseconds
-  ReadoutTest(6, 25, 20000.0, 2001);
+  ReadoutTest(6, 25, 20000.0, 512);
 }
