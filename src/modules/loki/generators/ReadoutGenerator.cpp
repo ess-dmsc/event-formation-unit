@@ -10,7 +10,7 @@
 // GCOVR_EXCL_START
 
 #include <common/debug/Trace.h>
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
 
 #include <cassert>
 #include <cstdint>
@@ -25,20 +25,21 @@
 
 namespace Caen {
 
-void LokiReadoutGenerator::generateData() {
+void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
   uint8_t LokiDataSize = sizeof(DataParser::CaenReadout);
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
     auto ReadoutData = (DataParser::CaenReadout *)DP;
 
     ReadoutData->DataLength = ReadoutDataSize;
     assert(ReadoutData->DataLength == LokiDataSize);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
 
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = Readout % 8;
@@ -53,9 +54,6 @@ void LokiReadoutGenerator::generateData() {
     //        ReadoutData->FiberId,
     //        ReadoutData->FENId, ReadoutData->Group, ReadoutData->AmpA);
     DP += LokiDataSize;
-
-    // increment readout time for next readout
-    addTicksBtwReadoutsToReadoutTime();
   }
 }
 

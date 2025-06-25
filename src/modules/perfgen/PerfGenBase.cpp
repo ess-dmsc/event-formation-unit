@@ -15,7 +15,7 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <common/TestImageUdder.h>
 #include <common/time/Timer.h>
 #include <common/time/TimeString.h>

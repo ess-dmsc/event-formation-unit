@@ -8,7 +8,7 @@
 
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -24,12 +24,12 @@
 #define SEND_FLAGS 0
 #endif
 
-bool Socket::isValidIp(const std::string &ipAddress) {
+bool SocketImpl::isValidIp(const std::string &ipAddress) {
   struct sockaddr_in SockAddr;
   return inet_pton(AF_INET, ipAddress.c_str(), &(SockAddr.sin_addr)) != 0;
 }
 
-std::string Socket::getHostByName(std::string &name) {
+std::string SocketImpl::getHostByName(std::string &name) {
   hostent *HostEntry = gethostbyname(name.c_str());
   if (HostEntry == nullptr) {
     throw std::runtime_error(
@@ -42,11 +42,11 @@ std::string Socket::getHostByName(std::string &name) {
   }
 }
 
-Socket::Socket(Socket::SocketType SocketType) {
+SocketImpl::SocketImpl(SocketImpl::SocketType SocketType) {
   auto Type =
-      (SocketType == Socket::SocketType::UDP) ? SOCK_DGRAM : SOCK_STREAM;
+      (SocketType == SocketImpl::SocketType::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto Protocol =
-      (SocketType == Socket::SocketType::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
+      (SocketType == SocketImpl::SocketType::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((SocketFileDescriptor = socket(AF_INET, Type, Protocol)) == -1) {
     LOG(IPC, Sev::Error, "socket() failed");
@@ -54,7 +54,7 @@ Socket::Socket(Socket::SocketType SocketType) {
   }
 }
 
-void Socket::setMulticastTTL() {
+void SocketImpl::setMulticastTTL() {
   int MulticastTTL{1};
 
   if ((setsockopt(SocketFileDescriptor, IPPROTO_IP, IP_MULTICAST_TTL,
@@ -65,7 +65,7 @@ void Socket::setMulticastTTL() {
   }
 }
 
-void Socket::setMulticastReceive() {
+void SocketImpl::setMulticastReceive() {
   if ((setsockopt(SocketFileDescriptor, SOL_SOCKET, SO_REUSEADDR,
                   &SockOptFlagOn, sizeof(SockOptFlagOn))) < 0) {
     LOG(IPC, Sev::Error, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed");
@@ -91,7 +91,7 @@ void Socket::setMulticastReceive() {
   }
 }
 
-int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
+int SocketImpl::setBufferSizes(int sndbuf, int rcvbuf) {
   if (sndbuf) {
     setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf));
   }
@@ -101,17 +101,17 @@ int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
   return 0; // setsockopt for SO_SND/RCVBUFon Linux cannot fail.
 }
 
-void Socket::getBufferSizes(int &sendBuffer, int &receiveBuffer) {
+void SocketImpl::getBufferSizes(int &sendBuffer, int &receiveBuffer) {
   sendBuffer = getSockOpt(SO_SNDBUF);
   receiveBuffer = getSockOpt(SO_RCVBUF);
 }
 
-void Socket::printBufferSizes() {
+void SocketImpl::printBufferSizes() {
   LOG(IPC, Sev::Info, "Socket receive buffer size: {}", getSockOpt(SO_RCVBUF));
   LOG(IPC, Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
 
-void Socket::checkRxBufferSizes(int32_t MinRxBufferSize) {
+void SocketImpl::checkRxBufferSizes(int32_t MinRxBufferSize) {
   int __attribute__((unused)) TxBufferSize;
   int RxBufferSize;
   getBufferSizes(TxBufferSize, RxBufferSize);
@@ -122,14 +122,14 @@ void Socket::checkRxBufferSizes(int32_t MinRxBufferSize) {
   }
 }
 
-int Socket::setRecvTimeout(int seconds, int usecs) {
+int SocketImpl::setRecvTimeout(int seconds, int usecs) {
   struct timeval timeout;
   timeout.tv_sec = seconds;
   timeout.tv_usec = usecs;
   return setSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
-int Socket::setNOSIGPIPE() {
+int SocketImpl::setNOSIGPIPE() {
 #ifdef SYSTEM_NAME_DARWIN
   LOG(IPC, Sev::Info, "setsockopt() - MacOS specific");
   int on = 1;
@@ -146,7 +146,7 @@ int Socket::setNOSIGPIPE() {
 #endif
 }
 
-void Socket::setLocalSocket(const std::string ipaddr, int port) {
+void SocketImpl::setLocalSocket(const std::string ipaddr, int port) {
   // zero out the structures
   std::memset((char *)&localSockAddr, 0, sizeof(localSockAddr));
   localSockAddr.sin_family = AF_INET;
@@ -181,7 +181,7 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
   LOG(IPC, Sev::Info, "Socket successfully bound to {}:{}", ipaddr, port);
 }
 
-void Socket::setRemoteSocket(const std::string ipaddr, int port) {
+void SocketImpl::setRemoteSocket(const std::string ipaddr, int port) {
   RemoteIp = ipaddr;
   RemotePort = port;
   // zero out the structures
@@ -197,7 +197,7 @@ void Socket::setRemoteSocket(const std::string ipaddr, int port) {
   }
 }
 
-int Socket::connectToRemote() {
+int SocketImpl::connectToRemote() {
   // zero out the structures
   struct sockaddr_in remoteSockAddr;
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
@@ -221,8 +221,8 @@ int Socket::connectToRemote() {
   return ret;
 }
 
-int Socket::send(void const *buffer, int len) {
-  XTRACE(IPC, DEB, "Socket::send(), length %d bytes", len);
+int SocketImpl::send(void const *buffer, int len) {
+  XTRACE(IPC, DEB, "SocketImpl::send(), length %d bytes", len);
   int ret = sendto(SocketFileDescriptor, buffer, len, SEND_FLAGS,
                    (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
@@ -233,7 +233,7 @@ int Socket::send(void const *buffer, int len) {
   return ret;
 }
 
-ssize_t Socket::receive(void *buffer, int buflen) {
+ssize_t SocketImpl::receive(void *buffer, int buflen) {
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
   return recvfrom(SocketFileDescriptor, buffer, buflen, 0,
@@ -244,7 +244,7 @@ ssize_t Socket::receive(void *buffer, int buflen) {
 // Private methods
 //
 
-int Socket::getSockOpt(int option) {
+int SocketImpl::getSockOpt(int option) {
   XTRACE(IPC, DEB, "getSockOpt(%d), fd %d", option, SocketFileDescriptor);
   int optval, ret;
   socklen_t optlen;
@@ -258,7 +258,7 @@ int Socket::getSockOpt(int option) {
   return optval;
 }
 
-int Socket::setSockOpt(int option, void *value, int size) {
+int SocketImpl::setSockOpt(int option, void *value, int size) {
   int ret;
   if ((ret = setsockopt(SocketFileDescriptor, SOL_SOCKET, option, value,
                         size)) < 0) {
@@ -267,13 +267,13 @@ int Socket::setSockOpt(int option, void *value, int size) {
   return ret;
 }
 
-bool Socket::isValidSocket() { return SocketIsGood; }
+bool SocketImpl::isValidSocket() { return SocketIsGood; }
 
 ///
 ///
 ///
 TCPTransmitter::TCPTransmitter(const std::string IpAddress, int Port)
-    : Socket(Socket::SocketType::TCP) {
+    : SocketImpl(SocketImpl::SocketType::TCP) {
   setRemoteSocket(IpAddress, Port);
   setNOSIGPIPE();
   connectToRemote();

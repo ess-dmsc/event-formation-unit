@@ -9,12 +9,14 @@
 
 #include <CLI/Error.hpp>
 #include <common/debug/Trace.h>
+#include <common/time/ESSTime.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-#include <cmath>
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <ctype.h>
+#include <memory>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -27,73 +29,92 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   Settings.Detector = Type;
 
   // Options
-  app.add_option("-i, --ip", Settings.IpAddress,
-                 "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort,
-                 "Destination UDP port");
+  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
+  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets,
                  "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle,
                  "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
                  "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Detector,
-                 "Detector type id");
+  app.add_option("-y, --type", Settings.Detector, "Detector type id");
   app.add_option("-f, --fibers", Settings.NFibers,
                  "Number of Fibers used in data header");
   app.add_option("-q, --frequency", Settings.Frequency,
                  "Pulse frequency in Hz. (default 0: refreshed for "
                  "each packet)");
-  app.add_option("-e, --ev_delay", Settings.TicksBtwEvents,
-                 "Delay (ticks) between events");
-  app.add_option("-d, --rd_delay", Settings.TicksBtwReadouts,
-                 "Delay (ticks) between coincident readouts");
-  app.add_option("-o, --readouts", Settings.NumReadouts,
-                 "Number of readouts per packet");
   app.add_option("-v, --header_version", Settings.headerVersion,
                  "Header version, v1 by default");
 
   // Flags
   app.add_flag("-r, --random", Settings.Randomise,
                "Randomise header and data fields");
-  app.add_flag("-l, --loop", Settings.Loop,
-               "Run forever");
-  app.add_flag("--debug", Settings.Debug,
-               "print debug information");
-  app.add_flag("--tof", Settings.Tof,
-               "generate tof distribution");
+  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+  app.add_flag("--debug", Settings.Debug, "print debug information");
+
+  pulseTime = ESSTime::now();
+  prevPulseTime = pulseTime;
 }
 
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes() {
-  return getReadOutTimes(timeOffFlightDist.getValue());
-}
-
-std::pair<uint32_t, uint32_t> ReadoutGeneratorBase::getReadOutTimes(double timeOfFlight) {
-  if (Settings.Tof) {
-    return {
-      pulseTime.getTimeHigh(),
-      pulseTime.getTimeLow() + static_cast<uint32_t>(timeOfFlight * TicksPerMs)
-    };
+std::pair<uint32_t, uint32_t>
+ReadoutGeneratorBase::generateReadoutTime() const {
+  if (readoutTimeGenerator == nullptr) {
+    throw std::runtime_error("Readout time generator is not initialized");
   }
-
-  return { getReadoutTimeHigh(), getReadoutTimeLow() };
+  return generateReadoutTime(TimeDurationMilli(readoutTimeGenerator->getValue()));
 }
 
-uint16_t ReadoutGeneratorBase::makePacket() {
+TimeDurationNano
+ReadoutGeneratorBase::getTimeOfFlightNS(ESSTime &readoutTime) const {
+  return readoutTime - pulseTime;
+}
+
+std::pair<uint32_t, uint32_t>
+ReadoutGeneratorBase::generateReadoutTime(TimeDurationMilli timeOfFlightMs) const {
+  ESSTime readoutTime = pulseTime + esstime::msToNanoseconds(timeOfFlightMs);
+  return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
+}
+
+void ReadoutGeneratorBase::generatePackets(
+    SocketInterface *socket, const TimeDurationNano &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
-  generateHeader();
-  generateData();
-  finishPacket();
-  return DataSize;
+  prevPulseTime = pulseTime;
+  pulseTime = ESSTime::now();
+  const TimeDurationNano start = pulseTime.toNS();
+  do {
+    generateHeader();
+    generateData();
+    finishPacket();
+    socket->send(&Buffer[0], DataSize);
+    Packets++;
+    if (Settings.PktThrottle) {
+      if (Packets % Settings.PktThrottle == 0) {
+        usleep(10);
+      }
+    }
+    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
+      break;
+    }
+    if (Settings.SpeedThrottle) {
+      usleep(Settings.SpeedThrottle);
+    }
+  } while (std::chrono::high_resolution_clock::now().time_since_epoch() -
+               start <
+           pulseTimeDuration);
+  numberOfReadouts = 0; // reset readout counter for next packet
 }
 
 void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
   ReadoutDataSize = ReadoutSize;
 }
 
+void ReadoutGeneratorBase::setReadoutPerPacket(uint32_t ReadoutCount) {
+  ReadoutPerPacket = ReadoutCount;
+}
+
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + NumberOfReadouts * ReadoutDataSize;
+  DataSize = HeaderSize + ReadoutPerPacket * ReadoutDataSize;
   if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
@@ -113,65 +134,6 @@ void ReadoutGeneratorBase::generateHeader() {
   // Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   Header->SeqNum = SeqNum;
-
-  // Generate pulse time first time
-  if (pulseTime.getTimeHigh() == 0 && pulseTime.getTimeLow() == 0) {
-    pulseTime = ESSTime(time(NULL), 0);
-    readoutTime = pulseTime;
-    prevPulseTime = pulseTime;
-
-    XTRACE(DATA, INF,
-           "First pulse time generated, High: %u, Low: %u, periodNs: %u",
-           pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
-  }
-
-  // If pulseFrequencyNs is set, we generate pulse time
-  // by adding the pulse time window according to the pulse frequency
-  // which will simulate the real operation of the data source
-  if (pulseFrequencyNs != TimeDurationNano(0)) {
-
-    // if the readout time is greater than the pulse time, generate new
-    // pulse time for the header
-    if (readoutTime.toNS() >= getNextPulseTimeNs()) {
-
-      // calculate the absolute time difference between the real time and the
-      // pulse time in milliseconds, because we do not need high precision
-      auto RealAndPulseTimeDiff =
-          abs(sToMilliseconds(time(NULL)) -
-              nsToMicroseconds(pulseTime.toNS().count()));
-
-      /// \note: reset the pulse time if it has drifted too much from
-      /// real clock. This is a workaround for the file writer not accepting the
-      /// pulse time if it is too far from the real clock
-      if (RealAndPulseTimeDiff > sToMilliseconds(MAX_TIME_DRIFT_NS)) {
-
-        XTRACE(DATA, WAR, "Pulse time has drifted too much, reset it");
-        pulseTime = ESSTime(time(NULL), 0);
-        prevPulseTime = pulseTime;
-        // reset the readout time as well since we resynced our time bases
-        readoutTime = pulseTime;
-      } else {
-        prevPulseTime = pulseTime;
-        pulseTime += pulseFrequencyNs;
-      }
-      XTRACE(DATA, INF,
-             "New pulseTime generated, High: %u, Low: %u, periodNs: %u",
-             pulseTime.getTimeHigh(), pulseTime.getTimeLow(),
-             pulseFrequencyNs.count());
-    }
-    // if the requested frequency is 0, generate a new pulse time for each
-    // packet and we use fake offset btw. pulse and prevPulse
-
-    /// \todo: This operation mode should be made obsolete as soon as
-    /// the infrastructure is updated to use frequency mode
-  } else {
-    prevPulseTime = ESSTime(time(NULL), PrevTimeLowOffset);
-    pulseTime = ESSTime(time(NULL), TimeLowOffset);
-    readoutTime = pulseTime + Settings.TicksBtwReadouts;
-    XTRACE(DATA, INF,
-           "New pulseTime generated for this packet, High: %u, Low: %u",
-           pulseTime.getTimeHigh(), pulseTime.getTimeLow());
-  }
 
   Header->PulseHigh = pulseTime.getTimeHigh();
   Header->PulseLow = pulseTime.getTimeLow();
@@ -208,32 +170,28 @@ void ReadoutGeneratorBase::argParse(int argc, char *argv[]) {
 }
 
 void ReadoutGeneratorBase::transmitLoop() {
+
+  // Estimate how many packages it is possible to generate per pulse.
+  TimeDurationNano pulseTimeDuration{
+      static_cast<int64_t>(1000000000 / Settings.Frequency)};
+
+  XTRACE(DATA, INF,
+         "First pulse time generated, High: %u, Low: %u, periodNs: %u",
+         pulseTime.getTimeHigh(), pulseTime.getTimeLow(), pulseFrequencyNs);
+
   do {
-    uint16_t DataSize = makePacket();
+    generatePackets(DataSource.get(), pulseTimeDuration);
 
-    DataSource->send(&Buffer[0], DataSize);
-
-    if (Settings.SpeedThrottle) {
-      usleep(Settings.SpeedThrottle);
-    }
-    Packets++;
-    if (Settings.PktThrottle) {
-      if (Packets % Settings.PktThrottle == 0) {
-        usleep(10);
-      }
-    }
-    if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
-      break;
-    }
     // printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or Packets < Settings.NumberOfPackets);
   // pcap.printstats();
   printf("Sent %" PRIu64 " packets\n", Packets);
 }
 
-void ReadoutGeneratorBase::main() {
-  Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
+void ReadoutGeneratorBase::initialize(
+    std::unique_ptr<FunctionGenerator> readoutGenerator) {
+  SocketImpl::Endpoint local("0.0.0.0", 0);
+  SocketImpl::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
   DataSource = std::make_unique<UDPTransmitter>(local, remote);
   DataSource->setBufferSizes(Settings.KernelTxBufferSize, 0);
@@ -259,13 +217,13 @@ void ReadoutGeneratorBase::main() {
     assert(HeaderSize == 32);
   }
 
-  if (Settings.Frequency != 0) {
-    pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
-    NumberOfReadouts = (BufferSize - HeaderSize) / ReadoutDataSize;
-    XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
-  } else {
-    NumberOfReadouts = Settings.NumReadouts;
-  }
+  // Figure out distribution that will be used for the readoutGenerator.
+  readoutTimeGenerator = std::move(readoutGenerator);
+
+  pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
+  if (ReadoutPerPacket == 0)
+    ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;
+  XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
 }
 
 // GCOVR_EXCL_STOP

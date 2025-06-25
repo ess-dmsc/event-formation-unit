@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <generators/udpgenpcap/ReaderPcap.h>
 #include <string.h>
 #include <string>
@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
   app.add_flag("-m, --multicast", Settings.Multicast, "Allow IP multicast");
   CLI11_PARSE(app, argc, argv);
 
-  bool IsMulticast = Socket::isMulticast(Settings.IpAddress);
+  bool IsMulticast = SocketImpl::isMulticast(Settings.IpAddress);
 
   if (IsMulticast and not Settings.Multicast) {
     printf("IP multicast addresses requires -m flag, exiting...\n");
     return -1;
   }
 
-  Socket::Endpoint LocalEndpoint("0.0.0.0", 0);
-  Socket::Endpoint RemoteEndpoint(Settings.IpAddress, Settings.UDPPort);
+  SocketImpl::Endpoint LocalEndpoint("0.0.0.0", 0);
+  SocketImpl::Endpoint RemoteEndpoint(Settings.IpAddress, Settings.UDPPort);
   UDPTransmitter DataSource(LocalEndpoint, RemoteEndpoint);
   DataSource.setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();

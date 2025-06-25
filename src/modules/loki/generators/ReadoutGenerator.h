@@ -15,9 +15,9 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
 namespace Caen {
-class LokiReadoutGenerator : public ReadoutGeneratorBase {
+class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
-  LokiReadoutGenerator() : ReadoutGeneratorBase(DetectorType::LOKI) {}
+  ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::LOKI) {}
 
 protected:
   void generateData() override;

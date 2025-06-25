@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2024 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,7 +6,10 @@
 /// \brief Generate artificial DREAM readouts
 //===----------------------------------------------------------------------===//
 
+#include <generators/functiongenerators/FunctionGenerator.h>
+#include <memory>
 #include <modules/dream/generators/ReadoutGenerator.h>
+#include <utility>
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
@@ -17,7 +20,9 @@ int main(int argc, char *argv[]) {
 
   DreamGen.argParse(argc, argv);
 
-  DreamGen.main();
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(DreamGen.Settings.Frequency);
+  DreamGen.initialize(std::move(readoutTimeGenerator));
   DreamGen.transmitLoop();
 
   return 0;

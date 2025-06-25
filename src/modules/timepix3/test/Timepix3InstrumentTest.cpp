@@ -4,7 +4,7 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>

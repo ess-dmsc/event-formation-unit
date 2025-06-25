@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source ERIC
+// Copyright (C) 2023 - 2025 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <modules/nmx/generators/TrackReadoutGenerator.h>
+#include <memory> // Add include for std::unique_ptr
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
@@ -16,7 +17,10 @@ int main(int argc, char *argv[]) {
   NmxGen.setReadoutDataSize(DataSize);
 
   NmxGen.argParse(argc, argv);
-  NmxGen.main();
+
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(NmxGen.Settings.Frequency);
+  NmxGen.initialize(std::move(readoutTimeGenerator));
 
   NmxGen.transmitLoop();
 

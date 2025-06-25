@@ -18,7 +18,10 @@ int main(int argc, char *argv[]) {
   FreiaGen.setReadoutDataSize(FreiaDataSize);
 
   FreiaGen.argParse(argc, argv);
-  FreiaGen.main();
+
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator = 
+      std::make_unique<DistributionGenerator>(FreiaGen.Settings.Frequency);
+  FreiaGen.initialize(std::move(readoutTimeGenerator));
 
   FreiaGen.transmitLoop();
 

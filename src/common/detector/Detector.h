@@ -19,7 +19,7 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 #include <functional>
 #include <map>
 #include <memory>
@@ -55,7 +55,7 @@ public:
   /// Receiving UDP data is now common across all detectors
   void inputThread() {
     XTRACE(INPUT, DEB, "Starting inputThread");
-    Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+    SocketImpl::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                            EFUSettings.DetectorPort);
 
     UDPReceiver dataReceiver(local);

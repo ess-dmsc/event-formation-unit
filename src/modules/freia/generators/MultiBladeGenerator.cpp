@@ -8,10 +8,10 @@
 
 // GCOVR_EXCL_START
 
-#include <modules/freia/generators/MultiBladeGenerator.h>
-#include <modules/freia/geometry/Geometry.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/testutils/bitmaps/BitMaps.h>
+#include <modules/freia/generators/MultiBladeGenerator.h>
+#include <modules/freia/geometry/Geometry.h>
 
 #include <fmt/core.h>
 
@@ -21,7 +21,8 @@ using namespace ESSReadout;
 
 namespace Freia {
 
-MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(DetectorType::FREIA) {
+MultiBladeGenerator::MultiBladeGenerator()
+    : ReadoutGeneratorBase(DetectorType::FREIA) {
   // clang-format off
 
   // Options
@@ -51,19 +52,21 @@ MultiBladeGenerator::MultiBladeGenerator() : ReadoutGeneratorBase(DetectorType::
 void MultiBladeGenerator::generateData() {
   constexpr size_t DATA_LENGTH = sizeof(VMM3Data);
 
-  // We loop over all readout counts. For a given Fiber and FEN, we use two iterations to
-  // generate a channel pair that corresponds to a non-background pixel for a bitmap
-  // associated with a given VMM.
-  const size_t N = NumberOfReadouts / 2;
+  // We loop over all readout counts. For a given Fiber and FEN, we use two
+  // iterations to generate a channel pair that corresponds to a non-background
+  // pixel for a bitmap associated with a given VMM.
+  const size_t N = ReadoutPerPacket / 2;
 
   for (size_t Count = 0; Count < N; Count++) {
     // Get FEN and Fibers Ids + Tof
-    const uint8_t FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.FiberVals, MultiBladeSettings.FiberMask);
-    const uint8_t FENId   = Fuzzer.randU8WithMask(MultiBladeSettings.FENVals,   MultiBladeSettings.FENMask);
-    const double ToF = getTimeOffFlight();
+    const uint8_t FiberId = Fuzzer.randU8WithMask(MultiBladeSettings.FiberVals,
+                                                  MultiBladeSettings.FiberMask);
+    const uint8_t FENId = Fuzzer.randU8WithMask(MultiBladeSettings.FENVals,
+                                                MultiBladeSettings.FENMask);
 
     // Get the VMM Id
-    const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.VMMVals, MultiBladeSettings.VMMMask);
+    const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.VMMVals,
+                                                MultiBladeSettings.VMMMask);
     const bool isEven = VMM0 % 2 == 0;
 
     // Parameters for pixel coordinates
@@ -75,16 +78,16 @@ void MultiBladeGenerator::generateData() {
     const double Delta = isFreia ? 15 : 16;
     const double Sg = (FiberId % 2) ? 1 : -1;
 
-    for (size_t i: {0, 1}) {
+    for (size_t i : {0, 1}) {
       // Get a VMM3Data struct pointer for the next Buffer write position
-      VMM3Data * ReadoutData = getReadoutDataPtr(2 * Count + i);
+      VMM3Data *ReadoutData = getReadoutDataPtr(2 * Count + i);
 
       ReadoutData->FiberId = FiberId;
-      ReadoutData->FENId   = FENId;
+      ReadoutData->FENId = FENId;
 
-      const auto [T0, T1] = getReadOutTimes(ToF);
+      const auto [T0, T1] = generateReadoutTime();
       ReadoutData->TimeHigh = T0;
-      ReadoutData->TimeLow  = T1;
+      ReadoutData->TimeLow = T1;
 
       // Misc
       ReadoutData->DataLength = DATA_LENGTH;
@@ -101,38 +104,28 @@ void MultiBladeGenerator::generateData() {
         const auto &[x, y] = image[index];
 
         switch (Settings.Detector) {
-          case DetectorType::FREIA:
-            XChannel = 63 - (16 + R * x + Sg * Delta);
-            YChannel = 47 - y;
-            break;
+        case DetectorType::FREIA:
+          XChannel = 63 - (16 + R * x + Sg * Delta);
+          YChannel = 47 - y;
+          break;
 
-          case DetectorType::ESTIA:
-            XChannel = 16 + x;
-            YChannel = 63 - (16 + R * y + Sg * Delta);
-            break;
+        case DetectorType::ESTIA:
+          XChannel = 16 + x;
+          YChannel = 63 - (16 + R * y + Sg * Delta);
+          break;
 
-          case DetectorType::TBLMB:
-            XChannel = 47 - y;
-            YChannel = 63 - (16 + R * x + Sg * Delta);
-            break;
+        case DetectorType::TBLMB:
+          XChannel = 47 - y;
+          YChannel = 63 - (16 + R * x + Sg * Delta);
+          break;
 
-          default:
-            break;
-          }
+        default:
+          break;
+        }
       }
 
       // Store channel
       ReadoutData->Channel = (i == 0) ? YChannel : XChannel;
-
-      // Short time delta between correlated X- and Y-channels
-      if (i == 0) {
-        addTicksBtwReadoutsToReadoutTime();
-      }
-
-      // Large time delta between uncorrelated X- and Y-channels
-      else {
-        addTickBtwEventsToReadoutTime();
-      }
 
       if (Settings.Debug) {
         if (i == 0) {
@@ -152,12 +145,14 @@ void MultiBladeGenerator::generateData() {
 }
 
 VMM3Data *MultiBladeGenerator::getReadoutDataPtr(size_t Index) {
-  return (VMM3Data *) &Buffer[HeaderSize + Index * ReadoutDataSize];
+  return (VMM3Data *)&Buffer[HeaderSize + Index * ReadoutDataSize];
 }
 
 void MultiBladeGenerator::main() {
   // Call base class
-  ReadoutGeneratorBase::main();
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(Settings.Frequency);
+  ReadoutGeneratorBase::initialize(std::move(readoutTimeGenerator));
 
   // Set detector type
   Settings.Detector = MultiBladeSettings.Detector;

@@ -18,8 +18,6 @@
 namespace Nmx {
 
 void Nmx::MultiHitReadoutGenerator::generateData() {
-  Settings.TicksBtwReadouts = 3;
-  Settings.TicksBtwEvents = 500000;
   auto DP = (uint8_t *)Buffer;
   DP += HeaderSize;
 
@@ -33,15 +31,16 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
   std::map<uint8_t, uint8_t> XPanelToFEN{{0, 0}, {1, 1}, {2, 5}, {3, 4}};
   std::map<uint8_t, uint8_t> YPanelToFEN{{0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
-  for (uint32_t Readout = 0; Readout < NumberOfReadouts; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
 
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    ReadoutData->TimeHigh = getReadoutTimeHigh();
-    ReadoutData->TimeLow = getReadoutTimeLow();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
     if ((Readout % 4) == 0) {
@@ -86,12 +85,6 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     ReadoutData->OTADC = ADC;
 
     DP += ReadoutDataSize;
-
-    if ((Readout % 4) == 3) {
-      addTickBtwEventsToReadoutTime();
-    } else {
-      addTicksBtwReadoutsToReadoutTime();
-    }
 
     XTRACE(DATA, DEB,
            "Generating readout, FiberId: %u, FENId:%u, VMM:%u, Channel:%u, "

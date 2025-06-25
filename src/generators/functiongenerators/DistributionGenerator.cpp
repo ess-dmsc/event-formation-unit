@@ -18,11 +18,17 @@ static double gaussianPDF(double X, double Mu, double Sigma) {
          exp(-(pow((X - Mu) / Sigma, 2) / 2.0));
 }
 
+DistributionGenerator::DistributionGenerator(uint16_t Frequency)
+: DistributionGenerator(1000.0 / Frequency, DEFAULT_BIN_COUNT) {}
+
+DistributionGenerator::DistributionGenerator(uint16_t Frequency, uint32_t Bins)
+: DistributionGenerator(1000.0 / Frequency, Bins) {}
+
 DistributionGenerator::DistributionGenerator(double MaxVal)
-    : DistributionGenerator(MaxVal, 512) {}
+    : DistributionGenerator(MaxVal, DEFAULT_BIN_COUNT) {}
 
 /// \brief generate Dist and CDF for the specified shape. Always use the absolute value of Bins.
-DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange(MaxVal), NumberOfBins(abs(Bins)) {
+DistributionGenerator::DistributionGenerator(double MaxVal, uint32_t Bins) : MaxRange(MaxVal), NumberOfBins(Bins) {
   Dist.resize(NumberOfBins);
   CDF.resize(NumberOfBins);
   BinWidth = MaxRange / (NumberOfBins - 1);
@@ -38,8 +44,11 @@ DistributionGenerator::DistributionGenerator(double MaxVal, int Bins) : MaxRange
   Norm = CDF[NumberOfBins - 1];
 }
 
-double DistributionGenerator::getDistValue(double Pos) {
-  int Index = static_cast<int>(Pos / BinWidth);
+double DistributionGenerator::getValueByPos(double Pos) {
+  uint Index = abs(static_cast<int>(Pos / BinWidth));
+  if (Index >= NumberOfBins) {
+    return Dist[NumberOfBins - 1];
+  }
   return Dist[Index];
 }
 

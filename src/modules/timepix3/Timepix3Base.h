@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "geometry/Config.h"
+#include <geometry/Config.h>
 #include <common/detector/Detector.h>
 #include <common/kafka/EV44Serializer.h>
 #include <memory>

@@ -6,17 +6,20 @@
 /// \brief Generate artificial LOKI readouts
 //===----------------------------------------------------------------------===//
 
-#include <modules/loki/generators/LokiReadoutGenerator.h>
+#include <modules/loki/generators/ReadoutGenerator.h>
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
 
-  Caen::LokiReadoutGenerator LokiGen;
+  Caen::ReadoutGenerator LokiGen;
   uint8_t LokiDataSize = sizeof(Caen::DataParser::CaenReadout);
   LokiGen.setReadoutDataSize(LokiDataSize);
 
   LokiGen.argParse(argc, argv);
-  LokiGen.main();
+
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator = 
+      std::make_unique<DistributionGenerator>(LokiGen.Settings.Frequency);
+  LokiGen.initialize(std::move(readoutTimeGenerator));
 
   LokiGen.transmitLoop();
 

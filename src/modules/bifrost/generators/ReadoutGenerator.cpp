@@ -9,10 +9,13 @@
 
 // GCOVR_EXCL_START
 
+#include <generators/functiongenerators/DistributionGenerator.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <bifrost/generators/ReadoutGenerator.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <fcntl.h>
+#include <memory>
 #include <sys/stat.h>
 
 // #undef TRC_LEVEL
@@ -71,13 +74,15 @@ void ReadoutGenerator::generateData() {
   dataPtr += HeaderSize;
 
   while (((res = readReadout(DatReadout)) > 0) &&
-         (SentReadouts < NumberOfReadouts)) {
+         (SentReadouts < ReadoutPerPacket)) {
 
     dataPkt.FiberId = DatReadout.fiber;
     dataPkt.FENId = 0;
     dataPkt.DataLength = ReadoutDataSize;
-    dataPkt.TimeHigh = getReadoutTimeHigh();
-    dataPkt.TimeLow = getReadoutTimeLow();
+
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    dataPkt.TimeHigh = readoutTimeHigh;
+    dataPkt.TimeLow = readoutTimeLow;
     dataPkt.Group = DatReadout.tube;
     dataPkt.AmpA = DatReadout.ampl_a;
     dataPkt.AmpB = DatReadout.ampl_b;
@@ -85,15 +90,14 @@ void ReadoutGenerator::generateData() {
     memcpy(dataPtr, &dataPkt, ReadoutDataSize);
     dataPtr += ReadoutDataSize;
 
-    // Increment time for the next readout
-    addTicksBtwReadoutsToReadoutTime();
-
     SentReadouts++;
   }
 }
 
 void ReadoutGenerator::main() {
-  ReadoutGeneratorBase::main();
+  std::unique_ptr<FunctionGenerator> readoutTimeGenerator =
+      std::make_unique<DistributionGenerator>(Settings.Frequency);
+  ReadoutGeneratorBase::initialize(std::move(readoutTimeGenerator));
 
   // If the number of packets is not set, calculate it how much packet is
   // required to send all the readouts in the file
@@ -111,7 +115,7 @@ void ReadoutGenerator::main() {
     // Calculate the number of dat_data_t that can fit into the file size
     size_t readoutInDatFile = fileSize / sizeof(struct dat_data_t);
 
-    Settings.NumberOfPackets = readoutInDatFile / NumberOfReadouts;
+    Settings.NumberOfPackets = readoutInDatFile / ReadoutPerPacket;
   }
 }
 

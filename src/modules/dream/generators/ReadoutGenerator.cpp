@@ -29,7 +29,7 @@ enum Detector {BwEndCap = 1, FwEndCap = 2, Mantle = 4, HR = 8, SANS = 16};
 bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
   ReadoutData.DataLength = ReadoutDataSize;
 
-  auto [readoutTimeHigh, readoutTimeLow] = getReadOutTimes();
+  auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
   ReadoutData.TimeHigh = readoutTimeHigh;
   ReadoutData.TimeLow = readoutTimeLow;
 
@@ -118,16 +118,13 @@ void ReadoutGenerator::generateData() {
   uint32_t Readouts{0};
   DataParser::CDTReadout ReadoutData;
 
-  while (Readouts < Settings.NumReadouts) {
+  while (Readouts < ReadoutPerPacket) {
     bool Valid = getRandomReadout(ReadoutData);
     if (not Valid) {
       continue;
     }
     memcpy(DataPtr, &ReadoutData, ReadoutDataSize);
     DataPtr += ReadoutDataSize;
-
-    // Increment the time for next readout
-    addTickBtwEventsToReadoutTime();
     Readouts++;
   }
 }

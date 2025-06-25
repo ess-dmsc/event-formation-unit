@@ -18,9 +18,10 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <common/system/SocketInterface.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
-class Socket {
+class SocketImpl : public SocketInterface {
 public:
   enum class SocketType { UDP, TCP };
 
@@ -43,10 +44,10 @@ public:
   static std::string getHostByName(std::string &name);
 
   /// Create a socker abstraction of type UDP or TCP
-  Socket(Socket::SocketType Type);
+  SocketImpl(SocketImpl::SocketType Type);
 
   /// Close the file descriptor
-  ~Socket() {
+  virtual ~SocketImpl() {
     if (SocketFileDescriptor >= 0) {
       close(SocketFileDescriptor);
     }
@@ -121,24 +122,24 @@ private:
 };
 
 /// UDP receiver only needs to specify local socket
-class UDPReceiver : public Socket {
+class UDPReceiver : public SocketImpl {
 public:
-  UDPReceiver(Endpoint Local) : Socket(Socket::SocketType::UDP) {
+  UDPReceiver(Endpoint Local) : SocketImpl(SocketImpl::SocketType::UDP) {
     this->setLocalSocket(Local.IpAddress, Local.Port);
   };
 };
 
 /// UDP transmitter needs to specify both local and remote socket
-class UDPTransmitter : public Socket {
+class UDPTransmitter : public SocketImpl {
 public:
   UDPTransmitter(Endpoint Local, Endpoint Remote)
-      : Socket(Socket::SocketType::UDP) {
+      : SocketImpl(SocketImpl::SocketType::UDP) {
     this->setLocalSocket(Local.IpAddress, Local.Port);
     this->setRemoteSocket(Remote.IpAddress, Remote.Port);
   };
 };
 
-class TCPTransmitter : public Socket {
+class TCPTransmitter : public SocketImpl {
 public:
   ///
   TCPTransmitter(const std::string ip, int port);

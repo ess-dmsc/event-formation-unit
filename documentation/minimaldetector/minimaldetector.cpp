@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/detector/Detector.h>
-#include <common/system/Socket.h>
+#include <common/system/SocketImpl.h>
 
 const char *classname = "Demo Detector";
 
@@ -49,7 +49,7 @@ const char *DemoDetector::detectorname() { return classname; }
 ///
 void DemoDetector::main_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+  SocketImpl::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver eth_receive(local);
   eth_receive.setRecvTimeout(0, 100000); /// secs, usecs
