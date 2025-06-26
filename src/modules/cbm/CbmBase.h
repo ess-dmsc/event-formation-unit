@@ -39,7 +39,7 @@ public:
   ///
   /// This function is responsible for the processing logic of the CbmBase
   /// detector.
-  void processing_thread();
+  void processingThread();
 
   /// Struct representing counters.
   ///
