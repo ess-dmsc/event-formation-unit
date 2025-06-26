@@ -72,10 +72,12 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.type.event0d_proccessed", Counters.Event0DReadoutsProcessed);
   Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
 
-  // Events published
+  // Published events and Ar51
   Stats.create("events.ibm", Counters.IBMEvents);
   Stats.create("events.event0d", Counters.Event0DEvents);
   Stats.create("events.ibm_npos_sum", Counters.NPOSCount);
+
+  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
@@ -101,7 +103,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
   AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    CbmBase::processing_thread();
+    CbmBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -109,7 +111,7 @@ CbmBase::CbmBase(BaseSettings const &settings)
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void CbmBase::processing_thread() {
+void CbmBase::processingThread() {
   /// \todo: properly the quite and stop application and log the fault.
   if (EFUSettings.KafkaTopic == "") {
     XTRACE(INPUT, ALW, "Missing topic - mandatory for beam monitor");
@@ -117,6 +119,7 @@ void CbmBase::processing_thread() {
   }
   XTRACE(INPUT, ALW, "Kafka topic %s", EFUSettings.KafkaTopic.c_str());
 
+  // ---------------------------------------------------------------------------
   // Event producer
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
@@ -126,6 +129,20 @@ void CbmBase::processing_thread() {
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
+
+
+  // ---------------------------------------------------------------------------
+  // Raw data monitor producer and serializer
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
+    KafkaCfg.CfgParms);
+
+  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
+                      const auto &Timestamp) {
+  MonitorProducer.produce(DataBuffer, Timestamp);
+  };
+
+  MonitorSerializer =
+  new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
 
   // Process instrument config file
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -235,6 +252,18 @@ void CbmBase::processing_thread() {
       Counters.TimeStats = cbmInstrument.ESSHeaderParser.Packet.Time.Stats;
 
       cbmInstrument.processMonitorReadouts();
+
+      // ---------------------------------------------------------------------------
+      // Send Ar51 monitoring data
+      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+        EFUSettings.MonitorSamples) {
+      XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+              ITCounters.RxPackets);
+      MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+      MonitorSerializer->produce();
+      Counters.TxRawReadoutPackets++;
+    }
+
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a

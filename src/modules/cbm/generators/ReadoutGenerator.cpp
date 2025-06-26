@@ -51,7 +51,7 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                        "Override channel ID (default 0)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
-  IbmGroup->add_option("--numReadout", cbmSettings.NumReadout,
+  IbmGroup->add_option("--numReadouts", cbmSettings.NumReadouts,
                        "Number of readouts per pulse");
   IbmGroup->add_option("--value", cbmSettings.Value,
       "Fixed value for the value function (required for Fixed generator type)");
@@ -130,7 +130,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
 
   for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
 
-    if (numberOfReadouts < cbmSettings.NumReadout) {
+    if (numberOfReadouts < cbmSettings.NumReadouts) {
 
       // Get pointer to the data buffer and clear memory with zeros
       auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -197,7 +197,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   if (Generator == nullptr) {
     Generator = std::make_unique<LinearGenerator>(
-        Settings.Frequency, cbmSettings.NumReadout,
+        Settings.Frequency, cbmSettings.NumReadouts,
         cbmSettings.Gradient.value());
   }
 
