@@ -14,6 +14,19 @@ set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 
 #=============================================================================
+# Set relative RPATH
+#=============================================================================
+if(APPLE)
+  set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+else()
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+endif()
+
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+
+#=============================================================================
 # Versioning
 #=============================================================================
 include(${EXTRA_MODULES_DIR}/Versioning.cmake)
