@@ -59,7 +59,7 @@ public:
     std::optional<uint32_t> Value;     // The optional value.
     std::optional<double> Gradient;  // The optional gradient.
     uint32_t NumberOfBins{512};        // The number of bins.
-    uint32_t NumReadout{5952};         // The number of readouts per pulse. 12us = 5952 for 14hz
+    uint32_t NumReadouts{5952};         // The number of readouts per pulse. 12us = 5952 for 14hz
   } cbmSettings;
   // clang-format on
 
