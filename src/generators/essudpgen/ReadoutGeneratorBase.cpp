@@ -76,8 +76,8 @@ ReadoutGeneratorBase::getTimeOfFlightNS(ESSTime &readoutTime) const {
 void ReadoutGeneratorBase::generatePackets(
     SocketInterface *socket, const TimeDurationNano &pulseTimeDuration) {
   assert(ReadoutDataSize != 0); // must be set in generator application
-  prevPulseTime = pulseTime;
   pulseTime = ESSTime::now();
+  prevPulseTime = pulseTime - pulseTimeDuration;
   const TimeDurationNano start = pulseTime.toNS();
   do {
     generateHeader();
@@ -219,8 +219,13 @@ void ReadoutGeneratorBase::initialize(
   readoutTimeGenerator = std::move(readoutGenerator);
 
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
-  if (ReadoutPerPacket == 0)
+  if (ReadoutPerPacket == 0) {
     ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;
+    // Ensure we have an even number of readouts
+    if (ReadoutPerPacket % 2) {
+      ReadoutPerPacket -= 1;
+    }
+  }
   XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);
 }
 
