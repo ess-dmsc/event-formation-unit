@@ -9,9 +9,10 @@
 #include <modules/timepix3/Timepix3Base.h>
 #include <modules/timepix3/Timepix3Instrument.h>
 
+#include <common/RuntimeStat.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/RuntimeStat.h>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -27,9 +28,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", ITCounters.RxPackets);
-  Stats.create("receive.bytes", ITCounters.RxBytes);
-  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // Counters related to readouts
@@ -66,7 +64,7 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
   // System counters
-  Stats.create("thread.input_idle", ITCounters.RxIdle);
+  Stats.create("thread.input_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats
@@ -115,7 +113,7 @@ void Timepix3Base::processingThread() {
   // Time out after one second
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+  RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
   unsigned int DataIndex;
@@ -147,7 +145,7 @@ void Timepix3Base::processingThread() {
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events,
+          {getInputCounters().RxPackets, Counters.Events,
            EventProducer.getStats().MsgStatusPersisted});
       Serializer.produce();
       Counters.ProduceCauseTimeout++;

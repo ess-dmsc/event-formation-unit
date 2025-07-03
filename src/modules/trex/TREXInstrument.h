@@ -34,7 +34,8 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   TREXInstrument(Counters &counters, BaseSettings &settings,
-                 EV44Serializer *serializer);
+                 EV44Serializer &serializer,
+                 ESSReadout::Parser &essHeaderParser);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -46,18 +47,7 @@ public:
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> &Events);
 
-  /// \brief initialise the serializer. This is used both in TREXInstrument
-  // and TREXBase. Called from TREXBase
-  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-
 public:
-  /// \brief Stuff that 'ties' TREX together
-  struct Counters &counters;
-  BaseSettings &Settings;
-
-  /// \brief serialiser (and producer) for events
-  EV44Serializer *Serializer{nullptr};
-
   /// ADC value histograms for all channels
   Hists ADCHist{1, 1}; // reinit in ctor
 
@@ -65,12 +55,11 @@ public:
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
 
-  /// \brief Instrument configuration (rings, FENs, Hybrids, etc)
-  Config Conf;
+  /// \brief parser for VMM3 readout data
+  ESSReadout::VMM3Parser VMMParser;
 
-  /// \brief logical geometry
-  /// get pixel IDs from x- and y- coordinates
-  ESSGeometry essgeom;
+private:
+  Geometry *GeometryInstance;
 
   /// \brief digital geometry
   /// Defines which digital geometry to use
@@ -78,16 +67,22 @@ public:
   TREXGeometry TREXGeometryInstance;
   LETGeometry LETGeometryInstance;
 
-  Geometry *GeometryInstance;
+  /// \brief logical geometry
+  /// get pixel IDs from x- and y- coordinates
+  ESSGeometry essgeom;
 
-  //
-  std::vector<ESSReadout::Hybrid> Hybrids;
+  /// \brief Instrument configuration (rings, FENs, Hybrids, etc)
+  Config Conf;
 
-  /// \brief parser for the ESS Readout header
-  ESSReadout::Parser ESSReadoutParser;
+  /// \brief Stuff that 'ties' TREX together
+  struct Counters &counters;
+  BaseSettings &Settings;
 
-  /// \brief parser for VMM3 readout data
-  ESSReadout::VMM3Parser VMMParser;
+  /// \brief serialiser (and producer) for events
+  EV44Serializer &Serializer;
+
+  /// \brief parser for the ESS readout header
+  ESSReadout::Parser &ESSHeaderParser;
 };
 
 } // namespace Trex

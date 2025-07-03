@@ -1,4 +1,4 @@
-// Copyright (C) 2017 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2017 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,16 +11,50 @@
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
 #include <cstring>
+#include <fmt/format.h>
 #include <memory>
 
 namespace ESSReadout {
 
-  using namespace esstime;
+using namespace esstime;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-Parser::Parser() { std::memset(NextSeqNum, 0, sizeof(NextSeqNum)); }
+Parser::Parser(Statistics &Stats) {
+  std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
+
+  // clang-format off
+  // Register ESS readout statistics counters
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_HEADER, ESSHeaderStats.ErrorHeader);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_BUFFER, ESSHeaderStats.ErrorBuffer);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_COOKIE, ESSHeaderStats.ErrorCookie);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_PAD, ESSHeaderStats.ErrorPad);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_SIZE, ESSHeaderStats.ErrorSize);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_VERSION, ESSHeaderStats.ErrorVersion);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE, ESSHeaderStats.ErrorOutputQueue);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TYPE, ESSHeaderStats.ErrorTypeSubType);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_SEQNO, ESSHeaderStats.ErrorSeqNum);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH, ESSHeaderStats.ErrorTimeHigh);
+  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC, ESSHeaderStats.ErrorTimeFrac);
+  Stats.create(METRIC_PARSER_ESSHEADER_HEARTBEATS, ESSHeaderStats.HeartBeats);
+  Stats.create(METRIC_PARSER_ESSHEADER_VERSION_V0, ESSHeaderStats.Version0Header);
+  Stats.create(METRIC_PARSER_ESSHEADER_VERSION_V1, ESSHeaderStats.Version1Header);
+
+  for (int i = 0; i < 12; i++) {
+    std::string statname = fmt::format("essheader.OQ.{:02}.packets", i);
+    Stats.create(statname, ESSHeaderStats.OQRxPackets[i]);
+  }
+
+  // Register ESS readout time counters stored in the Packet.Time.TimeCounters
+  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_COUNT, Packet.Time.Counters.TofCount);
+  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE, Packet.Time.Counters.TofNegative);
+  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_HIGH, Packet.Time.Counters.TofHigh);
+  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT, Packet.Time.Counters.PrevTofCount);
+  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE, Packet.Time.Counters.PrevTofNegative);
+  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH, Packet.Time.Counters.PrevTofHigh);
+  // clang-format on
+}
 
 int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
@@ -28,20 +62,20 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
 
   if (Buffer == nullptr or Size == 0) {
     XTRACE(PROCESS, WAR, "no buffer specified");
-    Stats.ErrorBuffer++;
+    ESSHeaderStats.ErrorBuffer++;
     return -Parser::EBUFFER;
   }
 
   if ((Size < MinDataSize) || (Size > MaxUdpDataSize)) {
     XTRACE(PROCESS, WAR, "Invalid data size (%u)", Size);
-    Stats.ErrorSize++;
+    ESSHeaderStats.ErrorSize++;
     return -Parser::ESIZE;
   }
 
   uint32_t VersionAndPad = htons(*(uint16_t *)(Buffer));
   if ((VersionAndPad >> 8) != 0) {
     XTRACE(PROCESS, WAR, "Padding is wrong (should be 0)");
-    Stats.ErrorPad++;
+    ESSHeaderStats.ErrorPad++;
     return -Parser::EHEADER;
   }
 
@@ -52,7 +86,7 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   } else {
     XTRACE(PROCESS, WAR, "Invalid version: expected 0, got %d",
            VersionAndPad & 0xff);
-    Stats.ErrorVersion++;
+    ESSHeaderStats.ErrorVersion++;
     return -Parser::EHEADER;
   }
 
@@ -61,32 +95,32 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   // XTRACE(PROCESS, DEB, "SwappedCookie 0x%08x", SwappedCookie);
   if (SwappedCookie != 0x535345) {
     XTRACE(PROCESS, WAR, "Wrong Cookie, 'ESS' expected");
-    Stats.ErrorCookie++;
+    ESSHeaderStats.ErrorCookie++;
     return -Parser::EHEADER;
   }
 
   // Check for v0 header size if the version field was v0
   if (hVersion == HeaderVersion::V0 && Size < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
-    Stats.ErrorSize++;
+    ESSHeaderStats.ErrorSize++;
     return -Parser::ESIZE;
   }
 
   // Check for v1 header size if the version field was v1
   if (hVersion == HeaderVersion::V1 && Size < sizeof(PacketHeaderV1)) {
     XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
-    Stats.ErrorSize++;
+    ESSHeaderStats.ErrorSize++;
     return -Parser::ESIZE;
   }
 
   switch (hVersion) {
   case HeaderVersion::V0:
     Packet.HeaderPtr = PacketHeader((PacketHeaderV0 *)(Buffer));
-    Stats.Version0Header++;
+    ESSHeaderStats.Version0Header++;
     break;
   default:
     Packet.HeaderPtr = PacketHeader((PacketHeaderV1 *)(Buffer));
-    Stats.Version1Header++;
+    ESSHeaderStats.Version1Header++;
     break;
   }
 
@@ -94,7 +128,7 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
       Packet.HeaderPtr.getTotalLength() < Packet.HeaderPtr.getSize()) {
     XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
            Packet.HeaderPtr.getTotalLength(), Size);
-    Stats.ErrorSize++;
+    ESSHeaderStats.ErrorSize++;
     return -Parser::ESIZE;
   }
 
@@ -102,18 +136,18 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   if (Type != ExpectedType) {
     XTRACE(PROCESS, WAR, "Unsupported data type (%u) for v0 (expected %u)",
            Type, ExpectedType);
-    Stats.ErrorTypeSubType++;
+    ESSHeaderStats.ErrorTypeSubType++;
     return -Parser::EHEADER;
   }
 
   if (Packet.HeaderPtr.getOutputQueue() >= MaxOutputQueues) {
     XTRACE(PROCESS, WAR, "Output queue %u exceeds max size %u",
            Packet.HeaderPtr.getOutputQueue(), MaxOutputQueues);
-    Stats.ErrorOutputQueue++;
+    ESSHeaderStats.ErrorOutputQueue++;
     return -Parser::EHEADER;
   }
 
-  Stats.OQRxPackets[Packet.HeaderPtr.getOutputQueue()]++;
+  ESSHeaderStats.OQRxPackets[Packet.HeaderPtr.getOutputQueue()]++;
 
   // Check per OutputQueue packet sequence number
   if (NextSeqNum[Packet.HeaderPtr.getOutputQueue()] !=
@@ -122,7 +156,7 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
            Packet.HeaderPtr.getOutputQueue(),
            NextSeqNum[Packet.HeaderPtr.getOutputQueue()],
            Packet.HeaderPtr.getSeqNum());
-    Stats.ErrorSeqNum++;
+    ESSHeaderStats.ErrorSeqNum++;
     NextSeqNum[Packet.HeaderPtr.getOutputQueue()] =
         Packet.HeaderPtr.getSeqNum();
   }
@@ -143,7 +177,7 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
   if (Packet.HeaderPtr.getPulseLow() > MaxFracTimeCount) {
     XTRACE(PROCESS, WAR, "Pulse time low (%u) exceeds max cycle count (%u)",
            Packet.HeaderPtr.getPulseLow(), MaxFracTimeCount);
-    Stats.ErrorTimeFrac++;
+    ESSHeaderStats.ErrorTimeFrac++;
     return -Parser::EHEADER;
   }
 
@@ -151,7 +185,7 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     XTRACE(PROCESS, WAR,
            "Prev pulse time low (%u) exceeds max cycle count (%u)",
            Packet.HeaderPtr.getPrevPulseLow(), MaxFracTimeCount);
-    Stats.ErrorTimeFrac++;
+    ESSHeaderStats.ErrorTimeFrac++;
     return -Parser::EHEADER;
   }
 
@@ -185,22 +219,25 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
            Packet.HeaderPtr.getPrevPulseLow());
     XTRACE(DATA, WAR, "PrevPulseTime (ns) %" PRIu64 "",
            Packet.Time.getPrevRefTimeUInt64());
-    Stats.ErrorTimeHigh++;
+    ESSHeaderStats.ErrorTimeHigh++;
 
     return -Parser::EHEADER;
   }
 
   //
-  if (hVersion == HeaderVersion::V0 && Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV0)) {
+  if (hVersion == HeaderVersion::V0 &&
+      Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV0)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet v0 (pulse time only)");
-    Stats.HeartBeats++;
+    ESSHeaderStats.HeartBeats++;
   }
 
-  if (hVersion == HeaderVersion::V1 && Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV1)) {
+  if (hVersion == HeaderVersion::V1 &&
+      Packet.HeaderPtr.getTotalLength() == sizeof(Parser::PacketHeaderV1)) {
     XTRACE(PROCESS, DEB, "Heartbeat packet v1 (pulse time only)");
-    Stats.HeartBeats++;
+    ESSHeaderStats.HeartBeats++;
   }
 
   return Parser::OK;
 }
+
 } // namespace ESSReadout

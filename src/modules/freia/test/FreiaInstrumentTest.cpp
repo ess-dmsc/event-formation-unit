@@ -6,6 +6,7 @@
 /// \brief Unit tests for FreiaInstrument
 //===----------------------------------------------------------------------===//
 
+#include <common/Statistics.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
@@ -15,6 +16,7 @@
 #include <freia/Counters.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
+#include <memory>
 
 using namespace Freia;
 using namespace ESSReadout;
@@ -148,30 +150,31 @@ std::vector<uint8_t> InvalidChannel{
 class FreiaInstrumentTest : public TestBase {
 public:
 protected:
-  struct Counters counters;
+  struct Counters Counters;
   BaseSettings Settings;
-  EV44Serializer *serializer;
-  FreiaInstrument *freia;
-  std::unique_ptr<TestHeaderFactory> headerFactory;
+  Statistics Stats;
+  ESSReadout::Parser ESSHeaderParser{Stats};
+  EV44Serializer serializer{115000, "freia"};
+  std::unique_ptr<FreiaInstrument> Freia;
+  std::unique_ptr<TestHeaderFactory> HeaderFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
     Settings.ConfigFile = FREIA_FULL;
-    serializer = new EV44Serializer(115000, "freia");
-    counters = {};
+    Counters = {};
 
-    headerFactory = std::make_unique<TestHeaderFactory>();
-    freia = new FreiaInstrument(counters, Settings, serializer);
-    freia->setSerializer(serializer);
-    freia->ESSReadoutParser.Packet.HeaderPtr =
-        headerFactory->createHeader(ESSReadout::Parser::V1);
+    HeaderFactory = std::make_unique<TestHeaderFactory>();
+    Freia = std::make_unique<FreiaInstrument>(Counters, Settings, serializer,
+                                              ESSHeaderParser);
+    ESSHeaderParser.Packet.HeaderPtr =
+        HeaderFactory->createHeader(ESSReadout::Parser::V1);
   }
   void TearDown() override {}
 
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
+    Packet.HeaderPtr = HeaderFactory->createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));
@@ -182,53 +185,53 @@ protected:
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
   Settings.CalibFile = CalibFile;
-  FreiaInstrument Freia(counters, Settings, serializer);
-  counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
+  FreiaInstrument Freia(Counters, Settings, serializer, ESSHeaderParser);
+  Counters.VMMStats = Freia.VMMParser.Stats;
+  ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
 }
 
 TEST_F(FreiaInstrumentTest, MappingError) {
-  makeHeader(freia->ESSReadoutParser.Packet, MappingError);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, MappingError);
+  auto Res = Freia->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 3);
-  counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
-  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
-  ASSERT_EQ(counters.HybridMappingErrors, 0);
-  ASSERT_EQ(counters.RingMappingErrors, 0);
-  ASSERT_EQ(counters.FENMappingErrors, 0);
+  Counters.VMMStats = Freia->VMMParser.Stats;
+  ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
+  ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(Counters.HybridMappingErrors, 0);
+  ASSERT_EQ(Counters.RingMappingErrors, 0);
+  ASSERT_EQ(Counters.FENMappingErrors, 0);
 
-  freia->processReadouts();
-  ASSERT_EQ(counters.HybridMappingErrors, 1);
-  ASSERT_EQ(counters.RingMappingErrors, 1);
-  ASSERT_EQ(counters.FENMappingErrors, 1);
-  ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
-  ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
+  Freia->processReadouts();
+  ASSERT_EQ(Counters.HybridMappingErrors, 1);
+  ASSERT_EQ(Counters.RingMappingErrors, 1);
+  ASSERT_EQ(Counters.FENMappingErrors, 1);
+  ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
+  ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
 }
 
 TEST_F(FreiaInstrumentTest, MaxRingMaxFENErrors) {
-  makeHeader(freia->ESSReadoutParser.Packet, MaxRingMaxFENErrors);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, MaxRingMaxFENErrors);
+  auto Res = Freia->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 0);
-  counters.VMMStats = freia->VMMParser.Stats;
-  ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
-  ASSERT_EQ(counters.VMMStats.ErrorFEN, 1);
+  Counters.VMMStats = Freia->VMMParser.Stats;
+  ASSERT_EQ(Counters.VMMStats.ErrorFiber, 1);
+  ASSERT_EQ(Counters.VMMStats.ErrorFEN, 1);
 }
 
 TEST_F(FreiaInstrumentTest, InvalidWireChannels) {
-  makeHeader(freia->ESSReadoutParser.Packet, InvalidChannel);
-  auto Res = freia->VMMParser.parse(freia->ESSReadoutParser.Packet);
-  counters.VMMStats = freia->VMMParser.Stats;
+  makeHeader(ESSHeaderParser.Packet, InvalidChannel);
+  auto Res = Freia->VMMParser.parse(ESSHeaderParser.Packet);
+  Counters.VMMStats = Freia->VMMParser.Stats;
 
   ASSERT_EQ(Res, 3);
-  ASSERT_EQ(counters.VMMStats.ErrorChannel, 1);
+  ASSERT_EQ(Counters.VMMStats.ErrorChannel, 1);
 
   // Hack last readout have valid channel
-  freia->VMMParser.Result[2].Channel = 65;
-  freia->processReadouts();
+  Freia->VMMParser.Result[2].Channel = 65;
+  Freia->processReadouts();
 
-  ASSERT_EQ(counters.InvalidXCoord, 1);
-  ASSERT_EQ(counters.InvalidYCoord, 2);
+  ASSERT_EQ(Counters.InvalidXCoord, 1);
+  ASSERT_EQ(Counters.InvalidYCoord, 2);
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
@@ -237,8 +240,8 @@ TEST_F(FreiaInstrumentTest, WireGap) {
   TestEvent.ClusterB.insert({0, 3, 100, 1});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.EventsInvalidWireGap, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.EventsInvalidWireGap, 1);
 }
 
 TEST_F(FreiaInstrumentTest, StripGap) {
@@ -247,24 +250,24 @@ TEST_F(FreiaInstrumentTest, StripGap) {
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.EventsInvalidStripGap, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.EventsInvalidStripGap, 1);
 }
 
 TEST_F(FreiaInstrumentTest, ClusterWireOnly) {
   TestEvent.ClusterB.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.EventsMatchedWireOnly, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.EventsMatchedWireOnly, 1);
 }
 
 TEST_F(FreiaInstrumentTest, ClusterStripOnly) {
   TestEvent.ClusterA.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
 
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.EventsMatchedStripOnly, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.EventsMatchedStripOnly, 1);
 }
 
 TEST_F(FreiaInstrumentTest, PixelError) {
@@ -272,26 +275,26 @@ TEST_F(FreiaInstrumentTest, PixelError) {
   TestEvent.ClusterA.insert({0, 2000, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.PixelErrors, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.PixelErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, EventTOFError) {
-  auto &Packet = freia->ESSReadoutParser.Packet;
+  auto &Packet = ESSHeaderParser.Packet;
   makeHeader(Packet, GoodEvent);
 
   Packet.Time.setReference(ESSTime(200, 0));
-  auto Res = freia->VMMParser.parse(Packet);
-  counters.VMMStats = freia->VMMParser.Stats;
+  auto Res = Freia->VMMParser.parse(Packet);
+  Counters.VMMStats = Freia->VMMParser.Stats;
 
-  freia->processReadouts();
-  for (auto &builder : freia->builders) {
+  Freia->processReadouts();
+  for (auto &builder : Freia->builders) {
     builder.flush(true);
-    freia->generateEvents(builder.Events);
+    Freia->generateEvents(builder.Events);
   }
   ASSERT_EQ(Res, 2);
-  ASSERT_EQ(counters.VMMStats.Readouts, 2);
-  ASSERT_EQ(counters.TimeErrors, 1);
+  ASSERT_EQ(Counters.VMMStats.Readouts, 2);
+  ASSERT_EQ(Counters.TimeErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
@@ -299,23 +302,23 @@ TEST_F(FreiaInstrumentTest, GoodEvent) {
   TestEvent.ClusterA.insert({0, 3, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.Events, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.Events, 1);
 }
 
 TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
   TestEvent.ClusterA.insert({3000000000, 3, 100, 0});
   TestEvent.ClusterB.insert({3000000000, 1, 100, 1});
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.MaxTOFErrors, 1);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.Events, 0);
+  ASSERT_EQ(Counters.MaxTOFErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, NoEvents) {
   Events.push_back(TestEvent);
-  freia->generateEvents(Events);
-  ASSERT_EQ(counters.Events, 0);
+  Freia->generateEvents(Events);
+  ASSERT_EQ(Counters.Events, 0);
 }
 
 int main(int argc, char **argv) {

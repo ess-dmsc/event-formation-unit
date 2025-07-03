@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,6 +15,8 @@
 namespace Caen {
 
 class CaenBase : public Detector {
+
+private:
   DetectorType Type;
 
 public:

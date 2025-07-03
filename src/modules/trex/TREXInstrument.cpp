@@ -27,8 +27,10 @@ namespace Trex {
 /// \brief load configuration and calibration files
 TREXInstrument::TREXInstrument(struct Counters &counters,
                                BaseSettings &settings,
-                               EV44Serializer *serializer)
-    : counters(counters), Settings(settings), Serializer(serializer) {
+                               EV44Serializer &serializer,
+                               ESSReadout::Parser &essHeaderParser)
+    : counters(counters), Settings(settings), Serializer(serializer),
+      ESSHeaderParser(essHeaderParser) {
 
   loadConfigAndCalib();
 
@@ -45,7 +47,7 @@ TREXInstrument::TREXInstrument(struct Counters &counters,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -89,9 +91,8 @@ void TREXInstrument::processReadouts() {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-  assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(
-      ESSReadoutParser.Packet.Time
+  Serializer.checkAndSetReferenceTime(
+      ESSHeaderParser.Packet.Time
           .getRefTimeUInt64()); /// \todo sometimes PrevPulseTime maybe?
 
   XTRACE(DATA, DEB, "processReadouts()");
@@ -215,7 +216,7 @@ void TREXInstrument::processReadouts() {
 }
 
 void TREXInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
 
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -288,7 +289,7 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
 
     XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, z %u, pixel %u", time,
            TimeOfFlight, x, y, z, PixelId);
-    Serializer->addEvent(TimeOfFlight, PixelId);
+    Serializer.addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate

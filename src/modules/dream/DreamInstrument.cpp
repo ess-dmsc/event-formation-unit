@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/kafka/EV44Serializer.h"
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>
@@ -20,9 +21,11 @@ namespace Dream {
 using namespace esstime;
 using namespace ESSReadout;
 
-DreamInstrument::DreamInstrument(struct Counters &counters,
-                                 BaseSettings &settings)
-    : counters(counters), Settings(settings) {
+DreamInstrument::DreamInstrument(struct Counters &counters, BaseSettings &settings,
+                                 EV44Serializer &serializer,
+                                 ESSReadout::Parser &essHeaderParser)
+    : Counters(counters), Settings(settings), Serializer(serializer),
+      ESSHeaderParser(essHeaderParser) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
@@ -30,7 +33,7 @@ DreamInstrument::DreamInstrument(struct Counters &counters,
 
   DreamConfiguration.loadAndApply();
 
-  ESSReadoutParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 
   if (DreamConfiguration.Instance == Config::DREAM) {
     Type = DetectorType::DREAM;
@@ -58,29 +61,9 @@ uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
 }
 
 void DreamInstrument::processReadouts() {
-  /// \todo We have a design issue here. Check is it a good approach to share
-  /// the ownership of the buffer between the parser and the instrument.
-  auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
-  uint64_t PulseTime = Time.setReference(ESSReadout::ESSTime(
-      PacketHeader.getPulseHigh(), PacketHeader.getPulseLow()));
-  uint64_t PrevPulseTime = Time.setPrevReference(ESSTime(
-      PacketHeader.getPrevPulseHigh(), PacketHeader.getPrevPulseLow()));
 
-  if (PulseTime - PrevPulseTime > DreamConfiguration.MaxPulseTimeDiffNS) {
-    XTRACE(DATA, WAR, "PulseTime and PrevPulseTime too far apart: %" PRIu64 "",
-           (PulseTime - PrevPulseTime));
-    counters.ReadoutStats.ErrorTimeHigh++;
-    counters.ErrorESSHeaders++;
-    return;
-  }
-
-  Serializer->checkAndSetReferenceTime(
-      PulseTime); /// \todo sometimes PrevPulseTime maybe?
-  XTRACE(DATA, DEB, "PulseTime     (%u,%u)", PacketHeader.getPulseHigh(),
-         PacketHeader.getPulseLow());
-  XTRACE(DATA, DEB, "PrevPulseTime (%u,%u)", PacketHeader.getPrevPulseHigh(),
-         PacketHeader.getPrevPulseLow());
-  //
+  Serializer.checkAndSetReferenceTime(
+      ESSHeaderParser.Packet.Time.getRefTimeUInt64());
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : DreamParser.Result) {
@@ -89,13 +72,13 @@ void DreamInstrument::processReadouts() {
 
     if (Ring > DreamConfiguration.MaxRing) {
       XTRACE(DATA, WAR, "Invalid RING: %u", Ring);
-      counters.RingMappingErrors++;
+      Counters.RingMappingErrors++;
       continue;
     }
 
     if (Data.FENId > DreamConfiguration.MaxFEN) {
       XTRACE(DATA, WAR, "Invalid FEN: %u", Data.FENId);
-      counters.FENMappingErrors++;
+      Counters.FENMappingErrors++;
       continue;
     }
 
@@ -104,11 +87,11 @@ void DreamInstrument::processReadouts() {
     if (not Parms.Initialised) {
       XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
              Ring, Data.FENId);
-      counters.ConfigErrors++;
+      Counters.ConfigErrors++;
       continue;
     }
 
-    auto TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+    auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
     // Calculate pixelid and apply calibration
@@ -116,10 +99,10 @@ void DreamInstrument::processReadouts() {
     XTRACE(DATA, DEB, "PixelId: %u", PixelId);
 
     if (PixelId == 0) {
-      counters.GeometryErrors++;
+      Counters.GeometryErrors++;
     } else {
-      Serializer->addEvent(TimeOfFlight, PixelId);
-      counters.Events++;
+      Serializer.addEvent(TimeOfFlight, PixelId);
+      Counters.Events++;
     }
   }
 }

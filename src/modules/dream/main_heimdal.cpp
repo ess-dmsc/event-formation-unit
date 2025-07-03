@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,7 +14,8 @@
 int main(int argc, char *argv[]) {
   MainProg Main("heimdal", argc, argv);
 
-  auto Detector = new Dream::DreamBase(Main.DetectorSettings);
+  auto Detector =
+      new Dream::DreamBase(Main.DetectorSettings, DetectorType::HEIMDAL);
 
   return Main.run(Detector);
 }

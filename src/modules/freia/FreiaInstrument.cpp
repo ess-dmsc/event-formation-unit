@@ -25,8 +25,10 @@ namespace Freia {
 /// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
                                  BaseSettings &settings,
-                                 EV44Serializer *serializer)
-    : counters(counters), Settings(settings), Serializer(serializer) {
+                                 EV44Serializer &serializer,
+                                 ESSReadout::Parser &essHeaderParser)
+    : counters(counters), Settings(settings), Serializer(serializer),
+      ESSHeaderParser(essHeaderParser) {
 
   loadConfigAndCalib();
 
@@ -34,7 +36,7 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
 
   Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 }
 
 void FreiaInstrument::loadConfigAndCalib() {
@@ -53,8 +55,10 @@ void FreiaInstrument::loadConfigAndCalib() {
 
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(Conf.MBFileParameters.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(Conf.MBFileParameters.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(Conf.MBFileParameters.MaxClusteringTimeGap);
+    builder.ClustererX.setMaximumTimeGap(
+        Conf.MBFileParameters.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(
+        Conf.MBFileParameters.MaxClusteringTimeGap);
     if (Conf.MBFileParameters.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
           Conf.MBFileParameters.SplitMultiEvents,
@@ -75,10 +79,9 @@ void FreiaInstrument::processReadouts() {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-  assert(Serializer != nullptr);
-  Serializer->checkAndSetReferenceTime(
+  Serializer.checkAndSetReferenceTime(
       /// \todo sometimes PrevPulseTime maybe?
-      ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+      ESSHeaderParser.Packet.Time.getRefTimeUInt64());
 
   for (const auto &readout : VMMParser.Result) {
 
@@ -148,7 +151,8 @@ void FreiaInstrument::processReadouts() {
 
     // Now we add readouts with the calibrated time and adc to the x,y builders
     if (Geom.isXCoord(readout.VMM)) {
-      uint16_t XCoord = Geom.xCoord(Hybrid.XOffset, readout.VMM, readout.Channel);
+      uint16_t XCoord =
+          Geom.xCoord(Hybrid.XOffset, readout.VMM, readout.Channel);
       XTRACE(DATA, INF,
              "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
              TimeNS, PlaneX, XCoord, readout.Channel, ADC);
@@ -181,7 +185,7 @@ void FreiaInstrument::processReadouts() {
 }
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
   // XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &e : Events) {
     if (e.empty()) {
@@ -260,7 +264,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", time,
            TimeOfFlight, x, y, PixelId);
-    Serializer->addEvent(TimeOfFlight, PixelId);
+    Serializer.addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate

@@ -9,10 +9,11 @@
 #include <modules/dream/DreamBase.h>
 #include <modules/dream/DreamInstrument.h>
 
+#include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/RuntimeStat.h>
+#include <unistd.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -20,32 +21,17 @@ namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
+DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type) : Detector(Settings), Type(type) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
+  
   // clang-format off
-  Stats.create("receive.packets", ITCounters.RxPackets);
-  Stats.create("receive.bytes", ITCounters.RxBytes);
-  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
-  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
-  Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
-  Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
   // ESS Readout Data Header
   Stats.create("readouts.count", Counters.Readouts);
@@ -61,14 +47,14 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
   Stats.create("readouts.error_config", Counters.ConfigErrors);
 
   //
-  Stats.create("thread.input_idle", ITCounters.RxIdle);
+  Stats.create("thread.input_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
@@ -90,8 +76,6 @@ DreamBase::DreamBase(BaseSettings const &Settings) : Detector(Settings) {
 /// \brief Normal processing thread
 void DreamBase::processingThread() {
 
-  DreamInstrument Dream(Counters, EFUSettings);
-
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
@@ -108,22 +92,22 @@ void DreamBase::processingThread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  MonitorSerializer = new AR51Serializer("dream", ProduceMonitor);
+  MonitorSerializer = std::make_unique<AR51Serializer>("dream", ProduceMonitor);
 
-  Serializer =
-      new EV44Serializer(KafkaBufferSize, EFUSettings.DetectorName, Produce);
+  Serializer = std::make_unique<EV44Serializer>(
+      KafkaBufferSize, EFUSettings.DetectorName, Produce);
 
   Stats.create("produce.cause.pulse_change",
                Serializer->stats().ProduceRefTimeTriggered);
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  Dream.setSerializer(Serializer); // would rather have this in DreamInstrument
+  DreamInstrument Dream(Counters, EFUSettings, *Serializer, ESSHeaderParser);
 
   unsigned int DataIndex;
   Timer ProduceTimer;
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+  RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
@@ -138,8 +122,7 @@ void DreamBase::processingThread() {
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = Dream.ESSReadoutParser.validate(DataPtr, DataLen, Dream.Type);
-      Counters.ReadoutStats = Dream.ESSReadoutParser.Stats;
+      auto Res = ESSHeaderParser.validate(DataPtr, DataLen, Type);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
@@ -148,17 +131,17 @@ void DreamBase::processingThread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Dream.DreamParser.parse(Dream.ESSReadoutParser.Packet.DataPtr,
-                                    Dream.ESSReadoutParser.Packet.DataLength);
+      Res = Dream.DreamParser.parse(ESSHeaderParser.Packet.DataPtr,
+                                    ESSHeaderParser.Packet.DataLength);
 
       // Process readouts, generate (end produce) events
       Dream.processReadouts();
 
       // send monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
           EFUSettings.MonitorSamples) {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               ITCounters.RxPackets);
+               getInputCounters().RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
         Counters.TxRawReadoutPackets++;
@@ -173,10 +156,11 @@ void DreamBase::processingThread() {
     EventProducer.poll(0);
 
     // Time out after one second
-    if (ProduceTimer.timeNS() >= EFUSettings.UpdateIntervalSec * 1'000'000'000) {
+    if (ProduceTimer.timeNS() >=
+        EFUSettings.UpdateIntervalSec * 1'000'000'000) {
 
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events,
+          {getInputCounters().RxPackets, Counters.Events,
            EventProducer.getStats().MsgStatusPersisted});
 
       Serializer->produce();

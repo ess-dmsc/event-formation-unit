@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -33,7 +33,7 @@ void writePacketToRxFIFO(T & Base, std::vector<uint8_t> Packet) {
   ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
   Base.RxRingbuffer.getNextBuffer();
 
-  while (Base.ITCounters.RxIdle == 0){
+  while (Base.getInputCounters().RxIdle == 0){
     usleep(100);
   }
   while (Base.Counters.ProcessingIdle == 0) {
@@ -44,7 +44,7 @@ void writePacketToRxFIFO(T & Base, std::vector<uint8_t> Packet) {
 //
 template <typename T>
 void waitForProcessing(T & Base) {
-  while (Base.ITCounters.RxIdle == 0){
+  while (Base.getInputCounters().RxIdle == 0){
     usleep(100);
   }
   while (Base.Counters.ProcessingIdle == 0) {

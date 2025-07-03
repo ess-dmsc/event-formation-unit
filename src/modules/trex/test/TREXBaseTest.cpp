@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -104,7 +104,7 @@ public:
 
 TEST_F(TREXBaseTest, Constructor) {
   Trex::TrexBase Readout(Settings);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 

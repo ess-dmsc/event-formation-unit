@@ -43,7 +43,7 @@ public:
 
 TEST_F(Timepix3BaseTest, Constructor) {
   Timepix3::Timepix3Base Readout(Settings);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
 std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};

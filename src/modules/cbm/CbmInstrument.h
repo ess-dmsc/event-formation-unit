@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <common/readout/ess/Parser.h>
 #include <common/detector/BaseSettings.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
@@ -34,12 +35,16 @@ public:
   CbmInstrument(Counters &counters, Config &Config,
                 const HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
                 const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-                    &HistogramSerializerPtrs);
+                    &HistogramSerializerPtrs,
+                ESSReadout::Parser &essHeaderParser);
 
   /// \brief Process the beam monitor readouts.
   void processMonitorReadouts(void);
 
-public:
+  /// \brief Parser for CBM readout data.
+  Parser CbmReadoutParser;
+
+private:
   /// \brief Reference to the counters for the CBM instrument.
   struct Counters &counters;
 
@@ -52,10 +57,7 @@ public:
       &HistogramSerializerMap;
 
   /// \brief Parser for the ESS Readout header.
-  ESSReadout::Parser ESSHeaderParser;
-
-  /// \brief Parser for CBM readout data.
-  Parser CbmReadoutParser;
+  ESSReadout::Parser &ESSHeaderParser;
 };
 
 } // namespace cbm

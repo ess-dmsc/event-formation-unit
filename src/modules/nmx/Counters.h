@@ -20,7 +20,6 @@ struct Counters {
   int64_t FifoSeqErrors;
 
   // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders;
   // int64_t RingRx[24];
 

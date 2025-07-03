@@ -81,6 +81,8 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   )
+
+set(DreamInstrumentTest_LIB efu_essreadout)
 create_test_executable(DreamInstrumentTest)
 
 

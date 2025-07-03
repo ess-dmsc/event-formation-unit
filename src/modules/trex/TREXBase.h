@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,6 +10,8 @@
 #pragma once
 
 #include <common/detector/Detector.h>
+#include <common/readout/ess/Parser.h>
+#include <memory>
 #include <modules/trex/Counters.h>
 
 namespace Trex {
@@ -22,6 +24,9 @@ public:
   void processing_thread();
 
   struct Counters Counters {};
+  
+protected:
+  std::unique_ptr<EV44Serializer> Serializer{nullptr};
 };
 
 } // namespace Trex

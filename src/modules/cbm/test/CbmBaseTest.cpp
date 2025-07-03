@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -99,7 +99,7 @@ public:
 
 TEST_F(CbmBaseTest, Constructor) {
   CbmBase DetectorBase(Settings);
-  EXPECT_EQ(DetectorBase.ITCounters.RxPackets, 0);
+  EXPECT_EQ(DetectorBase.getInputCounters().RxPackets, 0);
   EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
 }
 
@@ -118,7 +118,7 @@ TEST_F(CbmBaseTest, DataReceiveBadHeader) {
   BadTestPacket[0] = 0xff; // pad should be 0
   writePacketToRxFIFO(DetectorBase, BadTestPacket);
 
-  EXPECT_EQ(DetectorBase.Counters.ErrorESSHeaders, 1);
+  EXPECT_EQ(DetectorBase.Stats.valueByName("parser.essheader.errors.pad"), 1);
 
   // no readouts as header is bad
   EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
@@ -141,7 +141,7 @@ TEST_F(CbmBaseTest, EmulateFIFOError) {
 
   waitForProcessing(DetectorBase);
 
-  EXPECT_EQ(DetectorBase.Counters.FifoSeqErrors, 1);
+  EXPECT_EQ(DetectorBase.Stats.valueByName("receive.fifo_seq_errors"), 1);
   DetectorBase.stopThreads();
 }
 

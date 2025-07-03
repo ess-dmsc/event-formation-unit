@@ -134,13 +134,13 @@ TEST_F(VMM3ParserTest, ErrorTOF) {
   PacketData.Time.setReference(ESSTime(1, 0));
   PacketData.Time.setPrevReference(ESSTime(1, 0));
   ASSERT_EQ(VMMParser.Stats.Readouts, 0);
-  ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 0);
+  ASSERT_EQ(PacketData.Time.Counters.PrevTofNegative, 0);
 
   auto Res = VMMParser.parse(PacketData);
 
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(VMMParser.Stats.Readouts, 2);
-  ASSERT_EQ(PacketData.Time.Stats.PrevTofNegative, 2);
+  ASSERT_EQ(PacketData.Time.Counters.PrevTofNegative, 2);
 }
 
 // valid data two readouts

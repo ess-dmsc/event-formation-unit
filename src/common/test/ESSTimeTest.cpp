@@ -322,12 +322,12 @@ TEST_F(ESSTimeTest, SetRef) {
   ASSERT_EQ(Time.getTOF(ESSTime(100, 3)), 34);
   ASSERT_EQ(Time.getTOF(ESSTime(200, 0)), Time.InvalidTOF);
 
-  ASSERT_EQ(Time.Stats.TofCount, 4);
-  ASSERT_EQ(Time.Stats.TofNegative, 0);
-  ASSERT_EQ(Time.Stats.TofHigh, 1);
-  ASSERT_EQ(Time.Stats.PrevTofCount, 0);
-  ASSERT_EQ(Time.Stats.PrevTofNegative, 0);
-  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+  ASSERT_EQ(Time.Counters.TofCount, 4);
+  ASSERT_EQ(Time.Counters.TofNegative, 0);
+  ASSERT_EQ(Time.Counters.TofHigh, 1);
+  ASSERT_EQ(Time.Counters.PrevTofCount, 0);
+  ASSERT_EQ(Time.Counters.PrevTofNegative, 0);
+  ASSERT_EQ(Time.Counters.PrevTofHigh, 0);
 }
 
 TEST_F(ESSTimeTest, Bounds) {
@@ -351,48 +351,48 @@ TEST_F(ESSTimeTest, PrevPulse) {
   ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 50000)), 0);
   ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 49999)), Time.InvalidTOF);
 
-  ASSERT_EQ(Time.Stats.TofCount, 1);
-  ASSERT_EQ(Time.Stats.TofNegative, 2);
-  ASSERT_EQ(Time.Stats.TofHigh, 0);
-  ASSERT_EQ(Time.Stats.PrevTofCount, 3);
-  ASSERT_EQ(Time.Stats.PrevTofNegative, 2);
-  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+  ASSERT_EQ(Time.Counters.TofCount, 1);
+  ASSERT_EQ(Time.Counters.TofNegative, 2);
+  ASSERT_EQ(Time.Counters.TofHigh, 0);
+  ASSERT_EQ(Time.Counters.PrevTofCount, 3);
+  ASSERT_EQ(Time.Counters.PrevTofNegative, 2);
+  ASSERT_EQ(Time.Counters.PrevTofHigh, 0);
 }
 
 TEST_F(ESSTimeTest, AddConstantDelay) {
   Time.setReference(ESSTime(0, 0));
   ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499)), 999999988);
-  ASSERT_EQ(Time.Stats.TofCount, 1);
+  ASSERT_EQ(Time.Counters.TofCount, 1);
   ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 0), 999999988);
-  ASSERT_EQ(Time.Stats.TofCount, 2);
+  ASSERT_EQ(Time.Counters.TofCount, 2);
   ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 11), 999999999);
-  ASSERT_EQ(Time.Stats.TofCount, 3);
+  ASSERT_EQ(Time.Counters.TofCount, 3);
 }
 
 TEST_F(ESSTimeTest, MaxTOFExceeded) {
   Time.setReference(ESSTime(0, 0));
 
   Time.getTOF(ESSTime(0, 2));
-  ASSERT_EQ(Time.Stats.TofCount, 1);
-  ASSERT_EQ(Time.Stats.TofHigh, 0);
+  ASSERT_EQ(Time.Counters.TofCount, 1);
+  ASSERT_EQ(Time.Counters.TofHigh, 0);
 
   Time.setMaxTOF(0x01);
   Time.getTOF(ESSTime(0, 2));
-  ASSERT_EQ(Time.Stats.TofCount, 1);
-  ASSERT_EQ(Time.Stats.TofHigh, 1);
+  ASSERT_EQ(Time.Counters.TofCount, 1);
+  ASSERT_EQ(Time.Counters.TofHigh, 1);
 }
 
 TEST_F(ESSTimeTest, MaxPrevTOFExceeded) {
   Time.setPrevReference(ESSTime(0, 0));
 
   Time.getPrevTOF(ESSTime(0, 2));
-  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
-  ASSERT_EQ(Time.Stats.PrevTofHigh, 0);
+  ASSERT_EQ(Time.Counters.PrevTofCount, 1);
+  ASSERT_EQ(Time.Counters.PrevTofHigh, 0);
 
   Time.setMaxTOF(0x01);
   Time.getPrevTOF(ESSTime(0, 2));
-  ASSERT_EQ(Time.Stats.PrevTofCount, 1);
-  ASSERT_EQ(Time.Stats.PrevTofHigh, 1);
+  ASSERT_EQ(Time.Counters.PrevTofCount, 1);
+  ASSERT_EQ(Time.Counters.PrevTofHigh, 1);
 }
 
 TEST_F(ESSTimeTest, ExactPulseDelay) {

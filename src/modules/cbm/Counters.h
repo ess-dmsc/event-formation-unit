@@ -19,16 +19,12 @@ struct Counters {
   // Processing Counters - accessed in processing thread
   int64_t FifoSeqErrors{0};
 
-  // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats {
-    0
-  };
-  int64_t ErrorESSHeaders{0};
-
   // CBM Readouts
   struct cbm::ParserStats CbmStats {
     0
   };
+
+  int64_t DataHeaders{0};
 
   // Readout processing
   int64_t Event0DReadoutsProcessed{0};
@@ -50,8 +46,6 @@ struct Counters {
   // Processing time counters
   int64_t ProcessingIdle{0};
   int64_t TimeError{0};
-
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

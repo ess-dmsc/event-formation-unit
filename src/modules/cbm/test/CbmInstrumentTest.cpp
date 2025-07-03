@@ -4,14 +4,9 @@
 /// \file Unit test for the CbmInstrument class.
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV44Serializer.h>
-#include <common/kafka/serializer/DA00HistogramSerializer.h>
-#include <common/reduction/Event.h>
+#include "common/readout/ess/Parser.h"
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
-#include <filesystem>
-#include <gmock/gmock.h>
-#include <memory>
 #include <modules/cbm/CbmInstrument.h>
 
 using namespace cbm;
@@ -153,7 +148,8 @@ public:
 
 class MockHistogramSerializer : public HistogramSerializer<int32_t> {
 public:
-  MOCK_METHOD(void, addEvent, (const int32_t &time,const  int32_t &data), (override));
+  MOCK_METHOD(void, addEvent, (const int32_t &time, const int32_t &data),
+              (override));
 
   MockHistogramSerializer()
       : HistogramSerializer("cbm", 10, 10, "A", BinningStrategy::LastBin) {}
@@ -162,15 +158,19 @@ public:
 class CbmInstrumentTest : public TestBase {
 public:
 protected:
-  struct Counters counters;
+  /// Objects required to build the CbmInstrument
+  struct Counters CbmCounters;
   BaseSettings Settings;
   Config Configuration;
+  std::unique_ptr<Statistics> Stats;
+  std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
   HashMap2D<EV44Serializer> EV44SerializerPtrs{11};
   HashMap2D<HistogramSerializer<int32_t>> HistogramSerializerPtrs{11};
-  CbmInstrument *cbm;
+
+  /// The CbmInstrument object to be tested
+  /// It is created in SetUp() and destroyed automatically by the unique_ptr
+  std::unique_ptr<CbmInstrument> cbm;
   std::unique_ptr<TestHeaderFactory> headerFactory;
-  Event TestEvent;           // used for testing generateEvents()
-  std::vector<Event> Events; // used for testing generateEvents()
 
   inline static path FullConfigFile{""};
 
@@ -184,14 +184,19 @@ protected:
     Configuration = Config(Settings.ConfigFile);
     Configuration.loadAndApply();
 
+    // Create new instances of Stats and ESSHeaderParser for each test
+    Stats = std::make_unique<Statistics>();
+    ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
+
     initializeSerializers();
 
-    counters = {};
+    CbmCounters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    cbm = new CbmInstrument(counters, Configuration, EV44SerializerPtrs,
-                            HistogramSerializerPtrs);
-    cbm->ESSHeaderParser.Packet.HeaderPtr =
+    cbm = std::make_unique<CbmInstrument>(
+        CbmCounters, Configuration, EV44SerializerPtrs, HistogramSerializerPtrs,
+        *ESSHeaderParser);
+    ESSHeaderParser->Packet.HeaderPtr =
         headerFactory->createHeader(ESSReadout::Parser::V1);
   }
 
@@ -224,7 +229,9 @@ private:
 };
 
 // Test cases below
-TEST_F(CbmInstrumentTest, Constructor) { ASSERT_EQ(counters.RingCfgError, 0); }
+TEST_F(CbmInstrumentTest, Constructor) {
+  ASSERT_EQ(CbmCounters.RingCfgError, 0);
+}
 
 ///
 /// \brief Test case for validating Event0D type readouts.
@@ -264,30 +271,31 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
       .Times(testing::AtLeast(1));
 
   // initialze test data
-  makeHeader(cbm->ESSHeaderParser.Packet, ValidEvent0DReadouts);
-  cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
-  cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 0));
+  makeHeader(ESSHeaderParser->Packet, ValidEvent0DReadouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
   // check parser counters are as expected
-  EXPECT_EQ(counters.CbmStats.Readouts, 3);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 3);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   // check monitor readouts are processed correctly
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.CbmCounts, 3);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 3);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.Event0DEvents, 3);
-  EXPECT_EQ(counters.TimeStats.TofCount, 3);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 3);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 3);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 3);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 /// \brief Test case for validating IBM type readouts.
@@ -332,30 +340,31 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
       .Times(testing::AtLeast(1));
 
   // initialze test data
-  makeHeader(cbm->ESSHeaderParser.Packet, ValidIBMReadouts);
-  cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
-  cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 0));
+  makeHeader(ESSHeaderParser->Packet, ValidIBMReadouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
   // check parser counters are as expected
-  EXPECT_EQ(counters.CbmStats.Readouts, 4);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 1);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 4);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 1);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   // check monitor readouts are processed correctly
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.CbmCounts, 3);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 3);
-  EXPECT_EQ(counters.IBMEvents, 3);
-  EXPECT_EQ(counters.Event0DEvents, 0);
-  EXPECT_EQ(counters.TimeStats.TofCount, 3);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 3);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 3);
+  EXPECT_EQ(CbmCounters.IBMEvents, 3);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 ///
@@ -366,50 +375,51 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
 /// checks the expected counters and statistics.
 ///
 TEST_F(CbmInstrumentTest, RingConfigurationError) {
-  makeHeader(cbm->ESSHeaderParser.Packet, RingNotInCfgReadout);
+  makeHeader(ESSHeaderParser->Packet, RingNotInCfgReadout);
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 1);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 1);
-  EXPECT_EQ(counters.CbmCounts, 0);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
-  EXPECT_EQ(counters.TimeStats.TofCount, 0);
+  EXPECT_EQ(CbmCounters.RingCfgError, 1);
+  EXPECT_EQ(CbmCounters.CbmCounts, 0);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
 }
 
 /// \brief Test case for monitor readout with Type not supported
 /// \note This test is temporary because since all CBM are supported metric will
 /// be removed
 TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
-  makeHeader(cbm->ESSHeaderParser.Packet, NotSuppoertedTypeReadout);
+  makeHeader(ESSHeaderParser->Packet, NotSuppoertedTypeReadout);
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 1);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.TypeNotConfigured, 1);
-  EXPECT_EQ(counters.CbmCounts, 0);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
-  EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.Event0DEvents, 0);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.TypeNotConfigured, 1);
+  EXPECT_EQ(CbmCounters.CbmCounts, 0);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
 }
 
 ///
@@ -418,26 +428,27 @@ TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
 /// when the readout arrives for a monitor which is not configured for the EFU.
 ///
 TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
-  makeHeader(cbm->ESSHeaderParser.Packet, FenAndChannelNotInCfgReadout);
+  makeHeader(ESSHeaderParser->Packet, FenAndChannelNotInCfgReadout);
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 3);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 3);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.CbmCounts, 0);
-  EXPECT_EQ(counters.NoSerializerCfgError, 3);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 3);
-  EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.Event0DEvents, 0);
-  EXPECT_EQ(counters.TimeStats.TofCount, 3);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 0);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 3);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 3);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 ///
@@ -445,30 +456,32 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
 /// MaxTof limit configured in the configuration file
 ///
 TEST_F(CbmInstrumentTest, TOFHighError) {
-  makeHeader(cbm->ESSHeaderParser.Packet, TofToHighReadout);
-  cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(1, 100000));
-  cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 0));
+  makeHeader(ESSHeaderParser->Packet, TofToHighReadout);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 1);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.CbmCounts, 0);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 0);
-  EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.Event0DEvents, 0);
-  EXPECT_EQ(counters.TimeError, 1);
-  EXPECT_EQ(counters.TimeStats.TofCount, 0);
-  EXPECT_EQ(counters.TimeStats.TofHigh, 1);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 0);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
+  EXPECT_EQ(CbmCounters.TimeError, 1);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
 }
 
 ///
@@ -477,32 +490,38 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
 /// pulse time
 ///
 TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
-  makeHeader(cbm->ESSHeaderParser.Packet, PreviousAndNegativPrevTofReadouts);
-  cbm->ESSHeaderParser.Packet.Time.setReference(ESSTime(2, 100000));
-  cbm->ESSHeaderParser.Packet.Time.setPrevReference(ESSTime(1, 100000));
+  makeHeader(ESSHeaderParser->Packet, PreviousAndNegativPrevTofReadouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(2, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 100000));
 
-  cbm->CbmReadoutParser.parse(cbm->ESSHeaderParser.Packet);
-  counters.CbmStats = cbm->CbmReadoutParser.Stats;
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
 
-  EXPECT_EQ(counters.CbmStats.Readouts, 2);
-  EXPECT_EQ(counters.CbmStats.ErrorFiber, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorADC, 0);
-  EXPECT_EQ(counters.CbmStats.ErrorType, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 2);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   cbm->processMonitorReadouts();
-  EXPECT_EQ(counters.RingCfgError, 0);
-  EXPECT_EQ(counters.CbmCounts, 1);
-  EXPECT_EQ(counters.NoSerializerCfgError, 0);
-  EXPECT_EQ(counters.IBMReadoutsProcessed, 0);
-  EXPECT_EQ(counters.Event0DReadoutsProcessed, 1);
-  EXPECT_EQ(counters.IBMEvents, 0);
-  EXPECT_EQ(counters.Event0DEvents, 1);
-  EXPECT_EQ(counters.TimeError, 1);
-  EXPECT_EQ(counters.TimeStats.TofHigh, 0);
-  EXPECT_EQ(counters.TimeStats.TofCount, 0);
-  EXPECT_EQ(counters.TimeStats.PrevTofCount, 1);
-  EXPECT_EQ(counters.TimeStats.PrevTofNegative, 1);
+  EXPECT_EQ(CbmCounters.RingCfgError, 0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 1);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 1);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 1);
+  EXPECT_EQ(CbmCounters.TimeError, 1);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+  EXPECT_EQ(
+      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT),
+      1);
+  EXPECT_EQ(Stats->valueByName(
+                ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE),
+            1);
 }
 
 int main(int argc, char **argv) {

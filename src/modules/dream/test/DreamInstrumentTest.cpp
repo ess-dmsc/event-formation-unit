@@ -1,9 +1,11 @@
-// Copyright (C) 2021 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
+#include "common/kafka/EV44Serializer.h"
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
@@ -56,13 +58,16 @@ std::string ConfigStrHeimdal = R"(
 
 class DreamInstrumentTest : public TestBase {
 protected:
-  struct Counters counters;
+  struct Counters Counters;
+  Statistics Stats;
   BaseSettings Settings;
+  EV44Serializer Serializer{115000, "dream"};
+  ESSReadout::Parser ESSHeaderParser{Stats};
   std::unique_ptr<TestHeaderFactory> headerFactory;
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
-    counters = {};
+    Counters = {};
     headerFactory = std::make_unique<TestHeaderFactory>();
   }
   void TearDown() override {}
@@ -70,131 +75,111 @@ protected:
 
 /// Test cases below
 TEST_F(DreamInstrumentTest, Constructor) {
-  DreamInstrument Dream(counters, Settings);
-  ASSERT_EQ(Dream.counters.Readouts, 0);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ASSERT_EQ(Counters.Readouts, 0);
 }
 
 TEST_F(DreamInstrumentTest, ConstructorMagic) {
   Settings.ConfigFile = ConfigFileMagic;
-  DreamInstrument Dream(counters, Settings);
-  ASSERT_EQ(Dream.counters.Readouts, 0);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ASSERT_EQ(Counters.Readouts, 0);
 }
 
 TEST_F(DreamInstrumentTest, ConstructorHeimdal) {
   Settings.ConfigFile = ConfigFileHeimdal;
-  DreamInstrument Dream(counters, Settings);
-  ASSERT_EQ(Dream.counters.Readouts, 0);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ASSERT_EQ(Counters.Readouts, 0);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixel) {
-  DreamInstrument Dream(counters, Settings);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
+  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   Settings.ConfigFile = ConfigFileMagic;
-  DreamInstrument Dream(counters, Settings);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data),
+  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data),
             245760 + 1);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixelHeimdal) {
   Settings.ConfigFile = ConfigFileHeimdal;
-  DreamInstrument Dream(counters, Settings);
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.DreamConfiguration.RMConfig[0][0], Data), 1);
-}
-
-TEST_F(DreamInstrumentTest, PulseTimeDiffTooLarge) {
-  DreamInstrument Dream(counters, Settings);
-
-  ESSReadout::Parser::PacketHeaderV0 headerv0;
-  headerv0.PulseLow = 2; // 88MHz ticks
-  headerv0.PrevPulseLow = 0;
-
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(headerv0);
-
-  ASSERT_EQ(Dream.counters.ReadoutStats.ErrorTimeHigh, 0);
-  ASSERT_EQ(Dream.counters.ErrorESSHeaders, 0);
-
-  Dream.processReadouts();
-
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.ReadoutStats.ErrorTimeHigh, 1);
-  ASSERT_EQ(Dream.counters.ErrorESSHeaders, 1);
+  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
-  DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
-  Dream.Serializer = new EV44Serializer(115000, "dream");
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ESSHeaderParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
 
   // invalid FiberId
   Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
+  ASSERT_EQ(Counters.RingMappingErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 1);
+  ASSERT_EQ(Counters.ConfigErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
-  DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
-  Dream.Serializer = new EV44Serializer(115000, "dream");
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ESSHeaderParser.Packet.HeaderPtr =
+      headerFactory->createHeader(Parser::V0); // new HeaderV0;
 
   // invalid FENId
   Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Dream.counters.FENErrors, 0);
+  ASSERT_EQ(Counters.FENErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.FENMappingErrors, 1);
+  ASSERT_EQ(Counters.ConfigErrors, 0);
+  ASSERT_EQ(Counters.FENMappingErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
-  DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
-  Dream.Serializer = new EV44Serializer(115000, "dream");
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ESSHeaderParser.Packet.HeaderPtr =
+      headerFactory->createHeader(Parser::V0); // new HeaderV0;
 
   // unconfigured ring,fen combination
   Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
+  ASSERT_EQ(Counters.ConfigErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 1);
-  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
+  ASSERT_EQ(Counters.ConfigErrors, 1);
+  ASSERT_EQ(Counters.RingMappingErrors, 0);
+  ASSERT_EQ(Counters.FENMappingErrors, 0);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
-  DreamInstrument Dream(counters, Settings);
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;
-  Dream.Serializer = new EV44Serializer(115000, "dream");
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  ESSHeaderParser.Packet.HeaderPtr =
+      headerFactory->createHeader(Parser::V0); // new HeaderV0;
 
   // geometry error (no sumo defined)
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
-  ASSERT_EQ(Dream.counters.GeometryErrors, 1);
-  ASSERT_EQ(Dream.counters.Events, 0);
+  ASSERT_EQ(Counters.ConfigErrors, 0);
+  ASSERT_EQ(Counters.RingMappingErrors, 0);
+  ASSERT_EQ(Counters.FENMappingErrors, 0);
+  ASSERT_EQ(Counters.GeometryErrors, 1);
+  ASSERT_EQ(Counters.Events, 0);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
-  DreamInstrument Dream(counters, Settings);
-  Dream.DreamConfiguration.RMConfig[0][0].P2.SumoPair = 6;
-  Dream.ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0); // new HeaderV0;I
-  Dream.Serializer = new EV44Serializer(115000, "dream");
+  DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
+  Dream.getConfiguration().RMConfig[0][0].P2.SumoPair = 6;
+  ESSHeaderParser.Packet.HeaderPtr =
+      headerFactory->createHeader(Parser::V0); // new HeaderV0;I
 
   // finally an event
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Dream.counters.Events, 0);
+  ASSERT_EQ(Counters.Events, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Dream.counters.ConfigErrors, 0);
-  ASSERT_EQ(Dream.counters.RingMappingErrors, 0);
-  ASSERT_EQ(Dream.counters.FENMappingErrors, 0);
-  ASSERT_EQ(Dream.counters.GeometryErrors, 0);
-  ASSERT_EQ(Dream.counters.Events, 1);
+  ASSERT_EQ(Counters.ConfigErrors, 0);
+  ASSERT_EQ(Counters.RingMappingErrors, 0);
+  ASSERT_EQ(Counters.FENMappingErrors, 0);
+  ASSERT_EQ(Counters.GeometryErrors, 0);
+  ASSERT_EQ(Counters.Events, 1);
 }
 
 int main(int argc, char **argv) {

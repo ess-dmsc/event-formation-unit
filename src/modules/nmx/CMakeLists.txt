@@ -1,4 +1,4 @@
-# Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(test)
 add_subdirectory(generators)
@@ -48,4 +48,6 @@ set(NMXInstrumentTest_SRC
   ${nmx_common_src}
   test/NMXInstrumentTest.cpp
 )
+
+set(NMXInstrumentTest_LIB efu_essreadout)
 create_test_executable(NMXInstrumentTest)

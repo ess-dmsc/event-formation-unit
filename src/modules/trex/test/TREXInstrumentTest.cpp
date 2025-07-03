@@ -4,9 +4,11 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/testutils/HeaderFactory.h>
+#include "common/Statistics.h"
+#include <algorithm>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
@@ -387,21 +389,23 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  EV44Serializer *serializer;
-  TREXInstrument *trex;
+  Statistics Stats;
+  std::unique_ptr<EV44Serializer> serializer;
+  std::unique_ptr<TREXInstrument> trex;
+  ESSReadout::Parser ESSHeaderParser{Stats};
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
-    serializer = new EV44Serializer(115000, "trex");
+    serializer = std::make_unique<EV44Serializer>(115000, "trex");
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    trex = new TREXInstrument(counters, Settings, serializer);
-    trex->setSerializer(serializer);
-    trex->ESSReadoutParser.Packet.HeaderPtr =
+    trex = std::make_unique<TREXInstrument>(counters, Settings, *serializer,
+                                            ESSHeaderParser);
+    ESSHeaderParser.Packet.HeaderPtr =
         headerFactory->createHeader(ESSReadout::Parser::V0);
   }
   void TearDown() override {}
@@ -419,7 +423,7 @@ protected:
 // Test cases below
 TEST_F(TREXInstrumentTest, BadConfig) {
   Settings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(TREXInstrument(counters, Settings, serializer),
+  EXPECT_THROW(TREXInstrument(counters, Settings, *serializer, ESSHeaderParser),
                std::runtime_error);
 }
 
@@ -428,8 +432,8 @@ TEST_F(TREXInstrumentTest, Constructor) {
 }
 
 TEST_F(TREXInstrumentTest, BadRingAndFENError) {
-  makeHeader(trex->ESSReadoutParser.Packet, BadRingAndFENError);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, BadRingAndFENError);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 0);
   counters.VMMStats = trex->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
@@ -437,8 +441,8 @@ TEST_F(TREXInstrumentTest, BadRingAndFENError) {
 }
 
 TEST_F(TREXInstrumentTest, GoodEvent) {
-  makeHeader(trex->ESSReadoutParser.Packet, GoodEvent);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, GoodEvent);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = trex->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
@@ -460,8 +464,8 @@ TEST_F(TREXInstrumentTest, GoodEvent) {
 }
 
 TEST_F(TREXInstrumentTest, BadMappingError) {
-  makeHeader(trex->ESSReadoutParser.Packet, BadMappingError);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, BadMappingError);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
 
@@ -485,8 +489,8 @@ TEST_F(TREXInstrumentTest, BadMappingError) {
 }
 
 TEST_F(TREXInstrumentTest, MaxADC) {
-  makeHeader(trex->ESSReadoutParser.Packet, MaxADC);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, MaxADC);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   // ADC was above VMM threshold of 1023 once
@@ -495,8 +499,8 @@ TEST_F(TREXInstrumentTest, MaxADC) {
 }
 
 TEST_F(TREXInstrumentTest, MinADC) {
-  makeHeader(trex->ESSReadoutParser.Packet, MinADC);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, MinADC);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
@@ -507,8 +511,8 @@ TEST_F(TREXInstrumentTest, MinADC) {
 }
 
 TEST_F(TREXInstrumentTest, NoEventGridOnly) {
-  makeHeader(trex->ESSReadoutParser.Packet, NoEventGridOnly);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, NoEventGridOnly);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
@@ -532,8 +536,8 @@ TEST_F(TREXInstrumentTest, NoEventGridOnly) {
 }
 
 TEST_F(TREXInstrumentTest, NoEventWireOnly) {
-  makeHeader(trex->ESSReadoutParser.Packet, NoEventWireOnly);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, NoEventWireOnly);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = trex->VMMParser.Stats;
 
@@ -572,8 +576,8 @@ TEST_F(TREXInstrumentTest, PixelError) {
 }
 
 TEST_F(TREXInstrumentTest, BadEventLargeGridSpan) {
-  makeHeader(trex->ESSReadoutParser.Packet, BadEventLargeGridSpan);
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser.Packet, BadEventLargeGridSpan);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   ASSERT_EQ(Res, 5);
   counters.VMMStats = trex->VMMParser.Stats;
 
@@ -596,11 +600,11 @@ TEST_F(TREXInstrumentTest, BadEventLargeGridSpan) {
 }
 
 TEST_F(TREXInstrumentTest, NegativeTOF) {
-  auto &Packet = trex->ESSReadoutParser.Packet;
-  makeHeader(trex->ESSReadoutParser.Packet, GoodEvent);
+  auto &Packet = ESSHeaderParser.Packet;
+  makeHeader(ESSHeaderParser.Packet, GoodEvent);
   Packet.Time.setReference(ESSTime(200, 0));
 
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   trex->processReadouts();
@@ -616,9 +620,9 @@ TEST_F(TREXInstrumentTest, NegativeTOF) {
 }
 
 TEST_F(TREXInstrumentTest, HighTOFError) {
-  makeHeader(trex->ESSReadoutParser.Packet, HighTOFError);
+  makeHeader(ESSHeaderParser.Packet, HighTOFError);
 
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   trex->processReadouts();
@@ -634,9 +638,9 @@ TEST_F(TREXInstrumentTest, HighTOFError) {
 }
 
 TEST_F(TREXInstrumentTest, BadEventLargeTimeSpan) {
-  makeHeader(trex->ESSReadoutParser.Packet, BadEventLargeTimeSpan);
+  makeHeader(ESSHeaderParser.Packet, BadEventLargeTimeSpan);
 
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   trex->processReadouts();
@@ -652,9 +656,9 @@ TEST_F(TREXInstrumentTest, BadEventLargeTimeSpan) {
 }
 
 TEST_F(TREXInstrumentTest, EventCrossPackets) {
-  makeHeader(trex->ESSReadoutParser.Packet, SplitEventA);
+  makeHeader(ESSHeaderParser.Packet, SplitEventA);
 
-  auto Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  auto Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   trex->processReadouts();
@@ -664,9 +668,9 @@ TEST_F(TREXInstrumentTest, EventCrossPackets) {
   }
   ASSERT_EQ(Res, 1);
 
-  makeHeader(trex->ESSReadoutParser.Packet, SplitEventB);
+  makeHeader(ESSHeaderParser.Packet, SplitEventB);
 
-  Res = trex->VMMParser.parse(trex->ESSReadoutParser.Packet);
+  Res = trex->VMMParser.parse(ESSHeaderParser.Packet);
   counters.VMMStats = trex->VMMParser.Stats;
 
   trex->processReadouts();
