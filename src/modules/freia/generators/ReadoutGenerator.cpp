@@ -25,7 +25,7 @@ void ReadoutGenerator::generateData() {
   double XChannel{32};
   double YChannel{32};
 
-  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
     auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;

@@ -94,7 +94,7 @@ void ReadoutGenerator::generateData() {
 // Generate data for 0D event monitor
 void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 
-  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
 
     // Get pointer to the data buffer and clear memory with zeros
     auto dataPkt = (Parser::CbmReadout *)dataPtr;
@@ -128,7 +128,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
         std::chrono::microseconds(BeamShakeDistMs(RandomGenerator)));
   }
 
-  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
 
     if (numberOfReadouts < cbmSettings.NumReadouts) {
 

@@ -107,12 +107,12 @@ void ReadoutGeneratorBase::setReadoutDataSize(uint8_t ReadoutSize) {
 }
 
 void ReadoutGeneratorBase::setReadoutPerPacket(uint32_t ReadoutCount) {
-  ReadoutPerPacket = ReadoutCount;
+  ReadoutsPerPacket = ReadoutCount;
 }
 
 void ReadoutGeneratorBase::generateHeader() {
 
-  DataSize = HeaderSize + ReadoutPerPacket * ReadoutDataSize;
+  DataSize = HeaderSize + ReadoutsPerPacket * ReadoutDataSize;
   if (DataSize > BufferSize) {
     throw std::runtime_error("Too many readouts for buffer size");
   }
@@ -219,11 +219,11 @@ void ReadoutGeneratorBase::initialize(
   readoutTimeGenerator = std::move(readoutGenerator);
 
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
-  if (ReadoutPerPacket == 0) {
-    ReadoutPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;
+  if (ReadoutsPerPacket == 0) {
+    ReadoutsPerPacket = (BufferSize - HeaderSize) / ReadoutDataSize;
     // Ensure we have an even number of readouts
-    if (ReadoutPerPacket % 2) {
-      ReadoutPerPacket -= 1;
+    if (ReadoutsPerPacket % 2) {
+      ReadoutsPerPacket -= 1;
     }
   }
   XTRACE(DATA, INF, "Frequency defined as %u ns", pulseFrequencyNs);

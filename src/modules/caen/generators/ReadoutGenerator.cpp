@@ -41,7 +41,7 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
 
 
 void ReadoutGenerator::generateRandomData() {
-  for (size_t Count = 0; Count < ReadoutPerPacket; Count++) {
+  for (size_t Count = 0; Count < ReadoutsPerPacket; Count++) {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
     auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
@@ -106,7 +106,7 @@ void ReadoutGenerator::generateMaskedData() {
   // clang-format on
 
   // Generate all readouts
-  for (size_t Count = 0; Count < ReadoutPerPacket; Count++) {
+  for (size_t Count = 0; Count < ReadoutsPerPacket; Count++) {
     DataParser::CaenReadout &ReadoutData = *getReadoutDataPtr(Count);
     ReadoutData.DataLength = ReadoutDataSize;
 
