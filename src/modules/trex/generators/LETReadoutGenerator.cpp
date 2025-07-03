@@ -35,7 +35,7 @@ void LETReadoutGenerator::generateData() {
   uint8_t VMM = 0;
   uint16_t Channel = 0;
 
-  for (uint32_t Readout = 0; Readout < ReadoutPerPacket; Readout++) {
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
 
     auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
 

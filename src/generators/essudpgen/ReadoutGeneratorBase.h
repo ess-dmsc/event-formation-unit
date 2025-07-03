@@ -147,7 +147,7 @@ protected:
   const uint32_t TimeLowOffset{20000};        ///< Time offset for readout generation (ticks)
   const uint32_t PrevTimeLowOffset{10000};    ///< Previous time offset for readout generation (ticks)
   uint8_t ReadoutDataSize{0};                 ///< Size of the readout data
-  uint16_t ReadoutPerPacket{0};               ///< Number of readouts
+  uint16_t ReadoutsPerPacket{0};              ///< Number of readouts
   uint64_t Packets{0};                        ///< Number of packets
   uint32_t SeqNum{0};                         ///< Sequence number
   uint16_t DataSize{0};                       ///< Number of data bytes in packet
