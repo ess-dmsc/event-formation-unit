@@ -64,6 +64,10 @@ void MultiBladeGenerator::generateData() {
     const uint8_t FENId = Fuzzer.randU8WithMask(MultiBladeSettings.FENVals,
                                                 MultiBladeSettings.FENMask);
 
+    // Time high MUST be set out side the inner loop to ensure that X- and
+    // Y-channels are co-incident
+    const auto [timeHigh, timeLow] = generateReadoutTime();
+
     // Get the VMM Id
     const u_int8_t VMM0 = Fuzzer.randU8WithMask(MultiBladeSettings.VMMVals,
                                                 MultiBladeSettings.VMMMask);
@@ -85,9 +89,8 @@ void MultiBladeGenerator::generateData() {
       ReadoutData->FiberId = FiberId;
       ReadoutData->FENId = FENId;
 
-      const auto [T0, T1] = generateReadoutTime();
-      ReadoutData->TimeHigh = T0;
-      ReadoutData->TimeLow = T1;
+      ReadoutData->TimeHigh = timeHigh;
+      ReadoutData->TimeLow = timeLow;
 
       // Misc
       ReadoutData->DataLength = DATA_LENGTH;

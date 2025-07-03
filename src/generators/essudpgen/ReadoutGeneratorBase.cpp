@@ -61,18 +61,16 @@ ReadoutGeneratorBase::generateReadoutTime() const {
   if (readoutTimeGenerator == nullptr) {
     throw std::runtime_error("Readout time generator is not initialized");
   }
-  return generateReadoutTime(TimeDurationMilli(readoutTimeGenerator->getValue()));
+
+  TimeDurationMilli t = static_cast<TimeDurationMilli>(readoutTimeGenerator->getValue());
+  ESSTime readoutTime = pulseTime + esstime::msToNanoseconds(t);
+
+  return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
 }
 
 TimeDurationNano
 ReadoutGeneratorBase::getTimeOfFlightNS(ESSTime &readoutTime) const {
   return readoutTime - pulseTime;
-}
-
-std::pair<uint32_t, uint32_t>
-ReadoutGeneratorBase::generateReadoutTime(TimeDurationMilli timeOfFlightMs) const {
-  ESSTime readoutTime = pulseTime + esstime::msToNanoseconds(timeOfFlightMs);
-  return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
 }
 
 void ReadoutGeneratorBase::generatePackets(
