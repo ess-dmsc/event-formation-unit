@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -43,8 +43,8 @@ public:
 };
 
 TEST_F(DreamBaseTest, Constructor) {
-  Dream::DreamBase Readout(Settings);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
 /// | ESS Header    |
@@ -97,7 +97,7 @@ std::vector<uint8_t> TestPacket3{
 // clang-format off
 
 TEST_F(DreamBaseTest, DataReceiveGood) {
-  Dream::DreamBase Readout(Settings);
+  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
@@ -110,7 +110,7 @@ TEST_F(DreamBaseTest, DataReceiveGood) {
 }
 
 TEST_F(DreamBaseTest, DataReceiveBad) {
-  Dream::DreamBase Readout(Settings);
+  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
 
   writePacketToRxFIFO(Readout, TestPacket3);
 
@@ -125,7 +125,7 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
 
 
 TEST_F(DreamBaseTest, EmulateFIFOError) {
-  Dream::DreamBase Readout(Settings);
+  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
   EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
 
   Readout.startThreads();

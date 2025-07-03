@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -38,15 +38,14 @@ TEST_F(DetectorTest, StatAPI) {
   settings.DetectorName = "no detector";
   det = std::shared_ptr<Detector>(new Detector(settings));
   int res = det->statsize();
-  ASSERT_EQ(res, 0);
+  // Detector initialize 35 statistics counters for input thread coutners and
+  // for ESS header parser
+  ASSERT_EQ(res, 35);
 
-  int64_t val = det->statvalue(1);
+  int64_t val = det->statvalue(36);
   ASSERT_EQ(val, -1);
   val = det->statvalue(0);
   ASSERT_EQ(val, -1);
-
-  auto name = det->statname(1);
-  ASSERT_EQ("", name);
 
   auto detectorname = det->EFUSettings.DetectorName.c_str();
   ASSERT_STREQ("no detector", detectorname);

@@ -7,22 +7,21 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <memory>
 #include <trex/TREXBase.h>
 #include <trex/TREXInstrument.h>
 
+#include <common/RuntimeStat.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/monitor/HistogramSerializer.h>
-#include <common/RuntimeStat.h>
 #include <common/system/SocketImpl.h>
-#include <common/time/Timer.h>
 #include <common/time/TimeString.h>
+#include <common/time/Timer.h>
 
-#include <unistd.h>
-#include <stdio.h>
 #include <cinttypes>
 #include <stdio.h>
 #include <unistd.h>
@@ -40,27 +39,10 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
 
-  // Rx and Tx stats
-  Stats.create("receive.packets", ITCounters.RxPackets);
-  Stats.create("receive.bytes", ITCounters.RxBytes);
-  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
-  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
-  Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
-  Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
 
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
@@ -82,10 +64,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
 
 
   // Time stats
-  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
   Stats.create("readouts.tof_toolarge", Counters.TOFErrors); //move this to events.tof_toolarge
 
 
@@ -103,10 +81,10 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
 
   // Monitor and calibration stats
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   //
-  Stats.create("thread.receive_idle", ITCounters.RxIdle);
+  Stats.create("thread.receive_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats
@@ -158,14 +136,15 @@ void TrexBase::processing_thread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  Serializer = new EV44Serializer(KafkaBufferSize, "trex", Produce);
+  Serializer =
+      std::make_unique<EV44Serializer>(KafkaBufferSize, "trex", Produce);
 
   Stats.create("produce.cause.pulse_change",
                Serializer->stats().ProduceRefTimeTriggered);
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  TREXInstrument TREX(Counters, EFUSettings, Serializer);
+  TREXInstrument TREX(Counters, EFUSettings, *Serializer, ESSHeaderParser);
 
   HistogramSerializer ADCHistSerializer(TREX.ADCHist.needed_buffer_size(),
                                         "TREX");
@@ -175,7 +154,7 @@ void TrexBase::processing_thread() {
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
 
   // Monitor these counters
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+  RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
   unsigned int DataIndex;
@@ -190,27 +169,19 @@ void TrexBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = TREX.ESSReadoutParser.validate(DataPtr, DataLen, DetectorType::TREX);
-      Counters.ReadoutStats = TREX.ESSReadoutParser.Stats;
-
-      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
-               ITCounters.RxPackets);
-      }
+      auto Res = ESSHeaderParser.validate(DataPtr, DataLen, DetectorType::TREX);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
-               ITCounters.RxPackets);
+               getInputCounters().RxPackets);
         // hexDump(DataPtr, std::min(64, DataLen));
         Counters.ErrorESSHeaders++;
         continue;
       }
 
       // We have good header information, now parse readout data
-      Res = TREX.VMMParser.parse(TREX.ESSReadoutParser.Packet);
-      Counters.TimeStats = TREX.ESSReadoutParser.Packet.Time.Stats;
+      Res = TREX.VMMParser.parse(ESSHeaderParser.Packet);
       Counters.VMMStats = TREX.VMMParser.Stats;
 
       TREX.processReadouts();
@@ -228,7 +199,7 @@ void TrexBase::processing_thread() {
 
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events,
+          {getInputCounters().RxPackets, Counters.Events,
            EventProducer.getStats().MsgStatusPersisted});
 
       Serializer->produce();

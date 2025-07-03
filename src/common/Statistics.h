@@ -32,7 +32,8 @@ public:
   ~Statistics() = default;
 
   /// \brief creates a 'stat' entry with name and address for counter
-  /// duplicates are not allowed.
+  /// \note duplicates are not allowed, and values are initialized to 0 during
+  /// creation
   int create(const std::string &StatName, int64_t &Value);
 
   /// \brief returns the number of registered stats
@@ -49,7 +50,8 @@ public:
 
   /// \brief create grafana metric prefix by concatenation of strings
   /// PointChar will be added to the end
-  void setPrefix(const std::string &StatsPrefix, const std::string &StatsRegion);
+  void setPrefix(const std::string &StatsPrefix,
+                 const std::string &StatsRegion);
 
 private:
   std::string prefix{""};       ///< prepend to all stat names

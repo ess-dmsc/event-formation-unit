@@ -6,14 +6,14 @@
 /// detectors
 //===----------------------------------------------------------------------===//
 
-#include <modules/caen/CaenBase.h>
-#include <modules/caen/CaenInstrument.h>
-
 #include <common/RuntimeStat.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
-#include <common/time/Timer.h>
 #include <common/time/TimeString.h>
+#include <common/time/Timer.h>
+#include <memory>
+#include <modules/caen/CaenBase.h>
+#include <modules/caen/CaenInstrument.h>
 
 #include <cinttypes>
 #include <unistd.h>
@@ -30,50 +30,18 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
+  
   // clang-format off
-  Stats.create("receive.packets", ITCounters.RxPackets);
-  Stats.create("receive.bytes", ITCounters.RxBytes);
-  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-
-  // ESS Readout
-  Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.error_buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.error_cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.error_pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.error_size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.error_version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.error_output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.error_type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.error_seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.error_timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.error_timefrac", Counters.ReadoutStats.ErrorTimeFrac);
-  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
-  Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
-  Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
-
-  for (int i = 0; i < 12; i++) {
-    std::string statname = fmt::format("essheader.OQ.{:02}.packets", i);
-    Stats.create(statname, Counters.ReadoutStats.OQRxPackets[i]);
-  }
 
   // LoKI Readout Data
-  Stats.create("readouts.headers", Counters.Parser.DataHeaders);
-  Stats.create("readouts.count", Counters.Parser.Readouts);
-  Stats.create("readouts.error_maxadc", Counters.Parser.ReadoutsMaxADC);
-
-  Stats.create("readouts.error_headersize", Counters.Parser.DataHeaderSizeErrors);
-  Stats.create("readouts.error_datlen_mismatch", Counters.Parser.DataLenMismatch);
-  Stats.create("readouts.error_datlen_invalid", Counters.Parser.DataLenInvalid);
-  Stats.create("readouts.error_ringfen", Counters.Parser.RingFenErrors);
-
-  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_high", Counters.TimeStats.TofHigh);
-  Stats.create("readouts.prevtof_high", Counters.TimeStats.PrevTofHigh);
+  Stats.create("parser.readout.header.count", Counters.Parser.DataHeaders);
+  Stats.create("parser.readout.count", Counters.Parser.Readouts);
+  Stats.create("parser.readout.error_maxadc", Counters.Parser.ReadoutsMaxADC);
+  Stats.create("parser.readout.error_headersize", Counters.Parser.DataHeaderSizeErrors);
+  Stats.create("parser.readout.error_datlen_mismatch", Counters.Parser.DataLenMismatch);
+  Stats.create("parser.readout.error_datlen_invalid", Counters.Parser.DataLenInvalid);
+  Stats.create("parser.readout.error_ringfen", Counters.Parser.RingFenErrors);
 
   // Logical and Digital geometry incl. Calibration
   Stats.create("geometry.ring_errors", Counters.Geom.RingErrors);
@@ -92,14 +60,15 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
 
   // Events
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.pixel_errors", Counters.PixelErrors);
+  Stats.create("events.errors.pixel", Counters.PixelErrors);
+  Stats.create("events.errors.time", Counters.TimeError);
 
   // Monitor and calibration stats
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", ITCounters.CalibModePackets);
+  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   // System counters
-  Stats.create("thread.input_idle", ITCounters.RxIdle);
+  Stats.create("thread.input_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats
@@ -135,7 +104,7 @@ void CaenBase::processingThread() {
   };
 
   // Create the instrument
-  CaenInstrument Caen(Counters, EFUSettings);
+  CaenInstrument Caen(Counters, EFUSettings, ESSHeaderParser);
   // and its serializers
   Serializers.reserve(Caen.Geom->numSerializers());
   for (size_t i = 0; i < Caen.Geom->numSerializers(); ++i) {
@@ -154,10 +123,10 @@ void CaenBase::processingThread() {
     MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  MonitorSerializer =
-      new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
+  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
+                                                       ProduceMonitor);
 
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.Events,
+  RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
   // Time out after one second
@@ -179,10 +148,7 @@ void CaenBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-      auto Res = Caen.ESSReadoutParser.validate(DataPtr, DataLen, Type);
-
-      /// \todo could be moved
-      Counters.ReadoutStats = Caen.ESSReadoutParser.Stats;
+      auto Res = ESSHeaderParser.validate(DataPtr, DataLen, Type);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
@@ -191,17 +157,17 @@ void CaenBase::processingThread() {
       }
 
       // We have good header information, now parse readout data
-      Res = Caen.CaenParser.parse(Caen.ESSReadoutParser.Packet.DataPtr,
-                                  Caen.ESSReadoutParser.Packet.DataLength);
+      Res = Caen.CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
+                                  ESSHeaderParser.Packet.DataLength);
 
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
 
       // send monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
           EFUSettings.MonitorSamples) {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               ITCounters.RxPackets);
+               getInputCounters().RxPackets);
         MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
         MonitorSerializer->produce();
         Counters.TxRawReadoutPackets++;
@@ -209,7 +175,6 @@ void CaenBase::processingThread() {
 
       /// \todo This could be moved and done less frequently
       Counters.Parser = Caen.CaenParser.Stats;
-      Counters.TimeStats = Caen.ESSReadoutParser.Packet.Time.Stats;
       Counters.Geom = Caen.Geom->Stats;
       Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
@@ -223,7 +188,7 @@ void CaenBase::processingThread() {
     if (ProduceTimer.timeout()) {
       // XTRACE(DATA, DEB, "Serializer timer timed out, producing message now");
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.Events,
+          {getInputCounters().RxPackets, Counters.Events,
            EventProducer.getStats().MsgStatusPersisted});
       // Produce messages if there are events
       for (auto &Serializer : Serializers) {

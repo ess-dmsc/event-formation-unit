@@ -18,7 +18,6 @@ struct Counters {
   int64_t FifoSeqErrors{0};
 
   // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders{0};
 
   // DREAM DataParser

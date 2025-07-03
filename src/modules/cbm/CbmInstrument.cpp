@@ -8,6 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/readout/ess/Parser.h"
 #include <common/debug/Trace.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>
@@ -27,10 +28,12 @@ CbmInstrument::CbmInstrument(
     struct Counters &Counters, Config &Config,
     const HashMap2D<EV44Serializer> &Ev44serializerMap,
     const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-        &HistogramSerializerMap)
+        &HistogramSerializerMap,
+    ESSReadout::Parser &essHeaderParser)
 
     : counters(Counters), Conf(Config), Ev44SerializerMap(Ev44serializerMap),
-      HistogramSerializerMap(HistogramSerializerMap) {
+      HistogramSerializerMap(HistogramSerializerMap),
+      ESSHeaderParser(essHeaderParser) {
 
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
   ESSHeaderParser.Packet.Time.setMaxTOF(Conf.Parms.MaxTOFNS);
@@ -77,10 +80,10 @@ void CbmInstrument::processMonitorReadouts() {
 
     /// Calculates the time of flight (TOF) for the readout based on the
     /// reference time and the readout time. If the readout time is smaller than
-    /// the reference time, it means that tof would be negative and this fucntion
-    /// returns the TOF according to the previous reference time. This is includes
-    /// delayed readouts into the current pulse statistics.
-    /// \note: If time calculation fails, the function returns InvalidTOF
+    /// the reference time, it means that tof would be negative and this
+    /// fucntion returns the TOF according to the previous reference time. This
+    /// is includes delayed readouts into the current pulse statistics. \note:
+    /// If time calculation fails, the function returns InvalidTOF
     uint64_t TimeOfFlight = RefTime.getTOF(ReadoutTime);
 
     if (TimeOfFlight == RefTime.InvalidTOF) {
@@ -91,7 +94,7 @@ void CbmInstrument::processMonitorReadouts() {
       counters.TimeError++;
       continue;
     }
-    
+
     // Check for out_of_range errors thrown by the HashMap2D, which contains
     // the serializers
     try {
@@ -151,9 +154,6 @@ void CbmInstrument::processMonitorReadouts() {
 
     counters.CbmCounts++;
   }
-
-  // Update the time statistics
-  counters.TimeStats = RefTime.Stats;
 }
 
 } // namespace cbm

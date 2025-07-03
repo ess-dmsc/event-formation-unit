@@ -11,12 +11,13 @@
 #include <modules/cbm/CbmBase.h>
 #include <modules/cbm/CbmInstrument.h>
 
+#include <common/RuntimeStat.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/HashMap2D.h>
-#include <common/RuntimeStat.h>
 
 #include <memory>
+#include <unistd.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -32,40 +33,19 @@ CbmBase::CbmBase(BaseSettings const &settings)
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-
-  // Rx and Tx stats
-  Stats.create("receive.packets", ITCounters.RxPackets);
-  Stats.create("receive.bytes", ITCounters.RxBytes);
-  Stats.create("receive.dropped", ITCounters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
-  // ESS Readout header stats
-  Stats.create("essheader.errors.header", Counters.ErrorESSHeaders);
-  Stats.create("essheader.errors.buffer", Counters.ReadoutStats.ErrorBuffer);
-  Stats.create("essheader.errors.cookie", Counters.ReadoutStats.ErrorCookie);
-  Stats.create("essheader.errors.pad", Counters.ReadoutStats.ErrorPad);
-  Stats.create("essheader.errors.size", Counters.ReadoutStats.ErrorSize);
-  Stats.create("essheader.errors.version", Counters.ReadoutStats.ErrorVersion);
-  Stats.create("essheader.errors.output_queue", Counters.ReadoutStats.ErrorOutputQueue);
-  Stats.create("essheader.errors.type", Counters.ReadoutStats.ErrorTypeSubType);
-  Stats.create("essheader.errors.seqno", Counters.ReadoutStats.ErrorSeqNum);
-  Stats.create("essheader.errors.timehigh", Counters.ReadoutStats.ErrorTimeHigh);
-  Stats.create("essheader.errors.timefrac", Counters.ReadoutStats.ErrorTimeFrac);
-  Stats.create("essheader.heartbeats", Counters.ReadoutStats.HeartBeats);
-  Stats.create("essheader.version.v0", Counters.ReadoutStats.Version0Header);
-  Stats.create("essheader.version.v1", Counters.ReadoutStats.Version1Header);
-
-  Stats.create("parsing.readout_parsed", Counters.CbmStats.Readouts);
-
   // Readout parsing errors - readout dropped
-  Stats.create("parsing.errors.size", Counters.CbmStats.ErrorSize);
-  Stats.create("parsing.errors.fiber", Counters.CbmStats.ErrorFiber);
-  Stats.create("parsing.errors.fen", Counters.CbmStats.ErrorFEN);
-  Stats.create("parsing.errors.type", Counters.CbmStats.ErrorType);
-  Stats.create("parsing.errors.adc", Counters.CbmStats.ErrorADC);
-  Stats.create("parsing.errors.datalen", Counters.CbmStats.ErrorDataLength);
-  Stats.create("parsing.errors.timefrac", Counters.CbmStats.ErrorTimeFrac);
-  Stats.create("parsing.errors.no_data", Counters.CbmStats.NoData);
+  Stats.create("parser.readout.count", Counters.CbmStats.Readouts);
+  Stats.create("parser.readout.header.count", Counters.DataHeaders);
+  Stats.create("parser.readout.errors.size", Counters.CbmStats.ErrorSize);
+  Stats.create("parser.readout.errors.fiber", Counters.CbmStats.ErrorFiber);
+  Stats.create("parser.readout.errors.fen", Counters.CbmStats.ErrorFEN);
+  Stats.create("parser.readout.errors.type", Counters.CbmStats.ErrorType);
+  Stats.create("parser.readout.errors.adc", Counters.CbmStats.ErrorADC);
+  Stats.create("parser.readout.errors.datalen", Counters.CbmStats.ErrorDataLength);
+  Stats.create("parser.readout.errors.timefrac", Counters.CbmStats.ErrorTimeFrac);
+  Stats.create("parser.readout.errors.no_data", Counters.CbmStats.NoData);
 
   // Readout processing stats
   Stats.create("readouts.processed", Counters.CbmCounts);
@@ -85,14 +65,8 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.errors.type_not_configured", Counters.TypeNotConfigured);
   Stats.create("readouts.errors.time", Counters.TimeError);
 
-  // Time stats
-  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-
   //
-  Stats.create("thread.receive_idle", ITCounters.RxIdle);
+  Stats.create("thread.receive_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats
@@ -130,19 +104,18 @@ void CbmBase::processingThread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-
   // ---------------------------------------------------------------------------
   // Raw data monitor producer and serializer
   Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-    KafkaCfg.CfgParms);
+                           KafkaCfg.CfgParms);
 
   auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                      const auto &Timestamp) {
-  MonitorProducer.produce(DataBuffer, Timestamp);
+                                           const auto &Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  MonitorSerializer =
-  new AR51Serializer(EFUSettings.DetectorName, ProduceMonitor);
+  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
+                                                       ProduceMonitor);
 
   // Process instrument config file
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -207,11 +180,11 @@ void CbmBase::processingThread() {
 
   // Create instrument
   CbmInstrument cbmInstrument(Counters, CbmConfiguration, *EV44SerializerMapPtr,
-                              *HistogramSerializerMapPtr);
+                              *HistogramSerializerMapPtr, ESSHeaderParser);
 
   // Monitor these counters and time out after one second
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
-  RuntimeStat RtStat({ITCounters.RxPackets, Counters.CbmCounts,
+  RuntimeStat RtStat({getInputCounters().RxPackets, Counters.CbmCounts,
                       EventProducer.getStats().MsgStatusPersisted});
 
   unsigned int DataIndex;
@@ -226,44 +199,34 @@ void CbmBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      int64_t SeqErrOld = Counters.ReadoutStats.ErrorSeqNum;
-      auto Res = cbmInstrument.ESSHeaderParser.validate(
-          DataPtr, DataLen, cbmInstrument.Conf.Parms.TypeSubType);
-      Counters.ReadoutStats = cbmInstrument.ESSHeaderParser.Stats;
-
-      if (SeqErrOld != Counters.ReadoutStats.ErrorSeqNum) {
-        XTRACE(DATA, WAR, "SeqNum error at RxPackets %" PRIu64,
-               ITCounters.RxPackets);
-      }
+      auto Res = ESSHeaderParser.validate(
+          DataPtr, DataLen, CbmConfiguration.Parms.TypeSubType);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
-               ITCounters.RxPackets);
+               getInputCounters().RxPackets);
         // hexDump(DataPtr, std::min(64, DataLen));
-        Counters.ErrorESSHeaders++;
         continue;
       }
 
       // We have good header information, now parse readout data
       cbmInstrument.CbmReadoutParser.parse(
-          cbmInstrument.ESSHeaderParser.Packet);
+          ESSHeaderParser.Packet);
       Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
-      Counters.TimeStats = cbmInstrument.ESSHeaderParser.Packet.Time.Stats;
 
       cbmInstrument.processMonitorReadouts();
 
       // ---------------------------------------------------------------------------
       // Send Ar51 monitoring data
-      if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
-        EFUSettings.MonitorSamples) {
-      XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-              ITCounters.RxPackets);
-      MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-      MonitorSerializer->produce();
-      Counters.TxRawReadoutPackets++;
-    }
-
+      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
+          EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               getInputCounters().RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
+        MonitorSerializer->produce();
+        Counters.TxRawReadoutPackets++;
+      }
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a
@@ -279,7 +242,7 @@ void CbmBase::processingThread() {
     // only in case new pulse time is detected
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(
-          {ITCounters.RxPackets, Counters.CbmCounts,
+          {getInputCounters().RxPackets, Counters.CbmCounts,
            EventProducer.getStats().MsgStatusPersisted});
 
       for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {

@@ -11,7 +11,6 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
-#include <common/readout/vmm3/Hybrid.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/EventBuilder2D.h>
@@ -30,13 +29,33 @@ struct Counters;
 namespace Freia {
 
 class FreiaInstrument {
+
+private:
+  /// \brief Stuff that 'ties' Freia together
+  Counters &counters;
+  BaseSettings &Settings;
+
+  /// \brief Instrument configuration (rings, cassettes, FENs)
+  Config Conf;
+
+  /// \brief digital geometry
+  /// get x- and y- coordinates from cassettes and channels
+  Geometry Geom;
+
+  /// \brief serialiser (and producer) for events
+  EV44Serializer &Serializer;
+
+  /// \brief parser for the ESS Readout header
+  ESSReadout::Parser &ESSHeaderParser;
+
 public:
   /// \brief 'create' the Freia instrument
   /// based on settings the constructor loads both configuration
   /// and calibration data. It then initialises event builders and
   /// histograms
   FreiaInstrument(Counters &counters, BaseSettings &settings,
-                  EV44Serializer *serializer);
+                  EV44Serializer &serializer,
+                  ESSReadout::Parser &essHeaderParser);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -48,34 +67,9 @@ public:
   /// \brief process clusters into events
   void generateEvents(std::vector<Event> &Events);
 
-  /// \brief initialise the serializer. This is used both in FreiaInstrument
-  // and FreiaBase. Called from FreiaBase
-  void setSerializer(EV44Serializer *serializer) { Serializer = serializer; }
-
-public:
-  /// \brief Stuff that 'ties' Freia together
-  struct Counters &counters;
-  BaseSettings &Settings;
-
-  /// \brief serialiser (and producer) for events
-  EV44Serializer *Serializer{nullptr};
-
   /// \brief One builder per cassette, resize in constructor when we have
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
-
-  /// \brief Instrument configuration (rings, cassettes, FENs)
-  Config Conf;
-
-  /// \brief digital geometry
-  /// get x- and y- coordinates from cassettes and channels
-  Geometry Geom;
-
-  // Each cassette holds 2 VMMCalibrations
-  std::vector<ESSReadout::Hybrid> Hybrids;
-
-  /// \brief parser for the ESS Readout header
-  ESSReadout::Parser ESSReadoutParser;
 
   /// \brief parser for VMM3 readout data
   ESSReadout::VMM3Parser VMMParser;

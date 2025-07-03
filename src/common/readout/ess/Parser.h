@@ -1,10 +1,10 @@
-// Copyright (C) 2017 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2017 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
-/// \brief ESS Readout System Data definitions and parsing functions. For further
-/// details, see the readout ICD
+/// \brief ESS Readout System Data definitions and parsing functions. For
+/// further details, see the readout ICD
 ///
 ///   https://project.esss.dk/nextcloud/index.php/apps/files/files/16376550?dir=/DM/detectors/02%20instruments/01%20common/02%20Readout/02%20ICD
 ///
@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/time/ESSTime.h>
 #include <common/types/DetectorType.h>
 
@@ -28,26 +29,55 @@ const uint8_t MaxOutputQueues{12};
 const unsigned int MaxUdpDataSize{8972};
 const unsigned int MinDataSize{5}; // just pad, cookie and version
 
-struct ESSHeaderStats {
-  int64_t ErrorBuffer{0};
-  int64_t ErrorSize{0};
-  int64_t ErrorVersion{0};
-  int64_t ErrorCookie{0};
-  int64_t ErrorPad{0};
-  int64_t ErrorOutputQueue{0};
-  int64_t ErrorTypeSubType{0};
-  int64_t ErrorSeqNum{0};
-  int64_t ErrorTimeHigh{0};
-  int64_t ErrorTimeFrac{0};
-  int64_t Version0Header{0};
-  int64_t Version1Header{0};
-  int64_t HeartBeats{0};
-  int64_t OQRxPackets[MaxOutputQueues]{0};
-};
-
-
 class Parser {
+
 public:
+  // Static const strings for stat names
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_HEADER = "parser.essheader.errors.header";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_BUFFER = "parser.essheader.errors.buffer";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_COOKIE = "parser.essheader.errors.cookie";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_PAD = "parser.essheader.errors.pad";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SIZE = "parser.essheader.errors.size";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_VERSION = "parser.essheader.errors.version";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE = "parser.essheader.errors.output_queue";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TYPE = "parser.essheader.errors.type";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SEQNO = "parser.essheader.errors.seqno";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH = "parser.essheader.errors.timehigh";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC = "parser.essheader.errors.timefrac";
+  static inline const std::string METRIC_PARSER_ESSHEADER_HEARTBEATS = "parser.essheader.heartbeats";
+  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V0 = "parser.essheader.version.v0";
+  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V1 = "parser.essheader.version.v1";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_COUNT = "events.timestamp.tof.count";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE = "events.timestamp.tof.negative";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_HIGH = "events.timestamp.tof.high";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT = "events.timestamp.prevtof.count";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE = "events.timestamp.prevtof.negative";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH = "events.timestamp.prevtof.high";
+
+private:
+  struct ESSHeaderStats {
+    int64_t ErrorHeader{0};
+    int64_t ErrorBuffer{0};
+    int64_t ErrorSize{0};
+    int64_t ErrorVersion{0};
+    int64_t ErrorCookie{0};
+    int64_t ErrorPad{0};
+    int64_t ErrorOutputQueue{0};
+    int64_t ErrorTypeSubType{0};
+    int64_t ErrorSeqNum{0};
+    int64_t ErrorTimeHigh{0};
+    int64_t ErrorTimeFrac{0};
+    int64_t Version0Header{0};
+    int64_t Version1Header{0};
+    int64_t HeartBeats{0};
+    int64_t OQRxPackets[MaxOutputQueues]{0};
+  } ESSHeaderStats;
+
+public:
+  /// \brief Constructor of the parser
+  /// \param reference to the statistics object to register internal counters
+  Parser(Statistics &);
+
   enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   uint64_t NextSeqNum[MaxOutputQueues];
@@ -139,9 +169,6 @@ public:
   } __attribute__((packed));
 
   //
-  Parser();
-
-  //
   void setMaxPulseTimeDiff(uint32_t MaxTimeDiff) {
     MaxPulseTimeDiffNS = TimeDurationNano(MaxTimeDiff);
   }
@@ -153,8 +180,6 @@ public:
   /// \return on success return 0, else < 0
   int validate(const char *Buffer, uint32_t Size, uint8_t Type);
 
-  // Counters(for Grafana)
-  struct ESSHeaderStats Stats;
   // Maximum allowed separation between PulseTime and PrevPulseTime
   ///\todo 6289464 is (maybe) 14Hz in ticks of ESS clock, or?
   /// 71428571 in ns, but for now we set max pt to 0 and require

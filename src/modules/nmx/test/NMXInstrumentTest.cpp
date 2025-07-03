@@ -4,9 +4,10 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <common/testutils/HeaderFactory.h>
+#include <common/Statistics.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
@@ -399,21 +400,25 @@ public:
 protected:
   struct Counters counters;
   BaseSettings Settings;
-  EV44Serializer *serializer;
-  NMXInstrument *nmx;
+  std::unique_ptr<Statistics> Stats;
+  std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
+  EV44Serializer serializer{115000, "nmx"};
+  std::unique_ptr<NMXInstrument> nmx;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
 
   void SetUp() override {
     Settings.ConfigFile = ConfigFile;
-    serializer = new EV44Serializer(115000, "nmx");
     counters = {};
 
     headerFactory = std::make_unique<TestHeaderFactory>();
-    nmx = new NMXInstrument(counters, Settings, serializer);
-    nmx->setSerializer(serializer);
-    nmx->ESSReadoutParser.Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
+    Stats = std::make_unique<Statistics>();
+    ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
+    nmx = std::make_unique<NMXInstrument>(counters, Settings, serializer,
+                                          *ESSHeaderParser);
+
+    ESSHeaderParser->Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
   }
   void TearDown() override {}
 
@@ -430,13 +435,13 @@ protected:
 // Test cases below
 TEST_F(NMXInstrumentTest, BadConfig) {
   Settings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(NMXInstrument(counters, Settings, serializer),
+  EXPECT_THROW(NMXInstrument(counters, Settings, serializer, *ESSHeaderParser),
                std::runtime_error);
 }
 
 TEST_F(NMXInstrumentTest, BadConfig2) {
   Settings.ConfigFile = BadConfig2File;
-  EXPECT_THROW(NMXInstrument(counters, Settings, serializer),
+  EXPECT_THROW(NMXInstrument(counters, Settings, serializer, *ESSHeaderParser),
                nlohmann::detail::parse_error);
 }
 
@@ -445,8 +450,8 @@ TEST_F(NMXInstrumentTest, Constructor) {
 }
 
 TEST_F(NMXInstrumentTest, BadRingAndFENError) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadRingAndFENError);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, BadRingAndFENError);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 0);
   counters.VMMStats = nmx->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 1);
@@ -454,8 +459,8 @@ TEST_F(NMXInstrumentTest, BadRingAndFENError) {
 }
 
 TEST_F(NMXInstrumentTest, GoodEvent) {
-  makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, GoodEvent);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = nmx->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
@@ -477,8 +482,8 @@ TEST_F(NMXInstrumentTest, GoodEvent) {
 }
 
 TEST_F(NMXInstrumentTest, MaxADC) {
-  makeHeader(nmx->ESSReadoutParser.Packet, MaxADC);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, MaxADC);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   // ADC was above VMM threshold of 1023 once
@@ -487,8 +492,8 @@ TEST_F(NMXInstrumentTest, MaxADC) {
 }
 
 TEST_F(NMXInstrumentTest, MinADC) {
-  makeHeader(nmx->ESSReadoutParser.Packet, MinADC);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, MinADC);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
@@ -499,8 +504,8 @@ TEST_F(NMXInstrumentTest, MinADC) {
 }
 
 TEST_F(NMXInstrumentTest, NoEventYOnly) {
-  makeHeader(nmx->ESSReadoutParser.Packet, NoEventYOnly);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, NoEventYOnly);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
@@ -524,8 +529,8 @@ TEST_F(NMXInstrumentTest, NoEventYOnly) {
 }
 
 TEST_F(NMXInstrumentTest, NoEventXOnly) {
-  makeHeader(nmx->ESSReadoutParser.Packet, NoEventXOnly);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, NoEventXOnly);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 2);
   counters.VMMStats = nmx->VMMParser.Stats;
 
@@ -565,8 +570,8 @@ TEST_F(NMXInstrumentTest, PixelError) {
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeYSpan);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, BadEventLargeYSpan);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 5);
   counters.VMMStats = nmx->VMMParser.Stats;
 
@@ -589,8 +594,8 @@ TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {
 }
 
 TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadEventSmallXSpan);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, BadEventSmallXSpan);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 3);
   counters.VMMStats = nmx->VMMParser.Stats;
 
@@ -613,8 +618,8 @@ TEST_F(NMXInstrumentTest, BadEventSmallXSpan) {
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeXSpan);
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  makeHeader(ESSHeaderParser->Packet, BadEventLargeXSpan);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   ASSERT_EQ(Res, 5);
   counters.VMMStats = nmx->VMMParser.Stats;
 
@@ -637,11 +642,11 @@ TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
 }
 
 TEST_F(NMXInstrumentTest, NegativeTOF) {
-  auto &Packet = nmx->ESSReadoutParser.Packet;
-  makeHeader(nmx->ESSReadoutParser.Packet, GoodEvent);
+  auto &Packet = ESSHeaderParser->Packet;
+  makeHeader(ESSHeaderParser->Packet, GoodEvent);
   Packet.Time.setReference(ESSTime(200, 0));
 
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   nmx->processReadouts();
@@ -657,9 +662,9 @@ TEST_F(NMXInstrumentTest, NegativeTOF) {
 }
 
 TEST_F(NMXInstrumentTest, HighTOFError) {
-  makeHeader(nmx->ESSReadoutParser.Packet, HighTOFError);
+  makeHeader(ESSHeaderParser->Packet, HighTOFError);
 
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   nmx->processReadouts();
@@ -675,9 +680,9 @@ TEST_F(NMXInstrumentTest, HighTOFError) {
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeTimeSpan) {
-  makeHeader(nmx->ESSReadoutParser.Packet, BadEventLargeTimeSpan);
+  makeHeader(ESSHeaderParser->Packet, BadEventLargeTimeSpan);
 
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   nmx->processReadouts();
@@ -693,9 +698,9 @@ TEST_F(NMXInstrumentTest, BadEventLargeTimeSpan) {
 }
 
 TEST_F(NMXInstrumentTest, EventCrossPackets) {
-  makeHeader(nmx->ESSReadoutParser.Packet, SplitEventA);
+  makeHeader(ESSHeaderParser->Packet, SplitEventA);
 
-  auto Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   nmx->processReadouts();
@@ -705,9 +710,9 @@ TEST_F(NMXInstrumentTest, EventCrossPackets) {
   }
   ASSERT_EQ(Res, 1);
 
-  makeHeader(nmx->ESSReadoutParser.Packet, SplitEventB);
+  makeHeader(ESSHeaderParser->Packet, SplitEventB);
 
-  Res = nmx->VMMParser.parse(nmx->ESSReadoutParser.Packet);
+  Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
   nmx->processReadouts();

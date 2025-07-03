@@ -26,25 +26,22 @@ struct CaenCounters {
   int64_t ProcessingIdle{0};
 
   // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders{0};
-
+  
   // Caen DataParser
   struct DataParser::Stats Parser;
-
+  
   // Logical and Digital geometry incl. Calibration
   struct CDCalibration::Stats Calibration;
   struct Geometry::Stats Geom;
-
+  
   // Events
   int64_t Events{0};
   int64_t PixelErrors{0};
+  int64_t TimeError{0};
   int64_t EventsUdder{0};
   int64_t TxRawReadoutPackets{0};
   int64_t SerializerErrors{0};
-
-  // Time
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats {};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

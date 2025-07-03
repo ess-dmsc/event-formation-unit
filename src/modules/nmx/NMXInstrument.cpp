@@ -24,8 +24,10 @@ namespace Nmx {
 
 /// \brief load configuration and calibration files
 NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
-                             EV44Serializer *serializer)
-    : counters(counters), Settings(settings), Serializer(serializer) {
+                             EV44Serializer &serializer,
+                             ESSReadout::Parser &essHeaderParser)
+    : counters(counters), Settings(settings), Serializer(serializer),
+      ESSHeaderParser(essHeaderParser) {
 
   loadConfigAndCalib();
 
@@ -39,7 +41,7 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  ESSReadoutParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
 }
 
 void NMXInstrument::loadConfigAndCalib() {
@@ -66,7 +68,8 @@ void NMXInstrument::loadConfigAndCalib() {
   }
 
   if (Settings.CalibFile != "") {
-    XTRACE(INIT, ALW, "Loading and applying calibration file %s", Settings.CalibFile.c_str());
+    XTRACE(INIT, ALW, "Loading and applying calibration file %s",
+           Settings.CalibFile.c_str());
     Conf.loadAndApplyCalibration(Settings.CalibFile);
   }
 }
@@ -75,9 +78,9 @@ void NMXInstrument::processReadouts() {
   // All readouts are potentially now valid, but rings and fens
   // could still be outside the configured range, also
   // illegal time intervals can be detected here
-  assert(Serializer != nullptr);
   /// \todo sometimes PrevPulseTime maybe?
-  Serializer->checkAndSetReferenceTime(ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+  Serializer.checkAndSetReferenceTime(
+      ESSHeaderParser.Packet.Time.getRefTimeUInt64());
   XTRACE(DATA, DEB, "processReadouts()");
   for (const auto &readout : VMMParser.Result) {
 
@@ -107,9 +110,10 @@ void NMXInstrument::processReadouts() {
         Conf.ReversedChannels[Ring][readout.FENId][HybridId];
     uint16_t MinADC = Hybrid.MinADC;
 
-    //VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
+    // VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
-    uint64_t TimeNS = ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+    uint64_t TimeNS =
+        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     //   int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     //   XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64,
     //   TimeNS, TDCCorr);
@@ -123,15 +127,16 @@ void NMXInstrument::processReadouts() {
     uint16_t ADC = readout.OTADC & 0x3FF;
 
     if (ADC < MinADC) {
-      XTRACE(DATA, INF, "Under MinADC value, got %u, minimum is %u", ADC, MinADC);
+      XTRACE(DATA, INF, "Under MinADC value, got %u, minimum is %u", ADC,
+             MinADC);
       counters.MinADC++;
       continue;
     } else {
-      //XTRACE(DATA, DEB, "Valid ADC %u, min is %u", ADC, MinADC);
+      // XTRACE(DATA, DEB, "Valid ADC %u, min is %u", ADC, MinADC);
     }
 
-      // XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC &
-      // 0x3FF, ADC);
+    // XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC &
+    // 0x3FF, ADC);
 
     // If the corrected ADC reaches maximum value we count the occurance but
     // use the new value anyway
@@ -203,7 +208,7 @@ void NMXInstrument::checkConfigAndGeometry() {
 
 void NMXInstrument::generateEvents(std::vector<Event> &Events) {
   XTRACE(EVENT, DEB, "generateEvents()");
-  ESSReadout::ESSReferenceTime &TimeRef = ESSReadoutParser.Packet.Time;
+  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
   for (const auto &e : Events) {
     if (e.empty()) {
       XTRACE(EVENT, DEB, "event empty");
@@ -302,7 +307,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
 
     XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", time,
            TimeOfFlight, x, y, PixelId);
-    Serializer->addEvent(TimeOfFlight, PixelId);
+    Serializer.addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate

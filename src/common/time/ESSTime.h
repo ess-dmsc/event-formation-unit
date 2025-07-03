@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <stdexcept>
@@ -312,13 +313,13 @@ class ESSReferenceTime {
 
 public:
   struct Stats_t {
-    int64_t TofCount;
-    int64_t TofNegative;
-    int64_t PrevTofCount;
-    int64_t PrevTofNegative;
-    int64_t TofHigh;
-    int64_t PrevTofHigh;
-  };
+    int64_t TofCount{0};
+    int64_t TofNegative{0};
+    int64_t PrevTofCount{0};
+    int64_t PrevTofNegative{0};
+    int64_t TofHigh{0};
+    int64_t PrevTofHigh{0};
+  } Counters;
 
   ///
   /// \brief Default constructor.
@@ -330,7 +331,7 @@ public:
   ///
   /// \param pulseTime The pulse time used as the reference time.
   ///
-  ESSReferenceTime(const ESSTime &PulseTime) : TimeInNS(PulseTime.toNS()){};
+  ESSReferenceTime(const ESSTime &);
 
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
@@ -420,9 +421,7 @@ public:
   /// \return The calculated previous TOF value.
   ///
   uint64_t getPrevTOF(const ESSTime &EventTime, uint32_t DelayNS = 0);
-
-  struct Stats_t Stats = {};
-
+  
 private:
   TimeDurationNano TimeInNS{0};
   TimeDurationNano PrevTimeInNS{0};

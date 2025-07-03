@@ -5,10 +5,11 @@ include_directories(.)
 #=============================================================================
 set(perfgen_INC
   PerfGenBase.h
-  ${ESS_COMMON_DIR}/TestImageUdder.h
 )
 set(perfgen_SRC
   PerfGenBase.cpp
   main.cpp
 )
+
+set(perfgen_LIB efu_essreadout)
 create_executable(perfgen)

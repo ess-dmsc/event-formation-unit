@@ -7,9 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <string>
 #include <caen/CaenBase.h>
+#include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
+#include <string>
+
+using namespace ESSReadout;
 
 class CaenBaseTest : public ::testing::Test {
 public:
@@ -19,7 +22,7 @@ public:
     Settings.DetectorName = "loki";
     Settings.SocketRxTimeoutUS = 1000;
     Settings.NoHwCheck = true;
-    Settings.ConfigFile =  LOKI_CONFIG;
+    Settings.ConfigFile = LOKI_CONFIG;
     Settings.CalibFile = LOKI_CALIB;
   }
 
@@ -28,7 +31,7 @@ public:
 
 TEST_F(CaenBaseTest, LokiConstructor) {
   Caen::CaenBase Readout(Settings, DetectorType::LOKI);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, BifrostConstructor) {
@@ -37,9 +40,8 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.DetectorName = "bifrost";
   Caen::CaenBase Readout(Settings, DetectorType::BIFROST);
   Readout.Counters = {};
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
-
 
 TEST_F(CaenBaseTest, CspecConstructor) {
   Settings.ConfigFile = CSPEC_CONFIG;
@@ -47,7 +49,7 @@ TEST_F(CaenBaseTest, CspecConstructor) {
   Settings.DetectorName = "cspec";
   Caen::CaenBase Readout(Settings, DetectorType::CSPEC);
   Readout.Counters = {};
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
 TEST_F(CaenBaseTest, MiraclesConstructor) {
@@ -56,7 +58,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.DetectorName = "miracles";
   Caen::CaenBase Readout(Settings, DetectorType::MIRACLES);
   Readout.Counters = {};
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
 std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
@@ -64,7 +66,7 @@ std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
 ///
 std::vector<uint8_t> TestPacket2{
     // ESS header
-                0x00, 0x00, // pad, v0
+    0x00, 0x00,             // pad, v0
     0x45, 0x53, 0x53, 0x30, //  'E' 'S' 'S' 0x30
     0xae, 0x00, 0x00, 0x00, // 0x96 = 150 bytes
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
@@ -83,27 +85,22 @@ std::vector<uint8_t> TestPacket2{
 
     // Readout 2            Fiber 20 (Ring 10) is invalid -> RingErrors++
     0x14, 0x00, 0x18, 0x00, // fiber 20, fen 0, data size 64 bytes
-    0x11, 0x00, 0x00, 0x00, //time high 17s
+    0x11, 0x00, 0x00, 0x00, // time high 17s
     0x01, 0x02, 0x00, 0x00, // time low (257 clocks)
-    0x00, 0x00, 0x00, 0x00,
-    0x01, 0x01, 0x02, 0x01,
-    0x03, 0x01, 0x04, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x02, 0x01, 0x03, 0x01, 0x04, 0x01,
 
-    // Readout 3            FEN 19 is invalid -> FENErrors++ (for loki only so far)
+    // Readout 3            FEN 19 is invalid -> FENErrors++ (for loki only so
+    // far)
     0x01, 0x13, 0x18, 0x00, // fiber 1, fen 19, size 24 bytes
-    0x11, 0x00, 0x00, 0x00,
-    0x02, 0x02, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x01, 0x02, 0x02, 0x02,
-    0x03, 0x02, 0x04, 0x02,
+    0x11, 0x00, 0x00, 0x00, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x01, 0x02, 0x02, 0x02, 0x03, 0x02, 0x04, 0x02,
 
     // Readout 4            amplitudes are all 0 -> PixelErrors ++
     0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
     0x11, 0x00, 0x00, 0x00, // time high (17s)
     0x03, 0x01, 0x00, 0x00, // time low (259 clocks)
     0x00, 0x00, 0x00, 0x00, // amplitudes are all 0, PixelErrors ++
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
     // Readout 5
     0x00, 0x00, 0x18, 0x00, // ring 0, fen 0, data size 64 bytes
@@ -128,13 +125,14 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
   writePacketToRxFIFO(Readout, BadTestPacket);
 
-  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorSize, 1);
+  EXPECT_EQ(Readout.Stats.valueByName(
+                ESSReadout::Parser::METRIC_PARSER_ESSHEADER_ERRORS_SIZE),
+            1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
-  EXPECT_NE(Readout.ITCounters.RxIdle, 0);
+  EXPECT_NE(Readout.getInputCounters().RxIdle, 0);
   EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
   Readout.stopThreads();
 }
-
 
 TEST_F(CaenBaseTest, DataReceiveBifrost) {
   Settings.DetectorName = "bifrost";
@@ -144,7 +142,9 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
+  EXPECT_EQ(Readout.Stats.valueByName(
+                ESSReadout::Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
+            1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   Readout.stopThreads();
 }
@@ -170,10 +170,13 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
-  EXPECT_EQ(Readout.Counters.TimeStats.TofHigh, 1);
-  EXPECT_EQ(Readout.Counters.TimeStats.PrevTofNegative, 1);
+  EXPECT_EQ(Readout.Stats.valueByName(Parser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH),
+            1);
+  EXPECT_EQ(Readout.Stats.valueByName(
+                Parser::METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE),
+            1);
 
-  EXPECT_NE(Readout.ITCounters.RxIdle, 0);
+  EXPECT_NE(Readout.getInputCounters().RxIdle, 0);
   EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
   Readout.stopThreads();
 }
@@ -188,7 +191,9 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
+  EXPECT_EQ(Readout.Stats.valueByName(
+                ESSReadout::Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
+            1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   Readout.stopThreads();
 }
@@ -203,11 +208,12 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(Readout.Counters.ReadoutStats.ErrorTypeSubType, 1);
+  EXPECT_EQ(
+      Readout.Stats.valueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
+      1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   Readout.stopThreads();
 }
-
 
 TEST_F(CaenBaseTest, EmulateFIFOError) {
   Caen::CaenBase Readout(Settings, DetectorType::LOKI);
@@ -228,7 +234,6 @@ TEST_F(CaenBaseTest, EmulateFIFOError) {
   EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
   Readout.stopThreads();
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

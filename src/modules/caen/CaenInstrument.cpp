@@ -25,8 +25,9 @@ using namespace ESSReadout;
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
 CaenInstrument::CaenInstrument(struct CaenCounters &counters,
-                               BaseSettings &settings)
-    : counters(counters), Settings(settings) {
+                               BaseSettings &settings,
+                               ESSReadout::Parser &essHeaderParser)
+    : counters(counters), Settings(settings), ESSHeaderParser(essHeaderParser) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
@@ -59,8 +60,8 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
       CDCalibration(settings.DetectorName, Settings.CalibFile);
   Geom->CaenCDCalibration.parseCalibration();
 
-  ESSReadoutParser.setMaxPulseTimeDiff(CaenConfiguration.Legacy.MaxPulseTimeNS);
-  ESSReadoutParser.Packet.Time.setMaxTOF(CaenConfiguration.Legacy.MaxTOFNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(CaenConfiguration.Legacy.MaxPulseTimeNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(CaenConfiguration.Legacy.MaxTOFNS);
 }
 
 CaenInstrument::~CaenInstrument() {}
@@ -78,13 +79,14 @@ uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
   return pixel;
 }
 
-
 void CaenInstrument::processReadouts() {
   XTRACE(DATA, DEB, "Reference time is %" PRIi64,
-         ESSReadoutParser.Packet.Time.getRefTimeUInt64());
+         ESSHeaderParser.Packet.Time.getRefTimeUInt64());
   /// \todo sometimes PrevPulseTime maybe?
-  auto packet_ref_time = static_cast<int64_t>(ESSReadoutParser.Packet.Time.getRefTimeUInt64());
-  for (auto & Serializer: Serializers) Serializer->checkAndSetReferenceTime(packet_ref_time);
+  auto packet_ref_time =
+      static_cast<int64_t>(ESSHeaderParser.Packet.Time.getRefTimeUInt64());
+  for (auto &Serializer : Serializers)
+    Serializer->checkAndSetReferenceTime(packet_ref_time);
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
@@ -96,26 +98,26 @@ void CaenInstrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight = ESSReadoutParser.Packet.Time.getTOF(
+    uint64_t TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
     XTRACE(DATA, DEB,
            "PulseTime     %" PRIu64 ", Previous PulseTime: %" PRIu64
            ", Calculated ToF %" PRIu64 " ",
-           ESSReadoutParser.Packet.Time.getRefTimeUInt64(),
-           ESSReadoutParser.Packet.Time.getPrevRefTimeUInt64(), TimeOfFlight);
+           ESSHeaderParser.Packet.Time.getRefTimeUInt64(),
+           ESSHeaderParser.Packet.Time.getPrevRefTimeUInt64(), TimeOfFlight);
 
-    if (TimeOfFlight == ESSReadoutParser.Packet.Time.InvalidTOF) {
+    if (TimeOfFlight == ESSHeaderParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
+      counters.TimeError++;
     }
 
     XTRACE(DATA, DEB,
            "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %d, B "
            "%d, C %d, D %d",
-           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused,
-           Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-
+           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
+           Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixel and apply calibration
     uint32_t PixelId = calcPixel(Data);
@@ -125,17 +127,19 @@ void CaenInstrument::processReadouts() {
 
     if (PixelId == 0) {
       XTRACE(DATA, DEB,
-             "Pixel Error  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %u, B "
+             "Pixel Error  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group "
+             "%u, A %u, B "
              "%u, C %u, D %u",
-             Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused,
-             Data.Group, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+             Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
+             Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
       counters.PixelErrors++;
     } else if (SerializerId >= Serializers.size()) {
       XTRACE(EVENT, WAR, "Serializer identification error");
       counters.SerializerErrors++;
     } else {
       XTRACE(EVENT, DEB, "Pixel %u, TOF %u", PixelId, TimeOfFlight);
-      Serializers[SerializerId]->addEvent(static_cast<int32_t>(TimeOfFlight), static_cast<int32_t>(PixelId));
+      Serializers[SerializerId]->addEvent(static_cast<int32_t>(TimeOfFlight),
+                                          static_cast<int32_t>(PixelId));
       counters.Events++;
     }
 

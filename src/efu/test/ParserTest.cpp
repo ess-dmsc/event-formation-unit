@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,9 +7,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <algorithm>
 #include <common/detector/EFUArgs.h>
 #include <common/testutils/TestBase.h>
+#include <cstdint>
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
@@ -19,11 +21,13 @@ static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
 }
 
 // clang-format off
+
+// List of commands to test, each pair is a command and the expected reply
 std::vector<std::string> commands {
-  "STAT_GET_COUNT",                 "STAT_GET_COUNT 1",
+  "STAT_GET_COUNT",                 "STAT_GET_COUNT 36",
   "CMD_GET_COUNT",                  "CMD_GET_COUNT 11",
-  "STAT_GET 1",                     "STAT_GET dummystat 42",
-  "STAT_GET 2",                     "STAT_GET  -1",
+  "STAT_GET 36",                     "STAT_GET test.dummystat 42",
+  "STAT_GET 0",                     "STAT_GET  -1",
   "CALIB_MODE_GET",                 "CALIB_MODE_GET 0",
   "EXIT",                           "<OK>"
 };
@@ -62,22 +66,27 @@ public:
 
 class ParserTest : public TestBase {
 protected:
-  int64_t DummyCounter;
-  Parser *parser;
   EFUArgs efu_args;
-  Statistics stats;
+  int64_t dummyCounter; // Used to test statistics
+  std::unique_ptr<Parser> parser;
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
-
+  
   void SetUp() override {
+    // Initialize dummy detector with intarnal statistics (created by detector)
     auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
-    auto res = detectorif->Stats.create("dummystat", DummyCounter);
-    DummyCounter = 42;
-    printf("stats.create() returns %d\n", res);
-    parser = new Parser(detectorif, stats, keeprunning);
+    
+    // initialize statistics main thread statistics with dummyCounter
+    Statistics mainStats;
+    mainStats.create("test.dummystat", dummyCounter);
+    dummyCounter = 42;
+
+    // reinitialize parser for each test
+    parser = std::make_unique<Parser>(detectorif, mainStats, keeprunning);
+
   }
 
-  void TearDown() override { delete parser; }
+  void TearDown() override { /* nothing needed, unique_ptr cleans up */ }
 
   static const unsigned int buffer_size = 9000;
 
@@ -151,8 +160,9 @@ TEST_F(ParserTest, ValidCommands) {
     GTEST_COUT << "Checking command: " << cmd << "\n";
     printf("Checking command %s\n", cmd);
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
-    ASSERT_EQ(obytes, strlen(reply));
-    ASSERT_EQ(0, strcmp(output, reply));
+    std::string output_str(output);
+    std::string reply_str(reply);
+    ASSERT_EQ(output_str, reply_str);
     ASSERT_EQ(0, res);
   }
 }
@@ -199,8 +209,8 @@ TEST_F(ParserTest, DuplicateCommands) {
 
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
-  Statistics stats;
-  Parser parser(nullptr, stats,
+  auto stats = std::make_unique<Statistics>();
+  Parser parser(nullptr, *stats,
                 keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";

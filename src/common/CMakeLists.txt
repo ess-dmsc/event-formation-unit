@@ -13,6 +13,7 @@ set(efu_common_SRC
   config/Config.cpp
   debug/Hexdump.cpp
   debug/Log.cpp
+  detector/Detector.cpp
   detector/EFUArgs.cpp
   kafka/EV44Serializer.cpp
   kafka/AR51Serializer.cpp

@@ -19,7 +19,6 @@ struct Counters {
   int64_t FifoSeqErrors{0};
 
   // ESSReadout parser
-  struct ESSReadout::ESSHeaderStats ReadoutStats;
   int64_t ErrorESSHeaders{0};
   // int64_t RingRx[24];
 
@@ -44,7 +43,6 @@ struct Counters {
   int64_t PixelErrors{0};
   int64_t TimeErrors;
   int64_t TxRawReadoutPackets{0};
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

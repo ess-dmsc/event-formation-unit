@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>
@@ -55,10 +56,11 @@ using namespace Caen;
 class CombinedParserTest : public TestBase {
 protected:
   const int DataType{0x30};
-  ESSReadout::Parser CommonReadout;
+  Statistics Stats;
+  ESSReadout::Parser ESSHeaderParser{Stats};
   DataParser CaenParser;
 
-  void SetUp() override { CommonReadout.setMaxPulseTimeDiff(4000000000); }
+  void SetUp() override { ESSHeaderParser.setMaxPulseTimeDiff(4000000000); }
   void TearDown() override {}
 };
 
@@ -136,7 +138,7 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
               sizeof(ESSReadout::Parser::PacketHeaderV0) + (4 + 20));
     ASSERT_LT(bufferLength, Caen::ReadoutGenerator::BufferSize);
     auto Res =
-        CommonReadout.validate((char *)buffer.data(), bufferLength, DataType);
+        ESSHeaderParser.validate((char *)buffer.data(), bufferLength, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
   }
 }
@@ -165,11 +167,11 @@ TEST_F(CombinedParserTest, DataGenV0) {
     unsigned long packageSize = socket.GetData().size();
     ASSERT_EQ(packageSize,
               sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
-    auto Res = CommonReadout.validate((char *)socket.GetData().data(),
+    auto Res = ESSHeaderParser.validate((char *)socket.GetData().data(),
                                       packageSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
-    Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
-                           CommonReadout.Packet.DataLength);
+    Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
+                           ESSHeaderParser.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
   }
 }
@@ -197,21 +199,21 @@ TEST_F(CombinedParserTest, DataGenDefault) {
     ASSERT_EQ(packageSize,
               sizeof(ESSReadout::Parser::PacketHeaderV1) + Sections * (4 + 20));
 
-    auto Res = CommonReadout.validate((char *)socket.GetData().data(),
+    auto Res = ESSHeaderParser.validate((char *)socket.GetData().data(),
                                       packageSize, DataType);
     ASSERT_EQ(Res, ESSReadout::Parser::OK);
-    Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
-                           CommonReadout.Packet.DataLength);
+    Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
+                           ESSHeaderParser.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
   }
 }
 
 TEST_F(CombinedParserTest, ParseUDPPacket) {
-  auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(),
+  auto Res = ESSHeaderParser.validate((char *)&UdpPayload[0], UdpPayload.size(),
                                     DataType);
   ASSERT_EQ(Res, ESSReadout::Parser::OK);
-  Res = CaenParser.parse(CommonReadout.Packet.DataPtr,
-                         CommonReadout.Packet.DataLength);
+  Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
+                         ESSHeaderParser.Packet.DataLength);
   ASSERT_EQ(Res, 2);
 
   // Just for visual inspection for now

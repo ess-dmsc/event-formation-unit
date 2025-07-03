@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,7 +14,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("magic", argc, argv);
 
-  auto Detector = new Dream::DreamBase(Main.DetectorSettings);
+  auto Detector = new Dream::DreamBase(Main.DetectorSettings, DetectorType::MAGIC);
 
   return Main.run(Detector);
 }

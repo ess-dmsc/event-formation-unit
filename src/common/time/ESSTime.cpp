@@ -15,6 +15,10 @@
 
 namespace esstime {
 
+ESSReferenceTime::ESSReferenceTime(const ESSTime &PulseTime)
+    : TimeInNS{PulseTime.toNS()} {
+}
+
 uint64_t ESSReferenceTime::setReference(const ESSTime &refESSTime) {
   TimeInNS = refESSTime.toNS();
   return TimeInNS.count();
@@ -41,29 +45,30 @@ uint64_t ESSReferenceTime::getTOF(const ESSTime &eventTime, uint32_t DelayNS) {
            "TOF negative: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, TimeInNS);
-    Stats.TofNegative++;
+    Counters.TofNegative++;
     return getPrevTOF(eventTime, DelayNS);
   }
   if ((timeval - TimeInNS) > MaxTOF) {
     XTRACE(EVENT, WAR, "High TOF: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, TimeInNS);
-    Stats.TofHigh++;
+    Counters.TofHigh++;
     return InvalidTOF;
   }
 
-  Stats.TofCount++;
+  Counters.TofCount++;
   return (timeval - TimeInNS).count();
 }
 
-uint64_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime, uint32_t DelayNS) {
+uint64_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime,
+                                      uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < PrevTimeInNS) {
     XTRACE(EVENT, WAR,
            "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, PrevTimeInNS);
-    Stats.PrevTofNegative++;
+    Counters.PrevTofNegative++;
     return InvalidTOF;
   }
   if ((timeval - PrevTimeInNS) > MaxTOF) {
@@ -71,10 +76,10 @@ uint64_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime, uint32_t DelayNS
            "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, PrevTimeInNS);
-    Stats.PrevTofHigh++;
+    Counters.PrevTofHigh++;
     return InvalidTOF;
   }
-  Stats.PrevTofCount++;
+  Counters.PrevTofCount++;
   return (timeval - PrevTimeInNS).count();
 }
 

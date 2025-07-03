@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -58,7 +58,7 @@ public:
 
 TEST_F(FreiaBaseTest, Constructor) {
   Freia::FreiaBase Readout(Settings);
-  EXPECT_EQ(Readout.ITCounters.RxPackets, 0);
+  EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
