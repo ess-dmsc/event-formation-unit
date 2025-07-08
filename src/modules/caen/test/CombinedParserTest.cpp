@@ -13,6 +13,7 @@
 #include <caen/readout/DataParser.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
+#include <common/testutils/SocketMock.h>
 #include <loki/generators/ReadoutGenerator.h>
 
 #include <memory>
@@ -62,55 +63,6 @@ protected:
 
   void SetUp() override { ESSHeaderParser.setMaxPulseTimeDiff(4000000000); }
   void TearDown() override {}
-};
-
-class SocketMock : public SocketInterface {
-public:
-  using Buffer = std::vector<char>;
-
-  void Clear() { buffer.clear(); }
-
-  const Buffer &GetData() const { return buffer; }
-
-  int send(void const *dataBuffer, int dataLength) override {
-    for (int i = 0; i < dataLength; i++) {
-      buffer.emplace_back(((char *)dataBuffer)[i]);
-    }
-    return dataLength;
-  }
-
-  SocketMock() = default;
-  ~SocketMock() = default;
-
-private:
-  Buffer buffer{};
-};
-
-class MultipackageSocketMock : public SocketInterface {
-public:
-  using BufferItem = std::vector<char>;
-  using BufferList = std::vector<BufferItem>;
-
-  const BufferList &PackageList() const { return bufferList; }
-
-  void Clear() { bufferList.clear(); }
-
-  int send(void const *dataBuffer, int dataLength) override {
-    BufferItem value{};
-    value.reserve(dataLength);
-    for (int i = 0; i < dataLength; i++) {
-      value.emplace_back(((char *)dataBuffer)[i]);
-    }
-
-    bufferList.emplace_back(value);
-    return dataLength;
-  }
-
-  MultipackageSocketMock() = default;
-  ~MultipackageSocketMock() = default;
-
-private:
-  BufferList bufferList{};
 };
 
 // Cycle through all section values with equal number of readouts

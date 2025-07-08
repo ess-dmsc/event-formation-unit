@@ -23,6 +23,9 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
   // Options
   app.add_option("--detector", Settings.Detector, "Specify detector name (LOKI, CSPEC, ..)")->required();
 
+  app.add_option("--amplitudemask", CaenSettings.AmplitudeMask, 
+      "Mask to apply on amplitudes to limit maximum or negative amplitude.");
+
   app.add_option("--fibervals", CaenSettings.FiberVals, "Number of Fiber values to generate");
   app.add_option("--fibermask", CaenSettings.FiberMask, "Mask out unused fibers");
 
