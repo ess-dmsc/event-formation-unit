@@ -87,8 +87,32 @@ set(CombinedParserTest_SRC
   ${ESS_MODULE_DIR}/loki/generators/ReadoutGenerator.cpp
   ${ESS_MODULE_DIR}/caen/readout/DataParser.cpp
   ${ESS_COMMON_DIR}/readout/ess/Parser.cpp
+  ${ESS_COMMON_DIR}/testutils/SocketMock.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
   )
 create_test_executable(CombinedParserTest)
+
+##
+## Module test for amplitude mask used in Caen
+##
+set(AmplitudeMaskTest_INC
+  ${ESS_MODULE_DIR}/caen/generators/ReadoutGenerator.h
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.h
+  ${ESS_COMMON_DIR}/testutils/bitmaps/BitMaps.h
+  ${ESS_COMMON_DIR}/testutils/SocketMock.h
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.h
+)
+set(AmplitudeMaskTest_SRC
+  AmplitudeMaskTest.cpp
+  ${ESS_MODULE_DIR}/caen/generators/ReadoutGenerator.cpp
+  ${ESS_MODULE_DIR}/caen/readout/DataParser.cpp
+  ${ESS_COMMON_DIR}/testutils/bitmaps/BitMaps.cpp
+  ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
+  ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
+  ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp
+  )
+create_test_executable(AmplitudeMaskTest)

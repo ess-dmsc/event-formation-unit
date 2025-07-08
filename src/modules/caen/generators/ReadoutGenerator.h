@@ -25,7 +25,7 @@ public:
     bool Bitmaps{false};
 
     // Masks used to restrict generated data
-    uint32_t AmplitudeMask{0xffff};  // Amplitudes
+    uint16_t AmplitudeMask{0xffff};  // Amplitudes
     uint8_t  FiberVals{24};
     uint32_t FiberMask{0xffffff};    // Fibers 0 - 23
     uint8_t  FENVals{16};
