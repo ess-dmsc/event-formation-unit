@@ -1,6 +1,6 @@
 
 
-// Copyright (C) 2022 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,6 +22,7 @@ protected:
   void SetUp() override {
     geom = new MiraclesGeometry(CaenConfiguration);
     geom->NPos = 128;
+    geom->MaxRing = 2; // Miracles has 3 rings, but we use 0-2 for 3 rings
   }
   void TearDown() override {}
 };

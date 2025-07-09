@@ -44,13 +44,14 @@ public:
 
   /// \todo functions to handle multiple serialisers
   [[nodiscard]] size_t numSerializers() const override;
-  [[nodiscard]] size_t calcSerializer(DataParser::CaenReadout &Data) const override;
+  [[nodiscard]] size_t
+  calcSerializer(DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
   const int UnitsPerGroup{1};
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
-  Tbl3HeConfig & Conf;
+  Config &Conf;
 };
 } // namespace Caen

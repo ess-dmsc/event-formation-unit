@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -37,17 +37,13 @@ class Tbl3HeConfig : public Configurations::Config {
 
   struct {
     // configurable parameters
-    std::string InstrumentName{""};
-    uint32_t MaxPulseTimeNS{0};
-    uint32_t MaxTOFNS{0};
     int Resolution{0};
     int NumOfFENs{0};
-    int MaxGroup{0};
     int MinValidAmplitude{0};
     // Non configurable parameters
     int MinRing{0};
     int MaxRing{11};
-  } Parms;
+  } Params;
 
 
   struct Topology {

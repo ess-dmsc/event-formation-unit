@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,53 +11,24 @@
 std::string NotJsonFile{"deleteme_caen_notjson.json"};
 std::string NotJsonStr = R"(
 {
-  Ceci n’est pas Json
+  Ceci n'est pas Json
 )";
 
-// Invalid config file: StrawResolution missing, invalid names:
-// NotDetector
-auto InvalidConfig = R"(
-{
-  "NotDetector": "LoKI4x8",
-
-  "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "GroupsZ" : 4, "GroupsN" : 8, "Offset" :      0 }
-  ]
-}
-)"_json;
-
-// Invalid config file: StrawResolution missing
-auto InvalidConfigII = R"(
+// Base configuration for all tests
+auto BaseConfigJSON = R"(
   {
     "Detector" : "loki",
-
-    "GroupsZ" : 4,
-
-    "ReadoutConstDelayNS" : 0,
-    "MaxPulseTimeNS" : 357142855,
-    "MaxTOFNS" : 1000000000,
-
-    "Banks" : [
-       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
-    ],
-
-    "Config" : [
-      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
-    ]
-  }
-)"_json;
-
-// Invalid config file: Detector name is not LoKI
-auto BadDetector = R"(
-  {
-    "Detector" : "lokixx",
-
     "Resolution" : 512,
     "GroupsZ" : 4,
-
+    "StrawResolution" : 1024,
+    "MaxAmpl" : 65535,
+    "NumOfFENs" : 2,
+    "MinValidAmplitude" : 100,
     "ReadoutConstDelayNS" : 0,
     "MaxPulseTimeNS" : 357142855,
     "MaxTOFNS" : 1000000000,
+    "MaxFEN" : 16,
+    "MaxGroup" : 32,
 
     "Banks" : [
        {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
@@ -65,28 +36,11 @@ auto BadDetector = R"(
 
     "Config" : [
       { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
-    ]
-  }
-)"_json;
-
-// Good configuration file
-auto ValidConfig = R"(
-  {
-    "Detector" : "loki",
-
-    "Resolution" : 512,
-    "GroupsZ" : 4,
-
-    "ReadoutConstDelayNS" : 0,
-    "MaxPulseTimeNS" : 357142855,
-    "MaxTOFNS" : 1000000000,
-
-    "Banks" : [
-       {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0}
     ],
-
-    "Config" : [
-      { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" :  0}
+    
+    "Topology" : [
+      { "Ring" : 0, "FEN" : 0, "Bank" : 0 },
+      { "Ring" : 1, "FEN" : 1, "Bank" : 1 }
     ]
   }
 )"_json;
@@ -96,13 +50,52 @@ using namespace Caen;
 class CaenConfigTest : public TestBase {
 protected:
   Config config;
-  void SetUp() override {}
+  nlohmann::json testConfig;
+
+  void SetUp() override {
+    // Reset to base config before each test
+    testConfig = BaseConfigJSON;
+  }
+
   void TearDown() override {}
+
+  // Helper method to modify detector type
+  void setDetector(const std::string &detector) {
+    testConfig["Detector"] = detector;
+  }
+
+  // Helper method to remove a field from the config
+  void removeField(const std::string &field) { testConfig.erase(field); }
 };
 
 TEST_F(CaenConfigTest, Constructor) {
-  ASSERT_EQ(config.Legacy.Resolution, 0);
-  ASSERT_EQ(config.Legacy.NGroupsTotal, 0);
+  // Test CaenParms default values
+  ASSERT_EQ(config.CaenParms.InstrumentName, "");
+  ASSERT_EQ(config.CaenParms.MaxGroup, 0);
+  ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 5 * 71'428'571);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 0);
+  ASSERT_EQ(config.CaenParms.MaxFEN, 0);
+  ASSERT_EQ(config.CaenParms.MinRing, 0);
+  ASSERT_EQ(config.CaenParms.MaxRing, 11);
+
+  // Test LokiConf default values
+  ASSERT_EQ(config.LokiConf.Parms.Resolution, 0);
+  ASSERT_EQ(config.LokiConf.Parms.ConfiguredBanks, 0);
+  ASSERT_EQ(config.LokiConf.Parms.ConfiguredRings, 0);
+  ASSERT_EQ(config.LokiConf.Parms.GroupsZ, 0);
+  ASSERT_EQ(config.LokiConf.Parms.TotalGroups, 0);
+
+  // Test Tbl3HeConf default values
+  ASSERT_EQ(config.Tbl3HeConf.Params.Resolution, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Params.MinRing, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Params.MaxRing, 11);
+  ASSERT_EQ(config.Tbl3HeConf.TopologyMapPtr, nullptr);
+
+  // Test BifrostConf default values
+  ASSERT_EQ(config.BifrostConf.Parms.Resolution, 0);
+  ASSERT_EQ(config.BifrostConf.Parms.MaxAmpl, 0);
 }
 
 TEST_F(CaenConfigTest, NoConfigFile) {
@@ -119,24 +112,88 @@ TEST_F(CaenConfigTest, NotJson) {
 }
 
 TEST_F(CaenConfigTest, BadDetectorName) {
-  config.setRoot(BadDetector);
+  // Test with invalid detector name
+  setDetector("lokixx");
+  config.setRoot(testConfig);
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
 TEST_F(CaenConfigTest, InvalidConfig) {
-  config.setRoot(InvalidConfig);
+  // Test with missing Detector field
+  removeField("Detector");
+  testConfig["NotDetector"] = "LoKI4x8"; // Invalid field name
+  config.setRoot(testConfig);
   ASSERT_ANY_THROW(config.parseConfig());
 }
 
-TEST_F(CaenConfigTest, InvalidConfigII) {
-  config.setRoot(InvalidConfigII);
-  ASSERT_ANY_THROW(config.parseConfig());
+TEST_F(CaenConfigTest, MissingMaxFEN) {
+  removeField("MaxFEN");
+  config.setRoot(testConfig);
+
+  // Check that default value is applied
+  ASSERT_EQ(config.CaenParms.MaxFEN, 0); // Default value
 }
 
-TEST_F(CaenConfigTest, ValidConfig) {
-  config.setRoot(ValidConfig);
+TEST_F(CaenConfigTest, MissingMaxGroup) {
+  removeField("MaxGroup");
+  config.setRoot(testConfig);
+
+  // Check that default value is applied
+  ASSERT_EQ(config.CaenParms.MaxGroup, 0); // Default value
+}
+
+/// \brief Test that the loki identifed and related loki config is parsed
+/// correctly
+TEST_F(CaenConfigTest, ValidLokiConfig) {
+  config.setRoot(testConfig);
   config.parseConfig();
+
+  // Check total groups calculation is correct
   ASSERT_EQ(config.LokiConf.Parms.TotalGroups, (32 + 24) * 4);
+
+  // Check that Loki config values are set correctly
+  ASSERT_EQ(config.LokiConf.Parms.Resolution, 512);
+  ASSERT_EQ(config.LokiConf.Parms.GroupsZ, 4);
+
+  // Check CAEN general parameters
+  ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
+  ASSERT_EQ(config.CaenParms.InstrumentName, "loki");
+}
+
+/// \brief Test that the bifrost identifed and related bifrost config is parsed
+/// correctly
+TEST_F(CaenConfigTest, ValidBifrostConfig) {
+  setDetector("bifrost");
+  config.setRoot(testConfig);
+  config.parseConfig();
+
+  // Check that Bifrost some specific values are set correctly
+  ASSERT_EQ(config.BifrostConf.Parms.Resolution, 1024);
+  ASSERT_EQ(config.BifrostConf.Parms.MaxAmpl, 65535);
+
+  // Check CAEN general parameters
+  ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
+  ASSERT_EQ(config.CaenParms.InstrumentName, "bifrost");
+}
+
+/// \brief Test that the tbl3he identifed and related tbl3he config is parsed
+/// correctly
+TEST_F(CaenConfigTest, ValidTbl3HeConfig) {
+  setDetector("tbl3he");
+  config.setRoot(testConfig);
+  config.parseConfig();
+
+  // Verify Tbl3He specific parameters are set correctly
+  ASSERT_EQ(config.Tbl3HeConf.Params.Resolution, 512);
+  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 2);
+  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 100);
+
+  // Check CAEN general parameters
+  ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
+  ASSERT_EQ(config.CaenParms.InstrumentName, "tbl3he");
 }
 
 int main(int argc, char **argv) {

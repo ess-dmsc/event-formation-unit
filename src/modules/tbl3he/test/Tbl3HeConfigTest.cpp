@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,25 +6,28 @@
 
 #include <tbl3he/geometry/Tbl3HeConfig.h>
 #include <common/testutils/TestBase.h>
+#include <common/testutils/SaveBuffer.h>
 
 using namespace Caen;
 
-auto ValidConfig = R"(
+std::string NotJsonFile{"deleteme_tbl3he_notjson.json"};
+std::string NotJsonStr = R"(
+{
+  Ceci n'est pas Json
+)";
+
+// Valid Tbl3He configuration for testing - this is our base configuration
+auto ValidTbl3HeConfigJSON = R"(
   {
-    "Detector": "tbl3he",
-    "MaxRing": 11,
-    "Resolution": 100,
-    "MaxGroup": 7,
-    "MaxPulseTimeNS" : 71428600,
-    "MaxTOFNS" : 500000000,
-
-    "NumOfFENs" : 2,
-
-    "MinValidAmplitude" : 2,
-
+    "Detector" : "tbl3he",
+    "Resolution" : 2048,
+    "NumOfFENs" : 4,
+    "MinValidAmplitude" : 100,
     "Topology" : [
-       {"Ring" : 10, "FEN" : 0, "Bank" : 0},
-       {"Ring" :  9, "FEN" : 0, "Bank" : 1}
+      { "Ring" : 0, "FEN" : 0, "Bank" : 0 },
+      { "Ring" : 1, "FEN" : 1, "Bank" : 1 },
+      { "Ring" : 2, "FEN" : 2, "Bank" : 2 },
+      { "Ring" : 3, "FEN" : 3, "Bank" : 3 }
     ]
   }
 )"_json;
@@ -39,65 +42,105 @@ protected:
 
 
 TEST_F(Tbl3HeConfigTest, Constructor) {
-  ASSERT_EQ(config.Parms.Resolution, 0);
-  ASSERT_EQ(config.Parms.MaxPulseTimeNS, 0);
-  ASSERT_EQ(config.Parms.MaxTOFNS, 0);
-  ASSERT_EQ(config.Parms.MinValidAmplitude, 0);
-  ASSERT_EQ(config.Parms.NumOfFENs, 0);
-  ASSERT_EQ(config.Parms.MaxGroup, 0);
+  ASSERT_EQ(config.Params.Resolution, 0);
+  ASSERT_EQ(config.Params.MinValidAmplitude, 0);
+  ASSERT_EQ(config.Params.NumOfFENs, 0);
+  ASSERT_EQ(config.Params.MinRing, 0);
+  ASSERT_EQ(config.Params.MaxRing, 11);
+  ASSERT_EQ(config.TopologyMapPtr, nullptr);
 }
 
-
-TEST_F(Tbl3HeConfigTest, BadJsonFile) {
-  ASSERT_THROW(Tbl3HeConfig MyConfig("nofile.json"), std::runtime_error);
+TEST_F(Tbl3HeConfigTest, NoConfigFile) {
+  ASSERT_THROW(Tbl3HeConfig MyConfig(""), std::runtime_error);
 }
 
+TEST_F(Tbl3HeConfigTest, JsonFileNotExist) {
+  ASSERT_THROW(Tbl3HeConfig MyConfig("/this_file_doesnt_exist"), std::runtime_error);
+}
+
+TEST_F(Tbl3HeConfigTest, NotJson) {
+  ASSERT_ANY_THROW(Tbl3HeConfig MyConfig(NotJsonFile));
+  deleteFile(NotJsonFile);
+}
 
 TEST_F(Tbl3HeConfigTest, BadDetectorName) {
-  config.setRoot(ValidConfig);
-  config["Detector"] = "mybad";
+  auto badDetectorConfig = ValidTbl3HeConfigJSON;
+  badDetectorConfig["Detector"] = "tbl3hexx";
+  config.setRoot(badDetectorConfig);
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
-
-TEST_F(Tbl3HeConfigTest, ValidConfig) {
-  config.setRoot(ValidConfig);
-  ASSERT_NO_THROW(config.parseConfig());
-  ASSERT_EQ(config.Parms.Resolution, 100);
-  ASSERT_EQ(config.Parms.MaxPulseTimeNS, 71428600);
-  ASSERT_EQ(config.Parms.MaxTOFNS, 500000000);
-  ASSERT_EQ(config.Parms.MinValidAmplitude, 2);
-  ASSERT_EQ(config.Parms.NumOfFENs, 2);
-  ASSERT_EQ(config.Parms.MaxGroup, 7);
+TEST_F(Tbl3HeConfigTest, MissingResolution) {
+  auto missingResolutionConfig = ValidTbl3HeConfigJSON;
+  missingResolutionConfig.erase("Resolution");
+  config.setRoot(missingResolutionConfig);
+  ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
+TEST_F(Tbl3HeConfigTest, ValidTbl3HeConfig) {
+  config.setRoot(ValidTbl3HeConfigJSON);
+  ASSERT_NO_THROW(config.parseConfig());
+  
+  // Check that Tbl3He config values from JSON are properly stored
+  ASSERT_EQ(config.Params.Resolution, 2048);
+  ASSERT_EQ(config.Params.NumOfFENs, 4);
+  ASSERT_EQ(config.Params.MinValidAmplitude, 100);
+  
+  // Check topology configuration
+  ASSERT_NE(config.TopologyMapPtr, nullptr);
+  
+  // Test specific topology mappings
+  for (int i = 0; i < 4; i++) {
+    ASSERT_TRUE(config.TopologyMapPtr->isValue(i, i));
+    ASSERT_EQ(config.TopologyMapPtr->get(i, i)->Bank, i);
+  }
+}
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigMinRing) {
-  config.setRoot(ValidConfig);
-  config["Topology"][0]["Ring"] = -1; // outside interval 0 - 11
+  auto invalidMinRingConfig = ValidTbl3HeConfigJSON;
+  invalidMinRingConfig["Topology"][0]["Ring"] = -1; // outside interval 0 - 11
+  config.setRoot(invalidMinRingConfig);
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigMaxRing) {
-  config.setRoot(ValidConfig);
-  config["Topology"][0]["Ring"] = 12; // outside interval 0 - 11
+  auto invalidMaxRingConfig = ValidTbl3HeConfigJSON;
+  invalidMaxRingConfig["Topology"][0]["Ring"] = 12; // outside interval 0 - 11
+  config.setRoot(invalidMaxRingConfig);
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigNumOfFENs) {
-  config.setRoot(ValidConfig);
-  config["NumOfFENs"] = 3;
+  auto invalidNumOfFENsConfig = ValidTbl3HeConfigJSON;
+  invalidNumOfFENsConfig["NumOfFENs"] = 5; // Doesn't match topology size
+  config.setRoot(invalidNumOfFENsConfig);
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
 TEST_F(Tbl3HeConfigTest, InvalidConfigDuplicateRingFEN) {
-  config.setRoot(ValidConfig);
-  config["Topology"][0]["Ring"] = 9;
+  auto duplicateRingFENConfig = ValidTbl3HeConfigJSON;
+  duplicateRingFENConfig["Topology"][1]["Ring"] = 0; // Duplicate of first topology Ring
+  duplicateRingFENConfig["Topology"][1]["FEN"] = 0; // Duplicate of first topology FEN
+  config.setRoot(duplicateRingFENConfig);
   ASSERT_THROW(config.parseConfig(), std::runtime_error);
 }
 
+TEST_F(Tbl3HeConfigTest, MissingTopology) {
+  auto missingTopology = ValidTbl3HeConfigJSON;
+  missingTopology.erase("Topology");
+  config.setRoot(missingTopology);
+  ASSERT_THROW(config.parseConfig(), std::runtime_error);
+}
+
+TEST_F(Tbl3HeConfigTest, MissingMandatoryTopologyField) {
+  auto badTopology = ValidTbl3HeConfigJSON;
+  badTopology["Topology"][0].erase("Bank");
+  config.setRoot(badTopology);
+  ASSERT_THROW(config.parseConfig(), std::runtime_error);
+}
 
 int main(int argc, char **argv) {
+  saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

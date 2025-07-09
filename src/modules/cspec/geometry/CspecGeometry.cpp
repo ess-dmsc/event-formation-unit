@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,10 +19,10 @@ namespace Caen {
 
 CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
   ESSGeom = new ESSGeometry(900, 180, 1, 1);
-  setResolution(CaenConfiguration.Legacy.Resolution);
-  MaxRing = CaenConfiguration.Legacy.MaxRing;
-  MaxFEN = CaenConfiguration.Legacy.MaxFEN;
-  MaxGroup = CaenConfiguration.Legacy.MaxGroup;
+  setResolution(CaenConfiguration.CaenParms.Resolution);
+  MaxRing = CaenConfiguration.CaenParms.MaxRing;
+  MaxFEN = CaenConfiguration.CaenParms.MaxFEN;
+  MaxGroup = CaenConfiguration.CaenParms.MaxGroup;
 }
 
 bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {

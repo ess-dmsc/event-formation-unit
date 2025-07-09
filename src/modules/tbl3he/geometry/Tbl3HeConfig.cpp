@@ -38,38 +38,38 @@ void Tbl3HeConfig::errorExit(const std::string &ErrMsg) {
 }
 
 void Tbl3HeConfig::parseConfig() {
+
+  std::string InstrumentName;
   Json::checkKeys("Mandatory keys", root(),
-                  {"Detector", "Resolution", "MaxPulseTimeNS", "MaxTOFNS",
-                   "NumOfFENs", "MinValidAmplitude", "MaxGroup", "Topology"});
+                  {"Detector", "Resolution", 
+                   "NumOfFENs", "MinValidAmplitude", "Topology"});
 
   // Get detector/instrument name
   setMask(CHECK | XTRACE);
-  assign("Detector", Parms.InstrumentName);
-  if (Parms.InstrumentName != "tbl3he") {
-    errorExit(fmt::format("Invalid instrument name ({}) for tbl3he",
-                          Parms.InstrumentName));
+  assign("Detector", InstrumentName);
+  if (InstrumentName != "tbl3he") {
+    errorExit(
+        fmt::format("Invalid instrument name ({}) for tbl3he", InstrumentName));
   }
 
   try {
     // Assumed the same for all tubes
-    assign("Resolution",        Parms.Resolution);
+    assign("Resolution", Params.Resolution);
 
     setMask(LOG);
-    assign("MaxPulseTimeNS",    Parms.MaxPulseTimeNS);
-    assign("MaxTOFNS",          Parms.MaxTOFNS);
-    assign("NumOfFENs",         Parms.NumOfFENs);
-    assign("MinValidAmplitude", Parms.MinValidAmplitude);
-    assign("MaxGroup",          Parms.MaxGroup);
+    assign("NumOfFENs", Params.NumOfFENs);
+    assign("MinValidAmplitude", Params.MinValidAmplitude);
 
     // Run through the Topology section
     auto Configs = root()["Topology"];
 
-    if (Parms.NumOfFENs != (int)Configs.size()) {
-      errorExit(fmt::format("RING/FEN topology mismatch, NumOfFEN: {} != Config size: {}",
-                            Parms.NumOfFENs, Configs.size()));
+    if (Params.NumOfFENs != (int)Configs.size()) {
+      errorExit(fmt::format(
+          "RING/FEN topology mismatch, NumOfFEN: {} != Config size: {}",
+          Params.NumOfFENs, Configs.size()));
     }
 
-    TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
+    TopologyMapPtr.reset(new HashMap2D<Topology>(Params.NumOfFENs));
 
     for (auto &elt : Configs) {
       Json::checkKeys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
@@ -78,7 +78,7 @@ void Tbl3HeConfig::parseConfig() {
       int FEN = elt["FEN"].get<int>();
       int Bank = elt["Bank"].get<int>();
 
-      if ((Ring < Parms.MinRing) or (Ring > Parms.MaxRing)) {
+      if ((Ring < Params.MinRing) or (Ring > Params.MaxRing)) {
         errorExit(fmt::format("Invalid ring: %d", Ring));
       }
 

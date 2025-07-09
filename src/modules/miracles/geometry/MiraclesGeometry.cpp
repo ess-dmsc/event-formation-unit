@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,8 +20,8 @@ namespace Caen {
 MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration) {
   ///\todo make config dependent
   ESSGeom = new ESSGeometry(48, 128, 1, 1);
-  setResolution(CaenConfiguration.Legacy.Resolution);
-  MaxRing = CaenConfiguration.Legacy.MaxRing;
+  setResolution(CaenConfiguration.BifrostConf.Parms.Resolution);
+  MaxRing = CaenConfiguration.CaenParms.MaxRing;
 }
 
 uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
