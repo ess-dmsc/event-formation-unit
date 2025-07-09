@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file, ERIC
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file, ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,9 +28,10 @@ protected:
   void SetUp() override {
     geom = new BifrostGeometry(CaenConfiguration);
     geom->NPos = 300;
+    geom->MaxRing = 4;
 
-    CaenConfiguration.Legacy.NGroupsTotal=45;
-    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.Legacy.NGroupsTotal;
+    CaenConfiguration.CaenParms.MaxGroup=45;
+    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.CaenParms.MaxGroup;
     // Make nullcalibration
     for (int i = 0; i < 45; i++) {
       geom->CaenCDCalibration.Intervals.push_back(NullCalib);

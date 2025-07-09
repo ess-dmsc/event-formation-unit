@@ -22,6 +22,7 @@ set(LokiGeometryTest_INC
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
     ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.h
+    ${ESS_MODULE_DIR}/bifrost/geometry/BifrostConfig.h
 )
 set(LokiGeometryTest_SRC
     LokiGeometryTest.cpp
@@ -31,6 +32,7 @@ set(LokiGeometryTest_SRC
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
     ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.cpp
+    ${ESS_MODULE_DIR}/bifrost/geometry/BifrostConfig.cpp
 )
 create_test_executable(LokiGeometryTest)
 
@@ -46,6 +48,7 @@ set(LokiFullGeometryTest_INC
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.h
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.h
     ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.h
+    ${ESS_MODULE_DIR}/bifrost/geometry/BifrostConfig.h
 )
 set(LokiFullGeometryTest_SRC
     LokiFullGeometryTest.cpp
@@ -55,6 +58,7 @@ set(LokiFullGeometryTest_SRC
     ${ESS_MODULE_DIR}/loki/geometry/LokiConfig.cpp
     ${ESS_MODULE_DIR}/loki/geometry/LokiGeometry.cpp
     ${ESS_MODULE_DIR}/tbl3he/geometry/Tbl3HeConfig.cpp
+    ${ESS_MODULE_DIR}/bifrost/geometry/BifrostConfig.cpp
 )
 create_test_executable(LokiFullGeometryTest)
 target_compile_definitions(LokiFullGeometryTest PRIVATE LOKI_CONFIG="${LOKI_CONFIG}")

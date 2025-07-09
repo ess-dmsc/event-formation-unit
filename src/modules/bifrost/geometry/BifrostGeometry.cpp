@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,13 +16,13 @@
 
 namespace Caen {
 
-  BifrostGeometry::BifrostGeometry(Config &CaenConfiguration) {
+  BifrostGeometry::BifrostGeometry(Config &Config) {
   ESSGeom = new ESSGeometry(900, 15, 1, 1);
-  setResolution(CaenConfiguration.Legacy.Resolution);
-  MaxRing = CaenConfiguration.Legacy.MaxRing;
-  MaxFEN = CaenConfiguration.Legacy.MaxFEN;
-  MaxGroup = CaenConfiguration.Legacy.MaxGroup;
-  MaxAmpl = CaenConfiguration.Legacy.MaxAmpl;
+  MaxRing = Config.CaenParms.MaxRing;
+  MaxFEN = Config.CaenParms.MaxFEN;
+  MaxGroup = Config.CaenParms.MaxGroup;
+  setResolution(Config.BifrostConf.Parms.Resolution);
+  MaxAmpl = Config.BifrostConf.Parms.MaxAmpl;
 }
 
 bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {

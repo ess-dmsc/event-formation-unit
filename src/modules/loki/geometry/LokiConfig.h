@@ -28,7 +28,6 @@ class LokiConfig : public Configurations::Config {
   ///\brief parse the loaded json object
   void parseConfig();
 
-
   /// New and temporary
   /// \todo move somewhere else
   ///
@@ -73,12 +72,7 @@ class LokiConfig : public Configurations::Config {
   };
 
   struct LokiCfg {
-    std::string InstrumentName{""};
     int Resolution{0};
-    uint32_t ReadoutConstDelayNS{0};         /// added to readout data timestamp
-    uint32_t MaxPulseTimeNS{5 * 71'428'571}; /// 5 * 1/14 * 10^9
-    uint32_t MaxTOFNS{800000000};
-
     int ConfiguredBanks{0};
     int ConfiguredRings{0};
     int GroupsZ{0};

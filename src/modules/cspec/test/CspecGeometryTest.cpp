@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,6 +20,7 @@ protected:
   void SetUp() override {
     geom = new CspecGeometry(CaenConfiguration);
     geom->NPos = 300;
+    geom->MaxRing = 4;
   }
   void TearDown() override {}
 };

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,8 +36,8 @@ protected:
   Config CaenConfiguration;
 
   void SetUp() override {
-    CaenConfiguration.Tbl3HeConf.Parms.Resolution = 100;
-    CaenConfiguration.Tbl3HeConf.Parms.MaxGroup = 7;
+    CaenConfiguration.Tbl3HeConf.Params.Resolution = 100;
+    CaenConfiguration.CaenParms.MaxGroup = 7;
     geom = new Tbl3HeGeometry(CaenConfiguration);
 
     geom->CaenCDCalibration.Parms.Groups=8;
@@ -47,11 +47,11 @@ protected:
       geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}});
     }
 
-    geom->Conf.TopologyMapPtr.reset(new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
+    geom->Conf.Tbl3HeConf.TopologyMapPtr.reset(new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
     auto topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(0);
-    geom->Conf.TopologyMapPtr->add(0, 0, topo);
+    geom->Conf.Tbl3HeConf.TopologyMapPtr->add(0, 0, topo);
     topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(1);
-    geom->Conf.TopologyMapPtr->add(1, 0, topo);
+    geom->Conf.Tbl3HeConf.TopologyMapPtr->add(1, 0, topo);
   }
   void TearDown() override {}
 };
@@ -98,9 +98,9 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid Groups
-  for (int i = 0; i <= 23; i++) {
+  for (uint i = 0; i <= 23; i++) {
     readout.Group = i;
-    if (i <= geom->Conf.Parms.MaxGroup) {
+    if (i <= geom->Conf.CaenParms.MaxGroup) {
       ASSERT_EQ(geom->validateData(readout), true);
     } else {
       ASSERT_EQ(geom->validateData(readout), false);
@@ -166,7 +166,7 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
 }
 
 TEST_F(Tbl3HeGeometryTest, ErrorAmplitudeLow) {
-  geom->Conf.Parms.MinValidAmplitude = 1;
+  geom->Conf.Tbl3HeConf.Params.MinValidAmplitude = 1;
   //                               R  F              G     A   B  C  D
   DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout1), 0);
@@ -196,7 +196,7 @@ TEST_F(Tbl3HeGeometryTest, ErrorMaxRing) {
 
 
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
-  geom->Conf.Parms.MinValidAmplitude = -100;
+  geom->Conf.Tbl3HeConf.Params.MinValidAmplitude = -100;
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 }
