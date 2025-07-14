@@ -10,6 +10,7 @@
 #include <cinttypes>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <gtest/gtest.h>
 #include <nmx/NMXBase.h>
 #include <string>
 #include <vector>
@@ -94,6 +95,9 @@ public:
   void SetUp() override {
     Settings.ConfigFile = "nmx.json";
     Settings.NoHwCheck = true;
+    Settings.DetectorName = "nmx";
+    Settings.GraphitePrefix = "nmx";
+    Settings.GraphiteRegion = "test";
   }
 
   void TearDown() override {}
@@ -101,6 +105,7 @@ public:
 
 TEST_F(NMXBaseTest, Constructor) {
   Nmx::NmxBase Readout(Settings);
+  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "nmx.test.");
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 

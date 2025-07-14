@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <common/testutils/TestBase.h>
 #include <filesystem>
+#include <gtest/gtest.h>
 #include <string>
 #include <vector>
 
@@ -89,6 +90,9 @@ public:
     // Get base test dir
     path TestDir = path(__FILE__).parent_path();
     // Define test files
+    Settings.DetectorName = "cbm";
+    Settings.GraphitePrefix = "cbm";
+    Settings.GraphiteRegion = "test";
     Settings.ConfigFile = TestDir / path("cbm_base_test.json");
     Settings.KafkaTopic = "freia_beam_monitor";
     Settings.NoHwCheck = true;
@@ -99,6 +103,7 @@ public:
 
 TEST_F(CbmBaseTest, Constructor) {
   CbmBase DetectorBase(Settings);
+  ASSERT_EQ(DetectorBase.Stats.getStatPrefix(1), "cbm.test.");
   EXPECT_EQ(DetectorBase.getInputCounters().RxPackets, 0);
   EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
 }
@@ -118,7 +123,7 @@ TEST_F(CbmBaseTest, DataReceiveBadHeader) {
   BadTestPacket[0] = 0xff; // pad should be 0
   writePacketToRxFIFO(DetectorBase, BadTestPacket);
 
-  EXPECT_EQ(DetectorBase.Stats.valueByName("parser.essheader.errors.pad"), 1);
+  EXPECT_EQ(DetectorBase.Stats.getValueByName("parser.essheader.errors.pad"), 1);
 
   // no readouts as header is bad
   EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 0);
@@ -141,7 +146,7 @@ TEST_F(CbmBaseTest, EmulateFIFOError) {
 
   waitForProcessing(DetectorBase);
 
-  EXPECT_EQ(DetectorBase.Stats.valueByName("receive.fifo_seq_errors"), 1);
+  EXPECT_EQ(DetectorBase.Stats.getValueByName("receive.fifo_seq_errors"), 1);
   DetectorBase.stopThreads();
 }
 

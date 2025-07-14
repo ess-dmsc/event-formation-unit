@@ -37,6 +37,9 @@ public:
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     Settings.ConfigFile = "deleteme_dream.json";
+    Settings.DetectorName = "dream";
+    Settings.GraphitePrefix = "dream";
+    Settings.GraphiteRegion = "test";
   }
 
   void TearDown() override {}
@@ -44,6 +47,7 @@ public:
 
 TEST_F(DreamBaseTest, Constructor) {
   Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "dream.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 

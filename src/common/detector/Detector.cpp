@@ -10,6 +10,14 @@
 #include <common/detector/Detector.h>
 #include <common/system/SocketImpl.h>
 
+// clang-format off
+const std::string Detector::METRIC_RECEIVE_PACKETS = "receive.packets";
+const std::string Detector::METRIC_RECEIVE_BYTES = "receive.bytes";
+const std::string Detector::METRIC_RECEIVE_DROPPED = "receive.dropped";
+const std::string Detector::METRIC_THREAD_INPUT_IDLE = "thread.input_idle";
+const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "transmit.calibmode_packets";
+// clang-format on
+
 void Detector::inputThread() {
   XTRACE(INPUT, DEB, "Starting inputThread");
   SocketImpl::Endpoint local(EFUSettings.DetectorAddress.c_str(),

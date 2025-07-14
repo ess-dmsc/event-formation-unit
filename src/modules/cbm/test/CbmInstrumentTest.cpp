@@ -295,7 +295,7 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 3);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 /// \brief Test case for validating IBM type readouts.
@@ -364,7 +364,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(CbmCounters.IBMEvents, 3);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 ///
@@ -393,7 +393,7 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
   EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
 }
 
 /// \brief Test case for monitor readout with Type not supported
@@ -448,7 +448,7 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
 }
 
 ///
@@ -479,9 +479,9 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(CbmCounters.TimeError, 1);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
 }
 
 ///
@@ -513,13 +513,13 @@ TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   EXPECT_EQ(CbmCounters.Event0DEvents, 1);
   EXPECT_EQ(CbmCounters.TimeError, 1);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
   EXPECT_EQ(
-      Stats->valueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT),
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT),
       1);
-  EXPECT_EQ(Stats->valueByName(
+  EXPECT_EQ(Stats->getValueByName(
                 ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE),
             1);
 }

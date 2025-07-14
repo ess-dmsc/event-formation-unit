@@ -27,8 +27,7 @@ const char *classname = "Caen detector with ESS readout";
 
 CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
-  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
-
+      
   XTRACE(INIT, ALW, "Adding stats");
   
   // clang-format off
@@ -65,10 +64,8 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
 
   // Monitor and calibration stats
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   // System counters
-  Stats.create("thread.input_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats

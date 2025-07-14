@@ -51,6 +51,9 @@ public:
     Settings.KafkaTopic = "freia_detector";
     Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
+    Settings.DetectorName = "freia";
+    Settings.GraphitePrefix = "freia";
+    Settings.GraphiteRegion = "test";
   }
   void TearDown() override {}
 };
@@ -58,6 +61,7 @@ public:
 
 TEST_F(FreiaBaseTest, Constructor) {
   Freia::FreiaBase Readout(Settings);
+  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "freia.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }

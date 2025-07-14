@@ -33,6 +33,8 @@ public:
     Settings.ConfigFile = TIMEPIX_CONFIG;
     Settings.DetectorName = "timepix3";
     Settings.UpdateIntervalSec = 0;
+    Settings.GraphitePrefix = "timepix";
+    Settings.GraphiteRegion = "test";
 
     Readout = std::make_unique<Timepix3::Timepix3Base>(Settings);
     testCounters = &Readout->Counters;
@@ -43,6 +45,7 @@ public:
 
 TEST_F(Timepix3BaseTest, Constructor) {
   Timepix3::Timepix3Base Readout(Settings);
+  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "timepix.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 

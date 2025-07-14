@@ -23,8 +23,6 @@ const char *classname = "DREAM detector with ESS readout";
 
 DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type) : Detector(Settings), Type(type) {
 
-  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
-
   XTRACE(INIT, ALW, "Adding stats");
   
   // clang-format off
@@ -47,14 +45,12 @@ DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type) : Detector
   Stats.create("readouts.error_config", Counters.ConfigErrors);
 
   //
-  Stats.create("thread.input_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);

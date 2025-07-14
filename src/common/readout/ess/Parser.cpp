@@ -42,7 +42,7 @@ Parser::Parser(Statistics &Stats) {
   Stats.create(METRIC_PARSER_ESSHEADER_VERSION_V1, ESSHeaderStats.Version1Header);
 
   for (int i = 0; i < 12; i++) {
-    std::string statname = fmt::format("essheader.OQ.{:02}.packets", i);
+    std::string statname = fmt::format(METRIC_PARSER_ESSHEADER_OQ_PACKETS, i);
     Stats.create(statname, ESSHeaderStats.OQRxPackets[i]);
   }
 

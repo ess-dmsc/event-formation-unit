@@ -83,35 +83,35 @@ TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
 
   ProducerStandIn prod{"nobroker", "notopic", &Stats};
 
-  EXPECT_EQ(Stats.valueByName("kafka.config_errors"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.stat_events"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error_events"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_ok"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.produce_bytes_error"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.produce_calls"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.produce_errors"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.brokers.tx_bytes"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.brokers.tx_req_retries"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.max_num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.max_bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.delivery_success"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.status_persisted"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.status_not_persisted"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.status_possibly_persisted"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.msg.msg_delivery_event"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.msg_delivery"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.transmission"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.unknown_topic"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.unknown_partition"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.queue_full"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.timeout"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.msg_timeout"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.transport"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.authentication"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.msg_size"), 0);
-  EXPECT_EQ(Stats.valueByName("kafka.error.other"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.config_errors"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.stat_events"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error_events"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.produce_bytes_ok"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.produce_bytes_error"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.produce_calls"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.produce_errors"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.brokers.tx_bytes"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.brokers.tx_req_retries"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.max_num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.max_bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.delivery_success"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_not_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_possibly_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.msg.msg_delivery_event"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_delivery"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.transmission"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.unknown_topic"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.unknown_partition"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.queue_full"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.timeout"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_timeout"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.transport"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.authentication"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_size"), 0);
+  EXPECT_EQ(Stats.getValueByName("kafka.error.other"), 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
