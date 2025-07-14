@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "common/kafka/KafkaConfig.h"
 #include <CLI/CLI.hpp>
 #include <common/Statistics.h>
 #include <common/detector/BaseSettings.h>
@@ -35,8 +36,10 @@ private:
     int64_t RxBytes{0};
     int64_t FifoPushErrors{0};
     int64_t RxIdle{0};
-    int64_t CalibModePackets{0};
+    int64_t TxRawReadoutPackets{0};
   } ITCounters; // Input Thread Counters
+
+  std::unique_ptr<AR51Serializer> MonitorSerializer;
 
 public:
   // Static const strings for statistics names
@@ -56,13 +59,26 @@ public:
   Detector(BaseSettings settings)
       : EFUSettings(settings),
         Stats(settings.GraphitePrefix, settings.GraphiteRegion),
-        ESSHeaderParser(Stats) {
+        ESSHeaderParser(Stats), KafkaCfg(EFUSettings.KafkaConfigFile) {
 
     Stats.create(METRIC_RECEIVE_PACKETS, ITCounters.RxPackets);
     Stats.create(METRIC_RECEIVE_BYTES, ITCounters.RxBytes);
     Stats.create(METRIC_RECEIVE_DROPPED, ITCounters.FifoPushErrors);
     Stats.create(METRIC_THREAD_INPUT_IDLE, ITCounters.RxIdle);
-    Stats.create(METRIC_TRANSMIT_CALIBMODE_PACKETS, ITCounters.CalibModePackets);
+    Stats.create(METRIC_TRANSMIT_CALIBMODE_PACKETS,
+                 ITCounters.TxRawReadoutPackets);
+
+    // Create the raw-data monitor producer and serializer
+    Producer MonitorProducer(EFUSettings.KafkaBroker,
+                             EFUSettings.KafkaDebugTopic, KafkaCfg.CfgParms);
+
+    auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
+                                             const auto &Timestamp) {
+      MonitorProducer.produce(DataBuffer, Timestamp);
+    };
+
+    MonitorSerializer = std::make_unique<AR51Serializer>(
+        EFUSettings.DetectorName, ProduceMonitor);
   }
 
   /// Receiving UDP data is now common across all detectors
@@ -145,8 +161,8 @@ public:
 
   // Common to all EFUs
   std::unique_ptr<EV44Serializer> Serializer;
-  std::unique_ptr<AR51Serializer> MonitorSerializer;
 
 protected:
   ESSReadout::Parser ESSHeaderParser;
+  KafkaConfig KafkaCfg;
 };

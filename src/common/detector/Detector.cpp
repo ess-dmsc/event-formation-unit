@@ -15,7 +15,7 @@ const std::string Detector::METRIC_RECEIVE_PACKETS = "receive.packets";
 const std::string Detector::METRIC_RECEIVE_BYTES = "receive.bytes";
 const std::string Detector::METRIC_RECEIVE_DROPPED = "receive.dropped";
 const std::string Detector::METRIC_THREAD_INPUT_IDLE = "thread.input_idle";
-const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "transmit.calibmode_packets";
+const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "kafka.produce.packets";
 // clang-format on
 
 void Detector::inputThread() {
@@ -45,11 +45,23 @@ void Detector::inputThread() {
       ITCounters.RxPackets++;
       ITCounters.RxBytes += readSize;
 
+      // Calibration mode send all raw input data to sample topic
       if (CalibrationMode) {
         MonitorSerializer->serialize((uint8_t *)DataPtr, readSize);
         MonitorSerializer->produce();
-        ITCounters.CalibModePackets++;
+        ITCounters.TxRawReadoutPackets++;
         continue;
+
+        // Normal operation, send raw data data according to config, for every
+        // MonitorPeriod MonitorSamples number of packets parrallel to load data
+        // into the ring buffer
+      } else if (ITCounters.RxPackets % EFUSettings.MonitorPeriod <
+                 EFUSettings.MonitorSamples) {
+        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
+               getInputCounters().RxPackets);
+        MonitorSerializer->serialize((uint8_t *)DataPtr, readSize);
+        MonitorSerializer->produce();
+        ITCounters.TxRawReadoutPackets++;
       }
 
       if (InputFifo.push(rxBufferIndex)) {

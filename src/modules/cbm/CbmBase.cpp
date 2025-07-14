@@ -54,8 +54,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("events.event0d", Counters.Event0DEvents);
   Stats.create("events.ibm_npos_sum", Counters.NPOSCount);
 
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
@@ -63,7 +61,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("readouts.errors.time", Counters.TimeError);
 
   //
-  Stats.create("thread.receive_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats
@@ -100,19 +97,6 @@ void CbmBase::processingThread() {
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
-
-  // ---------------------------------------------------------------------------
-  // Raw data monitor producer and serializer
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                           const auto &Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
-                                                       ProduceMonitor);
 
   // Process instrument config file
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -212,17 +196,6 @@ void CbmBase::processingThread() {
       Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
 
       cbmInstrument.processMonitorReadouts();
-
-      // ---------------------------------------------------------------------------
-      // Send Ar51 monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
-      }
 
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a

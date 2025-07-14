@@ -48,8 +48,6 @@ struct Counters {
 
   int64_t PixelErrors;
   int64_t TimeErrors;
-  int64_t TxRawReadoutPackets;
-
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
 

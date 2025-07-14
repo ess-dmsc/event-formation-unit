@@ -77,9 +77,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
 
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 

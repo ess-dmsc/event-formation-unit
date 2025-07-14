@@ -49,8 +49,6 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
-  int64_t TxRawReadoutPackets{0};
-
 } __attribute__((aligned(64)));
 
 } // namespace cbm

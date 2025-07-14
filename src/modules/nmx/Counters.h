@@ -52,6 +52,4 @@ struct Counters {
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-
-  int64_t TxRawReadoutPackets;
 } __attribute__((aligned(64)));

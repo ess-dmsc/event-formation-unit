@@ -71,9 +71,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
@@ -121,12 +118,6 @@ void FreiaBase::processing_thread() {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](auto &DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
   Serializer = std::make_unique<EV44Serializer>(KafkaBufferSize,
                                                 FlatBufferSource, Produce);
 
@@ -134,8 +125,6 @@ void FreiaBase::processing_thread() {
                Serializer->stats().ProduceRefTimeTriggered);
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
-
-  MonitorSerializer = std::make_unique<AR51Serializer>("freia", ProduceMonitor);
 
   FreiaInstrument Freia(Counters, EFUSettings, *Serializer, ESSHeaderParser);
 
@@ -196,15 +185,6 @@ void FreiaBase::processing_thread() {
       }
       // done processing data
 
-      // send monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
-      }
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a
       // little

@@ -30,7 +30,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   // clang-format off
 
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -80,9 +79,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
-
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -138,17 +134,6 @@ void NmxBase::processing_thread() {
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  // Create the raw-data monitor producer and serializer
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                           const auto &Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
-                                                       ProduceMonitor);
-
   NMXInstrument NMX(Counters, EFUSettings, *Serializer, ESSHeaderParser);
 
   // Time out after one second
@@ -192,16 +177,6 @@ void NmxBase::processing_thread() {
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
         Counters.MatcherStats.addAndClear(builder.matcher.Stats);
-      }
-
-      // send monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
       }
 
     } else {

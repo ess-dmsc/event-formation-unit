@@ -42,7 +42,6 @@ struct Counters {
   int64_t EventsMatchedClusters{0};
   int64_t PixelErrors{0};
   int64_t TimeErrors;
-  int64_t TxRawReadoutPackets{0};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};
