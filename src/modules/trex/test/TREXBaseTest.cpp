@@ -96,6 +96,9 @@ public:
   void SetUp() override {
     Settings.ConfigFile = "trex.json";
     Settings.NoHwCheck = true;
+    Settings.DetectorName = "trex";
+    Settings.GraphitePrefix = "trex";
+    Settings.GraphiteRegion = "test";
   }
   void TearDown() override {}
 
@@ -104,6 +107,8 @@ public:
 
 TEST_F(TREXBaseTest, Constructor) {
   Trex::TrexBase Readout(Settings);
+  // Check stats prefix (assumes the prefix is set based on Settings)
+  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "trex.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }

@@ -26,14 +26,14 @@ void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr,
 
   if (StatDb->isValidSocket()) {
     for (int i = 1; i <= DetectorPtr->statsize(); i++) {
-      auto StatString = fmt::format("{} {} {}\n", DetectorPtr->statname(i),
+      auto StatString = fmt::format("{} {} {}\n", DetectorPtr->getStatFullName(i),
                                     DetectorPtr->statvalue(i), unixtime);
 
       StatDb->senddata(StatString.c_str(), StatString.size());
     }
     for (size_t i = 1; i <= OtherStats.size(); i++) {
-      auto StatString = fmt::format("{} {} {}\n", OtherStats.name(i),
-                                    OtherStats.value(i), unixtime);
+      auto StatString = fmt::format("{} {} {}\n", OtherStats.getFullName(i),
+                                    OtherStats.getValue(i), unixtime);
 
       StatDb->senddata(StatString.c_str(), StatString.size());
     }

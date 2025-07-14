@@ -39,6 +39,14 @@ private:
   } ITCounters; // Input Thread Counters
 
 public:
+  // Static const strings for statistics names
+  // Definition of static const strings for statistics names
+  static const std::string METRIC_RECEIVE_PACKETS;
+  static const std::string METRIC_RECEIVE_BYTES;
+  static const std::string METRIC_RECEIVE_DROPPED;
+  static const std::string METRIC_THREAD_INPUT_IDLE;
+  static const std::string METRIC_TRANSMIT_CALIBMODE_PACKETS;
+
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
@@ -46,10 +54,15 @@ public:
   /// \brief Constructor for the Detector class
   /// \param settings BaseSettings object containing configuration parameters
   Detector(BaseSettings settings)
-      : EFUSettings(settings), Stats(), ESSHeaderParser(Stats) {
-    Stats.create("receive.packets", ITCounters.RxPackets);
-    Stats.create("receive.bytes", ITCounters.RxBytes);
-    Stats.create("receive.dropped", ITCounters.FifoPushErrors);
+      : EFUSettings(settings),
+        Stats(settings.GraphitePrefix, settings.GraphiteRegion),
+        ESSHeaderParser(Stats) {
+
+    Stats.create(METRIC_RECEIVE_PACKETS, ITCounters.RxPackets);
+    Stats.create(METRIC_RECEIVE_BYTES, ITCounters.RxBytes);
+    Stats.create(METRIC_RECEIVE_DROPPED, ITCounters.FifoPushErrors);
+    Stats.create(METRIC_THREAD_INPUT_IDLE, ITCounters.RxIdle);
+    Stats.create(METRIC_TRANSMIT_CALIBMODE_PACKETS, ITCounters.CalibModePackets);
   }
 
   /// Receiving UDP data is now common across all detectors
@@ -63,18 +76,20 @@ public:
 
   /// \brief returns the value of a runtime counter (efustat) based on its index
   /// used by Parser.cpp for command query
-  inline virtual int64_t statvalue(size_t index) { return Stats.value(index); }
+  inline virtual int64_t statvalue(size_t index) {
+    return Stats.getValue(index);
+  }
 
   /// \brief returns the value of a runtime counter (efustat) based on name
   /// used by Parser.cpp for command query
   inline virtual int64_t statvaluebyname(const std::string &name) {
-    return Stats.valueByName(name);
+    return Stats.getValueByName(name);
   }
 
   /// \brief returns the name of a runtime counter (efustat) based on its index
   /// used by Parser.cpp for command query
-  inline virtual std::string &statname(size_t index) {
-    return Stats.name(index);
+  inline virtual std::string getStatFullName(size_t index) {
+    return Stats.getFullName(index);
   }
 
   /// \brief Getter for the input thread counters

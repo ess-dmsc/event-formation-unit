@@ -28,9 +28,6 @@ using namespace fbserializer;
 
 CbmBase::CbmBase(BaseSettings const &settings)
     : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
-
-  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
-
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
@@ -199,8 +196,8 @@ void CbmBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = ESSHeaderParser.validate(
-          DataPtr, DataLen, CbmConfiguration.Parms.TypeSubType);
+      auto Res = ESSHeaderParser.validate(DataPtr, DataLen,
+                                          CbmConfiguration.Parms.TypeSubType);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
@@ -211,8 +208,7 @@ void CbmBase::processingThread() {
       }
 
       // We have good header information, now parse readout data
-      cbmInstrument.CbmReadoutParser.parse(
-          ESSHeaderParser.Packet);
+      cbmInstrument.CbmReadoutParser.parse(ESSHeaderParser.Packet);
       Counters.CbmStats = cbmInstrument.CbmReadoutParser.Stats;
 
       cbmInstrument.processMonitorReadouts();

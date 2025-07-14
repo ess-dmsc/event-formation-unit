@@ -24,8 +24,6 @@ const char *classname = "Timepix3 detector with ESS readout";
 Timepix3Base::Timepix3Base(BaseSettings const &settings)
     : Detector(settings), timepix3Configuration(settings.ConfigFile) {
 
-  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
-
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);

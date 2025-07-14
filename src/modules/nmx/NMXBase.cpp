@@ -25,7 +25,6 @@ namespace Nmx {
 const char *classname = "NMX detector with ESS readout";
 
 NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
-  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -84,10 +83,8 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
 
   // Monitor and calibration stats
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-  Stats.create("transmit.calibmode_packets", getInputCounters().CalibModePackets);
 
   //
-  Stats.create("thread.receive_idle", getInputCounters().RxIdle);
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   // Produce cause call stats

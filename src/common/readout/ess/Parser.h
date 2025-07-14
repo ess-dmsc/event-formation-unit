@@ -47,6 +47,8 @@ public:
   static inline const std::string METRIC_PARSER_ESSHEADER_HEARTBEATS = "parser.essheader.heartbeats";
   static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V0 = "parser.essheader.version.v0";
   static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V1 = "parser.essheader.version.v1";
+  static inline const std::string METRIC_PARSER_ESSHEADER_OQ_PACKETS = "essheader.OQ.{:02}.packets";
+  
   static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_COUNT = "events.timestamp.tof.count";
   static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE = "events.timestamp.tof.negative";
   static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_HIGH = "events.timestamp.tof.high";

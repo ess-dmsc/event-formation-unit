@@ -53,12 +53,12 @@ static int stat_get(const std::vector<std::string> &cmdargs, char *output,
   int64_t value;
   // Detector stats
   if (index <= detector->statsize()) {
-    name = detector->statname(index);
+    name = detector->getStatFullName(index);
     value = detector->statvalue(index);
   } else { // User supplied stats
     index = index - detector->statsize();
-    name = stats.name(index);
-    value = stats.value(index);
+    name = stats.getFullName(index);
+    value = stats.getValue(index);
   }
   LOG(CMD, Sev::Debug, "STAT_GET {} {}", name, value);
 
@@ -151,7 +151,7 @@ static int stat_get_name(const std::vector<std::string> &cmdargs, char *output,
 
   int64_t value = detector->statvaluebyname(name);
   if (value == -1) {
-    value = stats.valueByName(name);
+    value = stats.getValueByName(name);
   }
 
   LOG(CMD, Sev::Debug, "STAT_GET_NAME {} {}", name, value);
