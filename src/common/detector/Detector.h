@@ -67,18 +67,6 @@ public:
     Stats.create(METRIC_THREAD_INPUT_IDLE, ITCounters.RxIdle);
     Stats.create(METRIC_TRANSMIT_CALIBMODE_PACKETS,
                  ITCounters.TxRawReadoutPackets);
-
-    // Create the raw-data monitor producer and serializer
-    Producer MonitorProducer(EFUSettings.KafkaBroker,
-                             EFUSettings.KafkaDebugTopic, KafkaCfg.CfgParms);
-
-    auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                             const auto &Timestamp) {
-      MonitorProducer.produce(DataBuffer, Timestamp);
-    };
-
-    MonitorSerializer = std::make_unique<AR51Serializer>(
-        EFUSettings.DetectorName, ProduceMonitor);
   }
 
   /// Receiving UDP data is now common across all detectors

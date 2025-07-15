@@ -60,7 +60,8 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
       CDCalibration(settings.DetectorName, Settings.CalibFile);
   Geom->CaenCDCalibration.parseCalibration();
 
-  ESSHeaderParser.setMaxPulseTimeDiff(CaenConfiguration.CaenParms.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(
+      CaenConfiguration.CaenParms.MaxPulseTimeNS);
   ESSHeaderParser.Packet.Time.setMaxTOF(CaenConfiguration.CaenParms.MaxTOFNS);
 }
 

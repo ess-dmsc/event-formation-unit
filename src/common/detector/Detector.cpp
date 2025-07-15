@@ -15,7 +15,7 @@ const std::string Detector::METRIC_RECEIVE_PACKETS = "receive.packets";
 const std::string Detector::METRIC_RECEIVE_BYTES = "receive.bytes";
 const std::string Detector::METRIC_RECEIVE_DROPPED = "receive.dropped";
 const std::string Detector::METRIC_THREAD_INPUT_IDLE = "thread.input_idle";
-const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "kafka.produce.packets";
+const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "produce.cause.monitor_packets";
 // clang-format on
 
 void Detector::inputThread() {
@@ -28,6 +28,18 @@ void Detector::inputThread() {
                               EFUSettings.RxSocketBufferSize);
   dataReceiver.printBufferSizes();
   dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
+
+  // Create the raw packet sample producer and ar51 serializer
+  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
+                           KafkaCfg.CfgParms);
+
+  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
+                                           const auto &Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
+  };
+
+  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
+                                                       ProduceMonitor);
 
   LOG(INIT, Sev::Info, "Detector input thread started on {}:{}",
       local.IpAddress, local.Port);

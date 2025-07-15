@@ -3,7 +3,6 @@
   "Resolution": 100,
   "MaxGroup": 7,
   "MaxPulseTimeNS" : 71428600,
-  "MaxTOFNS" : 500000000,
 
   "NumOfFENs" : 2,
 

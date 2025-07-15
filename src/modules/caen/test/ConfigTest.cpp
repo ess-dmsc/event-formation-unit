@@ -196,6 +196,18 @@ TEST_F(CaenConfigTest, ValidTbl3HeConfig) {
   ASSERT_EQ(config.CaenParms.InstrumentName, "tbl3he");
 }
 
+/// \brief Test default MaxTOFNS value when not specified in config
+TEST_F(CaenConfigTest, DefaultMaxTofConfig) {
+
+  const uint64_t DefaultMaxTofNS = 20 * 71'428'571; // 20 * 14 Hz pulse period
+
+  removeField("MaxTOFNS");
+  config.setRoot(testConfig);
+  config.parseConfig();
+
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, DefaultMaxTofNS);
+}
+
 int main(int argc, char **argv) {
   saveBuffer(NotJsonFile, (void *)NotJsonStr.c_str(), NotJsonStr.size());
   testing::InitGoogleTest(&argc, argv);

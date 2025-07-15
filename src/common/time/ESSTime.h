@@ -425,6 +425,7 @@ public:
 private:
   TimeDurationNano TimeInNS{0};
   TimeDurationNano PrevTimeInNS{0};
+  /// \todo review that this still appropriate to have 32 bit integer limit
   TimeDurationNano MaxTOF{
       2147483647}; // max 32 bit integer, larger TOFs cause errors downstream
 };
