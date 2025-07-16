@@ -113,8 +113,8 @@ std::vector<uint8_t> FenAndChannelNotInCfgReadout {
 /// \brief Monitor readout with TOF value higher then MaxTof limit
 std::vector<uint8_t> TofToHighReadout {
   0x16, 0x00, 0x14, 0x00,  // Fiber 22, FEN 0, Data Length 20
-  0x0A, 0x00, 0x00, 0x00,  // Time HI 10 s
-  0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+  0x02, 0x00, 0x00, 0x00,  // Time HI 2 s
+  0x11, 0xB2, 0x5F, 0x02,   // Time LO 37736785 tick, ~0.4 seconds
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
@@ -135,6 +135,33 @@ std::vector<uint8_t> PreviousAndNegativPrevTofReadouts {
   0x01, 0x00, 0x01, 0x00,  // Type 1, Ch 0, ADC 1
   0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
 };
+
+auto TestConfig = R"(
+{
+  "Detector" : "CBM",
+  "TypeSubType" : 16,
+  "NumberOfMonitors" : 11,
+  "MaxPulseTimeDiffNS" : 1000000000,
+  "MaxPulseTimeNS" : 357142855,
+  "MaxFENId" : 2,
+  "MaxFEN" : 16,
+  "Banks" : [
+    { "Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0 }
+  ],
+  "Config" : [
+    { "Ring" : 0, "Bank" : 0, "FENs" : 16, "FENOffset" : 0 }
+  ],
+  "Topology" : [
+    { "FEN": 0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
+    { "FEN": 0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 1 },
+    { "FEN": 1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 3 },
+    { "FEN": 1, "Channel": 1, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100 },
+    { "FEN": 1, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100 },
+    { "FEN": 2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100 }
+  ]
+}
+)"_json;
+
 // clang-format on
 
 using namespace fbserializer;
@@ -161,59 +188,51 @@ protected:
   /// Objects required to build the CbmInstrument
   struct Counters CbmCounters;
   BaseSettings Settings;
-  Config Configuration;
+  std::unique_ptr<Config> Configuration; // Changed to unique_ptr
+  TestHeaderFactory headerFactory;
+
+  /// Objects required for the CbmInstrument
+  /// \note These are initialized in SetUp()
   std::unique_ptr<Statistics> Stats;
   std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
   HashMap2D<EV44Serializer> EV44SerializerPtrs{11};
   HashMap2D<HistogramSerializer<int32_t>> HistogramSerializerPtrs{11};
-
-  /// The CbmInstrument object to be tested
-  /// It is created in SetUp() and destroyed automatically by the unique_ptr
   std::unique_ptr<CbmInstrument> cbm;
-  std::unique_ptr<TestHeaderFactory> headerFactory;
 
   inline static path FullConfigFile{""};
 
   void SetUp() override {
-
-    // Get base test dir
-    path TestDir = path(__FILE__).parent_path();
-    // Define test files
-    Settings.ConfigFile = TestDir / path("cbm_instrument_test.json");
-
-    Configuration = Config(Settings.ConfigFile);
-    Configuration.loadAndApply();
-
-    // Create new instances of Stats and ESSHeaderParser for each test
+    // Initialize stats and parser
     Stats = std::make_unique<Statistics>();
     ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
+
+    // Reinitialize Configuration as unique_ptr
+    Configuration = std::make_unique<Config>();
+    Configuration->setRoot(TestConfig);
+    Configuration->apply();
 
     initializeSerializers();
 
     CbmCounters = {};
 
-    headerFactory = std::make_unique<TestHeaderFactory>();
-    cbm = std::make_unique<CbmInstrument>(
-        CbmCounters, Configuration, EV44SerializerPtrs, HistogramSerializerPtrs,
-        *ESSHeaderParser);
     ESSHeaderParser->Packet.HeaderPtr =
-        headerFactory->createHeader(ESSReadout::Parser::V1);
+        headerFactory.createHeader(ESSReadout::Parser::V1);
   }
 
   void TearDown() override {}
 
+protected:
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V1);
+    Packet.HeaderPtr = headerFactory.createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));
     Packet.Time.setPrevReference(ESSTime(0, 0));
   }
 
-private:
   void initializeSerializers() {
-    for (auto &Topology : Configuration.TopologyMapPtr->toValuesList()) {
+    for (auto &Topology : Configuration->TopologyMapPtr->toValuesList()) {
       if (Topology->Type == CbmType::EVENT_0D) {
         std::unique_ptr<EV44Serializer> SerializerPtr =
             std::make_unique<MockEV44Serializer>();
@@ -226,10 +245,17 @@ private:
       }
     }
   }
+
+  void initializeCbmInstrument() {
+    cbm = std::make_unique<CbmInstrument>(
+        CbmCounters, *Configuration, EV44SerializerPtrs,
+        HistogramSerializerPtrs, *ESSHeaderParser);
+  }
 };
 
 // Test cases below
 TEST_F(CbmInstrumentTest, Constructor) {
+  initializeCbmInstrument();
   ASSERT_EQ(CbmCounters.RingCfgError, 0);
 }
 
@@ -242,6 +268,7 @@ TEST_F(CbmInstrumentTest, Constructor) {
 /// addEvent is called with proper arguments.
 ///
 TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
+  initializeCbmInstrument();
 
   // Set expectations on the mocked serializer objects, one for each monitor
   // readout
@@ -295,7 +322,8 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 3);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      3);
 }
 
 /// \brief Test case for validating IBM type readouts.
@@ -306,6 +334,7 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DTypeReadouts) {
 /// addEvent is called with proper arguments.
 ///
 TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
+  initializeCbmInstrument();
 
   // Set expectations on the mocked serializer objects, one for each monitor
   // readout
@@ -364,7 +393,8 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(CbmCounters.IBMEvents, 3);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      3);
 }
 
 ///
@@ -375,6 +405,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
 /// checks the expected counters and statistics.
 ///
 TEST_F(CbmInstrumentTest, RingConfigurationError) {
+  initializeCbmInstrument();
   makeHeader(ESSHeaderParser->Packet, RingNotInCfgReadout);
 
   cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
@@ -393,13 +424,15 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
   EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
   EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      0);
 }
 
 /// \brief Test case for monitor readout with Type not supported
 /// \note This test is temporary because since all CBM are supported metric will
 /// be removed
 TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
+  initializeCbmInstrument();
   makeHeader(ESSHeaderParser->Packet, NotSuppoertedTypeReadout);
 
   cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
@@ -428,6 +461,7 @@ TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
 /// when the readout arrives for a monitor which is not configured for the EFU.
 ///
 TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
+  initializeCbmInstrument();
   makeHeader(ESSHeaderParser->Packet, FenAndChannelNotInCfgReadout);
 
   cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
@@ -448,20 +482,24 @@ TEST_F(CbmInstrumentTest, NoSerializerCfgError) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 3);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      3);
 }
 
 ///
 /// \brief Test case for the scenario when the calculated TOF is higher then the
 /// MaxTof limit configured in the configuration file
 ///
-TEST_F(CbmInstrumentTest, TOFHighError) {
+TEST_F(CbmInstrumentTest, HighTofErrorDefaultValue) {
+  initializeCbmInstrument();
   makeHeader(ESSHeaderParser->Packet, TofToHighReadout);
-  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
-  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 0));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(0, 1000000));
 
   cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
   CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  cbm->processMonitorReadouts();
 
   EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
   EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
@@ -469,7 +507,6 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
   EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
-  cbm->processMonitorReadouts();
   EXPECT_EQ(CbmCounters.RingCfgError, 0);
   EXPECT_EQ(CbmCounters.CbmCounts, 0);
   EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
@@ -479,9 +516,47 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(CbmCounters.TimeError, 1);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      0);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH),
+      1);
+}
+
+///
+/// \brief Test case for the scenario when MaxTOFNS is set to 0 in the
+/// configuration. Any valid readout, even with TOF close to ESS Time, should
+/// produce a HighTof error.
+///
+TEST_F(CbmInstrumentTest, HighTofErrorMaxTofSetInJson) {
+  // Modify configuration to set MaxTOFNS to 0
+  auto ZeroMaxTofConfig = TestConfig;
+  ZeroMaxTofConfig["MaxTOFNS"] = 0;
+  Configuration->setRoot(ZeroMaxTofConfig);
+  Configuration->apply();
+
+  initializeSerializers();
+  initializeCbmInstrument();
+
+  // Use a valid Event0D readout with TOF close to ESS Time
+  makeHeader(ESSHeaderParser->Packet, ValidEvent0DReadouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  cbm->processMonitorReadouts();
+
+  // All readouts should be rejected due to MaxTOFNS == 0
+  EXPECT_EQ(CbmCounters.TimeError, 3);
+  EXPECT_EQ(
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH),
+      3);
+  EXPECT_EQ(
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      0);
+  EXPECT_EQ(CbmCounters.CbmCounts, 0);
 }
 
 ///
@@ -490,6 +565,7 @@ TEST_F(CbmInstrumentTest, TOFHighError) {
 /// pulse time
 ///
 TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
+  initializeCbmInstrument();
   makeHeader(ESSHeaderParser->Packet, PreviousAndNegativPrevTofReadouts);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(2, 100000));
   ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 100000));
@@ -513,12 +589,14 @@ TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   EXPECT_EQ(CbmCounters.Event0DEvents, 1);
   EXPECT_EQ(CbmCounters.TimeError, 1);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 0);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_HIGH),
+      0);
   EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 0);
-  EXPECT_EQ(
-      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT),
-      1);
+      Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+      0);
+  EXPECT_EQ(Stats->getValueByName(
+                ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT),
+            1);
   EXPECT_EQ(Stats->getValueByName(
                 ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE),
             1);

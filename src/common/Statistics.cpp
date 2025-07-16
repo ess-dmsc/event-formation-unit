@@ -14,7 +14,8 @@
 Statistics::Statistics(const std::string &StatsPrefix,
                        const std::string &StatsRegion) {
   setPrefix(StatsPrefix, StatsRegion);
-  LOG(UTILS, Sev::Info, "Statistics initialized with prefix: {}", DefaultPrefix);
+  LOG(UTILS, Sev::Info, "Statistics initialized with prefix: {}",
+      DefaultPrefix);
 }
 
 int Statistics::create(const std::string &StatName, int64_t &Value,
@@ -42,32 +43,64 @@ int Statistics::create(const std::string &StatName, int64_t &Value,
   return 0;
 }
 
-size_t Statistics::size() { return stats.size(); }
+size_t Statistics::size() const { return stats.size(); }
 
-std::string &Statistics::getStatName(size_t Index) {
+const std::string &Statistics::getStatName(size_t Index) const {
   if (Index > stats.size() || Index < 1) {
     return nostat;
   }
   return stats.at(Index - 1).StatName;
 }
 
-std::string &Statistics::getStatPrefix(size_t Index) {
+bool Statistics::setStatName(size_t Index, const std::string &Name) {
+  if (Index > stats.size() || Index < 1) {
+    return false;
+  }
+  stats.at(Index - 1).StatName = Name;
+  return true;
+}
+
+bool Statistics::setStatName(size_t Index, std::string &&Name) {
+  if (Index > stats.size() || Index < 1) {
+    return false;
+  }
+  stats.at(Index - 1).StatName = std::move(Name);
+  return true;
+}
+
+const std::string &Statistics::getStatPrefix(size_t Index) const {
   if (Index > stats.size() || Index < 1) {
     return nostat;
   }
   return stats.at(Index - 1).StatPrefix;
 }
 
-std::string Statistics::getFullName(size_t Index) {
+bool Statistics::setStatPrefix(size_t Index, const std::string &Prefix) {
+  if (Index > stats.size() || Index < 1) {
+    return false;
+  }
+  stats.at(Index - 1).StatPrefix = Prefix;
+  return true;
+}
+
+bool Statistics::setStatPrefix(size_t Index, std::string &&Prefix) {
+  if (Index > stats.size() || Index < 1) {
+    return false;
+  }
+  stats.at(Index - 1).StatPrefix = std::move(Prefix);
+  return true;
+}
+
+std::string Statistics::getFullName(size_t Index) const {
   if (Index > stats.size() || Index < 1) {
     return nostat;
   }
 
-  StatTuple &stat = stats.at(Index - 1);
+  const StatTuple &stat = stats.at(Index - 1);
   return stat.StatPrefix + stat.StatName;
 }
 
-int64_t Statistics::getValue(size_t Index) {
+int64_t Statistics::getValue(size_t Index) const {
   if (Index > stats.size() || Index < 1) {
     return -1;
   }
@@ -75,7 +108,7 @@ int64_t Statistics::getValue(size_t Index) {
 }
 
 int64_t Statistics::getValueByName(const std::string &name,
-                                   const std::string &Prefix) {
+                                   const std::string &Prefix) const {
 
   std::string effectivePrefix = Prefix.empty() ? DefaultPrefix : Prefix;
 
