@@ -272,11 +272,15 @@ publish_docker_job:
           --build-arg https_proxy="http://172.20.72.11:8888" \
           --build-arg http_proxy="http://172.20.72.11:8888" \
           --build-arg INSTRUMENT_NAME=$INSTRUMENT \
-          -t "$IMAGE_NAME" \
+          -t "$IMAGE_NAME:$DOCKER_IMAGE_TAG" \
           -f .ci/docker/Dockerfile.deploy .
-    - docker push "$IMAGE_NAME"
+    - docker push "$IMAGE_NAME:$DOCKER_IMAGE_TAG"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        DOCKER_IMAGE_TAG: "latest"
     - if: $CI_COMMIT_TAG
+      variables:
+        DOCKER_IMAGE_TAG: "${CI_COMMIT_TAG}"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
