@@ -136,6 +136,9 @@ protected:
   /// \throws std::runtime_error if readout time generator is not initialized.
   std::pair<uint32_t, uint32_t> generateReadoutTime() const;
 
+  /// \brief as above but only generates time every Nth readout
+  std::pair<uint32_t, uint32_t> generateReadoutTimeEveryN(int EveryN = 1);
+
   /// \brief Get the time of flight from the readout time generator.
   /// \return Time of flight in double precision.
   /// \note The unit depends on the generator configuration, typically in ms.
@@ -154,6 +157,11 @@ protected:
   uint8_t HeaderSize{0};                      ///< Size of the header
 
   uint32_t numberOfReadouts{0}; ///< Number of readouts genearated
+
+  // for generateReadoutTimeEveryN()
+  uint32_t cachedTimeHigh{0};
+  uint32_t cachedTimeLow{0};
+
   // clang-format on
 
   DataFuzzer Fuzzer;                            ///< Data fuzzer
