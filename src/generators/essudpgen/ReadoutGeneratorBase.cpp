@@ -68,6 +68,17 @@ ReadoutGeneratorBase::generateReadoutTime() const {
   return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
 }
 
+std::pair<uint32_t, uint32_t>
+ReadoutGeneratorBase::generateReadoutTimeEveryN(int EveryN) {
+  static int Counter = 0;
+
+  if ((Counter % EveryN) == 0) {
+    std::tie(cachedTimeHigh, cachedTimeLow) = generateReadoutTime();
+  }
+  Counter++;
+  return {cachedTimeHigh, cachedTimeLow};
+}
+
 TimeDurationNano
 ReadoutGeneratorBase::getTimeOfFlightNS(ESSTime &readoutTime) const {
   return readoutTime - pulseTime;

@@ -37,9 +37,10 @@ void SmileReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTimeEveryN(2);
     ReadoutData->TimeHigh = readoutTimeHigh;
     ReadoutData->TimeLow = readoutTimeLow;
+
     ReadoutData->OTADC = 1000;
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
