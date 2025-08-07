@@ -41,7 +41,9 @@ void TrackReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    std::tie(ReadoutData->TimeHigh, ReadoutData->TimeLow) = generateReadoutTimeEveryN(ReadoutsPerEvent);
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTimeEveryN(ReadoutsPerEvent);
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
 
     ReadoutData->OTADC = 1000;
     ReadoutData->FiberId = 0;

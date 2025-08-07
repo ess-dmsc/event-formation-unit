@@ -32,7 +32,7 @@ void ReadoutGenerator::generateData() {
     ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
     assert(ReadoutData->DataLength == 20);
 
-    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTimeEveryN(2);
     ReadoutData->TimeHigh = readoutTimeHigh;
     ReadoutData->TimeLow = readoutTimeLow;
     ReadoutData->VMM = Readout & 0x3;

@@ -38,7 +38,9 @@ void Nmx::MultiHitReadoutGenerator::generateData() {
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 
-    std::tie(ReadoutData->TimeHigh, ReadoutData->TimeLow) = generateReadoutTimeEveryN(2);
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTimeEveryN(2);
+    ReadoutData->TimeHigh = readoutTimeHigh;
+    ReadoutData->TimeLow = readoutTimeLow;
 
     ReadoutData->FiberId = 0;
     XTRACE(DATA, DEB, "Generating Readout %u", Readout);
