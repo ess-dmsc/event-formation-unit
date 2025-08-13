@@ -15,9 +15,6 @@
 #include <common/reduction/matching/GapMatcher.h>
 
 struct Counters {
-  // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors;
-
   // ESSReadout parser
   int64_t ErrorESSHeaders;
   // int64_t RingRx[24];

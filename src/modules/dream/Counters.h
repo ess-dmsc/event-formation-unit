@@ -14,9 +14,6 @@
 #include <common/readout/ess/Parser.h>
 
 struct Counters {
-  // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors{0};
-
   // ESSReadout parser
   int64_t ErrorESSHeaders{0};
 

@@ -18,6 +18,7 @@
 #include <common/memory/RingBuffer.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/readout/ess/Parser.h>
+#include <cstdint>
 #include <thread>
 
 // #undef TRC_LEVEL
@@ -30,13 +31,14 @@ struct ThreadInfo {
 };
 
 class Detector {
-private:
+protected:
   struct {
     int64_t RxPackets{0};
     int64_t RxBytes{0};
     int64_t FifoPushErrors{0};
     int64_t RxIdle{0};
     int64_t TxRawReadoutPackets{0};
+    int64_t FifoSeqErrors{0};
   } ITCounters; // Input Thread Counters
 
   std::unique_ptr<AR51Serializer> MonitorSerializer;
@@ -49,6 +51,7 @@ public:
   static const std::string METRIC_RECEIVE_DROPPED;
   static const std::string METRIC_THREAD_INPUT_IDLE;
   static const std::string METRIC_TRANSMIT_CALIBMODE_PACKETS;
+  static const std::string METRIC_FIFO_SEQ_ERRORS;
 
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
@@ -64,6 +67,7 @@ public:
     Stats.create(METRIC_RECEIVE_PACKETS, ITCounters.RxPackets);
     Stats.create(METRIC_RECEIVE_BYTES, ITCounters.RxBytes);
     Stats.create(METRIC_RECEIVE_DROPPED, ITCounters.FifoPushErrors);
+    Stats.create(METRIC_FIFO_SEQ_ERRORS, ITCounters.FifoSeqErrors);
     Stats.create(METRIC_THREAD_INPUT_IDLE, ITCounters.RxIdle);
     Stats.create(METRIC_TRANSMIT_CALIBMODE_PACKETS,
                  ITCounters.TxRawReadoutPackets);

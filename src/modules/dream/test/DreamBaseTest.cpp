@@ -130,7 +130,7 @@ TEST_F(DreamBaseTest, DataReceiveBad) {
 
 TEST_F(DreamBaseTest, EmulateFIFOError) {
   Dream::DreamBase Readout(Settings, DetectorType::DREAM);
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 0);
 
   Readout.startThreads();
 
@@ -144,7 +144,7 @@ TEST_F(DreamBaseTest, EmulateFIFOError) {
 
   waitForProcessing(Readout);
 
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 1);
   Readout.stopThreads();
 }
 

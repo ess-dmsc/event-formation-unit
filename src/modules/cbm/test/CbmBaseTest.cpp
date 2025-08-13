@@ -132,7 +132,7 @@ TEST_F(CbmBaseTest, DataReceiveBadHeader) {
 
 TEST_F(CbmBaseTest, EmulateFIFOError) {
   CbmBase DetectorBase(Settings);
-  EXPECT_EQ(DetectorBase.Counters.FifoSeqErrors, 0);
+  EXPECT_EQ(DetectorBase.getInputCounters().FifoSeqErrors, 0);
 
   DetectorBase.startThreads();
 

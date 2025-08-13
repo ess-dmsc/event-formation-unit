@@ -22,7 +22,6 @@ struct CaenCounters {
   // Processing Counters - accessed in processing thread
 
   // System counters
-  int64_t FifoSeqErrors{0};
   int64_t ProcessingIdle{0};
 
   // ESSReadout parser

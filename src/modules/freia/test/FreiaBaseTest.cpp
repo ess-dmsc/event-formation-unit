@@ -95,7 +95,7 @@ TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
 
 TEST_F(FreiaBaseTest, EmulateFIFOError) {
   Freia::FreiaBase Readout(Settings);
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 0);
 
   Readout.startThreads();
 
@@ -109,7 +109,7 @@ TEST_F(FreiaBaseTest, EmulateFIFOError) {
 
   waitForProcessing(Readout);
 
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 1);
   Readout.stopThreads();
 }
 

@@ -27,7 +27,6 @@ DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type)
   XTRACE(INIT, ALW, "Adding stats");
 
   // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -101,7 +100,7 @@ void DreamBase::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 

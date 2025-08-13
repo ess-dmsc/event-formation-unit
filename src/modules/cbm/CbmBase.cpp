@@ -30,8 +30,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
     : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-
   // Readout parsing errors - readout dropped
   Stats.create("parser.readout.count", Counters.CbmStats.Readouts);
   Stats.create("parser.readout.header.count", Counters.DataHeaders);
@@ -173,7 +171,7 @@ void CbmBase::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 

@@ -16,6 +16,7 @@ const std::string Detector::METRIC_RECEIVE_BYTES = "receive.bytes";
 const std::string Detector::METRIC_RECEIVE_DROPPED = "receive.dropped";
 const std::string Detector::METRIC_THREAD_INPUT_IDLE = "thread.input_idle";
 const std::string Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS = "produce.cause.monitor_packets";
+const std::string Detector::METRIC_FIFO_SEQ_ERRORS = "receive.fifo_seq_errors";
 // clang-format on
 
 void Detector::inputThread() {

@@ -26,7 +26,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
@@ -119,7 +118,7 @@ void Timepix3Base::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
       XTRACE(DATA, DEB, "getting data buffer");

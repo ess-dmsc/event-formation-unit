@@ -16,9 +16,6 @@
 namespace cbm {
 
 struct Counters {
-  // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors{0};
-
   // CBM Readouts
   struct cbm::ParserStats CbmStats {
     0

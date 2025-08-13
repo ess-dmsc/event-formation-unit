@@ -29,10 +29,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
 
   XTRACE(INIT, ALW, "Adding stats");
-
-  // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-
   // LoKI Readout Data
   Stats.create("parser.readout.header.count", Counters.Parser.DataHeaders);
   Stats.create("parser.readout.count", Counters.Parser.Readouts);
@@ -118,7 +114,7 @@ void CaenBase::processingThread() {
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
         XTRACE(DATA, ERR, "Data length in FIFO is zero");
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 

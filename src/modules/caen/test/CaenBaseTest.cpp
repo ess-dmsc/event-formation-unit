@@ -232,7 +232,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
 
 TEST_F(CaenBaseTest, EmulateFIFOError) {
   Caen::CaenBase Readout(Settings, DetectorType::LOKI);
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 0);
 
   Readout.startThreads();
 
@@ -246,7 +246,7 @@ TEST_F(CaenBaseTest, EmulateFIFOError) {
 
   waitForProcessing(Readout);
 
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 1);
   Readout.stopThreads();
 }
 
