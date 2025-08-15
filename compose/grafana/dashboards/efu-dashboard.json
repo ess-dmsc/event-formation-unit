@@ -81,19 +81,22 @@
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -117,7 +120,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -178,7 +181,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -213,7 +217,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -239,7 +243,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red"
+                "color": "dark-red",
+                "value": 0
               },
               {
                 "color": "dark-red",
@@ -280,7 +285,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -323,7 +328,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red"
+                "color": "dark-red",
+                "value": 0
               },
               {
                 "color": "dark-red",
@@ -364,7 +370,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -432,7 +438,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -449,6 +456,626 @@
         "x": 0,
         "y": 11
       },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0-16557133545",
+      "targets": [
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "A",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v0), 'header v0/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v1), 'header v1/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "C",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_buffer), 'buffer err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.buffer), 'buffer err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "E",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_cookie), 'cookie err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.cookie), 'cookie err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_header), 'header err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "H",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.header), 'header err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "I",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_pad), 'pad err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "J",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.pad), 'pad err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "K",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_seqno), 'deq err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "L",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.seqno), 'deq err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "M",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_size), 'size err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "N",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.size), 'size err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "O",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_version), 'version err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "P",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.version), 'version err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "R",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_type), 'type err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "S",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.type), 'type err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "V",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timehigh), 'timehigh err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "U",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_timehigh), 'timehigh err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "Q",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timefrac), 'timefrac err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "W",
+          "target": "alias(perSecond(efu.$instrument.$region.essheader.error_timefrac), 'timefrac err/s')"
+        }
+      ],
+      "title": "ESS Header",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "graphite",
+        "uid": "P1D261A8554D2DA69"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 1,
+            "scaleDistribution": {
+              "log": 10,
+              "type": "log"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 11
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0-16557133545",
+      "targets": [
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_amplitude), 'ampl err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "A",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_headersize), 'header size err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "C",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_datlen_invalid), 'datalen err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_ringfen), 'datalen err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_datlen_mismatch), 'datalen missmatch/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "J",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.no_serializer), 'serializer err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "K",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.ring_mismatch), 'ring err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "L",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.time), 'time err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "M",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.type), 'type err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "N",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.adc_max), 'max adc err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_adc), 'adc err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "H",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_bc), 'bc err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "I",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_channel), 'channel err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "O",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_datalen), 'datalen err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "Q",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_fen), 'fen err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "P",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.data), 'data header/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "R",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_fiber), 'fiber err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "S",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_mapping), 'mapping err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "T",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_size), 'size err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "U",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_timefrac), 'timefrac err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "V",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_vmm), 'vmm err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "W",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.over_threshold), 'over threshouldr/s')"
+        }
+      ],
+      "title": "Readout Errors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "graphite",
+        "uid": "P1D261A8554D2DA69"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 1,
+            "scaleDistribution": {
+              "log": 10,
+              "type": "log"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
       "id": 3,
       "options": {
         "legend": {
@@ -463,7 +1090,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -611,532 +1238,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 8,
-        "y": 11
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
           },
-          "hide": false,
-          "refCount": 0,
-          "refId": "B",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_amplitude), 'ampl err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "A",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_headersize), 'header size err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "C",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_datlen_invalid), 'datalen err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "D",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_ringfen), 'datalen err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "H",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.tof_neg), 'tof neg/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "E",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.tof_high), 'tof high/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "F",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.error_datlen_mismatch), 'datalen missmatch/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "G",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.prevtof_high), 'pretof high/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "I",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.prevtof_neg), 'pretof neg/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "J",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.no_serializer), 'serializer err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "K",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.ring_mismatch), 'ring err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "L",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.time), 'time err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "M",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.errors.type), 'type err/s')"
-        }
-      ],
-      "title": "Readout Errors",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "graphite",
-        "uid": "P1D261A8554D2DA69"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 6,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 2,
-            "pointSize": 1,
-            "scaleDistribution": {
-              "log": 10,
-              "type": "log"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 16,
-        "y": 11
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "A",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v0), 'header v0/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "B",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.version.v1), 'header v1/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "C",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_buffer), 'buffer err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "D",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.buffer), 'buffer err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "E",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_cookie), 'cookie err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "F",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.cookie), 'cookie err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "G",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_header), 'header err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "H",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.header), 'header err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "I",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_pad), 'pad err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "J",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.pad), 'pad err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "K",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_seqno), 'deq err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "L",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.seqno), 'deq err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "M",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_size), 'size err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "N",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.size), 'size err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "O",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_version), 'version err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "P",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.version), 'version err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "R",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_type), 'type err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "S",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.type), 'type err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "T",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors_timehigh), 'timehigh err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "V",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timehigh), 'timehigh err/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
-          "refId": "Q",
-          "target": "alias(perSecond(efu.$instrument.$region.essheader.errors.timefrac), 'timefrac err/s')"
-        }
-      ],
-      "title": "ESS Header",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "graphite",
-        "uid": "P1D261A8554D2DA69"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 6,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 2,
-            "pointSize": 1,
-            "scaleDistribution": {
-              "log": 10,
-              "type": "log"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+          "unit": "short"
         },
         "overrides": []
       },
@@ -1160,7 +1271,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -1199,8 +1310,8 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "E",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.tof_count), 'tof/s')"
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.count), 'readouts/s')"
         },
         {
           "datasource": {
@@ -1209,8 +1320,18 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "F",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.prevtof_count), 'pre tof/s')"
+          "refId": "C",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.bccalib), 'bccalib/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.data), 'data header/s')"
         }
       ],
       "title": "Readouts",
@@ -1268,7 +1389,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1299,7 +1421,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -1407,14 +1529,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "none"
         },
         "overrides": []
       },
@@ -1438,7 +1562,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -1467,16 +1591,6 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "A",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.processed), 'readouts/s')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "P1D261A8554D2DA69"
-          },
-          "hide": false,
-          "refCount": 0,
           "refId": "D",
           "target": "alias(perSecond(efu.$instrument.$region.readouts.type.ibm_processed), 'ibm readout/s')"
         },
@@ -1487,8 +1601,8 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "E",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.tof_count), 'tof/s')"
+          "refId": "G",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.type.ttl_proccessed), 'ttl readout/s')"
         },
         {
           "datasource": {
@@ -1497,8 +1611,108 @@
           },
           "hide": false,
           "refCount": 0,
-          "refId": "G",
-          "target": "alias(perSecond(efu.$instrument.$region.readouts.type.ttl_proccessed), 'ttl readout/s')"
+          "refId": "A",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.processed), 'readouts/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "F",
+          "target": "alias(perSecond(efu.$instrument.$region.readouts.count), 'readouts/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "H",
+          "target": "alias(perSecond(efu.$instrument.$region.events.count), 'events/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "I",
+          "target": "alias(perSecond(efu.$instrument.$region.events.pixel_errors), 'pixel err/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "E",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matcherstats.discared_span_too_large), 'span large/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "J",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matcherstats.match_attempt_count), 'match attempt/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "K",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matcherstats.split_span_too_large), 'split large/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "L",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matched_clusters), 'matched/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "M",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matched_x_only), 'matched x/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "N",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.matched_y_only), 'matched y/s')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "P1D261A8554D2DA69"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "O",
+          "target": "alias(perSecond(efu.$instrument.$region.cluster.no_coincidence), 'no coincidence/s')"
         }
       ],
       "title": "Event Calculation",
@@ -1556,14 +1770,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -1587,7 +1803,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "datasource": {
@@ -1755,7 +1971,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           }
@@ -1782,7 +1999,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -1849,7 +2066,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "#EAB839",
@@ -1886,7 +2104,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -1956,7 +2174,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           }
@@ -1983,7 +2202,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -2143,7 +2362,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           }
@@ -2170,7 +2390,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -2271,7 +2491,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "#EAB839",
@@ -2306,7 +2527,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
@@ -2376,10 +2597,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -2403,7 +2626,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.2.0-16557133545",
       "targets": [
         {
           "refCount": 0,
