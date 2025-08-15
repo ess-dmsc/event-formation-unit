@@ -34,7 +34,8 @@ protected:
   std::unordered_set<std::string> ExpectedStatNames = {
       // Detector stats
       Detector::METRIC_RECEIVE_PACKETS, Detector::METRIC_RECEIVE_BYTES,
-      Detector::METRIC_RECEIVE_DROPPED, Detector::METRIC_THREAD_INPUT_IDLE,
+      Detector::METRIC_RECEIVE_DROPPED, Detector::METRIC_FIFO_SEQ_ERRORS,
+      Detector::METRIC_THREAD_INPUT_IDLE,
       Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS,
 
       // Parser stats
@@ -101,7 +102,7 @@ public:
 TEST_F(DetectorTest, TestConstructorAndStatCreation) {
 
   ASSERT_TRUE(DetectorPtr) << "Detector not created, unitialized pointer"
-                        << std::endl;
+                           << std::endl;
 
   // Test with a name that shouldn't exist
   ASSERT_FALSE(verifyStatName("nonexistent.stat.name"));

@@ -110,7 +110,7 @@ void FreiaBase::processing_thread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
   auto Produce = [&EventProducer](const auto &DataBuffer,
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);

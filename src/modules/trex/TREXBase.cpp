@@ -116,16 +116,16 @@ void TrexBase::processing_thread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
   auto Produce = [&EventProducer](const auto &DataBuffer,
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "trex_debug",
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
+  Producer AdcHistogramProducer(EFUSettings.KafkaBroker, "trex_debug",
+                           KafkaCfg.CfgParms, Stats, "adc");
+  auto ProduceMonitor = [&AdcHistogramProducer](auto DataBuffer, auto Timestamp) {
+    AdcHistogramProducer.produce(DataBuffer, Timestamp);
   };
 
   Serializer =

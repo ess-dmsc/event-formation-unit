@@ -24,8 +24,8 @@ using testing::_;
 class ProducerStandIn : public Producer {
 public:
   ProducerStandIn(const std::string &Broker, const std::string &Topic,
-                  Statistics *Stats = nullptr)
-      : Producer(Broker, Topic, KafkaCfg.CfgParms, Stats) {}
+                  Statistics &Stats, const std::string &Name = "test")
+      : Producer(Broker, Topic, KafkaCfg.CfgParms, Stats, Name) {}
   using Producer::Config;
   using Producer::KafkaProducer;
   using Producer::KafkaTopic;
@@ -40,8 +40,9 @@ protected:
 };
 
 TEST_F(ProducerTest, ConstructorOK) {
+  Statistics Stats;
 
-  ProducerStandIn prod{"nobroker", "notopic"};
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
   std::vector<unsigned char> DataBuffer(10);
   int ret = prod.produce(DataBuffer, time(nullptr) * 1000);
   ASSERT_NE(prod.Config, nullptr);
@@ -81,41 +82,42 @@ TEST_F(ProducerTest, ConstructorOK) {
 TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
   Statistics Stats;
 
-  ProducerStandIn prod{"nobroker", "notopic", &Stats};
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
 
-  EXPECT_EQ(Stats.getValueByName("kafka.config_errors"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.stat_events"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error_events"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.produce_bytes_ok"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.produce_bytes_error"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.produce_calls"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.produce_errors"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.brokers.tx_bytes"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.brokers.tx_req_retries"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.max_num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.max_bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.delivery_success"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_not_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.status_possibly_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.msg.msg_delivery_event"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_delivery"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.transmission"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.unknown_topic"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.unknown_partition"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.queue_full"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.timeout"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_timeout"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.transport"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.authentication"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.msg_size"), 0);
-  EXPECT_EQ(Stats.getValueByName("kafka.error.other"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.config_errors"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.stat_events"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error_events"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.produce_bytes_ok"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.produce_bytes_error"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.produce_calls"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.produce_errors"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.brokers.tx_bytes"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.brokers.tx_req_retries"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.max_num_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.max_bytes_of_msg_in_queue"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.delivery_success"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_not_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_possibly_persisted"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.msg.msg_delivery_event"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_delivery"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.transmission"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.unknown_topic"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.unknown_partition"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.queue_full"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.timeout"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_timeout"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.transport"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.authentication"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_size"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.other"), 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
   auto Res = prod.setConfig("queue.buffering.max.ms", "101");
   ASSERT_EQ(Res, RdKafka::Conf::CONF_OK);
   ASSERT_EQ(prod.getStats().config_errors, 0);
@@ -126,7 +128,8 @@ TEST_F(ProducerTest, ConfigError) {
 }
 
 TEST_F(ProducerTest, CreateConfFail1) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
   prod.KafkaProducer.reset(nullptr);
   std::array<uint8_t, 10> Data;
   int ret = prod.produce(Data, 10);
@@ -134,7 +137,8 @@ TEST_F(ProducerTest, CreateConfFail1) {
 }
 
 TEST_F(ProducerTest, CreateConfFail2) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
   prod.KafkaTopic.reset(nullptr);
   std::array<uint8_t, 10> Data;
   int ret = prod.produce(Data, 10);
@@ -142,7 +146,8 @@ TEST_F(ProducerTest, CreateConfFail2) {
 }
 
 TEST_F(ProducerTest, ProducerFail) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
 
   /// will be deleted by the TestProducer when unique_ptr goes out of scope
   auto MockKafkaProducer = new MockProducer();
@@ -169,7 +174,8 @@ TEST_F(ProducerTest, ProducerFail) {
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
-  ProducerStandIn TestProducer{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn TestProducer{"nobroker", "notopic", Stats};
 
   /// will be deleted by the TestProducer when unique_ptr goes out of scope
   auto MockKafkaProducer = new MockProducer();
@@ -198,16 +204,18 @@ TEST_F(ProducerTest, ProducerSuccess) {
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
+  Statistics Stats;
   KafkaConfig KafkaCfg2("");
   ASSERT_EQ(KafkaCfg2.CfgParms.size(), static_cast<size_t>(6));
-  Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms};
+  Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms, Stats, "testsize"};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
 }
 
 TEST_F(ProducerTest, EventCbIncreasesCounters) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
 
   std::string fakeEventJson = R"({
     "msg_cnt": 10,
@@ -243,7 +251,8 @@ TEST_F(ProducerTest, EventCbIncreasesCounters) {
 }
 
 TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
 
   // Mock logger to capture log messages
   auto LoggerMock = MockLogger();
@@ -338,7 +347,8 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
 }
 
 TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
-  ProducerStandIn prod{"nobroker", "notopic"};
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
 
   // Mock logger to capture log messages
   auto LoggerMock = MockLogger();

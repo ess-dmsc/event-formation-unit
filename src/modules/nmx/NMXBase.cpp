@@ -120,7 +120,7 @@ void NmxBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };

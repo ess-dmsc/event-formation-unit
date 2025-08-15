@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <cstdint>
 #pragma GCC diagnostic push
@@ -58,15 +59,17 @@ public:
   /// \param Topic The name of the Kafka topic according to the agreement, for
   /// example, "trex_detector".
   /// \param Configs A vector of configuration <type,value> pairs.
+  /// \param Stats Reference to Statistics object for counter registration.
+  /// \param Name Name of the producer instance for statistics prefix.
   Producer(const std::string &Broker, const std::string &Topic,
            std::vector<std::pair<std::string, std::string>> &Configs,
-           Statistics *Stats = nullptr);
+           Statistics &Stats, const std::string Name = "event");
 
   /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;
 
   /// \brief Structure to hold producer statistics.
-  struct ProducerStats {
+  struct ProducerStats : public StatCounterBase {
     /// \brief Count of configuration errors
     int64_t config_errors{0};
     /// \brief Count of bytes successfully produced
@@ -133,6 +136,47 @@ public:
     int64_t BytesTransmittedToBrokers{0};
     /// \brief Count of transmission request retries
     int64_t TxRequestRetries{0};
+
+    /// \brief Constructor that registers all counters with Statistics
+    ProducerStats(Statistics &Stats, const std::string &Prefix)
+        : StatCounterBase(
+              Stats,
+              {{"config_errors", config_errors},
+               {"stat_events", StatsEventCounter},
+               {"error_events", ErrorEventCounter},
+               {"produce_bytes_ok", produce_bytes_ok},
+               {"produce_bytes_error", produce_bytes_error},
+               {"produce_calls", produce_calls},
+               {"produce_errors", produce_errors},
+
+               /// librdkafka transmission stats
+               {"brokers.tx_bytes", BytesTransmittedToBrokers},
+               {"brokers.tx_req_retries", TxRequestRetries},
+
+               /// librdkafka message stats
+               {"msg.num_of_msg_in_queue", NumberOfMsgInQueue},
+               {"msg.max_num_of_msg_in_queue", MaxNumOfMsgInQueue},
+               {"msg.bytes_of_msg_in_queue", BytesOfMsgInQueue},
+               {"msg.max_bytes_of_msg_in_queue", MaxBytesOfMsgInQueue},
+               {"msg.delivery_success", MsgDeliverySuccess},
+               {"msg.status_persisted", MsgStatusPersisted},
+               {"msg.status_not_persisted", MsgStatusNotPersisted},
+               {"msg.status_possibly_persisted", MsgStatusPossiblyPersisted},
+               {"msg.msg_delivery_event", TotalMsgDeliveryEvent},
+
+               /// librdkafka error stats
+               {"error.msg_delivery", MsgError},
+               {"error.transmission", TransmissionErrors},
+               {"error.unknown_topic", ErrTopic},
+               {"error.unknown_partition", ErrUknownPartition},
+               {"error.queue_full", ErrQueueFull},
+               {"error.timeout", ErrTimeout},
+               {"error.msg_timeout", ErrMsgTimeout},
+               {"error.transport", ErrTransport},
+               {"error.authentication", ErrAuth},
+               {"error.msg_size", ErrMsgSizeTooLarge},
+               {"error.other", ErrOther}},
+              Prefix) {}
   } __attribute__((aligned(64)));
 
   /// \brief Polls the producer for events.
@@ -148,7 +192,7 @@ public:
 
   /// \brief Returns the producer statistics reference.
   /// \return ProducerStats The producer statistics.
-  inline const ProducerStats &getStats() const { return ProducerStats; }
+  inline const ProducerStats &getStats() const { return StatCounters; }
 
   /// \brief Produces Kafka messages and sends them to the cluster and increment
   /// internal counters. This function is non-blocking, returns immediately
@@ -178,7 +222,7 @@ public:
 private:
   /// Local struct to store producer statistics. References of these counters
   /// are registered into the Statistics object.
-  ProducerStats ProducerStats = {};
+  ProducerStats StatCounters;
 
   void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode);
 };
