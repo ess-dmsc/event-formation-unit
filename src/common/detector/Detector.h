@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common/kafka/KafkaConfig.h"
+#include "common/kafka/Producer.h"
 #include <CLI/CLI.hpp>
 #include <common/Statistics.h>
 #include <common/detector/BaseSettings.h>
@@ -41,8 +42,6 @@ protected:
     int64_t FifoSeqErrors{0};
   } ITCounters; // Input Thread Counters
 
-  std::unique_ptr<AR51Serializer> MonitorSerializer;
-
 public:
   // Static const strings for statistics names
   // Definition of static const strings for statistics names
@@ -57,12 +56,35 @@ public:
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
 
-  /// \brief Constructor for the Detector class
+  /// \brief Construct a Detector instance and initialize owned subsystems.
+  ///
+  /// This constructor stores the provided `BaseSettings` and constructs
+  /// several helper objects that the detector owns and uses at runtime.
+  ///
+  /// Important owned objects created/configured by this constructor:
+  ///  - `BaseSettings EFUSettings`
+  ///  - `Statistics Stats`
+  ///  - `ESSReadout::Parser ESSHeaderParser`
+  ///  - `KafkaConfig KafkaCfg`
+  ///  - `Producer MonitorProducer`
+  ///  - `AR51Serializer MonitorSerializer`
+  ///
+  /// \note: take care with shutdown ordering — `MonitorSerializer` must not
+  /// invoke its callback after `MonitorProducer` has been destroyed. Currently
+  /// declaration order ensures, that MonitorSerializer is destroyed before
+  /// MonitorProducer.
   /// \param settings BaseSettings object containing configuration parameters
   Detector(BaseSettings settings)
       : EFUSettings(settings),
         Stats(settings.GraphitePrefix, settings.GraphiteRegion),
-        ESSHeaderParser(Stats), KafkaCfg(EFUSettings.KafkaConfigFile) {
+        ESSHeaderParser(Stats), KafkaCfg(EFUSettings.KafkaConfigFile),
+        MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
+                        KafkaCfg.CfgParms, Stats, "monitor"),
+        MonitorSerializer(
+            EFUSettings.DetectorName,
+            [this](const auto &DataBuffer, const auto &Timestamp) {
+              MonitorProducer.produce(DataBuffer, Timestamp);
+            }) {
 
     Stats.create(METRIC_RECEIVE_PACKETS, ITCounters.RxPackets);
     Stats.create(METRIC_RECEIVE_BYTES, ITCounters.RxBytes);
@@ -157,4 +179,8 @@ public:
 protected:
   ESSReadout::Parser ESSHeaderParser;
   KafkaConfig KafkaCfg;
+
+private:
+  Producer MonitorProducer;
+  AR51Serializer MonitorSerializer;
 };

@@ -30,18 +30,6 @@ void Detector::inputThread() {
   dataReceiver.printBufferSizes();
   dataReceiver.setRecvTimeout(0, EFUSettings.SocketRxTimeoutUS);
 
-  // Create the raw packet sample producer and ar51 serializer
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms, Stats, "monitor");
-
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                           const auto &Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
-                                                       ProduceMonitor);
-
   LOG(INIT, Sev::Info, "Detector input thread started on {}:{}",
       local.IpAddress, local.Port);
 
@@ -60,8 +48,8 @@ void Detector::inputThread() {
 
       // Calibration mode send all raw input data to sample topic
       if (CalibrationMode) {
-        MonitorSerializer->serialize((uint8_t *)DataPtr, readSize);
-        MonitorSerializer->produce();
+        MonitorSerializer.serialize((uint8_t *)DataPtr, readSize);
+        MonitorSerializer.produce();
         ITCounters.TxRawReadoutPackets++;
         continue;
 
@@ -72,8 +60,8 @@ void Detector::inputThread() {
                  EFUSettings.MonitorSamples) {
         XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
                getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, readSize);
-        MonitorSerializer->produce();
+        MonitorSerializer.serialize((uint8_t *)DataPtr, readSize);
+        MonitorSerializer.produce();
         ITCounters.TxRawReadoutPackets++;
       }
 
