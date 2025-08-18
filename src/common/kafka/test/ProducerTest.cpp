@@ -84,7 +84,7 @@ TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
 
   ProducerStandIn prod{"nobroker", "notopic", Stats};
 
-  EXPECT_EQ(Stats.getValueByName("producer.test.config_errors"), 0);
+  EXPECT_EQ(Stats.getValueByName("producer.test.error.config"), 0);
   EXPECT_EQ(Stats.getValueByName("producer.test.stat_events"), 0);
   EXPECT_EQ(Stats.getValueByName("producer.test.error_events"), 0);
   EXPECT_EQ(Stats.getValueByName("producer.test.produce_bytes_ok"), 0);
@@ -120,11 +120,11 @@ TEST_F(ProducerTest, ConfigError) {
   ProducerStandIn prod{"nobroker", "notopic", Stats};
   auto Res = prod.setConfig("queue.buffering.max.ms", "101");
   ASSERT_EQ(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.getStats().config_errors, 0);
+  ASSERT_EQ(prod.getStats().ErrConfig, 0);
 
   Res = prod.setConfig("this.does.not.exist", "so.this.has.no.meaning");
   ASSERT_NE(Res, RdKafka::Conf::CONF_OK);
-  ASSERT_EQ(prod.getStats().config_errors, 1);
+  ASSERT_EQ(prod.getStats().ErrConfig, 1);
 }
 
 TEST_F(ProducerTest, CreateConfFail1) {

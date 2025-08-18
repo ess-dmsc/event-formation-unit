@@ -70,8 +70,6 @@ public:
 
   /// \brief Structure to hold producer statistics.
   struct ProducerStats : public StatCounterBase {
-    /// \brief Count of configuration errors
-    int64_t config_errors{0};
     /// \brief Count of bytes successfully produced
     int64_t produce_bytes_ok{0};
     /// \brief Count of bytes that failed to produce
@@ -81,7 +79,9 @@ public:
     /// \brief Count of failed produce() calls
     int64_t produce_errors{0};
 
-    // librdkafka error statistics
+    // librdkafka errors
+    /// \brief Count errors during librdkafka config operations
+    int64_t ErrConfig{0};
     /// \brief Count of timeout errors
     int64_t ErrTimeout{0};
     /// \brief Count of transport errors
@@ -141,8 +141,7 @@ public:
     ProducerStats(Statistics &Stats, const std::string &Prefix)
         : StatCounterBase(
               Stats,
-              {{"config_errors", config_errors},
-               {"stat_events", StatsEventCounter},
+              {{"stat_events", StatsEventCounter},
                {"error_events", ErrorEventCounter},
                {"produce_bytes_ok", produce_bytes_ok},
                {"produce_bytes_error", produce_bytes_error},
@@ -166,6 +165,7 @@ public:
 
                /// librdkafka error stats
                {"error.msg_delivery", MsgError},
+               {"error.config", ErrConfig},
                {"error.transmission", TransmissionErrors},
                {"error.unknown_topic", ErrTopic},
                {"error.unknown_partition", ErrUknownPartition},
