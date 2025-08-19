@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "common/kafka/KafkaConfig.h"
-#include "common/kafka/Producer.h"
+#include <common/kafka/KafkaConfig.h>
+#include <common/kafka/Producer.h>
 #include <CLI/CLI.hpp>
 #include <common/Statistics.h>
 #include <common/detector/BaseSettings.h>
