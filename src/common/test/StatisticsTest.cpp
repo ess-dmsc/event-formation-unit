@@ -1,7 +1,7 @@
-// Copyright (C) 2016, 2017 European Spallation Source ERIC
+// Copyright (C) 2016 - 2025 European Spallation Source ERIC
 
-#include <common/Statistics.h>
 #include <common/StatCounterBase.h>
+#include <common/Statistics.h>
 #include <common/testutils/TestBase.h>
 
 class NewStatsTest : public TestBase {};
@@ -70,21 +70,10 @@ TEST_F(NewStatsTest, ValueByName) {
 
   // Test existing name with non-existent prefix
   ASSERT_EQ(-1, stats.getValueByName("stat1", "nonexistent."));
-
-  // Set common prefix and test
-  stats.setPrefix("common", "prefix");
-  int64_t ctr5 = 555;
-  stats.create(std::string("stat3"), ctr5);
-
-  // Test retrieval with common prefix
-  ASSERT_EQ(ctr5, stats.getValueByName("stat3", "common.prefix."));
-  // Default should now use common prefix
-  ASSERT_EQ(ctr5, stats.getValueByName("stat3"));
 }
 
 TEST_F(NewStatsTest, CreateStatPrefix) {
-  Statistics stats;
-  stats.setPrefix("dmsc.efu", "0");
+  Statistics stats("dmsc.efu", "0");
   int64_t ctr1 = 765;
   int64_t ctr2 = 432;
 
@@ -106,24 +95,22 @@ TEST_F(NewStatsTest, CreateStatPrefix) {
 }
 
 TEST_F(NewStatsTest, CreateStatPrefixWithDot) {
-  Statistics stats;
-  int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix.";
   std::string Region = "0.";
   std::string SomeStat = "stat1";
-  stats.setPrefix(DotPrefix, Region);
+  int64_t ctr1 = 765;
+  Statistics stats(DotPrefix, Region);
   stats.create(SomeStat, ctr1);
   ASSERT_EQ(1U, stats.size());
   ASSERT_EQ(DotPrefix + Region + SomeStat, stats.getFullName(1));
 }
 
 TEST_F(NewStatsTest, CreateStatPrefixWitoutDot) {
-  Statistics stats;
   int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix";
   std::string Region = "0";
   std::string SomeStat = "stat1";
-  stats.setPrefix(DotPrefix, "0");
+  Statistics stats(DotPrefix, Region);
   stats.create(SomeStat, ctr1);
   ASSERT_EQ(1U, stats.size());
   ASSERT_EQ(DotPrefix + "." + Region + "." + SomeStat, stats.getFullName(1));
@@ -191,7 +178,7 @@ TEST_F(NewStatsTest, StatValue) {
 
 TEST_F(NewStatsTest, StatCounterBaseRegistration) {
   Statistics stats;
-  
+
   // Test struct that uses StatCounterBase for automatic registration
   struct TestCounters : public StatCounterBase {
     int64_t CounterA{0};
@@ -200,7 +187,7 @@ TEST_F(NewStatsTest, StatCounterBaseRegistration) {
     TestCounters(Statistics &Stats)
         : StatCounterBase(Stats, {{"a", CounterA}, {"b", CounterB}}, "dummy") {}
   };
-  
+
   TestCounters counters(stats);
 
   // Verify counters are registered with correct initial values
@@ -211,7 +198,7 @@ TEST_F(NewStatsTest, StatCounterBaseRegistration) {
   // Update counters and verify they reflect in Statistics
   counters.CounterA = 5;
   counters.CounterB = 99;
-  
+
   ASSERT_EQ(stats.getValueByName("dummy.a"), 5);
   ASSERT_EQ(stats.getValueByName("dummy.b"), 99);
 }

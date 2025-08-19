@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/debug/Trace.h"
+#include <common/debug/Trace.h>
 #include <common/Statistics.h>
 #include <common/debug/Log.h>
 
@@ -25,18 +25,20 @@ int Statistics::create(const std::string &StatName, int64_t &Value,
 
   std::string effectivePrefix = Prefix.empty() ? DefaultPrefix : Prefix;
 
-  for (auto s : stats) {
-    // Check if name, prefix pairs or Value address are is a duplicate
-    if ((s.StatName == StatName && s.StatPrefix == effectivePrefix) ||
-        &Value == &s.StatValue) {
-      LOG(UTILS, Sev::Error,
-          "Duplicate StatName/Prefix combination or Value address for {}",
-          StatName);
-      return -1;
-    }
+  // Check for duplicates using thread-safe operations
+  bool isDuplicate = stats.any_of([&](const StatTuple& s) {
+    return (s.StatName == StatName && s.StatPrefix == effectivePrefix) ||
+           &Value == &s.StatValue;
+  });
+
+  if (isDuplicate) {
+    LOG(UTILS, Sev::Error,
+        "Duplicate StatName/Prefix combination or Value address for {}",
+        StatName);
+    return -1;
   }
 
-  stats.push_back(StatTuple{StatName, Value, effectivePrefix});
+  stats.emplace_back(StatName, Value, effectivePrefix);
   XTRACE(UTILS, DEB, "Created stat %s with prefix %s and value address %p",
          StatName.c_str(), effectivePrefix.c_str(), &Value);
 
@@ -112,12 +114,11 @@ int64_t Statistics::getValueByName(const std::string &name,
 
   std::string effectivePrefix = Prefix.empty() ? DefaultPrefix : Prefix;
 
-  for (const auto &stat : stats) {
-    if (stat.StatName == name && stat.StatPrefix == effectivePrefix) {
-      return stat.StatValue;
-    }
-  }
-  return -1;
+  const StatTuple* found = stats.find_if([&](const StatTuple& stat) {
+    return stat.StatName == name && stat.StatPrefix == effectivePrefix;
+  });
+
+  return found ? found->StatValue : -1;
 }
 
 void Statistics::setPrefix(const std::string &StatsPrefix,

@@ -59,6 +59,7 @@ set(efu_common_INC
   memory/PoolAllocator.h
   memory/RingBuffer.h
   memory/HashMap2D.h
+  memory/ThreadSafeVector.h
   math/BitMath.h
   math/NumericalMath.h
   system/gccintel.h
