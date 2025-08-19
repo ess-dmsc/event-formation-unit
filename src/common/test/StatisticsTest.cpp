@@ -1,6 +1,7 @@
 // Copyright (C) 2016, 2017 European Spallation Source ERIC
 
 #include <common/Statistics.h>
+#include <common/StatCounterBase.h>
 #include <common/testutils/TestBase.h>
 
 class NewStatsTest : public TestBase {};
@@ -186,6 +187,33 @@ TEST_F(NewStatsTest, StatValue) {
 
   ctr1++; // cppcheck-suppress unreadVariable // IS read by stats.value()
   ASSERT_EQ(INT64_MIN, stats.getValue(1));
+}
+
+TEST_F(NewStatsTest, StatCounterBaseRegistration) {
+  Statistics stats;
+  
+  // Test struct that uses StatCounterBase for automatic registration
+  struct TestCounters : public StatCounterBase {
+    int64_t CounterA{0};
+    int64_t CounterB{42};
+
+    TestCounters(Statistics &Stats)
+        : StatCounterBase(Stats, {{"a", CounterA}, {"b", CounterB}}, "dummy") {}
+  };
+  
+  TestCounters counters(stats);
+
+  // Verify counters are registered with correct initial values
+  ASSERT_EQ(stats.size(), 2U);
+  ASSERT_EQ(stats.getValueByName("dummy.a"), 0);
+  ASSERT_EQ(stats.getValueByName("dummy.b"), 42);
+
+  // Update counters and verify they reflect in Statistics
+  counters.CounterA = 5;
+  counters.CounterB = 99;
+  
+  ASSERT_EQ(stats.getValueByName("dummy.a"), 5);
+  ASSERT_EQ(stats.getValueByName("dummy.b"), 99);
 }
 
 int main(int argc, char **argv) {
