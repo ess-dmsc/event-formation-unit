@@ -57,9 +57,13 @@ public:
     GeneratorType generatorType{
        GeneratorType::Distribution};   // The generator type.
     std::optional<uint32_t> Value;     // The optional value.
-    std::optional<double> Gradient;  // The optional gradient.
+    std::optional<double> Gradient;    // The optional gradient.
     uint32_t NumberOfBins{512};        // The number of bins.
-    uint32_t NumReadouts{5952};         // The number of readouts per pulse. 12us = 5952 for 14hz
+    uint32_t NumReadouts{5952};        // The number of readouts per pulse. 12us = 5952 for 14hz
+    uint16_t MaxXValue{512};           // Maximum X coordinate value for 2D Beam monitor used in 
+                                       // random generator
+    uint16_t MaxYValue{512};           // Maximum Y coordinate value for 2D Beam monitor used in 
+                                       // random generator 
   } cbmSettings;
   // clang-format on
 
@@ -69,6 +73,8 @@ public:
   ReadoutGenerator();
 
 private:
+  using DistParamType = std::uniform_int_distribution<>::param_type;
+
   // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
   static constexpr uint8_t CBM_FIBER_ID = 22;
   static constexpr int MILLISEC = 1e3;
@@ -88,6 +94,8 @@ private:
   std::uniform_int_distribution<int> BeamShakeDistMs{SHAKE_BEAM_US.first,
                                                      SHAKE_BEAM_US.second};
   std::uniform_int_distribution<int> NoiseDist{0, 50};
+  // Uniform distribution used for 2D CBM event position. 
+  std::uniform_int_distribution<int> PositionDist{0, 512};
 
   ///
   /// \brief Generates the data for the ReadoutGenerator.
@@ -107,6 +115,13 @@ private:
   /// \param dataPtr Pointer to the data buffer.
   ///
   void generateEvent0DData(uint8_t *dataPtr);
+
+  ///
+  /// \brief Generates the 2D event data for the ReadoutGenerator.
+  ///
+  /// \param dataPtr Pointer to the data buffer.
+  ///
+  void generateEvent2DData(uint8_t *dataPtr);
 
   ///
   /// \brief Generates the distribution value for the ReadoutGenerator.

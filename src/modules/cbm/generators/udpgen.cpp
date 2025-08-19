@@ -21,7 +21,8 @@ int main(int argc, char *argv[]) {
   CbmGen.argParse(argc, argv);
 
   std::unique_ptr<FunctionGenerator> readoutTimeGenerator;
-  if (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) {
+  if ((CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) ||
+      (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_2D)) {
     readoutTimeGenerator =
         std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
   } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {

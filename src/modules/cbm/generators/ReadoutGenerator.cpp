@@ -49,6 +49,12 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                        "Override FEN ID (default 0)");
   CbmGroup->add_option("--channel", cbmSettings.ChannelId,
                        "Override channel ID (default 0)");
+  CbmGroup->add_option("--maxXValue", cbmSettings.MaxXValue,
+                       "Maximum X coordinate value for 2D Beam monitor. "
+                       "Valid numbers 0 - 65535 (default 512)");
+  CbmGroup->add_option("--maxYValue", cbmSettings.MaxYValue,
+                       "Maximum X coordinate value for 2D Beam monitor. "
+                       "Valid numbers 0 - 65535 (default 512)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
   IbmGroup->add_option("--numReadouts", cbmSettings.NumReadouts,
@@ -69,7 +75,6 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                      "(default false)");
   IbmGroup->add_flag("--noise", cbmSettings.Randomise,
                      "Add noise to the distribution value (default false)");
-
   IbmGroup
       ->add_option("--generator_type", cbmSettings.generatorType,
                    "Set the generator type ([Dist, Fixed, Linear] default : Dist)")
@@ -84,6 +89,8 @@ void ReadoutGenerator::generateData() {
 
   if (cbmSettings.monitorType == CbmType::EVENT_0D) {
     generateEvent0DData(dataPtr);
+  } else if (cbmSettings.monitorType == CbmType::EVENT_2D) {
+    generateEvent2DData(dataPtr);
   } else if (cbmSettings.monitorType == CbmType::IBM) {
     generateIBMData(dataPtr);
   } else {
@@ -111,6 +118,49 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
     dataPkt->Channel = cbmSettings.ChannelId;
     dataPkt->ADC = 12345;
     dataPkt->NPos = 0;
+
+    // Move pointer to next readout
+    dataPtr += sizeof(Parser::CbmReadout);
+  }
+}
+
+// Generate data for 2D event monitor
+void ReadoutGenerator::generateEvent2DData(uint8_t *dataPtr) {
+
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
+
+    // Get pointer to the data buffer and clear memory with zeros
+    auto dataPkt = reinterpret_cast<Parser::CbmReadout *>(dataPtr);
+    memset(dataPkt, 0, sizeof(Parser::CbmReadout));
+
+    // Write data packet to the buffer
+    dataPkt->DataLength = sizeof(Parser::CbmReadout);
+    dataPkt->FiberId = CBM_FIBER_ID;
+    dataPkt->FENId = cbmSettings.FenId;
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    dataPkt->TimeHigh = readoutTimeHigh;
+    dataPkt->TimeLow = readoutTimeLow;
+    dataPkt->Type = cbmSettings.monitorType;
+    dataPkt->Channel = cbmSettings.ChannelId;
+    dataPkt->ADC = 12345;
+    // Capture position at present two uniform distributions are used.
+    dataPkt->Pos.XPos = PositionDist(RandomGenerator, 
+      DistParamType(0, cbmSettings.MaxXValue));
+    dataPkt->Pos.YPos = PositionDist(RandomGenerator,
+      DistParamType(0, cbmSettings.MaxYValue));
+    if (cbmSettings.Randomise) {
+      // When noise is enabled the generator will reduce number of
+      // neutrons at the start and end of (x, y) dimension.
+      int xPos = NoiseDist(RandomGenerator);
+      int yPos = NoiseDist(RandomGenerator);
+      if (xPos % 2 == 0) {
+        dataPkt->Pos.XPos += xPos;
+        dataPkt->Pos.YPos += yPos;
+      } else {
+        dataPkt->Pos.XPos -= xPos;
+        dataPkt->Pos.YPos -= yPos;
+      }
+    } 
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
