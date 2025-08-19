@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-/// \brief Base class that automatically registers counter members
+/// \brief Base class that automatically registers counters
 /// to the Statistics system during construction.
 ///
 /// Usage:
@@ -36,11 +36,11 @@
 ///
 /// Benefits:
 /// - Automatic registration: No manual Stats.create() calls needed
-/// - Compile-time safety: Must call base constructor or compilation fails
+/// - Protected constructor: Prevents direct instantiation, inheritance only
 /// - Consistent naming: Automatic prefix handling with dots
-/// - Memory aligned: Use __attribute__((aligned(64))) for performance
+/// - Performance tip: Use __attribute__((aligned(64))) on derived structs
 class StatCounterBase {
-public:
+protected:
   /// \brief Type alias for counter name-reference pairs
   using CounterMap = std::vector<std::pair<std::string, std::reference_wrapper<int64_t>>>;
 
@@ -55,6 +55,6 @@ public:
     }
   }
 
-  /// \brief Virtual destructor for proper inheritance
+  /// \brief Virtual destructor to ensure proper cleanup in derived classes
   virtual ~StatCounterBase() = default;
 };
