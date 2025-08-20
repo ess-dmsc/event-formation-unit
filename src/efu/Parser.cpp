@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@
 static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
                           unsigned int *obytes,
                           std::shared_ptr<Detector> detector,
-                          Statistics stats) {
+                          const Statistics &stats) {
   auto nargs = cmdargs.size();
 
   LOG(CMD, Sev::Debug, "STAT_GET_COUNT");
@@ -41,7 +41,7 @@ static int stat_get_count(const std::vector<std::string> &cmdargs, char *output,
 //=============================================================================
 static int stat_get(const std::vector<std::string> &cmdargs, char *output,
                     unsigned int *obytes, std::shared_ptr<Detector> detector,
-                    Statistics stats) {
+                    const Statistics &stats) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "STAT_GET");
   if (nargs != 2) {
@@ -139,7 +139,7 @@ static int version_get(const std::vector<std::string> &cmdargs, char *output,
 //=============================================================================
 static int stat_get_name(const std::vector<std::string> &cmdargs, char *output,
                          unsigned int *obytes,
-                         std::shared_ptr<Detector> detector, Statistics stats) {
+                         std::shared_ptr<Detector> detector, const Statistics &stats) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "STAT_GET_NAME");
   if (nargs != 2) {
@@ -281,19 +281,19 @@ Parser::Parser(std::shared_ptr<Detector> detector, Statistics &mainStats,
   }
 
   registercmd("STAT_GET",
-              [detector, mainStats](const std::vector<std::string> &cmd,
+              [detector, &mainStats](const std::vector<std::string> &cmd,
                                     char *resp, unsigned int *nrChars) {
                 return stat_get(cmd, resp, nrChars, detector, mainStats);
               });
 
   registercmd("STAT_GET_NAME",
-              [detector, mainStats](const std::vector<std::string> &cmd,
+              [detector, &mainStats](const std::vector<std::string> &cmd,
                                     char *resp, unsigned int *nrChars) {
                 return stat_get_name(cmd, resp, nrChars, detector, mainStats);
               });
 
   registercmd("STAT_GET_COUNT",
-              [detector, mainStats](const std::vector<std::string> &cmd,
+              [detector, &mainStats](const std::vector<std::string> &cmd,
                                     char *resp, unsigned int *nrChars) {
                 return stat_get_count(cmd, resp, nrChars, detector, mainStats);
               });

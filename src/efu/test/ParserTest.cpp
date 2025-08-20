@@ -67,26 +67,33 @@ public:
 class ParserTest : public TestBase {
 protected:
   EFUArgs efu_args;
-  int64_t dummyCounter; // Used to test statistics
-  std::unique_ptr<Parser> parser;
+  int64_t dummyCounter{42}; // Used to test statistics, initialized here
+  Statistics mainStats; // parser use reference to mainStats, stored as member
+                        // ensures lifecycle management
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
-  
-  void SetUp() override {
-    // Initialize dummy detector with intarnal statistics (created by detector)
-    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
-    
-    // initialize statistics main thread statistics with dummyCounter
-    Statistics mainStats;
+
+  std::unique_ptr<Parser> parser;
+
+  // Constructor to initialize mainStats once
+  ParserTest() {
+    // initialize statistics main thread statistics with dummyCounter once
     mainStats.create("test.dummystat", dummyCounter);
-    dummyCounter = 42;
-
-    // reinitialize parser for each test
-    parser = std::make_unique<Parser>(detectorif, mainStats, keeprunning);
-
   }
 
-  void TearDown() override { /* nothing needed, unique_ptr cleans up */ }
+  void SetUp() override {
+    // Reset dummyCounter value for consistent test state
+    dummyCounter = 42;
+
+    // Initialize dummy detector with internal statistics (created by detector)
+    auto detectorif = std::shared_ptr<Detector>(new Detector(settings));
+
+    // reinitialize parser for each test with the same mainStats
+    parser = std::make_unique<Parser>(detectorif, mainStats, keeprunning);
+  }
+
+  void TearDown() override { /* nothing needed, unique_ptr cleans up */
+  }
 
   static const unsigned int buffer_size = 9000;
 
