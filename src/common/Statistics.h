@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <common/memory/ThreadSafeVector.h>
 #include <cinttypes>
 #include <string>
 #include <vector>
@@ -60,38 +61,69 @@ public:
   /// \return the number of registered stats
   /// \note this is the size of the stats vector but it is 1-based, so the first
   /// stat is at index 1
-  size_t size();
+  size_t size() const;
 
   /// \brief returns the name of stat based on index
-  /// \param Index the index of the stat to return
-  /// \return the name of the stat or an empty string if not found
-  /// \note the index is 1-based, so the first stat is at index
-  std::string &getStatName(size_t Index);
+  /// \param Index the index of the stat to return (1-based)
+  /// \return a const reference to the name of the stat or an empty string if
+  /// not found
+  const std::string &getStatName(size_t Index) const;
+
+  /// \brief sets the name of stat based on index
+  /// \param Index the index of the stat to update
+  /// \param Name the new name for the stat
+  /// \return true if successful, false if index is invalid
+  bool setStatName(size_t Index, const std::string &Name);
+
+  /// \brief sets the name of stat based on index (move version)
+  /// \param Index the index of the stat to update
+  /// \param Name the new name for the stat (will be moved from)
+  /// \return true if successful, false if index is invalid
+  bool setStatName(size_t Index, std::string &&Name);
 
   /// \brief returns the prefix of stat based on index
   /// \param Index the index of the stat to return
-  /// \return the prefix of the stat or an empty string if not found
-  std::string &getStatPrefix(size_t Index);
+  /// \return a const reference to the prefix of the stat or an empty string if
+  /// not found
+  const std::string &getStatPrefix(size_t Index) const;
+
+  /// \brief sets the prefix of stat based on index
+  /// \param Index the index of the stat to update
+  /// \param Prefix the new prefix for the stat
+  /// \return true if successful, false if index is invalid
+  bool setStatPrefix(size_t Index, const std::string &Prefix);
+
+  /// \brief sets the prefix of stat based on index (move version)
+  /// \param Index the index of the stat to update
+  /// \param Prefix the new prefix for the stat (will be moved from)
+  /// \return true if successful, false if index is invalid
+  bool setStatPrefix(size_t Index, std::string &&Prefix);
 
   /// \brief return a full name with prefix
   /// \param Index the index of the stat to return
   /// \return the full name of the stat or an empty string if not found
   /// \note the full name is created by concatenating the prefix, name and stat
   /// name
-  std::string getFullName(size_t Index);
+  std::string getFullName(size_t Index) const;
 
   /// \brief return value of stat based on index
   /// \param Index the index of the stat to return
   /// \return the value of the stat or -1 if not found
-  int64_t getValue(size_t Index);
+  int64_t getValue(size_t Index) const;
 
-  /// \brief return value of stat based on name by seraching through all stats
-  /// \note if multiple stats with the same name exist, the first one is
-  /// returned \param Name the name of the stat to search for \param Prefix the
-  /// prefix to search for, if empty, DefaultPrefix is used which is empty by
-  /// default \return the value of the stat or -1 if not found
+  /// \brief return value of stat based on name by searching through all stats
+  /// \param Name the name of the stat to search for
+  /// \param Prefix the prefix to search for, if empty, DefaultPrefix is used
+  /// \return the value of the stat or -1 if not found
+  /// \note if multiple stats with the same name exist, the first one is returned
   int64_t getValueByName(const std::string &Name,
-                         const std::string &Prefix = "");
+                         const std::string &Prefix = "") const;
+
+private:
+  std::string DefaultPrefix{""}; ///< prepend to all stat names
+  ThreadSafeVector<StatTuple> stats;  ///< holds all registered stats
+  std::string nostat{""}; ///< used to return when stats are not available
+  const char PointChar = '.';
 
   /// \brief set the default prefix
   /// \param StatsPrefix the prefix to prepend to all stat names
@@ -101,10 +133,4 @@ public:
   /// \note already created stats will not be affected by this change
   void setPrefix(const std::string &StatsPrefix,
                  const std::string &StatsRegion);
-
-private:
-  std::string DefaultPrefix{""}; ///< prepend to all stat names
-  std::vector<StatTuple> stats;  ///< holds all registered stats
-  std::string nostat{""}; ///< used to return when stats are not available
-  const char PointChar = '.';
 };
