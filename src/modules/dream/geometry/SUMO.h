@@ -8,6 +8,7 @@
 #pragma once
 
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
@@ -83,8 +84,20 @@ public:
            "Sector %u, Sumo %u, Cassette %u, Counter %u, Wire %u, Strip %u",
            Sector, Sumo, Cassette, Counter, Wire, Strip);
 
-    uint16_t X = getX(Sector, Sumo, Cassette, Counter);
-    uint16_t Y = getY(Wire, Strip);
+    int IntX = getX(Sector, Sumo, Cassette, Counter);
+    int IntY = getY(Wire, Strip);
+    if (IntX < 0 || IntX > UINT16_MAX) {
+      XTRACE(EVENT, WAR, "x_val out of uint16_t range: %d", IntX);
+      // PixelId 0 is invalid
+      return 0;
+    }
+    if (IntY < 0 || IntY > UINT16_MAX) {
+      XTRACE(EVENT, WAR, "y_val out of uint16_t range: %d", IntY);
+      // PixelId 0 is invalid
+      return 0;
+    }
+    uint16_t X = static_cast<uint16_t>(IntX);
+    uint16_t Y = static_cast<uint16_t>(IntY);
     uint32_t Pixel = Geometry.pixel2D(X, Y);
 
     XTRACE(EVENT, DEB, "x %u, y %u - pixel: %u", X, Y, Pixel);
