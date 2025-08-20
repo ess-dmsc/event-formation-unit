@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "CbmTypes.h"
+#include <fmt/format.h>
 #include <modules/cbm/geometry/Config.h>
 
 namespace cbm {
@@ -106,8 +107,35 @@ void Config::apply() {
       } catch (...) {
         errorExit(fmt::format(
             "Entry: {}, Malformed 'Topology' section for {} Type (Need "
-            "PixelOffset, PixelRange)",
+            "PixelOffset)",
             Entry, MonitorType.toString()));
+      }
+    }
+
+    if (MonitorType == CbmType::EVENT_2D) {
+
+      try {
+        param1 = Module["Width"].get<int>();
+        param2 = Module["Height"].get<int>();
+      } catch (...) {
+        errorExit(fmt::format(
+            "Entry: {}, Malformed 'Topology' section for {} Type (Need "
+            "Width, Height)",
+            Entry, MonitorType.toString()));
+      }
+      //Maximum allowed value for width and height
+      const uint16_t maxValue = std::numeric_limits<uint16_t>::max();
+      if ((param1 < 0) || (param1 > maxValue)) {
+        errorExit(fmt::format(
+          "Entry: {} for {} Type "
+          " valid width values {} - {}, Read Value {}", 
+          Entry, MonitorType.toString(), 0, maxValue, param1));
+      }
+      if ((param2 < 0) || (param2 > maxValue)) {
+        errorExit(fmt::format(
+          "Entry: {} for {} Type "
+          "valid height values {} - {}, Read Value {}", 
+          Entry, MonitorType.toString(), 0, maxValue, param2));
       }
     }
 

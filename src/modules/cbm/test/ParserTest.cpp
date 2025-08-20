@@ -118,6 +118,22 @@ std::vector<uint8_t> GoodNonIBMADCData{
     0x01, 0x00, 0x00, 0x00, // Type 0x01, Channel 0, ADC 0x000
     0x00, 0x00, 0x00, 0x00}; // XPos 0, YPos 0
 
+/// \brief Good ADC values for event and non event readouts
+std::vector<uint8_t> Good2DData{
+    // First readout
+    0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x02, 0x00, 0x01, 0x00, // Type 0x02, Channel 0, ADC 0x100
+    0xFF, 0x00, 0xFF, 0x01, // XPos 256, YPos 511
+
+    // Second readout
+    0x16, 0x00, 0x14, 0x00, // Data header - Ring 22, FEN 0, Size 20
+    0x01, 0x00, 0x00, 0x00, // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00, // Time LO 1 tick
+    0x02, 0x00, 0x00, 0x00, // Type 0x02, Channel 0, ADC 0x000
+    0xFF, 0x00, 0xFF, 0x01}; // XPos 256, YPos 511
+
 class CbmParserTest : public TestBase {
 protected:
   ESSReadout::Parser::PacketDataV0 PacketData;
@@ -227,6 +243,17 @@ TEST_F(CbmParserTest, CheckADCValues) {
   EXPECT_EQ(parser.Stats.ErrorADC, 1);
   EXPECT_EQ(parser.Stats.Readouts, 4);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+}
+
+TEST_F(CbmParserTest, Check2DValues) {
+  makeHeader(Good2DData);
+
+  parser.parse(PacketData);
+  EXPECT_EQ(parser.Stats.ErrorADC, 0);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
+
+  //Wrong geometry data will be checked on cbminstrument.
 }
 
 int main(int argc, char **argv) {

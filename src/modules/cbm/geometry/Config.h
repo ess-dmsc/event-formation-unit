@@ -34,10 +34,12 @@ struct Topology {
     int param1{0};
     int pixelOffset;
     int maxTofBin;
+    int width;
   };
   union {
     int param2{0};
     int BinCount;
+    int height;
   };
 
   Topology() = default;

@@ -47,11 +47,13 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // Readout processing stats
   Stats.create("readouts.processed", Counters.CbmCounts);
   Stats.create("readouts.type.event0d_proccessed", Counters.Event0DReadoutsProcessed);
+  Stats.create("readouts.type.event2d_proccessed", Counters.Event2DReadoutsProcessed);
   Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
 
   // Published events and Ar51
   Stats.create("events.ibm", Counters.IBMEvents);
   Stats.create("events.event0d", Counters.Event0DEvents);
+  Stats.create("events.event2d", Counters.Event2DEvents);
   Stats.create("events.ibm_npos_sum", Counters.NPOSCount);
 
   Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
@@ -127,7 +129,7 @@ void CbmBase::processingThread() {
       CbmConfiguration.Parms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
-    if (Topology->Type == CbmType::EVENT_0D) {
+    if ((Topology->Type == CbmType::EVENT_0D) || (Topology->Type == CbmType::EVENT_2D)) {
 
       std::unique_ptr<EV44Serializer> SerializerPtr =
           std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,
