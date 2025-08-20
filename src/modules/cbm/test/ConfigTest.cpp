@@ -117,10 +117,14 @@ auto ConfigWithTopology = R"(
       { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 0},
       { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  0, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100}
+      { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm7", "Width": 512, "Height": 512},
+      { "FEN":  1, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Width": 512, "Height": 512},
+      { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Width": 512, "Height": 512}
     ]
   }
 )"_json;
+
 // clang-format on
 
 using namespace cbm;
@@ -245,7 +249,46 @@ TEST_F(CbmConfigTest, LoadFileFullInstrument) {
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxFENId, 2);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 2);
+  EXPECT_EQ(config.Parms.NumberOfMonitors, 3);
+}
+
+TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
+    auto ConfigJson = R"(
+    {
+      "Detector" : "CBM",
+      "MonitorRing" : 11,
+      "MaxTOFNS" : 1000000000,
+      "MaxPulseTimeDiffNS" : 1000000000,
+      "MaxFENId" : 2,
+
+      "Topology" : [
+        { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Width": 0, "Height": 0}
+      ]
+    }
+  )"_json;
+  
+  config.setRoot(ConfigJson);
+
+  //Widths are outside valid range
+  config["Topology"][0]["Width"] = -1;
+  config["Topology"][0]["Height"] = 512;
+  EXPECT_THROW(config.apply(), std::runtime_error);
+  config["Topology"][0]["Width"] = 65636;
+  config["Topology"][0]["Height"] = 321;
+  EXPECT_THROW(config.apply(), std::runtime_error);
+
+  //Heights are outside valid range
+  config["Topology"][0]["Width"] = 312;
+  config["Topology"][0]["Height"] = -1;
+  EXPECT_THROW(config.apply(), std::runtime_error);
+  config["Topology"][0]["Width"] = 123;
+  config["Topology"][0]["Height"] = 65636;
+  EXPECT_THROW(config.apply(), std::runtime_error);
+
+  // Valid values.
+  config["Topology"][0]["Width"] = 256;
+  config["Topology"][0]["Height"] = 356;
+  EXPECT_NO_THROW(config.apply());
 }
 
 TEST_F(CbmConfigTest, TestTopology) {
@@ -255,7 +298,7 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(config.Parms.MonitorRing, 11);
   EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
   EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 6);
+  EXPECT_EQ(config.Parms.NumberOfMonitors, 9);
 
   // Testing topology
   // Test first entry
@@ -299,6 +342,28 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(TopologyEntry->Source, "cbm6");
   EXPECT_EQ(TopologyEntry->FEN, 2);
   EXPECT_EQ(TopologyEntry->Channel, 1);
+
+  // Test seventh entry
+  TopologyEntry = config.TopologyMapPtr->get(2, 2);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_2D);
+  EXPECT_EQ(TopologyEntry->Source, "cbm7");
+  EXPECT_EQ(TopologyEntry->FEN, 2);
+  EXPECT_EQ(TopologyEntry->Channel, 2);
+
+  // Test eight entry
+  TopologyEntry = config.TopologyMapPtr->get(1, 2);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_2D);
+  EXPECT_EQ(TopologyEntry->Source, "cbm8");
+  EXPECT_EQ(TopologyEntry->FEN, 1);
+  EXPECT_EQ(TopologyEntry->Channel, 2);
+
+  // Test ninth entry
+  TopologyEntry = config.TopologyMapPtr->get(1, 1);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::EVENT_2D);
+  EXPECT_EQ(TopologyEntry->Source, "cbm9");
+  EXPECT_EQ(TopologyEntry->FEN, 1);
+  EXPECT_EQ(TopologyEntry->Channel, 1);
+
 }
 
 int main(int argc, char **argv) {

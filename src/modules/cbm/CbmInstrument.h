@@ -15,6 +15,7 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/memory/HashMap2D.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <modules/cbm/Counters.h>
 #include <modules/cbm/geometry/Config.h>
 #include <modules/cbm/geometry/Parser.h>
@@ -58,6 +59,11 @@ private:
 
   /// \brief Parser for the ESS Readout header.
   ESSReadout::Parser &ESSHeaderParser;
+  /// \brief Geometries is a map with the individual ESS geometry used for each 
+  /// EVENT_2D beam monitor in the topology file. 
+  /// Key is created with FEN id as the 8 most significant bits and channel id
+  /// as 8 least significant bits
+  std::unordered_map<uint16_t, std::unique_ptr<ESSGeometry>> Geometries{};
 };
 
 } // namespace cbm
