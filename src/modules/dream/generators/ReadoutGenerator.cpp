@@ -59,7 +59,15 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
       ReadoutData.FiberId = BWES6FiberId[Sector];
       ReadoutData.FENId = BWES6FENId[Sector];
       ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);
-      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      // Smart cathode generation to ensure valid cassette (0-9) for SUMO 6
+      if (ReadoutData.Anode < 32) {
+        // Anode/32 = 0, so -(0) = 0. Need 2*(Cathode/16) <= 9, so Cathode <= 79
+        ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)79);
+      } else {
+        // Anode/32 = 1, so -(1) = -1. Need 2*(Cathode/16) >= 1, so Cathode >= 16
+        // and 2*(Cathode/16) <= 10, so Cathode <= 95. Result: Cathode 16-95
+        ReadoutData.Cathode = 16 + (Fuzzer.random8() % 80); // 16-95
+      }
 
     } break;
 
@@ -75,7 +83,15 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
       ReadoutData.FiberId = FWES6FiberId[Sector];
       ReadoutData.FENId = FWES6FENId[Sector];
       ReadoutData.Anode = std::min(Fuzzer.random8(), (uint8_t)63);   /// anodes == wires
-      ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)95); /// cathodes == strips
+      // Smart cathode generation to ensure valid cassette (0-9) for SUMO 6
+      if (ReadoutData.Anode < 32) {
+        // Anode/32 = 0, so -(0) = 0. Need 2*(Cathode/16) <= 9, so Cathode <= 79
+        ReadoutData.Cathode = std::min(Fuzzer.random8(), (uint8_t)79);
+      } else {
+        // Anode/32 = 1, so -(1) = -1. Need 2*(Cathode/16) >= 1, so Cathode >= 16
+        // and 2*(Cathode/16) <= 10, so Cathode <= 95. Result: Cathode 16-95
+        ReadoutData.Cathode = 16 + (Fuzzer.random8() % 80); // 16-95
+      }
     } break;
 
     case Mantle: { // Mantle
@@ -87,8 +103,8 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
     } break;
 
     case HR: { // HR
-      //uint8_t Sector = Fuzzer.random8() % 17;
-      uint8_t Sector = Fuzzer.random8() % 17;
+      // Limit to 16 sectors to ensure Index + Instance <= 32 (HR has 33 elements: 0-32)
+      uint8_t Sector = Fuzzer.random8() % 16; // 0-15 instead of 0-16
       uint8_t Instance = Fuzzer.random8() % 2;
       ReadoutData.FiberId = HRFiberId[Sector];
       ReadoutData.FENId = HRFENId[Sector];
@@ -98,7 +114,8 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
     } break;
 
     case SANS: { // SANS
-      uint8_t Sector = Fuzzer.random8() % 18;
+      // Limit to 17 sectors to ensure Index + Instance <= 35 (SANS has 36 elements: 0-35)
+      uint8_t Sector = Fuzzer.random8() % 17; // 0-16 instead of 0-17
       uint8_t Instance = Fuzzer.random8() % 2;
       ReadoutData.FiberId = SANSFiberId[Sector];
       ReadoutData.FENId = SANSFENId[Sector];
