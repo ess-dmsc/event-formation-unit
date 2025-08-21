@@ -144,11 +144,21 @@ public:
     rotateXY(LocalX, LocalY, Rotation);
 
     constexpr int YDim{7 * 16};
-    int x = Offset.X + LocalX;
-    int y = YDim * Strip + Offset.Y + LocalY;
-    XTRACE(DATA, DEB, "x %u, y %u", x, y);
+    int IntX = Offset.X + LocalX;
+    int IntY = YDim * Strip + Offset.Y + LocalY;
+    XTRACE(DATA, DEB, "x %d, y %d", IntX, IntY);
 
-    return Geometry.pixel2D(x, y);
+    // Validate coordinates before casting to prevent overflow
+    if (IntX < 0 || IntX > UINT16_MAX) {
+      XTRACE(DATA, WAR, "x coordinate out of range: %d", IntX);
+      return 0; // Invalid pixel
+    }
+    if (IntY < 0 || IntY > UINT16_MAX) {
+      XTRACE(DATA, WAR, "y coordinate out of range: %d", IntY);
+      return 0; // Invalid pixel
+    }
+
+    return Geometry.pixel2D(static_cast<uint16_t>(IntX), static_cast<uint16_t>(IntY));
   }
 };
 } // namespace Dream

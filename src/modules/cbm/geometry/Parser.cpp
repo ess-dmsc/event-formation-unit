@@ -84,7 +84,7 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    /// check redouts are valid accoridng to the supported data types
+    /// Check readouts are valid according to the supported data types
     switch (Readout->Type) {
 
     case CbmType::EVENT_0D:
