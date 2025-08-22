@@ -59,12 +59,12 @@ TEST_F(DetectorTest, TestConstructorAndStatCreation) {
   EXPECT_EQ(statSize, ExpectedStatCount);
 
   // Test invalid stat indices
-  int64_t val = DetectorPtr->statvalue(statSize + 1);
+  int64_t val = DetectorPtr->getStatValue(statSize + 1);
   ASSERT_EQ(val, -1);
-  val = DetectorPtr->statvalue(0);
+  val = DetectorPtr->getStatValue(0);
   ASSERT_EQ(val, -1);
 
-  auto detectorname = DetectorPtr->EFUSettings.DetectorName.c_str();
+  auto detectorname = DetectorPtr->getDetectorName().c_str();
   ASSERT_STREQ("no detector", detectorname);
 }
 

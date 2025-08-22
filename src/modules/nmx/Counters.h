@@ -45,7 +45,6 @@ struct Counters {
   int64_t EventsMatchedClusters;
   int64_t PixelErrors;
   int64_t TimeErrors;
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;

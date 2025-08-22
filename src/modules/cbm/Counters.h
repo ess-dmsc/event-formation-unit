@@ -17,9 +17,7 @@ namespace cbm {
 
 struct Counters {
   // CBM Readouts
-  struct cbm::ParserStats CbmStats {
-    0
-  };
+  struct cbm::ParserStats CbmStats;
 
   int64_t DataHeaders{0};
 

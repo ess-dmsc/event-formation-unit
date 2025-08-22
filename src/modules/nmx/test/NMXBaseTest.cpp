@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2023 European Spallation Source, see LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -105,7 +105,7 @@ public:
 
 TEST_F(NMXBaseTest, Constructor) {
   Nmx::NmxBase Readout(Settings);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "nmx.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "nmx.test.");
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 

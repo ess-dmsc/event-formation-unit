@@ -60,10 +60,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
-  // System counters
-  Stats.create("thread.input_idle", getInputCounters().RxIdle);
-  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 

@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <cstdint>
@@ -310,28 +311,52 @@ public:
 /// time and event times.
 ///
 class ESSReferenceTime {
-
 public:
-  struct Stats_t {
+  // clang-format off
+  static inline const std::string TOF_COUNT_NAME = "events.timestamp.tof.count";
+  static inline const std::string TOF_NEGATIVE_NAME = "events.timestamp.tof.negative";
+  static inline const std::string TOF_HIGH_NAME = "events.timestamp.tof.high";
+  static inline const std::string PREV_TOF_COUNT_NAME = "events.timestamp.prevtof.count";
+  static inline const std::string PREV_TOF_NEGATIVE_NAME = "events.timestamp.prevtof.negative";
+  static inline const std::string PREV_TOF_HIGH_NAME = "events.timestamp.prevtof.high";
+  // clang-format on
+  struct StatCounters : public StatCounterBase {
     int64_t TofCount{0};
     int64_t TofNegative{0};
     int64_t PrevTofCount{0};
     int64_t PrevTofNegative{0};
     int64_t TofHigh{0};
     int64_t PrevTofHigh{0};
+
+    StatCounters(Statistics &Stats)
+        : StatCounterBase(Stats, {{TOF_COUNT_NAME, TofCount},
+                                  {TOF_NEGATIVE_NAME, TofNegative},
+                                  {TOF_HIGH_NAME, TofHigh},
+                                  {PREV_TOF_COUNT_NAME, PrevTofCount},
+                                  {PREV_TOF_NEGATIVE_NAME, PrevTofNegative},
+                                  {PREV_TOF_HIGH_NAME, PrevTofHigh}}) {}
   } Counters;
 
+  /// Counters
+  ///  \brief Default constructor.
   ///
-  /// \brief Default constructor.
+  ESSReferenceTime() = delete;
+
   ///
-  ESSReferenceTime() = default;
+  /// \brief Constructor that initializes the ESSReferenceTime object with
+  /// Statistics.
+  ///
+  ESSReferenceTime(Statistics &Stats) : Counters(Stats) {}
 
   /// \brief Constructor that initializes the ESSReferenceTime object with the
   /// given pulse time.
   ///
   /// \param pulseTime The pulse time used as the reference time.
   ///
-  ESSReferenceTime(const ESSTime &);
+  ESSReferenceTime(const ESSTime &PulseTime, Statistics &Stats)
+      : ESSReferenceTime(Stats) {
+    setReference(PulseTime);
+  }
 
   const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
 
@@ -421,7 +446,7 @@ public:
   /// \return The calculated previous TOF value.
   ///
   uint64_t getPrevTOF(const ESSTime &EventTime, uint32_t DelayNS = 0);
-  
+
 private:
   TimeDurationNano TimeInNS{0};
   TimeDurationNano PrevTimeInNS{0};

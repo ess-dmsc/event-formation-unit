@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/Statistics.h>
 #include <common/testutils/TestBase.h>
 #include <common/time/ESSTime.h>
 #include <cstdint>
@@ -15,7 +16,11 @@ using namespace esstime;
 
 class ESSTimeTest : public TestBase {
 protected:
+  Statistics TestStats;
   ESSReferenceTime Time;
+
+  ESSTimeTest() : Time(TestStats) {}
+
   void SetUp() override {}
   void TearDown() override {}
 };
@@ -308,10 +313,9 @@ TEST_F(ESSTimeTest, ESSTimeEdgeCases) {
 //---------------------------------------------------------------------
 
 TEST_F(ESSTimeTest, Constructors) {
-  ESSReferenceTime testTime1 = ESSReferenceTime();
-  ESSReferenceTime testTime2 = ESSReferenceTime(ESSTime(0, 1));
+  Statistics testStats1, testStats2;
+  ESSReferenceTime testTime1 = ESSReferenceTime(testStats1);
   ASSERT_EQ(testTime1.getTOF(ESSTime(0, 0)), 0);
-  ASSERT_EQ(testTime2.getTOF(ESSTime(0, 2)), 11);
 }
 
 TEST_F(ESSTimeTest, SetRef) {

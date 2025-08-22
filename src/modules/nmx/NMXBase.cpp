@@ -51,15 +51,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
 
-
-  // Time stats
-  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors); //move this to events.tof_toolarge
-
-
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);

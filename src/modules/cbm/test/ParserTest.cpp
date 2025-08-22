@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
 #include <modules/cbm/geometry/Parser.h>
@@ -136,7 +137,8 @@ std::vector<uint8_t> Good2DData{
 
 class CbmParserTest : public TestBase {
 protected:
-  ESSReadout::Parser::PacketDataV0 PacketData;
+  Statistics Stats;
+  ESSReadout::Parser::PacketDataV0 PacketData{Stats};
   Parser parser;
   void SetUp() override {
     PacketData.DataPtr = nullptr;

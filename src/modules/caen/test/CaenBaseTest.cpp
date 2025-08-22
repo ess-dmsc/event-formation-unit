@@ -33,7 +33,7 @@ public:
 
 TEST_F(CaenBaseTest, LokiConstructor) {
   Caen::CaenBase Readout(Settings, DetectorType::LOKI);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "loki.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "loki.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
@@ -44,7 +44,7 @@ TEST_F(CaenBaseTest, BifrostConstructor) {
   Settings.GraphitePrefix = "bifrost";
   Caen::CaenBase Readout(Settings, DetectorType::BIFROST);
   Readout.Counters = {};
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "bifrost.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "bifrost.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
@@ -54,7 +54,7 @@ TEST_F(CaenBaseTest, CspecConstructor) {
   Settings.DetectorName = "cspec";
   Settings.GraphitePrefix = "cspec";
   Caen::CaenBase Readout(Settings, DetectorType::CSPEC);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "cspec.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "cspec.test.");
   Readout.Counters = {};
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
@@ -65,7 +65,7 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   Settings.DetectorName = "miracles";
   Settings.GraphitePrefix = "miracles";
   Caen::CaenBase Readout(Settings, DetectorType::MIRACLES);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "miracles.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "miracles.test.");
   Readout.Counters = {};
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
@@ -139,9 +139,9 @@ TEST_F(CaenBaseTest, DataReceiveLoki) {
 
   writePacketToRxFIFO(Readout, BadTestPacket);
 
-  EXPECT_EQ(
-      Readout.Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_SIZE),
-      1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                Parser::METRIC_PARSER_ESSHEADER_ERRORS_SIZE),
+            1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   EXPECT_NE(Readout.getInputCounters().RxIdle, 0);
   EXPECT_NE(Readout.Counters.ProcessingIdle, 0);
@@ -156,7 +156,7 @@ TEST_F(CaenBaseTest, DataReceiveBifrost) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(Readout.Stats.getValueByName(
+  EXPECT_EQ(Readout.getStatValueByName(
                 ESSReadout::Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
             1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
@@ -185,9 +185,8 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
   EXPECT_EQ(Readout.Counters.PixelErrors, 1);
   EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
   EXPECT_EQ(
-      Readout.Stats.getValueByName(Parser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH),
-      1);
-  EXPECT_EQ(Readout.Stats.getValueByName(
+      Readout.getStatValueByName(Parser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
+  EXPECT_EQ(Readout.getStatValueByName(
                 Parser::METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE),
             1);
 
@@ -206,7 +205,7 @@ TEST_F(CaenBaseTest, DataReceiveGoodBifrostForceUpdate) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(Readout.Stats.getValueByName(
+  EXPECT_EQ(Readout.getStatValueByName(
                 ESSReadout::Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
             1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
@@ -223,9 +222,9 @@ TEST_F(CaenBaseTest, DataReceiveGoodMiraclesForceUpdate) {
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
-  EXPECT_EQ(
-      Readout.Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
-      1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                Parser::METRIC_PARSER_ESSHEADER_ERRORS_TYPE),
+            1);
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 0);
   Readout.stopThreads();
 }
