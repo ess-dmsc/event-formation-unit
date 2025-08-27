@@ -48,7 +48,7 @@ protected:
   /// \param Stats Reference to Statistics object for registration
   /// \param Counters Vector of {name, counter_reference} pairs to register
   /// \param Prefix Optional prefix for counter names (automatically adds dot separator)
-  StatCounterBase(Statistics& Stats, const CounterMap& Counters, const std::string& Prefix = "") {
+  StatCounterBase(Statistics& Stats, const CounterMap &Counters, const std::string &Prefix = "") {
     for (const auto& [name, counterRef] : Counters) {
       std::string fullName = Prefix.empty() ? name : Prefix + "." + name;
       Stats.create(fullName, counterRef.get());

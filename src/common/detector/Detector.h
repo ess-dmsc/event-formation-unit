@@ -52,7 +52,7 @@ protected:
                            {Detector::METRIC_RECEIVE_DROPPED, FifoPushErrors},
                            {Detector::METRIC_FIFO_SEQ_ERRORS, FifoSeqErrors},
                            {Detector::METRIC_THREAD_INPUT_IDLE, RxIdle},
-                           {Detector::METRIC_TRANSMIT_CALIBMODE_PACKETS,
+                           {Detector::METRIC_PRODUCE_MONITOR_PACKETS,
                             TxRawReadoutPackets}}) {}
   } ITCounters;
 
@@ -63,7 +63,7 @@ public:
   static const std::string METRIC_RECEIVE_BYTES;
   static const std::string METRIC_RECEIVE_DROPPED;
   static const std::string METRIC_THREAD_INPUT_IDLE;
-  static const std::string METRIC_TRANSMIT_CALIBMODE_PACKETS;
+  static const std::string METRIC_PRODUCE_MONITOR_PACKETS;
   static const std::string METRIC_FIFO_SEQ_ERRORS;
 
   using CommandFunction =

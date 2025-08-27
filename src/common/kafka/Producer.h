@@ -63,7 +63,7 @@ public:
   /// \param Name Name of the producer instance for statistics prefix.
   Producer(const std::string &Broker, const std::string &Topic,
            std::vector<std::pair<std::string, std::string>> &Configs,
-           Statistics &Stats, const std::string Name = "event");
+           Statistics &Stats, const std::string &Name = "event");
 
   /// \brief Cleans up by deleting allocated structures.
   ~Producer() = default;

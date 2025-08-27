@@ -188,7 +188,7 @@ public:
     char *DataPtr{nullptr};
     ESSReferenceTime Time;
 
-    PacketDataV0(Statistics& Stats) : Time(Stats) {}
+    PacketDataV0(Statistics &Stats) : Time(Stats) {}
   } Packet;
 
   // Header for each data block

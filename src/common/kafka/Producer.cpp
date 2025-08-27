@@ -46,7 +46,7 @@ RdKafka::Conf::ConfResult Producer::setConfig(const std::string &Key,
 ///
 Producer::Producer(const std::string &Broker, const std::string &Topic,
                    std::vector<std::pair<std::string, std::string>> &Configs,
-                   Statistics &Stats, const std::string Name)
+                   Statistics &Stats, const std::string &Name)
     : ProducerBase(), TopicName(Topic),
       StatCounters(Stats, "producer." + Name) {
 
