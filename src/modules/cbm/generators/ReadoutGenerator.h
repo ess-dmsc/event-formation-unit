@@ -52,6 +52,7 @@ public:
     uint8_t FenId{0};                  //< The FEN ID.
     uint8_t ChannelId{0};              //< The channel ID.
     uint32_t Offset{0};                //< The offset value.
+    bool BeamMask{false};              //< Flag for generating images on 2D CBM
     bool ShakeBeam{false};             //< Flag to shake the beam.
     bool Randomise{false};             //< Flag to Randomise the data.
     GeneratorType generatorType{
@@ -74,6 +75,17 @@ public:
 
 private:
   using DistParamType = std::uniform_int_distribution<>::param_type;
+  using Image = std::vector<std::pair<uint8_t, uint8_t>>;
+  using Images = std::vector<const Image *>;
+
+  // Images size in pixels
+  static constexpr std::pair<uint16_t, uint16_t> IMAGE_SIZE {32, 32};
+  /// Bitmap images used as neutron masks
+  Images mImages{};
+  // Figures will be shown in a grid. Grid layout will be x / y count.
+  // Individual grid cells coordinates will be stored in a vector for 
+  // faster retrieval when creating readouts
+  std::vector<std::pair<uint16_t, uint16_t>> GridCoordinateVector{};
 
   // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
   static constexpr uint8_t CBM_FIBER_ID = 22;
@@ -121,7 +133,14 @@ private:
   ///
   /// \param dataPtr Pointer to the data buffer.
   ///
-  void generateEvent2DData(uint8_t *dataPtr);
+  void generate2DData(uint8_t *dataPtr);
+  ///
+  /// \brief Generates the 2D event data for the ReadoutGenerator 
+  /// with a mask in front of the beam.
+  ///
+  /// \param dataPtr Pointer to the data buffer.
+  ///
+  void generate2DBitmapData(uint8_t *dataPtr);
 
   ///
   /// \brief Generates the distribution value for the ReadoutGenerator.

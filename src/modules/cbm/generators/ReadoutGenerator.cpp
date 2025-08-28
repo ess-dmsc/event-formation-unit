@@ -12,6 +12,7 @@
 #include <cbm/CbmTypes.h>
 #include <chrono>
 #include <common/debug/Trace.h>
+#include <common/testutils/bitmaps/BitMaps.h>
 #include <common/time/ESSTime.h>
 #include <functional>
 #include <generators/functiongenerators/DistributionGenerator.h>
@@ -53,8 +54,11 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                        "Maximum X coordinate value for 2D Beam monitor. "
                        "Valid numbers 0 - 65535 (default 512)");
   CbmGroup->add_option("--maxYValue", cbmSettings.MaxYValue,
-                       "Maximum X coordinate value for 2D Beam monitor. "
+                       "Maximum Y coordinate value for 2D Beam monitor. "
                        "Valid numbers 0 - 65535 (default 512)");
+  CbmGroup->add_option("--beamMask", cbmSettings.BeamMask,
+                       "Generate readout with mask in front of beam. "
+                       "Default (false)");
 
   auto IbmGroup = app.add_option_group("IBM Options");
   IbmGroup->add_option("--numReadouts", cbmSettings.NumReadouts,
@@ -79,6 +83,15 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
       ->add_option("--generator_type", cbmSettings.generatorType,
                    "Set the generator type ([Dist, Fixed, Linear] default : Dist)")
       ->check(genTypeValidator);
+
+  // Load bitmaps. All bit maps are of size 32 * 32 
+  // However they will be used as 40 * 40 then there is a margin
+  // Around them
+  mImages.push_back(&BitMaps::si1_0);
+  mImages.push_back(&BitMaps::si1_1);
+  mImages.push_back(&BitMaps::si2_0);
+  mImages.push_back(&BitMaps::si2_1);
+  mImages.push_back(&BitMaps::zeta);    
 }
 // clang-format on
 
@@ -90,7 +103,11 @@ void ReadoutGenerator::generateData() {
   if (cbmSettings.monitorType == CbmType::EVENT_0D) {
     generateEvent0DData(dataPtr);
   } else if (cbmSettings.monitorType == CbmType::EVENT_2D) {
-    generateEvent2DData(dataPtr);
+    if (cbmSettings.BeamMask) {
+      generate2DBitmapData(dataPtr);
+    } else {
+      generate2DData(dataPtr);
+    }
   } else if (cbmSettings.monitorType == CbmType::IBM) {
     generateIBMData(dataPtr);
   } else {
@@ -125,7 +142,7 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 }
 
 // Generate data for 2D event monitor
-void ReadoutGenerator::generateEvent2DData(uint8_t *dataPtr) {
+void ReadoutGenerator::generate2DData(uint8_t *dataPtr) {
 
   for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
 
@@ -161,6 +178,79 @@ void ReadoutGenerator::generateEvent2DData(uint8_t *dataPtr) {
         dataPkt->Pos.YPos -= yPos;
       }
     } 
+
+    // Move pointer to next readout
+    dataPtr += sizeof(Parser::CbmReadout);
+  }
+}
+
+// Generate data for 2D event monitor
+void ReadoutGenerator::generate2DBitmapData(uint8_t *dataPtr) {
+
+  // Create image grid with grid cell coordinates stored in a vector. If vector is populated
+  // it indicates that grid layout have been made and this part can be skipped. 
+  if (GridCoordinateVector.size() == 0) {
+    if (IMAGE_SIZE.first > cbmSettings.MaxXValue) {
+      throw std::runtime_error("Minimum Beam Mask width of 32 is larger than MaxXValue."
+                               "MaxXValue must be 32 or larger.");
+    }
+    if (IMAGE_SIZE.second > cbmSettings.MaxYValue) {
+      throw std::runtime_error("Minimum Beam Mask height of 32 is larger than MaxYValue"
+                               "MaxYValue must be 32 or larger.");
+    }
+
+    //Calculate the a grid for all figures.
+    const uint16_t gridX = cbmSettings.MaxXValue / IMAGE_SIZE.first;
+    const uint16_t gridY = cbmSettings.MaxYValue / IMAGE_SIZE.second;
+    // calculate a margin to put the grid in the center
+    const uint16_t residualX = (cbmSettings.MaxXValue - gridX * IMAGE_SIZE.first) / 2;
+    const uint16_t residualY = (cbmSettings.MaxYValue - gridY * IMAGE_SIZE.second) / 2;
+    //Create the grid coordinate vector containing the CBM coordinate of 
+    //upper left grid corner of each grid cell on a centred mask
+    for (uint16_t xLoop = 0; xLoop < gridX; xLoop++) {
+      for (uint16_t yLoop = 0; yLoop < gridY; yLoop++) {
+        uint16_t xPos = residualX + xLoop * IMAGE_SIZE.first;
+        uint16_t yPos = residualY + yLoop * IMAGE_SIZE.second;
+        GridCoordinateVector.emplace_back(std::make_pair(xPos, yPos));
+      }
+    }
+  }
+
+  for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
+
+    // Get pointer to the data buffer and clear memory with zeros
+    auto dataPkt = reinterpret_cast<Parser::CbmReadout *>(dataPtr);
+    memset(dataPkt, 0, sizeof(Parser::CbmReadout));
+
+    // Write data packet to the buffer
+    dataPkt->DataLength = sizeof(Parser::CbmReadout);
+    dataPkt->FiberId = CBM_FIBER_ID;
+    dataPkt->FENId = cbmSettings.FenId;
+    auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
+    dataPkt->TimeHigh = readoutTimeHigh;
+    dataPkt->TimeLow = readoutTimeLow;
+    dataPkt->Type = cbmSettings.monitorType;
+    dataPkt->Channel = cbmSettings.ChannelId;
+    dataPkt->ADC = 12345;
+
+    //Calculate a xpos and ypos for the read out.
+    //Find a grid cell for a readout and determine which figure is used
+    const int gridIndex = Fuzzer.randomInterval(0, GridCoordinateVector.size());
+    const int imageIndex = gridIndex % mImages.size();
+    const Image &image = *mImages[imageIndex];
+    //Now we have the figure lets find the pixel that has been read.
+    //Image is saved as an array with pixel coordinates. To get a random pixel a random 
+    //item in the array is read. When getting the pixel coordinates "image.size() - 1" 
+    //is used. This will leave out the last pixel in the figure and create an asymmetric figure
+    const int index = Fuzzer.randomInterval(1, image.size() - 1);
+    const auto &[gridX, gridY] = image[index];
+    // Now we have a x, y coordinate within the grid. 
+    // Time to get the offset coordinate of current grid
+    const auto &[offsetX, offsetY] = GridCoordinateVector[gridIndex];
+
+    // Lets calculate the actual coordinate within the beam.
+    dataPkt->Pos.XPos = gridX + offsetX;
+    dataPkt->Pos.YPos = gridY + offsetY;
 
     // Move pointer to next readout
     dataPtr += sizeof(Parser::CbmReadout);
