@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "common/StatCounterBase.h"
+#include <common/StatCounterBase.h>
 #include <CLI/CLI.hpp>
 #include <common/Statistics.h>
 #include <common/detector/BaseSettings.h>
