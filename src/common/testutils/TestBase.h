@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <system_error>
 #include <unistd.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -19,9 +20,10 @@
 
 // For use i xxBaseTest
 template <typename T>
-void writePacketToRxFIFO(T & Base, std::vector<uint8_t> Packet) {
-  Base.startThreads();
+void writePacketToRxFIFO(T &Base, std::vector<uint8_t> Packet) {
 
+  /// First we load data packet into the ring buffer to ensure
+  /// data is avaiable for processing thread when it's starts.
   unsigned int rxBufferIndex = Base.RxRingbuffer.getDataIndex();
   ASSERT_EQ(rxBufferIndex, 0);
   auto PacketSize = Packet.size();
@@ -33,18 +35,17 @@ void writePacketToRxFIFO(T & Base, std::vector<uint8_t> Packet) {
   ASSERT_TRUE(Base.InputFifo.push(rxBufferIndex));
   Base.RxRingbuffer.getNextBuffer();
 
-  while (Base.getInputCounters().RxIdle == 0){
-    usleep(100);
-  }
-  while (Base.Counters.ProcessingIdle == 0) {
-    usleep(100);
-  }
+  /// we start all threads, but ring buffer already loaded with data
+  Base.startThreads();
+
+  /// we wait until processing have at least one idle cycle, to ensure data from
+  /// ring buffer was processed
+  waitForProcessing(Base);
 }
 
-//
-template <typename T>
-void waitForProcessing(T & Base) {
-  while (Base.getInputCounters().RxIdle == 0){
+/// \brief Wait until input and processing threads are in idle state
+template <typename T> void waitForProcessing(T &Base) {
+  while (Base.getInputCounters().RxIdle == 0) {
     usleep(100);
   }
   while (Base.Counters.ProcessingIdle == 0) {
