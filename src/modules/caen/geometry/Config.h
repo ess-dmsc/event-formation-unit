@@ -36,7 +36,7 @@ public:
     std::string InstrumentName;
     uint32_t Resolution{1}; // user for cspec only
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 times 14 hz pulse period
-    uint32_t MaxTOFNS{0};
+    uint32_t MaxTOFNS{800000000};
     uint32_t MaxFEN{0};
     uint32_t MaxGroup{0};
     // Non configurable parameters
