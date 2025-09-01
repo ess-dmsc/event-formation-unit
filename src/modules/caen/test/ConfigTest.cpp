@@ -73,7 +73,7 @@ TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.CaenParms.InstrumentName, "");
   ASSERT_EQ(config.CaenParms.MaxGroup, 0);
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 5 * 71'428'571);
-  ASSERT_EQ(config.CaenParms.MaxTOFNS, 0);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 800000000);
   ASSERT_EQ(config.CaenParms.MaxFEN, 0);
   ASSERT_EQ(config.CaenParms.MinRing, 0);
   ASSERT_EQ(config.CaenParms.MaxRing, 11);
