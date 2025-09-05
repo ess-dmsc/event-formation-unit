@@ -21,12 +21,12 @@ namespace Dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
-DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type) : Detector(Settings), Type(type) {
+DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type)
+    : Detector(Settings), Type(type) {
 
   XTRACE(INIT, ALW, "Adding stats");
-  
+
   // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -49,8 +49,6 @@ DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type) : Detector
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
-
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
@@ -75,20 +73,12 @@ void DreamBase::processingThread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
 
   auto Produce = [&EventProducer](const auto &DataBuffer,
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
-
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>("dream", ProduceMonitor);
 
   Serializer = std::make_unique<EV44Serializer>(
       KafkaBufferSize, EFUSettings.DetectorName, Produce);
@@ -110,7 +100,7 @@ void DreamBase::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 
@@ -132,16 +122,6 @@ void DreamBase::processingThread() {
 
       // Process readouts, generate (end produce) events
       Dream.processReadouts();
-
-      // send monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
-      }
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
       Counters.ProcessingIdle++;

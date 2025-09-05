@@ -7,7 +7,6 @@
 
   "ReadoutConstDelayNS" : 0,
   "MaxPulseTimeNS" : 357142855,
-  "MaxTOFNS" : 1000000000,
 
   "Banks" : [
      {"Bank" : 0, "ID" : "bank0", "GroupsN" : 56, "YOffset" : 0},

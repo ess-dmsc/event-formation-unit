@@ -21,39 +21,10 @@ using namespace esstime;
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-Parser::Parser(Statistics &Stats) {
+Parser::Parser(Statistics &StatsRef) 
+    : ESSHeaderStats(StatsRef), Packet(StatsRef) {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
-
-  // clang-format off
-  // Register ESS readout statistics counters
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_HEADER, ESSHeaderStats.ErrorHeader);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_BUFFER, ESSHeaderStats.ErrorBuffer);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_COOKIE, ESSHeaderStats.ErrorCookie);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_PAD, ESSHeaderStats.ErrorPad);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_SIZE, ESSHeaderStats.ErrorSize);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_VERSION, ESSHeaderStats.ErrorVersion);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE, ESSHeaderStats.ErrorOutputQueue);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TYPE, ESSHeaderStats.ErrorTypeSubType);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_SEQNO, ESSHeaderStats.ErrorSeqNum);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH, ESSHeaderStats.ErrorTimeHigh);
-  Stats.create(METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC, ESSHeaderStats.ErrorTimeFrac);
-  Stats.create(METRIC_PARSER_ESSHEADER_HEARTBEATS, ESSHeaderStats.HeartBeats);
-  Stats.create(METRIC_PARSER_ESSHEADER_VERSION_V0, ESSHeaderStats.Version0Header);
-  Stats.create(METRIC_PARSER_ESSHEADER_VERSION_V1, ESSHeaderStats.Version1Header);
-
-  for (int i = 0; i < 12; i++) {
-    std::string statname = fmt::format(METRIC_PARSER_ESSHEADER_OQ_PACKETS, i);
-    Stats.create(statname, ESSHeaderStats.OQRxPackets[i]);
-  }
-
-  // Register ESS readout time counters stored in the Packet.Time.TimeCounters
-  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_COUNT, Packet.Time.Counters.TofCount);
-  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE, Packet.Time.Counters.TofNegative);
-  Stats.create(METRIC_EVENTS_TIMESTAMP_TOF_HIGH, Packet.Time.Counters.TofHigh);
-  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT, Packet.Time.Counters.PrevTofCount);
-  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE, Packet.Time.Counters.PrevTofNegative);
-  Stats.create(METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH, Packet.Time.Counters.PrevTofHigh);
-  // clang-format on
+  // All statistics counters are now registered automatically via StatCounterBase
 }
 
 int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {

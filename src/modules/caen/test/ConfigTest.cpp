@@ -73,7 +73,7 @@ TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.CaenParms.InstrumentName, "");
   ASSERT_EQ(config.CaenParms.MaxGroup, 0);
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 5 * 71'428'571);
-  ASSERT_EQ(config.CaenParms.MaxTOFNS, 800000000);
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, 20 * 71'428'571);
   ASSERT_EQ(config.CaenParms.MaxFEN, 0);
   ASSERT_EQ(config.CaenParms.MinRing, 0);
   ASSERT_EQ(config.CaenParms.MaxRing, 11);
@@ -194,6 +194,18 @@ TEST_F(CaenConfigTest, ValidTbl3HeConfig) {
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
   ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
   ASSERT_EQ(config.CaenParms.InstrumentName, "tbl3he");
+}
+
+/// \brief Test default MaxTOFNS value when not specified in config
+TEST_F(CaenConfigTest, DefaultMaxTofConfig) {
+
+  const uint64_t DefaultMaxTofNS = 20 * 71'428'571; // 20 * 14 Hz pulse period
+
+  removeField("MaxTOFNS");
+  config.setRoot(testConfig);
+  config.parseConfig();
+
+  ASSERT_EQ(config.CaenParms.MaxTOFNS, DefaultMaxTofNS);
 }
 
 int main(int argc, char **argv) {

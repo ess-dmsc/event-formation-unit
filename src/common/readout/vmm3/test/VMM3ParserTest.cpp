@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/test/VMM3ParserTestData.h>
@@ -16,7 +17,8 @@ namespace ESSReadout {
 
 class VMM3ParserTest : public TestBase {
 protected:
-  Parser::PacketDataV0 PacketData;
+  Statistics Stats;
+  Parser::PacketDataV0 PacketData{Stats};
   VMM3Parser VMMParser;
   void SetUp() override {
     PacketData.DataPtr = nullptr;
