@@ -27,12 +27,8 @@ const char *classname = "Caen detector with ESS readout";
 
 CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
-      
-  XTRACE(INIT, ALW, "Adding stats");
-  
-  // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
+  XTRACE(INIT, ALW, "Adding stats");
   // LoKI Readout Data
   Stats.create("parser.readout.header.count", Counters.Parser.DataHeaders);
   Stats.create("parser.readout.count", Counters.Parser.Readouts);
@@ -62,9 +58,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
   Stats.create("events.errors.pixel", Counters.PixelErrors);
   Stats.create("events.errors.time", Counters.TimeError);
 
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
-
   // System counters
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
@@ -84,7 +77,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-///
 /// \brief Normal processing thread
 void CaenBase::processingThread() {
   if (EFUSettings.KafkaTopic.empty()) {
@@ -92,9 +84,8 @@ void CaenBase::processingThread() {
     EFUSettings.KafkaTopic = EFUSettings.DetectorName + "_detector";
   }
 
-  KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
 
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
@@ -111,18 +102,6 @@ void CaenBase::processingThread() {
   // give the instrument shared pointers to the serializers
   Caen.setSerializers(Serializers);
 
-  // Create the raw-data monitor producer and serializer
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                           const auto &Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
-                                                       ProduceMonitor);
-
   RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
 
@@ -135,7 +114,7 @@ void CaenBase::processingThread() {
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
         XTRACE(DATA, ERR, "Data length in FIFO is zero");
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 
@@ -159,16 +138,6 @@ void CaenBase::processingThread() {
 
       // Process readouts, generate (and produce) events
       Caen.processReadouts();
-
-      // send monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
-      }
 
       /// \todo This could be moved and done less frequently
       Counters.Parser = Caen.CaenParser.Stats;

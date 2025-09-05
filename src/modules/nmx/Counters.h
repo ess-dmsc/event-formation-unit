@@ -16,9 +16,6 @@
 #include <cinttypes>
 
 struct Counters {
-  // Processing Counters - accessed in processing thread
-  int64_t FifoSeqErrors;
-
   // ESSReadout parser
   int64_t ErrorESSHeaders;
   // int64_t RingRx[24];
@@ -48,10 +45,7 @@ struct Counters {
   int64_t EventsMatchedClusters;
   int64_t PixelErrors;
   int64_t TimeErrors;
-  struct ESSReadout::ESSReferenceTime::Stats_t TimeStats;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
-
-  int64_t TxRawReadoutPackets;
 } __attribute__((aligned(64)));

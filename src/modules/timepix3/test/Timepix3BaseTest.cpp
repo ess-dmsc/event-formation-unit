@@ -45,7 +45,7 @@ public:
 
 TEST_F(Timepix3BaseTest, Constructor) {
   Timepix3::Timepix3Base Readout(Settings);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "timepix.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "timepix.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 

@@ -54,7 +54,7 @@ static int stat_get(const std::vector<std::string> &cmdargs, char *output,
   // Detector stats
   if (index <= detector->statsize()) {
     name = detector->getStatFullName(index);
-    value = detector->statvalue(index);
+    value = detector->getStatValue(index);
   } else { // User supplied stats
     index = index - detector->statsize();
     name = stats.getFullName(index);
@@ -149,7 +149,7 @@ static int stat_get_name(const std::vector<std::string> &cmdargs, char *output,
 
   std::string name = cmdargs.at(1);
 
-  int64_t value = detector->statvaluebyname(name);
+  int64_t value = detector->getStatValueByName(name);
   if (value == -1) {
     value = stats.getValueByName(name);
   }
@@ -215,7 +215,7 @@ static int detector_info_get(const std::vector<std::string> &cmdargs,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
-                     detector->EFUSettings.DetectorName.c_str());
+                     detector->getDetectorName().c_str());
 
   return Parser::OK;
 }

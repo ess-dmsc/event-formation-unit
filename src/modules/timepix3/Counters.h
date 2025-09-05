@@ -20,7 +20,6 @@ struct Counters {
   // Temporary timepix characterising counters
 
   // System counters
-  int64_t FifoSeqErrors{0};
   int64_t ProcessingIdle{0};
 
   // Events

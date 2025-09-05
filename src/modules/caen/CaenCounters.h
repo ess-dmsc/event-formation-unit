@@ -22,7 +22,6 @@ struct CaenCounters {
   // Processing Counters - accessed in processing thread
 
   // System counters
-  int64_t FifoSeqErrors{0};
   int64_t ProcessingIdle{0};
 
   // ESSReadout parser
@@ -40,7 +39,6 @@ struct CaenCounters {
   int64_t PixelErrors{0};
   int64_t TimeError{0};
   int64_t EventsUdder{0};
-  int64_t TxRawReadoutPackets{0};
   int64_t SerializerErrors{0};
 
   // Identification of the cause of produce calls

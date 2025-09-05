@@ -37,7 +37,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
 
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -76,9 +75,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
-
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -120,16 +116,16 @@ void TrexBase::processing_thread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
   auto Produce = [&EventProducer](const auto &DataBuffer,
                                   const auto &Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  Producer MonitorProducer(EFUSettings.KafkaBroker, "trex_debug",
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
+  Producer AdcHistogramProducer(EFUSettings.KafkaBroker, "trex_debug",
+                           KafkaCfg.CfgParms, Stats, "adc");
+  auto ProduceMonitor = [&AdcHistogramProducer](auto DataBuffer, auto Timestamp) {
+    AdcHistogramProducer.produce(DataBuffer, Timestamp);
   };
 
   Serializer =
@@ -158,7 +154,7 @@ void TrexBase::processing_thread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 

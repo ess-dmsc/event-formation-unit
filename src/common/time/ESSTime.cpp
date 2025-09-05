@@ -10,14 +10,11 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+#include <common/Statistics.h>
 #include <common/time/ESSTime.h>
 #include <inttypes.h>
 
 namespace esstime {
-
-ESSReferenceTime::ESSReferenceTime(const ESSTime &PulseTime)
-    : TimeInNS{PulseTime.toNS()} {
-}
 
 uint64_t ESSReferenceTime::setReference(const ESSTime &refESSTime) {
   TimeInNS = refESSTime.toNS();

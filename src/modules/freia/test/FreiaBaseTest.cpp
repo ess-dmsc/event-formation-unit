@@ -61,7 +61,7 @@ public:
 
 TEST_F(FreiaBaseTest, Constructor) {
   Freia::FreiaBase Readout(Settings);
-  ASSERT_EQ(Readout.Stats.getStatPrefix(1), "freia.test.");
+  ASSERT_EQ(Readout.getStatPrefix(1), "freia.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
@@ -95,7 +95,7 @@ TEST_F(FreiaBaseTest, DataReceiveBadHeader) {
 
 TEST_F(FreiaBaseTest, EmulateFIFOError) {
   Freia::FreiaBase Readout(Settings);
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 0);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 0);
 
   Readout.startThreads();
 
@@ -109,7 +109,7 @@ TEST_F(FreiaBaseTest, EmulateFIFOError) {
 
   waitForProcessing(Readout);
 
-  EXPECT_EQ(Readout.Counters.FifoSeqErrors, 1);
+  EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 1);
   Readout.stopThreads();
 }
 

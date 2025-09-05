@@ -27,7 +27,7 @@ void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr,
   if (StatDb->isValidSocket()) {
     for (int i = 1; i <= DetectorPtr->statsize(); i++) {
       auto StatString = fmt::format("{} {} {}\n", DetectorPtr->getStatFullName(i),
-                                    DetectorPtr->statvalue(i), unixtime);
+                                    DetectorPtr->getStatValue(i), unixtime);
 
       StatDb->senddata(StatString.c_str(), StatString.size());
     }

@@ -29,8 +29,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
 
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
@@ -53,15 +51,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.bccalib", Counters.VMMStats.CalibReadouts);
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
 
-
-  // Time stats
-  Stats.create("readouts.tof_count", Counters.TimeStats.TofCount);
-  Stats.create("readouts.tof_neg", Counters.TimeStats.TofNegative);
-  Stats.create("readouts.prevtof_count", Counters.TimeStats.PrevTofCount);
-  Stats.create("readouts.prevtof_neg", Counters.TimeStats.PrevTofNegative);
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors); //move this to events.tof_toolarge
-
-
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
@@ -80,9 +69,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
-
-  // Monitor and calibration stats
-  Stats.create("transmit.monitor_packets", Counters.TxRawReadoutPackets);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
@@ -125,7 +111,7 @@ void NmxBase::processing_thread() {
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
 
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
   auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
     EventProducer.produce(DataBuffer, Timestamp);
   };
@@ -137,17 +123,6 @@ void NmxBase::processing_thread() {
                Serializer->stats().ProduceRefTimeTriggered);
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
-
-  // Create the raw-data monitor producer and serializer
-  Producer MonitorProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaDebugTopic,
-                           KafkaCfg.CfgParms);
-  auto ProduceMonitor = [&MonitorProducer](const auto &DataBuffer,
-                                           const auto &Timestamp) {
-    MonitorProducer.produce(DataBuffer, Timestamp);
-  };
-
-  MonitorSerializer = std::make_unique<AR51Serializer>(EFUSettings.DetectorName,
-                                                       ProduceMonitor);
 
   NMXInstrument NMX(Counters, EFUSettings, *Serializer, ESSHeaderParser);
 
@@ -163,7 +138,7 @@ void NmxBase::processing_thread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
 
@@ -192,16 +167,6 @@ void NmxBase::processing_thread() {
       for (auto &builder : NMX.builders) {
         NMX.generateEvents(builder.Events);
         Counters.MatcherStats.addAndClear(builder.matcher.Stats);
-      }
-
-      // send monitoring data
-      if (getInputCounters().RxPackets % EFUSettings.MonitorPeriod <
-          EFUSettings.MonitorSamples) {
-        XTRACE(PROCESS, DEB, "Serialize and stream monitor data for packet %lu",
-               getInputCounters().RxPackets);
-        MonitorSerializer->serialize((uint8_t *)DataPtr, DataLen);
-        MonitorSerializer->produce();
-        Counters.TxRawReadoutPackets++;
       }
 
     } else {

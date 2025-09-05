@@ -26,7 +26,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   // Counters related to readouts
   Stats.create("readouts.pixel_readout_count", Counters.PixelReadouts);
@@ -61,10 +60,6 @@ Timepix3Base::Timepix3Base(BaseSettings const &settings)
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
 
-  // System counters
-  Stats.create("thread.input_idle", getInputCounters().RxIdle);
-  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
-
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);
 
@@ -92,7 +87,7 @@ void Timepix3Base::processingThread() {
 
   KafkaConfig KafkaCfg(EFUSettings.KafkaConfigFile);
   Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic,
-                         KafkaCfg.CfgParms, &Stats);
+                         KafkaCfg.CfgParms, Stats);
 
   auto Produce = [&EventProducer](const auto &DataBuffer,
                                   const auto &Timestamp) {
@@ -119,7 +114,7 @@ void Timepix3Base::processingThread() {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
-        Counters.FifoSeqErrors++;
+        ITCounters.FifoSeqErrors++;
         continue;
       }
       XTRACE(DATA, DEB, "getting data buffer");

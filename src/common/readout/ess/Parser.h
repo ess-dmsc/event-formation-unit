@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <common/time/ESSTime.h>
 #include <common/types/DetectorType.h>
@@ -19,6 +20,7 @@
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
+#include <fmt/format.h>
 
 namespace ESSReadout {
 
@@ -57,7 +59,7 @@ public:
   static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH = "events.timestamp.prevtof.high";
 
 private:
-  struct ESSHeaderStats {
+  struct ESSHeaderStats : public StatCounterBase {
     int64_t ErrorHeader{0};
     int64_t ErrorBuffer{0};
     int64_t ErrorSize{0};
@@ -73,12 +75,36 @@ private:
     int64_t Version1Header{0};
     int64_t HeartBeats{0};
     int64_t OQRxPackets[MaxOutputQueues]{0};
+
+    ESSHeaderStats(Statistics& Stats)
+        : StatCounterBase(Stats, {
+            {METRIC_PARSER_ESSHEADER_ERRORS_HEADER, ErrorHeader},
+            {METRIC_PARSER_ESSHEADER_ERRORS_BUFFER, ErrorBuffer},
+            {METRIC_PARSER_ESSHEADER_ERRORS_COOKIE, ErrorCookie},
+            {METRIC_PARSER_ESSHEADER_ERRORS_PAD, ErrorPad},
+            {METRIC_PARSER_ESSHEADER_ERRORS_SIZE, ErrorSize},
+            {METRIC_PARSER_ESSHEADER_ERRORS_VERSION, ErrorVersion},
+            {METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE, ErrorOutputQueue},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TYPE, ErrorTypeSubType},
+            {METRIC_PARSER_ESSHEADER_ERRORS_SEQNO, ErrorSeqNum},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH, ErrorTimeHigh},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC, ErrorTimeFrac},
+            {METRIC_PARSER_ESSHEADER_HEARTBEATS, HeartBeats},
+            {METRIC_PARSER_ESSHEADER_VERSION_V0, Version0Header},
+            {METRIC_PARSER_ESSHEADER_VERSION_V1, Version1Header}
+        }) {
+      // Register the array elements manually since StatCounterBase doesn't handle arrays
+      for (int i = 0; i < MaxOutputQueues; i++) {
+        std::string statname = fmt::format(METRIC_PARSER_ESSHEADER_OQ_PACKETS, i);
+        Stats.create(statname, OQRxPackets[i]);
+      }
+    }
   } ESSHeaderStats;
 
 public:
   /// \brief Constructor of the parser
   /// \param reference to the statistics object to register internal counters
-  Parser(Statistics &);
+  Parser(Statistics &Stats);
 
   enum HeaderVersion { V0 = 0x00, V1 = 0x01 };
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
@@ -161,6 +187,8 @@ public:
     uint16_t DataLength{0};
     char *DataPtr{nullptr};
     ESSReferenceTime Time;
+
+    PacketDataV0(Statistics &Stats) : Time(Stats) {}
   } Packet;
 
   // Header for each data block
