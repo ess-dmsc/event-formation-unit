@@ -53,9 +53,6 @@ void Tbl3HeConfig::parseConfig() {
   }
 
   try {
-    // Assumed the same for all tubes
-    assign("Resolution", Params.Resolution);
-
     setMask(LOG);
     assign("NumOfFENs", Params.NumOfFENs);
     assign("MinValidAmplitude", Params.MinValidAmplitude);

@@ -1,7 +1,7 @@
 {
   "Detector": "bifrost",
   "MaxRing": 4,
-  "StrawResolution": 300,
+  "Resolution": 300,
   "MaxGroup": 15,
   "MaxAmpl": 32767
 }

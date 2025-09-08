@@ -6,22 +6,26 @@
 /// \brief Unit test for CSPEC position calculations
 ///
 //===----------------------------------------------------------------------===//
+#include "common/Statistics.h"
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
 #include <cspec/geometry/CspecGeometry.h>
+#include <memory>
 
 using namespace Caen;
 
 class CspecGeometryTest : public TestBase {
 protected:
+  Statistics Stats;
   Config CaenConfiguration;
-  CspecGeometry *geom;
+  std::unique_ptr<CspecGeometry> geom;
 
   void SetUp() override {
-    geom = new CspecGeometry(CaenConfiguration);
-    geom->NPos = 300;
-    geom->MaxRing = 4;
+    CaenConfiguration.CaenParms.MaxRing = 4;
+    CaenConfiguration.CaenParms.Resolution = 300;
+    geom = std::make_unique<CspecGeometry>(Stats, CaenConfiguration);
   }
+
   void TearDown() override {}
 };
 
@@ -47,7 +51,7 @@ protected:
 
 TEST_F(CspecGeometryTest, YCoord) {
   ASSERT_EQ(geom->yCoord(0, 0), -1);
-  ASSERT_EQ(geom->yCoord(1, 0), geom->NPos - 1);
+  ASSERT_EQ(geom->yCoord(1, 0), geom->Resolution - 1);
   ASSERT_EQ(geom->yCoord(0, 1), 0);
 }
 
@@ -68,7 +72,7 @@ TEST_F(CspecGeometryTest, YCoord) {
 TEST_F(CspecGeometryTest, Position) {
   ASSERT_EQ(geom->posAlongUnit(0, 0), -1);
   ASSERT_EQ(geom->posAlongUnit(0, 1), 0);
-  ASSERT_EQ(geom->posAlongUnit(1, 0), geom->NPos - 1);
+  ASSERT_EQ(geom->posAlongUnit(1, 0), geom->Resolution - 1);
 }
 
 TEST_F(CspecGeometryTest, CalcPixel) {
@@ -82,28 +86,28 @@ TEST_F(CspecGeometryTest, CalcPixel) {
 ///\todo Fix CSPEC geometry tests once a new ICD is decided for 3He CSPEC
 TEST_F(CspecGeometryTest, Validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
+  ASSERT_TRUE(geom->validateReadoutData(readout));
 
   readout.FiberId = 10;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
 
   readout.FiberId = 0;
   readout.FENId = 20;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 1);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 1);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
 
   readout.FiberId = 0;
   readout.FENId = 0;
   readout.Group = 20;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 1);
-  ASSERT_EQ(geom->Stats.GroupErrors, 1);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 1);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 1);
 }
 
 int main(int argc, char **argv) {

@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include <tbl3he/geometry/Tbl3HeGeometry.h>
 #include <common/testutils/TestBase.h>
-
+#include <memory>
+#include <tbl3he/geometry/Tbl3HeGeometry.h>
 
 auto ValidConfig = R"(
   {
@@ -32,40 +32,39 @@ using namespace Caen;
 
 class Tbl3HeGeometryTest : public TestBase {
 protected:
-  Tbl3HeGeometry *geom{nullptr};
+  Statistics Stats;
+  std::unique_ptr<Tbl3HeGeometry> geom;
   Config CaenConfiguration;
 
   void SetUp() override {
-    CaenConfiguration.Tbl3HeConf.Params.Resolution = 100;
+    CaenConfiguration.CaenParms.Resolution = 100;
     CaenConfiguration.CaenParms.MaxGroup = 7;
-    geom = new Tbl3HeGeometry(CaenConfiguration);
+    geom = std::make_unique<Tbl3HeGeometry>(Stats, CaenConfiguration);
 
-    geom->CaenCDCalibration.Parms.Groups=8;
+    geom->CaenCDCalibration.Parms.Groups = 8;
     // Make nullcalibration for the eight groups
     for (int i = 0; i < 8; i++) {
       geom->CaenCDCalibration.Intervals.push_back({{0.00, 1.00}});
       geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}});
     }
 
-    geom->Conf.Tbl3HeConf.TopologyMapPtr.reset(new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
+    CaenConfiguration.Tbl3HeConf.TopologyMapPtr.reset(
+        new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
     auto topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(0);
-    geom->Conf.Tbl3HeConf.TopologyMapPtr->add(0, 0, topo);
+    CaenConfiguration.Tbl3HeConf.TopologyMapPtr->add(0, 0, topo);
     topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(1);
-    geom->Conf.Tbl3HeConf.TopologyMapPtr->add(1, 0, topo);
+    CaenConfiguration.Tbl3HeConf.TopologyMapPtr->add(1, 0, topo);
   }
   void TearDown() override {}
 };
 
-
 TEST_F(Tbl3HeGeometryTest, Constructor) {
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadouts) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -73,75 +72,67 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadouts) {
   // Check valid FiberIds
   for (int FiberId = 0; FiberId < 24; FiberId++) {
     for (int FENId = 0; FENId < 12; FENId++) {
-        readout.FiberId = FiberId;
-        readout.FENId = FENId;
-        if ((FiberId < 4) and (FENId < 1)) {
-          ASSERT_EQ(geom->validateData(readout), true);
-        } else {
-          ASSERT_EQ(geom->validateData(readout), false);
-        }
+      readout.FiberId = FiberId;
+      readout.FENId = FENId;
+      if ((FiberId < 4) and (FENId < 1)) {
+        ASSERT_EQ(geom->validateReadoutData(readout), true);
+      } else {
+        ASSERT_EQ(geom->validateReadoutData(readout), false);
       }
     }
-  ASSERT_EQ(geom->Stats.TopologyErrors, 24 * 12 - 4);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
-
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  }
+  ASSERT_EQ(geom->getBaseCounters().TopologyError, 24 * 12 - 4);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
+  
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid Groups
-  for (uint i = 0; i <= 23; i++) {
+  for (int i = 0; i <= 23; i++) {
     readout.Group = i;
-    if (i <= geom->Conf.CaenParms.MaxGroup) {
-      ASSERT_EQ(geom->validateData(readout), true);
+    if (i <= CaenConfiguration.CaenParms.MaxGroup) {
+      ASSERT_EQ(geom->validateReadoutData(readout), true);
     } else {
-      ASSERT_EQ(geom->validateData(readout), false);
+      ASSERT_EQ(geom->validateReadoutData(readout), false);
     }
   }
 
-  ASSERT_EQ(geom->Stats.GroupErrors, 16);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 16);
 
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 1);
 
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
   //                              R  F               G     A    B
   DataParser::CaenReadout readout{3, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   //                               R  F              G     A   B  C  D
@@ -151,56 +142,49 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout2), 100);
   //                               R  F              G      A  B  C  D
-  DataParser::CaenReadout readout3{1, 0, 0, 0, 0, 0, 7, 0,  0, 10, 0, 0};
+  DataParser::CaenReadout readout3{1, 0, 0, 0, 0, 0, 7, 0, 0, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout3), 701);
 
   DataParser::CaenReadout readout4{1, 0, 0, 0, 0, 0, 7, 0, 10, 0, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout4), 800);
 
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
 }
 
 TEST_F(Tbl3HeGeometryTest, ErrorAmplitudeLow) {
-  geom->Conf.Tbl3HeConf.Params.MinValidAmplitude = 1;
+  CaenConfiguration.Tbl3HeConf.Params.MinValidAmplitude = 1;
   //                               R  F              G     A   B  C  D
   DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout1), 0);
 
-
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 0);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 1);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 1);
 }
 
 TEST_F(Tbl3HeGeometryTest, ErrorMaxRing) {
   //                               R  F              G     A   B  C  D
   DataParser::CaenReadout readout{24, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
-  ASSERT_EQ(geom->validateData(readout), false);
+  ASSERT_EQ(geom->validateReadoutData(readout), false);
 
-
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
-  ASSERT_EQ(geom->MaxFEN, 0);
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeLow, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
 }
 
-
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
-  geom->Conf.Tbl3HeConf.Params.MinValidAmplitude = -100;
+  CaenConfiguration.Tbl3HeConf.Params.MinValidAmplitude = -100;
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 }
-
 
 TEST_F(Tbl3HeGeometryTest, Serialisers) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
@@ -213,12 +197,11 @@ TEST_F(Tbl3HeGeometryTest, Serialisers) {
   ASSERT_EQ(geom->calcSerializer(readout), 1);
 }
 
-
 // Pretty ugly and not easily testable, but it works.
 TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
   CaenConfiguration.setRoot(ValidConfig);
   CaenConfiguration.parseConfig();
-  Tbl3HeGeometry g(CaenConfiguration);
+  Tbl3HeGeometry g(Stats, CaenConfiguration);
 
   // Create nullcalibration profile for the eight Groups (tubes)
   g.CaenCDCalibration.Parms.Groups = 8;
@@ -230,16 +213,16 @@ TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
   DataParser::CaenReadout readout;
   readout.FENId = 0;
   readout.DataLength = 0; // not used for geometry
-  readout.TimeHigh = 0; // not used for geometry
-  readout.TimeLow = 0; // not used for geometry
-  readout.FlagsOM = 0; // not used for geometry
-  readout.Unused = 0; // not used for geometry
+  readout.TimeHigh = 0;   // not used for geometry
+  readout.TimeLow = 0;    // not used for geometry
+  readout.FlagsOM = 0;    // not used for geometry
+  readout.Unused = 0;     // not used for geometry
   readout.AmpC = 0;
   readout.AmpD = 0;
 
   // Here goes, ...
   readout.FiberId = 20; // Ring 10
-  readout.Group = 0; // first Tube
+  readout.Group = 0;    // first Tube
   readout.AmpA = 0;
   readout.AmpB = 10;
   ASSERT_EQ(g.calcPixel(readout), 1);
@@ -264,7 +247,6 @@ TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
   readout.Group = 3; // fourth tube
   ASSERT_EQ(g.calcPixel(readout), 800);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

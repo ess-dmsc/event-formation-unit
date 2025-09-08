@@ -9,6 +9,11 @@ set(DetectorTest_SRC
   )
 create_test_executable(DetectorTest)
 
+set(DetectorGeometryTest_SRC
+  DetectorGeometryTest.cpp
+  )
+create_test_executable(DetectorGeometryTest)
+
 set(EFUArgsTest_SRC
   EFUArgsTest.cpp
   )

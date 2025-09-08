@@ -37,10 +37,9 @@ class Tbl3HeConfig : public Configurations::Config {
 
   struct {
     // configurable parameters
-    int Resolution{0};
     int NumOfFENs{0};
     int MinValidAmplitude{0};
-    // Non configurable parameters
+    //  non configurable parameters
     int MinRing{0};
     int MaxRing{11};
   } Params;

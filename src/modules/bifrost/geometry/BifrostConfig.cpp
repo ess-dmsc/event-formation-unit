@@ -37,9 +37,6 @@ void BifrostConfig::parseConfig() {
   }
 
   try {
-    setMask(LOG | CHECK);
-    assign("StrawResolution", Parms.Resolution);
-
     setMask(LOG);
     assign("MaxAmpl", Parms.MaxAmpl);
     

@@ -24,15 +24,12 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class BifrostGeometry : public Geometry {
+class BifrostGeometry : public Geometry, ESSGeometry {
 public:
-  explicit BifrostGeometry(Config &CaenConfiguration);
+  explicit BifrostGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-
-  ///\brief virtual method inherited from base class
-  bool validateData(DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
@@ -51,13 +48,26 @@ public:
   std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
 
   [[nodiscard]] size_t numSerializers() const override;
-  [[nodiscard]] size_t calcSerializer(DataParser::CaenReadout &Data) const override;
+  [[nodiscard]] size_t
+  calcSerializer(const DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
   const int UnitsPerGroup{3};
   const int TripletsPerRing{15};
   int UnitPixellation{100}; ///< Number of pixels along a single He tube.
 
+  // Per-detector resolution: horizontal pixel stride used for ring offsets
+  int StrideResolution;
+
   const std::pair<int, float> InvalidPos{-1, -1.0};
+
+  // Holds the parsed configuration
+  Config &Conf;
+
+protected:
+  /// \brief Implementation for pixel calculation for Bifrost geometry
+  /// \param Data Pointer to CaenReadout object (cast internally)
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(void *DataPtr) override;
 };
 } // namespace Caen
