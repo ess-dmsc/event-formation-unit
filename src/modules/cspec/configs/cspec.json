@@ -1,6 +1,6 @@
 {
   "Detector": "cspec",
   "MaxRing": 4,
-  "StrawResolution": 300,
+  "Resolution": 300,
   "MaxGroup": 180
 }

@@ -8,7 +8,9 @@
 /// \brief Unit test for Miracles position calculations
 ///
 //===----------------------------------------------------------------------===//
+#include "common/Statistics.h"
 #include <common/testutils/TestBase.h>
+#include <memory>
 #include <miracles/geometry/MiraclesGeometry.h>
 
 using namespace Caen;
@@ -17,13 +19,16 @@ class MiraclesGeometryTest : public TestBase {
 protected:
   int TubeA{0};
   int TubeB{1};
-  MiraclesGeometry *geom;
+  Statistics Stats;
+  std::unique_ptr<MiraclesGeometry> geom;
   Config CaenConfiguration;
+
   void SetUp() override {
-    geom = new MiraclesGeometry(CaenConfiguration);
-    geom->NPos = 128;
-    geom->MaxRing = 2; // Miracles has 3 rings, but we use 0-2 for 3 rings
+    CaenConfiguration.CaenParms.MaxRing = 2; // Miracles has 3 rings, but we use 0-2 for 3 rings
+    CaenConfiguration.CaenParms.Resolution = 128;
+    geom = std::make_unique<MiraclesGeometry>(Stats, CaenConfiguration);
   }
+
   void TearDown() override {}
 };
 
@@ -53,10 +58,10 @@ TEST_F(MiraclesGeometryTest, PosAlongTube) {
 
 TEST_F(MiraclesGeometryTest, ValidateData) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
+  ASSERT_TRUE(geom->validateReadoutData(readout));
 
   DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-  ASSERT_FALSE(geom->validateData(readout2));
+  ASSERT_FALSE(geom->validateReadoutData(readout2));
 }
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {

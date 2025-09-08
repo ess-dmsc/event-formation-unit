@@ -32,16 +32,16 @@ public:
   /// \brief parse the loaded json object
   virtual void parseConfig();
 
-  struct {
+  struct CaenParameters {
     std::string InstrumentName;
-    uint32_t Resolution{1};                  // user for cspec only
+    uint32_t Resolution{1};                  // Common resolution for all detectors
     uint32_t MaxTOFNS{20 * 71'428'571};      // < Twenty 14Hz pulses
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 times 14 hz pulse period
-    uint32_t MaxFEN{0};
-    uint32_t MaxGroup{0};
+    int MaxFEN{0};
+    int MaxGroup{0};
     // Non configurable parameters
-    uint32_t MinRing{0};  // 0-11
-    uint32_t MaxRing{11}; // 0-11
+    int MinRing{0};  // 0-11
+    int MaxRing{11}; // 0-11
   } CaenParms;
 
   LokiConfig LokiConf;

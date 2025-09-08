@@ -42,7 +42,6 @@ protected:
 
 
 TEST_F(Tbl3HeConfigTest, Constructor) {
-  ASSERT_EQ(config.Params.Resolution, 0);
   ASSERT_EQ(config.Params.MinValidAmplitude, 0);
   ASSERT_EQ(config.Params.NumOfFENs, 0);
   ASSERT_EQ(config.Params.MinRing, 0);
@@ -82,7 +81,6 @@ TEST_F(Tbl3HeConfigTest, ValidTbl3HeConfig) {
   ASSERT_NO_THROW(config.parseConfig());
   
   // Check that Tbl3He config values from JSON are properly stored
-  ASSERT_EQ(config.Params.Resolution, 2048);
   ASSERT_EQ(config.Params.NumOfFENs, 4);
   ASSERT_EQ(config.Params.MinValidAmplitude, 100);
   

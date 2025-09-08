@@ -27,9 +27,9 @@
 
 namespace Caen {
 
-class LokiGeometry : public Geometry {
+class LokiGeometry : public Geometry, ESSGeometry {
 public:
-  explicit LokiGeometry(Config &CaenConfiguration);
+  explicit LokiGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -38,9 +38,8 @@ public:
   /// \param AmpD amplitude D from readout data
   /// \return tube index (0, 1, 2, .. 6) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, double> calcUnitAndPos(int Group,
-    int AmpA, int AmpB, int AmpC, int AmpD);
-
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB, int AmpC,
+                                        int AmpD);
 
   /// \brief The four amplitudes measured at certain points in the
   /// Helium tube circuit diagram are used to identify the straw that
@@ -52,26 +51,38 @@ public:
   // bool calcPositions(int16_t AmplitudeA, int16_t AmplitudeB,
   //                    int16_t AmplitudeC, int16_t AmplitudeD);
 
-  void setCalibration(CDCalibration Calib) { CaenCDCalibration = Calib; }
+  void setCalibration(const CDCalibration &Calib) { CaenCDCalibration = Calib; }
 
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-  bool validateData(DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   // Holds the parsed configuration
-  Config & Conf;
+  Config &Conf;
 
   const std::pair<int, float> InvalidPos{-1, -1.0};
 
+  // Per-detector resolution: number of pixels per unit/straw
+  int StrawResolution;
+
   /// \brief return the total number of serializers used by the geometry
-  [[nodiscard]] inline size_t numSerializers() const override {return 1;}
+  [[nodiscard]] inline size_t numSerializers() const override { return 1; }
 
   /// \brief calculate the serializer index for the given readout
   /// \param Data CaenReadout to calculate serializer index for
-  [[nodiscard]] inline size_t calcSerializer(DataParser::CaenReadout &) const override {return 0;}
+  [[nodiscard]] inline size_t
+  calcSerializer(const DataParser::CaenReadout &) const override {
+    return 0;
+  }
 
   /// \brief return the name of the serializer at the given index
-  [[nodiscard]] inline std::string serializerName(size_t) const override {return "caen";}
+  [[nodiscard]] inline std::string serializerName(size_t) const override {
+    return "caen";
+  }
 
+protected:
+  /// \brief Implementation for pixel calculation for Loki geometry
+  /// \param Data Pointer to CaenReadout object (cast internally)
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(void *DataPtr) override;
 };
 
 } // namespace Caen

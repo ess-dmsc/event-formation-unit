@@ -29,8 +29,7 @@ public:
   void parseConfig();
 
   struct BifrostCfg {
-    int Resolution{0};
-    int MaxAmpl{0};
+    int MaxAmpl{std::numeric_limits<int>::max()};
   } Parms;
 };
 

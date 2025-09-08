@@ -40,8 +40,8 @@ public:
   ///
   /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  CaenInstrument(CaenCounters &counters, BaseSettings &settings,
-                 ESSReadout::Parser &essHeaderParser);
+  CaenInstrument(Statistics &Stats, CaenCounters &counters,
+                 BaseSettings &settings, ESSReadout::Parser &essHeaderParser);
 
   ~CaenInstrument();
 
@@ -53,9 +53,6 @@ public:
   setSerializers(std::vector<std::shared_ptr<EV44Serializer>> &serializers) {
     Serializers = serializers;
   }
-
-  /// \brief Caen pixel calculations
-  uint32_t calcPixel(DataParser::CaenReadout &Data);
 
   /// \brief Stuff that 'ties' Caen together
 

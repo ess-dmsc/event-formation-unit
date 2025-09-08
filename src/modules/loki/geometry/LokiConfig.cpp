@@ -45,9 +45,6 @@ void LokiConfig::parseConfig() {
   }
 
   try {
-    // Assumed the same for all straws in all banks
-    assign("Resolution", Parms.Resolution);
-
     setMask(LOG);
     assign("GroupsZ", Parms.GroupsZ);
 

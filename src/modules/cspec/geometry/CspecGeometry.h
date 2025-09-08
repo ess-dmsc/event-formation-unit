@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "common/Statistics.h"
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -20,11 +21,11 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class CspecGeometry : public Geometry {
+class CspecGeometry : public Geometry, ESSGeometry {
 public:
-  explicit CspecGeometry(Config &CaenConfiguration);
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-  bool validateData(DataParser::CaenReadout &Data) override;
+  explicit CspecGeometry(Statistics &Stats, const Config &CaenConfiguration);
+
+  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Group);
@@ -35,16 +36,30 @@ public:
   /// \brief return the position along the unit (tube for CSPEC)
   int posAlongUnit(int AmpA, int AmpB);
 
-
   /// \brief return the total number of serializers used by the geometry
-  [[nodiscard]] inline size_t numSerializers() const override {return 1;}
+  [[nodiscard]] inline size_t numSerializers() const override { return 1; }
 
   /// \brief calculate the serializer index for the given readout
   /// \param Data CaenReadout to calculate serializer index for
-  [[nodiscard]] inline size_t calcSerializer(DataParser::CaenReadout &) const override {return 0;}
+  [[nodiscard]] inline size_t
+  calcSerializer(const DataParser::CaenReadout &) const override {
+    return 0;
+  }
 
   /// \brief return the name of the serializer at the given index
-  [[nodiscard]] inline std::string serializerName(size_t) const override {return "caen";}
+  [[nodiscard]] inline std::string serializerName(size_t) const override {
+    return "caen";
+  }
+  // Per-detector resolution: number of pixels across one unit
+  int Resolution;
 
+protected:
+  /// \brief validate the readout data fields for this geometry
+  /// \param DataPtr pointer to readout data
+  /// \return pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(void *DataPtr) override;
 };
 } // namespace Caen
+
+// Per-detector resolution: number of pixels across one unit
+// Note: CspecGeometry will use this value from its implementation file.

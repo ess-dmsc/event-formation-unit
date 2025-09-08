@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <algorithm>
 #include <common/testutils/TestBase.h>
 #include <loki/geometry/LokiGeometry.h>
@@ -16,30 +17,39 @@ using namespace Caen;
 
 class LokiGeometryTest : public TestBase {
 protected:
-  LokiGeometry *geom;
+  Statistics Stats;
+  std::unique_ptr<LokiGeometry> geom;
   Config CaenConfiguration;
 
   void SetUp() override {
-    CaenConfiguration.LokiConf.Parms.Resolution = 512;
-    CaenConfiguration.LokiConf.Parms.TotalGroups = 56*4;
+    CaenConfiguration.CaenParms.Resolution = 512;
+    CaenConfiguration.LokiConf.Parms.TotalGroups = 56 * 4;
     CaenConfiguration.LokiConf.Parms.Rings[0].Bank = 0;
     CaenConfiguration.LokiConf.Parms.Rings[0].FENs = 16;
     CaenConfiguration.LokiConf.Parms.Rings[0].FENOffset = 0;
 
     CaenConfiguration.LokiConf.Parms.Banks[0].GroupsN = 56;
     CaenConfiguration.LokiConf.Parms.Banks[0].YOffset = 0;
-    geom = new LokiGeometry(CaenConfiguration);
-    geom->setResolution(512);
+    geom = std::make_unique<LokiGeometry>(Stats, CaenConfiguration);
 
-
-
-    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.LokiConf.Parms.TotalGroups;
+    geom->CaenCDCalibration.Parms.Groups =
+        CaenConfiguration.LokiConf.Parms.TotalGroups;
     // Make nullcalibration
     for (int i = 0; i < geom->Conf.LokiConf.Parms.TotalGroups; i++) {
-      geom->CaenCDCalibration.Intervals.push_back({{0.0,0.143}, {0.144,0.286},
-            {0.287,0.429}, {0.43,0.571}, {0.572,0.714},
-            {0.715,0.857}, {0.858,  1.0}});
-      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
+      geom->CaenCDCalibration.Intervals.push_back({{0.0, 0.143},
+                                                   {0.144, 0.286},
+                                                   {0.287, 0.429},
+                                                   {0.43, 0.571},
+                                                   {0.572, 0.714},
+                                                   {0.715, 0.857},
+                                                   {0.858, 1.0}});
+      geom->CaenCDCalibration.Calibration.push_back({{0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0},
+                                                     {0.0, 0.0, 0.0, 0.0}});
     }
   }
   void TearDown() override {}
@@ -47,11 +57,9 @@ protected:
 
 // Test cases below
 TEST_F(LokiGeometryTest, AllZeroes) {
-  geom->setResolution(512);
   geom->calcUnitAndPos(0, 0, 0, 0, 0);
-  ASSERT_EQ(geom->Stats.AmplitudeZero, 1);
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 1);
 }
-
 
 TEST_F(LokiGeometryTest, UnitLimits) {
   double delta = 0.0001;
@@ -76,7 +84,6 @@ TEST_F(LokiGeometryTest, UnitLimits) {
   ASSERT_EQ(geom->CaenCDCalibration.getUnitId(0, 0.858 + delta), 6);
 }
 
-
 ///\brief Using formula from ICD to calculate Unit (straw in LOKI terms)
 ///
 ///            B + D
@@ -84,7 +91,6 @@ TEST_F(LokiGeometryTest, UnitLimits) {
 ///        A + B + C + D
 ///
 TEST_F(LokiGeometryTest, MinMaxUnit) {
-  geom->setResolution(512);
   unsigned int iMax = 4096;
   for (unsigned int i = 1; i < iMax; i++) {
     //                           Group A  B  C  D
@@ -101,7 +107,6 @@ TEST_F(LokiGeometryTest, MinMaxUnit) {
   }
 }
 
-
 ///\brief Using formula from ICD to calculate Position (in unit interval)
 ///
 ///            A + B
@@ -109,7 +114,6 @@ TEST_F(LokiGeometryTest, MinMaxUnit) {
 ///        A + B + C + D
 ///
 TEST_F(LokiGeometryTest, MinMaxPos) {
-  geom->setResolution(512);
   for (unsigned int i = 1; i < 4095; i++) {
     //                          Group  A  B  C  D
     auto Pos = geom->calcUnitAndPos(0, 0, 0, i, 0).second;
@@ -123,24 +127,21 @@ TEST_F(LokiGeometryTest, MinMaxPos) {
   }
 }
 
-
-
 TEST_F(LokiGeometryTest, validate) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
+  ASSERT_TRUE(geom->validateReadoutData(readout));
 
   readout.FiberId = 10;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingMappingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingMappingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
 
   readout.FiberId = 0;
   readout.FENId = 20;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingMappingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENMappingErrors, 1);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingMappingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().TopologyError, 1);
 }
-
 
 ///\todo Very rudimentary test, should be extended
 TEST_F(LokiGeometryTest, calcPixel) {
@@ -155,7 +156,6 @@ TEST_F(LokiGeometryTest, calcPixel) {
   // So pixel is 3 * 512 + 255 + 1 =
   ASSERT_EQ(geom->calcPixel(readout), 1793);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
