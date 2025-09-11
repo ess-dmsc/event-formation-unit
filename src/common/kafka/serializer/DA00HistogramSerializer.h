@@ -97,8 +97,8 @@ class HistogramSerializer : public AbstractSerializer {
   const R BinOffset;
   const enum BinningStrategy BinningStrategy;
   HistrogramSerializerStats Stats;
-
   std::vector<size_t> BinSizes;
+  flatbuffers::FlatBufferBuilder BufferBuilder{};
 
   data_t DataBins;
   std::vector<R> XAxisValues;
@@ -123,7 +123,8 @@ public:
       : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
         Period(std::move(Period)), BinCount(std::move(BinCount)),
         SignalUnit(std::move(DataUnit)), AggregateFunction(std::move(AggFunc)),
-        BinOffset(BinOffset), BinningStrategy(std::move(Strategy)), Stats() {
+        BinOffset(BinOffset), BinningStrategy(std::move(Strategy)), Stats(),
+        BufferBuilder(BinCount * (sizeof(T) + sizeof(R)) + 256) {
 
     // Check for negative values in the bin count and period
     // Current concept not support negative values for bins
@@ -165,7 +166,8 @@ public:
         Stats(other.Stats), BinOffset(BinOffset),
         AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
-        DataBins(other.DataBins), XAxisValues(other.XAxisValues) {}
+        DataBins(other.DataBins), XAxisValues(other.XAxisValues),
+        BufferBuilder(other.BufferBuilder) {}
 
   /// \brief This function finds the bin index for a given time.
   /// \note This function marked virtual for testing purposes.
@@ -232,29 +234,37 @@ private:
 
     std::vector<T> AggregatedBins;
     AggregatedBins.reserve(DataBins.size());
-    for (auto Data : DataBins) {
+    bool emptyBins = true;
+    for (const auto &Data : DataBins) {
+      if (Data.second > 0) {
+        emptyBins = false;
+      }
       AggregatedBins.push_back(AggregateFunction(Data));
     }
+    if (!emptyBins) {
+      auto XAxis = (da00flatbuffers::Variable("frame_time", {"frame_time"},
+                                              {static_cast<int64_t>(BinCount) + 1})
+                        .unit("ns")
+                        .data(XAxisValues));
 
-    auto XAxis = (da00flatbuffers::Variable("frame_time", {"frame_time"},
-                                            {static_cast<int64_t>(BinCount) + 1})
-                      .unit("ns")
-                      .data(XAxisValues));
+      auto YAxis =
+          (da00flatbuffers::Variable("signal", {"frame_time"},
+                                    {static_cast<int64_t>(BinCount)})
+              .unit(SignalUnit)
+              .data(AggregatedBins));
 
-    auto YAxis =
-        (da00flatbuffers::Variable("signal", {"frame_time"},
-                                   {static_cast<int64_t>(BinCount)})
-             .unit(SignalUnit)
-             .data(AggregatedBins));
+      const auto DataArray = da00flatbuffers::DataArray(
+          Source, ReferenceTime.value(), {XAxis, YAxis});
 
-    const auto DataArray = da00flatbuffers::DataArray(
-        Source, ReferenceTime.value(), {XAxis, YAxis});
-
-    flatbuffers::FlatBufferBuilder Builder(BinCount * (sizeof(T) + sizeof(R)) +
-                                           256);
-
-    Builder.Finish(DataArray.pack(Builder), da00_DataArrayIdentifier());
-    Buffer = Builder.Release();
+      BufferBuilder.Finish(DataArray.pack(BufferBuilder), da00_DataArrayIdentifier());
+      // Create a detached buffer for AbstractSerializer produce method. Detached buffer
+      // wrap a pointer and size to internal buffer builder objects.
+      Buffer = BufferBuilder.Release();
+    } else {
+      // Set Buffer value in parent.
+      // Create an empty buffer used for AbstractSerializer produce method
+      Buffer = flatbuffers::DetachedBuffer();
+    }
 
     DataBins.clear();
     DataBins.resize(BinCount, {0, 0});
