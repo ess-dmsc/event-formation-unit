@@ -74,6 +74,7 @@ private:
 
 public:
   ProducerCallback MockedProduceFunction;
+  std::function<void(bool)> Invoked;
 
   TestValidator(const CommonFbMemebers &TestData)
       : CommonMembers(TestData),
@@ -81,6 +82,16 @@ public:
                                      int64_t TestProduceCallTime) {
           this->flatbufferTester(TestFlatBuffer, TestProduceCallTime);
         }) {}
+
+  // minor change to constructor above. This one can be used to verify that produce callback
+  // has been invoked
+  TestValidator(const CommonFbMemebers &TestData, const std::function<void(bool)> &invoked)
+      : CommonMembers(TestData),
+        MockedProduceFunction([this](nonstd::span<const uint8_t> TestFlatBuffer,
+                                     int64_t TestProduceCallTime) {
+          this->flatbufferTester(TestFlatBuffer, TestProduceCallTime);
+          Invoked(true);
+        }), Invoked(invoked) {}
 
   TestValidator(const CommonFbMemebers &TestData,
                 const std::vector<T> &ExpectedResults)
@@ -412,6 +423,82 @@ TEST_F(HistogramSerializerTest, TestEmtpyCalls) {
   EXPECT_NO_THROW(serializer.produce());
 
   EXPECT_NO_THROW(serializer.produce());
+}
+
+TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
+
+  //Setup callback for serializer.
+  bool invoked = false;
+  auto HasBeenInvoked =  [&](bool isInvoked) { invoked = isInvoked; };
+
+  //We want pulse time to increment with 1 microseconds
+  constexpr int BinInterval = 1000;
+  constexpr int BinCount = 10;
+  esstime::TimeDurationNano IBMPulseInterval = 
+    esstime::TimeDurationNano(BinInterval * BinCount);
+  ESSTime current = ESSTime(0, 0);
+
+  CommonFbMembers.Period = BinInterval;
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+
+  auto serializer = Validator.createHistogramSerializer(
+      fbserializer::BinningStrategy::LastBin);
+
+  // Perform test 1
+  // Empty bins. Nothing serialized and callback method must not be invoked.
+  // Test that callback flag is not set.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_NO_THROW(serializer.produce());
+  EXPECT_FALSE(invoked);
+  invoked = false;
+
+  // Perform test 2
+  //Set data in bin. Test data is 3 readout times with a values 300, 800, 1200. 
+  //Expected result with current setup (where each bin is 100ns) must be  in expect bin. 
+  //If readout time is larger than highest bin it is added to last bin BinningStrategy::LastBin.
+  //Each readout time in test data is divided with 100 bin. Expected data with last bin strategy
+  //is bin index, 4, 9, 10. Bin index = readout time / 100 + 1. One is added because first bin
+  //is pulse time + 0 readout.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
+  Validator.setData({0, 0, 0, 10, 0, 0, 0, 0, 9, 8});
+  for (auto &item : testData) {
+    serializer.addEvent(item.first, item.second);
+  }
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_NO_THROW(serializer.produce());
+  EXPECT_TRUE(invoked);
+  invoked = false;
+
+  // Perform test 3
+  // Empty bins again after a pulse with data to verify that internal empty bin flags are cleared after
+  // data has been sent. Nothing serialized and callback method must not be invoked.
+  // Test that callback flag is not set.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_NO_THROW(serializer.produce());
+  EXPECT_FALSE(invoked);
+  invoked = false;
+
+  // Perform test 4
+  //Set data in bin again. Test data is 1 readout times with a values 700. 
+  //Expected result with current setup (where each bin is 100ns) must be in expect bin. 
+  //If readout time is larger than highest bin it is added to last bin BinningStrategy::LastBin.
+  //Each readout time in test data is divided with 100 bin. Expected data with last bin strategy
+  //is bin index, 8. Bin index = readout time / 100 + 1. One is added because first bin
+  //is pulse time + 0 readout.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  Validator.setData({0, 0, 0, 0, 0, 0, 0, 10, 0, 0});
+  serializer.addEvent(700, 10);
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_NO_THROW(serializer.produce());
+  EXPECT_TRUE(invoked);
 }
 
 TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {

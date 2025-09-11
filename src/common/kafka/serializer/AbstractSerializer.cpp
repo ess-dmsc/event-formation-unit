@@ -21,7 +21,6 @@ namespace fbserializer {
 AbstractSerializer::AbstractSerializer(const ProducerCallback Callback,
                                        SerializerStats &Stats)
     : ProduceCallback(std::move(Callback)), Stats(Stats) {}
-flatbuffers::DetachedBuffer Buffer;
 
 void AbstractSerializer::produce() {
   Stats.ProduceCalled++;
@@ -36,9 +35,15 @@ void AbstractSerializer::produce() {
           .count();
 
   serialize();
+  // Serialize method populate Buffer (flatbuffer detached buffer) 
+  // If serialize did not find any data to send buffer size will
+  // be empty.
+  if (Buffer.size() == 0) {
+    return;
+  }
 
   auto DataBuffer = nonstd::span<const uint8_t>(Buffer.data(), Buffer.size());
-
+  
   ProduceCallback(DataBuffer, CurrentHwClock);
 }
 
