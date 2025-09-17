@@ -83,14 +83,15 @@ public:
   /// This function increments the ProduceCalled statistic, gets the current
   /// hardware clock, calls the serialize() function, and invokes the
   /// ProduceCallback with the serialized data and the current hardware clock.
-  ///
   void produce();
 
   /// \brief Sets the reference time for serialization.
   ///
   /// \param Time The reference time in ns precision
   ///
-  void checkAndSetReferenceTime(const TimeDurationNano &Time);
+  /// This function must be implemented in specific implementation of 
+  /// AbstractSerializer
+  virtual void checkAndSetReferenceTime(const TimeDurationNano &Time) = 0;
 };
 
 } // namespace fbserializer

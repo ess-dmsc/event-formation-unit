@@ -93,12 +93,14 @@ class HistogramSerializer : public AbstractSerializer {
   const time_t Period;
   const time_t BinCount;
   const std::string SignalUnit;
+  const uint8_t SumUpPulses{}; 
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const R BinOffset;
   const enum BinningStrategy BinningStrategy;
   HistrogramSerializerStats Stats;
   std::vector<size_t> BinSizes;
   flatbuffers::FlatBufferBuilder BufferBuilder{};
+  int PulseCounter{0};
 
   data_t DataBins;
   std::vector<R> XAxisValues;
@@ -110,20 +112,22 @@ public:
   /// \param Period is the length of time of one frame in the specified units
   /// \param BinCount is the number of the bins used
   /// \param DataUnit is the unit of the binned data
+  /// \param SumUpPulses number of pulses to aggregate before send
   /// \param Callback is the producer callback function
   /// \param AggFunc is the aggregation function used to aggregate the data
   /// inside the bins
   /// \param Strategy is the enum like binning strategy we can select
 
-  HistogramSerializer(
+  explicit HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, const std::string &DataUnit,
-      ProducerCallback Callback = {}, R BinOffset = 0,
+      uint8_t SumUpPulses = 1, ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
       enum BinningStrategy Strategy = BinningStrategy::Drop)
       : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
         Period(std::move(Period)), BinCount(std::move(BinCount)),
-        SignalUnit(std::move(DataUnit)), AggregateFunction(std::move(AggFunc)),
-        BinOffset(BinOffset), BinningStrategy(std::move(Strategy)), Stats(),
+        SignalUnit(std::move(DataUnit)), SumUpPulses(SumUpPulses),
+        AggregateFunction(std::move(AggFunc)), BinOffset(BinOffset), 
+        BinningStrategy(std::move(Strategy)), Stats(),
         BufferBuilder(BinCount * (sizeof(T) + sizeof(R)) + 256) {
 
     // Check for negative values in the bin count and period
@@ -151,23 +155,23 @@ public:
 
   /// \brief Constructor for the HistogramBuilder class.
   /// \details This constructor is used when binning strategy is provided
-  HistogramSerializer(
+  explicit HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, const std::string &Unit,
-      enum BinningStrategy Strategy = BinningStrategy::Drop,
+      enum BinningStrategy Strategy = BinningStrategy::Drop, uint8_t SumUpPulses = 1, 
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Source, Period, BinCount, Unit, Callback, BinOffset,
-                            AggFunc, Strategy) {}
+      : HistogramSerializer(Source, Period, BinCount, Unit, SumUpPulses, Callback, 
+                            BinOffset, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
-  HistogramSerializer(const HistogramSerializer &other)
+  explicit HistogramSerializer(const HistogramSerializer &other)
       : AbstractSerializer(other), Source(other.Source), Period(other.Period),
         BinCount(other.BinCount), SignalUnit(other.SignalUnit),
         Stats(other.Stats), BinOffset(BinOffset),
         AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
-        DataBins(other.DataBins), XAxisValues(other.XAxisValues),
-        BufferBuilder(other.BufferBuilder) {}
+        SumUpPulses(other.SumUpPulses), DataBins(other.DataBins), 
+        XAxisValues(other.XAxisValues), BufferBuilder(other.BufferBuilder) {}
 
   /// \brief This function finds the bin index for a given time.
   /// \note This function marked virtual for testing purposes.
@@ -217,6 +221,34 @@ public:
            "Value %zu added to DataBin[%zu] New value sum: %zu, count: %zu.",
            Value, BinIndex, firstPair.first, firstPair.second);
   }
+
+
+  /// \brief Sets the reference time for serialization.
+  ///
+  /// \param Time The reference time in ns precision
+  ///
+  /// Set reference time and trigger message serialize.
+  /// If message is serialized it will be sent to message broker
+  virtual void checkAndSetReferenceTime(const TimeDurationNano &Time) override {
+    // Produce already collected data before change reference time
+    if (!ReferenceTime.has_value()) {
+      ReferenceTime = Time;
+      return;
+    } else if (Time == ReferenceTime.value()) {
+      return;
+    }
+    
+    PulseCounter++;
+    if (PulseCounter >= SumUpPulses) {
+      produce();
+      PulseCounter = 0;
+    }
+
+    Stats.ProduceRefTimeTriggered++;
+    // Update reference time
+    ReferenceTime = Time;
+  }
+
   // Getter function for the Stats member
   HistrogramSerializerStats &stats() { return Stats; }
 
@@ -224,7 +256,7 @@ private:
   /// \brief Serialize the data to a flatbuffer.
   /// \details The data is serialized to a flatbuffer and stored in the buffer
   /// of the abstract serializer
-  void serialize() {
+  void serialize() override {
     if (static_cast<time_t>(DataBins.size()) != BinCount) {
       auto msg = fmt::format(
           "Expected data to serialize to have {} elements but provided {}",
