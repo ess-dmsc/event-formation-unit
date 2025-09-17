@@ -25,12 +25,13 @@ using namespace da00flatbuffers;
 struct CommonFbMemebers {
   std::string Source;
   std::string DataUnit;
+  uint8_t SumUpPulses{1};
   int64_t Period;
   size_t BinSize;
   TimeDurationNano ReferenceTime;
   int64_t ProduceCallTime;
   int64_t BinOffset{0}; // Add BinOffset with default value
-
+ 
   CommonFbMemebers &setSource(const std::string &Source) {
     this->Source = Source;
     return *this;
@@ -104,14 +105,15 @@ public:
   fbserializer::HistogramSerializer<T, R> createHistogramSerializer() {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.DataUnit, MockedProduceFunction, CommonMembers.BinOffset);
+        CommonMembers.DataUnit, CommonMembers.SumUpPulses, 
+        MockedProduceFunction, CommonMembers.BinOffset);
   }
 
   fbserializer::HistogramSerializer<T, R>
   createHistogramSerializer(fbserializer::BinningStrategy Strategy) {
     return fbserializer::HistogramSerializer<T, R>(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
-        CommonMembers.DataUnit, Strategy, MockedProduceFunction,
+        CommonMembers.DataUnit, Strategy, CommonMembers.SumUpPulses, MockedProduceFunction,
         CommonMembers.BinOffset);
   }
 
@@ -423,6 +425,149 @@ TEST_F(HistogramSerializerTest, TestEmtpyCalls) {
   EXPECT_NO_THROW(serializer.produce());
 
   EXPECT_NO_THROW(serializer.produce());
+}
+
+TEST_F(HistogramSerializerTest, TestBufferSumUpPulsesCalls) {
+
+  //Setup callback for serializer.
+  int invokeCount{0};
+  auto HasBeenInvoked =  [&](bool) { ++invokeCount; };
+
+  //We want pulse time to increment with 1 microseconds
+  constexpr int BinInterval = 1000;
+  constexpr int BinCount = 10;
+  constexpr int SumUpPulseCount = 10;
+  esstime::TimeDurationNano IBMPulseInterval = 
+    esstime::TimeDurationNano(BinInterval * BinCount);
+  ESSTime current = ESSTime(0, 0);
+
+  CommonFbMembers.Period = BinInterval;
+  CommonFbMembers.SumUpPulses = SumUpPulseCount;
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+
+  auto serializer = Validator.createHistogramSerializer(
+      fbserializer::BinningStrategy::LastBin);
+
+  //Setup serializer. First pulse after system start will never
+  //be serialized. When a new pulse is received, the previous is serialized
+  //and sent. Make a start pulse that will make system ready.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  serializer.checkAndSetReferenceTime(current.toNS());
+    EXPECT_EQ(invokeCount, 0);
+
+  // Perform test 1
+  //Set data in the bin. Test data is 3 readout times with a values 300, 800, 1200. 
+  //Expected result with current setup (where each bin is 100 ns) must be in the expected bin. 
+  //If readout time is larger than the highest bin, it is added to last bin BinningStrategy::LastBin.
+  //Each readout time in test data is divided with 100 bin. Expected data with last bin strategy
+  //is bin index, 4, 9, 10. The bin index is given by index = readout time / 100 + 1. One is added because the first bin
+  //is pulse time + 0 readout.
+  //Pulse will be repeated 10 times and should only give a readout on 11th.
+  std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
+  Validator.setData({0, 0, 0, 100, 0, 0, 0, 0, 90, 80});
+  for (size_t i = 0; i < 10; i++)
+  {
+    CommonFbMembers.setReferenceTime(current.toNS());
+    current += IBMPulseInterval;
+    for (const auto &[time, value] : testData) {
+        serializer.addEvent(time, value);
+    }
+    serializer.checkAndSetReferenceTime(current.toNS());
+    //Last check will result in a serialized payload
+    EXPECT_EQ(invokeCount, i != 9 ? 0 : 1);
+  }
+
+  // Perform test 4
+  //Set data in the bin again. Test data is 1 readout times with a values 700. 
+  //Expected result with current setup (where each bin is 100 ns) must be in the expected bin. 
+  //If readout time is larger than the highest bin, it is added to last bin BinningStrategy::LastBin.
+  //Each readout time in test data is divided with 100 bin. Expected data with last the bin strategy
+  //is bin index 8. The bin index is given by bin = = readout time / 100 + 1. One is added because the first bin
+  //is pulse time + 0 readout.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  Validator.setData({0, 0, 0, 100, 0, 0, 0, 0, 90, 80});
+  serializer.addEvent(700, 10);
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_EQ(invokeCount, 1);
+  //Set it back to default for other unit test to have expected value
+  CommonFbMembers.SumUpPulses = 1;
+}
+
+TEST_F(HistogramSerializerTest, TestBufferSumUpPulsesCallsWithEmpty) {
+  //Almost the same test as above but this one will have to pulses whit out any
+  //Histogram data
+  //Setup callback for serializer.
+  int invokeCount{0};
+  auto HasBeenInvoked =  [&](bool) { ++invokeCount; };
+
+  //We want pulse time to increment with 1 microseconds
+  constexpr int BinInterval = 1000;
+  constexpr int BinCount = 10;
+  constexpr int SumUpPulseCount = 10;
+  esstime::TimeDurationNano IBMPulseInterval = 
+    esstime::TimeDurationNano(BinInterval * BinCount);
+  ESSTime current = ESSTime(0, 0);
+
+  CommonFbMembers.Period = BinInterval;
+  CommonFbMembers.SumUpPulses = SumUpPulseCount;
+  /// Initialize validator and create serializer
+  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+
+  auto serializer = Validator.createHistogramSerializer(
+      fbserializer::BinningStrategy::LastBin);
+
+  //Setup serializer. First pulse after system start will never
+  //be serialized. When a new pulse is received, the previous pulse is serialized
+  //and sent. Make a start pulse that will make system ready.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  serializer.checkAndSetReferenceTime(current.toNS());
+    EXPECT_EQ(invokeCount, 0);
+
+  // Perform test 1
+  //Set data in the bin. Test data is 3 readout times with the values 300, 800, and 1200. 
+  //Expected result with current setup (where each bin is 100 ns) must be in the expected bin. 
+  //If the readout time is larger than the highest bin, it is added to the last bin BinningStrategy::LastBin.
+  //Each readout time in test data, it is is divided with 100 bin. Expected data with the last bin strategy
+  //is bin index, 4, 9, and 10. The bin index is index = readout time / 100 + 1. One is added because the first bin
+  //is pulse time + 0 readout.
+  //The pulse will be repeated 8 times and 2 times with empty histogram and only gives a readout on the 11th repeat.
+  std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
+  Validator.setData({0, 0, 0, 80, 0, 0, 0, 0, 72, 64});
+  for (size_t i = 0; i < 10; i++)
+  {
+    CommonFbMembers.setReferenceTime(current.toNS());
+    current += IBMPulseInterval;
+    //Make two empty pulses
+    if ((i != 3) && (i != 7)) {
+      for (const auto &[time, value] : testData) {
+        serializer.addEvent(time, value);
+      }
+    }
+    serializer.checkAndSetReferenceTime(current.toNS());
+    //Last check will result in a serialized payload
+    EXPECT_EQ(invokeCount, i != 9 ? 0 : 1);
+  }
+
+  // Perform test 4
+  //Set data in bin again. Test data is 1 readout times with a values 700. 
+  //Expected result with current setup (where each bin is 100ns) must be in expect bin. 
+  //If readout time is larger than highest bin it is added to last bin BinningStrategy::LastBin.
+  //Each readout time in test data is divided with 100 bin. Expected data with last bin strategy
+  //is bin index, 8. Bin index = readout time / 100 + 1. One is added because first bin
+  //is pulse time + 0 readout.
+  //This pulse should not trigger an message before 9 more are added.
+  CommonFbMembers.setReferenceTime(current.toNS());
+  current += IBMPulseInterval;
+  Validator.setData({0, 0, 0, 100, 0, 0, 0, 0, 90, 80});
+  serializer.addEvent(700, 10);
+  serializer.checkAndSetReferenceTime(current.toNS());
+  EXPECT_EQ(invokeCount, 1);
+  //Set it back to default for other unit test to have expected value
+  CommonFbMembers.SumUpPulses = 1;
 }
 
 TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {

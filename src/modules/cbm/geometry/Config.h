@@ -83,6 +83,7 @@ public:
     uint8_t NumberOfMonitors{1};                 // < Number of monitor in the config
     uint8_t MaxFENId{10};                        // < Maximum FEN ID
     uint8_t NumOfFENs{11};                       // < Number of FENs, MaxId + 1
+    uint8_t SumUpPulses{1};                      // < Number of pulse to sum in a histogram
   } Parms;
   // clang-format on
 

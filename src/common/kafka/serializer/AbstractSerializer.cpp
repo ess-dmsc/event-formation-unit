@@ -29,15 +29,14 @@ void AbstractSerializer::produce() {
     Stats.ProduceFailedNoReferenceTime++;
     return;
   }
-
   uint64_t CurrentHwClock =
       duration_cast<milliseconds>(system_clock::now().time_since_epoch())
           .count();
 
   serialize();
-  // Serialize method populate Buffer (flatbuffer detached buffer) 
-  // If serialize did not find any data to send buffer size will
-  // be empty.
+  // After Serialize a detached buffer have been created.
+  // If detached buffer size is zero the previous pulse did not 
+  // contain any relevant data.
   if (Buffer.size() == 0) {
     return;
   }
@@ -46,23 +45,4 @@ void AbstractSerializer::produce() {
   
   ProduceCallback(DataBuffer, CurrentHwClock);
 }
-
-void AbstractSerializer::checkAndSetReferenceTime(
-    const TimeDurationNano &Time) {
-
-  // Produce already collected data before change reference time
-  if (!ReferenceTime.has_value()) {
-    ReferenceTime = Time;
-    return;
-
-  } else if (Time == ReferenceTime.value()) {
-    return;
-  }
-
-  // Update reference time
-  produce();
-  Stats.ProduceRefTimeTriggered++;
-  ReferenceTime = Time;
-}
-
 } // namespace fbserializer
