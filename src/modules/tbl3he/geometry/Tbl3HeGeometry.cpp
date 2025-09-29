@@ -85,8 +85,8 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
 
 /// \brief calculate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
-uint32_t Tbl3HeGeometry::calcPixelImpl(void *DataPtr) {
-  auto Data = static_cast<DataParser::CaenReadout *>(DataPtr);
+uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) {
+  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int Tube = Data->Group;
 

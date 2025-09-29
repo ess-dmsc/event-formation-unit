@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -57,7 +57,7 @@ protected:
   /// \brief validate the readout data fields for this geometry
   /// \param DataPtr pointer to readout data
   /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) override;
 };
 } // namespace Caen
 

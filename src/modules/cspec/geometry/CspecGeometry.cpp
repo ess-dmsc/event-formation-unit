@@ -51,8 +51,8 @@ int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   return ((Resolution - 1) * AmpA) / (AmpA + AmpB);
 }
 
-uint32_t CspecGeometry::calcPixelImpl(void *DataPtr) {
-  auto Data = static_cast<DataParser::CaenReadout *>(DataPtr);
+uint32_t CspecGeometry::calcPixelImpl(const void *DataPtr) {
+  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int xoff = xOffset(Ring, Data->Group);
   int ylocal = yCoord(Data->AmpA, Data->AmpB);

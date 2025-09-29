@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -82,7 +82,7 @@ protected:
   /// \brief Implementation for pixel calculation for Loki geometry
   /// \param Data Pointer to CaenReadout object (cast internally)
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) override;
 };
 
 } // namespace Caen

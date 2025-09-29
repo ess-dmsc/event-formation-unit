@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/kafka/EV44Serializer.h"
+#include <common/kafka/EV44Serializer.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/time/TimeString.h>

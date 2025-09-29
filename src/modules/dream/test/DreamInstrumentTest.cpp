@@ -4,8 +4,8 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
-#include "common/kafka/EV44Serializer.h"
+#include <common/Statistics.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>

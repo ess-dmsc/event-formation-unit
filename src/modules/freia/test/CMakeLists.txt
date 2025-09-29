@@ -22,28 +22,43 @@ target_compile_definitions(FreiaConfigTest PRIVATE FREIA_FULL="${FREIA_FULL}")
 
 
 set(FreiaGeometryTest_INC
-  ../geometry/Geometry.h)
+  ../geometry/FreiaGeometry.h
+  ../geometry/Config.h)
 set(FreiaGeometryTest_SRC
-  ../test/GeometryTest.cpp)
+  ../geometry/Config.cpp
+  ../geometry/GeometryBase.cpp
+  ../test/FreiaGeometryTest.cpp)
 create_test_executable(FreiaGeometryTest)
 
 
-set(FreiaChannelMappingTest_INC
-  ../geometry/FreiaChannelMapping.h)
-set(FreiaChannelMappingTest_SRC
-  ../test/FreiaChannelMappingTest.cpp)
-create_test_executable(FreiaChannelMappingTest)
+set(AmorGeometryTest_INC
+  ../geometry/AmorGeometry.h
+  ../geometry/Config.h)
+set(AmorGeometryTest_SRC
+  ../geometry/Config.cpp
+  ../geometry/GeometryBase.cpp
+  ../test/AmorGeometryTest.cpp)
+create_test_executable(AmorGeometryTest)
 
+set(EstiaGeometryTest_INC
+  ../geometry/EstiaGeometry.h
+  ../geometry/Config.h)
+set(EstiaGeometryTest_SRC
+  ../geometry/Config.cpp
+  ../geometry/GeometryBase.cpp
+  ../test/EstiaGeometryTest.cpp)
+create_test_executable(EstiaGeometryTest)
 
-set(AMORChannelMappingTest_INC
-  ../geometry/AMORChannelMapping.h)
-set(AMORChannelMappingTest_SRC
-  ../test/AMORChannelMappingTest.cpp)
-create_test_executable(AMORChannelMappingTest)
-
-
-set(EstiaChannelMappingTest_INC
-  ../geometry/FreiaChannelMapping.h)
-set(EstiaChannelMappingTest_SRC
-  ../test/EstiaChannelMappingTest.cpp)
-create_test_executable(EstiaChannelMappingTest)
+# Consolidated geometry tests (replaces removed selector based Geometry.h tests)
+set(GeometryTest_INC
+  ../geometry/FreiaGeometry.h
+  ../geometry/AmorGeometry.h
+  ../geometry/EstiaGeometry.h
+  ../geometry/TBLMBGeometry.h
+  ../geometry/GeometryBase.h)
+set(GeometryTest_SRC
+  ../geometry/Config.cpp
+  ../geometry/GeometryBase.cpp
+  ../test/GeometryTest.cpp)
+create_test_executable(GeometryTest)
+target_compile_definitions(GeometryTest PRIVATE UNIT_TEST)

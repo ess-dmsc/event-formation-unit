@@ -4,9 +4,9 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
-#include "common/readout/ess/Parser.h"
-#include "readout/DataParser.h"
+#include <common/Statistics.h>
+#include <common/readout/ess/Parser.h>
+#include <readout/DataParser.h>
 #include <caen/CaenInstrument.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>

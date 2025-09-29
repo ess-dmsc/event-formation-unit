@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "common/readout/ess/Parser.h"
+#include <common/readout/ess/Parser.h>
 #include <bifrost/geometry/BifrostGeometry.h>
 #include <caen/CaenBase.h> // to get CaenSettings
 #include <caen/CaenCounters.h>

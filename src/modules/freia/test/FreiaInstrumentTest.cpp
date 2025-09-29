@@ -12,6 +12,7 @@
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <common/types/DetectorType.h>
 
 #include <freia/Counters.h>
 #include <freia/FreiaBase.h>
@@ -166,7 +167,8 @@ protected:
 
     HeaderFactory = std::make_unique<TestHeaderFactory>();
     Freia = std::make_unique<FreiaInstrument>(Counters, Settings, serializer,
-                                              ESSHeaderParser);
+                                              ESSHeaderParser, Stats, 
+                                              DetectorType::FREIA);
     ESSHeaderParser.Packet.HeaderPtr =
         HeaderFactory->createHeader(ESSReadout::Parser::V1);
   }
@@ -185,7 +187,8 @@ protected:
 // Test cases below
 TEST_F(FreiaInstrumentTest, Constructor) {
   Settings.CalibFile = CalibFile;
-  FreiaInstrument Freia(Counters, Settings, serializer, ESSHeaderParser);
+  FreiaInstrument Freia(Counters, Settings, serializer, ESSHeaderParser, Stats,
+                        DetectorType::FREIA);
   Counters.VMMStats = Freia.VMMParser.Stats;
   ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
 }
@@ -197,14 +200,14 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   Counters.VMMStats = Freia->VMMParser.Stats;
   ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
-  ASSERT_EQ(Counters.HybridMappingErrors, 0);
-  ASSERT_EQ(Counters.RingMappingErrors, 0);
-  ASSERT_EQ(Counters.FENMappingErrors, 0);
+  const GeometryBase &Geom = Freia->getGeometry();
+  ASSERT_EQ(Geom.getBaseCounters().RingErrors, 0);
+  ASSERT_EQ(Geom.getBaseCounters().FENErrors, 0);
 
   Freia->processReadouts();
-  ASSERT_EQ(Counters.HybridMappingErrors, 1);
-  ASSERT_EQ(Counters.RingMappingErrors, 1);
-  ASSERT_EQ(Counters.FENMappingErrors, 1);
+  ASSERT_EQ(Geom.getVmmGeometryCounters().HybridMappingErrors, 1);
+  ASSERT_EQ(Geom.getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(Geom.getBaseCounters().FENErrors, 1);
   ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
 }
@@ -230,8 +233,9 @@ TEST_F(FreiaInstrumentTest, InvalidWireChannels) {
   Freia->VMMParser.Result[2].Channel = 65;
   Freia->processReadouts();
 
-  ASSERT_EQ(Counters.InvalidXCoord, 1);
-  ASSERT_EQ(Counters.InvalidYCoord, 2);
+  auto GeomStats = Freia->getVmmGeometryStats();
+  ASSERT_EQ(GeomStats.InvalidXCoord, 1);
+  ASSERT_EQ(GeomStats.InvalidYCoord, 2);
 }
 
 TEST_F(FreiaInstrumentTest, WireGap) {
@@ -276,7 +280,8 @@ TEST_F(FreiaInstrumentTest, PixelError) {
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
   Freia->generateEvents(Events);
-  ASSERT_EQ(Counters.PixelErrors, 1);
+  auto const &Geom = Freia->getGeometry();
+  ASSERT_EQ(Geom.getBaseCounters().PixelErrors, 1);
 }
 
 TEST_F(FreiaInstrumentTest, EventTOFError) {

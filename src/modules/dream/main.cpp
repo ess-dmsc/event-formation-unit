@@ -5,7 +5,7 @@
 /// \brief Main entry for dream
 //===----------------------------------------------------------------------===//
 
-#include "common/types/DetectorType.h"
+#include <common/types/DetectorType.h>
 #include <efu/MainProg.h>
 #include <modules/dream/DreamBase.h>
 
