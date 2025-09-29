@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "Producer.h"
-#include "ar51_readout_data_generated.h"
+#include <common/kafka/Producer.h>
+#include <ar51_readout_data_generated.h>
 
 
 class AR51Serializer {

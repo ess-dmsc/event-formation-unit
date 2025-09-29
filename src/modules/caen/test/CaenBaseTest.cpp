@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/detector/Detector.h"
-#include "common/geometry/DetectorGeometry.h"
+#include <common/detector/Detector.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <caen/CaenBase.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>

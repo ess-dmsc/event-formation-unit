@@ -8,7 +8,7 @@
 /// \brief Unit test for Miracles position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <common/testutils/TestBase.h>
 #include <memory>
 #include <miracles/geometry/MiraclesGeometry.h>

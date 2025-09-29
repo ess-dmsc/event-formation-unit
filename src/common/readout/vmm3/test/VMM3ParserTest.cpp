@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/test/VMM3ParserTestData.h>

@@ -8,7 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/readout/ess/Parser.h"
+#include <common/readout/ess/Parser.h>
 #include <common/debug/Trace.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>

@@ -22,15 +22,13 @@
 
 #pragma once
 
+#include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <common/geometry/GeometryType.h>
 #include <common/memory/HashMap2D.h>
 #include <string>
 #include <typeinfo>
-
-// Include CAEN DataParser for type checking
-#include <modules/caen/readout/DataParser.h>
 
 ///
 /// \brief Common detector geometry base class for ESS Ring/FEN detectors
@@ -119,10 +117,16 @@ protected:
 
   /// \brief Pure virtual implementation method for pixel calculation
   /// Derived classes must implement this method for their specific geometry
-  /// \param Data Pointer to readout data object (cast to appropriate type
-  /// internally)
-  /// \return Calculated pixel ID, or 0 if calculation failed
-  virtual uint32_t calcPixelImpl(void *Data) = 0;
+  /// \param Data Pointer to readout data object (const, cast to appropriate
+  /// type internally) \return Calculated pixel ID, or 0 if calculation failed
+  virtual uint32_t calcPixelImpl(const void *Data) = 0;
+
+  /// \brief Pure virtual method for runtime type validation
+  /// Derived classes must implement this method to validate readout data types
+  /// specific to their geometry type (e.g., CAEN, VMM3, etc.)
+  /// \param type_info Type information from typeid()
+  /// \return true if type is valid for this geometry, false otherwise
+  virtual bool inline validateDataType(const std::type_info &type_info) = 0;
 
 public:
   /// \brief Get access to BaseGeometryCounters object
@@ -172,11 +176,11 @@ public:
 
   /// \brief Template wrapper for pixel calculation with runtime type validation
   /// \tparam T The readout data type
-  /// \param InstReadout Readout data object to calculate pixel for
+  /// \param Readout Data object to calculate pixel for (const reference)
   /// \return Calculated pixel ID, with automatic error counting for failures
-  template <typename T> uint32_t calcPixel(T &Readout) {
+  template <typename T> uint32_t calcPixel(const T &Data) {
     // Runtime type validation
-    if (!validateReadoutType(typeid(T))) {
+    if (!validateDataType(typeid(T))) {
       XTRACE(DATA, ERR, "Invalid readout type for geometry type %s",
              GeomType.toString().c_str());
       BaseCounters.TypeErrors++;
@@ -184,47 +188,13 @@ public:
     }
 
     // Use type erasure to call the derived class's calcPixelImpl method
-    uint32_t pixel = calcPixelImpl(&Readout);
+    uint32_t pixel = calcPixelImpl(&Data);
     if (pixel == 0) {
       BaseCounters.PixelErrors++;
       XTRACE(DATA, DEB, "Pixel calculation failed, counted as pixel error");
     }
 
     return pixel;
-  }
-
-private:
-  /// \brief Runtime type validation for readout data
-  /// \param type_info Type information from typeid()
-  /// \return true if type is valid for this geometry, false otherwise
-  bool validateReadoutType(const std::type_info &type_info) {
-    switch (GeomType) {
-    case GeometryType::CAEN:
-      // For CAEN geometries, we expect DataParser::CaenReadout
-      XTRACE(DATA, DEB, "Validating CAEN readout type: %s", type_info.name());
-      if (type_info == typeid(Caen::DataParser::CaenReadout)) {
-        return true;
-      } else {
-        XTRACE(DATA, WAR, "Invalid readout type for CAEN geometry: %s",
-               type_info.name());
-        return false;
-      }
-
-    /// \todo: add specific type checks for other geometry types
-    case GeometryType::VMM3:
-    case GeometryType::DREAM:
-    case GeometryType::TREX:
-    case GeometryType::CBM:
-      // Add specific type checks for other geometry types as needed
-      XTRACE(DATA, DEB, "Validating %s readout type: %s",
-             GeomType.toString().c_str(), type_info.name());
-      return true; // Accept for now
-
-    default:
-      XTRACE(DATA, WAR, "Unrecognized geometry type for type validation: %s",
-             GeomType.toString().c_str());
-      return false;
-    }
   }
 };
 

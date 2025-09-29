@@ -6,7 +6,7 @@
 /// \brief Unit test for CSPEC position calculations
 ///
 //===----------------------------------------------------------------------===//
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
 #include <cspec/geometry/CspecGeometry.h>

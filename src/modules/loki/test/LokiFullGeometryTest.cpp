@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2023 European Spallation Source, see LICENSE file, ERIC
+// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <algorithm>
 #include <common/testutils/TestBase.h>
 #include <loki/geometry/LokiConfig.h>

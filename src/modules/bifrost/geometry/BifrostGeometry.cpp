@@ -88,8 +88,8 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-uint32_t BifrostGeometry::calcPixelImpl(void *DataPtr) {
-  auto Data = static_cast<DataParser::CaenReadout *>(DataPtr);
+uint32_t BifrostGeometry::calcPixelImpl(const void *DataPtr) {
+  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int xoff = xOffset(Ring, Data->Group);
   int yoff = yOffset(Data->Group);

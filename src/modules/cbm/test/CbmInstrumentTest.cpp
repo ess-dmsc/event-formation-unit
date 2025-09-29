@@ -4,7 +4,7 @@
 /// \file Unit test for the CbmInstrument class.
 //===----------------------------------------------------------------------===//
 
-#include "common/readout/ess/Parser.h"
+#include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
 #include <modules/cbm/CbmInstrument.h>

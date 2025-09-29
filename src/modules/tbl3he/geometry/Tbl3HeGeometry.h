@@ -54,7 +54,7 @@ protected:
   /// \brief validate the readout data fields for this geometry
   /// \param DataPtr pointer to readout data
   /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) override;
 
 private:
   const Config &Conf;

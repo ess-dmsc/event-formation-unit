@@ -9,7 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <cmath>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/miracles/geometry/MiraclesGeometry.h>
@@ -25,8 +25,8 @@ MiraclesGeometry::MiraclesGeometry(Statistics &Stats, const Config &CaenConfigur
       ESSGeometry(48, 128, 1, 1),
       GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
-uint32_t MiraclesGeometry::calcPixelImpl(void *DataPtr) {
-  auto Data = static_cast<DataParser::CaenReadout *>(DataPtr);
+uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) {
+  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
 
   int Ring = Data->FiberId / 2;
   int x = xCoord(Ring, Data->Group, Data->AmpA, Data->AmpB);
