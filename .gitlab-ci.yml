@@ -42,6 +42,7 @@ variables:
     - cp -r utils/efushell archive/event-formation-unit/util
     - mkdir archive/event-formation-unit/configs
     - mkdir archive/event-formation-unit/data
+    - cp -r CHANGELOG archive/event-formation-unit/
 
 .versioning_rules:
   rules:
