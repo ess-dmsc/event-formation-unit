@@ -73,11 +73,11 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
-std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
+std::vector<uint8_t> BadTestPacket {0x00, 0x01, 0x02};
 
-std::vector<uint8_t> TestPacket2{
-    // ESS header
-    // clang-format off
+std::vector<uint8_t> TestPacket2 {
+  // ESS header
+  // clang-format off
   0x00, 0x00,             // pad, v0
   0x45, 0x53, 0x53, 0x30, //  'E' 'S' 'S' 0x30
   0xae, 0x00, 0x00, 0x00, // 0x96 = 150 bytes

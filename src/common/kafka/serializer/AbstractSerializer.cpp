@@ -21,7 +21,6 @@ namespace fbserializer {
 AbstractSerializer::AbstractSerializer(const ProducerCallback Callback,
                                        SerializerStats &Stats)
     : ProduceCallback(std::move(Callback)), Stats(Stats) {}
-flatbuffers::DetachedBuffer Buffer;
 
 void AbstractSerializer::produce() {
   Stats.ProduceCalled++;
@@ -30,34 +29,20 @@ void AbstractSerializer::produce() {
     Stats.ProduceFailedNoReferenceTime++;
     return;
   }
-
   uint64_t CurrentHwClock =
       duration_cast<milliseconds>(system_clock::now().time_since_epoch())
           .count();
 
   serialize();
-
-  auto DataBuffer = nonstd::span<const uint8_t>(Buffer.data(), Buffer.size());
-
-  ProduceCallback(DataBuffer, CurrentHwClock);
-}
-
-void AbstractSerializer::checkAndSetReferenceTime(
-    const TimeDurationNano &Time) {
-
-  // Produce already collected data before change reference time
-  if (!ReferenceTime.has_value()) {
-    ReferenceTime = Time;
-    return;
-
-  } else if (Time == ReferenceTime.value()) {
+  // After Serialize a detached buffer have been created.
+  // If detached buffer size is zero the previous pulse did not 
+  // contain any relevant data.
+  if (Buffer.size() == 0) {
     return;
   }
 
-  // Update reference time
-  produce();
-  Stats.ProduceRefTimeTriggered++;
-  ReferenceTime = Time;
+  auto DataBuffer = nonstd::span<const uint8_t>(Buffer.data(), Buffer.size());
+  
+  ProduceCallback(DataBuffer, CurrentHwClock);
 }
-
 } // namespace fbserializer

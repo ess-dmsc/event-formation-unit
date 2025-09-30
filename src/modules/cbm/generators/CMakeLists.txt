@@ -7,6 +7,7 @@
 set(cbm_udp_generated_INC
   ReadoutGenerator.h
   GeneratorType.h
+  ${ESS_COMMON_DIR}/testutils/bitmaps/BitMaps.h
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.h
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.h
   ${ESS_SOURCE_DIR}/generators/functiongenerators/FunctionGenerator.h
@@ -16,6 +17,7 @@ set(cbm_udp_generated_INC
 set(cbm_udp_generated_SRC
   ReadoutGenerator.cpp
   udpgen.cpp
+  ${ESS_COMMON_DIR}/testutils/bitmaps/BitMaps.cpp
   ${ESS_COMMON_DIR}/testutils/DataFuzzer.cpp
   ${ESS_SOURCE_DIR}/generators/essudpgen/ReadoutGeneratorBase.cpp
   ${ESS_SOURCE_DIR}/generators/functiongenerators/DistributionGenerator.cpp

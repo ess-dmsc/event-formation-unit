@@ -97,8 +97,8 @@ void CaenInstrument::processReadouts() {
 
     if (TimeOfFlight == ESSHeaderParser.Packet.Time.InvalidTOF) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
-      continue;
       counters.TimeError++;
+      continue;
     }
 
     XTRACE(DATA, DEB,

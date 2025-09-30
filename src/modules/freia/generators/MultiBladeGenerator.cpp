@@ -100,6 +100,9 @@ void MultiBladeGenerator::generateData() {
       const Image &image = *mImages[VMM0 % mImages.size()];
 
       if (i == 0) {
+        //Image is saved as an array with pixel coordinates. To get a random pixel a random 
+        //item in the array is read. When getting the pixel coordinates "image.size() - 1" 
+        //is used. This will leave out the last pixel in the figure and create an asymmetric figure
         const int index = Fuzzer.randomInterval(1, image.size() - 1);
         const auto &[x, y] = image[index];
 

@@ -95,7 +95,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   // Check valid Groups
-  for (int i = 0; i <= 23; i++) {
+  for (uint i = 0; i <= 23; i++) {
     readout.Group = i;
     if (i <= CaenConfiguration.CaenParms.MaxGroup) {
       ASSERT_EQ(geom->validateReadoutData(readout), true);

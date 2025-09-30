@@ -4,12 +4,12 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include <caen/CaenInstrument.h>
 #include <common/Statistics.h>
 #include <common/readout/ess/Parser.h>
-#include <readout/DataParser.h>
-#include <caen/CaenInstrument.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
+#include <readout/DataParser.h>
 
 using namespace Caen;
 
@@ -196,7 +196,8 @@ TEST_F(CaenInstrumentTest, CountPixelErrors) {
 
   // Verify that the pixel error was counted through DetectorGeometry
   EXPECT_EQ(Caen.Geom->getBaseCounters().PixelErrors, 1);
-  // Verify that Events counter is still 0 (no successful pixel calculation)
+  // Verify that Events counter is still 0 (no successful pixel
+  // calculation)
   EXPECT_EQ(counters.Events, 0);
 }
 

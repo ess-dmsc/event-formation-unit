@@ -95,7 +95,7 @@ void CbmInstrument::processMonitorReadouts() {
     /// Calculates the time of flight (TOF) for the readout based on the
     /// reference time and the readout time. If the readout time is smaller than
     /// the reference time, it means that tof would be negative and this
-    /// fucntion returns the TOF according to the previous reference time. This
+    /// function returns the TOF according to the previous reference time. This
     /// is includes delayed readouts into the current pulse statistics. \note:
     /// If time calculation fails, the function returns InvalidTOF
     uint64_t TimeOfFlight = RefTime.getTOF(ReadoutTime);
@@ -176,13 +176,13 @@ void CbmInstrument::processMonitorReadouts() {
         continue;
       }
     } catch (std::out_of_range &e) {
-      XTRACE(DATA, WAR, "No serializer configured for FEN {}, Channel {}",
+      XTRACE(DATA, WAR, "No serializer configured for FEN %" PRIu8 ", Channel %" PRIu8,
              Readout.FENId, Readout.Channel);
 
       counters.NoSerializerCfgError++;
       continue;
     } catch (std::invalid_argument &e) {
-      XTRACE(DATA, WAR, "Invalid CbmType: {} for readout {} with time {}",
+      XTRACE(DATA, WAR, "Invalid CbmType: %" PRIu8 " for readout %" PRIu8 " with time %" PRIu8 ,
              e.what(), counters.CbmCounts, ReadoutTime.toNS().count());
       counters.TypeNotConfigured++;
       continue;
