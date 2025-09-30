@@ -8,6 +8,21 @@ have been implemented. Mostly implemented in C/C++.
 ## Documentation
 For more details on the file structure, architecture, primitives see [documentation/README.md](documentation/README.md)
 
+## Changelog Generator
+This project includes an automated changelog generator that creates formatted release notes from git commits. The tool uses [uv](https://github.com/astral-sh/uv) for dependency management and requires no manual setup. See [utils/changelog/README.md](utils/changelog/README.md) for details.
+
+Quick usage from project root:
+```bash
+# Generate changelog since last tag (recommended)
+./generate-changelog.sh --from-commit v1.0.0
+
+# Or run directly with uv
+uv run utils/changelog/generate_changelog.py --from-commit abc1234 --times
+
+# Script can also be run directly (with executable permissions)
+utils/changelog/generate_changelog.py --from-commit abc1234
+```
+
 ## Getting started
 
 The [essdaq repository](https://github.com/ess-dmsc/essdaq) has scripts for automatically
