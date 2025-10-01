@@ -48,23 +48,25 @@ public:
 
   // clang-format off
   struct CbmGeneratorSettings {
-    CbmType monitorType{CbmType::EVENT_0D}; //< The type of monitor.
-    uint8_t FenId{0};                  //< The FEN ID.
-    uint8_t ChannelId{0};              //< The channel ID.
-    uint32_t Offset{0};                //< The offset value.
-    bool BeamMask{false};              //< Flag for generating images on 2D CBM
-    bool ShakeBeam{false};             //< Flag to shake the beam.
-    bool Randomise{false};             //< Flag to Randomise the data.
+    CbmType monitorType{CbmType::EVENT_0D}; // The type of monitor.
+    uint8_t FiberId{22};               // Fiber ID. Beam monitors are always on logical  
+                                       // fiber 22 (ring 11) and fen 0.
+    uint8_t FenId{0};                  // The FEN ID.
+    uint8_t ChannelId{0};              // The channel ID.
+    uint32_t Offset{0};                // The offset value.
+    bool BeamMask{false};              // Flag for generating images on 2D CBM.
+    bool ShakeBeam{false};             // Flag to shake the beam.
+    bool Randomise{false};             // Flag to Randomise the data.
     GeneratorType generatorType{
        GeneratorType::Distribution};   // The generator type.
     std::optional<uint32_t> Value;     // The optional value.
     std::optional<double> Gradient;    // The optional gradient.
     uint32_t NumberOfBins{512};        // The number of bins.
-    uint32_t NumReadouts{5952};        // The number of readouts per pulse. 12us = 5952 for 14hz
+    uint32_t NumReadouts{5952};        // The number of readouts per pulse. 12us = 5952 for 14hz.
     uint16_t MaxXValue{512};           // Maximum X coordinate value for 2D Beam monitor used in 
-                                       // random generator
+                                       // random generator.
     uint16_t MaxYValue{512};           // Maximum Y coordinate value for 2D Beam monitor used in 
-                                       // random generator 
+                                       // random generator.
   } cbmSettings;
   // clang-format on
 
@@ -87,8 +89,6 @@ private:
   // faster retrieval when creating readouts
   std::vector<std::pair<uint16_t, uint16_t>> GridCoordinateVector{};
 
-  // Beam monitors are always on logical fiber 22 (ring 11) and fen 0
-  static constexpr uint8_t CBM_FIBER_ID = 22;
   static constexpr int MILLISEC = 1e3;
 
   // Shake beam time in microseconds range
