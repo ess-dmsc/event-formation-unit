@@ -68,7 +68,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
 // 0 is A, 1 is B
 int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
   float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
-  if (UnitPos <= 0.5) {
+  if (UnitPos >= 0.5) {
     XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
     return 0;
   } else {
@@ -89,12 +89,12 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
   XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    tubepos = pos * 2 * (NPos / 2 - 1);
+    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
     XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   } else {
-    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
-    XTRACE(DATA, DEB, "B: TubePos %u, pos %f", tubepos, pos);
+    tubepos = pos * 2 * (NPos / 2 - 1);
+    XTRACE(DATA, DEB, "B: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   }
 }
