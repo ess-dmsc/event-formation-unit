@@ -52,15 +52,21 @@ TEST_F(MiraclesGeometryTest, PosAlongTube) {
 }
 
 TEST_F(MiraclesGeometryTest, ValidateData) {
+  // Test valid data case
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
-  DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  // Test invalid ring case - Ring is greater than MaxRing
+  DataParser::CaenReadout readout2{6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
   ASSERT_FALSE(geom->validateData(readout2));
 
   // Test zero amplitude case - both AmpA and AmpB are zero
   DataParser::CaenReadout readoutZeroAmps{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   ASSERT_FALSE(geom->validateData(readoutZeroAmps));
+
+  // Test amplitude exceeding maximum case - AmpA is greater than MaxAmplitude
+  DataParser::CaenReadout readoutExceedingMaxAmp{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4096, 0};
+  ASSERT_FALSE(geom->validateData(readoutExceedingMaxAmp));
 }
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {
