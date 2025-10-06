@@ -44,6 +44,12 @@ bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
     Stats.RingErrors++;
     return false;
   }
+
+  if (Data.AmpA + Data.AmpB == 0) {
+    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+    Stats.AmplitudeZero++;
+    return false;
+  }
   return true;
 }
 
@@ -63,18 +69,6 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
     offset += NPos / 2;
   }
   return offset + posAlongUnit(AmpA, AmpB);
-}
-
-// 0 is A, 1 is B
-int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
-  float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
-  if (UnitPos >= 0.5) {
-    XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
-    return 0;
-  } else {
-    XTRACE(DATA, DEB, "B-tube (pos %f)", UnitPos);
-    return 1;
-  }
 }
 
 int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {

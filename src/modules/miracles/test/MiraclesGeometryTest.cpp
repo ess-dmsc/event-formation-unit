@@ -52,11 +52,15 @@ TEST_F(MiraclesGeometryTest, PosAlongTube) {
 }
 
 TEST_F(MiraclesGeometryTest, ValidateData) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
   DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
   ASSERT_FALSE(geom->validateData(readout2));
+
+  // Test zero amplitude case - both AmpA and AmpB are zero
+  DataParser::CaenReadout readoutZeroAmps{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_FALSE(geom->validateData(readoutZeroAmps));
 }
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {
