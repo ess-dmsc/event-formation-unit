@@ -51,6 +51,12 @@ bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
     return false;
   }
   return true;
+
+  if (Data.AmpA + Data.AmpB > MaxAmpl) {
+    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
+    Stats.AmplitudeHigh++;
+    return false;
+  }
 }
 
 int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
