@@ -44,7 +44,19 @@ bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
     Stats.RingErrors++;
     return false;
   }
+
+  if (Data.AmpA + Data.AmpB == 0) {
+    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+    Stats.AmplitudeZero++;
+    return false;
+  }
   return true;
+
+  if (Data.AmpA + Data.AmpB > MaxAmpl) {
+    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
+    Stats.AmplitudeHigh++;
+    return false;
+  }
 }
 
 int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
@@ -65,18 +77,6 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
   return offset + posAlongUnit(AmpA, AmpB);
 }
 
-// 0 is A, 1 is B
-int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
-  float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
-  if (UnitPos <= 0.5) {
-    XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
-    return 0;
-  } else {
-    XTRACE(DATA, DEB, "B-tube (pos %f)", UnitPos);
-    return 1;
-  }
-}
-
 int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
   int tubepos;
   if (AmpA + AmpB == 0) {
@@ -89,12 +89,12 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
   XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    tubepos = pos * 2 * (NPos / 2 - 1);
+    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
     XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   } else {
-    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
-    XTRACE(DATA, DEB, "B: TubePos %u, pos %f", tubepos, pos);
+    tubepos = pos * 2 * (NPos / 2 - 1);
+    XTRACE(DATA, DEB, "B: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   }
 }

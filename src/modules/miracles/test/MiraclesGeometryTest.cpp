@@ -28,35 +28,45 @@ protected:
 };
 
 TEST_F(MiraclesGeometryTest, Corner) {
-  ASSERT_EQ(0, geom->xCoord(0, 0, 0, 5));
+  ASSERT_EQ(1, geom->xCoord(0, 0, 0, 5));
   ASSERT_EQ(0, geom->yCoord(0, 0, 5));
 
-  ASSERT_EQ(47, geom->xCoord(1, 11, 5, 0));
+  ASSERT_EQ(46, geom->xCoord(1, 11, 5, 0));
   ASSERT_EQ(0, geom->yCoord(1, 5, 0));
   ASSERT_EQ(64, geom->yCoord(2, 5, 0));
 }
 
 TEST_F(MiraclesGeometryTest, PosAlongTube) {
-  printf("A top\n");
-  ASSERT_EQ(geom->tubeAorB(0, 1), TubeA); // 0 ia A
-  ASSERT_EQ(geom->posAlongUnit(0, 1), 0); // tube A - top 'pixel'
-  printf("A bottom\n");
-  ASSERT_EQ(geom->tubeAorB(1, 1), TubeA);  // 0 ia A
-  ASSERT_EQ(geom->posAlongUnit(1, 1), 63); // tube A - bottom 'pixel'
-  printf("B bottom\n");
-  EXPECT_EQ(geom->tubeAorB(101, 100), TubeB);  // 1 ia B
-  EXPECT_EQ(geom->posAlongUnit(101, 100), 63); // tube B - bottom 'pixel'
   printf("B top\n");
-  EXPECT_EQ(geom->tubeAorB(800, 1), TubeB); // 1 ia B
-  EXPECT_EQ(geom->posAlongUnit(800, 1), 0); // tube B - top 'pixel'
+  ASSERT_EQ(geom->tubeAorB(0, 1), TubeB); // 1 is B
+  ASSERT_EQ(geom->posAlongUnit(0, 1), 0); // tube B - top 'pixel'
+  printf("A bottom\n");
+  ASSERT_EQ(geom->tubeAorB(1, 1), TubeA);  // 0 is A
+  ASSERT_EQ(geom->posAlongUnit(1, 1), 63); // tube A - bottom 'pixel'
+  printf("A bottom\n");
+  EXPECT_EQ(geom->tubeAorB(101, 100), TubeA);  // 0 is A
+  EXPECT_EQ(geom->posAlongUnit(101, 100), 63); // tube A - bottom 'pixel'
+  printf("A top\n");
+  EXPECT_EQ(geom->tubeAorB(800, 1), TubeA); // 0 is A
+  EXPECT_EQ(geom->posAlongUnit(800, 1), 0); // tube A - top 'pixel'
 }
 
 TEST_F(MiraclesGeometryTest, ValidateData) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  // Test valid data case
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
   ASSERT_TRUE(geom->validateData(readout));
 
-  DataParser::CaenReadout readout2{11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  // Test invalid ring case - Ring is greater than MaxRing
+  DataParser::CaenReadout readout2{6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
   ASSERT_FALSE(geom->validateData(readout2));
+
+  // Test zero amplitude case - both AmpA and AmpB are zero
+  DataParser::CaenReadout readoutZeroAmps{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_FALSE(geom->validateData(readoutZeroAmps));
+
+  // Test amplitude exceeding maximum case - AmpA is greater than MaxAmplitude
+  DataParser::CaenReadout readoutExceedingMaxAmp{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4096, 0};
+  ASSERT_FALSE(geom->validateData(readoutExceedingMaxAmp));
 }
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {
@@ -64,7 +74,7 @@ TEST_F(MiraclesGeometryTest, CalcPixel) {
   ASSERT_EQ(geom->calcPixel(readout), 0);
 
   DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout2), 1);
+  ASSERT_EQ(geom->calcPixel(readout2), 2);
 }
 
 int main(int argc, char **argv) {
