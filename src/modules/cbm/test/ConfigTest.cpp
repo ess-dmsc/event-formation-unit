@@ -252,6 +252,111 @@ TEST_F(CbmConfigTest, LoadFileFullInstrument) {
   EXPECT_EQ(config.Parms.NumberOfMonitors, 3);
 }
 
+//Test that CBM IBM get default values for aggregated frames
+//and for aggregation mode
+TEST_F(CbmConfigTest, TestDefaultAggregateFramesConfig) {
+    auto ConfigJson = R"(
+    {
+      "Detector"           : "CBM",
+      "MonitorRing"        : 11,
+      "MaxTOFNS"           : 1000000000,
+      "MaxPulseTimeDiffNS" : 1000000000,
+      "MaxFENId"           : 2,
+
+      "Topology" : [
+        { 
+          "FEN":  1, 
+          "Channel": 1, 
+          "Type": "IBM", 
+          "Source" : "cbm1", 
+          "MaxTofBin": 10000, 
+          "BinCount": 100 
+        }
+      ]
+    }
+  )"_json;
+  
+  config.setRoot(ConfigJson);
+  config.apply();
+  auto *TopologyEntry = config.TopologyMapPtr->get(1, 1);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
+  EXPECT_EQ(TopologyEntry->Source, "cbm1");
+  EXPECT_EQ(TopologyEntry->FEN, 1);
+  EXPECT_EQ(TopologyEntry->Channel, 1);
+  EXPECT_EQ(TopologyEntry->maxTofBin, 10000);
+  EXPECT_EQ(TopologyEntry->BinCount, 100);
+  EXPECT_EQ(TopologyEntry->AggregatedFrames, 1);
+  EXPECT_EQ(TopologyEntry->AggregationMode, (int)AggregationType::SUM);
+}
+
+//Test that CBM IBM get aggregated frames and mode from json
+TEST_F(CbmConfigTest, TestOverrideAggregateFramesConfig) {
+    auto ConfigJson = R"(
+    {
+      "Detector" : "CBM",
+      "MonitorRing" : 11,
+      "MaxTOFNS" : 1000000000,
+      "MaxPulseTimeDiffNS" : 1000000000,
+      "MaxFENId" : 2,
+
+      "Topology" : [
+        { 
+          "FEN":  1, 
+          "Channel": 1, 
+          "Type": "IBM", 
+          "Source" : "cbm1", 
+          "MaxTofBin": 10000, 
+          "BinCount": 100,
+          "AggregatedFrames": 20, 
+          "AggregationMode": 1 
+        }
+      ]
+    }
+  )"_json;
+  
+  config.setRoot(ConfigJson);
+  config.apply();
+  auto *TopologyEntry = config.TopologyMapPtr->get(1, 1);
+  EXPECT_EQ(TopologyEntry->Type, CbmType::IBM);
+  EXPECT_EQ(TopologyEntry->Source, "cbm1");
+  EXPECT_EQ(TopologyEntry->FEN, 1);
+  EXPECT_EQ(TopologyEntry->Channel, 1);
+  EXPECT_EQ(TopologyEntry->maxTofBin, 10000);
+  EXPECT_EQ(TopologyEntry->BinCount, 100);
+  EXPECT_EQ(TopologyEntry->AggregatedFrames, 20);
+  EXPECT_EQ(TopologyEntry->AggregationMode, (int)AggregationType::AVG);
+}
+
+//Test that CBM IBM get aggregated frames and mode from json
+TEST_F(CbmConfigTest, TestMalformedAggregateFramesConfig) {
+    auto ConfigJson = R"(
+    {
+      "Detector" : "CBM",
+      "MonitorRing" : 11,
+      "MaxTOFNS" : 1000000000,
+      "MaxPulseTimeDiffNS" : 1000000000,
+      "MaxFENId" : 2,
+
+      "Topology" : [
+        {
+          "FEN":  1, 
+          "Channel": 1, 
+          "Type": "IBM", 
+          "Source" : "cbm1", 
+          "MaxTofBin": 10000, 
+          "BinCount": 100,
+          "AggregatedFrames": 20, 
+          "AggregationMode": 2 
+        }
+      ]
+    }
+  )"_json;
+  
+  config.setRoot(ConfigJson);
+  EXPECT_THROW(config.apply(), std::runtime_error);
+}
+
+
 TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
     auto ConfigJson = R"(
     {

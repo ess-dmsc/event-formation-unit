@@ -93,43 +93,53 @@ class HistogramSerializer : public AbstractSerializer {
   const time_t Period;
   const time_t BinCount;
   const std::string SignalUnit;
-  const uint8_t SumUpPulses{}; 
+  const uint8_t AggregatedFrames{}; 
   const essmath::VectorAggregationFunc<T> AggregateFunction;
   const R BinOffset;
   const enum BinningStrategy BinningStrategy;
   HistrogramSerializerStats Stats;
   std::vector<size_t> BinSizes;
   flatbuffers::FlatBufferBuilder BufferBuilder{};
-  int PulseCounter{0};
+  int FrameCounter{0};
 
   data_t DataBins;
   std::vector<R> XAxisValues;
 
 public:
+  // clang-format off
   /// \brief Constructor for the HistogramBuilder class.
   ///
-  /// \param Source is the source of the data
-  /// \param Period is the length of time of one frame in the specified units
-  /// \param BinCount is the number of the bins used
-  /// \param DataUnit is the unit of the binned data
-  /// \param SumUpPulses number of pulses to aggregate before send
-  /// \param Callback is the producer callback function
-  /// \param AggFunc is the aggregation function used to aggregate the data
-  /// inside the bins
-  /// \param Strategy is the enum like binning strategy we can select
+  /// \param Source   Data source
+  /// \param Period   TDuration one frame in the specified units
+  /// \param BinCount Number of used bins
+  /// \param DataUnit Bin unit
+  /// \param AggregatedFrames Number of pulses to aggregate before send
+  /// \param Callback Producer callback function
+  /// \param AggFunc  Function used to aggregate bin data
+  /// \param Strategy Enum used to select the binning strategy
 
   explicit HistogramSerializer(
-      std::string Source, time_t Period, time_t BinCount, const std::string &DataUnit,
-      uint8_t SumUpPulses = 1, ProducerCallback Callback = {}, R BinOffset = 0,
-      essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
-      enum BinningStrategy Strategy = BinningStrategy::Drop)
-      : AbstractSerializer(Callback, Stats), Source(std::move(Source)),
-        Period(std::move(Period)), BinCount(std::move(BinCount)),
-        SignalUnit(std::move(DataUnit)), SumUpPulses(SumUpPulses),
-        AggregateFunction(std::move(AggFunc)), BinOffset(BinOffset), 
-        BinningStrategy(std::move(Strategy)), Stats(),
-        BufferBuilder(BinCount * (sizeof(T) + sizeof(R)) + 256) {
-
+              std::string Source, 
+              time_t Period, 
+              time_t BinCount, 
+              const std::string &DataUnit,
+              uint8_t AggregatedFrames = 1, 
+              ProducerCallback Callback = {}, 
+              R BinOffset = 0,
+              essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>,
+              enum BinningStrategy Strategy = BinningStrategy::Drop)
+    : AbstractSerializer(Callback, Stats)
+    , Source(std::move(Source))
+    , Period(std::move(Period))
+    , BinCount(std::move(BinCount))
+    , SignalUnit(std::move(DataUnit))
+    , AggregatedFrames(AggregatedFrames)
+    , AggregateFunction(std::move(AggFunc))
+    , BinOffset(BinOffset)
+    , BinningStrategy(std::move(Strategy))
+    , Stats()
+    , BufferBuilder(BinCount * (sizeof(T) + sizeof(R)) + 256) {
+    // clang-format on
     // Check for negative values in the bin count and period
     // Current concept not support negative values for bins
     if (BinCount < 0) {
@@ -157,10 +167,10 @@ public:
   /// \details This constructor is used when binning strategy is provided
   explicit HistogramSerializer(
       std::string Source, time_t Period, time_t BinCount, const std::string &Unit,
-      enum BinningStrategy Strategy = BinningStrategy::Drop, uint8_t SumUpPulses = 1, 
+      enum BinningStrategy Strategy = BinningStrategy::Drop, uint8_t AggregatedFrames = 1, 
       ProducerCallback Callback = {}, R BinOffset = 0,
       essmath::VectorAggregationFunc<T> AggFunc = essmath::SUM_AGG_FUNC<T>)
-      : HistogramSerializer(Source, Period, BinCount, Unit, SumUpPulses, Callback, 
+      : HistogramSerializer(Source, Period, BinCount, Unit, AggregatedFrames, Callback, 
                             BinOffset, AggFunc, Strategy) {}
 
   /// \brief Copy constructor for the HistogramBuilder class.
@@ -170,7 +180,7 @@ public:
         Stats(other.Stats), BinOffset(BinOffset),
         AggregateFunction(other.AggregateFunction),
         BinningStrategy(other.BinningStrategy), BinSizes(other.BinSizes),
-        SumUpPulses(other.SumUpPulses), DataBins(other.DataBins), 
+        AggregatedFrames(other.AggregatedFrames), DataBins(other.DataBins), 
         XAxisValues(other.XAxisValues), BufferBuilder(other.BufferBuilder) {}
 
   /// \brief This function finds the bin index for a given time.
@@ -238,10 +248,10 @@ public:
       return;
     }
     
-    PulseCounter++;
-    if (PulseCounter >= SumUpPulses) {
+    FrameCounter++;
+    if (FrameCounter >= AggregatedFrames) {
       produce();
-      PulseCounter = 0;
+      FrameCounter = 0;
     }
 
     Stats.ProduceRefTimeTriggered++;
