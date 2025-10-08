@@ -99,6 +99,8 @@ void Config::apply() {
 
     int param1{0};
     int param2{0};
+    int param3{0};
+    int param4{0};
 
     if (MonitorType == CbmType::EVENT_0D) {
 
@@ -144,16 +146,25 @@ void Config::apply() {
       try {
         param1 = Module["MaxTofBin"].get<int>();
         param2 = Module["BinCount"].get<int>();
+        param3 = Module.value<int>("AggregatedFrames", Parms.AggregatedFrames);
+        param4 = Module.value<int>("AggregationMode", Parms.AggregationMode);
       } catch (...) {
         errorExit(fmt::format(
             "Entry: {}, Malformed 'Topology' section for {} Type (Need "
-            "MaxTofBin, BinCount)",
+            "MaxTofBin, BinCount) optional (AggregatedFrames, AggregationMode)",
             Entry, MonitorType.toString()));
+      }
+
+      if ((param4 < 0) || (param4 > 1)) {
+        errorExit(fmt::format(
+          "Entry: {} Malformed 'AggregationMode' for {} Type "
+          "valid values {} - {}, Read Value {}", 
+          Entry, MonitorType.toString(), 0, (int)AggregationType::AVG, param4));
       }
     }
 
     auto topo = std::make_unique<Topology>(FEN, Channel, Source, MonitorType,
-                                           param1, param2);
+                                           param1, param2, param3, param4);
     TopologyMapPtr->add(FEN, Channel, topo);
 
     XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",

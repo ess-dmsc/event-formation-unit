@@ -316,7 +316,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
       // that the generator can generate values for the whole shake beam range.
       // Generator max value is in milliseconds, shake beam range is in
       // microseconds.
-      GenMaX += round(static_cast<float>(SHAKE_BEAM_US.second) / 1e3);
+      GenMaX += round(static_cast<float>(SHAKE_BEAM_US.second) / MILLISEC);
     }
 
     Generator = std::make_unique<DistributionGenerator>(

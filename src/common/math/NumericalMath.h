@@ -37,7 +37,8 @@ using VectorAggregationFunc = std::function<T(std::pair<T, uint32_t>)>;
 /// \throws std::runtime_error if the input pair is empty.
 ///
 template <typename T> T average(const std::pair<T, uint32_t> &data) {
-  if (data.empty()) {
+  if (data.second == 0) {
+    return data.first;
     throw std::runtime_error("Cannot calculate average of an empty value pair");
   }
 
