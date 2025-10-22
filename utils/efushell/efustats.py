@@ -10,6 +10,7 @@ parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)
                     type = int, default = 8888)
 parser.add_argument("-z", help = "don't show counters with value 0 (zero suppression)", action = 'store_true')
 parser.add_argument("-v", help = "dump stats in format suitable for verifymetrics.py", action = 'store_true')
+parser.add_argument("-d", help = "add 3-digit separators to counters", action = 'store_true')
 
 args = parser.parse_args()
 
@@ -33,12 +34,16 @@ for statnum in range(1, numstats + 1):
 # Find the string length of the largest quantity and count
 q_length = max([len(result.split()[1].strip()) for result in results]) + 1
 c_length = max([len(result.split()[2].strip()) for result in results]) + 1
-c_length += c_length//3
+
+# Check if we use 3-digit separators
+if args.d:
+    c_length += c_length//3
 
 # Print quantity and count in two aligned columns
 for result in results:
     (key, count) = [r for r in result.split()][1:]
-    count = '{:,}'.format(int(count))
+    if args.d:
+        count = '{:,}'.format(int(count))
     print("{} {}".format(key.ljust(q_length), count.rjust(c_length)))
 
 if args.v:
