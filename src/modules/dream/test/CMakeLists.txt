@@ -10,12 +10,14 @@ set(DREAM_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(SUMOGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/SUMO.h)
 set(SUMOGeometryTest_SRC
+  ${DREAM_BASE_DIR}/geometry/SUMO.cpp
   SUMOGeometryTest.cpp)
 create_test_executable(SUMOGeometryTest)
 
 set(PADetectorTest_INC
   ${DREAM_BASE_DIR}/geometry/PADetector.h)
 set(PADetectorTest_SRC
+  ${DREAM_BASE_DIR}/geometry/PADetector.cpp
   PADetectorTest.cpp)
 create_test_executable(PADetectorTest)
 
@@ -28,6 +30,11 @@ set(DreamGeometryTest_SRC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/SUMO.cpp
+  ${DREAM_BASE_DIR}/geometry/Cuboid.cpp
+  ${DREAM_BASE_DIR}/geometry/DreamMantle.cpp
+  ${DREAM_BASE_DIR}/geometry/HeimdalMantle.cpp
+  ${DREAM_BASE_DIR}/geometry/PADetector.cpp
   DreamGeometryTest.cpp)
 create_test_executable(DreamGeometryTest)
 
@@ -35,6 +42,8 @@ set(MagicGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.h)
 set(MagicGeometryTest_SRC
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/PADetector.cpp
+  ${DREAM_BASE_DIR}/geometry/DreamMantle.cpp
   MagicGeometryTest.cpp)
 create_test_executable(MagicGeometryTest)
 
@@ -42,6 +51,7 @@ set(HeimdalGeometryTest_INC
   ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.h)
 set(HeimdalGeometryTest_SRC
   ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/HeimdalMantle.cpp
   HeimdalGeometryTest.cpp)
 create_test_executable(HeimdalGeometryTest)
 
@@ -59,6 +69,7 @@ set(CuboidTest_INC
   ${DREAM_BASE_DIR}/geometry/Cuboid.h
   )
 set(CuboidTest_SRC
+  ${DREAM_BASE_DIR}/geometry/Cuboid.cpp
   CuboidTest.cpp
   )
 create_test_executable(CuboidTest)
@@ -79,6 +90,11 @@ set(DreamInstrumentTest_SRC
   ${DREAM_BASE_DIR}/geometry/DreamGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/HeimdalGeometry.cpp
   ${DREAM_BASE_DIR}/geometry/MagicGeometry.cpp
+  ${DREAM_BASE_DIR}/geometry/DreamMantle.cpp
+  ${DREAM_BASE_DIR}/geometry/HeimdalMantle.cpp
+  ${DREAM_BASE_DIR}/geometry/Cuboid.cpp
+  ${DREAM_BASE_DIR}/geometry/SUMO.cpp
+  ${DREAM_BASE_DIR}/geometry/PADetector.cpp
   ${DREAM_BASE_DIR}/readout/DataParser.cpp
   )
 

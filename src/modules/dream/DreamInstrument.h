@@ -12,13 +12,14 @@
 #pragma once
 
 #include <common/readout/ess/Parser.h>
+#include <common/Statistics.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
-#include <dream/geometry/DreamGeometry.h>
-#include <dream/geometry/HeimdalGeometry.h>
-#include <dream/geometry/MagicGeometry.h>
+#include <dream/geometry/Geometry.h>
 #include <dream/readout/DataParser.h>
+
+#include <memory>
 
 namespace Dream {
 
@@ -27,10 +28,8 @@ private:
   struct Counters &Counters;
   BaseSettings &Settings;
   Config DreamConfiguration;
-  DetectorType Type;
-  DreamGeometry DreamGeom;
-  MagicGeometry MagicGeom;
-  HeimdalGeometry HeimdalGeom;
+  Statistics Stats;
+  std::unique_ptr<Geometry> Geom;
   EV44Serializer &Serializer;
   ESSReadout::Parser &ESSHeaderParser;
 
@@ -52,8 +51,8 @@ public:
   /// \return reference to the configuration
   Config &getConfiguration() { return DreamConfiguration; }
 
-  /// \brief process clusters into events
-  uint32_t calcPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
+  /// \brief Get const reference to the active geometry
+  const Geometry &getGeometry() const;
 
   DataParser DreamParser{Counters};
 };

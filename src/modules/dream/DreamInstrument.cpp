@@ -7,11 +7,15 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/kafka/EV44Serializer.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/kafka/EV44Serializer.h>
 #include <common/time/TimeString.h>
 #include <dream/DreamInstrument.h>
+#include <dream/geometry/DreamGeometry.h>
+#include <dream/geometry/Geometry.h>
+#include <dream/geometry/HeimdalGeometry.h>
+#include <dream/geometry/MagicGeometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,7 +25,8 @@ namespace Dream {
 using namespace esstime;
 using namespace ESSReadout;
 
-DreamInstrument::DreamInstrument(struct Counters &counters, BaseSettings &settings,
+DreamInstrument::DreamInstrument(struct Counters &counters,
+                                 BaseSettings &settings,
                                  EV44Serializer &serializer,
                                  ESSReadout::Parser &essHeaderParser)
     : Counters(counters), Settings(settings), Serializer(serializer),
@@ -36,27 +41,14 @@ DreamInstrument::DreamInstrument(struct Counters &counters, BaseSettings &settin
   ESSHeaderParser.setMaxPulseTimeDiff(DreamConfiguration.MaxPulseTimeDiffNS);
 
   if (DreamConfiguration.Instance == Config::DREAM) {
-    Type = DetectorType::DREAM;
+    Geom = std::make_unique<DreamGeometry>(Stats, DreamConfiguration);
   } else if (DreamConfiguration.Instance == Config::MAGIC) {
-    Type = DetectorType::MAGIC;
+    Geom = std::make_unique<MagicGeometry>(Stats, DreamConfiguration);
   } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
-    Type = DetectorType::HEIMDAL;
+    Geom = std::make_unique<HeimdalGeometry>(Stats, DreamConfiguration);
   } else {
     throw std::runtime_error(
-        "Unsupported instrument instance (not DREAM/MAGIC)");
-  }
-}
-
-uint32_t DreamInstrument::calcPixel(Config::ModuleParms &Parms,
-                                    DataParser::CDTReadout &Data) {
-  if (DreamConfiguration.Instance == Config::DREAM) {
-    return DreamGeom.getPixel(Parms, Data);
-  } else if (DreamConfiguration.Instance == Config::MAGIC) {
-    return MagicGeom.getPixel(Parms, Data);
-  } else if (DreamConfiguration.Instance == Config::HEIMDAL) {
-    return HeimdalGeom.getPixel(Parms, Data);
-  } else {
-    return 0;
+        "Unsupported instrument instance (not DREAM/MAGIC/HEIMDAL)");
   }
 }
 
@@ -67,40 +59,22 @@ void DreamInstrument::processReadouts() {
 
   /// Traverse readouts, calculate pixels
   for (auto &Data : DreamParser.Result) {
-    int Ring = Data.FiberId / 2;
-    XTRACE(DATA, DEB, "Ring %u, FEN %u", Ring, Data.FENId);
+    XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.FiberId / 2, Data.FENId);
 
-    if (Ring > DreamConfiguration.MaxRing) {
-      XTRACE(DATA, WAR, "Invalid RING: %u", Ring);
-      Counters.RingMappingErrors++;
-      continue;
-    }
-
-    if (Data.FENId > DreamConfiguration.MaxFEN) {
-      XTRACE(DATA, WAR, "Invalid FEN: %u", Data.FENId);
-      Counters.FENMappingErrors++;
-      continue;
-    }
-
-    Config::ModuleParms &Parms = DreamConfiguration.RMConfig[Ring][Data.FENId];
-
-    if (not Parms.Initialised) {
-      XTRACE(DATA, WAR, "Config mismatch: RING %u, FEN %u is unconfigured",
-             Ring, Data.FENId);
-      Counters.ConfigErrors++;
+    // Validate Ring, FEN and configuration through geometry class
+    if (!Geom->validateReadoutData(Data)) {
       continue;
     }
 
     auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
-    // Calculate pixelid and apply calibration
-    uint32_t PixelId = calcPixel(Parms, Data);
+    // Calculate pixelid and apply calibration using polymorphism
+    // The geometry extracts ModuleParms from the RMConfig array internally
+    uint32_t PixelId = Geom->calcPixel<DataParser::CDTReadout>(Data);
     XTRACE(DATA, DEB, "PixelId: %u", PixelId);
 
-    if (PixelId == 0) {
-      Counters.GeometryErrors++;
-    } else {
+    if (PixelId != 0) {
       Serializer.addEvent(TimeOfFlight, PixelId);
       Counters.Events++;
     }
@@ -109,5 +83,13 @@ void DreamInstrument::processReadouts() {
 
 //
 DreamInstrument::~DreamInstrument() {}
+
+const Geometry &DreamInstrument::getGeometry() const {
+  if (!Geom) {
+    throw std::runtime_error(
+        "Geometry not initialized for this instrument type");
+  }
+  return *Geom.get();
+}
 
 } // namespace Dream

@@ -25,7 +25,7 @@ MiraclesGeometry::MiraclesGeometry(Statistics &Stats, const Config &CaenConfigur
       ESSGeometry(48, 128, 1, 1),
       GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
-uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) {
+uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
 
   int Ring = Data->FiberId / 2;
@@ -45,7 +45,7 @@ bool MiraclesGeometry::validateReadoutData(const DataParser::CaenReadout &Data) 
   return validateRing(Ring);
 }
 
-int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
+int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) const {
   int xOffset = 2 * Tube;
   if ((Ring == 1) or (Ring == 3)) {
     xOffset += 24; ///\todo make config dependent
@@ -53,7 +53,7 @@ int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
   return xOffset + tubeAorB(AmpA, AmpB);
 }
 
-int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
+int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) const {
   XTRACE(DATA, DEB, "Calculating yCoord, Ring: %u, AmpA: %u, AmpB: %u", Ring,
          AmpA, AmpB);
   int offset{0};
@@ -64,7 +64,7 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
 }
 
 // 0 is A, 1 is B
-int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
+int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) const {
   float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
   if (UnitPos <= 0.5) {
     XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
@@ -75,7 +75,7 @@ int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) {
   }
 }
 
-int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
+int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   int tubepos;
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");

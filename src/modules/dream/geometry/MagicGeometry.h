@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,22 +14,34 @@
 
 #include <dream/geometry/Config.h>
 #include <dream/geometry/DreamMantle.h>
+#include <dream/geometry/Geometry.h>
 #include <dream/geometry/PADetector.h>
 #include <dream/readout/DataParser.h>
 
 namespace Dream {
 
-class MagicGeometry {
+class MagicGeometry : public Geometry {
 public:
+  /// \brief Constructor
+  /// \param Stats Reference to Statistics object for counter registration
+  /// \param Config Reference to the DREAM configuration object
+  MagicGeometry(Statistics &Stats, const Config &Config)
+      : Geometry(Stats, Config), padetector(Stats, 256, 512),
+        frdetector(Stats, 128) {}
+
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
   /// for that module (see ICD for full description)
-  int getPixelOffset(Config::ModuleType Type);
+  int getPixelOffset(Config::ModuleType Type) const;
 
-  /// \brief return pixel id from the digital identifiers
-  int getPixel(Config::ModuleParms &Parms, DataParser::CDTReadout &Data);
+  /// \brief Implementation of pixel calculation through type-safe template
+  uint32_t calcPixelImpl(const void *Data) const override;
 
-  PADetector padetector{256, 512};
-  DreamMantle frdetector{128};
+  /// \brief Validate readout data for MAGIC geometry
+  bool validateReadoutData(const DataParser::CDTReadout &Data) const override;
+
+private:
+  PADetector padetector;
+  DreamMantle frdetector;
 };
 } // namespace Dream

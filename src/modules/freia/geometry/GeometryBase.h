@@ -105,7 +105,7 @@ public:
   /// Current implementation accepts Event for calcPixelImpl path.
   /// \param type_info std::type_info of the provided data pointer
   /// \return true if type is the supported Event type, false otherwise
-  bool validateDataType(const std::type_info &type_info) override {
+  bool validateDataType(const std::type_info &type_info) const override {
     // For VMM3 geometries, we can accept either VMM3Parser::VMM3Data or Event
     XTRACE(DATA, DEB, "Validating data type: %s", type_info.name());
     if (type_info == typeid(Event)) {
@@ -229,7 +229,7 @@ private:
   /// implementations, this function expects a pointer to Event. Uses cluster
   /// center-of-mass for both X and Y, then maps via pixel2D(). \param Data
   /// Pointer to Event \return Pixel id (0 if invalid per ESSGeometry)
-  uint32_t calcPixelImpl(const void *Data) override {
+  uint32_t calcPixelImpl(const void *Data) const override {
     const auto &Event = *static_cast<const class Event *>(Data);
 
     auto x = static_cast<uint16_t>(std::round(Event.ClusterA.coordCenter()));

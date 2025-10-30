@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,28 +15,41 @@
 
 namespace Dream {
 
-int DreamGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::CDTReadout &Data) {
+bool DreamGeometry::validateReadoutData(
+    const DataParser::CDTReadout &Data) const {
+  int Ring = Data.FiberId / 2;
+
+  return validateAll(
+      [&]() { return validateRing(Ring); },
+      [&]() { return validateFEN(Data.FENId); },
+      [&]() { return validateConfigMapping(Ring, Data.FENId); });
+}
+
+uint32_t DreamGeometry::calcPixelImpl(const void *DataPtr) const {
+  const auto *Data = static_cast<const DataParser::CDTReadout *>(DataPtr);
+
+  int Ring = Data->FiberId / 2;
+  const Config::ModuleParms &Parms = getModuleParms(Ring, Data->FENId);
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
   case Config::BwEndCap:
-    Pixel = bwec.getPixelId(Parms, Data);
+    Pixel = bwec.calcPixelId(Parms, *Data);
     break;
 
   case Config::FwEndCap:
-    Pixel = fwec.getPixelId(Parms, Data);
+    Pixel = fwec.calcPixelId(Parms, *Data);
     break;
 
   case Config::DreamMantle:
-    Pixel = mantle.getPixelId(Parms, Data);
+    Pixel = mantle.calcPixelId(Parms, *Data);
     break;
 
   case Config::HR: // fallthrough \todo might or might not work
   case Config::SANS:
-    Pixel = cuboid.getPixelId(Parms, Data);
+    Pixel = cuboid.calcPixelId(Parms, *Data);
     break;
   default:
     XTRACE(DATA, WAR, "Unknown detector");
@@ -58,7 +71,7 @@ int DreamGeometry::getPixel(Config::ModuleParms &Parms,
   return GlobalPixel;
 }
 
-int DreamGeometry::getPixelOffset(Config::ModuleType Type) {
+int DreamGeometry::getPixelOffset(Config::ModuleType Type) const {
   int RetVal{-1};
   switch (Type) {
   case Config::FwEndCap:

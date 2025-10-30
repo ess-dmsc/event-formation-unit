@@ -34,18 +34,18 @@ public:
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
   /// \param Group - identifies a tube triplet (new chargediv nomenclature)
-  int xOffset(int Ring, int Group);
+  int xOffset(int Ring, int Group) const;
 
   /// \brief return the global y-offset for the given identifiers
   /// \param Group - identifies a tube triplet (new chargediv nomenclature)
-  int yOffset(int Group);
+  int yOffset(int Group) const;
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB) const;
 
   [[nodiscard]] size_t numSerializers() const override;
   [[nodiscard]] size_t
@@ -68,6 +68,6 @@ protected:
   /// \brief Implementation for pixel calculation for Bifrost geometry
   /// \param Data Pointer to CaenReadout object (cast internally)
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) const override;
 };
 } // namespace Caen

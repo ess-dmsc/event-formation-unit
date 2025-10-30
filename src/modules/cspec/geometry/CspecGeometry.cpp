@@ -36,14 +36,14 @@ bool CspecGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
                      [&]() { return validateGroup(Data.Group); });
 }
 
-int CspecGeometry::xOffset(int Ring, int Group) {
+int CspecGeometry::xOffset(int Ring, int Group) const {
   ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He
   /// CSPEC
   // Use per-detector Resolution for ring stride and subdivide for groups.
   return Ring * Resolution + (Group % 24) * (Resolution / 24);
 }
 
-int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
+int CspecGeometry::posAlongUnit(int AmpA, int AmpB) const {
   if (AmpA + AmpB == 0) {
     ///\todo add counter
     return -1;
@@ -51,7 +51,7 @@ int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
   return ((Resolution - 1) * AmpA) / (AmpA + AmpB);
 }
 
-uint32_t CspecGeometry::calcPixelImpl(const void *DataPtr) {
+uint32_t CspecGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int xoff = xOffset(Ring, Data->Group);

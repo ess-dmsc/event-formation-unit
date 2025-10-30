@@ -39,16 +39,10 @@ DreamBase::DreamBase(BaseSettings const &Settings, DetectorType type)
   Stats.create("readouts.error_fiber", Counters.FiberErrors);
   Stats.create("readouts.error_fen", Counters.FENErrors);
 
-  // Config related
-  Stats.create("readouts.error_ringmapping", Counters.RingMappingErrors);
-  Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
-  Stats.create("readouts.error_config", Counters.ConfigErrors);
-
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   // Produce cause call stats
   Stats.create("produce.cause.timeout", Counters.ProduceCauseTimeout);

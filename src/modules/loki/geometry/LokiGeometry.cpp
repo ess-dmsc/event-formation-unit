@@ -30,7 +30,7 @@ LokiGeometry::LokiGeometry(Statistics &Stats, Config &CaenConfiguration)
 
 std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
                                                     int AmpB, int AmpC,
-                                                    int AmpD) {
+                                                    int AmpD) const {
 
   XTRACE(DATA, DEB, "calcUnitAndPos: GlobalGroup %d", GlobalGroup);
 
@@ -68,8 +68,8 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   return std::make_pair(Unit, UncorrPos);
 }
 
-uint32_t LokiGeometry::calcPixelImpl(const void* DataPtr) {
-  auto *Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
+uint32_t LokiGeometry::calcPixelImpl(const void* DataPtr) const {
+  const auto *Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
 
   int Ring = Data->FiberId / 2;
   int FEN = Data->FENId;

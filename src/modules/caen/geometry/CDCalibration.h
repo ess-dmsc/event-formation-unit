@@ -40,10 +40,10 @@ public:
   /// \param GroupIndex which group are we in
   /// \param UnitIndex which polynomial of the N (GroupSize)
   /// \return the corrected position
-  double posCorrection(int GroupIndex, int UnitIndex, double Pos);
+  double posCorrection(int GroupIndex, int UnitIndex, double Pos) const;
 
   /// \brief return the UnitId provided the Group and the Global position
-  int getUnitId(int GroupIndex, double pos);
+  int getUnitId(int GroupIndex, double pos) const;
 
   /// \brief intervals are vectors of vectors
   std::vector<std::vector<std::pair<double, double>>> Intervals;
@@ -57,7 +57,7 @@ public:
     int64_t ClampHigh{0};
     int64_t GroupErrors{0};
     int64_t OutsideInterval{0};
-  } Stats;
+  } mutable Stats;
 
   struct {
     // New abstraction: Groups is used in stead of Tubes(LOKI),

@@ -94,14 +94,14 @@ TEST_F(DreamInstrumentTest, ConstructorHeimdal) {
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data), 1);
+  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   Settings.ConfigFile = ConfigFileMagic;
   DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data),
+  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data),
             245760 + 1);
 }
 
@@ -109,7 +109,7 @@ TEST_F(DreamInstrumentTest, CalcPixelHeimdal) {
   Settings.ConfigFile = ConfigFileHeimdal;
   DreamInstrument Dream(Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.calcPixel(Dream.getConfiguration().RMConfig[0][0], Data), 1);
+  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
@@ -118,9 +118,9 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {
 
   // invalid FiberId
   Dream.DreamParser.Result.push_back({12, 0, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Counters.RingMappingErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().RingMappingErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Counters.ConfigErrors, 1);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
@@ -130,10 +130,10 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsMaxFEN) {
 
   // invalid FENId
   Dream.DreamParser.Result.push_back({0, 12, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Counters.FENErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().FENErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Counters.ConfigErrors, 0);
-  ASSERT_EQ(Counters.FENMappingErrors, 1);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().FENErrors, 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
@@ -143,11 +143,12 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsConfigError) {
 
   // unconfigured ring,fen combination
   Dream.DreamParser.Result.push_back({2, 2, 0, 0, 0, 0, 6, 0, 0});
-  ASSERT_EQ(Counters.ConfigErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Counters.ConfigErrors, 1);
-  ASSERT_EQ(Counters.RingMappingErrors, 0);
-  ASSERT_EQ(Counters.FENMappingErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 1);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().RingMappingErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().PixelErrors, 0);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
@@ -158,10 +159,10 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGeometryError) {
   // geometry error (no sumo defined)
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0});
   Dream.processReadouts();
-  ASSERT_EQ(Counters.ConfigErrors, 0);
-  ASSERT_EQ(Counters.RingMappingErrors, 0);
-  ASSERT_EQ(Counters.FENMappingErrors, 0);
-  ASSERT_EQ(Counters.GeometryErrors, 1);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().RingMappingErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().PixelErrors, 1);
   ASSERT_EQ(Counters.Events, 0);
 }
 
@@ -175,10 +176,9 @@ TEST_F(DreamInstrumentTest, ProcessReadoutsGood) {
   Dream.DreamParser.Result.push_back({0, 0, 0, 0, 0, 0, 6, 0, 0});
   ASSERT_EQ(Counters.Events, 0);
   Dream.processReadouts();
-  ASSERT_EQ(Counters.ConfigErrors, 0);
-  ASSERT_EQ(Counters.RingMappingErrors, 0);
-  ASSERT_EQ(Counters.FENMappingErrors, 0);
-  ASSERT_EQ(Counters.GeometryErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getDreamCounters().ConfigErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().RingMappingErrors, 0);
+  ASSERT_EQ(Dream.getGeometry().getBaseCounters().FENErrors, 0);
   ASSERT_EQ(Counters.Events, 1);
 }
 
