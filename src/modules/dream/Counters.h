@@ -25,14 +25,9 @@ struct Counters {
   int64_t FiberErrors{0};
   int64_t FENErrors{0};
 
-  int64_t RingMappingErrors{0};
-  int64_t FENMappingErrors{0};
-  int64_t ConfigErrors{0};
-
-  //
+  // DREAM Processing
   int64_t ProcessingIdle{0};
   int64_t Events{0};
-  int64_t GeometryErrors{0};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

@@ -67,7 +67,7 @@ protected:
 
   /// \brief Geometry statistics counters with automatic registration
   ///        limited to CAEN-specific geometry objects.
-  CaenGeometryCounters CaenStats; ///< Geometry statistics counters
+  mutable CaenGeometryCounters CaenStats; ///< Geometry statistics counters
 
 public:
   /// \brief sets the calibration parameters for straw stretch corrections
@@ -81,7 +81,7 @@ public:
   /// \brief Runtime type validation for CAEN readout data
   /// \param type_info Type information from typeid()
   /// \return true if type is valid for CAEN geometry, false otherwise
-  bool validateDataType(const std::type_info &type_info) override {
+  bool validateDataType(const std::type_info &type_info) const override {
     // For CAEN geometries, we expect DataParser::CaenReadout
     XTRACE(DATA, DEB, "Validating CAEN readout type: %s", type_info.name());
     if (type_info == typeid(DataParser::CaenReadout)) {

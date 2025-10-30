@@ -36,20 +36,20 @@ bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
                      [&]() { return validateGroup(Data.Group); });
 }
 
-int BifrostGeometry::xOffset(int Ring, int Group) {
+int BifrostGeometry::xOffset(int Ring, int Group) const {
   int RingOffset = Ring * StrideResolution;
   int GroupOffset = (Group % 3) * UnitPixellation;
   XTRACE(DATA, DEB, "RingOffset %d, GroupOffset %d", RingOffset, GroupOffset);
   return RingOffset + GroupOffset;
 }
 
-int BifrostGeometry::yOffset(int Group) {
+int BifrostGeometry::yOffset(int Group) const {
   int Arc = Group / 3; // 3 == triplets per arc (for a given ring)
   return Arc * UnitsPerGroup;
 }
 
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
-                                                       int AmpB) {
+                                                       int AmpB) const {
 
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
@@ -88,7 +88,7 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-uint32_t BifrostGeometry::calcPixelImpl(const void *DataPtr) {
+uint32_t BifrostGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int xoff = xOffset(Ring, Data->Group);

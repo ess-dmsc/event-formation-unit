@@ -113,27 +113,27 @@ protected:
   virtual ~DetectorGeometry() = default;
 
   /// \brief Public access to statistics counters
-  BaseGeometryCounters BaseCounters;
+  mutable BaseGeometryCounters BaseCounters;
 
   /// \brief Pure virtual implementation method for pixel calculation
   /// Derived classes must implement this method for their specific geometry
   /// \param Data Pointer to readout data object (const, cast to appropriate
   /// type internally) \return Calculated pixel ID, or 0 if calculation failed
-  virtual uint32_t calcPixelImpl(const void *Data) = 0;
+  virtual uint32_t calcPixelImpl(const void *Data) const = 0;
 
   /// \brief Pure virtual method for runtime type validation
   /// Derived classes must implement this method to validate readout data types
   /// specific to their geometry type (e.g., CAEN, VMM3, etc.)
   /// \param type_info Type information from typeid()
   /// \return true if type is valid for this geometry, false otherwise
-  virtual bool inline validateDataType(const std::type_info &type_info) = 0;
+  virtual bool inline validateDataType(const std::type_info &type_info) const = 0;
 
 public:
   /// \brief Get access to BaseGeometryCounters object
   const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
 
   /// \brief Validate ring number against configuration
-  bool inline validateRing(int Ring) {
+  bool inline validateRing(int Ring) const {
     if (Ring < 0 || Ring > MaxRing) {
       XTRACE(DATA, WAR, "RING %d is invalid (out of range)", Ring);
       BaseCounters.RingErrors++;
@@ -143,7 +143,7 @@ public:
   }
 
   /// \brief Validate FEN number against configuration
-  bool inline validateFEN(int FEN) {
+  bool inline validateFEN(int FEN) const {
     if (FEN < 0 || FEN > MaxFEN) {
       XTRACE(DATA, WAR, "FEN %d is invalid (out of range)", FEN);
       BaseCounters.FENErrors++;
@@ -153,7 +153,7 @@ public:
   }
 
   template <typename T>
-  bool validateTopology(HashMap2D<T> &map, int Col, int Row) {
+  bool validateTopology(HashMap2D<T> &map, int Col, int Row) const {
     if (not map.isValue(Col, Row)) {
       XTRACE(DATA, WAR, "Col %d, Row %d is incompatible with config", Col, Row);
       BaseCounters.TopologyError++;
@@ -166,7 +166,7 @@ public:
   /// \param validators List of functions returning bool
   /// \return true if all validators return true, false otherwise
   template <typename... Validators>
-  bool validateAll(Validators &&...validators) {
+  bool validateAll(Validators &&...validators) const {
     bool result = (validators() && ...);
     if (!result) {
       BaseCounters.ValidationErrors++;
@@ -178,7 +178,7 @@ public:
   /// \tparam T The readout data type
   /// \param Readout Data object to calculate pixel for (const reference)
   /// \return Calculated pixel ID, with automatic error counting for failures
-  template <typename T> uint32_t calcPixel(const T &Data) {
+  template <typename T> uint32_t calcPixel(const T &Data) const {
     // Runtime type validation
     if (!validateDataType(typeid(T))) {
       XTRACE(DATA, ERR, "Invalid readout type for geometry type %s",

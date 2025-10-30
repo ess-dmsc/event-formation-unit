@@ -1,54 +1,61 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
+#include <common/Statistics.h>
 #include <dream/geometry/DreamGeometry.h>
+#include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
+#include <memory>
 
 using namespace Dream;
 
 class DreamGeometryTest : public TestBase {
 protected:
   DataParser::CDTReadout Readout{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
-  DreamGeometry geometry;
-  void SetUp() override {}
+  std::unique_ptr<DreamGeometry> geometry;
+  Statistics Stats;
+  Config DreamConfig;
+
+  void SetUp() override {
+    geometry = std::make_unique<DreamGeometry>(Stats, DreamConfig);
+  }
   void TearDown() override {}
 };
 
 TEST_F(DreamGeometryTest, PixelOffsets) {
-  ASSERT_EQ(geometry.getPixelOffset(Config::FwEndCap), 0);
-  ASSERT_EQ(geometry.getPixelOffset(Config::BwEndCap), 71680);
-  ASSERT_EQ(geometry.getPixelOffset(Config::DreamMantle), 229376);
-  ASSERT_EQ(geometry.getPixelOffset(Config::SANS), 720896);
-  ASSERT_EQ(geometry.getPixelOffset(Config::HR), 1122304);
+  ASSERT_EQ(geometry->getPixelOffset(Config::FwEndCap), 0);
+  ASSERT_EQ(geometry->getPixelOffset(Config::BwEndCap), 71680);
+  ASSERT_EQ(geometry->getPixelOffset(Config::DreamMantle), 229376);
+  ASSERT_EQ(geometry->getPixelOffset(Config::SANS), 720896);
+  ASSERT_EQ(geometry->getPixelOffset(Config::HR), 1122304);
 }
 
 TEST_F(DreamGeometryTest, PixelOffsetsError) {
-  ASSERT_EQ(geometry.getPixelOffset(Config::PA), -1);
+  ASSERT_EQ(geometry->getPixelOffset(Config::PA), -1);
 }
 
 TEST_F(DreamGeometryTest, GetPixel) {
-  Parms.Type = Config::ModuleType::BwEndCap;
+  DreamConfig.RMConfig[0][0].Type = Config::ModuleType::BwEndCap;
   Readout.UnitId = 6;
-  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 71681);
+  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 71681);
 
-  Parms.Type = Config::ModuleType::DreamMantle;
-  Parms.P2.Cassette = 0;
-  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 229377);
+  DreamConfig.RMConfig[0][0].Type = Config::ModuleType::DreamMantle;
+  DreamConfig.RMConfig[0][0].P2.Cassette = 0;
+  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 229377);
 
-  Parms.Type = Config::ModuleType::HR;
-  Parms.P2.Rotate = 0;
-  ASSERT_TRUE(geometry.getPixel(Parms, Readout) >= 1122305);
+  DreamConfig.RMConfig[0][0].Type = Config::ModuleType::HR;
+  DreamConfig.RMConfig[0][0].P2.Rotate = 0;
+  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 1122305);
 }
 
 TEST_F(DreamGeometryTest, GetPixelError) {
-  Parms.Type = Config::ModuleType::PA;
+  DreamConfig.RMConfig[0][0].Type = Config::ModuleType::PA;
   Readout.UnitId = 6;
-  ASSERT_EQ(geometry.getPixel(Parms, Readout), 0);
+  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 0);
 }
 
 int main(int argc, char **argv) {

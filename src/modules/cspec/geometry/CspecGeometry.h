@@ -28,13 +28,13 @@ public:
   bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   /// \brief return the global x-offset for the given identifiers
-  int xOffset(int Ring, int Group);
+  int xOffset(int Ring, int Group) const;
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int AmpA, int AmpB) { return posAlongUnit(AmpA, AmpB); }
+  int yCoord(int AmpA, int AmpB) const { return posAlongUnit(AmpA, AmpB); }
 
   /// \brief return the position along the unit (tube for CSPEC)
-  int posAlongUnit(int AmpA, int AmpB);
+  int posAlongUnit(int AmpA, int AmpB) const;
 
   /// \brief return the total number of serializers used by the geometry
   [[nodiscard]] inline size_t numSerializers() const override { return 1; }
@@ -57,7 +57,7 @@ protected:
   /// \brief validate the readout data fields for this geometry
   /// \param DataPtr pointer to readout data
   /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) const override;
 };
 } // namespace Caen
 

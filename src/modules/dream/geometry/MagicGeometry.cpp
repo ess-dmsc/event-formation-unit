@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,19 +18,31 @@
 
 namespace Dream {
 
-int MagicGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::CDTReadout &Data) {
+bool MagicGeometry::validateReadoutData(
+    const DataParser::CDTReadout &Data) const {
+  int Ring = Data.FiberId / 2;
+
+  return validateAll([&]() { return validateRing(Ring); },
+                     [&]() { return validateFEN(Data.FENId); },
+                     [&]() { return validateConfigMapping(Ring, Data.FENId); });
+}
+
+uint32_t MagicGeometry::calcPixelImpl(const void *DataPtr) const {
+  const auto *Data = static_cast<const DataParser::CDTReadout *>(DataPtr);
+
+  int Ring = Data->FiberId / 2;
+  const Config::ModuleParms &Parms = getModuleParms(Ring, Data->FENId);
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
   case Config::PA:
-    Pixel = padetector.getPixelId(Parms, Data);
+    Pixel = padetector.calcPixelId(Parms, *Data);
     break;
 
   case Config::FR:
-    Pixel = frdetector.getPixelId(Parms, Data);
+    Pixel = frdetector.calcPixelId(Parms, *Data);
     break;
 
   default:
@@ -49,7 +61,7 @@ int MagicGeometry::getPixel(Config::ModuleParms &Parms,
 }
 
 ///\brief the pixel offset values are defined in the MAGIC ICD
-int MagicGeometry::getPixelOffset(Config::ModuleType Type) {
+int MagicGeometry::getPixelOffset(Config::ModuleType Type) const {
   int RetVal{-1};
   switch (Type) {
   case Config::FR:

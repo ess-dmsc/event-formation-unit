@@ -29,7 +29,7 @@ Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguratio
 ///\todo refactoring oportunity: this code is nearly identical to the code in
 /// bifrost
 std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
-                                                      int AmpB) {
+                                                      int AmpB) const {
   int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
   if ((AmpA < MinAmpl) or
       (AmpB < MinAmpl)) { ///\todo replace with configuration
@@ -85,7 +85,7 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
 
 /// \brief calculate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
-uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) {
+uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
   int Ring = Data->FiberId / 2;
   int Tube = Data->Group;

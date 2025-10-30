@@ -38,7 +38,7 @@ public:
   /// \return tube index (0) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
   /// \todo refactoring oportunity: their code is the same as for bifrost
-  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB) const;
 
   /// \todo functions to handle multiple serialisers
   [[nodiscard]] size_t numSerializers() const override;
@@ -54,7 +54,7 @@ protected:
   /// \brief validate the readout data fields for this geometry
   /// \param DataPtr pointer to readout data
   /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) override;
+  uint32_t calcPixelImpl(const void *DataPtr) const override;
 
 private:
   const Config &Conf;

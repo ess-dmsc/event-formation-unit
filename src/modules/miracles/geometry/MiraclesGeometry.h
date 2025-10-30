@@ -28,15 +28,15 @@ public:
   bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   /// \brief return local x-coordinate from amplitudes
-  int xCoord(int Ring, int Tube, int AmpA, int AmpB);
+  int xCoord(int Ring, int Tube, int AmpA, int AmpB) const;
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int Ring, int AmpA, int AmpB);
+  int yCoord(int Ring, int AmpA, int AmpB) const;
 
-  int tubeAorB(int AmpA, int AmpB);
+  int tubeAorB(int AmpA, int AmpB) const;
 
   /// \brief return the position along the tube
-  int posAlongUnit(int AmpA, int AmpB);
+  int posAlongUnit(int AmpA, int AmpB) const;
 
   /// \brief return the total number of serializers used by the geometry
   [[nodiscard]] inline size_t numSerializers() const override { return 1; }
@@ -59,6 +59,6 @@ protected:
   /// \brief Calculate pixel ID from readout data
   /// \param Data Pointer to CaenReadout object (cast internally)
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *Data) override;
+  uint32_t calcPixelImpl(const void *Data) const override;
 };
 } // namespace Caen
