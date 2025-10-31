@@ -4,6 +4,9 @@
 *.a
 *.so
 *.pyc
+*.pyo
+*.pyd
+__pycache__/
 *.gcda
 *.gcno
 a.out
@@ -31,3 +34,4 @@ CMakeLists.txt.user
 .devcontainer
 .clang-format
 resources
+uv.lock

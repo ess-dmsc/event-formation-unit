@@ -46,6 +46,8 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
   auto CbmGroup = app.add_option_group("CBM Options");
   CbmGroup->add_option("--monitor_type", cbmSettings.monitorType,
                        "Beam monitor type (" + CbmType::getTypeNames() + ")");
+  CbmGroup->add_option("--fiber", cbmSettings.FiberId,
+                       "Override Fiber ID (default 22)");
   CbmGroup->add_option("--fen", cbmSettings.FenId,
                        "Override FEN ID (default 0)");
   CbmGroup->add_option("--channel", cbmSettings.ChannelId,
@@ -126,7 +128,7 @@ void ReadoutGenerator::generateEvent0DData(uint8_t *dataPtr) {
 
     // write data packet to the buffer
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    dataPkt->FiberId = CBM_FIBER_ID;
+    dataPkt->FiberId = cbmSettings.FiberId;
     dataPkt->FENId = cbmSettings.FenId;
     auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     dataPkt->TimeHigh = readoutTimeHigh;
@@ -152,7 +154,7 @@ void ReadoutGenerator::generate2DData(uint8_t *dataPtr) {
 
     // Write data packet to the buffer
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    dataPkt->FiberId = CBM_FIBER_ID;
+    dataPkt->FiberId = cbmSettings.FiberId;
     dataPkt->FENId = cbmSettings.FenId;
     auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     dataPkt->TimeHigh = readoutTimeHigh;
@@ -224,7 +226,7 @@ void ReadoutGenerator::generate2DBitmapData(uint8_t *dataPtr) {
 
     // Write data packet to the buffer
     dataPkt->DataLength = sizeof(Parser::CbmReadout);
-    dataPkt->FiberId = CBM_FIBER_ID;
+    dataPkt->FiberId = cbmSettings.FiberId;
     dataPkt->FENId = cbmSettings.FenId;
     auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
     dataPkt->TimeHigh = readoutTimeHigh;
@@ -277,7 +279,7 @@ void ReadoutGenerator::generateIBMData(uint8_t *dataPtr) {
       memset(dataPkt, 0, sizeof(Parser::CbmReadout));
 
       // write data packet to the buffer
-      dataPkt->FiberId = CBM_FIBER_ID;
+      dataPkt->FiberId = cbmSettings.FiberId;
       dataPkt->FENId = cbmSettings.FenId;
       dataPkt->DataLength = sizeof(Parser::CbmReadout);
       auto [readoutTimeHigh, readoutTimeLow] = generateReadoutTime();
@@ -314,7 +316,7 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
       // that the generator can generate values for the whole shake beam range.
       // Generator max value is in milliseconds, shake beam range is in
       // microseconds.
-      GenMaX += round(static_cast<float>(SHAKE_BEAM_US.second) / 1e3);
+      GenMaX += round(static_cast<float>(SHAKE_BEAM_US.second) / MILLISEC);
     }
 
     Generator = std::make_unique<DistributionGenerator>(

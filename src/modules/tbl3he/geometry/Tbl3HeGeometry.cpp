@@ -30,17 +30,15 @@ Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguratio
 /// bifrost
 std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
                                                       int AmpB) const {
+  // Defensive checks to prevent crashes (division by zero, invalid calculations)
+  // These should not normally be reached if validateReadoutData() is called first
   int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
-  if ((AmpA < MinAmpl) or
-      (AmpB < MinAmpl)) { ///\todo replace with configuration
-    XTRACE(DATA, DEB, "At least one amplitude is too low");
-    CaenStats.AmplitudeLow++;
+  
+  if (!validateAmplitudeLow(AmpA, AmpB, MinAmpl)) {
     return InvalidPos;
   }
 
-  if (AmpA + AmpB == 0) {
-    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    CaenStats.AmplitudeZero++;
+  if (!validateAmplitudeZero(AmpA, AmpB)) {
     return InvalidPos;
   }
 
@@ -75,12 +73,16 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
+  int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
+
   return validateAll([&]() { return validateRing(Ring); },
                      [&]() { return validateGroup(Data.Group); },
                      [&]() {
                        return validateTopology(*Conf.Tbl3HeConf.TopologyMapPtr,
                                                Ring, Data.FENId);
-                     });
+                     },
+                     [&]() { return validateAmplitudeLow(Data.AmpA, Data.AmpB, MinAmpl); },
+                     [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); });
 }
 
 /// \brief calculate the pixel id from the readout data

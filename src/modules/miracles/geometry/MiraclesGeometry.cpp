@@ -9,8 +9,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/Statistics.h>
 #include <cmath>
+#include <common/Statistics.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/miracles/geometry/MiraclesGeometry.h>
 
@@ -19,9 +19,10 @@
 
 namespace Caen {
 
-MiraclesGeometry::MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration)
+MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
+                                   const Config &CaenConfiguration, int MaxAmpl)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
-               CaenConfiguration.CaenParms.MaxFEN, 1),
+               CaenConfiguration.CaenParms.MaxFEN, 1, MaxAmpl),
       ESSGeometry(48, 128, 1, 1),
       GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
@@ -38,11 +39,15 @@ uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
   return pixel;
 }
 
-bool MiraclesGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
+bool MiraclesGeometry::validateReadoutData(
+    const DataParser::CaenReadout &Data) {
   int Ring = Data.FiberId / 2;
   XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId, Data.Group);
 
-  return validateRing(Ring);
+  return validateAll(
+      [&]() { return validateRing(Ring); },
+      [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); },
+      [&]() { return validateAmplitudeHigh(Data.AmpA, Data.AmpB); });
 }
 
 int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) const {
@@ -63,18 +68,6 @@ int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) const {
   return offset + posAlongUnit(AmpA, AmpB);
 }
 
-// 0 is A, 1 is B
-int MiraclesGeometry::tubeAorB(int AmpA, int AmpB) const {
-  float UnitPos = 1.0 * AmpA / (AmpA + AmpB);
-  if (UnitPos <= 0.5) {
-    XTRACE(DATA, DEB, "A-tube (pos %f)", UnitPos);
-    return 0;
-  } else {
-    XTRACE(DATA, DEB, "B-tube (pos %f)", UnitPos);
-    return 1;
-  }
-}
-
 int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   int tubepos;
   if (AmpA + AmpB == 0) {
@@ -87,14 +80,14 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    tubepos = pos * 2 * (static_cast<int>(GroupResolution / 2) - 1);
+    tubepos =
+        round(static_cast<int>(GroupResolution / 2) - 1 -
+              (pos - 0.5) * 2 * (static_cast<int>(GroupResolution / 2 - 1)));
     XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   } else {
-    tubepos =
-        round(static_cast<int>(GroupResolution / 2) - 1 -
-              (pos - 0.5) * 2 * (static_cast<int>(GroupResolution / 2) - 1));
-    XTRACE(DATA, DEB, "B: TubePos %u, pos %f", tubepos, pos);
+    tubepos = pos * 2 * (static_cast<int>(GroupResolution / 2) - 1);
+    XTRACE(DATA, DEB, "B: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   }
 }

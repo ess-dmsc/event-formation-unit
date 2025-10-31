@@ -24,7 +24,8 @@
 namespace Caen {
 class MiraclesGeometry : public Geometry, ESSGeometry {
 public:
-  explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration);
+  explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration, 
+                            int MaxAmpl = std::numeric_limits<int>::max());
   bool validateReadoutData(const DataParser::CaenReadout &Data) override;
 
   /// \brief return local x-coordinate from amplitudes
@@ -32,8 +33,6 @@ public:
 
   /// \brief return local y-coordinate from amplitudes
   int yCoord(int Ring, int AmpA, int AmpB) const;
-
-  int tubeAorB(int AmpA, int AmpB) const;
 
   /// \brief return the position along the tube
   int posAlongUnit(int AmpA, int AmpB) const;
@@ -52,8 +51,23 @@ public:
   [[nodiscard]] inline std::string serializerName(size_t) const override {
     return "caen";
   }
+
   // Per-detector resolution: number of pixels across one unit (tube pair)
   int GroupResolution;
+
+  /// \brief return the tube number (0 or 1) for the given amplitudes
+  /// \param AmpA amplitude from A-tube
+  /// \param AmpB amplitude from B-tube
+  /// \return 0 for A-tube, 1 for B-tube
+  [[nodiscard]] inline int tubeAorB(int AmpA, int AmpB) const {
+    if (AmpA >= AmpB) {
+      XTRACE(DATA, DEB, "A-tube (A: %f > B: %f)", AmpA, AmpB);
+      return 0;
+    } else {
+      XTRACE(DATA, DEB, "B-tube (A: %f < B: %f)", AmpA, AmpB);
+      return 1;
+    }
+  }
 
 protected:
   /// \brief Calculate pixel ID from readout data
@@ -61,4 +75,5 @@ protected:
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const void *Data) const override;
 };
+
 } // namespace Caen

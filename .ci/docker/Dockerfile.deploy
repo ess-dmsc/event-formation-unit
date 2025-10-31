@@ -13,6 +13,7 @@ COPY build/licenses /ess/ecdc/event_formation_unit/licenses
 COPY utils/efushell /ess/ecdc/event_formation_unit/efushell
 COPY build/bin/${INSTRUMENT_NAME} /ess/ecdc/event_formation_unit/bin/${INSTRUMENT_NAME}
 COPY build/BUILD_INFO /ess/ecdc/event_formation_unit
+COPY CHANGELOG /ess/ecdc/event_formation_unit/CHANGELOG
 COPY .ci/docker/Dockerfile_entrypoint.sh /ess/ecdc/event_formation_unit/entrypoint.sh
 
 

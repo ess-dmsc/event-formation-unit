@@ -133,10 +133,17 @@ void CbmBase::processingThread() {
                                 SerializerPtr);
     } else if (Topology->Type == CbmType::IBM) {
 
+      essmath::VectorAggregationFunc<int32_t> AggFunc =
+          essmath::SUM_AGG_FUNC<int32_t>;
+      if (Topology->AggregationMode == AggregationType::AVG) {
+        AggFunc = essmath::AVERAGE_AGG_FUNC<int32_t>;
+      }
+
       std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
           std::make_unique<HistogramSerializer<int32_t>>(
               Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
-              CbmConfiguration.Parms.SumUpPulses, Produce);
+              Topology->AggregatedFrames, Produce, 0, AggFunc);
+
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);

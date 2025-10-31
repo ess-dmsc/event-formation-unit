@@ -25,6 +25,14 @@
 
 namespace cbm {
 
+// enumeration of how to aggregate pulses on CBM
+// SUM will be used as default where it will sum
+// up one pulse.
+enum AggregationType {
+  SUM = 0x00,     // < Calculate sum of X pulses 
+  AVG = 0x01      // < Calculate average of X pulses
+};
+
 struct Topology {
   const int FEN{0};
   const int Channel{0};
@@ -41,18 +49,45 @@ struct Topology {
     int BinCount;
     int height;
   };
+  union {
+    int param3{0};
+    int AggregatedFrames;
+  };
+  union {
+    int param4{0};
+    int AggregationMode;
+  };
 
   Topology() = default;
 
-  Topology(int FEN, int Channel, const std::string &Source,
-           const CbmType &Type, int param1)
-      : FEN(FEN), Channel(Channel), Source(Source), Type(Type),
-        param1(param1){};
+  // clang-format off
+  Topology(int FEN, 
+           int Channel, 
+           const std::string &Source,
+           const CbmType &Type, 
+           int param1)
+    : FEN(FEN)
+    , Channel(Channel)
+    , Source(Source)
+    , Type(Type)
+    , param1(param1){};
 
-  Topology(int FEN, int Channel, const std::string &Source,
-           const CbmType &Type, int param1, int param2)
-      : FEN(FEN), Channel(Channel), Source(Source), Type(Type),
-        param1(param1), param2(param2){};
+  Topology(int FEN, 
+           int Channel, 
+           const std::string &Source,
+           const CbmType &Type, 
+           int param1, 
+           int param2,
+           int param3, 
+           int param4)
+    : FEN(FEN), Channel(Channel)
+    , Source(Source)
+    , Type(Type)
+    , param1(param1)
+    , param2(param2)
+    , param3(param3)
+    , param4(param4){};
+  // clang-format on
 };
 
 class Config : public Configurations::Config {
@@ -77,13 +112,16 @@ public:
   // Parameters (eventually) obtained from JSON config file
   struct {
     uint8_t TypeSubType{DetectorType::CBM};
-    uint32_t MaxTOFNS{20 * 71'428'571};          // < Twenty 14Hz pulses
-    uint32_t MaxPulseTimeDiffNS{5 * 71'428'571}; // < Five 14Hz pulses
-    uint8_t MonitorRing{11};                     // < Ring number for the monitors
-    uint8_t NumberOfMonitors{1};                 // < Number of monitor in the config
-    uint8_t MaxFENId{10};                        // < Maximum FEN ID
-    uint8_t NumOfFENs{11};                       // < Number of FENs, MaxId + 1
-    uint8_t SumUpPulses{1};                      // < Number of pulse to sum in a histogram
+    uint32_t MaxTOFNS{20 * 71'428'571};             // < Twenty 14Hz pulses
+    uint32_t MaxPulseTimeDiffNS{5 * 71'428'571};    // < Five 14Hz pulses
+    uint8_t MonitorRing{11};                        // < Ring number for the monitors
+    uint8_t NumberOfMonitors{1};                    // < Number of monitors in the config
+    uint8_t MaxFENId{10};                           // < Maximum number of FEN IDs
+    uint8_t NumOfFENs{11};                          // < Number of FENs (MaxId + 1)
+    uint8_t AggregationMode{AggregationType::SUM};  // < How to aggregate pulses. Default is SUM
+    uint8_t AggregatedFrames{1};                    // < Number of pulse to sum in a histogram
+                                                    //   When set to one and with the default SUM mode,
+                                                    //   this will be one frame one histogram.
   } Parms;
   // clang-format on
 

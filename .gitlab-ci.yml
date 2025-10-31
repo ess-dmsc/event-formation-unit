@@ -16,8 +16,8 @@ stages:
   - publish
 
 variables:
-  ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.3.0"
-  CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-centos7-conan:1.1.0"
+  ALMALINUX9_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-almalinux9-conan:1.5.0-rc.1"
+  CENTOS7_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-centos7-conan:1.4.0"
   UBUNTU2204_IMAGE: "registry.esss.lu.se/ecdc/ess-dmsc/docker-ubuntu2204-conan:1.1.0"
   CONAN_USER_HOME: "$CI_PROJECT_DIR"
 
@@ -42,6 +42,7 @@ variables:
     - cp -r utils/efushell archive/event-formation-unit/util
     - mkdir archive/event-formation-unit/configs
     - mkdir archive/event-formation-unit/data
+    - cp -r CHANGELOG archive/event-formation-unit/
 
 .versioning_rules:
   rules:

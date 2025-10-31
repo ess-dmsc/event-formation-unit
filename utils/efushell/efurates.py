@@ -15,12 +15,19 @@ def getRates(args):
     statCount = int(stat.split()[1])
 
     # Properties we should get rates for
-    props = [
+    extra_quantities = []
+    if args.q:
+        extra_quantities = [q.strip() for q in args.q.split(',')]
+    quantities = [
         'receive.packets',
         'receive.bytes',
+
         'readouts.count',
+        'readout.count',
+
         'events.count',
-    ]
+        'events.ibm',
+    ] + extra_quantities
 
     # Store stat keys here
     keys = []
@@ -29,12 +36,13 @@ def getRates(args):
     indices = []
     for index in range(1, statCount + 1):
         stat = str(metrics._get_efu_command("STAT_GET " + str(index)), 'utf-8')
-        if any([p in stat for p in props]):
+        stat = stat.split()[1].strip()
+        if any([stat.endswith(quantity) for quantity in quantities]):
             indices.append(index)
-            keys.append(stat.strip().split()[1])
+            keys.append(stat)
 
     # Length of longest key
-    length = max(len(key) for key in keys)
+    length = max(len(key) for key in keys) + 1
 
     # Initialize variables
     dt = args.d
@@ -59,9 +67,16 @@ def getRates(args):
         # Print new rates
         if ((t0 is not None) and (r0 is not None)):
             print ("\n{}".format(caption))
-            for index in range(4):
+            rates = []
+            for index in range(len(indices)):
                 delta = float(t1 - t0)
-                print("{}: {:.1f}".format(keys[index].ljust(length), (r1[index] - r0[index])/delta))
+                rate = (r1[index] - r0[index])/delta
+                rate = '{:.1f}'.format(rate)
+                rates.append((keys[index], rate))
+
+            r_length = max(len(r) for (key, r) in rates)
+            for (key, rate) in rates:
+                print("{} {}".format(key.ljust(length), rate.rjust(r_length)))
 
         # Store old time and readout
         t0 = t1
@@ -81,6 +96,9 @@ if __name__ == "__main__":
 
     parser.add_argument("-d", metavar='delta', help = "Sample time between each stat readout",
                         type = float, default = 1.0)
+
+    parser.add_argument("-q", metavar='quantities', help = "Print rates for a comma separated list of quantities",
+                        type = str, default = "")
 
     args = parser.parse_args()
 

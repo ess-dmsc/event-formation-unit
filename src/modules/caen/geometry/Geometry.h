@@ -118,6 +118,46 @@ public:
     return true;
   }
 
+  /// \brief Validate amplitude sum is not zero
+  /// \param AmpA Amplitude A value
+  /// \param AmpB Amplitude B value
+  /// \return true if sum is non-zero, false otherwise
+  inline bool validateAmplitudeZero(int AmpA, int AmpB) const {
+    if (AmpA + AmpB == 0) {
+      XTRACE(DATA, DEB, "Sum of amplitudes is 0");
+      CaenStats.AmplitudeZero++;
+      return false;
+    }
+    return true;
+  }
+
+  /// \brief Validate amplitude sum does not exceed maximum
+  /// \param AmpA Amplitude A value
+  /// \param AmpB Amplitude B value
+  /// \return true if sum is within limits, false otherwise
+  inline bool validateAmplitudeHigh(int AmpA, int AmpB) const {
+    if (AmpA + AmpB > MaxAmpl) {
+      XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
+      CaenStats.AmplitudeHigh++;
+      return false;
+    }
+    return true;
+  }
+
+  /// \brief Validate individual amplitudes meet minimum threshold
+  /// \param AmpA Amplitude A value
+  /// \param AmpB Amplitude B value
+  /// \param MinAmpl Minimum valid amplitude
+  /// \return true if both amplitudes meet minimum, false otherwise
+  inline bool validateAmplitudeLow(int AmpA, int AmpB, int MinAmpl) const {
+    if ((AmpA < MinAmpl) || (AmpB < MinAmpl)) {
+      XTRACE(DATA, DEB, "At least one amplitude is too low");
+      CaenStats.AmplitudeLow++;
+      return false;
+    }
+    return true;
+  }
+
   CDCalibration CaenCDCalibration;
   const int MaxGroup{0}; ///< Maximum valid Group value (exclusive)
   const int MinAmpl{0};      ///< Minimum valid amplitude value
