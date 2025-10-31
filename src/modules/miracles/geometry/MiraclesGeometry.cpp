@@ -72,7 +72,7 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   int tubepos;
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");
-    ///\todo add counter
+    CaenStats.ZeroDivError++;
     return -1;
   }
 

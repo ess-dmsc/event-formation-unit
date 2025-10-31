@@ -22,29 +22,25 @@ namespace Caen {
 Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
                CaenConfiguration.CaenParms.MaxFEN,
-               CaenConfiguration.CaenParms.MaxGroup,
-               CaenConfiguration.CaenParms.Resolution),
+               CaenConfiguration.CaenParms.MaxGroup),
       ESSGeometry(100, 8, 1, 1), Conf(CaenConfiguration) {}
 
 ///\todo refactoring oportunity: this code is nearly identical to the code in
 /// bifrost
 std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
                                                       int AmpB) const {
-  // Defensive checks to prevent crashes (division by zero, invalid calculations)
-  // These should not normally be reached if validateReadoutData() is called first
-  int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
-  
-  if (!validateAmplitudeLow(AmpA, AmpB, MinAmpl)) {
-    return InvalidPos;
-  }
-
-  if (!validateAmplitudeZero(AmpA, AmpB)) {
+  // Defensive check to prevent division by zero
+  // This should not normally be reached if validateReadoutData() is called first
+  if (AmpA + AmpB == 0) {
+    XTRACE(DATA, WAR, "AmpA + AmpB == 0, should have been caught in validation");
+    CaenStats.ZeroDivError++;
     return InvalidPos;
   }
 
   double GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
   if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    CaenStats.GlobalPosInvalid++;
     return InvalidPos;
   }
 
@@ -52,6 +48,7 @@ std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
   if (Unit == -1) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
            AmpB, GlobalPos);
+    CaenStats.UnitIdInvalid++;
     return InvalidPos;
   }
 

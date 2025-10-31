@@ -33,7 +33,9 @@ bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
 
   return validateAll([&]() { return validateRing(Ring); },
                      [&]() { return validateFEN(Data.FENId); },
-                     [&]() { return validateGroup(Data.Group); });
+                     [&]() { return validateGroup(Data.Group); },
+                     [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); },
+                     [&]() { return validateAmplitudeHigh(Data.AmpA, Data.AmpB); });
 }
 
 int BifrostGeometry::xOffset(int Ring, int Group) const {
@@ -51,21 +53,18 @@ int BifrostGeometry::yOffset(int Group) const {
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
                                                        int AmpB) const {
 
+  // Defensive check to prevent division by zero
+  // This should not normally be reached if validateReadoutData() is called first
   if (AmpA + AmpB == 0) {
-    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    CaenStats.AmplitudeZero++;
-    return InvalidPos;
-  }
-
-  if (AmpA + AmpB > MaxAmpl) {
-    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
-    CaenStats.AmplitudeHigh++;
+    XTRACE(DATA, WAR, "AmpA + AmpB == 0, should have been caught in validation");
+    CaenStats.ZeroDivError++;
     return InvalidPos;
   }
 
   double GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
   if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    CaenStats.GlobalPosInvalid++;
     return InvalidPos;
   }
 
@@ -73,6 +72,7 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   if (Unit == -1) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
            AmpB, GlobalPos);
+    CaenStats.UnitIdInvalid++;
     return InvalidPos;
   }
 

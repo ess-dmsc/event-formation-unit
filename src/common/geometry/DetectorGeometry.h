@@ -65,7 +65,6 @@ public:
 protected:
   const int MaxRing{0};        ///< Maximum valid Ring value (exclusive)
   const int MaxFEN{0};         ///< Maximum valid FEN value (exclusive)
-  const GeometryType GeomType; ///< Geometry type for validation
 
   ///
   /// \brief Geometry statistics counters with automatic registration
@@ -104,9 +103,8 @@ protected:
   /// \param MaxFEN Maximum valid FEN value (exclusive)
   /// \param GeomType Geometry type for runtime validation
   ///
-  DetectorGeometry(Statistics &Stats, int MaxRing, int MaxFEN,
-                   GeometryType GeomType = GeometryType::CAEN)
-      : MaxRing(MaxRing), MaxFEN(MaxFEN), GeomType(GeomType),
+  DetectorGeometry(Statistics &Stats, int MaxRing, int MaxFEN)
+      : MaxRing(MaxRing), MaxFEN(MaxFEN),
         BaseCounters(Stats) {}
 
   /// \brief Virtual destructor for proper inheritance
@@ -182,7 +180,7 @@ public:
     // Runtime type validation
     if (!validateDataType(typeid(T))) {
       XTRACE(DATA, ERR, "Invalid readout type for geometry type %s",
-             GeomType.toString().c_str());
+             typeid(T).name());
       BaseCounters.TypeErrors++;
       return 0;
     }

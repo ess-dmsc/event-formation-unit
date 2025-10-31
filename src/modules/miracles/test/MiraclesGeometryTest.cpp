@@ -132,6 +132,8 @@ TEST_F(MiraclesGeometryTest, ValidateDataAllCounters) {
 TEST_F(MiraclesGeometryTest, PosAlongUnitZeroAmplitude) {
   // Test zero amplitude case - defensive check in posAlongUnit should return -1
   ASSERT_EQ(geom->posAlongUnit(0, 0), -1);
+  // Verify the ZeroDivError counter was incremented
+  ASSERT_EQ(geom->getCaenCounters().ZeroDivError, 1);
 }
 
 TEST_F(MiraclesGeometryTest, CalcPixel) {

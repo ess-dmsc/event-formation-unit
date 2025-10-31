@@ -38,6 +38,9 @@ protected:
   static inline const std::string METRIC_COUNTER_AMPL_LOW = "geometry.ampl_low";
   static inline const std::string METRIC_COUNTER_AMPL_HIGH = "geometry.ampl_high";
   static inline const std::string METRIC_COUNTER_GROUP_ERRORS = "geometry.group_errors";
+  static inline const std::string METRIC_COUNTER_GLOBALPOS_INVALID = "geometry.globalpos_invalid";
+  static inline const std::string METRIC_COUNTER_ZERODIV_CATCH = "geometry.zerodiv_catch";
+  static inline const std::string METRIC_COUNTER_UNITID_INVALID = "geometry.unitid_invalid";
   // clang-format on
 
   struct CaenGeometryCounters : public StatCounterBase {
@@ -45,12 +48,18 @@ protected:
     int64_t AmplitudeLow{0};
     int64_t AmplitudeHigh{0};
     int64_t GroupErrors{0};
+    int64_t GlobalPosInvalid{0};
+    int64_t ZeroDivError{0};
+    int64_t UnitIdInvalid{0};
 
     CaenGeometryCounters(Statistics &Stats)
         : StatCounterBase(Stats, {{METRIC_COUNTER_AMPL_ZERO, AmplitudeZero},
                                   {METRIC_COUNTER_AMPL_LOW, AmplitudeLow},
                                   {METRIC_COUNTER_AMPL_HIGH, AmplitudeHigh},
-                                  {METRIC_COUNTER_GROUP_ERRORS, GroupErrors}}) {
+                                  {METRIC_COUNTER_GROUP_ERRORS, GroupErrors},
+                                  {METRIC_COUNTER_GLOBALPOS_INVALID, GlobalPosInvalid},
+                                  {METRIC_COUNTER_ZERODIV_CATCH, ZeroDivError},
+                                  {METRIC_COUNTER_UNITID_INVALID, UnitIdInvalid}}) {
     }
   };
 
@@ -62,7 +71,7 @@ protected:
   /// \param MaxAmpl Maximum valid amplitude value for this detector
   Geometry(Statistics &Stats, int MaxRing, int MaxFEN, int MaxGroup,
            int MaxAmpl = std::numeric_limits<int>::max())
-      : DetectorGeometry(Stats, MaxRing, MaxFEN, GeometryType::CAEN), 
+      : DetectorGeometry(Stats, MaxRing, MaxFEN), 
         CaenStats(Stats), MaxGroup(MaxGroup), MaxAmpl(MaxAmpl) {}
 
   /// \brief Geometry statistics counters with automatic registration

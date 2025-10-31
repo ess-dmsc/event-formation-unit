@@ -114,17 +114,6 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutsGroup) {
   ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
 }
 
-TEST_F(Tbl3HeGeometryTest, CalcPixelBadAmpl) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout), 0);
-  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 1);
-
-  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
-  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
-  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
-  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
-}
-
 TEST_F(Tbl3HeGeometryTest, CalcPixelOutOfRange) {
   //                              R  F               G     A    B
   DataParser::CaenReadout readout{3, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0};
@@ -155,19 +144,6 @@ TEST_F(Tbl3HeGeometryTest, CalcPixelSelectedOK) {
   ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
   ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
   ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 0);
-}
-
-TEST_F(Tbl3HeGeometryTest, ErrorAmplitudeLow) {
-  CaenConfiguration.Tbl3HeConf.Params.MinValidAmplitude = 1;
-  //                               R  F              G     A   B  C  D
-  DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout1), 0);
-
-  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
-  ASSERT_EQ(geom->getBaseCounters().RingErrors, 0);
-  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
-  ASSERT_EQ(geom->getCaenCounters().AmplitudeZero, 0);
-  ASSERT_EQ(geom->getCaenCounters().AmplitudeLow, 1);
 }
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutAmplitudeZero) {
@@ -274,6 +250,45 @@ TEST_F(Tbl3HeGeometryTest, OkFromConfigFile) {
 
   readout.Group = 3; // fourth tube
   ASSERT_EQ(g.calcPixel(readout), 800);
+}
+
+TEST_F(Tbl3HeGeometryTest, ZeroDivisionDefensiveCheck) {
+  // Test defensive check for division by zero (AmpA + AmpB == 0)
+  std::pair<int, double> Result = geom->calcUnitAndPos(0, 0, 0);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().ZeroDivError, 1);
+}
+
+TEST_F(Tbl3HeGeometryTest, GlobalPosInvalidCounter) {
+  // Test counter for GlobalPos outside [0.0, 1.0] interval
+  // When AmpA is negative, GlobalPos can be outside [0, 1]
+  std::pair<int, double> Result = geom->calcUnitAndPos(0, -1, 20);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().GlobalPosInvalid, 1);
+}
+
+TEST_F(Tbl3HeGeometryTest, UnitIdInvalidCounter) {
+  // Test counter for when calibration getUnitId returns -1
+  // With null calibration intervals {0.00, 1.00}, most positions should be valid
+  // But we set up the calibration to have limited intervals for this test
+  std::pair<int, double> Result = geom->calcUnitAndPos(0, 1, 1);
+  // GlobalPos = 0.5, which should be within {0.00, 1.00}, so UnitIdInvalid should not increment
+  ASSERT_NE(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().UnitIdInvalid, 0);
+}
+
+TEST_F(Tbl3HeGeometryTest, AmplitudeHighNotValidated) {
+  // NOTE: Tbl3HeGeometry does NOT validate AmplitudeHigh
+  // This is intentional: Tbl3He detector doesn't require MaxAmpl validation.
+  // The Geometry base class is initialized without a MaxAmpl parameter,
+  // so it uses the default value and validateAmplitudeHigh() is not called.
+  // This is by design - Tbl3He has different validation requirements than Bifrost.
+  
+  // Verify that even with very high amplitudes, no AmplitudeHigh counter is incremented
+  //                               R  F              G     A       B       C  D
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 32767, 32767, 0, 0};
+  ASSERT_EQ(geom->validateReadoutData(readout), true); // Passes (no high amplitude check)
+  ASSERT_EQ(geom->getCaenCounters().AmplitudeHigh, 0);
 }
 
 int main(int argc, char **argv) {

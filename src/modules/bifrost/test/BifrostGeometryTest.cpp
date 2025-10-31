@@ -153,6 +153,31 @@ TEST_F(BifrostGeometryTest, Validate) {
   ASSERT_EQ(geom->getCaenCounters().GroupErrors, 1);
 }
 
+TEST_F(BifrostGeometryTest, ZeroDivisionDefensiveCheck) {
+  // Test defensive check for division by zero (AmpA + AmpB == 0)
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, 0, 0);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().ZeroDivError, 1);
+}
+
+TEST_F(BifrostGeometryTest, GlobalPosInvalidCounter) {
+  // Test counter for GlobalPos outside [0.0, 1.0] interval
+  // When AmpA is negative or AmpB is negative, GlobalPos can be outside [0, 1]
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, -1, 20);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().GlobalPosInvalid, 1);
+}
+
+TEST_F(BifrostGeometryTest, UnitIdInvalidCounter) {
+  // Test counter for when calibration getUnitId returns -1
+  // Using ManualCalibGroup with out-of-range position
+  // ManualCalib intervals: {0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}
+  // Position that falls outside all intervals should trigger UnitIdInvalid
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, 1, 1000);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().UnitIdInvalid, 1);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
