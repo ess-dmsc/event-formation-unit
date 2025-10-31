@@ -25,7 +25,6 @@
 #include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
-#include <common/geometry/GeometryType.h>
 #include <common/memory/HashMap2D.h>
 #include <string>
 #include <typeinfo>

@@ -128,7 +128,7 @@ TEST_F(BifrostGeometryTest, CalcPixelAndCountPixelErrors) {
 }
 
 TEST_F(BifrostGeometryTest, Validate) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1};
   ASSERT_TRUE(geom->validateReadoutData(readout));
 
   readout.FiberId = 10;

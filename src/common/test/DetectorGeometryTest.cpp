@@ -26,9 +26,8 @@ struct MockWrongReadout {
 class TestDetectorGeometry : public DetectorGeometry {
 public:
   /// \brief Constructor for the TestDetectorGeometry class
-  explicit TestDetectorGeometry(Statistics &Stats,
-                                GeometryType GeomType = GeometryType::CAEN)
-      : DetectorGeometry(Stats, 23, 11, GeomType) {
+  explicit TestDetectorGeometry(Statistics &Stats)
+      : DetectorGeometry(Stats, 23, 11) {
   } // Use standard CAEN limits: 24 rings (0-23), 12 FENs (0-11)
 
   /// \brief Destructor for the TestDetectorGeometry class
@@ -72,7 +71,7 @@ protected:
 
   void SetUp() override {
     caenGeometry =
-        std::make_unique<TestDetectorGeometry>(Stats, GeometryType::CAEN);
+        std::make_unique<TestDetectorGeometry>(Stats);
   }
 
   void TearDown() override {}
@@ -217,22 +216,6 @@ TEST_F(DetectorGeometryTest, TypeValidationSystem) {
             2); // No additional type error
   ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors,
             0); // No pixel calculation error
-}
-
-/// \brief Test GeometryType constructor with invalid values
-TEST_F(DetectorGeometryTest, InvalidGeometryTypeHandling) {
-  // Test invalid string throws exception
-  ASSERT_THROW(geometry::GeometryType("INVALID"), std::out_of_range);
-
-  // Test invalid integer throws exception
-  ASSERT_THROW(geometry::GeometryType(999), std::out_of_range);
-  ASSERT_THROW(geometry::GeometryType(-1), std::out_of_range);
-
-  // Test valid values work
-  ASSERT_NO_THROW(geometry::GeometryType("CAEN"));
-  ASSERT_NO_THROW(geometry::GeometryType("caen")); // case insensitive
-  ASSERT_NO_THROW(geometry::GeometryType(0));      // CAEN
-  ASSERT_NO_THROW(geometry::GeometryType(4));      // CBM
 }
 
 int main(int argc, char **argv) {

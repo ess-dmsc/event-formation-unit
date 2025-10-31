@@ -53,8 +53,7 @@ public:
   /// \param Stats Reference to Statistics object for counter registration
   /// \param Config Reference to the DREAM configuration object
   Geometry(Statistics &Stats, const Config &Config)
-      : DetectorGeometry(Stats, Config.MaxRing, Config.MaxFEN,
-                         GeometryType::CAEN),
+      : DetectorGeometry(Stats, Config.MaxRing, Config.MaxFEN),
         DreamCounters(Stats), DreamConfig(Config) {}
 
   /// \brief Geometry statistics counters with automatic registration

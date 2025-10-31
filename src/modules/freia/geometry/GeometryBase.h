@@ -148,8 +148,7 @@ protected:
   /// \brief Protected constructor - only derived classes can create instances
   GeometryBase(Statistics &Stats, Config &Cfg, int MaxRing, int MaxFEN, int nx,
                int ny, int nz, int np)
-      : geometry::DetectorGeometry(Stats, MaxRing, MaxFEN,
-                                   geometry::GeometryType::VMM3),
+      : geometry::DetectorGeometry(Stats, MaxRing, MaxFEN),
         ESSGeometry(nx, ny, nz, np), GeometryCounters(Stats), Conf(Cfg) {}
 
   // Methods that derived classes may need to override or call
