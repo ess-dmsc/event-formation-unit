@@ -31,6 +31,8 @@ set(FreiaGeometryTest_SRC
 create_test_executable(FreiaGeometryTest)
 
 
+get_filename_component(AMOR_FULL "${ESS_MODULE_DIR}/freia/configs/amor.json" ABSOLUTE)
+
 set(AmorGeometryTest_INC
   ../geometry/AmorGeometry.h
   ../geometry/Config.h)
@@ -39,6 +41,7 @@ set(AmorGeometryTest_SRC
   ../geometry/GeometryBase.cpp
   ../test/AmorGeometryTest.cpp)
 create_test_executable(AmorGeometryTest)
+target_compile_definitions(AmorGeometryTest PRIVATE AMOR_FULL="${AMOR_FULL}")
 
 set(EstiaGeometryTest_INC
   ../geometry/EstiaGeometry.h

@@ -5,6 +5,9 @@ add_subdirectory(generators)
 include_directories(.)
 
 get_filename_component(FREIA_FULL "${ESS_MODULE_DIR}/freia/configs/freia.json" ABSOLUTE)
+get_filename_component(AMOR_FULL "${ESS_MODULE_DIR}/freia/configs/amor.json" ABSOLUTE)
+get_filename_component(TBLMB_FULL "${ESS_MODULE_DIR}/freia/configs/tblmb.json" ABSOLUTE)
+get_filename_component(ESTIA_FULL "${ESS_MODULE_DIR}/freia/configs/estia_config.json" ABSOLUTE)
 
 #=============================================================================
 # freia detector module and base test
@@ -85,4 +88,8 @@ set(FreiaInstrumentTest_SRC
   test/FreiaInstrumentTest.cpp
 )
 create_test_executable(FreiaInstrumentTest)
-target_compile_definitions(FreiaInstrumentTest PRIVATE FREIA_FULL="${FREIA_FULL}")
+target_compile_definitions(FreiaInstrumentTest PRIVATE 
+  FREIA_FULL="${FREIA_FULL}" 
+  AMOR_FULL="${AMOR_FULL}"
+  TBLMB_FULL="${TBLMB_FULL}"
+  ESTIA_FULL="${ESTIA_FULL}")
