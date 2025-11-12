@@ -16,6 +16,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+using namespace vmm3;
+
 void VMM3Config::loadAndApplyConfig() {
   loadFromFile();
   applyVMM3Config();
@@ -66,7 +68,7 @@ void VMM3Config::applyVMM3Config() {
       }
 
       // Define new hybrid
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Hybrid at: %p", &Hybrid);
 
       if (Hybrid.Initialised) {
@@ -147,7 +149,7 @@ void VMM3Config::applyCalibration(const std::string &HybridID,
 
   Json::checkKeys("Calibration error", Calibration, {"VMMHybridCalibration"});
 
-  ESSReadout::Hybrid &CurrentHybrid = getHybrid(HybridID);
+  Hybrid &CurrentHybrid = getHybrid(HybridID);
 
   auto & CalibEntry = Calibration["VMMHybridCalibration"];
 
@@ -168,7 +170,7 @@ void VMM3Config::applyCalibration(const std::string &HybridID,
   applyVMM3Calibration(CurrentHybrid, 1, vmm1cal);
 }
 
-void VMM3Config::applyVMM3Calibration(ESSReadout::Hybrid &Hybrid,
+void VMM3Config::applyVMM3Calibration(Hybrid &Hybrid,
                                       unsigned vmmid,
                                       nlohmann::json VMMCalibration) {
 

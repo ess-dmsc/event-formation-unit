@@ -12,7 +12,6 @@ set(nmx_common_inc
   NMXInstrument.h
   geometry/Config.h
   geometry/NMXGeometry.h
-  geometry/Geometry.h
   )
 set(nmx_common_src
   NMXBase.cpp

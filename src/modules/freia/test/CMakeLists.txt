@@ -26,29 +26,23 @@ set(FreiaGeometryTest_INC
   ../geometry/Config.h)
 set(FreiaGeometryTest_SRC
   ../geometry/Config.cpp
-  ../geometry/GeometryBase.cpp
   ../test/FreiaGeometryTest.cpp)
 create_test_executable(FreiaGeometryTest)
 
-
-get_filename_component(AMOR_FULL "${ESS_MODULE_DIR}/freia/configs/amor.json" ABSOLUTE)
 
 set(AmorGeometryTest_INC
   ../geometry/AmorGeometry.h
   ../geometry/Config.h)
 set(AmorGeometryTest_SRC
   ../geometry/Config.cpp
-  ../geometry/GeometryBase.cpp
   ../test/AmorGeometryTest.cpp)
 create_test_executable(AmorGeometryTest)
-target_compile_definitions(AmorGeometryTest PRIVATE AMOR_FULL="${AMOR_FULL}")
 
 set(EstiaGeometryTest_INC
   ../geometry/EstiaGeometry.h
   ../geometry/Config.h)
 set(EstiaGeometryTest_SRC
   ../geometry/Config.cpp
-  ../geometry/GeometryBase.cpp
   ../test/EstiaGeometryTest.cpp)
 create_test_executable(EstiaGeometryTest)
 
@@ -57,11 +51,9 @@ set(GeometryTest_INC
   ../geometry/FreiaGeometry.h
   ../geometry/AmorGeometry.h
   ../geometry/EstiaGeometry.h
-  ../geometry/TBLMBGeometry.h
-  ../geometry/GeometryBase.h)
+  ../geometry/TBLMBGeometry.h)
 set(GeometryTest_SRC
   ../geometry/Config.cpp
-  ../geometry/GeometryBase.cpp
   ../test/GeometryTest.cpp)
 create_test_executable(GeometryTest)
 target_compile_definitions(GeometryTest PRIVATE UNIT_TEST)

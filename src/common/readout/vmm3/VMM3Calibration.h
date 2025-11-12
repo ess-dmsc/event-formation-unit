@@ -16,6 +16,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace vmm3 {
+
 class VMM3Calibration {
 public:
   static constexpr int CHANNELS{64};
@@ -64,3 +66,5 @@ private:
 
   struct Calib Calibration[CHANNELS];
 };
+
+} // namespace vmm3

@@ -20,7 +20,7 @@ struct Counters {
   // int64_t RingRx[24];
 
   // VMM3a Readouts
-  struct ESSReadout::VMM3ParserStats VMMStats;
+  struct vmm3::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
   int64_t HybridMappingErrors{0};

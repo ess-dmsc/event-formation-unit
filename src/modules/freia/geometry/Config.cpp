@@ -10,6 +10,8 @@
 #include <common/debug/Trace.h>
 #include <freia/geometry/Config.h>
 
+using namespace vmm3;
+
 namespace Freia {
 
 // #undef TRC_LEVEL
@@ -48,7 +50,7 @@ void Config::applyConfig() {
     uint8_t FEN = Mapping["FEN"].get<uint8_t>();
     uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
 
-    ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+    Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
     uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
 

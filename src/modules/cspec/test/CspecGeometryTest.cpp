@@ -10,6 +10,7 @@
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
 #include <cspec/geometry/CspecGeometry.h>
+#include <gtest/gtest.h>
 #include <memory>
 
 using namespace Caen;
@@ -108,6 +109,17 @@ TEST_F(CspecGeometryTest, Validate) {
   ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
   ASSERT_EQ(geom->getBaseCounters().FENErrors, 1);
   ASSERT_EQ(geom->getCaenCounters().GroupErrors, 1);
+}
+
+TEST_F(CspecGeometryTest, SerializerConfiguration) {
+  // Test that CSPEC geometry uses a single serializer
+  ASSERT_EQ(geom->numSerializers(), 1);
+  
+  // Test serializer name at index 0
+  ASSERT_EQ(geom->serializerName(0), "caen");
+
+  // Test serializer name at out of range index
+  ASSERT_EQ(geom->serializerName(2), "caen"); // out of range index still returns "caen"
 }
 
 int main(int argc, char **argv) {

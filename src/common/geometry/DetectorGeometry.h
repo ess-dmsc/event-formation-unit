@@ -62,8 +62,8 @@ public:
   // clang-format on
 
 protected:
-  const int MaxRing{0};        ///< Maximum valid Ring value (exclusive)
-  const int MaxFEN{0};         ///< Maximum valid FEN value (exclusive)
+  const int MaxRing{0}; ///< Maximum valid Ring value (exclusive)
+  const int MaxFEN{0};  ///< Maximum valid FEN value (exclusive)
 
   ///
   /// \brief Geometry statistics counters with automatic registration
@@ -103,8 +103,7 @@ protected:
   /// \param GeomType Geometry type for runtime validation
   ///
   DetectorGeometry(Statistics &Stats, int MaxRing, int MaxFEN)
-      : MaxRing(MaxRing), MaxFEN(MaxFEN),
-        BaseCounters(Stats) {}
+      : MaxRing(MaxRing), MaxFEN(MaxFEN), BaseCounters(Stats) {}
 
   /// \brief Virtual destructor for proper inheritance
   virtual ~DetectorGeometry() = default;
@@ -116,18 +115,15 @@ protected:
   /// Derived classes must implement this method for their specific geometry
   /// \param Data Pointer to readout data object (const, cast to appropriate
   /// type internally) \return Calculated pixel ID, or 0 if calculation failed
-  virtual uint32_t calcPixelImpl(const void *Data) const = 0;
+  virtual inline uint32_t calcPixelImpl(const void *Data) const = 0;
 
   /// \brief Pure virtual method for runtime type validation
   /// Derived classes must implement this method to validate readout data types
   /// specific to their geometry type (e.g., CAEN, VMM3, etc.)
   /// \param type_info Type information from typeid()
   /// \return true if type is valid for this geometry, false otherwise
-  virtual bool inline validateDataType(const std::type_info &type_info) const = 0;
-
-public:
-  /// \brief Get access to BaseGeometryCounters object
-  const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
+  virtual bool inline validateDataType(
+      const std::type_info &type_info) const = 0;
 
   /// \brief Validate ring number against configuration
   bool inline validateRing(int Ring) const {
@@ -150,7 +146,7 @@ public:
   }
 
   template <typename T>
-  bool validateTopology(HashMap2D<T> &map, int Col, int Row) const {
+  bool inline validateTopology(HashMap2D<T> &map, int Col, int Row) const {
     if (not map.isValue(Col, Row)) {
       XTRACE(DATA, WAR, "Col %d, Row %d is incompatible with config", Col, Row);
       BaseCounters.TopologyError++;
@@ -171,11 +167,23 @@ public:
     return result;
   }
 
+public:
+  /// \brief Get access to BaseGeometryCounters object
+  /// \return Const reference to BaseGeometryCounters instance
+  const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
+
+  /// \brief Calculate Ring from FiberId using physical->logical mapping
+  /// Common method used across all VMM3-based detectors.
+  /// Ring = FiberId / 2 (each physical fiber pair maps to one logical ring)
+  /// \param FiberId Physical fiber identifier
+  /// \return Logical ring number
+  static inline uint8_t calcRing(uint8_t FiberId) { return FiberId / 2; }
+
   /// \brief Template wrapper for pixel calculation with runtime type validation
   /// \tparam T The readout data type
   /// \param Readout Data object to calculate pixel for (const reference)
   /// \return Calculated pixel ID, with automatic error counting for failures
-  template <typename T> uint32_t calcPixel(const T &Data) const {
+  template <typename T> inline uint32_t calcPixel(const T &Data) const {
     // Runtime type validation
     if (!validateDataType(typeid(T))) {
       XTRACE(DATA, ERR, "Invalid readout type for geometry type %s",

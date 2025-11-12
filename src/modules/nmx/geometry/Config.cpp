@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,6 +10,8 @@
 #include <nmx/geometry/Config.h>
 
 #include <iostream>
+
+using namespace vmm3;
 
 namespace Nmx {
 
@@ -45,38 +47,39 @@ void Config::applyConfig() {
 
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Got Hybrid");
 
+      // Get all hybrid parameters and populate new optimized struct
+      HybridParams &params = HybridParam[Ring][FEN][LocalHybrid];
+
       try {
-        Plane[Ring][FEN][LocalHybrid] = Mapping["Plane"].get<uint8_t>();
-        XTRACE(INIT, DEB, "Got Plane: %u", Plane[Ring][FEN][LocalHybrid]);
+        params.Plane = Mapping["Plane"].get<uint8_t>();
+        XTRACE(INIT, DEB, "Got Plane: %u", params.Plane);
       } catch (...) {
         XTRACE(INIT, DEB, "Failed to get Plane, using 0");
-        Plane[Ring][FEN][LocalHybrid] = 0;
+        params.Plane = 0;
       }
 
       try {
-        ReversedChannels[Ring][FEN][LocalHybrid] =
-            Mapping["ReversedChannels"].get<bool>();
-        XTRACE(INIT, DEB, "Got ReversedChannels: %u",
-               ReversedChannels[Ring][FEN][LocalHybrid]);
+        params.ReversedChannels = Mapping["ReversedChannels"].get<bool>();
+        XTRACE(INIT, DEB, "Got ReversedChannels: %u", params.ReversedChannels);
       } catch (...) {
-        ReversedChannels[Ring][FEN][LocalHybrid] = false;
+        params.ReversedChannels = false;
       }
 
       try {
-        Offset[Ring][FEN][LocalHybrid] = Mapping["Offset"].get<uint64_t>();
-        XTRACE(INIT, DEB, "Got Offset: %u", Offset[Ring][FEN][LocalHybrid]);
+        params.Offset = Mapping["Offset"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Offset: %u", params.Offset);
       } catch (...) {
-        Offset[Ring][FEN][LocalHybrid] = 0;
+        params.Offset = 0;
       }
 
       try {
-        Panel[Ring][FEN][LocalHybrid] = Mapping["Panel"].get<uint64_t>();
-        XTRACE(INIT, DEB, "Got Panel: %u", Panel[Ring][FEN][LocalHybrid]);
+        params.Panel = Mapping["Panel"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Panel: %u", params.Panel);
       } catch (...) {
-        Panel[Ring][FEN][LocalHybrid] = 0;
+        params.Panel = 0;
       }
 
       Hybrid.MinADC = NMXFileParameters.DefaultMinADC;

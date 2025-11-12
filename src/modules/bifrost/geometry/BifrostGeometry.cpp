@@ -27,7 +27,7 @@ BifrostGeometry::BifrostGeometry(Statistics &Stats, Config &CaenConfiguration)
       Conf(CaenConfiguration) {}
 
 bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+  int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
@@ -90,7 +90,7 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
 
 uint32_t BifrostGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-  int Ring = Data->FiberId / 2;
+  int Ring = calcRing(Data->FiberId);
   int xoff = xOffset(Ring, Data->Group);
   int yoff = yOffset(Data->Group);
 
@@ -127,7 +127,7 @@ size_t BifrostGeometry::numSerializers() const {
 size_t BifrostGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
   // FiberID = _physical_ Ring (logical_ring/2)
   // Group == triplet number
-  return Data.FiberId / 2 * TripletsPerRing + Data.Group;
+  return calcRing(Data.FiberId) * TripletsPerRing + Data.Group;
 }
 
 std::string BifrostGeometry::serializerName(size_t Index) const {

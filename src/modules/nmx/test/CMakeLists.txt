@@ -22,12 +22,11 @@ target_compile_definitions(NMXConfigTest PRIVATE NMX_FULL="${NMX_FULL}")
 
 
 set(NMXGeometryTest_INC
-  ../geometry/NMXGeometry.h
-  ../geometry/Geometry.h)
+  ../geometry/NMXGeometry.h)
 set(NMXGeometryTest_SRC
   ../test/NMXGeometryTest.cpp
   ../geometry/NMXGeometry.cpp
-  ../geometry/Geometry.h)
+  ../geometry/Config.cpp)
 create_test_executable(NMXGeometryTest)
 
 

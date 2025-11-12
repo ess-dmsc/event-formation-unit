@@ -416,7 +416,7 @@ protected:
     Stats = std::make_unique<Statistics>();
     ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
     nmx = std::make_unique<NMXInstrument>(counters, Settings, serializer,
-                                          *ESSHeaderParser);
+                                          *ESSHeaderParser, *Stats);
 
     ESSHeaderParser->Packet.HeaderPtr = headerFactory->createHeader(Parser::V0);
   }
@@ -435,14 +435,16 @@ protected:
 // Test cases below
 TEST_F(NMXInstrumentTest, BadConfig) {
   Settings.ConfigFile = BadConfigFile;
-  EXPECT_THROW(NMXInstrument(counters, Settings, serializer, *ESSHeaderParser),
-               std::runtime_error);
+  EXPECT_THROW(
+      NMXInstrument(counters, Settings, serializer, *ESSHeaderParser, *Stats),
+      std::runtime_error);
 }
 
 TEST_F(NMXInstrumentTest, BadConfig2) {
   Settings.ConfigFile = BadConfig2File;
-  EXPECT_THROW(NMXInstrument(counters, Settings, serializer, *ESSHeaderParser),
-               nlohmann::detail::parse_error);
+  EXPECT_THROW(
+      NMXInstrument(counters, Settings, serializer, *ESSHeaderParser, *Stats),
+      nlohmann::detail::parse_error);
 }
 
 TEST_F(NMXInstrumentTest, Constructor) {
@@ -499,8 +501,9 @@ TEST_F(NMXInstrumentTest, MinADC) {
   ASSERT_EQ(counters.VMMStats.ErrorADC, 0);
 
   nmx->processReadouts();
-  ASSERT_EQ(counters.MinADC, 2); // ADC was under vessel specific threshold
-                                 // once, under general default once
+  ASSERT_EQ(nmx->getGeometry().getNmxCounters().ADCErrors,
+            2); // ADC was under vessel specific threshold
+                // once, under general default once
 }
 
 TEST_F(NMXInstrumentTest, NoEventYOnly) {
@@ -566,7 +569,7 @@ TEST_F(NMXInstrumentTest, PixelError) {
   Events.push_back(TestEvent);
   nmx->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.PixelErrors, 1);
+  ASSERT_EQ(nmx->getGeometry().getBaseCounters().PixelErrors, 1);
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeYSpan) {

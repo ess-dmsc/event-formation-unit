@@ -9,10 +9,13 @@
 #include <modules/nmx/generators/ReadoutGenerator.h>
 // GCOVR_EXCL_START
 
+using namespace vmm3;
+using VMM3Data = VMM3Parser::VMM3Data;
+
 int main(int argc, char *argv[]) {
 
   Nmx::ReadoutGenerator NmxGen;
-  uint8_t DataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+  uint8_t DataSize = sizeof(VMM3Data);
   NmxGen.setReadoutDataSize(DataSize);
 
   NmxGen.argParse(argc, argv);

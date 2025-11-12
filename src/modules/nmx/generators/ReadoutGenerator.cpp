@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,9 +9,12 @@
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
 
+#include "gtest/gtest.h"
 #include <common/debug/Trace.h>
 #include <modules/nmx/generators/ReadoutGenerator.h>
 
+using namespace vmm3;
+using VMM3Data = VMM3Parser::VMM3Data;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -31,9 +34,9 @@ void ReadoutGenerator::generateData() {
   std::map<uint8_t, uint8_t> YPanelToFEN{{0, 7}, {1, 2}, {2, 6}, {3, 3}};
 
   for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
-    auto ReadoutData = (ESSReadout::VMM3Parser::VMM3Data *)DP;
+    auto ReadoutData = (VMM3Data *)DP;
 
-    ReadoutData->DataLength = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+    ReadoutData->DataLength = sizeof(VMM3Data);
     // NMX VMM readouts all have DataLength 20
     assert(ReadoutData->DataLength == 20);
 

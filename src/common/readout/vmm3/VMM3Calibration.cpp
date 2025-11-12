@@ -12,6 +12,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+using namespace vmm3;
+
 bool VMM3Calibration::setCalibration(int Channel, double TDCOffset,
                                      double TDCSlope, double ADCOffset,
                                      double ADCSlope) {

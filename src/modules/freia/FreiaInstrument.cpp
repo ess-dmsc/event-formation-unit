@@ -8,8 +8,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
@@ -19,6 +21,9 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
+
+using namespace vmm3;
+using namespace geometry;
 
 namespace Freia {
 
@@ -84,19 +89,18 @@ void FreiaInstrument::processReadouts() {
            readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    uint8_t Ring = readout.FiberId / 2; // physical->logical mapping
+    uint8_t Ring = DetectorGeometry::calcRing(readout.FiberId);
 
     // Validate readout data (Ring, FEN, Hybrid)
     if (!Geom->validateReadoutData(readout)) {
       continue;
     }
 
-    uint8_t HybridId = readout.VMM >> 1;
+    uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
     // Validation of hybrid done in validateReadoutData()
     // Get hybrid mapping
-    const ESSReadout::Hybrid &Hybrid =
-        Conf.getHybrid(Ring, readout.FENId, HybridId);
+    const Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     const uint8_t Asic = readout.VMM & 0x1;
     XTRACE(DATA, DEB, "Asic calculated to be %u", Asic);
@@ -118,23 +122,24 @@ void FreiaInstrument::processReadouts() {
            TDCCorr);
     TimeNS += TDCCorr;
 
-    const uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
+    // Extract raw 10-bit ADC value, then apply calibration
+    const uint16_t RawADC = VMM3Geometry::getRawADC(readout.OTADC);
+    const uint16_t ADC = Calib.ADCCorr(readout.Channel, RawADC);
     if (ADC >= Calib.VMM_ADC_10BIT_LIMIT) {
       counters.MaxADC++;
     }
-    XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF,
-           ADC);
+    XTRACE(DATA, DEB, "ADC calibration from %u to %u", RawADC, ADC);
 
     // Use unified coordinate calculation with auto-detection
     auto result = Geom->calculateCoordinate(Hybrid.XOffset, Hybrid.YOffset,
                                             readout.VMM, readout.Channel);
 
-    XTRACE(DATA, DEB,
-           "%s: TimeNS %" PRIu64 ", Coord %u, Channel %u, ADC %u", result.isXPlane ? "X" : "Y",
-           TimeNS, result.coord, readout.Channel, ADC);
+    XTRACE(DATA, DEB, "%s: TimeNS %" PRIu64 ", Coord %u, Channel %u, ADC %u",
+           result.isXPlane ? "X" : "Y", TimeNS, result.coord, readout.Channel,
+           ADC);
 
     /// skip further processing if coordinate is invalid
-    if (result.coord == GeometryBase::InvalidCoord) {
+    if (result.coord == VMM3Geometry::InvalidCoord) {
       continue;
     }
 
