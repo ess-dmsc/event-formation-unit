@@ -21,6 +21,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace vmm3 {
+
 class VMM3Config : public Configurations::Config {
 public:
   // Provide maximum values from all VMM3 detectors
@@ -45,7 +47,7 @@ public:
   void loadAndApplyCalibration(const std::string &CalibFile);
 
   /// \brief Applies calibration json object to specified VMM on Hybrid
-  void applyVMM3Calibration(ESSReadout::Hybrid &Hybrid, unsigned vmmid,
+  void applyVMM3Calibration(Hybrid &Hybrid, unsigned vmmid,
                             nlohmann::json VMMCalibration);
 
   /// \brief Apply VMM3 generic aspects of loaded configuration json file
@@ -58,7 +60,7 @@ public:
 
   /// \brief Get Hybrid from the Ring, FEN, and VMM numbers
   // Currently Hybrids are stored as a 3D array, but may be updated in future
-  ESSReadout::Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
+  Hybrid &getHybrid(uint8_t Ring, uint8_t FEN, uint8_t VMM) {
     return Hybrids[Ring][FEN][VMM];
   }
 
@@ -71,7 +73,7 @@ public:
 
   /// \brief Get a Hybrid with a given Hybrid Id; if no Hybrid is located, an
   /// exception is thrown (this implementation uses a fast map-based look-up)
-  ESSReadout::Hybrid &getHybrid(const std::string &HybridID) {
+  Hybrid &getHybrid(const std::string &HybridID) {
     // If Hybrid with a given Id is in the map, return it
     const auto iter = HybridMap.find(HybridID);
     if (iter != HybridMap.cend()) {
@@ -95,10 +97,10 @@ public:
   } FileParameters;
 
   // Container used for storing a Hybrid with a given (Ring, FEN, Hybrid)
-  ESSReadout::Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 
   // Map used for fast access to a Hybrid with a given Id
-  std::map<std::string, ESSReadout::Hybrid*> HybridMap;
+  std::map<std::string, Hybrid*> HybridMap;
 
   uint8_t NumHybrids{0};
   uint32_t NumPixels{0};
@@ -106,3 +108,5 @@ public:
   // Other parameters
   std::string ExpectedName{""};
 };
+
+} // namespace vmm3

@@ -19,7 +19,7 @@
 
 namespace Freia {
 
-class TBLMBGeometry : public AmorGeometry {
+class TBLMBGeometry final : public AmorGeometry {
 public:
 	TBLMBGeometry(Statistics &Stats, Config &Cfg) : AmorGeometry(Stats, Cfg) {}
 

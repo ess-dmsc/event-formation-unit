@@ -8,9 +8,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cstdint>
@@ -21,6 +23,9 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+using namespace vmm3;
+using namespace geometry;
 
 namespace Trex {
 
@@ -99,9 +104,9 @@ void TREXInstrument::processReadouts() {
   for (const auto &readout : VMMParser.Result) {
 
     // Convert from physical fiber to rings
-    uint8_t Ring = readout.FiberId / 2;
+    uint8_t Ring = DetectorGeometry::calcRing(readout.FiberId);
 
-    uint8_t HybridId = readout.VMM >> 1;
+    uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
     XTRACE(
         DATA, DEB,
@@ -110,8 +115,7 @@ void TREXInstrument::processReadouts() {
         readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM,
         readout.Channel, readout.TimeLow);
 
-    ESSReadout::Hybrid const &Hybrid =
-        Conf.getHybrid(Ring, readout.FENId, HybridId);
+    Hybrid const &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,

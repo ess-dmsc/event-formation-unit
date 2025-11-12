@@ -17,6 +17,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+using namespace geometry;
+
 namespace Caen {
 
 Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration)
@@ -65,7 +67,7 @@ std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
 }
 
 bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
-  auto Ring = Data.FiberId / 2;
+  auto Ring = calcRing(Data.FiberId);
 
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
@@ -86,7 +88,7 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
 /// \return 0 for invalid pixel, nonzero for good pixels
 uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-  int Ring = Data->FiberId / 2;
+  int Ring = calcRing(Data->FiberId);
   int Tube = Data->Group;
 
   int Bank = Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data->FENId)->Bank;
@@ -125,7 +127,7 @@ uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) const {
 size_t Tbl3HeGeometry::numSerializers() const { return 2; }
 
 size_t Tbl3HeGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
-  int Ring = Data.FiberId / 2;
+  int Ring = DetectorGeometry::calcRing(Data.FiberId);
   return Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
 }
 

@@ -3,9 +3,11 @@
 ///
 /// \file
 ///
-/// \brief Freia geometry class
+/// \brief Common VMM3 geometry base class
 ///
-/// Mapping from digital identifiers to x- and y- coordinates
+/// Mapping from digital identifiers to x- and y- coordinates for VMM3-based
+/// detectors. This class provides shared functionality for all VMM3 detectors
+/// including Freia, NMX, and others.
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -13,10 +15,10 @@
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <common/geometry/DetectorGeometry.h>
+#include <common/readout/vmm3/VMM3Config.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
 #include <cstdint>
-#include <freia/geometry/Config.h>
 #include <limits>
 #include <logical_geometry/ESSGeometry.h>
 #include <string>
@@ -24,14 +26,11 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Freia {
+namespace vmm3 {
 
-// Forward declaration for Config
-class Config;
-
-/// \brief Abstract base for Freia family geometries with ESSGeometry
+/// \brief Abstract base for VMM3-based geometries with ESSGeometry
 /// inheritance. Concrete geometries inherit from this class.
-class GeometryBase : public geometry::DetectorGeometry, public ESSGeometry {
+class VMM3Geometry : public geometry::DetectorGeometry, public ESSGeometry {
 public:
   /// \brief Stats counters for geometry-level validation.
   struct VmmGeometryCounters : public StatCounterBase {
@@ -76,20 +75,21 @@ public:
   static const uint16_t MinWireChannel;
   static const uint16_t MaxWireChannel;
 
-  // Public interface methods
+  virtual ~VMM3Geometry() = default;
+
   /// \brief Check if the given VMM belongs to the X coordinate plane.
   ///
   /// Default policy: X on odd VMM, Y on even VMM. Instruments can override.
   /// \param VMM ASIC index (0..N) within the hybrid
   /// \return true if VMM contributes to X
-  virtual bool isXCoord(uint8_t VMM) { return (VMM & 0x1) != 0; }
+  virtual inline bool isXCoord(uint8_t VMM) { return (VMM & 0x1) != 0; }
 
   /// \brief Check if the given VMM belongs to the Y coordinate plane.
   ///
   /// Uses the complement of isXCoord() and thus follows overridden policies.
   /// \param VMM ASIC index (0..N) within the hybrid
   /// \return true if VMM contributes to Y
-  virtual bool isYCoord(uint8_t VMM) { return not isXCoord(VMM); }
+  virtual inline bool isYCoord(uint8_t VMM) { return not isXCoord(VMM); }
 
   /// \brief Validate a raw VMM3 readout according to instrument geometry.
   ///
@@ -97,15 +97,15 @@ public:
   /// instrument-specific rules (ring/FEN/hybrid ranges etc.).
   /// \param Data VMM3 readout to validate
   /// \return true if valid, false otherwise (and increments counters)
-  virtual bool
-  validateReadoutData(const ESSReadout::VMM3Parser::VMM3Data &Data) = 0;
+  virtual inline bool
+  validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) = 0;
 
   /// \brief Runtime type validation for pixel calculation input.
   ///
   /// Current implementation accepts Event for calcPixelImpl path.
   /// \param type_info std::type_info of the provided data pointer
   /// \return true if type is the supported Event type, false otherwise
-  bool validateDataType(const std::type_info &type_info) const override {
+  bool inline validateDataType(const std::type_info &type_info) const override {
     // For VMM3 geometries, we can accept either VMM3Parser::VMM3Data or Event
     XTRACE(DATA, DEB, "Validating data type: %s", type_info.name());
     if (type_info == typeid(Event)) {
@@ -118,9 +118,8 @@ public:
   }
 
   /// \brief Get access to the geometry counters for monitoring
-  const VmmGeometryCounters &getVmmGeometryCounters() const {
-    return GeometryCounters;
-  }
+  /// \return Const reference to VmmGeometryCounters instance
+  const VmmGeometryCounters &getVmmCounters() const { return Counters; }
 
   /// \brief Unified coordinate calculation that determines plane and validates.
   ///
@@ -133,23 +132,36 @@ public:
   /// \param VMM ASIC index
   /// \param Channel Channel within the ASIC
   /// \return {coordinate, isXPlane} - coordinate is InvalidCoord on failure
-  CoordResult calculateCoordinate(uint16_t XOffset, uint16_t YOffset,
-                                  uint8_t VMM, uint8_t Channel);
+  [[nodiscard]] CoordResult calculateCoordinate(uint16_t XOffset, uint16_t YOffset,
+                                                uint8_t VMM, uint8_t Channel);
 
+  /// \brief Extract the raw 10-bit ADC value from OTADC field
+  ///
+  /// Common method for all VMM3-based instruments to consistently extract
+  /// the valid 10-bit ADC value from the raw readout OTADC field.
+  /// This masks out bits beyond the 10-bit ADC value.
+  ///
+  /// \param OTADC Raw OTADC field from VMM3 readout (typically 16-bit)
+  /// \return 10-bit ADC value (range 0-1023)
+  static inline uint16_t getRawADC(uint16_t OTADC) { return OTADC & 0x3FF; }
+
+  /// \brief Calculate HybridId from VMM index
+  /// \param VMM ASIC index
+  /// \return HybridId uint8_t (VMM >> 1)
+  static inline uint8_t calcHybridId(uint8_t VMM) { return VMM >> 1; }
+
+protected:
   /// \brief Validate channel range based on VMM plane and coordinate type
   /// \param VMM ASIC index (determines plane)
   /// \param Channel Channel within the ASIC
   /// \return true if channel is valid for this plane's coordinate type
   bool validateChannel(uint8_t VMM, uint8_t Channel);
 
-  virtual ~GeometryBase() = default;
-
-protected:
   /// \brief Protected constructor - only derived classes can create instances
-  GeometryBase(Statistics &Stats, Config &Cfg, int MaxRing, int MaxFEN, int nx,
-               int ny, int nz, int np)
-      : geometry::DetectorGeometry(Stats, MaxRing, MaxFEN),
-        ESSGeometry(nx, ny, nz, np), GeometryCounters(Stats), Conf(Cfg) {}
+  VMM3Geometry(Statistics &Stats, VMM3Config &Cfg, int MaxRing, int MaxFEN,
+               int nx, int ny, int nz, int np)
+      : DetectorGeometry(Stats, MaxRing, MaxFEN), ESSGeometry(nx, ny, nz, np),
+        Counters(Stats), Conf(Cfg) {}
 
   // Methods that derived classes may need to override or call
   /// \brief Determine if this instrument uses wires for X plane (default:
@@ -165,7 +177,7 @@ protected:
   /// can be XOffset for Estia) \param Channel Channel within ASIC \return
   /// Calculated coordinate (Offset + NumStrips - 1 - Channel) or InvalidCoord
   /// if overflow
-  inline uint16_t calcFromStrip(uint16_t Offset, uint8_t Channel) const {
+  [[nodiscard]] inline uint16_t calcFromStrip(uint16_t Offset, uint8_t Channel) const {
     // Use uint32_t to detect overflow
     uint32_t result = static_cast<uint32_t>(Offset) + NumStrips - 1 - Channel;
     XTRACE(DATA, INF, "Calculated strip coordinate: %u (Offset %u, Channel %u)",
@@ -174,7 +186,7 @@ protected:
     if (result > std::numeric_limits<uint16_t>::max()) {
       XTRACE(DATA, WAR, "Coordinate overflow: %u + %u - 1 - %u = %u", Offset,
              NumStrips, Channel, result);
-      GeometryCounters.CoordOverflow++;
+      Counters.CoordOverflow++;
       return InvalidCoord;
     }
     return static_cast<uint16_t>(result);
@@ -186,7 +198,7 @@ protected:
   /// \return Calculated coordinate (Offset + MaxWireChannel - Channel) or
   /// InvalidCoord if overflow \note This function can be overridden by
   /// instruments like Estia
-  virtual uint16_t calcFromWire(uint16_t Offset, uint8_t Channel) const {
+  [[nodiscard]] virtual uint16_t calcFromWire(uint16_t Offset, uint8_t Channel) const {
     // Use uint32_t to detect overflow
     uint32_t result = static_cast<uint32_t>(Offset) + MaxWireChannel - Channel;
     XTRACE(DATA, INF, "Calculated wire coordinate: %u (Offset %u, Channel %u)",
@@ -195,7 +207,7 @@ protected:
     if (result > std::numeric_limits<uint16_t>::max()) {
       XTRACE(DATA, WAR, "Coordinate overflow: %u + %u - %u = %u", Offset,
              MaxWireChannel, Channel, result);
-      GeometryCounters.CoordOverflow++;
+      Counters.CoordOverflow++;
       return InvalidCoord;
     }
     return static_cast<uint16_t>(result);
@@ -206,11 +218,21 @@ protected:
   /// \param FENId Front-end index within the ring
   /// \param HybridId Hybrid index (VMM pair)
   /// \return true if the hybrid is initialised in config, false otherwise
-  virtual bool validateHybrid(uint8_t Ring, uint8_t FENId, uint8_t HybridId);
+  inline bool validateHybrid(uint8_t Ring, uint8_t FENId, uint8_t HybridId) {
+    auto &Hybrid = Conf.getHybrid(Ring, FENId, HybridId);
+    if (!Hybrid.Initialised) {
+      XTRACE(DATA, WAR,
+             "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
+             Ring, FENId, (HybridId << 1));
+      Counters.HybridMappingErrors++;
+      return false;
+    }
+    return true;
+  }
 
   // Protected member variables - accessible to derived classes
-  mutable VmmGeometryCounters GeometryCounters; // auto-registered stats
-  Config &Conf; // shared configuration reference
+  mutable VmmGeometryCounters Counters; // auto-registered stats
+  VMM3Config &Conf;                     // shared configuration reference
 
 private:
   // Private methods - only used internally by this class
@@ -218,9 +240,9 @@ private:
   /// \param isX true for X coordinate plane, false for Y coordinate plane
   inline void incrementErrorCounter(bool isX) {
     if (isX) {
-      GeometryCounters.InvalidXCoord++;
+      Counters.InvalidXCoord++;
     } else {
-      GeometryCounters.InvalidYCoord++;
+      Counters.InvalidYCoord++;
     }
   }
 
@@ -238,4 +260,4 @@ private:
   }
 };
 
-} // namespace Freia
+} // namespace vmm3

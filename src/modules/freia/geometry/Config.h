@@ -21,7 +21,7 @@
 
 namespace Freia {
 
-class Config : public VMM3Config {
+class Config : public vmm3::VMM3Config {
 public:
   static constexpr unsigned int NumWiresPerCassette{32};
   static constexpr unsigned int NumStripsPerCassette{64};
@@ -30,7 +30,7 @@ public:
 
   // Load and apply the json config
   Config(const std::string &Instrument, const std::string &ConfigFile)
-      : VMM3Config(Instrument, ConfigFile) {}
+      : vmm3::VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
   void applyConfig() override;

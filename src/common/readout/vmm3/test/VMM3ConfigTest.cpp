@@ -12,6 +12,8 @@
 
 #include <filesystem>
 
+using namespace vmm3;
+
 using std::filesystem::path;
 
 class VMM3 : public VMM3Config {

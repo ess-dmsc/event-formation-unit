@@ -3,18 +3,18 @@
 ///
 /// \file
 ///
-/// \brief Freia geometry base class implementation
+/// \brief Common VMM3 geometry base class implementation
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
-#include <freia/geometry/GeometryBase.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
 
-namespace Freia {
+using namespace vmm3;
 
-GeometryBase::CoordResult GeometryBase::calculateCoordinate(uint16_t XOffset,
+VMM3Geometry::CoordResult VMM3Geometry::calculateCoordinate(uint16_t XOffset,
                                                             uint16_t YOffset,
                                                             uint8_t VMM,
                                                             uint8_t Channel) {
@@ -44,7 +44,7 @@ GeometryBase::CoordResult GeometryBase::calculateCoordinate(uint16_t XOffset,
   return {coordinate, isX};
 }
 
-bool GeometryBase::validateChannel(uint8_t VMM, uint8_t Channel) {
+bool VMM3Geometry::validateChannel(uint8_t VMM, uint8_t Channel) {
   bool isX = isXCoord(VMM);
   bool usesWires = isX ? usesWiresForX() : usesWiresForY();
 
@@ -52,7 +52,7 @@ bool GeometryBase::validateChannel(uint8_t VMM, uint8_t Channel) {
     if ((Channel < MinWireChannel) || (Channel > MaxWireChannel)) {
       XTRACE(DATA, WAR, "Invalid Channel %d (%d <= ch <= %d)", Channel,
              MinWireChannel, MaxWireChannel);
-      GeometryCounters.WireChannelRangeErrors++;
+      Counters.WireChannelRangeErrors++;
       // Also increment the general coordinate error counter for backward
       // compatibility
       incrementErrorCounter(isX);
@@ -61,7 +61,7 @@ bool GeometryBase::validateChannel(uint8_t VMM, uint8_t Channel) {
   } else {
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (Max %d)", Channel, NumStrips - 1);
-      GeometryCounters.StripChannelRangeErrors++;
+      Counters.StripChannelRangeErrors++;
       // Also increment the general coordinate error counter for backward
       // compatibility
       incrementErrorCounter(isX);
@@ -71,24 +71,9 @@ bool GeometryBase::validateChannel(uint8_t VMM, uint8_t Channel) {
   return true;
 }
 
-bool GeometryBase::validateHybrid(uint8_t Ring, uint8_t FENId,
-                                  uint8_t HybridId) {
-  auto &Hybrid = Conf.getHybrid(Ring, FENId, HybridId);
-  if (!Hybrid.Initialised) {
-    XTRACE(DATA, WAR,
-           "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-           Ring, FENId, (HybridId << 1));
-    GeometryCounters.HybridMappingErrors++;
-    return false;
-  }
-  return true;
-}
-
 // Static member definitions
-uint16_t const GeometryBase::InvalidCoord = 0xFFFF;
-uint16_t const GeometryBase::NumStrips = 64;
-uint16_t const GeometryBase::NumWires = 32;
-uint16_t const GeometryBase::MinWireChannel = 16;
-uint16_t const GeometryBase::MaxWireChannel = 47;
-
-} // namespace Freia
+uint16_t const VMM3Geometry::InvalidCoord = 0xFFFF;
+uint16_t const VMM3Geometry::NumStrips = 64;
+uint16_t const VMM3Geometry::NumWires = 32;
+uint16_t const VMM3Geometry::MinWireChannel = 16;
+uint16_t const VMM3Geometry::MaxWireChannel = 47;

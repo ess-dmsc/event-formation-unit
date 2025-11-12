@@ -16,6 +16,7 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/EventBuilder2D.h>
 #include <common/types/DetectorType.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <freia/geometry/AmorGeometry.h>
 #include <freia/geometry/Config.h>
 #include <freia/geometry/EstiaGeometry.h>
@@ -46,10 +47,10 @@ private:
   Config Conf;
 
   /// \brief digital geometry instance
-  std::unique_ptr<GeometryBase> Geom;
+  std::unique_ptr<vmm3::VMM3Geometry> Geom;
 
   /// \brief factory for geometry instances
-  std::unique_ptr<GeometryBase> createGeometry(const DetectorType &detectorType,
+  std::unique_ptr<vmm3::VMM3Geometry> createGeometry(const DetectorType &detectorType,
                                                const std::string &InstGeometry,
                                                Statistics &Stats) {
     // Convert to uppercase for case-insensitive comparison
@@ -117,18 +118,18 @@ public:
   void generateEvents(std::vector<Event> &Events);
 
   /// \brief get geometry statistics
-  const GeometryBase::VmmGeometryCounters &getVmmGeometryStats() const {
-    return Geom->getVmmGeometryCounters();
+  const vmm3::VMM3Geometry::VmmGeometryCounters &getVmmGeometryStats() const {
+    return Geom->getVmmCounters();
   }
 
-  const GeometryBase &getGeometry() const { return *Geom; }
+  const vmm3::VMM3Geometry &getGeometry() const { return *Geom; }
 
   /// \brief One builder per cassette, resize in constructor when we have
   /// parsed the configuration file and know the number of cassettes
   std::vector<EventBuilder2D> builders; // reinit in ctor
 
   /// \brief parser for VMM3 readout data
-  ESSReadout::VMM3Parser VMMParser;
+  vmm3::VMM3Parser VMMParser;
 };
 
 } // namespace Freia

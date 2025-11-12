@@ -20,7 +20,7 @@
 #include <memory>
 
 using namespace Freia;
-using namespace ESSReadout;
+using namespace vmm3;
 // clang-format off
 
 std::string CalibFile{"deleteme_freia_instr_calib.json"};
@@ -200,12 +200,12 @@ TEST_F(FreiaInstrumentTest, MappingError) {
   Counters.VMMStats = Freia->VMMParser.Stats;
   ASSERT_EQ(Counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
-  const GeometryBase &Geom = Freia->getGeometry();
+  const VMM3Geometry &Geom = Freia->getGeometry();
   ASSERT_EQ(Geom.getBaseCounters().RingErrors, 0);
   ASSERT_EQ(Geom.getBaseCounters().FENErrors, 0);
 
   Freia->processReadouts();
-  ASSERT_EQ(Geom.getVmmGeometryCounters().HybridMappingErrors, 1);
+  ASSERT_EQ(Geom.getVmmCounters().HybridMappingErrors, 1);
   ASSERT_EQ(Geom.getBaseCounters().RingErrors, 1);
   ASSERT_EQ(Geom.getBaseCounters().FENErrors, 1);
   ASSERT_EQ(Counters.VMMStats.ErrorFEN, 0);
@@ -340,7 +340,7 @@ TEST_F(FreiaInstrumentTest, CreateFreiaGeometry) {
   
   FreiaInstrument FreiaWithFreia(Counters, Settings, serializer, ESSHeaderParser,
                                  Stats, DetectorType::FREIA);
-  const GeometryBase &Geom = FreiaWithFreia.getGeometry();
+  const VMM3Geometry &Geom = FreiaWithFreia.getGeometry();
   
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
@@ -356,7 +356,7 @@ TEST_F(FreiaInstrumentTest, CreateAmorGeometry) {
   
   FreiaInstrument FreiaWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::FREIA);
-  const GeometryBase &Geom = FreiaWithAmor.getGeometry();
+  const VMM3Geometry &Geom = FreiaWithAmor.getGeometry();
   
   // Verify that the geometry is the expected concrete type
   const AmorGeometry *GeometryPtr = dynamic_cast<const AmorGeometry *>(&Geom);
@@ -374,7 +374,7 @@ TEST_F(FreiaInstrumentTest, CreateCaseInsensitiveAmorGeometry) {
   // Test that this is properly loaded and compared (case-insensitive)
   FreiaInstrument FreiaWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::FREIA);
-  const GeometryBase &Geom = FreiaWithAmor.getGeometry();
+  const VMM3Geometry &Geom = FreiaWithAmor.getGeometry();
   
   // Verify successful creation and correct concrete type despite case handling
   // returns nullptr if the cast fails
@@ -384,40 +384,43 @@ TEST_F(FreiaInstrumentTest, CreateCaseInsensitiveAmorGeometry) {
 
 TEST_F(FreiaInstrumentTest, CreateInvalidFREIAGeometry) {
   /// Test that FREIA detector with invalid geometry throws exception
-  /// This covers the error case in the selected code block:
-  /// throw std::runtime_error("FREIA detector requires InstrumentGeometry...")
+  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
   
-  // Create a temporary invalid config file
-  std::string InvalidConfigFile{"deleteme_freia_invalid_geometry.json"};
-  std::string InvalidConfigStr = R"(
-    {
-      "Detector" : "Freia",
-      "InstrumentGeometry" : "InvalidGeometry",
-      "Version" : 1,
-      "Date" : "test",
-      "Info" : "Test config with invalid geometry",
-      "Hybrids" : 32,
-      "Config" : []
-    }
+  std::string InvalidFREIAConfig{"deleteme_freia_invalid_geometry.json"};
+  std::string InvalidFREIAConfigStr = R"(
+{
+  "Detector" : "Freia",
+  "InstrumentGeometry" : "InvalidGeometry",
+  "Version" : 1,
+  "Comment" : "Test config with invalid geometry",
+  "Date" : "2025-11-11",
+  "Info" : "Test config - FREIA requires FREIA or AMOR geometry",
+  "WireChOffset" : 16,
+  "Config" : [
+    { "CassetteNumber":  0, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "Thresholds" : [[0],[0]], "HybridId" : "E5533333222222221111111100000000"}
+  ]
+}
   )";
   
-  saveBuffer(InvalidConfigFile, (void *)InvalidConfigStr.c_str(), 
-             InvalidConfigStr.size());
+  saveBuffer(InvalidFREIAConfig, (void *)InvalidFREIAConfigStr.c_str(), 
+             InvalidFREIAConfigStr.size());
   
-  Settings.ConfigFile = InvalidConfigFile;
-  Settings.CalibFile = CalibFile;
+  Settings.ConfigFile = InvalidFREIAConfig;
+  Settings.CalibFile = "";
   
-  // Expect runtime_error to be thrown with appropriate message
-  EXPECT_THROW(
-    {
-      FreiaInstrument InvalidFreia(Counters, Settings, serializer, 
-                                   ESSHeaderParser, Stats, 
-                                   DetectorType::FREIA);
-    },
-    std::runtime_error
-  );
+  // Expect runtime_error for invalid geometry with FREIA
+  try {
+    FreiaInstrument InvalidFreia(Counters, Settings, serializer, 
+                                 ESSHeaderParser, Stats, 
+                                 DetectorType::FREIA);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    std::string error_msg(e.what());
+    // Verify exact error message
+    EXPECT_EQ(error_msg, "FREIA detector requires InstrumentGeometry 'AMOR' or 'Freia', got: InvalidGeometry");
+  }
   
-  deleteFile(InvalidConfigFile);
+  deleteFile(InvalidFREIAConfig);
 }
 
 //===----------------------------------------------------------------------===//
@@ -433,7 +436,7 @@ TEST_F(FreiaInstrumentTest, CreateTBLMBGeometry) {
   
   FreiaInstrument TBLMBWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::TBLMB);
-  const GeometryBase &Geom = TBLMBWithAmor.getGeometry();
+  const VMM3Geometry &Geom = TBLMBWithAmor.getGeometry();
   
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
@@ -443,36 +446,41 @@ TEST_F(FreiaInstrumentTest, CreateTBLMBGeometry) {
 
 TEST_F(FreiaInstrumentTest, CreateInvalidTBLMBGeometry) {
   /// Test that TBLMB detector with non-AMOR geometry throws exception
-  /// This covers: DetectorType::TBLMB + !(AMOR) -> throw error
+  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
   
   std::string InvalidTBLMBConfig{"deleteme_tblmb_invalid_geometry.json"};
   std::string InvalidTBLMBConfigStr = R"(
-    {
-      "Detector" : "TBLMB",
-      "InstrumentGeometry" : "InvalidGeometry",
-      "Version" : 1,
-      "Date" : "test",
-      "Info" : "Test config - TBLMB requires AMOR geometry",
-      "Hybrids" : 32,
-      "Config" : []
-    }
+{
+  "Detector" : "Freia",
+  "InstrumentGeometry" : "InvalidGeometry",
+  "Version" : 1,
+  "Comment" : "Test config with invalid geometry",
+  "Date" : "2025-11-11",
+  "Info" : "Test config - TBLMB requires AMOR geometry",
+  "WireChOffset" : 16,
+  "Config" : [
+    { "CassetteNumber":  0, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "Thresholds" : [[0],[0]], "HybridId" : "E5533333222222221111111100000000"}
+  ]
+}
   )";
   
   saveBuffer(InvalidTBLMBConfig, (void *)InvalidTBLMBConfigStr.c_str(), 
              InvalidTBLMBConfigStr.size());
   
   Settings.ConfigFile = InvalidTBLMBConfig;
-  Settings.CalibFile = CalibFile;
+  Settings.CalibFile = "";
   
   // Expect runtime_error for non-AMOR geometry with TBLMB
-  EXPECT_THROW(
-    {
-      FreiaInstrument InvalidTBLMB(Counters, Settings, serializer, 
-                                   ESSHeaderParser, Stats, 
-                                   DetectorType::TBLMB);
-    },
-    std::runtime_error
-  );
+  try {
+    FreiaInstrument InvalidTBLMB(Counters, Settings, serializer, 
+                                 ESSHeaderParser, Stats, 
+                                 DetectorType::TBLMB);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    std::string error_msg(e.what());
+    // Verify exact error message
+    EXPECT_EQ(error_msg, "TBLMB detector requires InstrumentGeometry 'AMOR', got: InvalidGeometry");
+  }
   
   deleteFile(InvalidTBLMBConfig);
 }
@@ -492,12 +500,96 @@ TEST_F(FreiaInstrumentTest, CreateEstiaGeometry) {
   
   FreiaInstrument EstiaWithEstia(Counters, Settings, serializer, ESSHeaderParser,
                                  Stats, DetectorType::ESTIA);
-  const GeometryBase &Geom = EstiaWithEstia.getGeometry();
+  const VMM3Geometry &Geom = EstiaWithEstia.getGeometry();
   
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
   const EstiaGeometry *GeometryPtr = dynamic_cast<const EstiaGeometry *>(&Geom);
   ASSERT_NE(GeometryPtr, nullptr);
+}
+
+TEST_F(FreiaInstrumentTest, CreateInvalidEstiaGeometry) {
+  /// Test that ESTIA detector with non-ESTIA geometry throws exception
+  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
+  /// Note: Current implementation has detectorType != UpperInstGeometry comparison
+  
+  std::string InvalidEstiaConfig{"deleteme_estia_invalid_geometry.json"};
+  std::string InvalidEstiaConfigStr = R"(
+{
+  "Detector" : "Freia",
+  "InstrumentGeometry" : "InvalidGeometry",
+  "Version" : 1,
+  "Comment" : "Test config with invalid geometry",
+  "Date" : "2025-11-11",
+  "Info" : "Test config - ESTIA requires ESTIA geometry",
+  "WireChOffset" : 16,
+  "Config" : [
+    { "CassetteNumber":  0, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "Thresholds" : [[0],[0]], "HybridId" : "E5533333222222221111111100000000"}
+  ]
+}
+  )";
+  
+  saveBuffer(InvalidEstiaConfig, (void *)InvalidEstiaConfigStr.c_str(), 
+             InvalidEstiaConfigStr.size());
+  
+  Settings.ConfigFile = InvalidEstiaConfig;
+  Settings.CalibFile = "";
+  
+  // Expect runtime_error for non-ESTIA geometry with ESTIA detector
+  try {
+    FreiaInstrument InvalidEstia(Counters, Settings, serializer, 
+                                 ESSHeaderParser, Stats, 
+                                 DetectorType::ESTIA);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    std::string error_msg(e.what());
+    // Verify exact error message
+    EXPECT_EQ(error_msg, "ESTIA detector requires InstrumentGeometry 'ESTIA', got: InvalidGeometry");
+  }
+  
+  deleteFile(InvalidEstiaConfig);
+}
+
+TEST_F(FreiaInstrumentTest, CreateUnsupportedDetectorType) {
+  /// Test that unsupported DetectorType throws exception
+  /// This test uses a valid config but BIFROST detector is not supported
+  /// This covers the final error case: throw std::runtime_error("Unsupported DetectorType...")
+  
+  std::string ValidConfig{"deleteme_unsupported_detector.json"};
+  std::string ValidConfigStr = R"(
+{
+  "Detector" : "Freia",
+  "InstrumentGeometry" : "Freia",
+  "Version" : 1,
+  "Comment" : "Valid config but unsupported DetectorType",
+  "Date" : "2025-11-11",
+  "Info" : "Test config - valid config but unsupported DetectorType",
+  "WireChOffset" : 16,
+  "Config" : [
+    { "CassetteNumber":  0, "Ring" :  0, "FEN": 0, "Hybrid" :  0, "Thresholds" : [[0],[0]], "HybridId" : "E5533333222222221111111100000000"}
+  ]
+}
+  )";
+  
+  saveBuffer(ValidConfig, (void *)ValidConfigStr.c_str(), 
+             ValidConfigStr.size());
+  
+  Settings.ConfigFile = ValidConfig;
+  Settings.CalibFile = "";
+  
+  // Expect runtime_error for unsupported detector type
+  try {
+    FreiaInstrument UnsupportedDetector(Counters, Settings, serializer, 
+                                        ESSHeaderParser, Stats, 
+                                        DetectorType::BIFROST);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    std::string error_msg(e.what());
+    // Verify exact error message
+    EXPECT_EQ(error_msg, "Unsupported DetectorType: BIFROST");
+  }
+  
+  deleteFile(ValidConfig);
 }
 
 int main(int argc, char **argv) {

@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include <common/debug/Trace.h>
-#include <freia/geometry/GeometryBase.h>
-#include <freia/geometry/Config.h>
-#include <freia/Counters.h>
-#include <common/readout/vmm3/VMM3Config.h>
 #include <common/Statistics.h>
+#include <common/debug/Trace.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
+#include <common/readout/vmm3/VMM3Config.h>
+#include <freia/Counters.h>
+#include <freia/geometry/Config.h>
 
 #include <cinttypes>
 
@@ -24,7 +24,7 @@
 
 namespace Freia {
 
-class FreiaGeometry : public GeometryBase {
+class FreiaGeometry final : public vmm3::VMM3Geometry {
 public:
   static constexpr uint32_t ESSGEOMTERY_NX = 64;
   static constexpr uint32_t ESSGEOMTERY_NY = 1024;
@@ -32,33 +32,23 @@ public:
   static constexpr uint32_t ESSGEOMTERY_NP = 1;
 
   FreiaGeometry(Statistics &Stats, Config &Cfg)
-      : GeometryBase(Stats, Cfg, VMM3Config::MaxRing, VMM3Config::MaxFEN,
-                     ESSGEOMTERY_NX, ESSGEOMTERY_NY, ESSGEOMTERY_NZ,
-                     ESSGEOMTERY_NP) {}
+      : vmm3::VMM3Geometry(Stats, Cfg, vmm3::VMM3Config::MaxRing,
+                           vmm3::VMM3Config::MaxFEN, ESSGEOMTERY_NX,
+                           ESSGEOMTERY_NY, ESSGEOMTERY_NZ, ESSGEOMTERY_NP) {}
 
   /// \brief Validate VMM3 readout data for Freia geometry
   /// \param Data VMM3 readout data to validate
-  /// \return true if readout is valid, false otherwise
-  bool validateReadoutData(const ESSReadout::VMM3Parser::VMM3Data &Data) override {
+  /// \return true if valid, false otherwise
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) override {
     uint8_t Ring = Data.FiberId / 2; // physical->logical mapping
-    uint8_t HybridId = Data.VMM >> 1;
-    
-    return validateAll(
-      [&]() {
-        return validateRing(Ring);
-      },
-      [&]() {
-        return validateFEN(Data.FENId);
-      },
-      [&]() {
-        return validateHybrid(Ring, Data.FENId, HybridId);
-      },
-      [&]() {
-        return validateChannel(Data.VMM, Data.Channel);
-      }
-    );
-  }
+    uint8_t HybridId = calcHybridId(Data.VMM);
 
+    return validateAll(
+        [&]() { return validateRing(Ring); },
+        [&]() { return validateFEN(Data.FENId); },
+        [&]() { return validateHybrid(Ring, Data.FENId, HybridId); },
+        [&]() { return validateChannel(Data.VMM, Data.Channel); });
+  }
 };
 
 } // namespace Freia

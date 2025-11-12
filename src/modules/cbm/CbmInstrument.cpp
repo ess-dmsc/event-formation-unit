@@ -10,6 +10,7 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
@@ -19,9 +20,10 @@
 
 #define IBM_ADC_MASK 0xFFFFFF
 
+using namespace esstime;
+using namespace geometry;
 namespace cbm {
 
-using namespace esstime;
 
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
@@ -82,7 +84,7 @@ void CbmInstrument::processMonitorReadouts() {
            Readout.FiberId, Readout.FENId, Readout.Pos, Readout.Type,
            Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
-    int Ring = Readout.FiberId / 2;
+    int Ring = DetectorGeometry::calcRing(Readout.FiberId);
     if (Ring != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
              Conf.Parms.MonitorRing);

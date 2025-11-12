@@ -29,7 +29,7 @@ MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
 uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
   auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
 
-  int Ring = Data->FiberId / 2;
+  int Ring = calcRing(Data->FiberId);
   int x = xCoord(Ring, Data->Group, Data->AmpA, Data->AmpB);
   int y = yCoord(Ring, Data->AmpA, Data->AmpB);
   uint32_t pixel = pixel2D(x, y);
@@ -41,7 +41,7 @@ uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
 
 bool MiraclesGeometry::validateReadoutData(
     const DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+  int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId, Data.Group);
 
   return validateAll(

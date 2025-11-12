@@ -62,6 +62,32 @@ public:
     }
     return false;
   }
+
+  // Public test wrapper methods that call protected validation methods
+  // This keeps the base class methods protected while allowing testing
+
+  /// \brief Public wrapper to test Ring validation
+  bool testValidateRing(int Ring) const {
+    return validateRing(Ring);
+  }
+
+  /// \brief Public wrapper to test FEN validation
+  bool testValidateFEN(int FEN) const {
+    return validateFEN(FEN);
+  }
+
+  /// \brief Public wrapper to test validateAll with Ring and FEN
+  bool testValidateAll(int Ring, int FEN) const {
+    return validateAll(
+        [&]() { return validateRing(Ring); },
+        [&]() { return validateFEN(FEN); });
+  }
+
+  /// \brief Public wrapper to test topology validation
+  template <typename T>
+  bool testValidateTopology(HashMap2D<T> &map, int Col, int Row) const {
+    return validateTopology(map, Col, Row);
+  }
 };
 
 class DetectorGeometryTest : public TestBase {
@@ -90,23 +116,14 @@ TEST_F(DetectorGeometryTest, Constructor) {
 /// \brief Test all validation functions using validateAll method
 TEST_F(DetectorGeometryTest, ValidateAll) {
   // Test all valid values together
-  bool allValid = caenGeometry->validateAll(
-      [&]() { return caenGeometry->validateRing(10); },
-      [&]() { return caenGeometry->validateFEN(5); });
+  bool allValid = caenGeometry->testValidateAll(10, 5);
   ASSERT_TRUE(allValid);
   ASSERT_EQ(caenGeometry->getBaseCounters().ValidationErrors, 0);
   ASSERT_EQ(caenGeometry->getBaseCounters().RingErrors, 0);
   ASSERT_EQ(caenGeometry->getBaseCounters().FENErrors, 0);
 
   // Test with one invalid ring value (first validator fails - short-circuit)
-  bool ringInvalid = caenGeometry->validateAll(
-      [&]() {
-        return caenGeometry->validateRing(-1);
-      }, // Invalid - increments RingErrors
-      [&]() {
-        return caenGeometry->validateFEN(5);
-      } // Not executed due to short-circuit
-  );
+  bool ringInvalid = caenGeometry->testValidateAll(-1, 5);
   ASSERT_FALSE(ringInvalid);
   ASSERT_EQ(caenGeometry->getBaseCounters().ValidationErrors, 1);
   ASSERT_EQ(caenGeometry->getBaseCounters().RingErrors, 1);
@@ -114,12 +131,7 @@ TEST_F(DetectorGeometryTest, ValidateAll) {
             0); // Still 0 due to short-circuit
 
   // Test with one invalid FEN value (first validator succeeds, second fails)
-  bool fenInvalid = caenGeometry->validateAll(
-      [&]() { return caenGeometry->validateRing(10); }, // Valid
-      [&]() {
-        return caenGeometry->validateFEN(12);
-      } // Invalid - increments FENErrors
-  );
+  bool fenInvalid = caenGeometry->testValidateAll(10, 12);
   ASSERT_FALSE(fenInvalid);
   ASSERT_EQ(caenGeometry->getBaseCounters().ValidationErrors, 2);
   ASSERT_EQ(caenGeometry->getBaseCounters().RingErrors, 1);
@@ -127,14 +139,7 @@ TEST_F(DetectorGeometryTest, ValidateAll) {
 
   // Test with multiple invalid values - due to short-circuit, only first
   // executes
-  bool multipleInvalid = caenGeometry->validateAll(
-      [&]() {
-        return caenGeometry->validateRing(24);
-      }, // Invalid - increments RingErrors
-      [&]() {
-        return caenGeometry->validateFEN(-1);
-      } // Not executed due to short-circuit
-  );
+  bool multipleInvalid = caenGeometry->testValidateAll(24, -1);
   ASSERT_FALSE(multipleInvalid);
   ASSERT_EQ(caenGeometry->getBaseCounters().ValidationErrors, 3);
   ASSERT_EQ(caenGeometry->getBaseCounters().RingErrors, 2);
@@ -142,15 +147,15 @@ TEST_F(DetectorGeometryTest, ValidateAll) {
             1); // Still 1, not incremented
 
   // Test individual validation boundary cases
-  ASSERT_TRUE(caenGeometry->validateRing(0));   // Min valid ring
-  ASSERT_TRUE(caenGeometry->validateRing(23));  // Max valid ring
-  ASSERT_FALSE(caenGeometry->validateRing(-1)); // Below min (3rd ring error)
-  ASSERT_FALSE(caenGeometry->validateRing(24)); // Above max (4th ring error)
+  ASSERT_TRUE(caenGeometry->testValidateRing(0));   // Min valid ring
+  ASSERT_TRUE(caenGeometry->testValidateRing(23));  // Max valid ring
+  ASSERT_FALSE(caenGeometry->testValidateRing(-1)); // Below min (3rd ring error)
+  ASSERT_FALSE(caenGeometry->testValidateRing(24)); // Above max (4th ring error)
 
-  ASSERT_TRUE(caenGeometry->validateFEN(0));   // Min valid FEN
-  ASSERT_TRUE(caenGeometry->validateFEN(11));  // Max valid FEN
-  ASSERT_FALSE(caenGeometry->validateFEN(-1)); // Below min (2nd FEN error)
-  ASSERT_FALSE(caenGeometry->validateFEN(12)); // Above max (3rd FEN error)
+  ASSERT_TRUE(caenGeometry->testValidateFEN(0));   // Min valid FEN
+  ASSERT_TRUE(caenGeometry->testValidateFEN(11));  // Max valid FEN
+  ASSERT_FALSE(caenGeometry->testValidateFEN(-1)); // Below min (2nd FEN error)
+  ASSERT_FALSE(caenGeometry->testValidateFEN(12)); // Above max (3rd FEN error)
 
   // Verify final counts
   ASSERT_EQ(caenGeometry->getBaseCounters().RingErrors, 4);

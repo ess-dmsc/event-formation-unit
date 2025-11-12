@@ -16,7 +16,6 @@ set(freia_common_inc
   FreiaBase.h
   FreiaInstrument.h
   geometry/Config.h
-  geometry/GeometryBase.h
   geometry/FreiaGeometry.h
   geometry/EstiaGeometry.h
   geometry/AmorGeometry.h
@@ -26,7 +25,6 @@ set(freia_common_src
   FreiaBase.cpp
   FreiaInstrument.cpp
   geometry/Config.cpp
-  geometry/GeometryBase.cpp
   )
 
 #=============================================================================

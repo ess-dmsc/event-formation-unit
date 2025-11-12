@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,13 +25,13 @@
 
 namespace Nmx {
 
-class Config : public VMM3Config {
+class Config : public vmm3::VMM3Config {
 public:
   Config() { FileParameters.InstrumentGeometry = "NMX"; };
 
   // Load and apply the json config
   Config(const std::string &Instrument, const std::string &ConfigFile)
-      : VMM3Config(Instrument, ConfigFile) {}
+      : vmm3::VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
   void applyConfig() override;
@@ -59,9 +59,16 @@ public:
 
   // Derived parameters
   // NMX specific Hybrid fields not included in common Hybrid class
-  bool ReversedChannels[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint8_t Plane[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint8_t Panel[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
-  uint64_t Offset[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
+  // Grouped into a single struct for cache-friendly access
+  struct HybridParams {
+    uint64_t Offset{0};
+    uint8_t Plane{0};
+    uint8_t Panel{0};
+    bool ReversedChannels{false};
+  };
+  
+  // Single 3D array of structs for cache-optimal access pattern
+  // All 4 fields fit in a single cache line (~32 bytes for alignment)
+  HybridParams HybridParam[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
 } // namespace Nmx

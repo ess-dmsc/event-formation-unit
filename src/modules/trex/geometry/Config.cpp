@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,6 +10,8 @@
 #include <trex/geometry/Config.h>
 
 #include <iostream>
+
+using namespace vmm3;
 
 namespace Trex {
 
@@ -33,7 +35,7 @@ void Config::applyConfig() {
 
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =

@@ -37,7 +37,7 @@
 #include <cstdlib>
 #include <string>
 
-namespace VMM3 {
+namespace vmm3 {
 
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
@@ -70,4 +70,4 @@ struct __attribute__((packed)) Readout {
   std::string debug() const;
 };
 
-} // namespace VMM3
+} // namespace vmm3

@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+using namespace vmm3;
 using namespace ESSReadout;
 
 namespace Freia {
