@@ -262,12 +262,7 @@ publish_docker_job:
     - almalinux9_gcc11_release
   script:
     - echo "Publishing docker image"
-    - |
-      docker login \
-      -u "$CI_REGISTRY_USER" \
-      -p "$CI_REGISTRY_PASSWORD" \
-      "$CI_REGISTRY"
-
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - |
       docker build \
           --build-arg https_proxy="http://172.20.72.11:8888" \
