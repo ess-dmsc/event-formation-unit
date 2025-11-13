@@ -86,6 +86,10 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                    "Set the generator type ([Dist, Fixed, Linear] default : Dist)")
       ->check(genTypeValidator);
 
+  IbmGroup->add_flag("--normFactor", cbmSettings.NormFactor,
+                     "defines how many ADC measurement summed by the hardware "
+                     "(default 1)");
+
   // Load bitmaps. All bit maps are of size 32 * 32 
   // However they will be used as 40 * 40 then there is a margin
   // Around them
@@ -333,7 +337,8 @@ void ReadoutGenerator::distributionValueGenerator(Parser::CbmReadout *value) {
     Noise = NoiseDist(RandomGenerator);
   }
 
-  value->NPos = 1000 * Generator->getValueByPos(TofMs) + Noise;
+  value->NADC.setNADC(static_cast<uint32_t>(1000 * Generator->getValueByPos(TofMs) + Noise));
+  value->NADC.MCASum = cbmSettings.NormFactor;
 }
 
 void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
@@ -346,11 +351,13 @@ void ReadoutGenerator::linearValueGenerator(Parser::CbmReadout *value) {
   auto readoutTime = esstime::ESSTime(value->TimeHigh, value->TimeLow);
   auto TofMs = esstime::nsToMilliseconds(getTimeOfFlightNS(readoutTime)).count();
 
-  value->NPos = Generator->getValueByPos(TofMs);
+  value->NADC.setNADC(static_cast<uint32_t>(Generator->getValueByPos(TofMs)));
+  value->NADC.MCASum = cbmSettings.NormFactor;
 }
 
 void ReadoutGenerator::fixedValueGenerator(Parser::CbmReadout *value) {
-  value->NPos = cbmSettings.Value.value() + cbmSettings.Offset;
+  value->NADC.setNADC(static_cast<uint32_t>(cbmSettings.Value.value() + cbmSettings.Offset));
+  value->NADC.MCASum = cbmSettings.NormFactor;
 }
 
 } // namespace cbm

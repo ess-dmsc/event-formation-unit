@@ -148,6 +148,24 @@ std::vector<uint8_t> Good2DData{
     0x02, 0x00, 0x00, 0x00,  // Type 0x02, Channel 0, ADC 0x000
     0xFF, 0x00, 0xFF, 0x01   // XPos 256, YPos 511
 };
+
+/// \brief Check data for SADC value read and convert
+std::vector<uint8_t> SADCTestData{
+    // First readout
+    0x16, 0x00, 0x14, 0x00,  // Data header - Ring 22, FEN 0, Size 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+    0x02, 0x00, 0x01, 0x00,  // Type 0x02, Channel 0, ADC 0x100
+    0xFF, 0xFF, 0xFF, 0x00,  // SAD 0x00FFFFFF -> ADC = 16777215, Count = 0
+
+    // Second readout
+    0x16, 0x00, 0x14, 0x00,  // Data header - Ring 22, FEN 0, Size 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0x01, 0x00, 0x00, 0x00,  // Time LO 1 tick
+    0x02, 0x00, 0x00, 0x00,  // Type 0x02, Channel 0, ADC 0x000
+    0x10, 0x01, 0xA3, 0x4A,  // SAD 0x4AA30110 -> ADC = 10682640, Count = 74
+};
+
 //clang-format on
 class CbmParserTest : public TestBase {
 protected:
@@ -270,6 +288,36 @@ TEST_F(CbmParserTest, Check2DValues) {
   EXPECT_EQ(parser.Stats.ErrorType, 0);
 
   // Wrong geometry data will be checked on cbminstrument.
+}
+
+// Test that SADC data structure endian decoding works correct
+TEST_F(CbmParserTest, CheckSDACStructure) {
+  makeHeader(SADCTestData);
+
+  parser.parse(PacketData);
+  EXPECT_EQ(parser.Stats.ErrorADC, 0);
+  EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.ErrorType, 0);
+
+  //Check SDAC 
+  EXPECT_EQ(parser.Result.size(), 2);
+
+  Parser::NormADC &data = parser.Result.at(0).NADC;
+  EXPECT_EQ(data.getNADC(), 16777215);
+  EXPECT_EQ(data.MCASum, 0);
+
+  data = parser.Result.at(1).NADC;
+  EXPECT_EQ(data.getNADC(), 10682640);
+  EXPECT_EQ(data.MCASum, 74);
+
+  //Make write read test of ADC()
+  uint32_t overFlow = 16777500;
+  data.setNADC(overFlow);
+  EXPECT_EQ(data.getNADC(), 0x00FFFFFF);
+
+  overFlow -= 1000;
+  data.setNADC(overFlow);
+  EXPECT_EQ(data.getNADC(), overFlow);
 }
 
 int main(int argc, char **argv) {

@@ -43,6 +43,34 @@ public:
     uint16_t YPos;
   } __attribute__((packed));
 
+  //Normalize ADC value for IBM beam monitors
+  struct NormADC {
+    uint8_t MCAValue[3];  // analog-to-digital little endian encoded value
+    uint8_t MCASum;  //Number of readouts in pulse
+    
+    /// \brief Get ADC measurement summed by the hardware
+    uint32_t getNADC() const {
+      return
+        static_cast<uint32_t>(MCAValue[0]) +
+        static_cast<uint32_t>(MCAValue[1] << 8) + 
+        static_cast<uint32_t>(MCAValue[2] << 16);
+    };
+    /// \brief Set ADC measurement sum 
+    /// This method is used to set a value and is only used in a generator
+    void setNADC(uint32_t value) {
+      // We will control content in case the value exceeds the storage capacity of 3 bytes.
+      if (value > 0x00FFFFFF) {
+        MCAValue[0] = 0xFF;
+        MCAValue[1] = 0xFF;
+        MCAValue[2] = 0xFF;
+      } else {
+        MCAValue[0] = static_cast<uint8_t>(value & 0x000000FF);
+        MCAValue[1] = static_cast<uint8_t>((value & 0x0000FF00) >> 8);
+        MCAValue[2] = static_cast<uint8_t>((value & 0x00FF0000) >> 16);
+      }
+    };
+  } __attribute__((packed));
+
   struct CbmReadout {
     uint8_t FiberId;
     uint8_t FENId;
@@ -54,6 +82,7 @@ public:
     uint16_t ADC;
     union {
       Position Pos;
+      NormADC NADC;
       uint32_t NPos;
     };
   } __attribute__((packed));
