@@ -118,16 +118,23 @@ void CbmInstrument::processMonitorReadouts() {
       if (Type == CbmType::IBM) {
         counters.IBMReadoutsProcessed++;
 
+        // Get normalized ADC value from readout.
+        uint32_t normADC{Readout.NADC.getNADC()};
+        if (Readout.NADC.MCASum != 0) {
+          normADC /= Readout.NADC.MCASum;
+        } 
+
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
-            ->addEvent(TimeOfFlight, Readout.NPos);
+            ->addEvent(TimeOfFlight, normADC);
 
         XTRACE(DATA, DEB,
-               "CBM Event, CbmType: %" PRIu8 " NPOS: %" PRIu32 " TOF %" PRIu64
+               "CBM Event, CbmType: %" PRIu8 " ADC: %" PRIu32 " MCASum: %" PRIu32 " TOF %" PRIu64
                "ns",
-               Readout.Type, Readout.NPos, TimeOfFlight);
+               Readout.Type, Readout.NADC.getNADC(), Readout.NADC.MCASum, TimeOfFlight);
 
         counters.IBMEvents++;
-        counters.NPOSCount += Readout.NPos;
+        counters.NPOSCount += normADC;
+
       } else if (Type == CbmType::EVENT_0D) {
         counters.Event0DReadoutsProcessed++;
 

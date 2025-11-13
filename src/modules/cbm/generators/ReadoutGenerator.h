@@ -67,6 +67,8 @@ public:
                                        // random generator.
     uint16_t MaxYValue{512};           // Maximum Y coordinate value for 2D Beam monitor used in 
                                        // random generator.
+    uint8_t NormFactor{1};             // Factor used for beam monitor histogram 
+                                       // normalization. Default = 1
   } cbmSettings;
   // clang-format on
 
