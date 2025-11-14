@@ -253,21 +253,14 @@ publish_docker_job:
       - INSTRUMENT: "trex"
 
   stage: publish
-  image: docker:latest
-  services:
-    - docker:dind
+  image: docker:28-cli
   variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/efu-$INSTRUMENT"
   dependencies:
     - almalinux9_gcc11_release
   script:
     - echo "Publishing docker image"
-    - |
-      docker login \
-      -u "$CI_REGISTRY_USER" \
-      -p "$CI_REGISTRY_PASSWORD" \
-      "$CI_REGISTRY"
-
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - |
       docker build \
           --build-arg https_proxy="http://172.20.72.11:8888" \
