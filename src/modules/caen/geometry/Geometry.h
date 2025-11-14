@@ -39,7 +39,7 @@ protected:
   static inline const std::string METRIC_COUNTER_AMPL_HIGH = "geometry.ampl_high";
   static inline const std::string METRIC_COUNTER_GROUP_ERRORS = "geometry.group_errors";
   static inline const std::string METRIC_COUNTER_GLOBALPOS_INVALID = "geometry.globalpos_invalid";
-  static inline const std::string METRIC_COUNTER_ZERODIV_CATCH = "geometry.zerodiv_catch";
+  static inline const std::string METRIC_COUNTER_ZERODIV_ERROR = "geometry.zerodiv_error";
   static inline const std::string METRIC_COUNTER_UNITID_INVALID = "geometry.unitid_invalid";
   // clang-format on
 
@@ -58,7 +58,7 @@ protected:
                                   {METRIC_COUNTER_AMPL_HIGH, AmplitudeHigh},
                                   {METRIC_COUNTER_GROUP_ERRORS, GroupErrors},
                                   {METRIC_COUNTER_GLOBALPOS_INVALID, GlobalPosInvalid},
-                                  {METRIC_COUNTER_ZERODIV_CATCH, ZeroDivError},
+                                  {METRIC_COUNTER_ZERODIV_ERROR, ZeroDivError},
                                   {METRIC_COUNTER_UNITID_INVALID, UnitIdInvalid}}) {
     }
   };
