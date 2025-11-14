@@ -25,7 +25,6 @@ namespace Dream {
 
 class DreamInstrument {
 private:
-  Statistics &Stats;
   struct Counters &Counters;
   BaseSettings &Settings;
   Config DreamConfiguration;

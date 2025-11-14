@@ -30,7 +30,7 @@ DreamInstrument::DreamInstrument(Statistics &Stats, struct Counters &counters,
                                  BaseSettings &settings,
                                  EV44Serializer &serializer,
                                  ESSReadout::Parser &essHeaderParser)
-    : Stats(Stats), Counters(counters), Settings(settings),
+    : Counters(counters), Settings(settings),
       Serializer(serializer), ESSHeaderParser(essHeaderParser) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
