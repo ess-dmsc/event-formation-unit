@@ -27,7 +27,7 @@ protected:
   Config::ModuleParms Parms{false, Config::ModuleType::BwEndCap, {0}, {0}};
   std::unique_ptr<SUMO> endcap;
 
-  void SetUp() override { endcap = std::make_unique<SUMO>(Stats, 616, 256); }
+  void SetUp() override { endcap = std::make_unique<SUMO>(Stats, 616, 256, "sumo"); }
 };
 
 TEST_F(DreamGeometryTest, Constructor) {
