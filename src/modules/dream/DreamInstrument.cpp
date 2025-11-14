@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include "common/Statistics.h"
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/kafka/EV44Serializer.h>
@@ -25,12 +26,12 @@ namespace Dream {
 using namespace esstime;
 using namespace ESSReadout;
 
-DreamInstrument::DreamInstrument(struct Counters &counters,
+DreamInstrument::DreamInstrument(Statistics &Stats, struct Counters &counters,
                                  BaseSettings &settings,
                                  EV44Serializer &serializer,
                                  ESSReadout::Parser &essHeaderParser)
-    : Counters(counters), Settings(settings), Serializer(serializer),
-      ESSHeaderParser(essHeaderParser) {
+    : Stats(Stats), Counters(counters), Settings(settings),
+      Serializer(serializer), ESSHeaderParser(essHeaderParser) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());

@@ -82,7 +82,8 @@ void DreamBase::processingThread() {
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  DreamInstrument Dream(Counters, EFUSettings, *Serializer, ESSHeaderParser);
+  DreamInstrument Dream(Stats, Counters, EFUSettings, *Serializer,
+                        ESSHeaderParser);
 
   unsigned int DataIndex;
   Timer ProduceTimer;

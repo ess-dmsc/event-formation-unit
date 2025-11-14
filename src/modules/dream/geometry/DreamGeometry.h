@@ -28,7 +28,7 @@ public:
   /// \param Stats Reference to Statistics object for counter registration
   /// \param Config Reference to the DREAM configuration object
   DreamGeometry(Statistics &Stats, const Config &Config)
-      : Geometry(Stats, Config), fwec(Stats, 280, 256), bwec(Stats, 616, 256),
+      : Geometry(Stats, Config), fwec(Stats, 280, 256, "fwec"), bwec(Stats, 616, 256, "bwec"  ),
         mantle(Stats, 256), cuboid(Stats) {}
 
   /// \brief return the global pixel id offset for each of the DREAM detector

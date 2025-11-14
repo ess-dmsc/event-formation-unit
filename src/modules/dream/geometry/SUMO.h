@@ -32,7 +32,7 @@ private:
     int64_t MaxWireErrors{0};
     int64_t MaxStripErrors{0};
 
-    SUMOCounters(Statistics &Stats)
+    SUMOCounters(Statistics &Stats, std::string name)
         : StatCounterBase(
               Stats, {
                          {METRIC_COUNTER_MAX_SECTOR_ERRORS, MaxSectorErrors},
@@ -41,7 +41,7 @@ private:
                          {METRIC_COUNTER_COUNTER_ERRORS, CounterErrors},
                          {METRIC_COUNTER_MAX_WIRE_ERRORS, MaxWireErrors},
                          {METRIC_COUNTER_MAX_STRIP_ERRORS, MaxStripErrors},
-                     }) {}
+                     }, name) {}
   };
 
   uint16_t getLocalYCoord(uint8_t Wire) const { return Wire; }
@@ -68,16 +68,16 @@ public:
   const uint8_t WiresPerCounter{16};
 
   // clang-format off
-  static inline const std::string METRIC_COUNTER_MAX_SECTOR_ERRORS  = "geometry.sumo.max_sector_errors";
-  static inline const std::string METRIC_COUNTER_SUMO_ID_ERRORS     = "geometry.sumo.sumo_id_errors";
-  static inline const std::string METRIC_COUNTER_CASSETTE_ID_ERRORS = "geometry.sumo.cassette_id_errors";
-  static inline const std::string METRIC_COUNTER_COUNTER_ERRORS     = "geometry.sumo.counter_errors";
-  static inline const std::string METRIC_COUNTER_MAX_WIRE_ERRORS    = "geometry.sumo.max_wire_errors";
-  static inline const std::string METRIC_COUNTER_MAX_STRIP_ERRORS   = "geometry.sumo.max_strip_errors";
+  static inline const std::string METRIC_COUNTER_MAX_SECTOR_ERRORS  = "geometry.max_sector_errors";
+  static inline const std::string METRIC_COUNTER_SUMO_ID_ERRORS     = "geometry.sumo_id_errors";
+  static inline const std::string METRIC_COUNTER_CASSETTE_ID_ERRORS = "geometry.cassette_id_errors";
+  static inline const std::string METRIC_COUNTER_COUNTER_ERRORS     = "geometry.counter_errors";
+  static inline const std::string METRIC_COUNTER_MAX_WIRE_ERRORS    = "geometry.max_wire_errors";
+  static inline const std::string METRIC_COUNTER_MAX_STRIP_ERRORS   = "geometry.max_strip_errors";
   // clang-format on
 
-  SUMO(Statistics &Stats, uint16_t xdim, uint16_t ydim)
-      : ESSGeometry(xdim, ydim, 1, 1), SUMOCounters(Stats) {}
+  SUMO(Statistics &Stats, uint16_t xdim, uint16_t ydim, std::string name)
+      : ESSGeometry(xdim, ydim, 1, 1), SUMOCounters(Stats, name) {}
 
   /// \brief Get access to SUMO-specific geometry statistics counters
   inline const struct SUMOCounters &getSUMOCounters() const {

@@ -38,7 +38,7 @@ private:
                          {METRIC_COUNTER_COUNTER_ERRORS, CounterErrors},
                          {METRIC_COUNTER_WIRE_ERRORS, WireErrors},
                          {METRIC_COUNTER_STRIP_ERRORS, StripErrors},
-                     }) {}
+                     }, "padetector") {}
   };
 
   ///\brief calculate the cassette id from the digital identifiers:
@@ -64,11 +64,11 @@ private:
 
 public:
   // clang-format off
-  static inline const std::string METRIC_COUNTER_MAX_SECTOR_ERRORS  = "geometry.padetector.max_sector_errors";
-  static inline const std::string METRIC_COUNTER_CASSETTE_ID_ERRORS = "geometry.padetector.cassette_id_errors";
-  static inline const std::string METRIC_COUNTER_COUNTER_ERRORS     = "geometry.padetector.counter_errors";
-  static inline const std::string METRIC_COUNTER_WIRE_ERRORS        = "geometry.padetector.wire_errors";
-  static inline const std::string METRIC_COUNTER_STRIP_ERRORS       = "g eometry.padetector.strip_errors";
+  static inline const std::string METRIC_COUNTER_MAX_SECTOR_ERRORS  = "geometry.max_sector_errors";
+  static inline const std::string METRIC_COUNTER_CASSETTE_ID_ERRORS = "geometry.cassette_id_errors";
+  static inline const std::string METRIC_COUNTER_COUNTER_ERRORS     = "geometry.counter_errors";
+  static inline const std::string METRIC_COUNTER_WIRE_ERRORS        = "geometry.wire_errors";
+  static inline const std::string METRIC_COUNTER_STRIP_ERRORS       = "geometry.strip_errors";
   // clang-format on
 
   const uint8_t MaxSector{7};

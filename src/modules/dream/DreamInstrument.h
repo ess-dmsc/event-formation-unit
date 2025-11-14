@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include <common/readout/ess/Parser.h>
 #include <common/Statistics.h>
+#include <common/readout/ess/Parser.h>
 #include <dream/Counters.h>
 #include <dream/DreamBase.h> // to get DreamSettings
 #include <dream/geometry/Config.h>
@@ -25,10 +25,10 @@ namespace Dream {
 
 class DreamInstrument {
 private:
+  Statistics &Stats;
   struct Counters &Counters;
   BaseSettings &Settings;
   Config DreamConfiguration;
-  Statistics Stats;
   std::unique_ptr<Geometry> Geom;
   EV44Serializer &Serializer;
   ESSReadout::Parser &ESSHeaderParser;
@@ -38,8 +38,8 @@ public:
   ///
   /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
-  DreamInstrument(struct Counters &counters, BaseSettings &settings,
-                  EV44Serializer &serializer,
+  DreamInstrument(Statistics &Stats, struct Counters &counters,
+                  BaseSettings &settings, EV44Serializer &serializer,
                   ESSReadout::Parser &essHeaderParser);
 
   ~DreamInstrument();

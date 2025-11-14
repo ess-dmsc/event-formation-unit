@@ -34,18 +34,20 @@ private:
     int64_t TypeErrors{0};
 
     CuboidCounters(Statistics &Stats)
-        : StatCounterBase(Stats, {
-                                     {METRIC_COUNTER_INDEX_ERRORS, IndexErrors},
-                                     {METRIC_COUNTER_TYPE_ERRORS, TypeErrors},
-                                 }) {}
+        : StatCounterBase(Stats,
+                          {
+                              {METRIC_COUNTER_INDEX_ERRORS, IndexErrors},
+                              {METRIC_COUNTER_TYPE_ERRORS, TypeErrors},
+                          },
+                          "cuboid") {}
   };
 
   mutable CuboidCounters CuboidCounters;
 
 public:
   // clang-format off
-  static inline const std::string METRIC_COUNTER_INDEX_ERRORS = "geometry.cuboid.index_errors";
-  static inline const std::string METRIC_COUNTER_TYPE_ERRORS  = "geometry.cuboid.type_errors";
+  static inline const std::string METRIC_COUNTER_INDEX_ERRORS = "geometry.index_errors";
+  static inline const std::string METRIC_COUNTER_TYPE_ERRORS  = "geometry.type_errors";
   // clang-format on
 
   Cuboid(Statistics &Stats)
