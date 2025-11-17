@@ -8,11 +8,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/geometry/DetectorGeometry.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cstdint>
@@ -37,9 +37,6 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
       Serializer(serializer), ESSHeaderParser(essHeaderParser) {
 
   loadConfigAndCalib();
-
-  essgeom = ESSGeometry(Conf.NMXFileParameters.SizeX,
-                        Conf.NMXFileParameters.SizeY, 1, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParameters.InstrumentGeometry == "NMX") {

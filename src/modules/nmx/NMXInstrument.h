@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/monitor/Histogram.h>
 #include <common/readout/ess/Parser.h>
@@ -18,13 +19,12 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/reduction/Event.h>
 #include <common/reduction/EventBuilder2D.h>
-#include <common/Statistics.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <memory>
 #include <nmx/Counters.h>
 #include <nmx/NMXBase.h>
 #include <nmx/geometry/Config.h>
 #include <nmx/geometry/NMXGeometry.h>
-#include <memory>
 
 namespace Nmx {
 
@@ -35,8 +35,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   NMXInstrument(Counters &counters, BaseSettings &Settings,
-                EV44Serializer &serializer,
-                ESSReadout::Parser &essHeaderParser,
+                EV44Serializer &serializer, ESSReadout::Parser &essHeaderParser,
                 Statistics &Stats);
 
   /// \brief handle loading and application of configuration and calibration
@@ -61,7 +60,7 @@ public:
   struct Counters &counters;
 
   BaseSettings &Settings;
-  
+
   /// \brief Statistics object for counters
   Statistics &Stats;
 
@@ -78,14 +77,11 @@ public:
 private:
   /// \brief serialiser (and producer) for events
   EV44Serializer &Serializer;
-  /// \brief logical geometry
-  /// get pixel IDs from x- and y- coordinates
-  ESSGeometry essgeom;
   /// \brief digital geometry
   /// Defines which digital geometry to use
   /// for calculating pixel ids
   std::unique_ptr<NMXGeometry> NMXGeom;
-  
+
   /// \brief parser for the ESS Readout header
   ESSReadout::Parser &ESSHeaderParser;
 };

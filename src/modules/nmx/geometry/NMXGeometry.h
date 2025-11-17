@@ -34,8 +34,6 @@ class Config;
 /// \brief NMX geometry class with DetectorGeometry and ESSGeometry inheritance
 class NMXGeometry final : public vmm3::VMM3Geometry {
 public:
-  static constexpr uint32_t ESSGEOMETRY_NX = 128; // Example dimensions
-  static constexpr uint32_t ESSGEOMETRY_NY = 128;
   static constexpr uint32_t ESSGEOMETRY_NZ = 1;
   static constexpr uint32_t ESSGEOMETRY_NP = 1;
 
@@ -64,8 +62,9 @@ public:
   /// \param MaxRing Maximum ring number for validation
   /// \param MaxFEN Maximum FEN number for validation
   NMXGeometry(Statistics &Stats, Config &Cfg, int MaxRing, int MaxFEN)
-      : vmm3::VMM3Geometry(Stats, Cfg, MaxRing, MaxFEN, ESSGEOMETRY_NX,
-                           ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
+      : vmm3::VMM3Geometry(
+            Stats, Cfg, MaxRing, MaxFEN, Cfg.NMXFileParameters.SizeX,
+            Cfg.NMXFileParameters.SizeY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
         NmxCounters(Stats) {}
 
   /// \brief Validate VMM3 readout data for NMX geometry
