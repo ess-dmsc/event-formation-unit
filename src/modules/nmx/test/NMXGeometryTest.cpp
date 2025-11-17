@@ -170,20 +170,20 @@ TEST_F(NMXGeometryTest, AsicValidationInReadout) {
 /// inputs
 TEST_F(NMXGeometryTest, CoordinateErrorCounter) {
   // Test with invalid AsicId (>1)
-  int64_t initialCoordErrors = Geom.getNmxCounters().CoordinateOverflowError;
+  int64_t initialCoordErrors = Geom.getVmmCounters().CoordOverflow;
   uint16_t result = Geom.coord(32, 2, 0, false); // AsicId = 2 (invalid)
   ASSERT_EQ(result, NMXGeometry::InvalidCoord)
       << "Invalid AsicId should return InvalidCoord";
-  ASSERT_EQ(Geom.getNmxCounters().CoordinateOverflowError, initialCoordErrors + 1)
+  ASSERT_EQ(Geom.getVmmCounters().CoordOverflow, initialCoordErrors + 1)
       << "Coordinate error counter should increment by exactly 1 on invalid "
          "AsicId";
 
   // Test with invalid Channel (>63)
-  initialCoordErrors = Geom.getNmxCounters().CoordinateOverflowError;
+  initialCoordErrors = Geom.getVmmCounters().CoordOverflow;
   result = Geom.coord(64, 0, 0, false); // Channel = 64 (invalid)
   ASSERT_EQ(result, NMXGeometry::InvalidCoord)
       << "Invalid Channel should return InvalidCoord";
-  ASSERT_EQ(Geom.getNmxCounters().CoordinateOverflowError, initialCoordErrors + 1)
+  ASSERT_EQ(Geom.getVmmCounters().CoordOverflow, initialCoordErrors + 1)
       << "Coordinate error counter should increment by exactly 1 on invalid "
          "Channel";
 }

@@ -60,7 +60,7 @@ uint16_t NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
   // validation during readout processing where VMM was available.
 
   if (!validateAsicIdAndChannel(AsicId, Channel)) {
-    NmxCounters.CoordinateOverflowError++;
+    Counters.CoordOverflow++;
     return InvalidCoord;
   }
 

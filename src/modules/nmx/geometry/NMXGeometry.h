@@ -41,28 +41,22 @@ public:
 
   /// \brief NMX-specific stats counters that extend VMM3 base counters
   struct NmxGeometryCounters : public StatCounterBase {
-    int64_t CoordinateOverflowError{0};
     int64_t ChannelRangeErrors{0};
     int64_t AsicRangeErrors{0};
     int64_t ADCErrors{0};
 
-    // metric names
-    static inline const std::string METRIC_COORDINATE_OVERFLOW_ERRORS{
-        "geometry.coordinate_overflow_errors"};
-    static inline const std::string METRIC_CHANNEL_RANGE_ERRORS{
-        "geometry.channel_range_errors"};
-    static inline const std::string METRIC_ASIC_RANGE_ERRORS{
-        "geometry.asic_range_errors"};
-    static inline const std::string METRIC_ADC_ERRORS{"geometry.adc_errors"};
-
     NmxGeometryCounters(Statistics &Stats)
-        : StatCounterBase(
-              Stats,
-              {{METRIC_COORDINATE_OVERFLOW_ERRORS, CoordinateOverflowError},
-               {METRIC_CHANNEL_RANGE_ERRORS, ChannelRangeErrors},
-               {METRIC_ASIC_RANGE_ERRORS, AsicRangeErrors},
-               {METRIC_ADC_ERRORS, ADCErrors}}) {}
+        : StatCounterBase(Stats,
+                          {{METRIC_CHANNEL_RANGE_ERRORS, ChannelRangeErrors},
+                           {METRIC_ASIC_RANGE_ERRORS, AsicRangeErrors},
+                           {METRIC_ADC_ERRORS, ADCErrors}}) {}
   };
+
+  // clang-format off
+  static inline const std::string METRIC_CHANNEL_RANGE_ERRORS{"geometry.channel_range_errors"};
+  static inline const std::string METRIC_ASIC_RANGE_ERRORS{"geometry.asic_range_errors"};
+  static inline const std::string METRIC_ADC_ERRORS{"geometry.adc_errors"};
+  // clang-format on
 
   /// \brief Constructor
   /// \param Stats Reference to Statistics object for counter registration
@@ -115,20 +109,20 @@ private:
   inline bool validateAsicIdAndChannel(uint8_t AsicId, uint8_t Channel) {
     // NMX uses strip-based channels: 0-63 per ASIC (2 ASICs total)
     bool isValid = true;
-    
+
     if (Channel >= NumStrips) {
       XTRACE(DATA, WAR, "Invalid Channel %d (expected 0-%d)", Channel,
              NumStrips - 1);
       NmxCounters.ChannelRangeErrors++;
       isValid = false;
     }
-    
+
     if (AsicId >= 2) {
       XTRACE(DATA, WAR, "Invalid AsicId %d (expected 0-1)", AsicId);
       NmxCounters.AsicRangeErrors++;
       isValid = false;
     }
-    
+
     return isValid;
   }
 
