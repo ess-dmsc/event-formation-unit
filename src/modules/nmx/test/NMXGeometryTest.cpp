@@ -264,6 +264,142 @@ TEST_F(NMXGeometryTest, HybridNotInitializedValidation) {
   ASSERT_EQ(Geom.getVmmCounters().HybridMappingErrors, initialHybridErrors + 1);
 }
 
+/// \brief Test calcPixel function with coordinate range validation against configured SizeX and SizeY
+TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
+  // Create a custom config with larger coordinate ranges for testing
+  Config LargeConfig;
+  LargeConfig.NMXFileParameters.SizeX = 2000;  
+  LargeConfig.NMXFileParameters.SizeY = 1500;
+  
+  // Create geometry with larger coordinate space
+  Statistics LargeStats;
+  NMXGeometry LargeGeom{LargeStats, LargeConfig, 4, 4};
+  
+  // Test 1: Valid event within configured coordinate range
+  Event validEvent;
+  Hit validHitX{1000, 1000, 100, 0};  // time=1000, coord=1000, weight=100, plane=0 (X)
+  Hit validHitY{1000, 800, 100, 1};   // time=1000, coord=800, weight=100, plane=1 (Y)
+  validEvent.insert(validHitX);
+  validEvent.insert(validHitY);
+  
+  int64_t initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
+  uint32_t validPixelId = LargeGeom.calcPixel<Event>(validEvent);
+  
+  EXPECT_NE(validPixelId, 0) << "Event within coordinate range should produce valid pixel ID";
+  EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors)
+      << "Valid coordinates should not increment pixel error counter";
+  
+  // Test 2: Invalid event - X coordinate exceeds SizeX
+  // Let's debug what coordinates are actually being calculated
+  Event invalidEventX;
+  Hit invalidHitX{1000, 2500, 100, 0};  // time=1000, coord=2500, weight=100, plane=0 (X) 
+  Hit validHitY2{1000, 500, 100, 1};    // time=1000, coord=500, weight=100, plane=1 (Y)
+  invalidEventX.insert(invalidHitX);
+  invalidEventX.insert(validHitY2);
+  
+  initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
+  uint32_t invalidPixelIdX = LargeGeom.calcPixel<Event>(invalidEventX);
+  
+  EXPECT_EQ(invalidPixelIdX, 0) << "Event with X coordinate > SizeX should return pixel ID 0";
+  EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors + 1)
+      << "Invalid X coordinate should increment pixel error counter by 1";
+  
+  // Test 3: Invalid event - Y coordinate exceeds SizeY
+  Event invalidEventY;
+  Hit validHitX2{1000, 1200, 100, 0};   // time=1000, coord=1200, weight=100, plane=0 (X)
+  Hit invalidHitY{1000, 1800, 100, 1};  // time=1000, coord=1800, weight=100, plane=1 (Y)
+  invalidEventY.insert(validHitX2);
+  invalidEventY.insert(invalidHitY);
+  
+  initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
+  uint32_t invalidPixelIdY = LargeGeom.calcPixel<Event>(invalidEventY);
+  
+  EXPECT_EQ(invalidPixelIdY, 0) << "Event with Y coordinate > SizeY should return pixel ID 0";
+  EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors + 1)
+      << "Invalid Y coordinate should increment pixel error counter by 1";
+  
+  // Test 4: Boundary coordinates (exactly at SizeX-1 and SizeY-1)
+  Event boundaryEvent;
+  Hit boundaryHitX{1000, 1999, 100, 0};  // time=1000, coord=1999, weight=100, plane=0 (X)
+  Hit boundaryHitY{1000, 1499, 100, 1};  // time=1000, coord=1499, weight=100, plane=1 (Y)
+  boundaryEvent.insert(boundaryHitX);
+  boundaryEvent.insert(boundaryHitY);
+  
+  initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
+  uint32_t boundaryPixelId = LargeGeom.calcPixel<Event>(boundaryEvent);
+  
+  EXPECT_NE(boundaryPixelId, 0) << "Event at coordinate boundaries should produce valid pixel ID";
+  EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors)
+      << "Boundary coordinates should not increment pixel error counter";
+}
+
+/// \brief Test calcPixel function with small configured sizes to verify boundary checking
+TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
+  // Create a config with small coordinate ranges
+  Config SmallConfig;
+  SmallConfig.NMXFileParameters.SizeX = 400;   // Small X range
+  SmallConfig.NMXFileParameters.SizeY = 200;   // Small Y range
+  
+  Statistics SmallStats;
+  NMXGeometry SmallGeom{SmallStats, SmallConfig, 4, 4};
+  
+  // Test 1: Valid event within small coordinate limits
+  Event validEvent;
+  Hit validHitX{1000, 200, 100, 0};  // time=1000, coord=200, weight=100, plane=0 (X)
+  Hit validHitY{1000, 100, 100, 1};  // time=1000, coord=100, weight=100, plane=1 (Y)
+  validEvent.insert(validHitX);
+  validEvent.insert(validHitY);
+  
+  int64_t initialErrors = SmallGeom.getBaseCounters().PixelErrors;
+  uint32_t validPixel = SmallGeom.calcPixel<Event>(validEvent);
+  
+  EXPECT_NE(validPixel, 0) << "Event within small coordinate limits should be valid";
+  EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors)
+      << "Valid event should not increment pixel error counter";
+  
+  // Test 2: Invalid event exceeding small SizeX
+  Event invalidEventX;
+  Hit invalidHitX{1000, 500, 100, 0};  // time=1000, coord=500, weight=100, plane=0 (X)
+  Hit validHitY2{1000, 150, 100, 1};   // time=1000, coord=150, weight=100, plane=1 (Y)
+  invalidEventX.insert(invalidHitX);
+  invalidEventX.insert(validHitY2);
+  
+  initialErrors = SmallGeom.getBaseCounters().PixelErrors;
+  uint32_t invalidPixelX = SmallGeom.calcPixel<Event>(invalidEventX);
+  
+  EXPECT_EQ(invalidPixelX, 0) << "Event beyond small SizeX should return pixel ID 0";
+  EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors + 1)
+      << "Invalid X coordinate should increment pixel error counter";
+  
+  // Test 3: Invalid event exceeding small SizeY
+  Event invalidEventY;
+  Hit validHitX2{1000, 300, 100, 0};   // time=1000, coord=300, weight=100, plane=0 (X)
+  Hit invalidHitY{1000, 250, 100, 1};  // time=1000, coord=250, weight=100, plane=1 (Y)
+  invalidEventY.insert(validHitX2);
+  invalidEventY.insert(invalidHitY);
+  
+  initialErrors = SmallGeom.getBaseCounters().PixelErrors;
+  uint32_t invalidPixelY = SmallGeom.calcPixel<Event>(invalidEventY);
+  
+  EXPECT_EQ(invalidPixelY, 0) << "Event beyond small SizeY should return pixel ID 0";
+  EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors + 1)
+      << "Invalid Y coordinate should increment pixel error counter";
+  
+  // Test 4: Test exact boundary values (SizeX-1, SizeY-1)
+  Event boundaryEvent;
+  Hit boundaryHitX{1000, 399, 100, 0};  // time=1000, coord=399, weight=100, plane=0 (X)
+  Hit boundaryHitY{1000, 199, 100, 1};  // time=1000, coord=199, weight=100, plane=1 (Y)
+  boundaryEvent.insert(boundaryHitX);
+  boundaryEvent.insert(boundaryHitY);
+  
+  initialErrors = SmallGeom.getBaseCounters().PixelErrors;
+  uint32_t boundaryPixel = SmallGeom.calcPixel<Event>(boundaryEvent);
+  
+  EXPECT_NE(boundaryPixel, 0) << "Event at exact boundaries should be valid";
+  EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors)
+      << "Boundary coordinates should not increment error counter";
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
