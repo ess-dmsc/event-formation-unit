@@ -100,14 +100,14 @@ std::vector<uint8_t> ValidIBMReadouts {
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
   0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
-  0xFF, 0xFF, 0xFF, 0x00,   // NPOS Limit
+  0xFF, 0xFF, 0xFF, 0x00,   // NADC (3 bytes), MCA Sum (0)
 
   // Test high 32bit NPOS value, should not be accepted
   0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
   0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
-  0xFF, 0xFF, 0xFF, 0xFF   // NPOS MAX
+  0xFF, 0xFF, 0xFF, 0x01   // NADC (3 bytes), MCA Sum (1)
 };
 
 /// \brief Monitor readout with invalid Ring
@@ -547,17 +547,14 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
       .Times(testing::AtLeast(1));
 
   // Serializer 3
-  //
-  // Fix this in a separate MR
-  //
-  // MockHistogramSerializer *Serializer3 =
-  //     dynamic_cast<MockHistogramSerializer *>(
-  //         HistogramSerializerPtrs.get(2, 1));
-  // expectedTime = 3 * ESSTime::ESSClockTick;
-  // expectedData = 16777215;
-  // EXPECT_CALL(*Serializer3,
-  //             addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-  //     .Times(testing::AtLeast(1));
+  MockHistogramSerializer *Serializer3 =
+      dynamic_cast<MockHistogramSerializer *>(
+          HistogramSerializerPtrs.get(2, 1));
+  expectedTime = 3 * ESSTime::ESSClockTick;
+  expectedData = 16777215;
+  EXPECT_CALL(*Serializer3,
+              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
 
   // initialize test data
   makeHeader(ESSHeaderParser->Packet, ValidIBMReadouts);
