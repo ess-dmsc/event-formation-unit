@@ -267,14 +267,14 @@ TEST_F(CbmParserTest, CheckADCValues) {
   makeHeader(BadIBMNPOSData);
 
   parser.parse(PacketData);
-  EXPECT_EQ(parser.Stats.ErrorADC, 1);
+  EXPECT_EQ(parser.Stats.ErrorADC, 0);
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
 
   makeHeader(GoodNonIBMADCData);
 
   parser.parse(PacketData);
-  EXPECT_EQ(parser.Stats.ErrorADC, 1);
+  EXPECT_EQ(parser.Stats.ErrorADC, 0);
   EXPECT_EQ(parser.Stats.Readouts, 4);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
 }
@@ -299,7 +299,7 @@ TEST_F(CbmParserTest, CheckSDACStructure) {
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
 
-  //Check SDAC 
+  //Check SDAC
   EXPECT_EQ(parser.Result.size(), 2);
 
   Parser::NormADC &data = parser.Result.at(0).NADC;

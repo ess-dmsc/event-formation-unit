@@ -43,8 +43,8 @@ CbmInstrument::CbmInstrument(
   std::vector<Topology*> topologies = Conf.TopologyMapPtr->toValuesList();
   for (const auto *item : topologies) {
     if (item->Type == CbmType::EVENT_2D) {
-      // Geometry key is created from FEN and Channel where 
-      // FEN will be most significant Byte and  channel least significant Byte. 
+      // Geometry key is created from FEN and Channel where
+      // FEN will be most significant Byte and  channel least significant Byte.
       // TopologyMapPtr is basically using the same key but in a different way.
       uint16_t key = (item->FEN << 8) +  item->Channel;
       Geometries.emplace(key, std::make_unique<ESSGeometry>(
@@ -122,7 +122,7 @@ void CbmInstrument::processMonitorReadouts() {
         uint32_t normADC{Readout.NADC.getNADC()};
         if (Readout.NADC.MCASum != 0) {
           normADC /= Readout.NADC.MCASum;
-        } 
+        }
 
         HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, normADC);
