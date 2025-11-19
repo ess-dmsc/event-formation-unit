@@ -86,8 +86,8 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::CBM) {
                    "Set the generator type ([Dist, Fixed, Linear] default : Dist)")
       ->check(genTypeValidator);
 
-  IbmGroup->add_flag("--normFactor", cbmSettings.NormFactor,
-                     "defines how many ADC measurement summed by the hardware "
+  IbmGroup->add_option("--normFactor", cbmSettings.NormFactor,
+                     "defines how many ADC measurements are summed by the hardware "
                      "(default 1)");
 
   // Load bitmaps. All bit maps are of size 32 * 32 
