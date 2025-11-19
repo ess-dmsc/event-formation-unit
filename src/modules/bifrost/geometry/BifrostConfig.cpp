@@ -38,7 +38,15 @@ void BifrostConfig::parseConfig() {
 
   try {
     setMask(LOG | CHECK);
-    assign("StrawResolution", Parms.Resolution);
+    // Accept either "Resolution" or "StrawResolution"
+    if (root().contains("StrawResolution")) {
+      assign("StrawResolution", Parms.Resolution);
+    } else if (root().contains("Resolution")) {
+      assign("Resolution", Parms.Resolution);
+    } else {
+      LOG(INIT, Sev::Error, "Missing 'Resolution' or 'StrawResolution' field");
+      throw std::runtime_error("Missing 'Resolution' or 'StrawResolution' field");
+    }
 
     setMask(LOG);
     assign("MaxAmpl", Parms.MaxAmpl);
