@@ -25,7 +25,7 @@ struct BaseSettings {
   int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
   int32_t  RxSocketBufferSize   {2000000}; // bytes
   int32_t  TxSocketBufferSize   {2000000}; // bytes
-  int32_t  SocketRxTimeoutUS    {100000}; // 100000us = 0.1s
+  int32_t  SocketRxTimeoutUS    {1}; // wait only 1us for data on socket
   /// /brief Monitoring
   uint32_t MonitorPeriod        {1000};  // start capturing every 1000 packets
   uint32_t MonitorSamples       {2};     // capture 2 consecutive packets

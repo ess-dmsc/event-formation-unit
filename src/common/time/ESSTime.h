@@ -19,6 +19,8 @@
 
 namespace esstime {
 
+using local_clock = std::chrono::high_resolution_clock;
+
 using TimePointNano = std::chrono::high_resolution_clock::time_point;
 /// \brief Duration in nanoseconds with int64_t precision
 using TimeDurationNano = std::chrono::duration<int64_t, std::nano>;
