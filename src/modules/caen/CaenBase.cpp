@@ -21,9 +21,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+using namespace esstime;
 
-const char *classname = "Caen detector with ESS readout";
+namespace Caen {
 
 CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
@@ -110,6 +110,9 @@ void CaenBase::processingThread() {
 
   unsigned int DataIndex;
   while (runThreads) {
+
+    auto idle_start = local_clock::now();
+
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
@@ -145,8 +148,11 @@ void CaenBase::processingThread() {
       Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
-      Counters.ProcessingIdle++;
-      usleep(10);
+      usleep(100); // sleep 100 microsecond
+      Counters.ProcessingIdle +=
+          std::chrono::duration_cast<std::chrono::microseconds>(
+              local_clock::now() - idle_start)
+              .count();
     }
 
     EventProducer.poll(0);
