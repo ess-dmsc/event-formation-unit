@@ -14,8 +14,11 @@
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/KafkaConfig.h>
 #include <unistd.h>
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+using namespace esstime;
 
 namespace Dream {
 
@@ -97,6 +100,9 @@ void DreamBase::processingThread() {
                       EventProducer.getStats().MsgStatusPersisted});
 
   while (runThreads) {
+
+    auto idle_start = local_clock::now();
+
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
@@ -124,8 +130,11 @@ void DreamBase::processingThread() {
       Dream.processReadouts();
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
-      Counters.ProcessingIdle++;
-      usleep(10);
+      usleep(100);
+      Counters.ProcessingIdle +=
+          std::chrono::duration_cast<std::chrono::microseconds>(
+              local_clock::now() - idle_start)
+              .count();
     }
 
     /// poll producer stats

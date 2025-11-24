@@ -7,8 +7,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/debug/TraceGroups.h>
 #include <common/detector/Detector.h>
 #include <common/system/SocketImpl.h>
+#include <common/time/ESSTime.h>
+
+using namespace esstime;
 
 // clang-format off
 const std::string Detector::METRIC_RECEIVE_PACKETS = "receive.packets";
@@ -34,13 +38,19 @@ void Detector::inputThread() {
       local.IpAddress, local.Port);
 
   while (runThreads) {
-    int readSize;
-    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
+    auto idle_start = local_clock::now();
+
+    int readSize;
+
+    // Get next buffer from ringbuffer
+    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
     RxRingbuffer.setDataLength(rxBufferIndex, 0);
     auto DataPtr = RxRingbuffer.getDataBuffer(rxBufferIndex);
+
     if ((readSize =
              dataReceiver.receive(DataPtr, RxRingbuffer.getMaxBufSize())) > 0) {
+
       RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       ITCounters.RxPackets++;
@@ -71,7 +81,10 @@ void Detector::inputThread() {
         ITCounters.FifoPushErrors++;
       }
     } else {
-      ITCounters.RxIdle++;
+      ITCounters.RxIdle +=
+          std::chrono::duration_cast<std::chrono::microseconds>(
+              local_clock::now() - idle_start)
+              .count();
     }
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
