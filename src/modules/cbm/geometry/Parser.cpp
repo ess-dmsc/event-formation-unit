@@ -94,12 +94,6 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       break;
 
     case CbmType::IBM:
-      if (Readout->NPos > 0x00FFFFFFU) { // Max value for 24-bit is 0x00FFFFFF
-        XTRACE(DATA, WAR, "Invalid ADC value %d (max is %d)", Readout->NPos,
-               0x00FFFFFFU);
-        Stats.ErrorADC++;
-        continue;
-      }
       break;
 
     default:

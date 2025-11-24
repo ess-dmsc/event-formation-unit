@@ -100,14 +100,14 @@ std::vector<uint8_t> ValidIBMReadouts {
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
   0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
-  0xFF, 0xFF, 0xFF, 0x00,   // NPOS Limit
+  0xFF, 0xFF, 0xFF, 0x00,   // NADC (3 bytes), MCA Sum (0)
 
   // Test high 32bit NPOS value, should not be accepted
   0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
   0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
-  0xFF, 0xFF, 0xFF, 0xFF   // NPOS MAX
+  0xFF, 0xFF, 0xFF, 0x01   // NADC (3 bytes), MCA Sum (1)
 };
 
 /// \brief Monitor readout with invalid Ring
@@ -273,7 +273,7 @@ protected:
 protected:
   void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory.createHeader(ESSReadout::Parser::V1);                                        
+    Packet.HeaderPtr = headerFactory.createHeader(ESSReadout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));
@@ -282,7 +282,7 @@ protected:
 
   void initializeSerializers() {
     for (auto &Topology : Configuration->TopologyMapPtr->toValuesList()) {
-      if (Topology->Type == CbmType::EVENT_0D) {                                              
+      if (Topology->Type == CbmType::EVENT_0D) {
         std::unique_ptr<EV44Serializer> SerializerPtr =
             std::make_unique<Mock0DimEV44Serializer>();
         EV44SerializerPtrs.add(Topology->FEN, Topology->Channel, SerializerPtr);
@@ -556,7 +556,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
 
-  // initialze test data
+  // initialize test data
   makeHeader(ESSHeaderParser->Packet, ValidIBMReadouts);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
   ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
@@ -568,23 +568,23 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(CbmCounters.CbmStats.Readouts, 4);
   EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
   EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
-  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 1);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
   EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
 
   // check monitor readouts are processed correctly
   cbm->processMonitorReadouts();
   EXPECT_EQ(CbmCounters.RingCfgError, 0);
-  EXPECT_EQ(CbmCounters.CbmCounts, 3);
+  EXPECT_EQ(CbmCounters.CbmCounts, 4);
   EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
   EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
   EXPECT_EQ(CbmCounters.Event2DReadoutsProcessed, 0);
-  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 3);
-  EXPECT_EQ(CbmCounters.IBMEvents, 3);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 4);
+  EXPECT_EQ(CbmCounters.IBMEvents, 4);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(CbmCounters.Event2DEvents, 0);
   EXPECT_EQ(
       Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
-      3);
+      4);
 }
 
 ///
@@ -619,7 +619,7 @@ TEST_F(CbmInstrumentTest, RingConfigurationError) {
 }
 
 /// \brief Test case for monitor readout with Type not supported
-/// After support of all instruments it will now test for an error. Unknown instruments increment 
+/// After support of all instruments it will now test for an error. Unknown instruments increment
 /// ErrorType counter
 TEST_F(CbmInstrumentTest, TypeNotSupportedError) {
   makeHeader(ESSHeaderParser->Packet, NotSupportedTypeReadout);

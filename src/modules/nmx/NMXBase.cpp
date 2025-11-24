@@ -132,6 +132,9 @@ void NmxBase::processing_thread() {
 
   unsigned int DataIndex;
   while (runThreads) {
+
+    auto idle_start = esstime::local_clock::now();
+
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
@@ -169,8 +172,11 @@ void NmxBase::processing_thread() {
     } else {
       // There is NO data in the FIFO - increment idle counter and sleep a
       // little
-      Counters.ProcessingIdle++;
-      usleep(10);
+      usleep(100);
+      Counters.ProcessingIdle +=
+          std::chrono::duration_cast<std::chrono::microseconds>(
+              esstime::local_clock::now() - idle_start)
+              .count();
     }
 
     if (ProduceTimer.timeout()) {
