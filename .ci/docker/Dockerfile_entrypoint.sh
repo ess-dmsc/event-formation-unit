@@ -39,6 +39,10 @@ if [ -n "$REGION" ]; then
     CMD="$CMD --region $REGION"
 fi
 
+if [ -n "$EXTRA_ARGS" ]; then
+    CMD="$CMD $EXTRA_ARGS"
+fi
+
 echo "Running $CMD"
 
 exec $CMD
