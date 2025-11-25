@@ -25,8 +25,6 @@ using namespace esstime;
 
 namespace Caen {
 
-const char *classname = "Caen detector with ESS readout";
-
 CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
 
@@ -142,7 +140,7 @@ void CaenBase::processingThread() {
       Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little
-      usleep(100); // sleep 1 microsecond
+      usleep(100); // sleep 100 microsecond
       Counters.ProcessingIdle +=
           std::chrono::duration_cast<std::chrono::microseconds>(
               local_clock::now() - idle_start)

@@ -29,6 +29,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
+using namespace esstime;
+
 namespace Trex {
 
 const char *classname = "TREX detector with ESS readout";
@@ -152,7 +154,7 @@ void TrexBase::processing_thread() {
   unsigned int DataIndex;
   while (runThreads) {
 
-    auto idle_start = esstime::local_clock::now();
+    auto idle_start = local_clock::now();
 
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
@@ -191,7 +193,7 @@ void TrexBase::processing_thread() {
       usleep(100);
       Counters.ProcessingIdle +=
           std::chrono::duration_cast<std::chrono::microseconds>(
-              esstime::local_clock::now() - idle_start)
+              local_clock::now() - idle_start)
               .count();
     }
 

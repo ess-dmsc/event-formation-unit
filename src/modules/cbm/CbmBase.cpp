@@ -25,6 +25,7 @@
 namespace cbm {
 
 using namespace fbserializer;
+using namespace esstime;
 
 CbmBase::CbmBase(BaseSettings const &settings)
     : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
@@ -178,7 +179,7 @@ void CbmBase::processingThread() {
   unsigned int DataIndex;
   while (runThreads) {
 
-    auto idle_start = esstime::local_clock::now();
+    auto idle_start = local_clock::now();
 
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
       auto DataLen = RxRingbuffer.getDataLength(DataIndex);
@@ -213,7 +214,7 @@ void CbmBase::processingThread() {
       usleep(100);
       Counters.ProcessingIdle +=
           std::chrono::duration_cast<std::chrono::microseconds>(
-              esstime::local_clock::now() - idle_start)
+              local_clock::now() - idle_start)
               .count();
     }
 
