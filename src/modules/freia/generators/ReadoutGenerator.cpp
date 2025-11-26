@@ -29,7 +29,7 @@ void ReadoutGenerator::generateData() {
   double YChannel{32};
 
   for (uint32_t Readout = 0; Readout < ReadoutsPerPacket; Readout++) {
-    auto ReadoutData = (VMM3Data *)DP;
+    auto ReadoutData = static_cast<VMM3Data *>(DP);
     ReadoutData->FiberId = (Readout / 10) % Settings.NFibers;
     ReadoutData->FENId = 0x00;
     ReadoutData->DataLength = sizeof(VMM3Data);

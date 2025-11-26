@@ -126,7 +126,7 @@ public:
   ///
   /// \param OTADC Raw OTADC field from VMM3 readout (typically 16-bit)
   /// \return 10-bit ADC value (range 0-1023)
-  static inline uint16_t getRawADC(uint16_t OTADC) { return OTADC & 0x3FF; }
+  static inline uint16_t getRawADC(uint16_t OTADC) { return OTADC & 0x03FF; }
 
   /// \brief Calculate HybridId from VMM index
   /// \param VMM ASIC index

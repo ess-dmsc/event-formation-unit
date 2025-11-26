@@ -109,7 +109,7 @@ public:
   /// DetectorType detector(0x48);        // FREIA detector
   /// DetectorType defaultType();         // RESERVED detector
   /// \endcode
-  DetectorType(const int type=RESERVED) {
+  DetectorType(int type=RESERVED) {
     if (type >= MIN && type <= MAX) {
       mDetectorType = static_cast<Types>(type);
     }

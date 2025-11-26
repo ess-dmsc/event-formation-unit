@@ -76,8 +76,8 @@ public:
   static inline const std::string METRIC_COUNTER_MAX_STRIP_ERRORS   = "geometry.max_strip_errors";
   // clang-format on
 
-  SUMO(Statistics &Stats, uint16_t xdim, uint16_t ydim, std::string name)
-      : ESSGeometry(xdim, ydim, 1, 1), SUMOCounters(Stats, name) {}
+  SUMO(Statistics &Stats, uint16_t XDim, uint16_t YDim, std::string Name)
+      : ESSGeometry(XDim, YDim, 1, 1), SUMOCounters(Stats, Name) {}
 
   /// \brief Get access to SUMO-specific geometry statistics counters
   inline const struct SUMOCounters &getSUMOCounters() const {

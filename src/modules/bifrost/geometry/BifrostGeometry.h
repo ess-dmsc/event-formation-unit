@@ -59,7 +59,7 @@ public:
   // Per-detector resolution: horizontal pixel stride used for ring offsets
   int StrideResolution;
 
-  const std::pair<int, float> InvalidPos{-1, -1.0};
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0};
 
   // Holds the parsed configuration
   Config &Conf;
