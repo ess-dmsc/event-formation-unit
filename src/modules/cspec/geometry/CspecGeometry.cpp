@@ -26,7 +26,7 @@ CspecGeometry::CspecGeometry(Statistics &Stats, const Config &CaenConfiguration)
       ESSGeometry(900, 180, 1, 1),
       Resolution(CaenConfiguration.CaenParms.Resolution) {}
 
-bool CspecGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
+bool CspecGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
   int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Group %u", Data.FiberId,
          Ring, Data.FENId, Data.Group);
@@ -51,11 +51,10 @@ int CspecGeometry::posAlongUnit(int AmpA, int AmpB) const {
   return ((Resolution - 1) * AmpA) / (AmpA + AmpB);
 }
 
-uint32_t CspecGeometry::calcPixelImpl(const void *DataPtr) const {
-  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-  int Ring = calcRing(Data->FiberId);
-  int xoff = xOffset(Ring, Data->Group);
-  int ylocal = yCoord(Data->AmpA, Data->AmpB);
+uint32_t CspecGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
+  int xoff = xOffset(Ring, Data.Group);
+  int ylocal = yCoord(Data.AmpA, Data.AmpB);
   uint32_t pixel = pixel2D(xoff, ylocal);
 
   XTRACE(DATA, DEB, "xoffset %d, ylocal %d, pixel %hu", xoff, ylocal, pixel);

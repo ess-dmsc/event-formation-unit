@@ -26,7 +26,7 @@ BifrostGeometry::BifrostGeometry(Statistics &Stats, Config &CaenConfiguration)
       StrideResolution(CaenConfiguration.CaenParms.Resolution),
       Conf(CaenConfiguration) {}
 
-bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
+bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
   int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
@@ -88,15 +88,14 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-uint32_t BifrostGeometry::calcPixelImpl(const void *DataPtr) const {
-  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-  int Ring = calcRing(Data->FiberId);
-  int xoff = xOffset(Ring, Data->Group);
-  int yoff = yOffset(Data->Group);
+uint32_t BifrostGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
+  int xoff = xOffset(Ring, Data.Group);
+  int yoff = yOffset(Data.Group);
 
-  int Group = Ring * TripletsPerRing + Data->Group;
+  int Group = Ring * TripletsPerRing + Data.Group;
   std::pair<int, double> UnitPos =
-      calcUnitAndPos(Group, Data->AmpA, Data->AmpB);
+      calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {
     return 0;

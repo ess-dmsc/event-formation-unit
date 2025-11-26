@@ -38,14 +38,14 @@ TEST_F(MagicGeometryTest, PixelOffsets) {
 
 TEST_F(MagicGeometryTest, GetPixel) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::BwEndCap;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 0);
+  ASSERT_EQ(geometry->calcPixel(Readout), 0);
 
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::FR;
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 1);
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) < 245761);
+  ASSERT_TRUE(geometry->calcPixel(Readout) >= 1);
+  ASSERT_TRUE(geometry->calcPixel(Readout) < 245761);
 
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::PA;
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 245761);
+  ASSERT_TRUE(geometry->calcPixel(Readout) >= 245761);
 }
 
 int main(int argc, char **argv) {

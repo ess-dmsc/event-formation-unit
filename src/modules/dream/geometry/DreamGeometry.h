@@ -40,9 +40,9 @@ public:
   bool validateReadoutData(const DataParser::CDTReadout &Data) const override;
 
   /// \brief Implementation for pixel calculation for DREAM geometry
-  /// \param Data Pointer to DreamReadout object (cast internally)
+  /// \param Data Const reference to CDTReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *Data) const override;
+  uint32_t calcPixelImpl(const DataParser::CDTReadout &Data) const override;
 
   SUMO fwec;
   SUMO bwec;

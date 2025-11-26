@@ -94,14 +94,14 @@ TEST_F(DreamInstrumentTest, ConstructorHeimdal) {
 TEST_F(DreamInstrumentTest, CalcPixel) {
   DreamInstrument Dream(Stats, Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 6, 0, 0};
-  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data), 1);
+  ASSERT_EQ(Dream.getGeometry().calcPixel(Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, CalcPixelMagic) {
   Settings.ConfigFile = ConfigFileMagic;
   DreamInstrument Dream(Stats, Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data),
+  ASSERT_EQ(Dream.getGeometry().calcPixel(Data),
             245760 + 1);
 }
 
@@ -109,7 +109,7 @@ TEST_F(DreamInstrumentTest, CalcPixelHeimdal) {
   Settings.ConfigFile = ConfigFileHeimdal;
   DreamInstrument Dream(Stats, Counters, Settings, Serializer, ESSHeaderParser);
   DataParser::CDTReadout Data{0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(Dream.getGeometry().calcPixel<DataParser::CDTReadout>(Data), 1);
+  ASSERT_EQ(Dream.getGeometry().calcPixel(Data), 1);
 }
 
 TEST_F(DreamInstrumentTest, ProcessReadoutsMaxRing) {

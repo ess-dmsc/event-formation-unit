@@ -72,7 +72,7 @@ void DreamInstrument::processReadouts() {
 
     // Calculate pixelid and apply calibration using polymorphism
     // The geometry extracts ModuleParms from the RMConfig array internally
-    uint32_t PixelId = Geom->calcPixel<DataParser::CDTReadout>(Data);
+    uint32_t PixelId = Geom->calcPixel(Data);
     XTRACE(DATA, DEB, "PixelId: %u", PixelId);
 
     if (PixelId != 0) {

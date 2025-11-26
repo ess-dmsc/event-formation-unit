@@ -30,7 +30,7 @@ public:
   Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -51,10 +51,10 @@ public:
   const std::pair<int, float> InvalidPos{-1, -1.0};
 
 protected:
-  /// \brief validate the readout data fields for this geometry
-  /// \param DataPtr pointer to readout data
-  /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) const override;
+  /// \brief Calculate pixel ID from readout data for Tbl3He geometry
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 
 private:
   const Config &Conf;

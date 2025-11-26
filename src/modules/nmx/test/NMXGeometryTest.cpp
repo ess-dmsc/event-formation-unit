@@ -283,7 +283,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
   validEvent.insert(validHitY);
   
   int64_t initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
-  uint32_t validPixelId = LargeGeom.calcPixel<Event>(validEvent);
+  uint32_t validPixelId = LargeGeom.calcPixel(validEvent);
   
   EXPECT_NE(validPixelId, 0) << "Event within coordinate range should produce valid pixel ID";
   EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors)
@@ -298,7 +298,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
   invalidEventX.insert(validHitY2);
   
   initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
-  uint32_t invalidPixelIdX = LargeGeom.calcPixel<Event>(invalidEventX);
+  uint32_t invalidPixelIdX = LargeGeom.calcPixel(invalidEventX);
   
   EXPECT_EQ(invalidPixelIdX, 0) << "Event with X coordinate > SizeX should return pixel ID 0";
   EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors + 1)
@@ -312,7 +312,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
   invalidEventY.insert(invalidHitY);
   
   initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
-  uint32_t invalidPixelIdY = LargeGeom.calcPixel<Event>(invalidEventY);
+  uint32_t invalidPixelIdY = LargeGeom.calcPixel(invalidEventY);
   
   EXPECT_EQ(invalidPixelIdY, 0) << "Event with Y coordinate > SizeY should return pixel ID 0";
   EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors + 1)
@@ -326,7 +326,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
   boundaryEvent.insert(boundaryHitY);
   
   initialPixelErrors = LargeGeom.getBaseCounters().PixelErrors;
-  uint32_t boundaryPixelId = LargeGeom.calcPixel<Event>(boundaryEvent);
+  uint32_t boundaryPixelId = LargeGeom.calcPixel(boundaryEvent);
   
   EXPECT_NE(boundaryPixelId, 0) << "Event at coordinate boundaries should produce valid pixel ID";
   EXPECT_EQ(LargeGeom.getBaseCounters().PixelErrors, initialPixelErrors)
@@ -351,7 +351,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
   validEvent.insert(validHitY);
   
   int64_t initialErrors = SmallGeom.getBaseCounters().PixelErrors;
-  uint32_t validPixel = SmallGeom.calcPixel<Event>(validEvent);
+  uint32_t validPixel = SmallGeom.calcPixel(validEvent);
   
   EXPECT_NE(validPixel, 0) << "Event within small coordinate limits should be valid";
   EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors)
@@ -365,7 +365,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
   invalidEventX.insert(validHitY2);
   
   initialErrors = SmallGeom.getBaseCounters().PixelErrors;
-  uint32_t invalidPixelX = SmallGeom.calcPixel<Event>(invalidEventX);
+  uint32_t invalidPixelX = SmallGeom.calcPixel(invalidEventX);
   
   EXPECT_EQ(invalidPixelX, 0) << "Event beyond small SizeX should return pixel ID 0";
   EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors + 1)
@@ -379,7 +379,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
   invalidEventY.insert(invalidHitY);
   
   initialErrors = SmallGeom.getBaseCounters().PixelErrors;
-  uint32_t invalidPixelY = SmallGeom.calcPixel<Event>(invalidEventY);
+  uint32_t invalidPixelY = SmallGeom.calcPixel(invalidEventY);
   
   EXPECT_EQ(invalidPixelY, 0) << "Event beyond small SizeY should return pixel ID 0";
   EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors + 1)
@@ -393,7 +393,7 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
   boundaryEvent.insert(boundaryHitY);
   
   initialErrors = SmallGeom.getBaseCounters().PixelErrors;
-  uint32_t boundaryPixel = SmallGeom.calcPixel<Event>(boundaryEvent);
+  uint32_t boundaryPixel = SmallGeom.calcPixel(boundaryEvent);
   
   EXPECT_NE(boundaryPixel, 0) << "Event at exact boundaries should be valid";
   EXPECT_EQ(SmallGeom.getBaseCounters().PixelErrors, initialErrors)

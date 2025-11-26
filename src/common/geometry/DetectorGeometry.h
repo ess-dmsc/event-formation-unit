@@ -27,7 +27,6 @@
 #include <common/debug/Trace.h>
 #include <common/memory/HashMap2D.h>
 #include <string>
-#include <typeinfo>
 
 ///
 /// \brief Common detector geometry base class for ESS Ring/FEN detectors
@@ -37,15 +36,15 @@
 /// and provides common validation methods to eliminate code duplication.
 ///
 /// Usage:
-/// 1. Inherit from DetectorGeometry
-/// 2. Implement calcPixelImpl(void* Data) for your specific data type (cast
-/// internally)
-/// 3. Call calcPixel<T>(Data) to get automatic error counting
+/// 1. Inherit from DetectorGeometry<T> where T is your readout data type
+/// 2. Implement calcPixelImpl(const T &Data) for your specific geometry
+/// 3. Call calcPixel(Data) to get automatic error counting
 /// 4. Error counters are automatically updated and registered
 ///
 
 namespace geometry {
 
+template<typename T>
 class DetectorGeometry {
   // Public static keys for StatCounterBase map entries. Use inline to
   // allow header-only definition without ODR issues (C++17 and later).
@@ -58,7 +57,6 @@ public:
   static inline const std::string METRIC_TOPOLOGY_ERRORS{"geometry.topology_errors"};
   static inline const std::string METRIC_VALIDATION_ERRORS{"geometry.validation_errors"};
   static inline const std::string METRIC_PIXEL_ERRORS{"geometry.pixel_errors"};
-  static inline const std::string METRIC_READOUT_TYPE_ERRORS{"geometry.readout_type_errors"};
   // clang-format on
 
 protected:
@@ -78,7 +76,6 @@ protected:
     int64_t TopologyError{0};     ///< Topology configuration issues
     int64_t ValidationErrors{0};  ///< General validation failures
     int64_t PixelErrors{0};       ///< Pixel calculation failures
-    int64_t TypeErrors{0};        ///< Type validation failures
 
     ///
     /// \brief Constructor with automatic counter registration
@@ -91,8 +88,7 @@ protected:
                            {METRIC_RING_MAPPING_ERRORS, RingMappingErrors},
                            {METRIC_TOPOLOGY_ERRORS, TopologyError},
                            {METRIC_VALIDATION_ERRORS, ValidationErrors},
-                           {METRIC_PIXEL_ERRORS, PixelErrors},
-                           {METRIC_READOUT_TYPE_ERRORS, TypeErrors}}) {}
+                           {METRIC_PIXEL_ERRORS, PixelErrors}}) {}
   };
 
   ///
@@ -113,20 +109,12 @@ protected:
 
   /// \brief Pure virtual implementation method for pixel calculation
   /// Derived classes must implement this method for their specific geometry
-  /// \param Data Pointer to readout data object (const, cast to appropriate
-  /// type internally) \return Calculated pixel ID, or 0 if calculation failed
-  virtual inline uint32_t calcPixelImpl(const void *Data) const = 0;
-
-  /// \brief Pure virtual method for runtime type validation
-  /// Derived classes must implement this method to validate readout data types
-  /// specific to their geometry type (e.g., CAEN, VMM3, etc.)
-  /// \param type_info Type information from typeid()
-  /// \return true if type is valid for this geometry, false otherwise
-  virtual bool inline validateDataType(
-      const std::type_info &type_info) const = 0;
+  /// \param Data Const reference to readout data object of type T
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  virtual uint32_t calcPixelImpl(const T &Data) const = 0;
 
   /// \brief Validate ring number against configuration
-  bool inline validateRing(int Ring) const {
+  inline bool validateRing(int Ring) const {
     if (Ring < 0 || Ring > MaxRing) {
       XTRACE(DATA, WAR, "RING %d is invalid (out of range)", Ring);
       BaseCounters.RingErrors++;
@@ -136,7 +124,7 @@ protected:
   }
 
   /// \brief Validate FEN number against configuration
-  bool inline validateFEN(int FEN) const {
+  inline bool validateFEN(int FEN) const {
     if (FEN < 0 || FEN > MaxFEN) {
       XTRACE(DATA, WAR, "FEN %d is invalid (out of range)", FEN);
       BaseCounters.FENErrors++;
@@ -145,8 +133,8 @@ protected:
     return true;
   }
 
-  template <typename T>
-  bool inline validateTopology(HashMap2D<T> &map, int Col, int Row) const {
+  template <typename U>
+  inline bool validateTopology(HashMap2D<U> &map, int Col, int Row) const {
     if (not map.isValue(Col, Row)) {
       XTRACE(DATA, WAR, "Col %d, Row %d is incompatible with config", Col, Row);
       BaseCounters.TopologyError++;
@@ -159,7 +147,7 @@ protected:
   /// \param validators List of functions returning bool
   /// \return true if all validators return true, false otherwise
   template <typename... Validators>
-  bool validateAll(Validators &&...validators) const {
+  inline bool validateAll(Validators &&...validators) const {
     bool result = (validators() && ...);
     if (!result) {
       BaseCounters.ValidationErrors++;
@@ -170,7 +158,7 @@ protected:
 public:
   /// \brief Get access to BaseGeometryCounters object
   /// \return Const reference to BaseGeometryCounters instance
-  const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
+  inline const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
 
   /// \brief Calculate Ring from FiberId using physical->logical mapping
   /// Common method used across all VMM3-based detectors.
@@ -179,21 +167,13 @@ public:
   /// \return Logical ring number
   static inline uint8_t calcRing(uint8_t FiberId) { return FiberId / 2; }
 
-  /// \brief Template wrapper for pixel calculation with runtime type validation
-  /// \tparam T The readout data type
-  /// \param Readout Data object to calculate pixel for (const reference)
+  /// \brief Pixel calculation with automatic error counting
+  /// Uses compile-time type checking via template parameter T
+  /// \param Data Data object of type T to calculate pixel for
   /// \return Calculated pixel ID, with automatic error counting for failures
-  template <typename T> inline uint32_t calcPixel(const T &Data) const {
-    // Runtime type validation
-    if (!validateDataType(typeid(T))) {
-      XTRACE(DATA, ERR, "Invalid readout type for geometry type %s",
-             typeid(T).name());
-      BaseCounters.TypeErrors++;
-      return 0;
-    }
-
+  inline uint32_t calcPixel(const T &Data) const {
     // Use type erasure to call the derived class's calcPixelImpl method
-    uint32_t pixel = calcPixelImpl(&Data);
+    uint32_t pixel = calcPixelImpl(Data);
     if (pixel == 0) {
       BaseCounters.PixelErrors++;
       XTRACE(DATA, DEB, "Pixel calculation failed, counted as pixel error");

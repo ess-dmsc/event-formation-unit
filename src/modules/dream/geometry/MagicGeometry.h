@@ -34,8 +34,10 @@ public:
   /// for that module (see ICD for full description)
   int getPixelOffset(Config::ModuleType Type) const;
 
-  /// \brief Implementation of pixel calculation through type-safe template
-  uint32_t calcPixelImpl(const void *Data) const override;
+  /// \brief Implementation of pixel calculation using template specialization
+  /// \param Data Const reference to CDTReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CDTReadout &Data) const override;
 
   /// \brief Validate readout data for MAGIC geometry
   bool validateReadoutData(const DataParser::CDTReadout &Data) const override;

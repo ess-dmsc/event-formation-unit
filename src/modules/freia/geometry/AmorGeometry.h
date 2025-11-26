@@ -38,12 +38,12 @@ public:
                      ESSGEOMTERY_NP) {}
 
   /// \brief AMOR uses X on even VMM (opposite of base policy)
-  bool isXCoord(uint8_t VMM) override { return !vmm3::VMM3Geometry::isXCoord(VMM); }
+  bool isXCoord(uint8_t VMM) const override { return !vmm3::VMM3Geometry::isXCoord(VMM); }
 
   /// \brief Validate VMM3 readout data for AMOR geometry
   /// \param Data VMM3 readout data to validate
   /// \return true if readout is valid, false otherwise
-  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) override {
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const override {
     uint8_t Ring = calcRing(Data.FiberId);
     uint8_t HybridId = calcHybridId(Data.VMM);
 

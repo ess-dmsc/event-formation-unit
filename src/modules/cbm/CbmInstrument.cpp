@@ -84,7 +84,7 @@ void CbmInstrument::processMonitorReadouts() {
            Readout.FiberId, Readout.FENId, Readout.Pos, Readout.Type,
            Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
-    int Ring = DetectorGeometry::calcRing(Readout.FiberId);
+    int Ring = DetectorGeometry<cbm::Parser::CbmReadout>::calcRing(Readout.FiberId);
     if (Ring != Conf.Parms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
              Conf.Parms.MonitorRing);

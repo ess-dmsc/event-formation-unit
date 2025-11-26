@@ -66,7 +66,7 @@ std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
+bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
   auto Ring = calcRing(Data.FiberId);
 
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
@@ -86,21 +86,20 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
 
 /// \brief calculate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
-uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) const {
-  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-  int Ring = calcRing(Data->FiberId);
-  int Tube = Data->Group;
+uint32_t Tbl3HeGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
+  int Tube = Data.Group;
 
-  int Bank = Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data->FENId)->Bank;
+  int Bank = Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
 
-  XTRACE(DATA, DEB, "FiberId %d, Ring %d, Group %d, Bank %d", Data->FiberId,
+  XTRACE(DATA, DEB, "FiberId %d, Ring %d, Group %d, Bank %d", Data.FiberId,
          Ring, Tube, Bank);
 
   // Get global Group id - will be used for calibration
   int GlobalGroup = Bank * 4 + Tube;
 
   std::pair<int, double> UnitPos =
-      calcUnitAndPos(GlobalGroup, Data->AmpA, Data->AmpB);
+      calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {
     return 0;
@@ -127,7 +126,7 @@ uint32_t Tbl3HeGeometry::calcPixelImpl(const void *DataPtr) const {
 size_t Tbl3HeGeometry::numSerializers() const { return 2; }
 
 size_t Tbl3HeGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
-  int Ring = DetectorGeometry::calcRing(Data.FiberId);
+  int Ring = DetectorGeometry<DataParser::CaenReadout>::calcRing(Data.FiberId);
   return Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
 }
 

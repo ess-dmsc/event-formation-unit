@@ -101,7 +101,7 @@ void NMXInstrument::processReadouts() {
     }
 
     // Convert from fiberid to ringid
-    int Ring = DetectorGeometry::calcRing(readout.FiberId);
+    int Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
     uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
     // CACHE-OPTIMIZED: Single 3D array lookup instead of 4 separate lookups

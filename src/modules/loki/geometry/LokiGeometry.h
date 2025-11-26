@@ -53,7 +53,7 @@ public:
 
   void setCalibration(const CDCalibration &Calib) { CaenCDCalibration = Calib; }
 
-  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   // Holds the parsed configuration
   Config &Conf;
@@ -80,9 +80,9 @@ public:
 
 protected:
   /// \brief Implementation for pixel calculation for Loki geometry
-  /// \param Data Pointer to CaenReadout object (cast internally)
+  /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) const override;
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
 
 } // namespace Caen

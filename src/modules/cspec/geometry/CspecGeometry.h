@@ -25,7 +25,7 @@ class CspecGeometry : public Geometry, ESSGeometry {
 public:
   explicit CspecGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
-  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the global x-offset for the given identifiers
   int xOffset(int Ring, int Group) const;
@@ -54,10 +54,10 @@ public:
   int Resolution;
 
 protected:
-  /// \brief validate the readout data fields for this geometry
-  /// \param DataPtr pointer to readout data
-  /// \return pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) const override;
+  /// \brief Calculate pixel ID from readout data for CSPEC geometry
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
 } // namespace Caen
 

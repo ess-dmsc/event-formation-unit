@@ -70,19 +70,7 @@ public:
   /// \brief Validate VMM3 readout data for NMX geometry
   /// \param Data VMM3 readout data to validate
   /// \return true if readout is valid, false otherwise
-  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) override;
-
-  /// \brief Runtime type validation for pixel calculation input
-  bool validateDataType(const std::type_info &type_info) const override {
-    XTRACE(DATA, DEB, "Validating data type: %s", type_info.name());
-    if (type_info == typeid(Event)) {
-      return true;
-    } else {
-      XTRACE(DATA, WAR, "Invalid data type for NMX geometry: %s",
-             type_info.name());
-      return false;
-    }
-  }
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const override;
 
   /// \brief Get access to the NMX-specific geometry counters for monitoring
   const NmxGeometryCounters &getNmxCounters() const { return NmxCounters; }
@@ -105,7 +93,7 @@ private:
   /// \param AsicId ASIC identifier (expected 0-1)
   /// \param Channel Channel within the ASIC (expected 0-63)
   /// \return true if both are valid, false otherwise
-  inline bool validateAsicIdAndChannel(uint8_t AsicId, uint8_t Channel) {
+  inline bool validateAsicIdAndChannel(uint8_t AsicId, uint8_t Channel) const {
     // NMX uses strip-based channels: 0-63 per ASIC (2 ASICs total)
     bool isValid = true;
 
@@ -137,14 +125,12 @@ private:
   // Protected member variables - accessible to derived classes
   mutable NmxGeometryCounters NmxCounters; // auto-registered NMX-specific stats
 
-  /// \brief Pixel calculation used by DetectorGeometry
-  /// \param Data Pointer to Event object
+  /// \brief Pixel calculation used by DetectorGeometry template
+  /// \param Data Const reference to Event object
   /// \return Pixel id (0 if invalid per ESSGeometry)
-  inline uint32_t calcPixelImpl(const void *Data) const override {
-    const auto &Event = *static_cast<const class Event *>(Data);
-
-    auto x = static_cast<uint16_t>(std::round(Event.ClusterA.coordUtpc(false)));
-    auto y = static_cast<uint16_t>(std::round(Event.ClusterB.coordUtpc(false)));
+  inline uint32_t calcPixelImpl(const Event &Data) const override {
+    auto x = static_cast<uint16_t>(std::round(Data.ClusterA.coordUtpc(false)));
+    auto y = static_cast<uint16_t>(std::round(Data.ClusterB.coordUtpc(false)));
 
     auto pixelId = ESSGeometry::pixel2D(x, y);
 

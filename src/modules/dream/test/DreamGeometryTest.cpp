@@ -41,21 +41,21 @@ TEST_F(DreamGeometryTest, PixelOffsetsError) {
 TEST_F(DreamGeometryTest, GetPixel) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::BwEndCap;
   Readout.UnitId = 6;
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 71681);
+  ASSERT_TRUE(geometry->calcPixel(Readout) >= 71681);
 
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::DreamMantle;
   DreamConfig.RMConfig[0][0].P2.Cassette = 0;
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 229377);
+  ASSERT_TRUE(geometry->calcPixel(Readout) >= 229377);
 
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::HR;
   DreamConfig.RMConfig[0][0].P2.Rotate = 0;
-  ASSERT_TRUE(geometry->calcPixel<DataParser::CDTReadout>(Readout) >= 1122305);
+  ASSERT_TRUE(geometry->calcPixel(Readout) >= 1122305);
 }
 
 TEST_F(DreamGeometryTest, GetPixelError) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::PA;
   Readout.UnitId = 6;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 0);
+  ASSERT_EQ(geometry->calcPixel(Readout), 0);
 }
 
 int main(int argc, char **argv) {

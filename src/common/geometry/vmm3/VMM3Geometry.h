@@ -30,7 +30,7 @@ namespace vmm3 {
 
 /// \brief Abstract base for VMM3-based geometries with ESSGeometry
 /// inheritance. Concrete geometries inherit from this class.
-class VMM3Geometry : public geometry::DetectorGeometry, public ESSGeometry {
+class VMM3Geometry : public geometry::DetectorGeometry<Event>, public ESSGeometry {
 public:
   /// \brief Stats counters for geometry-level validation.
   struct VmmGeometryCounters : public StatCounterBase {
@@ -82,14 +82,14 @@ public:
   /// Default policy: X on odd VMM, Y on even VMM. Instruments can override.
   /// \param VMM ASIC index (0..N) within the hybrid
   /// \return true if VMM contributes to X
-  virtual inline bool isXCoord(uint8_t VMM) { return (VMM & 0x1) != 0; }
+  virtual inline bool isXCoord(uint8_t VMM) const { return (VMM & 0x1) != 0; }
 
   /// \brief Check if the given VMM belongs to the Y coordinate plane.
   ///
   /// Uses the complement of isXCoord() and thus follows overridden policies.
   /// \param VMM ASIC index (0..N) within the hybrid
   /// \return true if VMM contributes to Y
-  virtual inline bool isYCoord(uint8_t VMM) { return not isXCoord(VMM); }
+  virtual inline bool isYCoord(uint8_t VMM) const { return not isXCoord(VMM); }
 
   /// \brief Validate a raw VMM3 readout according to instrument geometry.
   ///
@@ -97,25 +97,8 @@ public:
   /// instrument-specific rules (ring/FEN/hybrid ranges etc.).
   /// \param Data VMM3 readout to validate
   /// \return true if valid, false otherwise (and increments counters)
-  virtual inline bool
-  validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) = 0;
-
-  /// \brief Runtime type validation for pixel calculation input.
-  ///
-  /// Current implementation accepts Event for calcPixelImpl path.
-  /// \param type_info std::type_info of the provided data pointer
-  /// \return true if type is the supported Event type, false otherwise
-  bool inline validateDataType(const std::type_info &type_info) const override {
-    // For VMM3 geometries, we can accept either VMM3Parser::VMM3Data or Event
-    XTRACE(DATA, DEB, "Validating data type: %s", type_info.name());
-    if (type_info == typeid(Event)) {
-      return true;
-    } else {
-      XTRACE(DATA, WAR, "Invalid data type for VMM3 geometry: %s",
-             type_info.name());
-      return false;
-    }
-  }
+  virtual bool
+  validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const = 0;
 
   /// \brief Get access to the geometry counters for monitoring
   /// \return Const reference to VmmGeometryCounters instance
@@ -155,7 +138,7 @@ protected:
   /// \param VMM ASIC index (determines plane)
   /// \param Channel Channel within the ASIC
   /// \return true if channel is valid for this plane's coordinate type
-  bool validateChannel(uint8_t VMM, uint8_t Channel);
+  bool validateChannel(uint8_t VMM, uint8_t Channel) const;
 
   /// \brief Protected constructor - only derived classes can create instances
   VMM3Geometry(Statistics &Stats, VMM3Config &Cfg, int MaxRing, int MaxFEN,
@@ -166,11 +149,11 @@ protected:
   // Methods that derived classes may need to override or call
   /// \brief Determine if this instrument uses wires for X plane (default:
   /// false, strips)
-  virtual bool inline usesWiresForX() const { return false; }
+  virtual inline bool usesWiresForX() const { return false; }
 
   /// \brief Determine if this instrument uses wires for Y plane (default: true,
   /// wires)
-  virtual bool inline usesWiresForY() const { return true; }
+  virtual inline bool usesWiresForY() const { return true; }
 
   /// \brief Unified calculation for strip-based coordinates
   /// \param Offset Instrument offset to add (for strips, typically YOffset but
@@ -218,7 +201,7 @@ protected:
   /// \param FENId Front-end index within the ring
   /// \param HybridId Hybrid index (VMM pair)
   /// \return true if the hybrid is initialised in config, false otherwise
-  inline bool validateHybrid(uint8_t Ring, uint8_t FENId, uint8_t HybridId) {
+  inline bool validateHybrid(uint8_t Ring, uint8_t FENId, uint8_t HybridId) const {
     auto &Hybrid = Conf.getHybrid(Ring, FENId, HybridId);
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
@@ -238,7 +221,7 @@ private:
   // Private methods - only used internally by this class
   /// \brief Increment the appropriate error counter based on coordinate plane
   /// \param isX true for X coordinate plane, false for Y coordinate plane
-  inline void incrementErrorCounter(bool isX) {
+  inline void incrementErrorCounter(bool isX) const {
     if (isX) {
       Counters.InvalidXCoord++;
     } else {
@@ -246,15 +229,14 @@ private:
     }
   }
 
-  /// \brief Pixel calculation used by DetectorGeometry. For VMM3-based
-  /// implementations, this function expects a pointer to Event. Uses cluster
-  /// center-of-mass for both X and Y, then maps via pixel2D(). \param Data
-  /// Pointer to Event \return Pixel id (0 if invalid per ESSGeometry)
-  uint32_t calcPixelImpl(const void *Data) const override {
-    const auto &Event = *static_cast<const class Event *>(Data);
-
-    auto x = static_cast<uint16_t>(std::round(Event.ClusterA.coordCenter()));
-    auto y = static_cast<uint16_t>(std::round(Event.ClusterB.coordCenter()));
+  /// \brief Pixel calculation used by DetectorGeometry template.
+  /// For VMM3-based implementations, uses Event's cluster center-of-mass
+  /// for both X and Y coordinates, then maps via pixel2D().
+  /// \param Data Const reference to Event object
+  /// \return Pixel id (0 if invalid per ESSGeometry)
+  uint32_t calcPixelImpl(const Event &Data) const override {
+    auto x = static_cast<uint16_t>(std::round(Data.ClusterA.coordCenter()));
+    auto y = static_cast<uint16_t>(std::round(Data.ClusterB.coordCenter()));
 
     return ESSGeometry::pixel2D(x, y);
   }
