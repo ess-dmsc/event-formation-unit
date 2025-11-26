@@ -159,7 +159,7 @@ TEST_F(Tbl3HeGeometryTest, ValidateReadoutAmplitudeZero) {
 }
 
 TEST_F(Tbl3HeGeometryTest, ValidateReadoutAmplitudeLow) {
-  CaenConfiguration.Tbl3HeConf.Params.MinValidAmplitude = 10;
+  CaenConfiguration.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude = 10;
   //                               R  F              G     A  B  C  D
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0};
   ASSERT_EQ(geom->validateReadoutData(readout), false);
@@ -185,7 +185,7 @@ TEST_F(Tbl3HeGeometryTest, ErrorMaxRing) {
 }
 
 TEST_F(Tbl3HeGeometryTest, OutsideUnitInterval) {
-  CaenConfiguration.Tbl3HeConf.Params.MinValidAmplitude = -100;
+  CaenConfiguration.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude = -100;
   DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 10, -1, 0, 0};
   ASSERT_EQ(geom->calcPixel(readout), 0);
 }

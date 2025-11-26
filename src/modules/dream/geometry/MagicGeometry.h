@@ -26,8 +26,8 @@ public:
   /// \param Stats Reference to Statistics object for counter registration
   /// \param Config Reference to the DREAM configuration object
   MagicGeometry(Statistics &Stats, const Config &Config)
-      : Geometry(Stats, Config), padetector(Stats, 256, 512),
-        frdetector(Stats, 128) {}
+      : Geometry(Stats, Config), padetector(Stats, MaxStrips, MaxWires),
+        frdetector(Stats, MaxCassettes) {}
 
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
@@ -43,6 +43,10 @@ public:
   bool validateReadoutData(const DataParser::CDTReadout &Data) const override;
 
 private:
+  static constexpr int MaxStrips = 256;
+  static constexpr int MaxWires = 512;
+  static constexpr int MaxCassettes = 128;
+
   PADetector padetector;
   DreamMantle frdetector;
 };

@@ -32,7 +32,7 @@ public:
   /// \brief parse the loaded json object
   virtual void parseConfig();
 
-  struct CaenParameters {
+  struct {
     std::string InstrumentName;
     uint32_t Resolution{1};                  // user for cspec only
     uint32_t MaxTOFNS{20 * 71'428'571};      // < Twenty 14Hz pulses

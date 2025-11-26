@@ -27,7 +27,7 @@ namespace Nmx {
 
 class Config : public vmm3::VMM3Config {
 public:
-  Config() { FileParameters.InstrumentGeometry = "NMX"; };
+  Config() { FileParms.InstrumentGeometry = "NMX"; };
 
   // Load and apply the json config
   Config(const std::string &Instrument, const std::string &ConfigFile)
@@ -37,6 +37,7 @@ public:
   void applyConfig() override;
 
 public:
+
   // Parameters obtained from JSON config file
   struct {
     uint16_t SizeX{1280};
@@ -55,7 +56,7 @@ public:
     uint16_t MaxTimeSpan{500};
     uint16_t MaxMatchingTimeGap{500};
     uint16_t MaxClusteringTimeGap{500};
-  } NMXFileParameters;
+  } NMXFileParms;
 
   // Derived parameters
   // NMX specific Hybrid fields not included in common Hybrid class

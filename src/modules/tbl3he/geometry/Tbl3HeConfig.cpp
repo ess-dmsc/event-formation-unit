@@ -54,19 +54,19 @@ void Tbl3HeConfig::parseConfig() {
 
   try {
     setMask(LOG);
-    assign("NumOfFENs", Params.NumOfFENs);
-    assign("MinValidAmplitude", Params.MinValidAmplitude);
+    assign("NumOfFENs", Tbl3HeParms.NumOfFENs);
+    assign("MinValidAmplitude", Tbl3HeParms.MinValidAmplitude);
 
     // Run through the Topology section
     auto Configs = root()["Topology"];
 
-    if (Params.NumOfFENs != (int)Configs.size()) {
+    if (Tbl3HeParms.NumOfFENs != (int)Configs.size()) {
       errorExit(fmt::format(
           "RING/FEN topology mismatch, NumOfFEN: {} != Config size: {}",
-          Params.NumOfFENs, Configs.size()));
+          Tbl3HeParms.NumOfFENs, Configs.size()));
     }
 
-    TopologyMapPtr.reset(new HashMap2D<Topology>(Params.NumOfFENs));
+    TopologyMapPtr.reset(new HashMap2D<Topology>(Tbl3HeParms.NumOfFENs));
 
     for (auto &elt : Configs) {
       Json::checkKeys("Mandatory Topology keys", elt, {"Ring", "FEN", "Bank"});
@@ -75,7 +75,7 @@ void Tbl3HeConfig::parseConfig() {
       int FEN = elt["FEN"].get<int>();
       int Bank = elt["Bank"].get<int>();
 
-      if ((Ring < Params.MinRing) or (Ring > Params.MaxRing)) {
+      if ((Ring < Tbl3HeParms.MinRing) or (Ring > Tbl3HeParms.MaxRing)) {
         errorExit(fmt::format("Invalid ring: %d", Ring));
       }
 

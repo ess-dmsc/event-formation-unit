@@ -5,9 +5,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/testutils/TestBase.h>
-#include <memory>
 #include <dream/geometry/Cuboid.h>
 #include <dream/readout/DataParser.h>
+#include <memory>
 
 using namespace Dream;
 
@@ -18,20 +18,19 @@ protected:
   Config::ModuleParms Parms{false, Config::ModuleType::HR, {0}, {0}};
   std::unique_ptr<Cuboid> CuboidGeometry;
 
-  void SetUp() override {
-    CuboidGeometry = std::make_unique<Cuboid>(Stats);
-  }
+  void SetUp() override { CuboidGeometry = std::make_unique<Cuboid>(Stats); }
 };
 
 TEST_F(CuboidGeometryTest, IndexSizes) {
   ASSERT_EQ(CuboidGeometry->OffsetsHR.size(), CuboidGeometry->RotateHR.size());
-  ASSERT_EQ(CuboidGeometry->OffsetsSANS.size(), CuboidGeometry->RotateSANS.size());
+  ASSERT_EQ(CuboidGeometry->OffsetsSANS.size(),
+            CuboidGeometry->RotateSANS.size());
 }
 
 TEST_F(CuboidGeometryTest, Rotate0) {
   int x = 1;
   int y = 12;
-  CuboidGeometry->rotateXY(x, y, 0);
+  CuboidGeometry->rotateXY(0, x, y);
   ASSERT_EQ(x, 1);
   ASSERT_EQ(y, 12);
 }
@@ -39,12 +38,12 @@ TEST_F(CuboidGeometryTest, Rotate0) {
 TEST_F(CuboidGeometryTest, Rotate1) {
   int x = 1;
   int y = 12;
-  CuboidGeometry->rotateXY(x, y, 1);
+  CuboidGeometry->rotateXY(1, x, y);
   ASSERT_NE(x, 1);
   ASSERT_NE(y, 12);
-  CuboidGeometry->rotateXY(x, y, 1);
-  CuboidGeometry->rotateXY(x, y, 1);
-  CuboidGeometry->rotateXY(x, y, 1);
+  CuboidGeometry->rotateXY(1, x, y);
+  CuboidGeometry->rotateXY(1, x, y);
+  CuboidGeometry->rotateXY(1, x, y);
   ASSERT_EQ(x, 1);
   ASSERT_EQ(y, 12);
 }
@@ -52,10 +51,10 @@ TEST_F(CuboidGeometryTest, Rotate1) {
 TEST_F(CuboidGeometryTest, Rotate2) {
   int x = 1;
   int y = 12;
-  CuboidGeometry->rotateXY(x, y, 2);
+  CuboidGeometry->rotateXY(2, x, y);
   ASSERT_NE(x, 1);
   ASSERT_NE(y, 12);
-  CuboidGeometry->rotateXY(x, y, 2);
+  CuboidGeometry->rotateXY(2, x, y);
   ASSERT_EQ(x, 1);
   ASSERT_EQ(y, 12);
 }
@@ -63,10 +62,10 @@ TEST_F(CuboidGeometryTest, Rotate2) {
 TEST_F(CuboidGeometryTest, Rotate3) {
   int x = 1;
   int y = 12;
-  CuboidGeometry->rotateXY(x, y, 3);
+  CuboidGeometry->rotateXY(3, x, y);
   ASSERT_NE(x, 1);
   ASSERT_NE(y, 12);
-  CuboidGeometry->rotateXY(x, y, 1);
+  CuboidGeometry->rotateXY(1, x, y);
   ASSERT_EQ(x, 1);
   ASSERT_EQ(y, 12);
 }

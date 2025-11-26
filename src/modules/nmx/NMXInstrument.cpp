@@ -39,7 +39,7 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
   loadConfigAndCalib();
 
   // We can now use the settings in Conf
-  if (Conf.FileParameters.InstrumentGeometry == "NMX") {
+  if (Conf.FileParms.InstrumentGeometry == "NMX") {
     // Create geometry instance with proper inheritance
     NMXGeom =
         std::make_unique<NMXGeometry>(Stats, Conf, Conf.MaxRing, Conf.MaxFEN);
@@ -47,7 +47,7 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
 }
 
 void NMXInstrument::loadConfigAndCalib() {
@@ -57,19 +57,19 @@ void NMXInstrument::loadConfigAndCalib() {
   Conf.loadAndApplyConfig();
   checkConfigAndGeometry();
 
-  builders = std::vector<EventBuilder2D>(Conf.NMXFileParameters.NumPanels);
+  builders = std::vector<EventBuilder2D>(Conf.NMXFileParms.NumPanels);
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(
-        Conf.NMXFileParameters.MaxMatchingTimeGap);
+        Conf.NMXFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
-        Conf.NMXFileParameters.MaxClusteringTimeGap);
+        Conf.NMXFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
-        Conf.NMXFileParameters.MaxClusteringTimeGap);
-    if (Conf.NMXFileParameters.SplitMultiEvents) {
+        Conf.NMXFileParms.MaxClusteringTimeGap);
+    if (Conf.NMXFileParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
-          Conf.NMXFileParameters.SplitMultiEvents,
-          Conf.NMXFileParameters.SplitMultiEventsCoefficientLow,
-          Conf.NMXFileParameters.SplitMultiEventsCoefficientHigh);
+          Conf.NMXFileParms.SplitMultiEvents,
+          Conf.NMXFileParms.SplitMultiEventsCoefficientLow,
+          Conf.NMXFileParms.SplitMultiEventsCoefficientHigh);
     }
   }
 
@@ -207,42 +207,42 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxSpanX < Event.ClusterA.coordSpan()) {
+    if (Conf.NMXFileParms.MaxSpanX < Event.ClusterA.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too far in X direction, %u",
              Event.ClusterA.coordSpan());
       counters.ClustersTooLargeSpanX++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MinSpanX > Event.ClusterA.coordSpan()) {
+    if (Conf.NMXFileParms.MinSpanX > Event.ClusterA.coordSpan()) {
       XTRACE(EVENT, DEB, "Event doesn't span far enough in X direction, %u",
              Event.ClusterA.coordSpan());
       counters.ClustersTooSmallSpanX++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxTimeSpan < Event.ClusterA.timeSpan()) {
+    if (Conf.NMXFileParms.MaxTimeSpan < Event.ClusterA.timeSpan()) {
       XTRACE(EVENT, DEB, "Event spans too long a time in X cluster, %u",
              Event.ClusterA.timeSpan());
       counters.ClustersTooLargeTimeSpan++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxSpanY < Event.ClusterB.coordSpan()) {
+    if (Conf.NMXFileParms.MaxSpanY < Event.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too far in Y direction, %u",
              Event.ClusterB.coordSpan());
       counters.ClustersTooLargeSpanY++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MinSpanY > Event.ClusterB.coordSpan()) {
+    if (Conf.NMXFileParms.MinSpanY > Event.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event doesn't span far enough in Y direction, %u",
              Event.ClusterB.coordSpan());
       counters.ClustersTooSmallSpanY++;
       continue;
     }
 
-    if (Conf.NMXFileParameters.MaxTimeSpan < Event.ClusterB.timeSpan()) {
+    if (Conf.NMXFileParms.MaxTimeSpan < Event.ClusterB.timeSpan()) {
       XTRACE(EVENT, DEB, "Event spans too long a time in Y cluster, %u",
              Event.ClusterB.timeSpan());
       counters.ClustersTooLargeTimeSpan++;
@@ -266,8 +266,8 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
-    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }

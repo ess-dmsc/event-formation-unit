@@ -3,7 +3,7 @@
 
 namespace Dream {
 
-void Cuboid::rotateXY(int &LocalX, int &LocalY, int Rotate) const {
+void Cuboid::rotateXY(int Rotate, int &LocalX, int &LocalY) const {
   int SavedY = LocalY;
 
   switch (Rotate) {
@@ -67,7 +67,7 @@ uint32_t Cuboid::calcPixelId(const Config::ModuleParms &Parms,
   XTRACE(DATA, DEB, "local x %u, local y %u, rotate %u", LocalX, LocalY,
          Rotation);
 
-  rotateXY(LocalX, LocalY, Rotation);
+  rotateXY(Rotation, LocalX, LocalY);
 
   constexpr int YDim{7 * 16};
   int IntX = Offset.X + LocalX;

@@ -27,15 +27,15 @@ void VMM3Config::loadAndApplyConfig() {
 void VMM3Config::applyVMM3Config() {
   setMask(LOG | CHECK);
 
-  assign("Detector", FileParameters.InstrumentName);
-  if (FileParameters.InstrumentName != ExpectedName) {
+  assign("Detector", FileParms.InstrumentName);
+  if (FileParms.InstrumentName != ExpectedName) {
     LOG(INIT, Sev::Error, "InstrumentName mismatch");
     throw std::runtime_error("Inconsistent Json file - invalid name");
   }
 
   setMask(LOG);
-  assign("InstrumentGeometry", FileParameters.InstrumentGeometry);
-  assign("MaxPulseTimeNS", FileParameters.MaxPulseTimeNS);
+  assign("InstrumentGeometry", FileParms.InstrumentGeometry);
+  assign("MaxPulseTimeNS", FileParms.MaxPulseTimeNS);
 
   try {
     const auto PanelConfig = root()["Config"];
@@ -81,7 +81,7 @@ void VMM3Config::applyVMM3Config() {
       Hybrid.Initialised = true;
       Hybrid.HybridId = IDString;
 
-      const std::string Name = FileParameters.InstrumentName;
+      const std::string Name = FileParms.InstrumentName;
       auto Message = fmt::format("JSON config - Detector {}, Hybrid {}, Ring {}, FEN {}, LocalHybrid "
       "{}", Name, NumHybrids, Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, Message.c_str());

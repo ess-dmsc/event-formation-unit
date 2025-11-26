@@ -24,7 +24,7 @@ public:
   /// \param Stats Reference to Statistics object for counter registration
   /// \param Config Reference to the DREAM configuration object
   HeimdalGeometry(Statistics &Stats, const Config &Config)
-      : Geometry(Stats, Config), mantle(Stats) {}
+      : Geometry(Stats, Config) {}
 
   /// \brief return the global pixel id offset for each of the Heimdal detector
   /// components. This offset must be added to the local pixel id calculated

@@ -23,6 +23,13 @@
 namespace Caen {
 class CspecGeometry : public Geometry, ESSGeometry {
 public:
+  // Detector geometry constants
+  static constexpr int ESSGEOMETRY_NX{900}; ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{180}; ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};   ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};   ///< P dimension (pixels)
+  static constexpr int GROUPS_PER_RING{24}; ///< Number of groups per ring
+
   explicit CspecGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
   bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
@@ -59,7 +66,5 @@ protected:
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
-} // namespace Caen
 
-// Per-detector resolution: number of pixels across one unit
-// Note: CspecGeometry will use this value from its implementation file.
+} // namespace Caen

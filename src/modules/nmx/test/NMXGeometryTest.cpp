@@ -268,8 +268,8 @@ TEST_F(NMXGeometryTest, HybridNotInitializedValidation) {
 TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
   // Create a custom config with larger coordinate ranges for testing
   Config LargeConfig;
-  LargeConfig.NMXFileParameters.SizeX = 2000;  
-  LargeConfig.NMXFileParameters.SizeY = 1500;
+  LargeConfig.NMXFileParms.SizeX = 2000;  
+  LargeConfig.NMXFileParms.SizeY = 1500;
   
   // Create geometry with larger coordinate space
   Statistics LargeStats;
@@ -337,8 +337,8 @@ TEST_F(NMXGeometryTest, AIGEN_CalcPixelCoordinateRangeValidation) {
 TEST_F(NMXGeometryTest, AIGEN_CalcPixelSmallCoordinateRanges) {
   // Create a config with small coordinate ranges
   Config SmallConfig;
-  SmallConfig.NMXFileParameters.SizeX = 400;   // Small X range
-  SmallConfig.NMXFileParameters.SizeY = 200;   // Small Y range
+  SmallConfig.NMXFileParms.SizeX = 400;   // Small X range
+  SmallConfig.NMXFileParms.SizeY = 200;   // Small Y range
   
   Statistics SmallStats;
   NMXGeometry SmallGeom{SmallStats, SmallConfig, 4, 4};

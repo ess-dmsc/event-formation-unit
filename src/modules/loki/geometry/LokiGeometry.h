@@ -29,6 +29,10 @@ namespace Caen {
 
 class LokiGeometry : public Geometry, ESSGeometry {
 public:
+  // Detector geometry constants
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
+  static constexpr int UNITS_PER_STRAW{7};           ///< Units per straw/group
+
   explicit LokiGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   /// \brief return the position along the tube
@@ -57,8 +61,6 @@ public:
 
   // Holds the parsed configuration
   Config &Conf;
-
-  const std::pair<int, float> InvalidPos{-1, -1.0};
 
   // Per-detector resolution: number of pixels per unit/straw
   int StrawResolution;

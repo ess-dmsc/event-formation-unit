@@ -39,9 +39,9 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   loadConfigAndCalib();
   // Geometry depends on DetectorType and configuration InstrumentGeometry
   // string
-  Geom = createGeometry(detectorType, Conf.FileParameters.InstrumentGeometry,
+  Geom = createGeometry(detectorType, Conf.FileParms.InstrumentGeometry,
                         Stats);
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
 }
 
 void FreiaInstrument::loadConfigAndCalib() {
@@ -57,16 +57,16 @@ void FreiaInstrument::loadConfigAndCalib() {
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(Conf.MBFileParameters.MaxMatchingTimeGap);
+    builder.matcher.setMaximumTimeGap(Conf.MBFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
-        Conf.MBFileParameters.MaxClusteringTimeGap);
+        Conf.MBFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
-        Conf.MBFileParameters.MaxClusteringTimeGap);
-    if (Conf.MBFileParameters.SplitMultiEvents) {
+        Conf.MBFileParms.MaxClusteringTimeGap);
+    if (Conf.MBFileParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
-          Conf.MBFileParameters.SplitMultiEvents,
-          Conf.MBFileParameters.SplitMultiEventsCoefficientLow,
-          Conf.MBFileParameters.SplitMultiEventsCoefficientHigh);
+          Conf.MBFileParms.SplitMultiEvents,
+          Conf.MBFileParms.SplitMultiEventsCoefficientLow,
+          Conf.MBFileParms.SplitMultiEventsCoefficientHigh);
     }
   }
 
@@ -181,7 +181,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (Event.ClusterB.hasGap(Conf.MBFileParameters.MaxGapWire)) {
+      if (Event.ClusterB.hasGap(Conf.MBFileParms.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -189,7 +189,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (Event.ClusterA.hasGap(Conf.MBFileParameters.MaxGapStrip)) {
+      if (Event.ClusterA.hasGap(Conf.MBFileParms.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
@@ -213,8 +213,8 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
-    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
       counters.MaxTOFErrors++;
       continue;
     }

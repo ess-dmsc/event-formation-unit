@@ -84,10 +84,10 @@ TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.LokiConf.Parms.TotalGroups, 0);
 
   // Test Tbl3HeConf default values
-  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinRing, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MaxRing, 11);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.NumOfFENs, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinRing, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MaxRing, 11);
   ASSERT_EQ(config.Tbl3HeConf.TopologyMapPtr, nullptr);
 
   // Test BifrostConf default values
@@ -181,8 +181,8 @@ TEST_F(CaenConfigTest, ValidTbl3HeConfig) {
   config.parseConfig();
 
   // Verify Tbl3He specific parameters are set correctly
-  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 2);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 100);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.NumOfFENs, 2);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude, 100);
 
   // Check CAEN general parameters
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);

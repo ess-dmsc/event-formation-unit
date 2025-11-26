@@ -20,10 +20,10 @@ namespace Trex {
 
 void Config::applyConfig() {
   setMask(LOG);
-  assign("DefaultMinADC", TREXFileParameters.DefaultMinADC);
-  assign("SizeX",         TREXFileParameters.SizeX);
-  assign("SizeY",         TREXFileParameters.SizeY);
-  assign("SizeZ",         TREXFileParameters.SizeZ);
+  assign("DefaultMinADC", TREXFileParms.DefaultMinADC);
+  assign("SizeX",         TREXFileParms.SizeX);
+  assign("SizeY",         TREXFileParms.SizeY);
+  assign("SizeZ",         TREXFileParms.SizeZ);
 
   try {
     auto PanelConfig = root()["Config"];
@@ -65,7 +65,7 @@ void Config::applyConfig() {
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
-        Hybrid.MinADC = TREXFileParameters.DefaultMinADC;
+        Hybrid.MinADC = TREXFileParms.DefaultMinADC;
       }
     }
 

@@ -28,8 +28,9 @@ public:
   /// \param Stats Reference to Statistics object for counter registration
   /// \param Config Reference to the DREAM configuration object
   DreamGeometry(Statistics &Stats, const Config &Config)
-      : Geometry(Stats, Config), fwec(Stats, 280, 256, "fwec"), bwec(Stats, 616, 256, "bwec"  ),
-        mantle(Stats, 256), cuboid(Stats) {}
+      : Geometry(Stats, Config), fwec(Stats, FwecCassettes, FwecStrips, "fwec"),
+        bwec(Stats, BwecCassettes, BwecStrips, "bwec"),
+        mantle(Stats, MantleStrips), cuboid(Stats) {}
 
   /// \brief return the global pixel id offset for each of the DREAM detector
   /// components. This offset must be added to the local pixel id calculated
@@ -44,6 +45,15 @@ public:
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const DataParser::CDTReadout &Data) const override;
 
+private:
+  /// \brief Constants for DREAM detector components
+  static constexpr int FwecCassettes = 280;
+  static constexpr int FwecStrips = 256;
+  static constexpr int BwecCassettes = 616;
+  static constexpr int BwecStrips = 256;
+  static constexpr int MantleStrips = 256;
+
+  /// DREAM detector components
   SUMO fwec;
   SUMO bwec;
   DreamMantle mantle;

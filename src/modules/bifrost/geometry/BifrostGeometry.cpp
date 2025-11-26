@@ -22,7 +22,7 @@ BifrostGeometry::BifrostGeometry(Statistics &Stats, Config &CaenConfiguration)
                CaenConfiguration.CaenParms.MaxFEN,
                CaenConfiguration.CaenParms.MaxGroup,
                CaenConfiguration.BifrostConf.Parms.MaxAmpl),
-      ESSGeometry(900, 15, 1, 1),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
       StrideResolution(CaenConfiguration.CaenParms.Resolution),
       Conf(CaenConfiguration) {}
 
@@ -40,14 +40,14 @@ bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) c
 
 int BifrostGeometry::xOffset(int Ring, int Group) const {
   int RingOffset = Ring * StrideResolution;
-  int GroupOffset = (Group % 3) * UnitPixellation;
+  int GroupOffset = (Group % 3) * UNIT_PIXELLATION;
   XTRACE(DATA, DEB, "RingOffset %d, GroupOffset %d", RingOffset, GroupOffset);
   return RingOffset + GroupOffset;
 }
 
 int BifrostGeometry::yOffset(int Group) const {
-  int Arc = Group / 3; // 3 == triplets per arc (for a given ring)
-  return Arc * UnitsPerGroup;
+  int Arc = Group / UNITS_PER_TRIPLETS; // units per arc (for a given ring)
+  return Arc * UNITS_PER_TRIPLETS;
 }
 
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
@@ -93,7 +93,7 @@ uint32_t BifrostGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) con
   int xoff = xOffset(Ring, Data.Group);
   int yoff = yOffset(Data.Group);
 
-  int Group = Ring * TripletsPerRing + Data.Group;
+  int Group = Ring * TRIPLETS_PER_RING + Data.Group;
   std::pair<int, double> UnitPos =
       calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
@@ -102,7 +102,7 @@ uint32_t BifrostGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) con
   }
 
   int ylocal = UnitPos.first;
-  int xlocal = UnitPos.second * (UnitPixellation - 1);
+  int xlocal = UnitPos.second * (UNIT_PIXELLATION - 1);
   int X = xoff + xlocal;
   int Y = yoff + ylocal;
 
@@ -119,19 +119,19 @@ uint32_t BifrostGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) con
 }
 
 size_t BifrostGeometry::numSerializers() const {
-  return TripletsPerRing *
+  return TRIPLETS_PER_RING *
          (MaxRing + 1); // MaxRing is likely 2 (but [0, 1, 2] are all valid)
 }
 
 size_t BifrostGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
   // FiberID = _physical_ Ring (logical_ring/2)
   // Group == triplet number
-  return calcRing(Data.FiberId) * TripletsPerRing + Data.Group;
+  return calcRing(Data.FiberId) * TRIPLETS_PER_RING + Data.Group;
 }
 
 std::string BifrostGeometry::serializerName(size_t Index) const {
-  auto ring_id = Index / TripletsPerRing;
-  auto tube_id = Index - ring_id * TripletsPerRing;
+  auto ring_id = Index / TRIPLETS_PER_RING;
+  auto tube_id = Index - ring_id * TRIPLETS_PER_RING;
   auto arc = tube_id / 3u;
   auto triplet = (tube_id % 3u) + ring_id * 3u;
   return fmt::format("arc={};triplet={}", arc, triplet);

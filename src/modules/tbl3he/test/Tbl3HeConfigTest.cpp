@@ -42,10 +42,10 @@ protected:
 
 
 TEST_F(Tbl3HeConfigTest, Constructor) {
-  ASSERT_EQ(config.Params.MinValidAmplitude, 0);
-  ASSERT_EQ(config.Params.NumOfFENs, 0);
-  ASSERT_EQ(config.Params.MinRing, 0);
-  ASSERT_EQ(config.Params.MaxRing, 11);
+  ASSERT_EQ(config.Tbl3HeParms.MinValidAmplitude, 0);
+  ASSERT_EQ(config.Tbl3HeParms.NumOfFENs, 0);
+  ASSERT_EQ(config.Tbl3HeParms.MinRing, 0);
+  ASSERT_EQ(config.Tbl3HeParms.MaxRing, 11);
   ASSERT_EQ(config.TopologyMapPtr, nullptr);
 }
 
@@ -81,8 +81,8 @@ TEST_F(Tbl3HeConfigTest, ValidTbl3HeConfig) {
   ASSERT_NO_THROW(config.parseConfig());
   
   // Check that Tbl3He config values from JSON are properly stored
-  ASSERT_EQ(config.Params.NumOfFENs, 4);
-  ASSERT_EQ(config.Params.MinValidAmplitude, 100);
+  ASSERT_EQ(config.Tbl3HeParms.NumOfFENs, 4);
+  ASSERT_EQ(config.Tbl3HeParms.MinValidAmplitude, 100);
   
   // Check topology configuration
   ASSERT_NE(config.TopologyMapPtr, nullptr);

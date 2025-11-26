@@ -27,6 +27,11 @@
 namespace Caen {
 class Tbl3HeGeometry : public Geometry, ESSGeometry {
 public:
+  // Detector geometry constants
+  static constexpr int UNITS_PER_GROUP{1};           ///< Tubes per group
+  static constexpr int GROUPS_PER_RING{16};          ///< Groups per ring
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
+
   Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
@@ -46,9 +51,7 @@ public:
   calcSerializer(const DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
-  const int UnitsPerGroup{1};
-
-  const std::pair<int, float> InvalidPos{-1, -1.0};
+  ///< Invalid position marker
 
 protected:
   /// \brief Calculate pixel ID from readout data for Tbl3He geometry

@@ -37,18 +37,18 @@ void Config::apply() {
   }
 
   setMask(LOG);
-  assign("TypeSubType", Parms.TypeSubType);
-  assign("MaxPulseTimeDiffNS", Parms.MaxPulseTimeDiffNS);
-  assign("MaxTOFNS", Parms.MaxTOFNS);
-  assign("MonitorRing", Parms.MonitorRing);
+  assign("TypeSubType", CbmParms.TypeSubType);
+  assign("MaxPulseTimeDiffNS", CbmParms.MaxPulseTimeDiffNS);
+  assign("MaxTOFNS", CbmParms.MaxTOFNS);
+  assign("MonitorRing", CbmParms.MonitorRing);
 
   setMask(LOG | CHECK);
-  assign("MaxFENId", Parms.MaxFENId);
+  assign("MaxFENId", CbmParms.MaxFENId);
 
   // Number of FENs must must be 1 even is MaxFENId is 0
-  Parms.NumOfFENs = Parms.MaxFENId + 1;
+  CbmParms.NumOfFENs = CbmParms.MaxFENId + 1;
 
-  TopologyMapPtr.reset(new HashMap2D<Topology>(Parms.NumOfFENs));
+  TopologyMapPtr.reset(new HashMap2D<Topology>(CbmParms.NumOfFENs));
   if (!root().contains("Topology")) {
     throw std::runtime_error("No 'Topology' section found in the "
                              "configuration. Cannot setup Beam Monitors");
@@ -78,9 +78,9 @@ void Config::apply() {
     }
 
     // Check for array sizes and duplicate entries
-    if (FEN > Parms.MaxFENId) {
+    if (FEN > CbmParms.MaxFENId) {
       errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
-                            Parms.MaxFENId));
+                            CbmParms.MaxFENId));
     }
 
     if (TopologyMapPtr->isValue(FEN, Channel)) {
@@ -146,8 +146,8 @@ void Config::apply() {
       try {
         param1 = Module["MaxTofBin"].get<int>();
         param2 = Module["BinCount"].get<int>();
-        param3 = Module.value<int>("AggregatedFrames", Parms.AggregatedFrames);
-        param4 = Module.value<int>("AggregationMode", Parms.AggregationMode);
+        param3 = Module.value<int>("AggregatedFrames", CbmParms.AggregatedFrames);
+        param4 = Module.value<int>("AggregationMode", CbmParms.AggregationMode);
       } catch (...) {
         errorExit(fmt::format(
             "Entry: {}, Malformed 'Topology' section for {} Type (Need "
@@ -174,7 +174,7 @@ void Config::apply() {
     Entry++;
   }
 
-  Parms.NumberOfMonitors = Entry;
+  CbmParms.NumberOfMonitors = Entry;
 }
 
 } // namespace cbm

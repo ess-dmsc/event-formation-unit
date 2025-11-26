@@ -147,10 +147,10 @@ protected:
 };
 
 TEST_F(CbmConfigTest, Constructor) {
-  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
-  EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
-  EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
-  EXPECT_EQ(config.Parms.MonitorRing, 11);
+  ASSERT_EQ(config.CbmParms.TypeSubType, DetectorType::CBM);
+  EXPECT_EQ(config.CbmParms.MaxTOFNS, 20 * int(1000000000 / 14));
+  EXPECT_EQ(config.CbmParms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
+  EXPECT_EQ(config.CbmParms.MonitorRing, 11);
   EXPECT_EQ(config.TopologyMapPtr, nullptr);
 }
 
@@ -167,9 +167,9 @@ TEST_F(CbmConfigTest, InvalidInstrument) {
 TEST_F(CbmConfigTest, DefaultValues) {
   config.setRoot(DefaultValuesOnly);
   config.apply();
-  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
-  EXPECT_EQ(config.Parms.MaxTOFNS, 20 * int(1000000000 / 14));
-  EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
+  ASSERT_EQ(config.CbmParms.TypeSubType, DetectorType::CBM);
+  EXPECT_EQ(config.CbmParms.MaxTOFNS, 20 * int(1000000000 / 14));
+  EXPECT_EQ(config.CbmParms.MaxPulseTimeDiffNS, 5 * int(1000000000 / 14));
 }
 
 TEST_F(CbmConfigTest, IncorrectFENConfig) {
@@ -244,12 +244,12 @@ TEST_F(CbmConfigTest, NoTopology) {
 TEST_F(CbmConfigTest, LoadFileFullInstrument) {
   config = Config(FullConfigFile);
   config.loadAndApply();
-  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
-  EXPECT_EQ(config.Parms.MonitorRing, 11);
-  EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.MaxFENId, 2);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 3);
+  ASSERT_EQ(config.CbmParms.TypeSubType, DetectorType::CBM);
+  EXPECT_EQ(config.CbmParms.MonitorRing, 11);
+  EXPECT_EQ(config.CbmParms.MaxTOFNS, 1'000'000'000);
+  EXPECT_EQ(config.CbmParms.MaxPulseTimeDiffNS, 1'000'000'000);
+  EXPECT_EQ(config.CbmParms.MaxFENId, 2);
+  EXPECT_EQ(config.CbmParms.NumberOfMonitors, 3);
 }
 
 //Test that CBM IBM get default values for aggregated frames
@@ -399,11 +399,11 @@ TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
 TEST_F(CbmConfigTest, TestTopology) {
   config.setRoot(ConfigWithTopology);
   config.apply();
-  ASSERT_EQ(config.Parms.TypeSubType, DetectorType::CBM);
-  EXPECT_EQ(config.Parms.MonitorRing, 11);
-  EXPECT_EQ(config.Parms.MaxTOFNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.MaxPulseTimeDiffNS, 1'000'000'000);
-  EXPECT_EQ(config.Parms.NumberOfMonitors, 9);
+  ASSERT_EQ(config.CbmParms.TypeSubType, DetectorType::CBM);
+  EXPECT_EQ(config.CbmParms.MonitorRing, 11);
+  EXPECT_EQ(config.CbmParms.MaxTOFNS, 1'000'000'000);
+  EXPECT_EQ(config.CbmParms.MaxPulseTimeDiffNS, 1'000'000'000);
+  EXPECT_EQ(config.CbmParms.NumberOfMonitors, 9);
 
   // Testing topology
   // Test first entry

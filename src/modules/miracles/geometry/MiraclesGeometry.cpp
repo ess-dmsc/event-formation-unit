@@ -23,7 +23,7 @@ MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
                                    const Config &CaenConfiguration, int MaxAmpl)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
                CaenConfiguration.CaenParms.MaxFEN, 1, MaxAmpl),
-      ESSGeometry(48, 128, 1, 1),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
       GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
 uint32_t MiraclesGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {

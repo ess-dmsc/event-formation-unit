@@ -21,21 +21,21 @@ namespace Nmx {
 void Config::applyConfig() {
   // Initialize parameters
   setMask(LOG);
-  assign("DefaultMinADC", NMXFileParameters.DefaultMinADC);
-  assign("SizeX", NMXFileParameters.SizeX);
-  assign("SizeY", NMXFileParameters.SizeY);
-  assign("MaxSpanX", NMXFileParameters.MaxSpanX);
-  assign("MaxSpanY", NMXFileParameters.MaxSpanY);
-  assign("MinSpanX", NMXFileParameters.MinSpanX);
-  assign("MinSpanY", NMXFileParameters.MinSpanY);
-  assign("MaxGapX", NMXFileParameters.MaxGapX);
-  assign("MaxGapY", NMXFileParameters.MaxGapY);
-  assign("MaxMatchingTimeGap", NMXFileParameters.MaxMatchingTimeGap);
-  assign("MaxClusteringTimeGap", NMXFileParameters.MaxClusteringTimeGap);
-  assign("NumPanels", NMXFileParameters.NumPanels);
-  assign("SplitMultiEvents", NMXFileParameters.SplitMultiEvents);
-  assign("SplitMultiEventsCoefficientLow", NMXFileParameters.SplitMultiEventsCoefficientLow);
-  assign("SplitMultiEventsCoefficientHigh", NMXFileParameters.SplitMultiEventsCoefficientHigh);
+  assign("DefaultMinADC", NMXFileParms.DefaultMinADC);
+  assign("SizeX", NMXFileParms.SizeX);
+  assign("SizeY", NMXFileParms.SizeY);
+  assign("MaxSpanX", NMXFileParms.MaxSpanX);
+  assign("MaxSpanY", NMXFileParms.MaxSpanY);
+  assign("MinSpanX", NMXFileParms.MinSpanX);
+  assign("MinSpanY", NMXFileParms.MinSpanY);
+  assign("MaxGapX", NMXFileParms.MaxGapX);
+  assign("MaxGapY", NMXFileParms.MaxGapY);
+  assign("MaxMatchingTimeGap", NMXFileParms.MaxMatchingTimeGap);
+  assign("MaxClusteringTimeGap", NMXFileParms.MaxClusteringTimeGap);
+  assign("NumPanels", NMXFileParms.NumPanels);
+  assign("SplitMultiEvents", NMXFileParms.SplitMultiEvents);
+  assign("SplitMultiEventsCoefficientLow", NMXFileParms.SplitMultiEventsCoefficientLow);
+  assign("SplitMultiEventsCoefficientHigh", NMXFileParms.SplitMultiEventsCoefficientHigh);
 
   try {
     auto PanelConfig = root()["Config"];
@@ -82,7 +82,7 @@ void Config::applyConfig() {
         params.Panel = 0;
       }
 
-      Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
+      Hybrid.MinADC = NMXFileParms.DefaultMinADC;
     }
 
     // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels,

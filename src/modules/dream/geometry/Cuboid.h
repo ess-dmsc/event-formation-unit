@@ -26,6 +26,10 @@ namespace Dream {
 
 class Cuboid : public ESSGeometry {
 private:
+  constexpr static uint32_t MAX_X = 112;
+  constexpr static uint32_t MAX_Y = 112 * 32;
+  constexpr static uint32_t MAX_Z = 1;
+  constexpr static uint32_t MAX_PIXEL = 1;
   constexpr static uint8_t WIRES_PER_COUNTER = 16;
   constexpr static uint8_t STRIPS_PER_CASSETTE = 32;
 
@@ -45,20 +49,15 @@ private:
   mutable CuboidCounters CuboidCounters;
 
 public:
-  // clang-format off
-  static inline const std::string METRIC_COUNTER_INDEX_ERRORS = "geometry.index_errors";
-  static inline const std::string METRIC_COUNTER_TYPE_ERRORS  = "geometry.type_errors";
-  // clang-format on
-
-  Cuboid(Statistics &Stats)
-      : ESSGeometry(112, 112 * 32, 1, 1), CuboidCounters(Stats) {}
-
   struct CuboidOffset {
     int X;
     int Y;
   };
 
   // clang-format off
+  static inline const std::string METRIC_COUNTER_INDEX_ERRORS = "geometry.index_errors";
+  static inline const std::string METRIC_COUNTER_TYPE_ERRORS  = "geometry.type_errors";
+
   /// \brief Showing offsets roughly as the detector Cuboids are arranged
   ///
   std::vector<CuboidOffset> OffsetsHR {
@@ -101,13 +100,21 @@ public:
      3, 3, 3, 2, 2,
         3, 3, 2
   };
-
   // clang-format on
 
-  /// \brief rotate (x,y)
-  void rotateXY(int &LocalX, int &LocalY, int Rotate) const;
+  Cuboid(Statistics &Stats)
+      : ESSGeometry(MAX_X, MAX_Y, MAX_Z, MAX_PIXEL), CuboidCounters(Stats) {}
 
-  /// \brief get pixel id from CDT readout data
+  /// \brief Rotate local x,y coordinates according to module rotation
+  /// \param Rotate Rotation index (0-3)
+  /// \param LocalX Local x-coordinate to rotate (input and output)
+  /// \param LocalY Local y-coordinate to rotate (input and output)
+  void rotateXY(int Rotate, int &LocalX, int &LocalY) const;
+
+  /// \brief get pixel id from CDT readout data and module parameters
+  /// \param Parms Const reference to module parameters
+  /// \param Data Const reference to CDT readout data
+  /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelId(const Config::ModuleParms &Parms,
                        const DataParser::CDTReadout &Data) const;
 

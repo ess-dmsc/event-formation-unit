@@ -72,7 +72,7 @@ bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) co
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
-  int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
+  int MinAmpl = Conf.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude;
 
   return validateAll([&]() { return validateRing(Ring); },
                      [&]() { return validateGroup(Data.Group); },

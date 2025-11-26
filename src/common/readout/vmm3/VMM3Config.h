@@ -94,7 +94,7 @@ public:
     std::string InstrumentGeometry{""};
     uint32_t MaxTOFNS{1'000'000'000};
     uint32_t MaxPulseTimeNS{5 * 71'428'571}; // 5 * 1/14 * 10^9=
-  } FileParameters;
+  } FileParms;
 
   // Container used for storing a Hybrid with a given (Ring, FEN, Hybrid)
   Hybrid Hybrids[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];

@@ -23,7 +23,7 @@ CspecGeometry::CspecGeometry(Statistics &Stats, const Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
                CaenConfiguration.CaenParms.MaxFEN,
                CaenConfiguration.CaenParms.MaxGroup),
-      ESSGeometry(900, 180, 1, 1),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
       Resolution(CaenConfiguration.CaenParms.Resolution) {}
 
 bool CspecGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
@@ -40,7 +40,7 @@ int CspecGeometry::xOffset(int Ring, int Group) const {
   ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He
   /// CSPEC
   // Use per-detector Resolution for ring stride and subdivide for groups.
-  return Ring * Resolution + (Group % 24) * (Resolution / 24);
+  return Ring * Resolution + (Group % GROUPS_PER_RING) * (Resolution / GROUPS_PER_RING);
 }
 
 int CspecGeometry::posAlongUnit(int AmpA, int AmpB) const {

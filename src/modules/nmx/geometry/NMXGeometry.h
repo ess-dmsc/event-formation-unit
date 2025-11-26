@@ -63,8 +63,8 @@ public:
   /// \param MaxFEN Maximum FEN number for validation
   NMXGeometry(Statistics &Stats, Config &Cfg, int MaxRing, int MaxFEN)
       : vmm3::VMM3Geometry(
-            Stats, Cfg, MaxRing, MaxFEN, Cfg.NMXFileParameters.SizeX,
-            Cfg.NMXFileParameters.SizeY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
+            Stats, Cfg, MaxRing, MaxFEN, Cfg.NMXFileParms.SizeX,
+            Cfg.NMXFileParms.SizeY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
         NmxCounters(Stats) {}
 
   /// \brief Validate VMM3 readout data for NMX geometry

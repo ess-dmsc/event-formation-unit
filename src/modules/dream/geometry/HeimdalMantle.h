@@ -40,7 +40,7 @@ public:
     return 12 * MU + 2 * Cassette + Counter;
   }
   ///\brief change default number of strips per cassette
-  explicit HeimdalMantle(Statistics &, uint16_t Strips = 64)
+  explicit HeimdalMantle(uint16_t Strips = 64)
       : ESSGeometry{144, 2048, 1, 1}, StripsPerCass(Strips) {}
 
   //

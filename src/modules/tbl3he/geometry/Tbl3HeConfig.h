@@ -42,7 +42,7 @@ class Tbl3HeConfig : public Configurations::Config {
     //  non configurable parameters
     int MinRing{0};
     int MaxRing{11};
-  } Params;
+  } Tbl3HeParms;
 
 
   struct Topology {

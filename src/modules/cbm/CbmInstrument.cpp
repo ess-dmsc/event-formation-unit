@@ -37,8 +37,8 @@ CbmInstrument::CbmInstrument(
       HistogramSerializerMap(HistogramSerializerMap),
       ESSHeaderParser(essHeaderParser) {
 
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
-  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.Parms.MaxTOFNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.CbmParms.MaxPulseTimeDiffNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.CbmParms.MaxTOFNS);
 
   //To handle EVENT_2D monitors the configuration list must be analysed
   //for EVENT_2D data to create the geometry
@@ -85,9 +85,9 @@ void CbmInstrument::processMonitorReadouts() {
            Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
     int Ring = DetectorGeometry<cbm::Parser::CbmReadout>::calcRing(Readout.FiberId);
-    if (Ring != Conf.Parms.MonitorRing) {
+    if (Ring != Conf.CbmParms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
-             Conf.Parms.MonitorRing);
+             Conf.CbmParms.MonitorRing);
       counters.RingCfgError++;
       continue;
     }
