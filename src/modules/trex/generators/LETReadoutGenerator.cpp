@@ -43,7 +43,7 @@ void LETReadoutGenerator::generateData() {
 
     XTRACE(DATA, DEB, "TimeLow = %u, TimeHigh = %u", readoutTimeLow,
            readoutTimeHigh);
-    auto ReadoutData = static_cast<VMM3Parser::VMM3Data *>(DP);
+    auto ReadoutData = reinterpret_cast<VMM3Parser::VMM3Data *>(DP);
 
     ReadoutData->DataLength = sizeof(VMM3Parser::VMM3Data);
     // TREX VMM readouts all have DataLength 20
