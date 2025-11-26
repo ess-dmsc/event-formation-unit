@@ -29,10 +29,6 @@ namespace Caen {
 
 class LokiGeometry : public Geometry, ESSGeometry {
 public:
-  // Detector geometry constants
-  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
-  static constexpr int UNITS_PER_STRAW{7};           ///< Units per straw/group
-
   explicit LokiGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   /// \brief return the position along the tube
@@ -85,6 +81,13 @@ protected:
   /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  // Detector geometry constants
+  // clang-format off
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
+  static constexpr int UNITS_PER_STRAW{7};                          ///< Units per straw/group
+  // clang-format on
 };
 
 } // namespace Caen

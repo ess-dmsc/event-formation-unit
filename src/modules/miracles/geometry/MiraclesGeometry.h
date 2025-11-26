@@ -24,13 +24,7 @@
 namespace Caen {
 class MiraclesGeometry : public Geometry, ESSGeometry {
 public:
-  // Detector geometry constants
-  static constexpr int ESSGEOMETRY_NX{48};   ///< X dimension (pixels)
-  static constexpr int ESSGEOMETRY_NY{128};  ///< Y dimension (pixels)
-  static constexpr int ESSGEOMETRY_NZ{1};    ///< Z dimension (pixels)
-  static constexpr int ESSGEOMETRY_NP{1};    ///< P dimension (pixels)
-
-  explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration, 
+  explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration,
                             int MaxAmpl = std::numeric_limits<int>::max());
   bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
@@ -80,6 +74,13 @@ protected:
   /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  // Detector geometry constants
+  static constexpr int ESSGEOMETRY_NX{48};  ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{128}; ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};   ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};   ///< P dimension (pixels)
 };
 
 } // namespace Caen

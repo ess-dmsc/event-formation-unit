@@ -24,7 +24,7 @@ LokiGeometry::LokiGeometry(Statistics &Stats, Config &CaenConfiguration)
                CaenConfiguration.CaenParms.MaxFEN,
                CaenConfiguration.LokiConf.Parms.TotalGroups),
       ESSGeometry(CaenConfiguration.CaenParms.Resolution,
-                  CaenConfiguration.LokiConf.Parms.TotalGroups * 7, 1, 1),
+                  CaenConfiguration.LokiConf.Parms.TotalGroups * UNITS_PER_STRAW, 1, 1),
       Conf(CaenConfiguration),
       StrawResolution(CaenConfiguration.CaenParms.Resolution) {}
 

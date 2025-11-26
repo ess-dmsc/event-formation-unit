@@ -27,11 +27,6 @@
 namespace Caen {
 class Tbl3HeGeometry : public Geometry, ESSGeometry {
 public:
-  // Detector geometry constants
-  static constexpr int UNITS_PER_GROUP{1};           ///< Tubes per group
-  static constexpr int GROUPS_PER_RING{16};          ///< Groups per ring
-  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
-
   Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
@@ -62,6 +57,16 @@ protected:
 private:
   const Config &Conf;
 
-  int UnitPixellation{100}; ///< Number of pixels along a single He tube.
+  // Detector geometry constants
+  // clang-format off
+  static constexpr int UNITS_PER_GROUP{1};           ///< Tubes per group
+  static constexpr int GROUPS_PER_RING{16};          ///< Groups per ring
+  static constexpr int ESSGEOMETRY_NX{100};          ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{8};            ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};            ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};            ///< P dimension (pixels)
+  static constexpr int UNIT_PIXELLATION{100};         ///< Pixels along a single He tube.
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
+  // clang-format on
 };
 } // namespace Caen

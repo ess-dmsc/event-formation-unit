@@ -25,7 +25,7 @@ Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguratio
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
                CaenConfiguration.CaenParms.MaxFEN,
                CaenConfiguration.CaenParms.MaxGroup),
-      ESSGeometry(100, 8, 1, 1), Conf(CaenConfiguration) {}
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP), Conf(CaenConfiguration) {}
 
 ///\todo refactoring oportunity: this code is nearly identical to the code in
 /// bifrost
@@ -108,7 +108,7 @@ uint32_t Tbl3HeGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) cons
   double CalibratedUnitPos = CaenCDCalibration.posCorrection(
       GlobalGroup, UnitPos.first, UnitPos.second);
 
-  int xlocal = CalibratedUnitPos * (UnitPixellation - 1);
+  int xlocal = CalibratedUnitPos * (UNIT_PIXELLATION - 1);
 
   int X = xlocal;
   int Y = GlobalGroup;

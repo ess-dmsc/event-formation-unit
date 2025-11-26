@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "gtest/gtest.h"
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -26,15 +27,6 @@
 namespace Caen {
 class BifrostGeometry : public Geometry, ESSGeometry {
 public:
-  // Detector geometry constants
-  static constexpr int UNITS_PER_TRIPLETS{3};          ///< Tube triplets per group
-  static constexpr int TRIPLETS_PER_RING{15};       ///< Triplets per ring
-  static constexpr int UNIT_PIXELLATION{100}; ///< Pixels along tube
-  static constexpr int ESSGEOMETRY_NX{900};         ///< X dimension (pixels)
-  static constexpr int ESSGEOMETRY_NY{15};          ///< Y dimension (pixels)
-  static constexpr int ESSGEOMETRY_NZ{1};           ///< Z dimension (pixels)
-  static constexpr int ESSGEOMETRY_NP{1};           ///< P dimension (pixels)
-
   explicit BifrostGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
@@ -61,7 +53,6 @@ public:
   calcSerializer(const DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
-
   // Per-detector resolution: horizontal pixel stride used for ring offsets
   int StrideResolution;
 
@@ -75,5 +66,15 @@ protected:
   /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
   uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  // Detector geometry constants
+  static constexpr int UNITS_PER_TRIPLETS{3}; ///< Tube triplets per group
+  static constexpr int TRIPLETS_PER_RING{15}; ///< Triplets per ring
+  static constexpr int UNIT_PIXELLATION{100}; ///< Pixels along tube
+  static constexpr int ESSGEOMETRY_NX{900};   ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{15};    ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};     ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};     ///< P dimension (pixels)
 };
 } // namespace Caen
