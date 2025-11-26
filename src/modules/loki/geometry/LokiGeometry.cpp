@@ -68,21 +68,19 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   return std::make_pair(Unit, UncorrPos);
 }
 
-uint32_t LokiGeometry::calcPixelImpl(const void* DataPtr) const {
-  const auto *Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
+uint32_t LokiGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = Data.FiberId / 2;
+  int FEN = Data.FENId;
+  int Group = Data.Group; // local group for a FEN
 
-  int Ring = Data->FiberId / 2;
-  int FEN = Data->FENId;
-  int Group = Data->Group; // local group for a FEN
-
-  XTRACE(DATA, DEB, "Fiber ID %u, Ring %d", Data->FiberId, Ring);
+  XTRACE(DATA, DEB, "Fiber ID %u, Ring %d", Data.FiberId, Ring);
 
   uint32_t GlobalGroup = Conf.LokiConf.getGlobalGroup(Ring, FEN, Group);
   XTRACE(DATA, DEB, "FEN %d, LocalGroup %d, GlobalGroup %d", FEN, Group,
          GlobalGroup);
 
   std::pair<int, double> UnitPos =
-      calcUnitAndPos(GlobalGroup, Data->AmpA, Data->AmpB, Data->AmpC, Data->AmpD);
+      calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
   XTRACE(DATA, DEB, "Unit %d, GlobalPos %f", UnitPos.first, UnitPos.second);
 
   if (UnitPos.first == -1) {
@@ -90,7 +88,7 @@ uint32_t LokiGeometry::calcPixelImpl(const void* DataPtr) const {
   }
 
   uint32_t GlobalUnit =
-      Conf.LokiConf.getY(Ring, FEN, Data->Group, UnitPos.first);
+      Conf.LokiConf.getY(Ring, FEN, Data.Group, UnitPos.first);
 
   double CalibratedUnitPos = CaenCDCalibration.posCorrection(
       GlobalGroup, UnitPos.first, UnitPos.second);
@@ -108,7 +106,7 @@ uint32_t LokiGeometry::calcPixelImpl(const void* DataPtr) const {
   return PixelId;
 }
 
-bool LokiGeometry::validateReadoutData(const DataParser::CaenReadout &Data) {
+bool LokiGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
   auto Ring = Data.FiberId / 2;
   auto &Cfg = Conf.LokiConf.Parms;
 

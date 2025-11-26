@@ -29,7 +29,7 @@ public:
   explicit BifrostGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
@@ -66,8 +66,8 @@ public:
 
 protected:
   /// \brief Implementation for pixel calculation for Bifrost geometry
-  /// \param Data Pointer to CaenReadout object (cast internally)
+  /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *DataPtr) const override;
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
 } // namespace Caen

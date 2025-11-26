@@ -104,7 +104,7 @@ void TREXInstrument::processReadouts() {
   for (const auto &readout : VMMParser.Result) {
 
     // Convert from physical fiber to rings
-    uint8_t Ring = DetectorGeometry::calcRing(readout.FiberId);
+    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
     uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 

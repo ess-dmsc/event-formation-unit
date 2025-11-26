@@ -39,7 +39,7 @@ public:
   /// \brief Validate VMM3 readout data for Freia geometry
   /// \param Data VMM3 readout data to validate
   /// \return true if valid, false otherwise
-  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) override {
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const override {
     uint8_t Ring = Data.FiberId / 2; // physical->logical mapping
     uint8_t HybridId = calcHybridId(Data.VMM);
 

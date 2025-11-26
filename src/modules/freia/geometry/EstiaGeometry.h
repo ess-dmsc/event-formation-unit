@@ -36,7 +36,7 @@ public:
                            vmm3::VMM3Config::MaxFEN, ESSGEOMTERY_NX,
                            ESSGEOMTERY_NY, ESSGEOMTERY_NZ, ESSGEOMTERY_NP) {}
 
-  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) override {
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const override {
     uint8_t Ring = calcRing(Data.FiberId);
     uint8_t HybridId = calcHybridId(Data.VMM);
 
@@ -49,10 +49,10 @@ public:
 
 protected:
   /// \brief Estia uses wires for X plane (different from default)
-  bool inline usesWiresForX() const override { return true; }
+  inline bool usesWiresForX() const override { return true; }
 
   /// \brief Estia uses strips for Y plane (different from default)
-  bool inline usesWiresForY() const override { return false; }
+  inline bool usesWiresForY() const override { return false; }
 
   /// \brief Estia wire calculation: Offset + (Channel - MinWireChannel) or
   /// InvalidCoord if overflow

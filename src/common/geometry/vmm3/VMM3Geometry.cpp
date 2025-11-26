@@ -44,7 +44,7 @@ VMM3Geometry::CoordResult VMM3Geometry::calculateCoordinate(uint16_t XOffset,
   return {coordinate, isX};
 }
 
-bool VMM3Geometry::validateChannel(uint8_t VMM, uint8_t Channel) {
+bool VMM3Geometry::validateChannel(uint8_t VMM, uint8_t Channel) const {
   bool isX = isXCoord(VMM);
   bool usesWires = isX ? usesWiresForX() : usesWiresForY();
 

@@ -26,7 +26,7 @@ class MiraclesGeometry : public Geometry, ESSGeometry {
 public:
   explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration, 
                             int MaxAmpl = std::numeric_limits<int>::max());
-  bool validateReadoutData(const DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return local x-coordinate from amplitudes
   int xCoord(int Ring, int Tube, int AmpA, int AmpB) const;
@@ -71,9 +71,9 @@ public:
 
 protected:
   /// \brief Calculate pixel ID from readout data
-  /// \param Data Pointer to CaenReadout object (cast internally)
+  /// \param Data Const reference to CaenReadout object
   /// \return Calculated pixel ID, or 0 if calculation failed
-  uint32_t calcPixelImpl(const void *Data) const override;
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
 
 } // namespace Caen

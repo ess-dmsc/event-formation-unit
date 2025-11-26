@@ -29,7 +29,7 @@ namespace Caen {
 
 using namespace geometry;
 
-class Geometry : public DetectorGeometry {
+class Geometry : public DetectorGeometry<DataParser::CaenReadout> {
 protected:
   // Counter name constants
   // clang-format off
@@ -85,22 +85,7 @@ public:
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data CaenReadout to check validity of.
-  virtual bool validateReadoutData(const DataParser::CaenReadout &Data) = 0;
-
-  /// \brief Runtime type validation for CAEN readout data
-  /// \param type_info Type information from typeid()
-  /// \return true if type is valid for CAEN geometry, false otherwise
-  bool validateDataType(const std::type_info &type_info) const override {
-    // For CAEN geometries, we expect DataParser::CaenReadout
-    XTRACE(DATA, DEB, "Validating CAEN readout type: %s", type_info.name());
-    if (type_info == typeid(DataParser::CaenReadout)) {
-      return true;
-    } else {
-      XTRACE(DATA, WAR, "Invalid readout type for CAEN geometry: %s",
-             type_info.name());
-      return false;
-    }
-  }
+  virtual bool validateReadoutData(const DataParser::CaenReadout &Data) const = 0;
 
   /// \brief return the total number of serializers used by the geometry
   [[nodiscard]] virtual size_t numSerializers() const = 0;
@@ -118,7 +103,7 @@ public:
     return CaenStats;
   }
 
-  inline bool validateGroup(int Group) {
+  inline bool validateGroup(int Group) const {
     if (Group < 0 || Group > MaxGroup) {
       XTRACE(DATA, WAR, "Group %d is invalid (out of range)", Group);
       CaenStats.GroupErrors++;

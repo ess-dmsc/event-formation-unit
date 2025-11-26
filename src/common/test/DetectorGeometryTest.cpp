@@ -23,7 +23,7 @@ struct MockWrongReadout {
 /// TestDetectorGeometry is a mock detector geometry class for testing purposes
 /// It inherits from DetectorGeometry and can be used to create instances for
 /// testing
-class TestDetectorGeometry : public DetectorGeometry {
+class TestDetectorGeometry : public DetectorGeometry<DataParser::CaenReadout> {
 public:
   /// \brief Constructor for the TestDetectorGeometry class
   explicit TestDetectorGeometry(Statistics &Stats)
@@ -36,31 +36,13 @@ public:
   /// \brief Simple mock implementation of calcPixelImpl for testing
   /// \param Data Pointer to mock data (unused in this test)
   /// \return Fixed test value for validation
-  uint32_t calcPixelImpl(const void *Data) const override {
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override {
     // Simple mock implementation that always returns a valid pixel
-    if (Data == nullptr) {
-      return 0;
-    }
-    const auto *caenData = static_cast<const DataParser::CaenReadout *>(Data);
-
-    if (caenData->FiberId != 0) {
+    if (Data.FiberId != 0) {
       return 0; // Simulate failure simulation for non-zero FiberId
     }
 
     return 1; // Simple valid pixel
-  }
-
-  /// \brief Mock implementation of validateDataType for testing
-  /// \param type_info Type information from typeid()
-  /// \return true only for CaenReadout, false for other types to test type
-  /// validation
-  bool validateDataType(const std::type_info &type_info) const override {
-    // For CAEN geometry testing, only accept CAEN readout types
-    // This allows us to test type validation failure with MockWrongReadout
-    if (type_info == typeid(DataParser::CaenReadout)) {
-      return true;
-    }
-    return false;
   }
 
   // Public test wrapper methods that call protected validation methods
@@ -110,7 +92,6 @@ TEST_F(DetectorGeometryTest, Constructor) {
   ASSERT_EQ(caenGeometry->getBaseCounters().TopologyError, 0);
   ASSERT_EQ(caenGeometry->getBaseCounters().ValidationErrors, 0);
   ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors, 0);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 0);
 }
 
 /// \brief Test all validation functions using validateAll method
@@ -171,7 +152,6 @@ TEST_F(DetectorGeometryTest, CalcPixelValidCAEN) {
   uint32_t pixel = caenGeometry->calcPixel(readout);
   ASSERT_EQ(pixel, 1);
   ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors, 0);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 0);
 }
 
 /// \brief Test calcPixel method with CAEN readout that causes calculation
@@ -182,45 +162,6 @@ TEST_F(DetectorGeometryTest, CalcPixelFailure) {
   uint32_t pixel = caenGeometry->calcPixel(readout);
   ASSERT_EQ(pixel, 0);
   ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors, 1);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 0);
-}
-
-/// \brief Test calcPixel method with wrong readout type (TypeError)
-/// This test verifies that the type validation works correctly by using
-/// MockWrongReadout which should be rejected by validateDataType()
-TEST_F(DetectorGeometryTest, CalcPixelWrongType) {
-  MockWrongReadout wrongReadout{123, 456};
-
-  uint32_t pixel = caenGeometry->calcPixel(wrongReadout);
-
-  // MockWrongReadout should be rejected by validateDataType, causing TypeError
-  ASSERT_EQ(pixel, 0);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 1);
-  ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors, 0);
-}
-
-/// \brief Test type validation system with multiple invalid types
-TEST_F(DetectorGeometryTest, TypeValidationSystem) {
-  // Test with first invalid type
-  MockWrongReadout wrongReadout1{100, 200};
-  uint32_t pixel1 = caenGeometry->calcPixel(wrongReadout1);
-  ASSERT_EQ(pixel1, 0);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 1);
-
-  // Test with another completely different invalid type
-  int invalidType = 42;
-  uint32_t pixel2 = caenGeometry->calcPixel(invalidType);
-  ASSERT_EQ(pixel2, 0);
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors, 2);
-
-  // Test that valid CAEN type still works after invalid attempts
-  DataParser::CaenReadout validReadout{0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0};
-  uint32_t pixel3 = caenGeometry->calcPixel(validReadout);
-  ASSERT_EQ(pixel3, 1); // Should succeed
-  ASSERT_EQ(caenGeometry->getBaseCounters().TypeErrors,
-            2); // No additional type error
-  ASSERT_EQ(caenGeometry->getBaseCounters().PixelErrors,
-            0); // No pixel calculation error
 }
 
 int main(int argc, char **argv) {

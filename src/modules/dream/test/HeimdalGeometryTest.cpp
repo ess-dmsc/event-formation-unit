@@ -44,19 +44,19 @@ TEST_F(HeimdalGeometryTest, PixelOffsets) {
 ///\todo only tests (some) x-coordinates
 TEST_F(HeimdalGeometryTest, GetPixel) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::HeimdalMantle;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 56161); // Cass 0 of first MU
+  ASSERT_EQ(geometry->calcPixel(Readout), 56161); // Cass 0 of first MU
   DreamConfig.RMConfig[0][0].P1.MU = 1;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 56161 + 12); // Cass 0 of second MU
+  ASSERT_EQ(geometry->calcPixel(Readout), 56161 + 12); // Cass 0 of second MU
   DreamConfig.RMConfig[0][0].P1.MU = 2;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 56161 + 24); // Cass 0 of third MU
+  ASSERT_EQ(geometry->calcPixel(Readout), 56161 + 24); // Cass 0 of third MU
   DreamConfig.RMConfig[0][0].P1.MU = 11;
   DreamConfig.RMConfig[0][0].P2.Cassette = 5;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 56161 + 142); // last Cass of last MU
+  ASSERT_EQ(geometry->calcPixel(Readout), 56161 + 142); // last Cass of last MU
 }
 
 TEST_F(HeimdalGeometryTest, GetPixelBadType) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::DreamMantle;
-  ASSERT_EQ(geometry->calcPixel<DataParser::CDTReadout>(Readout), 0);
+  ASSERT_EQ(geometry->calcPixel(Readout), 0);
 }
 
 int main(int argc, char **argv) {

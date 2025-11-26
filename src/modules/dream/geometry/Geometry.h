@@ -32,7 +32,7 @@ namespace Dream {
 
 using namespace geometry;
 
-class Geometry : public DetectorGeometry {
+class Geometry : public DetectorGeometry<DataParser::CDTReadout> {
 
 private:
   struct DreamGeometryCounters : public StatCounterBase {
@@ -77,21 +77,6 @@ protected:
   /// \return Reference to ModuleParms for the given Ring/FEN
   const Config::ModuleParms &getModuleParms(int Ring, int FENId) const {
     return DreamConfig.RMConfig[Ring][FENId];
-  }
-
-  /// \brief Runtime type validation for DREAM readout data
-  /// \param type_info Type information from typeid()
-  /// \return true if type is valid for DREAM geometry, false otherwise
-  bool validateDataType(const std::type_info &type_info) const override {
-    // For DREAM geometries, we expect DataParser::CDTReadout
-    XTRACE(DATA, DEB, "Validating DREAM readout type: %s", type_info.name());
-    if (type_info == typeid(DataParser::CDTReadout)) {
-      return true;
-    } else {
-      XTRACE(DATA, WAR, "Invalid readout type for DREAM geometry: %s",
-             type_info.name());
-      return false;
-    }
   }
 
   /// \brief Validate that configuration for Ring/FEN is initialized

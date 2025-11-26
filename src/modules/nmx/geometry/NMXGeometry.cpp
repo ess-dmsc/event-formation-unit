@@ -17,7 +17,7 @@ using namespace vmm3;
 
 namespace Nmx {
 
-bool NMXGeometry::validateReadoutData(const VMM3Parser::VMM3Data &Data) {
+bool NMXGeometry::validateReadoutData(const VMM3Parser::VMM3Data &Data) const {
   uint8_t Ring = calcRing(Data.FiberId);
   uint8_t HybridId = calcHybridId(Data.VMM);
 

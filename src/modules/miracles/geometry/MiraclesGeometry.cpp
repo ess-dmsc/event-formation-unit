@@ -26,12 +26,10 @@ MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
       ESSGeometry(48, 128, 1, 1),
       GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
-uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
-  auto Data = static_cast<const DataParser::CaenReadout *>(DataPtr);
-
-  int Ring = calcRing(Data->FiberId);
-  int x = xCoord(Ring, Data->Group, Data->AmpA, Data->AmpB);
-  int y = yCoord(Ring, Data->AmpA, Data->AmpB);
+uint32_t MiraclesGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
+  int x = xCoord(Ring, Data.Group, Data.AmpA, Data.AmpB);
+  int y = yCoord(Ring, Data.AmpA, Data.AmpB);
   uint32_t pixel = pixel2D(x, y);
 
   XTRACE(DATA, DEB, "xcoord %d, ycoord %d, pixel %hu", x, y, pixel);
@@ -40,7 +38,7 @@ uint32_t MiraclesGeometry::calcPixelImpl(const void *DataPtr) const {
 }
 
 bool MiraclesGeometry::validateReadoutData(
-    const DataParser::CaenReadout &Data) {
+    const DataParser::CaenReadout &Data) const {
   int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId, Data.Group);
 

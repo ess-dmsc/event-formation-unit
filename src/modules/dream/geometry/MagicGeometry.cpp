@@ -27,22 +27,20 @@ bool MagicGeometry::validateReadoutData(
                      [&]() { return validateConfigMapping(Ring, Data.FENId); });
 }
 
-uint32_t MagicGeometry::calcPixelImpl(const void *DataPtr) const {
-  const auto *Data = static_cast<const DataParser::CDTReadout *>(DataPtr);
-
-  int Ring = Data->FiberId / 2;
-  const Config::ModuleParms &Parms = getModuleParms(Ring, Data->FENId);
+uint32_t MagicGeometry::calcPixelImpl(const DataParser::CDTReadout &Data) const {
+  int Ring = Data.FiberId / 2;
+  const Config::ModuleParms &Parms = getModuleParms(Ring, Data.FENId);
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
   case Config::PA:
-    Pixel = padetector.calcPixelId(Parms, *Data);
+    Pixel = padetector.calcPixelId(Parms, Data);
     break;
 
   case Config::FR:
-    Pixel = frdetector.calcPixelId(Parms, *Data);
+    Pixel = frdetector.calcPixelId(Parms, Data);
     break;
 
   default:

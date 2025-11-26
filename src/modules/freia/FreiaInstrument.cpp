@@ -89,7 +89,7 @@ void FreiaInstrument::processReadouts() {
            readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    uint8_t Ring = DetectorGeometry::calcRing(readout.FiberId);
+    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
     // Validate readout data (Ring, FEN, Hybrid)
     if (!Geom->validateReadoutData(readout)) {
