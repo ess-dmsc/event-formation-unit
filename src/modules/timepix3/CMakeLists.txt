@@ -119,3 +119,12 @@ set(Timepix3GeometryTest_SRC
   test/Timepix3GeometryTest.cpp
 )
 create_test_executable(Timepix3GeometryTest)
+
+set(Timepix3ConfigTest_INC
+  ${timepix3_common_inc}
+)
+set(Timepix3ConfigTest_SRC
+  ${timepix3_common_src}
+  test/Timepix3ConfigTest.cpp
+)
+create_test_executable(Timepix3ConfigTest)
