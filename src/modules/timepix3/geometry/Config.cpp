@@ -20,12 +20,12 @@ namespace Timepix3 {
 Config::Config() {}
 
 Config::Config(const std::string &ConfigFile)
-  : Configurations::Config(ConfigFile) {
+    : Configurations::Config(ConfigFile) {
   XTRACE(INIT, DEB, "Loading json file");
   loadFromFile();
   XTRACE(INIT, DEB, "Loaded json file");
 
-  setMask(LOG | CHECK);
+  setMask(Flags::LOG | CHECK);
   assign("Detector", InstrumentName);
 
   if (InstrumentName != "timepix3") {
@@ -33,25 +33,12 @@ Config::Config(const std::string &ConfigFile)
     throw std::runtime_error(
         "Inconsistent Json file - invalid name, expected timepix3");
   }
-
   assign("XResolution", XResolution);
   assign("YResolution", YResolution);
   assign("ParallelThreads", ParallelThreads);
 
-  try {
-    ScaleUpFactor = assign("ScaleUpFactor", ScaleUpFactor);
-    LOG(INIT, Sev::Info,
-        "Camera image resolution ({}X{}) scaled up with factor {} to super "
-        "resolution of ({}X{})",
-        XResolution, YResolution, ScaleUpFactor, XResolution * ScaleUpFactor,
-        YResolution * ScaleUpFactor);
-  } catch (...) {
-    LOG(INIT, Sev::Info,
-        "Using default ScaleUpFactor = {}, super resolution not applied",
-        ScaleUpFactor);
-  }
-
-  setMask(LOG);
+  setMask(Flags::LOG);
+  assign("ScaleUpFactor", ScaleUpFactor);
   assign("MaxTimeGapNS", MaxTimeGapNS);
   assign("MinEventTimeSpanNS", MinEventTimeSpanNS);
   assign("FrequencyHz", FrequencyHz);
