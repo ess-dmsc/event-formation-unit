@@ -23,7 +23,7 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
   // Options
   app.add_option("--detector", Settings.Detector, "Specify detector name (LOKI, CSPEC, ..)")->required();
 
-  app.add_option("--amplitudemask", CaenSettings.AmplitudeMask, 
+  app.add_option("--amplitudemask", CaenSettings.AmplitudeMask,
       "Mask to apply on amplitudes to limit maximum or negative amplitude.");
 
   app.add_option("--fibervals", CaenSettings.FiberVals, "Number of Fiber values to generate");
@@ -36,8 +36,8 @@ ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
   app.add_option("--groupmask", CaenSettings.GroupMask, "Mask out unused Groups");
 
   // Flags
-  app.add_flag("--loki",    CaenSettings.Loki,    "generate data for all four amplitudes");
-  app.add_flag("--bitmaps", CaenSettings.Bitmaps, "generate data using bitmap images");
+  app.add_flag("--loki",    CaenSettings.Loki,    "Generate data for all four amplitudes");
+  app.add_flag("--bitmaps", CaenSettings.Bitmaps, "Generate data using bitmap images");
 
   // clang-format on
 }

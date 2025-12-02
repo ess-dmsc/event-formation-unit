@@ -28,29 +28,27 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   // Store the detector type
   Settings.Detector = Type;
 
+  // clang-format off
+  //
   // Options
-  app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
-  app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
-  app.add_option("-a, --packets", Settings.NumberOfPackets,
-                 "Number of packets to send");
-  app.add_option("-t, --throttle", Settings.SpeedThrottle,
-                 "Speed throttle (0 is fastest, larger is slower)");
-  app.add_option("-s, --pkt_throttle", Settings.PktThrottle,
-                 "Extra usleep() after n packets");
-  app.add_option("-y, --type", Settings.Detector, "Detector type id");
-  app.add_option("-f, --fibers", Settings.NFibers,
-                 "Number of Fibers used in data header");
-  app.add_option("-q, --frequency", Settings.Frequency,
-                 "Pulse frequency in Hz. (default 0: refreshed for "
-                 "each packet)");
-  app.add_option("-v, --header_version", Settings.headerVersion,
-                 "Header version, v1 by default");
+  app.add_option("-i, --ip",             Settings.IpAddress,      "Destination IP address");
+  app.add_option("-p, --port",           Settings.UDPPort,        "Destination UDP port");
+  app.add_option("-a, --packets",        Settings.NumberOfPackets,"Number of packets to send");
+  app.add_option("-t, --throttle",       Settings.SpeedThrottle,  "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle",   Settings.PktThrottle,    "Number of microseconds to pause after n packets");
+  app.add_option("-y, --type",           Settings.Detector,       "Detector type id");
+  app.add_option("-f, --fibers",         Settings.NFibers,        "Number of fibers used in data header");
+  app.add_option("-q, --frequency",      Settings.Frequency,      "Pulse frequency in Hz. (default 0: refreshed for each packet)");
+  app.add_option("-v, --header_version", Settings.HeaderVersion,  "Header version, v1 by default");
+  app.add_option("--time_source",        Settings.TimeSource,     "Bit mask defining activated bits of the time source field");
 
   // Flags
-  app.add_flag("-r, --random", Settings.Randomise,
-               "Randomise header and data fields");
-  app.add_flag("-l, --loop", Settings.Loop, "Run forever");
-  app.add_flag("--debug", Settings.Debug, "print debug information");
+  app.add_flag("-r, --random",  Settings.Randomise, "Randomise header and data fields");
+  app.add_flag("-l, --loop",    Settings.Loop,      "Run forever");
+  app.add_flag("--debug",       Settings.Debug,     "print debug information");
+  //
+  // clang-format on
+
 
   pulseTime = ESSTime::now();
   prevPulseTime = pulseTime;
@@ -148,6 +146,7 @@ void ReadoutGeneratorBase::generateHeader() {
   Header->PulseLow = pulseTime.getTimeLow();
   Header->PrevPulseHigh = prevPulseTime.getTimeHigh();
   Header->PrevPulseLow = prevPulseTime.getTimeLow();
+  Header->TimeSource = Settings.TimeSource;
 
   if (headerVersion == Parser::HeaderVersion::V1) {
     auto HeaderV1 = reinterpret_cast<Parser::PacketHeaderV1 *>(Buffer);
@@ -207,7 +206,7 @@ void ReadoutGeneratorBase::initialize(
   DataSource->printBufferSizes();
 
   // Parse the header version
-  switch (Settings.headerVersion) {
+  switch (Settings.HeaderVersion) {
   case Parser::HeaderVersion::V0:
     headerVersion = Parser::HeaderVersion::V0;
     HeaderSize = sizeof(Parser::PacketHeaderV0);

@@ -17,10 +17,11 @@
 #include <common/time/ESSTime.h>
 #include <common/types/DetectorType.h>
 
+#include <fmt/format.h>
+
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
-#include <fmt/format.h>
 
 namespace ESSReadout {
 
@@ -35,28 +36,37 @@ class Parser {
 
 public:
   // Static const strings for stat names
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_HEADER = "parser.essheader.errors.header";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_BUFFER = "parser.essheader.errors.buffer";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_COOKIE = "parser.essheader.errors.cookie";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_PAD = "parser.essheader.errors.pad";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SIZE = "parser.essheader.errors.size";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_VERSION = "parser.essheader.errors.version";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE = "parser.essheader.errors.output_queue";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TYPE = "parser.essheader.errors.type";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SEQNO = "parser.essheader.errors.seqno";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH = "parser.essheader.errors.timehigh";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC = "parser.essheader.errors.timefrac";
-  static inline const std::string METRIC_PARSER_ESSHEADER_HEARTBEATS = "parser.essheader.heartbeats";
-  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V0 = "parser.essheader.version.v0";
-  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V1 = "parser.essheader.version.v1";
-  static inline const std::string METRIC_PARSER_ESSHEADER_OQ_PACKETS = "parser.essheader.OQ.{:02}.packets";
-  
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_COUNT = "events.timestamp.tof.count";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE = "events.timestamp.tof.negative";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_HIGH = "events.timestamp.tof.high";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT = "events.timestamp.prevtof.count";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE = "events.timestamp.prevtof.negative";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH = "events.timestamp.prevtof.high";
+  // clang-format off
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_HEADER          = "parser.essheader.errors.header";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_BUFFER          = "parser.essheader.errors.buffer";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_COOKIE          = "parser.essheader.errors.cookie";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_PAD             = "parser.essheader.errors.pad";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SIZE            = "parser.essheader.errors.size";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_VERSION         = "parser.essheader.errors.version";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE    = "parser.essheader.errors.output_queue";
+
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMING          = "parser.essheader.errors.timing";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS     = "parser.essheader.errors.time_status";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC = "parser.essheader.errors.even_fibre_sync";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC  = "parser.essheader.errors.odd_fibre_sync";
+
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TYPE            = "parser.essheader.errors.type";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SEQNO           = "parser.essheader.errors.seqno";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH        = "parser.essheader.errors.timehigh";
+  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC        = "parser.essheader.errors.timefrac";
+
+  static inline const std::string METRIC_PARSER_ESSHEADER_HEARTBEATS             = "parser.essheader.heartbeats";
+  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V0             = "parser.essheader.version.v0";
+  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V1             = "parser.essheader.version.v1";
+  static inline const std::string METRIC_PARSER_ESSHEADER_OQ_PACKETS             = "parser.essheader.OQ.{:02}.packets";
+
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_COUNT              = "events.timestamp.tof.count";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE           = "events.timestamp.tof.negative";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_HIGH               = "events.timestamp.tof.high";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT          = "events.timestamp.prevtof.count";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE       = "events.timestamp.prevtof.negative";
+  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH           = "events.timestamp.prevtof.high";
+  // clang-format on
 
 private:
   struct ESSHeaderStats : public StatCounterBase {
@@ -67,6 +77,13 @@ private:
     int64_t ErrorCookie{0};
     int64_t ErrorPad{0};
     int64_t ErrorOutputQueue{0};
+
+    // TimeSrc errors
+    int64_t ErrorTiming{0};
+    int64_t ErrorTimeStatus{0};
+    int64_t ErrorEvenFibreSync{0};
+    int64_t ErrorOddFibreSync{0};
+
     int64_t ErrorTypeSubType{0};
     int64_t ErrorSeqNum{0};
     int64_t ErrorTimeHigh{0};
@@ -78,24 +95,33 @@ private:
 
     ESSHeaderStats(Statistics& Stats)
         : StatCounterBase(Stats, {
-            {METRIC_PARSER_ESSHEADER_ERRORS_HEADER, ErrorHeader},
-            {METRIC_PARSER_ESSHEADER_ERRORS_BUFFER, ErrorBuffer},
-            {METRIC_PARSER_ESSHEADER_ERRORS_COOKIE, ErrorCookie},
-            {METRIC_PARSER_ESSHEADER_ERRORS_PAD, ErrorPad},
-            {METRIC_PARSER_ESSHEADER_ERRORS_SIZE, ErrorSize},
-            {METRIC_PARSER_ESSHEADER_ERRORS_VERSION, ErrorVersion},
-            {METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE, ErrorOutputQueue},
-            {METRIC_PARSER_ESSHEADER_ERRORS_TYPE, ErrorTypeSubType},
-            {METRIC_PARSER_ESSHEADER_ERRORS_SEQNO, ErrorSeqNum},
-            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH, ErrorTimeHigh},
-            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC, ErrorTimeFrac},
-            {METRIC_PARSER_ESSHEADER_HEARTBEATS, HeartBeats},
-            {METRIC_PARSER_ESSHEADER_VERSION_V0, Version0Header},
-            {METRIC_PARSER_ESSHEADER_VERSION_V1, Version1Header}
+            // clang-format off
+            {METRIC_PARSER_ESSHEADER_ERRORS_HEADER,          ErrorHeader},
+            {METRIC_PARSER_ESSHEADER_ERRORS_BUFFER,          ErrorBuffer},
+            {METRIC_PARSER_ESSHEADER_ERRORS_COOKIE,          ErrorCookie},
+            {METRIC_PARSER_ESSHEADER_ERRORS_PAD,             ErrorPad},
+            {METRIC_PARSER_ESSHEADER_ERRORS_SIZE,            ErrorSize},
+            {METRIC_PARSER_ESSHEADER_ERRORS_VERSION,         ErrorVersion},
+            {METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE,    ErrorOutputQueue},
+
+            // TimeSrc error counters
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIMING,          ErrorTiming},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS,     ErrorTimeStatus},
+            {METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC, ErrorEvenFibreSync},
+            {METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC,  ErrorOddFibreSync},
+
+            {METRIC_PARSER_ESSHEADER_ERRORS_TYPE,            ErrorTypeSubType},
+            {METRIC_PARSER_ESSHEADER_ERRORS_SEQNO,           ErrorSeqNum},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH,        ErrorTimeHigh},
+            {METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC,        ErrorTimeFrac},
+            {METRIC_PARSER_ESSHEADER_HEARTBEATS,             HeartBeats},
+            {METRIC_PARSER_ESSHEADER_VERSION_V0,             Version0Header},
+            {METRIC_PARSER_ESSHEADER_VERSION_V1,             Version1Header}
+            // clang-format on
         }) {
       // Register the array elements manually since StatCounterBase doesn't handle arrays
-      for (int i = 0; i < MaxOutputQueues; i++) {
-        std::string statname = fmt::format(METRIC_PARSER_ESSHEADER_OQ_PACKETS, i);
+      for (size_t i = 0; i < MaxOutputQueues; i++) {
+        const std::string statname = fmt::format(METRIC_PARSER_ESSHEADER_OQ_PACKETS, i);
         Stats.create(statname, OQRxPackets[i]);
       }
     }

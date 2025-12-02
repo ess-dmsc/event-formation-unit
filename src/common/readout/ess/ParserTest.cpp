@@ -263,6 +263,56 @@ TEST_F(ReadoutTest, InvalidCookie) {
   ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_COOKIE), 1);
 }
 
+TEST_F(ReadoutTest, InvalidTimeStatus) {
+  std::vector<uint8_t> Buffer = OkVersionV1;
+  int Result = 0;
+
+  // All good
+  Buffer[9] = 0x00;
+  Result = ESSParser.validate((char *) &Buffer[0], Buffer.size(), DataType);
+  ASSERT_EQ(Result, Parser::OK);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIMING),          0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS),     0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC), 0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC),  0);
+
+  // Time source is local but sync source is MRF
+  Buffer[9] = 0x02;
+  Result = ESSParser.validate((char *) &Buffer[0], Buffer.size(), DataType);
+  ASSERT_EQ(Result, -Parser::EHEADER);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIMING),          1);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS),     0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC), 0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC),  0);
+
+  // Even fibre lost sync
+  Buffer[9] = 0x20;
+  Result = ESSParser.validate((char *) &Buffer[0], Buffer.size(), DataType);
+  ASSERT_EQ(Result, -Parser::EHEADER);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIMING),          1);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS),     0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC), 1);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC),  0);
+
+  // Odd fibre lost sync
+  Buffer[9] = 0x80;
+  Result = ESSParser.validate((char *) &Buffer[0], Buffer.size(), DataType);
+  ASSERT_EQ(Result, -Parser::EHEADER);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIMING),          1);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS),     0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC), 1);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC),  1);
+
+  // All errors on
+  Buffer[9] = 0xa2;
+  Result = ESSParser.validate((char *) &Buffer[0], Buffer.size(), DataType);
+  ASSERT_EQ(Result, -Parser::EHEADER);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIMING),          2);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS),     0);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC), 2);
+  ASSERT_EQ(Stats.getValueByName(Parser::METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC),  2);
+}
+
 } // namespace ESSReadout
 
 int main(int argc, char **argv) {
