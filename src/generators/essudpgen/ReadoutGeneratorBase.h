@@ -50,15 +50,16 @@ public:
     uint64_t NumberOfPackets{0};                            ///< Number of packets to transmit (0 means all packets)
     uint64_t SpeedThrottle{0};                              ///< Speed throttle for transmission
     uint64_t PktThrottle{0};                                ///< Packet throttle for transmission
+    uint8_t  TimeSource{0x00};                              ///< Time source bit set - all are activated by default
 
     /// \todo This should be the default mode and obsolete per packet generation
     /// \todo Frequency should be a double instead of integer.
-    uint16_t Frequency{ DEFAULT_FREQUENCY };                ///< Frequency of time updates for each packet
+    uint16_t Frequency{DEFAULT_FREQUENCY};                  ///< Frequency of time updates for each packet
 
-    uint8_t headerVersion{1};             ///< Header version
-    bool Loop{false};                     ///< Flag to keep looping the same file forever
-    bool Randomise{false};                ///< Flag to randomise header and data
-    uint32_t KernelTxBufferSize{1000000}; ///< Kernel transmit buffer size
+    uint8_t HeaderVersion{1};                               ///< Header version
+    bool Loop{false};                                       ///< Flag to keep looping the same file forever
+    bool Randomise{false};                                  ///< Flag to randomise header and data
+    uint32_t KernelTxBufferSize{1000000};                   ///< Kernel transmit buffer size
   } Settings;
   // clang-format on
 

@@ -10,8 +10,11 @@
 #include <arpa/inet.h>
 #include <common/debug/Trace.h>
 #include <common/readout/ess/Parser.h>
-#include <cstring>
+#include <common/types/TimeSourceTypes.h>
+
 #include <fmt/format.h>
+
+#include <cstring>
 #include <memory>
 
 namespace ESSReadout {
@@ -21,7 +24,7 @@ using namespace esstime;
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-Parser::Parser(Statistics &StatsRef) 
+Parser::Parser(Statistics &StatsRef)
     : ESSHeaderStats(StatsRef), Packet(StatsRef) {
   std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
   // All statistics counters are now registered automatically via StatCounterBase
@@ -141,6 +144,41 @@ int Parser::validate(const char *Buffer, uint32_t Size, uint8_t ExpectedType) {
     Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
     Packet.DataLength =
         Packet.HeaderPtr.getTotalLength() - sizeof(PacketHeaderV0);
+  }
+
+  // Check time source flags - for further details, see the ticket
+  //
+  //   https://jira.ess.eu/browse/ECDC-5154 for further details
+  //
+  const uint8_t TS = Packet.HeaderPtr.getTimeSource();
+  bool TSError = false;
+
+  if ( !(TS & TimeSource::TIME_SOURCE) && (TS & TimeSource::SYNC_SOURCE) ) {
+    XTRACE(PROCESS, WAR, "Time source is local but sync source is MRF, TimeSrc = 0x%x", TS);
+    ESSHeaderStats.ErrorTiming++;
+    TSError = true;
+  }
+
+  if ( !(TS & TimeSource::TIME_SOURCE) && (TS & TimeSource::TIMING_STATUS) ) {
+    XTRACE(PROCESS, WAR, "Time status: MRF error when time source is MRF, TimeSrc = 0x%x", TS);
+    ESSHeaderStats.ErrorTimeStatus++;
+    TSError = true;
+  }
+
+  if (TS & TimeSource::EVEN_FIBRE_SYNC) {
+    XTRACE(PROCESS, WAR, "Even fibre has lost sync, TimeSrc = 0x%x", TS);
+    ESSHeaderStats.ErrorEvenFibreSync++;
+    TSError = true;
+  }
+
+  if (TS & TimeSource::ODD_FIBRE_SYNC) {
+    XTRACE(PROCESS, WAR, "Odd fibre has lost sync, TimeSrc = 0x%x", TS);
+    ESSHeaderStats.ErrorOddFibreSync++;
+    TSError = true;
+  }
+
+  if (TSError) {
+    return -Parser::EHEADER;
   }
 
   //

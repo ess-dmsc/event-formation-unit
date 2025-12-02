@@ -26,7 +26,7 @@ std::vector<uint8_t> UdpPayload
 {
                 0x00, 0x00, // pad, v0
     0x45, 0x53, 0x53, 0x30, // 'E', 'S', 'S', type 0x30
-    0x4e, 0x00, 0x01, 0x00, // len 78/0x4e OQ 1
+    0x4e, 0x00, 0x01, 0x00, // len 78/0x4e OQ 1, TSrc0
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
@@ -74,7 +74,7 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
           ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   Caen::ReadoutGenerator gen;
-  gen.Settings.headerVersion = 0;
+  gen.Settings.HeaderVersion = 0;
   gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
 
   gen.initialize(std::move(readoutTimeGenerator));
@@ -105,7 +105,7 @@ TEST_F(CombinedParserTest, DataGenV0) {
           ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   Caen::ReadoutGenerator gen;
-  gen.Settings.headerVersion = 0;
+  gen.Settings.HeaderVersion = 0;
   gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
   gen.initialize(std::move(readoutTimeGenerator));
 

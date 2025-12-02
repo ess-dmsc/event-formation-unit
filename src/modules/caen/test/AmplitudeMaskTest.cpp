@@ -30,7 +30,7 @@ static void runMaskTest(uint16_t maskTrunc, DetectorType detector) {
       ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
   ReadoutGenerator gen;
-  gen.Settings.headerVersion = 0;
+  gen.Settings.HeaderVersion = 0;
   gen.Settings.Detector = detector;
   gen.Settings.FiberMask = 0x3f;
   gen.CaenSettings.AmplitudeMask = maskTrunc;

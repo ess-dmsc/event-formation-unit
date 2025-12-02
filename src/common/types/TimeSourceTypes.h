@@ -1,9 +1,9 @@
 // Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
-/// \file DetectorType.h
+/// \file TimeSource.h
 ///
-/// Detector enums used in the EFU
+/// Time source enums used by the EFU
 //===----------------------------------------------------------------------===//
 
 #pragma once
@@ -16,61 +16,56 @@
 #include <stdexcept>
 #include <string>
 
-class DetectorType {
+class TimeSource {
 public:
 
   // Enum definition
   enum Types {
-    RESERVED = 0x00,
-    CBM      = 0x10,
-    LOKI     = 0x30,
-    TBL3HE   = 0x32,
-    BIFROST  = 0x34,
-    MIRACLES = 0x38,
-    CSPEC    = 0x3C,
-    TREX     = 0x40,
-    NMX      = 0x44,
-    FREIA    = 0x48,
-    TBLMB    = 0x49,
-    ESTIA    = 0x4C,
-    BEER     = 0x50,
-    DREAM    = 0x60,
-    MAGIC    = 0x64,
-    HEIMDAL  = 0x68
+    TIME_SOURCE       = 1 << 0,
+    SYNC_SOURCE       = 1 << 1,
+    LOCAL_SYNC_SOURCE = 1 << 2,
+    TIMING_STATUS     = 1 << 3,
+
+    EVEN_FIBRE_STATUS = 1 << 4,
+    EVEN_FIBRE_SYNC   = 1 << 5,
+
+    ODD_FIBRE_STATUS  = 1 << 6,
+    ODD_FIBRE_SYNC    = 1 << 7,
   };
 
   // Max and min enum values
-  static constexpr int MIN = Types::RESERVED;
-  static constexpr int MAX = Types::HEIMDAL;
+  static constexpr int MIN = Types::TIME_SOURCE;
+  static constexpr int MAX = Types::ODD_FIBRE_SYNC;
 
   // Construct from string
-  DetectorType(const std::string &typeName) {
+  TimeSource(const std::string &typeName) {
+
     // Convert to upper case, so both "value" and "VALUE" will work
     std::string upper = typeName;
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     const auto t = magic_enum::enum_cast<Types>(upper);
     if (t.has_value()) {
-      mDetectorType = t.value();
+      mTimeSource = t.value();
     } else {
-      throw std::out_of_range("Invalid DetectorType string: " + typeName);
+      throw std::out_of_range("Invalid TimeSource string: " + typeName);
     }
   }
 
   // Construct from integer
-  DetectorType(const int type=RESERVED) {
+  TimeSource(const int type=TIME_SOURCE) {
     if (type >= MIN && type <= MAX) {
-      mDetectorType = static_cast<Types>(type);
+      mTimeSource = static_cast<Types>(type);
     }
 
     else {
-      throw std::out_of_range("Invalid DetectorType integer: " +
+      throw std::invalid_argument("Invalid TimeSource integer: " +
                                   std::to_string(type));
     }
   }
 
   std::string toString() const {
-    const std::string name(magic_enum::enum_name(mDetectorType));
+    const std::string name(magic_enum::enum_name(mTimeSource));
 
     return name;
   }
@@ -87,24 +82,24 @@ public:
     return lower;
   }
 
-  operator uint8_t() const { return static_cast<uint8_t>(mDetectorType); }
+  operator int() const { return static_cast<int>(mTimeSource); }
 
-  bool operator==(const DetectorType &other) const {
-    return mDetectorType == other.mDetectorType;
+  bool operator==(const TimeSource &other) const {
+    return mTimeSource == other.mTimeSource;
   }
 
-  bool operator!=(const DetectorType &other) const {
-    return mDetectorType != other.mDetectorType;
+  bool operator!=(const TimeSource &other) const {
+    return mTimeSource != other.mTimeSource;
   }
 
   bool operator==(const Types &other) const {
-    return mDetectorType == other;
+    return mTimeSource == other;
   }
 
   bool operator!=(const Types &other) const {
-    return mDetectorType != other;
+    return mTimeSource != other;
   }
 
 private:
-  Types mDetectorType;
+  Types mTimeSource;
 };
