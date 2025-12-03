@@ -8,8 +8,9 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/readout/ess/Parser.h"
+#include <common/readout/ess/Parser.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
@@ -19,9 +20,10 @@
 
 #define IBM_ADC_MASK 0xFFFFFF
 
+using namespace esstime;
+using namespace geometry;
 namespace cbm {
 
-using namespace esstime;
 
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
@@ -35,8 +37,8 @@ CbmInstrument::CbmInstrument(
       HistogramSerializerMap(HistogramSerializerMap),
       ESSHeaderParser(essHeaderParser) {
 
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.Parms.MaxPulseTimeDiffNS);
-  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.Parms.MaxTOFNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.CbmParms.MaxPulseTimeDiffNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.CbmParms.MaxTOFNS);
 
   //To handle EVENT_2D monitors the configuration list must be analysed
   //for EVENT_2D data to create the geometry
@@ -82,10 +84,10 @@ void CbmInstrument::processMonitorReadouts() {
            Readout.FiberId, Readout.FENId, Readout.Pos, Readout.Type,
            Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
-    int Ring = Readout.FiberId / 2;
-    if (Ring != Conf.Parms.MonitorRing) {
+    int Ring = DetectorGeometry<cbm::Parser::CbmReadout>::calcRing(Readout.FiberId);
+    if (Ring != Conf.CbmParms.MonitorRing) {
       XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
-             Conf.Parms.MonitorRing);
+             Conf.CbmParms.MonitorRing);
       counters.RingCfgError++;
       continue;
     }

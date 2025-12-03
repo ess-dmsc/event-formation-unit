@@ -7,7 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <generators/functiongenerators/FunctionGenerator.h>
 #include <caen/CaenCounters.h>
 #include <caen/readout/DataParser.h>

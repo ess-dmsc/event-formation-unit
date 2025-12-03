@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("heimdal", argc, argv);
 
   auto Detector =
-      new Dream::DreamBase(Main.DetectorSettings, DetectorType::HEIMDAL);
+      new Dream::DreamBase<DetectorType::HEIMDAL>(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

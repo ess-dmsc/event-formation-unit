@@ -9,10 +9,12 @@
 #include <modules/trex/generators/ReadoutGenerator.h>
 // GCOVR_EXCL_START
 
+using namespace vmm3;
+
 int main(int argc, char *argv[]) {
 
   Trex::ReadoutGenerator TrexGen;
-  uint8_t TrexDataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+  uint8_t TrexDataSize = sizeof(VMM3Parser::VMM3Data);
   TrexGen.setReadoutDataSize(TrexDataSize);
 
   TrexGen.argParse(argc, argv);

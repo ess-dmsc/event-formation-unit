@@ -15,6 +15,7 @@ set(efu_common_SRC
   debug/Log.cpp
   detector/Detector.cpp
   detector/EFUArgs.cpp
+  geometry/vmm3/VMM3Geometry.cpp
   kafka/EV44Serializer.cpp
   kafka/AR51Serializer.cpp
   kafka/KafkaConfig.cpp
@@ -47,6 +48,8 @@ set(efu_common_INC
   detector/BaseSettings.h
   detector/Detector.h
   detector/EFUArgs.h
+  geometry/DetectorGeometry.h
+  geometry/vmm3/VMM3Geometry.h
   kafka/EV44Serializer.h
   kafka/AR51Serializer.h
   kafka/KafkaConfig.h

@@ -10,6 +10,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/Statistics.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <modules/cspec/geometry/CspecGeometry.h>
 
 // #undef TRC_LEVEL
@@ -17,57 +19,43 @@
 
 namespace Caen {
 
-CspecGeometry::CspecGeometry(Config &CaenConfiguration) {
-  ESSGeom = new ESSGeometry(900, 180, 1, 1);
-  setResolution(CaenConfiguration.CaenParms.Resolution);
-  MaxRing = CaenConfiguration.CaenParms.MaxRing;
-  MaxFEN = CaenConfiguration.CaenParms.MaxFEN;
-  MaxGroup = CaenConfiguration.CaenParms.MaxGroup;
-}
+CspecGeometry::CspecGeometry(Statistics &Stats, const Config &CaenConfiguration)
+    : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
+               CaenConfiguration.CaenParms.MaxFEN,
+               CaenConfiguration.CaenParms.MaxGroup),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
+      Resolution(CaenConfiguration.CaenParms.Resolution) {}
 
-bool CspecGeometry::validateData(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+bool CspecGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "FiberId: %u, Ring %d, FEN %u, Group %u", Data.FiberId,
          Ring, Data.FENId, Data.Group);
 
-  if (Ring > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
-    Stats.RingErrors++;
-    return false;
-  }
-
-  if (Data.FENId > MaxFEN) {
-    XTRACE(DATA, WAR, "FEN %d is incompatible with config", Data.FENId);
-    Stats.FENErrors++;
-    return false;
-  }
-
-  if (Data.Group > MaxGroup) {
-    XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
-    Stats.GroupErrors++;
-    return false;
-  }
-  return true;
+  return validateAll([&]() { return validateRing(Ring); },
+                     [&]() { return validateFEN(Data.FENId); },
+                     [&]() { return validateGroup(Data.Group); });
 }
 
-int CspecGeometry::xOffset(int Ring, int Group) {
-  ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He CSPEC
-  return Ring * NPos + (Group % 24) * (NPos / 24);
+int CspecGeometry::xOffset(int Ring, int Group) const {
+  ///\todo Determine the 'real' x-offset once a new ICD is decided for 3He
+  /// CSPEC
+  // Use per-detector Resolution for ring stride and subdivide for groups.
+  return Ring * Resolution + (Group % GROUPS_PER_RING) * (Resolution / GROUPS_PER_RING);
 }
 
-int CspecGeometry::posAlongUnit(int AmpA, int AmpB) {
+int CspecGeometry::posAlongUnit(int AmpA, int AmpB) const {
   if (AmpA + AmpB == 0) {
     ///\todo add counter
     return -1;
   }
-  return ((NPos - 1) * AmpA) / (AmpA + AmpB);
+  return ((Resolution - 1) * AmpA) / (AmpA + AmpB);
 }
 
-uint32_t CspecGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+uint32_t CspecGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   int xoff = xOffset(Ring, Data.Group);
   int ylocal = yCoord(Data.AmpA, Data.AmpB);
-  uint32_t pixel = ESSGeom->pixel2D(xoff, ylocal);
+  uint32_t pixel = pixel2D(xoff, ylocal);
 
   XTRACE(DATA, DEB, "xoffset %d, ylocal %d, pixel %hu", xoff, ylocal, pixel);
 

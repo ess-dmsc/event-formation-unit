@@ -122,7 +122,7 @@ public:
     uint8_t AggregatedFrames{1};                    // < Number of pulse to sum in a histogram
                                                     //   When set to one and with the default SUM mode,
                                                     //   this will be one frame one histogram.
-  } Parms;
+  } CbmParms;
   // clang-format on
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;

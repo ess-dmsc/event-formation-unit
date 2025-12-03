@@ -42,15 +42,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
   Stats.create("parser.readout.error_ringfen", Counters.Parser.RingFenErrors);
 
   // Logical and Digital geometry incl. Calibration
-  Stats.create("geometry.ring_errors", Counters.Geom.RingErrors);
-  Stats.create("geometry.fen_errors", Counters.Geom.FENErrors);
-  Stats.create("geometry.ring_mapping_errors", Counters.Geom.RingMappingErrors);
-  Stats.create("geometry.fen_mapping_errors", Counters.Geom.FENMappingErrors);
-  Stats.create("geometry.topology_errors", Counters.Geom.TopologyErrors);
-  Stats.create("geometry.group_errors", Counters.Geom.GroupErrors);
-  Stats.create("geometry.ampl_zero", Counters.Geom.AmplitudeZero);
-  Stats.create("geometry.ampl_low", Counters.Geom.AmplitudeLow);
-  Stats.create("geometry.ampl_high", Counters.Geom.AmplitudeHigh);
   Stats.create("geometry.pos_low", Counters.Calibration.ClampLow);
   Stats.create("geometry.pos_high", Counters.Calibration.ClampHigh);
   Stats.create("geometry.calib_group_errors", Counters.Calibration.GroupErrors);
@@ -58,7 +49,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
 
   // Events
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.errors.pixel", Counters.PixelErrors);
   Stats.create("events.errors.time", Counters.TimeError);
 
   // System counters
@@ -95,7 +85,7 @@ void CaenBase::processingThread() {
   };
 
   // Create the instrument
-  CaenInstrument Caen(Counters, EFUSettings, ESSHeaderParser);
+  CaenInstrument Caen(Stats, Counters, EFUSettings, ESSHeaderParser);
   // and its serializers
   Serializers.reserve(Caen.Geom->numSerializers());
   for (size_t i = 0; i < Caen.Geom->numSerializers(); ++i) {
@@ -147,7 +137,6 @@ void CaenBase::processingThread() {
 
       /// \todo This could be moved and done less frequently
       Counters.Parser = Caen.CaenParser.Stats;
-      Counters.Geom = Caen.Geom->Stats;
       Counters.Calibration = Caen.Geom->CaenCDCalibration.Stats;
 
     } else { // There is NO data in the FIFO - do stop checks and sleep a little

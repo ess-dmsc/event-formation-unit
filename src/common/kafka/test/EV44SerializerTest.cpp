@@ -1,6 +1,6 @@
-// Copyright (C) 2022 European Spallation Source ERIC
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 
-#include "ev44_events_generated.h"
+#include <ev44_events_generated.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/Producer.h>
 #include <common/math/Units.h>

@@ -5,7 +5,7 @@
 /// \brief Main entry for dream
 //===----------------------------------------------------------------------===//
 
-#include "common/types/DetectorType.h"
+#include <common/types/DetectorType.h>
 #include <efu/MainProg.h>
 #include <modules/dream/DreamBase.h>
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("dream", argc, argv);
 
   auto Detector =
-      new Dream::DreamBase(Main.DetectorSettings, DetectorType::DREAM);
+      new Dream::DreamBase<DetectorType::DREAM>(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

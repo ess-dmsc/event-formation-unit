@@ -40,8 +40,8 @@ public:
     uint32_t MaxFEN{0};
     uint32_t MaxGroup{0};
     // Non configurable parameters
-    uint32_t MinRing{0};  // 0-11
-    uint32_t MaxRing{11}; // 0-11
+    int MinRing{0};  // 0-11
+    int MaxRing{11}; // 0-11
   } CaenParms;
 
   LokiConfig LokiConf;

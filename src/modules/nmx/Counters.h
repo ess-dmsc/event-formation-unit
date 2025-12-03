@@ -18,16 +18,15 @@
 struct Counters {
   // ESSReadout parser
   int64_t ErrorESSHeaders;
-  // int64_t RingRx[24];
 
   // VMM3a Readouts
-  struct ESSReadout::VMM3ParserStats VMMStats;
+  struct vmm3::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
   int64_t HybridMappingErrors;
   int64_t TOFErrors;
+  /// \todo TREX still using this, we should decouple it from NMX Counters
   int64_t MinADC;
-  int64_t MaxADC;
   int64_t MappingErrors;
 
   struct GapMatcherStats MatcherStats;
@@ -43,7 +42,6 @@ struct Counters {
   int64_t ClustersTooSmallSpanY;
   int64_t ClustersTooLargeTimeSpan;
   int64_t EventsMatchedClusters;
-  int64_t PixelErrors;
   int64_t TimeErrors;
 
   // Identification of the cause of produce calls

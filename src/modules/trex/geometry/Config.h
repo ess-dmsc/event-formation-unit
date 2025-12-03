@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,18 +25,19 @@
 
 namespace Trex {
 
-class Config : public VMM3Config {
+class Config : public vmm3::VMM3Config {
 public:
-  Config() { FileParameters.InstrumentGeometry = "TREX"; };
+  Config() { FileParms.InstrumentGeometry = "TREX"; };
 
   // Load and apply the json config
   Config(const std::string &Instrument, const std::string &ConfigFile)
-      : VMM3Config(Instrument, ConfigFile) {}
+      : vmm3::VMM3Config(Instrument, ConfigFile) {}
 
   // Apply the loaded json file
   void applyConfig() override;
 
 public:
+
   // Parameters obtained from JSON config file
   struct {
     uint16_t SizeX{384};
@@ -46,7 +47,7 @@ public:
     uint16_t DefaultMinADC{50};
     uint16_t MaxMatchingTimeGap{500};
     uint16_t MaxClusteringTimeGap{500};
-  } TREXFileParameters;
+  } TREXFileParms;
 
   // Derived parameters
   // TREX specific Hybrid fields not included in common Hybrid class

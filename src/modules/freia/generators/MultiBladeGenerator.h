@@ -12,9 +12,11 @@
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
+using namespace vmm3;
+
 namespace Freia {
 
-using VMM3Data = ESSReadout::VMM3Parser::VMM3Data;
+using VMM3Data = VMM3Parser::VMM3Data;
 
 class MultiBladeGenerator : public ReadoutGeneratorBase {
   using Image = std::vector<std::pair<uint8_t, uint8_t>>;

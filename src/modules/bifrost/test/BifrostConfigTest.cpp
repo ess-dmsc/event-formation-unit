@@ -14,7 +14,6 @@
 auto ValidJson = R"(
     {
       "Detector": "bifrost",
-      "StrawResolution": 300,
       "MaxAmpl": 32767,
       "MaxRing": 4,
       "MaxGroup": 15
@@ -25,7 +24,6 @@ auto ValidJson = R"(
 auto InvalidDetectorJson = R"(
     {
       "Detector": "invalid",
-      "StrawResolution": 300,
       "MaxAmpl": 32767
     }
   )"_json;
@@ -33,7 +31,6 @@ auto InvalidDetectorJson = R"(
 // Missing required field
 auto MissingFieldJson = R"(
     {
-      "Detector": "bifrost",
       "MaxAmpl": 32767
     }
   )"_json;
@@ -42,7 +39,6 @@ auto MissingFieldJson = R"(
 const std::string MalformedJson = R"(
     {
       "Detector": "bifrost"
-      "StrawResolution": 300,
       "MaxAmpl": 32767
     }
   )";
@@ -60,7 +56,6 @@ protected:
 TEST_F(BifrostConfigTest, ParseValidConfig) {
   Config.setRoot(ValidJson);
   ASSERT_NO_THROW(Config.parseConfig());
-  ASSERT_EQ(Config.Parms.Resolution, 300);
   ASSERT_EQ(Config.Parms.MaxAmpl, 32767);
 }
 
@@ -80,8 +75,7 @@ TEST_F(BifrostConfigTest, MalformedJson) {
 }
 
 TEST_F(BifrostConfigTest, DefaultConstructor) {
-  ASSERT_EQ(Config.Parms.Resolution, 0);
-  ASSERT_EQ(Config.Parms.MaxAmpl, 0);
+  ASSERT_EQ(Config.Parms.MaxAmpl, std::numeric_limits<int>::max());
 }
 
 int main(int argc, char **argv) {

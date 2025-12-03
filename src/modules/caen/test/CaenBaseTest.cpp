@@ -8,11 +8,15 @@
 //===----------------------------------------------------------------------===//
 
 #include <caen/CaenBase.h>
+#include <common/detector/Detector.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
 #include <string>
 
 using namespace ESSReadout;
+using namespace geometry;
+using CaenReadout = Caen::DataParser::CaenReadout;
 
 class CaenBaseTest : public ::testing::Test {
 public:
@@ -70,11 +74,11 @@ TEST_F(CaenBaseTest, MiraclesConstructor) {
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
 
-std::vector<uint8_t> BadTestPacket {0x00, 0x01, 0x02};
+std::vector<uint8_t> BadTestPacket{0x00, 0x01, 0x02};
 
-std::vector<uint8_t> TestPacket2 {
-  // ESS header
-  // clang-format off
+std::vector<uint8_t> TestPacket2{
+    // ESS header
+    // clang-format off
   0x00, 0x00,             // pad, v0
   0x45, 0x53, 0x53, 0x30, //  'E' 'S' 'S' 0x30
   0xae, 0x00, 0x00, 0x00, // 0x96 = 150 bytes, OQ11, TSrc0
@@ -182,8 +186,18 @@ TEST_F(CaenBaseTest, DataReceiveGoodLoki) {
 
   EXPECT_EQ(Readout.Counters.Parser.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Parser.DataHeaders, 6);
-  EXPECT_EQ(Readout.Counters.PixelErrors, 1);
-  EXPECT_EQ(Readout.Counters.Geom.RingMappingErrors, 1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                DetectorGeometry<CaenReadout>::METRIC_PIXEL_ERRORS),
+            1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                DetectorGeometry<CaenReadout>::METRIC_TOPOLOGY_ERRORS),
+            1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                DetectorGeometry<CaenReadout>::METRIC_RING_MAPPING_ERRORS),
+            1);
+  EXPECT_EQ(Readout.getStatValueByName(
+                DetectorGeometry<CaenReadout>::METRIC_VALIDATION_ERRORS),
+            2);
   EXPECT_EQ(
       Readout.getStatValueByName(Parser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH), 1);
   EXPECT_EQ(Readout.getStatValueByName(

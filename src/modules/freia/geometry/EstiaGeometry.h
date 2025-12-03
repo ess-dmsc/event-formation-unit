@@ -1,0 +1,72 @@
+// Copyright (C) 2024 - 2025 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Estia geometry class
+///
+/// Mapping from digital identifiers to x- and y- coordinates
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+#include <common/Statistics.h>
+#include <common/debug/Trace.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
+#include <common/readout/vmm3/VMM3Config.h>
+#include <freia/Counters.h>
+#include <freia/geometry/Config.h>
+#include <limits>
+
+#include <cinttypes>
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
+namespace Freia {
+
+class EstiaGeometry final : public vmm3::VMM3Geometry {
+public:
+  static constexpr uint32_t ESSGEOMTERY_NX = 1536;
+  static constexpr uint32_t ESSGEOMTERY_NY = 128;
+  static constexpr uint32_t ESSGEOMTERY_NZ = 1;
+  static constexpr uint32_t ESSGEOMTERY_NP = 1;
+
+  EstiaGeometry(Statistics &Stats, Config &Cfg)
+      : vmm3::VMM3Geometry(Stats, Cfg, vmm3::VMM3Config::MaxRing,
+                           vmm3::VMM3Config::MaxFEN, ESSGEOMTERY_NX,
+                           ESSGEOMTERY_NY, ESSGEOMTERY_NZ, ESSGEOMTERY_NP) {}
+
+  bool validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const override {
+    uint8_t Ring = calcRing(Data.FiberId);
+    uint8_t HybridId = calcHybridId(Data.VMM);
+
+    return validateAll(
+        [&]() { return validateRing(Ring); },
+        [&]() { return validateFEN(Data.FENId); },
+        [&]() { return validateHybrid(Ring, Data.FENId, HybridId); },
+        [&]() { return validateChannel(Data.VMM, Data.Channel); });
+  }
+
+protected:
+  /// \brief Estia uses wires for X plane (different from default)
+  inline bool usesWiresForX() const override { return true; }
+
+  /// \brief Estia uses strips for Y plane (different from default)
+  inline bool usesWiresForY() const override { return false; }
+
+  /// \brief Estia wire calculation: Offset + (Channel - MinWireChannel) or
+  /// InvalidCoord if overflow
+  uint16_t calcFromWire(uint16_t Offset, uint8_t Channel) const override {
+    // Use uint32_t to detect overflow
+    uint32_t result = static_cast<uint32_t>(Offset) + Channel - MinWireChannel;
+    if (result > 65535) {
+      XTRACE(DATA, WAR, "Coordinate overflow: %u + %u - %u = %u", Offset,
+             Channel, MinWireChannel, result);
+      Counters.CoordOverflow++;
+      return vmm3::VMM3Geometry::InvalidCoord;
+    }
+    return static_cast<uint16_t>(result);
+  }
+};
+
+} // namespace Freia

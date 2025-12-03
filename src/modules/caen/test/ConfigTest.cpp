@@ -18,9 +18,8 @@ std::string NotJsonStr = R"(
 auto BaseConfigJSON = R"(
   {
     "Detector" : "loki",
-    "Resolution" : 512,
+    "Resolution" : 1024,
     "GroupsZ" : 4,
-    "StrawResolution" : 1024,
     "MaxAmpl" : 65535,
     "NumOfFENs" : 2,
     "MinValidAmplitude" : 100,
@@ -79,23 +78,20 @@ TEST_F(CaenConfigTest, Constructor) {
   ASSERT_EQ(config.CaenParms.MaxRing, 11);
 
   // Test LokiConf default values
-  ASSERT_EQ(config.LokiConf.Parms.Resolution, 0);
   ASSERT_EQ(config.LokiConf.Parms.ConfiguredBanks, 0);
   ASSERT_EQ(config.LokiConf.Parms.ConfiguredRings, 0);
   ASSERT_EQ(config.LokiConf.Parms.GroupsZ, 0);
   ASSERT_EQ(config.LokiConf.Parms.TotalGroups, 0);
 
   // Test Tbl3HeConf default values
-  ASSERT_EQ(config.Tbl3HeConf.Params.Resolution, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinRing, 0);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MaxRing, 11);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.NumOfFENs, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinRing, 0);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MaxRing, 11);
   ASSERT_EQ(config.Tbl3HeConf.TopologyMapPtr, nullptr);
 
   // Test BifrostConf default values
-  ASSERT_EQ(config.BifrostConf.Parms.Resolution, 0);
-  ASSERT_EQ(config.BifrostConf.Parms.MaxAmpl, 0);
+  ASSERT_EQ(config.BifrostConf.Parms.MaxAmpl, std::numeric_limits<int>::max());
 }
 
 TEST_F(CaenConfigTest, NoConfigFile) {
@@ -152,7 +148,6 @@ TEST_F(CaenConfigTest, ValidLokiConfig) {
   ASSERT_EQ(config.LokiConf.Parms.TotalGroups, (32 + 24) * 4);
 
   // Check that Loki config values are set correctly
-  ASSERT_EQ(config.LokiConf.Parms.Resolution, 512);
   ASSERT_EQ(config.LokiConf.Parms.GroupsZ, 4);
 
   // Check CAEN general parameters
@@ -169,13 +164,13 @@ TEST_F(CaenConfigTest, ValidBifrostConfig) {
   config.parseConfig();
 
   // Check that Bifrost some specific values are set correctly
-  ASSERT_EQ(config.BifrostConf.Parms.Resolution, 1024);
   ASSERT_EQ(config.BifrostConf.Parms.MaxAmpl, 65535);
 
   // Check CAEN general parameters
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
   ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
   ASSERT_EQ(config.CaenParms.InstrumentName, "bifrost");
+  ASSERT_EQ(config.CaenParms.Resolution, 1024);
 }
 
 /// \brief Test that the tbl3he identifed and related tbl3he config is parsed
@@ -186,14 +181,29 @@ TEST_F(CaenConfigTest, ValidTbl3HeConfig) {
   config.parseConfig();
 
   // Verify Tbl3He specific parameters are set correctly
-  ASSERT_EQ(config.Tbl3HeConf.Params.Resolution, 512);
-  ASSERT_EQ(config.Tbl3HeConf.Params.NumOfFENs, 2);
-  ASSERT_EQ(config.Tbl3HeConf.Params.MinValidAmplitude, 100);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.NumOfFENs, 2);
+  ASSERT_EQ(config.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude, 100);
 
   // Check CAEN general parameters
   ASSERT_EQ(config.CaenParms.MaxPulseTimeNS, 357142855);
   ASSERT_EQ(config.CaenParms.MaxTOFNS, 1000000000);
   ASSERT_EQ(config.CaenParms.InstrumentName, "tbl3he");
+}
+
+TEST_F(CaenConfigTest, MissingResolution) {
+  // Test missing Resolution field
+  auto invalidConfig = BaseConfigJSON;
+  invalidConfig.erase("Resolution");
+  config.setRoot(invalidConfig);
+
+  try {
+    config.parseConfig();
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    EXPECT_STREQ("Invalid Json file", e.what());
+  } catch (...) {
+    FAIL() << "Expected std::runtime_error with 'Invalid Json file' message";
+  }
 }
 
 /// \brief Test default MaxTOFNS value when not specified in config

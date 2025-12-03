@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,8 @@
 
 #include <common/readout/vmm3/VMM3Calibration.h>
 #include <common/testutils/TestBase.h>
+
+using namespace vmm3;
 
 class VMM3CalibrationTest : public TestBase {
 protected:

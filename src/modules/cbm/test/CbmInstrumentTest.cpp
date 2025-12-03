@@ -4,7 +4,7 @@
 /// \file Unit test for the CbmInstrument class.
 //===----------------------------------------------------------------------===//
 
-#include "common/readout/ess/Parser.h"
+#include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
 #include <modules/cbm/CbmInstrument.h>
@@ -45,7 +45,7 @@ std::vector<uint8_t> ValidEvent2DReadouts {
   0x02, 0x00, 0x01, 0x00,  // Type 2, Ch 0, ADC 1
   0x00, 0x01, 0x01, 0x01,  // XPos 256, YPos 257
 
-  0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
+  0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
   0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
   0xA2, 0x86, 0x01, 0x00,  // Time LO 100002 tick
   0x02, 0x01, 0x01, 0x00,  // Type 2, Ch 1, ADC 1

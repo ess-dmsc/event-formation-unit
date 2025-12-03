@@ -9,13 +9,16 @@
 #include <bifrost/geometry/BifrostGeometry.h>
 #include <caen/readout/DataParser.h>
 #include <common/testutils/TestBase.h>
+#include <gtest/gtest.h>
+#include <memory>
 
 using namespace Caen;
 
 class BifrostGeometryTest : public TestBase {
 protected:
+  Statistics Stats;
   Config CaenConfiguration;
-  BifrostGeometry *geom;
+  std::unique_ptr<BifrostGeometry> geom;
 
   int NullCalibGroup{0};
   int ManualCalibGroup{44};
@@ -26,12 +29,13 @@ protected:
       {0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}};
 
   void SetUp() override {
-    geom = new BifrostGeometry(CaenConfiguration);
-    geom->NPos = 300;
-    geom->MaxRing = 4;
-
-    CaenConfiguration.CaenParms.MaxGroup=45;
-    geom->CaenCDCalibration.Parms.Groups=CaenConfiguration.CaenParms.MaxGroup;
+    CaenConfiguration.CaenParms.MaxRing = 4;
+    CaenConfiguration.CaenParms.MaxGroup = 45;
+    CaenConfiguration.CaenParms.Resolution = 300;
+    // force the half-range upper limit on pulse-height values
+    CaenConfiguration.BifrostConf.Parms.MaxAmpl = 32767;
+    geom = std::make_unique<BifrostGeometry>(Stats, CaenConfiguration);
+    geom->CaenCDCalibration.Parms.Groups = CaenConfiguration.CaenParms.MaxGroup;
     // Make nullcalibration
     for (int i = 0; i < 45; i++) {
       geom->CaenCDCalibration.Intervals.push_back(NullCalib);
@@ -39,9 +43,6 @@ protected:
           {{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}});
     }
     geom->CaenCDCalibration.Intervals[ManualCalibGroup] = ManualCalib;
-
-    // force the half-range upper limit on pulse-height values
-    geom->MaxAmpl = 32767;
   }
   void TearDown() override {}
 };
@@ -97,7 +98,7 @@ TEST_F(BifrostGeometryTest, BadAmplitudes) {
   ASSERT_EQ(Result.first, -1);
 }
 
-TEST_F(BifrostGeometryTest, TooLargeAmplitudes){
+TEST_F(BifrostGeometryTest, TooLargeAmplitudes) {
   // A + B > 32768  -> pos < 0
   auto Result = geom->calcUnitAndPos(ManualCalibGroup, 32767, 1);
   ASSERT_EQ(Result.first, -1);
@@ -116,38 +117,65 @@ TEST_F(BifrostGeometryTest, MiddleUnit) {
   ASSERT_TRUE(Result.second < 0.5);
 }
 
-TEST_F(BifrostGeometryTest, CalcPixel) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout), 0);
+TEST_F(BifrostGeometryTest, CalcPixelAndCountPixelErrors) {
+  DataParser::CaenReadout readout1{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout1), 1);
+  ASSERT_EQ(geom->getBaseCounters().PixelErrors, 0);
 
-  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-  ASSERT_EQ(geom->calcPixel(readout2), 1);
+  DataParser::CaenReadout readout2{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  ASSERT_EQ(geom->calcPixel(readout2), 0);
+  ASSERT_EQ(geom->getBaseCounters().PixelErrors, 1);
 }
 
 TEST_F(BifrostGeometryTest, Validate) {
-  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  ASSERT_TRUE(geom->validateData(readout));
+  DataParser::CaenReadout readout{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1};
+  ASSERT_TRUE(geom->validateReadoutData(readout));
 
   readout.FiberId = 10;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 0);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 0);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
 
   readout.FiberId = 0;
   readout.FENId = 20;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 1);
-  ASSERT_EQ(geom->Stats.GroupErrors, 0);
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 1);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 0);
 
   readout.FiberId = 0;
   readout.FENId = 0;
-  readout.Group = 20;
-  ASSERT_FALSE(geom->validateData(readout));
-  ASSERT_EQ(geom->Stats.RingErrors, 1);
-  ASSERT_EQ(geom->Stats.FENErrors, 1);
-  ASSERT_EQ(geom->Stats.GroupErrors, 1);
+  readout.Group = 46;
+  ASSERT_FALSE(geom->validateReadoutData(readout));
+  ASSERT_EQ(geom->getBaseCounters().RingErrors, 1);
+  ASSERT_EQ(geom->getBaseCounters().FENErrors, 1);
+  ASSERT_EQ(geom->getCaenCounters().GroupErrors, 1);
+}
+
+TEST_F(BifrostGeometryTest, ZeroDivisionDefensiveCheck) {
+  // Test defensive check for division by zero (AmpA + AmpB == 0)
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, 0, 0);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().ZeroDivError, 1);
+}
+
+TEST_F(BifrostGeometryTest, GlobalPosInvalidCounter) {
+  // Test counter for GlobalPos outside [0.0, 1.0] interval
+  // When AmpA is negative or AmpB is negative, GlobalPos can be outside [0, 1]
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, -1, 20);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().GlobalPosInvalid, 1);
+}
+
+TEST_F(BifrostGeometryTest, UnitIdInvalidCounter) {
+  // Test counter for when calibration getUnitId returns -1
+  // Using ManualCalibGroup with out-of-range position
+  // ManualCalib intervals: {0.030, 0.290}, {0.627, 0.363}, {0.705, 0.970}
+  // Position that falls outside all intervals should trigger UnitIdInvalid
+  std::pair<int, double> Result = geom->calcUnitAndPos(ManualCalibGroup, 1, 1000);
+  ASSERT_EQ(Result.first, -1);
+  ASSERT_EQ(geom->getCaenCounters().UnitIdInvalid, 1);
 }
 
 int main(int argc, char **argv) {

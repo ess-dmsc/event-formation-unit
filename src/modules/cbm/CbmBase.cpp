@@ -25,6 +25,7 @@
 namespace cbm {
 
 using namespace fbserializer;
+using namespace esstime;
 
 CbmBase::CbmBase(BaseSettings const &settings)
     : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
@@ -106,9 +107,9 @@ void CbmBase::processingThread() {
 
   // Create serializers
   EV44SerializerMapPtr.reset(
-      new HashMap2D<EV44Serializer>(CbmConfiguration.Parms.NumOfFENs));
+      new HashMap2D<EV44Serializer>(CbmConfiguration.CbmParms.NumOfFENs));
   HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer<int32_t>>(
-      CbmConfiguration.Parms.NumOfFENs));
+      CbmConfiguration.CbmParms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
     if ((Topology->Type == CbmType::EVENT_0D) ||
@@ -191,7 +192,7 @@ void CbmBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen,
-                                          CbmConfiguration.Parms.TypeSubType);
+                                          CbmConfiguration.CbmParms.TypeSubType);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,

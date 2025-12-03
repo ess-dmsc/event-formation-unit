@@ -46,7 +46,7 @@ public:
 };
 
 TEST_F(DreamBaseTest, Constructor) {
-  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  Dream::DreamBase<DetectorType::DREAM> Readout(Settings);
   ASSERT_EQ(Readout.getStatPrefix(1), "dream.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
@@ -101,35 +101,29 @@ std::vector<uint8_t> TestPacket3{
 // clang-format off
 
 TEST_F(DreamBaseTest, DataReceiveGood) {
-  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  Dream::DreamBase<DetectorType::DREAM> Readout(Settings);
 
   writePacketToRxFIFO(Readout, TestPacket2);
 
   EXPECT_EQ(Readout.Counters.Readouts, 1);
   EXPECT_EQ(Readout.Counters.DataHeaders, 1);
-  EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
-  EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
-  EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
   Readout.stopThreads();
 }
 
 TEST_F(DreamBaseTest, DataReceiveBad) {
-  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  Dream::DreamBase<DetectorType::DREAM> Readout(Settings);
 
   writePacketToRxFIFO(Readout, TestPacket3);
 
   EXPECT_EQ(Readout.Counters.Readouts, 0);
   EXPECT_EQ(Readout.Counters.DataHeaders, 0);
-  EXPECT_EQ(Readout.Counters.GeometryErrors, 0);
-  EXPECT_EQ(Readout.Counters.FENMappingErrors, 0);
-  EXPECT_EQ(Readout.Counters.RingMappingErrors, 0);
   EXPECT_EQ(Readout.Counters.ErrorESSHeaders, 1);
   Readout.stopThreads();
 }
 
 
 TEST_F(DreamBaseTest, EmulateFIFOError) {
-  Dream::DreamBase Readout(Settings, DetectorType::DREAM);
+  Dream::DreamBase<DetectorType::DREAM> Readout(Settings);
   EXPECT_EQ(Readout.getInputCounters().FifoSeqErrors, 0);
 
   Readout.startThreads();

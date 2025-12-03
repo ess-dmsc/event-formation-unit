@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2024 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,19 +14,20 @@
 
 namespace Dream {
 
-int HeimdalGeometry::getPixel(Config::ModuleParms &Parms,
-                            DataParser::CDTReadout &Data) const {
+uint32_t HeimdalGeometry::calcPixelImpl(const DataParser::CDTReadout &Data) const {
+  int Ring = Data.FiberId / 2;
+  const Config::ModuleParms &Parms = getModuleParms(Ring, Data.FENId);
 
   int Pixel{0};
   XTRACE(DATA, DEB, "Type: %u", Parms.Type);
 
   switch (Parms.Type) {
-    case Config::HeimdalMantle:
-      Pixel = mantle.getPixelId(Parms, Data);
-      break;
-    default:
-      XTRACE(DATA, WAR, "Unknown detector");
-      break;
+  case Config::HeimdalMantle:
+    Pixel = mantle.calcPixelId(Parms, Data);
+    break;
+  default:
+    XTRACE(DATA, WAR, "Unknown detector");
+    break;
   }
 
   int Offset = getPixelOffset(Parms.Type);

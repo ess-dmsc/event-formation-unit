@@ -8,9 +8,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <assert.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cstdint>
@@ -21,6 +23,9 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+using namespace vmm3;
+using namespace geometry;
 
 namespace Trex {
 
@@ -35,19 +40,19 @@ TREXInstrument::TREXInstrument(struct Counters &counters,
   loadConfigAndCalib();
 
   essgeom =
-      ESSGeometry(Conf.TREXFileParameters.SizeX, Conf.TREXFileParameters.SizeY,
-                  Conf.TREXFileParameters.SizeZ, 1);
+      ESSGeometry(Conf.TREXFileParms.SizeX, Conf.TREXFileParms.SizeY,
+                  Conf.TREXFileParms.SizeZ, 1);
 
   // We can now use the settings in Conf
-  if (Conf.FileParameters.InstrumentGeometry == "TREX") {
+  if (Conf.FileParms.InstrumentGeometry == "TREX") {
     GeometryInstance = &TREXGeometryInstance;
-  } else if (Conf.FileParameters.InstrumentGeometry == "LET") {
+  } else if (Conf.FileParms.InstrumentGeometry == "LET") {
     GeometryInstance = &LETGeometryInstance;
   } else {
     throw std::runtime_error("Invalid InstrumentGeometry in config file");
   }
 
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -74,11 +79,11 @@ void TREXInstrument::loadConfigAndCalib() {
 
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(
-        Conf.TREXFileParameters.MaxMatchingTimeGap);
+        Conf.TREXFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
-        Conf.TREXFileParameters.MaxClusteringTimeGap);
+        Conf.TREXFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
-        Conf.TREXFileParameters.MaxClusteringTimeGap);
+        Conf.TREXFileParms.MaxClusteringTimeGap);
   }
 
   if (Settings.CalibFile != "") {
@@ -99,9 +104,9 @@ void TREXInstrument::processReadouts() {
   for (const auto &readout : VMMParser.Result) {
 
     // Convert from physical fiber to rings
-    uint8_t Ring = readout.FiberId / 2;
+    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
-    uint8_t HybridId = readout.VMM >> 1;
+    uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
     XTRACE(
         DATA, DEB,
@@ -110,8 +115,7 @@ void TREXInstrument::processReadouts() {
         readout.FiberId, Ring, readout.FENId, HybridId, readout.VMM,
         readout.Channel, readout.TimeLow);
 
-    ESSReadout::Hybrid const &Hybrid =
-        Conf.getHybrid(Ring, readout.FENId, HybridId);
+    Hybrid const &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
     if (!Hybrid.Initialised) {
       XTRACE(DATA, WAR,
@@ -240,7 +244,7 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (Conf.TREXFileParameters.MaxGridsSpan < e.ClusterB.coordSpan()) {
+    if (Conf.TREXFileParms.MaxGridsSpan < e.ClusterB.coordSpan()) {
       XTRACE(EVENT, DEB, "Event spans too many grids, %u",
              e.ClusterA.coordSpan());
       counters.ClustersTooLargeGridSpan++;
@@ -265,8 +269,8 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
-    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
       counters.TOFErrors++;
       continue;
     }

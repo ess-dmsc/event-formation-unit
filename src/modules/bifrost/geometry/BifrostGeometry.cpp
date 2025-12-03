@@ -9,6 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <logical_geometry/ESSGeometry.h>
 #include <modules/bifrost/geometry/BifrostGeometry.h>
 
 // #undef TRC_LEVEL
@@ -16,70 +17,54 @@
 
 namespace Caen {
 
-  BifrostGeometry::BifrostGeometry(Config &Config) {
-  ESSGeom = new ESSGeometry(900, 15, 1, 1);
-  MaxRing = Config.CaenParms.MaxRing;
-  MaxFEN = Config.CaenParms.MaxFEN;
-  MaxGroup = Config.CaenParms.MaxGroup;
-  setResolution(Config.BifrostConf.Parms.Resolution);
-  MaxAmpl = Config.BifrostConf.Parms.MaxAmpl;
-}
+BifrostGeometry::BifrostGeometry(Statistics &Stats, Config &CaenConfiguration)
+    : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
+               CaenConfiguration.CaenParms.MaxFEN,
+               CaenConfiguration.CaenParms.MaxGroup,
+               CaenConfiguration.BifrostConf.Parms.MaxAmpl),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
+      StrideResolution(CaenConfiguration.CaenParms.Resolution),
+      Conf(CaenConfiguration) {}
 
-bool BifrostGeometry::validateData(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+bool BifrostGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
-  if (Ring > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
-    Stats.RingErrors++;
-    return false;
-  }
-
-  if (Data.FENId > MaxFEN) {
-    XTRACE(DATA, WAR, "FEN %d is incompatible with config", Data.FENId);
-    Stats.FENErrors++;
-    return false;
-  }
-
-  if (Data.Group > MaxGroup) {
-    XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
-    Stats.GroupErrors++;
-    return false;
-  }
-  return true;
+  return validateAll([&]() { return validateRing(Ring); },
+                     [&]() { return validateFEN(Data.FENId); },
+                     [&]() { return validateGroup(Data.Group); },
+                     [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); },
+                     [&]() { return validateAmplitudeHigh(Data.AmpA, Data.AmpB); });
 }
 
-int BifrostGeometry::xOffset(int Ring, int Group) {
-  int RingOffset = Ring * NPos;
-  int GroupOffset = (Group % 3) * UnitPixellation;
+int BifrostGeometry::xOffset(int Ring, int Group) const {
+  int RingOffset = Ring * StrideResolution;
+  int GroupOffset = (Group % 3) * UNIT_PIXELLATION;
   XTRACE(DATA, DEB, "RingOffset %d, GroupOffset %d", RingOffset, GroupOffset);
   return RingOffset + GroupOffset;
 }
 
-int BifrostGeometry::yOffset(int Group) {
-  int Arc = Group / 3; // 3 == triplets per arc (for a given ring)
-  return Arc * UnitsPerGroup;
+int BifrostGeometry::yOffset(int Group) const {
+  int Arc = Group / UNITS_PER_TRIPLETS; // units per arc (for a given ring)
+  return Arc * UNITS_PER_TRIPLETS;
 }
 
 std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
-                                                       int AmpB) {
+                                                       int AmpB) const {
 
+  // Defensive check to prevent division by zero
+  // This should not normally be reached if validateReadoutData() is called first
   if (AmpA + AmpB == 0) {
-    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    Stats.AmplitudeZero++;
-    return InvalidPos;
-  }
-
-  if (AmpA + AmpB > MaxAmpl){
-    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
-    Stats.AmplitudeHigh++;
+    XTRACE(DATA, WAR, "AmpA + AmpB == 0, should have been caught in validation");
+    CaenStats.ZeroDivError++;
     return InvalidPos;
   }
 
   double GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
   if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    CaenStats.GlobalPosInvalid++;
     return InvalidPos;
   }
 
@@ -87,6 +72,7 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   if (Unit == -1) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
            AmpB, GlobalPos);
+    CaenStats.UnitIdInvalid++;
     return InvalidPos;
   }
 
@@ -102,24 +88,25 @@ std::pair<int, double> BifrostGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+uint32_t BifrostGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   int xoff = xOffset(Ring, Data.Group);
   int yoff = yOffset(Data.Group);
 
-  int Group = Ring * TripletsPerRing + Data.Group;
-  std::pair<int, double> UnitPos = calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
+  int Group = Ring * TRIPLETS_PER_RING + Data.Group;
+  std::pair<int, double> UnitPos =
+      calcUnitAndPos(Group, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {
     return 0;
   }
 
   int ylocal = UnitPos.first;
-  int xlocal = UnitPos.second * (UnitPixellation - 1);
+  int xlocal = UnitPos.second * (UNIT_PIXELLATION - 1);
   int X = xoff + xlocal;
   int Y = yoff + ylocal;
 
-  uint32_t pixel = ESSGeom->pixel2D(X, Y);
+  uint32_t pixel = pixel2D(X, Y);
   if (pixel == 0) {
     XTRACE(DATA, WAR, "xoffset %d, xlocal %d, yoffset %d, ylocal %d, pixel %hu",
            xoff, xlocal, yoff, ylocal, pixel);
@@ -132,18 +119,19 @@ uint32_t BifrostGeometry::calcPixel(DataParser::CaenReadout &Data) {
 }
 
 size_t BifrostGeometry::numSerializers() const {
-  return TripletsPerRing * (MaxRing + 1); // MaxRing is likely 2 (but [0, 1, 2] are all valid)
+  return TRIPLETS_PER_RING *
+         (MaxRing + 1); // MaxRing is likely 2 (but [0, 1, 2] are all valid)
 }
 
-size_t BifrostGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
+size_t BifrostGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
   // FiberID = _physical_ Ring (logical_ring/2)
   // Group == triplet number
-  return Data.FiberId / 2 * TripletsPerRing + Data.Group;
+  return calcRing(Data.FiberId) * TRIPLETS_PER_RING + Data.Group;
 }
 
 std::string BifrostGeometry::serializerName(size_t Index) const {
-  auto ring_id = Index / TripletsPerRing;
-  auto tube_id = Index - ring_id * TripletsPerRing;
+  auto ring_id = Index / TRIPLETS_PER_RING;
+  auto tube_id = Index - ring_id * TRIPLETS_PER_RING;
   auto arc = tube_id / 3u;
   auto triplet = (tube_id % 3u) + ring_id * 3u;
   return fmt::format("arc={};triplet={}", arc, triplet);

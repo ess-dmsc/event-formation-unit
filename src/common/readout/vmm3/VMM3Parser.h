@@ -15,7 +15,7 @@
 #include <cinttypes>
 #include <vector>
 
-namespace ESSReadout {
+namespace vmm3 {
 
 struct VMM3ParserStats {
   int64_t ErrorSize{0};
@@ -72,7 +72,7 @@ public:
   ~VMM3Parser(){};
 
   //
-  int parse(Parser::PacketDataV0 &PacketData);
+  int parse(ESSReadout::Parser::PacketDataV0 &PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;
@@ -89,4 +89,4 @@ private:
   const uint16_t ADCMask{0x7fff};
   bool IsMonitor{false};
 };
-} // namespace ESSReadout
+} // namespace vmm3

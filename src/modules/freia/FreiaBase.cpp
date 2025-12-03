@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/types/DetectorType.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
 
@@ -38,11 +39,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
   Stats.create("readouts.tof_toolarge", Counters.MaxTOFErrors);
-  Stats.create("readouts.error_hybrid_mapping", Counters.HybridMappingErrors);
-  Stats.create("readouts.error_ring_mapping", Counters.RingMappingErrors);
-  Stats.create("readouts.error_fen_mapping", Counters.FENMappingErrors);
-  Stats.create("readouts.error_invalid_xcoord", Counters.InvalidXCoord);
-  Stats.create("readouts.error_invalid_ycoord", Counters.InvalidYCoord);
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.VMMStats.ErrorFiber);
@@ -66,7 +62,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
   // Event stats
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
@@ -126,7 +121,30 @@ void FreiaBase::processing_thread() {
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  FreiaInstrument Freia(Counters, EFUSettings, *Serializer, ESSHeaderParser);
+  // Convert string to DetectorType (will throw if invalid)
+  DetectorType detectorType(EFUSettings.DetectorName);
+
+  // Validate that this detector type is supported by Freia instrument
+  // FREIA can use different geometries (Freia, AMOR, Estia)
+  // TBLMB uses AMOR geometry
+  // ESTIA uses Estia geometry
+  if (!(detectorType == DetectorType::FREIA ||
+        detectorType == DetectorType::TBLMB ||
+        detectorType == DetectorType::ESTIA)) {
+    XTRACE(INIT, ERR,
+           "Unsupported detector type '%s' for Freia instrument. Supported "
+           "types: FREIA, TBLMB, ESTIA.",
+           EFUSettings.DetectorName.c_str());
+    throw std::runtime_error(
+        "Unsupported detector type for Freia instrument: " +
+        EFUSettings.DetectorName);
+  }
+
+  XTRACE(INIT, ALW, "Freia instrument configured for detector type: %s",
+         detectorType.toString().c_str());
+
+  FreiaInstrument Freia(Counters, EFUSettings, *Serializer, ESSHeaderParser,
+                        Stats, detectorType);
 
   unsigned int DataIndex;
 
@@ -136,21 +154,6 @@ void FreiaBase::processing_thread() {
   // Monitor these counters
   RuntimeStat RtStat({getInputCounters().RxPackets, Counters.Events,
                       EventProducer.getStats().MsgStatusPersisted});
-
-  // Set the datatype
-  uint8_t DataType{DetectorType::FREIA};
-
-  if (EFUSettings.DetectorName == "freia") {
-    DataType = DetectorType::FREIA;
-  }
-
-  else if (EFUSettings.DetectorName == "estia") {
-    DataType = DetectorType::ESTIA;
-  }
-
-  else if (EFUSettings.DetectorName == "tblmb") {
-    DataType = DetectorType::TBLMB;
-  }
 
   while (runThreads) {
 
@@ -166,7 +169,7 @@ void FreiaBase::processing_thread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = ESSHeaderParser.validate(DataPtr, DataLen, DataType);
+      auto Res = ESSHeaderParser.validate(DataPtr, DataLen, detectorType);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,

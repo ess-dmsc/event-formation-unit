@@ -10,14 +10,19 @@
 
 #pragma once
 
-#include <freia/geometry/AMORChannelMapping.h>
+#include <freia/geometry/AmorGeometry.h>
+#include <freia/geometry/Config.h>
+#include <freia/Counters.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Freia {
 
-class TBLMBGeometry : public AMORGeometry {
+class TBLMBGeometry final : public AmorGeometry {
+public:
+	TBLMBGeometry(Statistics &Stats, Config &Cfg) : AmorGeometry(Stats, Cfg) {}
+
 };
 
 } // namespace Freia

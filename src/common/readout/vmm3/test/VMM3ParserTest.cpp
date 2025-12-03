@@ -7,13 +7,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "common/Statistics.h"
+#include <common/Statistics.h>
 #include <common/readout/ess/Parser.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/readout/vmm3/test/VMM3ParserTestData.h>
 #include <common/testutils/TestBase.h>
 
-namespace ESSReadout {
+using namespace vmm3;
+using namespace ESSReadout;
 
 class VMM3ParserTest : public TestBase {
 protected:
@@ -164,8 +165,6 @@ TEST_F(VMM3ParserTest, GoodCalib1) {
   ASSERT_EQ(VMMParser.Stats.DataReadouts, 0);
   ASSERT_EQ(VMMParser.Stats.CalibReadouts, 2);
 }
-
-} // namespace ESSReadout
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -72,7 +72,6 @@ class LokiConfig : public Configurations::Config {
   };
 
   struct LokiCfg {
-    int Resolution{0};
     int ConfiguredBanks{0};
     int ConfiguredRings{0};
     int GroupsZ{0};

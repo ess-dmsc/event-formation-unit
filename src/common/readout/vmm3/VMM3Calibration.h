@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,9 +16,12 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace vmm3 {
+
 class VMM3Calibration {
 public:
   static constexpr int CHANNELS{64};
+  static constexpr uint16_t VMM_ADC_10BIT_LIMIT{1023};
 
   struct Calib {
     double TDCOffset;
@@ -41,13 +44,13 @@ public:
 
   ///\brief return the corrected TDC time in ns for the specified channel
   /// It is assumed that Channel is within the valid range (0 - 63)
-  double TDCCorr(int Channel, uint8_t TDC);
+  double TDCCorr(int Channel, uint8_t TDC) const;
 
   ///\brief return the corrected ADC value for the specified channel
   /// Values are clamped to 0 or 1023 if correction falls outside
   /// the valid ranges.
   /// It is assumed that Channel is within the valid range (0 - 63)
-  double ADCCorr(int Channel, uint16_t ADC);
+  double ADCCorr(int Channel, uint16_t ADC) const;
 
 private:
   ///\brief the initial calibration is the identity calibration with
@@ -63,3 +66,5 @@ private:
 
   struct Calib Calibration[CHANNELS];
 };
+
+} // namespace vmm3

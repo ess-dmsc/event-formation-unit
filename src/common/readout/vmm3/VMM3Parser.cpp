@@ -12,15 +12,14 @@
 #include <common/memory/span.hpp>
 #include <common/readout/vmm3/VMM3Parser.h>
 
-namespace ESSReadout {
-
-  using namespace esstime;
+using namespace vmm3;
+using namespace esstime;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
-int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
+int VMM3Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   Result.clear();
   uint32_t GoodReadouts{0};
 
@@ -66,9 +65,9 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout.TimeLow > MaxFracTimeCount) {
+    if (Readout.TimeLow > ESSReadout::MaxFracTimeCount) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow,
-             MaxFracTimeCount);
+             ESSReadout::MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
       continue;
     }
@@ -135,5 +134,3 @@ int VMM3Parser::parse(Parser::PacketDataV0 &PacketData) {
 
   return GoodReadouts;
 }
-
-} // namespace ESSReadout
