@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -21,20 +22,20 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class MiraclesGeometry : public Geometry {
+class MiraclesGeometry : public Geometry, ESSGeometry {
 public:
-  explicit MiraclesGeometry(Config &CaenConfiguration);
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-  bool validateData(DataParser::CaenReadout &Data) override;
+  explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration,
+                            int MaxAmpl = std::numeric_limits<int>::max());
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return local x-coordinate from amplitudes
-  int xCoord(int Ring, int Tube, int AmpA, int AmpB);
+  int xCoord(int Ring, int Tube, int AmpA, int AmpB) const;
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int Ring, int AmpA, int AmpB);
+  int yCoord(int Ring, int AmpA, int AmpB) const;
 
   /// \brief return the position along the tube
-  int posAlongUnit(int AmpA, int AmpB);
+  int posAlongUnit(int AmpA, int AmpB) const;
 
   /// \brief return the total number of serializers used by the geometry
   [[nodiscard]] inline size_t numSerializers() const override { return 1; }
@@ -42,7 +43,7 @@ public:
   /// \brief calculate the serializer index for the given readout
   /// \param Data CaenReadout to calculate serializer index for
   [[nodiscard]] inline size_t
-  calcSerializer(DataParser::CaenReadout &) const override {
+  calcSerializer(const DataParser::CaenReadout &) const override {
     return 0;
   }
 
@@ -51,11 +52,14 @@ public:
     return "caen";
   }
 
+  // Per-detector resolution: number of pixels across one unit (tube pair)
+  int GroupResolution;
+
   /// \brief return the tube number (0 or 1) for the given amplitudes
   /// \param AmpA amplitude from A-tube
   /// \param AmpB amplitude from B-tube
   /// \return 0 for A-tube, 1 for B-tube
-  [[nodiscard]] inline int tubeAorB(int AmpA, int AmpB) {
+  [[nodiscard]] inline int tubeAorB(int AmpA, int AmpB) const {
     if (AmpA >= AmpB) {
       XTRACE(DATA, DEB, "A-tube (A: %f > B: %f)", AmpA, AmpB);
       return 0;
@@ -64,6 +68,19 @@ public:
       return 1;
     }
   }
+
+protected:
+  /// \brief Calculate pixel ID from readout data
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  // Detector geometry constants
+  static constexpr int ESSGEOMETRY_NX{48};  ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{128}; ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};   ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};   ///< P dimension (pixels)
 };
 
 } // namespace Caen

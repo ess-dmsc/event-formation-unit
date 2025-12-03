@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -10,29 +10,55 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
+#include <cstdint>
 #include <dream/geometry/Config.h>
+#include <dream/geometry/GeometryModule.h>
 #include <dream/readout/DataParser.h>
 #include <logical_geometry/ESSGeometry.h>
+#include <stdint.h>
+#include <string>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
 namespace Dream {
 
-class Cuboid {
+class Cuboid : public ESSGeometry, public DreamSubModule {
+private:
+  constexpr static uint32_t MAX_X = 112;
+  constexpr static uint32_t MAX_Y = 112 * 32;
+  constexpr static uint32_t MAX_Z = 1;
+  constexpr static uint32_t MAX_PIXEL = 1;
+  constexpr static uint8_t WIRES_PER_COUNTER = 16;
+  constexpr static uint8_t STRIPS_PER_CASSETTE = 32;
+
+  struct CuboidCounters : public StatCounterBase {
+    int64_t IndexErrors{0};
+    int64_t TypeErrors{0};
+
+    CuboidCounters(Statistics &Stats, const std::string &Name)
+        : StatCounterBase(Stats,
+                          {
+                              {METRIC_COUNTER_INDEX_ERRORS, IndexErrors},
+                              {METRIC_COUNTER_TYPE_ERRORS, TypeErrors},
+                          },
+                          Name) {}
+  };
+
+  mutable CuboidCounters CuboidCounters;
+
 public:
-  ESSGeometry Geometry{112, 112 * 32, 1, 1};
-
-  const uint8_t WiresPerCounter{16};
-  const uint8_t StripsPerCass{32};
-
   struct CuboidOffset {
     int X;
     int Y;
   };
 
   // clang-format off
+  static inline const std::string METRIC_COUNTER_INDEX_ERRORS = "geometry.index_errors";
+  static inline const std::string METRIC_COUNTER_TYPE_ERRORS  = "geometry.type_errors";
+
   /// \brief Showing offsets roughly as the detector Cuboids are arranged
   ///
   std::vector<CuboidOffset> OffsetsHR {
@@ -75,90 +101,26 @@ public:
      3, 3, 3, 2, 2,
         3, 3, 2
   };
-
   // clang-format on
 
-  /// \brief rotate (x,y)
-  void rotateXY(int &LocalX, int &LocalY, int Rotate) {
-    int SavedY = LocalY;
+  Cuboid(Statistics &Stats, const std::string &Name)
+      : ESSGeometry(MAX_X, MAX_Y, MAX_Z, MAX_PIXEL), CuboidCounters(Stats, Name) {}
 
-    switch (Rotate) {
-    case 1: // 90 deg. clockwise
-      LocalY = LocalX;
-      LocalX = 15 - SavedY;
-      break;
-    case 2: // 180 deg. cockwise
-      LocalY = 15 - LocalY;
-      LocalX = 15 - LocalX;
-      break;
-    case 3: // 270 deg. clockwise
-      LocalY = 15 - LocalX;
-      LocalX = SavedY;
-      break;
-    }
-  }
+  /// \brief Rotate local x,y coordinates according to module rotation
+  /// \param Rotate Rotation index (0-3)
+  /// \param LocalX Local x-coordinate to rotate (input and output)
+  /// \param LocalY Local y-coordinate to rotate (input and output)
+  void rotateXY(int Rotate, int &LocalX, int &LocalY) const;
 
-  //
-  uint32_t getPixelId(Config::ModuleParms &Parms,
-                      DataParser::CDTReadout &Data) {
-    uint8_t Index = Parms.P1.Index;
-    Index += Data.UnitId;
+  /// \brief get pixel id from CDT readout data and module parameters
+  /// \param Parms Const reference to module parameters
+  /// \param Data Const reference to CDT readout data
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelId(const Config::ModuleParms &Parms,
+                       const DataParser::CDTReadout &Data) const override;
 
-    XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
-           Data.Cathode);
-    uint8_t Cassette = Data.Anode / 32 + 2 * (Data.Cathode / 32);
-    uint8_t Counter = (Data.Anode / WiresPerCounter) % 2;
-    uint8_t Wire = Data.Anode % WiresPerCounter;
-    uint8_t Strip = Data.Cathode % StripsPerCass;
-
-    XTRACE(DATA, DEB, "cass %u, ctr %u, wire %u, strip %u", Cassette, Counter,
-           Wire, Strip);
-
-    CuboidOffset Offset;
-    int Rotation;
-    if (Parms.Type == Config::ModuleType::SANS) {
-      if (Index >= (int)OffsetsSANS.size()) {
-        XTRACE(DATA, WAR, "Bad SANS index %u", Index);
-        return 0;
-      }
-      Offset = OffsetsSANS[Index];
-      Rotation = RotateSANS[Index];
-    } else if (Parms.Type == Config::ModuleType::HR) {
-      if (Index >= (int)OffsetsHR.size()) {
-        XTRACE(DATA, WAR, "Bad HR index %u", Index);
-        return 0;
-      }
-      Offset = OffsetsHR[Index];
-      Rotation = RotateHR[Index];
-    } else {
-      XTRACE(DATA, WAR, "Inconsistent type (%d) for Cuboid", Parms.Type);
-      return 0;
-    }
-
-    int LocalX = 2 * Cassette + Counter; // unrotated x,y values
-    int LocalY = 15 - Wire;
-
-    XTRACE(DATA, DEB, "local x %u, local y %u, rotate %u", LocalX, LocalY,
-           Rotation);
-
-    rotateXY(LocalX, LocalY, Rotation);
-
-    constexpr int YDim{7 * 16};
-    int IntX = Offset.X + LocalX;
-    int IntY = YDim * Strip + Offset.Y + LocalY;
-    XTRACE(DATA, DEB, "x %d, y %d", IntX, IntY);
-
-    // Validate coordinates before casting to prevent overflow
-    if (IntX < 0 || IntX > UINT16_MAX) {
-      XTRACE(DATA, WAR, "x coordinate out of range: %d", IntX);
-      return 0; // Invalid pixel
-    }
-    if (IntY < 0 || IntY > UINT16_MAX) {
-      XTRACE(DATA, WAR, "y coordinate out of range: %d", IntY);
-      return 0; // Invalid pixel
-    }
-
-    return Geometry.pixel2D(static_cast<uint16_t>(IntX), static_cast<uint16_t>(IntY));
+  const struct CuboidCounters &getCuboidCounters() const {
+    return CuboidCounters;
   }
 };
 } // namespace Dream

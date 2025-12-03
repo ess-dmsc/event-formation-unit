@@ -9,39 +9,40 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/memory/HashMap2D.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <modules/tbl3he/geometry/Tbl3HeGeometry.h>
+#include <tbl3he/geometry/Tbl3HeConfig.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+using namespace geometry;
+
 namespace Caen {
 
-Tbl3HeGeometry::Tbl3HeGeometry(Config &CaenConfiguration)
-    : Conf(CaenConfiguration) {
-  ESSGeom = new ESSGeometry(100, 8, 1, 1);
-  setResolution(Conf.Tbl3HeConf.Params.Resolution);
-}
+Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration)
+    : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
+               CaenConfiguration.CaenParms.MaxFEN,
+               CaenConfiguration.CaenParms.MaxGroup),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP), Conf(CaenConfiguration) {}
 
-
-///\todo refactoring oportunity: this code is nearly identical to the code in bifrost
+///\todo refactoring oportunity: this code is nearly identical to the code in
+/// bifrost
 std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
-                                                       int AmpB) {
-  int MinAmpl = Conf.Tbl3HeConf.Params.MinValidAmplitude;
-  if ((AmpA < MinAmpl) or (AmpB < MinAmpl)) { ///\todo replace with configuration
-    XTRACE(DATA, DEB, "At least one amplitude is too low");
-    Stats.AmplitudeLow++;
-    return InvalidPos;
-  }
-
+                                                      int AmpB) const {
+  // Defensive check to prevent division by zero
+  // This should not normally be reached if validateReadoutData() is called first
   if (AmpA + AmpB == 0) {
-    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    Stats.AmplitudeZero++;
+    XTRACE(DATA, WAR, "AmpA + AmpB == 0, should have been caught in validation");
+    CaenStats.ZeroDivError++;
     return InvalidPos;
   }
 
   double GlobalPos = 1.0 * AmpA / (AmpA + AmpB); // [0.0 ; 1.0]
   if ((GlobalPos < 0) or (GlobalPos > 1.0)) {
     XTRACE(DATA, WAR, "Pos %f not in unit interval", GlobalPos);
+    CaenStats.GlobalPosInvalid++;
     return InvalidPos;
   }
 
@@ -49,6 +50,7 @@ std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
   if (Unit == -1) {
     XTRACE(DATA, DEB, "A %d, B %d, GlobalPos %f outside valid region", AmpA,
            AmpB, GlobalPos);
+    CaenStats.UnitIdInvalid++;
     return InvalidPos;
   }
 
@@ -64,38 +66,28 @@ std::pair<int, double> Tbl3HeGeometry::calcUnitAndPos(int Group, int AmpA,
   return std::make_pair(Unit, RawUnitPos);
 }
 
-bool Tbl3HeGeometry::validateData(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+bool Tbl3HeGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
+  auto Ring = calcRing(Data.FiberId);
+
   XTRACE(DATA, DEB, "Fiber %u, Ring %d, FEN %u, Group %u", Data.FiberId, Ring,
          Data.FENId, Data.Group);
 
+  int MinAmpl = Conf.Tbl3HeConf.Tbl3HeParms.MinValidAmplitude;
 
-  if (Ring > Conf.Tbl3HeConf.Params.MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config (MaxRing %d)", Ring, MaxRing);
-    Stats.RingErrors++;
-    return false;
-  }
-
-
-  if (not Conf.Tbl3HeConf.TopologyMapPtr->isValue(Ring, Data.FENId)) {
-    XTRACE(DATA, WAR, "Ring %d, FEN %d is incompatible with config", Ring, Data.FENId);
-    Stats.TopologyErrors++;
-    return false;
-  }
-
-  if (Data.Group > Conf.CaenParms.MaxGroup) {
-    XTRACE(DATA, WAR, "Group %d is incompatible with config", Data.Group);
-    Stats.GroupErrors++;
-    return false;
-  }
-  return true;
+  return validateAll([&]() { return validateRing(Ring); },
+                     [&]() { return validateGroup(Data.Group); },
+                     [&]() {
+                       return validateTopology(*Conf.Tbl3HeConf.TopologyMapPtr,
+                                               Ring, Data.FENId);
+                     },
+                     [&]() { return validateAmplitudeLow(Data.AmpA, Data.AmpB, MinAmpl); },
+                     [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); });
 }
-
 
 /// \brief calculate the pixel id from the readout data
 /// \return 0 for invalid pixel, nonzero for good pixels
-uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+uint32_t Tbl3HeGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   int Tube = Data.Group;
 
   int Bank = Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
@@ -106,38 +98,35 @@ uint32_t Tbl3HeGeometry::calcPixel(DataParser::CaenReadout &Data) {
   // Get global Group id - will be used for calibration
   int GlobalGroup = Bank * 4 + Tube;
 
-  std::pair<int, double> UnitPos = calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB);
+  std::pair<int, double> UnitPos =
+      calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB);
 
   if (UnitPos.first == -1) {
     return 0;
   }
 
-  double CalibratedUnitPos =
-      CaenCDCalibration.posCorrection(GlobalGroup, UnitPos.first, UnitPos.second);
+  double CalibratedUnitPos = CaenCDCalibration.posCorrection(
+      GlobalGroup, UnitPos.first, UnitPos.second);
 
-  int xlocal = CalibratedUnitPos * (UnitPixellation - 1);
+  int xlocal = CalibratedUnitPos * (UNIT_PIXELLATION - 1);
 
   int X = xlocal;
   int Y = GlobalGroup;
 
-  uint32_t pixel = ESSGeom->pixel2D(X, Y);
+  uint32_t pixel = pixel2D(X, Y);
   if (pixel == 0) {
-    XTRACE(DATA, WAR, "xlocal %d, X %d, Y %d, pixel %hu",
-           xlocal, X, Y, pixel);
+    XTRACE(DATA, WAR, "xlocal %d, X %d, Y %d, pixel %hu", xlocal, X, Y, pixel);
   } else {
-    XTRACE(DATA, DEB, "xlocal %d, X %d, Y %d, pixel %hu",
-           xlocal, X, Y, pixel);
+    XTRACE(DATA, DEB, "xlocal %d, X %d, Y %d, pixel %hu", xlocal, X, Y, pixel);
   }
 
   return pixel;
 }
 
-size_t Tbl3HeGeometry::numSerializers() const {
-  return 2;
-}
+size_t Tbl3HeGeometry::numSerializers() const { return 2; }
 
-size_t Tbl3HeGeometry::calcSerializer(DataParser::CaenReadout &Data) const {
-  int Ring = Data.FiberId / 2;
+size_t Tbl3HeGeometry::calcSerializer(const DataParser::CaenReadout &Data) const {
+  int Ring = DetectorGeometry<DataParser::CaenReadout>::calcRing(Data.FiberId);
   return Conf.Tbl3HeConf.TopologyMapPtr->get(Ring, Data.FENId)->Bank;
 }
 

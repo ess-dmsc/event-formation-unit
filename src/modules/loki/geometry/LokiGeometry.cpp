@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -19,19 +19,18 @@
 
 namespace Caen {
 
-LokiGeometry::LokiGeometry(Config &CaenConfiguration)
-  : Conf(CaenConfiguration) {
-  XTRACE(INIT, ALW, "Logical geometry: %u x %u", Conf.LokiConf.Parms.Resolution,
-    Conf.LokiConf.Parms.TotalGroups * 7);
-  ESSGeom = new ESSGeometry(
-      Conf.LokiConf.Parms.Resolution,
-      Conf.LokiConf.Parms.TotalGroups * 7, 1, 1);
-  setResolution(Conf.LokiConf.Parms.Resolution);
-}
-
+LokiGeometry::LokiGeometry(Statistics &Stats, Config &CaenConfiguration)
+    : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
+               CaenConfiguration.CaenParms.MaxFEN,
+               CaenConfiguration.LokiConf.Parms.TotalGroups),
+      ESSGeometry(CaenConfiguration.CaenParms.Resolution,
+                  CaenConfiguration.LokiConf.Parms.TotalGroups * UNITS_PER_STRAW, 1, 1),
+      Conf(CaenConfiguration),
+      StrawResolution(CaenConfiguration.CaenParms.Resolution) {}
 
 std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
-    int AmpB, int AmpC, int AmpD) {
+                                                    int AmpB, int AmpC,
+                                                    int AmpD) const {
 
   XTRACE(DATA, DEB, "calcUnitAndPos: GlobalGroup %d", GlobalGroup);
 
@@ -39,17 +38,17 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   // amplitude swapping.
   int Denominator = AmpA + AmpB + AmpC + AmpD;
 
-  if ( Denominator == 0) {
+  if (Denominator == 0) {
     XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    Stats.AmplitudeZero++;
+    CaenStats.AmplitudeZero++;
     return InvalidPos;
   }
 
   // Calculate uncorrected position as float
   // While formally wrong, this calculation is not affected by the
   // amplitude swapping.
-  double UncorrPos = 1.0 * (AmpA + AmpB )/ Denominator; // [0.0 ; 1.0]
-    if ((UncorrPos < 0) or (UncorrPos > 1.0)) {
+  double UncorrPos = 1.0 * (AmpA + AmpB) / Denominator; // [0.0 ; 1.0]
+  if ((UncorrPos < 0) or (UncorrPos > 1.0)) {
     XTRACE(DATA, WAR, "UncorrPos %f not in unit interval", UncorrPos);
     return InvalidPos;
   }
@@ -69,9 +68,8 @@ std::pair<int, double> LokiGeometry::calcUnitAndPos(int GlobalGroup, int AmpA,
   return std::make_pair(Unit, UncorrPos);
 }
 
-
-uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId/2;
+uint32_t LokiGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = Data.FiberId / 2;
   int FEN = Data.FENId;
   int Group = Data.Group; // local group for a FEN
 
@@ -79,61 +77,71 @@ uint32_t LokiGeometry::calcPixel(DataParser::CaenReadout &Data) {
 
   uint32_t GlobalGroup = Conf.LokiConf.getGlobalGroup(Ring, FEN, Group);
   XTRACE(DATA, DEB, "FEN %d, LocalGroup %d, GlobalGroup %d", FEN, Group,
-    GlobalGroup);
+         GlobalGroup);
 
-  std::pair<int, double> UnitPos = calcUnitAndPos(GlobalGroup, Data.AmpA,
-    Data.AmpB, Data.AmpC, Data.AmpD);
-    XTRACE(DATA, DEB, "Unit %d, GlobalPos %f", UnitPos.first, UnitPos.second);
+  std::pair<int, double> UnitPos =
+      calcUnitAndPos(GlobalGroup, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+  XTRACE(DATA, DEB, "Unit %d, GlobalPos %f", UnitPos.first, UnitPos.second);
 
   if (UnitPos.first == -1) {
     return 0;
   }
 
-  uint32_t GlobalUnit = Conf.LokiConf.getY(Ring, FEN, Data.Group, UnitPos.first);
+  uint32_t GlobalUnit =
+      Conf.LokiConf.getY(Ring, FEN, Data.Group, UnitPos.first);
 
-  double CalibratedUnitPos =
-      CaenCDCalibration.posCorrection(GlobalGroup, UnitPos.first, UnitPos.second);
-  uint16_t CalibratedPos = round(CalibratedUnitPos * (NPos - 1));
+  double CalibratedUnitPos = CaenCDCalibration.posCorrection(
+      GlobalGroup, UnitPos.first, UnitPos.second);
+  uint16_t CalibratedPos = round(CalibratedUnitPos * (StrawResolution - 1));
   XTRACE(EVENT, DEB, "Group %d, Unit %d - calibrated unit pos: %g, pos %d",
          GlobalGroup, UnitPos.first, CalibratedUnitPos, CalibratedPos);
 
-  uint32_t PixelId = ESSGeom->pixel2D(CalibratedPos, GlobalUnit);
+  uint32_t PixelId = pixel2D(CalibratedPos, GlobalUnit);
 
   ///\todo this print statement prints a random number for pixel id
-  XTRACE(EVENT, DEB, "xpos %f (calibrated: %u), ypos %u, pixel: %u", UnitPos.second,
-         CalibratedPos, GlobalUnit, PixelId);
+  XTRACE(EVENT, DEB, "xpos %f (calibrated: %u), ypos %u, pixel: %u",
+         UnitPos.second, CalibratedPos, GlobalUnit, PixelId);
 
   XTRACE(EVENT, DEB, "Pixel is %u", PixelId);
   return PixelId;
 }
 
-bool LokiGeometry::validateData(DataParser::CaenReadout &Data) {
-  unsigned int Ring = Data.FiberId / 2;
+bool LokiGeometry::validateReadoutData(const DataParser::CaenReadout &Data) const {
+  auto Ring = Data.FiberId / 2;
+  auto &Cfg = Conf.LokiConf.Parms;
 
-  auto & Cfg = Conf.LokiConf.Parms;
-
-  if (Ring >= Cfg.NumRings) {
-    XTRACE(DATA, WAR, "RINGId %u is >= %u", Ring, Cfg.NumRings);
-    Stats.RingErrors++;
-    return false;
-  }
-
-  int Bank = Cfg.Rings[Ring].Bank;
-  if (Bank == -1) {
-    XTRACE(DATA, WAR, "RINGId %u is uninitialised", Ring);
-    Stats.RingMappingErrors++;
-    return false;
-  }
-
-  int FENs = Cfg.Rings[Ring].FENs;
-  if (Data.FENId >= FENs) {
-    XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId, FENs);
-    Stats.FENMappingErrors++;
-    return false;
-  }
-  XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId, FENs - 1);
-  return true;
+  return validateAll(
+      [&]() {
+        if (Ring >= Cfg.NumRings) {
+          XTRACE(DATA, WAR, "RINGId %u is >= %u", Ring, Cfg.NumRings);
+          BaseCounters.RingErrors++;
+          return false;
+        } else {
+          return true;
+        }
+      },
+      [&]() {
+        auto Bank = Cfg.Rings[Ring].Bank;
+        if (Bank == -1) {
+          XTRACE(DATA, WAR, "RINGId %u is uninitialised", Ring);
+          BaseCounters.RingMappingErrors++;
+          return false;
+        } else {
+          return true;
+        }
+      },
+      [&]() {
+        auto FENs = Cfg.Rings[Ring].FENs;
+        if (Data.FENId >= FENs) {
+          XTRACE(DATA, DEB, "FENId %d, Max FENId %d", Data.FENId, FENs - 1);
+          XTRACE(DATA, WAR, "FENId %u outside valid range 0 - %u", Data.FENId,
+                 FENs);
+          BaseCounters.TopologyError++;
+          return false;
+        } else {
+          return true;
+        }
+      });
 }
-
 
 } // namespace Caen

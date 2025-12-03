@@ -46,6 +46,9 @@ void Config::parseConfig() {
     assign("MaxPulseTimeNS", CaenParms.MaxPulseTimeNS);
     assign("MaxTOFNS", CaenParms.MaxTOFNS);
 
+    setMask(LOG | CHECK);
+    assign("Resolution", CaenParms.Resolution);
+
     setMask(LOG | XTRACE);
     assign("MaxFEN", CaenParms.MaxFEN);
     assign("MaxGroup", CaenParms.MaxGroup);

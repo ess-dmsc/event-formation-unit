@@ -35,10 +35,8 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
   // ESS Readout header stats
   Stats.create("essheader.error_header", Counters.ErrorESSHeaders);
 
-  //
-  Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   // VMM3Parser stats
+  Stats.create("readouts.error_mapping", Counters.HybridMappingErrors);
   Stats.create("readouts.count", Counters.VMMStats.Readouts);
   Stats.create("readouts.error_fiber", Counters.VMMStats.ErrorFiber);
   Stats.create("readouts.error_fen", Counters.VMMStats.ErrorFEN);
@@ -69,7 +67,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
 
   // Event stats
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.pixel_errors", Counters.PixelErrors);
   Stats.create("events.time_errors", Counters.TimeErrors);
 
   //
@@ -126,7 +123,7 @@ void NmxBase::processing_thread() {
   Stats.create("produce.cause.max_events_reached",
                Serializer->stats().ProduceTriggeredMaxEvents);
 
-  NMXInstrument NMX(Counters, EFUSettings, *Serializer, ESSHeaderParser);
+  NMXInstrument NMX(Counters, EFUSettings, *Serializer, ESSHeaderParser, Stats);
 
   // Time out after one second
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);

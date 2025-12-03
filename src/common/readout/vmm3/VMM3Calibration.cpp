@@ -1,4 +1,4 @@
-// Copyright (C) 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,6 +11,8 @@
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+using namespace vmm3;
 
 bool VMM3Calibration::setCalibration(int Channel, double TDCOffset,
                                      double TDCSlope, double ADCOffset,
@@ -29,7 +31,7 @@ bool VMM3Calibration::setCalibration(int Channel, double TDCOffset,
   return true;
 }
 
-double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) {
+double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) const {
   XTRACE(DATA, DEB, "TDC Correction, Offset %d, Slope %d",
          Calibration[Channel].TDCOffset, Calibration[Channel].TDCSlope);
   double TDCns = 1.5 * 22.72 - 60.0 * TDC / 255;
@@ -38,7 +40,7 @@ double VMM3Calibration::TDCCorr(int Channel, uint8_t TDC) {
   return TDCCorr;
 }
 
-double VMM3Calibration::ADCCorr(int Channel, uint16_t ADC) {
+double VMM3Calibration::ADCCorr(int Channel, uint16_t ADC) const {
   XTRACE(DATA, DEB, "ADC Correction, Offset %d, Slope %d",
          Calibration[Channel].ADCOffset, Calibration[Channel].ADCSlope);
   double ADCCorr =

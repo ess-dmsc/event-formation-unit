@@ -11,10 +11,13 @@
 #include <modules/freia/generators/ReadoutGenerator.h>
 #include <common/readout/vmm3/VMM3Parser.h>
 
+using namespace vmm3;
+using VMM3Data = VMM3Parser::VMM3Data;
+
 int main(int argc, char *argv[]) {
 
   Freia::ReadoutGenerator FreiaGen;
-  uint8_t FreiaDataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+  uint8_t FreiaDataSize = sizeof(VMM3Data);
   FreiaGen.setReadoutDataSize(FreiaDataSize);
 
   FreiaGen.argParse(argc, argv);

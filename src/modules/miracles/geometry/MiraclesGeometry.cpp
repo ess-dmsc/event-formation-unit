@@ -10,6 +10,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <cmath>
+#include <common/Statistics.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <modules/miracles/geometry/MiraclesGeometry.h>
 
 // #undef TRC_LEVEL
@@ -17,49 +19,36 @@
 
 namespace Caen {
 
-MiraclesGeometry::MiraclesGeometry(Config &CaenConfiguration) {
-  ///\todo make config dependent
-  ESSGeom = new ESSGeometry(48, 128, 1, 1);
-  setResolution(CaenConfiguration.BifrostConf.Parms.Resolution);
-  MaxRing = CaenConfiguration.CaenParms.MaxRing;
-}
+MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
+                                   const Config &CaenConfiguration, int MaxAmpl)
+    : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
+               CaenConfiguration.CaenParms.MaxFEN, 1, MaxAmpl),
+      ESSGeometry(ESSGEOMETRY_NX, ESSGEOMETRY_NY, ESSGEOMETRY_NZ, ESSGEOMETRY_NP),
+      GroupResolution(CaenConfiguration.CaenParms.Resolution) {}
 
-uint32_t MiraclesGeometry::calcPixel(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+uint32_t MiraclesGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   int x = xCoord(Ring, Data.Group, Data.AmpA, Data.AmpB);
   int y = yCoord(Ring, Data.AmpA, Data.AmpB);
-  uint32_t pixel = ESSGeom->pixel2D(x, y);
+  uint32_t pixel = pixel2D(x, y);
 
   XTRACE(DATA, DEB, "xcoord %d, ycoord %d, pixel %hu", x, y, pixel);
 
   return pixel;
 }
 
-bool MiraclesGeometry::validateData(DataParser::CaenReadout &Data) {
-  int Ring = Data.FiberId / 2;
+bool MiraclesGeometry::validateReadoutData(
+    const DataParser::CaenReadout &Data) const {
+  int Ring = calcRing(Data.FiberId);
   XTRACE(DATA, DEB, "Ring %u, FEN %u, Group %u", Ring, Data.FENId, Data.Group);
 
-  if (Ring > MaxRing) {
-    XTRACE(DATA, WAR, "RING %d is incompatible with config", Ring);
-    Stats.RingErrors++;
-    return false;
-  }
-
-  if (Data.AmpA + Data.AmpB == 0) {
-    XTRACE(DATA, DEB, "Sum of amplitudes is 0");
-    Stats.AmplitudeZero++;
-    return false;
-  }
-  return true;
-
-  if (Data.AmpA + Data.AmpB > MaxAmpl) {
-    XTRACE(DATA, DEB, "Sum of amplitudes exceeds maximum");
-    Stats.AmplitudeHigh++;
-    return false;
-  }
+  return validateAll(
+      [&]() { return validateRing(Ring); },
+      [&]() { return validateAmplitudeZero(Data.AmpA, Data.AmpB); },
+      [&]() { return validateAmplitudeHigh(Data.AmpA, Data.AmpB); });
 }
 
-int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
+int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) const {
   int xOffset = 2 * Tube;
   if ((Ring == 1) or (Ring == 3)) {
     xOffset += 24; ///\todo make config dependent
@@ -67,21 +56,21 @@ int MiraclesGeometry::xCoord(int Ring, int Tube, int AmpA, int AmpB) {
   return xOffset + tubeAorB(AmpA, AmpB);
 }
 
-int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) {
+int MiraclesGeometry::yCoord(int Ring, int AmpA, int AmpB) const {
   XTRACE(DATA, DEB, "Calculating yCoord, Ring: %u, AmpA: %u, AmpB: %u", Ring,
          AmpA, AmpB);
   int offset{0};
   if ((Ring == 2) or (Ring == 3)) {
-    offset += NPos / 2;
+    offset += GroupResolution / 2;
   }
   return offset + posAlongUnit(AmpA, AmpB);
 }
 
-int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
+int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   int tubepos;
   if (AmpA + AmpB == 0) {
     XTRACE(DATA, WAR, "AmpA + AmpB == 0, invalid amplitudes");
-    ///\todo add counter
+    CaenStats.ZeroDivError++;
     return -1;
   }
 
@@ -89,11 +78,13 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) {
   XTRACE(DATA, DEB, "Position along tube pair %f", pos);
 
   if (tubeAorB(AmpA, AmpB) == 0) {
-    tubepos = round(NPos / 2 - 1 - (pos - 0.5) * 2 * (NPos / 2 - 1));
+    tubepos =
+        round(static_cast<int>(GroupResolution / 2) - 1 -
+              (pos - 0.5) * 2 * (static_cast<int>(GroupResolution / 2 - 1)));
     XTRACE(DATA, DEB, "A: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   } else {
-    tubepos = pos * 2 * (NPos / 2 - 1);
+    tubepos = pos * 2 * (static_cast<int>(GroupResolution / 2) - 1);
     XTRACE(DATA, DEB, "B: TubePos %u, pos: %f", tubepos, pos);
     return tubepos;
   }

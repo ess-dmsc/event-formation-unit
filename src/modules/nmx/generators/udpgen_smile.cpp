@@ -10,10 +10,13 @@
 #include <memory> // Add include for std::unique_ptr
 // GCOVR_EXCL_START
 
+using namespace vmm3;
+using VMM3Data = VMM3Parser::VMM3Data;
+
 int main(int argc, char *argv[]) {
 
   Nmx::SmileReadoutGenerator NmxGen;
-  uint8_t DataSize = sizeof(ESSReadout::VMM3Parser::VMM3Data);
+  uint8_t DataSize = sizeof(VMM3Data);
   NmxGen.setReadoutDataSize(DataSize);
 
   NmxGen.argParse(argc, argv);

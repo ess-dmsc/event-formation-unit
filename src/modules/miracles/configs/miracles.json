@@ -1,6 +1,6 @@
 {
   "Detector": "miracles",
   "MaxRing": 4,
-  "StrawResolution": 128,
+  "Resolution": 128,
   "MaxTOFNS" : 1000000000
 }

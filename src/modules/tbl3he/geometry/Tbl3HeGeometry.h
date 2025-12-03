@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -24,15 +25,12 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class Tbl3HeGeometry : public Geometry {
+class Tbl3HeGeometry : public Geometry, ESSGeometry {
 public:
-  Tbl3HeGeometry(Config &CaenConfiguration);
+  Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-
-  ///\brief virtual method inherited from base class
-  bool validateData(DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
@@ -40,18 +38,35 @@ public:
   /// \return tube index (0) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
   /// \todo refactoring oportunity: their code is the same as for bifrost
-  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB) const;
 
   /// \todo functions to handle multiple serialisers
   [[nodiscard]] size_t numSerializers() const override;
   [[nodiscard]] size_t
-  calcSerializer(DataParser::CaenReadout &Data) const override;
+  calcSerializer(const DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
-  const int UnitsPerGroup{1};
-  int UnitPixellation{100}; ///< Number of pixels along a single He tube.
+  ///< Invalid position marker
 
-  const std::pair<int, float> InvalidPos{-1, -1.0};
-  Config &Conf;
+protected:
+  /// \brief Calculate pixel ID from readout data for Tbl3He geometry
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  const Config &Conf;
+
+  // Detector geometry constants
+  // clang-format off
+  static constexpr int UNITS_PER_GROUP{1};           ///< Tubes per group
+  static constexpr int GROUPS_PER_RING{16};          ///< Groups per ring
+  static constexpr int ESSGEOMETRY_NX{100};          ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{8};            ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};            ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};            ///< P dimension (pixels)
+  static constexpr int UNIT_PIXELLATION{100};         ///< Pixels along a single He tube.
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
+  // clang-format on
 };
 } // namespace Caen

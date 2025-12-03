@@ -11,12 +11,13 @@
 #include <common/readout/vmm3/VMM3Parser.h>
 #include <common/testutils/bitmaps/BitMaps.h>
 #include <modules/freia/generators/MultiBladeGenerator.h>
-#include <modules/freia/geometry/Geometry.h>
+// Geometry selector removed; generators now rely on config only.
 
 #include <fmt/core.h>
 
 #include <cmath>
 
+using namespace vmm3;
 using namespace ESSReadout;
 
 namespace Freia {

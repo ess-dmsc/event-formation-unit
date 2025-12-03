@@ -32,11 +32,9 @@ struct CaenCounters {
   
   // Logical and Digital geometry incl. Calibration
   struct CDCalibration::Stats Calibration;
-  struct Geometry::Stats Geom;
   
   // Events
   int64_t Events{0};
-  int64_t PixelErrors{0};
   int64_t TimeError{0};
   int64_t EventsUdder{0};
   int64_t SerializerErrors{0};

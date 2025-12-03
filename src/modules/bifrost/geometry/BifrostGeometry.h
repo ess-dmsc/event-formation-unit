@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "gtest/gtest.h"
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -24,40 +25,56 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class BifrostGeometry : public Geometry {
+class BifrostGeometry : public Geometry, ESSGeometry {
 public:
-  explicit BifrostGeometry(Config &CaenConfiguration);
+  explicit BifrostGeometry(Statistics &Stats, Config &CaenConfiguration);
 
   ///\brief virtual method inherited from base class
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-
-  ///\brief virtual method inherited from base class
-  bool validateData(DataParser::CaenReadout &Data) override;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the global x-offset for the given identifiers
   /// \param Ring logical ring as defined in the ICD
   /// \param Group - identifies a tube triplet (new chargediv nomenclature)
-  int xOffset(int Ring, int Group);
+  int xOffset(int Ring, int Group) const;
 
   /// \brief return the global y-offset for the given identifiers
   /// \param Group - identifies a tube triplet (new chargediv nomenclature)
-  int yOffset(int Group);
+  int yOffset(int Group) const;
 
   /// \brief return the position along the tube
   /// \param AmpA amplitude A from readout data
   /// \param AmpB amplitude B from readout data
   /// \return tube index (0, 1, 2) and normalised position [0.0 ; 1.0]
   /// or (-1, -1.0) if invalid
-  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB);
+  std::pair<int, double> calcUnitAndPos(int Group, int AmpA, int AmpB) const;
 
   [[nodiscard]] size_t numSerializers() const override;
-  [[nodiscard]] size_t calcSerializer(DataParser::CaenReadout &Data) const override;
+  [[nodiscard]] size_t
+  calcSerializer(const DataParser::CaenReadout &Data) const override;
   [[nodiscard]] std::string serializerName(size_t Index) const override;
 
-  const int UnitsPerGroup{3};
-  const int TripletsPerRing{15};
-  int UnitPixellation{100}; ///< Number of pixels along a single He tube.
+  // Per-detector resolution: horizontal pixel stride used for ring offsets
+  int StrideResolution;
 
-  const std::pair<int, float> InvalidPos{-1, -1.0};
+  static constexpr std::pair<int, float> InvalidPos{-1, -1.0};
+
+  // Holds the parsed configuration
+  Config &Conf;
+
+protected:
+  /// \brief Implementation for pixel calculation for Bifrost geometry
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
+
+private:
+  // Detector geometry constants
+  static constexpr int UNITS_PER_TRIPLETS{3}; ///< Tube triplets per group
+  static constexpr int TRIPLETS_PER_RING{15}; ///< Triplets per ring
+  static constexpr int UNIT_PIXELLATION{100}; ///< Pixels along tube
+  static constexpr int ESSGEOMETRY_NX{900};   ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{15};    ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};     ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};     ///< P dimension (pixels)
 };
 } // namespace Caen

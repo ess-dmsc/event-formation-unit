@@ -24,12 +24,15 @@ set(dream_common_inc
 )
 
 set(dream_common_src
-  DreamInstrument.cpp
-  DreamBase.cpp
   geometry/DreamGeometry.cpp
   geometry/HeimdalGeometry.cpp
   geometry/MagicGeometry.cpp
   geometry/Config.cpp
+  geometry/SUMO.cpp
+  geometry/DreamMantle.cpp
+  geometry/HeimdalMantle.cpp
+  geometry/Cuboid.cpp
+  geometry/PADetector.cpp
   readout/DataParser.cpp
   readout/DataParser.cpp
 )

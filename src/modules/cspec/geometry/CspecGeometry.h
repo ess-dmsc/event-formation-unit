@@ -1,4 +1,4 @@
-// Copyright (C) 2023 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <modules/caen/geometry/Config.h>
@@ -20,31 +21,50 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Caen {
-class CspecGeometry : public Geometry {
+class CspecGeometry : public Geometry, ESSGeometry {
 public:
-  explicit CspecGeometry(Config &CaenConfiguration);
-  uint32_t calcPixel(DataParser::CaenReadout &Data) override;
-  bool validateData(DataParser::CaenReadout &Data) override;
+  // Detector geometry constants
+  static constexpr int ESSGEOMETRY_NX{900}; ///< X dimension (pixels)
+  static constexpr int ESSGEOMETRY_NY{180}; ///< Y dimension (pixels)
+  static constexpr int ESSGEOMETRY_NZ{1};   ///< Z dimension (pixels)
+  static constexpr int ESSGEOMETRY_NP{1};   ///< P dimension (pixels)
+  static constexpr int GROUPS_PER_RING{24}; ///< Number of groups per ring
+
+  explicit CspecGeometry(Statistics &Stats, const Config &CaenConfiguration);
+
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override;
 
   /// \brief return the global x-offset for the given identifiers
-  int xOffset(int Ring, int Group);
+  int xOffset(int Ring, int Group) const;
 
   /// \brief return local y-coordinate from amplitudes
-  int yCoord(int AmpA, int AmpB) { return posAlongUnit(AmpA, AmpB); }
+  int yCoord(int AmpA, int AmpB) const { return posAlongUnit(AmpA, AmpB); }
 
   /// \brief return the position along the unit (tube for CSPEC)
-  int posAlongUnit(int AmpA, int AmpB);
-
+  int posAlongUnit(int AmpA, int AmpB) const;
 
   /// \brief return the total number of serializers used by the geometry
-  [[nodiscard]] inline size_t numSerializers() const override {return 1;}
+  [[nodiscard]] inline size_t numSerializers() const override { return 1; }
 
   /// \brief calculate the serializer index for the given readout
   /// \param Data CaenReadout to calculate serializer index for
-  [[nodiscard]] inline size_t calcSerializer(DataParser::CaenReadout &) const override {return 0;}
+  [[nodiscard]] inline size_t
+  calcSerializer(const DataParser::CaenReadout &) const override {
+    return 0;
+  }
 
   /// \brief return the name of the serializer at the given index
-  [[nodiscard]] inline std::string serializerName(size_t) const override {return "caen";}
+  [[nodiscard]] inline std::string serializerName(size_t) const override {
+    return "caen";
+  }
+  // Per-detector resolution: number of pixels across one unit
+  int Resolution;
 
+protected:
+  /// \brief Calculate pixel ID from readout data for CSPEC geometry
+  /// \param Data Const reference to CaenReadout object
+  /// \return Calculated pixel ID, or 0 if calculation failed
+  uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
+
 } // namespace Caen

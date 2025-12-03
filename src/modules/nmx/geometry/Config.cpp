@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+using namespace vmm3;
+
 namespace Nmx {
 
 // #undef TRC_LEVEL
@@ -19,21 +21,21 @@ namespace Nmx {
 void Config::applyConfig() {
   // Initialize parameters
   setMask(LOG);
-  assign("DefaultMinADC", NMXFileParameters.DefaultMinADC);
-  assign("SizeX", NMXFileParameters.SizeX);
-  assign("SizeY", NMXFileParameters.SizeY);
-  assign("MaxSpanX", NMXFileParameters.MaxSpanX);
-  assign("MaxSpanY", NMXFileParameters.MaxSpanY);
-  assign("MinSpanX", NMXFileParameters.MinSpanX);
-  assign("MinSpanY", NMXFileParameters.MinSpanY);
-  assign("MaxGapX", NMXFileParameters.MaxGapX);
-  assign("MaxGapY", NMXFileParameters.MaxGapY);
-  assign("MaxMatchingTimeGap", NMXFileParameters.MaxMatchingTimeGap);
-  assign("MaxClusteringTimeGap", NMXFileParameters.MaxClusteringTimeGap);
-  assign("NumPanels", NMXFileParameters.NumPanels);
-  assign("SplitMultiEvents", NMXFileParameters.SplitMultiEvents);
-  assign("SplitMultiEventsCoefficientLow", NMXFileParameters.SplitMultiEventsCoefficientLow);
-  assign("SplitMultiEventsCoefficientHigh", NMXFileParameters.SplitMultiEventsCoefficientHigh);
+  assign("DefaultMinADC", NMXFileParms.DefaultMinADC);
+  assign("SizeX", NMXFileParms.SizeX);
+  assign("SizeY", NMXFileParms.SizeY);
+  assign("MaxSpanX", NMXFileParms.MaxSpanX);
+  assign("MaxSpanY", NMXFileParms.MaxSpanY);
+  assign("MinSpanX", NMXFileParms.MinSpanX);
+  assign("MinSpanY", NMXFileParms.MinSpanY);
+  assign("MaxGapX", NMXFileParms.MaxGapX);
+  assign("MaxGapY", NMXFileParms.MaxGapY);
+  assign("MaxMatchingTimeGap", NMXFileParms.MaxMatchingTimeGap);
+  assign("MaxClusteringTimeGap", NMXFileParms.MaxClusteringTimeGap);
+  assign("NumPanels", NMXFileParms.NumPanels);
+  assign("SplitMultiEvents", NMXFileParms.SplitMultiEvents);
+  assign("SplitMultiEventsCoefficientLow", NMXFileParms.SplitMultiEventsCoefficientLow);
+  assign("SplitMultiEventsCoefficientHigh", NMXFileParms.SplitMultiEventsCoefficientHigh);
 
   try {
     auto PanelConfig = root()["Config"];
@@ -45,41 +47,42 @@ void Config::applyConfig() {
 
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
       XTRACE(INIT, DEB, "Got Hybrid");
 
+      // Get all hybrid parameters and populate new optimized struct
+      HybridParams &params = HybridParam[Ring][FEN][LocalHybrid];
+
       try {
-        Plane[Ring][FEN][LocalHybrid] = Mapping["Plane"].get<uint8_t>();
-        XTRACE(INIT, DEB, "Got Plane: %u", Plane[Ring][FEN][LocalHybrid]);
+        params.Plane = Mapping["Plane"].get<uint8_t>();
+        XTRACE(INIT, DEB, "Got Plane: %u", params.Plane);
       } catch (...) {
         XTRACE(INIT, DEB, "Failed to get Plane, using 0");
-        Plane[Ring][FEN][LocalHybrid] = 0;
+        params.Plane = 0;
       }
 
       try {
-        ReversedChannels[Ring][FEN][LocalHybrid] =
-            Mapping["ReversedChannels"].get<bool>();
-        XTRACE(INIT, DEB, "Got ReversedChannels: %u",
-               ReversedChannels[Ring][FEN][LocalHybrid]);
+        params.ReversedChannels = Mapping["ReversedChannels"].get<bool>();
+        XTRACE(INIT, DEB, "Got ReversedChannels: %u", params.ReversedChannels);
       } catch (...) {
-        ReversedChannels[Ring][FEN][LocalHybrid] = false;
+        params.ReversedChannels = false;
       }
 
       try {
-        Offset[Ring][FEN][LocalHybrid] = Mapping["Offset"].get<uint64_t>();
-        XTRACE(INIT, DEB, "Got Offset: %u", Offset[Ring][FEN][LocalHybrid]);
+        params.Offset = Mapping["Offset"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Offset: %u", params.Offset);
       } catch (...) {
-        Offset[Ring][FEN][LocalHybrid] = 0;
+        params.Offset = 0;
       }
 
       try {
-        Panel[Ring][FEN][LocalHybrid] = Mapping["Panel"].get<uint64_t>();
-        XTRACE(INIT, DEB, "Got Panel: %u", Panel[Ring][FEN][LocalHybrid]);
+        params.Panel = Mapping["Panel"].get<uint64_t>();
+        XTRACE(INIT, DEB, "Got Panel: %u", params.Panel);
       } catch (...) {
-        Panel[Ring][FEN][LocalHybrid] = 0;
+        params.Panel = 0;
       }
 
-      Hybrid.MinADC = NMXFileParameters.DefaultMinADC;
+      Hybrid.MinADC = NMXFileParms.DefaultMinADC;
     }
 
     // 2 Hybrids represent the x and y of a single square of 128 * 128 pixels,

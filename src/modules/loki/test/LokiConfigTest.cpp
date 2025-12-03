@@ -15,7 +15,6 @@ auto ValidLokiConfig = R"(
   {
     "Detector" : "loki",
 
-    "Resolution" : 512,
     "GroupsZ" : 4,
 
     "ReadoutConstDelayNS" : 0,
@@ -45,15 +44,13 @@ public:
 protected:
   LokiConfig config{LOKI_CONFIG};
   LokiConfig emptyConfig; // For constructor/default value tests
-  void SetUp() override {
-    ASSERT_EQ(config.Parms.Resolution, 0); // check one var is uninitialised
-  }
+  void SetUp() override {}
+
   void TearDown() override {}
 };
 
 TEST_F(LokiConfigTest, Constructor) {
   // Check that default values are correctly initialized
-  ASSERT_EQ(emptyConfig.Parms.Resolution, 0);
   ASSERT_EQ(emptyConfig.Parms.ConfiguredBanks, 0);
   ASSERT_EQ(emptyConfig.Parms.ConfiguredRings, 0);
   ASSERT_EQ(emptyConfig.Parms.GroupsZ, 0);
@@ -74,7 +71,6 @@ TEST_F(LokiConfigTest, Constructor) {
 
 TEST_F(LokiConfigTest, ParseConfig) {
   ASSERT_NO_THROW(config.parseConfig());
-  ASSERT_EQ(config.Parms.Resolution, 512);
   ASSERT_EQ(config.Parms.ConfiguredBanks, 9);
   ASSERT_EQ(config.Parms.ConfiguredRings, 10);
 }
@@ -85,7 +81,6 @@ TEST_F(LokiConfigTest, ValidLokiConfigTest) {
   testConfig.parseConfig();
 
   // Check that Loki config values from JSON are properly stored
-  ASSERT_EQ(testConfig.Parms.Resolution, 512);
   ASSERT_EQ(testConfig.Parms.GroupsZ, 4);
 
   // Check Banks configuration - now verifying multiple banks
@@ -127,14 +122,14 @@ TEST_F(LokiConfigTest, InvalidConfigTest) {
   // Test missing Resolution field
   LokiConfig testConfig;
   auto invalidConfig = ValidLokiConfig;
-  invalidConfig.erase("Resolution");
+  invalidConfig.erase("Detector");
   testConfig.setRoot(invalidConfig);
 
   try {
     testConfig.parseConfig();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &e) {
-    EXPECT_STREQ("Invalid Json file", e.what());
+    EXPECT_STREQ("Missing 'Detector' field", e.what());
   } catch (...) {
     FAIL() << "Expected std::runtime_error with 'Invalid Json file' message";
   }
@@ -190,7 +185,6 @@ TEST_F(LokiConfigTest, MissingGroupsZTest) {
   ASSERT_EQ(testConfig.Parms.GroupsZ, 0);
 
   // Other fields should be correctly parsed
-  ASSERT_EQ(testConfig.Parms.Resolution, 512);
   ASSERT_EQ(testConfig.Parms.ConfiguredBanks, 3);
   ASSERT_EQ(testConfig.Parms.ConfiguredRings, 3);
 }

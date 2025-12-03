@@ -8,8 +8,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
@@ -20,32 +22,33 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_INF
 
+using namespace vmm3;
+using namespace geometry;
+
 namespace Freia {
 
-/// \brief load configuration and calibration files
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
                                  BaseSettings &settings,
                                  EV44Serializer &serializer,
-                                 ESSReadout::Parser &essHeaderParser)
+                                 ESSReadout::Parser &essHeaderParser,
+                                 Statistics &Stats,
+                                 const DetectorType &detectorType)
     : counters(counters), Settings(settings), Serializer(serializer),
       ESSHeaderParser(essHeaderParser) {
 
   loadConfigAndCalib();
-
-  // We can now use the settings in Conf
-
-  Geom.setGeometry(Conf.FileParameters.InstrumentGeometry);
-
-  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParameters.MaxPulseTimeNS);
+  // Geometry depends on DetectorType and configuration InstrumentGeometry
+  // string
+  Geom = createGeometry(detectorType, Conf.FileParms.InstrumentGeometry,
+                        Stats);
+  ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
 }
 
 void FreiaInstrument::loadConfigAndCalib() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          Settings.ConfigFile.c_str());
 
-  /// \brief Covers FREIA, ESTIA and AMOR
-  /// Differentiation is done using the InstrumentGeometry value
-  /// see usage in Config.cpp and Geometry.h
+  /// \brief Covers FREIA, ESTIA, AMOR, TBLMB via InstrumentGeometry value
   Conf = Config("Freia", Settings.ConfigFile);
   Conf.loadAndApplyConfig();
 
@@ -54,16 +57,16 @@ void FreiaInstrument::loadConfigAndCalib() {
   builders = std::vector<EventBuilder2D>(Conf.NumHybrids);
 
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(Conf.MBFileParameters.MaxMatchingTimeGap);
+    builder.matcher.setMaximumTimeGap(Conf.MBFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
-        Conf.MBFileParameters.MaxClusteringTimeGap);
+        Conf.MBFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
-        Conf.MBFileParameters.MaxClusteringTimeGap);
-    if (Conf.MBFileParameters.SplitMultiEvents) {
+        Conf.MBFileParms.MaxClusteringTimeGap);
+    if (Conf.MBFileParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
-          Conf.MBFileParameters.SplitMultiEvents,
-          Conf.MBFileParameters.SplitMultiEventsCoefficientLow,
-          Conf.MBFileParameters.SplitMultiEventsCoefficientHigh);
+          Conf.MBFileParms.SplitMultiEvents,
+          Conf.MBFileParms.SplitMultiEventsCoefficientLow,
+          Conf.MBFileParms.SplitMultiEventsCoefficientHigh);
     }
   }
 
@@ -76,53 +79,37 @@ void FreiaInstrument::loadConfigAndCalib() {
 void FreiaInstrument::processReadouts() {
   XTRACE(DATA, DEB,
          "\n================== NEW PACKET =====================\n\n");
-  // All readouts are potentially now valid, but rings and fens
-  // could still be outside the configured range, also
-  // illegal time intervals can be detected here
+
   Serializer.checkAndSetReferenceTime(
-      /// \todo sometimes PrevPulseTime maybe?
       ESSHeaderParser.Packet.Time.getRefTimeUInt64());
 
   for (const auto &readout : VMMParser.Result) {
-
     XTRACE(DATA, INF,
            "readout: FiberId %d, FENId %d, VMM %d, Channel %d, TimeLow %d",
            readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    // Convert from physical rings to logical rings
-    uint8_t Ring = readout.FiberId / 2;
+    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
-    // Check for configuration mismatch
-    if (Ring > VMM3Config::MaxRing) {
-      counters.RingMappingErrors++;
+    // Validate readout data (Ring, FEN, Hybrid)
+    if (!Geom->validateReadoutData(readout)) {
       continue;
     }
 
-    if (readout.FENId > VMM3Config::MaxFEN) {
-      counters.FENMappingErrors++;
-      continue;
-    }
+    uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
-    uint8_t HybridId = readout.VMM >> 1;
-    if (!Conf.getHybrid(Ring, readout.FENId, HybridId).Initialised) {
-      XTRACE(DATA, WAR,
-             "Hybrid for Ring %d, FEN %d, VMM %d not defined in config file",
-             Ring, readout.FENId, HybridId);
-      counters.HybridMappingErrors++;
-      continue;
-    }
+    // Validation of hybrid done in validateReadoutData()
+    // Get hybrid mapping
+    const Hybrid &Hybrid = Conf.getHybrid(Ring, readout.FENId, HybridId);
 
-    ESSReadout::Hybrid &Hybrid =
-        Conf.getHybrid(Ring, readout.FENId, readout.VMM >> 1);
-
-    uint8_t Asic = readout.VMM & 0x1;
+    const uint8_t Asic = readout.VMM & 0x1;
     XTRACE(DATA, DEB, "Asic calculated to be %u", Asic);
-    VMM3Calibration &Calib = Hybrid.VMMs[Asic];
+
+    const VMM3Calibration &Calib = Hybrid.VMMs[Asic];
     XTRACE(DATA, DEB, "Hybrid at: %p", &Hybrid);
     XTRACE(DATA, DEB, "Calibration at: %p", &Hybrid.VMMs[Asic]);
 
-    // apply adc thresholds
+    // ADC threshold
     if (readout.OTADC < Hybrid.ADCThresholds[Asic][0]) {
       counters.ADCBelowThreshold++;
       continue;
@@ -130,81 +117,63 @@ void FreiaInstrument::processReadouts() {
 
     uint64_t TimeNS =
         ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
-    int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
+    const auto TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS,
            TDCCorr);
-
     TimeNS += TDCCorr;
-    XTRACE(DATA, DEB, "TimeNS corrected %" PRIu64, TimeNS);
 
-    // Only 10 bits of the 16-bit OTADC field is used hence the 0x3ff mask below
-    uint16_t ADC = Calib.ADCCorr(readout.Channel, readout.OTADC & 0x3FF);
-
-    XTRACE(DATA, DEB, "ADC calibration from %u to %u", readout.OTADC & 0x3FF,
-           ADC);
-
-    // If the corrected ADC reaches maximum value we count the occurance but
-    // use the new value anyway
-    if (ADC >= 1023) {
+    // Extract raw 10-bit ADC value, then apply calibration
+    const uint16_t RawADC = VMM3Geometry::getRawADC(readout.OTADC);
+    const uint16_t ADC = Calib.ADCCorr(readout.Channel, RawADC);
+    if (ADC >= Calib.VMM_ADC_10BIT_LIMIT) {
       counters.MaxADC++;
     }
+    XTRACE(DATA, DEB, "ADC calibration from %u to %u", RawADC, ADC);
 
-    // Now we add readouts with the calibrated time and adc to the x,y builders
-    if (Geom.isXCoord(readout.VMM)) {
-      uint16_t XCoord =
-          Geom.xCoord(Hybrid.XOffset, readout.VMM, readout.Channel);
-      XTRACE(DATA, INF,
-             "X: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneX, XCoord, readout.Channel, ADC);
+    // Use unified coordinate calculation with auto-detection
+    auto result = Geom->calculateCoordinate(Hybrid.XOffset, Hybrid.YOffset,
+                                            readout.VMM, readout.Channel);
 
-      if (XCoord == GeometryBase::InvalidCoord) {
-        counters.InvalidXCoord++;
-        continue;
-      }
+    XTRACE(DATA, DEB, "%s: TimeNS %" PRIu64 ", Coord %u, Channel %u, ADC %u",
+           result.isXPlane ? "X" : "Y", TimeNS, result.coord, readout.Channel,
+           ADC);
 
-      builders[Hybrid.HybridNumber].insert({TimeNS, XCoord, ADC, PlaneX});
-
-    } else { // implicit isYCoord
-      uint16_t yCoord =
-          Geom.yCoord(Hybrid.YOffset, readout.VMM, readout.Channel);
-      XTRACE(DATA, INF,
-             "Y: TimeNS %" PRIu64 ", Plane %u, Coord %u, Channel %u, ADC %u",
-             TimeNS, PlaneY, yCoord, readout.Channel, ADC);
-      if (yCoord == GeometryBase::InvalidCoord) {
-        counters.InvalidYCoord++;
-        continue;
-      }
-
-      builders[Hybrid.HybridNumber].insert({TimeNS, yCoord, ADC, PlaneY});
+    /// skip further processing if coordinate is invalid
+    if (result.coord == VMM3Geometry::InvalidCoord) {
+      continue;
     }
+
+    // Insert into appropriate builder based on plane
+    uint8_t plane = result.isXPlane ? PlaneX : PlaneY;
+    builders[Hybrid.HybridNumber].insert({TimeNS, result.coord, ADC, plane});
   }
 
   for (auto &builder : builders) {
-    builder.flush(true); // Do matching
+    builder.flush(true);
   }
 }
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
   ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
   // XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
-  for (const auto &e : Events) {
-    if (e.empty()) {
+  for (const auto &Event : Events) {
+    if (Event.empty()) {
       XTRACE(EVENT, DEB, "Empty event");
       continue;
     }
 
-    if (!e.both_planes()) {
+    if (!Event.both_planes()) {
       XTRACE(EVENT, DEB,
              "\n================== NO COINCIDENCE =====================\n\n");
       XTRACE(EVENT, DEB, "Event has no coincidence\n %s\n",
-             e.to_string({}, true).c_str());
+             Event.to_string({}, true).c_str());
       counters.EventsNoCoincidence++;
 
-      if (not e.ClusterB.empty()) {
+      if (not Event.ClusterB.empty()) {
         counters.EventsMatchedWireOnly++;
       }
 
-      if (not e.ClusterA.empty()) {
+      if (not Event.ClusterA.empty()) {
         counters.EventsMatchedStripOnly++;
       }
       continue;
@@ -212,7 +181,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     // Discard if there are gaps in the strip or wire channels
     if (Conf.WireGapCheck) {
-      if (e.ClusterB.hasGap(Conf.MBFileParameters.MaxGapWire)) {
+      if (Event.ClusterB.hasGap(Conf.MBFileParms.MaxGapWire)) {
         XTRACE(EVENT, DEB, "Event discarded due to wire gap");
         counters.EventsInvalidWireGap++;
         continue;
@@ -220,7 +189,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     if (Conf.StripGapCheck) {
-      if (e.ClusterA.hasGap(Conf.MBFileParameters.MaxGapStrip)) {
+      if (Event.ClusterA.hasGap(Conf.MBFileParms.MaxGapStrip)) {
         XTRACE(EVENT, DEB, "Event discarded due to strip gap");
         counters.EventsInvalidStripGap++;
         continue;
@@ -228,10 +197,10 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     }
 
     counters.EventsMatchedClusters++;
-    XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
+    XTRACE(EVENT, INF, "Event Valid\n %s", Event.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.timeStart();
+    uint64_t EventTime = Event.timeStart();
 
     XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
            TimeRef.getRefTimeUInt64());
@@ -244,29 +213,30 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
 
-    if (TimeOfFlight > Conf.FileParameters.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParameters.MaxTOFNS);
+    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
+      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
       counters.MaxTOFErrors++;
       continue;
     }
 
-    // calculate local x and y using center of mass
-    auto x = static_cast<uint16_t>(std::round(e.ClusterA.coordCenter()));
-    auto y = static_cast<uint16_t>(std::round(e.ClusterB.coordCenter()));
-    auto PixelId = Geom.pixel2D(x, y);
+    auto PixelId = Geom->calcPixel(Event);
+    XTRACE(EVENT, DEB, "Calculated pixel ID: %u", PixelId);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, x %u, y %u, pixel %u",
-             time, TimeOfFlight, x, y, PixelId);
-      counters.PixelErrors++;
+      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, pixel %u", time,
+             TimeOfFlight, PixelId);
+      /// \note ZeroPixelErrors are now counted automatically by
+      /// DetectorGeometry::calcPixel()
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, pixel %u", time,
-           TimeOfFlight, x, y, PixelId);
+    XTRACE(EVENT, INF, "Time: %u TOF: %u, pixel %u", time, TimeOfFlight,
+           PixelId);
+
     Serializer.addEvent(TimeOfFlight, PixelId);
     counters.Events++;
   }
+
   Events.clear(); // else events will accumulate
 }
 

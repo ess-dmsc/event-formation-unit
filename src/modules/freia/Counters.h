@@ -20,14 +20,9 @@ struct Counters {
   // int64_t RingRx[24];
 
   // VMM3a Readouts
-  struct ESSReadout::VMM3ParserStats VMMStats;
+  struct vmm3::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
-  int64_t RingMappingErrors;
-  int64_t FENMappingErrors;
-  int64_t HybridMappingErrors;
-  int64_t InvalidXCoord;
-  int64_t InvalidYCoord;
   int64_t MaxTOFErrors;
   int64_t MaxADC;
   int64_t ADCBelowThreshold;
@@ -43,7 +38,6 @@ struct Counters {
   int64_t EventsInvalidWireGap;
   struct GapMatcherStats MatcherStats;
 
-  int64_t PixelErrors;
   int64_t TimeErrors;
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;

@@ -10,6 +10,8 @@
 #include <common/debug/Trace.h>
 #include <freia/geometry/Config.h>
 
+using namespace vmm3;
+
 namespace Freia {
 
 // #undef TRC_LEVEL
@@ -20,23 +22,23 @@ void Config::applyConfig() {
 
   // Initialize and check Version parameter
   setMask(LOG);
-  assign("Version", MBFileParameters.Version);
-  if (MBFileParameters.Version != 1) {
+  assign("Version", MBFileParms.Version);
+  if (MBFileParms.Version != 1) {
     auto Msg =
-        fmt::format("Invalid config version {} - expected 1", MBFileParameters.Version);
+        fmt::format("Invalid config version {} - expected 1", MBFileParms.Version);
     LOG(INIT, Sev::Error, Msg.c_str());
     throw std::runtime_error(Msg);
   }
-  LOG(INIT, Sev::Info, "Config file version {}", MBFileParameters.Version);
+  LOG(INIT, Sev::Info, "Config file version {}", MBFileParms.Version);
 
   // Initialize all other parameter
-  assign("MaxGapWire", MBFileParameters.MaxGapWire);
-  assign("MaxGapStrip", MBFileParameters.MaxGapStrip);
-  assign("SplitMultiEvents", MBFileParameters.SplitMultiEvents);
-  assign("SplitMultiEventsCoefficientLow", MBFileParameters.SplitMultiEventsCoefficientLow);
-  assign("SplitMultiEventsCoefficientHigh", MBFileParameters.SplitMultiEventsCoefficientHigh);
-  assign("MaxMatchingTimeGap", MBFileParameters.MaxMatchingTimeGap);
-  assign("MaxClusteringTimeGap", MBFileParameters.MaxClusteringTimeGap);
+  assign("MaxGapWire", MBFileParms.MaxGapWire);
+  assign("MaxGapStrip", MBFileParms.MaxGapStrip);
+  assign("SplitMultiEvents", MBFileParms.SplitMultiEvents);
+  assign("SplitMultiEventsCoefficientLow", MBFileParms.SplitMultiEventsCoefficientLow);
+  assign("SplitMultiEventsCoefficientHigh", MBFileParms.SplitMultiEventsCoefficientHigh);
+  assign("MaxMatchingTimeGap", MBFileParms.MaxMatchingTimeGap);
+  assign("MaxClusteringTimeGap", MBFileParms.MaxClusteringTimeGap);
 
   /// RING/FEN/Hybrid
   auto PanelConfig = root()["Config"];
@@ -48,7 +50,7 @@ void Config::applyConfig() {
     uint8_t FEN = Mapping["FEN"].get<uint8_t>();
     uint8_t LocalHybrid = Mapping["Hybrid"].get<uint8_t>();
 
-    ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+    Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
     uint8_t CassetteId = Mapping["CassetteNumber"].get<uint8_t>();
 
@@ -68,7 +70,7 @@ void Config::applyConfig() {
 
     /// Thresholds
     /// Version 1: one threshold for asic0 and asic1 at index, 0 and 1
-    if (MBFileParameters.Version == 1) {
+    if (MBFileParms.Version == 1) {
      XTRACE(INIT, ALW, "Thresholds for VMM3 Hybrid %d at RING/FEN %d/%d",
             LocalHybrid, Ring, FEN);
      auto &Thresholds = Mapping["Thresholds"];

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+using namespace vmm3;
+
 namespace Trex {
 
 // #undef TRC_LEVEL
@@ -18,10 +20,10 @@ namespace Trex {
 
 void Config::applyConfig() {
   setMask(LOG);
-  assign("DefaultMinADC", TREXFileParameters.DefaultMinADC);
-  assign("SizeX",         TREXFileParameters.SizeX);
-  assign("SizeY",         TREXFileParameters.SizeY);
-  assign("SizeZ",         TREXFileParameters.SizeZ);
+  assign("DefaultMinADC", TREXFileParms.DefaultMinADC);
+  assign("SizeX",         TREXFileParms.SizeX);
+  assign("SizeY",         TREXFileParms.SizeY);
+  assign("SizeZ",         TREXFileParms.SizeZ);
 
   try {
     auto PanelConfig = root()["Config"];
@@ -33,7 +35,7 @@ void Config::applyConfig() {
 
       XTRACE(INIT, DEB, "Ring %u, FEN %u, Hybrid %u", Ring, FEN, LocalHybrid);
 
-      ESSReadout::Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
+      Hybrid &Hybrid = getHybrid(Ring, FEN, LocalHybrid);
 
       std::string VesselID = Mapping["VesselId"];
       Rotated[Ring][FEN][LocalHybrid] =
@@ -63,7 +65,7 @@ void Config::applyConfig() {
         XTRACE(INIT, DEB, "Vessel specific MinADC %u assigned to vessel %s",
                Hybrid.MinADC, VesselID.c_str());
       } catch (...) {
-        Hybrid.MinADC = TREXFileParameters.DefaultMinADC;
+        Hybrid.MinADC = TREXFileParms.DefaultMinADC;
       }
     }
 

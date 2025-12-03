@@ -56,7 +56,7 @@ public:
   std::vector<EventBuilder2D> builders; // reinit in ctor
 
   /// \brief parser for VMM3 readout data
-  ESSReadout::VMM3Parser VMMParser;
+  vmm3::VMM3Parser VMMParser;
 
 private:
   Geometry *GeometryInstance;

@@ -37,8 +37,8 @@ CDCalibration::CDCalibration(const std::string &Name, const std::string &Calibra
   }
 }
 
-double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
-  std::vector<double> &Pols = Calibration[Group][Unit];
+double CDCalibration::posCorrection(int Group, int Unit, double Pos) const {
+  const std::vector<double> &Pols = Calibration[Group][Unit];
   double a = Pols[0];
   double b = Pols[1];
   double c = Pols[2];
@@ -65,7 +65,7 @@ double CDCalibration::posCorrection(int Group, int Unit, double Pos) {
 }
 
 ///\brief
-int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) {
+int CDCalibration::getUnitId(int GroupIndex, double GlobalPos) const {
   XTRACE(EVENT, DEB, "GroupIndex %u GlobalPos %f", GroupIndex, GlobalPos);
 
   if (GroupIndex >= Parms.Groups) {

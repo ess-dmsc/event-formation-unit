@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2022 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace ESSReadout {
+namespace vmm3 {
 
 class Hybrid {
 public:
@@ -53,4 +53,4 @@ public:
   uint16_t MinADC{0};
 }; // class Hybrid
 
-} // namespace ESSReadout
+} // namespace vmm3

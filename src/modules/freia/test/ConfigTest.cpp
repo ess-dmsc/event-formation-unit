@@ -84,73 +84,73 @@ TEST_F(FreiaConfigTest, BadThresholdArraySize) {
 
 /// Test optional parameters
 TEST_F(FreiaConfigTest, ParmMaxGapWire) {
-  EXPECT_EQ(config.MBFileParameters.MaxGapWire, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapWire, 0);
 
   config["MaxGapWire"] = 129;
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxGapWire, 129);
+  EXPECT_EQ(config.MBFileParms.MaxGapWire, 129);
 }
 
 TEST_F(FreiaConfigTest, DefaultParmMaxGapWire) {
   Json::changeKey(config.root(), "MaxGapWire", "NoMaxGapWire");
-  EXPECT_EQ(config.MBFileParameters.MaxGapWire, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapWire, 0);
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxGapWire, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapWire, 0);
 }
 
 TEST_F(FreiaConfigTest, ParmMaxGapStrip) {
-  EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapStrip, 0);
 
   config["MaxGapStrip"] = 129;
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 129);
+  EXPECT_EQ(config.MBFileParms.MaxGapStrip, 129);
 }
 
 TEST_F(FreiaConfigTest, DefaultParmMaxGapStrip) {
   Json::changeKey(config.root(), "MaxGapStrip", "NoMaxGapStrip");
-  EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapStrip, 0);
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxGapStrip, 0);
+  EXPECT_EQ(config.MBFileParms.MaxGapStrip, 0);
 }
 
 TEST_F(FreiaConfigTest, ParmSplitMultiEvents) {
-  EXPECT_EQ(config.MBFileParameters.SplitMultiEvents, false);
+  EXPECT_EQ(config.MBFileParms.SplitMultiEvents, false);
 
   config["SplitMultiEvents"] = true;
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.SplitMultiEvents, true);
+  EXPECT_EQ(config.MBFileParms.SplitMultiEvents, true);
 }
 
 TEST_F(FreiaConfigTest, ParmMultiEventsCoefficientLow) {
-  EXPECT_NEAR(config.MBFileParameters.SplitMultiEventsCoefficientLow, 0.8, FPEquality);
+  EXPECT_NEAR(config.MBFileParms.SplitMultiEventsCoefficientLow, 0.8, FPEquality);
 
   config["SplitMultiEventsCoefficientLow"] = 0.42;
   config.applyConfig();
-  EXPECT_NEAR(config.MBFileParameters.SplitMultiEventsCoefficientLow, 0.42, FPEquality);
+  EXPECT_NEAR(config.MBFileParms.SplitMultiEventsCoefficientLow, 0.42, FPEquality);
 }
 
 TEST_F(FreiaConfigTest, ParmMultiEventsCoefficientHigh) {
-  EXPECT_NEAR(config.MBFileParameters.SplitMultiEventsCoefficientHigh, 1.2, FPEquality);
+  EXPECT_NEAR(config.MBFileParms.SplitMultiEventsCoefficientHigh, 1.2, FPEquality);
 
   config["SplitMultiEventsCoefficientHigh"] = 0.42;
   config.applyConfig();
-  EXPECT_NEAR(config.MBFileParameters.SplitMultiEventsCoefficientHigh, 0.42, FPEquality);
+  EXPECT_NEAR(config.MBFileParms.SplitMultiEventsCoefficientHigh, 0.42, FPEquality);
 }
 
 TEST_F(FreiaConfigTest, ParmMaxMatchingTimeGap) {
-  EXPECT_EQ(config.MBFileParameters.MaxMatchingTimeGap, 500);
+  EXPECT_EQ(config.MBFileParms.MaxMatchingTimeGap, 500);
 
   config["MaxMatchingTimeGap"] = 42;
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxMatchingTimeGap, 42);
+  EXPECT_EQ(config.MBFileParms.MaxMatchingTimeGap, 42);
 }
 
 TEST_F(FreiaConfigTest, ParmMaxClusteringTimeGap) {
-  EXPECT_EQ(config.MBFileParameters.MaxClusteringTimeGap, 500);
+  EXPECT_EQ(config.MBFileParms.MaxClusteringTimeGap, 500);
 
   config["MaxClusteringTimeGap"] = 42;
   config.applyConfig();
-  EXPECT_EQ(config.MBFileParameters.MaxClusteringTimeGap, 42);
+  EXPECT_EQ(config.MBFileParms.MaxClusteringTimeGap, 42);
 }
 
 // Compare calculated maxpixels and number of fens against

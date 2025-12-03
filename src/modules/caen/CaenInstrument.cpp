@@ -24,7 +24,7 @@ using namespace ESSReadout;
 ///
 /// throws if number of pixels do not match, and if the (invalid) pixel
 /// value 0 is mapped to a nonzero value
-CaenInstrument::CaenInstrument(struct CaenCounters &counters,
+CaenInstrument::CaenInstrument(Statistics &Stats, struct CaenCounters &counters,
                                BaseSettings &settings,
                                ESSReadout::Parser &essHeaderParser)
     : counters(counters), Settings(settings), ESSHeaderParser(essHeaderParser) {
@@ -35,15 +35,15 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
   CaenConfiguration.parseConfig();
 
   if (settings.DetectorName == "loki") {
-    Geom = new LokiGeometry(CaenConfiguration);
+    Geom = new LokiGeometry(Stats, CaenConfiguration);
   } else if (settings.DetectorName == "bifrost") {
-    Geom = new BifrostGeometry(CaenConfiguration);
+    Geom = new BifrostGeometry(Stats, CaenConfiguration);
   } else if (settings.DetectorName == "miracles") {
-    Geom = new MiraclesGeometry(CaenConfiguration);
+    Geom = new MiraclesGeometry(Stats, CaenConfiguration);
   } else if (settings.DetectorName == "cspec") {
-    Geom = new CspecGeometry(CaenConfiguration);
+    Geom = new CspecGeometry(Stats, CaenConfiguration);
   } else if (settings.DetectorName == "tbl3he") {
-    Geom = new Tbl3HeGeometry(CaenConfiguration);
+    Geom = new Tbl3HeGeometry(Stats, CaenConfiguration);
   } else {
     XTRACE(INIT, ERR, "Invalid Detector Name %s",
            settings.DetectorName.c_str());
@@ -67,19 +67,6 @@ CaenInstrument::CaenInstrument(struct CaenCounters &counters,
 
 CaenInstrument::~CaenInstrument() {}
 
-/// \brief helper function to calculate pixels from knowledge about
-/// caen panel, FENId and a single readout dataset
-///
-/// also applies the calibration
-uint32_t CaenInstrument::calcPixel(DataParser::CaenReadout &Data) {
-  XTRACE(DATA, DEB, "Calculating pixel");
-
-  uint32_t pixel = Geom->calcPixel(Data);
-  // seems to be wrong
-  XTRACE(DATA, DEB, "Calculated pixel to be %u", pixel);
-  return pixel;
-}
-
 void CaenInstrument::processReadouts() {
   XTRACE(DATA, DEB, "Reference time is %" PRIi64,
          ESSHeaderParser.Packet.Time.getRefTimeUInt64());
@@ -92,7 +79,7 @@ void CaenInstrument::processReadouts() {
   /// Traverse readouts, calculate pixels
   for (auto &Data : CaenParser.Result) {
     XTRACE(DATA, DEB, "Fiber %u, FEN %u", Data.FiberId, Data.FENId);
-    bool validData = Geom->validateData(Data);
+    bool validData = Geom->validateReadoutData(Data);
     if (not validData) {
       XTRACE(DATA, WAR, "Invalid Data, skipping readout");
       continue;
@@ -120,8 +107,8 @@ void CaenInstrument::processReadouts() {
            Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
            Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
-    // Calculate pixel and apply calibration
-    uint32_t PixelId = calcPixel(Data);
+    // Calculate pixel using template wrapper with automatic error counting
+    uint32_t PixelId = Geom->calcPixel(Data);
 
     // Determine the correct serializer for this pixel
     auto SerializerId = Geom->calcSerializer(Data);
@@ -133,7 +120,7 @@ void CaenInstrument::processReadouts() {
              "%u, C %u, D %u",
              Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
              Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-      counters.PixelErrors++;
+      // PixelErrors are now counted automatically by DetectorGeometry::calcPixel()
     } else if (SerializerId >= Serializers.size()) {
       XTRACE(EVENT, WAR, "Serializer identification error");
       counters.SerializerErrors++;
