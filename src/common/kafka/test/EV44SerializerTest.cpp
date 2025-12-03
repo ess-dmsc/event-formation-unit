@@ -3,8 +3,11 @@
 #include "ev44_events_generated.h"
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/Producer.h>
+#include <common/math/Units.h>
 #include <common/testutils/TestBase.h>
 #include <cstring>
+
+using namespace essmath::units;
 
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
@@ -26,7 +29,7 @@ class EV44SerializerTest : public TestBase {
   void TearDown() override {}
 
 protected:
-  char flatbuffer[1024 * 1024];
+  char flatbuffer[MiB];
   uint32_t time[200000];
   uint32_t pixel[200000];
   EV44Serializer fb{ARRAYLENGTH, "nameless"};

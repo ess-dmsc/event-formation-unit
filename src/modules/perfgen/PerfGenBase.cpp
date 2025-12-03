@@ -7,23 +7,21 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
 #include <modules/perfgen/PerfGenBase.h>
 
+#include <common/TestImageUdder.h>
 #include <common/debug/Trace.h>
 #include <common/detector/EFUArgs.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/SPSCFifo.h>
 #include <common/system/SocketImpl.h>
-#include <common/TestImageUdder.h>
-#include <common/time/Timer.h>
 #include <common/time/TimeString.h>
+#include <common/time/Timer.h>
 #include <logical_geometry/ESSGeometry.h>
 
 #include <cinttypes>
 #include <unistd.h>
-
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -91,6 +89,7 @@ void PerfGenBase::processingThread() {
 
     usleep(EFUSettings.TestImageUSleep);
 
+    // Poll Kafka to handle delivery reports
     EventProducer.poll(0);
 
     TimeOfFlight = 0;

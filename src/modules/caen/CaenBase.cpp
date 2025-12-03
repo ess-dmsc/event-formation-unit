@@ -33,9 +33,12 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
   Stats.create("parser.readout.header.count", Counters.Parser.DataHeaders);
   Stats.create("parser.readout.count", Counters.Parser.Readouts);
   Stats.create("parser.readout.error_maxadc", Counters.Parser.ReadoutsMaxADC);
-  Stats.create("parser.readout.error_headersize", Counters.Parser.DataHeaderSizeErrors);
-  Stats.create("parser.readout.error_datlen_mismatch", Counters.Parser.DataLenMismatch);
-  Stats.create("parser.readout.error_datlen_invalid", Counters.Parser.DataLenInvalid);
+  Stats.create("parser.readout.error_headersize",
+               Counters.Parser.DataHeaderSizeErrors);
+  Stats.create("parser.readout.error_datlen_mismatch",
+               Counters.Parser.DataLenMismatch);
+  Stats.create("parser.readout.error_datlen_invalid",
+               Counters.Parser.DataLenInvalid);
   Stats.create("parser.readout.error_ringfen", Counters.Parser.RingFenErrors);
 
   // Logical and Digital geometry incl. Calibration
@@ -155,6 +158,7 @@ void CaenBase::processingThread() {
               .count();
     }
 
+    // Poll Kafka to handle delivery reports
     EventProducer.poll(0);
 
     if (ProduceTimer.timeout()) {

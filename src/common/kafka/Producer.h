@@ -22,6 +22,7 @@
 #include <common/memory/Buffer.h>
 #include <common/memory/span.hpp>
 #include <functional>
+#include <malloc.h>
 #include <memory>
 #include <unordered_map> // add if not already included
 #include <utility>
@@ -71,13 +72,15 @@ public:
   /// \brief Structure to hold producer statistics.
   struct ProducerStats : public StatCounterBase {
     /// \brief Count of bytes successfully produced
-    int64_t produce_bytes_ok{0};
+    int64_t ProduceBytesOk{0};
     /// \brief Count of bytes that failed to produce
-    int64_t produce_bytes_error{0};
+    int64_t ProduceBytesError{0};
     /// \brief Total number of produce() calls
-    int64_t produce_calls{0};
+    int64_t ProduceCalls{0};
     /// \brief Count of failed produce() calls
-    int64_t produce_errors{0};
+    int64_t ProduceError{0};
+    /// \brief Count of malloc_trim calls made
+    int64_t MallocTrimCalls{0};
 
     // librdkafka errors
     /// \brief Count errors during librdkafka config operations
@@ -127,9 +130,9 @@ public:
     /// \brief Maximum number of messages in queue
     int64_t MaxNumOfMsgInQueue{0};
     /// \brief Current bytes of messages in queue
-    int64_t BytesOfMsgInQueue{0};
+    int64_t BytesInQueue{0};
     /// \brief Maximum bytes of messages in queue
-    int64_t MaxBytesOfMsgInQueue{0};
+    int64_t MaxBytesInQueue{0};
 
     // librdkafka transmission statistics
     /// \brief Total bytes transmitted to brokers
@@ -143,11 +146,14 @@ public:
               Stats,
               {{"stat_events", StatsEventCounter},
                {"error_events", ErrorEventCounter},
-               {"produce_bytes_ok", produce_bytes_ok},
-               {"produce_bytes_error", produce_bytes_error},
-               {"produce_calls", produce_calls},
-               {"produce_errors", produce_errors},
-
+               {"produce_bytes_ok", ProduceBytesOk},
+               {"produce_bytes_error", ProduceBytesError},
+               {"produce_calls", ProduceCalls},
+               {"produce_errors", ProduceError},
+               
+              /// performance indicators
+               {"memory_cleanups", MallocTrimCalls},
+               
                /// librdkafka transmission stats
                {"brokers.tx_bytes", BytesTransmittedToBrokers},
                {"brokers.tx_req_retries", TxRequestRetries},
@@ -155,8 +161,8 @@ public:
                /// librdkafka message stats
                {"msg.num_of_msg_in_queue", NumberOfMsgInQueue},
                {"msg.max_num_of_msg_in_queue", MaxNumOfMsgInQueue},
-               {"msg.bytes_of_msg_in_queue", BytesOfMsgInQueue},
-               {"msg.max_bytes_of_msg_in_queue", MaxBytesOfMsgInQueue},
+               {"msg.bytes_in_queue", BytesInQueue},
+               {"msg.max_bytes_in_queue", MaxBytesInQueue},
                {"msg.delivery_success", MsgDeliverySuccess},
                {"msg.status_persisted", MsgStatusPersisted},
                {"msg.status_not_persisted", MsgStatusNotPersisted},
@@ -179,8 +185,31 @@ public:
               Prefix) {}
   } __attribute__((aligned(64)));
 
-  /// \brief Polls the producer for events.
-  void poll(int TimeoutMS) { KafkaProducer->poll(TimeoutMS); };
+  /// \brief Polls the producer for events and checks queue length.
+  /// and triggers memory recovery if needed.
+  /// \param TimeoutMS The timeout in milliseconds for polling.
+  inline void poll(int TimeoutMS) {
+
+    int current = KafkaProducer->outq_len();
+
+    // Track high watermark occurrence
+    HighWatermarkReached = current >= QueueHighWatermark;
+
+    // If queue dropped significantly from peak (>50% to <1%), trigger cleanup
+    if (HighWatermarkReached && current < QueueRecoveryThreshold) {
+
+      malloc_trim(0);
+      StatCounters.MallocTrimCalls++;
+      HighWatermarkReached = false;
+      XTRACE(KAFKA, INF,
+             "Kafka producer queue recovered, triggered malloc_trim");
+    }
+
+    if (!KafkaProducer)
+      return;
+    KafkaProducer->poll(TimeoutMS);
+    StatCounters.NumberOfMsgInQueue = KafkaProducer->outq_len();
+  };
 
   /// \brief Delivery report callback. This function is called when we
   /// processing delivery reports from the producer when calling poll().
@@ -223,6 +252,12 @@ private:
   /// Local struct to store producer statistics. References of these counters
   /// are registered into the Statistics object.
   ProducerStats StatCounters;
+
+  /// \brief Calculated based on the configured max queue size.
+  int QueueRecoveryThreshold{0};
+  int QueueHighWatermark{0};
+
+  bool HighWatermarkReached{false};
 
   void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode);
 };

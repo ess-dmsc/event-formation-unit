@@ -12,13 +12,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
+#include <common/StatCounterBase.h>
 #include <common/kafka/Producer.h>
+#include <common/math/Units.h>
 #include <common/system/gccintel.h>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <librdkafka/rdkafkacpp.h>
-#include <nlohmann/json.hpp>
+
+using namespace essmath::units;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -70,6 +73,8 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     setConfig(Config.first, Config.second);
   }
 
+  setConfig("statistics.interval.ms", "0");
+
   /// Register this producer (this object) as the event call back handler to
   /// receive events
   if (Config->set("event_cb", static_cast<RdKafka::EventCb *>(this),
@@ -96,6 +101,29 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     LOG(KAFKA, Sev::Error, "Failed to create topic: {}", ErrorMessage);
     return;
   }
+
+  // Query configured queue limits
+  std::string val;
+  if (Config->get("queue.buffering.max.messages", val) ==
+      RdKafka::Conf::CONF_OK) {
+    StatCounters.MaxNumOfMsgInQueue = std::stoi(val);
+  }
+  if (Config->get("queue.buffering.max.kbytes", val) ==
+      RdKafka::Conf::CONF_OK) {
+    StatCounters.MaxBytesInQueue = std::stoi(val) * KiB;
+  }
+
+  // Pre-calculate thresholds (1% and 50% of configured max)
+  if (StatCounters.MaxNumOfMsgInQueue > 100) {
+    QueueRecoveryThreshold = StatCounters.MaxNumOfMsgInQueue / 100;
+    QueueHighWatermark = StatCounters.MaxNumOfMsgInQueue / 2;
+  } else {
+    QueueRecoveryThreshold = 10;
+    QueueRecoveryThreshold = 5;
+  }
+
+  LOG(KAFKA, Sev::Info, "Kafka queue limits: {} messages, and {} Bytes",
+      StatCounters.MaxNumOfMsgInQueue, StatCounters.MaxBytesInQueue);
 }
 
 int Producer::produce(const nonstd::span<const uint8_t> &Buffer,
@@ -111,13 +139,15 @@ int Producer::produce(const nonstd::span<const uint8_t> &Buffer,
       const_cast<uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
       MessageTimestampMS, NULL);
 
-  KafkaProducer->poll(0);
+  // Poll to handle delivery reports and events
+  poll(0);
 
-  StatCounters.produce_calls++;
+  StatCounters.ProduceCalls++;
 
   if (error != RdKafka::ERR_NO_ERROR) {
-    StatCounters.produce_errors++;
-    StatCounters.produce_bytes_error += Buffer.size_bytes();
+    StatCounters.ProduceError++;
+    StatCounters.ProduceBytesError += Buffer.size_bytes();
+
     applyKafkaErrorCode(error);
 
     LOG(KAFKA, Sev::Error, "Failed to produce message: {}",
@@ -125,62 +155,28 @@ int Producer::produce(const nonstd::span<const uint8_t> &Buffer,
     return error;
   }
 
-  StatCounters.produce_bytes_ok += Buffer.size_bytes();
+  StatCounters.BytesInQueue += Buffer.size_bytes();
+  StatCounters.ProduceBytesOk += Buffer.size_bytes();
 
   return 0;
 }
 
-// Implementation of KafkaEventHandler override
+/// \brief Event callback override
+/// Handles error events from librdkafka
 void Producer::event_cb(RdKafka::Event &event) {
-  nlohmann::json res;
-
-  /// initialize variable to sum up the values later when looping over brokers
-  int64_t TransmissionErrors = 0;
-  int64_t BytesTransmittedToBrokers = 0;
-  int64_t TxRequestRetries = 0;
-
-  switch (event.type()) {
-  case RdKafka::Event::EVENT_STATS:
-    StatCounters.StatsEventCounter++;
-
-    res = nlohmann::json::parse(event.str());
-    StatCounters.NumberOfMsgInQueue = res["msg_cnt"].get<int64_t>();
-    StatCounters.MaxNumOfMsgInQueue = res["msg_max"].get<int64_t>();
-    StatCounters.BytesOfMsgInQueue = res["msg_size"].get<int64_t>();
-    StatCounters.MaxBytesOfMsgInQueue += res["msg_size_max"].get<int64_t>();
-
-    /// \note loop over brokers and sum up the values into local variables
-    /// before assigning them to the ProducerStats struct.
-    /// This is to improve thread safety because the ProducerStats struct
-    /// is registered into the Statistics object and can be accessed from
-    /// multiple threads.
-    for (const auto &[key, broker_info] : res["brokers"].items()) {
-      BytesTransmittedToBrokers += broker_info.value("txbytes", (int64_t)0);
-      TransmissionErrors += broker_info.value("txerrs", (int64_t)0);
-      TxRequestRetries += broker_info.value("txretries", (int64_t)0);
-    }
-
-    /// assign the values to the ProducerStats struct in one step
-    /// to ensure thread safety
-    StatCounters.BytesTransmittedToBrokers = BytesTransmittedToBrokers;
-    StatCounters.TransmissionErrors = TransmissionErrors;
-    StatCounters.TxRequestRetries = TxRequestRetries;
-
-    break;
-
-  case RdKafka::Event::EVENT_ERROR:
+  if (event.type() == RdKafka::Event::EVENT_ERROR) {
     StatCounters.ErrorEventCounter++;
     applyKafkaErrorCode(event.err());
-    break;
-
-  default:
-    break;
   }
 }
 
-// Implementation of DeliveryReportHandler override
+/// \brief Delivery report callback override
+/// Handles delivery reports from librdkafka
 void Producer::dr_cb(RdKafka::Message &message) {
   StatCounters.TotalMsgDeliveryEvent++;
+
+  // Decrease the bytes in queue counter message processed from the queue
+  StatCounters.BytesInQueue -= message.len();
 
   switch (message.status()) {
   case RdKafka::Message::MSG_STATUS_NOT_PERSISTED:
@@ -203,6 +199,7 @@ void Producer::dr_cb(RdKafka::Message &message) {
 
   } else {
     StatCounters.MsgDeliverySuccess++;
+    StatCounters.BytesTransmittedToBrokers += message.len();
   }
 }
 

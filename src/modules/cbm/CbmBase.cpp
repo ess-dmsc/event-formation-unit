@@ -111,7 +111,8 @@ void CbmBase::processingThread() {
       CbmConfiguration.Parms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
-    if ((Topology->Type == CbmType::EVENT_0D) || (Topology->Type == CbmType::EVENT_2D)) {
+    if ((Topology->Type == CbmType::EVENT_0D) ||
+        (Topology->Type == CbmType::EVENT_2D)) {
 
       std::unique_ptr<EV44Serializer> SerializerPtr =
           std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,
@@ -143,7 +144,6 @@ void CbmBase::processingThread() {
           std::make_unique<HistogramSerializer<int32_t>>(
               Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
               Topology->AggregatedFrames, Produce, 0, AggFunc);
-
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    SerializerPtr->stats().ProduceCalled);
@@ -217,6 +217,7 @@ void CbmBase::processingThread() {
               .count();
     }
 
+    // Poll Kafka to handle delivery reports
     EventProducer.poll(0);
 
     // Not only flush serializer data but also update runtime stats

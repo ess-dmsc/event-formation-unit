@@ -1,10 +1,12 @@
 // Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
 
+#include <common/math/BitMath.h>
+#include <common/math/Units.h>
 #include <common/memory/FixedSizePool.h>
 #include <common/testutils/TestBase.h>
-#include <common/math/BitMath.h>
 
 using namespace essmath;
+using namespace essmath::units;
 
 class FixedSizePoolTest : public TestBase {
 public:
@@ -137,7 +139,7 @@ TEST_F(FixedSizePoolTest, Large_All) {
 
 TEST_F(FixedSizePoolTest, Large_1mb) {
   // tests the validation can run in proper time on 1 mb pool
-  auto pool = new FixedSizePool<FixedSizePoolParams<1, 1ull * 1024 * 1024>>();
+  auto pool = new FixedSizePool<FixedSizePoolParams<1, MiB>>();
   ASSERT_EQ(pool->ValidateEmptyStateAndReturnError(), nullptr);
   delete pool;
 }

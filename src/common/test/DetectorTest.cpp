@@ -55,7 +55,7 @@ TEST_F(DetectorTest, TestConstructorAndStatCreation) {
   // Get the total number of stats
   int statSize = DetectorPtr->statsize();
   // Update this in case of new counters introduced for detector class
-  constexpr int ExpectedStatCount = 71;
+  constexpr int ExpectedStatCount = 72;
   EXPECT_EQ(statSize, ExpectedStatCount);
 
   // Test invalid stat indices
