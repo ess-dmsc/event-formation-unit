@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <common/reduction/Hit2DVector.h>
 
+using namespace essmath::units;
+
 #define ASCII_grayscale94                                                      \
   " .`:,;'_^\"></"                                                             \
   "-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#" \
@@ -18,7 +20,7 @@
 #define ASCII_grayscale10 " .:-=+*#%@"
 
 #if ENABLE_GREEDY_HIT_ALLOCATOR
-const size_t Bytes_2GB = 2ULL * 1024 * 1024 * 1024;
+const size_t Bytes_2GB = 2ULL * GiB;
 char *GreedyHit2DStorage::MemBegin = (char *)malloc(Bytes_2GB);
 char *GreedyHit2DStorage::MemEnd = MemBegin + Bytes_2GB;
 #else

@@ -40,3 +40,24 @@ KafkaConfig::KafkaConfig(const std::string &KafkaConfigFile) {
     throw std::runtime_error("Invalid Json file for Kafka config");
   }
 }
+
+std::string KafkaConfig::getCfgParmValStr(const std::string &Key) const {
+  for (const auto &Parm : CfgParms) {
+    if (Parm.first == Key) {
+      return Parm.second;
+    }
+  }
+  return "";
+}
+
+int KafkaConfig::getCfgParmValInt(const std::string &Key) const {
+  std::string Val = getCfgParmValStr(Key);
+  if (Val.empty()) {
+    return 0;
+  }
+  try {
+    return std::stoi(Val);
+  } catch (...) {
+    return 0;
+  }
+}

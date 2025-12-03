@@ -10,6 +10,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
+#include <common/math/Units.h>
 #include <common/reduction/Hit2D.h>
 
 #include <filesystem>
@@ -147,9 +148,8 @@ public:
 //-----------------------------------------------------------------------------
 
 struct Hit2DVectorStorage {
-  enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
   using AllocConfig =
-      PoolAllocatorConfig<Hit2D, Bytes_1GB, MyVector<Hit2D>::MinReserveCount,
+      PoolAllocatorConfig<Hit2D, essmath::units::GiB, MyVector<Hit2D>::MinReserveCount,
                           false, true>;
   static AllocConfig::PoolType *Pool;
   static PoolAllocator<AllocConfig> Alloc;

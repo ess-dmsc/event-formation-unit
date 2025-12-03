@@ -1,8 +1,10 @@
 // Copyright (C) 2016, 2017 European Spallation Source ERIC
 
+#include <common/math/Units.h>
 #include <common/monitor/HistogramSerializer.h>
-
 #include <common/testutils/TestBase.h>
+
+using namespace essmath::units;
 
 #define MAX_STRIP_VAL_TEST 5000
 
@@ -18,7 +20,7 @@ class HistogramSerializerTest : public TestBase {
 
 protected:
   Hists hists{MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
-  char flatbuffer[1024 * 1024 * 5];
+  char flatbuffer[5 * MiB];
 
 public:
   void copy_buffer(nonstd::span<const uint8_t> b) {

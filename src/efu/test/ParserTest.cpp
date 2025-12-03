@@ -24,9 +24,9 @@ static int dummy_command(std::vector<std::string>, char *, unsigned int *) {
 
 // List of commands to test, each pair is a command and the expected reply
 std::vector<std::string> commands {
-  "STAT_GET_COUNT",                 "STAT_GET_COUNT 72",
+  "STAT_GET_COUNT",                 "STAT_GET_COUNT 73",
   "CMD_GET_COUNT",                  "CMD_GET_COUNT 11",
-  "STAT_GET 72",                    "STAT_GET test.dummystat 42",
+  "STAT_GET 73",                    "STAT_GET test.dummystat 42",
   "STAT_GET 0",                     "STAT_GET  -1",
   "CALIB_MODE_GET",                 "CALIB_MODE_GET 0",
   "EXIT",                           "<OK>"

@@ -11,11 +11,13 @@
 
 #include <common/debug/Trace.h>
 
+using namespace essmath::units;
+
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 #if ENABLE_GREEDY_CLUSTER_ALLOCATOR
-enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
+enum : size_t { Bytes_1GB = GiB };
 char *GreedyCluster2DStorage::MemBegin = (char *)malloc(Bytes_1GB);
 char *GreedyCluster2DStorage::MemEnd = MemBegin + Bytes_1GB;
 #else

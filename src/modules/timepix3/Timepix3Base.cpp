@@ -141,6 +141,7 @@ void Timepix3Base::processingThread() {
               .count();
     }
 
+    // Poll Kafka to handle delivery reports
     EventProducer.poll(0);
 
     if (ProduceTimer.timeout()) {

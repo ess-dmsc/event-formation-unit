@@ -1,7 +1,10 @@
 // Copyright (C) 2018 European Spallation Source ERIC
 
+#include <common/math/Units.h>
 #include <common/monitor/HitSerializer.h>
 #include <common/testutils/TestBase.h>
+
+using namespace essmath::units;
 
 class HitSerializerTest : public TestBase {
   void SetUp() override {}
@@ -14,7 +17,7 @@ protected:
       106;                         // found by experimentation, now with header!
   static const int entrysize = 10; // three u16 + one u32
 
-  char flatbuffer[1024 * 1024 * 5];
+  char flatbuffer[5 * MiB];
 
 public:
   void copy_buffer(nonstd::span<const uint8_t> b) {

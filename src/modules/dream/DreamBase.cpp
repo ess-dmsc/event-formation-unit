@@ -137,7 +137,7 @@ void DreamBase::processingThread() {
               .count();
     }
 
-    /// poll producer stats
+    // Poll Kafka to handle delivery reports
     EventProducer.poll(0);
 
     // Time out after one second

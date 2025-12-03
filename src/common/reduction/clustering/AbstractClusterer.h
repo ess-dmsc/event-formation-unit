@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "common/math/Units.h"
 #include <common/reduction/Cluster.h>
 #include <list>
 
@@ -57,7 +58,7 @@ struct ClusterPoolStorage {
     void *nodeGuess1;
     void *nodeGuess2;
   };
-  enum : size_t { Bytes_1GB = 1024 * 1024 * 1024, ObjectsPerSlot = 1 };
+  enum : size_t { Bytes_1GB = essmath::units::GiB, ObjectsPerSlot = 1 };
   using AllocConfig =
       PoolAllocatorConfig<StorageGuess, Bytes_1GB, ObjectsPerSlot, false, true>;
   static AllocConfig::PoolType *Pool;

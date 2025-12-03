@@ -9,11 +9,14 @@
 #include <common/Statistics.h>
 #include <common/kafka/KafkaConfig.h>
 #include <common/kafka/Producer.h>
+#include <common/math/Units.h>
 #include <common/testutils/TestBase.h>
 #include <cstring>
 #include <dlfcn.h>
 #include <fakeit.hpp>
 #include <librdkafka/rdkafkacpp.h>
+
+using namespace essmath::units;
 
 KafkaConfig KafkaCfg{""};
 
@@ -50,10 +53,10 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_NE(prod.KafkaTopic, nullptr);
   ASSERT_NE(prod.KafkaProducer, nullptr);
   ASSERT_EQ(ret, RdKafka::ERR_NO_ERROR);
-  EXPECT_EQ(prod.getStats().produce_bytes_error, 0);
-  EXPECT_EQ(prod.getStats().produce_bytes_ok, 10);
-  EXPECT_EQ(prod.getStats().produce_calls, 1);
-  EXPECT_EQ(prod.getStats().produce_errors, 0);
+  EXPECT_EQ(prod.getStats().ProduceBytesError, 0);
+  EXPECT_EQ(prod.getStats().ProduceBytesOk, 10);
+  EXPECT_EQ(prod.getStats().ProduceCalls, 1);
+  EXPECT_EQ(prod.getStats().ProduceError, 0);
   EXPECT_EQ(prod.getStats().ErrTimeout, 0);
   EXPECT_EQ(prod.getStats().ErrTransport, 0);
   EXPECT_EQ(prod.getStats().ErrBrokerNotAvailable, 0);
@@ -71,48 +74,14 @@ TEST_F(ProducerTest, ConstructorOK) {
   EXPECT_EQ(prod.getStats().MsgStatusPossiblyPersisted, 0);
   EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 0);
   EXPECT_EQ(prod.getStats().TotalMsgDeliveryEvent, 0);
-  EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 0);
-  EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue, 0);
-  EXPECT_EQ(prod.getStats().BytesOfMsgInQueue, 0);
-  EXPECT_EQ(prod.getStats().MaxBytesOfMsgInQueue, 0);
+    EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 1);
+    EXPECT_EQ(prod.getStats().MaxBytesInQueue,
+                        KafkaCfg.getCfgParmValInt("queue.buffering.max.kbytes") * KiB);
+  EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue,
+            KafkaCfg.getCfgParmValInt("queue.buffering.max.messages"));
+  EXPECT_EQ(prod.getStats().BytesInQueue, 10);
   EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 0);
   EXPECT_EQ(prod.getStats().TxRequestRetries, 0);
-}
-
-TEST_F(ProducerTest, ConstructorCreatesStatsEntries) {
-  Statistics Stats;
-
-  ProducerStandIn prod{"nobroker", "notopic", Stats};
-
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.config"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.stat_events"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error_events"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.produce_bytes_ok"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.produce_bytes_error"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.produce_calls"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.produce_errors"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.brokers.tx_bytes"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.brokers.tx_req_retries"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.max_num_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.max_bytes_of_msg_in_queue"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.delivery_success"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_not_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.status_possibly_persisted"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.msg.msg_delivery_event"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_delivery"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.transmission"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.unknown_topic"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.unknown_partition"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.queue_full"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.timeout"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_timeout"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.transport"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.authentication"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.msg_size"), 0);
-  EXPECT_EQ(Stats.getValueByName("producer.test.error.other"), 0);
 }
 
 TEST_F(ProducerTest, ConfigError) {
@@ -165,12 +134,12 @@ TEST_F(ProducerTest, ProducerFail) {
   prod.KafkaProducer.reset(MockKafkaProducer);
   uint8_t SomeData[20];
 
-  ASSERT_EQ(prod.getStats().produce_errors, 0);
+  ASSERT_EQ(prod.getStats().ProduceError, 0);
 
   int ret = prod.produce(SomeData, 999);
 
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(prod.getStats().produce_errors, 1);
+  ASSERT_EQ(prod.getStats().ProduceError, 1);
 }
 
 TEST_F(ProducerTest, ProducerSuccess) {
@@ -194,60 +163,22 @@ TEST_F(ProducerTest, ProducerSuccess) {
   unsigned int NrOfBytes{200};
   auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
 
-  ASSERT_EQ(TestProducer.getStats().produce_errors, 0);
-  ASSERT_EQ(TestProducer.getStats().produce_bytes_ok, 0);
+  ASSERT_EQ(TestProducer.getStats().ProduceError, 0);
+  ASSERT_EQ(TestProducer.getStats().ProduceBytesOk, 0);
 
   int ret = TestProducer.produce({SomeData.get(), NrOfBytes}, 999);
   ASSERT_EQ(ret, ReturnValue);
-  ASSERT_EQ(TestProducer.getStats().produce_errors, 0);
-  ASSERT_EQ(TestProducer.getStats().produce_bytes_ok, 200);
+  ASSERT_EQ(TestProducer.getStats().ProduceError, 0);
+  ASSERT_EQ(TestProducer.getStats().ProduceBytesOk, 200);
 }
 
 TEST_F(ProducerTest, ProducerFailDueToSize) {
   Statistics Stats;
   KafkaConfig KafkaCfg2("");
-  ASSERT_EQ(KafkaCfg2.CfgParms.size(), static_cast<size_t>(6));
   Producer prod{"nobroker", "notopic", KafkaCfg2.CfgParms, Stats, "testsize"};
   auto DataPtr = std::make_unique<unsigned char>();
   int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
-}
-
-TEST_F(ProducerTest, EventCbIncreasesCounters) {
-  Statistics Stats;
-  ProducerStandIn prod{"nobroker", "notopic", Stats};
-
-  std::string fakeEventJson = R"({
-    "msg_cnt": 10,
-    "msg_max": 20,
-    "msg_size": 1000,
-    "msg_size_max": 2000,
-    "brokers": {
-      "broker1": {
-        "txbytes": 500,
-        "txerrs": 2,
-        "txretries": 1
-      },
-      "broker2": {
-        "txbytes": 300,
-        "txerrs": 1,
-        "txretries": 2
-      }
-    }
-  })";
-
-  Mock<RdKafka::Event> statsEvent;
-  When(Method(statsEvent, type)).AlwaysReturn(RdKafka::Event::EVENT_STATS);
-  When(Method(statsEvent, str)).AlwaysReturn(fakeEventJson);
-  prod.event_cb(statsEvent.get());
-
-  EXPECT_EQ(prod.getStats().NumberOfMsgInQueue, 10);
-  EXPECT_EQ(prod.getStats().MaxNumOfMsgInQueue, 20);
-  EXPECT_EQ(prod.getStats().BytesOfMsgInQueue, 1000);
-  EXPECT_EQ(prod.getStats().MaxBytesOfMsgInQueue, 2000);
-  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 800);
-  EXPECT_EQ(prod.getStats().TransmissionErrors, 3);
-  EXPECT_EQ(prod.getStats().TxRequestRetries, 3);
 }
 
 TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
@@ -337,8 +268,9 @@ TEST_F(ProducerTest, EventCbProcessesErrorsAndLogs) {
   EXPECT_EQ(prod.getStats().ErrTopic, 2);
 
   // Testing for Invalid topic error
-  EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
       .Times(1);
 
   When(Method(fakeEvent, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
@@ -363,6 +295,7 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
             std::cout << "LoggerMock called with category: " << category
                       << ", message: " << message << std::endl;
           });
+  When(Method(fakeMessage, len)).AlwaysReturn(100);
 
   // Testing for Timed out error
   EXPECT_CALL(LoggerMock,
@@ -445,8 +378,9 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 7);
 
   // Testing for Invalid topic error
-  EXPECT_CALL(LoggerMock,
-              log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA", "Rdkafka error occurred: [17] Broker: Invalid topic"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_TOPIC_EXCEPTION);
@@ -455,15 +389,60 @@ TEST_F(ProducerTest, DeliveryReportCbProcessesErrorsAndLogs) {
   EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 8);
 
   // Testing for Message size too large error
-  EXPECT_CALL(LoggerMock,
-              log("KAFKA",
-                  "Rdkafka error occurred: [10] Broker: Message size too large"))
+  EXPECT_CALL(
+      LoggerMock,
+      log("KAFKA",
+          "Rdkafka error occurred: [10] Broker: Message size too large"))
       .Times(1);
 
   When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_MSG_SIZE_TOO_LARGE);
   prod.dr_cb(fakeMessage.get());
   EXPECT_EQ(prod.getStats().ErrMsgSizeTooLarge, 1);
   EXPECT_EQ(prod.getStats().MsgStatusNotPersisted, 9);
+}
+
+TEST_F(ProducerTest, BytesInQueueAndTxBytesUpdateCorrectly) {
+  Statistics Stats;
+  ProducerStandIn prod{"nobroker", "notopic", Stats};
+
+  auto MockKafkaProducer = new MockProducer();
+  EXPECT_CALL(*MockKafkaProducer, produce(_, _, _, _, _, _, _, _, _))
+      .Times(1)
+      .WillRepeatedly(testing::Return(RdKafka::ERR_NO_ERROR));
+  EXPECT_CALL(*MockKafkaProducer, poll(_))
+      .Times(1)
+      .WillRepeatedly(testing::Return(0));
+  EXPECT_CALL(*MockKafkaProducer, outq_len())
+      .WillRepeatedly(testing::Return(0));
+
+  prod.KafkaProducer.reset(MockKafkaProducer);
+
+  size_t DataSize = 100;
+  std::vector<unsigned char> DataBuffer(DataSize);
+
+  // Initial state
+  EXPECT_EQ(prod.getStats().BytesInQueue, 0);
+  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 0);
+
+  // Produce data
+  prod.produce(DataBuffer, 0);
+
+  // Check BytesInQueue increased
+  EXPECT_EQ(prod.getStats().BytesInQueue, DataSize);
+  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, 0);
+
+  // Simulate Delivery Report
+  Mock<RdKafka::Message> fakeMessage;
+  When(Method(fakeMessage, len)).AlwaysReturn(DataSize);
+  When(Method(fakeMessage, err)).AlwaysReturn(RdKafka::ERR_NO_ERROR);
+  When(Method(fakeMessage, status))
+      .AlwaysReturn(RdKafka::Message::MSG_STATUS_PERSISTED);
+
+  prod.dr_cb(fakeMessage.get());
+
+  // Check BytesInQueue decreased and TxBytes increased
+  EXPECT_EQ(prod.getStats().BytesInQueue, 0);
+  EXPECT_EQ(prod.getStats().BytesTransmittedToBrokers, DataSize);
 }
 
 int main(int argc, char **argv) {

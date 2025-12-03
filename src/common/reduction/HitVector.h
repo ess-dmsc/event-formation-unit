@@ -10,6 +10,7 @@
 
 #include <common/debug/Trace.h>
 #include <common/memory/PoolAllocator.h>
+#include <common/math/Units.h>
 #include <common/reduction/Hit.h>
 
 #include <filesystem>
@@ -145,7 +146,7 @@ public:
 //-----------------------------------------------------------------------------
 
 struct HitVectorStorage {
-  enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
+  enum : size_t { Bytes_1GB = essmath::units::GiB };
   using AllocConfig =
       PoolAllocatorConfig<Hit, Bytes_1GB, MyVector<Hit>::MinReserveCount, false,
                           true>;
