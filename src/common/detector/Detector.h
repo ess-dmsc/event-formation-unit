@@ -125,7 +125,7 @@ public:
 
   /// \brief returns the value of a runtime counter (efustat) based on name
   /// used by Parser.cpp for command query
-  inline virtual int64_t getStatValueByName(const std::string &name) const {
+  inline virtual int64_t getStatValueByName(const std::string_view &name) const {
     return Stats.getValueByName(name);
   }
 

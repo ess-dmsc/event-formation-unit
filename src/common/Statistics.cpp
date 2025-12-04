@@ -109,7 +109,7 @@ int64_t Statistics::getValue(size_t Index) const {
   return stats.at(Index - 1).StatValue;
 }
 
-int64_t Statistics::getValueByName(const std::string &name,
+int64_t Statistics::getValueByName(const std::string_view &name,
                                    const std::string &Prefix) const {
 
   std::string effectivePrefix = Prefix.empty() ? DefaultPrefix : Prefix;

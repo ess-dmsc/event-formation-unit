@@ -26,8 +26,8 @@
 ///   struct MyComponentStats : public StatCounterBase {
 ///     int64_t ErrorCount{0};
 ///     int64_t ProcessedItems{0};
-///     
-///     MyComponentStats(Statistics& Stats) 
+///
+///     MyComponentStats(Statistics& Stats)
 ///       : StatCounterBase(Stats, {
 ///           {"errors", ErrorCount},
 ///           {"processed", ProcessedItems}
@@ -42,7 +42,7 @@
 class StatCounterBase {
 protected:
   /// \brief Type alias for counter name-reference pairs
-  using CounterMap = std::vector<std::pair<std::string, std::reference_wrapper<int64_t>>>;
+  using CounterMap = std::vector<std::pair<std::string_view, std::reference_wrapper<int64_t>>>;
 
   /// \brief Constructor that automatically registers all counters from the map
   /// \param Stats Reference to Statistics object for registration
@@ -50,8 +50,9 @@ protected:
   /// \param Prefix Optional prefix for counter names (automatically adds dot separator)
   StatCounterBase(Statistics& Stats, const CounterMap &Counters, const std::string &Prefix = "") {
     for (const auto& [name, counterRef] : Counters) {
-      std::string fullName = Prefix.empty() ? name : Prefix + "." + name;
-      Stats.create(fullName, counterRef.get());
+     printf("%s\n", Prefix.c_str());
+     std::string fullName = Prefix.empty() ? std::string(name) : Prefix + "." + std::string(name);
+     Stats.create(fullName, counterRef.get());
     }
   }
 
