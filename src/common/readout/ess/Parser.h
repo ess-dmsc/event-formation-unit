@@ -22,6 +22,7 @@
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 namespace ESSReadout {
 
@@ -37,35 +38,35 @@ class Parser {
 public:
   // Static const strings for stat names
   // clang-format off
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_HEADER          = "parser.essheader.errors.header";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_BUFFER          = "parser.essheader.errors.buffer";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_COOKIE          = "parser.essheader.errors.cookie";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_PAD             = "parser.essheader.errors.pad";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SIZE            = "parser.essheader.errors.size";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_VERSION         = "parser.essheader.errors.version";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE    = "parser.essheader.errors.output_queue";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_HEADER          = "parser.essheader.errors.header";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_BUFFER          = "parser.essheader.errors.buffer";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_COOKIE          = "parser.essheader.errors.cookie";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_PAD             = "parser.essheader.errors.pad";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_SIZE            = "parser.essheader.errors.size";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_VERSION         = "parser.essheader.errors.version";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_OUTPUT_QUEUE    = "parser.essheader.errors.output_queue";
 
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMING          = "parser.essheader.errors.timing";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS     = "parser.essheader.errors.time_status";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC = "parser.essheader.errors.even_fibre_sync";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC  = "parser.essheader.errors.odd_fibre_sync";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_TIMING          = "parser.essheader.errors.timing";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_TIME_STATUS     = "parser.essheader.errors.time_status";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_EVEN_FIBRE_SYNC = "parser.essheader.errors.even_fibre_sync";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_ODD_FIBRE_SYNC  = "parser.essheader.errors.odd_fibre_sync";
 
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TYPE            = "parser.essheader.errors.type";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_SEQNO           = "parser.essheader.errors.seqno";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH        = "parser.essheader.errors.timehigh";
-  static inline const std::string METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC        = "parser.essheader.errors.timefrac";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_TYPE            = "parser.essheader.errors.type";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_SEQNO           = "parser.essheader.errors.seqno";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_TIMEHIGH        = "parser.essheader.errors.timehigh";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_ERRORS_TIMEFRAC        = "parser.essheader.errors.timefrac";
 
-  static inline const std::string METRIC_PARSER_ESSHEADER_HEARTBEATS             = "parser.essheader.heartbeats";
-  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V0             = "parser.essheader.version.v0";
-  static inline const std::string METRIC_PARSER_ESSHEADER_VERSION_V1             = "parser.essheader.version.v1";
-  static inline const std::string METRIC_PARSER_ESSHEADER_OQ_PACKETS             = "parser.essheader.OQ.{:02}.packets";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_HEARTBEATS             = "parser.essheader.heartbeats";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_VERSION_V0             = "parser.essheader.version.v0";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_VERSION_V1             = "parser.essheader.version.v1";
+  static constexpr std::string_view METRIC_PARSER_ESSHEADER_OQ_PACKETS             = "parser.essheader.OQ.{:02}.packets";
 
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_COUNT              = "events.timestamp.tof.count";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE           = "events.timestamp.tof.negative";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_TOF_HIGH               = "events.timestamp.tof.high";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT          = "events.timestamp.prevtof.count";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE       = "events.timestamp.prevtof.negative";
-  static inline const std::string METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH           = "events.timestamp.prevtof.high";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_TOF_COUNT              = "events.timestamp.tof.count";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_TOF_NEGATIVE           = "events.timestamp.tof.negative";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_TOF_HIGH               = "events.timestamp.tof.high";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_PREVTOF_COUNT          = "events.timestamp.prevtof.count";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_PREVTOF_NEGATIVE       = "events.timestamp.prevtof.negative";
+  static constexpr std::string_view METRIC_EVENTS_TIMESTAMP_PREVTOF_HIGH           = "events.timestamp.prevtof.high";
   // clang-format on
 
 private:
