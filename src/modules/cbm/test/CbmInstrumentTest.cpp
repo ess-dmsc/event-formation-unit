@@ -187,6 +187,7 @@ auto TestConfig = R"(
   "MaxPulseTimeNS" : 357142855,
   "MaxFENId" : 3,
   "MaxFEN" : 16,
+  "NormalizeIBMReadouts": true,
 
   "Topology" : [
     { "FEN": 0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
@@ -585,6 +586,90 @@ TEST_F(CbmInstrumentTest, TestValidIBMTypeReadouts) {
   EXPECT_EQ(
       Stats->getValueByName(ESSHeaderParser->METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
       4);
+}
+
+///
+/// \brief Test IBM readout normalization with NADC = FFFFFF MCASum = 8
+///
+/// Test method is focused only on normalize ADC value.
+TEST_F(CbmInstrumentTest, TestIBMNormalizeReadouts) {
+    std::vector<uint8_t> Readouts {
+    // Test NDAC and MCASum value
+    0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+    0x03, 0x01, 0x01, 0x00,  // Type 3, Ch 1, ADC 1
+    0xFF, 0xFF, 0xFF, 0x08   // NADC (3 bytes), MCA Sum (8)
+  };
+
+  int FenId = 2;
+  int ChannelId = 1;
+  // Serializer 
+  MockHistogramSerializer *Serializer =
+      dynamic_cast<MockHistogramSerializer *>(
+          HistogramSerializerPtrs.get(FenId, ChannelId));
+  int expectedTime = 1 * ESSTime::ESSClockTick;
+  int expectedNorm = 8;
+  int expectedData = 0xFFFFFF / expectedNorm;
+  EXPECT_CALL(*Serializer,
+     addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  makeHeader(ESSHeaderParser->Packet, Readouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  // check parser counters are as expected
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(CbmCounters.IBMEvents, 1);
+}
+
+///
+/// \brief Test IBM readout where EFU configuration has disabled normalize
+/// functionality regardless of what is in the data packet
+///
+/// Test method is focused only on normalize ADC value.
+TEST_F(CbmInstrumentTest, TestIBMDisableNormalizeReadouts) {
+  //Update config with new normalize flag
+  this->Configuration->CbmParms.NormalizeIBMReadouts = false;
+  std::vector<uint8_t> Readouts {
+    // Test NDAC and MCASum value
+    0x16, 0x01, 0x14, 0x00,  // Fiber 22, FEN 1, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+    0x03, 0x02, 0x01, 0x00,  // Type 3, Ch 2, ADC 1
+    0xFF, 0xFF, 0xFF, 0x08   // NADC (3 bytes), MCA Sum (8)
+  };
+
+  int FenId = 1;
+  int ChannelId = 2;
+  // Serializer 
+  MockHistogramSerializer *Serializer =
+      dynamic_cast<MockHistogramSerializer *>(
+          HistogramSerializerPtrs.get(FenId, ChannelId));
+  int expectedTime = 1 * ESSTime::ESSClockTick;
+  int expectedData = 0xFFFFFF;
+  EXPECT_CALL(*Serializer,
+     addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  makeHeader(ESSHeaderParser->Packet, Readouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  // check parser counters are as expected
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 1);
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(CbmCounters.IBMEvents, 1);
+  //Rollback normalize flag changes
+  this->Configuration->CbmParms.NormalizeIBMReadouts = true;
 }
 
 ///

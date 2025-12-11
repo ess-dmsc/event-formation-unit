@@ -122,7 +122,7 @@ void CbmInstrument::processMonitorReadouts() {
 
         // Get normalized ADC value from readout.
         uint32_t normADC{Readout.NADC.getNADC()};
-        if (Readout.NADC.MCASum != 0) {
+        if (Conf.CbmParms.NormalizeIBMReadouts && (Readout.NADC.MCASum != 0)) {
           normADC /= Readout.NADC.MCASum;
         }
 

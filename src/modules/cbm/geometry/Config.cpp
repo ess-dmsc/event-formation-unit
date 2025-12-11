@@ -41,6 +41,7 @@ void Config::apply() {
   assign("MaxPulseTimeDiffNS", CbmParms.MaxPulseTimeDiffNS);
   assign("MaxTOFNS", CbmParms.MaxTOFNS);
   assign("MonitorRing", CbmParms.MonitorRing);
+  assign("NormalizeIBMReadouts", CbmParms.NormalizeIBMReadouts);
 
   setMask(LOG | CHECK);
   assign("MaxFENId", CbmParms.MaxFENId);
