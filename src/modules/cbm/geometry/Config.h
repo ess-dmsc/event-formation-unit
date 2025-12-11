@@ -122,6 +122,8 @@ public:
     uint8_t AggregatedFrames{1};                    // < Number of pulse to sum in a histogram
                                                     //   When set to one and with the default SUM mode,
                                                     //   this will be one frame one histogram.
+    bool NormalizeIBMReadouts{true};                // < Normalize IBM ADC value readout. 
+                                                    //   Default is enabled.
   } CbmParms;
   // clang-format on
 

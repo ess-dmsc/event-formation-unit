@@ -356,6 +356,71 @@ TEST_F(CbmConfigTest, TestMalformedAggregateFramesConfig) {
   EXPECT_THROW(config.apply(), std::runtime_error);
 }
 
+TEST_F(CbmConfigTest, TestEnableNormalizeADCValuesConfig) {
+  auto ConfigJson = R"(
+    {
+      "Detector" : "CBM",
+      "MonitorRing" : 11,
+      "MaxFENId" : 1, 
+      "NormalizeIBMReadouts": true, 
+
+      "Topology" : [
+        {
+          "FEN"              : 1,
+          "Channel"          : 1,
+          "Type"             : "IBM",
+          "Source"           : "cbm1",
+          "MaxTofBin"        : 10000,
+          "BinCount"         : 100,
+          "AggregatedFrames" : 20,
+          "AggregationMode"  : 1
+        }
+      ]
+    }
+  )"_json;
+
+  //Test that CBM IBM normalize ADC values enable flag works
+  config.setRoot(ConfigJson);
+  config.apply();
+  EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, true);
+}
+
+TEST_F(CbmConfigTest, TestDisableNormalizeADCValuesConfig) {
+  auto ConfigJson = R"(
+    {
+      "Detector" : "CBM",
+      "MonitorRing" : 11,
+      "MaxFENId" : 1, 
+      "NormalizeIBMReadouts": false, 
+
+      "Topology" : [
+        {
+          "FEN"              : 1,
+          "Channel"          : 1,
+          "Type"             : "IBM",
+          "Source"           : "cbm1",
+          "MaxTofBin"        : 10000,
+          "BinCount"         : 100,
+          "AggregatedFrames" : 20,
+          "AggregationMode"  : 1
+        }
+      ]
+    }
+  )"_json;
+
+  //Test that CBM IBM normalize ADC values disable flag works
+  config.setRoot(ConfigJson);
+  config.apply();
+  EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, false);
+}
+
+TEST_F(CbmConfigTest, TestDefaultNormalizeADCValuesConfig) {
+  //Test that CBM IBM normalize ADC values default flag works
+  config.setRoot(ConfigWithTopology);
+  config.apply();
+  EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, true);
+}
+
 
 TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
     auto ConfigJson = R"(
