@@ -191,8 +191,8 @@ void CbmBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
-      auto Res = ESSHeaderParser.validate(DataPtr, DataLen,
-                                          CbmConfiguration.CbmParms.TypeSubType);
+      auto Res = ESSHeaderParser.validate(
+          DataPtr, DataLen, CbmConfiguration.CbmParms.TypeSubType);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
@@ -216,13 +216,13 @@ void CbmBase::processingThread() {
           std::chrono::duration_cast<std::chrono::microseconds>(
               local_clock::now() - idle_start)
               .count();
+
+      // Poll Kafka to handle events and delivery reports
+      EventProducer.poll(0);
     }
-
-    // Poll Kafka to handle delivery reports
-    EventProducer.poll(0);
-
+    
     // Not only flush serializer data but also update runtime stats
-    // This not applies for histogram serializer which should be flushed
+    // This does not apply for histogram serializer which should be flushed
     // only in case new pulse time is detected
     if (ProduceTimer.timeout()) {
       RuntimeStatusMask = RtStat.getRuntimeStatusMask(

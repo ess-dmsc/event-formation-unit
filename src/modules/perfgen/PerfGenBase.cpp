@@ -89,7 +89,7 @@ void PerfGenBase::processingThread() {
 
     usleep(EFUSettings.TestImageUSleep);
 
-    // Poll Kafka to handle delivery reports
+    // Poll Kafka to handle events and delivery reports
     EventProducer.poll(0);
 
     TimeOfFlight = 0;
