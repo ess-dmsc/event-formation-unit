@@ -179,6 +179,9 @@ void NmxBase::processing_thread() {
           std::chrono::duration_cast<std::chrono::microseconds>(
               local_clock::now() - idle_start)
               .count();
+
+      // Poll Kafka to handle events and delivery reports
+      EventProducer.poll(0);
     }
 
     if (ProduceTimer.timeout()) {
