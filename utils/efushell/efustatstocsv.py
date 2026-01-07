@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 from EFUMetrics import Metrics
 import argparse
-import csv
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default 127.0.0.1)",
