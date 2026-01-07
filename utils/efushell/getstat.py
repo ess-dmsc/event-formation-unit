@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 from EFUMetrics import Metrics
-import argparse, sys
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('stat', metavar='stat', type=str, help="stat name (sub)string");
