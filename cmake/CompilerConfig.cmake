@@ -9,9 +9,15 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra -Wno-deprecated")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -DRELEASE -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -g0 -DRELEASE -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 #set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-ggdb -fno-omit-frame-pointer")
+
+# Enable LTO and stripping for Release builds
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " -s")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " -s")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_RELEASE " -s")
 
 add_definitions("-D__FAVOR_BSD") #Not working correctly?
 
