@@ -16,14 +16,18 @@ def setCalibrationMode(args):
     # Set up commandline 
     if args.mode is not None:
         mode = 1 if args.mode == 'on' else 0
-        cmd = f'echo CALIB_MODE_SET {mode} | nc -q 1 {args.i} {args.p}'
+        cmd = f'echo CALIB_MODE_SET {mode} | nc -N {args.i} {args.p}'
     else:
-        cmd = f'echo CALIB_MODE_GET | nc -q 1 {args.i} {args.p}'
+        cmd = f'echo CALIB_MODE_GET | nc -N {args.i} {args.p}'
 
     # Run command
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    response = p.stdout.readlines(-1)[0]
-    response = response.decode("utf-8")
+
+    response = p.stdout.readlines()
+    if not response:
+        print("Failed to query calibration mode")
+        return False
+    response = response[0].decode("utf-8")
 
     # Setting
     if args.mode is not None:
@@ -36,6 +40,8 @@ def setCalibrationMode(args):
     else:
         mode = 'off' if '0' in response else 'on'
         print ('Calibration mode is "{mode}"'.format(mode=mode))
+
+    return True
 
 if __name__ == "__main__":
     # Extract args
