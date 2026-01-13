@@ -2,7 +2,6 @@ import socket
 import sys
 import threading
 
-
 class SimpleSocket:
     def __init__(self, hostname="localhost", port=8888, timeout=2):
         self.access_semaphor = threading.Semaphore(1)
