@@ -18,8 +18,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#define IBM_ADC_MASK 0xFFFFFF
-
 using namespace esstime;
 using namespace geometry;
 namespace cbm {
@@ -29,8 +27,7 @@ namespace cbm {
 CbmInstrument::CbmInstrument(
     struct Counters &Counters, Config &Config,
     const HashMap2D<EV44Serializer> &Ev44serializerMap,
-    const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-        &HistogramSerializerMap,
+    const HashMap2D<HistogramSerializer_t> &HistogramSerializerMap,
     ESSReadout::Parser &essHeaderParser)
 
     : counters(Counters), Conf(Config), Ev44SerializerMap(Ev44serializerMap),

@@ -108,7 +108,7 @@ void CbmBase::processingThread() {
   // Create serializers
   EV44SerializerMapPtr.reset(
       new HashMap2D<EV44Serializer>(CbmConfiguration.CbmParms.NumOfFENs));
-  HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer<int32_t>>(
+  HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer_t>(
       CbmConfiguration.CbmParms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
@@ -141,8 +141,8 @@ void CbmBase::processingThread() {
         AggFunc = essmath::AVERAGE_AGG_FUNC<int32_t>;
       }
 
-      std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
-          std::make_unique<HistogramSerializer<int32_t>>(
+      std::unique_ptr<HistogramSerializer_t> SerializerPtr =
+          std::make_unique<HistogramSerializer_t>(
               Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
               Topology->AggregatedFrames, Produce, 0, AggFunc);
 
