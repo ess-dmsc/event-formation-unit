@@ -68,10 +68,18 @@ struct CommonFbMemebers {
   }
 };
 
-template <typename T, typename R = T> class TestValidator {
+template <typename T, typename R, typename V> class TestValidator {
+public:
+  using Serializer_t = fbserializer::HistogramSerializer<T, R, V>;
+  using ResultData_t = T;
+  using ReferenceTime_t = R;
+  using SumValue_t = V;
+
 private:
   const CommonFbMemebers &CommonMembers;
-  std::vector<T> ExpectedResults;
+  std::vector<T> ExpectedDataResults{};
+  std::vector<ReferenceTime_t> ExpectedReferenceResults{};
+  std::vector<SumValue_t> ExpectedIntensityResults{};
 
 public:
   ProducerCallback MockedProduceFunction;
@@ -94,36 +102,58 @@ public:
           Invoked(true);
         }), Invoked(invoked) {}
 
+  // TestValidator(const CommonFbMemebers &TestData,
+  //               const std::vector<T> &ExpectedDataResults)
+  //     : TestValidator(TestData) {
+  //   this->ExpectedDataResults = ExpectedDataResults;
+  // }
+
   TestValidator(const CommonFbMemebers &TestData,
-                const std::vector<T> &ExpectedResults)
+                const std::vector<T> &ExpectedDataResults,
+                const std::vector<ReferenceTime_t> &ExpectedReferenceResults,
+                const std::vector<SumValue_t> &ExpectedIntensityResults)
       : TestValidator(TestData) {
-    this->ExpectedResults = ExpectedResults;
+    this->ExpectedDataResults = ExpectedDataResults;
+    this->ExpectedReferenceResults = ExpectedReferenceResults;
+    this->ExpectedIntensityResults = ExpectedIntensityResults;
   }
 
-  void setData(const std::vector<T> &Data) { this->ExpectedResults = Data; }
+  void setData(const std::vector<T> &Data) { this->ExpectedDataResults = Data; }
+  void setReference(const std::vector<ReferenceTime_t> &Data) { this->ExpectedReferenceResults = Data; }
+  void setIntensity(const std::vector<SumValue_t> &Data) { this->ExpectedIntensityResults = Data; }
 
-  fbserializer::HistogramSerializer<T, R> createHistogramSerializer() {
-    return fbserializer::HistogramSerializer<T, R>(
+  Serializer_t createHistogramSerializer() {
+    return Serializer_t(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.DataUnit, CommonMembers.AggregatedFrames, 
         MockedProduceFunction, CommonMembers.BinOffset);
   }
 
-  fbserializer::HistogramSerializer<T, R>
+  Serializer_t
   createHistogramSerializer(fbserializer::BinningStrategy Strategy) {
-    return fbserializer::HistogramSerializer<T, R>(
+    return Serializer_t(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.DataUnit, Strategy, CommonMembers.AggregatedFrames, MockedProduceFunction,
         CommonMembers.BinOffset);
   }
 
-  fbserializer::HistogramSerializer<T, R>
+  Serializer_t
   createHistogramSerializer(fbserializer::BinningStrategy Strategy, 
     essmath::VectorAggregationFunc<T> AggFunc) {
-    return fbserializer::HistogramSerializer<T, R>(
+    return Serializer_t(
         CommonMembers.Source, CommonMembers.Period, CommonMembers.BinSize,
         CommonMembers.DataUnit, Strategy, CommonMembers.AggregatedFrames, MockedProduceFunction,
         CommonMembers.BinOffset, AggFunc);
+  }
+  
+  template <typename Type_t>
+  std::vector<Type_t> GetSerializedData(const Variable &buffer) {
+    std::vector<Type_t> vector;
+    for (size_t i = 0; i < buffer.getData().size(); i += sizeof(Type_t)) {
+      const Type_t *value = reinterpret_cast<const Type_t *>(&buffer.getData()[i]);
+      vector.push_back(*value);
+    }
+    return vector;
   }
 
   void flatbufferTester(nonstd::span<const uint8_t> TestFlatBuffer,
@@ -142,10 +172,12 @@ public:
     EXPECT_EQ(DeserializedDataArray.getSourceName(), CommonMembers.Source);
     EXPECT_EQ(DeserializedDataArray.getTimeStamp(),
               CommonMembers.ReferenceTime);
-    EXPECT_EQ(DeserializedDataArray.getData().size(), 2);
+    EXPECT_EQ(DeserializedDataArray.getData().size(), 4);
 
     Variable TimeAxis = DeserializedDataArray.getData().at(0);
     Variable SignalAxis = DeserializedDataArray.getData().at(1);
+    Variable ReferenceAxis = DeserializedDataArray.getData().at(2);
+    Variable IntensityAxis = DeserializedDataArray.getData().at(3);
 
     EXPECT_EQ(TimeAxis.getName(), "frame_time");
     EXPECT_EQ(TimeAxis.getAxes(), std::vector<std::string>{"frame_time"});
@@ -157,12 +189,7 @@ public:
         (static_cast<double>(CommonMembers.Period) - CommonMembers.BinOffset) /
         static_cast<double>(CommonMembers.BinSize);
 
-    std::vector<R> axisVector;
-    for (size_t i = 0; i < TimeAxis.getData().size(); i += sizeof(R)) {
-      const R *valuePtr = reinterpret_cast<const R *>(&TimeAxis.getData()[i]);
-      axisVector.push_back(*valuePtr);
-    }
-
+    std::vector<R> axisVector = GetSerializedData<R>(TimeAxis);
     for (size_t i = 0; i < axisVector.size(); i++) {
       EXPECT_NEAR(axisVector[i], CommonMembers.BinOffset + i * step, 0.0001);
     }
@@ -173,13 +200,24 @@ public:
     EXPECT_EQ(SignalAxis.getData().size(), CommonMembers.BinSize * sizeof(T));
 
     // Convert Data vector to type T vector
-    std::vector<T> dataVector;
-    for (size_t i = 0; i < SignalAxis.getData().size(); i += sizeof(T)) {
-      const T *valuePtr = reinterpret_cast<const T *>(&SignalAxis.getData()[i]);
-      dataVector.push_back(*valuePtr);
-    }
+    std::vector<T> dataVector = GetSerializedData<T>(SignalAxis);
+    EXPECT_EQ(dataVector, ExpectedDataResults);
 
-    EXPECT_EQ(dataVector, ExpectedResults);
+    //Get reference time vector 
+    EXPECT_EQ(ReferenceAxis.getName(), "reference_time");
+    EXPECT_EQ(ReferenceAxis.getAxes(), std::vector<std::string>{"reference_time"});
+    EXPECT_EQ(ReferenceAxis.getUnit(), "ns");
+    EXPECT_EQ(ReferenceAxis.getData().size(), CommonMembers.AggregatedFrames * sizeof(R));
+    std::vector<ReferenceTime_t> referenceVector = GetSerializedData<ReferenceTime_t>(ReferenceAxis);
+    EXPECT_EQ(referenceVector, ExpectedReferenceResults);
+
+    //Get intensity vector
+    EXPECT_EQ(IntensityAxis.getName(), "frame_total");
+    EXPECT_EQ(IntensityAxis.getAxes(), std::vector<std::string>{"reference_time"});
+    EXPECT_EQ(IntensityAxis.getUnit(), "counts");
+    EXPECT_EQ(IntensityAxis.getData().size(), CommonMembers.AggregatedFrames * sizeof(V));
+    std::vector<SumValue_t> intensityVector = GetSerializedData<SumValue_t>(IntensityAxis);
+    EXPECT_EQ(intensityVector, ExpectedIntensityResults);
   }
 };
 
@@ -203,14 +241,21 @@ protected:
 };
 
 TEST_F(HistogramSerializerTest, TestIntConstructor) {
+  using Validator_t = TestValidator<int64_t, int64_t, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -219,14 +264,21 @@ TEST_F(HistogramSerializerTest, TestIntConstructor) {
 }
 
 TEST_F(HistogramSerializerTest, TestUInt64Constructor) {
+  using Validator_t = TestValidator<uint64_t, uint64_t, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<uint64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<uint64_t> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -235,14 +287,21 @@ TEST_F(HistogramSerializerTest, TestUInt64Constructor) {
 }
 
 TEST_F(HistogramSerializerTest, TestFloatConstructor) {
+  using Validator_t = TestValidator<float, float, double>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<float> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<float> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -251,15 +310,21 @@ TEST_F(HistogramSerializerTest, TestFloatConstructor) {
 }
 
 TEST_F(HistogramSerializerTest, TestIntConstructorNegativeValues) {
+  using Validator_t = TestValidator<int64_t, int64_t, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(-1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedResultData};
-
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   EXPECT_THROW(Validator.createHistogramSerializer(), std::domain_error);
 
   CommonFbMembers.setPeriod(1000).setBinSize(-10);
@@ -268,14 +333,21 @@ TEST_F(HistogramSerializerTest, TestIntConstructorNegativeValues) {
 }
 
 TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
+  using Validator_t = TestValidator<double, double, double>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<double> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<double> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -284,14 +356,21 @@ TEST_F(HistogramSerializerTest, TestDoubleConstructor) {
 }
 
 TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(100).setBinSize(33).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -300,14 +379,21 @@ TEST_F(HistogramSerializerTest, TestIntDoubleConstructor) {
 }
 
 TEST_F(HistogramSerializerTest, TestProduceFailsIfNoReference) {
+  using Validator_t = TestValidator<int64_t, int64_t, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(1000).setBinSize(10).setReferenceTime(
       std::chrono::seconds(10));
 
-  std::vector<int64_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {0};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   serializer.produce();
@@ -317,15 +403,22 @@ TEST_F(HistogramSerializerTest, TestProduceFailsIfNoReference) {
 }
 
 TEST_F(HistogramSerializerTest, TestIntegerBinning) {
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
   std::map<int, int> testData = {{3, 0}, {8, 1}, {12, 1}};
-  std::vector<int64_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {2};
 
   /// Setup test Condition
   CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
       std::chrono::seconds(10));
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -339,15 +432,22 @@ TEST_F(HistogramSerializerTest, TestIntegerBinning) {
 }
 
 TEST_F(HistogramSerializerTest, TestNegativeIntegerBinning) {
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
   std::map<int, int> testData = {{-33, 1}, {8, 1}, {-12, 1}, {12, 1}};
-  std::vector<int64_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {2};
 
   /// Setup test Condition
   CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
       std::chrono::seconds(10));
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+
   auto serializer = Validator.createHistogramSerializer();
 
   // Perform test
@@ -361,15 +461,22 @@ TEST_F(HistogramSerializerTest, TestNegativeIntegerBinning) {
 }
 
 TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodDropped) {
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
   std::map<int, int> testData = {{3, 1}, {8, 0}, {12, 1}, {25, 1}, {26, 1}};
-  std::vector<int64_t> ExpectedResultData = {1, 3};
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {1, 3};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {4};
 
   /// Setup test Condition
   CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
       std::chrono::seconds(10));
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
 
@@ -387,6 +494,7 @@ TEST_F(HistogramSerializerTest, TestHigherTimeThenPeriodDropped) {
 }
 
 TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
+  using Validator_t = TestValidator<int64_t, float, uint64_t>;
   /// Setup test Condition
   CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
       std::chrono::seconds(10));
@@ -399,10 +507,16 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
   std::map<float, int> testData = {
       {1.0, 1}, {step - minFloatStep, 1}, {step, 1}, {step + 1, 1}};
 
-  std::vector<int64_t> ExpectedResultData = {2, 2};
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {2, 2};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {4};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, float> Validator{CommonFbMembers, ExpectedResultData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+
   auto serializer = Validator.createHistogramSerializer();
 
   // Perform test
@@ -419,10 +533,19 @@ TEST_F(HistogramSerializerTest, EdgeTestFractionalBinning) {
 }
 
 TEST_F(HistogramSerializerTest, TestEmtpyCalls) {
+  using Validator_t = TestValidator<int64_t, float, uint64_t>;
+
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = 
+    {static_cast<Validator_t::ReferenceTime_t>(ESSTime::SecInNs.count() * 10)};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {4};
 
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers,
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+  TestValidator Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
 
@@ -443,6 +566,7 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCalls) {
   auto HasBeenInvoked =  [&](bool) { ++invokeCount; };
 
   //We want pulse time to increment with 1 microseconds
+  constexpr int LoopCount = 10;
   constexpr int BinInterval = 1000;
   constexpr int BinCount = 10;
   constexpr int AggregatedFrameCount = 10;
@@ -453,7 +577,8 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCalls) {
   CommonFbMembers.Period = BinInterval;
   CommonFbMembers.AggregatedFrames = AggregatedFrameCount;
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+  Validator_t Validator{CommonFbMembers, HasBeenInvoked};
 
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
@@ -464,7 +589,7 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCalls) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   serializer.checkAndSetReferenceTime(current.toNS());
-    EXPECT_EQ(invokeCount, 0);
+  EXPECT_EQ(invokeCount, 0);
 
   // Perform test 1
   //Set data in the bin. Test data is 3 readout times with a values 300, 800, 1200. 
@@ -476,9 +601,18 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCalls) {
   //Pulse will be repeated 10 times and should only give a readout on 11th.
   std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
   //Since pulse values are summed the expected will be 10 * input
-  std::vector<int64_t> validatorData = {0, 0, 0, 100, 0, 0, 0, 0, 90, 80};
+  std::vector<Validator_t::ResultData_t> validatorData = {0, 0, 0, 100, 0, 0, 0, 0, 90, 80};
+  //Calculate pulse integration. Pulse data to validator is reference time and intensity values
+  //Because of how ESS time operate with adding nano seconds following numbers will look strange
+  std::vector<Validator_t::ReferenceTime_t> referenceData = {0, 9994, 19988, 29982, 39976, 49970, 59964, 69958, 79952, 89946};
+  //Intensity is the sum of values in testData map 
+  std::vector<Validator_t::SumValue_t> intensityData{27, 27, 27, 27, 27, 27, 27, 27, 27, 27};
+
   Validator.setData(validatorData);
-  for (size_t i = 0; i < 10; i++)
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
+
+  for (size_t i = 0; i < LoopCount; i++)
   {
     CommonFbMembers.setReferenceTime(current.toNS());
     current += IBMPulseInterval;
@@ -525,7 +659,8 @@ TEST_F(HistogramSerializerTest, TestBufferAveragedPulsesCalls) {
   CommonFbMembers.Period = BinInterval;
   CommonFbMembers.AggregatedFrames = AggregatedFrameCount;
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+  Validator_t Validator{CommonFbMembers, HasBeenInvoked};
 
   auto serializer = Validator.createHistogramSerializer(
     fbserializer::BinningStrategy::LastBin,
@@ -548,9 +683,18 @@ TEST_F(HistogramSerializerTest, TestBufferAveragedPulsesCalls) {
   //is pulse time + 0 readout.
   //Pulse will be repeated 10 times and should only give a readout on 11th.
   std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
-  std::vector<int64_t> validatorData = {0, 0, 0, 10, 0, 0, 0, 0, 9, 8};
-  //Since pulse values are summed the expected will be 10 * input
+  //Runing average values will not be changed in bin
+  std::vector<Validator_t::ResultData_t> validatorData = {0, 0, 0, 10, 0, 0, 0, 0, 9, 8};
+  //Calculate pulse integration. Pulse data to validator is reference time and intensity values
+  //Because of how ESS time operate with adding nano seconds following numbers will look strange
+  std::vector<Validator_t::ReferenceTime_t> referenceData = {0, 9994, 19988, 29982, 39976, 49970, 59964, 69958, 79952, 89946};
+  //Sum of validator data
+  std::vector<Validator_t::SumValue_t> intensityData{27, 27, 27, 27, 27, 27, 27, 27, 27, 27};
+
   Validator.setData(validatorData);
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
+
   for (size_t i = 0; i < 10; i++)
   {
     CommonFbMembers.setReferenceTime(current.toNS());
@@ -599,7 +743,8 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCallsWithEmpty) {
   CommonFbMembers.Period = BinInterval;
   CommonFbMembers.AggregatedFrames = AggregatedFrameCount;
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+  Validator_t Validator{CommonFbMembers, HasBeenInvoked};
 
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
@@ -610,7 +755,7 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCallsWithEmpty) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   serializer.checkAndSetReferenceTime(current.toNS());
-    EXPECT_EQ(invokeCount, 0);
+  EXPECT_EQ(invokeCount, 0);
 
   // Perform test 1
   //Set data in the bin. Test data is 3 readout times with the values 300, 800, and 1200. 
@@ -622,7 +767,17 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCallsWithEmpty) {
   //The pulse will be repeated 8 times and 2 times with empty histogram and only gives a readout on the 11th repeat.
   std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
   //Since pulse values are summed the expected will be 8 * input because of 2 empty
-  Validator.setData({0, 0, 0, 80, 0, 0, 0, 0, 72, 64});
+  std::vector<Validator_t::ResultData_t> validatorData = {0, 0, 0, 80, 0, 0, 0, 0, 72, 64};
+  //Calculate pulse integration. Pulse data to validator is reference time and intensity values
+  //Because of how ESS time operate with adding nano seconds following numbers will look strange
+  std::vector<Validator_t::ReferenceTime_t> referenceData = {0, 9994, 19988, 29982, 39976, 49970, 59964, 69958, 79952, 89946};
+  //At pulse 3 and 7 nothing is read. Other pulses will be sum of 10 + 9 + 8
+  std::vector<Validator_t::SumValue_t> intensityData{27, 27, 27, 0, 27, 27, 27, 0, 27, 27};
+
+  Validator.setData(validatorData);
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
+
   for (size_t i = 0; i < 10; i++)
   {
     CommonFbMembers.setReferenceTime(current.toNS());
@@ -657,7 +812,6 @@ TEST_F(HistogramSerializerTest, TestBufferAggregatedPulsesCallsWithEmpty) {
   CommonFbMembers.AggregatedFrames = 1;
 }
 
-
 TEST_F(HistogramSerializerTest, TestBufferAveragePulsesCallsWithEmpty) {
   //Almost the same test as above but this one will have to pulses whit out any
   //Histogram data
@@ -676,7 +830,8 @@ TEST_F(HistogramSerializerTest, TestBufferAveragePulsesCallsWithEmpty) {
   CommonFbMembers.Period = BinInterval;
   CommonFbMembers.AggregatedFrames = AggregatedFrameCount;
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+  Validator_t Validator{CommonFbMembers, HasBeenInvoked};
 
   auto serializer = Validator.createHistogramSerializer(
     fbserializer::BinningStrategy::LastBin,
@@ -688,7 +843,7 @@ TEST_F(HistogramSerializerTest, TestBufferAveragePulsesCallsWithEmpty) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   serializer.checkAndSetReferenceTime(current.toNS());
-    EXPECT_EQ(invokeCount, 0);
+  EXPECT_EQ(invokeCount, 0);
 
   // Perform test 1
   //Set data in the bin. Test data is 3 readout times with the values 300, 800, and 1200. 
@@ -700,8 +855,17 @@ TEST_F(HistogramSerializerTest, TestBufferAveragePulsesCallsWithEmpty) {
   //The pulse will be repeated 8 times and 2 times with empty histogram and only gives a readout on the 11'th repeat.
   std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
   //Since we use average the expected values are 
-  std::vector<int64_t> validatorData = {0, 0, 0, 10, 0, 0, 0, 0, 9, 8};
+  std::vector<Validator_t::ResultData_t> validatorData = {0, 0, 0, 10, 0, 0, 0, 0, 9, 8};
+  //Calculate pulse integration. Pulse data to validator is reference time and intensity values
+  //Because of how ESS time operate with adding nano seconds following numbers will look strange
+  std::vector<Validator_t::ReferenceTime_t> referenceData = {0, 9994, 19988, 29982, 39976, 49970, 59964, 69958, 79952, 89946};
+  //At pulse 3 and 7 nothing is read. Other pulses will be sum of 10 + 9 + 8
+  std::vector<Validator_t::SumValue_t> intensityData{27, 27, 27, 0, 27, 27, 27, 0, 27, 27};
+
   Validator.setData(validatorData);
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
+  
   for (size_t i = 0; i < 10; i++)
   {
     CommonFbMembers.setReferenceTime(current.toNS());
@@ -751,7 +915,8 @@ TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
 
   CommonFbMembers.Period = BinInterval;
   /// Initialize validator and create serializer
-  TestValidator<int64_t, double> Validator{CommonFbMembers, HasBeenInvoked};
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+  Validator_t Validator{CommonFbMembers, HasBeenInvoked};
 
   auto serializer = Validator.createHistogramSerializer(
       fbserializer::BinningStrategy::LastBin);
@@ -762,7 +927,6 @@ TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   serializer.checkAndSetReferenceTime(current.toNS());
-  EXPECT_NO_THROW(serializer.produce());
   EXPECT_FALSE(invoked);
   invoked = false;
 
@@ -776,12 +940,22 @@ TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   std::map<int, int> testData = {{300, 10}, {800, 9}, {1200, 8}};
-  Validator.setData({0, 0, 0, 10, 0, 0, 0, 0, 9, 8});
+  
+  std::vector<Validator_t::ResultData_t> validatorData = {0, 0, 0, 10, 0, 0, 0, 0, 9, 8};
+  //Calculate pulse integration. Pulse data to validator is reference time and intensity values
+  //Because of how ESS time operate with adding nano seconds following numbers will look strange
+  std::vector<Validator_t::ReferenceTime_t> referenceData = {0};
+  //At pulse 3 and 7 nothing is read. Other pulses will be sum of 10 + 9 + 8
+  std::vector<Validator_t::SumValue_t> intensityData{27};
+
+  Validator.setData(validatorData);
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
+
   for (auto &item : testData) {
     serializer.addEvent(item.first, item.second);
   }
   serializer.checkAndSetReferenceTime(current.toNS());
-  EXPECT_NO_THROW(serializer.produce());
   EXPECT_TRUE(invoked);
   invoked = false;
 
@@ -792,7 +966,6 @@ TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
   serializer.checkAndSetReferenceTime(current.toNS());
-  EXPECT_NO_THROW(serializer.produce());
   EXPECT_FALSE(invoked);
   invoked = false;
 
@@ -805,22 +978,34 @@ TEST_F(HistogramSerializerTest, TestBufferBinContentBehaviourCalls) {
   //is pulse time + 0 readout.
   CommonFbMembers.setReferenceTime(current.toNS());
   current += IBMPulseInterval;
-  Validator.setData({0, 0, 0, 0, 0, 0, 0, 10, 0, 0});
+  validatorData = {0, 0, 0, 0, 0, 0, 0, 10, 0, 0};
+  referenceData = {19988}; //29982
+  intensityData = {10};
+  Validator.setData(validatorData);
+  Validator.setReference(referenceData);
+  Validator.setIntensity(intensityData);
   serializer.addEvent(700, 10);
   serializer.checkAndSetReferenceTime(current.toNS());
-  EXPECT_NO_THROW(serializer.produce());
   EXPECT_TRUE(invoked);
 }
 
 TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
+  using Validator_t = TestValidator<int64_t, double, uint64_t>;
+
   std::map<int, int> testData = {{3, 0}, {8, 1}, {12, 1}};
-  std::vector<int64_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ResultData_t> ExpectedResultData = {1, 1};
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {2};
 
   /// Setup test Condition
   CommonFbMembers.setPeriod(20).setBinSize(2).setReferenceTime(
       std::chrono::seconds(10));
 
-  TestValidator<int64_t, double> Validator{CommonFbMembers, {0, 0}};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   serializer.checkAndSetReferenceTime(CommonFbMembers.ReferenceTime);
@@ -838,18 +1023,26 @@ TEST_F(HistogramSerializerTest, TestReferenceTimeTriggersProduce) {
 }
 
 TEST_F(HistogramSerializerTest, TestBinOffset) {
+  using Validator_t = TestValidator<int64_t, int64_t, uint64_t>;
   /// Setup test condition
   CommonFbMembers.setPeriod(100)
       .setBinSize(10)
       .setReferenceTime(std::chrono::seconds(10))
       .setBinOffset(50); // Set BinOffset
 
-  std::vector<int64_t> ExpectedData(CommonFbMembers.BinSize, 0);
-  ExpectedData[1] = 2; // Events at 55 and 59
+  std::vector<Validator_t::ResultData_t> ExpectedResultData(CommonFbMembers.BinSize, 0);
+  std::vector<Validator_t::ReferenceTime_t> ExpectedReferenceData = {0};
+  std::vector<Validator_t::SumValue_t> ExpectedIntensityData = {2};
+
+  ExpectedResultData[1] = 2; // Events at 55 and 59
 
   // Initialize validator and create serializer using
   // createHistogramSerializer()
-  TestValidator<int64_t> Validator{CommonFbMembers, ExpectedData};
+  Validator_t Validator{CommonFbMembers, 
+    ExpectedResultData,
+    ExpectedReferenceData,
+    ExpectedIntensityData};
+    
   auto serializer = Validator.createHistogramSerializer();
 
   /// Perform test
@@ -866,6 +1059,16 @@ TEST_F(HistogramSerializerTest, TestBinOffset) {
   EXPECT_EQ(serializer.stats().DataOverPeriodDropped,
             1); // One event before offset
   EXPECT_EQ(serializer.stats().DataOverPeriodLastBin, 0);
+}
+
+TEST_F(HistogramSerializerTest, TestAllowedTypeTemplates) {
+  using InCompleteList_t = fbserializer::AllowedList<int8_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>;
+  using CompleteList_t = fbserializer::AllowedList<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>;
+
+  bool test = fbserializer::Is_Type_Allowed<int16_t, InCompleteList_t>::Valid;
+  EXPECT_FALSE(test);
+  test = fbserializer::Is_Type_Allowed<int16_t, CompleteList_t>::Valid;
+  EXPECT_TRUE(test);
 }
 
 int main(int argc, char **argv) {

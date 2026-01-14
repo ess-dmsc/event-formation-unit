@@ -48,9 +48,10 @@ public:
   struct Counters Counters {};
 
 private:
+  using HistogramSerializer_t = fbserializer::HistogramSerializer<int32_t, int32_t, uint64_t>;
+
   std::unique_ptr<HashMap2D<EV44Serializer>> EV44SerializerMapPtr;
-  std::unique_ptr<HashMap2D<fbserializer::HistogramSerializer<int32_t>>>
-      HistogramSerializerMapPtr;
+  std::unique_ptr<HashMap2D<HistogramSerializer_t>> HistogramSerializerMapPtr;
 
   Config CbmConfiguration;
 };

@@ -222,7 +222,7 @@ public:
 };
 
 
-class MockHistogramSerializer : public HistogramSerializer<int32_t> {
+class MockHistogramSerializer : public HistogramSerializer<int32_t, int32_t, uint64_t> {
 public:
   MOCK_METHOD(void, addEvent, (const int32_t &time, const int32_t &data),
               (override));
@@ -245,7 +245,7 @@ protected:
   std::unique_ptr<Statistics> Stats;
   std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
   HashMap2D<EV44Serializer> EV44SerializerPtrs{11};
-  HashMap2D<HistogramSerializer<int32_t>> HistogramSerializerPtrs{11};
+  HashMap2D<HistogramSerializer<int32_t, int32_t, uint64_t>> HistogramSerializerPtrs{11};
   std::unique_ptr<CbmInstrument> cbm;
 
   inline static path FullConfigFile{""};
@@ -292,7 +292,7 @@ protected:
             std::make_unique<Mock2DimEV44Serializer>();
         EV44SerializerPtrs.add(Topology->FEN, Topology->Channel, SerializerPtr);
       } else if (Topology->Type == CbmType::IBM) {
-        std::unique_ptr<HistogramSerializer<int32_t>> SerializerPtr =
+        std::unique_ptr<HistogramSerializer<int32_t, int32_t, uint64_t>> SerializerPtr =
             std::make_unique<MockHistogramSerializer>();
         HistogramSerializerPtrs.add(Topology->FEN, Topology->Channel,
                                     SerializerPtr);

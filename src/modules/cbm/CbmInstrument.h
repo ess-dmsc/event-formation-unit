@@ -24,6 +24,8 @@ namespace cbm {
 
 class CbmInstrument {
 public:
+  using HistogramSerializer_t = fbserializer::HistogramSerializer<int32_t, int32_t, uint64_t>;
+
   /// \brief Constructor for the CbmInstrument class.
   /// \details The constructor initializes the instrument and sets the
   /// references to the counters, configuration data, and serializers.
@@ -35,8 +37,7 @@ public:
   /// HistogramSerializer pointers.
   CbmInstrument(Counters &counters, Config &Config,
                 const HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
-                const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-                    &HistogramSerializerPtrs,
+                const HashMap2D<HistogramSerializer_t> &HistogramSerializerPtrs,
                 ESSReadout::Parser &essHeaderParser);
 
   /// \brief Process the beam monitor readouts.
@@ -46,6 +47,7 @@ public:
   Parser CbmReadoutParser;
 
 private:
+
   /// \brief Reference to the counters for the CBM instrument.
   struct Counters &counters;
 
@@ -54,8 +56,7 @@ private:
 
   /// \brief References for the serializers of the supported types.
   const HashMap2D<EV44Serializer> &Ev44SerializerMap;
-  const HashMap2D<fbserializer::HistogramSerializer<int32_t>>
-      &HistogramSerializerMap;
+  const HashMap2D<HistogramSerializer_t> &HistogramSerializerMap;
 
   /// \brief Parser for the ESS Readout header.
   ESSReadout::Parser &ESSHeaderParser;

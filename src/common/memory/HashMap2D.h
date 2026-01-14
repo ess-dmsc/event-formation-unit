@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <vector>
 
@@ -36,6 +36,7 @@ public:
     if (this != &other) {
       NumColumns = other.NumColumns;
       ValueMap = other.ValueMap;
+      ValueList = other.ValueList;
     }
     return *this;
   }
@@ -52,7 +53,8 @@ public:
   /// moved).
   inline void add(int Col, int Row, std::unique_ptr<T> &Value) {
     int Index = Row * NumColumns + Col;
-    ValueMap.emplace(Index, std::move(Value));
+    auto iter = ValueMap.emplace(Index, std::move(Value));
+    ValueList.push_back(iter.first->second.get());
   }
 
   /// Retrieves a value from the map.
@@ -88,12 +90,8 @@ public:
   /// values.
   ///
   /// \return A reference to the map of values.
-  std::vector<T *> toValuesList() const {
-    std::vector<T *> Values;
-    for (auto &Value : ValueMap) {
-      Values.push_back(Value.second.get());
-    }
-    return Values;
+  const std::vector<T *>& toValuesList() const {
+    return ValueList;
   }
 
   /// Checks if the map is empty.
@@ -107,5 +105,6 @@ public:
 
 private:
   int NumColumns;
-  std::map<int, std::unique_ptr<T>> ValueMap;
+  std::unordered_map<int, std::unique_ptr<T>> ValueMap{};
+  std::vector<T *> ValueList{};
 };
