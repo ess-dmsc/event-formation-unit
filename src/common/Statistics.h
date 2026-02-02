@@ -116,7 +116,7 @@ public:
   /// \param Prefix the prefix to search for, if empty, DefaultPrefix is used
   /// \return the value of the stat or -1 if not found
   /// \note if multiple stats with the same name exist, the first one is returned
-  int64_t getValueByName(const std::string_view &Name,
+  int64_t getValueByName(std::string_view Name,
                          const std::string &Prefix = "") const;
 
 private:
