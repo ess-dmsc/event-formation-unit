@@ -101,7 +101,7 @@ void ReadoutGenerator::generateMaskedData() {
     Bitmap(BitMaps::T),
     Bitmap(BitMaps::Space),
     Bitmap(BitMaps::N2),
-    Bitmap(BitMaps::N5),
+    Bitmap(BitMaps::N6),
     Bitmap(BitMaps::Space),
   }) {
     bitmaps[bitmaps.size()] = bitmap;
