@@ -11,10 +11,6 @@
 
 #pragma once
 
-#include <common/testutils/bitmaps/BitMaps.h>
-#include <common/time/ESSTime.h>
-#include <generators/essudpgen/ReadoutGeneratorBase.h>
-#include <generators/functiongenerators/FunctionGenerator.h>
 #include <cbm/CbmTypes.h>
 #include <cbm/generators/CbmDataGenerator.h>
 #include <cbm/generators/Event0DDataGenerator.h>
@@ -22,6 +18,10 @@
 #include <cbm/generators/GeneratorType.h>
 #include <cbm/generators/IBMDataGenerator.h>
 #include <cbm/readout/Parser.h>
+#include <common/testutils/bitmaps/BitMaps.h>
+#include <common/time/ESSTime.h>
+#include <generators/essudpgen/ReadoutGeneratorBase.h>
+#include <generators/functiongenerators/FunctionGenerator.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -89,10 +89,10 @@ public:
   /// provides time of flight distribution for readout time calculations. Use a
   /// DistributionGenerator implementation when neutron arrival follows a
   /// probability distribution, or a LinearDistribution when neutrons are
-  /// expected at specific intervals. \throws std::runtime_error Header version
-  /// is not V0 or V1.
+  /// expected at specific intervals.
+  /// \throws std::runtime_error Header version is not V0 or V1.
   ///
-  void initialize(std::unique_ptr<FunctionGenerator>&& timeGenerator) override;
+  void initialize(std::unique_ptr<FunctionGenerator> &&timeGenerator) override;
 
 private:
   static constexpr int MILLISEC = 1e3;
