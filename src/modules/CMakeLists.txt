@@ -17,6 +17,7 @@ add_subdirectory(miracles)
 add_subdirectory(nmx)
 add_subdirectory(perfgen)
 add_subdirectory(cbm)
+add_subdirectory(beer)
 add_subdirectory(tbl3he)
 
 

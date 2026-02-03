@@ -9,8 +9,8 @@
 // GCOVR_EXCL_START
 
 #include <modules/cbm/generators/DataGeneratorFactory.h>
-#include <modules/cbm/generators/TimeGeneratorFactory.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
+#include <modules/cbm/generators/TimeGeneratorFactory.h>
 #include <modules/cbm/readout/Parser.h>
 
 using namespace cbm;
