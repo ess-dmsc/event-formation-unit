@@ -8,9 +8,9 @@
 /// Stat counters accumulate
 //===----------------------------------------------------------------------===//
 
-#include <CbmTypes.h>
-#include <cbm/geometry/Parser.h>
 #include <common/debug/Trace.h>
+#include <modules/cbm/CbmTypes.h>
+#include <modules/cbm/readout/Parser.h>
 
 namespace cbm {
 

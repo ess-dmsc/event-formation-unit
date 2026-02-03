@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2024 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,6 +16,8 @@
 
 namespace cbm {
 
+#define DATASIZE 20
+
 struct ParserStats {
   int64_t ErrorSize{0};
   int64_t ErrorFiber{0};
@@ -30,35 +32,31 @@ struct ParserStats {
 
 class Parser {
 public:
-  const unsigned int MaxFiberId{23};
-  const unsigned int MaxFENId{23};
-  const unsigned int MaxReadoutsInPacket{600};
-
-// From TTLMon ICD (CBM ICD) version 1 draft 2 - 4
-// Preliminary agreed 2023 09 12 (Francesco, Farnaz, Fabio)
-#define DATASIZE 20
+  static constexpr unsigned int MaxFiberId{23};
+  static constexpr unsigned int MaxFENId{23};
+  static constexpr unsigned int MaxUdpDatagramSize{8972};
 
   struct Position {
     uint16_t XPos;
     uint16_t YPos;
   } __attribute__((packed));
 
-  //Normalize ADC value for IBM beam monitors
+  // Normalize ADC value for IBM beam monitors
   struct NormADC {
-    uint8_t MCAValue[3];  // analog-to-digital little endian encoded value
-    uint8_t MCASum;  //Number of readouts in pulse
-    
+    uint8_t MCAValue[3]; // analog-to-digital little endian encoded value
+    uint8_t MCASum;      // Number of readouts in pulse
+
     /// \brief Get ADC measurement summed by the hardware
     uint32_t getNADC() const {
-      return
-        static_cast<uint32_t>(MCAValue[0]) +
-        static_cast<uint32_t>(MCAValue[1] << 8) + 
-        static_cast<uint32_t>(MCAValue[2] << 16);
+      return static_cast<uint32_t>(MCAValue[0]) +
+             static_cast<uint32_t>(MCAValue[1] << 8) +
+             static_cast<uint32_t>(MCAValue[2] << 16);
     };
-    /// \brief Set ADC measurement sum 
+    /// \brief Set ADC measurement sum
     /// This method is used to set a value and is only used in a generator
     void setNADC(uint32_t value) {
-      // We will control content in case the value exceeds the storage capacity of 3 bytes.
+      // We will control content in case the value exceeds the storage capacity
+      // of 3 bytes.
       if (value > 0x00FFFFFF) {
         MCAValue[0] = 0xFF;
         MCAValue[1] = 0xFF;
@@ -90,19 +88,29 @@ public:
   static_assert(sizeof(Parser::CbmReadout) == (DATASIZE),
                 "Wrong header size (update assert or check packing)");
 
-  Parser() { Result.reserve(MaxReadoutsInPacket); };
+  /// Constructor
+  Parser() = default;
 
   ~Parser(){};
 
   //
+  /// \brief Parse CBM readouts from packet data V0
+  /// \param PacketData Packet data structure to be filled
+  ///
   void parse(ESSReadout::Parser::PacketDataV0 &PacketData);
 
-  // To be iterated over in processing thread
-  std::vector<struct CbmReadout> Result;
+  /// Vector to hold parsed readouts
+  /// \note Pre-allocated to maximum possible readouts in a packet
+  std::vector<struct CbmReadout> Result{MaxReadoutsInPacket};
 
   struct ParserStats Stats;
 
 private:
-  const uint16_t DataLength{DATASIZE};
+  static constexpr uint16_t DataLength{
+      static_cast<uint16_t>(sizeof(Parser::CbmReadout))};
+  static constexpr unsigned int MaxUdpPayloadSize{
+      MaxUdpDatagramSize - sizeof(ESSReadout::Parser::PacketHeaderV1)};
+  static constexpr unsigned int MaxReadoutsInPacket{MaxUdpPayloadSize /
+                                                    DataLength};
 };
 } // namespace cbm

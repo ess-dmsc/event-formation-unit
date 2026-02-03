@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,13 +12,16 @@
 
 #include <common/readout/ess/Parser.h>
 #include <common/detector/BaseSettings.h>
+#include <common/geometry/DetectorGeometry.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/kafka/serializer/DA00HistogramSerializer.h>
 #include <common/memory/HashMap2D.h>
-#include <logical_geometry/ESSGeometry.h>
+#include <common/Statistics.h>
 #include <modules/cbm/Counters.h>
+#include <modules/cbm/geometry/Geometry2D.h>
+#include <modules/cbm/geometry/Geometry0D.h>
 #include <modules/cbm/geometry/Config.h>
-#include <modules/cbm/geometry/Parser.h>
+#include <modules/cbm/readout/Parser.h>
 
 namespace cbm {
 
@@ -30,12 +33,13 @@ public:
   /// \details The constructor initializes the instrument and sets the
   /// references to the counters, configuration data, and serializers.
   ///
+  /// \param Stats Reference to Statistics object for counter registration.
   /// \param counters Reference to the counters for the CBM instrument.
   /// \param Config Reference to the configuration data for the CBM instrument.
   /// \param Ev44SerializerPtrs Reference to the HashMap2D of EV44Serializer
   /// pointers. \param HistogramSerializerPtrs Reference to the HashMap2D of
   /// HistogramSerializer pointers.
-  CbmInstrument(Counters &counters, Config &Config,
+  CbmInstrument(Statistics &Stats, Counters &counters, Config &Config,
                 const HashMap2D<EV44Serializer> &Ev44SerializerPtrs,
                 const HashMap2D<HistogramSerializer_t> &HistogramSerializerPtrs,
                 ESSReadout::Parser &essHeaderParser);
@@ -60,11 +64,20 @@ private:
 
   /// \brief Parser for the ESS Readout header.
   ESSReadout::Parser &ESSHeaderParser;
-  /// \brief Geometries is a map with the individual ESS geometry used for each 
-  /// EVENT_2D beam monitor in the topology file. 
+
+  /// \brief Geometries map for all beam monitor types.
   /// Key is created with FEN id as the 8 most significant bits and channel id
-  /// as 8 least significant bits
-  std::unordered_map<uint16_t, std::unique_ptr<ESSGeometry>> Geometries{};
+  /// as 8 least significant bits. Stores DetectorGeometry base class pointers
+  /// for polymorphic access to validation and pixel calculation.
+  std::unordered_map<uint16_t, std::unique_ptr<geometry::DetectorGeometry<Parser::CbmReadout>>> Geometries{};
+
+  /// \brief Calculate geometry map key from FEN and Channel IDs
+  /// \param FENId FEN identifier (8-bit)
+  /// \param ChannelId Channel identifier (8-bit)
+  /// \return 16-bit key with FEN in upper byte and Channel in lower byte
+  inline uint16_t calcGeometryKey(uint8_t FENId, uint8_t ChannelId) const {
+    return (static_cast<uint16_t>(FENId) << 8) | ChannelId;
+  }
 };
 
 } // namespace cbm
