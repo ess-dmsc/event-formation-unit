@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,9 +8,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/readout/ess/Parser.h>
 #include <common/debug/Trace.h>
-#include <common/geometry/DetectorGeometry.h>
 #include <modules/cbm/CbmInstrument.h>
 #include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
@@ -22,10 +20,9 @@ using namespace esstime;
 using namespace geometry;
 namespace cbm {
 
-
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
-    struct Counters &Counters, Config &Config,
+    Statistics &Stats, struct Counters &Counters, Config &Config,
     const HashMap2D<EV44Serializer> &Ev44serializerMap,
     const HashMap2D<HistogramSerializer_t> &HistogramSerializerMap,
     ESSReadout::Parser &essHeaderParser)
@@ -37,17 +34,28 @@ CbmInstrument::CbmInstrument(
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.CbmParms.MaxPulseTimeDiffNS);
   ESSHeaderParser.Packet.Time.setMaxTOF(Conf.CbmParms.MaxTOFNS);
 
-  //To handle EVENT_2D monitors the configuration list must be analysed
-  //for EVENT_2D data to create the geometry
-  std::vector<Topology*> topologies = Conf.TopologyMapPtr->toValuesList();
+  // Analyze topology configuration to create appropriate geometries for each
+  // monitor type. Geometry key is created from FEN and Channel where
+  // FEN will be most significant Byte and channel least significant Byte.
+  std::vector<Topology *> topologies = Conf.TopologyMapPtr->toValuesList();
   for (const auto *item : topologies) {
+    uint16_t key = calcGeometryKey(item->FEN, item->Channel);
+
     if (item->Type == CbmType::EVENT_2D) {
-      // Geometry key is created from FEN and Channel where
-      // FEN will be most significant Byte and  channel least significant Byte.
-      // TopologyMapPtr is basically using the same key but in a different way.
-      uint16_t key = (item->FEN << 8) +  item->Channel;
-      Geometries.emplace(key, std::make_unique<ESSGeometry>(
-        item->width, item->height, 1, 1));
+      // EVENT_2D monitors need 2D geometry with X/Y validation
+      Geometries.emplace(
+          key, std::make_unique<Geometry2D>(Stats, Conf, item->Source,
+                                            item->width, item->height));
+    } else if (item->Type == CbmType::EVENT_0D) {
+      // EVENT_0D monitors use base geometry with fixed pixel offset
+      Geometries.emplace(key, std::make_unique<Geometry0D>(
+                                  Stats, Conf, item->Source,
+                                  static_cast<uint32_t>(item->pixelOffset)));
+    } else if (item->Type == CbmType::IBM) {
+      // IBM monitors use base geometry with pixel offset 0 (not used for
+      // histograms)
+      Geometries.emplace(
+          key, std::make_unique<Geometry0D>(Stats, Conf, item->Source, 0));
     }
   }
 }
@@ -81,14 +89,6 @@ void CbmInstrument::processMonitorReadouts() {
            Readout.FiberId, Readout.FENId, Readout.Pos, Readout.Type,
            Readout.Channel, Readout.ADC, Readout.TimeHigh, Readout.TimeLow);
 
-    int Ring = DetectorGeometry<cbm::Parser::CbmReadout>::calcRing(Readout.FiberId);
-    if (Ring != Conf.CbmParms.MonitorRing) {
-      XTRACE(DATA, WAR, "Invalid ring %u (expect %u) for monitor readout", Ring,
-             Conf.CbmParms.MonitorRing);
-      counters.RingCfgError++;
-      continue;
-    }
-
     ESSTime ReadoutTime = ESSTime(Readout.TimeHigh, Readout.TimeLow);
 
     /// Calculates the time of flight (TOF) for the readout based on the
@@ -117,6 +117,16 @@ void CbmInstrument::processMonitorReadouts() {
       if (Type == CbmType::IBM) {
         counters.IBMReadoutsProcessed++;
 
+        // Get geometry for validation
+        const auto &geometry =
+            Geometries.at(calcGeometryKey(Readout.FENId, Readout.Channel));
+
+        // Validate readout data (Ring/FEN/Topology)
+        if (!geometry->validateReadoutData(Readout)) {
+          XTRACE(DATA, WAR, "Invalid IBM readout data, skipping");
+          continue;
+        }
+
         // Get normalized ADC value from readout.
         uint32_t normADC{Readout.NADC.getNADC()};
         if (Conf.CbmParms.NormalizeIBMReadouts && (Readout.NADC.MCASum != 0)) {
@@ -127,54 +137,77 @@ void CbmInstrument::processMonitorReadouts() {
             ->addEvent(TimeOfFlight, normADC);
 
         XTRACE(DATA, DEB,
-               "CBM Event, CbmType: %" PRIu8 " ADC: %" PRIu32 " MCASum: %" PRIu32 " TOF %" PRIu64
-               "ns",
-               Readout.Type, Readout.NADC.getNADC(), Readout.NADC.MCASum, TimeOfFlight);
+               "CBM IBM Event, CbmType: %" PRIu8 " ADC: %" PRIu32
+               " MCASum: %" PRIu32 " TOF %" PRIu64 "ns",
+               Readout.Type, Readout.NADC.getNADC(), Readout.NADC.MCASum,
+               TimeOfFlight);
 
         counters.IBMEvents++;
         counters.NPOSCount += normADC;
 
       } else if (Type == CbmType::EVENT_0D) {
+
         counters.Event0DReadoutsProcessed++;
 
-        // Register pixels according to the topology map pixel offset
-        auto &PixelId = Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel)
-                            ->pixelOffset;
+        // Get geometry for validation and pixel calculation
+        const auto &geometry =
+            Geometries.at(calcGeometryKey(Readout.FENId, Readout.Channel));
+
+        // Validate readout data (Ring/FEN/Topology)
+        if (!geometry->validateReadoutData(Readout)) {
+          XTRACE(DATA, WAR, "Invalid EVENT_0D readout data, skipping");
+          continue;
+        }
+
+        // Get pixel from geometry (fixed offset configured in topology)
+        uint32_t PixelId = geometry->calcPixel(Readout);
 
         Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
             ->addEvent(TimeOfFlight, PixelId);
 
         XTRACE(DATA, DEB,
-               "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
+               "CBM 0D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
                "ns",
                Readout.Type, PixelId, TimeOfFlight);
 
         counters.Event0DEvents++;
+
       } else if (Type == CbmType::EVENT_2D) {
+
         counters.Event2DReadoutsProcessed++;
 
-        auto *topology = Conf.TopologyMapPtr->get(Readout.FENId, Readout.Channel);
-        if ((Readout.Pos.XPos > topology->width) || (Readout.Pos.YPos > topology->height)) {
-          CbmReadoutParser.Stats.ErrorADC++;
+        const auto &geometry =
+            Geometries.at(calcGeometryKey(Readout.FENId, Readout.Channel));
 
+        // Validate readout data before pixel calculation
+        bool isValid = geometry->validateReadoutData(Readout);
+        if (!isValid) {
+          XTRACE(DATA, WAR, "Invalid EVENT_2D data, skipping readout");
+          continue;
+        }
+
+        // Calculate pixel using template wrapper with automatic error counting
+        uint32_t PixelId = geometry->calcPixel(Readout);
+
+        if (PixelId == 0) {
+          // Pixel calculation failed - error already counted by Geometry2D
           XTRACE(DATA, DEB,
-                "CBM Event, CbmType: %" PRIu32 " TOF %" PRIu64
-                "ns, XPos %" PRIu32 " YPos %" PRIu32,
-                Readout.Type, TimeOfFlight, Readout.Pos.XPos, Readout.Pos.YPos);
+                 "CBM Event pixel calculation failed, CbmType: %" PRIu8
+                 " TOF %" PRIu64 "ns, XPos %" PRIu16 " YPos %" PRIu16,
+                 Readout.Type, TimeOfFlight, Readout.Pos.XPos,
+                 Readout.Pos.YPos);
         } else {
-          const auto &geometry = Geometries.at((Readout.FENId << 8) + Readout.Channel);
-          uint32_t PixelId = geometry->pixel2D(Readout.Pos.XPos, Readout.Pos.YPos);
-
           Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
               ->addEvent(TimeOfFlight, PixelId);
 
-          XTRACE(DATA, DEB,
-                "CBM Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
-                "ns, XPos %" PRIu32 " YPos %" PRIu32,
-                Readout.Type, PixelId, TimeOfFlight, Readout.Pos.XPos, Readout.Pos.YPos);
-        }
+          counters.Event2DEvents++;
 
-        counters.Event2DEvents++;
+          XTRACE(DATA, DEB,
+                 "CBM 2D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32
+                 " TOF %" PRIu64 "ns, XPos %" PRIu16 " YPos %" PRIu16,
+                 Readout.Type, PixelId, TimeOfFlight, Readout.Pos.XPos,
+                 Readout.Pos.YPos);
+        }
       } else {
         XTRACE(DATA, WAR, "Type %d currently not supported by EFU",
                Readout.Type);
@@ -182,13 +215,16 @@ void CbmInstrument::processMonitorReadouts() {
         continue;
       }
     } catch (std::out_of_range &e) {
-      XTRACE(DATA, WAR, "No serializer configured for FEN %" PRIu8 ", Channel %" PRIu8,
+      XTRACE(DATA, WAR,
+             "No serializer configured for FEN %" PRIu8 ", Channel %" PRIu8,
              Readout.FENId, Readout.Channel);
 
       counters.NoSerializerCfgError++;
       continue;
     } catch (std::invalid_argument &e) {
-      XTRACE(DATA, WAR, "Invalid CbmType: %" PRIu8 " for readout %" PRIu8 " with time %" PRIu8 ,
+      XTRACE(DATA, WAR,
+             "Invalid CbmType: %" PRIu8 " for readout %" PRIu8
+             " with time %" PRIu8,
              e.what(), counters.CbmCounts, ReadoutTime.toNS().count());
       counters.TypeNotConfigured++;
       continue;

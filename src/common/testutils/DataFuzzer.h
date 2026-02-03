@@ -27,7 +27,7 @@ public:
   /// \brief generate random 16 bit values
   uint16_t random16() { return IntDist(Generator) & 0xFFFF; }
 
-  /// \brief Generate random ints in the interval [Begin ; End[
+  /// \brief Generate random ints in the interval [Begin ; End]
   uint16_t randomInterval(uint16_t Begin, uint16_t End) {
     return Begin + RealDist(Generator) * (End - Begin);
   }

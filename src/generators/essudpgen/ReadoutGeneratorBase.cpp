@@ -49,18 +49,18 @@ ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {
   //
   // clang-format on
 
-
   pulseTime = ESSTime::now();
   prevPulseTime = pulseTime;
 }
 
 std::pair<uint32_t, uint32_t>
 ReadoutGeneratorBase::generateReadoutTime() const {
-  if (readoutTimeGenerator == nullptr) {
+  if (ReadoutTimeGenerator == nullptr) {
     throw std::runtime_error("Readout time generator is not initialized");
   }
 
-  TimeDurationMilli t = static_cast<TimeDurationMilli>(readoutTimeGenerator->getValue());
+  TimeDurationMilli t =
+      static_cast<TimeDurationMilli>(ReadoutTimeGenerator->getValue());
   ESSTime readoutTime = pulseTime + esstime::msToNanoseconds(t);
 
   return {readoutTime.getTimeHigh(), readoutTime.getTimeLow()};
@@ -197,7 +197,7 @@ void ReadoutGeneratorBase::transmitLoop() {
 }
 
 void ReadoutGeneratorBase::initialize(
-    std::unique_ptr<FunctionGenerator> readoutGenerator) {
+    std::unique_ptr<FunctionGenerator> &&TimeGenerator) {
   SocketImpl::Endpoint local("0.0.0.0", 0);
   SocketImpl::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
@@ -225,8 +225,8 @@ void ReadoutGeneratorBase::initialize(
     assert(HeaderSize == 32);
   }
 
-  // Figure out distribution that will be used for the readoutGenerator.
-  readoutTimeGenerator = std::move(readoutGenerator);
+  // Figure out distribution that will be used for the TimeGenerator.
+  ReadoutTimeGenerator = std::move(TimeGenerator);
 
   pulseFrequencyNs = esstime::hzToNanoseconds(Settings.Frequency);
   if (ReadoutsPerPacket == 0) {

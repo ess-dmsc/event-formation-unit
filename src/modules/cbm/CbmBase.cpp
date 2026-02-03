@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -56,7 +56,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   Stats.create("events.ibm_npos_sum", Counters.NPOSCount);
 
   // Readout processing errors - readout dropped
-  Stats.create("readouts.errors.ring_mismatch", Counters.RingCfgError);
   Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
   Stats.create("readouts.errors.type_not_configured", Counters.TypeNotConfigured);
   Stats.create("readouts.errors.time", Counters.TimeError);
@@ -168,7 +167,7 @@ void CbmBase::processingThread() {
   }
 
   // Create instrument
-  CbmInstrument cbmInstrument(Counters, CbmConfiguration, *EV44SerializerMapPtr,
+  CbmInstrument cbmInstrument(Stats, Counters, CbmConfiguration, *EV44SerializerMapPtr,
                               *HistogramSerializerMapPtr, ESSHeaderParser);
 
   // Monitor these counters and time out after one second

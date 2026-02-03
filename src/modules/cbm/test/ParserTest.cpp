@@ -10,7 +10,7 @@
 #include <common/Statistics.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/TestBase.h>
-#include <modules/cbm/geometry/Parser.h>
+#include <modules/cbm/readout/Parser.h>
 
 using namespace cbm;
 

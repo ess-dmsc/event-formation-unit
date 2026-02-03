@@ -28,6 +28,8 @@
 #include <common/memory/HashMap2D.h>
 #include <string>
 
+namespace geometry {
+
 ///
 /// \brief Common detector geometry base class for ESS Ring/FEN detectors
 ///
@@ -36,16 +38,17 @@
 /// and provides common validation methods to eliminate code duplication.
 ///
 /// Usage:
-/// 1. Inherit from DetectorGeometry<T> where T is your readout data type
-/// 2. Implement calcPixelImpl(const T &Data) for your specific geometry
-/// 3. Call calcPixel(Data) to get automatic error counting
-/// 4. Error counters are automatically updated and registered
+/// 1. Inherit from DetectorGeometry<TReadout, TData> where:
+///    - TReadout is the readout data type for validation
+///    - TData is the data type for pixel calculation
+/// 2. Implement calcPixelImpl(const TData &Data) for your specific geometry
+/// 3. Implement validateReadoutData(const TReadout &Data) for validation
+/// 4. Call calcPixel(Data) to get automatic error counting
+/// 5. Error counters are automatically updated and registered
 ///
-
-namespace geometry {
-
-template<typename T>
-class DetectorGeometry {
+/// For detectors using the same type for both, use DetectorGeometry<T, T>
+///
+template <typename TReadout, typename TData = TReadout> class DetectorGeometry {
   // Public static keys for StatCounterBase map entries. Use inline to
   // allow header-only definition without ODR issues (C++17 and later).
 
@@ -101,17 +104,19 @@ protected:
   DetectorGeometry(Statistics &Stats, int MaxRing, int MaxFEN)
       : MaxRing(MaxRing), MaxFEN(MaxFEN), BaseCounters(Stats) {}
 
+public:
   /// \brief Virtual destructor for proper inheritance
   virtual ~DetectorGeometry() = default;
 
+protected:
   /// \brief Public access to statistics counters
   mutable BaseGeometryCounters BaseCounters;
 
   /// \brief Pure virtual implementation method for pixel calculation
   /// Derived classes must implement this method for their specific geometry
-  /// \param Data Const reference to readout data object of type T
+  /// \param Data Const reference to readout data object of type TData
   /// \return Calculated pixel ID, or 0 if calculation failed
-  virtual uint32_t calcPixelImpl(const T &Data) const = 0;
+  virtual uint32_t calcPixelImpl(const TData &Data) const = 0;
 
   /// \brief Validate ring number against configuration
   inline bool validateRing(int Ring) const {
@@ -158,7 +163,9 @@ protected:
 public:
   /// \brief Get access to BaseGeometryCounters object
   /// \return Const reference to BaseGeometryCounters instance
-  inline const BaseGeometryCounters &getBaseCounters() const { return BaseCounters; }
+  inline const BaseGeometryCounters &getBaseCounters() const {
+    return BaseCounters;
+  }
 
   /// \brief Calculate Ring from FiberId using physical->logical mapping
   /// Common method used across all VMM3-based detectors.
@@ -167,11 +174,16 @@ public:
   /// \return Logical ring number
   static inline uint8_t calcRing(uint8_t FiberId) { return FiberId / 2; }
 
+  /// \brief Validate readout data - must be implemented by derived classes
+  /// \param Data Data object of type TReadout to validate
+  /// \return true if validation passes, false otherwise
+  virtual bool validateReadoutData(const TReadout &Data) const = 0;
+
   /// \brief Pixel calculation with automatic error counting
-  /// Uses compile-time type checking via template parameter T
-  /// \param Data Data object of type T to calculate pixel for
+  /// Uses compile-time type checking via template parameter TData
+  /// \param Data Data object of type TData to calculate pixel for
   /// \return Calculated pixel ID, with automatic error counting for failures
-  inline uint32_t calcPixel(const T &Data) const {
+  inline uint32_t calcPixel(const TData &Data) const {
     // Use type erasure to call the derived class's calcPixelImpl method
     uint32_t pixel = calcPixelImpl(Data);
     if (pixel == 0) {

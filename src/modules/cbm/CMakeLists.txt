@@ -1,4 +1,4 @@
-# Copyright (C) 2022 - 2023 European Spallation Source, ERIC. See LICENSE file
+# Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 
 add_subdirectory(generators)
 include_directories(.)
@@ -11,7 +11,7 @@ set(cbm_common_inc
   CbmInstrument.h
   CbmTypes.h
   geometry/Config.h
-  geometry/Parser.h
+  readout/Parser.h
   )
 
 
@@ -19,7 +19,7 @@ set(cbm_common_src
   CbmBase.cpp
   CbmInstrument.cpp
   geometry/Config.cpp
-  geometry/Parser.cpp
+  readout/Parser.cpp
   )
 
 #
@@ -42,6 +42,30 @@ set(CbmBaseTest_SRC
   test/CbmBaseTest.cpp
 )
 create_test_executable(CbmBaseTest)
+
+#============================================================================
+# Geometry2DTest Unit test
+#============================================================================
+set(Geometry2DTest_INC
+  ${cbm_common_inc}
+)
+set(Geometry2DTest_SRC
+  ${cbm_common_src}
+  test/Geometry2DTest.cpp
+)
+create_test_executable(Geometry2DTest)
+
+#============================================================================
+# Geometry0DTest Unit test
+#============================================================================
+set(Geometry0DTest_INC
+  ${cbm_common_inc}
+)
+set(Geometry0DTest_SRC
+  ${cbm_common_src}
+  test/Geometry0DTest.cpp
+)
+create_test_executable(Geometry0DTest)
 
 #============================================================================
 # CBMInstrumentTest Module integration test

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 European Spallation Source ERIC
+// Copyright (C) 2024-2026 European Spallation Source ERIC
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,31 +8,24 @@
 
 // GCOVR_EXCL_START
 
-#include <generators/functiongenerators/LinearGenerator.h>
+#include <modules/cbm/generators/DataGeneratorFactory.h>
+#include <modules/cbm/generators/TimeGeneratorFactory.h>
 #include <modules/cbm/generators/ReadoutGenerator.h>
-#include <modules/cbm/geometry/Parser.h>
+#include <modules/cbm/readout/Parser.h>
+
+using namespace cbm;
 
 int main(int argc, char *argv[]) {
 
-  cbm::ReadoutGenerator CbmGen;
-  uint8_t cbmReadoutDataSize = sizeof(cbm::Parser::CbmReadout);
+  ReadoutGenerator CbmGen;
+  uint8_t cbmReadoutDataSize = sizeof(Parser::CbmReadout);
   CbmGen.setReadoutDataSize(cbmReadoutDataSize);
 
   CbmGen.argParse(argc, argv);
 
-  std::unique_ptr<FunctionGenerator> readoutTimeGenerator;
-  if ((CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_0D) ||
-      (CbmGen.cbmSettings.monitorType == cbm::CbmType::EVENT_2D)) {
-    readoutTimeGenerator =
-        std::make_unique<DistributionGenerator>(CbmGen.Settings.Frequency);
-  } else if (CbmGen.cbmSettings.monitorType == cbm::CbmType::IBM) {
-    readoutTimeGenerator = std::make_unique<LinearGenerator>(
-        CbmGen.Settings.Frequency, CbmGen.cbmSettings.NumReadouts);
-  } else {
-    throw std::runtime_error("Unsupported monitor type");
-  }
-
-  CbmGen.initialize(std::move(readoutTimeGenerator));
+  CbmGen.initialize(TimeGeneratorFactory::createTimeGenerator(
+      CbmGen.cbmSettings.monitorType, CbmGen.Settings.Frequency,
+      CbmGen.cbmSettings.NumReadouts));
 
   CbmGen.transmitLoop();
   return 0;

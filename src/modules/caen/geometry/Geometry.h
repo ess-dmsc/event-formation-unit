@@ -85,7 +85,7 @@ public:
 
   /// \brief returns true if Data is a valid readout with the given config
   /// \param Data CaenReadout to check validity of.
-  virtual bool validateReadoutData(const DataParser::CaenReadout &Data) const = 0;
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override = 0;
 
   /// \brief return the total number of serializers used by the geometry
   [[nodiscard]] virtual size_t numSerializers() const = 0;

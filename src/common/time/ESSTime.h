@@ -10,11 +10,13 @@
 #pragma once
 
 #include <chrono>
+#include <climits>
 #include <cmath>
 #include <common/StatCounterBase.h>
 #include <common/Statistics.h>
 #include <common/debug/Trace.h>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 
 namespace esstime {
@@ -77,6 +79,25 @@ inline TimeDurationMilli nsToMilliseconds(int64_t NanoSeconds) {
 /// milliseconds.
 inline TimeDurationMilli nsToMilliseconds(const TimeDurationNano &NanoSeconds) {
   return std::chrono::duration_cast<TimeDurationMilli>(NanoSeconds);
+}
+
+/// \brief Converts a duration in microseconds (int64_t) to milliseconds.
+/// \param MicroSeconds Duration in microseconds.
+/// \return TimeDurationMilli(double) The corresponding duration in
+/// milliseconds.
+inline TimeDurationMilli usToMilliseconds(int64_t MicroSeconds) {
+  return std::chrono::duration_cast<TimeDurationMilli>(
+      TimeDurationMicro(MicroSeconds));
+}
+
+/// \brief Converts a duration in microseconds (TimeDurationMicro) to
+/// milliseconds.
+/// \param MicroSeconds Duration in microseconds.
+/// \return TimeDurationMilli(double) The corresponding duration in
+/// milliseconds.
+inline TimeDurationMilli
+usToMilliseconds(const TimeDurationMicro &MicroSeconds) {
+  return std::chrono::duration_cast<TimeDurationMilli>(MicroSeconds);
 }
 
 /// \brief Converts a duration in seconds (double) to nanoseconds.
@@ -271,6 +292,24 @@ public:
   }
 
   ///
+  /// \brief Equality comparison operator.
+  /// \param other The ESSTime object to compare with.
+  /// \return True if both ESSTime objects are equal, false otherwise.
+  ///
+  inline bool operator==(const ESSTime &other) const {
+    return (TimeHigh == other.TimeHigh) && (TimeLow == other.TimeLow);
+  }
+
+  ///
+  /// \brief Inequality comparison operator.
+  /// \param other The ESSTime object to compare with.
+  /// \return True if the ESSTime objects are not equal, false otherwise.
+  ///
+  inline bool operator!=(const ESSTime &other) const {
+    return !(*this == other);
+  }
+
+  ///
   /// \brief Converts the ESSTime object to a duration in nanoseconds.
   /// \return The duration in nanoseconds.
   ///
@@ -449,12 +488,35 @@ public:
   ///
   uint64_t getPrevTOF(const ESSTime &EventTime, uint32_t DelayNS = 0);
 
+  ///
+  /// \brief Equality comparison operator.
+  ///
+  /// \param other The ESSReferenceTime object to compare with.
+  /// \return True if both ESSReferenceTime objects are equal, false otherwise.
+  ///
+  inline bool operator==(const ESSReferenceTime &other) const {
+    return (TimeInNS == other.TimeInNS) &&
+           (PrevTimeInNS == other.PrevTimeInNS) && (MaxTOF == other.MaxTOF);
+  }
+
+  ///
+  /// \brief Inequality comparison operator.
+  ///
+  /// \param other The ESSReferenceTime object to compare with.
+  /// \return True if the ESSReferenceTime objects are not equal, false
+  /// otherwise.
+  ///
+  inline bool operator!=(const ESSReferenceTime &other) const {
+    return !(*this == other);
+  }
+
 private:
   TimeDurationNano TimeInNS{0};
   TimeDurationNano PrevTimeInNS{0};
   /// \todo review that this still appropriate to have 32 bit integer limit
   TimeDurationNano MaxTOF{
-      2147483647}; // max 32 bit integer, larger TOFs cause errors downstream
+      std::numeric_limits<int32_t>::max()}; // max 32 bit integer, larger TOFs
+                                            // cause errors downstream
 };
 
 } // namespace esstime

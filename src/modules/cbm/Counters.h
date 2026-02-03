@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,7 +11,7 @@
 
 #include <common/kafka/Producer.h>
 #include <cstdint>
-#include <modules/cbm/geometry/Parser.h>
+#include <modules/cbm/readout/Parser.h>
 
 namespace cbm {
 
@@ -33,7 +33,6 @@ struct Counters {
   int64_t Event2DEvents{0};
 
   // Logical and Digital geometry incl. Calibration
-  int64_t RingCfgError{0};
   int64_t CbmCounts{0};
   int64_t NPOSCount{0};
 

@@ -65,7 +65,7 @@ public:
   /// parameters
   /// \param Data CDTReadout to check validity of.
   /// \return true if valid, false otherwise
-  virtual bool validateReadoutData(const DataParser::CDTReadout &Data) {
+  bool validateReadoutData(const DataParser::CDTReadout &Data) const override {
     int Ring = calcRing(Data.FiberId);
 
     return validateAll(

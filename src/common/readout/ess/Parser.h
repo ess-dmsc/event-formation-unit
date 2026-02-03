@@ -243,4 +243,5 @@ public:
   /// setting this in the config file.
   TimeDurationNano MaxPulseTimeDiffNS{0};
 };
+
 } // namespace ESSReadout

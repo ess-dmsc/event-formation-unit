@@ -30,7 +30,9 @@ namespace vmm3 {
 
 /// \brief Abstract base for VMM3-based geometries with ESSGeometry
 /// inheritance. Concrete geometries inherit from this class.
-class VMM3Geometry : public geometry::DetectorGeometry<Event>, public ESSGeometry {
+/// Uses VMM3Parser::VMM3Data for validation and Event for pixel calculation.
+class VMM3Geometry : public geometry::DetectorGeometry<VMM3Parser::VMM3Data, Event>,
+                     public ESSGeometry {
 public:
   /// \brief Stats counters for geometry-level validation.
   struct VmmGeometryCounters : public StatCounterBase {
@@ -90,15 +92,6 @@ public:
   /// \param VMM ASIC index (0..N) within the hybrid
   /// \return true if VMM contributes to Y
   virtual inline bool isYCoord(uint8_t VMM) const { return not isXCoord(VMM); }
-
-  /// \brief Validate a raw VMM3 readout according to instrument geometry.
-  ///
-  /// Derived geometries should compose common checks using validateAll() and
-  /// instrument-specific rules (ring/FEN/hybrid ranges etc.).
-  /// \param Data VMM3 readout to validate
-  /// \return true if valid, false otherwise (and increments counters)
-  virtual bool
-  validateReadoutData(const vmm3::VMM3Parser::VMM3Data &Data) const = 0;
 
   /// \brief Get access to the geometry counters for monitoring
   /// \return Const reference to VmmGeometryCounters instance

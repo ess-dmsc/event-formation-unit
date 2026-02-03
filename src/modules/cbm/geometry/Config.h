@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -115,6 +115,7 @@ public:
     uint32_t MaxTOFNS{20 * 71'428'571};             // < Twenty 14Hz pulses
     uint32_t MaxPulseTimeDiffNS{5 * 71'428'571};    // < Five 14Hz pulses
     uint8_t MonitorRing{11};                        // < Ring number for the monitors
+    uint8_t MaxRing{11};                            // < Maximum valid Ring value (optional, defaults to 11)
     uint8_t NumberOfMonitors{1};                    // < Number of monitors in the config
     uint8_t MaxFENId{10};                           // < Maximum number of FEN IDs
     uint8_t NumOfFENs{11};                          // < Number of FENs (MaxId + 1)

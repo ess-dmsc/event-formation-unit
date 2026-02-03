@@ -45,6 +45,16 @@ public:
     return 1; // Simple valid pixel
   }
 
+  /// \brief Simple mock implementation of validateReadoutData for testing
+  /// \param Data Readout data to validate
+  /// \return true if Ring and FEN are valid
+  bool validateReadoutData(const DataParser::CaenReadout &Data) const override {
+    int Ring = calcRing(Data.FiberId);
+    return validateAll(
+        [&]() { return validateRing(Ring); },
+        [&]() { return validateFEN(Data.FENId); });
+  }
+
   // Public test wrapper methods that call protected validation methods
   // This keeps the base class methods protected while allowing testing
 

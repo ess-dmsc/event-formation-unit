@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -41,6 +41,7 @@ void Config::apply() {
   assign("MaxPulseTimeDiffNS", CbmParms.MaxPulseTimeDiffNS);
   assign("MaxTOFNS", CbmParms.MaxTOFNS);
   assign("MonitorRing", CbmParms.MonitorRing);
+  assign("MaxRing", CbmParms.MaxRing);  // Optional, defaults to 11
   assign("NormalizeIBMReadouts", CbmParms.NormalizeIBMReadouts);
 
   setMask(LOG | CHECK);
