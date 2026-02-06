@@ -1,5 +1,10 @@
 # Event Formation Unit
-[![License (2-Clause BSD)](https://img.shields.io/badge/license-BSD%202--Clause-blue.svg)](https://github.com/ess-dmsc/event-formation-unit/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668) [![Build Status](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/badge/icon)](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/)
+[![License (2-Clause BSD)](https://img.shields.io/badge/license-BSD%202--Clause-blue.svg)](https://github.com/ess-dmsc/event-formation-unit/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668)
+
+master: [![pipeline status](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/badges/master/pipeline.svg)](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/-/commits/master)
+[![coverage report](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/badges/master/coverage.svg)](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/-/commits/master)
+
+> **📊 Detailed Coverage Reports:** Interactive HTML coverage reports are available at [GitLab Pages](https://ess-dmsc.pages.esss.lu.se/event-formation-unit/coverage.html). These reports provide line-by-line coverage analysis and are automatically updated with each merge to master.
 
 This project implements processing of neutron detector event data into neutron events. Pipelines
 for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors
@@ -189,6 +194,8 @@ conduct and the process for submitting pull requests to us.
 * Martin Shetty
 * Jonas Nilsson
 * Jenny Walker
+* Tibor Bukovics
+* Michael Christiansen
 
 See also the [list of contributors](https://github.com/ess-dmsc/event-formation-unit/graphs/contributors) on Github.
 

@@ -79,7 +79,7 @@ add_custom_target(coverage
     --object-directory ${CMAKE_BINARY_DIR}
     --txt
     --output ${CMAKE_BINARY_DIR}/coverage/coverage.txt
-    --gcov-ignore-parse-errors=negative_hits.warn
+    --gcov-ignore-parse-errors
     --exclude='.*gtest.*'
     --exclude='.*CLI.hpp'
     --exclude='.*Test.cpp'
@@ -98,7 +98,7 @@ add_custom_target(coverage_xml
     --cobertura-pretty 
     --cobertura
     --output ${CMAKE_BINARY_DIR}/coverage/coverage.xml
-    --gcov-ignore-parse-errors=negative_hits.warn
+    --gcov-ignore-parse-errors
     --exclude='.*gtest.*'
     --exclude='.*CLI.hpp'
     --exclude='.*Test.cpp'
@@ -115,7 +115,7 @@ add_custom_target(coverage_html
     --html
     --html-details
     --output ${CMAKE_BINARY_DIR}/coverage/coverage.html
-    --gcov-ignore-parse-errors=negative_hits.warn
+    --gcov-ignore-parse-errors
     --exclude='.*gtest.*'
     --exclude='.*CLI.hpp'
     --exclude='.*Test.cpp'
