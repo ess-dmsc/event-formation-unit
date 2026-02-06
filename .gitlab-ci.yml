@@ -201,6 +201,9 @@ coverage:
     - cmake -DCOV=ON -DCMAKE_BUILD_TYPE=Debug -DGOOGLE_BENCHMARK=ON ..
     - make -j$(nproc) runtest
     - make coverage_all
+    # Ensure relative paths in Cobertura XML for GitLab
+    - sed -i "s|<source>${CI_PROJECT_DIR}/*|<source>|g" coverage/coverage.xml
+    - sed -i "s|filename=\"${CI_PROJECT_DIR}/|filename=\"|g" coverage/coverage.xml
   artifacts:
     paths:
       - build/coverage
@@ -278,3 +281,17 @@ publish_docker_job:
         DOCKER_IMAGE_TAG: "${CI_COMMIT_TAG}"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
+
+publish_coverage_job:
+  stage: publish
+  dependencies:
+    - coverage
+  script:
+    - mkdir -p public
+    - cp -r build/coverage/* public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+

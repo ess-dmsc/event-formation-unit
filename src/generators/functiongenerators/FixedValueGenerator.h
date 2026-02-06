@@ -33,5 +33,3 @@ public:
 private:
   uint32_t Value;
 };
-
-// GCOVR_EXCL_STOP
