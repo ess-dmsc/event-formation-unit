@@ -289,9 +289,11 @@ publish_coverage_job:
   script:
     - mkdir -p public
     - cp -r build/coverage/* public/
+  pages: true
   artifacts:
     paths:
       - public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: production
 
