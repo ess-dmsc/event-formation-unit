@@ -13,6 +13,7 @@ stages:
   - cppcheck
   - build
   - test
+  - deploy
   - publish
 
 variables:
@@ -204,9 +205,15 @@ coverage:
     # Ensure relative paths in Cobertura XML for GitLab
     - sed -i "s|<source>${CI_PROJECT_DIR}/*|<source>|g" coverage/coverage.xml
     - sed -i "s|filename=\"${CI_PROJECT_DIR}/|filename=\"|g" coverage/coverage.xml
+    # Add commit metadata to HTML coverage report
+    - python3 ../utils/citools/add_coverage_metadata.py coverage/coverage.html "${CI_COMMIT_REF_NAME}" "${CI_COMMIT_SHORT_SHA}" "$(date +'%Y-%m-%d %H:%M:%S')"
+    # Prepare public directory for GitLab Pages
+    - mkdir -p ../public
+    - cp -r coverage/* ../public/
   artifacts:
     paths:
       - build/coverage
+      - public
     expire_in: 1 week
     reports:
       junit: build/test_results/*.xml
@@ -282,18 +289,15 @@ publish_docker_job:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
 
-publish_coverage_job:
-  stage: publish
+pages:
+  stage: deploy
   dependencies:
     - coverage
   script:
-    - mkdir -p public
-    - cp -r build/coverage/* public/
-  pages: true
-  artifacts:
-    paths:
-      - public
+    - echo "Using coverage build artifacts for GitLab Pages"
+  pages:
+    publish: public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  environment: production
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
