@@ -90,6 +90,11 @@ add_custom_target(valgrind DEPENDS ${valgrind_targets})
 add_custom_target(benchmark DEPENDS ${benchmark_targets})
 add_custom_target(doxygen COMMAND doxygen ../src/doxyfile)
 
+# Finalize benchmarks (creates benchmark_report target)
+if(GOOGLE_BENCHMARK)
+  finalize_benchmarks()
+endif()
+
 #=============================================================================
 # Cppcheck
 #=============================================================================
@@ -112,8 +117,10 @@ add_custom_target(hints
   COMMAND echo "Run unit tests:                         make runtest"
   COMMAND echo "Run memcheck tests:                     make valgrind"
   COMMAND echo "Run coverage tests:                     make coverage"
+  COMMAND echo "Run benchmarks (with report):           make benchmark_report"
   COMMAND echo "Run cppcheck:                           make cppcheck"
   COMMAND echo "Generate cppcheck HTML report:          make cppcheckhtml"
   COMMAND echo "Configure with Release build:           cmake -DCMAKE_BUILD_TYPE=Release"
+  COMMAND echo "Enable benchmarks:                      cmake -DGOOGLE_BENCHMARK=YES"
   COMMAND echo "Specify Conan toolchain:                cmake -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake"
 )
