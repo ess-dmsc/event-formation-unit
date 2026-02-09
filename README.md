@@ -5,7 +5,7 @@
 |--------|----------------|----------|
 | master | [![pipeline status](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/badges/master/pipeline.svg)](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/-/commits/master) | [![coverage report](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/badges/master/coverage.svg)](https://gitlab.esss.lu.se/ecdc/ess-dmsc/event-formation-unit/-/commits/master) |
 
-> **📊 Detailed Coverage Reports:** Interactive HTML coverage reports are available at [GitLab Pages](http://pages.ess.eu/ess-dmsc/event-formation-unit/coverage.html). These reports provide line-by-line coverage analysis and are automatically updated with each merge to master.
+> **📊 Detailed Coverage Reports:** Interactive HTML coverage reports are available at [GitLab Pages](http://ecdc.pages.ess.eu/ess-dmsc/event-formation-unit/coverage.html). These reports provide line-by-line coverage analysis and are automatically updated with each merge to master.
 
 This project implements processing of neutron detector event data into neutron events. Pipelines
 for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors
