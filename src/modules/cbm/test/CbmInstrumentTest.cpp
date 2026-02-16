@@ -4,6 +4,7 @@
 /// \file Unit test for the CbmInstrument class.
 //===----------------------------------------------------------------------===//
 
+#include <common/detector/BaseSettings.h>
 #include <common/geometry/DetectorGeometry.h>
 #include <common/readout/ess/Parser.h>
 #include <common/testutils/HeaderFactory.h>
@@ -232,15 +233,17 @@ auto TestConfig = R"(
   "NormalizeIBMReadouts": true,
 
   "Topology" : [
-    { "FEN": 0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
-    { "FEN": 0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 1 },
-    { "FEN": 1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 3 },
-    { "FEN": 1, "Channel": 1, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN": 1, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN": 2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN":  3, "Channel": 0, "Type": "EVENT_2D", "Source" : "cbm7", "Width": 512, "Height": 512 },
-    { "FEN":  3, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm8", "Width": 512, "Height": 512 },
-    { "FEN":  3, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm9", "Width": 512, "Height": 512 }
+    { "FEN": 0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0 },
+    { "FEN": 0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "Schema": "ev44", "PixelOffset": 1 },
+    { "FEN": 1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "Schema": "ev44", "PixelOffset": 3 },
+    { "FEN": 1, "Channel": 1, "Type": "IBM", "Source" : "cbm4", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100 },
+    { "FEN": 1, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100 },
+    { "FEN": 2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100 },
+    { "FEN": 3, "Channel": 0, "Type": "EVENT_2D", "Source" : "cbm7", "Schema": "ev44", "Width": 512, "Height": 512 },
+    { "FEN": 3, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm8", "Schema": "ev44", "Width": 512, "Height": 512 },
+    { "FEN": 3, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm9", "Schema": "ev44", "Width": 512, "Height": 512 },
+    { "FEN": 3, "Channel": 3, "Type": "EVENT_0D", "Source" : "cbm10", "Schema": "da00", "PixelOffset": 0 },
+    { "FEN": 3, "Channel": 4, "Type": "IBM", "Source" : "cbm11", "Schema": "ev44", "MaxTofBin": 10000, "BinCount": 100 }
   ]
 }
 )"_json;
@@ -263,8 +266,10 @@ public:
   Mock2DimEV44Serializer() : EV44Serializer(0, "cbm") {}
 };
 
+using HistogramSerializer_t = SchemaDetails::DA00Serializer_t;
+
 class MockHistogramSerializer
-    : public HistogramSerializer<int32_t, int32_t, uint64_t> {
+    : public HistogramSerializer_t {
 public:
   MOCK_METHOD(void, addEvent, (const int32_t &time, const int32_t &data),
               (override));
@@ -275,6 +280,7 @@ public:
 
 class CbmInstrumentTest : public TestBase {
 public:
+
 protected:
   /// Objects required to build the CbmInstrument
   struct Counters CbmCounters;
@@ -286,9 +292,7 @@ protected:
   /// \note These are initialized in SetUp()
   std::unique_ptr<Statistics> Stats;
   std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
-  HashMap2D<EV44Serializer> EV44SerializerPtrs{11};
-  HashMap2D<HistogramSerializer<int32_t, int32_t, uint64_t>>
-      HistogramSerializerPtrs{11};
+  HashMap2D<SchemaDetails> SchemaMap{11};
   std::unique_ptr<CbmInstrument> cbm;
 
   inline static path FullConfigFile{""};
@@ -326,29 +330,238 @@ protected:
 
   void initializeSerializers() {
     for (auto &Topology : Configuration->TopologyMapPtr->toValuesList()) {
+      std::unique_ptr<SchemaDetails> details;
+
       if (Topology->Type == CbmType::EVENT_0D) {
-        std::unique_ptr<EV44Serializer> SerializerPtr =
+        if (Topology->Schema == SchemaType::EV44) {
+
+          std::unique_ptr<EV44Serializer> Serializer =
             std::make_unique<Mock0DimEV44Serializer>();
-        EV44SerializerPtrs.add(Topology->FEN, Topology->Channel, SerializerPtr);
+          details = std::make_unique<SchemaDetails>(
+            Topology->Schema, std::move(Serializer));
+        } else if (Topology->Schema == SchemaType::DA00) {
+
+          std::unique_ptr<HistogramSerializer_t> Serializer =
+            std::make_unique<MockHistogramSerializer>();
+          details = std::make_unique<SchemaDetails>(
+            Topology->Schema, std::move(Serializer));
+        } else {
+          FAIL() << "Schema configuration is not correct";
+        }
+
       } else if (Topology->Type == CbmType::EVENT_2D) {
-        std::unique_ptr<EV44Serializer> SerializerPtr =
-            std::make_unique<Mock2DimEV44Serializer>();
-        EV44SerializerPtrs.add(Topology->FEN, Topology->Channel, SerializerPtr);
+
+        std::unique_ptr<EV44Serializer> Serializer =
+          std::make_unique<Mock2DimEV44Serializer>();
+        details = std::make_unique<SchemaDetails>(
+          Topology->Schema, std::move(Serializer));
+        
       } else if (Topology->Type == CbmType::IBM) {
-        std::unique_ptr<HistogramSerializer<int32_t, int32_t, uint64_t>>
-            SerializerPtr = std::make_unique<MockHistogramSerializer>();
-        HistogramSerializerPtrs.add(Topology->FEN, Topology->Channel,
-                                    SerializerPtr);
+
+        if (Topology->Schema == SchemaType::EV44) {
+
+          std::unique_ptr<EV44Serializer> Serializer =
+            std::make_unique<Mock0DimEV44Serializer>();
+          details = std::make_unique<SchemaDetails>(
+            Topology->Schema, std::move(Serializer));
+        } else if (Topology->Schema == SchemaType::DA00) {
+
+          std::unique_ptr<HistogramSerializer_t> Serializer =
+            std::make_unique<MockHistogramSerializer>();
+          details = std::make_unique<SchemaDetails>(
+            Topology->Schema, std::move(Serializer));
+        } else {
+          FAIL() << "Schema configuration is not correct";
+        }
       }
+      SchemaMap.add(Topology->FEN, Topology->Channel, details);
     }
   }
 
   void initializeCbmInstrument() {
     cbm = std::make_unique<CbmInstrument>(
-        *Stats, CbmCounters, *Configuration, EV44SerializerPtrs,
-        HistogramSerializerPtrs, *ESSHeaderParser);
+        *Stats, CbmCounters, *Configuration, 
+        SchemaMap, *ESSHeaderParser);
   }
 };
+
+/// \brief Test case for validating IBM type readouts serialized into a
+/// ev44 schema
+///TestEvent0DToDA00Schema
+TEST_F(CbmInstrumentTest, TestIBMToEV44Schema) {
+
+  // =========================================================================
+  // Set Mock Expectations
+  // =========================================================================
+  // Serializer 1
+  SchemaDetails *details = SchemaMap.get(3, 4);
+  Mock0DimEV44Serializer *Serializer =
+      dynamic_cast<Mock0DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
+  int expectedTime = 1 * ESSTime::ESSClockTick;
+  int expectedData = 10;
+  EXPECT_CALL(*Serializer,
+              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  expectedTime = 2 * ESSTime::ESSClockTick;
+  expectedData = 500;
+  EXPECT_CALL(*Serializer,
+              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  expectedTime = 3 * ESSTime::ESSClockTick;
+  expectedData = 16777215;
+  EXPECT_CALL(*Serializer,
+              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  // =========================================================================
+  // Initialize Test Data
+  // =========================================================================
+  /// \brief Monitor readout with valid IBM readouts with time and NPOS values
+  std::vector<uint8_t> DataPacket {
+    // Test low 8bit NPOS value
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+    0x03, 0x04, 0x00, 0x01,  // Type 3, Ch 4, ADC 1
+    0x0A, 0x00, 0x00, 0x00,  // NPOS 10
+
+    // Test medium 16bit NPOS value
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA2, 0x86, 0x01, 0x00,  // Time LO 100002 tick
+    0x03, 0x04, 0x01, 0x00,  // Type 3, Ch 4, ADC 1
+    0xF4, 0x01, 0x00, 0x00,  // NPOS 500
+
+      // Test high 24bit NPOS value
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
+    0x03, 0x04, 0x01, 0x00,  // Type 3, Ch 4, ADC 1
+    0xFF, 0xFF, 0xFF, 0x00,   // NADC (3 bytes), MCA Sum (0)
+
+    // Test high 32bit NPOS value, should not be accepted
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
+    0x03, 0x04, 0x01, 0x00,  // Type 3, Ch 4, ADC 1
+    0xFF, 0xFF, 0xFF, 0x01   // NADC (3 bytes), MCA Sum (1)
+  };
+
+  makeHeader(ESSHeaderParser->Packet, DataPacket);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  // check parser counters are as expected
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 4);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
+
+  // check monitor readouts are processed correctly
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(CbmCounters.CbmCounts, 4);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.Event2DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 4);
+  EXPECT_EQ(CbmCounters.IBMEvents, 4);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
+  EXPECT_EQ(CbmCounters.Event2DEvents, 0);
+  EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+            4);
+}
+
+///
+/// \brief Test case for Event0D type readouts serialized with
+/// DA00 schema.
+///
+TEST_F(CbmInstrumentTest, TestEvent0DToDA00Schema) {
+  // =========================================================================
+  // Set Mock Expectations
+  // =========================================================================
+  // Serializer 1
+  int expectedTime = 1 * ESSTime::ESSClockTick;
+  int expectedData = 1;
+  SchemaDetails *details = SchemaMap.get(3, 3);
+
+  MockHistogramSerializer *Serializer =
+      dynamic_cast<MockHistogramSerializer *>(
+        details->GetSerializer<SchemaType::DA00>());
+  EXPECT_CALL(*Serializer,
+    addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  expectedTime = 2 * ESSTime::ESSClockTick;
+  expectedData = 1;
+  EXPECT_CALL(*Serializer,
+    addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  expectedTime = 3 * ESSTime::ESSClockTick;
+  expectedData = 1;
+  EXPECT_CALL(*Serializer,
+    addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
+      .Times(testing::AtLeast(1));
+
+  // =========================================================================
+  // Initialize Test Data
+  // =========================================================================
+
+  /// Monitor readout with valid Event0D readouts with time values
+  std::vector<uint8_t> DataPacket {
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+    0x01, 0x03, 0x01, 0x00,  // Type 1, Ch 3, ADC 1
+    0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA2, 0x86, 0x01, 0x00,  // Time LO 100002 tick
+    0x01, 0x03, 0x01, 0x00,  // Type 1, Ch 3, ADC 1
+    0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
+    0x01, 0x03, 0x01, 0x00,  // Type 1, Ch 3, ADC 1
+    0x00, 0x00, 0x00, 0x00   // XPos 0, YPos 0
+  };
+
+  makeHeader(ESSHeaderParser->Packet, DataPacket);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  // check parser counters are as expected
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 3);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
+
+  // check monitor readouts are processed correctly
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(CbmCounters.CbmCounts, 3);
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 3);
+  EXPECT_EQ(CbmCounters.Event2DReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 0);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0);
+  EXPECT_EQ(CbmCounters.Event0DEvents, 3);
+  EXPECT_EQ(CbmCounters.Event2DEvents, 0);
+  EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
+            3);
+}
 
 ///
 /// \brief Test case for validating Event0D type readouts.
@@ -366,24 +579,31 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DReadouts) {
   // Serializer 1
   int expectedTime = 1 * ESSTime::ESSClockTick;
   int expectedData = 0;
+  SchemaDetails *details = SchemaMap.get(0, 0);
+
   Mock0DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock0DimEV44Serializer *>(EV44SerializerPtrs.get(0, 0));
+      dynamic_cast<Mock0DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
 
   expectedTime = 2 * ESSTime::ESSClockTick;
   expectedData = 1;
+  details = SchemaMap.get(0, 1);
   Mock0DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock0DimEV44Serializer *>(EV44SerializerPtrs.get(0, 1));
+      dynamic_cast<Mock0DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 3;
+  details = SchemaMap.get(1, 0);
   Mock0DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock0DimEV44Serializer *>(EV44SerializerPtrs.get(1, 0));
+      dynamic_cast<Mock0DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
@@ -438,8 +658,11 @@ TEST_F(CbmInstrumentTest, TestValidEvent2DReadouts) {
   int expectedTime = 1 * ESSTime::ESSClockTick;
   // Test Data => XPos 256, YPos 257
   int expectedData = 257 * HorizontalWidth + 256 + 1;
+  SchemaDetails *details = SchemaMap.get(3, 0);
+
   Mock2DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 0));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
@@ -447,8 +670,10 @@ TEST_F(CbmInstrumentTest, TestValidEvent2DReadouts) {
   expectedTime = 2 * ESSTime::ESSClockTick;
   // Test Data => XPos 426, YPos 443
   expectedData = 443 * HorizontalWidth + 426 + 1;
+  details = SchemaMap.get(3, 1);
   Mock2DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 1));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
@@ -456,8 +681,10 @@ TEST_F(CbmInstrumentTest, TestValidEvent2DReadouts) {
   expectedTime = 3 * ESSTime::ESSClockTick;
   // Test Data => XPos 204, YPos 221
   expectedData = 221 * HorizontalWidth + 204 + 1;
+  details = SchemaMap.get(3, 2);
   Mock2DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 2));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(1));
@@ -510,20 +737,27 @@ TEST_F(CbmInstrumentTest, TestInvalidEvent2DReadouts) {
   // =========================================================================
   int expectedTime = 0;
   int expectedData = 0;
+  SchemaDetails *details = SchemaMap.get(3, 0);
+
   Mock2DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 0));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(0));
 
+  details = SchemaMap.get(3, 1);
   Mock2DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 1));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(0));
 
+  details = SchemaMap.get(3, 2);
   Mock2DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock2DimEV44Serializer *>(EV44SerializerPtrs.get(3, 2));
+      dynamic_cast<Mock2DimEV44Serializer *>(
+        details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
       .Times(testing::AtLeast(0));
@@ -585,12 +819,18 @@ TEST_F(CbmInstrumentTest, TestInvalidEvent0DReadouts) {
   // =========================================================================
   // Set Mock Expectations - No events should be added
   // =========================================================================
+  SchemaDetails *details = SchemaMap.get(0, 0);
+
   Mock0DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock0DimEV44Serializer *>(EV44SerializerPtrs.get(0, 0));
+    dynamic_cast<Mock0DimEV44Serializer *>(
+      details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(0);
 
+  details = SchemaMap.get(0, 1);
+
   Mock0DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock0DimEV44Serializer *>(EV44SerializerPtrs.get(0, 1));
+    dynamic_cast<Mock0DimEV44Serializer *>(
+      details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(0);
 
   // =========================================================================
@@ -624,8 +864,13 @@ TEST_F(CbmInstrumentTest, TestInvalidEvent0DReadouts) {
   EXPECT_EQ(CbmCounters.Event2DEvents, 0);
 
   // Verify validation errors are tracked via Stats
-  EXPECT_EQ(Stats->getValueByName("cbm1." + Geometry0D::METRIC_MONITOR_RING_MISMATCH_ERRORS), 1);
-  EXPECT_EQ(Stats->getValueByName("cbm2." + Geometry0D::METRIC_MONITOR_RING_MISMATCH_ERRORS), 1);
+  //Check cbm1
+  const cbm::Geometry *geometry = cbm->GetGeometry(0, 0);
+  EXPECT_EQ(geometry->getGeometryCounters().MonitorRingMismatchErrors, 1);
+
+  //Check cbm2
+  geometry = cbm->GetGeometry(0, 1);
+  EXPECT_EQ(geometry->getGeometryCounters().MonitorRingMismatchErrors, 1);
 
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
             2);
@@ -643,14 +888,16 @@ TEST_F(CbmInstrumentTest, TestInvalidIBMReadouts) {
   // =========================================================================
   // Set Mock Expectations - No events should be added
   // =========================================================================
+  SchemaDetails *details = SchemaMap.get(1, 1);
   MockHistogramSerializer *Serializer1 =
-      dynamic_cast<MockHistogramSerializer *>(
-          HistogramSerializerPtrs.get(1, 1));
+    dynamic_cast<MockHistogramSerializer *>(
+      details->GetSerializer<SchemaType::DA00>());
   EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(0);
 
+  details = SchemaMap.get(2, 1);
   MockHistogramSerializer *Serializer2 =
-      dynamic_cast<MockHistogramSerializer *>(
-          HistogramSerializerPtrs.get(2, 1));
+    dynamic_cast<MockHistogramSerializer *>(
+      details->GetSerializer<SchemaType::DA00>());
   EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(0);
 
   // =========================================================================
@@ -685,9 +932,114 @@ TEST_F(CbmInstrumentTest, TestInvalidIBMReadouts) {
 
   // Verify validation errors are tracked via Stats
   // clang-format off
-  EXPECT_EQ(Stats->getValueByName("cbm4." + Geometry0D::METRIC_MONITOR_RING_MISMATCH_ERRORS), 1);
-  EXPECT_EQ(Stats->getValueByName("cbm6." + Geometry0D::METRIC_MONITOR_RING_MISMATCH_ERRORS), 1);
+  // Verify validation errors are tracked via Stats
+  //Check cbm4
+  const cbm::Geometry *geometry = cbm->GetGeometry(1, 1);
+  EXPECT_EQ(geometry->getGeometryCounters().MonitorRingMismatchErrors, 1);
+
+  //Check cbm6
+  geometry = cbm->GetGeometry(2, 1);
+  EXPECT_EQ(geometry->getGeometryCounters().MonitorRingMismatchErrors, 1);
+
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT), 2);
+  // clang-format on
+}
+
+///
+/// \brief Test case for validating type readouts.
+///
+/// This test verifies that readouts with wrong type compared to configuration 
+/// generate an type_mismatch_errors metric
+///
+TEST_F(CbmInstrumentTest, TestInvalidTypeReadouts) {
+
+  // =========================================================================
+  // Set Mock Expectations - No events should be added
+  // =========================================================================
+  SchemaDetails *details = SchemaMap.get(1, 0); //cbm3 EVENT_0D type 1
+  Mock0DimEV44Serializer *Serializer1 =
+    dynamic_cast<Mock0DimEV44Serializer *>(
+      details->GetSerializer<SchemaType::EV44>());
+  EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+
+  details = SchemaMap.get(2, 1); // //cbm 6 IBM type 3
+  MockHistogramSerializer *Serializer2 =
+    dynamic_cast<MockHistogramSerializer *>(
+      details->GetSerializer<SchemaType::DA00>());
+  EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+
+  details = SchemaMap.get(3, 1); //cbm8 EVENT_2D type 2
+  Mock2DimEV44Serializer *Serializer3 =
+    dynamic_cast<Mock2DimEV44Serializer *>(
+      details->GetSerializer<SchemaType::EV44>());
+  EXPECT_CALL(*Serializer3, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+
+  // =========================================================================
+  // Initialize Test Data
+  // =========================================================================
+  /// \brief Monitor readout with wrong Types using 3 for EVENT_0D, 2 for IBM
+  /// and 1 for EVENT_2D
+  std::vector<uint8_t> DReadouts {
+    0x16, 0x01, 0x14, 0x00,  // Fiber 22, FEN 1, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA1, 0x86, 0x01, 0x00,  // Time LO 100001 tick
+    0x03, 0x00, 0x01, 0x00,  // Type 3, Ch 0, ADC 1
+    0x00, 0x00, 0x00, 0x00,  // XPos 0, YPos 0
+
+    0x16, 0x02, 0x14, 0x00,  // Fiber 22, FEN 2, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA2, 0x86, 0x01, 0x00,  // Time LO 100002 tick
+    0x02, 0x01, 0x01, 0x00,  // Type 2, Ch 1, ADC 1
+    0xF4, 0x01, 0x00, 0x00,  // NPOS 500
+
+    0x16, 0x03, 0x14, 0x00,  // Fiber 22, FEN 3, Data Length 20
+    0x01, 0x00, 0x00, 0x00,  // Time HI 1 s
+    0xA3, 0x86, 0x01, 0x00,  // Time LO 100003 tick
+    0x01, 0x01, 0x01, 0x00,  // Type 1, Ch 1, ADC 1
+    0xCC, 0x00, 0xDD, 0x00   // XPos 204, YPos 221
+  };
+
+  makeHeader(ESSHeaderParser->Packet, DReadouts);
+  ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
+  ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 0));
+
+  cbm->CbmReadoutParser.parse(ESSHeaderParser->Packet);
+  CbmCounters.CbmStats = cbm->CbmReadoutParser.Stats;
+
+  // check parser counters are as expected
+  EXPECT_EQ(CbmCounters.CbmStats.Readouts, 3);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFiber, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorFEN, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorADC, 0);
+  EXPECT_EQ(CbmCounters.CbmStats.ErrorType, 0);
+
+  // =========================================================================
+  // Process and Verify Results
+  // =========================================================================
+  cbm->processMonitorReadouts();
+  EXPECT_EQ(CbmCounters.CbmCounts, 0); // No valid events (all fail validation)
+  EXPECT_EQ(CbmCounters.NoSerializerCfgError, 0);
+  EXPECT_EQ(CbmCounters.Event0DReadoutsProcessed, 1);
+  EXPECT_EQ(CbmCounters.Event2DReadoutsProcessed, 1);
+  EXPECT_EQ(CbmCounters.IBMReadoutsProcessed, 1);
+  EXPECT_EQ(CbmCounters.IBMEvents, 0); // No events (all fail validation)
+  EXPECT_EQ(CbmCounters.Event0DEvents, 0);
+  EXPECT_EQ(CbmCounters.Event2DEvents, 0);
+
+  // Verify validation errors are tracked via Stats
+  // clang-format off
+  // Verify validation errors are tracked via Stats
+  //Check cbm3
+  const cbm::Geometry *geometry = cbm->GetGeometry(1, 0);
+  EXPECT_EQ(geometry->getGeometryCounters().TypeMismatchError, 1);
+
+  //Check cbm6
+  geometry = cbm->GetGeometry(2, 1);
+  EXPECT_EQ(geometry->getGeometryCounters().TypeMismatchError, 1);
+
+  //Check cbm8
+  geometry = cbm->GetGeometry(3, 1);
+  EXPECT_EQ(geometry->getGeometryCounters().TypeMismatchError, 1);
   // clang-format on
 }
 
@@ -704,9 +1056,10 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
   // Set Mock Expectations
   // =========================================================================
   // Serializer 1
+  SchemaDetails *details = SchemaMap.get(1, 1);
   MockHistogramSerializer *Serializer1 =
       dynamic_cast<MockHistogramSerializer *>(
-          HistogramSerializerPtrs.get(1, 1));
+        details->GetSerializer<SchemaType::DA00>());
   int expectedTime = 1 * ESSTime::ESSClockTick;
   int expectedData = 10;
   EXPECT_CALL(*Serializer1,
@@ -714,9 +1067,10 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
       .Times(testing::AtLeast(1));
 
   // Serializer 2
+  details = SchemaMap.get(1, 2);
   MockHistogramSerializer *Serializer2 =
       dynamic_cast<MockHistogramSerializer *>(
-          HistogramSerializerPtrs.get(1, 2));
+        details->GetSerializer<SchemaType::DA00>());
   expectedTime = 2 * ESSTime::ESSClockTick;
   expectedData = 500;
   EXPECT_CALL(*Serializer2,
@@ -724,9 +1078,10 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
       .Times(testing::AtLeast(1));
 
   // Serializer 3
+  details = SchemaMap.get(2, 1);
   MockHistogramSerializer *Serializer3 =
       dynamic_cast<MockHistogramSerializer *>(
-          HistogramSerializerPtrs.get(2, 1));
+        details->GetSerializer<SchemaType::DA00>());
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 16777215;
   EXPECT_CALL(*Serializer3,
@@ -786,8 +1141,11 @@ TEST_F(CbmInstrumentTest, TestIBMNormalizeReadouts) {
   // =========================================================================
   int FenId = 2;
   int ChannelId = 1;
-  MockHistogramSerializer *Serializer = dynamic_cast<MockHistogramSerializer *>(
-      HistogramSerializerPtrs.get(FenId, ChannelId));
+  // Serializer 
+  SchemaDetails *details = SchemaMap.get(FenId, ChannelId);
+  MockHistogramSerializer *Serializer =
+      dynamic_cast<MockHistogramSerializer *>(
+        details->GetSerializer<SchemaType::DA00>());
   int expectedTime = 1 * ESSTime::ESSClockTick;
   int expectedNorm = 8;
   int expectedData = 0xFFFFFF / expectedNorm;
@@ -836,8 +1194,11 @@ TEST_F(CbmInstrumentTest, TestIBMDisableNormalizeReadouts) {
   // =========================================================================
   int FenId = 1;
   int ChannelId = 2;
-  MockHistogramSerializer *Serializer = dynamic_cast<MockHistogramSerializer *>(
-      HistogramSerializerPtrs.get(FenId, ChannelId));
+  // Serializer 
+  SchemaDetails *details = SchemaMap.get(FenId, ChannelId);
+  MockHistogramSerializer *Serializer =
+      dynamic_cast<MockHistogramSerializer *>(
+        details->GetSerializer<SchemaType::DA00>());
   int expectedTime = 1 * ESSTime::ESSClockTick;
   int expectedData = 0xFFFFFF;
   EXPECT_CALL(*Serializer,

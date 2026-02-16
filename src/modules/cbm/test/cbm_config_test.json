@@ -13,8 +13,8 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
-    { "FEN":  0, "Channel": 1, "Type": "IBM", "Source" : "cbm2", "MaxTofBin": 71428572, "BinCount": 512 },
-    { "FEN":  0, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm3", "Width": 512, "Height": 512 }
+    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema" : "EV44", "PixelOffset": 0 },
+    { "FEN":  0, "Channel": 1, "Type": "IBM",      "Source" : "cbm2", "Schema" : "DA00", "MaxTofBin": 71428572, "BinCount": 512 },
+    { "FEN":  0, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm3", "Schema" : "EV44", "Width": 512,          "Height": 512 }
   ]
 }

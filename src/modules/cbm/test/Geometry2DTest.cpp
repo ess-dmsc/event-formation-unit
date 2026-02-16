@@ -23,6 +23,7 @@ protected:
   Statistics Stats;
   Config CbmConfig;
   std::unique_ptr<Geometry2D> geom;
+  CbmType MonitorType{CbmType::EVENT_2D};
 
   void SetUp() override {
 
@@ -38,7 +39,7 @@ protected:
 
     // Create geometry with 512x512 dimensions, like in production config
     geom =
-        std::make_unique<Geometry2D>(Stats, CbmConfig, "test_source", 512, 512);
+        std::make_unique<Geometry2D>(Stats, CbmConfig, MonitorType, "test_source", 512, 512);
   }
 
   void TearDown() override {}
@@ -55,6 +56,7 @@ TEST_F(Geometry2DTest, ValidateValidReadoutData) {
   Parser::CbmReadout readout{};
 
   // Set valid Ring and FEN
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FiberId = 22; // Ring = 22/2 = 11, valid (MaxRing = 11)
   readout.FENId = 3;    // Valid topology (configured in SetUp)
   readout.Channel = 0;  // Valid topology (configured in SetUp)
@@ -100,6 +102,7 @@ TEST_F(Geometry2DTest, ValidateTopology) {
   readout.Pos.XPos = 100; // Valid coordinates
   readout.Pos.YPos = 100;
 
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FiberId = 22; // Valid Ring
 
   // Valid topology
@@ -130,6 +133,7 @@ TEST_F(Geometry2DTest, ValidateTopology) {
 
 TEST_F(Geometry2DTest, ValidateRingAndFEN) {
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FENId = 3;   // Valid topology (configured in SetUp)
   readout.Channel = 0; // Valid topology (configured in SetUp)
 
@@ -175,6 +179,7 @@ TEST_F(Geometry2DTest, ValidateRingAndFEN) {
 
 TEST_F(Geometry2DTest, ValidateCoordinates) {
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   // Use valid Ring and FEN with topology for all coordinate tests
   readout.FiberId = 22;
   readout.FENId = 3;   // Valid topology (configured in SetUp)
@@ -228,6 +233,7 @@ TEST_F(Geometry2DTest, ValidateCoordinates) {
 TEST_F(Geometry2DTest, CalcPixelErrorCounting) {
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   // When calcPixel is called with invalid coordinates (out of ESSGeometry
   // range), ESSGeometry returns 0, which triggers PixelErrors counter increment
   readout.Pos.XPos = 512;
@@ -250,6 +256,7 @@ TEST_F(Geometry2DTest, CalcPixelErrorCounting) {
 TEST_F(Geometry2DTest, CalcPixelValid) {
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   // Test corner pixels
   readout.Pos.XPos = 0;
   readout.Pos.YPos = 0;
@@ -286,12 +293,13 @@ TEST_F(Geometry2DTest, DifferentDimensions) {
   smallConfig.TopologyMapPtr->add(3, 0, nullTopo);
 
   auto smallGeom =
-      std::make_unique<Geometry2D>(Stats, smallConfig, "small", 256, 128);
+      std::make_unique<Geometry2D>(Stats, smallConfig, MonitorType, "small", 256, 128);
 
   EXPECT_EQ(smallGeom->getWidth(), 256);
   EXPECT_EQ(smallGeom->getHeight(), 128);
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FiberId = 22; // Valid Ring
   readout.FENId = 3;
   readout.Channel = 0;
@@ -337,13 +345,14 @@ TEST_F(Geometry2DTest, CustomMaxRingAndFENLimits) {
   customConfig.TopologyMapPtr->add(5, 5, nullTopo);
 
   auto customGeom =
-      std::make_unique<Geometry2D>(Stats, customConfig, "custom", 256, 256);
+      std::make_unique<Geometry2D>(Stats, customConfig, MonitorType, "custom", 256, 256);
 
   ASSERT_EQ(customGeom->getWidth(), 256);
   ASSERT_EQ(customGeom->getHeight(), 256);
   ASSERT_EQ(customGeom->getSourceName(), "custom");
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FiberId = 10; // Valid Ring
   readout.FENId = 5;
   readout.Channel = 5;
@@ -390,10 +399,11 @@ TEST_F(Geometry2DTest, MetricNamesWithSourcePrefix) {
   std::unique_ptr<Topology> nullTopo2 = nullptr;
   config2.TopologyMapPtr->add(5, 5, nullTopo2);
 
-  auto geom1 = std::make_unique<Geometry2D>(Stats, config1, "cbm7", 512, 512);
-  auto geom2 = std::make_unique<Geometry2D>(Stats, config2, "cbm8", 512, 512);
+  auto geom1 = std::make_unique<Geometry2D>(Stats, config1, MonitorType, "cbm7", 512, 512);
+  auto geom2 = std::make_unique<Geometry2D>(Stats, config2, MonitorType, "cbm8", 512, 512);
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   readout.FiberId = 22; // Valid Ring
   readout.FENId = 5;
   readout.Channel = 5;
@@ -435,6 +445,7 @@ TEST_F(Geometry2DTest, ValidationOrder) {
   // Test that validation stops at first failure
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_2D; //Cbm Type
   // All invalid: Ring, MonitorRing, FEN, Topology
   // Only Ring error should be counted (first failure)
   readout.FiberId =
@@ -444,6 +455,25 @@ TEST_F(Geometry2DTest, ValidationOrder) {
 
   EXPECT_FALSE(geom->validateReadoutData(readout));
   EXPECT_EQ(geom->getBaseCounters().RingErrors, 1);
+  EXPECT_EQ(geom->getBaseCounters().FENErrors, 0);     // Not reached
+  EXPECT_EQ(geom->getBaseCounters().TopologyError, 0); // Not reached
+  EXPECT_EQ(geom->getGeometryCounters().MonitorRingMismatchErrors,
+            0); // Not reached
+  EXPECT_EQ(geom->getBaseCounters().ValidationErrors, 1);
+}
+
+TEST_F(Geometry2DTest, ValidateType) {
+  // Test that validation stops at first failure
+  Parser::CbmReadout readout{};
+
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
+  // All invalid: Ring, MonitorRing, FEN, Topology
+  readout.FiberId = 22; // Valid Ring
+  readout.FENId = 5;
+  readout.Channel = 5;
+
+  EXPECT_FALSE(geom->validateReadoutData(readout));
+  EXPECT_EQ(geom->getBaseCounters().RingErrors, 0);
   EXPECT_EQ(geom->getBaseCounters().FENErrors, 0);     // Not reached
   EXPECT_EQ(geom->getBaseCounters().TopologyError, 0); // Not reached
   EXPECT_EQ(geom->getGeometryCounters().MonitorRingMismatchErrors,

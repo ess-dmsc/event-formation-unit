@@ -6,7 +6,6 @@
 /// \brief using nlohmann json parser to read configurations from file
 //===----------------------------------------------------------------------===//
 
-#include "CbmTypes.h"
 #include <fmt/format.h>
 #include <modules/cbm/geometry/Config.h>
 
@@ -66,16 +65,18 @@ void Config::apply() {
     int Channel{-1};
     std::string Source{""};
     std::string Type{""};
+    std::string Schema{""};
 
     try {
       FEN = Module["FEN"].get<int>();
       Channel = Module["Channel"].get<int>();
       Type = Module["Type"].get<std::string>();
       Source = Module["Source"].get<std::string>();
+      Schema = Module["Schema"].get<std::string>();
 
     } catch (...) {
-      std::runtime_error(
-          "Malformed 'Topology' section (Need FEN, Channel, Type and"
+      errorExit(
+          "Malformed 'Topology' section (Need FEN, Channel, Type, Schema and"
           "Source)");
     }
 
@@ -99,6 +100,15 @@ void Config::apply() {
                             Entry, Type));
     }
 
+    //Determine used schema type. However EVENT_2D can only use option EV44
+    SchemaType DataSchema = SchemaType::EV44;
+    try {
+      DataSchema = SchemaType(Schema);
+    } catch (...) {
+      errorExit(fmt::format("Entry: {}, Invalid Type: {} is not a Schema Type",
+                            Entry, Schema));
+    }
+
     int param1{0};
     int param2{0};
     int param3{0};
@@ -117,7 +127,6 @@ void Config::apply() {
     }
 
     if (MonitorType == CbmType::EVENT_2D) {
-
       try {
         param1 = Module["Width"].get<int>();
         param2 = Module["Height"].get<int>();
@@ -140,6 +149,11 @@ void Config::apply() {
           "Entry: {} for {} Type "
           "valid height values {} - {}, Read Value {}", 
           Entry, MonitorType.toString(), 0, maxValue, param2));
+      }
+      if (DataSchema != SchemaType::EV44) {
+        errorExit(fmt::format(
+          "Entry: {} for {} Schema only EV44 is allowed", 
+          Entry, DataSchema.toString()));
       }
     }
 
@@ -166,7 +180,7 @@ void Config::apply() {
     }
 
     auto topo = std::make_unique<Topology>(FEN, Channel, Source, MonitorType,
-                                           param1, param2, param3, param4);
+                                           DataSchema, param1, param2, param3, param4);
     TopologyMapPtr->add(FEN, Channel, topo);
 
     XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",

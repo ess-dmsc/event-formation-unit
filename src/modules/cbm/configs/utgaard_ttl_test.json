@@ -13,7 +13,7 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
-    { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm2", "Width": 512, "Height": 512 }
+    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0 },
+    { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm2", "Schema": "da00", "Width": 512, "Height": 512 }
   ]
 }

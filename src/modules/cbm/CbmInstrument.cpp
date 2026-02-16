@@ -9,8 +9,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/debug/Trace.h>
+#include <modules/cbm/geometry/Geometry2D.h>
+#include <modules/cbm/geometry/Geometry0D.h>
 #include <modules/cbm/CbmInstrument.h>
-#include <modules/cbm/CbmTypes.h>
 #include <stdexcept>
 
 // #undef TRC_LEVEL
@@ -23,12 +24,9 @@ namespace cbm {
 /// \brief load configuration and calibration files
 CbmInstrument::CbmInstrument(
     Statistics &Stats, struct Counters &Counters, Config &Config,
-    const HashMap2D<EV44Serializer> &Ev44serializerMap,
-    const HashMap2D<HistogramSerializer_t> &HistogramSerializerMap,
+    const HashMap2D<SchemaDetails> &SchemaDetailMap, 
     ESSReadout::Parser &essHeaderParser)
-
-    : counters(Counters), Conf(Config), Ev44SerializerMap(Ev44serializerMap),
-      HistogramSerializerMap(HistogramSerializerMap),
+    : counters(Counters), Conf(Config), SchemaMap(SchemaDetailMap),
       ESSHeaderParser(essHeaderParser) {
 
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.CbmParms.MaxPulseTimeDiffNS);
@@ -42,20 +40,26 @@ CbmInstrument::CbmInstrument(
     uint16_t key = calcGeometryKey(item->FEN, item->Channel);
 
     if (item->Type == CbmType::EVENT_2D) {
+
       // EVENT_2D monitors need 2D geometry with X/Y validation
       Geometries.emplace(
-          key, std::make_unique<Geometry2D>(Stats, Conf, item->Source,
-                                            item->width, item->height));
+        key, std::make_unique<Geometry2D>(
+          Stats, Conf, item->Type, item->Source,
+          item->width, item->height));
     } else if (item->Type == CbmType::EVENT_0D) {
+
       // EVENT_0D monitors use base geometry with fixed pixel offset
-      Geometries.emplace(key, std::make_unique<Geometry0D>(
-                                  Stats, Conf, item->Source,
-                                  static_cast<uint32_t>(item->pixelOffset)));
+      Geometries.emplace(
+        key, std::make_unique<Geometry0D>(
+          Stats, Conf, item->Type, item->Source,
+          static_cast<uint32_t>(item->pixelOffset)));
     } else if (item->Type == CbmType::IBM) {
+
       // IBM monitors use base geometry with pixel offset 0 (not used for
       // histograms)
       Geometries.emplace(
-          key, std::make_unique<Geometry0D>(Stats, Conf, item->Source, 0));
+          key, std::make_unique<Geometry0D>(
+            Stats, Conf, item->Type, item->Source, 0));
     }
   }
 }
@@ -66,16 +70,18 @@ void CbmInstrument::processMonitorReadouts() {
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here
 
-  for (auto &Serializer : Ev44SerializerMap.toValuesList()) {
-    Serializer->checkAndSetReferenceTime(
-        ESSHeaderParser.Packet.Time.getRefTimeUInt64());
-    /// \todo sometimes PrevPulseTime maybe?
-  }
-
-  for (auto &Serializer : HistogramSerializerMap.toValuesList()) {
-    Serializer->checkAndSetReferenceTime(
-        ESSHeaderParser.Packet.Time.getRefTimeNS());
-    /// \todo sometimes PrevPulseTime maybe?
+  for (auto &Details : SchemaMap.toValuesList()) {
+    if (Details->GetSchema() == SchemaType::DA00) {
+      DA00Serializer_t *Serializer = Details->GetSerializer<SchemaType::DA00>();
+      Serializer->checkAndSetReferenceTime(
+          ESSHeaderParser.Packet.Time.getRefTimeNS());
+      /// \todo sometimes PrevPulseTime maybe?
+    } else {
+      EV44Serializer_t *Serializer = Details->GetSerializer<SchemaType::EV44>();
+      Serializer->checkAndSetReferenceTime(
+          ESSHeaderParser.Packet.Time.getRefTimeUInt64());
+      /// \todo sometimes PrevPulseTime maybe?
+    }
   }
 
   XTRACE(DATA, DEB, "processMonitorReadouts() - has %zu entries",
@@ -132,9 +138,12 @@ void CbmInstrument::processMonitorReadouts() {
         if (Conf.CbmParms.NormalizeIBMReadouts && (Readout.NADC.MCASum != 0)) {
           normADC /= Readout.NADC.MCASum;
         }
-
-        HistogramSerializerMap.get(Readout.FENId, Readout.Channel)
-            ->addEvent(TimeOfFlight, normADC);
+        const SchemaDetails *Details = SchemaMap.get(Readout.FENId, Readout.Channel);
+        if (Details->GetSchema() == SchemaType::DA00) {
+          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight, normADC);
+        } else {
+          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight, normADC);
+        }
 
         XTRACE(DATA, DEB,
                "CBM IBM Event, CbmType: %" PRIu8 " ADC: %" PRIu32
@@ -162,8 +171,12 @@ void CbmInstrument::processMonitorReadouts() {
         // Get pixel from geometry (fixed offset configured in topology)
         uint32_t PixelId = geometry->calcPixel(Readout);
 
-        Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
-            ->addEvent(TimeOfFlight, PixelId);
+        SchemaDetails *Details = SchemaMap.get(Readout.FENId, Readout.Channel);
+        if (Details->GetSchema() == SchemaType::DA00) {
+          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight, 1);
+        } else {
+          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight, PixelId);
+        }
 
         XTRACE(DATA, DEB,
                "CBM 0D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
@@ -197,7 +210,8 @@ void CbmInstrument::processMonitorReadouts() {
                  Readout.Type, TimeOfFlight, Readout.Pos.XPos,
                  Readout.Pos.YPos);
         } else {
-          Ev44SerializerMap.get(Readout.FENId, Readout.Channel)
+
+          SchemaMap.get(Readout.FENId, Readout.Channel)->GetSerializer<SchemaType::EV44>()
               ->addEvent(TimeOfFlight, PixelId);
 
           counters.Event2DEvents++;

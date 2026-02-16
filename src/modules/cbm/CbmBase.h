@@ -10,12 +10,13 @@
 #pragma once
 
 #include <common/detector/Detector.h>
-#include <common/kafka/EV44Serializer.h>
-#include <common/kafka/serializer/DA00HistogramSerializer.h>
-#include <common/memory/HashMap2D.h>
+  #include <common/kafka/EV44Serializer.h>
+  #include <common/kafka/serializer/DA00HistogramSerializer.h>
+  #include <common/memory/HashMap2D.h>
 #include <memory>
 #include <modules/cbm/Counters.h>
 #include <modules/cbm/geometry/Config.h>
+#include <modules/cbm/SchemaDetails.h>
 
 namespace cbm {
 
@@ -48,10 +49,7 @@ public:
   struct Counters Counters {};
 
 private:
-  using HistogramSerializer_t = fbserializer::HistogramSerializer<int32_t, int32_t, uint64_t>;
-
-  std::unique_ptr<HashMap2D<EV44Serializer>> EV44SerializerMapPtr;
-  std::unique_ptr<HashMap2D<HistogramSerializer_t>> HistogramSerializerMapPtr;
+  std::unique_ptr<HashMap2D<SchemaDetails>> SchemaMap;
 
   Config CbmConfiguration;
 };
