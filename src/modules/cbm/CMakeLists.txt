@@ -10,8 +10,13 @@ set(cbm_common_inc
   CbmBase.h
   CbmInstrument.h
   CbmTypes.h
-  geometry/Config.h
+  SchemaType.h
+  SchemaDetails.h
   readout/Parser.h
+  geometry/Geometry.h
+  geometry/Config.h
+  geometry/Geometry0D.h
+  geometry/Geometry2D.h
   )
 
 

@@ -22,6 +22,7 @@ protected:
   Statistics Stats;
   Config CbmConfig;
   std::unique_ptr<Geometry0D> geom;
+  CbmType MonitorType{CbmType::EVENT_0D};
 
   void SetUp() override {
     CbmConfig.CbmParms.MonitorRing = 11; // Default monitor ring
@@ -34,7 +35,7 @@ protected:
     CbmConfig.TopologyMapPtr->add(3, 0, nullTopo);
 
     // Create 0D geometry with pixel offset 100 (EVENT_0D style)
-    geom = std::make_unique<Geometry0D>(Stats, CbmConfig, "test_source", 100);
+    geom = std::make_unique<Geometry0D>(Stats, CbmConfig, MonitorType, "test_source", 100);
   }
 
   void TearDown() override {}
@@ -48,7 +49,7 @@ TEST_F(Geometry0DTest, Constructor) {
 
 TEST_F(Geometry0DTest, ConstructorIBMStyle) {
   // IBM monitors use pixel offset 0
-  auto ibmGeom = std::make_unique<Geometry0D>(Stats, CbmConfig, "ibm1");
+  auto ibmGeom = std::make_unique<Geometry0D>(Stats, CbmConfig, MonitorType, "ibm1");
   EXPECT_EQ(ibmGeom->getPixelOffset(), 0);
   EXPECT_EQ(ibmGeom->getSourceName(), "ibm1");
 }
@@ -56,6 +57,7 @@ TEST_F(Geometry0DTest, ConstructorIBMStyle) {
 TEST_F(Geometry0DTest, ValidateValidReadoutData) {
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   // Set valid Ring and FEN
   readout.FiberId = 22; // Ring = 22/2 = 11, matches MonitorRing
   readout.FENId = 3;    // Valid topology
@@ -71,6 +73,7 @@ TEST_F(Geometry0DTest, ValidateValidReadoutData) {
 
 TEST_F(Geometry0DTest, ValidateTopology) {
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FiberId = 22; // Valid Ring
 
   // Valid topology
@@ -99,6 +102,7 @@ TEST_F(Geometry0DTest, ValidateTopology) {
 
 TEST_F(Geometry0DTest, ValidateRingAndFEN) {
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FENId = 3;   // Valid topology
   readout.Channel = 0; // Valid topology
 
@@ -140,6 +144,7 @@ TEST_F(Geometry0DTest, ValidateRingAndFEN) {
 
 TEST_F(Geometry0DTest, ValidateMonitorRingMismatch) {
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FENId = 3;   // Valid topology
   readout.Channel = 0; // Valid topology
 
@@ -167,6 +172,7 @@ TEST_F(Geometry0DTest, ValidateMonitorRingMismatch) {
 TEST_F(Geometry0DTest, CalcPixelReturnsFixedOffset) {
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   // For EVENT_0D geometry, calcPixel always returns the fixed pixel offset
   readout.FiberId = 22;
   readout.FENId = 3;
@@ -186,9 +192,10 @@ TEST_F(Geometry0DTest, CalcPixelReturnsFixedOffset) {
 
 TEST_F(Geometry0DTest, CalcPixelIBMStyle) {
   // IBM monitors return 0 (pixel not used for histograms)
-  auto ibmGeom = std::make_unique<Geometry0D>(Stats, CbmConfig, "ibm1", 0);
+  auto ibmGeom = std::make_unique<Geometry0D>(Stats, CbmConfig, MonitorType, "ibm1", 0);
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FiberId = 22;
   readout.FENId = 3;
   readout.Channel = 0;
@@ -213,12 +220,13 @@ TEST_F(Geometry0DTest, CustomMaxRingAndFENLimits) {
   customConfig.TopologyMapPtr->add(5, 5, nullTopo);
 
   auto customGeom =
-      std::make_unique<Geometry0D>(Stats, customConfig, "custom", 50);
+      std::make_unique<Geometry0D>(Stats, customConfig, MonitorType, "custom", 50);
 
   ASSERT_EQ(customGeom->getSourceName(), "custom");
   ASSERT_EQ(customGeom->getPixelOffset(), 50);
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FiberId = 10; // Ring = 5, matches custom MaxRing and MonitorRing
   readout.FENId = 5;
   readout.Channel = 5;
@@ -268,10 +276,11 @@ TEST_F(Geometry0DTest, MetricNamesWithSourcePrefix) {
   std::unique_ptr<Topology> nullTopo2 = nullptr;
   config2.TopologyMapPtr->add(5, 5, nullTopo2);
 
-  auto geom1 = std::make_unique<Geometry0D>(Stats, config1, "cbm1", 100);
-  auto geom2 = std::make_unique<Geometry0D>(Stats, config2, "cbm2", 200);
+  auto geom1 = std::make_unique<Geometry0D>(Stats, config1, MonitorType, "cbm1", 100);
+  auto geom2 = std::make_unique<Geometry0D>(Stats, config2, MonitorType, "cbm2", 200);
 
   Parser::CbmReadout readout{};
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   readout.FiberId = 20; // Ring = 10, doesn't match MonitorRing = 11
   readout.FENId = 5;
   readout.Channel = 5;
@@ -306,6 +315,7 @@ TEST_F(Geometry0DTest, ValidationOrder) {
   // Test that validation stops at first failure
   Parser::CbmReadout readout{};
 
+  readout.Type = CbmType::EVENT_0D; //Cbm Type
   // All invalid: Ring, MonitorRing, FEN, Topology
   // Only Ring error should be counted (first failure)
   readout.FiberId =
@@ -320,6 +330,47 @@ TEST_F(Geometry0DTest, ValidationOrder) {
   EXPECT_EQ(geom->getGeometryCounters().MonitorRingMismatchErrors,
             0); // Not reached
   EXPECT_EQ(geom->getBaseCounters().ValidationErrors, 1);
+}
+
+// Test monitor type is setup as EVENT_0D so validation should fail.
+TEST_F(Geometry0DTest, ValidateTypeWithError) {
+  // Test that validation stops at first failure
+  Parser::CbmReadout readout{};
+
+  readout.Type = CbmType::IBM; //Cbm Type
+  readout.FiberId = 10; // Ring = 5, matches custom MaxRing and MonitorRing
+  readout.FENId = 5;
+  readout.Channel = 5;
+
+  EXPECT_FALSE(geom->validateReadoutData(readout));
+  EXPECT_EQ(geom->getBaseCounters().RingErrors, 0);
+  EXPECT_EQ(geom->getBaseCounters().FENErrors, 0);     // Not reached
+  EXPECT_EQ(geom->getBaseCounters().TopologyError, 0); // Not reached
+  EXPECT_EQ(geom->getGeometryCounters().MonitorRingMismatchErrors,
+            0); // Not reached
+  EXPECT_EQ(geom->getBaseCounters().ValidationErrors, 1);
+}
+
+// Test monitor type IBM .
+TEST_F(Geometry0DTest, ValidateIBMTypeWithoutError) {
+  // Test that validation stops at first failure
+  Parser::CbmReadout readout{};
+
+  readout.Type = CbmType::IBM; //Cbm Type
+  readout.FiberId = 22; // Ring = 11
+  readout.FENId = 3;
+  readout.Channel = 0;
+
+  CbmType Monitor = CbmType::IBM;
+  auto ibmGeom = std::make_unique<Geometry0D>(Stats, CbmConfig, Monitor, "ibm1");
+
+  EXPECT_TRUE(ibmGeom->validateReadoutData(readout));
+  EXPECT_EQ(ibmGeom->getBaseCounters().RingErrors, 0);
+  EXPECT_EQ(ibmGeom->getBaseCounters().FENErrors, 0);     // Not reached
+  EXPECT_EQ(ibmGeom->getBaseCounters().TopologyError, 0); // Not reached
+  EXPECT_EQ(ibmGeom->getGeometryCounters().MonitorRingMismatchErrors,
+            0); // Not reached
+  EXPECT_EQ(ibmGeom->getBaseCounters().ValidationErrors, 0);
 }
 
 int main(int argc, char **argv) {

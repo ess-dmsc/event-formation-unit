@@ -16,6 +16,7 @@
 #include <common/memory/HashMap2D.h>
 #include <common/readout/ess/Parser.h>
 #include <modules/cbm/CbmTypes.h>
+#include <modules/cbm/SchemaType.h>
 
 #include <memory>
 #include <string>
@@ -25,9 +26,10 @@
 
 namespace cbm {
 
-// enumeration of how to aggregate pulses on CBM
-// SUM will be used as default where it will sum
-// up one pulse.
+/// \enum AggregationType
+/// \brief enumeration of how to aggregate pulses on CBM
+/// SUM will be used as default where it will sum
+/// up one pulse.
 enum AggregationType {
   SUM = 0x00,     // < Calculate sum of X pulses 
   AVG = 0x01      // < Calculate average of X pulses
@@ -38,6 +40,8 @@ struct Topology {
   const int Channel{0};
   const std::string Source{"CBM"};
   const CbmType Type{CbmType::EVENT_0D};
+  const SchemaType Schema{SchemaType::EV44};
+
   union {
     int param1{0};
     int pixelOffset;
@@ -65,17 +69,20 @@ struct Topology {
            int Channel, 
            const std::string &Source,
            const CbmType &Type, 
+           const SchemaType &Schema,
            int param1)
     : FEN(FEN)
     , Channel(Channel)
     , Source(Source)
     , Type(Type)
+    , Schema(Schema)
     , param1(param1){};
 
   Topology(int FEN, 
            int Channel, 
            const std::string &Source,
            const CbmType &Type, 
+           const SchemaType &Schema,
            int param1, 
            int param2,
            int param3, 
@@ -83,6 +90,7 @@ struct Topology {
     : FEN(FEN), Channel(Channel)
     , Source(Source)
     , Type(Type)
+    , Schema(Schema)
     , param1(param1)
     , param2(param2)
     , param3(param3)
@@ -125,6 +133,7 @@ public:
                                                     //   this will be one frame one histogram.
     bool NormalizeIBMReadouts{true};                // < Normalize IBM ADC value readout. 
                                                     //   Default is enabled.
+    uint8_t Schema{SchemaType::DA00};                   // < Default schema of serialized message to kafka
   } CbmParms;
   // clang-format on
 

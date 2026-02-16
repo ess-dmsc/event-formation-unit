@@ -13,13 +13,13 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0 },
-    { "FEN":  0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 1 },
-    { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 3 },
-    { "FEN":  1, "Channel": 1, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN":  1, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100 },
-    { "FEN":  2, "Channel": 0, "Type": "EVENT_2D", "Source" : "cbm7", "Width": 512, "Height": 512 },
-    { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Width": 512, "Height": 512 }
+    { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source": "cbm1", "Schema": "ev44", "PixelOffset": 0 },
+    { "FEN":  0, "Channel": 1, "Type": "EVENT_0D", "Source": "cbm2", "Schema": "ev44", "PixelOffset": 1 },
+    { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source": "cbm3", "Schema": "ev44", "PixelOffset": 3 },
+    { "FEN":  1, "Channel": 1, "Type": "IBM",      "Source": "cbm4", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
+    { "FEN":  1, "Channel": 2, "Type": "IBM",      "Source": "cbm5", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
+    { "FEN":  2, "Channel": 1, "Type": "IBM",      "Source": "cbm6", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
+    { "FEN":  2, "Channel": 0, "Type": "EVENT_2D", "Source": "cbm7", "Schema": "ev44", "Width"      : 512,   "Height":   512 },
+    { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source": "cbm8", "Schema": "ev44", "Width"      : 512,   "Height":   512 }
   ]
 }

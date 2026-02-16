@@ -16,6 +16,8 @@
 #include <common/kafka/KafkaConfig.h>
 #include <common/memory/HashMap2D.h>
 
+#include <fmt/format.h>
+
 #include <memory>
 #include <unistd.h>
 
@@ -105,70 +107,79 @@ void CbmBase::processingThread() {
   CbmConfiguration.loadAndApply();
 
   // Create serializers
-  EV44SerializerMapPtr.reset(
-      new HashMap2D<EV44Serializer>(CbmConfiguration.CbmParms.NumOfFENs));
-  HistogramSerializerMapPtr.reset(new HashMap2D<HistogramSerializer_t>(
+  SchemaMap.reset(new HashMap2D<SchemaDetails>(
       CbmConfiguration.CbmParms.NumOfFENs));
 
   for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
-    if ((Topology->Type == CbmType::EVENT_0D) ||
-        (Topology->Type == CbmType::EVENT_2D)) {
+  
+    //Create map for serializers.
+    std::unique_ptr<SchemaDetails> SchemaData;
+    if (Topology->Schema == SchemaType::DA00) {
 
-      std::unique_ptr<EV44Serializer> SerializerPtr =
-          std::make_unique<EV44Serializer>(KafkaBufferSize, Topology->Source,
-                                           Produce);
-
-      Stats.create("serialize." + Topology->Source + ".produce_called",
-                   SerializerPtr->stats().ProduceCalled);
-      Stats.create("serialize." + Topology->Source +
-                       ".produce_triggered_reftime",
-                   SerializerPtr->stats().ProduceRefTimeTriggered);
-      Stats.create("serialize." + Topology->Source +
-                       ".produce_triggered_max_events",
-                   SerializerPtr->stats().ProduceTriggeredMaxEvents);
-      Stats.create("serialize." + Topology->Source +
-                       ".produce_failed_no_reftime",
-                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
-
-      EV44SerializerMapPtr->add(Topology->FEN, Topology->Channel,
-                                SerializerPtr);
-    } else if (Topology->Type == CbmType::IBM) {
-
+      //Setup aggregation functions for DA00 serializers
       essmath::VectorAggregationFunc<int32_t> AggFunc =
           essmath::SUM_AGG_FUNC<int32_t>;
       if (Topology->AggregationMode == AggregationType::AVG) {
         AggFunc = essmath::AVERAGE_AGG_FUNC<int32_t>;
       }
 
-      std::unique_ptr<HistogramSerializer_t> SerializerPtr =
-          std::make_unique<HistogramSerializer_t>(
-              Topology->Source, Topology->maxTofBin, Topology->BinCount, "A",
-              Topology->AggregatedFrames, Produce, 0, AggFunc);
+      SchemaData = std::make_unique<SchemaDetails>( 
+        Topology->Schema, Topology->Source, 
+        Topology->maxTofBin, Topology->BinCount, "A",
+        static_cast<uint8_t>(Topology->AggregatedFrames), 
+        Produce, 0, AggFunc
+      );
+      //Create Stats counter
+      auto* Serializer = SchemaData->GetSerializer<SchemaType::DA00>();
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
-                   SerializerPtr->stats().ProduceCalled);
+                   Serializer->stats().ProduceCalled);
       Stats.create("serialize." + Topology->Source +
                        ".tof_before_offset_dropped",
-                   SerializerPtr->stats().DataBeforeTimeOffsetDropped);
+                   Serializer->stats().DataBeforeTimeOffsetDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_dropped",
-                   SerializerPtr->stats().DataOverPeriodDropped);
+                   Serializer->stats().DataOverPeriodDropped);
       Stats.create("serialize." + Topology->Source + ".tof_over_max_last_bin",
-                   SerializerPtr->stats().DataOverPeriodLastBin);
+                   Serializer->stats().DataOverPeriodLastBin);
       Stats.create("serialize." + Topology->Source +
                        ".produce_triggered_reftime",
-                   SerializerPtr->stats().ProduceRefTimeTriggered);
+                   Serializer->stats().ProduceRefTimeTriggered);
       Stats.create("serialize." + Topology->Source +
                        ".produce_failed_no_reftime",
-                   SerializerPtr->stats().ProduceFailedNoReferenceTime);
+                   Serializer->stats().ProduceFailedNoReferenceTime);
+    } else if (Topology->Schema == SchemaType::EV44) {
+      SchemaData = std::make_unique<SchemaDetails>( 
+        Topology->Schema, KafkaBufferSize, Topology->Source,
+        Produce
+      );
 
-      HistogramSerializerMapPtr->add(Topology->FEN, Topology->Channel,
-                                     SerializerPtr);
+      //Create Stats counter
+      auto* Serializer = SchemaData->GetSerializer<SchemaType::EV44>();
+
+      Stats.create("serialize." + Topology->Source + ".produce_called",
+                   Serializer->stats().ProduceCalled);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_reftime",
+                   Serializer->stats().ProduceRefTimeTriggered);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_triggered_max_events",
+                   Serializer->stats().ProduceTriggeredMaxEvents);
+      Stats.create("serialize." + Topology->Source +
+                       ".produce_failed_no_reftime",
+                   Serializer->stats().ProduceFailedNoReferenceTime);
+    } else {
+      //This is theoretical because of SchemaType parsing
+      throw std::runtime_error(
+        fmt::format(
+          "Invalid Schema type used in CBM Topology configuration. Value {}" ,
+            static_cast<int>(Topology->Schema)
+        ));
     }
-  }
+    SchemaMap->add(Topology->FEN, Topology->Channel, SchemaData);
+ }
 
   // Create instrument
-  CbmInstrument cbmInstrument(Stats, Counters, CbmConfiguration, *EV44SerializerMapPtr,
-                              *HistogramSerializerMapPtr, ESSHeaderParser);
+  CbmInstrument cbmInstrument(Stats, Counters, CbmConfiguration, *SchemaMap, ESSHeaderParser);
 
   // Monitor these counters and time out after one second
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
@@ -228,9 +239,13 @@ void CbmBase::processingThread() {
           {getInputCounters().RxPackets, Counters.CbmCounts,
            EventProducer.getStats().MsgStatusPersisted});
 
-      for (auto &serializerMap : EV44SerializerMapPtr->toValuesList()) {
+      for (auto &schemaDetails : SchemaMap->toValuesList()) {
+        if (schemaDetails->GetSchema() != SchemaType::EV44) {
+          continue;
+        }
+
         XTRACE(DATA, DEB, "Serializer timed out, producing message now");
-        serializerMap->produce();
+        schemaDetails->GetSerializer<SchemaType::EV44>()->produce();
       }
 
       Counters.ProduceCauseTimeout++;

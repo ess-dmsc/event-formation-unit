@@ -30,7 +30,7 @@ auto DefaultValuesOnly = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -42,7 +42,7 @@ auto IncorrectFEN = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  12, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  12, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -54,7 +54,7 @@ auto FENIdEdgeCase = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -65,7 +65,7 @@ auto NoMaxFENId = R"(
     "MonitorRing" : 88,
 
     "Topology" : [
-      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  11, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -77,8 +77,8 @@ auto DuplicateEntry = R"(
     "MaxFENId" : 11,
 
     "Topology" : [
-      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0},
-      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 0}
+      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0},
+      { "FEN":  10, "Channel": 10, "Type": "EVENT_0D", "Source" : "cbm2", "Schema": "ev44", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -90,7 +90,7 @@ auto IncorrectType = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "PixelOffset": 0}
+      { "FEN":  0, "Channel": 0, "Type": "ESS", "Source" : "cbm1", "Schema": "da00", "PixelOffset": 0}
     ]
   }
 )"_json;
@@ -112,15 +112,15 @@ auto ConfigWithTopology = R"(
     "MaxFENId" : 2,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "PixelOffset": 0},
-      { "FEN":  0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "PixelOffset": 0},
-      { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "PixelOffset": 0},
-      { "FEN":  2, "Channel": 0, "Type": "IBM", "Source" : "cbm4", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  0, "Channel": 2, "Type": "IBM", "Source" : "cbm5", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  2, "Channel": 1, "Type": "IBM", "Source" : "cbm6", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm7", "Width": 512, "Height": 512},
-      { "FEN":  1, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Width": 512, "Height": 512},
-      { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Width": 512, "Height": 512}
+      { "FEN":  0, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm1", "Schema": "ev44", "PixelOffset": 0},
+      { "FEN":  0, "Channel": 1, "Type": "EVENT_0D", "Source" : "cbm2", "Schema": "ev44", "PixelOffset": 0},
+      { "FEN":  1, "Channel": 0, "Type": "EVENT_0D", "Source" : "cbm3", "Schema": "ev44", "PixelOffset": 0},
+      { "FEN":  2, "Channel": 0, "Type": "IBM",      "Source" : "cbm4", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  0, "Channel": 2, "Type": "IBM",      "Source" : "cbm5", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  2, "Channel": 1, "Type": "IBM",      "Source" : "cbm6", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
+      { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm7", "Schema": "ev44", "Width": 512,       "Height": 512},
+      { "FEN":  1, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Schema": "ev44", "Width": 512,       "Height": 512},
+      { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Schema": "ev44", "Width": 512,       "Height": 512}
     ]
   }
 )"_json;
@@ -269,6 +269,7 @@ TEST_F(CbmConfigTest, TestDefaultAggregateFramesConfig) {
           "Channel": 1, 
           "Type": "IBM", 
           "Source" : "cbm1", 
+          "Schema": "da00", 
           "MaxTofBin": 10000, 
           "BinCount": 100 
         }
@@ -305,6 +306,7 @@ TEST_F(CbmConfigTest, TestOverrideAggregateFramesConfig) {
           "Channel": 1, 
           "Type": "IBM", 
           "Source" : "cbm1", 
+          "Schema": "da00", 
           "MaxTofBin": 10000, 
           "BinCount": 100,
           "AggregatedFrames": 20, 
@@ -343,6 +345,7 @@ TEST_F(CbmConfigTest, TestMalformedAggregateFramesConfig) {
           "Channel": 1, 
           "Type": "IBM", 
           "Source" : "cbm1", 
+          "Schema": "da00", 
           "MaxTofBin": 10000, 
           "BinCount": 100,
           "AggregatedFrames": 20, 
@@ -370,6 +373,7 @@ TEST_F(CbmConfigTest, TestEnableNormalizeADCValuesConfig) {
           "Channel"          : 1,
           "Type"             : "IBM",
           "Source"           : "cbm1",
+          "Schema"           : "DA00", 
           "MaxTofBin"        : 10000,
           "BinCount"         : 100,
           "AggregatedFrames" : 20,
@@ -385,13 +389,42 @@ TEST_F(CbmConfigTest, TestEnableNormalizeADCValuesConfig) {
   EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, true);
 }
 
+/// Test that a DA00 Schema configuration for a 2D detector
+/// will throw an exception.
+TEST_F(CbmConfigTest, TestWrongSchemaConfig) {
+  auto ConfigJson = R"(
+    {
+      "Detector"           : "CBM",
+      "MonitorRing"        : 11,
+      "MaxFENId"           : 1, 
+      "MaxPulseTimeDiffNS" : 1000000000,
+      "MaxFENId"           : 2,
+      "Topology" : [
+        {
+          "FEN"     : 1,
+          "Channel" : 1,
+          "Type"    : "EVENT_2D",
+          "Source"  : "cbm1",
+          "Schema"  : "DA00", 
+          "Width"   : 512, 
+          "Height"  : 512
+        }
+      ]
+    }
+  )"_json;
+
+  //Test that CBM IBM normalize ADC values enable flag works
+  config.setRoot(ConfigJson);
+  EXPECT_THROW(config.apply(), std::runtime_error);
+}
+
 TEST_F(CbmConfigTest, TestDisableNormalizeADCValuesConfig) {
   auto ConfigJson = R"(
     {
-      "Detector" : "CBM",
-      "MonitorRing" : 11,
-      "MaxFENId" : 1, 
-      "NormalizeIBMReadouts": false, 
+      "Detector"             : "CBM",
+      "MonitorRing"          : 11,
+      "MaxFENId"             : 1, 
+      "NormalizeIBMReadouts" : false, 
 
       "Topology" : [
         {
@@ -399,6 +432,7 @@ TEST_F(CbmConfigTest, TestDisableNormalizeADCValuesConfig) {
           "Channel"          : 1,
           "Type"             : "IBM",
           "Source"           : "cbm1",
+          "Schema"           : "DA00", 
           "MaxTofBin"        : 10000,
           "BinCount"         : 100,
           "AggregatedFrames" : 20,
@@ -432,7 +466,7 @@ TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
       "MaxFENId" : 2,
 
       "Topology" : [
-        { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Width": 0, "Height": 0}
+        { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Schema": "ev44", "Width": 0, "Height": 0}
       ]
     }
   )"_json;
