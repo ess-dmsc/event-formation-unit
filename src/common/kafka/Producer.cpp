@@ -118,7 +118,6 @@ Producer::Producer(const std::string &Broker, const std::string &Topic,
     QueueRecoveryThreshold = StatCounters.MaxNumOfMsgInQueue / 100;
     QueueHighWatermark = StatCounters.MaxNumOfMsgInQueue / 2;
   } else {
-    QueueRecoveryThreshold = 10;
     QueueRecoveryThreshold = 5;
   }
 
