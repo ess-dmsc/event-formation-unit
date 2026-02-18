@@ -22,6 +22,13 @@
 #include <common/time/ESSTime.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 #include <generators/functiongenerators/FunctionGenerator.h>
+#include <cbm/CbmTypes.h>
+#include <cbm/generators/CbmDataGenerator.h>
+#include <cbm/generators/Event0DDataGenerator.h>
+#include <cbm/generators/Event2DDataGenerator.h>
+#include <cbm/generators/GeneratorType.h>
+#include <cbm/generators/IBMDataGenerator.h>
+#include <cbm/readout/Parser.h>
 #include <memory>
 #include <optional>
 #include <string>

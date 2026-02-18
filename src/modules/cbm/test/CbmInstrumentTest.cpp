@@ -11,6 +11,7 @@
 #include <common/testutils/TestBase.h>
 #include <geometry/Geometry0D.h>
 #include <geometry/Geometry2D.h>
+#include <memory>
 #include <modules/cbm/CbmInstrument.h>
 
 using namespace cbm;
@@ -285,13 +286,14 @@ protected:
   /// Objects required to build the CbmInstrument
   struct Counters CbmCounters;
   BaseSettings Settings;
-  std::unique_ptr<Config> Configuration; // Changed to unique_ptr
+  std::unique_ptr<Config> Configuration;
   TestHeaderFactory headerFactory;
 
   /// Objects required for the CbmInstrument
   /// \note These are initialized in SetUp()
   std::unique_ptr<Statistics> Stats;
   std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
+  std::unique_ptr<cbm::Parser> CbmReadoutParser;
   HashMap2D<SchemaDetails> SchemaMap{11};
   std::unique_ptr<CbmInstrument> cbm;
 
@@ -301,7 +303,7 @@ protected:
     // Initialize stats and parser
     Stats = std::make_unique<Statistics>();
     ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
-
+    CbmReadoutParser = std::make_unique<cbm::Parser>();
     // Reinitialize Configuration as unique_ptr
     Configuration = std::make_unique<Config>();
     Configuration->setRoot(TestConfig);
@@ -380,7 +382,7 @@ protected:
 
   void initializeCbmInstrument() {
     cbm = std::make_unique<CbmInstrument>(
-        *Stats, CbmCounters, *Configuration, 
+        *Stats, CbmCounters, *Configuration, *CbmReadoutParser,
         SchemaMap, *ESSHeaderParser);
   }
 };
@@ -796,12 +798,9 @@ TEST_F(CbmInstrumentTest, TestInvalidEvent2DReadouts) {
 
   // Verify X/Y position errors are tracked (2 XPos errors, 1 YPos error due to
   // short-circuit)
-  EXPECT_EQ(Stats->getValueByName("cbm7." + Geometry2D::METRIC_XPOS_ERRORS),
-            1);
-  EXPECT_EQ(Stats->getValueByName("cbm8." + Geometry2D::METRIC_YPOS_ERRORS),
-            1);
-  EXPECT_EQ(Stats->getValueByName("cbm9." + Geometry2D::METRIC_XPOS_ERRORS),
-            1);
+  EXPECT_EQ(Stats->getValueByName("cbm7." + Geometry2D::METRIC_XPOS_ERRORS), 1);
+  EXPECT_EQ(Stats->getValueByName("cbm8." + Geometry2D::METRIC_YPOS_ERRORS), 1);
+  EXPECT_EQ(Stats->getValueByName("cbm9." + Geometry2D::METRIC_XPOS_ERRORS), 1);
 
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),
             3);

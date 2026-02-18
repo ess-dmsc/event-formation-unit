@@ -2,16 +2,16 @@
 //===----------------------------------------------------------------------===//
 ///
 /// @file
-/// @brief Main entry for Common Beam Monitor (CBM) detector module.
+/// @brief Main entry for BEER detector module.
 //===----------------------------------------------------------------------===//
 
 #include <efu/MainProg.h>
-#include <modules/cbm/CbmBase.h>
+#include <modules/beer/BeerBase.h>
 
 int main(int argc, char *argv[]) {
-  MainProg Main(DetectorType::CBM, argc, argv);
+  MainProg Main(DetectorType::BEER, argc, argv);
 
-  auto Detector = new cbm::CbmBase(Main.DetectorSettings);
+  auto Detector = new beer::BeerBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

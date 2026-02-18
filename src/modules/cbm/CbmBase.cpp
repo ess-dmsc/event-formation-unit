@@ -30,7 +30,8 @@ using namespace fbserializer;
 using namespace esstime;
 
 CbmBase::CbmBase(BaseSettings const &settings)
-    : Detector(settings), CbmConfiguration(EFUSettings.ConfigFile) {
+    : Detector(settings), CbmParser(std::make_unique<Parser>()) {
+  CbmConfiguration = std::make_unique<Config>(EFUSettings.ConfigFile);
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   // Readout parsing errors - readout dropped
@@ -104,33 +105,32 @@ void CbmBase::processingThread() {
   XTRACE(INIT, ALW, "Loading configuration file %s",
          EFUSettings.ConfigFile.c_str());
 
-  CbmConfiguration.loadAndApply();
+  CbmConfiguration->loadAndApply();
 
   // Create serializers
-  SchemaMap.reset(new HashMap2D<SchemaDetails>(
-      CbmConfiguration.CbmParms.NumOfFENs));
+  SchemaMap.reset(
+      new HashMap2D<SchemaDetails>(CbmConfiguration->CbmParms.NumOfFENs));
 
-  for (auto &Topology : CbmConfiguration.TopologyMapPtr->toValuesList()) {
-  
-    //Create map for serializers.
+  for (auto &Topology : CbmConfiguration->TopologyMapPtr->toValuesList()) {
+
+    // Create map for serializers.
     std::unique_ptr<SchemaDetails> SchemaData;
     if (Topology->Schema == SchemaType::DA00) {
 
-      //Setup aggregation functions for DA00 serializers
+      // Setup aggregation functions for DA00 serializers
       essmath::VectorAggregationFunc<int32_t> AggFunc =
           essmath::SUM_AGG_FUNC<int32_t>;
       if (Topology->AggregationMode == AggregationType::AVG) {
         AggFunc = essmath::AVERAGE_AGG_FUNC<int32_t>;
       }
 
-      SchemaData = std::make_unique<SchemaDetails>( 
-        Topology->Schema, Topology->Source, 
-        Topology->maxTofBin, Topology->BinCount, "A",
-        static_cast<uint8_t>(Topology->AggregatedFrames), 
-        Produce, 0, AggFunc
-      );
-      //Create Stats counter
-      auto* Serializer = SchemaData->GetSerializer<SchemaType::DA00>();
+      SchemaData = std::make_unique<SchemaDetails>(
+          Topology->Schema, Topology->Source, Topology->maxTofBin,
+          Topology->BinCount, "A",
+          static_cast<uint8_t>(Topology->AggregatedFrames), Produce, 0,
+          AggFunc);
+      // Create Stats counter
+      auto *Serializer = SchemaData->GetSerializer<SchemaType::DA00>();
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    Serializer->stats().ProduceCalled);
@@ -148,13 +148,11 @@ void CbmBase::processingThread() {
                        ".produce_failed_no_reftime",
                    Serializer->stats().ProduceFailedNoReferenceTime);
     } else if (Topology->Schema == SchemaType::EV44) {
-      SchemaData = std::make_unique<SchemaDetails>( 
-        Topology->Schema, KafkaBufferSize, Topology->Source,
-        Produce
-      );
+      SchemaData = std::make_unique<SchemaDetails>(
+          Topology->Schema, KafkaBufferSize, Topology->Source, Produce);
 
-      //Create Stats counter
-      auto* Serializer = SchemaData->GetSerializer<SchemaType::EV44>();
+      // Create Stats counter
+      auto *Serializer = SchemaData->GetSerializer<SchemaType::EV44>();
 
       Stats.create("serialize." + Topology->Source + ".produce_called",
                    Serializer->stats().ProduceCalled);
@@ -168,18 +166,18 @@ void CbmBase::processingThread() {
                        ".produce_failed_no_reftime",
                    Serializer->stats().ProduceFailedNoReferenceTime);
     } else {
-      //This is theoretical because of SchemaType parsing
-      throw std::runtime_error(
-        fmt::format(
-          "Invalid Schema type used in CBM Topology configuration. Value {}" ,
-            static_cast<int>(Topology->Schema)
-        ));
+      // This is theoretical because of SchemaType parsing
+      throw std::runtime_error(fmt::format(
+          "Invalid Schema type used in CBM Topology configuration. Value {}",
+          static_cast<int>(Topology->Schema)));
     }
     SchemaMap->add(Topology->FEN, Topology->Channel, SchemaData);
- }
+  }
 
-  // Create instrument
-  CbmInstrument cbmInstrument(Stats, Counters, CbmConfiguration, *SchemaMap, ESSHeaderParser);
+  // Create instrument which will handle the readout processing and event
+  // production based on the configuration and serializers created above
+  CbmInstrument cbmInstrument(Stats, Counters, *CbmConfiguration, *CbmParser,
+                              *SchemaMap, ESSHeaderParser);
 
   // Monitor these counters and time out after one second
   Timer ProduceTimer(EFUSettings.UpdateIntervalSec * 1'000'000'000);
@@ -202,7 +200,7 @@ void CbmBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
 
       auto Res = ESSHeaderParser.validate(
-          DataPtr, DataLen, CbmConfiguration.CbmParms.TypeSubType);
+          DataPtr, DataLen, CbmConfiguration->Instrument);
 
       if (Res != ESSReadout::Parser::OK) {
         XTRACE(DATA, WAR,
@@ -230,7 +228,7 @@ void CbmBase::processingThread() {
       // Poll Kafka to handle events and delivery reports
       EventProducer.poll(0);
     }
-    
+
     // Not only flush serializer data but also update runtime stats
     // This does not apply for histogram serializer which should be flushed
     // only in case new pulse time is detected

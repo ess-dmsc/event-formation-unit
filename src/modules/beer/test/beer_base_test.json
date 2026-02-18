@@ -1,0 +1,18 @@
+{
+  "Detector" : "BEER",
+
+  "NumberOfMonitors" : 4,
+
+  "MaxPulseTimeDiffNS" : 1000000000,
+
+  "MaxTOFNS" : 1000000000,
+
+  "MaxFENId" : 1,
+
+  "Topology" : [
+    { "FEN":  0, "Channel": 0, "Source" : "beer1", "PixelOffset": 0,    "Width": 512, "Height": 512 },
+    { "FEN":  0, "Channel": 1, "Source" : "beer2", "PixelOffset": 1024, "Width": 512, "Height": 512 },
+    { "FEN":  1, "Channel": 0, "Source" : "beer3", "PixelOffset": 2048, "Width": 512, "Height": 512 },
+    { "FEN":  1, "Channel": 1, "Source" : "beer4", "PixelOffset": 3072, "Width": 512, "Height": 512 }
+  ]
+}
