@@ -85,18 +85,7 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
     }
 
     /// Check readouts are valid according to the supported data types
-    switch (Readout->Type) {
-
-    case CbmType::EVENT_0D:
-      break;
-
-    case CbmType::EVENT_2D:
-      break;
-
-    case CbmType::IBM:
-      break;
-
-    default:
+    if (!isValidType(Readout->Type)) {
       XTRACE(DATA, WAR, "Unsupported type %d", Readout->Type);
       Stats.ErrorType++;
       continue;
@@ -108,6 +97,17 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
   }
 
   return;
+}
+
+bool Parser::isValidType(uint8_t Type) const {
+  switch (Type) {
+  case CbmType::EVENT_0D:
+  case CbmType::EVENT_2D:
+  case CbmType::IBM:
+    return true;
+  default:
+    return false;
+  }
 }
 
 } // namespace cbm

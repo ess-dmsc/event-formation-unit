@@ -10,14 +10,14 @@
 
 #pragma once
 
+#include <common/Statistics.h>
 #include <common/geometry/DetectorGeometry.h>
 #include <common/memory/HashMap2D.h>
-#include <common/Statistics.h>
 #include <modules/cbm/Counters.h>
-#include <modules/cbm/geometry/Geometry.h>
-#include <modules/cbm/geometry/Config.h>
-#include <modules/cbm/readout/Parser.h>
 #include <modules/cbm/SchemaDetails.h>
+#include <modules/cbm/geometry/Config.h>
+#include <modules/cbm/geometry/Geometry.h>
+#include <modules/cbm/readout/Parser.h>
 #include <unordered_map>
 
 namespace cbm {
@@ -36,8 +36,10 @@ public:
   /// \param counters Reference to the counters for the CBM instrument.
   /// \param Config Reference to the configuration data for the CBM instrument.
   /// \param SchemaDetailMap Reference to the HashMap2D of Serializers
+  /// \param cbmReadoutParser CBM readout parser
   /// \param essHeaderParser Header parser
   CbmInstrument(Statistics &Stats, Counters &counters, Config &Config,
+                Parser &cbmReadoutParser,
                 const HashMap2D<SchemaDetails> &SchemaDetailMap,
                 ESSReadout::Parser &essHeaderParser);
 
@@ -56,11 +58,10 @@ public:
     return baseGeometry.get();
   }
 
-  /// \brief Parser for CBM readout data.
-  Parser CbmReadoutParser;
+  /// \brief Reference to parser for CBM readout data.
+  Parser &CbmReadoutParser;
 
 private:
-
   /// \brief Reference to the counters for the CBM instrument.
   struct Counters &counters;
 
@@ -78,7 +79,9 @@ private:
   /// as 8 least significant bits. Stores DetectorGeometry base class pointers
   /// for polymorphic access to validation and pixel calculation.
   GeometryMap_t Geometries{};
-  //std::unordered_map<uint16_t, std::unique_ptr<geometry::DetectorGeometry<Parser::CbmReadout>>> Geometries{};
+  // std::unordered_map<uint16_t,
+  // std::unique_ptr<geometry::DetectorGeometry<Parser::CbmReadout>>>
+  // Geometries{};
 
   /// \brief Calculate geometry map key from FEN and Channel IDs
   /// \param FENId FEN identifier (8-bit)

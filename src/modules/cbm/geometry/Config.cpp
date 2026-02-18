@@ -30,17 +30,18 @@ void Config::apply() {
   setMask(LOG | CHECK);
   assign("Detector", DetectorName);
 
-  if (DetectorName != "CBM") {
-    LOG(INIT, Sev::Error, "Detector name mismatch, expected CBM");
-    throw std::runtime_error("Detector name mismatch, expected CBM");
+  if (Instrument != DetectorName) {
+    LOG(INIT, Sev::Error, "Detector name mismatch, expected {}",
+        Instrument.toString());
+    throw std::runtime_error("Detector name mismatch, expected " +
+                             Instrument.toString());
   }
 
   setMask(LOG);
-  assign("TypeSubType", CbmParms.TypeSubType);
   assign("MaxPulseTimeDiffNS", CbmParms.MaxPulseTimeDiffNS);
   assign("MaxTOFNS", CbmParms.MaxTOFNS);
   assign("MonitorRing", CbmParms.MonitorRing);
-  assign("MaxRing", CbmParms.MaxRing);  // Optional, defaults to 11
+  assign("MaxRing", CbmParms.MaxRing); // Optional, defaults to 11
   assign("NormalizeIBMReadouts", CbmParms.NormalizeIBMReadouts);
 
   setMask(LOG | CHECK);
@@ -56,57 +57,41 @@ void Config::apply() {
   }
   const nlohmann::json Modules = root()["Topology"];
 
-  // Temporary map storage to check for duplicates of the two unique keys
+  // Parse and validate each topology entry
+  // user Entry to count actual entry and support error messages with nubmering.
   int Entry{0};
   for (const auto &Module : Modules) {
-    // Initialize the parameters with invalid values which are
-    // not used in the MAP to recall topology object
-    int FEN{-1};
-    int Channel{-1};
-    std::string Source{""};
-    std::string Type{""};
-    std::string Schema{""};
-
-    try {
-      FEN = Module["FEN"].get<int>();
-      Channel = Module["Channel"].get<int>();
-      Type = Module["Type"].get<std::string>();
-      Source = Module["Source"].get<std::string>();
-      Schema = Module["Schema"].get<std::string>();
-
-    } catch (...) {
-      errorExit(
-          "Malformed 'Topology' section (Need FEN, Channel, Type, Schema and"
-          "Source)");
-    }
+    // Parse basic fields from JSON
+    auto entryData = parseTopologyEntryData(Module);
 
     // Check for array sizes and duplicate entries
-    if (FEN > CbmParms.MaxFENId) {
-      errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry, FEN,
-                            CbmParms.MaxFENId));
+    if (entryData.FEN > CbmParms.MaxFENId) {
+      errorExit(fmt::format("Entry: {}, Invalid FEN: {} Max: {}", Entry,
+                            entryData.FEN, CbmParms.MaxFENId));
     }
 
-    if (TopologyMapPtr->isValue(FEN, Channel)) {
+    // Check for duplicate FEN/Channel combination
+    if (TopologyMapPtr->isValue(entryData.FEN, entryData.Channel)) {
       errorExit(fmt::format("Entry: {}, Duplicate entry for FEN {} Channel {}",
-                            Entry, FEN, Channel));
+                            Entry, entryData.FEN, entryData.Channel));
     }
 
     // Add parameter to the temporary map
     CbmType MonitorType = CbmType::EVENT_0D;
     try {
-      MonitorType = CbmType(Type);
+      MonitorType = CbmType(entryData.Type);
     } catch (...) {
       errorExit(fmt::format("Entry: {}, Invalid Type: {} is not a CBM Type",
-                            Entry, Type));
+                            Entry, entryData.Type));
     }
 
-    //Determine used schema type. However EVENT_2D can only use option EV44
+    // Determine used schema type. However EVENT_2D can only use option EV44
     SchemaType DataSchema = SchemaType::EV44;
     try {
-      DataSchema = SchemaType(Schema);
+      DataSchema = SchemaType(entryData.Schema);
     } catch (...) {
       errorExit(fmt::format("Entry: {}, Invalid Type: {} is not a Schema Type",
-                            Entry, Schema));
+                            Entry, entryData.Schema));
     }
 
     int param1{0};
@@ -136,24 +121,23 @@ void Config::apply() {
             "Width, Height)",
             Entry, MonitorType.toString()));
       }
-      //Maximum allowed value for width and height
+      // Maximum allowed value for width and height
       const uint16_t maxValue = std::numeric_limits<uint16_t>::max();
       if ((param1 < 0) || (param1 > maxValue)) {
-        errorExit(fmt::format(
-          "Entry: {} for {} Type "
-          " valid width values {} - {}, Read Value {}", 
-          Entry, MonitorType.toString(), 0, maxValue, param1));
+        errorExit(fmt::format("Entry: {} for {} Type "
+                              " valid width values {} - {}, Read Value {}",
+                              Entry, MonitorType.toString(), 0, maxValue,
+                              param1));
       }
       if ((param2 < 0) || (param2 > maxValue)) {
-        errorExit(fmt::format(
-          "Entry: {} for {} Type "
-          "valid height values {} - {}, Read Value {}", 
-          Entry, MonitorType.toString(), 0, maxValue, param2));
+        errorExit(fmt::format("Entry: {} for {} Type "
+                              "valid height values {} - {}, Read Value {}",
+                              Entry, MonitorType.toString(), 0, maxValue,
+                              param2));
       }
       if (DataSchema != SchemaType::EV44) {
-        errorExit(fmt::format(
-          "Entry: {} for {} Schema only EV44 is allowed", 
-          Entry, DataSchema.toString()));
+        errorExit(fmt::format("Entry: {} for {} Schema only EV44 is allowed",
+                              Entry, DataSchema.toString()));
       }
     }
 
@@ -162,7 +146,8 @@ void Config::apply() {
       try {
         param1 = Module["MaxTofBin"].get<int>();
         param2 = Module["BinCount"].get<int>();
-        param3 = Module.value<int>("AggregatedFrames", CbmParms.AggregatedFrames);
+        param3 =
+            Module.value<int>("AggregatedFrames", CbmParms.AggregatedFrames);
         param4 = Module.value<int>("AggregationMode", CbmParms.AggregationMode);
       } catch (...) {
         errorExit(fmt::format(
@@ -172,25 +157,47 @@ void Config::apply() {
       }
 
       if ((param4 < 0) || (param4 > 1)) {
-        errorExit(fmt::format(
-          "Entry: {} Malformed 'AggregationMode' for {} Type "
-          "valid values {} - {}, Read Value {}", 
-          Entry, MonitorType.toString(), 0, (int)AggregationType::AVG, param4));
+        errorExit(
+            fmt::format("Entry: {} Malformed 'AggregationMode' for {} Type "
+                        "valid values {} - {}, Read Value {}",
+                        Entry, MonitorType.toString(), 0,
+                        (int)AggregationType::AVG, param4));
       }
     }
 
-    auto topo = std::make_unique<Topology>(FEN, Channel, Source, MonitorType,
-                                           DataSchema, param1, param2, param3, param4);
-    TopologyMapPtr->add(FEN, Channel, topo);
+    auto topo = std::make_unique<Topology>(
+        entryData.FEN, entryData.Channel, entryData.Source, MonitorType,
+        DataSchema, param1, param2, param3, param4);
+    TopologyMapPtr->add(entryData.FEN, entryData.Channel, topo);
 
     XTRACE(INIT, ALW, "Entry %02d, FEN %02d, Channel %02d, Source %s Type %s",
-           Entry, FEN, Channel, Source.c_str(), Type.c_str());
+           Entry, entryData.FEN, entryData.Channel, entryData.Source.c_str(),
+           entryData.Type.c_str());
 
     // Count the number of valid entries
     Entry++;
   }
 
   CbmParms.NumberOfMonitors = Entry;
+}
+
+TopologyEntryData Config::parseTopologyEntryData(const nlohmann::json &Module) {
+
+  TopologyEntryData data;
+
+  try {
+    data.FEN = Module["FEN"].get<int>();
+    data.Channel = Module["Channel"].get<int>();
+    data.Type = Module["Type"].get<std::string>();
+    data.Source = Module["Source"].get<std::string>();
+    data.Schema = Module["Schema"].get<std::string>();
+
+  } catch (...) {
+    errorExit("Malformed 'Topology' section (Need FEN, Channel, Type, Source, "
+              "and Schema)");
+  }
+
+  return data;
 }
 
 } // namespace cbm

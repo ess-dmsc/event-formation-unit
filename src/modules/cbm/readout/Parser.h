@@ -89,9 +89,10 @@ public:
                 "Wrong header size (update assert or check packing)");
 
   /// Constructor
-  Parser() = default;
+  Parser() { Result.reserve(MaxReadoutsInPacket); }
 
-  ~Parser(){};
+  /// Virtual destructor for proper inheritance
+  virtual ~Parser() = default;
 
   //
   /// \brief Parse CBM readouts from packet data V0
@@ -99,9 +100,19 @@ public:
   ///
   void parse(ESSReadout::Parser::PacketDataV0 &PacketData);
 
+protected:
+  ///
+  /// \brief Validate the readout type
+  /// \param Type The readout type to validate
+  /// \return true if the type is valid, false otherwise
+  /// \note Override this method in derived classes to restrict supported types
+  ///
+  virtual bool isValidType(uint8_t Type) const;
+
+public:
   /// Vector to hold parsed readouts
   /// \note Pre-allocated to maximum possible readouts in a packet
-  std::vector<struct CbmReadout> Result{MaxReadoutsInPacket};
+  std::vector<struct CbmReadout> Result;
 
   struct ParserStats Stats;
 

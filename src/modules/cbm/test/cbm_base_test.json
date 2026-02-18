@@ -2,8 +2,6 @@
 {
   "Detector" : "CBM",
 
-  "TypeSubType" : 16,
-
   "NumberOfMonitors" : 11,
 
   "MaxPulseTimeDiffNS" : 1000000000,
