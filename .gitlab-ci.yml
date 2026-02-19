@@ -248,6 +248,7 @@ publish_docker_job:
   parallel: 
     matrix:
       - INSTRUMENT: "bifrost"
+      - INSTRUMENT: "beer"
       - INSTRUMENT: "cbm"
       - INSTRUMENT: "cspec"
       - INSTRUMENT: "dream"
