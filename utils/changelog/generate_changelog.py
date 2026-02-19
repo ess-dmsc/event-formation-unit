@@ -76,6 +76,7 @@ class ChangelogGenerator:
             r"\b(refactor|refactoring|restructure|reorganize)\b",
             r"\[refactor\]",
             r"^refactor:",
+            r"^ref:",
         ],
         "feature": [
             r"\b(feat|feature|implement)\b",
