@@ -11,6 +11,6 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 0, "Type": "IBM", "Source" : "cbm1", "MaxTofBin": 71428572, "BinCount": 512}
+    { "FEN":  0, "Channel": 0, "Type": "IBM", "Schema": "da00", "Source" : "cbm1", "MaxTofBin": 71428572, "BinCount": 512}
   ]
 }

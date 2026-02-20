@@ -13,6 +13,8 @@
 #include <modules/cbm/generators/IBMDataGenerator.h>
 #include <modules/cbm/readout/Parser.h>
 
+using namespace esstime;
+
 namespace cbm {
 
 IBMDataGenerator::IBMDataGenerator(
@@ -30,14 +32,16 @@ void IBMDataGenerator::generateData(uint8_t *dataPtr,
                                     uint32_t readoutsPerPacket,
                                     esstime::ESSTime pulseTime) const {
 
-  // Generate new random drift for each new pulse when ShakeBeam is enabled
-  if (ShakeBeam && pulseTime != LastPulseTime) {
+  if (pulseTime != LastPulseTime) {
+
+    // Generate new random drift for each new pulse when ShakeBeam is enabled
+    if (ShakeBeam) {
+      // Convert microseconds to milliseconds for the drift
+      PulseDriftMs =
+          usToMilliseconds((BeamShakeDistUs(RandomGenerator))).count();
+    }
+
     LastPulseTime = pulseTime;
-
-    // Convert microseconds to milliseconds for the drift
-    PulseDriftMs =
-        esstime::usToMilliseconds((BeamShakeDistUs(RandomGenerator))).count();
-
     // Reset counter at the start of each pulse
     NumberOfReadoutsGenerated = 0;
   }
@@ -63,8 +67,8 @@ void IBMDataGenerator::generateData(uint8_t *dataPtr,
       dataPkt->Channel = ChannelId;
       dataPkt->ADC = 0;
 
-      auto readoutTime = esstime::ESSTime(dataPkt->TimeHigh, dataPkt->TimeLow);
-      auto TofMs = esstime::nsToMilliseconds(readoutTime - pulseTime).count();
+      auto readoutTime = ESSTime(dataPkt->TimeHigh, dataPkt->TimeLow);
+      auto TofMs = nsToMilliseconds(readoutTime - pulseTime).count();
 
       // Apply pulse-constant random drift for beam shaking
       if (ShakeBeam && TofMs > PulseDriftMs) {
