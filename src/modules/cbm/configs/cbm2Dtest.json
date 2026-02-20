@@ -11,6 +11,6 @@
   "MaxFENId" : 2,
 
   "Topology" : [
-    { "FEN":  0, "Channel": 3, "Type": "EVENT_2D", "Source" : "cbm", "Width": 512, "Height": 512}
+    { "FEN":  0, "Channel": 3, "Type": "EVENT_2D", "Schema": "ev44", "Source" : "cbm", "Width": 512, "Height": 512}
   ]
 }
