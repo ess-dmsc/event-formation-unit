@@ -7,6 +7,7 @@
 #include <common/detector/BaseSettings.h>
 #include <common/geometry/DetectorGeometry.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/EV44SerializerMock.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/TestBase.h>
 #include <geometry/Geometry0D.h>
@@ -16,6 +17,7 @@
 
 using namespace cbm;
 using namespace ESSReadout;
+using namespace testing;
 
 using std::filesystem::path;
 using ESSParser = ESSReadout::Parser;
@@ -253,20 +255,6 @@ auto TestConfig = R"(
 
 using namespace fbserializer;
 
-class Mock0DimEV44Serializer : public EV44Serializer {
-public:
-  MOCK_METHOD(size_t, addEvent, (int32_t time, int32_t data), (override));
-
-  Mock0DimEV44Serializer() : EV44Serializer(0, "cbm") {}
-};
-
-class Mock2DimEV44Serializer : public EV44Serializer {
-public:
-  MOCK_METHOD(size_t, addEvent, (int32_t time, int32_t data), (override));
-
-  Mock2DimEV44Serializer() : EV44Serializer(0, "cbm") {}
-};
-
 using HistogramSerializer_t = SchemaDetails::DA00Serializer_t;
 
 class MockHistogramSerializer
@@ -338,7 +326,7 @@ protected:
         if (Topology->Schema == SchemaType::EV44) {
 
           std::unique_ptr<EV44Serializer> Serializer =
-            std::make_unique<Mock0DimEV44Serializer>();
+            std::make_unique<EV44SerializerMock>();
           details = std::make_unique<SchemaDetails>(
             Topology->Schema, std::move(Serializer));
         } else if (Topology->Schema == SchemaType::DA00) {
@@ -354,7 +342,7 @@ protected:
       } else if (Topology->Type == CbmType::EVENT_2D) {
 
         std::unique_ptr<EV44Serializer> Serializer =
-          std::make_unique<Mock2DimEV44Serializer>();
+          std::make_unique<EV44SerializerMock>();
         details = std::make_unique<SchemaDetails>(
           Topology->Schema, std::move(Serializer));
         
@@ -363,7 +351,7 @@ protected:
         if (Topology->Schema == SchemaType::EV44) {
 
           std::unique_ptr<EV44Serializer> Serializer =
-            std::make_unique<Mock0DimEV44Serializer>();
+            std::make_unique<EV44SerializerMock>();
           details = std::make_unique<SchemaDetails>(
             Topology->Schema, std::move(Serializer));
         } else if (Topology->Schema == SchemaType::DA00) {
@@ -397,26 +385,26 @@ TEST_F(CbmInstrumentTest, TestIBMToEV44Schema) {
   // =========================================================================
   // Serializer 1
   SchemaDetails *details = SchemaMap.get(3, 4);
-  Mock0DimEV44Serializer *Serializer =
-      dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   int expectedTime = 1 * ESSTime::ESSClockTick;
   int expectedData = 10;
   EXPECT_CALL(*Serializer,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 2 * ESSTime::ESSClockTick;
   expectedData = 500;
   EXPECT_CALL(*Serializer,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 16777215;
   EXPECT_CALL(*Serializer,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // =========================================================================
   // Initialize Test Data
@@ -498,19 +486,19 @@ TEST_F(CbmInstrumentTest, TestEvent0DToDA00Schema) {
         details->GetSerializer<SchemaType::DA00>());
   EXPECT_CALL(*Serializer,
     addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 2 * ESSTime::ESSClockTick;
   expectedData = 1;
   EXPECT_CALL(*Serializer,
     addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 1;
   EXPECT_CALL(*Serializer,
     addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // =========================================================================
   // Initialize Test Data
@@ -583,32 +571,32 @@ TEST_F(CbmInstrumentTest, TestValidEvent0DReadouts) {
   int expectedData = 0;
   SchemaDetails *details = SchemaMap.get(0, 0);
 
-  Mock0DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer1 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 2 * ESSTime::ESSClockTick;
   expectedData = 1;
   details = SchemaMap.get(0, 1);
-  Mock0DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer2 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   expectedData = 3;
   details = SchemaMap.get(1, 0);
-  Mock0DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer3 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // =========================================================================
   // Initialize Test Data
@@ -662,34 +650,34 @@ TEST_F(CbmInstrumentTest, TestValidEvent2DReadouts) {
   int expectedData = 257 * HorizontalWidth + 256 + 1;
   SchemaDetails *details = SchemaMap.get(3, 0);
 
-  Mock2DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer1 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 2 * ESSTime::ESSClockTick;
   // Test Data => XPos 426, YPos 443
   expectedData = 443 * HorizontalWidth + 426 + 1;
   details = SchemaMap.get(3, 1);
-  Mock2DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer2 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   expectedTime = 3 * ESSTime::ESSClockTick;
   // Test Data => XPos 204, YPos 221
   expectedData = 221 * HorizontalWidth + 204 + 1;
   details = SchemaMap.get(3, 2);
-  Mock2DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer3 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // =========================================================================
   // Initialize Test Data
@@ -735,34 +723,26 @@ TEST_F(CbmInstrumentTest, TestValidEvent2DReadouts) {
 TEST_F(CbmInstrumentTest, TestInvalidEvent2DReadouts) {
 
   // =========================================================================
-  // Set Mock Expectations
+  // Set Mock Expectations - No events should be added due to invalid positions
   // =========================================================================
-  int expectedTime = 0;
-  int expectedData = 0;
   SchemaDetails *details = SchemaMap.get(3, 0);
 
-  Mock2DimEV44Serializer *Serializer1 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer1 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer1,
-              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer1, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(3, 1);
-  Mock2DimEV44Serializer *Serializer2 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer2 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer2,
-              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer2, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(3, 2);
-  Mock2DimEV44Serializer *Serializer3 =
-      dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer3 =
+      dynamic_cast<EV44SerializerMock *>(
         details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer3,
-              addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer3, addEvent(_, _)).Times(0);
 
   // =========================================================================
   // Initialize Test Data
@@ -820,17 +800,17 @@ TEST_F(CbmInstrumentTest, TestInvalidEvent0DReadouts) {
   // =========================================================================
   SchemaDetails *details = SchemaMap.get(0, 0);
 
-  Mock0DimEV44Serializer *Serializer1 =
-    dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer1 =
+    dynamic_cast<EV44SerializerMock *>(
       details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(0);
+  EXPECT_CALL(*Serializer1, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(0, 1);
 
-  Mock0DimEV44Serializer *Serializer2 =
-    dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer2 =
+    dynamic_cast<EV44SerializerMock *>(
       details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(0);
+  EXPECT_CALL(*Serializer2, addEvent(_, _)).Times(0);
 
   // =========================================================================
   // Initialize Test Data
@@ -891,13 +871,13 @@ TEST_F(CbmInstrumentTest, TestInvalidIBMReadouts) {
   MockHistogramSerializer *Serializer1 =
     dynamic_cast<MockHistogramSerializer *>(
       details->GetSerializer<SchemaType::DA00>());
-  EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(0);
+  EXPECT_CALL(*Serializer1, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(2, 1);
   MockHistogramSerializer *Serializer2 =
     dynamic_cast<MockHistogramSerializer *>(
       details->GetSerializer<SchemaType::DA00>());
-  EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(0);
+  EXPECT_CALL(*Serializer2, addEvent(_, _)).Times(0);
 
   // =========================================================================
   // Initialize Test Data
@@ -953,25 +933,25 @@ TEST_F(CbmInstrumentTest, TestInvalidIBMReadouts) {
 TEST_F(CbmInstrumentTest, TestInvalidTypeReadouts) {
 
   // =========================================================================
-  // Set Mock Expectations - No events should be added
+  // Set Mock Expectations - No events should be added due to type mismatch
   // =========================================================================
   SchemaDetails *details = SchemaMap.get(1, 0); //cbm3 EVENT_0D type 1
-  Mock0DimEV44Serializer *Serializer1 =
-    dynamic_cast<Mock0DimEV44Serializer *>(
+  EV44SerializerMock *Serializer1 =
+    dynamic_cast<EV44SerializerMock *>(
       details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer1, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer1, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(2, 1); // //cbm 6 IBM type 3
   MockHistogramSerializer *Serializer2 =
     dynamic_cast<MockHistogramSerializer *>(
       details->GetSerializer<SchemaType::DA00>());
-  EXPECT_CALL(*Serializer2, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer2, addEvent(_, _)).Times(0);
 
   details = SchemaMap.get(3, 1); //cbm8 EVENT_2D type 2
-  Mock2DimEV44Serializer *Serializer3 =
-    dynamic_cast<Mock2DimEV44Serializer *>(
+  EV44SerializerMock *Serializer3 =
+    dynamic_cast<EV44SerializerMock *>(
       details->GetSerializer<SchemaType::EV44>());
-  EXPECT_CALL(*Serializer3, addEvent(testing::_, testing::_)).Times(testing::AtLeast(0));
+  EXPECT_CALL(*Serializer3, addEvent(_, _)).Times(0);
 
   // =========================================================================
   // Initialize Test Data
@@ -1063,7 +1043,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
   int expectedData = 10;
   EXPECT_CALL(*Serializer1,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // Serializer 2
   details = SchemaMap.get(1, 2);
@@ -1074,7 +1054,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
   expectedData = 500;
   EXPECT_CALL(*Serializer2,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // Serializer 3
   details = SchemaMap.get(2, 1);
@@ -1085,7 +1065,7 @@ TEST_F(CbmInstrumentTest, TestValidIBMReadouts) {
   expectedData = 16777215;
   EXPECT_CALL(*Serializer3,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   // =========================================================================
   // Initialize Test Data
@@ -1150,7 +1130,7 @@ TEST_F(CbmInstrumentTest, TestIBMNormalizeReadouts) {
   int expectedData = 0xFFFFFF / expectedNorm;
   EXPECT_CALL(*Serializer,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   makeHeader(ESSHeaderParser->Packet, Readouts);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
@@ -1202,7 +1182,7 @@ TEST_F(CbmInstrumentTest, TestIBMDisableNormalizeReadouts) {
   int expectedData = 0xFFFFFF;
   EXPECT_CALL(*Serializer,
               addEvent(testing::Eq(expectedTime), testing::Eq(expectedData)))
-      .Times(testing::AtLeast(1));
+      .Times(AtLeast(1));
 
   makeHeader(ESSHeaderParser->Packet, Readouts);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 100000));
@@ -1292,6 +1272,15 @@ TEST_F(CbmInstrumentTest, NoSerializerConfigError) {
 /// MaxTof limit configured in the configuration file
 ///
 TEST_F(CbmInstrumentTest, HighTofErrorDefaultValue) {
+  // =========================================================================
+  // Set Mock Expectations - No events should be added due to high TOF
+  // =========================================================================
+  SchemaDetails *details = SchemaMap.get(0, 0);
+  EV44SerializerMock *Serializer =
+    dynamic_cast<EV44SerializerMock *>(
+      details->GetSerializer<SchemaType::EV44>());
+  EXPECT_CALL(*Serializer, addEvent(_, _)).Times(0);
+
   makeHeader(ESSHeaderParser->Packet, TofToHighReadout);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(1, 0));
   ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(0, 1000000));
@@ -1315,7 +1304,9 @@ TEST_F(CbmInstrumentTest, HighTofErrorDefaultValue) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 0);
   EXPECT_EQ(CbmCounters.Event2DEvents, 0);
-  EXPECT_EQ(CbmCounters.TimeError, 1);
+  
+  // Verify that getTOF detected high TOF
+  EXPECT_EQ(ESSHeaderParser->Packet.Time.Counters.TofHigh, 1);
   // clang-format off
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),0);
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH),1);
@@ -1328,6 +1319,18 @@ TEST_F(CbmInstrumentTest, HighTofErrorDefaultValue) {
 /// pulse time
 ///
 TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
+  // =========================================================================
+  // Set Mock Expectations - One event should be created with non-negative time
+  // =========================================================================
+  SchemaDetails *details = SchemaMap.get(0, 0);
+  EV44SerializerMock *Serializer =
+    dynamic_cast<EV44SerializerMock *>(
+      details->GetSerializer<SchemaType::EV44>());
+  // Verify addEvent is called exactly once with non-negative time value
+  EXPECT_CALL(*Serializer, 
+              addEvent(Ge(0), Ge(0)))
+      .Times(1);
+
   makeHeader(ESSHeaderParser->Packet, PreviousAndNegativePrevTofReadouts);
   ESSHeaderParser->Packet.Time.setReference(ESSTime(2, 100000));
   ESSHeaderParser->Packet.Time.setPrevReference(ESSTime(1, 100000));
@@ -1350,7 +1353,11 @@ TEST_F(CbmInstrumentTest, PreviousTofAndNegativePrevTofErrors) {
   EXPECT_EQ(CbmCounters.IBMEvents, 0);
   EXPECT_EQ(CbmCounters.Event0DEvents, 1);
   EXPECT_EQ(CbmCounters.Event2DEvents, 0);
-  EXPECT_EQ(CbmCounters.TimeError, 1);
+  
+  // Verify that getTOF used previous pulse for first readout and detected negative prev TOF for second
+  EXPECT_EQ(ESSHeaderParser->Packet.Time.Counters.TofNegative, 2);
+  EXPECT_EQ(ESSHeaderParser->Packet.Time.Counters.PrevTofCount, 1);
+  EXPECT_EQ(ESSHeaderParser->Packet.Time.Counters.PrevTofNegative, 1);
   // clang-format off
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_HIGH),0);
   EXPECT_EQ(Stats->getValueByName(ESSParser::METRIC_EVENTS_TIMESTAMP_TOF_COUNT),0);

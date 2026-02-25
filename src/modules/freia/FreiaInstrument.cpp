@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -42,6 +42,7 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   Geom = createGeometry(detectorType, Conf.FileParms.InstrumentGeometry,
                         Stats);
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.FileParms.MaxTOFNS);
 }
 
 void FreiaInstrument::loadConfigAndCalib() {
@@ -200,22 +201,12 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, INF, "Event Valid\n %s", Event.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = Event.timeStart();
+    auto EventTimeNs = esstime::TimeDurationNano(Event.timeStart());
 
-    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
-           TimeRef.getRefTimeUInt64());
+    auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
 
-    if (TimeRef.getRefTimeUInt64() > EventTime) {
-      XTRACE(EVENT, WAR, "Negative TOF!");
-      counters.TimeErrors++;
-      continue;
-    }
-
-    uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
-
-    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
-      counters.MaxTOFErrors++;
+    if (!TimeOfFlight.has_value()) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
 
@@ -223,17 +214,15 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Calculated pixel ID: %u", PixelId);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, pixel %u", time,
-             TimeOfFlight, PixelId);
-      /// \note ZeroPixelErrors are now counted automatically by
-      /// DetectorGeometry::calcPixel()
+      XTRACE(EVENT, WAR, "Bad pixel!: EventTime: %u TOF: %u, pixel %u", EventTimeNs,
+             TimeOfFlight.value(), PixelId);
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, pixel %u", time, TimeOfFlight,
+    XTRACE(EVENT, INF, "EventTime: %u TOF: %u, pixel %u", EventTimeNs, TimeOfFlight.value(),
            PixelId);
 
-    Serializer.addEvent(TimeOfFlight, PixelId);
+    Serializer.addEvent(TimeOfFlight.value(), PixelId);
     counters.Events++;
   }
 

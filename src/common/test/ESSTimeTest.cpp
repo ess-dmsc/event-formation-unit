@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -315,16 +315,16 @@ TEST_F(ESSTimeTest, ESSTimeEdgeCases) {
 TEST_F(ESSTimeTest, Constructors) {
   Statistics testStats1, testStats2;
   ESSReferenceTime testTime1 = ESSReferenceTime(testStats1);
-  ASSERT_EQ(testTime1.getTOF(ESSTime(0, 0)), 0);
+  ASSERT_EQ(testTime1.getTOF(ESSTime(0, 0)).value(), 0);
 }
 
 TEST_F(ESSTimeTest, SetRef) {
   Time.setReference(ESSTime(100, 0));
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 0)), 0);
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 1)), 11);
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 2)), 22);
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 3)), 34);
-  ASSERT_EQ(Time.getTOF(ESSTime(200, 0)), Time.InvalidTOF);
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 0)).value(), 0);
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 1)).value(), 11);
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 2)).value(), 22);
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 3)).value(), 34);
+  ASSERT_FALSE(Time.getTOF(ESSTime(200, 0)).has_value());
 
   ASSERT_EQ(Time.Counters.TofCount, 4);
   ASSERT_EQ(Time.Counters.TofNegative, 0);
@@ -336,24 +336,24 @@ TEST_F(ESSTimeTest, SetRef) {
 
 TEST_F(ESSTimeTest, Bounds) {
   Time.setReference(ESSTime(0, 0));
-  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499)), 999999988);
+  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499)).value(), 999999988);
   Time.setReference(ESSTime(0, 88052499));
-  ASSERT_EQ(Time.getTOF(ESSTime(1, 0)), 12); // why not 11?
+  ASSERT_EQ(Time.getTOF(ESSTime(1, 0)).value(), 12); // why not 11?
 }
 
 TEST_F(ESSTimeTest, PrevPulse) {
   Time.setReference(ESSTime(100, 100000));
   Time.setPrevReference(ESSTime(100, 50000));
 
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 100000)), 0);
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 75000)),
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 100000)).value(), 0);
+  ASSERT_EQ(Time.getTOF(ESSTime(100, 75000)).value(),
             (uint64_t)(25000 * ESSTime::ESSClockTick));
-  ASSERT_EQ(Time.getTOF(ESSTime(100, 49999)), Time.InvalidTOF);
+  ASSERT_FALSE(Time.getTOF(ESSTime(100, 49999)).has_value());
 
-  ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 75000)),
+  ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 75000)).value(),
             (uint64_t)(25000 * ESSTime::ESSClockTick));
-  ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 50000)), 0);
-  ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 49999)), Time.InvalidTOF);
+  ASSERT_EQ(Time.getPrevTOF(ESSTime(100, 50000)).value(), 0);
+  ASSERT_FALSE(Time.getPrevTOF(ESSTime(100, 49999)).has_value());
 
   ASSERT_EQ(Time.Counters.TofCount, 1);
   ASSERT_EQ(Time.Counters.TofNegative, 2);
@@ -365,11 +365,11 @@ TEST_F(ESSTimeTest, PrevPulse) {
 
 TEST_F(ESSTimeTest, AddConstantDelay) {
   Time.setReference(ESSTime(0, 0));
-  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499)), 999999988);
+  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499)).value(), 999999988);
   ASSERT_EQ(Time.Counters.TofCount, 1);
-  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 0), 999999988);
+  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 0).value(), 999999988);
   ASSERT_EQ(Time.Counters.TofCount, 2);
-  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 11), 999999999);
+  ASSERT_EQ(Time.getTOF(ESSTime(0, 88052499), 11).value(), 999999999);
   ASSERT_EQ(Time.Counters.TofCount, 3);
 }
 

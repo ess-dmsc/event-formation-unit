@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -25,7 +25,6 @@ int VMM3Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
   char *Buffer = (char *)PacketData.DataPtr;
   unsigned int Size = PacketData.DataLength;
-  ESSReferenceTime &TimeRef = PacketData.Time;
 
   if (Buffer == nullptr) {
     Stats.ErrorSize++;
@@ -69,18 +68,6 @@ int VMM3Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout.TimeLow,
              ESSReadout::MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
-      continue;
-    }
-
-    // Check for negative TOFs
-    ///\todo Missing TDC correction
-    auto TimeOfFlight =
-        TimeRef.getTOF(ESSTime(Readout.TimeHigh, Readout.TimeLow));
-    XTRACE(DATA, DEB, "PulseTime     %" PRIu64 ", TimeStamp %" PRIu64 " ",
-           TimeRef.getRefTimeUInt64(), TimeOfFlight);
-
-    if (TimeOfFlight == TimeRef.InvalidTOF) {
-      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
 

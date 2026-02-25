@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -62,10 +62,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   Stats.create("readouts.over_threshold", Counters.VMMStats.OverThreshold);
 
 
-  // Time stats
-  Stats.create("readouts.tof_toolarge", Counters.TOFErrors); //move this to events.tof_toolarge
-
-
   // Clustering stats
   Stats.create("cluster.matched_clusters", Counters.EventsMatchedClusters);
   Stats.create("cluster.no_coincidence", Counters.ClustersNoCoincidence);
@@ -76,7 +72,6 @@ TrexBase::TrexBase(BaseSettings const &settings) : Detector(settings) {
   // Event stats
   Stats.create("events.count", Counters.Events);
   Stats.create("events.pixel_errors", Counters.PixelErrors);
-  Stats.create("events.time_errors", Counters.TimeErrors);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);

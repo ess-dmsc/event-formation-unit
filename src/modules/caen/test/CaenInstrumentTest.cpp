@@ -1,17 +1,25 @@
-// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 //===----------------------------------------------------------------------===//
 
+#include "common/time/ESSTime.h"
 #include <caen/CaenInstrument.h>
 #include <common/Statistics.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/EV44SerializerMock.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <readout/DataParser.h>
 
+#include <optional>
+
 using namespace Caen;
+using namespace testing;
+
+using MockSerializer = NiceMock<EV44SerializerMock>;
+using MockSerializerPtr = std::shared_ptr<MockSerializer>;
 
 class CaenInstrumentTest : public TestBase {
 protected:
@@ -20,6 +28,7 @@ protected:
   ESSReadout::Parser parser{stats};
   BaseSettings Settings;
   DataParser::CaenReadout readout;
+  std::vector<std::shared_ptr<EV44Serializer>> serializers;
 
   void SetUp() override {
     Settings.DetectorName = "loki";
@@ -42,38 +51,53 @@ protected:
     counters = {};
   }
 
-  void TearDown() override {}
+  void TearDown() override {
+    serializers.clear();
+  }
 
-  // Helper method to process readouts without assertions
-  void processReadouts(CaenInstrument &Caen) {
-    // Clear any existing results and add our test readout
+  // Helper method to create mock serializers for the instrument
+  MockSerializerPtr createMockSerializer() {
+    return std::make_shared<MockSerializer>();
+  }
+
+  // Helper method to process readouts with optional custom reference times
+  // By default adds two readouts (one normal, one late) with reference at 1000s
+  // For TOF tests, set addLateReadout=false and provide custom ref times
+  void processReadouts(CaenInstrument &Caen, uint32_t refHigh = 1000,
+                       esstime::tof_t prevRefHigh = std::nullopt,
+                       bool addLateReadout = true) {
     Caen.CaenParser.Result.clear();
-
-    // Add our first test readout
     Caen.CaenParser.Result.push_back(readout);
 
-    // Create a second readout with time beyond MaxTOF
-    DataParser::CaenReadout lateReadout = readout;
-    // This time high and time low are set to simulate a late readout
-    // that exceeds the MaxTOF threshold, ~1.4 seconds later then reference time
-    lateReadout.TimeHigh = 1001;
-    lateReadout.TimeLow = 37736786;
+    if (addLateReadout) {
+      // Create a second readout with time beyond MaxTOF
+      DataParser::CaenReadout lateReadout = readout;
+      lateReadout.TimeHigh = 1001;
+      lateReadout.TimeLow = 37736786;
+      Caen.CaenParser.Result.push_back(lateReadout);
+    }
 
-    // Add the late readout
-    Caen.CaenParser.Result.push_back(lateReadout);
-
-    // Set reference time
-    parser.Packet.Time.setReference(ESSReadout::ESSTime(1000, 0));
-
-    // Process readouts
+    parser.Packet.Time.setReference(ESSReadout::ESSTime(refHigh, 0));
+    if (prevRefHigh.has_value()) {
+      parser.Packet.Time.setPrevReference(
+          ESSReadout::ESSTime(prevRefHigh.value(), 0));
+    }
     Caen.processReadouts();
   }
 };
 
 // Test cases below
-TEST_F(CaenInstrumentTest, LokiInstrumentReadoutTest) {
+TEST_F(CaenInstrumentTest, LokiGoodEvent) {
   Settings.CalibFile = LOKI_CALIB;
   CaenInstrument Caen(stats, counters, Settings, parser);
+
+  // Create mock serializer and set it
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
+
+  // Good event - addEvent must be called at least once with non-negative ToF
+  EXPECT_CALL(*mockSerializer, addEvent(Ge(0), Gt(0))).Times(AtLeast(1));
 
   processReadouts(Caen);
 
@@ -83,7 +107,7 @@ TEST_F(CaenInstrumentTest, LokiInstrumentReadoutTest) {
   EXPECT_EQ(parser.Packet.Time.Counters.TofCount, 1);
 }
 
-TEST_F(CaenInstrumentTest, BifrostInstrumentReadoutTest) {
+TEST_F(CaenInstrumentTest, BifrostGoodEvent) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = BIFROST_CALIB;
   Settings.DetectorName = "bifrost";
@@ -102,14 +126,14 @@ TEST_F(CaenInstrumentTest, BifrostInstrumentReadoutTest) {
   EXPECT_EQ(parser.Packet.Time.Counters.TofCount, 1);
 }
 
-TEST_F(CaenInstrumentTest, BifrostInstrumentNullCalibTest) {
+TEST_F(CaenInstrumentTest, BifrostNullCalib) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = "";
   Settings.DetectorName = "bifrost";
   ASSERT_ANY_THROW(CaenInstrument Caen(stats, counters, Settings, parser));
 }
 
-TEST_F(CaenInstrumentTest, CspecInstrumentReadoutTest) {
+TEST_F(CaenInstrumentTest, CspecGoodEvent) {
   Settings.ConfigFile = CSPEC_CONFIG;
   Settings.CalibFile = CSPEC_CALIB;
   Settings.DetectorName = "cspec";
@@ -122,7 +146,7 @@ TEST_F(CaenInstrumentTest, CspecInstrumentReadoutTest) {
   EXPECT_EQ(parser.Packet.Time.Counters.TofCount, 1);
 }
 
-TEST_F(CaenInstrumentTest, Tbl3HeInstrumentReadoutTest) {
+TEST_F(CaenInstrumentTest, Tbl3HeGoodEvent) {
   Settings.ConfigFile = TBL3HE_CONFIG;
   Settings.CalibFile = TBL3HE_CALIB;
   Settings.DetectorName = "tbl3he";
@@ -142,7 +166,7 @@ TEST_F(CaenInstrumentTest, Tbl3HeInstrumentReadoutTest) {
 }
 
 // Test that when MaxTOF is 0 in config, default value is used
-TEST_F(CaenInstrumentTest, CheckMaxTOFZeroApplied) {
+TEST_F(CaenInstrumentTest, MaxTOFZeroConfig) {
   // Create a temporary config with MaxTofNS = 0
   nlohmann::json testConfig = R"(
   {
@@ -172,6 +196,14 @@ TEST_F(CaenInstrumentTest, CheckMaxTOFZeroApplied) {
   // Create the instrument
   CaenInstrument Caen(stats, counters, Settings, parser);
 
+  // Create mock serializer and set it
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
+
+  // ToF exceeds limit - addEvent must NOT be called
+  EXPECT_CALL(*mockSerializer, addEvent(_, _)).Times(0);
+
   processReadouts(Caen);
 
   // Check results with expectation of zero events
@@ -182,9 +214,14 @@ TEST_F(CaenInstrumentTest, CheckMaxTOFZeroApplied) {
   std::remove(tempConfigFile.c_str());
 }
 
-TEST_F(CaenInstrumentTest, CountPixelErrors) {
+TEST_F(CaenInstrumentTest, PixelError) {
   Settings.CalibFile = LOKI_CALIB;
   CaenInstrument Caen(stats, counters, Settings, parser);
+
+  // Create mock serializer and set it
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
 
   // Create a readout that will cause a pixel error (all amplitudes zero)
   readout.AmpA = 0;
@@ -192,12 +229,78 @@ TEST_F(CaenInstrumentTest, CountPixelErrors) {
   readout.AmpC = 0;
   readout.AmpD = 0;
 
+  // Pixel error - addEvent must NOT be called
+  EXPECT_CALL(*mockSerializer, addEvent(_, _)).Times(0);
+
   processReadouts(Caen);
 
   // Verify that the pixel error was counted through DetectorGeometry
   EXPECT_EQ(Caen.Geom->getBaseCounters().PixelErrors, 1);
   // Verify that Events counter is still 0 (no successful pixel
   // calculation)
+  EXPECT_EQ(counters.Events, 0);
+}
+
+TEST_F(CaenInstrumentTest, NegativeTOFFallback) {
+  Settings.CalibFile = LOKI_CALIB;
+  CaenInstrument Caen(stats, counters, Settings, parser);
+
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
+
+  // Readout time is ~1001s, reference=2000s (future), prevReference=1000s
+  // TOF vs current pulse is negative, but fallback to prev pulse succeeds
+  EXPECT_CALL(*mockSerializer, addEvent(Ge(0), Gt(0))).Times(1);
+
+  processReadouts(Caen, 2000, 1000, false);
+
+  // Verify TOF counters - negative vs current, but fallback succeeded
+  EXPECT_EQ(parser.Packet.Time.Counters.TofNegative, 1);
+  EXPECT_EQ(parser.Packet.Time.Counters.PrevTofCount, 1);
+  EXPECT_EQ(counters.Events, 1);
+}
+
+TEST_F(CaenInstrumentTest, NegativePrevTOFError) {
+  Settings.CalibFile = LOKI_CALIB;
+  CaenInstrument Caen(stats, counters, Settings, parser);
+
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
+
+  // Readout time is ~1001s, reference=2000s, prevReference=1500s
+  // TOF is negative vs both pulses - no fallback possible
+  EXPECT_CALL(*mockSerializer, addEvent(_, _)).Times(0);
+
+  processReadouts(Caen, 2000, 1500, false);
+
+  // Verify TOF counters - negative vs both pulses
+  EXPECT_EQ(parser.Packet.Time.Counters.TofNegative, 1);
+  EXPECT_EQ(parser.Packet.Time.Counters.PrevTofNegative, 1);
+  EXPECT_EQ(counters.Events, 0);
+}
+
+TEST_F(CaenInstrumentTest, HighTOFError) {
+  Settings.CalibFile = LOKI_CALIB;
+  CaenInstrument Caen(stats, counters, Settings, parser);
+
+  auto mockSerializer = createMockSerializer();
+  serializers.push_back(mockSerializer);
+  Caen.setSerializers(serializers);
+
+  // Set readout time to 1004s, reference to 1000s
+  // TOF = ~4 seconds = 4,000,000,000 ns > INT32_MAX (2,147,483,647)
+  readout.TimeHigh = 1004;
+  readout.TimeLow = 0;
+
+  // TOF exceeds INT32_MAX - addEvent must NOT be called
+  EXPECT_CALL(*mockSerializer, addEvent(_, _)).Times(0);
+
+  processReadouts(Caen, 1000, 0, false);
+
+  // Verify TofHigh counter was incremented
+  EXPECT_EQ(parser.Packet.Time.Counters.TofHigh, 1);
   EXPECT_EQ(counters.Events, 0);
 }
 

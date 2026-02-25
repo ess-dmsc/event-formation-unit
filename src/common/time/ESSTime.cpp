@@ -13,6 +13,7 @@
 #include <common/Statistics.h>
 #include <common/time/ESSTime.h>
 #include <inttypes.h>
+#include <optional>
 
 namespace esstime {
 
@@ -35,7 +36,7 @@ void ESSReferenceTime::setMaxTOF(uint64_t NewMaxTOF) {
   MaxTOF = TimeDurationNano(NewMaxTOF);
 }
 
-uint64_t ESSReferenceTime::getTOF(const ESSTime &eventTime, uint32_t DelayNS) {
+tof_t ESSReferenceTime::getTOF(const ESSTime &eventTime, uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < TimeInNS) {
     XTRACE(EVENT, WAR,
@@ -50,31 +51,31 @@ uint64_t ESSReferenceTime::getTOF(const ESSTime &eventTime, uint32_t DelayNS) {
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, TimeInNS);
     Counters.TofHigh++;
-    return InvalidTOF;
+    return InvalidTof;
   }
 
   Counters.TofCount++;
   return (timeval - TimeInNS).count();
 }
 
-uint64_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime,
+tof_t ESSReferenceTime::getPrevTOF(const ESSTime &eventTime,
                                       uint32_t DelayNS) {
   TimeDurationNano timeval = eventTime.toNS() + TimeDurationNano(DelayNS);
   if (timeval < PrevTimeInNS) {
     XTRACE(EVENT, WAR,
-           "Prev TOF negative: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
+           "Prev TOF negative: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, PrevTimeInNS);
     Counters.PrevTofNegative++;
-    return InvalidTOF;
+    return InvalidTof;
   }
   if ((timeval - PrevTimeInNS) > MaxTOF) {
     XTRACE(EVENT, WAR,
-           "High Prev TOF: High: 0x%04x, Low: 0x%04x, timens %" PRIu64,
+           "High Prev TOF: High: 0x%08x, Low: 0x%08x, timens %" PRIu64,
            ", PrevPTns: %" PRIu64, eventTime.getTimeHigh(),
            eventTime.getTimeLow(), timeval, PrevTimeInNS);
     Counters.PrevTofHigh++;
-    return InvalidTOF;
+    return InvalidTof;
   }
   Counters.PrevTofCount++;
   return (timeval - PrevTimeInNS).count();

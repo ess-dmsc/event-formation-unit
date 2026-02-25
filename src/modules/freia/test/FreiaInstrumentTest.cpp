@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,6 +9,7 @@
 #include <common/Statistics.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/EV44SerializerMock.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -17,10 +18,13 @@
 #include <freia/Counters.h>
 #include <freia/FreiaBase.h>
 #include <freia/FreiaInstrument.h>
+#include <gtest/gtest.h>
 #include <memory>
 
 using namespace Freia;
 using namespace vmm3;
+using namespace testing;
+using MockSerializer = NiceMock<EV44SerializerMock>;
 // clang-format off
 
 std::string CalibFile{"deleteme_freia_instr_calib.json"};
@@ -155,7 +159,7 @@ protected:
   BaseSettings Settings;
   Statistics Stats;
   ESSReadout::Parser ESSHeaderParser{Stats};
-  EV44Serializer serializer{115000, "freia"};
+  MockSerializer serializer;
   std::unique_ptr<FreiaInstrument> Freia;
   std::unique_ptr<TestHeaderFactory> HeaderFactory;
   Event TestEvent;           // used for testing generateEvents()
@@ -167,7 +171,7 @@ protected:
 
     HeaderFactory = std::make_unique<TestHeaderFactory>();
     Freia = std::make_unique<FreiaInstrument>(Counters, Settings, serializer,
-                                              ESSHeaderParser, Stats, 
+                                              ESSHeaderParser, Stats,
                                               DetectorType::FREIA);
     ESSHeaderParser.Packet.HeaderPtr =
         HeaderFactory->createHeader(ESSReadout::Parser::V1);
@@ -244,6 +248,9 @@ TEST_F(FreiaInstrumentTest, WireGap) {
   TestEvent.ClusterB.insert({0, 3, 100, 1});
   Events.push_back(TestEvent);
 
+  // Wire gap is a geometry error - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.EventsInvalidWireGap, 1);
 }
@@ -254,6 +261,9 @@ TEST_F(FreiaInstrumentTest, StripGap) {
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
 
+  // Strip gap is a geometry error - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.EventsInvalidStripGap, 1);
 }
@@ -262,6 +272,9 @@ TEST_F(FreiaInstrumentTest, ClusterWireOnly) {
   TestEvent.ClusterB.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
 
+  // Wire-only cluster has no strip - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.EventsMatchedWireOnly, 1);
 }
@@ -269,6 +282,9 @@ TEST_F(FreiaInstrumentTest, ClusterWireOnly) {
 TEST_F(FreiaInstrumentTest, ClusterStripOnly) {
   TestEvent.ClusterA.insert({0, 1, 0, 0});
   Events.push_back(TestEvent);
+
+  // Strip-only cluster has no wire - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
 
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.EventsMatchedStripOnly, 1);
@@ -279,18 +295,29 @@ TEST_F(FreiaInstrumentTest, PixelError) {
   TestEvent.ClusterA.insert({0, 2000, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
+
+  // Pixel error (invalid coordinate) - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   auto const &Geom = Freia->getGeometry();
   ASSERT_EQ(Geom.getBaseCounters().PixelErrors, 1);
 }
 
-TEST_F(FreiaInstrumentTest, EventTOFError) {
+TEST_F(FreiaInstrumentTest, NegativeTOFFallback) {
   auto &Packet = ESSHeaderParser.Packet;
   makeHeader(Packet, GoodEvent);
-
+  // Set current pulse time in the future so TOF is negative vs current pulse
+  // Event time is ~0s, Reference = 200s, PrevReference = 0s (from makeHeader)
+  // Fallback to previous pulse will succeed
   Packet.Time.setReference(ESSTime(200, 0));
+
   auto Res = Freia->VMMParser.parse(Packet);
   Counters.VMMStats = Freia->VMMParser.Stats;
+
+  // Fallback succeeds - addEvent must be called exactly once with value from
+  // calculated from prev pulse
+  EXPECT_CALL(serializer, addEvent(Ge(0), Gt(0))).Times(1);
 
   Freia->processReadouts();
   for (auto &builder : Freia->builders) {
@@ -299,7 +326,50 @@ TEST_F(FreiaInstrumentTest, EventTOFError) {
   }
   ASSERT_EQ(Res, 2);
   ASSERT_EQ(Counters.VMMStats.Readouts, 2);
-  ASSERT_EQ(Counters.TimeErrors, 1);
+  // Event is created because fallback to PrevPulse succeeds (PrevRef=0,
+  // EventTime~=0)
+  ASSERT_EQ(Counters.Events, 1);
+
+  // Verify that getTOF detected negative TOF and fell back to previous pulse
+  EXPECT_EQ(Packet.Time.Counters.TofCount, 0); // Current pulse failed
+  EXPECT_EQ(Packet.Time.Counters.TofNegative,
+            1); // Was negative vs current pulse
+  EXPECT_EQ(Packet.Time.Counters.PrevTofCount, 1); // Fallback succeeded
+  EXPECT_EQ(Packet.Time.Counters.PrevTofNegative, 0);
+}
+
+TEST_F(FreiaInstrumentTest, NegativePrevTOFError) {
+  auto &Packet = ESSHeaderParser.Packet;
+  makeHeader(Packet, GoodEvent);
+  // Set both pulse times in the future so the event is "too old"
+  // Event time is ~0s, Reference = 200s, PrevReference = 100s
+  // Both TOF calculations will be negative
+  Packet.Time.setReference(ESSTime(200, 0));
+  Packet.Time.setPrevReference(ESSTime(100, 0));
+
+  auto Res = Freia->VMMParser.parse(Packet);
+  Counters.VMMStats = Freia->VMMParser.Stats;
+
+  // Readout is negative to both pulses - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
+  Freia->processReadouts();
+  for (auto &builder : Freia->builders) {
+    builder.flush(true);
+    Freia->generateEvents(builder.Events);
+  }
+  ASSERT_EQ(Res, 2);
+  ASSERT_EQ(Counters.VMMStats.Readouts, 2);
+  // No event created - both pulse times fail
+  ASSERT_EQ(Counters.Events, 0);
+
+  // Verify that getTOF detected negative TOF and fallback also failed
+  EXPECT_EQ(Packet.Time.Counters.TofCount, 0); // Current pulse failed
+  EXPECT_EQ(Packet.Time.Counters.TofNegative,
+            1); // Was negative vs current pulse
+  EXPECT_EQ(Packet.Time.Counters.PrevTofCount, 0); // Fallback also failed
+  EXPECT_EQ(Packet.Time.Counters.PrevTofNegative,
+            1); // Was negative vs prev pulse too
 }
 
 TEST_F(FreiaInstrumentTest, GoodEvent) {
@@ -307,21 +377,35 @@ TEST_F(FreiaInstrumentTest, GoodEvent) {
   TestEvent.ClusterA.insert({0, 3, 100, 0});
   TestEvent.ClusterB.insert({0, 1, 100, 1});
   Events.push_back(TestEvent);
+
+  // Good event - addEvent must be called exactly once with non-negative ToF
+  EXPECT_CALL(serializer, addEvent(Ge(0), Gt(0))).Times(1);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.Events, 1);
 }
 
-TEST_F(FreiaInstrumentTest, EventTOFTooLarge) {
+TEST_F(FreiaInstrumentTest, HighTOFError) {
   TestEvent.ClusterA.insert({3000000000, 3, 100, 0});
   TestEvent.ClusterB.insert({3000000000, 1, 100, 1});
   Events.push_back(TestEvent);
+
+  // ToF exceeds INT32_MAX - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.Events, 0);
-  ASSERT_EQ(Counters.MaxTOFErrors, 1);
+
+  // Verify that getTOF detected the high TOF error internally
+  ASSERT_EQ(ESSHeaderParser.Packet.Time.Counters.TofHigh, 1);
 }
 
 TEST_F(FreiaInstrumentTest, NoEvents) {
   Events.push_back(TestEvent);
+
+  // Empty clusters - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Freia->generateEvents(Events);
   ASSERT_EQ(Counters.Events, 0);
 }
@@ -337,11 +421,11 @@ TEST_F(FreiaInstrumentTest, CreateFreiaGeometry) {
   /// This covers: DetectorType::FREIA + "FREIA" -> FreiaGeometry
   Settings.ConfigFile = FREIA_FULL;
   Settings.CalibFile = CalibFile;
-  
-  FreiaInstrument FreiaWithFreia(Counters, Settings, serializer, ESSHeaderParser,
-                                 Stats, DetectorType::FREIA);
+
+  FreiaInstrument FreiaWithFreia(Counters, Settings, serializer,
+                                 ESSHeaderParser, Stats, DetectorType::FREIA);
   const VMM3Geometry &Geom = FreiaWithFreia.getGeometry();
-  
+
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
   const FreiaGeometry *GeometryPtr = dynamic_cast<const FreiaGeometry *>(&Geom);
@@ -352,12 +436,12 @@ TEST_F(FreiaInstrumentTest, CreateAmorGeometry) {
   /// Test that FREIA detector with AMOR geometry creates AmorGeometry
   /// This covers: DetectorType::FREIA + "AMOR" -> AmorGeometry
   Settings.ConfigFile = AMOR_FULL;
-  Settings.CalibFile = "";  // Skip calibration to avoid hybrid ID mismatch
-  
+  Settings.CalibFile = ""; // Skip calibration to avoid hybrid ID mismatch
+
   FreiaInstrument FreiaWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::FREIA);
   const VMM3Geometry &Geom = FreiaWithAmor.getGeometry();
-  
+
   // Verify that the geometry is the expected concrete type
   const AmorGeometry *GeometryPtr = dynamic_cast<const AmorGeometry *>(&Geom);
   ASSERT_NE(GeometryPtr, nullptr);
@@ -368,14 +452,14 @@ TEST_F(FreiaInstrumentTest, CreateCaseInsensitiveAmorGeometry) {
   /// The createGeometry method converts geometry name to uppercase before
   /// comparison, so both "amor" and "AMOR" should create AmorGeometry
   Settings.ConfigFile = AMOR_FULL;
-  Settings.CalibFile = "";  // Skip calibration to avoid hybrid ID mismatch
-  
+  Settings.CalibFile = ""; // Skip calibration to avoid hybrid ID mismatch
+
   // AMOR_FULL config contains "InstrumentGeometry" : "AMOR"
   // Test that this is properly loaded and compared (case-insensitive)
   FreiaInstrument FreiaWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::FREIA);
   const VMM3Geometry &Geom = FreiaWithAmor.getGeometry();
-  
+
   // Verify successful creation and correct concrete type despite case handling
   // returns nullptr if the cast fails
   const AmorGeometry *GeometryPtr = dynamic_cast<const AmorGeometry *>(&Geom);
@@ -384,8 +468,9 @@ TEST_F(FreiaInstrumentTest, CreateCaseInsensitiveAmorGeometry) {
 
 TEST_F(FreiaInstrumentTest, CreateInvalidFREIAGeometry) {
   /// Test that FREIA detector with invalid geometry throws exception
-  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
-  
+  /// This test uses a valid config that passes loading but has invalid
+  /// InstrumentGeometry
+
   std::string InvalidFREIAConfig{"deleteme_freia_invalid_geometry.json"};
   std::string InvalidFREIAConfigStr = R"(
 {
@@ -401,25 +486,25 @@ TEST_F(FreiaInstrumentTest, CreateInvalidFREIAGeometry) {
   ]
 }
   )";
-  
-  saveBuffer(InvalidFREIAConfig, (void *)InvalidFREIAConfigStr.c_str(), 
+
+  saveBuffer(InvalidFREIAConfig, (void *)InvalidFREIAConfigStr.c_str(),
              InvalidFREIAConfigStr.size());
-  
+
   Settings.ConfigFile = InvalidFREIAConfig;
   Settings.CalibFile = "";
-  
+
   // Expect runtime_error for invalid geometry with FREIA
   try {
-    FreiaInstrument InvalidFreia(Counters, Settings, serializer, 
-                                 ESSHeaderParser, Stats, 
-                                 DetectorType::FREIA);
+    FreiaInstrument InvalidFreia(Counters, Settings, serializer,
+                                 ESSHeaderParser, Stats, DetectorType::FREIA);
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &e) {
     std::string error_msg(e.what());
     // Verify exact error message
-    EXPECT_EQ(error_msg, "FREIA detector requires InstrumentGeometry 'AMOR' or 'Freia', got: InvalidGeometry");
+    EXPECT_EQ(error_msg, "FREIA detector requires InstrumentGeometry 'AMOR' or "
+                         "'Freia', got: InvalidGeometry");
   }
-  
+
   deleteFile(InvalidFREIAConfig);
 }
 
@@ -432,12 +517,12 @@ TEST_F(FreiaInstrumentTest, CreateTBLMBGeometry) {
   /// Test that TBLMB detector with AMOR geometry creates TBLMBGeometry
   /// This covers: DetectorType::TBLMB + "AMOR" -> TBLMBGeometry
   Settings.ConfigFile = TBLMB_FULL;
-  Settings.CalibFile = "";  // Skip calibration to avoid hybrid ID mismatch
-  
+  Settings.CalibFile = ""; // Skip calibration to avoid hybrid ID mismatch
+
   FreiaInstrument TBLMBWithAmor(Counters, Settings, serializer, ESSHeaderParser,
                                 Stats, DetectorType::TBLMB);
   const VMM3Geometry &Geom = TBLMBWithAmor.getGeometry();
-  
+
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
   const TBLMBGeometry *GeometryPtr = dynamic_cast<const TBLMBGeometry *>(&Geom);
@@ -446,8 +531,9 @@ TEST_F(FreiaInstrumentTest, CreateTBLMBGeometry) {
 
 TEST_F(FreiaInstrumentTest, CreateInvalidTBLMBGeometry) {
   /// Test that TBLMB detector with non-AMOR geometry throws exception
-  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
-  
+  /// This test uses a valid config that passes loading but has invalid
+  /// InstrumentGeometry
+
   std::string InvalidTBLMBConfig{"deleteme_tblmb_invalid_geometry.json"};
   std::string InvalidTBLMBConfigStr = R"(
 {
@@ -463,45 +549,47 @@ TEST_F(FreiaInstrumentTest, CreateInvalidTBLMBGeometry) {
   ]
 }
   )";
-  
-  saveBuffer(InvalidTBLMBConfig, (void *)InvalidTBLMBConfigStr.c_str(), 
+
+  saveBuffer(InvalidTBLMBConfig, (void *)InvalidTBLMBConfigStr.c_str(),
              InvalidTBLMBConfigStr.size());
-  
+
   Settings.ConfigFile = InvalidTBLMBConfig;
   Settings.CalibFile = "";
-  
+
   // Expect runtime_error for non-AMOR geometry with TBLMB
   try {
-    FreiaInstrument InvalidTBLMB(Counters, Settings, serializer, 
-                                 ESSHeaderParser, Stats, 
-                                 DetectorType::TBLMB);
+    FreiaInstrument InvalidTBLMB(Counters, Settings, serializer,
+                                 ESSHeaderParser, Stats, DetectorType::TBLMB);
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &e) {
     std::string error_msg(e.what());
     // Verify exact error message
-    EXPECT_EQ(error_msg, "TBLMB detector requires InstrumentGeometry 'AMOR', got: InvalidGeometry");
+    EXPECT_EQ(error_msg, "TBLMB detector requires InstrumentGeometry 'AMOR', "
+                         "got: InvalidGeometry");
   }
-  
+
   deleteFile(InvalidTBLMBConfig);
 }
 
 //===----------------------------------------------------------------------===//
 /// \brief Test cases for ESTIA detector geometry creation
 /// Tests the ESTIA branch of the createGeometry method (lines 80-87)
-/// Note: The current implementation has a comparison bug (detectorType != UpperInstGeometry)
-/// which should be (UpperInstGeometry != "ESTIA"), but we test what's actually there
+/// Note: The current implementation has a comparison bug (detectorType !=
+/// UpperInstGeometry) which should be (UpperInstGeometry != "ESTIA"), but we
+/// test what's actually there
 //===----------------------------------------------------------------------===//
 
 TEST_F(FreiaInstrumentTest, CreateEstiaGeometry) {
   /// Test that ESTIA detector with ESTIA geometry creates EstiaGeometry
-  /// This covers: DetectorType::ESTIA -> EstiaGeometry (if the comparison passes)
+  /// This covers: DetectorType::ESTIA -> EstiaGeometry (if the comparison
+  /// passes)
   Settings.ConfigFile = ESTIA_FULL;
-  Settings.CalibFile = "";  // Skip calibration to avoid hybrid ID mismatch
-  
-  FreiaInstrument EstiaWithEstia(Counters, Settings, serializer, ESSHeaderParser,
-                                 Stats, DetectorType::ESTIA);
+  Settings.CalibFile = ""; // Skip calibration to avoid hybrid ID mismatch
+
+  FreiaInstrument EstiaWithEstia(Counters, Settings, serializer,
+                                 ESSHeaderParser, Stats, DetectorType::ESTIA);
   const VMM3Geometry &Geom = EstiaWithEstia.getGeometry();
-  
+
   // Verify that the geometry is the expected concrete type
   // returns nullptr if the cast fails
   const EstiaGeometry *GeometryPtr = dynamic_cast<const EstiaGeometry *>(&Geom);
@@ -510,9 +598,10 @@ TEST_F(FreiaInstrumentTest, CreateEstiaGeometry) {
 
 TEST_F(FreiaInstrumentTest, CreateInvalidEstiaGeometry) {
   /// Test that ESTIA detector with non-ESTIA geometry throws exception
-  /// This test uses a valid config that passes loading but has invalid InstrumentGeometry
-  /// Note: Current implementation has detectorType != UpperInstGeometry comparison
-  
+  /// This test uses a valid config that passes loading but has invalid
+  /// InstrumentGeometry Note: Current implementation has detectorType !=
+  /// UpperInstGeometry comparison
+
   std::string InvalidEstiaConfig{"deleteme_estia_invalid_geometry.json"};
   std::string InvalidEstiaConfigStr = R"(
 {
@@ -528,33 +617,34 @@ TEST_F(FreiaInstrumentTest, CreateInvalidEstiaGeometry) {
   ]
 }
   )";
-  
-  saveBuffer(InvalidEstiaConfig, (void *)InvalidEstiaConfigStr.c_str(), 
+
+  saveBuffer(InvalidEstiaConfig, (void *)InvalidEstiaConfigStr.c_str(),
              InvalidEstiaConfigStr.size());
-  
+
   Settings.ConfigFile = InvalidEstiaConfig;
   Settings.CalibFile = "";
-  
+
   // Expect runtime_error for non-ESTIA geometry with ESTIA detector
   try {
-    FreiaInstrument InvalidEstia(Counters, Settings, serializer, 
-                                 ESSHeaderParser, Stats, 
-                                 DetectorType::ESTIA);
+    FreiaInstrument InvalidEstia(Counters, Settings, serializer,
+                                 ESSHeaderParser, Stats, DetectorType::ESTIA);
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &e) {
     std::string error_msg(e.what());
     // Verify exact error message
-    EXPECT_EQ(error_msg, "ESTIA detector requires InstrumentGeometry 'ESTIA', got: InvalidGeometry");
+    EXPECT_EQ(error_msg, "ESTIA detector requires InstrumentGeometry 'ESTIA', "
+                         "got: InvalidGeometry");
   }
-  
+
   deleteFile(InvalidEstiaConfig);
 }
 
 TEST_F(FreiaInstrumentTest, CreateUnsupportedDetectorType) {
   /// Test that unsupported DetectorType throws exception
   /// This test uses a valid config but BIFROST detector is not supported
-  /// This covers the final error case: throw std::runtime_error("Unsupported DetectorType...")
-  
+  /// This covers the final error case: throw std::runtime_error("Unsupported
+  /// DetectorType...")
+
   std::string ValidConfig{"deleteme_unsupported_detector.json"};
   std::string ValidConfigStr = R"(
 {
@@ -570,17 +660,17 @@ TEST_F(FreiaInstrumentTest, CreateUnsupportedDetectorType) {
   ]
 }
   )";
-  
-  saveBuffer(ValidConfig, (void *)ValidConfigStr.c_str(), 
+
+  saveBuffer(ValidConfig, (void *)ValidConfigStr.c_str(),
              ValidConfigStr.size());
-  
+
   Settings.ConfigFile = ValidConfig;
   Settings.CalibFile = "";
-  
+
   // Expect runtime_error for unsupported detector type
   try {
-    FreiaInstrument UnsupportedDetector(Counters, Settings, serializer, 
-                                        ESSHeaderParser, Stats, 
+    FreiaInstrument UnsupportedDetector(Counters, Settings, serializer,
+                                        ESSHeaderParser, Stats,
                                         DetectorType::BIFROST);
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &e) {
@@ -588,7 +678,7 @@ TEST_F(FreiaInstrumentTest, CreateUnsupportedDetectorType) {
     // Verify exact error message
     EXPECT_EQ(error_msg, "Unsupported DetectorType: BIFROST");
   }
-  
+
   deleteFile(ValidConfig);
 }
 

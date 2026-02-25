@@ -41,7 +41,6 @@ struct Counters {
 
   // Processing time counters
   int64_t ProcessingIdle{0};
-  int64_t TimeError{0};
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

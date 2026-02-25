@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2020 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,6 @@ struct Counters {
   struct vmm3::VMM3ParserStats VMMStats;
 
   // Logical and Digital geometry incl. Calibration
-  int64_t MaxTOFErrors;
   int64_t MaxADC;
   int64_t ADCBelowThreshold;
 
@@ -38,7 +37,6 @@ struct Counters {
   int64_t EventsInvalidWireGap;
   struct GapMatcherStats MatcherStats;
 
-  int64_t TimeErrors;
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
 

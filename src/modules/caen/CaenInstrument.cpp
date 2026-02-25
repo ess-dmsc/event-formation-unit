@@ -1,4 +1,4 @@
-// Copyright (C) 2020 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -86,25 +86,24 @@ void CaenInstrument::processReadouts() {
     }
 
     // Calculate TOF in ns
-    uint64_t TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
+    auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
+
+    if (!TimeOfFlight.has_value()) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      continue;
+    }
 
     XTRACE(DATA, DEB,
            "PulseTime     %" PRIu64 ", Previous PulseTime: %" PRIu64
            ", Calculated ToF %" PRIu64 " ",
            ESSHeaderParser.Packet.Time.getRefTimeUInt64(),
-           ESSHeaderParser.Packet.Time.getPrevRefTimeUInt64(), TimeOfFlight);
-
-    if (TimeOfFlight == ESSHeaderParser.Packet.Time.InvalidTOF) {
-      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
-      counters.TimeError++;
-      continue;
-    }
+           ESSHeaderParser.Packet.Time.getPrevRefTimeUInt64(), TimeOfFlight.value());
 
     XTRACE(DATA, DEB,
-           "  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group %u, A %d, B "
+           "  Data: time (%10u, %10u) tof %llu, Unused %u, Group %u, A %d, B "
            "%d, C %d, D %d",
-           Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
+           Data.TimeHigh, Data.TimeLow, TimeOfFlight.value(), Data.Unused, Data.Group,
            Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
     // Calculate pixel using template wrapper with automatic error counting
@@ -118,15 +117,15 @@ void CaenInstrument::processReadouts() {
              "Pixel Error  Data: time (%10u, %10u) tof %llu, SeqNo %u, Group "
              "%u, A %u, B "
              "%u, C %u, D %u",
-             Data.TimeHigh, Data.TimeLow, TimeOfFlight, Data.Unused, Data.Group,
+             Data.TimeHigh, Data.TimeLow, TimeOfFlight.value(), Data.Unused, Data.Group,
              Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
       // PixelErrors are now counted automatically by DetectorGeometry::calcPixel()
     } else if (SerializerId >= Serializers.size()) {
       XTRACE(EVENT, WAR, "Serializer identification error");
       counters.SerializerErrors++;
     } else {
-      XTRACE(EVENT, DEB, "Pixel %u, TOF %u", PixelId, TimeOfFlight);
-      Serializers[SerializerId]->addEvent(static_cast<int32_t>(TimeOfFlight),
+      XTRACE(EVENT, DEB, "Pixel %u, TOF %u", PixelId, TimeOfFlight.value());
+      Serializers[SerializerId]->addEvent(static_cast<int32_t>(TimeOfFlight.value()),
                                           static_cast<int32_t>(PixelId));
       counters.Events++;
     }

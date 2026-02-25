@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,7 +24,6 @@ struct Counters {
 
   // Logical and Digital geometry incl. Calibration
   int64_t HybridMappingErrors;
-  int64_t TOFErrors;
   /// \todo TREX still using this, we should decouple it from NMX Counters
   int64_t MinADC;
   int64_t MappingErrors;
@@ -42,7 +41,6 @@ struct Counters {
   int64_t ClustersTooSmallSpanY;
   int64_t ClustersTooLargeTimeSpan;
   int64_t EventsMatchedClusters;
-  int64_t TimeErrors;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout;
