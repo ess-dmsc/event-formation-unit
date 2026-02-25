@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 #include <common/kafka/EV44Serializer.h>
+#include <common/testutils/EV44SerializerMock.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
 #include <geometry/Config.h>
@@ -14,6 +15,8 @@
 #include <timepix3/Timepix3Instrument.h>
 
 using namespace Timepix3;
+using namespace testing;
+using MockSerializer = NiceMock<EV44SerializerMock>;
 
 std::string ConfigFile{"deleteme_instr_config.json"};
 std::string ConfigStr = R"(
@@ -77,9 +80,7 @@ class Timepix3InstrumentTest : public TestBase {
 protected:
   struct Counters counters {};
 
-  EV44Serializer serializer;
-
-  Timepix3InstrumentTest() : serializer(115000, "timepix3") {}
+  MockSerializer serializer;
 
   void TearDown() override {}
 };

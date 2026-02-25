@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -38,7 +38,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
   //
   Stats.create("readouts.adc_max", Counters.MaxADC);
-  Stats.create("readouts.tof_toolarge", Counters.MaxTOFErrors);
   // VMM3Parser stats
   Stats.create("readouts.error_size", Counters.VMMStats.ErrorSize);
   Stats.create("readouts.error_fiber", Counters.VMMStats.ErrorFiber);
@@ -62,7 +61,6 @@ FreiaBase::FreiaBase(BaseSettings const &settings) : Detector(settings) {
 
   // Event stats
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.time_errors", Counters.TimeErrors);
   Stats.create("events.strip_gaps", Counters.EventsInvalidStripGap);
   Stats.create("events.wire_gaps", Counters.EventsInvalidWireGap);
 

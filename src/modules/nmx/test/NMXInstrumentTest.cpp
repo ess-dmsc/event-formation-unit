@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -7,6 +7,7 @@
 #include <common/Statistics.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/ess/Parser.h>
+#include <common/testutils/EV44SerializerMock.h>
 #include <common/testutils/HeaderFactory.h>
 #include <common/testutils/SaveBuffer.h>
 #include <common/testutils/TestBase.h>
@@ -17,6 +18,8 @@
 
 using namespace Nmx;
 using namespace ESSReadout;
+using namespace testing;
+using MockSerializer = NiceMock<EV44SerializerMock>;
 // clang-format off
 std::string BadConfigFile{"deleteme_nmx_instr_config_bad.json"};
 std::string BadConfigStr = R"(
@@ -402,7 +405,7 @@ protected:
   BaseSettings Settings;
   std::unique_ptr<Statistics> Stats;
   std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
-  EV44Serializer serializer{115000, "nmx"};
+  MockSerializer serializer;
   std::unique_ptr<NMXInstrument> nmx;
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
@@ -469,6 +472,9 @@ TEST_F(NMXInstrumentTest, GoodEvent) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
+  // Good event - addEvent must be called exactly once with non-negative ToF
+  EXPECT_CALL(serializer, addEvent(Ge(0), Gt(0))).Times(1);
+
   // Ring and FEN IDs are within bounds, but Hybrid is not defined in config
   nmx->processReadouts();
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
@@ -515,6 +521,9 @@ TEST_F(NMXInstrumentTest, NoEventYOnly) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
+  // Y-only cluster has no X coordinate - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   nmx->processReadouts();
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
@@ -541,6 +550,9 @@ TEST_F(NMXInstrumentTest, NoEventXOnly) {
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
   ASSERT_EQ(counters.HybridMappingErrors, 0);
 
+  // X-only cluster has no Y coordinate - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   nmx->processReadouts();
   ASSERT_EQ(counters.VMMStats.ErrorFiber, 0);
   ASSERT_EQ(counters.VMMStats.ErrorFEN, 0);
@@ -557,6 +569,9 @@ TEST_F(NMXInstrumentTest, NoEventXOnly) {
 }
 
 TEST_F(NMXInstrumentTest, NoEvents) {
+  // Empty event - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   Events.push_back(TestEvent);
   nmx->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
@@ -567,6 +582,10 @@ TEST_F(NMXInstrumentTest, PixelError) {
   TestEvent.ClusterA.insert({0, 2, 100, 0});
   TestEvent.ClusterB.insert({0, 60000, 100, 1});
   Events.push_back(TestEvent);
+
+  // Pixel error (invalid coordinate) - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   nmx->generateEvents(Events);
   ASSERT_EQ(counters.Events, 0);
   ASSERT_EQ(nmx->getGeometry().getBaseCounters().PixelErrors, 1);
@@ -644,13 +663,19 @@ TEST_F(NMXInstrumentTest, BadEventLargeXSpan) {
   ASSERT_EQ(counters.ClustersTooLargeSpanX, 1);
 }
 
-TEST_F(NMXInstrumentTest, NegativeTOF) {
+TEST_F(NMXInstrumentTest, NegativeTOFFallback) {
   auto &Packet = ESSHeaderParser->Packet;
   makeHeader(ESSHeaderParser->Packet, GoodEvent);
+  // Set current pulse time in the future so TOF is negative vs current pulse
+  // Event time is ~0s, Reference = 200s, PrevReference = 0s (from makeHeader)
+  // Fallback to previous pulse will succeed
   Packet.Time.setReference(ESSTime(200, 0));
 
   auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
+
+  // Fallback succeeds - addEvent must be called exactly once with non-negative ToF
+  EXPECT_CALL(serializer, addEvent(Ge(0), Gt(0))).Times(1);
 
   nmx->processReadouts();
   for (auto &builder : nmx->builders) {
@@ -660,8 +685,50 @@ TEST_F(NMXInstrumentTest, NegativeTOF) {
 
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
-  ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.TimeErrors, 1);
+  // Event is created because fallback to PrevPulse succeeds (PrevRef=0,
+  // EventTime~=0)
+  EXPECT_EQ(counters.Events, 1);
+
+  // Verify that getTOF detected negative TOF and fell back to previous pulse
+  EXPECT_EQ(Packet.Time.Counters.TofCount, 0); // Current pulse failed
+  EXPECT_EQ(Packet.Time.Counters.TofNegative,
+            1); // Was negative vs current pulse
+  EXPECT_EQ(Packet.Time.Counters.PrevTofCount, 1); // Fallback succeeded
+}
+
+TEST_F(NMXInstrumentTest, NegativePrevTOFError) {
+  auto &Packet = ESSHeaderParser->Packet;
+  makeHeader(ESSHeaderParser->Packet, GoodEvent);
+  // Set both pulse times in the future so the event is "too old"
+  // Event time is ~0s, Reference = 200s, PrevReference = 100s
+  // Both TOF calculations will be negative
+  Packet.Time.setReference(ESSTime(200, 0));
+  Packet.Time.setPrevReference(ESSTime(100, 0));
+
+  auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
+  counters.VMMStats = nmx->VMMParser.Stats;
+
+  // Readout is negative to both pulses - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
+  nmx->processReadouts();
+  for (auto &builder : nmx->builders) {
+    builder.flush(true);
+    nmx->generateEvents(builder.Events);
+  }
+
+  ASSERT_EQ(Res, 3);
+  ASSERT_EQ(counters.VMMStats.Readouts, 3);
+  // No event created - both pulse times fail
+  EXPECT_EQ(counters.Events, 0);
+
+  // Verify that getTOF detected negative TOF and fallback also failed
+  EXPECT_EQ(Packet.Time.Counters.TofCount, 0); // Current pulse failed
+  EXPECT_EQ(Packet.Time.Counters.TofNegative,
+            1); // Was negative vs current pulse
+  EXPECT_EQ(Packet.Time.Counters.PrevTofCount, 0); // Fallback also failed
+  EXPECT_EQ(Packet.Time.Counters.PrevTofNegative,
+            1); // Was negative vs prev pulse too
 }
 
 TEST_F(NMXInstrumentTest, HighTOFError) {
@@ -670,6 +737,9 @@ TEST_F(NMXInstrumentTest, HighTOFError) {
   auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
+  // ToF exceeds limit - addEvent must NOT be called
+  EXPECT_CALL(serializer, addEvent(_, _)).Times(0);
+
   nmx->processReadouts();
   for (auto &builder : nmx->builders) {
     builder.flush(true);
@@ -679,7 +749,9 @@ TEST_F(NMXInstrumentTest, HighTOFError) {
   ASSERT_EQ(Res, 3);
   ASSERT_EQ(counters.VMMStats.Readouts, 3);
   ASSERT_EQ(counters.Events, 0);
-  ASSERT_EQ(counters.TOFErrors, 1);
+
+  // Verify that getTOF detected high TOF
+  ASSERT_EQ(ESSHeaderParser->Packet.Time.Counters.TofHigh, 1);
 }
 
 TEST_F(NMXInstrumentTest, BadEventLargeTimeSpan) {

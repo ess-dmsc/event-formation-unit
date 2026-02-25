@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,11 +8,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/geometry/vmm3/VMM3Geometry.h>
+#include "common/time/ESSTime.h"
 #include <assert.h>
+#include <chrono>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/geometry/DetectorGeometry.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
 #include <cstdint>
@@ -39,9 +41,8 @@ TREXInstrument::TREXInstrument(struct Counters &counters,
 
   loadConfigAndCalib();
 
-  essgeom =
-      ESSGeometry(Conf.TREXFileParms.SizeX, Conf.TREXFileParms.SizeY,
-                  Conf.TREXFileParms.SizeZ, 1);
+  essgeom = ESSGeometry(Conf.TREXFileParms.SizeX, Conf.TREXFileParms.SizeY,
+                        Conf.TREXFileParms.SizeZ, 1);
 
   // We can now use the settings in Conf
   if (Conf.FileParms.InstrumentGeometry == "TREX") {
@@ -53,6 +54,7 @@ TREXInstrument::TREXInstrument(struct Counters &counters,
   }
 
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.FileParms.MaxTOFNS);
 
   // Reinit histogram size (was set to 1 in class definition)
   // ADC is 10 bit 2^10 = 1024
@@ -78,8 +80,7 @@ void TREXInstrument::loadConfigAndCalib() {
       std::vector<EventBuilder2D>((Conf.MaxRing + 1) * (Conf.MaxFEN + 1));
 
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(
-        Conf.TREXFileParms.MaxMatchingTimeGap);
+    builder.matcher.setMaximumTimeGap(Conf.TREXFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
         Conf.TREXFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
@@ -104,7 +105,8 @@ void TREXInstrument::processReadouts() {
   for (const auto &readout : VMMParser.Result) {
 
     // Convert from physical fiber to rings
-    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
+    uint8_t Ring =
+        DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
     uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
@@ -220,8 +222,6 @@ void TREXInstrument::processReadouts() {
 }
 
 void TREXInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
-
   for (const auto &e : Events) {
     if (e.empty()) {
       continue;
@@ -255,23 +255,13 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", e.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = e.timeStart();
+    auto EventTimeNs = esstime::TimeDurationNano(e.timeStart());
 
-    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
-           TimeRef.getRefTimeUInt64());
+    auto TimeOfFlight =
+        ESSHeaderParser.Packet.Time.getTOF(ESSReadout::ESSTime(EventTimeNs));
 
-    if (TimeRef.getRefTimeUInt64() > EventTime) {
-      XTRACE(EVENT, WAR, "Negative TOF, pulse = %u, event time = %u",
-             TimeRef.getRefTimeUInt64(), EventTime);
-      counters.TimeErrors++;
-      continue;
-    }
-
-    uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
-
-    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
-      counters.TOFErrors++;
+    if (!TimeOfFlight.has_value()) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
 
@@ -285,15 +275,15 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
 
     if (PixelId == 0) {
       XTRACE(EVENT, WAR,
-             "Bad pixel!: Time: %u TOF: %u, x %u, y %u, z %u, pixel %u", time,
-             TimeOfFlight, x, y, z, PixelId);
+             "Bad pixel!: EventTime: %u TOF: %u, x %u, y %u, z %u, pixel %u",
+             EventTimeNs, TimeOfFlight.value(), x, y, z, PixelId);
       counters.PixelErrors++;
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, x %u, y %u, z %u, pixel %u", time,
-           TimeOfFlight, x, y, z, PixelId);
-    Serializer.addEvent(TimeOfFlight, PixelId);
+    XTRACE(EVENT, INF, "EventTime: %u TOF: %u, x %u, y %u, z %u, pixel %u",
+           EventTimeNs, TimeOfFlight.value(), x, y, z, PixelId);
+    Serializer.addEvent(TimeOfFlight.value(), PixelId);
     counters.Events++;
   }
   Events.clear(); // else events will accumulate

@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -49,7 +49,6 @@ CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
 
   // Events
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.errors.time", Counters.TimeError);
 
   // System counters
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);

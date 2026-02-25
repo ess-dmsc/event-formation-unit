@@ -1,4 +1,4 @@
-// Copyright (C) 2023 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2023 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,9 +17,9 @@ using namespace timepixDTO;
 using namespace timepixReadout;
 using namespace std;
 
-class MockEV44Serializer : public EV44Serializer {
+class EV44SerializerMock : public EV44Serializer {
 public:
-  MockEV44Serializer() : EV44Serializer(0, "dummy", {}) {}
+  EV44SerializerMock() : EV44Serializer(0, "dummy", {}) {}
 
   int64_t pulseTimeToCompare;
   int32_t eventTimeToCompare;
@@ -91,7 +91,7 @@ protected:
 
   Counters counters{};
   shared_ptr<Timepix3Geometry> geometry{new Timepix3Geometry(256, 256, 1, 1)};
-  MockEV44Serializer serializer;
+  EV44SerializerMock serializer;
   Config Timepix3Config{};
   PixelEventHandler testEventHandler{counters, geometry, serializer,
                                      Timepix3Config};

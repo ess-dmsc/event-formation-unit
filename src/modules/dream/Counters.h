@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -12,6 +12,7 @@
 #include <cinttypes>
 #include <common/kafka/Producer.h>
 #include <common/readout/ess/Parser.h>
+#include <cstdint>
 
 struct Counters {
   // ESSReadout parser

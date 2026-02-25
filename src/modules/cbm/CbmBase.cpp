@@ -61,7 +61,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // Readout processing errors - readout dropped
   Stats.create("readouts.errors.no_serializer", Counters.NoSerializerCfgError);
   Stats.create("readouts.errors.type_not_configured", Counters.TypeNotConfigured);
-  Stats.create("readouts.errors.time", Counters.TimeError);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);

@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2019 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,11 +17,15 @@
 #include <common/debug/Trace.h>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 
 namespace esstime {
 
 using local_clock = std::chrono::high_resolution_clock;
+using tof_t = std::optional<uint64_t>;
+
+constexpr std::nullopt_t InvalidTof = std::nullopt;
 
 using TimePointNano = std::chrono::high_resolution_clock::time_point;
 /// \brief Duration in nanoseconds with int64_t precision
@@ -399,8 +403,6 @@ public:
     setReference(PulseTime);
   }
 
-  const uint64_t InvalidTOF{0xFFFFFFFFFFFFFFFFULL};
-
   ///
   /// \brief Sets the reference time.
   ///
@@ -476,7 +478,7 @@ public:
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated TOF value.
   ///
-  uint64_t getTOF(const ESSTime &EventEssTime, uint32_t DelayNS = 0);
+  tof_t getTOF(const ESSTime &EventEssTime, uint32_t DelayNS = 0);
 
   ///
   /// \brief Calculates the previous time-of-flight (TOF) value based on the
@@ -486,7 +488,7 @@ public:
   /// \param DelayNS The delay in nanoseconds.
   /// \return The calculated previous TOF value.
   ///
-  uint64_t getPrevTOF(const ESSTime &EventTime, uint32_t DelayNS = 0);
+  tof_t getPrevTOF(const ESSTime &EventTime, uint32_t DelayNS = 0);
 
   ///
   /// \brief Equality comparison operator.

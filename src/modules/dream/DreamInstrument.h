@@ -1,4 +1,4 @@
-// Copyright (C) 2021 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2021 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,6 +20,7 @@
 #include <common/kafka/EV44Serializer.h>
 #include <common/time/TimeString.h>
 
+#include <cstdint>
 #include <dream/Counters.h>
 #include <dream/geometry/Config.h>
 #include <dream/geometry/Geometry.h>
@@ -126,13 +127,18 @@ void DreamInstrument<Type_t>::processReadouts() {
     auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
+    if (!TimeOfFlight.has_value()) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
+      continue;
+    }  
+
     // Calculate pixelid and apply calibration using polymorphism
     // The geometry extracts ModuleParms from the RMConfig array internally
     uint32_t PixelId = Geom->calcPixel(Data);
     XTRACE(DATA, DEB, "PixelId: %u", PixelId);
 
     if (PixelId != 0) {
-      Serializer.addEvent(TimeOfFlight, PixelId);
+      Serializer.addEvent(TimeOfFlight.value(), PixelId);
       Counters.Events++;
     }
   }

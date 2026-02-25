@@ -99,15 +99,14 @@ void CbmInstrument::processMonitorReadouts() {
     /// the reference time, it means that tof would be negative and this
     /// function returns the TOF according to the previous reference time. This
     /// is includes delayed readouts into the current pulse statistics. \note:
-    /// If time calculation fails, the function returns InvalidTOF
-    uint64_t TimeOfFlight = RefTime.getTOF(ReadoutTime);
+    /// If time calculation fails, the function returns std::nullopt
+    auto TimeOfFlight = RefTime.getTOF(ReadoutTime);
 
-    if (TimeOfFlight == RefTime.InvalidTOF) {
+    if (!TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR,
              "No valid TOF from pulse time: %" PRIu32 " and %" PRIu64
              " readout time",
              RefTime.getPrevRefTimeUInt64(), ReadoutTime.toNS().count());
-      counters.TimeError++;
       continue;
     }
 
@@ -138,10 +137,10 @@ void CbmInstrument::processMonitorReadouts() {
         const SchemaDetails *Details =
             SchemaMap.get(Readout.FENId, Readout.Channel);
         if (Details->GetSchema() == SchemaType::DA00) {
-          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight,
+          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight.value(),
                                                                normADC);
         } else {
-          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight,
+          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight.value(),
                                                                normADC);
         }
 
@@ -149,7 +148,7 @@ void CbmInstrument::processMonitorReadouts() {
                "CBM IBM Event, CbmType: %" PRIu8 " ADC: %" PRIu32
                " MCASum: %" PRIu32 " TOF %" PRIu64 "ns",
                Readout.Type, Readout.NADC.getNADC(), Readout.NADC.MCASum,
-               TimeOfFlight);
+               TimeOfFlight.value());
 
         counters.IBMEvents++;
         counters.NPOSCount += normADC;
@@ -173,16 +172,16 @@ void CbmInstrument::processMonitorReadouts() {
 
         SchemaDetails *Details = SchemaMap.get(Readout.FENId, Readout.Channel);
         if (Details->GetSchema() == SchemaType::DA00) {
-          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight, 1);
+          Details->GetSerializer<SchemaType::DA00>()->addEvent(TimeOfFlight.value(), 1);
         } else {
-          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight,
+          Details->GetSerializer<SchemaType::EV44>()->addEvent(TimeOfFlight.value(),
                                                                PixelId);
         }
 
         XTRACE(DATA, DEB,
-               "CBM 0D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32
-               " TOF %" PRIu64 "ns",
-               Readout.Type, PixelId, TimeOfFlight);
+               "CBM 0D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32 " TOF %" PRIu64
+               "ns",
+               Readout.Type, PixelId, TimeOfFlight.value());
 
         counters.Event0DEvents++;
 
@@ -208,20 +207,20 @@ void CbmInstrument::processMonitorReadouts() {
           XTRACE(DATA, DEB,
                  "CBM Event pixel calculation failed, CbmType: %" PRIu8
                  " TOF %" PRIu64 "ns, XPos %" PRIu16 " YPos %" PRIu16,
-                 Readout.Type, TimeOfFlight, Readout.Pos.XPos,
+                 Readout.Type, TimeOfFlight.value(), Readout.Pos.XPos,
                  Readout.Pos.YPos);
         } else {
 
           SchemaMap.get(Readout.FENId, Readout.Channel)
               ->GetSerializer<SchemaType::EV44>()
-              ->addEvent(TimeOfFlight, PixelId);
+              ->addEvent(TimeOfFlight.value(), PixelId);
 
           counters.Event2DEvents++;
 
           XTRACE(DATA, DEB,
                  "CBM 2D Event, CbmType: %" PRIu8 " Pixel: %" PRIu32
                  " TOF %" PRIu64 "ns, XPos %" PRIu16 " YPos %" PRIu16,
-                 Readout.Type, PixelId, TimeOfFlight, Readout.Pos.XPos,
+                 Readout.Type, PixelId, TimeOfFlight.value(), Readout.Pos.XPos,
                  Readout.Pos.YPos);
         }
       } else {

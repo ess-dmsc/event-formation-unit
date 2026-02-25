@@ -1,4 +1,4 @@
-// Copyright (C) 2016 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2016 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -24,7 +24,6 @@ struct Counters {
 
   // Logical and Digital geometry incl. Calibration
   int64_t HybridMappingErrors{0};
-  int64_t TOFErrors{0};
   int64_t MinADC{0};
   int64_t MaxADC{0};
   int64_t MappingErrors{0};
@@ -38,7 +37,6 @@ struct Counters {
   int64_t ClustersTooLargeGridSpan{0};
   int64_t EventsMatchedClusters{0};
   int64_t PixelErrors{0};
-  int64_t TimeErrors;
 
   // Identification of the cause of produce calls
   int64_t ProduceCauseTimeout{0};

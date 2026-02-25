@@ -1,4 +1,4 @@
-// Copyright (C) 2019 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2019 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -35,7 +35,6 @@ struct CaenCounters {
   
   // Events
   int64_t Events{0};
-  int64_t TimeError{0};
   int64_t EventsUdder{0};
   int64_t SerializerErrors{0};
 

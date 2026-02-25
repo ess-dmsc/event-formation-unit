@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -48,6 +48,7 @@ NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
   }
 
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
+  ESSHeaderParser.Packet.Time.setMaxTOF(Conf.FileParms.MaxTOFNS);
 }
 
 void NMXInstrument::loadConfigAndCalib() {
@@ -253,37 +254,27 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Event Valid\n %s", Event.to_string({}, true).c_str());
 
     // Calculate TOF in ns
-    uint64_t EventTime = Event.timeEnd();
+    auto EventTimeNs = esstime::TimeDurationNano(Event.timeEnd());
 
-    XTRACE(EVENT, DEB, "EventTime %" PRIu64 ", TimeRef %" PRIu64, EventTime,
-           TimeRef.getRefTimeUInt64());
+    auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
 
-    if (TimeRef.getRefTimeUInt64() > EventTime) {
-      XTRACE(EVENT, WAR, "Negative TOF!");
-      counters.TimeErrors++;
-      continue;
-    }
-
-    uint64_t TimeOfFlight = EventTime - TimeRef.getRefTimeUInt64();
-
-    if (TimeOfFlight > Conf.FileParms.MaxTOFNS) {
-      XTRACE(DATA, WAR, "TOF larger than %u ns", Conf.FileParms.MaxTOFNS);
-      counters.TOFErrors++;
+    if (!TimeOfFlight.has_value()) {
+      XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
 
     auto PixelId = NMXGeom->calcPixel(Event);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: Time: %u TOF: %u, pixel %u", time,
-             TimeOfFlight, PixelId);
+      XTRACE(EVENT, WAR, "Bad pixel!: EventTime: %u TOF: %u, pixel %u", EventTimeNs,
+             TimeOfFlight.value(), PixelId);
       continue;
     }
 
-    XTRACE(EVENT, INF, "Time: %u TOF: %u, pixel %u", time, TimeOfFlight,
+    XTRACE(EVENT, INF, "EventTime: %u TOF: %u, pixel %u", EventTimeNs, TimeOfFlight.value(),
            PixelId);
 
-    Serializer.addEvent(TimeOfFlight, PixelId);
+    Serializer.addEvent(TimeOfFlight.value(), PixelId);
 
     counters.Events++;
   }

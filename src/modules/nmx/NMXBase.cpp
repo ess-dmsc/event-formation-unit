@@ -1,4 +1,4 @@
-// Copyright (C) 2022 - 2025 European Spallation Source, see LICENSE file
+// Copyright (C) 2022 - 2026 European Spallation Source, see LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -67,7 +67,6 @@ NmxBase::NmxBase(BaseSettings const &settings) : Detector(settings) {
 
   // Event stats
   Stats.create("events.count", Counters.Events);
-  Stats.create("events.time_errors", Counters.TimeErrors);
 
   //
   Stats.create("thread.processing_idle", Counters.ProcessingIdle);
