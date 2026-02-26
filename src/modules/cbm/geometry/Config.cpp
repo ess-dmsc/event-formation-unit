@@ -51,7 +51,7 @@ void Config::apply() {
   CbmParms.NumOfFENs = CbmParms.MaxFENId + 1;
 
   TopologyMapPtr.reset(new HashMap2D<Topology>(CbmParms.NumOfFENs));
-  if (!root().contains("Topology")) {
+  if (not root().contains("Topology")) {
     throw std::runtime_error("No 'Topology' section found in the "
                              "configuration. Cannot setup Beam Monitors");
   }

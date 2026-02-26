@@ -8,10 +8,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/debug/Log.h>
 #include <common/debug/Trace.h>
 #include <common/geometry/DetectorGeometry.h>
+#include <common/geometry/vmm3/VMM3Geometry.h>
 #include <common/kafka/EV44Serializer.h>
 #include <common/readout/vmm3/Readout.h>
 #include <common/time/TimeString.h>
@@ -39,8 +39,7 @@ FreiaInstrument::FreiaInstrument(struct Counters &counters,
   loadConfigAndCalib();
   // Geometry depends on DetectorType and configuration InstrumentGeometry
   // string
-  Geom = createGeometry(detectorType, Conf.FileParms.InstrumentGeometry,
-                        Stats);
+  Geom = createGeometry(detectorType, Conf.FileParms.InstrumentGeometry, Stats);
   ESSHeaderParser.setMaxPulseTimeDiff(Conf.FileParms.MaxPulseTimeNS);
   ESSHeaderParser.Packet.Time.setMaxTOF(Conf.FileParms.MaxTOFNS);
 }
@@ -59,10 +58,8 @@ void FreiaInstrument::loadConfigAndCalib() {
 
   for (EventBuilder2D &builder : builders) {
     builder.matcher.setMaximumTimeGap(Conf.MBFileParms.MaxMatchingTimeGap);
-    builder.ClustererX.setMaximumTimeGap(
-        Conf.MBFileParms.MaxClusteringTimeGap);
-    builder.ClustererY.setMaximumTimeGap(
-        Conf.MBFileParms.MaxClusteringTimeGap);
+    builder.ClustererX.setMaximumTimeGap(Conf.MBFileParms.MaxClusteringTimeGap);
+    builder.ClustererY.setMaximumTimeGap(Conf.MBFileParms.MaxClusteringTimeGap);
     if (Conf.MBFileParms.SplitMultiEvents) {
       builder.matcher.setSplitMultiEvents(
           Conf.MBFileParms.SplitMultiEvents,
@@ -90,10 +87,11 @@ void FreiaInstrument::processReadouts() {
            readout.FiberId, readout.FENId, readout.VMM, readout.Channel,
            readout.TimeLow);
 
-    uint8_t Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
+    uint8_t Ring =
+        DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
 
     // Validate readout data (Ring, FEN, Hybrid)
-    if (!Geom->validateReadoutData(readout)) {
+    if (not Geom->validateReadoutData(readout)) {
       continue;
     }
 
@@ -163,7 +161,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (!Event.both_planes()) {
+    if (not Event.both_planes()) {
       XTRACE(EVENT, DEB,
              "\n================== NO COINCIDENCE =====================\n\n");
       XTRACE(EVENT, DEB, "Event has no coincidence\n %s\n",
@@ -205,7 +203,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
 
     auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
 
-    if (!TimeOfFlight.has_value()) {
+    if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
@@ -214,12 +212,17 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     XTRACE(EVENT, DEB, "Calculated pixel ID: %u", PixelId);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: EventTime: %u TOF: %u, pixel %u", EventTimeNs,
-             TimeOfFlight.value(), PixelId);
+      XTRACE(EVENT, WAR,
+             "Bad pixel!: EventTime: %" PRIu64 " TOF: %" PRIu64
+             ", pixel %" PRIu32 "",
+             static_cast<uint64_t>(EventTimeNs.count()), TimeOfFlight.value(),
+             PixelId);
       continue;
     }
 
-    XTRACE(EVENT, INF, "EventTime: %u TOF: %u, pixel %u", EventTimeNs, TimeOfFlight.value(),
+    XTRACE(EVENT, INF,
+           "EventTime: %" PRIu64 " TOF: %" PRIu64 ", pixel %" PRIu32 "",
+           static_cast<uint64_t>(EventTimeNs.count()), TimeOfFlight.value(),
            PixelId);
 
     Serializer.addEvent(TimeOfFlight.value(), PixelId);

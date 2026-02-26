@@ -674,7 +674,8 @@ TEST_F(NMXInstrumentTest, NegativeTOFFallback) {
   auto Res = nmx->VMMParser.parse(ESSHeaderParser->Packet);
   counters.VMMStats = nmx->VMMParser.Stats;
 
-  // Fallback succeeds - addEvent must be called exactly once with non-negative ToF
+  // Fallback succeeds - addEvent must be called exactly once with non-negative
+  // ToF
   EXPECT_CALL(serializer, addEvent(Ge(0), Gt(0))).Times(1);
 
   nmx->processReadouts();

@@ -15,8 +15,6 @@ set(cbm_common_inc
   readout/Parser.h
   geometry/Geometry.h
   geometry/Config.h
-  geometry/Geometry0D.h
-  geometry/Geometry2D.h
   )
 
 
@@ -49,28 +47,16 @@ set(CbmBaseTest_SRC
 create_test_executable(CbmBaseTest)
 
 #============================================================================
-# Geometry2DTest Unit test
+# CbmGeometryTest Unit test (topology-based geometry)
 #============================================================================
-set(Geometry2DTest_INC
+set(CbmGeometryTest_INC
   ${cbm_common_inc}
 )
-set(Geometry2DTest_SRC
+set(CbmGeometryTest_SRC
   ${cbm_common_src}
-  test/Geometry2DTest.cpp
+  test/CbmGeometryTest.cpp
 )
-create_test_executable(Geometry2DTest)
-
-#============================================================================
-# Geometry0DTest Unit test
-#============================================================================
-set(Geometry0DTest_INC
-  ${cbm_common_inc}
-)
-set(Geometry0DTest_SRC
-  ${cbm_common_src}
-  test/Geometry0DTest.cpp
-)
-create_test_executable(Geometry0DTest)
+create_test_executable(CbmGeometryTest)
 
 #============================================================================
 # CBMInstrumentTest Module integration test

@@ -11,14 +11,12 @@
 #pragma once
 
 #include <common/Statistics.h>
-#include <common/geometry/DetectorGeometry.h>
 #include <common/memory/HashMap2D.h>
 #include <modules/cbm/Counters.h>
 #include <modules/cbm/SchemaDetails.h>
 #include <modules/cbm/geometry/Config.h>
 #include <modules/cbm/geometry/Geometry.h>
 #include <modules/cbm/readout/Parser.h>
-#include <unordered_map>
 
 namespace cbm {
 
@@ -26,7 +24,6 @@ class CbmInstrument {
 public:
   using DA00Serializer_t = SchemaDetails::DA00Serializer_t;
   using EV44Serializer_t = SchemaDetails::EV44Serializer_t;
-  using GeometryMap_t = std::unordered_map<uint16_t, std::unique_ptr<Geometry>>;
 
   /// \brief Constructor for the CbmInstrument class.
   /// \details The constructor initializes the instrument and sets the
@@ -46,16 +43,11 @@ public:
   /// \brief Process the beam monitor readouts.
   void processMonitorReadouts(void);
 
-  /// \brief Get read access to geometry object to access internal stats
-  /// counters.
+  /// \brief Get read access to the single geometry object
   ///
-  /// \param FENId FEN identifier (8-bit)
-  /// \param ChannelId Channel identifier (8-bit)
-  /// \return  Base geometry object.
-  const cbm::Geometry *GetGeometry(uint8_t FENId, uint8_t ChannelId) {
-    uint16_t key = calcGeometryKey(FENId, ChannelId);
-    std::unique_ptr<cbm::Geometry> &baseGeometry = Geometries[key];
-    return baseGeometry.get();
+  /// \return Reference to Geometry object
+  const Geometry &GetGeometry() const {
+    return CbmGeometry;
   }
 
   /// \brief Reference to parser for CBM readout data.
@@ -74,22 +66,8 @@ private:
   /// \brief Parser for the ESS Readout header.
   ESSReadout::Parser &ESSHeaderParser;
 
-  /// \brief Geometries map for all beam monitor types.
-  /// Key is created with FEN id as the 8 most significant bits and channel id
-  /// as 8 least significant bits. Stores DetectorGeometry base class pointers
-  /// for polymorphic access to validation and pixel calculation.
-  GeometryMap_t Geometries{};
-  // std::unordered_map<uint16_t,
-  // std::unique_ptr<geometry::DetectorGeometry<Parser::CbmReadout>>>
-  // Geometries{};
-
-  /// \brief Calculate geometry map key from FEN and Channel IDs
-  /// \param FENId FEN identifier (8-bit)
-  /// \param ChannelId Channel identifier (8-bit)
-  /// \return 16-bit key with FEN in upper byte and Channel in lower byte
-  inline uint16_t calcGeometryKey(uint8_t FENId, uint8_t ChannelId) const {
-    return (static_cast<uint16_t>(FENId) << 8) | ChannelId;
-  }
+  /// \brief Single geometry object for all beam monitor types
+  Geometry CbmGeometry;
 };
 
 } // namespace cbm
