@@ -77,7 +77,7 @@ std::unique_ptr<IBMDataGenerator> DataGeneratorFactory::IBMDataFactory(
 std::unique_ptr<FixedValueGenerator> DataGeneratorFactory::FixValueFactory(
   const CbmGeneratorSettings &settings) {
 
-      if (!settings.Value.has_value()) {
+      if (not settings.Value.has_value()) {
         throw std::runtime_error("Value must be provided for Fixed generator type");
       }
       return std::make_unique<FixedValueGenerator>(
@@ -87,7 +87,7 @@ std::unique_ptr<FixedValueGenerator> DataGeneratorFactory::FixValueFactory(
 std::unique_ptr<LinearGenerator> DataGeneratorFactory::LinearFactory(
   uint16_t frequency, const CbmGeneratorSettings &settings) {
 
-      if (!settings.Gradient.has_value()) {
+      if (not settings.Gradient.has_value()) {
         throw std::runtime_error("Gradient must be provided for Linear generator type");
       }
       return std::make_unique<LinearGenerator>(

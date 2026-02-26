@@ -60,8 +60,7 @@ void NMXInstrument::loadConfigAndCalib() {
 
   builders = std::vector<EventBuilder2D>(Conf.NMXFileParms.NumPanels);
   for (EventBuilder2D &builder : builders) {
-    builder.matcher.setMaximumTimeGap(
-        Conf.NMXFileParms.MaxMatchingTimeGap);
+    builder.matcher.setMaximumTimeGap(Conf.NMXFileParms.MaxMatchingTimeGap);
     builder.ClustererX.setMaximumTimeGap(
         Conf.NMXFileParms.MaxClusteringTimeGap);
     builder.ClustererY.setMaximumTimeGap(
@@ -97,12 +96,13 @@ void NMXInstrument::processReadouts() {
            readout.TimeLow);
 
     // Validate readout data using Freia-style validation
-    if (!NMXGeom->validateReadoutData(readout)) {
+    if (not NMXGeom->validateReadoutData(readout)) {
       continue;
     }
 
     // Convert from fiberid to ringid
-    int Ring = DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
+    int Ring =
+        DetectorGeometry<vmm3::VMM3Parser::VMM3Data>::calcRing(readout.FiberId);
     uint8_t HybridId = VMM3Geometry::calcHybridId(readout.VMM);
 
     // CACHE-OPTIMIZED: Single 3D array lookup instead of 4 separate lookups
@@ -195,7 +195,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
       continue;
     }
 
-    if (!Event.both_planes()) {
+    if (not Event.both_planes()) {
       XTRACE(EVENT, DEB, "Event has no coincidence");
       counters.ClustersNoCoincidence++;
       if (Event.ClusterA.empty()) {
@@ -258,7 +258,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
 
     auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
 
-    if (!TimeOfFlight.has_value()) {
+    if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }
@@ -266,12 +266,17 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     auto PixelId = NMXGeom->calcPixel(Event);
 
     if (PixelId == 0) {
-      XTRACE(EVENT, WAR, "Bad pixel!: EventTime: %u TOF: %u, pixel %u", EventTimeNs,
-             TimeOfFlight.value(), PixelId);
+      XTRACE(EVENT, WAR,
+             "Bad pixel!: EventTime: %" PRIu64 " TOF: %" PRIu64
+             ", pixel %" PRIu32 "",
+             static_cast<uint64_t>(EventTimeNs.count()), TimeOfFlight.value(),
+             PixelId);
       continue;
     }
 
-    XTRACE(EVENT, INF, "EventTime: %u TOF: %u, pixel %u", EventTimeNs, TimeOfFlight.value(),
+    XTRACE(EVENT, INF,
+           "EventTime: %" PRIu64 " TOF: %" PRIu64 ", pixel %" PRIu32 "",
+           static_cast<uint64_t>(EventTimeNs.count()), TimeOfFlight.value(),
            PixelId);
 
     Serializer.addEvent(TimeOfFlight.value(), PixelId);

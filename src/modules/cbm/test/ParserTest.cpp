@@ -234,6 +234,9 @@ TEST_F(CbmParserTest, ErrorDataTime) {
   EXPECT_EQ(parser.Stats.ErrorTimeFrac, 1);
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+  EXPECT_EQ(parser.Stats.Readouts0D, 1);
+  EXPECT_EQ(parser.Stats.Readouts2D, 0);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 0);
 }
 
 // invalid fractional time
@@ -243,6 +246,9 @@ TEST_F(CbmParserTest, ErrorDataType) {
   parser.parse(PacketData);
   EXPECT_EQ(parser.Stats.ErrorType, 2);
   EXPECT_EQ(parser.Stats.Readouts, 2);
+  EXPECT_EQ(parser.Stats.Readouts0D, 0);
+  EXPECT_EQ(parser.Stats.Readouts2D, 0);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 0);
 }
 
 TEST_F(CbmParserTest, DataGood) {
@@ -252,6 +258,9 @@ TEST_F(CbmParserTest, DataGood) {
   EXPECT_EQ(parser.Stats.ErrorSize, 0);
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+  EXPECT_EQ(parser.Stats.Readouts0D, 1);
+  EXPECT_EQ(parser.Stats.Readouts2D, 0);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 1);
 }
 
 TEST_F(CbmParserTest, ErrorFENId) {
@@ -270,6 +279,9 @@ TEST_F(CbmParserTest, CheckADCValues) {
   EXPECT_EQ(parser.Stats.ErrorADC, 0);
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+  EXPECT_EQ(parser.Stats.Readouts0D, 0);
+  EXPECT_EQ(parser.Stats.Readouts2D, 0);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 2);
 
   makeHeader(GoodNonIBMADCData);
 
@@ -277,6 +289,9 @@ TEST_F(CbmParserTest, CheckADCValues) {
   EXPECT_EQ(parser.Stats.ErrorADC, 0);
   EXPECT_EQ(parser.Stats.Readouts, 4);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+  EXPECT_EQ(parser.Stats.Readouts0D, 2);
+  EXPECT_EQ(parser.Stats.Readouts2D, 0);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 2);
 }
 
 TEST_F(CbmParserTest, Check2DValues) {
@@ -286,6 +301,9 @@ TEST_F(CbmParserTest, Check2DValues) {
   EXPECT_EQ(parser.Stats.ErrorADC, 0);
   EXPECT_EQ(parser.Stats.Readouts, 2);
   EXPECT_EQ(parser.Stats.ErrorType, 0);
+  EXPECT_EQ(parser.Stats.Readouts0D, 0);
+  EXPECT_EQ(parser.Stats.Readouts2D, 2);
+  EXPECT_EQ(parser.Stats.ReadoutsIBM, 0);
 
   // Wrong geometry data will be checked on cbminstrument.
 }

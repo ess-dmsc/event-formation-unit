@@ -159,8 +159,6 @@ TEST_F(CbmBaseTest, DataReceiveGoodPacket) {
   std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
   EXPECT_EQ(DetectorBase.Counters.CbmStats.Readouts, 3);
-  EXPECT_EQ(DetectorBase.Counters.Event0DReadoutsProcessed, 1);
-  EXPECT_EQ(DetectorBase.Counters.IBMReadoutsProcessed, 1);
   EXPECT_EQ(DetectorBase.Counters.ProduceCauseTimeout, 2);
   DetectorBase.stopThreads();
 }

@@ -22,9 +22,6 @@ struct Counters {
   int64_t DataHeaders{0};
 
   // Readout processing
-  int64_t Event0DReadoutsProcessed{0};
-  int64_t Event2DReadoutsProcessed{0};
-  int64_t IBMReadoutsProcessed{0};
   int64_t TypeNotConfigured{0};
 
   // Events

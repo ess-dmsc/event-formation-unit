@@ -93,6 +93,18 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
 
     Result.push_back(*Readout);
 
+    switch (Readout->Type) {
+    case CbmType::EVENT_0D:
+      Stats.Readouts0D++;
+      break;
+    case CbmType::EVENT_2D:
+      Stats.Readouts2D++;
+      break;
+    case CbmType::IBM:
+      Stats.ReadoutsIBM++;
+      break;
+    }
+
     Readout++;
   }
 

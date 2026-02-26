@@ -36,6 +36,9 @@ CbmBase::CbmBase(BaseSettings const &settings)
   // clang-format off
   // Readout parsing errors - readout dropped
   Stats.create("parser.readout.count", Counters.CbmStats.Readouts);
+  Stats.create("parser.readout.count.0d", Counters.CbmStats.Readouts0D);
+  Stats.create("parser.readout.count.2d", Counters.CbmStats.Readouts2D);
+  Stats.create("parser.readout.count.ibm", Counters.CbmStats.ReadoutsIBM);
   Stats.create("parser.readout.header.count", Counters.DataHeaders);
   Stats.create("parser.readout.errors.size", Counters.CbmStats.ErrorSize);
   Stats.create("parser.readout.errors.fiber", Counters.CbmStats.ErrorFiber);
@@ -48,9 +51,6 @@ CbmBase::CbmBase(BaseSettings const &settings)
 
   // Readout processing stats
   Stats.create("readouts.processed", Counters.CbmCounts);
-  Stats.create("readouts.type.event0d_proccessed", Counters.Event0DReadoutsProcessed);
-  Stats.create("readouts.type.event2d_proccessed", Counters.Event2DReadoutsProcessed);
-  Stats.create("readouts.type.ibm_processed", Counters.IBMReadoutsProcessed);
 
   // Published events and Ar51
   Stats.create("events.ibm", Counters.IBMEvents);

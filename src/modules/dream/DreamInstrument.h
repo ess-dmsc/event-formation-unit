@@ -120,14 +120,14 @@ void DreamInstrument<Type_t>::processReadouts() {
     XTRACE(DATA, DEB, "Ring %u, FEN %u", Data.FiberId / 2, Data.FENId);
 
     // Validate Ring, FEN and configuration through geometry class
-    if (!Geom->validateReadoutData(Data)) {
+    if (not Geom->validateReadoutData(Data)) {
       continue;
     }
 
     auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
-    if (!TimeOfFlight.has_value()) {
+    if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }  
@@ -146,7 +146,7 @@ void DreamInstrument<Type_t>::processReadouts() {
 
 template <int Type_t>
 const Geometry &DreamInstrument<Type_t>::getGeometry() const {
-  if (!Geom) {
+  if (not Geom) {
     throw std::runtime_error(
         "Geometry not initialized for this instrument type");
   }

@@ -89,7 +89,7 @@ void CaenInstrument::processReadouts() {
     auto TimeOfFlight = ESSHeaderParser.Packet.Time.getTOF(
         ESSTime(Data.TimeHigh, Data.TimeLow));
 
-    if (!TimeOfFlight.has_value()) {
+    if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
       continue;
     }

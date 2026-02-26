@@ -27,6 +27,9 @@ struct ParserStats {
   int64_t ErrorADC{0};
   int64_t ErrorType{0};
   int64_t Readouts{0};
+  int64_t Readouts0D{0};
+  int64_t Readouts2D{0};
+  int64_t ReadoutsIBM{0};
   int64_t NoData{0};
 };
 
