@@ -16,6 +16,8 @@
 
 using namespace cbm;
 
+constexpr int PIXEL_OFFSET_1024{1024};
+
 class GeometryTest : public TestBase {
 protected:
   Statistics Stats;
@@ -32,11 +34,12 @@ protected:
 
     // Add two EVENT_2D monitors at different FEN/Channel positions
     auto topo2D_1 = std::make_unique<Topology>(
-        3, 0, "cbm_2d_1", CbmType::EVENT_2D, SchemaType::EV44, 512, 512, 0, 0);
+        3, 0, "cbm_2d_1", CbmType::EVENT_2D, SchemaType::EV44,
+        PIXEL_OFFSET_1024, 512, 512, 0);
     CbmConfig.TopologyMapPtr->add(3, 0, topo2D_1);
 
     auto topo2D_2 = std::make_unique<Topology>(
-        3, 1, "cbm_2d_2", CbmType::EVENT_2D, SchemaType::EV44, 256, 256, 0, 0);
+        3, 1, "cbm_2d_2", CbmType::EVENT_2D, SchemaType::EV44, 0, 256, 256, 0);
     CbmConfig.TopologyMapPtr->add(3, 1, topo2D_2);
 
     // Add two EVENT_0D monitors at different FEN/Channel positions
@@ -71,6 +74,7 @@ TEST_F(GeometryTest, CachedTopologyCreated) {
   EXPECT_EQ(cached2D_1->Type, CbmType::EVENT_2D);
   EXPECT_EQ(cached2D_1->ESSGeom.nx(), 512);
   EXPECT_EQ(cached2D_1->ESSGeom.ny(), 512);
+  EXPECT_EQ(cached2D_1->PixelOffset, PIXEL_OFFSET_1024);
 
   // Check 2D cached topology #2 exists
   const auto *cached2D_2 = geom->getCachedTopology(3, 1);
@@ -78,6 +82,7 @@ TEST_F(GeometryTest, CachedTopologyCreated) {
   EXPECT_EQ(cached2D_2->Type, CbmType::EVENT_2D);
   EXPECT_EQ(cached2D_2->ESSGeom.nx(), 256);
   EXPECT_EQ(cached2D_2->ESSGeom.ny(), 256);
+  EXPECT_EQ(cached2D_2->PixelOffset, 0);
 
   // Check 0D cached topology #1 exists
   const auto *cached0D_1 = geom->getCachedTopology(4, 0);
@@ -411,22 +416,22 @@ TEST_F(GeometryTest, CalcPixel2D) {
   readout.Pos.XPos = 0;
   readout.Pos.YPos = 0;
   uint32_t pixel = geom->calcPixel(readout);
-  EXPECT_EQ(pixel, refGeom.pixel2D(0, 0));
+  EXPECT_EQ(pixel, refGeom.pixel2D(0, 0) + PIXEL_OFFSET_1024);
 
   readout.Pos.XPos = 1;
   readout.Pos.YPos = 0;
   pixel = geom->calcPixel(readout);
-  EXPECT_EQ(pixel, refGeom.pixel2D(1, 0));
+  EXPECT_EQ(pixel, refGeom.pixel2D(1, 0) + PIXEL_OFFSET_1024);
 
   readout.Pos.XPos = 0;
   readout.Pos.YPos = 1;
   pixel = geom->calcPixel(readout);
-  EXPECT_EQ(pixel, refGeom.pixel2D(0, 1));
+  EXPECT_EQ(pixel, refGeom.pixel2D(0, 1) + PIXEL_OFFSET_1024);
 
   readout.Pos.XPos = 100;
   readout.Pos.YPos = 200;
   pixel = geom->calcPixel(readout);
-  EXPECT_EQ(pixel, refGeom.pixel2D(100, 200));
+  EXPECT_EQ(pixel, refGeom.pixel2D(100, 200) + PIXEL_OFFSET_1024);
 }
 
 TEST_F(GeometryTest, CalcPixel0D) {

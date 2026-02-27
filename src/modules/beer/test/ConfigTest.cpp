@@ -30,7 +30,7 @@ auto CorrectBEERDetector = R"(
     "MaxFENId" : 1,
 
     "Topology" : [
-      { "FEN":  0, "Channel": 0, "Source" : "beer1", "PixelOffset": 0, "Width": 512, "Height": 512 }
+      { "FEN":  0, "Channel": 0, "Source" : "beer1", "PixelOffset": 1024, "Width": 512, "Height": 512 }
     ]
   }
 )"_json;
@@ -73,6 +73,11 @@ TEST_F(BeerConfigTest, AcceptsBEERDetectorName) {
   
   // Verify the detector type is correctly maintained
   ASSERT_EQ(BeerConfig.Instrument, DetectorType::BEER);
+
+  // Verify PixelOffset is parsed for BEER 2D topology
+  auto *TopologyEntry = BeerConfig.TopologyMapPtr->get(0, 0);
+  ASSERT_NE(TopologyEntry, nullptr);
+  EXPECT_EQ(TopologyEntry->pixelOffset, 1024);
 }
 
 int main(int argc, char **argv) {

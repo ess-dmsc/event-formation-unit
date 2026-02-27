@@ -17,7 +17,7 @@
     { "FEN":  1, "Channel": 1, "Type": "IBM",      "Source": "cbm4", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
     { "FEN":  1, "Channel": 2, "Type": "IBM",      "Source": "cbm5", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
     { "FEN":  2, "Channel": 1, "Type": "IBM",      "Source": "cbm6", "Schema": "da00", "MaxTofBin"  : 10000, "BinCount": 100 },
-    { "FEN":  2, "Channel": 0, "Type": "EVENT_2D", "Source": "cbm7", "Schema": "ev44", "Width"      : 512,   "Height":   512 },
+    { "FEN":  2, "Channel": 0, "Type": "EVENT_2D", "Source": "cbm7", "Schema": "ev44", "PixelOffset" : 1024, "Width" : 512,   "Height":   512 },
     { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source": "cbm8", "Schema": "ev44", "Width"      : 512,   "Height":   512 }
   ]
 }
