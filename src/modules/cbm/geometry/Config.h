@@ -47,16 +47,16 @@ struct Topology {
     int param1{0};
     int pixelOffset;
     int maxTofBin;
-    int width;
   };
   union {
     int param2{0};
     int BinCount;
-    int height;
+    int width;
   };
   union {
     int param3{0};
     int AggregatedFrames;
+    int height;
   };
   union {
     int param4{0};

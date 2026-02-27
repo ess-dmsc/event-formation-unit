@@ -113,8 +113,9 @@ void Config::apply() {
 
     if (MonitorType == CbmType::EVENT_2D) {
       try {
-        param1 = Module["Width"].get<int>();
-        param2 = Module["Height"].get<int>();
+        param1 = Module.value<int>("PixelOffset", 0);
+        param2 = Module["Width"].get<int>();
+        param3 = Module["Height"].get<int>();
       } catch (...) {
         errorExit(fmt::format(
             "Entry: {}, Malformed 'Topology' section for {} Type (Need "
@@ -123,21 +124,28 @@ void Config::apply() {
       }
       // Maximum allowed value for width and height
       const uint16_t maxValue = std::numeric_limits<uint16_t>::max();
-      if ((param1 < 0) || (param1 > maxValue)) {
+      if ((param2 < 0) || (param2 > maxValue)) {
         errorExit(fmt::format("Entry: {} for {} Type "
                               " valid width values {} - {}, Read Value {}",
                               Entry, MonitorType.toString(), 0, maxValue,
-                              param1));
+                              param2));
       }
-      if ((param2 < 0) || (param2 > maxValue)) {
+      if ((param3 < 0) || (param3 > maxValue)) {
         errorExit(fmt::format("Entry: {} for {} Type "
                               "valid height values {} - {}, Read Value {}",
                               Entry, MonitorType.toString(), 0, maxValue,
-                              param2));
+                              param3));
       }
       if (DataSchema != SchemaType::EV44) {
         errorExit(fmt::format("Entry: {} for {} Schema only EV44 is allowed",
                               Entry, DataSchema.toString()));
+      }
+      if (param1 < 0) {
+        errorExit(fmt::format(
+            "Entry: {} for {} Type valid PixelOffset values {} - {}, Read "
+            "Value {}",
+            Entry, MonitorType.toString(), 0,
+            std::numeric_limits<int>::max(), param1));
       }
     }
 

@@ -101,7 +101,7 @@ public:
     CbmType Type; ///< Monitor type (EVENT_2D, EVENT_0D, IBM)
     ESSGeometry
         ESSGeom; ///< ESSGeometry for pixel calculations (dummy for non-2D)
-    int PixelOffset{0}; ///< Pixel offset for 0D monitors
+    int PixelOffset{0}; ///< Pixel offset for 0D and optional 2D offset
 
     CachedTopology(CbmType type, int width, int height, int offset = 0)
         : Type(type), ESSGeom(width, height, 1, 1), PixelOffset(offset) {}
@@ -198,7 +198,7 @@ private:
   /// \brief Implementation of pixel calculation using cached topology
   ///
   /// Calculates pixel based on monitor type:
-  /// - EVENT_2D: uses ESSGeometry::pixel2D(XPos, YPos)
+  /// - EVENT_2D: uses ESSGeometry::pixel2D(XPos, YPos) + optional PixelOffset
   /// - EVENT_0D: pixel = PixelOffset
   /// - IBM: pixel = 0
   ///
@@ -218,8 +218,10 @@ private:
     }
 
     switch (static_cast<uint8_t>(cached->Type)) {
-    case static_cast<uint8_t>(CbmType::EVENT_2D):
-      return cached->ESSGeom.pixel2D(Data.Pos.XPos, Data.Pos.YPos);
+    case static_cast<uint8_t>(CbmType::EVENT_2D): {
+      auto pixelId = cached->ESSGeom.pixel2D(Data.Pos.XPos, Data.Pos.YPos);
+      return pixelId ? pixelId + cached->PixelOffset : pixelId;
+    }
     case static_cast<uint8_t>(CbmType::EVENT_0D):
       return cached->PixelOffset;
     case static_cast<uint8_t>(CbmType::IBM):
@@ -248,8 +250,9 @@ private:
       uint16_t key = calcCacheKey(item->FEN, item->Channel);
 
       if (item->Type == CbmType::EVENT_2D) {
-        TopologyCache.emplace(
-            key, CachedTopology{item->Type, item->width, item->height});
+        TopologyCache.emplace(key,
+                              CachedTopology{item->Type, item->width,
+                                             item->height, item->pixelOffset});
       } else if (item->Type == CbmType::EVENT_0D) {
         TopologyCache.emplace(key, CachedTopology{item->pixelOffset});
       } else { // IBM
@@ -324,6 +327,6 @@ private:
 
   /// Topology cache: key = (FEN << 8) | Channel -> compact topology data
   std::unordered_map<uint16_t, CachedTopology> TopologyCache;
-};
+}; // namespace cbm
 
 } // namespace cbm

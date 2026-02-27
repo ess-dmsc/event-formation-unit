@@ -118,9 +118,9 @@ auto ConfigWithTopology = R"(
       { "FEN":  2, "Channel": 0, "Type": "IBM",      "Source" : "cbm4", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  0, "Channel": 2, "Type": "IBM",      "Source" : "cbm5", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
       { "FEN":  2, "Channel": 1, "Type": "IBM",      "Source" : "cbm6", "Schema": "da00", "MaxTofBin": 10000, "BinCount": 100},
-      { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm7", "Schema": "ev44", "Width": 512,       "Height": 512},
-      { "FEN":  1, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Schema": "ev44", "Width": 512,       "Height": 512},
-      { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Schema": "ev44", "Width": 512,       "Height": 512}
+      { "FEN":  2, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm7", "Schema": "ev44", "PixelOffset": 1024, "Width": 512, "Height": 512},
+      { "FEN":  1, "Channel": 2, "Type": "EVENT_2D", "Source" : "cbm8", "Schema": "ev44", "Width": 512, "Height": 512},
+      { "FEN":  1, "Channel": 1, "Type": "EVENT_2D", "Source" : "cbm9", "Schema": "ev44", "Width": 512, "Height": 512}
     ]
   }
 )"_json;
@@ -193,7 +193,8 @@ TEST_F(CbmConfigTest, NoMaxFENIdSpecified) {
     config.apply();
     FAIL() << "Expected std::runtime_error";
   } catch (const std::runtime_error &err) {
-    EXPECT_EQ(err.what(), std::string("JSON config - error: The requested key 'MaxFENId' does not exist"));
+    EXPECT_EQ(err.what(), std::string("JSON config - error: The requested key "
+                                      "'MaxFENId' does not exist"));
   } catch (...) {
     FAIL() << "Expected std::runtime_error";
   }
@@ -249,10 +250,10 @@ TEST_F(CbmConfigTest, LoadFileFullInstrument) {
   EXPECT_EQ(TestConfig.CbmParms.NumberOfMonitors, 3);
 }
 
-//Test that CBM IBM get default values for aggregated frames
-//and for aggregation mode
+// Test that CBM IBM get default values for aggregated frames
+// and for aggregation mode
 TEST_F(CbmConfigTest, TestDefaultAggregateFramesConfig) {
-    auto ConfigJson = R"(
+  auto ConfigJson = R"(
     {
       "Detector"           : "CBM",
       "MonitorRing"        : 11,
@@ -273,7 +274,7 @@ TEST_F(CbmConfigTest, TestDefaultAggregateFramesConfig) {
       ]
     }
   )"_json;
-  
+
   config.setRoot(ConfigJson);
   config.apply();
   auto *TopologyEntry = config.TopologyMapPtr->get(1, 1);
@@ -287,9 +288,9 @@ TEST_F(CbmConfigTest, TestDefaultAggregateFramesConfig) {
   EXPECT_EQ(TopologyEntry->AggregationMode, (int)AggregationType::SUM);
 }
 
-//Test that CBM IBM get aggregated frames and mode from json
+// Test that CBM IBM get aggregated frames and mode from json
 TEST_F(CbmConfigTest, TestOverrideAggregateFramesConfig) {
-    auto ConfigJson = R"(
+  auto ConfigJson = R"(
     {
       "Detector" : "CBM",
       "MonitorRing" : 11,
@@ -312,7 +313,7 @@ TEST_F(CbmConfigTest, TestOverrideAggregateFramesConfig) {
       ]
     }
   )"_json;
-  
+
   config.setRoot(ConfigJson);
   config.apply();
   auto *TopologyEntry = config.TopologyMapPtr->get(1, 1);
@@ -326,9 +327,9 @@ TEST_F(CbmConfigTest, TestOverrideAggregateFramesConfig) {
   EXPECT_EQ(TopologyEntry->AggregationMode, (int)AggregationType::AVG);
 }
 
-//Test that CBM IBM get aggregated frames and mode from json
+// Test that CBM IBM get aggregated frames and mode from json
 TEST_F(CbmConfigTest, TestMalformedAggregateFramesConfig) {
-    auto ConfigJson = R"(
+  auto ConfigJson = R"(
     {
       "Detector" : "CBM",
       "MonitorRing" : 11,
@@ -351,7 +352,7 @@ TEST_F(CbmConfigTest, TestMalformedAggregateFramesConfig) {
       ]
     }
   )"_json;
-  
+
   config.setRoot(ConfigJson);
   EXPECT_THROW(config.apply(), std::runtime_error);
 }
@@ -380,7 +381,7 @@ TEST_F(CbmConfigTest, TestEnableNormalizeADCValuesConfig) {
     }
   )"_json;
 
-  //Test that CBM IBM normalize ADC values enable flag works
+  // Test that CBM IBM normalize ADC values enable flag works
   config.setRoot(ConfigJson);
   config.apply();
   EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, true);
@@ -410,7 +411,7 @@ TEST_F(CbmConfigTest, TestWrongSchemaConfig) {
     }
   )"_json;
 
-  //Test that CBM IBM normalize ADC values enable flag works
+  // Test that CBM IBM normalize ADC values enable flag works
   config.setRoot(ConfigJson);
   EXPECT_THROW(config.apply(), std::runtime_error);
 }
@@ -439,22 +440,21 @@ TEST_F(CbmConfigTest, TestDisableNormalizeADCValuesConfig) {
     }
   )"_json;
 
-  //Test that CBM IBM normalize ADC values disable flag works
+  // Test that CBM IBM normalize ADC values disable flag works
   config.setRoot(ConfigJson);
   config.apply();
   EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, false);
 }
 
 TEST_F(CbmConfigTest, TestDefaultNormalizeADCValuesConfig) {
-  //Test that CBM IBM normalize ADC values default flag works
+  // Test that CBM IBM normalize ADC values default flag works
   config.setRoot(ConfigWithTopology);
   config.apply();
   EXPECT_EQ(config.CbmParms.NormalizeIBMReadouts, true);
 }
 
-
 TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
-    auto ConfigJson = R"(
+  auto ConfigJson = R"(
     {
       "Detector" : "CBM",
       "MonitorRing" : 11,
@@ -467,10 +467,10 @@ TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
       ]
     }
   )"_json;
-  
+
   config.setRoot(ConfigJson);
 
-  //Widths are outside valid range
+  // Widths are outside valid range
   config["Topology"][0]["Width"] = -1;
   config["Topology"][0]["Height"] = 512;
   EXPECT_THROW(config.apply(), std::runtime_error);
@@ -478,7 +478,7 @@ TEST_F(CbmConfigTest, TestCBM2DErrorConfig) {
   config["Topology"][0]["Height"] = 321;
   EXPECT_THROW(config.apply(), std::runtime_error);
 
-  //Heights are outside valid range
+  // Heights are outside valid range
   config["Topology"][0]["Width"] = 312;
   config["Topology"][0]["Height"] = -1;
   EXPECT_THROW(config.apply(), std::runtime_error);
@@ -549,6 +549,7 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(TopologyEntry->Source, "cbm7");
   EXPECT_EQ(TopologyEntry->FEN, 2);
   EXPECT_EQ(TopologyEntry->Channel, 2);
+  EXPECT_EQ(TopologyEntry->pixelOffset, 1024);
 
   // Test eight entry
   TopologyEntry = config.TopologyMapPtr->get(1, 2);
@@ -556,6 +557,7 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(TopologyEntry->Source, "cbm8");
   EXPECT_EQ(TopologyEntry->FEN, 1);
   EXPECT_EQ(TopologyEntry->Channel, 2);
+  EXPECT_EQ(TopologyEntry->pixelOffset, 0);
 
   // Test ninth entry
   TopologyEntry = config.TopologyMapPtr->get(1, 1);
@@ -563,7 +565,7 @@ TEST_F(CbmConfigTest, TestTopology) {
   EXPECT_EQ(TopologyEntry->Source, "cbm9");
   EXPECT_EQ(TopologyEntry->FEN, 1);
   EXPECT_EQ(TopologyEntry->Channel, 1);
-
+  EXPECT_EQ(TopologyEntry->pixelOffset, 0);
 }
 
 int main(int argc, char **argv) {
