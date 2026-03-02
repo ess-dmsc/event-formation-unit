@@ -50,7 +50,6 @@ protected:
   /// \param Prefix Optional prefix for counter names (automatically adds dot separator)
   StatCounterBase(Statistics& Stats, const CounterMap &Counters, const std::string &Prefix = "") {
     for (const auto& [name, counterRef] : Counters) {
-     printf("%s\n", Prefix.c_str());
      std::string fullName = Prefix.empty() ? std::string(name) : Prefix + "." + std::string(name);
      Stats.create(fullName, counterRef.get());
     }

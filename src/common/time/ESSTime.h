@@ -153,6 +153,17 @@ inline TimeDurationNano msToNanoseconds(double Milliseconds) {
       TimeDurationMilli(Milliseconds));
 }
 
+///
+/// \brief Convert a time stamp in NS resolution to the wall-clock string format
+///
+///        Y-M-D H:M:S:MS
+///
+/// \param TimeStamp The time stamp that should be converted
+/// \return A string with the walTrue if the ESSReferenceTime objects are not equal, false
+/// otherwise.
+///
+std::string toString(TimeDurationNano TimeStamp);
+
 /// \class ESSTime
 ///
 /// \brief Represents a timestamp in the ESS (European Spallation Source) time
