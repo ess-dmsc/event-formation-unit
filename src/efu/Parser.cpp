@@ -91,6 +91,11 @@ static int calib_mode_set(const std::vector<std::string> &cmdargs,
 
   detector->CalibrationMode = bool(index);
   LOG(CMD, Sev::Debug, "CALIB_ {}", index);
+  if (detector->CalibrationMode) {
+    LOG(CMD, Sev::Warning, "Calibration Mode is enabled");
+  } else {
+    LOG(CMD, Sev::Info, "Calibration Mode is disabled");
+  }
   return Parser::OK;
 }
 

@@ -248,6 +248,49 @@ TEST_F(ParserTest, CmdGetCount) {
   ASSERT_EQ(res, -Parser::OK);
 }
 
+TEST_F(ParserTest, CalibrationOnOffCmd) {
+  // Mock logger to capture log messages
+  auto LoggerMock = MockLogger();
+
+  // Test calibration mode on off is detected
+  int activated = 0;
+  int deactivated = 0;
+  ON_CALL(LoggerMock, log(testing::_, testing::_))
+    .WillByDefault(
+      [&](const std::string &category,  const std::string &message) {
+
+        std::cout << "Supplied arguments Category: " << category 
+          << ", Message: " << message << std::endl;
+        if (category.compare("CMD") == 0) {
+          if (message.compare("Calibration Mode is disabled") == 0) {
+            ++deactivated;
+          } else if (message.compare("Calibration Mode is enabled") == 0) {
+            ++activated;
+          }
+        } 
+      });
+
+  // Enable calibration mode
+  const char *cmd = "CALIB_MODE_SET 1";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  GTEST_COUT << output << '\n';
+  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(activated, 1);
+  ASSERT_EQ(deactivated, 0);
+
+  activated = 0;
+  deactivated = 0;
+  // Disable calibration mode
+  cmd = "CALIB_MODE_SET 0";
+  std::memcpy(input, cmd, strlen(cmd));
+  res = parser->parse(input, strlen(cmd), output, &obytes);
+  GTEST_COUT << output << '\n';
+  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(activated, 0);
+  ASSERT_EQ(deactivated, 1);  
+}
+
 TEST_F(ParserTest, CmdGet) {
   const char *cmd = "CMD_GET 1";
   std::memcpy(input, cmd, strlen(cmd));
