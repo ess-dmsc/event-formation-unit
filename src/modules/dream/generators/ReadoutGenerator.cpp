@@ -104,7 +104,7 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
 
     case HR: { // HR
       // Limit to 16 sectors to ensure Index + Instance <= 32 (HR has 33 elements: 0-32)
-      uint8_t Sector = Fuzzer.random8() % 16; // 0-15 instead of 0-16
+      uint8_t Sector = Fuzzer.random8() % 17; // 0-16
       uint8_t Instance = Fuzzer.random8() % 2;
       ReadoutData.FiberId = HRFiberId[Sector];
       ReadoutData.FENId = HRFENId[Sector];
@@ -115,7 +115,7 @@ bool ReadoutGenerator::getRandomReadout(DataParser::CDTReadout &ReadoutData) {
 
     case SANS: { // SANS
       // Limit to 17 sectors to ensure Index + Instance <= 35 (SANS has 36 elements: 0-35)
-      uint8_t Sector = Fuzzer.random8() % 17; // 0-16 instead of 0-17
+      uint8_t Sector = Fuzzer.random8() % 18; // 0-17
       uint8_t Instance = Fuzzer.random8() % 2;
       ReadoutData.FiberId = SANSFiberId[Sector];
       ReadoutData.FENId = SANSFENId[Sector];
