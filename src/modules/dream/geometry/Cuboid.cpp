@@ -1,6 +1,9 @@
 #include "Cuboid.h"
 #include <common/debug/Trace.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 namespace Dream {
 
 void Cuboid::rotateXY(int Rotate, int &LocalX, int &LocalY) const {
@@ -24,8 +27,14 @@ void Cuboid::rotateXY(int Rotate, int &LocalX, int &LocalY) const {
 
 uint32_t Cuboid::calcPixelId(const Config::ModuleParms &Parms,
                              const DataParser::CDTReadout &Data) const {
-  uint8_t Index = Parms.P1.Index;
-  Index += Data.UnitId;
+
+  /// \brief figure out the CUBOID index (read from the config file)
+  uint8_t Index{255}; // invalid index
+  if (Data.UnitId == 0) {
+    Index = Parms.P1.Index;
+  } else if (Data.UnitId == 1) {
+    Index = Parms.P2.Index;
+  }
 
   XTRACE(DATA, DEB, "index %u, anode %u, cathode %u", Index, Data.Anode,
          Data.Cathode);

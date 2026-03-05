@@ -49,13 +49,14 @@ TEST_F(DreamGeometryTest, GetPixel) {
   geometry = std::make_unique<DreamGeometry>(Stats, DreamConfig);
   Readout.FiberId = 0;  // Ring = FiberId / 2 = 0
   Readout.FENId = 0;
-  Readout.UnitId = 6;
+  Readout.UnitId = 6; // ICD: SUMO 6
   Readout.Anode = 32;   // Valid anode value
   Readout.Cathode = 32; // Valid cathode value
   auto pixel = geometry->calcPixel(Readout);
   ASSERT_TRUE(pixel >= 71681) << "BwEndCap: Got pixel: " << pixel;
 
   // Reset and configure for DreamMantle test
+  Readout.UnitId = 2; // ICD: Mantle
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::DreamMantle;
   DreamConfig.RMConfig[0][0].P2.Cassette = 0;
   DreamConfig.RMConfig[0][0].Initialised = true;
@@ -66,8 +67,8 @@ TEST_F(DreamGeometryTest, GetPixel) {
   ASSERT_TRUE(pixel >= 229377) << "DreamMantle: Got pixel: " << pixel;
 
   // Reset and configure for HR test
+  Readout.UnitId = 0; // ICD: Cuboid 0
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::HR;
-  DreamConfig.RMConfig[0][0].P2.Rotate = 0;
   DreamConfig.RMConfig[0][0].P1.Index = 0;
   DreamConfig.RMConfig[0][0].Initialised = true;
   geometry = std::make_unique<DreamGeometry>(Stats, DreamConfig);
@@ -79,7 +80,7 @@ TEST_F(DreamGeometryTest, GetPixel) {
 
 TEST_F(DreamGeometryTest, GetPixelError) {
   DreamConfig.RMConfig[0][0].Type = Config::ModuleType::PA;
-  Readout.UnitId = 6;
+  Readout.UnitId = 6; // ICD: SUMO 6
   ASSERT_EQ(geometry->calcPixel(Readout), 0);
 }
 

@@ -64,7 +64,6 @@ public:
       int Index;
       int Cassette; // for Mantle
       int SumoPair; // for endcaps
-      int Rotate;   // for Cuboids
     } P2;
   };
 
