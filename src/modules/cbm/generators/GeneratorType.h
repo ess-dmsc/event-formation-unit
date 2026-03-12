@@ -74,7 +74,7 @@ public:
 
   /// \brief Checks if the generator type is valid.
   static bool isValid(GeneratorTypes type) {
-    return type >= MIN && type <= MAX;
+    return type <= MAX;
   }
 
   /// \brief Equality operator overload for GeneratorType.
