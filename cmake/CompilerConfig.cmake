@@ -8,7 +8,42 @@ if(NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra -Wno-deprecated")
+
+# Common flags: supported by both GCC 11+ and Clang
+set(EXTRA_CXX_FLAGS
+  "-Werror"
+  "-Wall"
+  "-Wpedantic"
+  "-Wno-deprecated"
+  "-Wdeprecated-copy"
+  "-Wempty-body"
+  "-Wexpansion-to-defined"
+  "-Wignored-qualifiers"
+  "-Wimplicit-fallthrough"
+  "-Wmissing-field-initializers"
+  "-Wredundant-move"
+  "-Wshift-negative-value"
+  "-Wsign-compare"
+  "-Wstring-compare"
+  "-Wtype-limits"
+  "-Wuninitialized"
+  "-Wunused-parameter"
+  "-Wunused-but-set-parameter"
+  "-Wtautological-compare"
+)
+
+# GCC-specific warnings (make production GCC stricter than Clang)
+if(CMAKE_COMPILER_IS_GNUCXX)
+  list(APPEND EXTRA_CXX_FLAGS
+    "-Wcast-function-type"
+    "-Wclobbered"
+    "-Wmaybe-uninitialized"
+    "-Wsized-deallocation"
+  )
+endif()
+
+string(REPLACE ";" " " EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS}")
+
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -g0 -DRELEASE -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 #set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-ggdb -fno-omit-frame-pointer")

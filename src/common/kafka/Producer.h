@@ -22,11 +22,15 @@
 #include <common/memory/Buffer.h>
 #include <common/memory/span.hpp>
 #include <functional>
-#include <malloc.h>
 #include <memory>
 #include <unordered_map> // add if not already included
 #include <utility>
 #include <vector>
+
+#ifdef __linux__
+// Forward declare glibc malloc_trim function (avoids including malloc.h)
+extern "C" int malloc_trim(size_t pad);
+#endif
 
 ///
 class ProducerBase {
@@ -150,10 +154,10 @@ public:
                {"produce_bytes_error", ProduceBytesError},
                {"produce_calls", ProduceCalls},
                {"produce_errors", ProduceError},
-               
-              /// performance indicators
+
+               /// performance indicators
                {"memory_cleanups", MallocTrimCalls},
-               
+
                /// librdkafka transmission stats
                {"brokers.tx_bytes", BytesTransmittedToBrokers},
                {"brokers.tx_req_retries", TxRequestRetries},
@@ -186,27 +190,14 @@ public:
   } __attribute__((aligned(64)));
 
   /// \brief Polls the producer for events and checks queue length.
-  /// and triggers memory recovery if needed.
+  /// and triggers memory recovery if needed (Linux only).
   /// \param TimeoutMS The timeout in milliseconds for polling.
   inline void poll(int TimeoutMS) {
-
-    int current = KafkaProducer->outq_len();
-
-    // Track high watermark occurrence
-    HighWatermarkReached = current >= QueueHighWatermark;
-
-    // If queue dropped significantly from peak (>50% to <1%), trigger cleanup
-    if (HighWatermarkReached && current < QueueRecoveryThreshold) {
-
-      malloc_trim(0);
-      StatCounters.MallocTrimCalls++;
-      HighWatermarkReached = false;
-      XTRACE(KAFKA, INF,
-             "Kafka producer queue recovered, triggered malloc_trim");
-    }
-
     if (!KafkaProducer)
       return;
+
+    tryMemoryRecovery();
+
     KafkaProducer->poll(TimeoutMS);
     StatCounters.NumberOfMsgInQueue = KafkaProducer->outq_len();
   };
@@ -253,11 +244,40 @@ private:
   /// are registered into the Statistics object.
   ProducerStats StatCounters;
 
-  /// \brief Calculated based on the configured max queue size.
+  /// \brief Calculated based on the configured max queue size,
+  /// this threshold is used to trigger memory recovery when the queue drops
+  /// significantly from its peak.
+  /// \note This is only relevant on Linux where we can call malloc_trim to
+  /// release
   int QueueRecoveryThreshold{0};
   int QueueHighWatermark{0};
-
+  #ifdef __linux__
   bool HighWatermarkReached{false};
+  #endif
+
+  /// \brief Attempts memory recovery when queue drops from high watermark.
+  /// This function triggers malloc_trim if the producer queue has dropped
+  /// significantly from its peak (>50% to <1%), releasing unused heap memory.
+  /// \note This is only implemented for Linux where malloc_trim is available.
+  ///       On other platforms, this inline function will be optimized away and
+  ///       will not executed.
+  inline void tryMemoryRecovery() {
+#ifdef __linux__
+    int current = KafkaProducer->outq_len();
+
+    // Track high watermark occurrence
+    HighWatermarkReached = current >= QueueHighWatermark;
+
+    // If queue dropped significantly from peak, trigger cleanup
+    if (HighWatermarkReached && current < QueueRecoveryThreshold) {
+      malloc_trim(0);
+      StatCounters.MallocTrimCalls++;
+      HighWatermarkReached = false;
+      XTRACE(KAFKA, INF,
+             "Kafka producer queue recovered, triggered malloc_trim");
+    }
+#endif
+  }
 
   void applyKafkaErrorCode(RdKafka::ErrorCode ErrorCode);
 };
