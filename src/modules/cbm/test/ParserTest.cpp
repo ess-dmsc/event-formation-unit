@@ -170,13 +170,13 @@ std::vector<uint8_t> SADCTestData{
 class CbmParserTest : public TestBase {
 protected:
   Statistics Stats;
-  ESSReadout::Parser::PacketDataV0 PacketData{Stats};
+  ess_readout::Parser::PacketDataV0 PacketData{Stats};
   Parser parser;
   void SetUp() override {
     PacketData.DataPtr = nullptr;
     PacketData.DataLength = 0;
-    PacketData.Time.setReference(ESSReadout::ESSTime(0, 0));
-    PacketData.Time.setPrevReference(ESSReadout::ESSTime(0, 0));
+    PacketData.Time.setReference(ess_readout::ESSTime(0, 0));
+    PacketData.Time.setPrevReference(ess_readout::ESSTime(0, 0));
   }
   void TearDown() override {}
 

@@ -14,7 +14,7 @@
 #include <common/kafka/AR51Serializer.h>
 #include <nmx/Counters.h>
 
-namespace Nmx {
+namespace nmx {
 
 class NmxBase : public Detector {
 public:
@@ -26,4 +26,4 @@ public:
   struct Counters Counters {};
 };
 
-} // namespace Nmx
+} // namespace nmx

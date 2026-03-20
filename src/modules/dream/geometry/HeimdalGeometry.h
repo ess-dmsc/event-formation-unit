@@ -16,7 +16,7 @@
 #include <dream/geometry/HeimdalMantle.h>
 #include <dream/readout/DataParser.h>
 
-namespace Dream {
+namespace dream {
 
 class HeimdalGeometry : public Geometry {
 public:
@@ -38,4 +38,4 @@ public:
 
   HeimdalMantle mantle;
 };
-} // namespace Dream
+} // namespace dream

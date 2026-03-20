@@ -4,7 +4,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 void Cuboid::rotateXY(int Rotate, int &LocalX, int &LocalY) const {
   int SavedY = LocalY;
@@ -96,4 +96,4 @@ uint32_t Cuboid::calcPixelId(const Config::ModuleParms &Parms,
   return pixel2D(static_cast<uint16_t>(IntX), static_cast<uint16_t>(IntY));
 }
 
-} // namespace Dream
+} // namespace dream

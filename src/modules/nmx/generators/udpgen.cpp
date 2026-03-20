@@ -14,7 +14,7 @@ using VMM3Data = VMM3Parser::VMM3Data;
 
 int main(int argc, char *argv[]) {
 
-  Nmx::ReadoutGenerator NmxGen;
+  nmx::ReadoutGenerator NmxGen;
   uint8_t DataSize = sizeof(VMM3Data);
   NmxGen.setReadoutDataSize(DataSize);
 

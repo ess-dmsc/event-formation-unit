@@ -42,7 +42,7 @@
 #include <limits>
 #include <string>
 
-namespace Dream {
+namespace dream {
 
 struct __attribute__((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
@@ -69,4 +69,4 @@ struct __attribute__((packed)) Readout {
   std::string debug() const;
 };
 
-} // namespace Dream
+} // namespace dream

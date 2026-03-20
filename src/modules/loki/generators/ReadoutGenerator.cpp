@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -57,5 +57,5 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Caen
+} // namespace caen
 // GCOVR_EXCL_STOP

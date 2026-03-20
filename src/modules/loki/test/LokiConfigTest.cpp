@@ -8,7 +8,7 @@
 #include <common/testutils/TestBase.h>
 #include <loki/geometry/LokiConfig.h>
 
-using namespace Caen;
+using namespace caen;
 
 // Valid Loki configuration for testing - now with multiple banks and configs
 auto ValidLokiConfig = R"(

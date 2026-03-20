@@ -15,7 +15,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
 Config::Config() {}
 
@@ -47,4 +47,4 @@ Config::Config(const std::string &ConfigFile)
   assign("MaxCoordinateGap", MaxCoordinateGap);
 }
 
-} // namespace Timepix3
+} // namespace timepix3

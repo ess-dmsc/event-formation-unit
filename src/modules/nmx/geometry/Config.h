@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Nmx {
+namespace nmx {
 
 class Config : public vmm3::VMM3Config {
 public:
@@ -72,4 +72,4 @@ public:
   // All 4 fields fit in a single cache line (~32 bytes for alignment)
   HybridParams HybridParam[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
-} // namespace Nmx
+} // namespace nmx

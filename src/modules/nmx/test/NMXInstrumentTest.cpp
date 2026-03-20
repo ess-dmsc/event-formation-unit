@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
-using namespace Nmx;
-using namespace ESSReadout;
+using namespace nmx;
+using namespace ess_readout;
 using namespace testing;
 using MockSerializer = NiceMock<EV44SerializerMock>;
 // clang-format off
@@ -404,7 +404,7 @@ protected:
   struct Counters counters;
   BaseSettings Settings;
   std::unique_ptr<Statistics> Stats;
-  std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
+  std::unique_ptr<ess_readout::Parser> ESSHeaderParser;
   MockSerializer serializer;
   std::unique_ptr<NMXInstrument> nmx;
   std::unique_ptr<TestHeaderFactory> headerFactory;
@@ -417,7 +417,7 @@ protected:
 
     headerFactory = std::make_unique<TestHeaderFactory>();
     Stats = std::make_unique<Statistics>();
-    ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
+    ESSHeaderParser = std::make_unique<ess_readout::Parser>(*Stats);
     nmx = std::make_unique<NMXInstrument>(counters, Settings, serializer,
                                           *ESSHeaderParser, *Stats);
 

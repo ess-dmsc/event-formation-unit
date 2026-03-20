@@ -16,7 +16,7 @@ using VMM3Data = VMM3Parser::VMM3Data;
 
 int main(int argc, char *argv[]) {
 
-  Freia::ReadoutGenerator FreiaGen;
+  freia::ReadoutGenerator FreiaGen;
   uint8_t FreiaDataSize = sizeof(VMM3Data);
   FreiaGen.setReadoutDataSize(FreiaDataSize);
 

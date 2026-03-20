@@ -33,10 +33,10 @@
 
 #include <memory>
 
-namespace Dream {
+namespace dream {
 
 using namespace esstime;
-using namespace ESSReadout;
+using namespace ess_readout;
 
 template <int Type_t>
 class DreamInstrument {
@@ -46,7 +46,7 @@ private:
   Config DreamConfiguration;
   std::unique_ptr<Geometry> Geom;
   EV44Serializer &Serializer;
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
 
 public:
   /// \brief 'create' the DREAM instrument
@@ -55,7 +55,7 @@ public:
   /// logical geometry and initialise the amplitude to position calculations
   DreamInstrument(Statistics &Stats, struct Counters &counters,
                   BaseSettings &settings, EV44Serializer &serializer,
-                  ESSReadout::Parser &essHeaderParser);
+                  ess_readout::Parser &essHeaderParser);
 
   ~DreamInstrument() = default;
 
@@ -76,7 +76,7 @@ template <int Type_t>
 DreamInstrument<Type_t>::DreamInstrument(Statistics &Stats, struct Counters &counters,
                                  BaseSettings &settings,
                                  EV44Serializer &serializer,
-                                 ESSReadout::Parser &essHeaderParser)
+                                 ess_readout::Parser &essHeaderParser)
     : Counters(counters), Settings(settings),
       Serializer(serializer), ESSHeaderParser(essHeaderParser) {
 
@@ -153,4 +153,4 @@ const Geometry &DreamInstrument<Type_t>::getGeometry() const {
   return *Geom.get();
 }
 
-} // namespace Dream
+} // namespace dream

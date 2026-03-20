@@ -7,7 +7,7 @@
 #include <common/testutils/TestBase.h>
 #include <trex/geometry/LETGeometry.h>
 
-using namespace Trex;
+using namespace trex;
 
 class LETGeometryTest : public TestBase {
 protected:

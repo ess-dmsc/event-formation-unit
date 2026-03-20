@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
 using namespace timepixReadout;
 
@@ -76,4 +76,4 @@ bool Timepix3Geometry::validateData(const PixelReadout &Data) const {
   return true;
 }
 
-} // namespace Timepix3
+} // namespace timepix3

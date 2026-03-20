@@ -24,7 +24,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 class BifrostGeometry : public Geometry, ESSGeometry {
 public:
   explicit BifrostGeometry(Statistics &Stats, Config &CaenConfiguration);
@@ -77,4 +77,4 @@ private:
   static constexpr int ESSGEOMETRY_NZ{1};     ///< Z dimension (pixels)
   static constexpr int ESSGEOMETRY_NP{1};     ///< P dimension (pixels)
 };
-} // namespace Caen
+} // namespace caen

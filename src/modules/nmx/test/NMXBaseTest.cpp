@@ -104,13 +104,13 @@ public:
 };
 
 TEST_F(NMXBaseTest, Constructor) {
-  Nmx::NmxBase Readout(Settings);
+  nmx::NmxBase Readout(Settings);
   ASSERT_EQ(Readout.getStatPrefix(1), "nmx.test.");
   EXPECT_EQ(Readout.Counters.VMMStats.Readouts, 0);
 }
 
 TEST_F(NMXBaseTest, DataReceive) {
-  Nmx::NmxBase Readout(Settings);
+  nmx::NmxBase Readout(Settings);
 
   writePacketToRxFIFO(Readout, BadTestPacket);
 
@@ -123,7 +123,7 @@ TEST_F(NMXBaseTest, DataReceive) {
 }
 
 TEST_F(NMXBaseTest, DataReceiveBadHeader) {
-  Nmx::NmxBase Readout(Settings);
+  nmx::NmxBase Readout(Settings);
 
   BadTestPacket[0] = 0xff; // pad should be 0
   writePacketToRxFIFO(Readout, BadTestPacket);

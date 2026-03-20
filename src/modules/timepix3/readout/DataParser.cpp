@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
 using namespace timepixReadout;
 
@@ -140,4 +140,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   return ParsedReadouts;
 }
 
-} // namespace Timepix3
+} // namespace timepix3

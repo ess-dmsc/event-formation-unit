@@ -21,9 +21,9 @@
 
 using namespace vmm3;
 
-namespace Trex {
+namespace trex {
 
-using namespace ESSReadout;
+using namespace ess_readout;
 
 void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -109,6 +109,6 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Trex
+} // namespace trex
 
 // GCOVR_EXCL_STOP

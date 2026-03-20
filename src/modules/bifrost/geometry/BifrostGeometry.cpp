@@ -15,7 +15,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 BifrostGeometry::BifrostGeometry(Statistics &Stats, Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
@@ -137,4 +137,4 @@ std::string BifrostGeometry::serializerName(size_t Index) const {
   return fmt::format("arc={};triplet={}", arc, triplet);
 }
 
-} // namespace Caen
+} // namespace caen

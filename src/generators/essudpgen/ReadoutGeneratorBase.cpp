@@ -21,7 +21,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-using namespace ESSReadout;
+using namespace ess_readout;
 
 ///\brief Constructor initialize the generator app
 ReadoutGeneratorBase::ReadoutGeneratorBase(DetectorType Type) {

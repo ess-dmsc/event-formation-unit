@@ -14,7 +14,7 @@
 #include <generators/functiongenerators/DistributionGenerator.h>
 #include <gtest/gtest.h>
 
-using namespace Caen;
+using namespace caen;
 
 class AmplitudeMaskTest : public TestBase {
 protected:
@@ -58,12 +58,12 @@ static void runMaskTest(uint16_t maskTrunc, DetectorType detector) {
     ASSERT_EQ(buffer.size(), 8958);
     auto *data = buffer.data();
     // Set data pointer to readouts, skipping the header
-    auto *readoutData = data + sizeof(ESSReadout::Parser::PacketHeaderV0);
+    auto *readoutData = data + sizeof(ess_readout::Parser::PacketHeaderV0);
 
     DataParser Parser;
     auto Res = Parser.parse(readoutData,
                             buffer.size() -
-                                sizeof(ESSReadout::Parser::PacketHeaderV0));
+                                sizeof(ess_readout::Parser::PacketHeaderV0));
     ASSERT_EQ(Res, ReadoutCount);
     ASSERT_EQ(Parser.Stats.Readouts, ReadoutCount);
     ASSERT_EQ(Parser.Stats.DataHeaders, ReadoutCount);

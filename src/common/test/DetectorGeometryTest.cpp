@@ -11,7 +11,7 @@
 #include <common/testutils/TestBase.h>
 #include <modules/caen/readout/DataParser.h>
 
-using namespace Caen;
+using namespace caen;
 using namespace geometry;
 
 /// Mock readout data structure for testing wrong type

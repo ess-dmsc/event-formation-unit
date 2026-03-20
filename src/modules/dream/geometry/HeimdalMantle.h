@@ -22,7 +22,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 class HeimdalMantle : public ESSGeometry {
 private:
@@ -47,4 +47,4 @@ public:
   uint32_t calcPixelId(const Config::ModuleParms &Parms,
                       const DataParser::CDTReadout &Data) const;
 };
-} // namespace Dream
+} // namespace dream

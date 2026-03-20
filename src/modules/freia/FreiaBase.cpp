@@ -23,7 +23,7 @@
 
 using namespace esstime;
 
-namespace Freia {
+namespace freia {
 
 const char *classname = "Freia detector with ESS readout";
 
@@ -169,7 +169,7 @@ void FreiaBase::processing_thread() {
 
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen, detectorType);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
                getInputCounters().RxPackets);
@@ -216,4 +216,4 @@ void FreiaBase::processing_thread() {
   return;
 }
 
-} // namespace Freia
+} // namespace freia

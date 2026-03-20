@@ -18,7 +18,7 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <math.h>
 
-namespace Timepix3 {
+namespace timepix3 {
 
 class Timepix3Geometry : public ESSGeometry {
 
@@ -78,4 +78,4 @@ private:
   int chunkSize;              ///< size of each chunk
 };
 
-} // namespace Timepix3
+} // namespace timepix3

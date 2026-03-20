@@ -15,7 +15,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 class BifrostConfig : public Configurations::Config {
 public:
@@ -33,4 +33,4 @@ public:
   } Parms;
 };
 
-} // namespace Caen
+} // namespace caen

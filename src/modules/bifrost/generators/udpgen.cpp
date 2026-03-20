@@ -13,7 +13,7 @@
 int main(int argc, char *argv[]) {
 
   ReadoutGenerator BifrostGen;
-  uint8_t BifrostDataSize = sizeof(Caen::DataParser::CaenReadout);
+  uint8_t BifrostDataSize = sizeof(caen::DataParser::CaenReadout);
   BifrostGen.setReadoutDataSize(BifrostDataSize);
 
   BifrostGen.argParse(argc, argv);

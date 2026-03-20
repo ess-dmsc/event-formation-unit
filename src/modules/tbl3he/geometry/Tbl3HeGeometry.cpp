@@ -19,7 +19,7 @@
 
 using namespace geometry;
 
-namespace Caen {
+namespace caen {
 
 Tbl3HeGeometry::Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
@@ -134,4 +134,4 @@ std::string Tbl3HeGeometry::serializerName(size_t Index) const {
   return fmt::format("bank{}", Index);
 }
 
-} // namespace Caen
+} // namespace caen

@@ -13,7 +13,7 @@
 
 using namespace vmm3;
 
-namespace Nmx {
+namespace nmx {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -97,4 +97,4 @@ void Config::applyConfig() {
   }
 }
 
-} // namespace Nmx
+} // namespace nmx

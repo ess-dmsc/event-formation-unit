@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <modules/dream/generators/ReadoutGenerator.h>
 
-namespace Dream {
+namespace dream {
 
 ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::DREAM) {
   app.add_option("--p1", DreamSettings.DetectorMask,
@@ -146,5 +146,5 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Dream
+} // namespace dream
 // GCOVR_EXCL_STOP

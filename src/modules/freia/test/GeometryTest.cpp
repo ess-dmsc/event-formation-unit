@@ -12,7 +12,7 @@
 #include <freia/geometry/Config.h>
 #include <common/Statistics.h>
 
-using namespace Freia;
+using namespace freia;
 
 class GeometryTest : public TestBase {
 protected:

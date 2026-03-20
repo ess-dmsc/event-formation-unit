@@ -12,7 +12,7 @@
 #include <common/readout/ess/ParserTestData.h>
 #include <common/testutils/TestBase.h>
 
-namespace ESSReadout {
+namespace ess_readout {
 
 class ReadoutTest : public TestBase {
 protected:

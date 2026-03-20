@@ -13,7 +13,7 @@
 
 using namespace vmm3;
 
-namespace Trex {
+namespace trex {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -88,4 +88,4 @@ void Config::applyConfig() {
   }
 }
 
-} // namespace Trex
+} // namespace trex

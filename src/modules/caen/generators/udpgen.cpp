@@ -12,8 +12,8 @@
 // GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
-  Caen::ReadoutGenerator CaenGen;
-  CaenGen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  caen::ReadoutGenerator CaenGen;
+  CaenGen.setReadoutDataSize(sizeof(caen::DataParser::CaenReadout));
   CaenGen.argParse(argc, argv);
 
   auto readoutTimeGenerator =

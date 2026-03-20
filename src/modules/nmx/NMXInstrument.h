@@ -26,7 +26,7 @@
 #include <nmx/geometry/Config.h>
 #include <nmx/geometry/NMXGeometry.h>
 
-namespace Nmx {
+namespace nmx {
 
 class NMXInstrument {
 public:
@@ -35,7 +35,7 @@ public:
   /// and calibration data. It then initialises event builders and
   /// histograms
   NMXInstrument(Counters &counters, BaseSettings &Settings,
-                EV44Serializer &serializer, ESSReadout::Parser &essHeaderParser,
+                EV44Serializer &serializer, ess_readout::Parser &essHeaderParser,
                 Statistics &Stats);
 
   /// \brief handle loading and application of configuration and calibration
@@ -83,7 +83,7 @@ private:
   std::unique_ptr<NMXGeometry> NMXGeom;
 
   /// \brief parser for the ESS Readout header
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
 };
 
-} // namespace Nmx
+} // namespace nmx

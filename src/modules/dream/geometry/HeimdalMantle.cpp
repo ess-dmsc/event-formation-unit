@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <dream/geometry/HeimdalMantle.h>
 
-namespace Dream {
+namespace dream {
 
 uint32_t HeimdalMantle::calcPixelId(const Config::ModuleParms &Parms,
                                    const DataParser::CDTReadout &Data) const {
@@ -29,4 +29,4 @@ uint32_t HeimdalMantle::calcPixelId(const Config::ModuleParms &Parms,
   return pixel2D(x, y);
 }
 
-} // namespace Dream
+} // namespace dream

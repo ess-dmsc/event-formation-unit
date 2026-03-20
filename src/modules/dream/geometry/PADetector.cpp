@@ -1,7 +1,7 @@
 #include "PADetector.h"
 #include <common/debug/Trace.h>
 
-namespace Dream {
+namespace dream {
 
 uint32_t PADetector::calcPixelId(const Config::ModuleParms &Parms,
                                 const DataParser::CDTReadout &Data) const {
@@ -65,4 +65,4 @@ int PADetector::getY(uint8_t Wire, uint8_t Strip) const {
   return YOffset + YLocal;
 }
 
-} // namespace Dream
+} // namespace dream

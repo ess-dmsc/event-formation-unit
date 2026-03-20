@@ -8,7 +8,7 @@
 #include <freia/geometry/EstiaGeometry.h>
 #include <gtest/gtest.h>
 
-using namespace Freia;
+using namespace freia;
 using namespace vmm3;
 
 class EstiaGeometryTest : public TestBase {

@@ -15,9 +15,9 @@
 #include <memory>
 #include <string.h>
 
-using namespace Dream;
+using namespace dream;
 using namespace testing;
-using HeaderV0 = ESSReadout::Parser::PacketHeaderV0;
+using HeaderV0 = ess_readout::Parser::PacketHeaderV0;
 using MockSerializer = NiceMock<EV44SerializerMock>;
 
 std::string ConfigFile{"deleteme_dreaminstrumenttest.json"};
@@ -65,7 +65,7 @@ protected:
   Statistics Stats;
   BaseSettings Settings;
   MockSerializer Serializer;
-  ESSReadout::Parser ESSHeaderParser{Stats};
+  ess_readout::Parser ESSHeaderParser{Stats};
   std::unique_ptr<TestHeaderFactory> headerFactory;
 
   void SetUp() override {
@@ -393,7 +393,7 @@ TEST_F(DreamInstrumentTest, AIGEN_DreamCounterRegistration) {
   size_t InitialCounterCount = Stats.size();
 
   // Create a new ESSReadout parser with the external stats
-  ESSReadout::Parser ExternalParser{Stats};
+  ess_readout::Parser ExternalParser{Stats};
 
   // Create DreamInstrument with external Statistics object
   // This should register all counters in Stats
@@ -459,7 +459,7 @@ TEST_F(DreamInstrumentTest, AIGEN_MagicCounterRegistration) {
   size_t InitialCounterCount = Stats.size();
 
   // Create parser with external stats
-  ESSReadout::Parser ExternalParser{Stats};
+  ess_readout::Parser ExternalParser{Stats};
 
   // Create DreamInstrument with Magic configuration
   DreamInstrument<DetectorType::MAGIC> Dream(Stats, Counters, Settings, Serializer, ExternalParser);
@@ -494,7 +494,7 @@ TEST_F(DreamInstrumentTest, AIGEN_HeimdalCounterRegistration) {
   size_t InitialCounterCount = Stats.size();
 
   // Create parser with external stats
-  ESSReadout::Parser ExternalParser{Stats};
+  ess_readout::Parser ExternalParser{Stats};
 
   // Create DreamInstrument with Heimdal configuration
   DreamInstrument<DetectorType::HEIMDAL> Dream(Stats, Counters, Settings, Serializer, ExternalParser);

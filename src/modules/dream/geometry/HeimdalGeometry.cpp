@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 uint32_t HeimdalGeometry::calcPixelImpl(const DataParser::CDTReadout &Data) const {
   int Ring = Data.FiberId / 2;
@@ -52,4 +52,4 @@ int HeimdalGeometry::getPixelOffset(Config::ModuleType Type) const {
   return RetVal;
 }
 
-} // namespace Dream
+} // namespace dream

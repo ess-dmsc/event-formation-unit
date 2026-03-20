@@ -16,7 +16,7 @@
 #include <modules/caen/geometry/Geometry.h>
 #include <modules/caen/readout/DataParser.h>
 
-namespace Caen {
+namespace caen {
 
 struct CaenCounters {
   // Processing Counters - accessed in processing thread
@@ -44,4 +44,4 @@ struct CaenCounters {
   int64_t ProduceCauseMaxEventsReached{0};
 
 } __attribute__((aligned(64)));
-} // namespace Caen
+} // namespace caen

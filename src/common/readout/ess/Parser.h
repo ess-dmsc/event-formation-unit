@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace ESSReadout {
+namespace ess_readout {
 
 using namespace esstime;
 

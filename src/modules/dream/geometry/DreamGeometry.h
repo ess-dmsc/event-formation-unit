@@ -20,7 +20,7 @@
 #include <array>
 #include <memory>
 
-namespace Dream {
+namespace dream {
 
 class DreamGeometry : public Geometry {
 public:
@@ -54,4 +54,4 @@ private:
   /// Indexed directly by Config::ModuleType enum value for O(1) access
   std::array<std::unique_ptr<DreamSubModule>, 8> SubModules;
 };
-} // namespace Dream
+} // namespace dream

@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Trex {
+namespace trex {
 
 class Config : public vmm3::VMM3Config {
 public:
@@ -54,4 +54,4 @@ public:
   bool Rotated[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
   bool Short[MaxRing + 1][MaxFEN + 1][MaxHybrid + 1];
 };
-} // namespace Trex
+} // namespace trex

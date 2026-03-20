@@ -20,7 +20,7 @@ using namespace esstime;
 // #define TRC_LEVEL TRC_L_DEB
 
 // Assume we start after the Common PacketHeader
-void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
+void Parser::parse(ess_readout::Parser::PacketDataV0 &PacketData) {
   Result.clear();
 
   char *Buffer = (char *)PacketData.DataPtr;
@@ -70,9 +70,9 @@ void Parser::parse(ESSReadout::Parser::PacketDataV0 &PacketData) {
       continue;
     }
 
-    if (Readout->TimeLow > ESSReadout::MaxFracTimeCount) {
+    if (Readout->TimeLow > ess_readout::MaxFracTimeCount) {
       XTRACE(DATA, WAR, "Invalid TimeLO %u (max is %u)", Readout->TimeLow,
-             ESSReadout::MaxFracTimeCount);
+             ess_readout::MaxFracTimeCount);
       Stats.ErrorTimeFrac++;
       continue;
     }

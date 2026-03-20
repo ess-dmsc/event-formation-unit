@@ -17,7 +17,7 @@
 #include <modules/timepix3/geometry/Config.h>
 #include <modules/timepix3/geometry/Timepix3Geometry.h>
 
-namespace Timepix3 {
+namespace timepix3 {
 
 ///
 /// \brief The PixelEventHandler class handles pixel data events and epoch ESS
@@ -39,8 +39,8 @@ namespace Timepix3 {
 /// \see Observer::DataEventObserver
 ///
 class PixelEventHandler
-    : public Observer::DataEventObserver<timepixReadout::PixelReadout>,
-      public Observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
+    : public observer::DataEventObserver<timepixReadout::PixelReadout>,
+      public observer::DataEventObserver<timepixDTO::ESSGlobalTimeStamp> {
 
 private:
   Counters &statCounters; /// < Reference to the Counters object for tracking
@@ -167,4 +167,4 @@ public:
   void pushDataToKafka();
 };
 
-} // namespace Timepix3
+} // namespace timepix3

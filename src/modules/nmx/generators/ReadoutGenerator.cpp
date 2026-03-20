@@ -18,7 +18,7 @@ using VMM3Data = VMM3Parser::VMM3Data;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
-namespace Nmx {
+namespace nmx {
 
 void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -92,6 +92,6 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Nmx
+} // namespace nmx
 
 // GCOVR_EXCL_STOP

@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 class Tbl3HeConfig : public Configurations::Config {
  public:
   ///\brief default constructor (useful for unit tests)
@@ -55,4 +55,4 @@ class Tbl3HeConfig : public Configurations::Config {
 
   std::unique_ptr<HashMap2D<Topology>> TopologyMapPtr;
 };
-} // namespace Caen
+} // namespace caen

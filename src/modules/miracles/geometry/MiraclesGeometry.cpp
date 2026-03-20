@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 MiraclesGeometry::MiraclesGeometry(Statistics &Stats,
                                    const Config &CaenConfiguration, int MaxAmpl)
@@ -90,4 +90,4 @@ int MiraclesGeometry::posAlongUnit(int AmpA, int AmpB) const {
   }
 }
 
-} // namespace Caen
+} // namespace caen

@@ -101,7 +101,7 @@ public:
   /// \brief Parse CBM readouts from packet data V0
   /// \param PacketData Packet data structure to be filled
   ///
-  void parse(ESSReadout::Parser::PacketDataV0 &PacketData);
+  void parse(ess_readout::Parser::PacketDataV0 &PacketData);
 
 protected:
   ///
@@ -123,7 +123,7 @@ private:
   static constexpr uint16_t DataLength{
       static_cast<uint16_t>(sizeof(Parser::CbmReadout))};
   static constexpr unsigned int MaxUdpPayloadSize{
-      MaxUdpDatagramSize - sizeof(ESSReadout::Parser::PacketHeaderV1)};
+      MaxUdpDatagramSize - sizeof(ess_readout::Parser::PacketHeaderV1)};
   static constexpr unsigned int MaxReadoutsInPacket{MaxUdpPayloadSize /
                                                     DataLength};
 };

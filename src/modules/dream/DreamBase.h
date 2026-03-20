@@ -19,7 +19,7 @@
 #include <dream/Counters.h>
 #include <dream/DreamInstrument.h>
 
-namespace Dream {
+namespace dream {
 
 const char *classname = "DREAM detector with ESS readout";
 
@@ -122,7 +122,7 @@ template <int Type_t> void DreamBase<Type_t>::processingThread() {
 
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen, Type_t);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
@@ -164,4 +164,4 @@ template <int Type_t> void DreamBase<Type_t>::processingThread() {
   return;
 }
 
-} // namespace Dream
+} // namespace dream

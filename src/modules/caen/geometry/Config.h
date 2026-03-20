@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <tbl3he/geometry/Tbl3HeConfig.h>
 
-namespace Caen {
+namespace caen {
 
 class Config : public Configurations::Config {
 
@@ -48,4 +48,4 @@ public:
   Tbl3HeConfig Tbl3HeConf;
   BifrostConfig BifrostConf;
 };
-} // namespace Caen
+} // namespace caen

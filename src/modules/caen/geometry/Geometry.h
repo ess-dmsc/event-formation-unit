@@ -25,7 +25,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 using namespace geometry;
 
@@ -160,4 +160,4 @@ public:
   // Note: per-detector resolution (previously UnitResolution) has been
   // moved into each concrete geometry implementation as `Resolution`.
 };
-} // namespace Caen
+} // namespace caen

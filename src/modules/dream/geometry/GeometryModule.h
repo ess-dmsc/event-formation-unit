@@ -16,7 +16,7 @@
 #include <dream/geometry/Config.h>
 #include <dream/readout/DataParser.h>
 
-namespace Dream {
+namespace dream {
 
 /// \brief Abstract base class for all DREAM geometry modules
 ///
@@ -34,4 +34,4 @@ public:
                                 const DataParser::CDTReadout &Data) const = 0;
 };
 
-} // namespace Dream
+} // namespace dream

@@ -12,7 +12,7 @@
 
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Freia {
+namespace freia {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
@@ -24,6 +24,6 @@ protected:
   const uint32_t TimeToFirstReadout{1000};
 };
 
-} // namespace Freia
+} // namespace freia
 
 // GCOVR_EXCL_STOP

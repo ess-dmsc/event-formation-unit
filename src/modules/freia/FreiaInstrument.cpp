@@ -25,12 +25,12 @@
 using namespace vmm3;
 using namespace geometry;
 
-namespace Freia {
+namespace freia {
 
 FreiaInstrument::FreiaInstrument(struct Counters &counters,
                                  BaseSettings &settings,
                                  EV44Serializer &serializer,
-                                 ESSReadout::Parser &essHeaderParser,
+                                 ess_readout::Parser &essHeaderParser,
                                  Statistics &Stats,
                                  const DetectorType &detectorType)
     : counters(counters), Settings(settings), Serializer(serializer),
@@ -115,7 +115,7 @@ void FreiaInstrument::processReadouts() {
     }
 
     uint64_t TimeNS =
-        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+        ess_readout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     const auto TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64, TimeNS,
            TDCCorr);
@@ -153,7 +153,7 @@ void FreiaInstrument::processReadouts() {
 }
 
 void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
-  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
+  ess_readout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
   // XTRACE(EVENT, DEB, "Number of events: %u", Events.size());
   for (const auto &Event : Events) {
     if (Event.empty()) {
@@ -201,7 +201,7 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
     // Calculate TOF in ns
     auto EventTimeNs = esstime::TimeDurationNano(Event.timeStart());
 
-    auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
+    auto TimeOfFlight = TimeRef.getTOF(ess_readout::ESSTime(EventTimeNs));
 
     if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
@@ -232,4 +232,4 @@ void FreiaInstrument::generateEvents(std::vector<Event> &Events) {
   Events.clear(); // else events will accumulate
 }
 
-} // namespace Freia
+} // namespace freia

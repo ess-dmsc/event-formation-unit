@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 /// \brief Check for overlapping intervals in a list
 /// First put intervals into canonical order where the first element is
@@ -40,4 +40,4 @@ bool Interval::overlaps(std::vector<std::pair<double, double>> Intervals) {
   return false;
 }
 
-} // namespace Caen
+} // namespace caen

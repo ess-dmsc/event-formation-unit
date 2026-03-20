@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
   using namespace timepixDTO;
   using namespace timepixReadout;
@@ -85,4 +85,4 @@ namespace Timepix3 {
     }
   }
 
-}  // namespace Timepix3
+}  // namespace timepix3

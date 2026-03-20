@@ -14,7 +14,7 @@
 
 using namespace vmm3;
 
-namespace Freia {
+namespace freia {
 
 using VMM3Data = VMM3Parser::VMM3Data;
 
@@ -66,6 +66,6 @@ class MultiBladeGenerator : public ReadoutGeneratorBase {
   const uint32_t mTimeToFirstReadout{1000};
 };
 
-} // namespace Freia
+} // namespace freia
 
 // GCOVR_EXCL_STOP

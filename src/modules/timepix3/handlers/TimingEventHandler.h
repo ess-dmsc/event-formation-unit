@@ -19,7 +19,7 @@
 using namespace std;
 using namespace std::chrono;
 
-namespace Timepix3 {
+namespace timepix3 {
 
 ///
 /// \class TimingEventHandler
@@ -47,9 +47,9 @@ namespace Timepix3 {
 /// \see timepixDTO::ESSGlobalTimeStamp
 ///
 class TimingEventHandler
-    : public Observer::DataEventObserver<timepixReadout::TDCReadout>,
-      public Observer::DataEventObserver<timepixReadout::EVRReadout>,
-      public Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp> {
+    : public observer::DataEventObserver<timepixReadout::TDCReadout>,
+      public observer::DataEventObserver<timepixReadout::EVRReadout>,
+      public observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp> {
 private:
   /// \todo move this into configuration file
   const milliseconds THRESHOLD_MS = milliseconds(20);
@@ -117,4 +117,4 @@ public:
   void applyData(const timepixReadout::EVRReadout &evrReadout) override;
 };
 
-} // namespace Timepix3
+} // namespace timepix3

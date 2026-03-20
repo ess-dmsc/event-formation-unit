@@ -11,7 +11,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("trex", argc, argv);
 
-  auto Detector = new Trex::TrexBase(Main.DetectorSettings);
+  auto Detector = new trex::TrexBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

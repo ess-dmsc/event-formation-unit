@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-using namespace Caen;
+using namespace caen;
 
 class BifrostGeometryTest : public TestBase {
 protected:

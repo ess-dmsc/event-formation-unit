@@ -11,7 +11,7 @@
 #include <dream/readout/DataParser.h>
 #include <dream/test/DataParserTestData.h>
 
-using namespace Dream;
+using namespace dream;
 
 class DataParserTest : public TestBase {
 protected:

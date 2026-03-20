@@ -32,7 +32,7 @@ class Event;
 struct BaseSettings;
 struct Counters;
 
-namespace Freia {
+namespace freia {
 
 class FreiaInstrument {
 
@@ -95,7 +95,7 @@ private:
   EV44Serializer &Serializer;
 
   /// \brief parser for the ESS Readout header
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
 
 public:
   /// \brief 'create' the Freia instrument
@@ -104,7 +104,7 @@ public:
   /// histograms
   FreiaInstrument(Counters &counters, BaseSettings &settings,
                   EV44Serializer &serializer,
-                  ESSReadout::Parser &essHeaderParser, Statistics &Stats,
+                  ess_readout::Parser &essHeaderParser, Statistics &Stats,
                   const DetectorType &detectorType);
 
   /// \brief handle loading and application of configuration and calibration
@@ -132,4 +132,4 @@ public:
   vmm3::VMM3Parser VMMParser;
 };
 
-} // namespace Freia
+} // namespace freia

@@ -11,7 +11,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("perfgen", argc, argv);
 
-  auto Detector = new PerfGen::PerfGenBase(Main.DetectorSettings);
+  auto Detector = new perf_gen::PerfGenBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

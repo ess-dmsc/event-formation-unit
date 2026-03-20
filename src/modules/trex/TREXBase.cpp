@@ -31,7 +31,7 @@
 
 using namespace esstime;
 
-namespace Trex {
+namespace trex {
 
 const char *classname = "TREX detector with ESS readout";
 
@@ -164,7 +164,7 @@ void TrexBase::processing_thread() {
 
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen, DetectorType::TREX);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
                getInputCounters().RxPackets);
@@ -222,4 +222,4 @@ void TrexBase::processing_thread() {
   return;
 }
 
-} // namespace Trex
+} // namespace trex

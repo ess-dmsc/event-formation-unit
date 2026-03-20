@@ -15,7 +15,7 @@
 #include <modules/timepix3/readout/DataParser.h>
 #include <timepix3/geometry/Timepix3Geometry.h>
 
-using namespace Timepix3;
+using namespace timepix3;
 using namespace timepixReadout;
 using namespace std;
 

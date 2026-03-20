@@ -14,7 +14,7 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Nmx {
+namespace nmx {
 
 class MultiHitReadoutGenerator : public ReadoutGeneratorBase {
 public:
@@ -27,6 +27,6 @@ protected:
   int64_t Number{0};
 };
 
-} // namespace Nmx
+} // namespace nmx
 
 // GCOVR_EXCL_STOP

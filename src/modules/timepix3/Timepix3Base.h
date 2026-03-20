@@ -16,7 +16,7 @@
 
 class Timepix3BaseTest; // For access to private members for testing
 
-namespace Timepix3 {
+namespace timepix3 {
 
 class Timepix3Base : public Detector {
 
@@ -31,4 +31,4 @@ public:
 private:
   Config timepix3Configuration;
 };
-} // namespace Timepix3
+} // namespace timepix3

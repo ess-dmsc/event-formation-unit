@@ -3,7 +3,7 @@
 #include <caen/geometry/Interval.h>
 #include <common/testutils/TestBase.h>
 
-using namespace Caen;
+using namespace caen;
 
 std::vector<std::pair<double, double>> StdInterval{
     {0.000, 0.1}, {0.101, 0.2}, {0.201, 0.3}, {0.301, 0.4}, {0.401, 0.5},

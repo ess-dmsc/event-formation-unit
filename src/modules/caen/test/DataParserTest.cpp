@@ -4,7 +4,7 @@
 #include <caen/test/DataParserTestData.h>
 #include <common/testutils/TestBase.h>
 
-using namespace Caen;
+using namespace caen;
 
 class DataParserTest : public TestBase {
 protected:

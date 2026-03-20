@@ -24,7 +24,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 class Tbl3HeGeometry : public Geometry, ESSGeometry {
 public:
   Tbl3HeGeometry(Statistics &Stats, const Config &CaenConfiguration);
@@ -69,4 +69,4 @@ private:
   static constexpr std::pair<int, float> InvalidPos{-1, -1.0}; ///< Invalid position marker
   // clang-format on
 };
-} // namespace Caen
+} // namespace caen

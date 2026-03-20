@@ -25,7 +25,7 @@
 class Timepix3BaseTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  std::unique_ptr<Timepix3::Timepix3Base> Readout;
+  std::unique_ptr<timepix3::Timepix3Base> Readout;
   Counters* testCounters;
 
   void SetUp() override {
@@ -36,7 +36,7 @@ public:
     Settings.GraphitePrefix = "timepix";
     Settings.GraphiteRegion = "test";
 
-    Readout = std::make_unique<Timepix3::Timepix3Base>(Settings);
+    Readout = std::make_unique<timepix3::Timepix3Base>(Settings);
     testCounters = &Readout->Counters;
   }
 
@@ -44,7 +44,7 @@ public:
 };
 
 TEST_F(Timepix3BaseTest, Constructor) {
-  Timepix3::Timepix3Base Readout(Settings);
+  timepix3::Timepix3Base Readout(Settings);
   ASSERT_EQ(Readout.getStatPrefix(1), "timepix.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
 }
@@ -133,18 +133,18 @@ std::vector<uint8_t> TestPacket2{
 
 /// \todo not a test yet, write correct pixel readout packet format
 TEST_F(Timepix3BaseTest, DataReceive) {
-  Timepix3::Timepix3Base Readout(Settings);
+  timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, BadTestPacket);
+  writePacketToRxFIFO<timepix3::Timepix3Base>(Readout, BadTestPacket);
 
   EXPECT_EQ(testCounters->PixelReadouts, 0);
   Readout.stopThreads();
 }
 
 TEST_F(Timepix3BaseTest, DataReceiveGood) {
-  Timepix3::Timepix3Base Readout(Settings);
+  timepix3::Timepix3Base Readout(Settings);
 
-  writePacketToRxFIFO<Timepix3::Timepix3Base>(Readout, TestPacket2);
+  writePacketToRxFIFO<timepix3::Timepix3Base>(Readout, TestPacket2);
 
   /// \todo not a test yet, write correct pixel readout packet format
   // EXPECT_EQ(Readout.Counters.PixelReadouts, 6);

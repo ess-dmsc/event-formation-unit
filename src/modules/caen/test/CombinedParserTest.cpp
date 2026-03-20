@@ -52,13 +52,13 @@ std::vector<uint8_t> UdpPayload
 };
 // clang-format on
 
-using namespace Caen;
+using namespace caen;
 
 class CombinedParserTest : public TestBase {
 protected:
   const int DataType{0x30};
   Statistics Stats;
-  ESSReadout::Parser ESSHeaderParser{Stats};
+  ess_readout::Parser ESSHeaderParser{Stats};
   DataParser CaenParser;
 
   void SetUp() override { ESSHeaderParser.setMaxPulseTimeDiff(4000000000); }
@@ -73,9 +73,9 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
       std::make_unique<DistributionGenerator>(
           ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
-  Caen::ReadoutGenerator gen;
+  caen::ReadoutGenerator gen;
   gen.Settings.HeaderVersion = 0;
-  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  gen.setReadoutDataSize(sizeof(caen::DataParser::CaenReadout));
 
   gen.initialize(std::move(readoutTimeGenerator));
 
@@ -87,11 +87,11 @@ TEST_F(CombinedParserTest, DataMultiPackage) {
   for (auto buffer : collection) {
     int bufferLength = buffer.size();
     ASSERT_GT(bufferLength,
-              sizeof(ESSReadout::Parser::PacketHeaderV0) + (4 + 20));
-    ASSERT_LT(bufferLength, Caen::ReadoutGenerator::BufferSize);
+              sizeof(ess_readout::Parser::PacketHeaderV0) + (4 + 20));
+    ASSERT_LT(bufferLength, caen::ReadoutGenerator::BufferSize);
     auto Res =
         ESSHeaderParser.validate((char *)buffer.data(), bufferLength, DataType);
-    ASSERT_EQ(Res, ESSReadout::Parser::OK);
+    ASSERT_EQ(Res, ess_readout::Parser::OK);
   }
 }
 
@@ -104,9 +104,9 @@ TEST_F(CombinedParserTest, DataGenV0) {
       std::make_unique<DistributionGenerator>(
           ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
-  Caen::ReadoutGenerator gen;
+  caen::ReadoutGenerator gen;
   gen.Settings.HeaderVersion = 0;
-  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  gen.setReadoutDataSize(sizeof(caen::DataParser::CaenReadout));
   gen.initialize(std::move(readoutTimeGenerator));
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
@@ -118,10 +118,10 @@ TEST_F(CombinedParserTest, DataGenV0) {
 
     unsigned long packageSize = socket.GetData().size();
     ASSERT_EQ(packageSize,
-              sizeof(ESSReadout::Parser::PacketHeaderV0) + Sections * (4 + 20));
+              sizeof(ess_readout::Parser::PacketHeaderV0) + Sections * (4 + 20));
     auto Res = ESSHeaderParser.validate((char *)socket.GetData().data(),
                                       packageSize, DataType);
-    ASSERT_EQ(Res, ESSReadout::Parser::OK);
+    ASSERT_EQ(Res, ess_readout::Parser::OK);
     Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
                            ESSHeaderParser.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
@@ -137,8 +137,8 @@ TEST_F(CombinedParserTest, DataGenDefault) {
       std::make_unique<DistributionGenerator>(
           ReadoutGeneratorBase::DEFAULT_FREQUENCY);
 
-  Caen::ReadoutGenerator gen;
-  gen.setReadoutDataSize(sizeof(Caen::DataParser::CaenReadout));
+  caen::ReadoutGenerator gen;
+  gen.setReadoutDataSize(sizeof(caen::DataParser::CaenReadout));
   gen.initialize(std::move(readoutTimeGenerator));
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
@@ -149,11 +149,11 @@ TEST_F(CombinedParserTest, DataGenDefault) {
     gen.generatePackets(&socket, pulseTimeDuration);
     unsigned long packageSize = socket.GetData().size();
     ASSERT_EQ(packageSize,
-              sizeof(ESSReadout::Parser::PacketHeaderV1) + Sections * (4 + 20));
+              sizeof(ess_readout::Parser::PacketHeaderV1) + Sections * (4 + 20));
 
     auto Res = ESSHeaderParser.validate((char *)socket.GetData().data(),
                                       packageSize, DataType);
-    ASSERT_EQ(Res, ESSReadout::Parser::OK);
+    ASSERT_EQ(Res, ess_readout::Parser::OK);
     Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
                            ESSHeaderParser.Packet.DataLength);
     ASSERT_EQ(Res, Sections);
@@ -163,7 +163,7 @@ TEST_F(CombinedParserTest, DataGenDefault) {
 TEST_F(CombinedParserTest, ParseUDPPacket) {
   auto Res = ESSHeaderParser.validate((char *)&UdpPayload[0], UdpPayload.size(),
                                     DataType);
-  ASSERT_EQ(Res, ESSReadout::Parser::OK);
+  ASSERT_EQ(Res, ess_readout::Parser::OK);
   Res = CaenParser.parse(ESSHeaderParser.Packet.DataPtr,
                          ESSHeaderParser.Packet.DataLength);
   ASSERT_EQ(Res, 2);

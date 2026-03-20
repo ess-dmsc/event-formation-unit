@@ -13,7 +13,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-using namespace Caen;
+using namespace caen;
 
 class CspecGeometryTest : public TestBase {
 protected:

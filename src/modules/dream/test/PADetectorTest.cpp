@@ -12,7 +12,7 @@
 #include <dream/geometry/PADetector.h>
 #include <memory>
 
-using namespace Dream;
+using namespace dream;
 
 class PADetectorTest : public TestBase {
 protected:

@@ -127,7 +127,7 @@ auto ValidConfigIndexes = R"(
 
 // clang-format on
 
-using namespace Dream;
+using namespace dream;
 
 class DreamConfigTest : public TestBase {
 protected:

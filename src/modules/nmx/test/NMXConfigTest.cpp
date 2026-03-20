@@ -122,7 +122,7 @@ auto DuplicateEntry = R"(
 }
 )"_json;
 
-using namespace Nmx;
+using namespace nmx;
 
 class NMXConfigTest : public TestBase {
 protected:

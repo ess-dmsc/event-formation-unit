@@ -12,7 +12,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 void Config::errorExit(const std::string &ErrMsg) {
   LOG(INIT, Sev::Error, ErrMsg);
@@ -103,4 +103,4 @@ void Config::apply() {
   }
 }
 
-} // namespace Dream
+} // namespace dream

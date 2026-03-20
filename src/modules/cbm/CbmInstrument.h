@@ -38,7 +38,7 @@ public:
   CbmInstrument(Statistics &Stats, Counters &counters, Config &Config,
                 Parser &cbmReadoutParser,
                 const HashMap2D<SchemaDetails> &SchemaDetailMap,
-                ESSReadout::Parser &essHeaderParser);
+                ess_readout::Parser &essHeaderParser);
 
   /// \brief Process the beam monitor readouts.
   void processMonitorReadouts(void);
@@ -64,7 +64,7 @@ private:
   const HashMap2D<SchemaDetails> &SchemaMap;
 
   /// \brief Parser for the ESS Readout header.
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
 
   /// \brief Single geometry object for all beam monitor types
   Geometry CbmGeometry;

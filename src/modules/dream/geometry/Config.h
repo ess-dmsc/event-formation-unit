@@ -20,7 +20,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 class Config : public Configurations::Config {
 
 public:
@@ -86,4 +86,4 @@ public:
 
 private:
 };
-} // namespace Dream
+} // namespace dream

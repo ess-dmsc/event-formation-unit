@@ -29,13 +29,13 @@
 using namespace vmm3;
 using namespace geometry;
 
-namespace Trex {
+namespace trex {
 
 /// \brief load configuration and calibration files
 TREXInstrument::TREXInstrument(struct Counters &counters,
                                BaseSettings &settings,
                                EV44Serializer &serializer,
-                               ESSReadout::Parser &essHeaderParser)
+                               ess_readout::Parser &essHeaderParser)
     : counters(counters), Settings(settings), Serializer(serializer),
       ESSHeaderParser(essHeaderParser) {
 
@@ -137,7 +137,7 @@ void TREXInstrument::processReadouts() {
     //   VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS =
-        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+        ess_readout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     //   int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     //   XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64,
     //   TimeNS, TDCCorr);
@@ -258,7 +258,7 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
     auto EventTimeNs = esstime::TimeDurationNano(e.timeStart());
 
     auto TimeOfFlight =
-        ESSHeaderParser.Packet.Time.getTOF(ESSReadout::ESSTime(EventTimeNs));
+        ESSHeaderParser.Packet.Time.getTOF(ess_readout::ESSTime(EventTimeNs));
 
     if (!TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
@@ -288,4 +288,4 @@ void TREXInstrument::generateEvents(std::vector<Event> &Events) {
   }
   Events.clear(); // else events will accumulate
 }
-} // namespace Trex
+} // namespace trex

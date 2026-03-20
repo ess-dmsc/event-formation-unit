@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 LokiGeometry::LokiGeometry(Statistics &Stats, Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
@@ -144,4 +144,4 @@ bool LokiGeometry::validateReadoutData(const DataParser::CaenReadout &Data) cons
       });
 }
 
-} // namespace Caen
+} // namespace caen

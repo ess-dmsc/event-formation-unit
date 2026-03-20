@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Freia {
+namespace freia {
 
 class Config : public vmm3::VMM3Config {
 public:
@@ -59,4 +59,4 @@ const std::vector<std::string> RootFields{
 const std::vector<std::string> MappingFields{
     "CassetteNumber", "Ring", "FEN", "Hybrid", "HybridId", "Thresholds"};
 
-} // namespace Freia
+} // namespace freia

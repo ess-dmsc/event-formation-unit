@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 Tbl3HeConfig::Tbl3HeConfig() {}
 
@@ -96,4 +96,4 @@ void Tbl3HeConfig::parseConfig() {
   }
 }
 
-} // namespace Caen
+} // namespace caen

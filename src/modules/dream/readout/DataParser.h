@@ -12,7 +12,7 @@
 #include <modules/dream/Counters.h>
 #include <vector>
 
-namespace Dream {
+namespace dream {
 
 class DataParser {
 public:
@@ -48,4 +48,4 @@ public:
 
   struct Counters &Stats;
 };
-} // namespace Dream
+} // namespace dream

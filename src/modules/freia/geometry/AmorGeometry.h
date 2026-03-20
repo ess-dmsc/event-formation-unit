@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Freia {
+namespace freia {
 
 class AmorGeometry : public vmm3::VMM3Geometry {
 public:
@@ -55,4 +55,4 @@ public:
   }
 };
 
-} // namespace Freia
+} // namespace freia

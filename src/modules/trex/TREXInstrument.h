@@ -25,7 +25,7 @@
 #include <trex/geometry/LETGeometry.h>
 #include <trex/geometry/TREXGeometry.h>
 
-namespace Trex {
+namespace trex {
 
 class TREXInstrument {
 public:
@@ -35,7 +35,7 @@ public:
   /// histograms
   TREXInstrument(Counters &counters, BaseSettings &settings,
                  EV44Serializer &serializer,
-                 ESSReadout::Parser &essHeaderParser);
+                 ess_readout::Parser &essHeaderParser);
 
   /// \brief handle loading and application of configuration and calibration
   /// files. This step will throw an exception upon errors.
@@ -82,7 +82,7 @@ private:
   EV44Serializer &Serializer;
 
   /// \brief parser for the ESS readout header
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
 };
 
-} // namespace Trex
+} // namespace trex

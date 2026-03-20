@@ -18,9 +18,9 @@
 #include <cmath>
 
 using namespace vmm3;
-using namespace ESSReadout;
+using namespace ess_readout;
 
-namespace Freia {
+namespace freia {
 
 MultiBladeGenerator::MultiBladeGenerator()
     : ReadoutGeneratorBase(DetectorType::FREIA) {
@@ -162,6 +162,6 @@ void MultiBladeGenerator::main() {
   Settings.Detector = MultiBladeSettings.Detector;
 }
 
-} // namespace Freia
+} // namespace freia
 
 // GCOVR_EXCL_STOP

@@ -26,7 +26,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Nmx {
+namespace nmx {
 
 // Forward declaration
 class Config;
@@ -141,4 +141,4 @@ private:
   }
 };
 
-} // namespace Nmx
+} // namespace nmx

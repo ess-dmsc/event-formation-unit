@@ -23,7 +23,7 @@
 
 using namespace esstime;
 
-namespace Caen {
+namespace caen {
 
 CaenBase::CaenBase(BaseSettings const &settings, DetectorType type)
     : Detector(settings), Type(type) {
@@ -121,7 +121,7 @@ void CaenBase::processingThread() {
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen, Type);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         Counters.ErrorESSHeaders++;
         continue;
@@ -174,4 +174,4 @@ void CaenBase::processingThread() {
 
   XTRACE(INPUT, ALW, "Stopping processing thread.");
 }
-} // namespace Caen
+} // namespace caen

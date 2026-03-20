@@ -25,7 +25,7 @@
 
 using namespace vmm3;
 
-namespace Trex {
+namespace trex {
 
 void LETReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -112,6 +112,6 @@ void LETReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Trex
+} // namespace trex
 
 // GCOVR_EXCL_STOP

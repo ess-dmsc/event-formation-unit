@@ -11,7 +11,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("estia", argc, argv);
 
-  auto Detector = new Freia::FreiaBase(Main.DetectorSettings);
+  auto Detector = new freia::FreiaBase(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

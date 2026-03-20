@@ -12,7 +12,7 @@
 #include <common/detector/Detector.h>
 #include <common/kafka/Producer.h>
 
-namespace PerfGen {
+namespace perf_gen {
 
 class PerfGenBase : public Detector {
 public:
@@ -30,4 +30,4 @@ protected:
   } __attribute__((aligned(64))) Counters;
 };
 
-} // namespace PerfGen
+} // namespace perfGen

@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Trex {
+namespace trex {
 
 class Geometry {
 public:
@@ -36,4 +36,4 @@ public:
                                 uint8_t Channel) = 0;
   static constexpr uint16_t InvalidCoord = 65535;
 };
-} // namespace Trex
+} // namespace trex

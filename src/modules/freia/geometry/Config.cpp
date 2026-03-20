@@ -12,7 +12,7 @@
 
 using namespace vmm3;
 
-namespace Freia {
+namespace freia {
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -93,4 +93,4 @@ void Config::applyConfig() {
   XTRACE(INIT, ALW, "Configuration file loaded successfully");
 }
 
-} // namespace Freia
+} // namespace freia

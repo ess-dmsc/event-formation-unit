@@ -14,11 +14,11 @@
 #include <modules/cbm/CbmInstrument.h>
 
 using namespace cbm;
-using namespace ESSReadout;
+using namespace ess_readout;
 using namespace testing;
 
 using std::filesystem::path;
-using ESSParser = ESSReadout::Parser;
+using ESSParser = ess_readout::Parser;
 
 // clang-format off
 
@@ -296,7 +296,7 @@ protected:
   /// Objects required for the CbmInstrument
   /// \note These are initialized in SetUp()
   std::unique_ptr<Statistics> Stats;
-  std::unique_ptr<ESSReadout::Parser> ESSHeaderParser;
+  std::unique_ptr<ess_readout::Parser> ESSHeaderParser;
   std::unique_ptr<cbm::Parser> CbmReadoutParser;
   HashMap2D<SchemaDetails> SchemaMap{11};
   std::unique_ptr<CbmInstrument> cbm;
@@ -306,7 +306,7 @@ protected:
   void SetUp() override {
     // Initialize stats and parser
     Stats = std::make_unique<Statistics>();
-    ESSHeaderParser = std::make_unique<ESSReadout::Parser>(*Stats);
+    ESSHeaderParser = std::make_unique<ess_readout::Parser>(*Stats);
     CbmReadoutParser = std::make_unique<cbm::Parser>();
     // Reinitialize Configuration as unique_ptr
     Configuration = std::make_unique<Config>();
@@ -319,15 +319,15 @@ protected:
     CbmCounters = {};
 
     ESSHeaderParser->Packet.HeaderPtr =
-        headerFactory.createHeader(ESSReadout::Parser::V1);
+        headerFactory.createHeader(ess_readout::Parser::V1);
   }
 
   void TearDown() override {}
 
 protected:
-  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+  void makeHeader(ess_readout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory.createHeader(ESSReadout::Parser::V1);
+    Packet.HeaderPtr = headerFactory.createHeader(ess_readout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));

@@ -9,7 +9,7 @@
 #include <common/testutils/TestBase.h>
 #include <freia/geometry/AmorGeometry.h>
 
-using namespace Freia;
+using namespace freia;
 using namespace vmm3;
 
 class AmorGeometryTest : public TestBase {
